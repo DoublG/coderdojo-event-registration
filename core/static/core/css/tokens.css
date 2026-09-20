@@ -1,0 +1,179 @@
+/* CoderDojo — generated from tokens.json */
+:root, [data-theme="light"] {
+  --surface: #ffffff; /* Page background in both themes — white in light, matching coderdojobelgium.be's own white ground. */
+  --surface-raised: #f7f8fa; /* Cards, the nav bar, modals, the ticket panel — a barely-there lift off the page, not a strong tint. */
+  --surface-sunken: #eff1f4; /* Recessed areas: the footer band, code snippets, image placeholders. */
+  --border: #e2e6eb; /* Decorative hairlines: card edges, table rules, dividers between sections. Not for interactive boundaries — use border-strong there. */
+  --border-strong: #6b7280; /* Input borders, select/checkbox outlines and any control boundary that must read as a shape (3:1 against surface and surface-raised in both themes). */
+  --ink: #1c2733; /* Primary text and headings on surface and surface-raised (4.5:1 in both themes) — the same dark navy coderdojobelgium.be sets its body copy in. */
+  --ink-muted: #56606c; /* Secondary text: captions, timestamps, helper copy, session locations on surface and surface-raised (4.5:1 in both themes). */
+  --primary: #c94823; /* Dojo Orange. Primary buttons, form focus accents, links — a slightly deepened version of the real coderdojobelgium.be accent orange, adjusted so on-primary text clears 4.5:1 (the site's own #da532c reads 4.0:1 with white and is kept exact as primary-bright for large/decorative use instead). */
+  --primary-hover: #a83a1a; /* Hover / pressed state of primary-filled buttons and links. */
+  --on-primary: #ffffff; /* Text and icons on a primary fill (4.5:1 in both themes). */
+  --primary-bright: #da532c; /* The exact coderdojobelgium.be accent orange, kept unaltered. Decorative and large-scale only — date badges, big numerals, illustration accents, the cover pattern — anything 24px+/bold or non-text (3:1 against every surface in both themes). Never small body text or a button fill; use primary there instead. */
+  --secondary: #1b5fa8; /* Dojo Blue. Text links, secondary buttons, session-type tags, the pathway-card arrow. As body text on surface it reads 4.5:1 in both themes. */
+  --secondary-hover: #134d89; /* Hover / pressed state of secondary-filled buttons and links. */
+  --on-secondary: #ffffff; /* Text and icons on a secondary fill (4.5:1 in both themes). */
+  --accent: #836e07; /* Spark Yellow. Decorative only: badge fills (category tags, the milestone award badge), a highlight underline, the cover pattern. Never for body text. Deepened from an earlier, much paler yellow so a filled accent badge sits at the same visual weight as a primary or secondary button instead of reading as a pale highlighter mark; hue nudged slightly toward true gold (away from warning's amber) so the two stay visually distinct now that both sit at a similar depth. */
+  --on-accent: #ffffff; /* Text and icons on an accent fill (5.0:1 light, 7.3:1 dark). Now white in light theme to match the deepened accent fill — the old pale accent needed dark text, this one doesn't. */
+  --success: #147a4f; /* Open sessions, confirmed sign-ups, ticket availability text on surface (4.5:1 in both themes). */
+  --on-success: #ffffff; /* Text and icons on a success fill (4.5:1 in both themes). */
+  --danger: #c81e3a; /* Closed / full sessions, sold-out tickets, form errors on surface (4.5:1 in both themes). Always paired with the word 'Full' or 'Sold out', never color alone. */
+  --on-danger: #ffffff; /* Text and icons on a danger fill (4.5:1 in both themes). */
+  --danger-surface: #fae8eb; /* A soft danger-tinted background for a banner or note whose text and border stay --danger — e.g. Form's cd-form__note--error (4.8:1 in both themes, so --danger text on it still clears small-text contrast). Never use this as a foreground/text color itself. */
+  --warning: #994000; /* Waitlist / limited-spots status, non-blocking form warnings. Always paired with the word 'Waitlist' or an icon, never color alone. Dark-theme value deepened to match danger/success's weight in dark mode — the earlier value ran noticeably brighter than every other status fill. Hue shifted from mustard toward a clearer amber-orange so it stays distinct from the deepened accent (both now sit at a similar depth, so hue is what tells them apart). */
+  --on-warning: #ffffff; /* Text and icons on a warning fill (4.5:1 in both themes). */
+  --warning-surface: #f5ece6; /* A soft warning-tinted background for a banner or note whose text and border stay --warning — e.g. Form's cd-form__note--warning (4.7:1 in both themes, so --warning text on it still clears small-text contrast). Never use this as a foreground/text color itself. */
+  --focus-ring: #1d4ed8; /* The 2px keyboard-focus outline on every interactive element, offset 2px from the control (3:1 against surface and surface-raised in both themes). */
+  --ink-bright: #1e323c; /* The exact brand navy from coderdojobelgium.be's tilted ribbon headline treatment, kept unaltered across both themes like primary-bright. Decorative ribbon/tag fills only, always paired with plain white text or accent-bright at 24px+/bold (13.3:1 and 7.75:1 respectively) — never a small-text foreground, and never itself used as a foreground color. */
+  --accent-bright: #edc043; /* The exact brand gold from the same tilted-ribbon asset's arrow glyph, kept unaltered across both themes like primary-bright and ink-bright. Decorative and large-scale only — the ribbon's arrow icon (7.75:1 against ink-bright) — never small text. */
+  --shadow-sm: 0 1px 2px rgba(28,39,51,0.06); /* Resting elevation for buttons and tags — kept faint on purpose. */
+  --shadow-md: 0 4px 12px rgba(28,39,51,0.08); /* Cards on hover, dropdowns, the sticky nav bar and ticket panel. */
+  --shadow-lg: 0 12px 32px rgba(28,39,51,0.10); /* The hero image panel and the registration/ticket modal. */
+}
+[data-theme="dark"] {
+  --surface: #12181f;
+  --surface-raised: #1b222b;
+  --surface-sunken: #0c1015;
+  --border: #2a323c;
+  --border-strong: #8a93a0;
+  --ink: #f3f5f7;
+  --ink-muted: #a9b1bc;
+  --primary: #ff7a45;
+  --primary-hover: #ff9568;
+  --on-primary: #12181f;
+  --primary-bright: #da532c;
+  --secondary: #5b9dff;
+  --secondary-hover: #82bbff;
+  --on-secondary: #12181f;
+  --accent: #c2a30a;
+  --on-accent: #12181f;
+  --success: #34c388;
+  --on-success: #12181f;
+  --danger: #ff6b81;
+  --on-danger: #12181f;
+  --danger-surface: #412933;
+  --warning: #ff6a00;
+  --on-warning: #12181f;
+  --warning-surface: #412819;
+  --focus-ring: #7db2ff;
+  --ink-bright: #1e323c;
+  --accent-bright: #edc043;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.35);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.5);
+}
+:root {
+  --space-1: 4px; /* Icon-to-label gaps, tight badge padding. */
+  --space-2: 8px; /* Gaps between a label and its input, chip padding. */
+  --space-3: 12px; /* Padding inside small controls (badges, buttons). */
+  --space-4: 16px; /* Standard card padding, gaps between form fields. */
+  --space-5: 24px; /* Gaps between cards in a grid, section-internal spacing. */
+  --space-6: 32px; /* Padding of large panels (hero, ticket panel, registration card). */
+  --space-7: 48px; /* Space between major page sections on mobile. */
+  --space-8: 64px; /* Space between major page sections on desktop. */
+  --space-9: 96px; /* Top padding of the hero section. */
+  --radius-sm: 8px; /* Inputs, small tags, code blocks, event-card thumbnails. */
+  --radius-md: 16px; /* Cards, buttons, the nav bar. */
+  --radius-lg: 28px; /* The hero panel, the ticket panel, the registration panel, large feature cards. */
+  --radius-pill: 999px; /* Badges, session-type tags, date badges, the mobile menu toggle. */
+  --font-display: "Fredoka", "Segoe UI Rounded", system-ui, sans-serif;
+  --font-sans: "Nunito", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --text-display-2xl: 600 52px/58px var(--font-display); /* The hero headline. One per page. */
+  --text-display-xl: 600 38px/44px var(--font-display); /* Section-opening headlines ('This year's schedule', 'Meet the mentors'). */
+  --text-display-lg: 600 30px/36px var(--font-display); /* Sub-section headlines and the cover name at small sizes. */
+  --text-heading-lg: 700 26px/32px var(--font-sans); /* Card group titles (a day's schedule, a mentor category). */
+  --text-heading-md: 700 20px/26px var(--font-sans); /* Card titles: a session name, an event card title, an FAQ question. */
+  --text-heading-sm: 700 17px/23px var(--font-sans); /* Compact headings inside a card or panel. */
+  --text-body-lg: 400 18px/28px var(--font-sans); /* The hero sub-headline, testimonial quotes and lead paragraphs. */
+  --text-body: 400 16px/24px var(--font-sans); /* Default paragraph and UI text. */
+  --text-body-sm: 400 14px/20px var(--font-sans); /* Secondary copy: form help text, sponsor blurbs, event card meta. */
+  --text-caption: 600 13px/18px var(--font-sans); /* Timestamps, room numbers, age tags — small and slightly bolder to stay legible. */
+  --text-label: 600 14px/20px var(--font-sans); /* Button text, form field labels, nav links, ticket-panel rows. */
+  --text-code: 500 14px/22px var(--font-mono); /* Inline code and the 'project of the month' code snippets. */
+}
+.display-2xl {
+  font-family: var(--font-display);
+  font-size: 52px;
+  line-height: 58px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.display-xl {
+  font-family: var(--font-display);
+  font-size: 38px;
+  line-height: 44px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.display-lg {
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.heading-lg {
+  font-family: var(--font-sans);
+  font-size: 26px;
+  line-height: 32px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.heading-md {
+  font-family: var(--font-sans);
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.heading-sm {
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 23px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.body-lg {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.body-sm {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.caption {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.label {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+}
+.code {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+  letter-spacing: 0;
+}

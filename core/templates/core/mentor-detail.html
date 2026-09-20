@@ -1,0 +1,118 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Priya Nair · CoderDojo</title>
+<link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/bundle.css' %}">
+<style>
+  html, body { margin: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+</style>
+</head>
+<body>
+<script src="{% static 'core/js/bundle.js' %}"></script>
+<style>
+  .mentor-detail-root { background: var(--surface-sunken); }
+  .mentor-detail-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4) var(--space-8); }
+  .mentor-detail-root .back-link { color: var(--secondary); margin: var(--space-5) 0 0; }
+  .mentor-detail-root .col { max-width: 720px; margin: 0 auto; }
+
+  /* role rings — a small ring around the avatar marks which of the four roles someone has.
+     the role is always also written out next to the name (see .cd-mentor__role / .role-line
+     below), so the ring is reinforcement, never the only signal. */
+  .mentor-detail-root .cd-mentor__avatar--ninja { outline: 3px solid #0e7c6b; outline-offset: 2px; }
+  .mentor-detail-root .cd-mentor__avatar--lead { outline: 3px solid #d1990a; outline-offset: 2px; }
+  .mentor-detail-root .cd-mentor__avatar--volunteer { outline: 3px solid #4a5fc1; outline-offset: 2px; }
+  .mentor-detail-root .cd-mentor__avatar--board { outline: 3px solid #4a5568; outline-offset: 2px; }
+
+  .mentor-detail-root .mentor-header { display: flex; gap: var(--space-5); align-items: flex-start; margin: var(--space-5) auto var(--space-6); max-width: 720px; }
+  .mentor-detail-root .mentor-header .cd-mentor__avatar { width: 88px; height: 88px; flex-shrink: 0; }
+  .mentor-detail-root .mentor-header h1 { color: var(--ink); margin: 0 0 var(--space-1); }
+  .mentor-detail-root .mentor-header .role-line { color: var(--ink-muted); margin: 0 0 var(--space-2); }
+  .mentor-detail-root .mentor-header .facts-line { color: var(--ink-muted); margin: 0; }
+
+  .mentor-detail-root .about h2 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .mentor-detail-root .about p { color: var(--ink); margin: 0; }
+
+  .mentor-detail-root .team-section { margin-top: var(--space-8); }
+  .mentor-detail-root .team-section h2 { color: var(--ink); text-align: center; margin: 0 0 var(--space-1); }
+  .mentor-detail-root .team-section .team-desc { color: var(--ink-muted); text-align: center; margin: 0 auto var(--space-5); max-width: 560px; }
+  .mentor-detail-root .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+  .mentor-detail-root .team-grid a { text-decoration: none; }
+  .mentor-detail-root .team-grid .cd-mentor {
+    flex-direction: column; align-items: center; text-align: center; gap: var(--space-2);
+    background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+    padding: var(--space-5) var(--space-4);
+  }
+  .mentor-detail-root .team-grid .cd-mentor__avatar { width: 56px; height: 56px; margin: 0 auto; }
+</style>
+
+<div class="cd-root mentor-detail-root" style="padding: 0;">
+  <div class="shell">
+    {% include "core/menu.html" with style="background: var(--surface)" %}
+
+    <p class="label back-link"><a href="#">← Back to Ghent Dojo</a></p>
+
+    <div class="mentor-header">
+      <div class="cd-mentor__avatar cd-mentor__avatar--lead" aria-hidden="true"></div>
+      <div>
+        <h1 class="display-lg">Priya Nair</h1>
+        <p class="body role-line">Dojo champion, software engineer</p>
+        <p class="body-sm facts-line">Ghent Dojo · Volunteering since 2021 · 40+ sessions run</p>
+      </div>
+    </div>
+
+    <div class="col about">
+      <h2 class="heading-md">About Priya</h2>
+      <p class="body">Priya founded Ghent Dojo in 2021 after two years mentoring at a dojo in Antwerp. She's a software engineer by day and spends most Saturday mornings making sure every ninja — and every parent dropping one off for the first time — feels welcome the moment they walk in. Ask her about accessible robotics kits; it's her favourite tangent.</p>
+    </div>
+
+    <div class="team-section">
+      <h2 class="heading-lg">Meet the rest of the team</h2>
+      <p class="body team-desc">Every dojo runs on four kinds of people. A small ring around each avatar marks which — the words next to it always say the same thing out loud, so the ring is never the only clue.</p>
+      <div class="team-grid">
+        <a href="#">
+          <div class="cd-mentor">
+            <div class="cd-mentor__avatar cd-mentor__avatar--ninja" aria-hidden="true"></div>
+            <div>
+              <p class="cd-mentor__name heading-sm">Jonas (16)</p>
+              <p class="cd-mentor__role body-sm">Ninja mentor, Python &amp; web</p>
+            </div>
+          </div>
+        </a>
+        <a href="#">
+          <div class="cd-mentor">
+            <div class="cd-mentor__avatar cd-mentor__avatar--volunteer" aria-hidden="true"></div>
+            <div>
+              <p class="cd-mentor__name heading-sm">Tom Verstraete</p>
+              <p class="cd-mentor__role body-sm">Volunteer mentor, data analyst</p>
+            </div>
+          </div>
+        </a>
+        <a href="#">
+          <div class="cd-mentor">
+            <div class="cd-mentor__avatar cd-mentor__avatar--board" aria-hidden="true"></div>
+            <div>
+              <p class="cd-mentor__name heading-sm">Aisling Byrne</p>
+              <p class="cd-mentor__role body-sm">CoderDojo Belgium board, programme lead</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <footer class="cd-footer" style="margin-top: var(--space-8);">
+      <p class="body-sm" style="margin:0;">CoderDojo · Ghent Public Library · hello@example.org</p>
+      <ul class="cd-footer__links body-sm">
+        <li><a href="#">Code of conduct</a></li>
+        <li><a href="#">Volunteer with us</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </footer>
+  </div>
+</div>
+<script></script>
+</body>
+</html>

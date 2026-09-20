@@ -1,0 +1,247 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upcoming events · CoderDojo</title>
+<link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/bundle.css' %}">
+<style>
+  html, body { margin: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+</style>
+</head>
+<body>
+<script src="{% static 'core/js/bundle.js' %}"></script>
+<style>
+  .event-root { background: var(--surface); }
+  .event-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .event-root .event-header { margin: var(--space-6) 0 var(--space-5); max-width: 640px; }
+  .event-root .event-header h1 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .event-root .event-header p { color: var(--ink-muted); margin: 0; }
+  .event-root .filter-card { padding: var(--space-5); margin-bottom: var(--space-6); }
+  .event-root .filter-row { display: flex; gap: var(--space-4); flex-wrap: wrap; align-items: flex-end; }
+  .event-root .filter-field { flex: 1 1 180px; display: flex; flex-direction: column; gap: var(--space-1); }
+  .event-root .filter-field label { color: var(--ink-muted); }
+  .event-root .date-group + .date-group { margin-top: var(--space-6); }
+  .event-root .date-group h2 { color: var(--ink); margin: 0 0 var(--space-3); }
+  .event-root .event-row { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4) 0; }
+  .event-root .event-row + .event-row { border-top: 1px solid var(--border); }
+  .event-root .event-row .date-box {
+    flex: 0 0 56px; text-align: center; background: var(--surface-sunken);
+    border-radius: var(--radius-md); padding: var(--space-2) 0;
+  }
+  .event-root .event-row .date-box .dow { display: block; color: var(--ink-muted); }
+  .event-root .event-row .date-box .dom { display: block; color: var(--ink); font-weight: 700; font-size: 18px; }
+  .event-root .event-row .info { flex: 1 1 auto; min-width: 0; }
+  .event-root .event-row .info h3 { color: var(--ink); margin: 0 0 2px; }
+  .event-root .event-row .info .meta { color: var(--ink-muted); margin: 0; }
+  .event-root .event-row .badges { display: flex; gap: var(--space-2); margin-top: var(--space-2); flex-wrap: wrap; }
+  .event-root .event-row .action { flex: 0 0 auto; }
+  .event-root .find-cta { padding: var(--space-6); text-align: center; margin-top: var(--space-7); }
+  .event-root .find-cta p { color: var(--ink-muted); margin: 0 0 var(--space-4); }
+  .event-root .filter-chip {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    background: var(--surface-sunken); border-radius: var(--radius-full, 999px);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+    margin-bottom: var(--space-5); color: var(--ink);
+  }
+  .event-root .filter-chip button {
+    border: none; background: none; cursor: pointer; color: var(--ink-muted);
+    width: 24px; height: 24px; border-radius: 50%; font-size: 16px; line-height: 1;
+  }
+  .event-root .filter-chip button:hover { background: var(--border); color: var(--ink); }
+  .event-root .date-group[hidden] { display: none; }
+  .event-root .event-row[hidden] { display: none; }
+  .event-root .filter-chip[hidden] { display: none; }
+</style>
+
+<div class="cd-root event-root" style="padding: 0;">
+  <div class="shell">
+    {% include "core/menu.html" %}
+
+    <div class="event-header">
+      <p class="cd-hero__eyebrow label" style="color: var(--primary);">Every dojo · Belgium</p>
+      <h1 class="display-xl">Upcoming events</h1>
+      <p class="body-lg">Every free session run by a CoderDojo across Belgium — filter by dojo, location, date or age.</p>
+    </div>
+
+    <div class="cd-card filter-card">
+      <div class="filter-row">
+        <div class="filter-field">
+          <label class="label" for="ep-dojo">Dojo</label>
+          <select class="cd-form__select body" id="ep-dojo">
+            <option>All dojos</option>
+            <option>Ghent Dojo</option>
+            <option>Destelbergen Dojo</option>
+            <option>Brussels North Dojo</option>
+            <option>Antwerp Dojo</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label class="label" for="ep-location">Location</label>
+          <input class="cd-form__input body" id="ep-location" type="text" placeholder="Postcode or city">
+        </div>
+        <div class="filter-field">
+          <label class="label" for="ep-date">Date</label>
+          <select class="cd-form__select body" id="ep-date">
+            <option>Any date</option>
+            <option>This week</option>
+            <option>This month</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label class="label" for="ep-age">Age</label>
+          <select class="cd-form__select body" id="ep-age">
+            <option>All ages</option>
+            <option>7–9</option>
+            <option>10–13</option>
+            <option>14–18</option>
+          </select>
+        </div>
+        <div class="filter-field" style="flex: 0 0 auto;">
+          <button type="button" class="cd-btn cd-btn--secondary label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            Search
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-chip" id="ep-filter-chip" hidden>
+      <span class="body-sm">Filtered by: <strong id="ep-filter-chip-name"></strong></span>
+      <button type="button" id="ep-filter-chip-clear" aria-label="Clear dojo filter">×</button>
+    </div>
+
+    <div class="date-group" data-group>
+      <h2 class="heading-lg">Saturday, 27 September</h2>
+
+      <div class="event-row" data-dojo="Ghent Dojo">
+        <div class="date-box"><span class="caption dow">SAT</span><span class="dom">27</span></div>
+        <div class="info">
+          <h3 class="heading-md">Scratch &amp; Python — Ghent Dojo</h3>
+          <p class="body-sm meta">10:00–13:15 · Ghent Public Library</p>
+          <div class="badges">
+            <span class="cd-badge cd-badge--success caption">Open</span>
+            <span class="cd-badge cd-badge--accent caption">Ages 7–18</span>
+          </div>
+        </div>
+        <div class="action"><a class="cd-btn cd-btn--ghost label" href="#">View event</a></div>
+      </div>
+
+      <div class="event-row" data-dojo="Destelbergen Dojo">
+        <div class="date-box"><span class="caption dow">SAT</span><span class="dom">27</span></div>
+        <div class="info">
+          <h3 class="heading-md">Web &amp; Robotics — Destelbergen Dojo</h3>
+          <p class="body-sm meta">10:00–12:30 · Dendermondesteenweg 1, Destelbergen</p>
+          <div class="badges">
+            <span class="cd-badge cd-badge--success caption">Open</span>
+            <span class="cd-badge cd-badge--accent caption">Ages 8–14</span>
+          </div>
+        </div>
+        <div class="action"><a class="cd-btn cd-btn--ghost label" href="#">View event</a></div>
+      </div>
+
+      <div class="event-row" data-dojo="Brussels North Dojo">
+        <div class="date-box"><span class="caption dow">SAT</span><span class="dom">27</span></div>
+        <div class="info">
+          <h3 class="heading-md">Intro to Python: quiz bot — Brussels North Dojo</h3>
+          <p class="body-sm meta">13:00–15:00 · Brussels</p>
+          <div class="badges">
+            <span class="cd-badge cd-badge--danger caption">Full</span>
+            <span class="cd-badge cd-badge--accent caption">Ages 10–16</span>
+          </div>
+        </div>
+        <div class="action"><a class="cd-btn cd-btn--ghost label" href="#">View event</a></div>
+      </div>
+    </div>
+
+    <div class="date-group" data-group>
+      <h2 class="heading-lg">Saturday, 4 October</h2>
+
+      <div class="event-row" data-dojo="Antwerp Dojo">
+        <div class="date-box"><span class="caption dow">SAT</span><span class="dom">4</span></div>
+        <div class="info">
+          <h3 class="heading-md">Coolest Projects showcase — Antwerp Dojo</h3>
+          <p class="body-sm meta">13:00 · Antwerp Expo</p>
+          <div class="badges">
+            <span class="cd-badge cd-badge--success caption">Open</span>
+            <span class="cd-badge cd-badge--accent caption">All ages</span>
+          </div>
+        </div>
+        <div class="action"><a class="cd-btn cd-btn--ghost label" href="#">View event</a></div>
+      </div>
+
+      <div class="event-row" data-dojo="Ghent Dojo">
+        <div class="date-box"><span class="caption dow">SAT</span><span class="dom">11</span></div>
+        <div class="info">
+          <h3 class="heading-md">Web &amp; Robotics — Ghent Dojo</h3>
+          <p class="body-sm meta">10:00 · Ghent Public Library</p>
+          <div class="badges">
+            <span class="cd-badge cd-badge--success caption">Open</span>
+            <span class="cd-badge cd-badge--accent caption">Ages 7–18</span>
+          </div>
+        </div>
+        <div class="action"><a class="cd-btn cd-btn--ghost label" href="#">View event</a></div>
+      </div>
+    </div>
+
+    <div class="cd-card find-cta">
+      <p class="body">Would rather browse by place than by date?</p>
+      <a class="cd-btn cd-btn--primary label" href="#">Find a dojo near you</a>
+    </div>
+
+    <footer class="cd-footer" style="margin-top: var(--space-8);">
+      <p class="body-sm" style="margin:0;">CoderDojo · Ghent Public Library · hello@example.org</p>
+      <ul class="cd-footer__links body-sm">
+        <li><a href="#">Code of conduct</a></li>
+        <li><a href="#">Volunteer with us</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </footer>
+  </div>
+</div>
+<script>
+  (function () {
+    var select = document.getElementById("ep-dojo");
+    var chip = document.getElementById("ep-filter-chip");
+    var chipName = document.getElementById("ep-filter-chip-name");
+    var chipClear = document.getElementById("ep-filter-chip-clear");
+    var rows = Array.prototype.slice.call(document.querySelectorAll(".event-row"));
+    var groups = Array.prototype.slice.call(document.querySelectorAll("[data-group]"));
+
+    function applyFilter(dojo) {
+      var filtering = dojo && dojo !== "All dojos";
+      rows.forEach(function (row) {
+        row.hidden = filtering && row.getAttribute("data-dojo") !== dojo;
+      });
+      groups.forEach(function (group) {
+        var visible = Array.prototype.slice.call(group.querySelectorAll(".event-row")).some(function (row) {
+          return !row.hidden;
+        });
+        group.hidden = !visible;
+      });
+      if (filtering) {
+        chipName.textContent = dojo;
+        chip.hidden = false;
+      } else {
+        chip.hidden = true;
+      }
+    }
+
+    select.addEventListener("change", function () {
+      applyFilter(select.value);
+    });
+    chipClear.addEventListener("click", function () {
+      select.value = "All dojos";
+      applyFilter("All dojos");
+    });
+
+    // Simulates arriving here from a DojoPage's "View this dojo's sessions" link,
+    // which would pass the dojo along (e.g. as a ?dojo= query param) in a real app.
+    select.value = "Ghent Dojo";
+    applyFilter("Ghent Dojo");
+  })();
+</script>
+</body>
+</html>

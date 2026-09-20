@@ -1,0 +1,127 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scratch & Python · CoderDojo</title>
+<link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/bundle.css' %}">
+<style>
+  html, body { margin: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+</style>
+</head>
+<body>
+<script src="{% static 'core/js/bundle.js' %}"></script>
+<style>
+  .eventdetail-root { background: var(--surface); }
+  .eventdetail-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .eventdetail-root .event-layout { display: flex; gap: var(--space-6); align-items: flex-start; margin-top: var(--space-6); }
+  .eventdetail-root .event-main { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: var(--space-6); }
+  .eventdetail-root .event-side { flex: 0 0 300px; position: sticky; top: var(--space-5); }
+  .eventdetail-root .event-header { margin-top: var(--space-6); }
+  .eventdetail-root .event-header .hosted-by { color: var(--secondary); }
+  .eventdetail-root .event-header h1 { color: var(--ink); margin: var(--space-2) 0; }
+  .eventdetail-root .event-header p.meta { color: var(--ink-muted); margin: 0; }
+  .eventdetail-root h2.section-title { color: var(--ink); margin: 0 0 var(--space-4); }
+  @media (max-width: 800px) {
+    .eventdetail-root .event-layout { flex-direction: column; }
+    .eventdetail-root .event-side { position: static; width: 100%; flex-basis: auto; }
+  }
+</style>
+
+<div class="cd-root eventdetail-root" style="padding: 0;">
+  <div class="shell">
+    {% include "core/menu.html" %}
+
+    <div class="event-header">
+      <a class="label hosted-by" href="#">← Hosted by Ghent Dojo</a>
+      <h1 class="display-xl">Scratch &amp; Python</h1>
+      <p class="body-lg meta">Sat 27 Sep · 10:00–13:15 · Ghent Public Library</p>
+    </div>
+
+    <div class="event-layout">
+      <div class="event-main">
+
+        <section>
+          <h2 class="heading-lg section-title">About this session</h2>
+          <p class="body" style="color: var(--ink);">
+            A relaxed Saturday morning of small-group coding — kids pick up where they left off or start fresh,
+            with a mentor keeping an eye on their screen the whole time. This session runs Scratch for first-timers
+            and Python for anyone ready for a bit more. There's no fixed curriculum, so it's fine to jump between the two.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="heading-lg section-title">What to bring</h2>
+          <p class="body" style="color: var(--ink);">
+            A laptop if you have one — a small number are available to borrow on the day. Nothing else is required;
+            mentors bring everything needed to get started.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="heading-lg section-title">Questions</h2>
+          <div class="cd-faq" id="faq-event-detail-page">
+            <div class="cd-faq__item" data-open="false">
+              <button class="cd-faq__question heading-sm">
+                <span>Is this session suitable for a complete beginner?</span>
+                <span class="cd-faq__icon" aria-hidden="true">+</span>
+              </button>
+              <p class="cd-faq__answer body" hidden>Yes — mentors group kids by what they're working on, not experience level, so first-timers and returning coders sit side by side.</p>
+            </div>
+            <div class="cd-faq__item" data-open="false">
+              <button class="cd-faq__question heading-sm">
+                <span>What if we're running a few minutes late?</span>
+                <span class="cd-faq__icon" aria-hidden="true">+</span>
+              </button>
+              <p class="cd-faq__answer body" hidden>Come on in — mentors are used to kids arriving throughout the first half hour.</p>
+            </div>
+            <div class="cd-faq__item" data-open="false">
+              <button class="cd-faq__question heading-sm">
+                <span>Do parents need to stay for this session?</span>
+                <span class="cd-faq__icon" aria-hidden="true">+</span>
+              </button>
+              <p class="cd-faq__answer body" hidden>Under-12s need an adult on site; older kids can be dropped off.</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <aside class="event-side">
+        <div class="cd-card cd-ticket-panel">
+          <div class="cd-ticket-panel__row">
+            <span class="cd-ticket-panel__label label">Date</span>
+            <span class="cd-ticket-panel__value body">Sat, 27 Sep · 10:00–13:15</span>
+          </div>
+          <div class="cd-ticket-panel__row">
+            <span class="cd-ticket-panel__label label">Location</span>
+            <span class="cd-ticket-panel__value body">Ghent Public Library</span>
+          </div>
+          <div class="cd-ticket-panel__row">
+            <span class="cd-ticket-panel__label label">Ages</span>
+            <span class="cd-ticket-panel__value body">7–18</span>
+          </div>
+          <hr class="cd-ticket-panel__divider">
+          <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="#">Sign up now</a>
+          <p class="cd-ticket-panel__note body-sm">3 of 30 spots left</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="cd-footer" style="margin-top: var(--space-8);">
+      <p class="body-sm" style="margin:0;">CoderDojo · Ghent Public Library · hello@example.org</p>
+      <ul class="cd-footer__links body-sm">
+        <li><a href="#">Code of conduct</a></li>
+        <li><a href="#">Volunteer with us</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </footer>
+  </div>
+</div>
+<script>
+  CoderDojo.initFaq(document.getElementById("faq-event-detail-page"));
+</script>
+</body>
+</html>

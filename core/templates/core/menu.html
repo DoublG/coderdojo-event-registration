@@ -1,0 +1,11 @@
+<nav class="cd-nav" style="{{ style }}">
+  <a class="cd-nav__brand display-lg" href="#" style="font-size: 22px"
+    >CoderDojo</a
+  >
+  <ul class="cd-nav__links">
+    <li><a class="cd-nav__link label" href="{% url 'home' %}">Home</a></li>
+    <li><a class="cd-nav__link label" href="{% url 'event_list' %}">Events</a></li>
+    <li><a class="cd-nav__link label" href="{% url 'login' %}">Log in</a></li>
+    <li><a class="cd-btn cd-btn--primary label" href="{% url 'register' %}">Sign up</a></li>
+  </ul>
+</nav>

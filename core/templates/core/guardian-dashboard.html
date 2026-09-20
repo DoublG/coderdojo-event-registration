@@ -1,0 +1,115 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My account · CoderDojo</title>
+<link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/bundle.css' %}">
+<style>
+  html, body { margin: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+</style>
+</head>
+<body>
+<script src="{% static 'core/js/bundle.js' %}"></script>
+<style>
+  .guardian-root { background: var(--surface); }
+  .guardian-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .guardian-root .col { max-width: 720px; }
+  .guardian-root .account-header { margin: var(--space-6) 0 var(--space-6); }
+  .guardian-root .account-header h1 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .guardian-root .account-header p { color: var(--ink-muted); margin: 0; }
+  .guardian-root h2.section-title { color: var(--ink); margin: 0 0 var(--space-4); }
+  .guardian-root .child-card { padding: var(--space-6); }
+  .guardian-root .child-card + .child-card { margin-top: var(--space-5); }
+  .guardian-root .child-card__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5); }
+  .guardian-root .child-card__person { display: flex; align-items: center; gap: var(--space-3); }
+  .guardian-root .child-card__person .cd-mentor__avatar { width: 48px; height: 48px; flex-shrink: 0; }
+  .guardian-root .child-card__name { color: var(--ink); margin: 0; }
+  .guardian-root .child-card__meta { color: var(--ink-muted); margin: 0; }
+  .guardian-root .child-card__link { color: var(--secondary); }
+  .guardian-root .next-row { display: flex; align-items: center; gap: var(--space-4); background: var(--surface-sunken); border-radius: var(--radius-md); padding: var(--space-4); }
+  .guardian-root .next-row .date-box {
+    flex: 0 0 52px; text-align: center; background: var(--surface); border-radius: var(--radius-md); padding: var(--space-2) 0;
+  }
+  .guardian-root .next-row .date-box .dow { display: block; color: var(--ink-muted); }
+  .guardian-root .next-row .date-box .dom { display: block; color: var(--ink); font-weight: 700; font-size: 16px; }
+  .guardian-root .next-row .info { flex: 1 1 auto; min-width: 0; }
+  .guardian-root .next-row .info h3 { color: var(--ink); margin: 0 0 2px; }
+  .guardian-root .next-row .info .meta { color: var(--ink-muted); margin: 0; }
+  .guardian-root .next-row .action { flex: 0 0 auto; }
+  .guardian-root .empty-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); background: var(--surface-sunken); border-radius: var(--radius-md); padding: var(--space-4); flex-wrap: wrap; }
+  .guardian-root .empty-row p { color: var(--ink-muted); margin: 0; }
+  .guardian-root .add-child { padding: var(--space-6); text-align: center; margin-top: var(--space-6); }
+  .guardian-root .add-child p { color: var(--ink-muted); margin: 0 0 var(--space-4); }
+</style>
+
+<div class="cd-root guardian-root" style="padding: 0;">
+  <div class="shell">
+    {% include "core/menu.html" %}
+
+    <div class="account-header col">
+      <h1 class="display-lg">Welcome back, Sofie</h1>
+      <p class="body-lg">Here's what's coming up for your children.</p>
+    </div>
+
+    <section>
+      <h2 class="heading-lg section-title">Your children</h2>
+
+      <div class="cd-card child-card">
+        <div class="child-card__top">
+          <div class="child-card__person">
+            <div class="cd-mentor__avatar" aria-hidden="true"></div>
+            <div>
+              <p class="heading-sm child-card__name">Sam</p>
+              <p class="body-sm child-card__meta">Age 9 · Ghent Dojo</p>
+            </div>
+          </div>
+          <a class="body-sm child-card__link" href="#">View Sam's awards &amp; history →</a>
+        </div>
+        <div class="next-row">
+          <div class="date-box"><span class="caption dow">SAT</span><span class="dom">27</span></div>
+          <div class="info">
+            <h3 class="heading-sm">Scratch &amp; Python</h3>
+            <p class="body-sm meta">10:00–13:15 · Ghent Public Library</p>
+          </div>
+          <div class="action"><a class="cd-btn cd-btn--ghost label" href="#">View event</a></div>
+        </div>
+      </div>
+
+      <div class="cd-card child-card">
+        <div class="child-card__top">
+          <div class="child-card__person">
+            <div class="cd-mentor__avatar" aria-hidden="true"></div>
+            <div>
+              <p class="heading-sm child-card__name">Mila</p>
+              <p class="body-sm child-card__meta">Age 7 · Ghent Dojo</p>
+            </div>
+          </div>
+          <a class="body-sm child-card__link" href="#">View Mila's awards &amp; history →</a>
+        </div>
+        <div class="empty-row">
+          <p class="body-sm">Not registered for an upcoming session.</p>
+          <a class="cd-btn cd-btn--secondary label" href="#">Browse events</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="cd-card add-child">
+      <p class="body">Registering another child?</p>
+      <a class="cd-btn cd-btn--primary label" href="#">Register another child</a>
+    </div>
+
+    <footer class="cd-footer" style="margin-top: var(--space-8);">
+      <p class="body-sm" style="margin:0;">CoderDojo · Ghent Public Library · hello@example.org</p>
+      <ul class="cd-footer__links body-sm">
+        <li><a href="#">Code of conduct</a></li>
+        <li><a href="#">Volunteer with us</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </footer>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,262 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoderDojo</title>
+<link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/bundle.css' %}">
+<style>
+  html, body { margin: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+</style>
+</head>
+<body>
+<script src="{% static 'core/js/bundle.js' %}"></script>
+<style>
+  .home-root { background: var(--surface); }
+  .home-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .home-root .section { padding: var(--space-8) 0; }
+  .home-root .section-head { max-width: 640px; margin: 0 0 var(--space-5); }
+  .home-root .section-head h2 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .home-root .section-head p { color: var(--ink-muted); margin: 0; }
+  .home-root .row { display: flex; gap: var(--space-5); flex-wrap: wrap; }
+  .home-root .row > * { flex: 1 1 220px; }
+  .home-root .center { display: flex; justify-content: center; }
+  .home-root .cta-wrap { background: var(--surface-raised); border-radius: var(--radius-lg); }
+  @media (max-width: 640px) {
+    .home-root .section { padding: var(--space-7) 0; }
+  }
+</style>
+
+<div class="cd-root home-root" style="padding: 0;">
+
+  <div class="shell">
+    {% include "core/menu.html" %}
+  </div>
+
+  <div class="shell">
+    <section class="cd-hero">
+      <p class="cd-hero__eyebrow label">Free coding club · Saturdays</p>
+      <h1 class="cd-hero__title display-2xl">Build something awesome with code.</h1>
+      <p class="cd-hero__subtitle body-lg">Free, for ages 7–18. No experience needed — bring a laptop and an idea, we'll help with the rest.</p>
+      <div class="cd-hero__actions">
+        <a class="cd-btn cd-btn--primary label" href="{% url 'register' %}">Sign up now</a>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'event_list' %}">Browse events</a>
+      </div>
+    </section>
+  </div>
+
+  <div class="shell section">
+    <div class="section-head">
+      <h2 class="heading-lg">What you'll learn</h2>
+      <p class="body">Pick a path — or try a bit of everything before you commit to one.</p>
+    </div>
+    <div class="row">
+      <article class="cd-pathway">
+        <div class="cd-pathway__image" aria-hidden="true"></div>
+        <h3 class="cd-pathway__title heading-md">Scratch</h3>
+        <p class="cd-pathway__desc body-sm">Build a platform game with drag-and-drop blocks.</p>
+        <a class="cd-pathway__link label" href="#">Explore Scratch →</a>
+      </article>
+      <article class="cd-pathway">
+        <div class="cd-pathway__image" aria-hidden="true"></div>
+        <h3 class="cd-pathway__title heading-md">Python</h3>
+        <p class="cd-pathway__desc body-sm">Write a quiz bot and your first real program.</p>
+        <a class="cd-pathway__link label" href="#">Explore Python →</a>
+      </article>
+      <article class="cd-pathway">
+        <div class="cd-pathway__image" aria-hidden="true"></div>
+        <h3 class="cd-pathway__title heading-md">Web</h3>
+        <p class="cd-pathway__desc body-sm">Design and publish your own website.</p>
+        <a class="cd-pathway__link label" href="#">Explore Web →</a>
+      </article>
+    </div>
+  </div>
+
+  <div class="shell section" style="background: var(--surface-sunken); border-radius: var(--radius-lg); padding: var(--space-6);">
+    <div class="section-head">
+      <h2 class="heading-lg">Find a dojo near you</h2>
+      <p class="body">Every session is free and run by local volunteers.</p>
+    </div>
+    <div class="center">
+      <div class="cd-dojo-finder">
+        <div class="cd-dojo-finder__bar">
+          <div class="cd-dojo-finder__field">
+            <span class="cd-dojo-finder__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            </span>
+            <input class="cd-dojo-finder__input body" type="text" placeholder="Enter your postcode or city" value="Ghent, Belgium">
+          </div>
+          <button type="button" class="cd-btn cd-btn--secondary label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+            Use my location
+          </button>
+        </div>
+        <p class="cd-dojo-finder__meta caption">Showing dojos within 25 km of Ghent, Belgium, nearest first</p>
+        <ul class="cd-dojo-finder__list">
+          <li class="cd-card cd-dojo-finder__result">
+            <div class="cd-dojo-finder__distance">
+              <span class="heading-sm">2.4</span>
+              <span class="caption">km</span>
+            </div>
+            <div class="cd-dojo-finder__info">
+              <h3 class="cd-dojo-finder__name heading-sm">Ghent Dojo</h3>
+              <p class="cd-dojo-finder__address body-sm">Technologiepark 12, 9052 Ghent</p>
+              <p class="cd-dojo-finder__next caption">Next session: Sat 27 Sep, 10:00 <span class="cd-badge cd-badge--success caption">Open</span></p>
+            </div>
+            <a href="{% url 'dojo_detail' 1 %}" class="cd-btn cd-btn--ghost label">View</a>
+          </li>
+          <li class="cd-card cd-dojo-finder__result">
+            <div class="cd-dojo-finder__distance">
+              <span class="heading-sm">5.1</span>
+              <span class="caption">km</span>
+            </div>
+            <div class="cd-dojo-finder__info">
+              <h3 class="cd-dojo-finder__name heading-sm">Destelbergen Dojo</h3>
+              <p class="cd-dojo-finder__address body-sm">Dendermondesteenweg 1, 9070 Destelbergen</p>
+              <p class="cd-dojo-finder__next caption">Next session: Sat 27 Sep, 13:00 <span class="cd-badge cd-badge--success caption">Open</span></p>
+            </div>
+            <a href="{% url 'dojo_detail' 2 %}" class="cd-btn cd-btn--ghost label">View</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="shell section">
+    <div class="section-head">
+      <h2 class="heading-lg">Upcoming sessions</h2>
+      <p class="body">Eventbrite-style browse: pick a date, see what's running.</p>
+    </div>
+    <div class="row">
+      <article class="cd-card cd-event" style="position:relative;">
+        <div class="cd-event__image">
+          <div class="cd-event__date-badge caption">
+            <span>SAT</span>
+            <span style="font-size:18px; font-weight:700;">27</span>
+          </div>
+        </div>
+        <div class="cd-event__body">
+          <h3 class="cd-event__title heading-md">Ghent Public Library Dojo</h3>
+          <p class="cd-event__meta body-sm">10:00 · Ghent Public Library</p>
+        </div>
+        <a href="{% url 'event_detail' 1 %}" style="position:absolute; inset:0;" aria-label="View Ghent Public Library Dojo"></a>
+      </article>
+      <article class="cd-card cd-event" style="position:relative;">
+        <div class="cd-event__image">
+          <div class="cd-event__date-badge caption">
+            <span>SAT</span>
+            <span style="font-size:18px; font-weight:700;">4</span>
+          </div>
+        </div>
+        <div class="cd-event__body">
+          <h3 class="cd-event__title heading-md">Antwerp Coolest Projects</h3>
+          <p class="cd-event__meta body-sm">13:00 · Antwerp Expo</p>
+        </div>
+        <a href="{% url 'event_detail' 2 %}" style="position:absolute; inset:0;" aria-label="View Antwerp Coolest Projects"></a>
+      </article>
+    </div>
+    <p style="margin: var(--space-4) 0 0;"><a class="body-sm" href="{% url 'event_list' %}" style="color: var(--secondary);">See every upcoming event →</a></p>
+  </div>
+
+  <div class="shell section">
+    <div class="section-head">
+      <h2 class="heading-lg">Meet our mentors</h2>
+      <p class="body">Volunteers and Ninja mentors who make every session run.</p>
+    </div>
+    <div class="row">
+      <a class="cd-mentor" href="{% url 'profile_detail' 2 %}">
+        <div class="cd-mentor__avatar" aria-hidden="true"></div>
+        <div>
+          <p class="cd-mentor__name heading-sm">Priya Nair</p>
+          <p class="cd-mentor__role body-sm">Software engineer, volunteer mentor</p>
+        </div>
+      </a>
+      <a class="cd-mentor" href="{% url 'profile_detail' 3 %}">
+        <div class="cd-mentor__avatar" aria-hidden="true"></div>
+        <div>
+          <p class="cd-mentor__name heading-sm">Jonas (16)</p>
+          <p class="cd-mentor__role body-sm">Ninja mentor, Python &amp; web</p>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="shell section">
+    <div class="center">
+      <figure class="cd-testimonial" style="max-width:520px;">
+        <blockquote class="cd-testimonial__quote body-lg">My daughter built her first game in one Saturday morning and hasn't stopped talking about it since.</blockquote>
+        <figcaption class="cd-testimonial__author body-sm">— Sofie, parent</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <div class="shell section">
+    <div class="section-head">
+      <h2 class="heading-lg">Frequently asked questions</h2>
+    </div>
+    <div class="cd-faq" id="faq-home-page">
+      <div class="cd-faq__item" data-open="false">
+        <button class="cd-faq__question heading-sm">
+          <span>Is it really free?</span>
+          <span class="cd-faq__icon" aria-hidden="true">+</span>
+        </button>
+        <p class="cd-faq__answer body" hidden>Yes — every Dojo session is free, run entirely by volunteers.</p>
+      </div>
+      <div class="cd-faq__item" data-open="false">
+        <button class="cd-faq__question heading-sm">
+          <span>Does my child need coding experience?</span>
+          <span class="cd-faq__icon" aria-hidden="true">+</span>
+        </button>
+        <p class="cd-faq__answer body" hidden>No experience needed — we group by age and skill on the day, not in advance.</p>
+      </div>
+      <div class="cd-faq__item" data-open="false">
+        <button class="cd-faq__question heading-sm">
+          <span>Do parents need to stay?</span>
+          <span class="cd-faq__icon" aria-hidden="true">+</span>
+        </button>
+        <p class="cd-faq__answer body" hidden>Under-12s need an adult on site; older kids can be dropped off.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="shell section">
+    <div class="section-head">
+      <h2 class="heading-lg">Made possible by</h2>
+    </div>
+    <div class="cd-sponsor-grid">
+      <div class="cd-sponsor-logo label">Acme Robotics</div>
+      <div class="cd-sponsor-logo label">Ghent Library</div>
+      <div class="cd-sponsor-logo label">Brightware</div>
+      <div class="cd-sponsor-logo label">Local Youth Fund</div>
+    </div>
+  </div>
+
+  <div class="shell section">
+    <div class="cta-wrap">
+      <section class="cd-cta">
+        <h2 class="cd-cta__title display-lg">Ready to build your first project?</h2>
+        <p class="cd-cta__subtitle body-lg">Free, for ages 7–18. No experience needed — spots are limited, so sign up before Saturday.</p>
+        <a class="cd-btn cd-btn--primary label" href="#">Sign up now</a>
+      </section>
+    </div>
+  </div>
+
+  <div class="shell">
+    <footer class="cd-footer">
+      <p class="body-sm" style="margin:0;">CoderDojo · Ghent Public Library · hello@example.org</p>
+      <ul class="cd-footer__links body-sm">
+        <li><a href="#">Code of conduct</a></li>
+        <li><a href="#">Volunteer with us</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </footer>
+  </div>
+
+</div>
+<script>
+  CoderDojo.initFaq(document.getElementById("faq-home-page"));
+</script>
+</body>
+</html>

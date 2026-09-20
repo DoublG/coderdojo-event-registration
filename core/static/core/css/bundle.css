@@ -1,0 +1,1238 @@
+/* CoderDojo event-site component styles. Built on the compiled tokens.css
+   custom properties (--surface, --primary, --space-4, --radius-md, --shadow-sm,
+   and the generated type-style classes: .display-2xl, .heading-md, .body, .label, .code, …).
+   Every rule below reads a token — nothing here is a hard-coded value. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+.cd-root {
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+/* Visible keyboard focus on every interactive element */
+.cd-root a:focus-visible,
+.cd-root button:focus-visible,
+.cd-root input:focus-visible,
+.cd-root summary:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Button ---------- */
+.cd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+.cd-btn.label { /* type-style class + component class combine */ }
+.cd-btn--primary { background: var(--primary); color: var(--on-primary); }
+.cd-btn--primary:hover, .cd-btn--primary:active { background: var(--primary-hover); }
+.cd-btn--secondary { background: var(--secondary); color: var(--on-secondary); }
+.cd-btn--secondary:hover, .cd-btn--secondary:active { background: var(--secondary-hover); }
+.cd-btn--ghost {
+  background: transparent;
+  color: var(--secondary);
+  border: 2px solid var(--border-strong);
+  box-shadow: none;
+}
+.cd-btn--ghost:hover { background: var(--surface-sunken); }
+.cd-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+.cd-btn--block { display: flex; width: 100%; justify-content: center; }
+
+/* ---------- Badge (status + session-type tags) ---------- */
+.cd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.cd-badge--accent { background: var(--accent); color: var(--on-accent); }
+.cd-badge--success { background: var(--success); color: var(--on-success); }
+.cd-badge--warning { background: var(--warning); color: var(--on-warning); }
+.cd-badge--danger { background: var(--danger); color: var(--on-danger); }
+.cd-badge--outline {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--border-strong);
+}
+
+/* ---------- Card shell (used by SessionCard, MentorCard, SponsorLogo) ---------- */
+.cd-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------- NavBar ---------- */
+.cd-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  background: var(--surface-raised);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.cd-nav__brand { color: var(--primary); text-decoration: none; }
+.cd-nav__links { display: flex; align-items: center; gap: var(--space-5); list-style: none; margin: 0; padding: 0; }
+.cd-nav__link { color: var(--ink); text-decoration: none; }
+.cd-nav__link:hover { color: var(--secondary); }
+.cd-nav__link--active { color: var(--primary); }
+
+/* ---------- Hero ---------- */
+.cd-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background: var(--surface-raised);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+.cd-hero__eyebrow { color: var(--secondary); }
+.cd-hero__title { color: var(--ink); margin: 0; }
+.cd-hero__subtitle { color: var(--ink-muted); margin: 0; max-width: 56ch; }
+.cd-hero__actions { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-2); }
+
+/* ---------- SessionCard (schedule item) ---------- */
+.cd-session {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.cd-session__time { color: var(--secondary); }
+.cd-session__title { color: var(--ink); margin: 0; }
+.cd-session__meta { color: var(--ink-muted); display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+
+/* ---------- MentorCard ---------- */
+.cd-mentor { display: flex; align-items: center; gap: var(--space-4); }
+.cd-mentor__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}
+.cd-mentor__name { color: var(--ink); margin: 0; }
+.cd-mentor__role { color: var(--ink-muted); margin: 0; }
+
+/* ---------- Registration CTA panel ---------- */
+.cd-cta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-6);
+  background: var(--primary);
+  color: var(--on-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+.cd-cta__title { margin: 0; color: var(--on-primary); }
+.cd-cta__subtitle { margin: 0; color: var(--on-primary); opacity: 0.92; max-width: 52ch; }
+.cd-cta .cd-btn--primary { background: var(--on-primary); color: var(--primary); }
+.cd-cta .cd-btn--primary:hover { background: var(--surface-sunken); }
+
+/* ---------- Sponsor grid ---------- */
+.cd-sponsor-grid { display: flex; flex-wrap: wrap; gap: var(--space-5); align-items: center; }
+.cd-sponsor-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  padding: 0 var(--space-4);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--ink-muted);
+}
+
+/* ---------- FAQ accordion ---------- */
+.cd-faq { border-top: 1px solid var(--border); }
+.cd-faq__item { border-bottom: 1px solid var(--border); }
+.cd-faq__question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4) var(--space-2);
+  background: transparent;
+  border: none;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.cd-faq__icon { color: var(--secondary); transition: transform 0.15s ease; flex-shrink: 0; }
+.cd-faq__item[data-open="true"] .cd-faq__icon { transform: rotate(45deg); }
+.cd-faq__answer { color: var(--ink-muted); padding: 0 var(--space-2) var(--space-4); margin: 0; }
+.cd-faq__answer[hidden] { display: none; }
+
+/* ---------- Footer ---------- */
+.cd-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-5);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-lg);
+  color: var(--ink-muted);
+}
+.cd-footer__links { display: flex; gap: var(--space-5); flex-wrap: wrap; list-style: none; margin: 0; padding: 0; }
+.cd-footer__links a { color: var(--ink-muted); text-decoration: underline; }
+.cd-footer__links a:hover { color: var(--ink); }
+
+/* ---------- EventCard (Eventbrite-style listing tile) ---------- */
+.cd-event {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.cd-event__image {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: var(--surface-sunken);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+.cd-event__date-badge {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: var(--shadow-sm);
+}
+.cd-event__body { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
+.cd-event__title { color: var(--ink); margin: 0; }
+.cd-event__meta { color: var(--ink-muted); margin: 0; }
+.cd-event__price { color: var(--success); margin-top: var(--space-1); }
+
+/* ---------- TicketPanel (Eventbrite-style sticky sidebar) ---------- */
+.cd-ticket-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
+}
+.cd-ticket-panel__row { display: flex; gap: var(--space-3); align-items: flex-start; }
+.cd-ticket-panel__label { color: var(--ink-muted); min-width: 84px; }
+.cd-ticket-panel__value { color: var(--ink); }
+.cd-ticket-panel__divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+.cd-ticket-panel__price { color: var(--ink); margin: 0; }
+.cd-ticket-panel__note { color: var(--ink-muted); margin: 0; }
+
+.cd-ticket-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+.cd-ticket-option__name { color: var(--ink); }
+.cd-ticket-option__price { color: var(--ink-muted); }
+.cd-ticket-option[data-disabled="true"] { opacity: 0.55; }
+
+/* ---------- PathwayCard (Code Club-style "what you'll learn") ---------- */
+.cd-pathway {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.cd-pathway__image {
+  aspect-ratio: 4 / 3;
+  background: var(--surface-sunken);
+  border-radius: var(--radius-sm);
+}
+.cd-pathway__title { color: var(--ink); margin: 0; }
+.cd-pathway__desc { color: var(--ink-muted); margin: 0; }
+.cd-pathway__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--secondary);
+  text-decoration: none;
+}
+.cd-pathway__link:hover { color: var(--secondary-hover); }
+
+/* ---------- Testimonial ---------- */
+.cd-testimonial {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  margin: 0;
+  background: var(--surface-raised);
+  border-radius: var(--radius-lg);
+}
+.cd-testimonial__quote { color: var(--ink); margin: 0; }
+.cd-testimonial__quote::before { content: "\201C"; color: var(--primary-bright); }
+.cd-testimonial__quote::after { content: "\201D"; color: var(--primary-bright); }
+.cd-testimonial__author { color: var(--ink-muted); margin: 0; }
+
+/* ---------- Table ---------- */
+.cd-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.cd-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+.cd-table thead th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  color: var(--ink-muted);
+  background: var(--surface-raised);
+  border-bottom: 1.5px solid var(--border-strong);
+  white-space: nowrap;
+}
+.cd-table th[aria-sort] { cursor: pointer; user-select: none; }
+.cd-table th[aria-sort] .cd-table__sort-icon {
+  display: inline-block;
+  margin-left: var(--space-1);
+  color: var(--ink-muted);
+  transition: transform 0.15s ease;
+}
+.cd-table th[aria-sort="descending"] .cd-table__sort-icon { transform: rotate(180deg); }
+.cd-table th[aria-sort="none"] .cd-table__sort-icon { opacity: 0.4; }
+.cd-table tbody td {
+  padding: var(--space-3) var(--space-4);
+  color: var(--ink);
+  border-bottom: 1px solid var(--border);
+}
+.cd-table tbody tr:last-child td { border-bottom: none; }
+.cd-table tbody tr:hover td { background: var(--surface-sunken); }
+.cd-table--zebra tbody tr:nth-child(even) td { background: var(--surface-raised); }
+.cd-table--zebra tbody tr:nth-child(even):hover td { background: var(--surface-sunken); }
+.cd-table td.cd-table__num, .cd-table th.cd-table__num { text-align: right; }
+
+/* ---------- Calendar (Outlook-style upcoming-events agenda: only dates with something on) ---------- */
+.cd-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  width: 100%;
+  max-width: 440px;
+}
+.cd-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.cd-calendar__title { color: var(--ink); margin: 0; }
+.cd-calendar__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+.cd-calendar__nav:hover { background: var(--surface-sunken); color: var(--ink); }
+
+.cd-calendar__list { display: flex; flex-direction: column; gap: var(--space-5); }
+
+/* A relative time bucket: "Today", "This week", "Next week", or a month name once far out */
+.cd-calendar__period { display: flex; flex-direction: column; gap: var(--space-2); }
+.cd-calendar__period-title {
+  color: var(--ink-muted);
+  margin: 0;
+  padding: 0 var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.cd-calendar__dates { display: flex; flex-direction: column; gap: var(--space-3); }
+
+/* One date that has something on it — never rendered for an empty day */
+.cd-calendar__date { display: flex; flex-direction: column; }
+.cd-calendar__date-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.cd-calendar__date-header:hover { background: var(--surface-sunken); }
+.cd-calendar__date-weekday { color: var(--ink-muted); }
+.cd-calendar__date-day { color: var(--ink); }
+
+.cd-calendar__date--selected .cd-calendar__date-header,
+.cd-calendar__date--selected .cd-calendar__date-header:hover {
+  background: var(--primary);
+}
+.cd-calendar__date--selected .cd-calendar__date-weekday,
+.cd-calendar__date--selected .cd-calendar__date-day { color: var(--on-primary); }
+.cd-calendar__date--selected .cd-calendar__events { border-left-color: var(--primary); }
+
+/* The events under one date, indented like a sub-list under its header */
+.cd-calendar__events {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-left: var(--space-4);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--border);
+}
+.cd-calendar__event {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-2);
+}
+.cd-calendar__event-time { color: var(--ink-muted); min-width: 64px; flex-shrink: 0; }
+.cd-calendar__event-title { color: var(--ink); }
+
+.cd-calendar__empty {
+  color: var(--ink-muted);
+  padding: var(--space-4) var(--space-2);
+}
+
+/* ---------- AwardCard (gamification: badges, streaks, milestones) ---------- */
+.cd-award-grid { display: flex; flex-wrap: wrap; gap: var(--space-5); }
+.cd-award {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-4);
+  width: 184px;
+}
+.cd-award__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+.cd-award__badge svg { width: 36px; height: 36px; }
+.cd-award__badge--attendance { background: var(--secondary); color: var(--on-secondary); }
+.cd-award__badge--skill { background: var(--primary); color: var(--on-primary); }
+.cd-award__badge--milestone { background: var(--accent); color: var(--on-accent); }
+.cd-award__badge--locked { background: var(--surface-sunken); color: var(--ink-muted); }
+
+.cd-award__title { color: var(--ink); margin: 0; }
+.cd-award__desc { color: var(--ink-muted); margin: 0; }
+.cd-award__meta { color: var(--ink-muted); margin-top: var(--space-1); }
+
+.cd-award--locked .cd-award__title { color: var(--ink-muted); }
+
+.cd-award__progress {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+.cd-award__progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+.cd-award__progress-fill { height: 100%; background: var(--secondary); border-radius: inherit; }
+
+/* ---------- Form (fieldset subgroups + repeatable child subgroups) ---------- */
+.cd-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Wrap one or more .cd-form__note in this when a submission has more than
+   one — a tight stack of related messages, not separate form sections, so
+   it gets its own small gap instead of inheriting .cd-form's space-6. */
+.cd-form__notes { display: flex; flex-direction: column; gap: var(--space-2); }
+
+/* Form-level note, aligned with Django's admin "errornote" convention: a
+   bordered summary at the very top of the form, above every field, used
+   when a whole submission needs attention rather than one control. */
+.cd-form__note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px solid;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  margin: 0;
+}
+.cd-form__note svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+.cd-form__note--error { background: var(--danger-surface); border-color: var(--danger); color: var(--danger); }
+.cd-form__note--warning { background: var(--warning-surface); border-color: var(--warning); color: var(--warning); }
+
+/* A named section of the form — "Your details", "Children" */
+.cd-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.cd-form__group-title { color: var(--ink); margin: 0; }
+.cd-form__group-desc { color: var(--ink-muted); margin: 0; margin-top: calc(var(--space-1) * -1); }
+
+/* A repeatable nested subgroup inside a group — one per child */
+.cd-form__subgroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+.cd-form__subgroup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.cd-form__subgroup-title { color: var(--ink); margin: 0; }
+.cd-form__remove {
+  background: transparent;
+  border: none;
+  padding: var(--space-1) var(--space-2);
+  color: var(--danger);
+  cursor: pointer;
+  text-decoration: underline;
+}
+.cd-form__remove:hover { color: var(--danger); opacity: 0.8; }
+
+.cd-form__add-button {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  color: var(--secondary);
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.cd-form__add-button:hover { background: var(--surface-sunken); color: var(--secondary-hover); }
+
+/* A row of fields laid side by side, wrapping on narrow widths */
+.cd-form__row { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+.cd-form__field { display: flex; flex-direction: column; gap: var(--space-1); flex: 1 1 160px; min-width: 160px; }
+
+.cd-form__label { color: var(--ink); }
+.cd-form__required { color: var(--danger); margin-left: var(--space-1); }
+
+.cd-form__input,
+.cd-form__select,
+.cd-form__textarea {
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface);
+  color: var(--ink);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  width: 100%;
+}
+.cd-form__textarea { resize: vertical; min-height: 72px; }
+.cd-form__input::placeholder, .cd-form__textarea::placeholder { color: var(--ink-muted); }
+.cd-form__input:focus-visible,
+.cd-form__select:focus-visible,
+.cd-form__textarea:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-color: var(--focus-ring);
+}
+.cd-form__input--invalid { border-color: var(--danger); }
+
+.cd-form__help { color: var(--ink-muted); margin: 0; }
+
+/* Per-field errors, aligned with Django's forms convention: a plain <ul>
+   (Django's own .errorlist) placed ABOVE the widget — label, then errors,
+   then the input — not below it, and able to hold more than one message. */
+/* min-height reserves one caption line even when empty — render this ul for
+   every field in a .cd-form__row that CAN error (not just the one that
+   currently does), so a sibling field's input doesn't jump out of alignment
+   the moment one of them gets an error. Skip it on fields outside a row,
+   where there's no sibling to stay aligned with. */
+.cd-form__errors { list-style: none; margin: 0; padding: 0; min-height: 18px; display: flex; flex-direction: column; gap: 2px; }
+.cd-form__errors li { color: var(--danger); }
+
+.cd-form__checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+.cd-form__checkbox-row input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.cd-form__checkbox-row label { color: var(--ink); }
+
+.cd-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* ---------- AngledBanner (exact reproduction of the uploaded tilted-ribbon asset) ---------- */
+/* The banner is drawn from the asset's own path geometry (viewBox 0 0 233.5 140.882:
+   two hand-tilted navy tiles + the small arrow tile, all ~-14deg, exactly as cut in the
+   original), with the vector-outlined lettering swapped for live, accessible <text> set
+   in the display face — same shapes, real editable words. */
+.cd-tilt-mark { display: block; width: 100%; height: auto; overflow: visible; }
+.cd-tilt-mark__tile { fill: var(--ink-bright); }
+.cd-tilt-mark__arrow { fill: var(--accent-bright); }
+.cd-tilt-mark__text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  fill: #fff;
+}
+
+/* A standalone version of the small arrow tile, for reuse as an inline "next"/scroll
+   cue elsewhere (before a link, between sections) — same navy, same -14deg tilt. */
+.cd-tilt-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  background: var(--ink-bright);
+  box-shadow: var(--shadow-sm);
+  color: var(--accent-bright);
+  transform: rotate(-14deg);
+}
+.cd-tilt-chip svg { width: 20px; height: 20px; }
+.cd-tilt-chip--sm { width: 32px; height: 32px; }
+.cd-tilt-chip--sm svg { width: 14px; height: 14px; }
+
+/* ---------- Login (account sign-in panel) ---------- */
+.cd-login {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: 380px;
+}
+.cd-login__header { display: flex; flex-direction: column; gap: var(--space-1); }
+.cd-login__title { color: var(--ink); margin: 0; }
+.cd-login__subtitle { color: var(--ink-muted); margin: 0; }
+
+.cd-login__fields { display: flex; flex-direction: column; gap: var(--space-4); }
+.cd-login__fields .cd-form__field { flex: none; }
+
+.cd-login__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.cd-login__forgot { color: var(--secondary); text-decoration: none; }
+.cd-login__forgot:hover { color: var(--secondary-hover); text-decoration: underline; }
+
+.cd-login__footer { color: var(--ink-muted); margin: 0; text-align: center; }
+.cd-login__footer a { color: var(--secondary); text-decoration: none; }
+.cd-login__footer a:hover { text-decoration: underline; }
+
+/* ---------- Wizard (a multi-step shell for splitting a long form, e.g. registration) ---------- */
+.cd-wizard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: 480px;
+}
+
+.cd-wizard__steps { display: flex; align-items: flex-start; list-style: none; margin: 0; padding: 0; }
+.cd-wizard__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  position: relative;
+  text-align: center;
+}
+/* The connecting line either side of a step's circle — each half colors independently,
+   so the colored line always ends exactly at the current step, never past it. */
+.cd-wizard__step::before,
+.cd-wizard__step::after {
+  content: "";
+  position: absolute;
+  top: 15px;
+  width: 50%;
+  height: 2px;
+  background: var(--border-strong);
+}
+.cd-wizard__step::before { left: 0; }
+.cd-wizard__step::after { left: 50%; }
+.cd-wizard__step:first-child::before { display: none; }
+.cd-wizard__step:last-child::after { display: none; }
+.cd-wizard__step--complete::before,
+.cd-wizard__step--complete::after,
+.cd-wizard__step--current::before { background: var(--primary); }
+
+.cd-wizard__step-index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink-muted);
+  position: relative;
+  z-index: 1;
+}
+.cd-wizard__step-index svg { width: 16px; height: 16px; }
+.cd-wizard__step--current .cd-wizard__step-index { border-color: var(--primary); color: var(--primary); }
+.cd-wizard__step--complete .cd-wizard__step-index { border-color: var(--primary); background: var(--primary); color: var(--on-primary); }
+
+.cd-wizard__step-label { color: var(--ink-muted); }
+.cd-wizard__step--current .cd-wizard__step-label,
+.cd-wizard__step--complete .cd-wizard__step-label { color: var(--ink); }
+
+/* A text fallback for narrow widths, where the full step row gets cramped */
+.cd-wizard__progress-text { display: none; color: var(--ink-muted); margin: 0; }
+@media (max-width: 420px) {
+  .cd-wizard__steps { display: none; }
+  .cd-wizard__progress-text { display: block; }
+}
+
+.cd-wizard__panel { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-6); }
+.cd-wizard__panel-title { color: var(--ink); margin: 0; }
+.cd-wizard__panel-desc { color: var(--ink-muted); margin: 0; }
+
+.cd-wizard__actions { display: flex; justify-content: space-between; gap: var(--space-3); }
+
+/* ---------- SearchTable (a search field that live-filters the table beneath it) ---------- */
+.cd-search-table { display: flex; flex-direction: column; gap: var(--space-4); }
+
+.cd-search-table__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.cd-search-table__field { position: relative; flex: 1; min-width: 200px; }
+.cd-search-table__icon {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-muted);
+  pointer-events: none;
+  display: flex;
+}
+.cd-search-table__icon svg { width: 16px; height: 16px; }
+.cd-search-table__input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3) var(--space-2) calc(var(--space-3) * 2 + 16px);
+  background: var(--surface);
+  color: var(--ink);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+}
+.cd-search-table__input::placeholder { color: var(--ink-muted); }
+.cd-search-table__input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-color: var(--focus-ring);
+}
+.cd-search-table__input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+
+.cd-search-table__count { color: var(--ink-muted); white-space: nowrap; }
+
+.cd-search-table__empty {
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  color: var(--ink-muted);
+}
+
+/* ---------- DojoFinder ("find a dojo near you", sorted by distance) ---------- */
+.cd-dojo-finder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: 520px;
+}
+
+.cd-dojo-finder__bar { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.cd-dojo-finder__field { position: relative; flex: 1; min-width: 200px; }
+.cd-dojo-finder__icon {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-muted);
+  pointer-events: none;
+  display: flex;
+}
+.cd-dojo-finder__icon svg { width: 16px; height: 16px; }
+.cd-dojo-finder__input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3) var(--space-2) calc(var(--space-3) * 2 + 16px);
+  background: var(--surface);
+  color: var(--ink);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+}
+.cd-dojo-finder__input::placeholder { color: var(--ink-muted); }
+.cd-dojo-finder__input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-color: var(--focus-ring);
+}
+
+.cd-dojo-finder__meta { color: var(--ink-muted); margin: 0; }
+
+.cd-dojo-finder__list { display: flex; flex-direction: column; gap: var(--space-3); list-style: none; margin: 0; padding: 0; }
+
+.cd-dojo-finder__result { display: flex; align-items: center; gap: var(--space-4); }
+
+/* The distance is the whole point of this list, so it leads every row — same
+   leading-badge shape as EventCard's date badge, but always on `primary` (not
+   `primary-bright`), since the unit label underneath is small text. */
+.cd-dojo-finder__distance {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: var(--on-primary);
+  flex-shrink: 0;
+  min-width: 56px;
+}
+
+.cd-dojo-finder__info { flex: 1; display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.cd-dojo-finder__name { color: var(--ink); margin: 0; }
+.cd-dojo-finder__address { color: var(--ink-muted); margin: 0; }
+.cd-dojo-finder__next { color: var(--ink-muted); margin: 0; display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+
+.cd-dojo-finder__empty {
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  color: var(--ink-muted);
+}
+
+/* ---------- AttendanceList (quick Present/Absent flagging during a session) ---------- */
+.cd-attendance { display: flex; flex-direction: column; gap: var(--space-4); }
+
+.cd-attendance__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.cd-attendance__title { color: var(--ink); margin: 0; }
+.cd-attendance__summary { color: var(--ink-muted); margin: 0; }
+
+.cd-attendance__list { display: flex; flex-direction: column; }
+.cd-attendance__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.cd-attendance__row:last-child { border-bottom: none; }
+
+.cd-attendance__person { display: flex; flex-direction: column; gap: 2px; min-width: 120px; }
+.cd-attendance__name { color: var(--ink); }
+.cd-attendance__meta { color: var(--ink-muted); }
+
+/* A two-button segmented toggle, sized for a thumb — this is the whole point
+   of the component, so it's the biggest tap target on the row. */
+.cd-attendance__toggle {
+  display: inline-flex;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.cd-attendance__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  min-height: 40px;
+  background: var(--surface);
+  color: var(--ink-muted);
+  border: none;
+  cursor: pointer;
+}
+.cd-attendance__btn:first-child { border-right: 1.5px solid var(--border-strong); }
+.cd-attendance__btn svg { width: 16px; height: 16px; }
+.cd-attendance__btn:hover { background: var(--surface-sunken); }
+.cd-attendance__btn--present[aria-pressed="true"] { background: var(--success); color: var(--on-success); }
+.cd-attendance__btn--absent[aria-pressed="true"] { background: var(--danger); color: var(--on-danger); }
+
+/* ---------- MagicLink (passwordless email sign-in, built on the Login shell) ---------- */
+/* .cd-magic-link reuses .cd-card and .cd-login__header/footer as-is; only the
+   two swappable panels below are new. */
+.cd-magic-link__panel { display: flex; flex-direction: column; gap: var(--space-4); }
+.cd-magic-link__panel[hidden] { display: none; }
+
+.cd-magic-link__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  color: var(--secondary);
+  flex-shrink: 0;
+}
+.cd-magic-link__icon svg { width: 26px; height: 26px; }
+
+.cd-magic-link__sent-title { color: var(--ink); margin: 0; }
+.cd-magic-link__sent-text { color: var(--ink-muted); margin: 0; }
+.cd-magic-link__email { color: var(--ink); font-weight: 700; }
+
+.cd-magic-link__status {
+  color: var(--success);
+  margin: 0;
+  min-height: 18px;
+}
+
+.cd-magic-link__resend {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--secondary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.cd-magic-link__resend:hover { color: var(--secondary-hover); }
+.cd-magic-link__resend:disabled { color: var(--ink-muted); text-decoration: none; cursor: not-allowed; }
+
+.cd-magic-link__change { color: var(--secondary); }
+
+/* ---------- Notification (bell + dropdown panel) ---------- */
+.cd-notif { position: relative; display: inline-block; }
+
+.cd-notif__bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+.cd-notif__bell svg { width: 20px; height: 20px; }
+.cd-notif__bell:hover { background: var(--surface-sunken); }
+.cd-notif__bell:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+.cd-notif__count {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: var(--radius-pill);
+  background: var(--danger);
+  color: var(--on-danger);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--surface-raised);
+}
+.cd-notif__count[hidden] { display: none; }
+
+.cd-notif__panel {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  width: 336px;
+  max-width: calc(100vw - var(--space-5));
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  z-index: 20;
+}
+.cd-notif__panel[hidden] { display: none; }
+
+.cd-notif__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+.cd-notif__title { color: var(--ink); margin: 0; }
+.cd-notif__mark-all {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--secondary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.cd-notif__mark-all:hover { color: var(--secondary-hover); }
+.cd-notif__mark-all:disabled { color: var(--ink-muted); text-decoration: none; cursor: not-allowed; }
+
+.cd-notif__list { list-style: none; margin: 0; padding: 0; max-height: 340px; overflow-y: auto; }
+
+.cd-notif__item-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+.cd-notif__list li:last-child .cd-notif__item-btn { border-bottom: none; }
+.cd-notif__item-btn:hover { background: var(--surface-sunken); }
+.cd-notif__item-btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+
+.cd-notif__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--secondary);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+/* Read items keep the dot's layout space so text doesn't shift, just hide it */
+.cd-notif__item:not([data-unread]) .cd-notif__dot { visibility: hidden; }
+
+.cd-notif__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cd-notif__text { color: var(--ink); margin: 0; }
+.cd-notif__item:not([data-unread]) .cd-notif__text { color: var(--ink-muted); }
+.cd-notif__time { color: var(--ink-muted); margin: 0; }
+
+.cd-notif__empty { padding: var(--space-5) var(--space-4); color: var(--ink-muted); text-align: center; margin: 0; }
+
+/* ---------- AdminNav (left sidebar for the dojo owner's admin area) ---------- */
+/* Plain Heading/Body throughout, same reasoning as Login: this is a utility
+   screen an owner uses daily, not a marketing moment for the display face. */
+.cd-admin-nav-shell { position: relative; }
+
+.cd-admin-nav__toggle {
+  display: none;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  cursor: pointer;
+}
+.cd-admin-nav__toggle svg { width: 18px; height: 18px; }
+
+.cd-admin-nav__backdrop { display: none; }
+
+.cd-admin-nav {
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+  min-width: 240px;
+  height: 100%;
+  background: var(--surface-raised);
+  border-right: 1px solid var(--border);
+  padding: var(--space-4) 0;
+  box-sizing: border-box;
+}
+
+.cd-admin-nav__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 var(--space-4) var(--space-4);
+  margin-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+.cd-admin-nav__brand-name { color: var(--ink); margin: 0; }
+.cd-admin-nav__brand-role { color: var(--ink-muted); margin: 0; }
+
+/* A flex item (not cd-btn--block) so it stretches via the column's default
+   align-items: stretch, which correctly subtracts these margins — combining
+   cd-btn--block's own width:100% with margins here would overflow instead. */
+.cd-admin-nav__create { margin: 0 var(--space-4) var(--space-5); justify-content: center; }
+.cd-admin-nav__create svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+.cd-admin-nav__group { margin-bottom: var(--space-5); padding: 0 var(--space-3); }
+.cd-admin-nav__group-label {
+  color: var(--ink-muted);
+  margin: 0 0 var(--space-2);
+  padding: 0 var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.cd-admin-nav__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.cd-admin-nav__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid transparent;
+  color: var(--ink);
+  text-decoration: none;
+}
+.cd-admin-nav__link svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--ink-muted); }
+.cd-admin-nav__link:hover { background: var(--surface-sunken); }
+.cd-admin-nav__link:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* Active state leans on weight + icon color + a left accent bar, not on
+   primary-colored text — primary text only reaches 4.2:1 against this
+   sunken background, short of the 4.5:1 small text needs. */
+.cd-admin-nav__link--active {
+  background: var(--surface-sunken);
+  border-left-color: var(--primary);
+  color: var(--ink);
+  font-weight: 700;
+}
+.cd-admin-nav__link--active svg { color: var(--primary); }
+
+.cd-admin-nav__count {
+  margin-left: auto;
+  background: var(--surface);
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+
+.cd-admin-nav__footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) 0;
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-4);
+}
+.cd-admin-nav__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  background: var(--secondary);
+  color: var(--on-secondary);
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.cd-admin-nav__footer-info { display: flex; flex-direction: column; gap: 0; min-width: 0; }
+.cd-admin-nav__footer-name { color: var(--ink); margin: 0; }
+.cd-admin-nav__signout {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  flex-shrink: 0;
+}
+.cd-admin-nav__signout svg { width: 18px; height: 18px; }
+.cd-admin-nav__signout:hover { background: var(--surface-sunken); color: var(--danger); }
+
+@media (max-width: 900px) {
+  .cd-admin-nav__toggle { display: inline-flex; }
+  .cd-admin-nav__backdrop[data-open="true"] {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(12, 16, 21, 0.5);
+    z-index: 30;
+  }
+  .cd-admin-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 31;
+    height: 100vh;
+    box-shadow: var(--shadow-lg);
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+  .cd-admin-nav[data-open="true"] { transform: translateX(0); }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .cd-faq__icon { transition: none; }
+  .cd-table__sort-icon { transition: none; }
+  .cd-admin-nav { transition: none; }
+}

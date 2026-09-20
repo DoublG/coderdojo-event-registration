@@ -1,0 +1,216 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Register · CoderDojo</title>
+<link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/bundle.css' %}">
+<style>
+  html, body { margin: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+</style>
+</head>
+<body>
+<script src="{% static 'core/js/bundle.js' %}"></script>
+<style>
+  .register-root { background: var(--surface-sunken); }
+  .register-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .register-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) 0; }
+  .register-root .page-title { color: var(--ink); margin: 0 0 var(--space-5); }
+  .register-root .form-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
+</style>
+
+<div class="cd-root register-root" style="padding: 0;">
+
+  <div class="shell">
+    {% include "core/menu.html" with style="background: var(--surface)" %}
+  </div>
+
+  <div class="page">
+    <h1 class="display-lg page-title">Register for a dojo</h1>
+
+    <div class="form-card">
+      <form class="cd-form" id="registration-form-page" novalidate>
+
+        <!--
+          Form-level notes (.cd-form__note--error / --warning inside .cd-form__notes) and
+          field-level .cd-form__errors lists are how this form shows problems — this system
+          only supplies the markup and styling for them; validating anything is server-side
+          work (built to match how Django renders its own form/field errors), filled back in
+          from whatever your backend returns. Left empty here since a fresh form has nothing
+          to report yet — see Form/preview.html for what a note and an inline error look like filled in.
+        -->
+        <div class="cd-form__notes" hidden></div>
+
+        <div class="cd-form__group">
+          <h3 class="cd-form__group-title heading-md">Your details (parent/guardian)</h3>
+          <div class="cd-form__row">
+            <div class="cd-form__field">
+              <label class="cd-form__label label" for="rp-pg-name">Full name<span class="cd-form__required" aria-hidden="true">*</span></label>
+              <ul class="cd-form__errors" aria-hidden="true"></ul>
+              <input class="cd-form__input body" id="rp-pg-name" name="guardian_name" type="text" placeholder="Jane Doe" required>
+            </div>
+            <div class="cd-form__field">
+              <label class="cd-form__label label" for="rp-pg-email">Email<span class="cd-form__required" aria-hidden="true">*</span></label>
+              <ul class="cd-form__errors" aria-hidden="true"></ul>
+              <input class="cd-form__input body" id="rp-pg-email" name="guardian_email" type="email" placeholder="jane.doe@example.com" required>
+            </div>
+          </div>
+          <div class="cd-form__row">
+            <div class="cd-form__field">
+              <label class="cd-form__label label" for="rp-pg-phone">Phone</label>
+              <input class="cd-form__input body" id="rp-pg-phone" name="guardian_phone" type="tel" placeholder="+32 4xx xx xx xx">
+              <p class="cd-form__help caption">Only used if we need to reach you during a session.</p>
+            </div>
+            <div class="cd-form__field">
+              <label class="cd-form__label label" for="rp-pg-password">Password<span class="cd-form__required" aria-hidden="true">*</span></label>
+              <input class="cd-form__input body" id="rp-pg-password" name="guardian_password" type="password" required>
+            </div>
+          </div>
+          <div class="cd-form__checkbox-row">
+            <input type="checkbox" id="rp-pg-consent" name="guardian_consent" required>
+            <label class="body-sm" for="rp-pg-consent">I am the parent or legal guardian of the children listed below.</label>
+          </div>
+        </div>
+
+        <div class="cd-form__group">
+          <h3 class="cd-form__group-title heading-md">Children</h3>
+          <p class="cd-form__group-desc body-sm">Add each child who'll attend the dojo.</p>
+
+          <div id="rp-children" data-count="1">
+            <div class="cd-form__subgroup" data-child="1">
+              <div class="cd-form__subgroup-header">
+                <h4 class="cd-form__subgroup-title heading-sm">Child 1</h4>
+              </div>
+              <div class="cd-form__row">
+                <div class="cd-form__field">
+                  <label class="cd-form__label label" for="rp-c1-name">First name<span class="cd-form__required" aria-hidden="true">*</span></label>
+                  <input class="cd-form__input body" id="rp-c1-name" name="child_1_name" type="text" placeholder="Sam" required>
+                </div>
+                <div class="cd-form__field">
+                  <label class="cd-form__label label" for="rp-c1-dob">Date of birth<span class="cd-form__required" aria-hidden="true">*</span></label>
+                  <input class="cd-form__input body" id="rp-c1-dob" name="child_1_dob" type="date" required>
+                </div>
+              </div>
+              <div class="cd-form__row">
+                <div class="cd-form__field">
+                  <label class="cd-form__label label" for="rp-c1-level">Experience level</label>
+                  <select class="cd-form__select body" id="rp-c1-level" name="child_1_level">
+                    <option>New to coding</option>
+                    <option>Some experience</option>
+                    <option>Confident</option>
+                  </select>
+                </div>
+                <div class="cd-form__field">
+                  <label class="cd-form__label label" for="rp-c1-notes">Allergies or notes</label>
+                  <input class="cd-form__input body" id="rp-c1-notes" name="child_1_notes" type="text" placeholder="None">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" class="cd-form__add-button label" id="rp-add-child">
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+            Add another child
+          </button>
+        </div>
+
+        <div class="cd-form__actions">
+          <a class="cd-btn cd-btn--ghost label" href="#">Cancel</a>
+          <button type="submit" class="cd-btn cd-btn--primary label">Create account</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <div class="shell">
+    <footer class="cd-footer">
+      <p class="body-sm" style="margin:0;">CoderDojo · Ghent Public Library · hello@example.org</p>
+      <ul class="cd-footer__links body-sm">
+        <li><a href="#">Code of conduct</a></li>
+        <li><a href="#">Volunteer with us</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </footer>
+  </div>
+
+</div>
+<script>
+  // Sample glue code, not part of the design system — "Add another child" / "Remove"
+  // ship as plain buttons with no behavior, so this wires them up for the demo.
+  (function () {
+    var childrenEl = document.getElementById("rp-children");
+    var addButton = document.getElementById("rp-add-child");
+    if (!childrenEl || !addButton) return;
+
+    function subgroupHtml(n) {
+      return (
+        '<div class="cd-form__subgroup" data-child="' + n + '">' +
+          '<div class="cd-form__subgroup-header">' +
+            '<h4 class="cd-form__subgroup-title heading-sm">Child ' + n + '</h4>' +
+            '<button type="button" class="cd-form__remove body-sm">Remove</button>' +
+          '</div>' +
+          '<div class="cd-form__row">' +
+            '<div class="cd-form__field">' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-name">First name<span class="cd-form__required" aria-hidden="true">*</span></label>' +
+              '<input class="cd-form__input body" id="rp-c' + n + '-name" name="child_' + n + '_name" type="text" placeholder="Sam" required>' +
+            '</div>' +
+            '<div class="cd-form__field">' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-dob">Date of birth<span class="cd-form__required" aria-hidden="true">*</span></label>' +
+              '<input class="cd-form__input body" id="rp-c' + n + '-dob" name="child_' + n + '_dob" type="date" required>' +
+            '</div>' +
+          '</div>' +
+          '<div class="cd-form__row">' +
+            '<div class="cd-form__field">' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-level">Experience level</label>' +
+              '<select class="cd-form__select body" id="rp-c' + n + '-level" name="child_' + n + '_level">' +
+                '<option>New to coding</option><option>Some experience</option><option>Confident</option>' +
+              '</select>' +
+            '</div>' +
+            '<div class="cd-form__field">' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-notes">Allergies or notes</label>' +
+              '<input class="cd-form__input body" id="rp-c' + n + '-notes" name="child_' + n + '_notes" type="text" placeholder="None">' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    function syncRemoveButtons() {
+      var subgroups = childrenEl.querySelectorAll(".cd-form__subgroup");
+      subgroups.forEach(function (sg) {
+        var removeBtn = sg.querySelector(".cd-form__remove");
+        if (subgroups.length > 1 && !removeBtn) {
+          var header = sg.querySelector(".cd-form__subgroup-header");
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "cd-form__remove body-sm";
+          btn.textContent = "Remove";
+          btn.addEventListener("click", onRemove);
+          header.appendChild(btn);
+        } else if (subgroups.length === 1 && removeBtn) {
+          removeBtn.remove();
+        }
+      });
+    }
+
+    function onRemove(e) {
+      e.target.closest(".cd-form__subgroup").remove();
+      syncRemoveButtons();
+    }
+
+    addButton.addEventListener("click", function () {
+      var n = childrenEl.querySelectorAll(".cd-form__subgroup").length + 1;
+      var wrapper = document.createElement("div");
+      wrapper.innerHTML = subgroupHtml(n);
+      var subgroup = wrapper.firstElementChild;
+      subgroup.querySelector(".cd-form__remove").addEventListener("click", onRemove);
+      childrenEl.appendChild(subgroup);
+      syncRemoveButtons();
+    });
+  })();
+</script>
+</body>
+</html>
