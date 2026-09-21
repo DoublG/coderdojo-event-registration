@@ -72,7 +72,7 @@
               <p class="cd-dojo-finder__address body-sm">Technologiepark 12, 9052 Ghent</p>
               <p class="cd-dojo-finder__next caption">Next session: Sat 27 Sep, 10:00 <span class="cd-badge cd-badge--success caption">Open</span></p>
             </div>
-            <a href="#" class="cd-btn cd-btn--ghost label">View</a>
+            <a href="{% url 'dojo_detail' dojo_id=3 %}" class="cd-btn cd-btn--ghost label">View</a>
           </li>
 
           <li class="cd-card cd-dojo-finder__result">
@@ -85,7 +85,7 @@
               <p class="cd-dojo-finder__address body-sm">Dendermondesteenweg 1, 9070 Destelbergen</p>
               <p class="cd-dojo-finder__next caption">Next session: Sat 27 Sep, 13:00 <span class="cd-badge cd-badge--success caption">Open</span></p>
             </div>
-            <a href="#" class="cd-btn cd-btn--ghost label">View</a>
+            <a href="{% url 'dojo_detail' dojo_id=4 %}" class="cd-btn cd-btn--ghost label">View</a>
           </li>
 
           <li class="cd-card cd-dojo-finder__result">
@@ -98,7 +98,7 @@
               <p class="cd-dojo-finder__address body-sm">Marktplein 5, 9880 Aalter</p>
               <p class="cd-dojo-finder__next caption">Next session: Sun 28 Sep, 10:00 <span class="cd-badge cd-badge--warning caption">Waitlist</span></p>
             </div>
-            <a href="#" class="cd-btn cd-btn--ghost label">View</a>
+            <a href="{% url 'dojo_detail' dojo_id=5 %}" class="cd-btn cd-btn--ghost label">View</a>
           </li>
 
           <li class="cd-card cd-dojo-finder__result">
@@ -111,7 +111,7 @@
               <p class="cd-dojo-finder__address body-sm">Kasteelweg 3, 8000 Bruges</p>
               <p class="cd-dojo-finder__next caption">Next session: Sat 4 Oct, 10:00 <span class="cd-badge cd-badge--success caption">Open</span></p>
             </div>
-            <a href="#" class="cd-btn cd-btn--ghost label">View</a>
+            <a href="{% url 'dojo_detail' dojo_id=6 %}" class="cd-btn cd-btn--ghost label">View</a>
           </li>
       </ul>
 
@@ -119,7 +119,7 @@
 
     <div class="cd-card find-cta">
       <p class="body">Already know when you'd like to come?</p>
-      <a class="cd-btn cd-btn--primary label" href="#">Browse upcoming events</a>
+      <a class="cd-btn cd-btn--primary label" href="{% url 'event_list' %}">Browse upcoming events</a>
     </div>
 
     <footer class="cd-footer" style="margin-top: var(--space-8);">

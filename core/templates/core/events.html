@@ -126,7 +126,7 @@
             <span class="cd-badge cd-badge--accent caption">Ages 7–18</span>
           </div>
         </div>
-        <div class="action"><a class="cd-btn cd-btn--ghost label" href="#">View event</a></div>
+        <div class="action"><a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=1 %}">View event</a></div>
       </div>
 
       <div class="event-row" data-dojo="Destelbergen Dojo">
@@ -139,7 +139,7 @@
             <span class="cd-badge cd-badge--accent caption">Ages 8–14</span>
           </div>
         </div>
-        <div class="action"><a class="cd-btn cd-btn--ghost label" href="#">View event</a></div>
+        <div class="action"><a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=2 %}">View event</a></div>
       </div>
 
       <div class="event-row" data-dojo="Brussels North Dojo">
@@ -152,7 +152,7 @@
             <span class="cd-badge cd-badge--accent caption">Ages 10–16</span>
           </div>
         </div>
-        <div class="action"><a class="cd-btn cd-btn--ghost label" href="#">View event</a></div>
+        <div class="action"><a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=3 %}">View event</a></div>
       </div>
     </div>
 
@@ -169,7 +169,7 @@
             <span class="cd-badge cd-badge--accent caption">All ages</span>
           </div>
         </div>
-        <div class="action"><a class="cd-btn cd-btn--ghost label" href="#">View event</a></div>
+        <div class="action"><a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=4 %}">View event</a></div>
       </div>
 
       <div class="event-row" data-dojo="Ghent Dojo">
@@ -182,13 +182,13 @@
             <span class="cd-badge cd-badge--accent caption">Ages 7–18</span>
           </div>
         </div>
-        <div class="action"><a class="cd-btn cd-btn--ghost label" href="#">View event</a></div>
+        <div class="action"><a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=5 %}">View event</a></div>
       </div>
     </div>
 
     <div class="cd-card find-cta">
       <p class="body">Would rather browse by place than by date?</p>
-      <a class="cd-btn cd-btn--primary label" href="#">Find a dojo near you</a>
+      <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_list' %}">Find a dojo near you</a>
     </div>
 
     <footer class="cd-footer" style="margin-top: var(--space-8);">

@@ -36,10 +36,10 @@
 
 <div class="cd-root signup-root" style="padding: 0;">
   <div class="shell">
-    {% include "/core/menu.html" %}
+    {% include "core/menu.html" %}
 
     <div class="signup-header">
-      <p class="label back-link" style="margin-top: var(--space-6);"><a href="#">← Back to this session</a></p>
+      <p class="label back-link" style="margin-top: var(--space-6);"><a href="{% url 'event_detail' event_id=1 %}">← Back to this session</a></p>
       <h1 class="display-lg">Sign up for Scratch &amp; Python</h1>
       <p class="body meta">Sat 27 Sep · 10:00–13:15 · Ghent Public Library</p>
       <div class="badges">
