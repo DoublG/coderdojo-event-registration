@@ -17,7 +17,9 @@
   .register-root { background: var(--surface-sunken); }
   .register-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
   .register-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) 0; }
-  .register-root .page-title { color: var(--ink); margin: 0 0 var(--space-5); }
+  .register-root .page-title { color: var(--ink); margin: 0 0 var(--space-2); }
+  .register-root .register-alt-link { color: var(--ink-muted); margin: 0 0 var(--space-5); }
+  .register-root .register-alt-link a { color: var(--secondary); }
   .register-root .form-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
 </style>
 
@@ -28,6 +30,7 @@
   </div>
 
   <div class="page">
+    <p class="label back-link"><a href="{% url 'register' %}">← Back to registration options</a></p>
     <h1 class="display-lg page-title">Register for a dojo</h1>
 
     <div class="form-card">

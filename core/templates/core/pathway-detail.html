@@ -1,0 +1,187 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scratch pathway · CoderDojo</title>
+<link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/bundle.css' %}">
+<style>
+  html, body { margin: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+</style>
+</head>
+<body>
+<script src="{% static 'core/js/bundle.js' %}"></script>
+<style>
+  .pathwaydetail-root { background: var(--surface); }
+  .pathwaydetail-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .pathwaydetail-root .back-link { color: var(--secondary); }
+  .pathwaydetail-root .pathway-header { margin: var(--space-6) 0 var(--space-6); max-width: 640px; }
+  .pathwaydetail-root .pathway-header .eyebrow { color: var(--primary); margin: var(--space-3) 0 var(--space-2); }
+  .pathwaydetail-root .pathway-header h1 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .pathwaydetail-root .pathway-header p.subtitle { color: var(--ink-muted); margin: 0 0 var(--space-4); }
+  .pathwaydetail-root .pathway-header .tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .pathwaydetail-root .section { padding: var(--space-7) 0; }
+  .pathwaydetail-root .section h2 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .pathwaydetail-root .section > p.section-desc { color: var(--ink-muted); margin: 0 0 var(--space-5); }
+  .pathwaydetail-root .row { display: flex; gap: var(--space-5); flex-wrap: wrap; }
+  .pathwaydetail-root .row > * { flex: 1 1 260px; }
+  .pathwaydetail-root .build-card, .pathwaydetail-root .step-card { padding: var(--space-5); }
+  .pathwaydetail-root .build-card h3, .pathwaydetail-root .step-card h3 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .pathwaydetail-root .build-card p, .pathwaydetail-root .step-card p { color: var(--ink-muted); margin: 0; }
+  .pathwaydetail-root .step-card .step-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--surface-sunken); color: var(--ink); margin-bottom: var(--space-3);
+  }
+  .pathwaydetail-root .skills { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .pathwaydetail-root .find-cta { padding: var(--space-6); text-align: center; }
+  .pathwaydetail-root .find-cta p { color: var(--ink-muted); margin: 0 0 var(--space-4); }
+  .pathwaydetail-root .find-cta .actions { display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap; }
+  .pathwaydetail-root .other-pathways .row > * { flex: 1 1 220px; }
+  .pathwaydetail-root .other-pathway-card { padding: var(--space-5); }
+  .pathwaydetail-root .other-pathway-card h3 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .pathwaydetail-root .other-pathway-card p { color: var(--ink-muted); margin: 0 0 var(--space-3); }
+  .pathwaydetail-root .other-pathway-card a { color: var(--secondary); }
+</style>
+
+<div class="cd-root pathwaydetail-root" style="padding: 0;">
+  <div class="shell">
+    {% include "core/menu.html" %}
+
+    <div class="pathway-header">
+      <a class="label back-link" href="#">← Back to what you'll learn</a>
+      <p class="label eyebrow">Pathway</p>
+      <h1 class="display-2xl">Scratch</h1>
+      <p class="body-lg subtitle">Drag-and-drop blocks and real games from your very first Saturday — no experience needed.</p>
+      <div class="tags">
+        <span class="cd-badge cd-badge--accent caption">Ages 7–10</span>
+        <span class="cd-badge cd-badge--outline caption">No experience needed</span>
+        <span class="cd-badge cd-badge--outline caption">Runs in the browser</span>
+      </div>
+    </div>
+
+    <section class="section">
+      <h2 class="heading-lg">What you'll build</h2>
+      <p class="section-desc body">A few of the projects kids on this pathway have walked out with.</p>
+      <div class="row">
+        <article class="cd-card build-card">
+          <h3 class="heading-md">A platformer game</h3>
+          <p class="body-sm">Design your own levels, add a jumping hero, and make it a little harder to beat with each try.</p>
+        </article>
+        <article class="cd-card build-card">
+          <h3 class="heading-md">A quiz game</h3>
+          <p class="body-sm">Write your own questions and keep score when a friend picks up the controls.</p>
+        </article>
+        <article class="cd-card build-card">
+          <h3 class="heading-md">An animated card</h3>
+          <p class="body-sm">Combine sprites, sound and a bit of logic into something you can actually send someone.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" style="background: var(--surface-sunken); border-radius: var(--radius-lg); padding: var(--space-6);">
+      <h2 class="heading-lg">How a session works</h2>
+      <p class="section-desc body">Every dojo runs this a little differently, but it usually looks like this.</p>
+      <div class="row">
+        <article class="cd-card step-card">
+          <span class="caption step-num">1</span>
+          <h3 class="heading-md">Pick a starter project</h3>
+          <p class="body-sm">Mentors bring a few ready-to-remix projects along for anyone who wants a running start.</p>
+        </article>
+        <article class="cd-card step-card">
+          <span class="caption step-num">2</span>
+          <h3 class="heading-md">Make it your own</h3>
+          <p class="body-sm">Change the art, the rules, the story — it's not finished until you've broken something on purpose.</p>
+        </article>
+        <article class="cd-card step-card">
+          <span class="caption step-num">3</span>
+          <h3 class="heading-md">Show the group</h3>
+          <p class="body-sm">Most sessions end with a few kids sharing their screen — no pressure, just show-and-tell.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="heading-lg">Skills you'll pick up</h2>
+      <p class="section-desc body">The building blocks every later pathway builds on.</p>
+      <div class="skills">
+        <span class="cd-badge cd-badge--outline caption">Sequencing</span>
+        <span class="cd-badge cd-badge--outline caption">Loops</span>
+        <span class="cd-badge cd-badge--outline caption">Conditionals</span>
+        <span class="cd-badge cd-badge--outline caption">Events &amp; broadcasting</span>
+        <span class="cd-badge cd-badge--outline caption">Variables</span>
+        <span class="cd-badge cd-badge--outline caption">Debugging</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="heading-lg">Questions</h2>
+      <div class="cd-faq" id="faq-pathway-detail-page">
+        <div class="cd-faq__item" data-open="false">
+          <button class="cd-faq__question heading-sm">
+            <span>How long does the Scratch pathway take?</span>
+            <span class="cd-faq__icon" aria-hidden="true">+</span>
+          </button>
+          <p class="cd-faq__answer body" hidden>There's no fixed length — most kids spend a few sessions here before trying Python or Web, and some stay much longer. It's fine either way.</p>
+        </div>
+        <div class="cd-faq__item" data-open="false">
+          <button class="cd-faq__question heading-sm">
+            <span>My child already knows Scratch — should they still start here?</span>
+            <span class="cd-faq__icon" aria-hidden="true">+</span>
+          </button>
+          <p class="cd-faq__answer body" hidden>Not necessarily — a mentor can place them straight into Python or Web on their very first visit.</p>
+        </div>
+        <div class="cd-faq__item" data-open="false">
+          <button class="cd-faq__question heading-sm">
+            <span>Do they need to install anything at home?</span>
+            <span class="cd-faq__icon" aria-hidden="true">+</span>
+          </button>
+          <p class="cd-faq__answer body" hidden>No — Scratch runs in the browser on the dojo's own laptops, so there's nothing to install beforehand.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="cd-card find-cta">
+        <p class="body">Ready to try it in person?</p>
+        <div class="actions">
+          <a class="cd-btn cd-btn--primary label" href="#">Find a dojo near you</a>
+          <a class="cd-btn cd-btn--ghost label" href="#">Browse upcoming events</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section other-pathways">
+      <h2 class="heading-lg">Other pathways</h2>
+      <p class="section-desc body">Not sure this is the right one? Kids move between pathways freely.</p>
+      <div class="row">
+        <article class="cd-card other-pathway-card">
+          <h3 class="heading-md">Python</h3>
+          <p class="body-sm">Write a quiz bot and your first real program.</p>
+          <a class="label" href="#">Explore Python →</a>
+        </article>
+        <article class="cd-card other-pathway-card">
+          <h3 class="heading-md">Web</h3>
+          <p class="body-sm">Design and publish your own website.</p>
+          <a class="label" href="#">Explore Web →</a>
+        </article>
+      </div>
+    </section>
+
+    <footer class="cd-footer" style="margin-top: var(--space-4);">
+      <p class="body-sm" style="margin:0;">CoderDojo · Ghent Public Library · hello@example.org</p>
+      <ul class="cd-footer__links body-sm">
+        <li><a href="#">Code of conduct</a></li>
+        <li><a href="#">Volunteer with us</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </footer>
+  </div>
+</div>
+<script>
+  CoderDojo.initFaq(document.getElementById("faq-pathway-detail-page"));
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Find a dojo · CoderDojo</title>
+<link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/bundle.css' %}">
+<style>
+  html, body { margin: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+</style>
+</head>
+<body>
+<script src="{% static 'core/js/bundle.js' %}"></script>
+<style>
+  .finder-root { background: var(--surface); }
+  .finder-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .finder-root .finder-header { margin: var(--space-6) 0 var(--space-5); max-width: 640px; }
+  .finder-root .finder-header h1 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .finder-root .finder-header p { color: var(--ink-muted); margin: 0; }
+
+  /* Match Events' own filter-card treatment exactly, so the two search pages
+     read as siblings rather than one being a narrower, floatier version of
+     the other. DojoFinder's own bar/field/button markup is untouched — only
+     the card wrapper and the width around it change on this page. */
+  .finder-root .filter-card { padding: var(--space-5); margin-bottom: var(--space-6); }
+  .finder-root .cd-dojo-finder { max-width: none; width: 100%; }
+  .finder-root .cd-dojo-finder__meta { margin-bottom: var(--space-2); }
+
+  .finder-root .find-cta { text-align: center; margin-top: var(--space-7); padding: var(--space-6); }
+  .finder-root .find-cta p { color: var(--ink-muted); margin: 0 0 var(--space-4); }
+</style>
+
+<div class="cd-root finder-root" style="padding: 0;">
+  <div class="shell">
+    {% include "core/menu.html" %}
+
+    <div class="finder-header">
+      <p class="cd-hero__eyebrow label" style="color: var(--primary);">CoderDojo · Belgium</p>
+      <h1 class="display-xl">Find a dojo near you</h1>
+      <p class="body-lg">Every CoderDojo in Belgium is free, run by local volunteers, and open to kids aged 7–18 — enter a postcode or city to see what's nearby.</p>
+    </div>
+
+    <div class="cd-dojo-finder">
+
+      <div class="cd-card filter-card">
+        <div class="cd-dojo-finder__bar">
+          <div class="cd-dojo-finder__field">
+            <span class="cd-dojo-finder__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            </span>
+            <input class="cd-dojo-finder__input body" type="text" placeholder="Enter your postcode or city" value="Ghent, Belgium">
+          </div>
+          <button type="button" class="cd-btn cd-btn--secondary label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+            Use my location
+          </button>
+        </div>
+      </div>
+
+      <p class="cd-dojo-finder__meta caption">Showing dojos within 25 km of Ghent, Belgium, nearest first</p>
+
+      <ul class="cd-dojo-finder__list">
+          <li class="cd-card cd-dojo-finder__result">
+            <div class="cd-dojo-finder__distance">
+              <span class="heading-sm">2.4</span>
+              <span class="caption">km</span>
+            </div>
+            <div class="cd-dojo-finder__info">
+              <h3 class="cd-dojo-finder__name heading-sm">Ghent Dojo</h3>
+              <p class="cd-dojo-finder__address body-sm">Technologiepark 12, 9052 Ghent</p>
+              <p class="cd-dojo-finder__next caption">Next session: Sat 27 Sep, 10:00 <span class="cd-badge cd-badge--success caption">Open</span></p>
+            </div>
+            <a href="#" class="cd-btn cd-btn--ghost label">View</a>
+          </li>
+
+          <li class="cd-card cd-dojo-finder__result">
+            <div class="cd-dojo-finder__distance">
+              <span class="heading-sm">5.1</span>
+              <span class="caption">km</span>
+            </div>
+            <div class="cd-dojo-finder__info">
+              <h3 class="cd-dojo-finder__name heading-sm">Destelbergen Dojo</h3>
+              <p class="cd-dojo-finder__address body-sm">Dendermondesteenweg 1, 9070 Destelbergen</p>
+              <p class="cd-dojo-finder__next caption">Next session: Sat 27 Sep, 13:00 <span class="cd-badge cd-badge--success caption">Open</span></p>
+            </div>
+            <a href="#" class="cd-btn cd-btn--ghost label">View</a>
+          </li>
+
+          <li class="cd-card cd-dojo-finder__result">
+            <div class="cd-dojo-finder__distance">
+              <span class="heading-sm">18.7</span>
+              <span class="caption">km</span>
+            </div>
+            <div class="cd-dojo-finder__info">
+              <h3 class="cd-dojo-finder__name heading-sm">Aalter Dojo</h3>
+              <p class="cd-dojo-finder__address body-sm">Marktplein 5, 9880 Aalter</p>
+              <p class="cd-dojo-finder__next caption">Next session: Sun 28 Sep, 10:00 <span class="cd-badge cd-badge--warning caption">Waitlist</span></p>
+            </div>
+            <a href="#" class="cd-btn cd-btn--ghost label">View</a>
+          </li>
+
+          <li class="cd-card cd-dojo-finder__result">
+            <div class="cd-dojo-finder__distance">
+              <span class="heading-sm">24.9</span>
+              <span class="caption">km</span>
+            </div>
+            <div class="cd-dojo-finder__info">
+              <h3 class="cd-dojo-finder__name heading-sm">Bruges Dojo</h3>
+              <p class="cd-dojo-finder__address body-sm">Kasteelweg 3, 8000 Bruges</p>
+              <p class="cd-dojo-finder__next caption">Next session: Sat 4 Oct, 10:00 <span class="cd-badge cd-badge--success caption">Open</span></p>
+            </div>
+            <a href="#" class="cd-btn cd-btn--ghost label">View</a>
+          </li>
+      </ul>
+
+    </div>
+
+    <div class="cd-card find-cta">
+      <p class="body">Already know when you'd like to come?</p>
+      <a class="cd-btn cd-btn--primary label" href="#">Browse upcoming events</a>
+    </div>
+
+    <footer class="cd-footer" style="margin-top: var(--space-8);">
+      <p class="body-sm" style="margin:0;">CoderDojo · Ghent Public Library · hello@example.org</p>
+      <ul class="cd-footer__links body-sm">
+        <li><a href="#">Code of conduct</a></li>
+        <li><a href="#">Volunteer with us</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </footer>
+  </div>
+</div>
+<script></script>
+</body>
+</html>

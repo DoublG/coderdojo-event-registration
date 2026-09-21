@@ -17,6 +17,11 @@ def dojo(request, dojo_id):
     context = {"id": dojo_id}
     return HttpResponse(template.render(context, request))
 
+def dojo_list(request):
+    template = loader.get_template("core/dojo-finder.html")
+    context = {}
+    return HttpResponse(template.render(context, request))
+
 def event(request, event_id):
     template = loader.get_template("core/event-detail.html")
     context = {"id": event_id}
@@ -43,7 +48,27 @@ def team(request, dojo_id):
     return HttpResponse(template.render(context, request))
 
 def register(request):
+    template = loader.get_template("core/register-choice.html")
+    context = {}
+    return HttpResponse(template.render(context, request))
+
+def register_helper(request):
+    template = loader.get_template("core/register-helper.html")
+    context = {}
+    return HttpResponse(template.render(context, request))
+
+def register_dojo(request):
+    template = loader.get_template("core/register-dojo.html")
+    context = {}
+    return HttpResponse(template.render(context, request))
+
+def register_guardian(request):
     template = loader.get_template("core/register.html")
+    context = {}
+    return HttpResponse(template.render(context, request))
+
+def register(request):
+    template = loader.get_template("core/register-choice.html")
     context = {}
     return HttpResponse(template.render(context, request))
 
@@ -60,4 +85,9 @@ def signup_event(request, event_id):
 def login(request):
     template = loader.get_template("core/login.html")
     context = {}
+    return HttpResponse(template.render(context, request))
+
+def pathway(request, pathway_id):
+    template = loader.get_template("core/pathway-detail.html")
+    context = {"id": pathway_id}
     return HttpResponse(template.render(context, request))
