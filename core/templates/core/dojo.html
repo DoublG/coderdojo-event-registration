@@ -80,8 +80,8 @@
       <cite class="body-sm dojo-hero__cite">— Priya Nair, dojo champion</cite>
       <p class="body dojo-hero__facts">Free · Every 2nd Saturday · Ages 7–18 · No experience needed</p>
       <div style="display:flex; gap: var(--space-4); flex-wrap: wrap;">
-        <a class="cd-btn cd-btn--primary label" href="#">Sign up now</a>
-        <a class="cd-btn cd-btn--ghost label" href="#">View this dojo's sessions</a>
+        <a class="cd-btn cd-btn--primary label" href="{% url 'event_list_by_dojo' dojo_id=1 event_id=1 %}">Sign up now</a>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'event_list' %}{% querystring dojo=1 %}">View this dojo's sessions</a>
       </div>
     </div>
 
@@ -97,8 +97,8 @@
         </div>
       </div>
       <div class="next-session-full__actions">
-        <a class="body-sm" href="#">View session details →</a>
-        <a class="cd-btn cd-btn--primary label" href="#">Sign up now</a>
+        <a class="body-sm" href="{% url 'event_detail' event_id=1 %}">View session details →</a>
+        <a class="cd-btn cd-btn--primary label" href="{% url 'signup_event' event_id=1 %}">Sign up now</a>
       </div>
     </div>
 

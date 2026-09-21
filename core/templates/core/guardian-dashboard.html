@@ -66,7 +66,7 @@
               <p class="body-sm child-card__meta">Age 9 · Ghent Dojo</p>
             </div>
           </div>
-          <a class="body-sm child-card__link" href="#">View Sam's awards &amp; history →</a>
+          <a class="body-sm child-card__link" href="{% url 'child_detail' guardian_id=1 child_id=1 %}">View Sam's awards &amp; history →</a>
         </div>
         <div class="next-row">
           <div class="date-box"><span class="caption dow">SAT</span><span class="dom">27</span></div>
@@ -74,7 +74,7 @@
             <h3 class="heading-sm">Scratch &amp; Python</h3>
             <p class="body-sm meta">10:00–13:15 · Ghent Public Library</p>
           </div>
-          <div class="action"><a class="cd-btn cd-btn--ghost label" href="#">View event</a></div>
+          <div class="action"><a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=1 %}">View event</a></div>
         </div>
       </div>
 
@@ -87,11 +87,11 @@
               <p class="body-sm child-card__meta">Age 7 · Ghent Dojo</p>
             </div>
           </div>
-          <a class="body-sm child-card__link" href="#">View Mila's awards &amp; history →</a>
+          <a class="body-sm child-card__link" href="{% url 'child_detail' guardian_id=1 child_id=1 %}">View Mila's awards &amp; history →</a>
         </div>
         <div class="empty-row">
           <p class="body-sm">Not registered for an upcoming session.</p>
-          <a class="cd-btn cd-btn--secondary label" href="#">Browse events</a>
+          <a class="cd-btn cd-btn--secondary label" href="{% url 'event_list' %}">Browse events</a>
         </div>
       </div>
     </section>

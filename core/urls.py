@@ -14,7 +14,7 @@ urlpatterns = [
     path("dojo/search", views.dojo_list, name="dojo_list"),
     path("dojo/<int:dojo_id>/team", views.team, name="dojo_team"),
     path("dojo/<int:dojo_id>", views.dojo, name="dojo_detail"),
-    path("dojo/<int:dojo_id>/event/<int:event_id>", views.events, name="event_list_by_dojo"), #needed for back button on event detail page
+    path("dojo/<int:dojo_id>/event/<int:event_id>", views.event, name="event_list_by_dojo"), #needed for back button on event detail page
 
     path("guardian/<int:guardian_id>", views.guardian, name="guardian_detail"),
     path("guardian/<int:guardian_id>/child/<int:child_id>", views.child, name="child_detail"),

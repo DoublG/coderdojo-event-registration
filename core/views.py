@@ -22,7 +22,7 @@ def dojo_list(request):
     context = {}
     return HttpResponse(template.render(context, request))
 
-def event(request, event_id):
+def event(request, event_id=None, dojo_id=None):
     template = loader.get_template("core/event-detail.html")
     context = {"id": event_id}
     return HttpResponse(template.render(context, request))

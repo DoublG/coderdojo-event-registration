@@ -27,9 +27,9 @@
 
 <div class="cd-root child-page-root" style="padding: 0;">
   <div class="shell">
-    {% include "/core/menu.html" %}
+    {% include "core/menu.html" %}
 
-    <p class="label back-link" style="margin-top: var(--space-6);"><a href="#">← Back to your account</a></p>
+    <p class="label back-link" style="margin-top: var(--space-6);"><a href="{% url 'guardian_detail' guardian_id=1 %}">← Back to your account</a></p>
 
     <div class="child-header">
       <div class="cd-mentor__avatar" aria-hidden="true"></div>
