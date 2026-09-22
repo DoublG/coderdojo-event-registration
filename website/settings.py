@@ -33,6 +33,11 @@ INTERNAL_IPS = [
 
 AUTH_USER_MODEL = 'accounts.User'
 
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.EmailOrUsernameBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 
 # Application definition
 
@@ -59,6 +64,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # Must come after SessionMiddleware, before CommonMiddleware, per
+    # https://docs.djangoproject.com/en/6.1/topics/i18n/translation/#how-django-discovers-language-preference
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -80,6 +88,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'accounts.context_processors.user_roles',
             ],
         },
     },
@@ -128,6 +137,18 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
+
+# Offered in the menu's language switcher (django.views.i18n.set_language,
+# see website/urls.py). No page content is translated into these yet — this
+# wires the real, working switching mechanism (session-stored locale,
+# LocaleMiddleware) as a first step; actual .po translation catalogs for
+# nl-be/fr-be/de are a separate follow-up.
+LANGUAGES = [
+    ('en-us', 'English'),
+    ('nl-be', 'Nederlands (België)'),
+    ('fr-be', 'Français (Belgique)'),
+    ('de', 'Deutsch'),
+]
 
 TIME_ZONE = 'UTC'
 

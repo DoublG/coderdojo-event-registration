@@ -17,7 +17,11 @@
       "Bash(.venv/bin/python3 manage.py seed_guardians)",
       "Bash(.venv/bin/python3 manage.py check)",
       "Bash(.venv/bin/python3 manage.py makemigrations --check --dry-run)",
-      "Bash(.venv/bin/python3 -c ' *)"
+      "Bash(.venv/bin/python3 -c ' *)",
+      "WebFetch(domain:htmx.org)",
+      "Bash(node --check /tmp/claude-1000/-home-erik-coderdojo-event-registration/ab551901-70bd-407e-a066-435ba38a7f41/scratchpad/dojo_geo.js)",
+      "Bash(node --check /tmp/claude-1000/-home-erik-coderdojo-event-registration/ab551901-70bd-407e-a066-435ba38a7f41/scratchpad/menu.js)",
+      "Bash(node --check /tmp/claude-1000/-home-erik-coderdojo-event-registration/ab551901-70bd-407e-a066-435ba38a7f41/scratchpad/dojo_geo2.js)"
     ]
   }
 }

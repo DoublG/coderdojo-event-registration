@@ -93,6 +93,69 @@
 .cd-nav__link:hover { color: var(--secondary); }
 .cd-nav__link--active { color: var(--primary); }
 
+.cd-nav__lang-select {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+}
+
+.cd-nav__theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+.cd-nav__theme-toggle:hover { background: var(--surface-sunken); }
+.cd-nav__theme-icon { width: 18px; height: 18px; }
+
+.cd-nav__account { position: relative; }
+.cd-nav__account > button.cd-nav__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+.cd-nav__account-menu {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  z-index: 20;
+}
+.cd-nav__account-menu[hidden] { display: none; }
+.cd-nav__account-link {
+  display: block;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  color: var(--ink);
+  text-decoration: none;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+.cd-nav__account-link:hover { background: var(--surface-sunken); }
+
 /* ---------- Hero ---------- */
 .cd-hero {
   display: flex;

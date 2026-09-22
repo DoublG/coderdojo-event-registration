@@ -1,7 +1,5 @@
-from django.http import HttpResponse
-from django.template import loader
+from django.shortcuts import render
 
 
 def home(request):
-    template = loader.get_template("core/home.html")
-    return HttpResponse(template.render({}, request))
+    return render(request, "core/home.html")

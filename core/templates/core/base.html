@@ -1,5 +1,10 @@
 {% load static %}<!doctype html>
-<html lang="en" {% block html_theme_attr %}data-theme="light"{% endblock %}>
+{% comment %}
+  Theme is read straight from the "theme" cookie the nav's toggle sets (see
+  menu.html), so the very first render already has the right theme — no
+  client-side flash-of-wrong-theme to guard against.
+{% endcomment %}
+<html lang="en" {% block html_theme_attr %}data-theme="{% if request.COOKIES.theme == 'dark' %}dark{% else %}light{% endif %}"{% endblock %}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,6 +18,7 @@
 {% block extra_style %}{% endblock %}
 </head>
 <body>
+<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
 <script src="{% static 'core/js/bundle.js' %}"></script>
 
 <div class="cd-root {% block root_class %}{% endblock %}" style="padding: 0;">

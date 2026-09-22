@@ -20,6 +20,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('i18n/', include('django.conf.urls.i18n')),  # provides the set_language view used by the menu's language switcher
     path("", include("core.urls")),
     path("", include("accounts.urls")),
     path("", include("applications.urls")),

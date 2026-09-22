@@ -1,0 +1,18 @@
+{% comment %}
+Renders one page's worth of <li> dojo results (no <ul> wrapper — the
+caller owns that). Used both for the initial full-page render and for
+htmx's infinite-scroll fragment requests (see _dojo_result.html and
+https://htmx.org/examples/infinite-scroll/): the last item carries the
+hx-get trigger for the next page, so this same partial is what an htmx
+"revealed" fetch returns too, chaining the trigger forward.
+
+Expects `dojos` (this page's slice) and `next_page_url` (falsy on the
+last page) in context.
+{% endcomment %}
+{% for dojo in dojos %}
+  {% if forloop.last and next_page_url %}
+    {% include "dojos/partials/_dojo_result.html" with hx_next_page_url=next_page_url %}
+  {% else %}
+    {% include "dojos/partials/_dojo_result.html" %}
+  {% endif %}
+{% endfor %}

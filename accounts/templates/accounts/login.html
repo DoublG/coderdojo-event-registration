@@ -25,14 +25,23 @@
         <p class="cd-login__subtitle body-sm">Log in to see your dojo's schedule and manage your account.</p>
       </div>
 
-      <form class="cd-login__fields" novalidate>
+      <form class="cd-login__fields" method="post" novalidate>
+        {% csrf_token %}
+        {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
+
+        {% if error %}
+          <div class="cd-form__notes">
+            <p class="cd-form__note cd-form__note--error caption">{{ error }}</p>
+          </div>
+        {% endif %}
+
         <div class="cd-form__field">
-          <label class="cd-form__label label" for="lp-login-email">Email</label>
-          <input class="cd-form__input body" id="lp-login-email" type="email" placeholder="you@example.com" required>
+          <label class="cd-form__label label" for="{{ form.email.id_for_label }}">Email</label>
+          {{ form.email }}
         </div>
         <div class="cd-form__field">
-          <label class="cd-form__label label" for="lp-login-password">Password</label>
-          <input class="cd-form__input body" id="lp-login-password" type="password" required>
+          <label class="cd-form__label label" for="{{ form.password.id_for_label }}">Password</label>
+          {{ form.password }}
         </div>
 
         <div class="cd-login__row">

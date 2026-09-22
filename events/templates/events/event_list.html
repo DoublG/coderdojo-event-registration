@@ -36,14 +36,14 @@
     padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
     margin-bottom: var(--space-5); color: var(--ink);
   }
-  .event-root .filter-chip button {
+  .event-root .filter-chip button,
+  .event-root .filter-chip a {
     border: none; background: none; cursor: pointer; color: var(--ink-muted);
     width: 24px; height: 24px; border-radius: 50%; font-size: 16px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
   }
-  .event-root .filter-chip button:hover { background: var(--border); color: var(--ink); }
-  .event-root .date-group[hidden] { display: none; }
-  .event-root .event-row[hidden] { display: none; }
-  .event-root .filter-chip[hidden] { display: none; }
+  .event-root .filter-chip button:hover,
+  .event-root .filter-chip a:hover { background: var(--border); color: var(--ink); }
 </style>
 {% endblock %}
 
@@ -55,63 +55,41 @@
       <p class="body-lg">Every free session run by a CoderDojo across Belgium — filter by dojo, location, date or age.</p>
     </div>
 
-    <div class="cd-card filter-card">
+    <form method="get" class="cd-card filter-card">
       <div class="filter-row">
         <div class="filter-field">
           <label class="label" for="ep-dojo">Dojo</label>
-          <select class="cd-form__select body" id="ep-dojo">
-            <option>All dojos</option>
-            {% for dojo in dojo_choices %}
-              <option>{{ dojo.name }}</option>
-            {% endfor %}
-          </select>
+          {{ form.dojo }}
         </div>
         <div class="filter-field">
           <label class="label" for="ep-location">Location</label>
-          <input class="cd-form__input body" id="ep-location" type="text" placeholder="Postcode or city">
+          {{ form.location }}
         </div>
         <div class="filter-field">
           <label class="label" for="ep-date">Date</label>
-          <select class="cd-form__select body" id="ep-date">
-            <option>Any date</option>
-            <option>This week</option>
-            <option>This month</option>
-          </select>
+          {{ form.date }}
         </div>
         <div class="filter-field">
           <label class="label" for="ep-age">Age</label>
-          <select class="cd-form__select body" id="ep-age">
-            <option>All ages</option>
-            <option>7–9</option>
-            <option>10–13</option>
-            <option>14–18</option>
-          </select>
+          {{ form.age }}
         </div>
         <div class="filter-field" style="flex: 0 0 auto;">
-          <button type="button" class="cd-btn cd-btn--secondary label">
+          <button type="submit" class="cd-btn cd-btn--secondary label">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
             Search
           </button>
         </div>
       </div>
-    </div>
+    </form>
 
-    <div class="filter-chip" id="ep-filter-chip" hidden>
-      <span class="body-sm">Filtered by: <strong id="ep-filter-chip-name"></strong></span>
-      <button type="button" id="ep-filter-chip-clear" aria-label="Clear dojo filter">×</button>
-    </div>
-
-    {% regroup events by start_time.date as date_groups %}
-    {% for date_group in date_groups %}
-      <div class="date-group" data-group>
-        <h2 class="heading-lg">{{ date_group.grouper|date:"l, j F" }}</h2>
-        {% for event in date_group.list %}
-          {% include "events/partials/_event_row.html" %}
-        {% endfor %}
+    {% if form.cleaned_data.dojo %}
+      <div class="filter-chip">
+        <span class="body-sm">Filtered by: <strong>{{ form.cleaned_data.dojo.name }}</strong></span>
+        <a href="{% querystring dojo=None %}" aria-label="Clear dojo filter">×</a>
       </div>
-    {% empty %}
-      <p class="body" style="color: var(--ink-muted);">No upcoming events scheduled right now — check back soon.</p>
-    {% endfor %}
+    {% endif %}
+
+    {% include "events/partials/_event_results_page.html" %}
 
     <div class="cd-card find-cta">
       <p class="body">Would rather browse by place than by date?</p>
@@ -119,44 +97,4 @@
     </div>
 
   </div>
-{% endblock %}
-
-{% block extra_script %}
-<script>
-  (function () {
-    var select = document.getElementById("ep-dojo");
-    var chip = document.getElementById("ep-filter-chip");
-    var chipName = document.getElementById("ep-filter-chip-name");
-    var chipClear = document.getElementById("ep-filter-chip-clear");
-    var rows = Array.prototype.slice.call(document.querySelectorAll(".event-row"));
-    var groups = Array.prototype.slice.call(document.querySelectorAll("[data-group]"));
-
-    function applyFilter(dojo) {
-      var filtering = dojo && dojo !== "All dojos";
-      rows.forEach(function (row) {
-        row.hidden = filtering && row.getAttribute("data-dojo") !== dojo;
-      });
-      groups.forEach(function (group) {
-        var visible = Array.prototype.slice.call(group.querySelectorAll(".event-row")).some(function (row) {
-          return !row.hidden;
-        });
-        group.hidden = !visible;
-      });
-      if (filtering) {
-        chipName.textContent = dojo;
-        chip.hidden = false;
-      } else {
-        chip.hidden = true;
-      }
-    }
-
-    select.addEventListener("change", function () {
-      applyFilter(select.value);
-    });
-    chipClear.addEventListener("click", function () {
-      select.value = "All dojos";
-      applyFilter("All dojos");
-    });
-  })();
-</script>
 {% endblock %}

@@ -1,0 +1,31 @@
+{% comment %}
+Renders one page's worth of events, grouped by day (no outer wrapper —
+the caller owns the surrounding shell). Used both for the initial
+full-page render and for htmx's infinite-scroll fragment requests (see
+https://htmx.org/examples/infinite-scroll/).
+
+The hx-get trigger goes on the *last date-group div* of the page, not on
+the last event-row: rows live inside a date-group, and htmx's
+hx-swap="afterend" inserts the next page as a sibling of whatever
+element the trigger is on, so putting it on a row would nest the next
+page's date-group(s) inside the current one instead of after it.
+
+Note: each page's {% regroup %} only groups within that page's slice, so
+if a date's events straddle a page boundary, that date's heading can
+appear twice in a row — a minor, accepted trade-off of paginating
+grouped data rather than something worth the added complexity to avoid.
+
+Expects `events` (this page's slice, ordered by start_time) and
+`next_page_url` (falsy on the last page) in context.
+{% endcomment %}
+{% regroup events by start_time.date as date_groups %}
+{% for date_group in date_groups %}
+  <div class="date-group" data-group{% if forloop.last and next_page_url %} hx-get="{{ next_page_url }}" hx-trigger="revealed" hx-swap="afterend"{% endif %}>
+    <h2 class="heading-lg">{{ date_group.grouper|date:"l, j F" }}</h2>
+    {% for event in date_group.list %}
+      {% include "events/partials/_event_row.html" %}
+    {% endfor %}
+  </div>
+{% empty %}
+  <p class="body" style="color: var(--ink-muted);">No upcoming events scheduled right now — check back soon.</p>
+{% endfor %}

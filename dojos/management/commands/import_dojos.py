@@ -9,11 +9,10 @@ from django.contrib.gis.geos import Point
 from django.core.management.base import BaseCommand
 
 from dojos.models import Dojo
+from geo.geocoding import USER_AGENT, geocode
 from geo.models import Municipality
 
 DOJOS_URL = "https://coderdojobelgium.be/nl/dojos"
-NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
-USER_AGENT = "coderdojo-event-registration-importer/1.0 (erik@woidt.be)"
 NOMINATIM_DELAY_SECONDS = 5  # Nominatim usage policy: max 1 request/second
 
 
@@ -59,21 +58,6 @@ def find_nearest_municipality(lat, lon):
     )
 
 
-def geocode(session, address):
-    query = address if "belgium" in address.lower() else f"{address}, Belgium"
-    response = session.get(
-        NOMINATIM_URL,
-        params={"q": query, "format": "json", "limit": 1, "countrycodes": "be"},
-        headers={"User-Agent": USER_AGENT},
-        timeout=10,
-    )
-    response.raise_for_status()
-    results = response.json()
-    if not results:
-        return None
-    return float(results[0]["lat"]), float(results[0]["lon"])
-
-
 class Command(BaseCommand):
     help = "Import dojos (with geocoded location) from the CoderDojo Belgium dojo finder page."
 
@@ -108,7 +92,7 @@ class Command(BaseCommand):
             if address:
                 time.sleep(NOMINATIM_DELAY_SECONDS)
                 try:
-                    coords = geocode(session, address)
+                    coords = geocode(address, session=session)
                 except requests.RequestException as exc:
                     self.stderr.write(self.style.WARNING(f"Skipping '{name}': geocoding request failed ({exc})"))
                     skipped += 1

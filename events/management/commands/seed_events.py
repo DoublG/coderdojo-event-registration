@@ -18,6 +18,10 @@ FRIDAY_SLOT = (time(18, 0), time(20, 30))
 
 EVENTS_PER_DOJO = 3
 CAPACITY_CHOICES = [15, 20, 24, 30]
+# Most sessions are open to the dojo's full age range; a minority run a
+# narrower specialised track (younger Scratch-only, or an older/advanced
+# group) — weighted so "all ages" is the common case.
+AGE_RANGE_CHOICES = [(7, 18), (7, 18), (7, 18), (7, 10), (10, 14), (13, 18)]
 
 # Most chapters run a monthly weekend workshop; a minority instead run a
 # weekly Wednesday or Friday session.
@@ -84,6 +88,7 @@ class Command(BaseCommand):
             for event_date in itertools.islice(dates, EVENTS_PER_DOJO):
                 start_dt = timezone.make_aware(datetime.combine(event_date, start_t))
                 end_dt = timezone.make_aware(datetime.combine(event_date, end_t))
+                min_age, max_age = rng.choice(AGE_RANGE_CHOICES)
                 _, was_created = Event.objects.get_or_create(
                     dojo=dojo,
                     start_time=start_dt,
@@ -92,6 +97,8 @@ class Command(BaseCommand):
                         "end_time": end_dt,
                         "places": rng.choice(CAPACITY_CHOICES),
                         "location": dojo.location,
+                        "min_age": min_age,
+                        "max_age": max_age,
                     },
                 )
                 created += 1 if was_created else 0

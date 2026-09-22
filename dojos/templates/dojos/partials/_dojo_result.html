@@ -3,12 +3,16 @@ Renders one dojo-finder search result. Expects a `dojo` Dojo instance in
 context; optionally annotated by the view with:
   - distance_km: float, distance from the searched postcode/location
   - next_event: the soonest upcoming Event for this dojo (or None)
+Pass `hx_next_page_url` (only on the last item of a page) to turn this
+result into an htmx infinite-scroll trigger, per
+https://htmx.org/examples/infinite-scroll/ — loading and appending the
+next page's results when it scrolls into view.
 Usage:
   {% for dojo in dojos %}
     {% include "dojos/partials/_dojo_result.html" %}
   {% endfor %}
 {% endcomment %}
-<li class="cd-card cd-dojo-finder__result">
+<li class="cd-card cd-dojo-finder__result"{% if hx_next_page_url %} hx-get="{{ hx_next_page_url }}" hx-trigger="revealed" hx-swap="afterend"{% endif %}>
   {% if dojo.distance_km %}
   <div class="cd-dojo-finder__distance">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>

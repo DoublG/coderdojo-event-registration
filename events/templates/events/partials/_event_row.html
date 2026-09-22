@@ -29,9 +29,7 @@ with Django's built-in `regroup` tag:
       {% else %}
         <span class="cd-badge cd-badge--success caption">Open</span>
       {% endif %}
-      {% if event.min_age or event.max_age %}
-        <span class="cd-badge cd-badge--accent caption">Ages {{ event.min_age|default:"7" }}–{{ event.max_age|default:"18" }}</span>
-      {% endif %}
+      <span class="cd-badge cd-badge--accent caption">Ages {{ event.min_age|default:"7" }}–{{ event.max_age|default:"18" }}</span>
     </div>
   </div>
   <div class="action"><a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=event.id %}">View event</a></div>
