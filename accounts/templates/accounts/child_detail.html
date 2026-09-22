@@ -20,7 +20,7 @@
   <div class="shell">
 
     <div class="child-header">
-      <div class="cd-mentor__avatar" aria-hidden="true"></div>
+      {% include "accounts/partials/_child_avatar.html" with child=child %}
       <div>
         <h1 class="display-lg">{{ child.name }}</h1>
         <p class="body">

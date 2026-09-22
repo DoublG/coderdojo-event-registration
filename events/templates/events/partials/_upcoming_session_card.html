@@ -11,6 +11,9 @@ see events.views.upcoming_sessions_widget.
     hx-swap="afterend"
   {% endif %}>
   <div class="cd-event__image">
+    {% if event.image %}
+      <img src="{{ event.image.url }}" alt="" loading="lazy">
+    {% endif %}
     <div class="cd-event__date-badge caption">
       <span>{{ event.start_time|date:"D"|upper }}</span>
       <span style="font-size:18px; font-weight:700;">{{ event.start_time|date:"j" }}</span>

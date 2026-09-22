@@ -1,0 +1,12 @@
+{% comment %}
+Renders one child's round avatar: their seeded/uploaded photo (Participant.photo)
+if they have one, else the plain placeholder circle. Expects a `child`
+Participant instance in context.
+Usage:
+  {% include "accounts/partials/_child_avatar.html" with child=child %}
+{% endcomment %}
+{% if child.photo %}
+  <img class="cd-mentor__avatar" src="{{ child.photo.url }}" alt="">
+{% else %}
+  <div class="cd-mentor__avatar" aria-hidden="true"></div>
+{% endif %}

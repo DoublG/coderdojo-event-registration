@@ -28,11 +28,17 @@
   .guardian-root .next-row .info { flex: 1 1 auto; min-width: 0; }
   .guardian-root .next-row .info h3 { color: var(--ink); margin: 0 0 2px; }
   .guardian-root .next-row .info .meta { color: var(--ink-muted); margin: 0; }
-  .guardian-root .next-row .action { flex: 0 0 auto; }
+  .guardian-root .next-row .action { flex: 0 0 auto; display: flex; align-items: center; gap: var(--space-2); }
   .guardian-root .empty-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); background: var(--surface-sunken); border-radius: var(--radius-md); padding: var(--space-4); flex-wrap: wrap; }
   .guardian-root .empty-row p { color: var(--ink-muted); margin: 0; }
   .guardian-root .add-child { padding: var(--space-6); text-align: center; margin-top: var(--space-6); }
-  .guardian-root .add-child p { color: var(--ink-muted); margin: 0 0 var(--space-4); }
+  .guardian-root .add-child summary { cursor: pointer; list-style: none; }
+  .guardian-root .add-child summary::-webkit-details-marker { display: none; }
+  .guardian-root .add-child summary p { color: var(--ink-muted); margin: 0 0 var(--space-4); }
+  .guardian-root .add-child[open] summary { margin-bottom: var(--space-5); }
+  .guardian-root .add-child form { text-align: left; }
+  .guardian-root .add-child .cd-form__row { align-items: flex-end; }
+  .guardian-root .add-child .cd-form__row .cd-form__field { flex: 1 1 180px; }
 </style>
 {% endblock %}
 
@@ -44,55 +50,38 @@
       <p class="body-lg">Here's what's coming up for your children.</p>
     </div>
 
-    <section>
-      <h2 class="heading-lg section-title">Your children</h2>
+    {% include "accounts/partials/_children_list.html" %}
 
-      {% for entry in children %}
-        <div class="cd-card child-card">
-          <div class="child-card__top">
-            <div class="child-card__person">
-              <div class="cd-mentor__avatar" aria-hidden="true"></div>
-              <div>
-                <p class="heading-sm child-card__name">{{ entry.child.name }}</p>
-                <p class="body-sm child-card__meta">
-                  {% if entry.child.age %}Age {{ entry.child.age }}{% endif %}
-                  {% if entry.child.home_dojo %} · {{ entry.child.home_dojo.name }}{% endif %}
-                </p>
-              </div>
-            </div>
-            <a class="body-sm child-card__link" href="{% url 'child_detail' guardian_id=guardian.id child_id=entry.child.id %}">View {{ entry.child.name }}'s awards &amp; history →</a>
+    <details class="cd-card add-child">
+      <summary>
+        <p class="body">Registering another child?</p>
+        <span class="cd-btn cd-btn--primary label">Register another child</span>
+      </summary>
+      <form class="cd-form" method="post" action="{% url 'add_child' guardian_id=guardian.id %}"
+            hx-post="{% url 'add_child' guardian_id=guardian.id %}" hx-target="#children-list" hx-swap="outerHTML"
+            hx-on::after-request="if(event.detail.successful){this.reset(); this.closest('details').open=false;}">
+        {% csrf_token %}
+        <div class="cd-form__row">
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="ac-name">Child's name</label>
+            <input class="cd-form__input body" type="text" id="ac-name" name="name" required>
           </div>
-          {% if entry.next_registration %}
-            <div class="next-row">
-              <div class="date-box">
-                <span class="caption dow">{{ entry.next_registration.event.start_time|date:"D"|upper }}</span>
-                <span class="dom">{{ entry.next_registration.event.start_time|date:"j" }}</span>
-              </div>
-              <div class="info">
-                <h3 class="heading-sm">{{ entry.next_registration.event.name }}</h3>
-                <p class="body-sm meta">
-                  {{ entry.next_registration.event.start_time|time:"H:i" }}–{{ entry.next_registration.event.end_time|time:"H:i" }}
-                  {% if entry.next_registration.event.venue_name %} · {{ entry.next_registration.event.venue_name }}{% endif %}
-                </p>
-              </div>
-              <div class="action"><a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=entry.next_registration.event.id %}">View event</a></div>
-            </div>
-          {% else %}
-            <div class="empty-row">
-              <p class="body-sm">Not registered for an upcoming session.</p>
-              <a class="cd-btn cd-btn--secondary label" href="{% url 'event_list' %}">Browse events</a>
-            </div>
-          {% endif %}
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="ac-dob">Date of birth (optional)</label>
+            <input class="cd-form__input body" type="date" id="ac-dob" name="date_of_birth">
+          </div>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="ac-icon">Avatar</label>
+            <select class="cd-form__select body" id="ac-icon" name="icon">
+              {% for value, label in icon_choices %}
+                <option value="{{ value }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
-      {% empty %}
-        <p class="body" style="color: var(--ink-muted);">No children registered yet.</p>
-      {% endfor %}
-    </section>
-
-    <div class="cd-card add-child">
-      <p class="body">Registering another child?</p>
-      <a class="cd-btn cd-btn--primary label" href="{% url 'register_guardian' %}">Register another child</a>
-    </div>
+        <button type="submit" class="cd-btn cd-btn--primary label">Add child</button>
+      </form>
+    </details>
 
   </div>
 {% endblock %}

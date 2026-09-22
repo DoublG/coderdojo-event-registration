@@ -1,15 +1,18 @@
 from datetime import timedelta
 
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db import transaction
+from django.db.models import Max, Q
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 
+from content.models import FAQ
 from dojos.models import Dojo
 
 from .forms import AGE_RANGES, EventSearchForm
-from .models import Event
+from .models import Event, Registration
 from .search import WIDGET_PAGE_SIZE, upcoming_available_events
 
 RESULTS_PER_PAGE = 20
@@ -96,9 +99,84 @@ def upcoming_sessions_widget(request):
 
 def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
-    return render(request, "events/event_detail.html", {"event": event})
+    faqs = FAQ.objects.for_event(event)
+
+    all_registered = False
+    guardian = getattr(request.user, "guardian", None)
+    if guardian is not None:
+        children = list(guardian.children.all())
+        if children:
+            registered_count = Registration.objects.filter(event=event, participant__in=children).count()
+            all_registered = registered_count == len(children)
+
+    return render(request, "events/event_detail.html", {
+        "event": event, "faqs": faqs, "all_registered": all_registered,
+    })
 
 
+@login_required
 def event_signup(request, event_id):
     event = get_object_or_404(Event, id=event_id)
-    return render(request, "events/event_signup.html", {"event": event, "full": event.places_left <= 0})
+    guardian = getattr(request.user, "guardian", None)
+    results = None
+    error = None
+
+    existing_registrations = {}
+    if guardian:
+        existing_registrations = {
+            r.participant_id: r
+            for r in Registration.objects.filter(event=event, participant__in=guardian.children.all())
+        }
+
+    if request.method == "POST" and guardian:
+        submitted_ids = request.POST.getlist("child")
+        # The order children were *checked* in (tracked client-side, since
+        # checkbox form submission is always DOM order regardless of click
+        # order) — falls back to submission order if JS didn't populate it
+        # (or a mismatched/stale value slipped through).
+        ordered_ids = [cid for cid in request.POST.get("child_order", "").split(",") if cid]
+        if set(ordered_ids) != set(submitted_ids):
+            ordered_ids = submitted_ids
+
+        children_by_id = {str(c.id): c for c in guardian.children.filter(id__in=submitted_ids)}
+        selected = [children_by_id[cid] for cid in dict.fromkeys(ordered_ids) if cid in children_by_id]
+        new_children = [c for c in selected if c.id not in existing_registrations]
+
+        if not selected:
+            error = "Please select at least one child."
+        elif not new_children:
+            error = "The child(ren) you selected are already signed up for this session."
+        else:
+            with transaction.atomic():
+                next_position = Registration.objects.filter(event=event).aggregate(Max("position"))["position__max"] or 0
+                confirmed_count = Registration.objects.filter(event=event, waiting_list=False).count()
+                results = []
+                for child in new_children:
+                    next_position += 1
+                    waiting_list = confirmed_count >= event.places
+                    Registration.objects.create(
+                        event=event, participant=child, waiting_list=waiting_list, position=next_position,
+                    )
+                    if not waiting_list:
+                        confirmed_count += 1
+                    results.append({"child": child, "waiting_list": waiting_list})
+            # Re-fetch: the children just registered above should now show
+            # as greyed-out/already-registered if the guardian lands back
+            # on this form (e.g. via the browser back button).
+            existing_registrations = {
+                r.participant_id: r
+                for r in Registration.objects.filter(event=event, participant__in=guardian.children.all())
+            }
+
+    children = [
+        {"child": child, "registration": existing_registrations.get(child.id)}
+        for child in guardian.children.all()
+    ] if guardian else []
+    all_registered = bool(children) and all(entry["registration"] for entry in children)
+
+    any_waitlisted = bool(results) and any(r["waiting_list"] for r in results)
+    return render(request, "events/event_signup.html", {
+        "event": event, "full": event.places_left <= 0, "guardian": guardian, "children": children,
+        "all_registered": all_registered,
+        "results": results, "any_waitlisted": any_waitlisted, "error": error,
+    })

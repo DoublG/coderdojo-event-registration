@@ -35,6 +35,16 @@
   .home-root .carousel__track::-webkit-scrollbar { display: none; }
   .home-root .carousel__track .cd-pathway { flex: 0 0 240px; scroll-snap-align: start; }
   .home-root .carousel__track .upcoming-sessions__card { flex: 0 0 280px; scroll-snap-align: start; }
+
+  /* role rings — see dojos/dojo_team.html for the full five-role writeup. Reused
+     verbatim wherever .cd-mentor__avatar appears; the role is always also spelled
+     out in .cd-mentor__role, so the ring is never the only signal. */
+  .home-root .cd-mentor__avatar--ninja { outline: 3px solid #0e7c6b; outline-offset: 2px; }
+  .home-root .cd-mentor__avatar--lead_coach { outline: 3px solid #d1990a; outline-offset: 2px; }
+  .home-root .cd-mentor__avatar--champion { outline: 3px solid #c1274a; outline-offset: 2px; }
+  .home-root .cd-mentor__avatar--volunteer { outline: 3px solid #4a5fc1; outline-offset: 2px; }
+  .home-root .cd-mentor__avatar--board { outline: 3px solid #4a5568; outline-offset: 2px; }
+  .home-root .row a.mentor-link { text-decoration: none; }
 </style>
 {% endblock %}
 
@@ -107,64 +117,55 @@
 
   <div class="shell section">
     <div class="section-head">
-      <h2 class="heading-lg">Meet our mentors</h2>
-      <p class="body">Volunteers and Ninja mentors who make every session run.</p>
+      <h2 class="heading-lg">Meet the team</h2>
+      <p class="body">Our team and volunteers who keep every dojo running.</p>
     </div>
     <div class="row">
-      <div class="cd-mentor">
-        <div class="cd-mentor__avatar cd-mentor__avatar--lead" aria-hidden="true"></div>
-        <div>
-          <p class="cd-mentor__name heading-sm">Priya Nair</p>
-          <p class="cd-mentor__role body-sm">Dojo champion, software engineer</p>
-        </div>
-      </div>
-      <div class="cd-mentor">
-        <div class="cd-mentor__avatar cd-mentor__avatar--ninja" aria-hidden="true"></div>
-        <div>
-          <p class="cd-mentor__name heading-sm">Jonas (16)</p>
-          <p class="cd-mentor__role body-sm">Ninja mentor, Python &amp; web</p>
-        </div>
-      </div>
+      {% for mentor in team %}
+        <a class="mentor-link" href="{% url 'mentor_profile' mentor_id=mentor.id %}">
+          <div class="cd-mentor">
+            {% include "dojos/partials/_mentor_avatar.html" with mentor=mentor %}
+            <div>
+              <p class="cd-mentor__name heading-sm">{{ mentor.name }}</p>
+              <p class="cd-mentor__role body-sm">{{ mentor.get_role_display }}{% if mentor.title %}, {{ mentor.title }}{% endif %}</p>
+            </div>
+          </div>
+        </a>
+      {% empty %}
+        <p class="body-sm" style="color: var(--ink-muted);">No team members listed yet.</p>
+      {% endfor %}
     </div>
   </div>
 
-  <div class="shell section">
-    <div class="center">
-      <figure class="cd-testimonial" style="max-width:520px;">
-        <blockquote class="cd-testimonial__quote body-lg">My daughter built her first game in one Saturday morning and hasn't stopped talking about it since.</blockquote>
-        <figcaption class="cd-testimonial__author body-sm">— Sofie, parent</figcaption>
-      </figure>
+  {% if testimonial %}
+    <div class="shell section">
+      <div class="center">
+        <figure class="cd-testimonial" style="max-width:520px;">
+          <blockquote class="cd-testimonial__quote body-lg">{{ testimonial.quote }}</blockquote>
+          <figcaption class="cd-testimonial__author body-sm">— {{ testimonial.author }}{% if testimonial.role %}, {{ testimonial.role }}{% endif %}</figcaption>
+        </figure>
+      </div>
     </div>
-  </div>
+  {% endif %}
 
-  <div class="shell section">
-    <div class="section-head">
-      <h2 class="heading-lg">Frequently asked questions</h2>
-    </div>
-    <div class="cd-faq" id="faq-home-page">
-      <div class="cd-faq__item" data-open="false">
-        <button class="cd-faq__question heading-sm">
-          <span>Is it really free?</span>
-          <span class="cd-faq__icon" aria-hidden="true">+</span>
-        </button>
-        <p class="cd-faq__answer body" hidden>Yes — every Dojo session is free, run entirely by volunteers.</p>
+  {% if faqs %}
+    <div class="shell section">
+      <div class="section-head">
+        <h2 class="heading-lg">Frequently asked questions</h2>
       </div>
-      <div class="cd-faq__item" data-open="false">
-        <button class="cd-faq__question heading-sm">
-          <span>Does my child need coding experience?</span>
-          <span class="cd-faq__icon" aria-hidden="true">+</span>
-        </button>
-        <p class="cd-faq__answer body" hidden>No experience needed — we group by age and skill on the day, not in advance.</p>
-      </div>
-      <div class="cd-faq__item" data-open="false">
-        <button class="cd-faq__question heading-sm">
-          <span>Do parents need to stay?</span>
-          <span class="cd-faq__icon" aria-hidden="true">+</span>
-        </button>
-        <p class="cd-faq__answer body" hidden>Under-12s need an adult on site; older kids can be dropped off.</p>
+      <div class="cd-faq" id="faq-home-page">
+        {% for faq in faqs %}
+          <div class="cd-faq__item" data-open="false">
+            <button class="cd-faq__question heading-sm">
+              <span>{{ faq.question }}</span>
+              <span class="cd-faq__icon" aria-hidden="true">+</span>
+            </button>
+            <p class="cd-faq__answer body" hidden>{{ faq.answer }}</p>
+          </div>
+        {% endfor %}
       </div>
     </div>
-  </div>
+  {% endif %}
 
   <div class="shell section">
     <div class="section-head">

@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load markdown_extras %}
 {% block title %}{{ event.name }} · CoderDojo{% endblock %}
 {% block root_class %}eventdetail-root{% endblock %}
 
@@ -10,10 +11,33 @@
   .eventdetail-root .event-main { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: var(--space-6); }
   .eventdetail-root .event-side { flex: 0 0 300px; position: sticky; top: var(--space-5); }
   .eventdetail-root .event-header { margin-top: var(--space-6); }
+  .eventdetail-root .event-header__top { display: flex; align-items: center; gap: var(--space-4); }
+  .eventdetail-root .event-header__image {
+    width: 88px; height: 88px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0;
+  }
   .eventdetail-root .event-header .hosted-by { color: var(--secondary); }
-  .eventdetail-root .event-header h1 { color: var(--ink); margin: var(--space-2) 0; }
-  .eventdetail-root .event-header p.meta { color: var(--ink-muted); margin: 0; }
+  .eventdetail-root .event-header h1 { color: var(--ink); margin: 0; }
+  .eventdetail-root .event-header p.meta { color: var(--ink-muted); margin: var(--space-2) 0 0; }
   .eventdetail-root h2.section-title { color: var(--ink); margin: 0 0 var(--space-4); }
+  .eventdetail-root .markdown-content { color: var(--ink); }
+  .eventdetail-root .markdown-content > *:first-child { margin-top: 0; }
+  .eventdetail-root .markdown-content > *:last-child { margin-bottom: 0; }
+  .eventdetail-root .markdown-content a { color: var(--secondary); }
+  .eventdetail-root .markdown-content ul,
+  .eventdetail-root .markdown-content ol { padding-left: 1.25em; }
+  .eventdetail-root .markdown-content code {
+    background: var(--surface-sunken); border-radius: var(--radius-sm, 4px); padding: 0 4px;
+  }
+  .eventdetail-root .markdown-content h1,
+  .eventdetail-root .markdown-content h2,
+  .eventdetail-root .markdown-content h3,
+  .eventdetail-root .markdown-content h4 {
+    font-family: var(--font-sans); color: var(--ink); margin: var(--space-4) 0 var(--space-2);
+  }
+  .eventdetail-root .markdown-content h1 { font-size: 20px; }
+  .eventdetail-root .markdown-content h2 { font-size: 18px; }
+  .eventdetail-root .markdown-content h3,
+  .eventdetail-root .markdown-content h4 { font-size: 16px; }
   @media (max-width: 800px) {
     .eventdetail-root .event-layout { flex-direction: column; }
     .eventdetail-root .event-side { position: static; width: 100%; flex-basis: auto; }
@@ -25,7 +49,12 @@
   <div class="shell">
 
     <div class="event-header">
-      <h1 class="display-xl">{{ event.name }}</h1>
+      <div class="event-header__top">
+        {% if event.image %}
+          <img class="event-header__image" src="{{ event.image.url }}" alt="">
+        {% endif %}
+        <h1 class="display-xl">{{ event.name }}</h1>
+      </div>
       <p class="body-lg meta">
         {{ event.start_time|date:"D j M" }} · {{ event.start_time|time:"H:i" }}–{{ event.end_time|time:"H:i" }}
         {% if event.venue_name %} · {{ event.venue_name }}{% endif %}
@@ -39,35 +68,26 @@
         {% if event.description %}
           <section>
             <h2 class="heading-lg section-title">About this session</h2>
-            <p class="body" style="color: var(--ink);">{{ event.description }}</p>
+            <div class="body markdown-content">{{ event.description|markdownify }}</div>
           </section>
         {% endif %}
 
-        {% if event.what_to_bring %}
+        {% if faqs %}
           <section>
-            <h2 class="heading-lg section-title">What to bring</h2>
-            <p class="body" style="color: var(--ink);">{{ event.what_to_bring }}</p>
+            <h2 class="heading-lg section-title">Questions</h2>
+            <div class="cd-faq" id="faq-event-detail-page">
+              {% for faq in faqs %}
+                <div class="cd-faq__item" data-open="false">
+                  <button class="cd-faq__question heading-sm">
+                    <span>{{ faq.question }}</span>
+                    <span class="cd-faq__icon" aria-hidden="true">+</span>
+                  </button>
+                  <p class="cd-faq__answer body" hidden>{{ faq.answer }}</p>
+                </div>
+              {% endfor %}
+            </div>
           </section>
         {% endif %}
-
-        {% with faqs=event.faqs.all %}
-          {% if faqs %}
-            <section>
-              <h2 class="heading-lg section-title">Questions</h2>
-              <div class="cd-faq" id="faq-event-detail-page">
-                {% for faq in faqs %}
-                  <div class="cd-faq__item" data-open="false">
-                    <button class="cd-faq__question heading-sm">
-                      <span>{{ faq.question }}</span>
-                      <span class="cd-faq__icon" aria-hidden="true">+</span>
-                    </button>
-                    <p class="cd-faq__answer body" hidden>{{ faq.answer }}</p>
-                  </div>
-                {% endfor %}
-              </div>
-            </section>
-          {% endif %}
-        {% endwith %}
 
       </div>
 
@@ -86,9 +106,13 @@
             <span class="cd-ticket-panel__value body">{{ event.min_age|default:"7" }}–{{ event.max_age|default:"18" }}</span>
           </div>
           <hr class="cd-ticket-panel__divider">
-          <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{% url 'event_signup' event_id=event.id %}">Sign up now</a>
+          {% if all_registered %}
+            <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>Already signed up</button>
+          {% else %}
+            <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{% url 'event_signup' event_id=event.id %}">Sign up now</a>
+          {% endif %}
           <p class="cd-ticket-panel__note body-sm">
-            {% if event.places_left > 0 %}{{ event.places_left }} of {{ event.places }} spots left{% else %}Full — join the waitlist{% endif %}
+            {% if all_registered %}Every child on your account is already signed up{% elif event.places_left > 0 %}{{ event.places_left }} of {{ event.places }} spots left{% else %}Full — join the waitlist{% endif %}
           </p>
         </div>
       </aside>

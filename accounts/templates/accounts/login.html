@@ -49,7 +49,7 @@
             <input type="checkbox" id="lp-login-remember">
             <label class="body-sm" for="lp-login-remember">Remember me</label>
           </div>
-          <a href="#" class="cd-login__forgot body-sm">Forgot password?</a>
+          <a href="{% url 'password_reset' %}" class="cd-login__forgot body-sm">Forgot password?</a>
         </div>
 
         <button type="submit" class="cd-btn cd-btn--primary cd-btn--block label">Log in</button>

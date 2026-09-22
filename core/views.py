@@ -2,7 +2,9 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.urls import reverse
 
+from content.models import FAQ, Testimonial
 from dojos.forms import DojoSearchForm
+from dojos.models import Mentor
 from dojos.search import attach_next_events, dojos_by_distance, resolve_search_origin
 from dojos.views import WIDGET_RESULTS_LIMIT
 from events.search import WIDGET_PAGE_SIZE, upcoming_available_events
@@ -11,6 +13,17 @@ from pathways.models import Pathway
 
 def home(request):
     pathways = Pathway.objects.all()
+
+    # The organisation-wide board — the homepage isn't tied to one dojo, so
+    # "Meet the team" shows Mentor.BOARD rather than any single chapter's
+    # mentors (see dojos.models.Mentor.dojo help text).
+    team = Mentor.objects.filter(role=Mentor.BOARD).public()
+
+    # A different quote on every load — order_by("?") is fine at this size
+    # (a handful of site-wide testimonials, dojo=None).
+    testimonial = Testimonial.objects.filter(dojo=None).order_by("?").first()
+
+    faqs = FAQ.objects.global_faqs()
 
     # Initial state for the "Find a dojo near you" widget (dojos app) — its
     # own searches happen via htmx against dojos.views.dojo_finder_widget,
@@ -29,6 +42,9 @@ def home(request):
 
     return render(request, "core/home.html", {
         "pathways": pathways,
+        "team": team,
+        "testimonial": testimonial,
+        "faqs": faqs,
         "form": dojo_widget_form,
         "dojos": dojos,
         "search_label": dojo_widget_search_label,

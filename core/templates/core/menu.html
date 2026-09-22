@@ -1,7 +1,7 @@
 {% load i18n %}
 <nav class="cd-nav" style="{{ style }}">
   <a class="cd-nav__brand display-lg" href="{% url 'home' %}" style="font-size: 22px"
-    >CoderDojo</a
+    >CoderDojo Belgium</a
   >
   <ul class="cd-nav__links">
     <li><a class="cd-nav__link label" href="{% url 'home' %}">Home</a></li>
@@ -39,7 +39,7 @@
           {% if user_guardian %}
             <a class="cd-nav__account-link body-sm" href="{% url 'guardian_detail' guardian_id=user_guardian.id %}">My Account</a>
           {% endif %}
-          {% if user_dojo_owner %}
+          {% if user_dojo_owner.dojos.first %}
             <a class="cd-nav__account-link body-sm" href="{% url 'dojo_dashboard' dojo_id=user_dojo_owner.dojos.first.id %}">Manage</a>
           {% endif %}
           <form method="post" action="{% url 'logout' %}">

@@ -1,5 +1,7 @@
 from django.contrib.gis.db import models
 
+MARKDOWN_HELP_TEXT = "Supports basic Markdown — # headings, **bold**, *italic*, links, lists."
+
 
 class Event(models.Model):
     name = models.CharField(max_length=200)
@@ -11,9 +13,12 @@ class Event(models.Model):
 
     location = models.PointField(srid=4326, null=True, blank=True, spatial_index=False)
     venue_name = models.CharField(max_length=200, blank=True, default="", help_text='e.g. "Ghent Public Library"')
+    image = models.ImageField(
+        upload_to="events/", null=True, blank=True,
+        help_text="Banner shown on the homepage's Upcoming sessions card.",
+    )
 
-    description = models.TextField(blank=True, default="")
-    what_to_bring = models.TextField(blank=True, default="")
+    description = models.TextField(blank=True, default="", help_text=MARKDOWN_HELP_TEXT)
     min_age = models.PositiveSmallIntegerField(null=True, blank=True)
     max_age = models.PositiveSmallIntegerField(null=True, blank=True)
     mentor = models.ForeignKey("dojos.Mentor", on_delete=models.SET_NULL, null=True, blank=True, related_name="events")
@@ -40,6 +45,13 @@ class Registration(models.Model):
     pathway = models.ForeignKey(
         "pathways.Pathway", on_delete=models.SET_NULL, null=True, blank=True, related_name="registrations"
     )
+
+    class Meta:
+        # `position` is the event's own first-come-first-served queue —
+        # see events.views.event_signup, which assigns it sequentially and
+        # uses it to decide who's confirmed vs waitlisted.
+        ordering = ["position"]
+        unique_together = [("event", "participant")]
 
 
 class Award(models.Model):

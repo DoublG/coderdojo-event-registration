@@ -1,0 +1,63 @@
+{% comment %}
+The guardian account page's "Your children" section. Expects `guardian`
+and `children` (list of {child, next_registration} dicts) in context —
+see accounts.views.guardian_detail and accounts.views.add_child, which
+both render this same partial (the latter as an htmx swap target after
+adding a child, so the list updates without a full page reload).
+{% endcomment %}
+<section id="children-list">
+  <h2 class="heading-lg section-title">Your children</h2>
+
+  {% for entry in children %}
+    <div class="cd-card child-card">
+      <div class="child-card__top">
+        <div class="child-card__person">
+          {% include "accounts/partials/_child_avatar.html" with child=entry.child %}
+          <div>
+            <p class="heading-sm child-card__name">{{ entry.child.name }}</p>
+            <p class="body-sm child-card__meta">
+              {% if entry.child.age %}Age {{ entry.child.age }}{% endif %}
+              {% if entry.child.home_dojo %} · {{ entry.child.home_dojo.name }}{% endif %}
+            </p>
+          </div>
+        </div>
+        <a class="body-sm child-card__link" href="{% url 'child_detail' guardian_id=guardian.id child_id=entry.child.id %}">View {{ entry.child.name }}'s awards &amp; history →</a>
+      </div>
+      {% if entry.next_registration %}
+        <div class="next-row">
+          <div class="date-box">
+            <span class="caption dow">{{ entry.next_registration.event.start_time|date:"D"|upper }}</span>
+            <span class="dom">{{ entry.next_registration.event.start_time|date:"j" }}</span>
+          </div>
+          <div class="info">
+            <h3 class="heading-sm">
+              {{ entry.next_registration.event.name }}
+              {% if entry.next_registration.waiting_list %}
+                <span class="cd-badge cd-badge--warning caption">Waiting list</span>
+              {% endif %}
+            </h3>
+            <p class="body-sm meta">
+              {{ entry.next_registration.event.start_time|time:"H:i" }}–{{ entry.next_registration.event.end_time|time:"H:i" }}
+              {% if entry.next_registration.event.venue_name %} · {{ entry.next_registration.event.venue_name }}{% endif %}
+            </p>
+          </div>
+          <div class="action">
+            <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=entry.next_registration.event.id %}">View event</a>
+            <form method="post" action="{% url 'cancel_registration' guardian_id=guardian.id registration_id=entry.next_registration.id %}"
+                  onsubmit="return confirm('Remove {{ entry.child.name }} from {{ entry.next_registration.event.name }}?');">
+              {% csrf_token %}
+              <button type="submit" class="cd-btn cd-btn--danger label">{% if entry.next_registration.waiting_list %}Leave waiting list{% else %}Cancel{% endif %}</button>
+            </form>
+          </div>
+        </div>
+      {% else %}
+        <div class="empty-row">
+          <p class="body-sm">Not registered for an upcoming session.</p>
+          <a class="cd-btn cd-btn--secondary label" href="{% url 'event_list' %}">Browse events</a>
+        </div>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p class="body" style="color: var(--ink-muted);">No children registered yet.</p>
+  {% endfor %}
+</section>

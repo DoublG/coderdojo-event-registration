@@ -1,20 +1,29 @@
 import random
+from pathlib import Path
 
+from django.core.files import File
 from django.core.management.base import BaseCommand
 
 from accounts.models import ChildAccount, Guardian, Participant
 
+# Reuse the same fun alien/robot/animal avatars seeded for ninja mentors
+# (dojos/seed_data/kid_avatars/) — same audience, same round .cd-mentor__avatar.
+KID_AVATARS_DIR = (
+    Path(__file__).resolve().parent.parent.parent.parent / "dojos" / "seed_data" / "kid_avatars"
+)
+KID_AVATAR_FILES = sorted(KID_AVATARS_DIR.glob("*.svg"))
+
 GUARDIAN_FIRST_NAMES = [
     "Ellen", "Tom", "Sarah", "Bram", "Nathalie", "Wouter", "Julie", "Kevin",
-    "An", "Stijn", "Karen", "Dries", "Isabelle", "Pieter", "Veerle", "Bart",
+    "An", "Stijn", "Karen", "Dries", "Isabelle", "Pieter", "Veerle", "Bart", "Thomas"
 ]
 GUARDIAN_LAST_NAMES = [
     "Peeters", "Janssens", "Maes", "Jacobs", "Mertens", "Willems", "Claes",
     "Goossens", "Wouters", "De Smet", "Dubois", "Lambert", "Simon", "Michel",
 ]
 CHILD_FIRST_NAMES = [
-    "Emma", "Liam", "Olivia", "Noah", "Sophie", "Lucas", "Mila", "Finn",
-    "Lotte", "Milan", "Fien", "Arthur", "Marie", "Louis", "Anna", "Jules",
+    "Emma", "Liam", "Olivia", "Noah", "Sophie", "Lucas", "Mila", "Finn", "Nina",
+    "Lotte", "Milan", "Fien", "Arthur", "Marie", "Louis", "Anna", "Jules", "Mara"
 ]
 
 NUM_GUARDIANS = 40
@@ -61,12 +70,23 @@ class Command(BaseCommand):
                     account.save()
                     child_logins_created += 1
 
-                Participant.objects.create(
+                participant = Participant.objects.create(
                     name=f"{child_first_name} {last_name}",
                     guardian=guardian,
                     account=account,
                 )
+                avatar_path = rng.choice(KID_AVATAR_FILES)
+                with open(avatar_path, "rb") as f:
+                    participant.photo.save(avatar_path.name, File(f), save=True)
                 children_created += 1
+
+        # Backfill: children seeded before Participant.photo was used this
+        # way (guardians already existing skip the loop above entirely).
+        for participant in Participant.objects.all():
+            if not participant.photo:
+                avatar_path = rng.choice(KID_AVATAR_FILES)
+                with open(avatar_path, "rb") as f:
+                    participant.photo.save(avatar_path.name, File(f), save=True)
 
         self.stdout.write(self.style.SUCCESS(
             f"Done. guardians={guardians_created} children={children_created} "

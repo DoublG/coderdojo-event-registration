@@ -2,6 +2,8 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
+from content.models import FAQ
+
 from .forms import DojoSearchForm
 from .models import Dojo, Mentor
 from .search import attach_next_events, dojos_by_distance, resolve_search_origin
@@ -59,12 +61,16 @@ def dojo_finder_widget(request):
 def dojo_detail(request, dojo_id):
     dojo = get_object_or_404(Dojo, id=dojo_id)
     next_event = dojo.event_set.filter(start_time__gte=timezone.now()).order_by("start_time").first()
-    return render(request, "dojos/dojo_detail.html", {"dojo": dojo, "next_event": next_event})
+    faqs = FAQ.objects.for_dojo(dojo)
+    mentors = dojo.mentors.lead_coach_first()
+    return render(request, "dojos/dojo_detail.html", {
+        "dojo": dojo, "next_event": next_event, "faqs": faqs, "mentors": mentors,
+    })
 
 
 def dojo_team(request, dojo_id):
     dojo = get_object_or_404(Dojo, id=dojo_id)
-    return render(request, "dojos/dojo_team.html", {"dojo": dojo, "mentors": dojo.mentors.all()})
+    return render(request, "dojos/dojo_team.html", {"dojo": dojo, "mentors": dojo.mentors.lead_coach_first()})
 
 
 def dojo_dashboard(request, dojo_id):

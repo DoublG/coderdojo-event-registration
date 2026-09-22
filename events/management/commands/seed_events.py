@@ -2,12 +2,16 @@ import itertools
 import random
 from calendar import monthrange
 from datetime import date, datetime, time, timedelta
+from pathlib import Path
 
+from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from dojos.models import Dojo
 from events.models import Event
+
+IMAGES_DIR = Path(__file__).resolve().parent.parent.parent / "seed_data" / "images"
 
 SATURDAY, SUNDAY, WEDNESDAY, FRIDAY = 5, 6, 2, 4
 
@@ -26,6 +30,56 @@ AGE_RANGE_CHOICES = [(7, 18), (7, 18), (7, 18), (7, 10), (10, 14), (13, 18)]
 # Most chapters run a monthly weekend workshop; a minority instead run a
 # weekly Wednesday or Friday session.
 PATTERN_WEIGHTS = {"weekend": 60, "wednesday": 20, "friday": 20}
+
+# The event's own name — not the dojo's name and not the date, both of
+# which are already shown alongside it (see events/partials/_event_row.html
+# and event_detail.html), so baking either into the name would just repeat
+# it.
+SESSION_NAMES = [
+    "Coding Saturday", "Open Lab", "Scratch & Games", "Build & Code",
+    "Ninja Session", "Code Club", "Make Something Session", "Project Time",
+    "Beginner's Workshop", "Game Jam Session",
+]
+
+# One banner image per session name (events/seed_data/images/), shown on
+# the homepage's "Upcoming sessions" card — see
+# events/templates/events/partials/_upcoming_session_card.html.
+SESSION_IMAGES = {
+    "Coding Saturday": "coding-saturday.svg",
+    "Open Lab": "open-lab.svg",
+    "Scratch & Games": "scratch-games.svg",
+    "Build & Code": "build-code.svg",
+    "Ninja Session": "ninja-session.svg",
+    "Code Club": "code-club.svg",
+    "Make Something Session": "make-something.svg",
+    "Project Time": "project-time.svg",
+    "Beginner's Workshop": "beginners-workshop.svg",
+    "Game Jam Session": "game-jam.svg",
+}
+
+
+def description_for(session_name):
+    """A single Markdown-formatted blurb covering both what the session is
+    and what to bring — Event has just the one free-text field, with
+    Markdown headings (see core.templatetags.markdown_extras) doing the
+    work a separate what_to_bring field used to."""
+    return (
+        f"**{session_name}** is a hands-on, beginner-friendly session. What you'll do:\n\n"
+        "- Pick a project and start building\n"
+        "- Get 1:1 help from a mentor whenever you're stuck\n"
+        "- Show off what you made at the end (totally optional)\n\n"
+        "### Bring with you\n\n"
+        "- A laptop, if you have one (we have a few spares to lend out)\n"
+        "- A water bottle and a snack\n\n"
+        "### Not required\n\n"
+        "No experience, no accounts to set up in advance — we'll get you going on the day."
+    )
+
+
+def assign_session_image(event, session_name):
+    image_path = IMAGES_DIR / SESSION_IMAGES[session_name]
+    with open(image_path, "rb") as f:
+        event.image.save(image_path.name, File(f), save=True)
 
 
 def nth_weekday_dates(start_date, weekday, n_occurrence):
@@ -89,19 +143,29 @@ class Command(BaseCommand):
                 start_dt = timezone.make_aware(datetime.combine(event_date, start_t))
                 end_dt = timezone.make_aware(datetime.combine(event_date, end_t))
                 min_age, max_age = rng.choice(AGE_RANGE_CHOICES)
-                _, was_created = Event.objects.get_or_create(
+                session_name = rng.choice(SESSION_NAMES)
+                event, was_created = Event.objects.get_or_create(
                     dojo=dojo,
                     start_time=start_dt,
                     defaults={
-                        "name": f"{dojo.name} - {event_date.strftime('%d/%m/%Y')}",
+                        "name": session_name,
                         "end_time": end_dt,
                         "places": rng.choice(CAPACITY_CHOICES),
                         "location": dojo.location,
                         "min_age": min_age,
                         "max_age": max_age,
+                        "description": description_for(session_name),
                     },
                 )
+                if was_created:
+                    assign_session_image(event, session_name)
                 created += 1 if was_created else 0
                 skipped += 1 if not was_created else 0
+
+        # Backfill: events seeded before Event.image existed have no
+        # banner yet — give them one based on their (already-set) name.
+        for event in Event.objects.all():
+            if not event.image and event.name in SESSION_IMAGES:
+                assign_session_image(event, event.name)
 
         self.stdout.write(self.style.SUCCESS(f"Done. created={created} skipped={skipped} (already existed)."))

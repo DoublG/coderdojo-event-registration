@@ -10,11 +10,12 @@
   .mentor-detail-root .back-link { color: var(--secondary); margin: var(--space-5) 0 0; }
   .mentor-detail-root .col { max-width: 720px; margin: 0 auto; }
 
-  /* role rings — a small ring around the avatar marks which of the four roles someone has.
+  /* role rings — a small ring around the avatar marks which of the five roles someone has.
      the role is always also written out next to the name (see .cd-mentor__role / .role-line
      below), so the ring is reinforcement, never the only signal. */
   .mentor-detail-root .cd-mentor__avatar--ninja { outline: 3px solid #0e7c6b; outline-offset: 2px; }
-  .mentor-detail-root .cd-mentor__avatar--lead { outline: 3px solid #d1990a; outline-offset: 2px; }
+  .mentor-detail-root .cd-mentor__avatar--lead_coach { outline: 3px solid #d1990a; outline-offset: 2px; }
+  .mentor-detail-root .cd-mentor__avatar--champion { outline: 3px solid #c1274a; outline-offset: 2px; }
   .mentor-detail-root .cd-mentor__avatar--volunteer { outline: 3px solid #4a5fc1; outline-offset: 2px; }
   .mentor-detail-root .cd-mentor__avatar--board { outline: 3px solid #4a5568; outline-offset: 2px; }
 
@@ -47,7 +48,7 @@
     {% with featured=mentors.first %}
       {% if featured %}
         <div class="mentor-header">
-          <div class="cd-mentor__avatar cd-mentor__avatar--{% if featured.role == 'champion' %}lead{% else %}{{ featured.role }}{% endif %}" aria-hidden="true"></div>
+          {% include "dojos/partials/_mentor_avatar.html" with mentor=featured %}
           <div>
             <h1 class="display-lg">{{ featured.name }}</h1>
             <p class="body role-line">{{ featured.get_role_display }}{% if featured.title %}, {{ featured.title }}{% endif %}</p>
@@ -76,12 +77,12 @@
 
     <div class="team-section">
       <h2 class="heading-lg">Meet the rest of the team</h2>
-      <p class="body team-desc">Every dojo runs on four kinds of people. A small ring around each avatar marks which — the words next to it always say the same thing out loud, so the ring is never the only clue.</p>
+      <p class="body team-desc">Every dojo runs on five kinds of people. A small ring around each avatar marks which — the words next to it always say the same thing out loud, so the ring is never the only clue.</p>
       <div class="team-grid">
         {% for mentor in mentors|slice:"1:" %}
           <a href="{% url 'mentor_profile' mentor_id=mentor.id %}">
             <div class="cd-mentor">
-              <div class="cd-mentor__avatar cd-mentor__avatar--{% if mentor.role == 'champion' %}lead{% else %}{{ mentor.role }}{% endif %}" aria-hidden="true"></div>
+              {% include "dojos/partials/_mentor_avatar.html" with mentor=mentor %}
               <div>
                 <p class="cd-mentor__name heading-sm">{{ mentor.name }}</p>
                 <p class="cd-mentor__role body-sm">{{ mentor.get_role_display }}{% if mentor.title %}, {{ mentor.title }}{% endif %}</p>

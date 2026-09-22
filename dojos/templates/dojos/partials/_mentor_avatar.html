@@ -1,0 +1,14 @@
+{% comment %}
+Renders one mentor's round avatar: their seeded/uploaded photo if they have
+one, else the plain placeholder circle. Expects a `mentor` Mentor instance;
+the role-ring modifier class (cd-mentor__avatar--lead_coach/champion/ninja/
+volunteer/board — one per Mentor.ROLE_CHOICES) is computed here from
+mentor.role so every call site stays in sync.
+Usage:
+  {% include "dojos/partials/_mentor_avatar.html" with mentor=mentor %}
+{% endcomment %}
+{% if mentor.photo %}
+  <img class="cd-mentor__avatar cd-mentor__avatar--{{ mentor.role }}" src="{{ mentor.photo.url }}" alt="">
+{% else %}
+  <div class="cd-mentor__avatar cd-mentor__avatar--{{ mentor.role }}" aria-hidden="true"></div>
+{% endif %}

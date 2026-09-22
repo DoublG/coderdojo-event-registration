@@ -18,7 +18,7 @@ with Django's built-in `regroup` tag:
     <span class="dom">{{ event.start_time|date:"j" }}</span>
   </div>
   <div class="info">
-    <h3 class="heading-md">{{ event.name }}</h3>
+    <h3 class="heading-md">{{ event.name }} - {{ event.dojo.name }}</h3>
     <p class="body-sm meta">
       {{ event.start_time|time:"H:i" }}{% if event.end_time %}–{{ event.end_time|time:"H:i" }}{% endif %}
       · {{ event.venue_name|default:event.dojo.address|default:event.dojo.name }}

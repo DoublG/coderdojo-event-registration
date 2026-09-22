@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load markdown_extras %}
 {% block title %}{{ dojo.name }} · CoderDojo{% endblock %}
 {% block root_class %}dojo-page-root{% endblock %}
 
@@ -12,9 +13,27 @@
   .dojo-page-root .dojo-hero__person .cd-mentor__avatar { width: 56px; height: 56px; flex-shrink: 0; }
   .dojo-page-root .dojo-hero__eyebrow { color: var(--dojo-accent); margin: 0 0 2px; }
   .dojo-page-root .dojo-hero__name { color: var(--ink); margin: 0; }
-  .dojo-page-root .dojo-hero__quote { color: var(--ink); margin: 0 0 var(--space-2); border-left: 3px solid var(--dojo-accent); padding-left: var(--space-4); }
-  .dojo-page-root .dojo-hero__cite { display: block; color: var(--ink-muted); margin: 0 0 var(--space-5); padding-left: calc(var(--space-4) + 3px); }
+  .dojo-page-root .dojo-hero__tagline { color: var(--ink); margin: 0 0 var(--space-4); }
   .dojo-page-root .dojo-hero__facts { color: var(--ink-muted); margin: 0 0 var(--space-5); }
+  .dojo-page-root .markdown-content { color: var(--ink); }
+  .dojo-page-root .markdown-content > *:first-child { margin-top: 0; }
+  .dojo-page-root .markdown-content > *:last-child { margin-bottom: 0; }
+  .dojo-page-root .markdown-content a { color: var(--secondary); }
+  .dojo-page-root .markdown-content ul,
+  .dojo-page-root .markdown-content ol { padding-left: 1.25em; }
+  .dojo-page-root .markdown-content code {
+    background: var(--surface-sunken); border-radius: var(--radius-sm, 4px); padding: 0 4px;
+  }
+  .dojo-page-root .markdown-content h1,
+  .dojo-page-root .markdown-content h2,
+  .dojo-page-root .markdown-content h3,
+  .dojo-page-root .markdown-content h4 {
+    font-family: var(--font-sans); color: var(--ink); margin: var(--space-4) 0 var(--space-2);
+  }
+  .dojo-page-root .markdown-content h1 { font-size: 20px; }
+  .dojo-page-root .markdown-content h2 { font-size: 18px; }
+  .dojo-page-root .markdown-content h3,
+  .dojo-page-root .markdown-content h4 { font-size: 16px; }
   .dojo-page-root .section { margin: var(--space-7) 0; }
   .dojo-page-root h2.section-title { color: var(--ink); margin: 0 0 var(--space-4); }
   .dojo-page-root .row { display: flex; gap: var(--space-5); flex-wrap: wrap; }
@@ -40,15 +59,18 @@
   .dojo-page-root .map-box {
     display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-4);
     background: var(--surface-sunken); border-radius: var(--radius-md);
-    padding: var(--space-4); color: var(--ink-muted);
+    padding: var(--space-4); color: var(--ink-muted); text-decoration: none;
   }
+  .dojo-page-root .map-box:hover { background: var(--border); }
   .dojo-page-root .map-box svg { width: 20px; height: 20px; flex-shrink: 0; color: var(--primary); }
+  .dojo-page-root .map-box span { text-decoration: underline; }
 
-  /* role rings — see MentorDetailPage for the full four-role writeup. Reused verbatim
+  /* role rings — see MentorDetailPage for the full five-role writeup. Reused verbatim
      wherever .cd-mentor__avatar appears; the role is always also spelled out in
      .cd-mentor__role, so the ring is never the only signal. */
   .dojo-page-root .cd-mentor__avatar--ninja { outline: 3px solid #0e7c6b; outline-offset: 2px; }
-  .dojo-page-root .cd-mentor__avatar--lead { outline: 3px solid #d1990a; outline-offset: 2px; }
+  .dojo-page-root .cd-mentor__avatar--lead_coach { outline: 3px solid #d1990a; outline-offset: 2px; }
+  .dojo-page-root .cd-mentor__avatar--champion { outline: 3px solid #c1274a; outline-offset: 2px; }
   .dojo-page-root .cd-mentor__avatar--volunteer { outline: 3px solid #4a5fc1; outline-offset: 2px; }
   .dojo-page-root .cd-mentor__avatar--board { outline: 3px solid #4a5568; outline-offset: 2px; }
   .dojo-page-root .row a.mentor-link { text-decoration: none; }
@@ -60,17 +82,18 @@
 
     <div class="dojo-hero col">
       <div class="dojo-hero__person">
-        <div class="cd-mentor__avatar" aria-hidden="true"></div>
+        {% if dojo.icon %}
+          <img class="cd-mentor__avatar" src="{{ dojo.icon.url }}" alt="">
+        {% else %}
+          <div class="cd-mentor__avatar" aria-hidden="true"></div>
+        {% endif %}
         <div>
           <p class="eyebrow label dojo-hero__eyebrow">CoderDojo{% if dojo.municipality %} · {{ dojo.municipality.name }}{% endif %}</p>
           <h1 class="display-xl dojo-hero__name">{{ dojo.name }}</h1>
         </div>
       </div>
-      {% if dojo.quote %}
-        <blockquote class="body-lg dojo-hero__quote">&ldquo;{{ dojo.quote }}&rdquo;</blockquote>
-        {% if dojo.quote_author %}
-          <cite class="body-sm dojo-hero__cite">— {{ dojo.quote_author.name }}, {{ dojo.quote_author.get_role_display|lower }}</cite>
-        {% endif %}
+      {% if dojo.tagline %}
+        <div class="body-lg markdown-content dojo-hero__tagline">{{ dojo.tagline|markdownify }}</div>
       {% endif %}
       <p class="body dojo-hero__facts">
         Free
@@ -111,17 +134,17 @@
     {% if dojo.description %}
       <section class="section col">
         <h2 class="heading-lg section-title">About this dojo</h2>
-        <p class="body" style="color: var(--ink);">{{ dojo.description }}</p>
+        <div class="body markdown-content">{{ dojo.description|markdownify }}</div>
       </section>
     {% endif %}
 
     <section class="section">
       <h2 class="heading-lg section-title">Run by</h2>
       <div class="row">
-        {% for mentor in dojo.mentors.all %}
+        {% for mentor in mentors %}
           <a class="mentor-link" href="{% url 'dojo_team' dojo.id %}">
             <div class="cd-mentor">
-              <div class="cd-mentor__avatar cd-mentor__avatar--{% if mentor.role == 'champion' %}lead{% else %}{{ mentor.role }}{% endif %}" aria-hidden="true"></div>
+              {% include "dojos/partials/_mentor_avatar.html" with mentor=mentor %}
               <div>
                 <p class="cd-mentor__name heading-sm">{{ mentor.name }}</p>
                 <p class="cd-mentor__role body-sm">{{ mentor.get_role_display }}{% if mentor.title %}, {{ mentor.title }}{% endif %}</p>
@@ -134,24 +157,22 @@
       </div>
     </section>
 
-    {% with faqs=dojo.faqs.all %}
-      {% if faqs %}
-        <section class="section col">
-          <h2 class="heading-lg section-title">Frequently asked questions</h2>
-          <div class="cd-faq" id="faq-dojo-page">
-            {% for faq in faqs %}
-              <div class="cd-faq__item" data-open="false">
-                <button class="cd-faq__question heading-sm">
-                  <span>{{ faq.question }}</span>
-                  <span class="cd-faq__icon" aria-hidden="true">+</span>
-                </button>
-                <p class="cd-faq__answer body" hidden>{{ faq.answer }}</p>
-              </div>
-            {% endfor %}
-          </div>
-        </section>
-      {% endif %}
-    {% endwith %}
+    {% if faqs %}
+      <section class="section col">
+        <h2 class="heading-lg section-title">Frequently asked questions</h2>
+        <div class="cd-faq" id="faq-dojo-page">
+          {% for faq in faqs %}
+            <div class="cd-faq__item" data-open="false">
+              <button class="cd-faq__question heading-sm">
+                <span>{{ faq.question }}</span>
+                <span class="cd-faq__icon" aria-hidden="true">+</span>
+              </button>
+              <p class="cd-faq__answer body" hidden>{{ faq.answer }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
 
     {% with announcements=dojo.announcements.all %}
       {% if announcements %}
@@ -199,11 +220,17 @@
           {% endif %}
         </div>
       </div>
+      {% if dojo.visit_notes %}
+        <div class="cd-card markdown-content" style="padding: var(--space-6); margin-top: var(--space-4);">
+          {{ dojo.visit_notes|markdownify }}
+        </div>
+      {% endif %}
       {% if dojo.address %}
-        <div class="map-box body-sm">
+        <a class="map-box body-sm" target="_blank" rel="noopener"
+           href="https://www.google.com/maps/search/?api=1&query={% if dojo.location %}{{ dojo.location.y }},{{ dojo.location.x }}{% else %}{{ dojo.address|urlencode }}{% endif %}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
           <span>{{ dojo.address }}</span>
-        </div>
+        </a>
       {% endif %}
     </section>
 

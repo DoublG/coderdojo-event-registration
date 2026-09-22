@@ -9,6 +9,13 @@ class User(AbstractUser):
     ChildAccount, and future roles) can subclass it via multi-table
     inheritance while sharing the same login/auth machinery."""
 
+    must_change_password = models.BooleanField(
+        default=False,
+        help_text="Forces a password change on next login — set when an admin provisions an "
+                  "account (DojoOwner, HelperAccount) with a temporary password. Enforced by "
+                  "accounts.middleware.ForcePasswordChangeMiddleware.",
+    )
+
 
 class DojoOwner(User):
     class Meta:
@@ -38,6 +45,21 @@ class ChildAccount(User):
     class Meta:
         verbose_name = "child account"
         verbose_name_plural = "child accounts"
+
+    def __str__(self):
+        return self.get_username()
+
+
+class HelperAccount(User):
+    """A login for an adult who helps out at a dojo but isn't its
+    registered owner and isn't a participant's guardian — e.g. a plain
+    volunteer or board mentor. See dojos.Mentor for how this, Guardian and
+    ChildAccount are the three account types a non-lead mentor profile can
+    be linked to."""
+
+    class Meta:
+        verbose_name = "helper account"
+        verbose_name_plural = "helper accounts"
 
     def __str__(self):
         return self.get_username()

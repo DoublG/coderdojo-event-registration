@@ -19,9 +19,23 @@
   .signup-root .child-select-row + .child-select-row { margin-top: var(--space-3); }
   .signup-root .child-select-row input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; }
   .signup-root .child-select-row .cd-mentor__avatar { width: 40px; height: 40px; flex-shrink: 0; }
-  .signup-root .child-select-row label { display: flex; flex-direction: column; cursor: pointer; }
+  .signup-root .child-select-row label { display: flex; flex-direction: column; cursor: pointer; margin-right: auto; }
   .signup-root .child-select-row label span:first-child { color: var(--ink); }
   .signup-root .child-select-row label span:last-child { color: var(--ink-muted); }
+  .signup-root .child-select-row--disabled { opacity: 0.55; background: var(--surface-sunken); }
+  .signup-root .child-select-row--disabled label { cursor: default; }
+  .signup-root .child-select-row__status { flex-shrink: 0; }
+  .signup-root .signup-summary { margin: var(--space-4) 0 0; }
+  .signup-root .confirmation-card {
+    margin: var(--space-4) 0 0; border: 1px solid var(--border); border-radius: var(--radius-md);
+    background: var(--surface-sunken); padding: 0 var(--space-5);
+  }
+  .signup-root .confirmation-list { list-style: none; margin: 0; padding: 0; }
+  .signup-root .confirmation-list li {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+    padding: var(--space-4) 0;
+  }
+  .signup-root .confirmation-list li + li { border-top: 1px solid var(--border); }
 </style>
 {% endblock %}
 
@@ -45,7 +59,41 @@
       </div>
 
       <div class="form-card">
-        <form class="cd-form" id="event-signup-form" novalidate>
+        {% if results %}
+
+          <h3 class="cd-form__group-title heading-md">You're all set</h3>
+          <div class="confirmation-card">
+            <ul class="confirmation-list">
+              {% for result in results %}
+                <li>
+                  <span class="body">{{ result.child.name }}</span>
+                  {% if result.waiting_list %}
+                    <span class="cd-badge cd-badge--warning caption">Waiting list</span>
+                  {% else %}
+                    <span class="cd-badge cd-badge--success caption">Confirmed</span>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% if any_waitlisted %}
+            <p class="cd-form__help caption signup-summary">We'll email you if anyone on the waiting list gets a spot.</p>
+          {% endif %}
+          <div class="cd-form__actions">
+            <a class="cd-btn cd-btn--primary label" href="{% url 'event_detail' event_id=event.id %}">Back to session</a>
+          </div>
+
+        {% else %}
+
+        <form class="cd-form" id="event-signup-form" method="post" data-places-left="{{ event.places_left }}" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="child_order" id="child-order-input" value="">
+
+          {% if error %}
+            <div class="cd-form__notes">
+              <p class="cd-form__note cd-form__note--error caption">{{ error }}</p>
+            </div>
+          {% endif %}
 
           {% if full %}
             <div class="cd-form__notes">
@@ -58,23 +106,51 @@
 
           <div class="cd-form__group">
             <h3 class="cd-form__group-title heading-md">Who's joining?</h3>
-            <p class="cd-form__group-desc body-sm">Tick each child you'd like to {% if full %}add to the waiting list for{% else %}sign up for{% endif %} this session.</p>
+            {% if all_registered %}
+              <p class="cd-form__group-desc body-sm">Every child on your account is already signed up for this session — see below.</p>
+            {% else %}
+              <p class="cd-form__group-desc body-sm">
+                Tick each child you'd like to {% if full %}add to the waiting list for{% else %}sign up for{% endif %} this session.
+                {% if not full %}Only {{ event.places_left }} spot{{ event.places_left|pluralize }} left — anyone beyond that goes on the waiting list.{% endif %}
+              </p>
+            {% endif %}
 
-            {% for child in guardian.children.all %}
-              <div class="child-select-row">
-                <input type="checkbox" id="es-child-{{ child.id }}" name="child" value="{{ child.id }}">
-                <div class="cd-mentor__avatar" aria-hidden="true"></div>
-                <label for="es-child-{{ child.id }}">
-                  <span class="body">{{ child.name }}</span>
-                  <span class="body-sm">{% if child.age %}Age {{ child.age }}{% endif %}{% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}</span>
-                </label>
-              </div>
+            {% for entry in children %}
+              {% with child=entry.child %}
+                {% if entry.registration %}
+                  <div class="child-select-row child-select-row--disabled">
+                    <input type="checkbox" disabled>
+                    {% include "accounts/partials/_child_avatar.html" with child=child %}
+                    <label>
+                      <span class="body">{{ child.name }}</span>
+                      <span class="body-sm">{% if child.age %}Age {{ child.age }}{% endif %}{% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}</span>
+                    </label>
+                    {% if entry.registration.waiting_list %}
+                      <span class="cd-badge cd-badge--warning caption">Already on waiting list</span>
+                    {% else %}
+                      <span class="cd-badge cd-badge--success caption">Already confirmed</span>
+                    {% endif %}
+                  </div>
+                {% else %}
+                  <div class="child-select-row" data-child-row>
+                    <input type="checkbox" id="es-child-{{ child.id }}" name="child" value="{{ child.id }}">
+                    {% include "accounts/partials/_child_avatar.html" with child=child %}
+                    <label for="es-child-{{ child.id }}">
+                      <span class="body">{{ child.name }}</span>
+                      <span class="body-sm">{% if child.age %}Age {{ child.age }}{% endif %}{% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}</span>
+                    </label>
+                    <span class="child-select-row__status cd-badge caption" data-status style="display:none;"></span>
+                  </div>
+                {% endif %}
+              {% endwith %}
             {% empty %}
-              <p class="cd-form__help caption">Log in to see your children here.</p>
+              <p class="cd-form__help caption">No children on your account yet — register one below to sign them up.</p>
             {% endfor %}
 
             <p class="cd-form__help caption" style="margin-top: var(--space-3);">Signing up on someone else's behalf? <a href="{% url 'register_guardian' %}">Register another child</a> first.</p>
           </div>
+
+          <p class="cd-form__help caption signup-summary" id="signup-summary" hidden></p>
 
           <div class="cd-form__actions">
             <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=event.id %}">Cancel</a>
@@ -82,6 +158,8 @@
           </div>
 
         </form>
+
+        {% endif %}
       </div>
 
   </div>
@@ -90,18 +168,79 @@
 {% block extra_script %}
 <script>
   (function () {
-    var checkboxes = Array.prototype.slice.call(document.querySelectorAll('input[name="child"]'));
+    var form = document.getElementById("event-signup-form");
+    if (!form) return;
+
+    var placesLeft = parseInt(form.getAttribute("data-places-left"), 10);
+    var rows = Array.prototype.slice.call(form.querySelectorAll("[data-child-row]"));
+    var checkboxes = rows.map(function (row) { return row.querySelector('input[name="child"]'); });
+    var rowById = {};
+    checkboxes.forEach(function (box, i) { rowById[box.value] = rows[i]; });
     var submit = document.getElementById("event-signup-submit");
+    var summary = document.getElementById("signup-summary");
+    var orderInput = document.getElementById("child-order-input");
+
+    // The order children were *checked* in, not their order in the list —
+    // whoever's ticked first gets first claim on a spot. Unchecking removes
+    // an id; re-checking puts it back at the end, as the newest pick.
+    var selectionOrder = [];
+
+    function onCheckboxChange(box) {
+      var id = box.value;
+      selectionOrder = selectionOrder.filter(function (existing) { return existing !== id; });
+      if (box.checked) {
+        selectionOrder.push(id);
+      }
+    }
 
     function sync() {
-      var anyChecked = checkboxes.some(function (box) { return box.checked; });
-      submit.disabled = !anyChecked;
-      submit.style.opacity = anyChecked ? "1" : "0.5";
-      submit.style.cursor = anyChecked ? "pointer" : "not-allowed";
+      orderInput.value = selectionOrder.join(",");
+
+      var waitlistedCount = 0;
+      rows.forEach(function (row) {
+        row.querySelector("[data-status]").style.display = "none";
+      });
+
+      selectionOrder.forEach(function (id, i) {
+        var status = rowById[id].querySelector("[data-status]");
+        var getsSpot = placesLeft > 0 && (i + 1) <= placesLeft;
+        status.style.display = "inline-flex";
+        if (getsSpot) {
+          status.textContent = "Spot available";
+          status.className = "child-select-row__status cd-badge cd-badge--success caption";
+        } else {
+          waitlistedCount += 1;
+          status.textContent = "Waiting list";
+          status.className = "child-select-row__status cd-badge cd-badge--warning caption";
+        }
+      });
+
+      var checkedCount = selectionOrder.length;
+      submit.disabled = checkedCount === 0;
+      submit.style.opacity = checkedCount === 0 ? "0.5" : "1";
+      submit.style.cursor = checkedCount === 0 ? "not-allowed" : "pointer";
+
+      if (checkedCount === 0) {
+        summary.hidden = true;
+      } else if (waitlistedCount === 0) {
+        summary.hidden = true;
+      } else {
+        var confirmedCount = checkedCount - waitlistedCount;
+        summary.hidden = false;
+        summary.textContent = confirmedCount === 0
+          ? "All " + waitlistedCount + " selected will join the waiting list."
+          : confirmedCount + " will get a spot · " + waitlistedCount + " will join the waiting list.";
+      }
     }
 
     checkboxes.forEach(function (box) {
-      box.addEventListener("change", sync);
+      // Covers bfcache/back-button restoring a checked box before any
+      // "change" event has fired for it this load.
+      if (box.checked) selectionOrder.push(box.value);
+      box.addEventListener("change", function () {
+        onCheckboxChange(box);
+        sync();
+      });
     });
     sync();
   })();
