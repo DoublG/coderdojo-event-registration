@@ -1,0 +1,38 @@
+{% comment %}
+Renders one row in the events list, grouped by day. Expects an `event`
+Event instance in context. Group a flat, start_time-ordered queryset by day
+with Django's built-in `regroup` tag:
+  {% regroup events by start_time.date as date_groups %}
+  {% for date_group in date_groups %}
+    <div class="date-group" data-group>
+      <h2 class="heading-lg">{{ date_group.grouper|date:"l, j F" }}</h2>
+      {% for event in date_group.list %}
+        {% include "events/partials/_event_row.html" %}
+      {% endfor %}
+    </div>
+  {% endfor %}
+{% endcomment %}
+<div class="event-row" data-dojo="{{ event.dojo.name }}">
+  <div class="date-box">
+    <span class="caption dow">{{ event.start_time|date:"D"|upper }}</span>
+    <span class="dom">{{ event.start_time|date:"j" }}</span>
+  </div>
+  <div class="info">
+    <h3 class="heading-md">{{ event.name }}</h3>
+    <p class="body-sm meta">
+      {{ event.start_time|time:"H:i" }}{% if event.end_time %}–{{ event.end_time|time:"H:i" }}{% endif %}
+      · {{ event.venue_name|default:event.dojo.address|default:event.dojo.name }}
+    </p>
+    <div class="badges">
+      {% if event.places_left <= 0 %}
+        <span class="cd-badge cd-badge--danger caption">Full</span>
+      {% else %}
+        <span class="cd-badge cd-badge--success caption">Open</span>
+      {% endif %}
+      {% if event.min_age or event.max_age %}
+        <span class="cd-badge cd-badge--accent caption">Ages {{ event.min_age|default:"7" }}–{{ event.max_age|default:"18" }}</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="action"><a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=event.id %}">View event</a></div>
+</div>

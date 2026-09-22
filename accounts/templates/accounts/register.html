@@ -1,0 +1,54 @@
+{% extends "core/base.html" %}
+{% block title %}Get involved · CoderDojo{% endblock %}
+{% block root_class %}register-choice-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .register-choice-root { background: var(--surface); }
+  .register-choice-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .register-choice-root .choice-header { margin: var(--space-6) 0 var(--space-6); max-width: 640px; }
+  .register-choice-root .choice-header h1 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .register-choice-root .choice-header p { color: var(--ink-muted); margin: 0; }
+  .register-choice-root .row { display: flex; gap: var(--space-5); flex-wrap: wrap; }
+  .register-choice-root .row > * { flex: 1 1 280px; }
+  .register-choice-root .choice-card { display: flex; flex-direction: column; height: 100%; padding: var(--space-6); }
+  .register-choice-root .choice-card .eyebrow { color: var(--primary); margin: 0 0 var(--space-2); }
+  .register-choice-root .choice-card h3 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .register-choice-root .choice-card p { color: var(--ink-muted); margin: 0 0 var(--space-4); flex: 1; }
+  .register-choice-root .choice-card a { color: var(--secondary); }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="shell">
+
+    <div class="choice-header">
+      <h1 class="display-xl">How would you like to get involved?</h1>
+      <p class="body-lg">Pick the option that fits — each one asks for exactly what we need, nothing more.</p>
+    </div>
+
+    <div class="row">
+      <div class="cd-card choice-card">
+        <p class="label eyebrow">For parents &amp; guardians</p>
+        <h3 class="heading-md">Register your family</h3>
+        <p class="body-sm">Create an account and add your children so they can join sessions at any dojo.</p>
+        <a class="label" href="{% url 'register_guardian' %}">Get started →</a>
+      </div>
+
+      <div class="cd-card choice-card">
+        <p class="label eyebrow">For organisers</p>
+        <h3 class="heading-md">Start a new dojo</h3>
+        <p class="body-sm">Bring CoderDojo to your city — tell us about your venue and we'll help you get set up.</p>
+        <a class="label" href="{% url 'register_dojo' %}">Apply to start a dojo →</a>
+      </div>
+
+      <div class="cd-card choice-card">
+        <p class="label eyebrow">For volunteers</p>
+        <h3 class="heading-md">Become a mentor or volunteer</h3>
+        <p class="body-sm">Help out at an existing dojo — no teaching experience required, just a Saturday morning.</p>
+        <a class="label" href="{% url 'register_helper' %}">Apply to volunteer →</a>
+      </div>
+    </div>
+
+  </div>
+{% endblock %}

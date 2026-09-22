@@ -1,18 +1,8 @@
-{% load static %}<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CoderDojo</title>
-<link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
-<link rel="stylesheet" href="{% static 'core/css/bundle.css' %}">
-<style>
-  html, body { margin: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-</style>
-</head>
-<body>
-<script src="{% static 'core/js/bundle.js' %}"></script>
+{% extends "core/base.html" %}
+{% block title %}CoderDojo{% endblock %}
+{% block root_class %}home-root{% endblock %}
+
+{% block extra_style %}
 <style>
   .home-root { background: var(--surface); }
   .home-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
@@ -28,12 +18,9 @@
     .home-root .section { padding: var(--space-7) 0; }
   }
 </style>
+{% endblock %}
 
-<div class="cd-root home-root" style="padding: 0;">
-
-  <div class="shell">
-    {% include "core/menu.html" %}
-  </div>
+{% block content %}
 
   <div class="shell">
     <section class="cd-hero">
@@ -243,20 +230,10 @@
     </div>
   </div>
 
-  <div class="shell">
-    <footer class="cd-footer">
-      <p class="body-sm" style="margin:0;">CoderDojo · Ghent Public Library · hello@example.org</p>
-      <ul class="cd-footer__links body-sm">
-        <li><a href="#">Code of conduct</a></li>
-        <li><a href="#">Volunteer with us</a></li>
-        <li><a href="#">Contact</a></li>
-      </ul>
-    </footer>
-  </div>
+{% endblock %}
 
-</div>
+{% block extra_script %}
 <script>
   CoderDojo.initFaq(document.getElementById("faq-home-page"));
 </script>
-</body>
-</html>
+{% endblock %}

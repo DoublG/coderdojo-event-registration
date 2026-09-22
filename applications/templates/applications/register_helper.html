@@ -1,0 +1,87 @@
+{% extends "core/base.html" %}
+{% block title %}Volunteer with us · CoderDojo{% endblock %}
+{% block root_class %}register-helper-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .register-helper-root { background: var(--surface-sunken); }
+  .register-helper-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .register-helper-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) 0; }
+  .register-helper-root .back-link { color: var(--secondary); }
+  .register-helper-root .page-title { color: var(--ink); margin: var(--space-2) 0 var(--space-2); }
+  .register-helper-root .page-subtitle { color: var(--ink-muted); margin: 0 0 var(--space-5); }
+  .register-helper-root .form-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="page">
+    <h1 class="display-lg page-title">Become a mentor or volunteer</h1>
+    <p class="body-lg page-subtitle">However much time you can give, we can use it — from mentoring most Saturdays to helping out at one big event a year.</p>
+
+    <div class="form-card">
+      <form class="cd-form" id="register-helper-form" novalidate>
+
+        <div class="cd-form__notes" hidden></div>
+
+        <div class="cd-form__group">
+          <h3 class="cd-form__group-title heading-md">Your details</h3>
+          <div class="cd-form__row">
+            <div class="cd-form__field">
+              <label class="cd-form__label label" for="rh-name">Full name<span class="cd-form__required" aria-hidden="true">*</span></label>
+              <input class="cd-form__input body" id="rh-name" name="applicant_name" type="text" placeholder="Tom Verstraete" required>
+            </div>
+            <div class="cd-form__field">
+              <label class="cd-form__label label" for="rh-email">Email<span class="cd-form__required" aria-hidden="true">*</span></label>
+              <input class="cd-form__input body" id="rh-email" name="applicant_email" type="email" placeholder="tom@example.com" required>
+            </div>
+          </div>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="rh-phone">Phone</label>
+            <input class="cd-form__input body" id="rh-phone" name="applicant_phone" type="tel" placeholder="+32 4xx xx xx xx">
+          </div>
+        </div>
+
+        <div class="cd-form__group">
+          <h3 class="cd-form__group-title heading-md">How you'd like to help</h3>
+          <div class="cd-form__row">
+            <div class="cd-form__field">
+              <label class="cd-form__label label" for="rh-dojo">Which dojo?</label>
+              <select class="cd-form__select body" id="rh-dojo" name="dojo">
+                <option value="">Not sure yet — any dojo</option>
+                {% for dojo in dojo_choices %}
+                  <option value="{{ dojo.id }}">{{ dojo.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="cd-form__field">
+              <label class="cd-form__label label" for="rh-role">Role</label>
+              <select class="cd-form__select body" id="rh-role" name="role">
+                <option value="volunteer_mentor">Volunteer mentor</option>
+                <option value="other">Something else (board, events, comms)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="cd-form__group">
+          <h3 class="cd-form__group-title heading-md">A bit about you</h3>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="rh-about">What would you like to help with?</label>
+            <textarea class="cd-form__input body" id="rh-about" name="about" rows="4" placeholder="e.g. Python, Scratch, web, robotics, event-day support — no experience necessary."></textarea>
+          </div>
+          <div class="cd-form__checkbox-row">
+            <input type="checkbox" id="rh-consent" name="background_check_consent" required>
+            <label class="body-sm" for="rh-consent">I understand a background check is required before I can work directly with children.</label>
+          </div>
+        </div>
+
+        <div class="cd-form__actions">
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'register' %}">Cancel</a>
+          <button type="submit" class="cd-btn cd-btn--primary label">Submit application</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+{% endblock %}

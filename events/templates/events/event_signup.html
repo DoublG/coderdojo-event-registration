@@ -1,0 +1,109 @@
+{% extends "core/base.html" %}
+{% block title %}Sign up · CoderDojo{% endblock %}
+{% block root_class %}signup-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .signup-root { background: var(--surface-sunken); }
+  .signup-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .signup-root .back-link { color: var(--secondary); }
+  .signup-root .signup-header { margin: var(--space-3) auto var(--space-6); max-width: 640px; }
+  .signup-root .signup-header h1 { color: var(--ink); margin: var(--space-2) 0 var(--space-2); }
+  .signup-root .signup-header .meta { color: var(--ink-muted); margin: 0 0 var(--space-3); }
+  .signup-root .signup-header .badges { display: flex; gap: var(--space-2); }
+  .signup-root .form-card { max-width: 640px; margin: 0 auto; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
+  .signup-root .child-select-row {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md);
+  }
+  .signup-root .child-select-row + .child-select-row { margin-top: var(--space-3); }
+  .signup-root .child-select-row input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; }
+  .signup-root .child-select-row .cd-mentor__avatar { width: 40px; height: 40px; flex-shrink: 0; }
+  .signup-root .child-select-row label { display: flex; flex-direction: column; cursor: pointer; }
+  .signup-root .child-select-row label span:first-child { color: var(--ink); }
+  .signup-root .child-select-row label span:last-child { color: var(--ink-muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="shell">
+
+      <div class="signup-header">
+        <h1 class="display-lg">Sign up for {{ event.name }}</h1>
+        <p class="body meta">
+          {{ event.start_time|date:"D j M" }} · {{ event.start_time|time:"H:i" }}–{{ event.end_time|time:"H:i" }}
+          {% if event.venue_name %} · {{ event.venue_name }}{% endif %}
+        </p>
+        <div class="badges">
+          {% if full %}
+            <span class="cd-badge cd-badge--danger caption">Full</span>
+          {% else %}
+            <span class="cd-badge cd-badge--success caption">Open</span>
+          {% endif %}
+          <span class="cd-badge cd-badge--accent caption">Ages {{ event.min_age|default:"7" }}–{{ event.max_age|default:"18" }}</span>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <form class="cd-form" id="event-signup-form" novalidate>
+
+          {% if full %}
+            <div class="cd-form__notes">
+              <p class="cd-form__note cd-form__note--warning caption">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+                This session is full. Signing up below adds your child(ren) to the waiting list — we'll email you the moment a spot opens.
+              </p>
+            </div>
+          {% endif %}
+
+          <div class="cd-form__group">
+            <h3 class="cd-form__group-title heading-md">Who's joining?</h3>
+            <p class="cd-form__group-desc body-sm">Tick each child you'd like to {% if full %}add to the waiting list for{% else %}sign up for{% endif %} this session.</p>
+
+            {% for child in guardian.children.all %}
+              <div class="child-select-row">
+                <input type="checkbox" id="es-child-{{ child.id }}" name="child" value="{{ child.id }}">
+                <div class="cd-mentor__avatar" aria-hidden="true"></div>
+                <label for="es-child-{{ child.id }}">
+                  <span class="body">{{ child.name }}</span>
+                  <span class="body-sm">{% if child.age %}Age {{ child.age }}{% endif %}{% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}</span>
+                </label>
+              </div>
+            {% empty %}
+              <p class="cd-form__help caption">Log in to see your children here.</p>
+            {% endfor %}
+
+            <p class="cd-form__help caption" style="margin-top: var(--space-3);">Signing up on someone else's behalf? <a href="{% url 'register_guardian' %}">Register another child</a> first.</p>
+          </div>
+
+          <div class="cd-form__actions">
+            <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=event.id %}">Cancel</a>
+            <button type="submit" class="cd-btn cd-btn--primary label" id="event-signup-submit">{% if full %}Join the waiting list{% else %}Sign up{% endif %}</button>
+          </div>
+
+        </form>
+      </div>
+
+  </div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+  (function () {
+    var checkboxes = Array.prototype.slice.call(document.querySelectorAll('input[name="child"]'));
+    var submit = document.getElementById("event-signup-submit");
+
+    function sync() {
+      var anyChecked = checkboxes.some(function (box) { return box.checked; });
+      submit.disabled = !anyChecked;
+      submit.style.opacity = anyChecked ? "1" : "0.5";
+      submit.style.cursor = anyChecked ? "pointer" : "not-allowed";
+    }
+
+    checkboxes.forEach(function (box) {
+      box.addEventListener("change", sync);
+    });
+    sync();
+  })();
+</script>
+{% endblock %}

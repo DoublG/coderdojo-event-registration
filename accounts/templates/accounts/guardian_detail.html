@@ -1,0 +1,98 @@
+{% extends "core/base.html" %}
+{% block title %}My account · CoderDojo{% endblock %}
+{% block root_class %}guardian-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .guardian-root { background: var(--surface); }
+  .guardian-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .guardian-root .col { max-width: 720px; }
+  .guardian-root .account-header { margin: var(--space-6) 0 var(--space-6); }
+  .guardian-root .account-header h1 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .guardian-root .account-header p { color: var(--ink-muted); margin: 0; }
+  .guardian-root h2.section-title { color: var(--ink); margin: 0 0 var(--space-4); }
+  .guardian-root .child-card { padding: var(--space-6); }
+  .guardian-root .child-card + .child-card { margin-top: var(--space-5); }
+  .guardian-root .child-card__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5); }
+  .guardian-root .child-card__person { display: flex; align-items: center; gap: var(--space-3); }
+  .guardian-root .child-card__person .cd-mentor__avatar { width: 48px; height: 48px; flex-shrink: 0; }
+  .guardian-root .child-card__name { color: var(--ink); margin: 0; }
+  .guardian-root .child-card__meta { color: var(--ink-muted); margin: 0; }
+  .guardian-root .child-card__link { color: var(--secondary); }
+  .guardian-root .next-row { display: flex; align-items: center; gap: var(--space-4); background: var(--surface-sunken); border-radius: var(--radius-md); padding: var(--space-4); }
+  .guardian-root .next-row .date-box {
+    flex: 0 0 52px; text-align: center; background: var(--surface); border-radius: var(--radius-md); padding: var(--space-2) 0;
+  }
+  .guardian-root .next-row .date-box .dow { display: block; color: var(--ink-muted); }
+  .guardian-root .next-row .date-box .dom { display: block; color: var(--ink); font-weight: 700; font-size: 16px; }
+  .guardian-root .next-row .info { flex: 1 1 auto; min-width: 0; }
+  .guardian-root .next-row .info h3 { color: var(--ink); margin: 0 0 2px; }
+  .guardian-root .next-row .info .meta { color: var(--ink-muted); margin: 0; }
+  .guardian-root .next-row .action { flex: 0 0 auto; }
+  .guardian-root .empty-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); background: var(--surface-sunken); border-radius: var(--radius-md); padding: var(--space-4); flex-wrap: wrap; }
+  .guardian-root .empty-row p { color: var(--ink-muted); margin: 0; }
+  .guardian-root .add-child { padding: var(--space-6); text-align: center; margin-top: var(--space-6); }
+  .guardian-root .add-child p { color: var(--ink-muted); margin: 0 0 var(--space-4); }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="shell">
+
+    <div class="account-header col">
+      <h1 class="display-lg">Welcome back{% if guardian.first_name %}, {{ guardian.first_name }}{% endif %}</h1>
+      <p class="body-lg">Here's what's coming up for your children.</p>
+    </div>
+
+    <section>
+      <h2 class="heading-lg section-title">Your children</h2>
+
+      {% for entry in children %}
+        <div class="cd-card child-card">
+          <div class="child-card__top">
+            <div class="child-card__person">
+              <div class="cd-mentor__avatar" aria-hidden="true"></div>
+              <div>
+                <p class="heading-sm child-card__name">{{ entry.child.name }}</p>
+                <p class="body-sm child-card__meta">
+                  {% if entry.child.age %}Age {{ entry.child.age }}{% endif %}
+                  {% if entry.child.home_dojo %} · {{ entry.child.home_dojo.name }}{% endif %}
+                </p>
+              </div>
+            </div>
+            <a class="body-sm child-card__link" href="{% url 'child_detail' guardian_id=guardian.id child_id=entry.child.id %}">View {{ entry.child.name }}'s awards &amp; history →</a>
+          </div>
+          {% if entry.next_registration %}
+            <div class="next-row">
+              <div class="date-box">
+                <span class="caption dow">{{ entry.next_registration.event.start_time|date:"D"|upper }}</span>
+                <span class="dom">{{ entry.next_registration.event.start_time|date:"j" }}</span>
+              </div>
+              <div class="info">
+                <h3 class="heading-sm">{{ entry.next_registration.event.name }}</h3>
+                <p class="body-sm meta">
+                  {{ entry.next_registration.event.start_time|time:"H:i" }}–{{ entry.next_registration.event.end_time|time:"H:i" }}
+                  {% if entry.next_registration.event.venue_name %} · {{ entry.next_registration.event.venue_name }}{% endif %}
+                </p>
+              </div>
+              <div class="action"><a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=entry.next_registration.event.id %}">View event</a></div>
+            </div>
+          {% else %}
+            <div class="empty-row">
+              <p class="body-sm">Not registered for an upcoming session.</p>
+              <a class="cd-btn cd-btn--secondary label" href="{% url 'event_list' %}">Browse events</a>
+            </div>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p class="body" style="color: var(--ink-muted);">No children registered yet.</p>
+      {% endfor %}
+    </section>
+
+    <div class="cd-card add-child">
+      <p class="body">Registering another child?</p>
+      <a class="cd-btn cd-btn--primary label" href="{% url 'register_guardian' %}">Register another child</a>
+    </div>
+
+  </div>
+{% endblock %}

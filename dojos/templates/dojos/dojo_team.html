@@ -1,0 +1,98 @@
+{% extends "core/base.html" %}
+{% block title %}{{ dojo.name }} team · CoderDojo{% endblock %}
+{% block root_class %}mentor-detail-root{% endblock %}
+{% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
+
+{% block extra_style %}
+<style>
+  .mentor-detail-root { background: var(--surface-sunken); }
+  .mentor-detail-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4) var(--space-8); }
+  .mentor-detail-root .back-link { color: var(--secondary); margin: var(--space-5) 0 0; }
+  .mentor-detail-root .col { max-width: 720px; margin: 0 auto; }
+
+  /* role rings — a small ring around the avatar marks which of the four roles someone has.
+     the role is always also written out next to the name (see .cd-mentor__role / .role-line
+     below), so the ring is reinforcement, never the only signal. */
+  .mentor-detail-root .cd-mentor__avatar--ninja { outline: 3px solid #0e7c6b; outline-offset: 2px; }
+  .mentor-detail-root .cd-mentor__avatar--lead { outline: 3px solid #d1990a; outline-offset: 2px; }
+  .mentor-detail-root .cd-mentor__avatar--volunteer { outline: 3px solid #4a5fc1; outline-offset: 2px; }
+  .mentor-detail-root .cd-mentor__avatar--board { outline: 3px solid #4a5568; outline-offset: 2px; }
+
+  .mentor-detail-root .mentor-header { display: flex; gap: var(--space-5); align-items: flex-start; margin: var(--space-5) auto var(--space-6); max-width: 720px; }
+  .mentor-detail-root .mentor-header .cd-mentor__avatar { width: 88px; height: 88px; flex-shrink: 0; }
+  .mentor-detail-root .mentor-header h1 { color: var(--ink); margin: 0 0 var(--space-1); }
+  .mentor-detail-root .mentor-header .role-line { color: var(--ink-muted); margin: 0 0 var(--space-2); }
+  .mentor-detail-root .mentor-header .facts-line { color: var(--ink-muted); margin: 0; }
+
+  .mentor-detail-root .about h2 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .mentor-detail-root .about p { color: var(--ink); margin: 0; }
+
+  .mentor-detail-root .team-section { margin-top: var(--space-8); }
+  .mentor-detail-root .team-section h2 { color: var(--ink); text-align: center; margin: 0 0 var(--space-1); }
+  .mentor-detail-root .team-section .team-desc { color: var(--ink-muted); text-align: center; margin: 0 auto var(--space-5); max-width: 560px; }
+  .mentor-detail-root .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+  .mentor-detail-root .team-grid a { text-decoration: none; }
+  .mentor-detail-root .team-grid .cd-mentor {
+    flex-direction: column; align-items: center; text-align: center; gap: var(--space-2);
+    background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+    padding: var(--space-5) var(--space-4);
+  }
+  .mentor-detail-root .team-grid .cd-mentor__avatar { width: 56px; height: 56px; margin: 0 auto; }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="shell">
+
+    {% with featured=mentors.first %}
+      {% if featured %}
+        <div class="mentor-header">
+          <div class="cd-mentor__avatar cd-mentor__avatar--{% if featured.role == 'champion' %}lead{% else %}{{ featured.role }}{% endif %}" aria-hidden="true"></div>
+          <div>
+            <h1 class="display-lg">{{ featured.name }}</h1>
+            <p class="body role-line">{{ featured.get_role_display }}{% if featured.title %}, {{ featured.title }}{% endif %}</p>
+            <p class="body-sm facts-line">
+              {{ dojo.name }}
+              {% if featured.joined_date %} · Volunteering since {{ featured.joined_date|date:"Y" }}{% endif %}
+              {% if featured.sessions_run %} · {{ featured.sessions_run }}+ sessions run{% endif %}
+            </p>
+          </div>
+        </div>
+
+        {% if featured.bio %}
+          <div class="col about">
+            <h2 class="heading-md">About {{ featured.name }}</h2>
+            <p class="body">{{ featured.bio }}</p>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="mentor-header">
+          <div>
+            <h1 class="display-lg">{{ dojo.name }} team</h1>
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="team-section">
+      <h2 class="heading-lg">Meet the rest of the team</h2>
+      <p class="body team-desc">Every dojo runs on four kinds of people. A small ring around each avatar marks which — the words next to it always say the same thing out loud, so the ring is never the only clue.</p>
+      <div class="team-grid">
+        {% for mentor in mentors|slice:"1:" %}
+          <a href="{% url 'mentor_profile' mentor_id=mentor.id %}">
+            <div class="cd-mentor">
+              <div class="cd-mentor__avatar cd-mentor__avatar--{% if mentor.role == 'champion' %}lead{% else %}{{ mentor.role }}{% endif %}" aria-hidden="true"></div>
+              <div>
+                <p class="cd-mentor__name heading-sm">{{ mentor.name }}</p>
+                <p class="cd-mentor__role body-sm">{{ mentor.get_role_display }}{% if mentor.title %}, {{ mentor.title }}{% endif %}</p>
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <p class="body-sm" style="color: var(--ink-muted);">No other mentors listed yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+{% endblock %}

@@ -27,6 +27,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+
+AUTH_USER_MODEL = 'accounts.User'
+
 
 # Application definition
 
@@ -37,7 +43,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "django.contrib.gis",
+    "debug_toolbar",
     'core',
+    'geo',
+    'accounts',
+    'dojos',
+    'pathways',
+    'events',
+    'content',
+    'applications',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'website.urls'
@@ -73,11 +90,17 @@ WSGI_APPLICATION = 'website.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
+# a78ef56c7cc4ede1037c19d19ff602b8000cb84c20dfdb1ab35bda3963e69912
+# docker run --name mysql-coderdojo   -e MYSQL_DATABASE=coderdojo   -e MYSQL_USER=coderdojo   -e MYSQL_PASSWORD=coderdojo   -e MYSQL_ROOT_PASSWORD=rootpassword   -p 13306:3306   -d mysql
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.contrib.gis.db.backends.mysql',
+        'NAME': 'coderdojo',
+        'USER': 'coderdojo',
+        'PASSWORD': 'coderdojo',
+        'HOST': '127.0.0.1',
+        'PORT': '13306',
     }
 }
 
@@ -124,3 +147,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
     "/var/www/static/",
 ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / "media"
+

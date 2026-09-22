@@ -1,0 +1,36 @@
+{% comment %}
+Renders one dojo-finder search result. Expects a `dojo` Dojo instance in
+context; optionally annotated by the view with:
+  - distance_km: float, distance from the searched postcode/location
+  - next_event: the soonest upcoming Event for this dojo (or None)
+Usage:
+  {% for dojo in dojos %}
+    {% include "dojos/partials/_dojo_result.html" %}
+  {% endfor %}
+{% endcomment %}
+<li class="cd-card cd-dojo-finder__result">
+  {% if dojo.distance_km %}
+  <div class="cd-dojo-finder__distance">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+    <span class="heading-sm">{{ dojo.distance_km|floatformat:1 }}</span>
+    <span class="caption">km</span>
+  </div>
+  {% endif %}
+  <div class="cd-dojo-finder__info">
+    <h3 class="cd-dojo-finder__name heading-sm">{{ dojo.name }}</h3>
+    <p class="cd-dojo-finder__address body-sm">{{ dojo.address|default:"Address to be confirmed" }}</p>
+    <p class="cd-dojo-finder__next caption">
+      {% if dojo.next_event %}
+        Next session: {{ dojo.next_event.start_time|date:"D j M, H:i" }}
+        {% if dojo.next_event.places_left <= 0 %}
+          <span class="cd-badge cd-badge--warning caption">Waitlist</span>
+        {% else %}
+          <span class="cd-badge cd-badge--success caption">Open</span>
+        {% endif %}
+      {% else %}
+        No upcoming sessions
+      {% endif %}
+    </p>
+  </div>
+  <a href="{% url 'dojo_detail' dojo_id=dojo.id %}" class="cd-btn cd-btn--ghost label">View</a>
+</li>

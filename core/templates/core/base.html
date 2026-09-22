@@ -1,0 +1,39 @@
+{% load static %}<!doctype html>
+<html lang="en" {% block html_theme_attr %}data-theme="light"{% endblock %}>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}CoderDojo{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/bundle.css' %}">
+<style>
+  html, body { margin: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+</style>
+{% block extra_style %}{% endblock %}
+</head>
+<body>
+<script src="{% static 'core/js/bundle.js' %}"></script>
+
+<div class="cd-root {% block root_class %}{% endblock %}" style="padding: 0;">
+  <div class="shell">
+    {% block menu %}{% include "core/menu.html" %}{% endblock %}
+  </div>
+
+  {% block content %}{% endblock %}
+
+  <div class="shell">
+    <footer class="cd-footer" style="margin-top: var(--space-8);">
+      <p class="body-sm" style="margin:0;">CoderDojo · Ghent Public Library · hello@example.org</p>
+      <ul class="cd-footer__links body-sm">
+        <li><a href="#">Code of conduct</a></li>
+        <li><a href="{% url 'register' %}">Volunteer with us</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </footer>
+  </div>
+</div>
+
+{% block extra_script %}{% endblock %}
+</body>
+</html>

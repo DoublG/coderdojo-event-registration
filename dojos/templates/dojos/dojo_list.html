@@ -1,0 +1,67 @@
+{% extends "core/base.html" %}
+{% block title %}Find a dojo · CoderDojo{% endblock %}
+{% block root_class %}finder-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .finder-root { background: var(--surface); }
+  .finder-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .finder-root .finder-header { margin: var(--space-6) 0 var(--space-5); max-width: 640px; }
+  .finder-root .finder-header h1 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .finder-root .finder-header p { color: var(--ink-muted); margin: 0; }
+
+  /* Match Events' own filter-card treatment exactly, so the two search pages
+     read as siblings rather than one being a narrower, floatier version of
+     the other. DojoFinder's own bar/field/button markup is untouched — only
+     the card wrapper and the width around it change on this page. */
+  .finder-root .filter-card { padding: var(--space-5); margin-bottom: var(--space-6); }
+  .finder-root .cd-dojo-finder { max-width: none; width: 100%; }
+  .finder-root .cd-dojo-finder__meta { margin-bottom: var(--space-2); }
+
+  .finder-root .find-cta { text-align: center; margin-top: var(--space-7); padding: var(--space-6); }
+  .finder-root .find-cta p { color: var(--ink-muted); margin: 0 0 var(--space-4); }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="shell">
+
+    <div class="finder-header">
+      <h1 class="display-xl">Find a dojo near you</h1>
+      <p class="body-lg">Every CoderDojo in Belgium is free, run by local volunteers, and open to kids aged 7–18 — enter a postcode or city to see what's nearby.</p>
+    </div>
+
+    <div class="cd-dojo-finder">
+
+      <div class="cd-card filter-card">
+        <div class="cd-dojo-finder__bar">
+          <div class="cd-dojo-finder__field">
+            <span class="cd-dojo-finder__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            </span>
+            <input class="cd-dojo-finder__input body" type="text" placeholder="Enter your postcode or city" value="Ghent, Belgium">
+          </div>
+          <button type="button" class="cd-btn cd-btn--secondary label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+            Use my location
+          </button>
+        </div>
+      </div>
+
+      <p class="cd-dojo-finder__meta caption">Showing {{ dojos|length }} dojo{{ dojos|length|pluralize }}</p>
+
+      <ul class="cd-dojo-finder__list">
+        {% for dojo in dojos %}
+          {% include "dojos/partials/_dojo_result.html" %}
+        {% endfor %}
+      </ul>
+
+    </div>
+
+    <div class="cd-card find-cta">
+      <p class="body">Already know when you'd like to come?</p>
+      <a class="cd-btn cd-btn--primary label" href="{% url 'event_list' %}">Browse upcoming events</a>
+    </div>
+
+  </div>
+{% endblock %}

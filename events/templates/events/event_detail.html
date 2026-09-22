@@ -1,0 +1,104 @@
+{% extends "core/base.html" %}
+{% block title %}{{ event.name }} · CoderDojo{% endblock %}
+{% block root_class %}eventdetail-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .eventdetail-root { background: var(--surface); }
+  .eventdetail-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .eventdetail-root .event-layout { display: flex; gap: var(--space-6); align-items: flex-start; margin-top: var(--space-6); }
+  .eventdetail-root .event-main { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: var(--space-6); }
+  .eventdetail-root .event-side { flex: 0 0 300px; position: sticky; top: var(--space-5); }
+  .eventdetail-root .event-header { margin-top: var(--space-6); }
+  .eventdetail-root .event-header .hosted-by { color: var(--secondary); }
+  .eventdetail-root .event-header h1 { color: var(--ink); margin: var(--space-2) 0; }
+  .eventdetail-root .event-header p.meta { color: var(--ink-muted); margin: 0; }
+  .eventdetail-root h2.section-title { color: var(--ink); margin: 0 0 var(--space-4); }
+  @media (max-width: 800px) {
+    .eventdetail-root .event-layout { flex-direction: column; }
+    .eventdetail-root .event-side { position: static; width: 100%; flex-basis: auto; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="shell">
+
+    <div class="event-header">
+      <h1 class="display-xl">{{ event.name }}</h1>
+      <p class="body-lg meta">
+        {{ event.start_time|date:"D j M" }} · {{ event.start_time|time:"H:i" }}–{{ event.end_time|time:"H:i" }}
+        {% if event.venue_name %} · {{ event.venue_name }}{% endif %}
+      </p>
+      <p class="body">Hosted by <a href="{% url 'dojo_detail' dojo_id=event.dojo.id %}">{{ event.dojo.name }}</a></p>
+    </div>
+
+    <div class="event-layout">
+      <div class="event-main">
+
+        {% if event.description %}
+          <section>
+            <h2 class="heading-lg section-title">About this session</h2>
+            <p class="body" style="color: var(--ink);">{{ event.description }}</p>
+          </section>
+        {% endif %}
+
+        {% if event.what_to_bring %}
+          <section>
+            <h2 class="heading-lg section-title">What to bring</h2>
+            <p class="body" style="color: var(--ink);">{{ event.what_to_bring }}</p>
+          </section>
+        {% endif %}
+
+        {% with faqs=event.faqs.all %}
+          {% if faqs %}
+            <section>
+              <h2 class="heading-lg section-title">Questions</h2>
+              <div class="cd-faq" id="faq-event-detail-page">
+                {% for faq in faqs %}
+                  <div class="cd-faq__item" data-open="false">
+                    <button class="cd-faq__question heading-sm">
+                      <span>{{ faq.question }}</span>
+                      <span class="cd-faq__icon" aria-hidden="true">+</span>
+                    </button>
+                    <p class="cd-faq__answer body" hidden>{{ faq.answer }}</p>
+                  </div>
+                {% endfor %}
+              </div>
+            </section>
+          {% endif %}
+        {% endwith %}
+
+      </div>
+
+      <aside class="event-side">
+        <div class="cd-card cd-ticket-panel">
+          <div class="cd-ticket-panel__row">
+            <span class="cd-ticket-panel__label label">Date</span>
+            <span class="cd-ticket-panel__value body">{{ event.start_time|date:"D, j M" }} · {{ event.start_time|time:"H:i" }}–{{ event.end_time|time:"H:i" }}</span>
+          </div>
+          <div class="cd-ticket-panel__row">
+            <span class="cd-ticket-panel__label label">Location</span>
+            <span class="cd-ticket-panel__value body">{{ event.venue_name|default:event.dojo.address|default:event.dojo.name }}</span>
+          </div>
+          <div class="cd-ticket-panel__row">
+            <span class="cd-ticket-panel__label label">Ages</span>
+            <span class="cd-ticket-panel__value body">{{ event.min_age|default:"7" }}–{{ event.max_age|default:"18" }}</span>
+          </div>
+          <hr class="cd-ticket-panel__divider">
+          <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{% url 'event_signup' event_id=event.id %}">Sign up now</a>
+          <p class="cd-ticket-panel__note body-sm">
+            {% if event.places_left > 0 %}{{ event.places_left }} of {{ event.places }} spots left{% else %}Full — join the waitlist{% endif %}
+          </p>
+        </div>
+      </aside>
+    </div>
+
+  </div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+  CoderDojo.initFaq(document.getElementById("faq-event-detail-page"));
+</script>
+{% endblock %}

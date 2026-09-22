@@ -1,0 +1,86 @@
+{% extends "core/base.html" %}
+{% block title %}{{ mentor.name }} · CoderDojo{% endblock %}
+{% block root_class %}board-profile-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .board-profile-root { background: var(--surface-sunken); }
+  .board-profile-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4) var(--space-8); }
+  .board-profile-root .back-link { color: var(--secondary); margin: var(--space-5) 0 0; }
+  .board-profile-root .col { max-width: 720px; margin: 0 auto; }
+
+  /* same role rings as MentorCard / DojoPage / MentorDetailPage — kept identical so a
+     ring means the same thing everywhere it appears. */
+  .board-profile-root .cd-mentor__avatar--board { outline: 3px solid #4a5568; outline-offset: 2px; }
+  .board-profile-root .cd-mentor__avatar--ninja { outline: 3px solid #0e7c6b; outline-offset: 2px; }
+  .board-profile-root .cd-mentor__avatar--lead { outline: 3px solid #d1990a; outline-offset: 2px; }
+  .board-profile-root .cd-mentor__avatar--volunteer { outline: 3px solid #4a5fc1; outline-offset: 2px; }
+
+  .board-profile-root .mentor-header { display: flex; gap: var(--space-5); align-items: flex-start; margin: var(--space-5) auto var(--space-6); max-width: 720px; }
+  .board-profile-root .mentor-header .cd-mentor__avatar { width: 88px; height: 88px; flex-shrink: 0; }
+  .board-profile-root .mentor-header h1 { color: var(--ink); margin: 0 0 var(--space-1); }
+  .board-profile-root .mentor-header .role-line { color: var(--ink-muted); margin: 0 0 var(--space-2); }
+  .board-profile-root .mentor-header .facts-line { color: var(--ink-muted); margin: 0; }
+
+  .board-profile-root .about h2 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .board-profile-root .about p { color: var(--ink); margin: 0; }
+
+  .board-profile-root .focus-areas { margin-top: var(--space-6); }
+  .board-profile-root .focus-areas h2 { color: var(--ink); margin: 0 0 var(--space-3); }
+  .board-profile-root .focus-areas .tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+
+  .board-profile-root .contact-card {
+    margin-top: var(--space-6); background: var(--surface); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm); padding: var(--space-5) var(--space-6);
+    display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap;
+  }
+  .board-profile-root .contact-card p { margin: 0; color: var(--ink-muted); }
+  .board-profile-root .contact-card a.body { color: var(--secondary); }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="shell">
+
+    <div class="mentor-header">
+      <div class="cd-mentor__avatar cd-mentor__avatar--{% if mentor.role == 'champion' %}lead{% else %}{{ mentor.role }}{% endif %}" aria-hidden="true"></div>
+      <div>
+        <h1 class="display-lg">{{ mentor.name }}</h1>
+        <p class="body role-line">{{ mentor.get_role_display }}{% if mentor.title %}, {{ mentor.title }}{% endif %}</p>
+        <p class="body-sm facts-line">
+          {% if mentor.dojo %}{{ mentor.dojo.name }}{% else %}CoderDojo Belgium{% endif %}
+          {% if mentor.joined_date %} · On the team since {{ mentor.joined_date|date:"Y" }}{% endif %}
+        </p>
+      </div>
+    </div>
+
+    {% if mentor.bio %}
+      <div class="col about">
+        <h2 class="heading-md">About {{ mentor.name }}</h2>
+        <p class="body">{{ mentor.bio }}</p>
+      </div>
+    {% endif %}
+
+    {% if focus_areas %}
+      <div class="col focus-areas">
+        <h2 class="heading-md">Focus areas</h2>
+        <div class="tags">
+          {% for area in focus_areas %}
+            <span class="cd-badge cd-badge--outline caption">{{ area }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if mentor.dojo.email %}
+      <div class="col contact-card">
+        <div>
+          <p class="body-sm">Press, partnerships, or starting a new dojo?</p>
+          <a class="body" href="mailto:{{ mentor.dojo.email }}">{{ mentor.dojo.email }}</a>
+        </div>
+        <span class="cd-badge cd-badge--outline caption">{{ mentor.get_role_display }}</span>
+      </div>
+    {% endif %}
+
+  </div>
+{% endblock %}
