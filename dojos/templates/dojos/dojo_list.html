@@ -20,11 +20,6 @@
 
   .finder-root .find-cta { text-align: center; margin-top: var(--space-7); padding: var(--space-6); }
   .finder-root .find-cta p { color: var(--ink-muted); margin: 0 0 var(--space-4); }
-
-  /* .cd-dojo-finder__icon is shared with the decorative (non-interactive)
-     search bar on the homepage, so it ships with pointer-events: none and
-     button-reset isn't assumed. Here it's a real submit button. */
-  .finder-root .cd-dojo-finder__icon { pointer-events: auto; background: none; border: none; padding: 0; cursor: pointer; }
 </style>
 {% endblock %}
 
@@ -48,7 +43,7 @@
           </div>
           {{ form.lat }}
           {{ form.lon }}
-          <button type="button" class="cd-btn cd-btn--secondary label" id="dojo-use-my-location">
+          <button type="button" class="cd-btn cd-btn--secondary label" data-cd-use-my-location>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
             <span>Use my location</span>
           </button>
@@ -77,54 +72,6 @@
 
 {% block extra_script %}
 <script>
-  (function () {
-    var button = document.getElementById("dojo-use-my-location");
-    var buttonLabel = button.querySelector("span");
-    var form = document.getElementById("dojo-search-form");
-    var latField = form.querySelector("[name=lat]");
-    var lonField = form.querySelector("[name=lon]");
-    var locationField = form.querySelector("[name=location]");
-    var defaultLabel = buttonLabel.textContent;
-
-    // Typing a new address means "search for this", not "still use my
-    // location" — without this, a stale lat/lon from an earlier "Use my
-    // location" search (re-rendered into these hidden fields by the bound
-    // form on every reload) would silently keep overriding the address
-    // the user just typed, since the view prefers lat/lon when present.
-    locationField.addEventListener("input", function () {
-      latField.value = "";
-      lonField.value = "";
-    });
-
-    if (!navigator.geolocation) {
-      button.disabled = true;
-      button.title = "Your browser doesn't support location lookup.";
-      return;
-    }
-
-    button.addEventListener("click", function () {
-      buttonLabel.textContent = "Locating…";
-      button.disabled = true;
-
-      navigator.geolocation.getCurrentPosition(
-        function (position) {
-          // Left blank on purpose: the view treats a filled-in location
-          // field as "the user typed an address, use that" and would
-          // otherwise ignore these coordinates in favor of geocoding
-          // whatever text sits here.
-          locationField.value = "";
-          latField.value = position.coords.latitude;
-          lonField.value = position.coords.longitude;
-          form.submit();
-        },
-        function () {
-          buttonLabel.textContent = defaultLabel;
-          button.disabled = false;
-          alert("Couldn't get your location — check your browser's location permission for this site and try again.");
-        },
-        { timeout: 10000 }
-      );
-    });
-  })();
+  CoderDojo.initDojoLocationSearch(document.getElementById("dojo-search-form"));
 </script>
 {% endblock %}

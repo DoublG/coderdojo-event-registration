@@ -364,6 +364,103 @@
     }
   }
 
+  // Wires a dojo-search form's "Use my location" button to the browser
+  // Geolocation API, filling the form's hidden lat/lon fields and
+  // (re-)submitting. Shared between the full dojo-finder page and the
+  // homepage's embedded widget — both forms follow the same field/id
+  // contract: a [name=location] text input, hidden [name=lat]/[name=lon]
+  // fields, and a button with [data-cd-use-my-location] containing a
+  // <span> label.
+  //
+  // Uses requestSubmit() rather than submit(): submit() does not fire a
+  // "submit" event, so on an htmx-enhanced form it would silently bypass
+  // htmx's hx-get entirely and just do nothing.
+  function initDojoLocationSearch(form) {
+    if (!form) return;
+    var button = form.querySelector("[data-cd-use-my-location]");
+    var buttonLabel = button && button.querySelector("span");
+    var latField = form.querySelector("[name=lat]");
+    var lonField = form.querySelector("[name=lon]");
+    var locationField = form.querySelector("[name=location]");
+    if (!button || !buttonLabel || !latField || !lonField || !locationField) return;
+    var defaultLabel = buttonLabel.textContent;
+
+    // Typing a new address means "search for this", not "still use my
+    // location" — without this, a stale lat/lon from an earlier "Use my
+    // location" search (re-rendered into these hidden fields by the bound
+    // form on every reload) would silently keep overriding the address
+    // the user just typed, since the view prefers lat/lon when present.
+    locationField.addEventListener("input", function () {
+      latField.value = "";
+      lonField.value = "";
+    });
+
+    if (!navigator.geolocation) {
+      button.disabled = true;
+      button.title = "Your browser doesn't support location lookup.";
+      return;
+    }
+
+    button.addEventListener("click", function () {
+      buttonLabel.textContent = "Locating…";
+      button.disabled = true;
+
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          // Left blank on purpose: the view treats a filled-in location
+          // field as "the user typed an address, use that" and would
+          // otherwise ignore these coordinates in favor of geocoding
+          // whatever text sits here.
+          locationField.value = "";
+          latField.value = position.coords.latitude;
+          lonField.value = position.coords.longitude;
+          buttonLabel.textContent = defaultLabel;
+          button.disabled = false;
+          form.requestSubmit();
+        },
+        function () {
+          buttonLabel.textContent = defaultLabel;
+          button.disabled = false;
+          alert("Couldn't get your location — check your browser's location permission for this site and try again.");
+        },
+        { timeout: 10000 }
+      );
+    });
+  }
+
+  // Shared prev/next scroll-snap carousel behaviour (pathways, upcoming
+  // sessions, ...). `cardSelector` finds one card to measure its width +
+  // gap for a "one page" scroll step. Content can be static or grow via
+  // htmx (e.g. lazy-loaded carousel batches) — either way scrollWidth is
+  // re-measured on every scroll/resize/htmx swap.
+  function initCarousel(track, prevBtn, nextBtn, cardSelector) {
+    if (!track || !prevBtn || !nextBtn) return;
+
+    function stepSize() {
+      var card = track.querySelector(cardSelector);
+      if (!card) return track.clientWidth;
+      var gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || "0");
+      return card.getBoundingClientRect().width + gap;
+    }
+
+    function updateButtons() {
+      var maxScroll = track.scrollWidth - track.clientWidth - 1;
+      prevBtn.disabled = track.scrollLeft <= 0;
+      nextBtn.disabled = track.scrollLeft >= maxScroll;
+    }
+
+    prevBtn.addEventListener("click", function () {
+      track.scrollBy({ left: -stepSize(), behavior: "smooth" });
+    });
+    nextBtn.addEventListener("click", function () {
+      track.scrollBy({ left: stepSize(), behavior: "smooth" });
+    });
+    track.addEventListener("scroll", updateButtons);
+    track.addEventListener("htmx:afterSwap", updateButtons);
+    window.addEventListener("resize", updateButtons);
+    updateButtons();
+  }
+
   window.CoderDojo = {
     version: 1,
     initFaq: initFaq,
@@ -372,6 +469,8 @@
     initAttendance: initAttendance,
     initMagicLink: initMagicLink,
     initNotifications: initNotifications,
-    initAdminNav: initAdminNav
+    initAdminNav: initAdminNav,
+    initDojoLocationSearch: initDojoLocationSearch,
+    initCarousel: initCarousel
   };
 })();

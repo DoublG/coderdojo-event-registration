@@ -1,0 +1,18 @@
+{% comment %}
+Renders one pathway teaser card (used on the homepage's "What you'll
+learn" section). Expects a `pathway` Pathway instance in context.
+Usage:
+  {% for pathway in pathways %}
+    {% include "pathways/partials/_pathway_card.html" %}
+  {% endfor %}
+{% endcomment %}
+<article class="cd-pathway">
+  {% if pathway.image %}
+    <img class="cd-pathway__image" src="{{ pathway.image.url }}" alt="" loading="lazy" width="400" height="300">
+  {% else %}
+    <div class="cd-pathway__image" aria-hidden="true"></div>
+  {% endif %}
+  <h3 class="cd-pathway__title heading-md">{{ pathway.name }}</h3>
+  <p class="cd-pathway__desc body-sm">{{ pathway.subtitle|truncatewords:12 }}</p>
+  <a class="cd-pathway__link label" href="{% url 'pathway_detail' pathway_id=pathway.id %}">Explore {{ pathway.name }} →</a>
+</article>

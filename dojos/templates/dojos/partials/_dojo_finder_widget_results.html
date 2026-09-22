@@ -1,0 +1,22 @@
+{% comment %}
+The meta line + result list for the homepage's "Find a dojo near you"
+widget — returned both as part of the widget's initial render
+(_dojo_finder_widget.html includes this) and directly by the
+dojo_finder_widget htmx endpoint on every new search.
+
+Expects `dojos` (already capped to WIDGET_RESULTS_LIMIT), `search_label`
+and `geocode_failed` in context.
+{% endcomment %}
+{% if geocode_failed %}
+  <p class="cd-dojo-finder__meta caption">Couldn't find "{{ search_label }}" — showing dojos near Ghent instead.</p>
+{% else %}
+  <p class="cd-dojo-finder__meta caption">Showing the {{ dojos|length }} closest dojo{{ dojos|length|pluralize }} to {{ search_label }}</p>
+{% endif %}
+
+<ul class="cd-dojo-finder__list">
+  {% for dojo in dojos %}
+    {% include "dojos/partials/_dojo_result.html" %}
+  {% empty %}
+    <li class="body-sm" style="color: var(--ink-muted);">No dojos found.</li>
+  {% endfor %}
+</ul>

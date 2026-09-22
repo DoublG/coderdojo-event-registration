@@ -875,8 +875,15 @@
   top: 50%;
   transform: translateY(-50%);
   color: var(--ink-muted);
-  pointer-events: none;
   display: flex;
+  /* It's a real submit button (the search field's icon doubles as the
+     search action), so reset the browser's default button chrome —
+     otherwise its own padding/border pushes it wider than the input's
+     padding-left leaves room for, and it overlaps the typed text. */
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 .cd-dojo-finder__icon svg { width: 16px; height: 16px; }
 .cd-dojo-finder__input {

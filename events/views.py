@@ -3,12 +3,14 @@ from datetime import timedelta
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils import timezone
 
 from dojos.models import Dojo
 
 from .forms import AGE_RANGES, EventSearchForm
 from .models import Event
+from .search import WIDGET_PAGE_SIZE, upcoming_available_events
 
 RESULTS_PER_PAGE = 20
 
@@ -68,6 +70,28 @@ def event_list(request):
     if request.headers.get("HX-Request") == "true":
         return render(request, "events/partials/_event_results_page.html", context)
     return render(request, "events/event_list.html", context)
+
+
+def upcoming_sessions_widget(request):
+    """Lazy-loaded batches for the home page's "Upcoming sessions" carousel.
+
+    Returns just the next batch of cards (see _upcoming_sessions_page.html),
+    triggered by htmx as the carousel is scrolled — same paging approach as
+    event_list's infinite scroll, but with an `intersect root:...` trigger
+    instead of `revealed` since this list scrolls horizontally inside its
+    own container rather than the window.
+    """
+    paginator = Paginator(upcoming_available_events(), WIDGET_PAGE_SIZE)
+    page = paginator.get_page(request.GET.get("page"))
+
+    next_page_url = None
+    if page.has_next():
+        next_page_url = f"{reverse('upcoming_sessions_widget')}?page={page.next_page_number()}"
+
+    return render(request, "events/partials/_upcoming_sessions_page.html", {
+        "events": page.object_list,
+        "next_page_url": next_page_url,
+    })
 
 
 def event_detail(request, event_id):

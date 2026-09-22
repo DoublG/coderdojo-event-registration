@@ -17,6 +17,24 @@
   @media (max-width: 640px) {
     .home-root .section { padding: var(--space-7) 0; }
   }
+
+  .home-root .carousel-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+  .home-root .carousel__controls { display: flex; gap: var(--space-2); flex-shrink: 0; }
+  .home-root .carousel__nav {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: var(--radius-pill);
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--ink); cursor: pointer;
+  }
+  .home-root .carousel__nav:hover:not(:disabled) { background: var(--surface-sunken); }
+  .home-root .carousel__nav:disabled { opacity: 0.35; cursor: default; }
+  .home-root .carousel__track {
+    display: flex; gap: var(--space-5); overflow-x: auto; scroll-snap-type: x mandatory;
+    scrollbar-width: none; padding-bottom: var(--space-1);
+  }
+  .home-root .carousel__track::-webkit-scrollbar { display: none; }
+  .home-root .carousel__track .cd-pathway { flex: 0 0 240px; scroll-snap-align: start; }
+  .home-root .carousel__track .upcoming-sessions__card { flex: 0 0 280px; scroll-snap-align: start; }
 </style>
 {% endblock %}
 
@@ -35,29 +53,24 @@
   </div>
 
   <div class="shell section">
-    <div class="section-head">
-      <h2 class="heading-lg">What you'll learn</h2>
-      <p class="body">Pick a path — or try a bit of everything before you commit to one.</p>
+    <div class="section-head carousel-section-head">
+      <div>
+        <h2 class="heading-lg">What you'll learn</h2>
+        <p class="body">Pick a path — or try a bit of everything before you commit to one.</p>
+      </div>
+      <div class="carousel__controls">
+        <button type="button" class="carousel__nav" id="pathway-carousel-prev" aria-label="Previous pathways">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button type="button" class="carousel__nav" id="pathway-carousel-next" aria-label="Next pathways">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
     </div>
-    <div class="row">
-      <article class="cd-pathway">
-        <div class="cd-pathway__image" aria-hidden="true"></div>
-        <h3 class="cd-pathway__title heading-md">Scratch</h3>
-        <p class="cd-pathway__desc body-sm">Build a platform game with drag-and-drop blocks.</p>
-        <a class="cd-pathway__link label" href="{% url 'pathway_detail' pathway_id=1 %}">Explore Scratch →</a>
-      </article>
-      <article class="cd-pathway">
-        <div class="cd-pathway__image" aria-hidden="true"></div>
-        <h3 class="cd-pathway__title heading-md">Python</h3>
-        <p class="cd-pathway__desc body-sm">Write a quiz bot and your first real program.</p>
-        <a class="cd-pathway__link label" href="{% url 'pathway_detail' pathway_id=2 %}">Explore Python →</a>
-      </article>
-      <article class="cd-pathway">
-        <div class="cd-pathway__image" aria-hidden="true"></div>
-        <h3 class="cd-pathway__title heading-md">Web</h3>
-        <p class="cd-pathway__desc body-sm">Design and publish your own website.</p>
-        <a class="cd-pathway__link label" href="{% url 'pathway_detail' pathway_id=3 %}">Explore Web →</a>
-      </article>
+    <div class="carousel__track" id="pathway-carousel-track">
+      {% for pathway in pathways %}
+        {% include "pathways/partials/_pathway_card.html" %}
+      {% endfor %}
     </div>
   </div>
 
@@ -67,82 +80,27 @@
       <p class="body">Every session is free and run by local volunteers.</p>
     </div>
     <div class="center">
-      <div class="cd-dojo-finder">
-        <div class="cd-dojo-finder__bar">
-          <div class="cd-dojo-finder__field">
-            <span class="cd-dojo-finder__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
-            </span>
-            <input class="cd-dojo-finder__input body" type="text" placeholder="Enter your postcode or city" value="Ghent, Belgium">
-          </div>
-          <button type="button" class="cd-btn cd-btn--secondary label">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-            Use my location
-          </button>
-        </div>
-        <p class="cd-dojo-finder__meta caption">Showing dojos within 25 km of Ghent, Belgium, nearest first</p>
-        <ul class="cd-dojo-finder__list">
-          <li class="cd-card cd-dojo-finder__result">
-            <div class="cd-dojo-finder__distance">
-              <span class="heading-sm">2.4</span>
-              <span class="caption">km</span>
-            </div>
-            <div class="cd-dojo-finder__info">
-              <h3 class="cd-dojo-finder__name heading-sm">Ghent Dojo</h3>
-              <p class="cd-dojo-finder__address body-sm">Technologiepark 12, 9052 Ghent</p>
-              <p class="cd-dojo-finder__next caption">Next session: Sat 27 Sep, 10:00 <span class="cd-badge cd-badge--success caption">Open</span></p>
-            </div>
-            <a href="{% url 'dojo_detail' 1 %}" class="cd-btn cd-btn--ghost label">View</a>
-          </li>
-          <li class="cd-card cd-dojo-finder__result">
-            <div class="cd-dojo-finder__distance">
-              <span class="heading-sm">5.1</span>
-              <span class="caption">km</span>
-            </div>
-            <div class="cd-dojo-finder__info">
-              <h3 class="cd-dojo-finder__name heading-sm">Destelbergen Dojo</h3>
-              <p class="cd-dojo-finder__address body-sm">Dendermondesteenweg 1, 9070 Destelbergen</p>
-              <p class="cd-dojo-finder__next caption">Next session: Sat 27 Sep, 13:00 <span class="cd-badge cd-badge--success caption">Open</span></p>
-            </div>
-            <a href="{% url 'dojo_detail' 2 %}" class="cd-btn cd-btn--ghost label">View</a>
-          </li>
-        </ul>
-      </div>
+      {% include "dojos/partials/_dojo_finder_widget.html" %}
     </div>
   </div>
 
   <div class="shell section">
-    <div class="section-head">
-      <h2 class="heading-lg">Upcoming sessions</h2>
-      <p class="body">Eventbrite-style browse: pick a date, see what's running.</p>
+    <div class="section-head carousel-section-head">
+      <div>
+        <h2 class="heading-lg">Upcoming sessions</h2>
+        <p class="body">Free sessions with open spots, soonest first.</p>
+      </div>
+      <div class="carousel__controls">
+        <button type="button" class="carousel__nav" id="sessions-carousel-prev" aria-label="Previous sessions">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button type="button" class="carousel__nav" id="sessions-carousel-next" aria-label="Next sessions">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
     </div>
-    <div class="row">
-      <article class="cd-card cd-event" style="position:relative;">
-        <div class="cd-event__image">
-          <div class="cd-event__date-badge caption">
-            <span>SAT</span>
-            <span style="font-size:18px; font-weight:700;">27</span>
-          </div>
-        </div>
-        <div class="cd-event__body">
-          <h3 class="cd-event__title heading-md">Ghent Public Library Dojo</h3>
-          <p class="cd-event__meta body-sm">10:00 · Ghent Public Library</p>
-        </div>
-        <a href="{% url 'event_detail' 1 %}" style="position:absolute; inset:0;" aria-label="View Ghent Public Library Dojo"></a>
-      </article>
-      <article class="cd-card cd-event" style="position:relative;">
-        <div class="cd-event__image">
-          <div class="cd-event__date-badge caption">
-            <span>SAT</span>
-            <span style="font-size:18px; font-weight:700;">4</span>
-          </div>
-        </div>
-        <div class="cd-event__body">
-          <h3 class="cd-event__title heading-md">Antwerp Coolest Projects</h3>
-          <p class="cd-event__meta body-sm">13:00 · Antwerp Expo</p>
-        </div>
-        <a href="{% url 'event_detail' 2 %}" style="position:absolute; inset:0;" aria-label="View Antwerp Coolest Projects"></a>
-      </article>
+    <div class="carousel__track" id="upcoming-sessions-track">
+      {% include "events/partials/_upcoming_sessions_page.html" with events=events next_page_url=events_next_page_url %}
     </div>
     <p style="margin: var(--space-4) 0 0;"><a class="body-sm" href="{% url 'event_list' %}" style="color: var(--secondary);">See every upcoming event →</a></p>
   </div>
@@ -235,5 +193,18 @@
 {% block extra_script %}
 <script>
   CoderDojo.initFaq(document.getElementById("faq-home-page"));
+
+  CoderDojo.initCarousel(
+    document.getElementById("pathway-carousel-track"),
+    document.getElementById("pathway-carousel-prev"),
+    document.getElementById("pathway-carousel-next"),
+    ".cd-pathway"
+  );
+  CoderDojo.initCarousel(
+    document.getElementById("upcoming-sessions-track"),
+    document.getElementById("sessions-carousel-prev"),
+    document.getElementById("sessions-carousel-next"),
+    ".upcoming-sessions__card"
+  );
 </script>
 {% endblock %}

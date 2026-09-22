@@ -1,0 +1,38 @@
+{% comment %}
+The compact "Find a dojo near you" widget, embedded on the homepage.
+Searching re-fetches just the results via htmx (dojo_finder_widget view) —
+the rest of the homepage is untouched.
+
+Expects `form` (a bound DojoSearchForm), `dojos` (already capped to
+WIDGET_RESULTS_LIMIT), `search_label` and `geocode_failed` in context —
+see dojos.views.dojo_finder_widget / core.views.home.
+{% endcomment %}
+<div class="cd-dojo-finder">
+
+  <form method="get" action="{% url 'dojo_finder_widget' %}" id="dojo-finder-widget-form"
+        hx-get="{% url 'dojo_finder_widget' %}" hx-target="#dojo-finder-widget-results" hx-swap="innerHTML">
+    <div class="cd-dojo-finder__bar">
+      <div class="cd-dojo-finder__field">
+        <button type="submit" class="cd-dojo-finder__icon" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        </button>
+        {{ form.location }}
+      </div>
+      {{ form.lat }}
+      {{ form.lon }}
+      <button type="button" class="cd-btn cd-btn--secondary label" data-cd-use-my-location>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        <span>Use my location</span>
+      </button>
+    </div>
+  </form>
+
+  <div id="dojo-finder-widget-results">
+    {% include "dojos/partials/_dojo_finder_widget_results.html" %}
+  </div>
+
+</div>
+
+<script>
+  CoderDojo.initDojoLocationSearch(document.getElementById("dojo-finder-widget-form"));
+</script>

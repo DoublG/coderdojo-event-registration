@@ -1,0 +1,24 @@
+{% comment %}
+One card in the home page's "Upcoming sessions" carousel. When this is the
+last card of a lazy-loaded batch and there's another page, it carries the
+htmx trigger that fetches the next 10 as the carousel is scrolled into it —
+see events.views.upcoming_sessions_widget.
+{% endcomment %}
+<article class="cd-card cd-event upcoming-sessions__card" style="position:relative;"
+  {% if is_last and next_page_url %}
+    hx-get="{{ next_page_url }}"
+    hx-trigger="intersect root:#upcoming-sessions-track once"
+    hx-swap="afterend"
+  {% endif %}>
+  <div class="cd-event__image">
+    <div class="cd-event__date-badge caption">
+      <span>{{ event.start_time|date:"D"|upper }}</span>
+      <span style="font-size:18px; font-weight:700;">{{ event.start_time|date:"j" }}</span>
+    </div>
+  </div>
+  <div class="cd-event__body">
+    <h3 class="cd-event__title heading-md">{{ event.name }}</h3>
+    <p class="cd-event__meta body-sm">{{ event.start_time|date:"H:i" }} · {{ event.venue_name|default:event.dojo.name }}</p>
+  </div>
+  <a href="{% url 'event_detail' event.id %}" style="position:absolute; inset:0;" aria-label="View {{ event.name }}"></a>
+</article>

@@ -1,74 +1,23 @@
-import requests
-from django.contrib.gis.geos import Point
 from django.core.paginator import Paginator
-from django.db.models import ExpressionWrapper, F, FloatField
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
-from events.models import Event
-from geo.functions import DistanceSphere
-from geo.geocoding import geocode
-
 from .forms import DojoSearchForm
 from .models import Dojo, Mentor
-
-# Default search origin/label before a real search is submitted — matches
-# the dojo-finder search bar's old pre-filled example location.
-DEFAULT_SEARCH_ORIGIN = Point(3.7174, 51.0543, srid=4326)  # Ghent, Belgium
-DEFAULT_SEARCH_LABEL = "Ghent, Belgium"
+from .search import attach_next_events, dojos_by_distance, resolve_search_origin
 
 RESULTS_PER_PAGE = 20
+WIDGET_RESULTS_LIMIT = 5
 
 
 def dojo_list(request):
     form = DojoSearchForm(request.GET)
-    origin, search_label, geocode_failed = DEFAULT_SEARCH_ORIGIN, DEFAULT_SEARCH_LABEL, False
-
-    # A typed address always wins over lat/lon, even if both are present in
-    # the request: the lat/lon hidden fields are re-rendered with their old
-    # bound value on every reload (Django forms echo back submitted data),
-    # so after "Use my location" they'd otherwise keep silently overriding
-    # a brand-new address the user types afterwards.
-    if form.is_valid() and form.cleaned_data["location"]:
-        search_label = form.cleaned_data["location"]
-        try:
-            coords = geocode(search_label)
-        except requests.RequestException:
-            coords = None
-        if coords:
-            lat, lon = coords
-            origin = Point(lon, lat, srid=4326)
-        else:
-            origin, geocode_failed = None, True
-    elif form.is_valid() and form.cleaned_data["lat"] is not None and form.cleaned_data["lon"] is not None:
-        # "Use my location": browser-supplied coordinates, no geocoding needed.
-        origin = Point(form.cleaned_data["lon"], form.cleaned_data["lat"], srid=4326)
-        search_label = "your location"
-
-    dojos_qs = Dojo.objects.all()
-    if origin is not None:
-        dojos_qs = dojos_qs.annotate(
-            distance_km=ExpressionWrapper(
-                DistanceSphere(F("location"), origin) / 1000.0,
-                output_field=FloatField(),
-            )
-        ).order_by(F("distance_km").asc(nulls_last=True))
+    origin, search_label, geocode_failed = resolve_search_origin(form)
+    dojos_qs = dojos_by_distance(origin)
 
     paginator = Paginator(dojos_qs, RESULTS_PER_PAGE)
     page = paginator.get_page(request.GET.get("page"))
-    dojos = list(page.object_list)
-
-    # One extra query for this page's next events, instead of one per dojo:
-    # take the events ordered by start_time and keep the first (soonest) one
-    # seen per dojo.
-    upcoming = Event.objects.filter(
-        dojo_id__in=[dojo.id for dojo in dojos], start_time__gte=timezone.now()
-    ).order_by("start_time")
-    next_event_by_dojo_id = {}
-    for event in upcoming:
-        next_event_by_dojo_id.setdefault(event.dojo_id, event)
-    for dojo in dojos:
-        dojo.next_event = next_event_by_dojo_id.get(dojo.id)
+    dojos = attach_next_events(list(page.object_list))
 
     next_page_url = None
     if page.has_next():
@@ -89,6 +38,22 @@ def dojo_list(request):
     if request.headers.get("HX-Request") == "true":
         return render(request, "dojos/partials/_dojo_results_page.html", context)
     return render(request, "dojos/dojo_list.html", context)
+
+
+def dojo_finder_widget(request):
+    """The compact "Find a dojo near you" widget embedded on the homepage
+    (core/templates/core/home.html). Always returns just the meta line +
+    result list fragment — this view has no full-page mode of its own, it's
+    only ever reached via the widget's initial render or its htmx search."""
+    form = DojoSearchForm(request.GET)
+    origin, search_label, geocode_failed = resolve_search_origin(form)
+    dojos = attach_next_events(list(dojos_by_distance(origin)[:WIDGET_RESULTS_LIMIT]))
+
+    return render(request, "dojos/partials/_dojo_finder_widget_results.html", {
+        "dojos": dojos,
+        "search_label": search_label,
+        "geocode_failed": geocode_failed,
+    })
 
 
 def dojo_detail(request, dojo_id):
