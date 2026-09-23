@@ -32,7 +32,6 @@
   .mentor-detail-root .team-section h2 { color: var(--ink); text-align: center; margin: 0 0 var(--space-1); }
   .mentor-detail-root .team-section .team-desc { color: var(--ink-muted); text-align: center; margin: 0 auto var(--space-5); max-width: 560px; }
   .mentor-detail-root .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
-  .mentor-detail-root .team-grid a { text-decoration: none; }
   .mentor-detail-root .team-grid .cd-mentor {
     flex-direction: column; align-items: center; text-align: center; gap: var(--space-2);
     background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
@@ -80,15 +79,13 @@
       <p class="body team-desc">Every dojo runs on five kinds of people. A small ring around each avatar marks which — the words next to it always say the same thing out loud, so the ring is never the only clue.</p>
       <div class="team-grid">
         {% for mentor in mentors|slice:"1:" %}
-          <a href="{% url 'mentor_profile' mentor_id=mentor.id %}">
-            <div class="cd-mentor">
-              {% include "dojos/partials/_mentor_avatar.html" with mentor=mentor %}
-              <div>
-                <p class="cd-mentor__name heading-sm">{{ mentor.name }}</p>
-                <p class="cd-mentor__role body-sm">{{ mentor.get_role_display }}{% if mentor.title %}, {{ mentor.title }}{% endif %}</p>
-              </div>
+          <div class="cd-mentor">
+            {% include "dojos/partials/_mentor_avatar.html" with mentor=mentor %}
+            <div>
+              <p class="cd-mentor__name heading-sm">{{ mentor.name }}</p>
+              <p class="cd-mentor__role body-sm">{{ mentor.get_role_display }}{% if mentor.title %}, {{ mentor.title }}{% endif %}</p>
             </div>
-          </a>
+          </div>
         {% empty %}
           <p class="body-sm" style="color: var(--ink-muted);">No other mentors listed yet.</p>
         {% endfor %}

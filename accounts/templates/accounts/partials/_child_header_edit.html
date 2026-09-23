@@ -1,0 +1,37 @@
+{% comment %}
+The child detail page's header, swapped in over htmx when the name is
+clicked (see _child_header_display.html). Submitting saves the name,
+avatar and birthday and swaps back to the display header; Cancel just
+reloads, since nothing's been saved yet.
+Expects `guardian`, `child`, `icon_choices` and `current_icon` in context.
+{% endcomment %}
+<form class="child-header child-header--editing" id="child-header" method="post"
+      hx-post="{% url 'edit_child' guardian_id=guardian.id child_id=child.id %}"
+      hx-target="#child-header" hx-swap="outerHTML">
+  {% csrf_token %}
+  {% include "accounts/partials/_child_avatar.html" with child=child %}
+  <div class="child-header__fields">
+    <div class="cd-form__row">
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="ec-name">Name</label>
+        <input class="cd-form__input body" type="text" id="ec-name" name="name" value="{{ child.name }}" autofocus required>
+      </div>
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="ec-dob">Date of birth</label>
+        <input class="cd-form__input body" type="date" id="ec-dob" name="date_of_birth" value="{{ child.date_of_birth|date:'Y-m-d' }}">
+      </div>
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="ec-icon">Avatar</label>
+        <select class="cd-form__select body" id="ec-icon" name="icon">
+          {% for value, label in icon_choices %}
+            <option value="{{ value }}" {% if value == current_icon %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="cd-form__actions">
+      <button type="button" class="cd-btn cd-btn--ghost label" onclick="window.location.reload();">Cancel</button>
+      <button type="submit" class="cd-btn cd-btn--primary label">Save</button>
+    </div>
+  </div>
+</form>

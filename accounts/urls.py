@@ -19,6 +19,8 @@ urlpatterns = [
     path("guardian/<int:guardian_id>/", views.guardian_detail, name="guardian_detail"),
     path("guardian/<int:guardian_id>/child/add/", views.add_child, name="add_child"),
     path("guardian/<int:guardian_id>/child/<int:child_id>/", views.child_detail, name="child_detail"),
+    path("guardian/<int:guardian_id>/child/<int:child_id>/edit/", views.edit_child, name="edit_child"),
+    path("guardian/<int:guardian_id>/child/<int:child_id>/awards/", views.award_widget, name="award_widget"),
     path(
         "guardian/<int:guardian_id>/registration/<int:registration_id>/cancel/",
         views.cancel_registration,

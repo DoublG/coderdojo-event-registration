@@ -55,22 +55,42 @@ class Registration(models.Model):
 
 
 class Award(models.Model):
-    ATTENDANCE = "attendance"
-    SKILL = "skill"
-    CATEGORY_CHOICES = [
-        (ATTENDANCE, "Attendance"),
-        (SKILL, "Skill"),
-    ]
+    """Base award — shared name/description/icon. Every real award is one
+    of the two subclasses below (multi-table inheritance, same pattern as
+    accounts.User's DojoOwner/Guardian/ChildAccount/HelperAccount):
+    MilestoneAward, unlocked by reaching a repeat-count threshold (e.g.
+    the attendance wristbands), or BadgeAward, a one-off with no counter
+    — you either did the specific thing or you haven't."""
 
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=300, blank=True, default="")
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
-    criteria = models.CharField(
-        max_length=200, blank=True, default="", help_text='e.g. "Visited the dojo 10 times."'
-    )
+    icon = models.ImageField(upload_to="awards/", null=True, blank=True)
 
     def __str__(self):
         return self.name
+
+
+class MilestoneAward(Award):
+    """Needs an unlock counter — e.g. the attendance wristbands (white at
+    1 visit, green at 5, red at 10, black at 15). ParticipantAward's
+    progress_current/progress_total track one participant's count toward
+    this award's threshold."""
+
+    threshold = models.PositiveIntegerField(
+        help_text='How many times something must happen to unlock this — e.g. 5 for "attend 5 sessions".'
+    )
+
+    def __str__(self):
+        return f"{self.name} ({self.threshold})"
+
+
+class BadgeAward(Award):
+    """No counter needed — a one-off you either have or don't (attended a
+    specific event, submitted to a specific challenge)."""
+
+    criteria = models.CharField(
+        max_length=200, blank=True, default="", help_text='e.g. "Attended a CoderDojo for Girls session."'
+    )
 
 
 class ParticipantAward(models.Model):

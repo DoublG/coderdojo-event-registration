@@ -20,6 +20,7 @@
   .guardian-root .child-card__meta { color: var(--ink-muted); margin: 0; }
   .guardian-root .child-card__link { color: var(--secondary); }
   .guardian-root .next-row { display: flex; align-items: center; gap: var(--space-4); background: var(--surface-sunken); border-radius: var(--radius-md); padding: var(--space-4); }
+  .guardian-root .next-row + .next-row { margin-top: var(--space-3); }
   .guardian-root .next-row .date-box {
     flex: 0 0 52px; text-align: center; background: var(--surface); border-radius: var(--radius-md); padding: var(--space-2) 0;
   }
@@ -35,7 +36,7 @@
   .guardian-root .add-child summary { cursor: pointer; list-style: none; }
   .guardian-root .add-child summary::-webkit-details-marker { display: none; }
   .guardian-root .add-child summary p { color: var(--ink-muted); margin: 0 0 var(--space-4); }
-  .guardian-root .add-child[open] summary { margin-bottom: var(--space-5); }
+  .guardian-root .add-child[open] summary { display: none; }
   .guardian-root .add-child form { text-align: left; }
   .guardian-root .add-child .cd-form__row { align-items: flex-end; }
   .guardian-root .add-child .cd-form__row .cd-form__field { flex: 1 1 180px; }
@@ -63,14 +64,6 @@
         {% csrf_token %}
         <div class="cd-form__row">
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="ac-name">Child's name</label>
-            <input class="cd-form__input body" type="text" id="ac-name" name="name" required>
-          </div>
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="ac-dob">Date of birth (optional)</label>
-            <input class="cd-form__input body" type="date" id="ac-dob" name="date_of_birth">
-          </div>
-          <div class="cd-form__field">
             <label class="cd-form__label label" for="ac-icon">Avatar</label>
             <select class="cd-form__select body" id="ac-icon" name="icon">
               {% for value, label in icon_choices %}
@@ -78,8 +71,19 @@
               {% endfor %}
             </select>
           </div>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="ac-name">Child's name</label>
+            <input class="cd-form__input body" type="text" id="ac-name" name="name" required>
+          </div>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="ac-dob">Date of birth (optional)</label>
+            <input class="cd-form__input body" type="date" id="ac-dob" name="date_of_birth">
+          </div>
         </div>
-        <button type="submit" class="cd-btn cd-btn--primary label">Add child</button>
+        <div class="cd-form__actions">
+          <button type="button" class="cd-btn cd-btn--ghost label" onclick="this.closest('details').open=false;">Cancel</button>
+          <button type="submit" class="cd-btn cd-btn--primary label">Add child</button>
+        </div>
       </form>
     </details>
 

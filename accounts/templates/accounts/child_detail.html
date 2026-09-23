@@ -11,67 +11,58 @@
   .child-page-root .child-header .cd-mentor__avatar { width: 64px; height: 64px; flex-shrink: 0; }
   .child-page-root .child-header h1 { color: var(--ink); margin: 0 0 2px; }
   .child-page-root .child-header p { color: var(--ink-muted); margin: 0; }
+  .child-page-root .child-header__name { cursor: pointer; border-radius: var(--radius-sm, 4px); }
+  .child-page-root .child-header__name:hover { background: var(--surface-sunken); }
+  .child-page-root .child-header--editing { align-items: flex-start; }
+  .child-page-root .child-header__fields { flex: 1 1 auto; min-width: 0; }
+  .child-page-root .child-header__fields .cd-form__row { align-items: flex-end; margin-bottom: var(--space-4); }
+  .child-page-root .child-header__fields .cd-form__field { flex: 1 1 160px; }
   .child-page-root .section { margin: var(--space-7) 0; }
   .child-page-root h2.section-title { color: var(--ink); margin: 0 0 var(--space-4); }
+  .child-page-root .cd-award__badge img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+
+  .child-page-root .carousel-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin: 0 0 var(--space-5); }
+  .child-page-root .carousel__controls { display: flex; gap: var(--space-2); flex-shrink: 0; }
+  .child-page-root .carousel__nav {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: var(--radius-pill);
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--ink); cursor: pointer;
+  }
+  .child-page-root .carousel__nav:hover:not(:disabled) { background: var(--surface-sunken); }
+  .child-page-root .carousel__nav:disabled { opacity: 0.35; cursor: default; }
+  .child-page-root .cd-award-grid {
+    flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory;
+    scrollbar-width: none; padding-bottom: var(--space-1);
+  }
+  .child-page-root .cd-award-grid::-webkit-scrollbar { display: none; }
+  .child-page-root .cd-award-grid .cd-award { flex: 0 0 200px; scroll-snap-align: start; }
 </style>
 {% endblock %}
 
 {% block content %}
   <div class="shell">
 
-    <div class="child-header">
-      {% include "accounts/partials/_child_avatar.html" with child=child %}
-      <div>
-        <h1 class="display-lg">{{ child.name }}</h1>
-        <p class="body">
-          {% if child.age %}Age {{ child.age }}{% endif %}
-          {% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}
-          {% if child.member_since %} · Member since {{ child.member_since|date:"F Y" }}{% endif %}
-        </p>
-      </div>
-    </div>
+    {% include "accounts/partials/_child_header_display.html" %}
 
-    {% with awards=child.awards.all %}
-      {% if awards %}
-        <section class="section">
+    {% if awards %}
+      <section class="section">
+        <div class="section-head carousel-section-head">
           <h2 class="heading-lg section-title">Awards</h2>
-          <div class="cd-award-grid">
-            {% for participant_award in awards %}
-              {% if participant_award.earned_date %}
-                <article class="cd-card cd-award">
-                  <div class="cd-award__badge cd-award__badge--{{ participant_award.award.category }}">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <polygon fill="currentColor" points="12.00,2.50 14.23,8.93 21.04,9.06 15.61,13.17 17.58,19.69 12.00,15.80 6.42,19.69 8.39,13.17 2.96,9.06 9.77,8.93"/>
-                    </svg>
-                  </div>
-                  <h3 class="cd-award__title heading-sm">{{ participant_award.award.name }}</h3>
-                  <p class="cd-award__desc body-sm">{{ participant_award.award.description }}</p>
-                  <p class="cd-award__meta caption">Earned {{ participant_award.earned_date|date:"j F Y" }}</p>
-                </article>
-              {% else %}
-                <article class="cd-card cd-award cd-award--locked" aria-label="{{ participant_award.award.name }}, locked, {{ participant_award.progress_current }} of {{ participant_award.progress_total }}">
-                  <div class="cd-award__badge cd-award__badge--locked">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <polygon fill="currentColor" points="12.00,2.50 14.23,8.93 21.04,9.06 15.61,13.17 17.58,19.69 12.00,15.80 6.42,19.69 8.39,13.17 2.96,9.06 9.77,8.93"/>
-                    </svg>
-                  </div>
-                  <h3 class="cd-award__title heading-sm">{{ participant_award.award.name }}</h3>
-                  <p class="cd-award__desc body-sm">{{ participant_award.award.description }}</p>
-                  {% if participant_award.progress_total %}
-                    <div class="cd-award__progress">
-                      <div class="cd-award__progress-track">
-                        <div class="cd-award__progress-fill" style="width: {% widthratio participant_award.progress_current participant_award.progress_total 100 %}%;"></div>
-                      </div>
-                      <p class="cd-award__meta caption">{{ participant_award.progress_current }} of {{ participant_award.progress_total }} sessions · <span class="cd-badge cd-badge--outline caption">Locked</span></p>
-                    </div>
-                  {% endif %}
-                </article>
-              {% endif %}
-            {% endfor %}
+          <div class="carousel__controls">
+            <button type="button" class="carousel__nav" id="awards-carousel-prev" aria-label="Previous awards">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button type="button" class="carousel__nav" id="awards-carousel-next" aria-label="Next awards">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
           </div>
-        </section>
-      {% endif %}
-    {% endwith %}
+        </div>
+        <div class="cd-award-grid" id="awards-track">
+          {% include "accounts/partials/_awards_page.html" %}
+        </div>
+      </section>
+    {% endif %}
 
     <section class="section">
       <h2 class="heading-lg section-title">Event history</h2>
@@ -104,4 +95,15 @@
     </section>
 
   </div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+  CoderDojo.initCarousel(
+    document.getElementById("awards-track"),
+    document.getElementById("awards-carousel-prev"),
+    document.getElementById("awards-carousel-next"),
+    ".cd-award"
+  );
+</script>
 {% endblock %}

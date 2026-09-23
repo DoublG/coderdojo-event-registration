@@ -1,19 +1,45 @@
+from pathlib import Path
+
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
+from django.core.files import File
+from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from events.models import Registration
 
 from .forms import ForcedPasswordChangeForm, LoginForm, StyledPasswordResetForm, StyledSetPasswordForm
 from .models import Guardian, Participant
+
+# Same pool as seed_guardians.py — a guardian adding a child through the
+# quick-add widget picks one of these instead of getting a random one.
+KID_AVATARS_DIR = Path(__file__).resolve().parent.parent / "dojos" / "seed_data" / "kid_avatars"
+KID_AVATAR_FILES = sorted(KID_AVATARS_DIR.glob("*.svg"))
+
+# Small on purpose — small enough that most children's award shelf
+# actually spans more than one page, so the lazy-load carousel (same
+# pattern as the homepage's "Upcoming sessions", see
+# events.views.upcoming_sessions_widget) has something to demonstrate.
+AWARDS_PAGE_SIZE = 4
+
+
+def _icon_choices():
+    choices = []
+    for path in KID_AVATAR_FILES:
+        category, _, descriptor = path.stem.split("-", 2)
+        descriptor = descriptor.replace("-", " ").title()
+        label = descriptor if category == "animal" else f"{descriptor} {category.title()}"
+        choices.append((path.name, label))
+    return choices
 
 
 def _get_own_guardian(request, guardian_id):
@@ -144,16 +170,17 @@ def _children_context(guardian):
     now = timezone.now()
     children = []
     for child in guardian.children.all():
-        # Not filtering on waiting_list — a waitlisted registration is
+        # All upcoming registrations, not just the nearest one — a child
+        # can be signed up for more than one session at a time. Not
+        # filtering on waiting_list either — a waitlisted registration is
         # still "what's coming up" for this child, just flagged as such
         # in the template (see the cd-badge--warning next to it).
-        next_registration = (
+        registrations = list(
             child.registration_set.filter(event__start_time__gte=now)
             .select_related("event")
             .order_by("event__start_time")
-            .first()
         )
-        children.append({"child": child, "next_registration": next_registration})
+        children.append({"child": child, "registrations": registrations})
     return children
 
 
@@ -161,7 +188,9 @@ def _children_context(guardian):
 def guardian_detail(request, guardian_id):
     guardian = _get_own_guardian(request, guardian_id)
     children = _children_context(guardian)
-    return render(request, "accounts/guardian_detail.html", {"guardian": guardian, "children": children})
+    return render(request, "accounts/guardian_detail.html", {
+        "guardian": guardian, "children": children, "icon_choices": _icon_choices(),
+    })
 
 
 @login_required
@@ -174,11 +203,19 @@ def add_child(request, guardian_id):
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
         if name:
-            Participant.objects.create(
-                guardian=guardian, name=name, date_of_birth=request.POST.get("date_of_birth") or None,
+            participant = Participant.objects.create(
+                guardian=guardian, name=name, date_of_birth=parse_date(request.POST.get("date_of_birth", "")),
             )
+            icon_path = KID_AVATARS_DIR / request.POST.get("icon", "")
+            if icon_path.exists() and icon_path.parent == KID_AVATARS_DIR:
+                with open(icon_path, "rb") as f:
+                    participant.photo.save(icon_path.name, File(f), save=True)
     children = _children_context(guardian)
     return render(request, "accounts/partials/_children_list.html", {"guardian": guardian, "children": children})
+
+
+def _awards_queryset(child):
+    return child.awards.select_related("award").order_by("id")
 
 
 @login_required
@@ -191,7 +228,86 @@ def child_detail(request, guardian_id, child_id):
         .select_related("event", "event__dojo", "event__mentor")
         .order_by("-event__start_time")
     )
-    return render(request, "accounts/child_detail.html", {"child": child, "history": history})
+
+    # Initial batch for the Awards carousel — further batches are
+    # lazy-loaded over htmx as it's scrolled, against award_widget below
+    # (same approach as the homepage's "Upcoming sessions" carousel).
+    awards_page = Paginator(_awards_queryset(child), AWARDS_PAGE_SIZE).get_page(1)
+    awards_next_page_url = None
+    if awards_page.has_next():
+        awards_next_page_url = (
+            f"{reverse('award_widget', kwargs={'guardian_id': guardian.id, 'child_id': child.id})}"
+            f"?page={awards_page.next_page_number()}"
+        )
+
+    return render(request, "accounts/child_detail.html", {
+        "guardian": guardian, "child": child, "history": history,
+        "awards": awards_page.object_list, "awards_next_page_url": awards_next_page_url,
+    })
+
+
+def _current_icon_value(child):
+    """Best-effort match of a child's current photo back to one of the
+    dropdown's filenames, so the edit form can preselect it — the saved
+    file has a randomised suffix (avatar-01-xyz123.svg), so this matches
+    on the stem rather than the exact name."""
+    if not child.photo:
+        return None
+    for path in KID_AVATAR_FILES:
+        if path.stem in child.photo.name:
+            return path.name
+    return None
+
+
+@login_required
+def edit_child(request, guardian_id, child_id):
+    """Click-to-edit for the child detail page's header (see
+    partials/_child_header_display.html) — GET swaps the display header
+    for a small inline form over htmx; POST saves it and swaps back."""
+    guardian = _get_own_guardian(request, guardian_id)
+    child = get_object_or_404(Participant, id=child_id, guardian=guardian)
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        if name:
+            child.name = name
+        child.date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
+
+        icon_path = KID_AVATARS_DIR / request.POST.get("icon", "")
+        if icon_path.exists() and icon_path.parent == KID_AVATARS_DIR:
+            with open(icon_path, "rb") as f:
+                child.photo.save(icon_path.name, File(f), save=False)
+        child.save()
+
+        return render(request, "accounts/partials/_child_header_display.html", {
+            "guardian": guardian, "child": child,
+        })
+
+    return render(request, "accounts/partials/_child_header_edit.html", {
+        "guardian": guardian, "child": child,
+        "icon_choices": _icon_choices(), "current_icon": _current_icon_value(child),
+    })
+
+
+@login_required
+def award_widget(request, guardian_id, child_id):
+    """Lazy-loaded batches for the child detail page's Awards carousel —
+    returns just the next batch of cards (see partials/_awards_page.html),
+    triggered by htmx as the carousel is scrolled."""
+    guardian = _get_own_guardian(request, guardian_id)
+    child = get_object_or_404(Participant, id=child_id, guardian=guardian)
+
+    page = Paginator(_awards_queryset(child), AWARDS_PAGE_SIZE).get_page(request.GET.get("page"))
+    next_page_url = None
+    if page.has_next():
+        next_page_url = (
+            f"{reverse('award_widget', kwargs={'guardian_id': guardian.id, 'child_id': child.id})}"
+            f"?page={page.next_page_number()}"
+        )
+
+    return render(request, "accounts/partials/_awards_page.html", {
+        "awards": page.object_list, "awards_next_page_url": next_page_url,
+    })
 
 
 @login_required

@@ -122,7 +122,7 @@
     </div>
     <div class="row">
       {% for mentor in team %}
-        <a class="mentor-link" href="{% url 'mentor_profile' mentor_id=mentor.id %}">
+        <a class="mentor-link" href="{% url 'team_member_detail' mentor_id=mentor.id %}">
           <div class="cd-mentor">
             {% include "dojos/partials/_mentor_avatar.html" with mentor=mentor %}
             <div>

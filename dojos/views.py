@@ -99,7 +99,12 @@ def dojo_dashboard(request, dojo_id):
     })
 
 
-def mentor_profile(request, mentor_id):
-    mentor = get_object_or_404(Mentor, id=mentor_id)
+def team_member_detail(request, mentor_id):
+    """A detail page of their own is for the global team only — not a
+    specific role, but Mentor.dojo being blank (see its help_text: "left
+    blank for board members, who work across dojos"). A dojo's own
+    mentors (lead coach, champion, ninja, volunteer) are shown inline on
+    dojo_team.html instead, whatever their role."""
+    mentor = get_object_or_404(Mentor, id=mentor_id, dojo__isnull=True)
     focus_areas = [area.strip() for area in mentor.focus_areas.split(",") if area.strip()]
-    return render(request, "dojos/mentor_profile.html", {"mentor": mentor, "focus_areas": focus_areas})
+    return render(request, "dojos/team_member_detail.html", {"mentor": mentor, "focus_areas": focus_areas})

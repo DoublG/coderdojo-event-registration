@@ -1,10 +1,13 @@
 import random
+from datetime import timedelta
 from pathlib import Path
 
 from django.core.files import File
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 
 from accounts.models import ChildAccount, Guardian, Participant
+from dojos.models import Dojo
 
 # Reuse the same fun alien/robot/animal avatars seeded for ninja mentors
 # (dojos/seed_data/kid_avatars/) — same audience, same round .cd-mentor__avatar.
@@ -41,6 +44,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         rng = random.Random(7)
         guardians_created = children_created = child_logins_created = 0
+        dojos = list(Dojo.objects.exclude(location=None))
+        today = timezone.localdate()
 
         for i in range(1, NUM_GUARDIANS + 1):
             username = f"guardian-{i}"
@@ -74,19 +79,32 @@ class Command(BaseCommand):
                     name=f"{child_first_name} {last_name}",
                     guardian=guardian,
                     account=account,
+                    home_dojo=rng.choice(dojos) if dojos else None,
+                    member_since=today - timedelta(days=rng.randint(30, 5 * 365)),
                 )
                 avatar_path = rng.choice(KID_AVATAR_FILES)
                 with open(avatar_path, "rb") as f:
                     participant.photo.save(avatar_path.name, File(f), save=True)
                 children_created += 1
 
-        # Backfill: children seeded before Participant.photo was used this
-        # way (guardians already existing skip the loop above entirely).
+        # Backfill: children seeded before Participant.photo/home_dojo/
+        # member_since were set this way (guardians already existing skip
+        # the loop above entirely, so this is the only path that reaches them).
         for participant in Participant.objects.all():
+            dirty_fields = []
             if not participant.photo:
                 avatar_path = rng.choice(KID_AVATAR_FILES)
                 with open(avatar_path, "rb") as f:
-                    participant.photo.save(avatar_path.name, File(f), save=True)
+                    participant.photo.save(avatar_path.name, File(f), save=False)
+                dirty_fields.append("photo")
+            if not participant.home_dojo_id and dojos:
+                participant.home_dojo = rng.choice(dojos)
+                dirty_fields.append("home_dojo")
+            if not participant.member_since:
+                participant.member_since = today - timedelta(days=rng.randint(30, 5 * 365))
+                dirty_fields.append("member_since")
+            if dirty_fields:
+                participant.save(update_fields=dirty_fields)
 
         self.stdout.write(self.style.SUCCESS(
             f"Done. guardians={guardians_created} children={children_created} "
