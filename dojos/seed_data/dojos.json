@@ -1,0 +1,1278 @@
+[
+  {
+    "model": "dojos.dojo",
+    "pk": 1,
+    "fields": {
+      "name": "Dojo Staden",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 2,
+    "fields": {
+      "name": "Dojo Temse",
+      "municipality": 271,
+      "province": 6,
+      "address": "Oeverstraat 15, 9140 Temse, Belgium",
+      "location": "SRID=4326;POINT (4.2118038 51.1251978)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 3,
+    "fields": {
+      "name": "Dojo Borgerhout",
+      "municipality": 874,
+      "province": 2,
+      "address": "Moorkensplein 19, 2140 Antwerpen, Belgium",
+      "location": "SRID=4326;POINT (4.4342914 51.2131317)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 4,
+    "fields": {
+      "name": "Dojo Ternat",
+      "municipality": 1669,
+      "province": 3,
+      "address": "Kerkstraat 4, 1740 Ternat, Belgium",
+      "location": "SRID=4326;POINT (4.155391 50.872955)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 5,
+    "fields": {
+      "name": "Dojo Ans",
+      "municipality": 938,
+      "province": 8,
+      "address": "Rue Walthère Jamar 168, 4430 Ans, Belgium",
+      "location": "SRID=4326;POINT (5.5352361 50.6552875)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 6,
+    "fields": {
+      "name": "Dojo Sivry",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 7,
+    "fields": {
+      "name": "Dojo Ramillies",
+      "municipality": 945,
+      "province": 4,
+      "address": "Rue du Wayaux 4, 1367 Ramillies, Belgium",
+      "location": "SRID=4326;POINT (4.9156777 50.6362887)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 8,
+    "fields": {
+      "name": "Dojo Gerpinnes",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 9,
+    "fields": {
+      "name": "Dojo Geraardsbergen",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 10,
+    "fields": {
+      "name": "Dojo Herent",
+      "municipality": 1770,
+      "province": 3,
+      "address": "Schoolstraat 15, 3020 Herent, Belgium",
+      "location": "SRID=4326;POINT (4.6762668 50.9067671)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 11,
+    "fields": {
+      "name": "Dojo Fabota Leuven",
+      "municipality": 2505,
+      "province": 3,
+      "address": "Riddersstraat 33, 3000 Leuven, Belgium",
+      "location": "SRID=4326;POINT (4.6901069 50.8826747)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 12,
+    "fields": {
+      "name": "Dojo Kortrijk Quindo",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 13,
+    "fields": {
+      "name": "Dojo Heusden-Zolder",
+      "municipality": 689,
+      "province": 9,
+      "address": "Sint-Willibrordusplein 8, 3550 Heusden-Zolder, Belgium",
+      "location": "SRID=4326;POINT (5.2808857 51.0337348)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 14,
+    "fields": {
+      "name": "Dojo Laken",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 15,
+    "fields": {
+      "name": "Dojo Denderleeuw",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 16,
+    "fields": {
+      "name": "Dojo Herselt",
+      "municipality": 367,
+      "province": 2,
+      "address": "Asbroek 1C, Herselt 2230",
+      "location": "SRID=4326;POINT (4.878331 51.0585407)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 17,
+    "fields": {
+      "name": "Dojo Ath",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 18,
+    "fields": {
+      "name": "Dojo Baarle",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 19,
+    "fields": {
+      "name": "Dojo Soignies",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 20,
+    "fields": {
+      "name": "Dojo Aywaille",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 21,
+    "fields": {
+      "name": "Dojo Hechtel-Eksel",
+      "municipality": 969,
+      "province": 9,
+      "address": "Geerstraat 1, Hechtel-Eksel 3940",
+      "location": "SRID=4326;POINT (5.3946697 51.1557604)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 22,
+    "fields": {
+      "name": "Dojo Lede",
+      "municipality": 2527,
+      "province": 6,
+      "address": "Kerkevijverstraat 19a, Lede 9340",
+      "location": "SRID=4326;POINT (3.9802613 50.9675704)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 23,
+    "fields": {
+      "name": "Dojo Meerhout",
+      "municipality": 352,
+      "province": 2,
+      "address": "Gasthuisstraat 29, Meerhout 2450",
+      "location": "SRID=4326;POINT (5.0767343 51.1346569)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 24,
+    "fields": {
+      "name": "Dojo Wijnegem",
+      "municipality": 1220,
+      "province": 2,
+      "address": "Turnhoutsebaan 199, Wijnegem 2110",
+      "location": "SRID=4326;POINT (4.5141147 51.2257815)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 25,
+    "fields": {
+      "name": "Dojo Uccle",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 26,
+    "fields": {
+      "name": "Dojo Monty",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 27,
+    "fields": {
+      "name": "Dojo MolenDojo (Molenbeek)",
+      "municipality": 1195,
+      "province": 3,
+      "address": "Rue des Béguines - Begijnenstraat 103 , Molenbeek-Saint-Jean - Sint-Jans-Molenbeek  1080",
+      "location": "SRID=4326;POINT (4.3119184 50.857749)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 28,
+    "fields": {
+      "name": "Dojo Forest (1190)",
+      "municipality": 2382,
+      "province": 3,
+      "address": "Rue des Alliés - Bondgenotenstraat 54 , Forest - Vorst  1190",
+      "location": "SRID=4326;POINT (4.3264537 50.8162296)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 29,
+    "fields": {
+      "name": "Dojo Anneessens-Funck",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 30,
+    "fields": {
+      "name": "Dojo Waterloo",
+      "municipality": 2248,
+      "province": 4,
+      "address": "Rue François Libert 26, Waterloo 1410",
+      "location": "SRID=4326;POINT (4.3959161 50.7160671)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 31,
+    "fields": {
+      "name": "Dojo Villers-la-Ville",
+      "municipality": 2464,
+      "province": 4,
+      "address": "Rue Gustave Linet 44, 1495 Villers-la-Ville, Belgium",
+      "location": "SRID=4326;POINT (4.490852 50.563938)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 32,
+    "fields": {
+      "name": "Dojo Tournai - Port'ouverte",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 33,
+    "fields": {
+      "name": "Dojo Namur",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 34,
+    "fields": {
+      "name": "Dojo Mons",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 35,
+    "fields": {
+      "name": "Dojo Marche",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 36,
+    "fields": {
+      "name": "Dojo Louvain-La-Neuve (LLN)",
+      "municipality": 2255,
+      "province": 4,
+      "address": "Chemin Du Cyclotron 6 , Louvain-la-Neuve  1348",
+      "location": "SRID=4326;POINT (4.624735 50.6654817)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 37,
+    "fields": {
+      "name": "Dojo Liège Chiroux",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 38,
+    "fields": {
+      "name": "Dojo Liège",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 39,
+    "fields": {
+      "name": "Dojo Lessines",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 40,
+    "fields": {
+      "name": "Dojo Gilly",
+      "municipality": 413,
+      "province": 7,
+      "address": "Gilly 6060",
+      "location": "SRID=4326;POINT (4.4795404 50.4237767)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 41,
+    "fields": {
+      "name": "Dojo Gembloux",
+      "municipality": 1070,
+      "province": 11,
+      "address": "Rue Camille Hubert 3, Gembloux 5030",
+      "location": "SRID=4326;POINT (4.7147275 50.5037214)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 42,
+    "fields": {
+      "name": "Dojo Clavier",
+      "municipality": 599,
+      "province": 8,
+      "address": "Rue des Écoles 2 ,   4590",
+      "location": "SRID=4326;POINT (5.4258619 50.449239)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 43,
+    "fields": {
+      "name": "Dojo Braine l'Alleud",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 44,
+    "fields": {
+      "name": "Dojo Zwijndrecht",
+      "municipality": 1240,
+      "province": 6,
+      "address": "Binnenplein 1 , Zwijndrecht  2070",
+      "location": "SRID=4326;POINT (4.3252884 51.2155094)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 45,
+    "fields": {
+      "name": "Dojo Zwijnaarde",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 46,
+    "fields": {
+      "name": "Dojo Zwalm",
+      "municipality": 1600,
+      "province": 6,
+      "address": "Sportlaan, Zwalm 9630",
+      "location": "SRID=4326;POINT (3.7294335 50.8760005)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 47,
+    "fields": {
+      "name": "Dojo Zulte",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 48,
+    "fields": {
+      "name": "Dojo Zonnebeke",
+      "municipality": 1604,
+      "province": 5,
+      "address": "Berten Pilstraat 5, Zonnebeke 8980",
+      "location": "SRID=4326;POINT (2.9879111 50.8703986)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 49,
+    "fields": {
+      "name": "Dojo Zelzate",
+      "municipality": 2394,
+      "province": 6,
+      "address": "50 Burgemeester Jos. Chalmetlaan, Zelzate 9060",
+      "location": "SRID=4326;POINT (3.8221805 51.1962362)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 50,
+    "fields": {
+      "name": "Dojo Zele",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 51,
+    "fields": {
+      "name": "Dojo Westerlo",
+      "municipality": 1783,
+      "province": 2,
+      "address": "5 Kasteelpark, Westerlo 2260",
+      "location": "SRID=4326;POINT (4.9105618 51.0900157)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 52,
+    "fields": {
+      "name": "Dojo Waregem",
+      "municipality": 2444,
+      "province": 5,
+      "address": "1 Boekenplein, Waregem 8790",
+      "location": "SRID=4326;POINT (3.4357131 50.8844107)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 53,
+    "fields": {
+      "name": "Dojo Vilvoorde",
+      "municipality": 2402,
+      "province": 3,
+      "address": "Grote Markt 9, Vilvoorde 1800",
+      "location": "SRID=4326;POINT (4.4235312 50.928996)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 54,
+    "fields": {
+      "name": "Dojo Turnhout",
+      "municipality": 25,
+      "province": 2,
+      "address": "Warandestraat 42, 2300 Turnhout, Belgium",
+      "location": "SRID=4326;POINT (4.943387 51.3245587)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 55,
+    "fields": {
+      "name": "Dojo Torhout",
+      "municipality": 260,
+      "province": 5,
+      "address": "Rijselstraat 110, Torhout 8820",
+      "location": "SRID=4326;POINT (3.104847 51.0586539)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 56,
+    "fields": {
+      "name": "Dojo Tienen",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 57,
+    "fields": {
+      "name": "Dojo Tielt",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 58,
+    "fields": {
+      "name": "Dojo Stekene",
+      "municipality": 2294,
+      "province": 6,
+      "address": "14 Polenlaan, Stekene 9190",
+      "location": "SRID=4326;POINT (4.0438786 51.2063651)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 59,
+    "fields": {
+      "name": "Dojo Sint-Pieters-Leeuw",
+      "municipality": 1185,
+      "province": 3,
+      "address": "Joseph Depauwstraat 11 , Sint-Pieters-Leeuw  1600",
+      "location": "SRID=4326;POINT (4.2461909 50.7789431)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 60,
+    "fields": {
+      "name": "Dojo Sint-Niklaas",
+      "municipality": 2046,
+      "province": 6,
+      "address": "3 Hendrik Heymanplein, Sint-Niklaas 9100",
+      "location": "SRID=4326;POINT (4.1392444 51.1625394)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 61,
+    "fields": {
+      "name": "Dojo SBSO Baken",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 62,
+    "fields": {
+      "name": "Dojo Rotselaar",
+      "municipality": 1541,
+      "province": 3,
+      "address": "Provinciebaan, Rotselaar 3110",
+      "location": "SRID=4326;POINT (4.6945139 50.9656988)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 63,
+    "fields": {
+      "name": "Dojo Roeselare",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 64,
+    "fields": {
+      "name": "Dojo Poperinge",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 65,
+    "fields": {
+      "name": "Dojo Overijse",
+      "municipality": 985,
+      "province": 3,
+      "address": "Begijnhof 13, Overijse 3090",
+      "location": "SRID=4326;POINT (4.5362003 50.7695705)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 66,
+    "fields": {
+      "name": "Dojo Oostende",
+      "municipality": 2407,
+      "province": 5,
+      "address": "17 Wellingtonstraat, Oostende 8400",
+      "location": "SRID=4326;POINT (2.9037886 51.2251272)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 67,
+    "fields": {
+      "name": "Dojo Ninove",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 68,
+    "fields": {
+      "name": "Dojo Nazareth",
+      "municipality": 2664,
+      "province": 6,
+      "address": "Dorp 2, Nazareth 9810",
+      "location": "SRID=4326;POINT (3.597122 50.9599997)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 69,
+    "fields": {
+      "name": "Dojo Meise",
+      "municipality": 1059,
+      "province": 3,
+      "address": "Brusselsesteenweg 1 , Meise  1860",
+      "location": "SRID=4326;POINT (4.327785 50.9339954)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 70,
+    "fields": {
+      "name": "Dojo Mechelen Technopolis",
+      "municipality": 2515,
+      "province": 2,
+      "address": "Technologielaan 1 , Mechelen  2800",
+      "location": "SRID=4326;POINT (4.4702099 51.001909)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 71,
+    "fields": {
+      "name": "Dojo Maldegem",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 72,
+    "fields": {
+      "name": "Dojo Maaseik",
+      "municipality": 1088,
+      "province": 9,
+      "address": "Van Eycklaan 72, 3680 Maaseik, Belgium",
+      "location": "SRID=4326;POINT (5.7885247 51.1001173)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 73,
+    "fields": {
+      "name": "Dojo Londerzeel",
+      "municipality": 193,
+      "province": 3,
+      "address": "Molenstraat 5, Londerzeel 1840",
+      "location": "SRID=4326;POINT (4.2998253 51.0050831)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 74,
+    "fields": {
+      "name": "Dojo Lommel",
+      "municipality": 2568,
+      "province": 9,
+      "address": "Michiel Jansplein 1, Lommel 3920",
+      "location": "SRID=4326;POINT (5.3163968 51.2290517)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 75,
+    "fields": {
+      "name": "Dojo Lier",
+      "municipality": 2161,
+      "province": 2,
+      "address": "Deensestraat 6-7, Lier 2500",
+      "location": "SRID=4326;POINT (4.5739952 51.1292218)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 76,
+    "fields": {
+      "name": "Dojo Leopoldsburg",
+      "municipality": 301,
+      "province": 9,
+      "address": "Caimolaan 131, Leopoldsburg 3970",
+      "location": "SRID=4326;POINT (5.2479453 51.1166561)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 77,
+    "fields": {
+      "name": "Dojo Lanaken",
+      "municipality": 2378,
+      "province": 9,
+      "address": "112 Koning Albertlaan, Lanaken 3620",
+      "location": "SRID=4326;POINT (5.6599771 50.8927345)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 78,
+    "fields": {
+      "name": "Dojo Kortrijk",
+      "municipality": 507,
+      "province": 5,
+      "address": "Doorniksesteenweg 145, Kortrijk 8500",
+      "location": "SRID=4326;POINT (3.2843834 50.8057594)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 79,
+    "fields": {
+      "name": "Dojo Kortenberg",
+      "municipality": 1646,
+      "province": 3,
+      "address": "Dr. V. De Walsplein 30, Kortenberg 3070",
+      "location": "SRID=4326;POINT (4.5384396 50.8857402)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 80,
+    "fields": {
+      "name": "Dojo Kessel-Lo",
+      "municipality": 215,
+      "province": 3,
+      "address": "16 Lolanden, Kessel-Lo 3010",
+      "location": "SRID=4326;POINT (4.7287194 50.8811541)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 81,
+    "fields": {
+      "name": "Dojo Kalmthout",
+      "municipality": 1230,
+      "province": 2,
+      "address": "23 Kerkeneind, Kalmthout 2920",
+      "location": "SRID=4326;POINT (4.4781231 51.3823558)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 82,
+    "fields": {
+      "name": "Dojo izegem",
+      "municipality": 24,
+      "province": 5,
+      "address": "sint jorisstraat 62, izegem 8870",
+      "location": "SRID=4326;POINT (3.2048416 50.9127246)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 83,
+    "fields": {
+      "name": "Dojo Ieper",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 84,
+    "fields": {
+      "name": "Dojo Ichtegem (/Eernegem)",
+      "municipality": 1536,
+      "province": 5,
+      "address": "Westkerkestraat 66 , Eernegem  8480",
+      "location": "SRID=4326;POINT (3.027484 51.1321588)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 85,
+    "fields": {
+      "name": "Dojo Houthalen",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 86,
+    "fields": {
+      "name": "Dojo Hoogstraten",
+      "municipality": 1408,
+      "province": 2,
+      "address": "Lindendreef 1 B, Hoogstraten 2320",
+      "location": "SRID=4326;POINT (4.7639186 51.4014995)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 87,
+    "fields": {
+      "name": "Dojo Herentals",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 88,
+    "fields": {
+      "name": "Dojo Hemiksem",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 89,
+    "fields": {
+      "name": "Dojo Hasselt",
+      "municipality": 269,
+      "province": 9,
+      "address": "Vildersstraat 5, Hasselt 3500",
+      "location": "SRID=4326;POINT (5.3452212 50.9349916)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 90,
+    "fields": {
+      "name": "Dojo Ham",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 91,
+    "fields": {
+      "name": "Dojo Halle",
+      "municipality": 735,
+      "province": 3,
+      "address": "Leide 3, Halle 1500",
+      "location": "SRID=4326;POINT (4.2400922 50.7361971)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 92,
+    "fields": {
+      "name": "Dojo Haaltert",
+      "municipality": 428,
+      "province": 6,
+      "address": "2a Pluimstraat, Haaltert 9450",
+      "location": "SRID=4326;POINT (4.0032201 50.9033486)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 93,
+    "fields": {
+      "name": "Dojo Gent",
+      "municipality": 2014,
+      "province": 6,
+      "address": "1 Gebroeders de Smetstraat, Gent 9000",
+      "location": "SRID=4326;POINT (3.7086948 51.0598134)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 94,
+    "fields": {
+      "name": "Dojo Genk",
+      "municipality": 1833,
+      "province": 9,
+      "address": "26 Europalaan, Genk 3600",
+      "location": "SRID=4326;POINT (5.4922359 50.9659606)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 95,
+    "fields": {
+      "name": "Dojo Geel",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 96,
+    "fields": {
+      "name": "Dojo Gavere",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 97,
+    "fields": {
+      "name": "Dojo Evergem",
+      "municipality": 2521,
+      "province": 6,
+      "address": "Bibliotheekstraat, Evergem 9940",
+      "location": "SRID=4326;POINT (3.7063716 51.1083585)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 98,
+    "fields": {
+      "name": "Dojo Dilbeek",
+      "municipality": 2539,
+      "province": 3,
+      "address": "46 Kamerijklaan, Dilbeek 1700",
+      "location": "SRID=4326;POINT (4.2608262 50.849993)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 99,
+    "fields": {
+      "name": "Dojo Diksmuide",
+      "municipality": 1910,
+      "province": 5,
+      "address": "24 Koning Albertstraat, Diksmuide 8600",
+      "location": "SRID=4326;POINT (2.8646407 51.03149)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 100,
+    "fields": {
+      "name": "Dojo Diest",
+      "municipality": 770,
+      "province": 3,
+      "address": "Grauwzustersstraat 10 , Diest  3290",
+      "location": "SRID=4326;POINT (5.0585453 50.9869788)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 101,
+    "fields": {
+      "name": "Dojo Deinze",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 102,
+    "fields": {
+      "name": "Dojo De Pinte",
+      "municipality": 2636,
+      "province": 6,
+      "address": "27 Baron de Gieylaan, De Pinte 9840",
+      "location": "SRID=4326;POINT (3.6531135 50.9923523)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 103,
+    "fields": {
+      "name": "Dojo Brugge",
+      "municipality": 809,
+      "province": 5,
+      "address": "4 Spoorwegstraat, Brugge 8200",
+      "location": "SRID=4326;POINT (3.2161691 51.19444)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 104,
+    "fields": {
+      "name": "Dojo Bree",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 105,
+    "fields": {
+      "name": "Dojo Brecht",
+      "municipality": 2026,
+      "province": 2,
+      "address": "Venusstraat 5, Brecht 2960",
+      "location": "SRID=4326;POINT (4.638468 51.3490869)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 106,
+    "fields": {
+      "name": "Dojo Boutersem",
+      "municipality": 1250,
+      "province": 3,
+      "address": "Kerkomsesteenweg 55 , Boutersem  3370",
+      "location": "SRID=4326;POINT (4.8416189 50.8448468)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 107,
+    "fields": {
+      "name": "Dojo Borsbeek",
+      "municipality": 2663,
+      "province": 2,
+      "address": "August Van Putlei 56, Borsbeek 2150",
+      "location": "SRID=4326;POINT (4.4763631 51.1962954)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 108,
+    "fields": {
+      "name": "Dojo Bilzen",
+      "municipality": 2392,
+      "province": 9,
+      "address": "Eikenlaan 23 , Bilzen  3740",
+      "location": "SRID=4326;POINT (5.5124612 50.8661856)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 109,
+    "fields": {
+      "name": "Dojo Beveren",
+      "municipality": 2558,
+      "province": 6,
+      "address": "Europalaan 1 , Beveren  9120",
+      "location": "SRID=4326;POINT (4.2532849 51.2192119)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 110,
+    "fields": {
+      "name": "Dojo Berchem",
+      "municipality": 873,
+      "province": 2,
+      "address": "Karel Oomsstraat 47a, 2018 Antwerpen, Belgium",
+      "location": "SRID=4326;POINT (4.4097978 51.1947683)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 111,
+    "fields": {
+      "name": "Dojo Beersel",
+      "municipality": 612,
+      "province": 3,
+      "address": "Brusselsesteenweg 77C , Alsemberg  1652",
+      "location": "SRID=4326;POINT (4.332147 50.7417767)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 112,
+    "fields": {
+      "name": "Dojo Balen",
+      "municipality": 2322,
+      "province": 2,
+      "address": "1 Bevrijdingsstraat, Balen 2490",
+      "location": "SRID=4326;POINT (5.1638451 51.17108)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 113,
+    "fields": {
+      "name": "Dojo Asse",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 114,
+    "fields": {
+      "name": "Dojo Adem",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 115,
+    "fields": {
+      "name": "Dojo Aarschot",
+      "municipality": 2306,
+      "province": 3,
+      "address": "Elisabethlaan 103a, Aarschot 3200",
+      "location": "SRID=4326;POINT (4.8390555 50.9881925)"
+    }
+  },
+  {
+    "model": "dojos.dojo",
+    "pk": 116,
+    "fields": {
+      "name": "Dojo Aalter",
+      "municipality": null,
+      "province": null,
+      "address": "",
+      "location": null
+    }
+  }
+]

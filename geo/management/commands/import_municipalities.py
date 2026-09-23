@@ -10,8 +10,10 @@ GEOPACKAGE_PATH = "/home/erik/territorialdivisions_4326.gpkg"
 
 class Command(BaseCommand):
     help = (
-        "Import Belgian municipal sections and postal districts "
-        "from Geo.be Territorial Divisions."
+        "Import Belgian municipal sections and postal districts from Geo.be "
+        "Territorial Divisions. Needs GEOPACKAGE_PATH on disk - for local "
+        "dev/container seeding use `manage.py seed_geo` instead, which loads a "
+        "bundled dump of this command's output."
     )
 
     def handle(self, *args, **options):

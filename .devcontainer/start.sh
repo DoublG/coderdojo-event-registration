@@ -12,3 +12,12 @@ fi
 
 cd /workspace
 python manage.py migrate
+
+# Seed municipalities/boundaries/dojos from the bundled JSON dumps
+# (geo/seed_data/, dojos/seed_data/dojos.json) rather than the real
+# import_municipalities/import_boundaries/import_dojos commands, which need
+# a local geopackage file and live network access (CoderDojo Belgium site +
+# Nominatim geocoding) this container doesn't have. Both are no-ops once
+# the data already exists, so this is safe to re-run.
+python manage.py seed_geo
+python manage.py seed_dojos

@@ -125,3 +125,6 @@ private_media/
 docs/build/
 docs/locale/
 docs/source/locale/*/LC_MESSAGES/**/*.mo
+
+# Auto-generated login credentials for seeded demo accounts - never commit
+seed_credentials.csv

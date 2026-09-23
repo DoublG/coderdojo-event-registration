@@ -59,7 +59,12 @@ def find_nearest_municipality(lat, lon):
 
 
 class Command(BaseCommand):
-    help = "Import dojos (with geocoded location) from the CoderDojo Belgium dojo finder page."
+    help = (
+        "Import dojos (with geocoded location) from the CoderDojo Belgium dojo finder "
+        "page. Hits the live site + Nominatim, so it's slow and network-dependent - for "
+        "local dev/container seeding use `manage.py seed_dojos` instead, which loads a "
+        "bundled dump of this command's output."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(

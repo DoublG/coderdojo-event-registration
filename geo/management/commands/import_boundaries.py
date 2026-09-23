@@ -26,9 +26,11 @@ def load_geometry(shapely_geometry):
 
 class Command(BaseCommand):
     help = (
-        "Import the Belgian country outline and province boundaries "
-        "from Geo.be Territorial Divisions, for use as reference layers "
-        "on the admin GIS map widget."
+        "Import the Belgian country outline and province boundaries from Geo.be "
+        "Territorial Divisions, for use as reference layers on the admin GIS map "
+        "widget. Needs GEOPACKAGE_PATH on disk - for local dev/container seeding "
+        "use `manage.py seed_geo` instead, which loads a bundled dump of this "
+        "command's output."
     )
 
     def handle(self, *args, **options):
