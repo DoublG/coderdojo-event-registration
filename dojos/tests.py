@@ -227,6 +227,20 @@ class DojoManageViewTests(TestCase):
             )
         mock_geocode.assert_not_called()
 
+    def test_template_icon_used_when_no_file_uploaded(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.post(
+            reverse("dojo_manage", kwargs={"dojo_id": self.dojo.id}),
+            self._valid_post_data(template_icon="icon-02-robot.svg"),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["saved"])
+        self.dojo.refresh_from_db()
+        self.assertTrue(self.dojo.icon)
+        self.assertIn("icon-02-robot", self.dojo.icon.name)
+
 
 class DojoEventListViewTests(TestCase):
     def setUp(self):
@@ -269,14 +283,16 @@ class DojoEventCreateViewTests(TestCase):
     def _valid_post_data(self, **overrides):
         data = {
             "name": "Coding Saturday",
-            "start_time": "2030-01-01T10:00",
-            "end_time": "2030-01-01T12:00",
+            "event_date": "01/01/2030",
+            "start_time": "10:00",
+            "end_time": "12:00",
             "places": "20",
             "venue_name": "",
+            "template_image": "",
             "description": "",
             "min_age": "",
             "max_age": "",
-            "mentor": "",
+            "mentors": [],
         }
         data.update(overrides)
         return data
@@ -303,13 +319,15 @@ class DojoEventCreateViewTests(TestCase):
         event = Event.objects.get(dojo=self.dojo)
         self.assertEqual(event.name, "Coding Saturday")
         self.assertEqual(event.status, Event.DRAFT)
+        self.assertEqual(event.start_time.strftime("%d/%m/%Y %H:%M"), "01/01/2030 10:00")
+        self.assertEqual(event.end_time.strftime("%d/%m/%Y %H:%M"), "01/01/2030 12:00")
 
     def test_invalid_post_reshows_form_without_creating(self):
         self.client.force_login(self.owner)
 
         response = self.client.post(
             reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}),
-            self._valid_post_data(end_time="2030-01-01T09:00"),  # before start_time
+            self._valid_post_data(end_time="09:00"),  # before start_time, same day
         )
 
         self.assertEqual(response.status_code, 200)
@@ -324,7 +342,33 @@ class DojoEventCreateViewTests(TestCase):
 
         response = self.client.get(reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}))
 
-        self.assertEqual(list(response.context["form"].fields["mentor"].queryset), [own_mentor])
+        self.assertEqual(list(response.context["form"].fields["mentors"].queryset), [own_mentor])
+
+    def test_multiple_mentors_can_be_assigned(self):
+        mentor_a = Mentor.objects.create(name="Mentor A", dojo=self.dojo, role=Mentor.VOLUNTEER)
+        mentor_b = Mentor.objects.create(name="Mentor B", dojo=self.dojo, role=Mentor.VOLUNTEER)
+        self.client.force_login(self.owner)
+
+        self.client.post(
+            reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}),
+            self._valid_post_data(mentors=[str(mentor_a.id), str(mentor_b.id)]),
+        )
+
+        event = Event.objects.get(dojo=self.dojo)
+        self.assertEqual(set(event.mentors.all()), {mentor_a, mentor_b})
+
+    def test_template_image_used_when_no_file_uploaded(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.post(
+            reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}),
+            self._valid_post_data(template_image="coding-saturday.svg"),
+        )
+
+        self.assertRedirects(response, reverse("dojo_event_list", kwargs={"dojo_id": self.dojo.id}))
+        event = Event.objects.get(dojo=self.dojo)
+        self.assertTrue(event.image)
+        self.assertIn("coding-saturday", event.image.name)
 
 
 class DojoEventSetStatusViewTests(TestCase):

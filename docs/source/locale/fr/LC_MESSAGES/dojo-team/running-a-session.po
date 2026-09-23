@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 17:38+0000\n"
+"POT-Creation-Date: 2026-09-23 18:04+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -52,24 +52,38 @@ msgstr "Planifier une séance"
 #: ../../source/dojo-team/running-a-session.rst:18
 msgid ""
 "From your dashboard's **Events** page, **New event** creates a new "
-"session for your dojo — name, date and time, how many places it has, and "
-"optionally a venue, banner image, description, age range and a leading "
-"mentor."
+"session for your dojo — name, a date with a start and end time (a session"
+" always runs within a single day, entered as dd/mm/yyyy and a 24-hour "
+"time, e.g. 20/07/2030 and 14:00), how many places it has, and optionally "
+"a venue, description, an age range and one or more mentors."
 msgstr ""
 "Depuis la page **Événements** de votre tableau de bord, **Nouvel "
-"événement** crée une nouvelle séance pour votre dojo — nom, date et "
-"heure, nombre de places, et éventuellement un lieu, une image de "
-"bannière, une description, une tranche d'âge et un mentor responsable."
+"événement** crée une nouvelle séance pour votre dojo — nom, une date "
+"avec une heure de début et de fin (une séance se déroule toujours sur "
+"une seule journée, à saisir au format jj/mm/aaaa et en heure sur 24 "
+"heures, par exemple 20/07/2030 et 14:00), le nombre de places "
+"disponibles, et éventuellement un lieu, une description, une tranche "
+"d'âge et un ou plusieurs mentors."
 
-#: ../../source/dojo-team/running-a-session.rst:23
+#: ../../source/dojo-team/running-a-session.rst:24
+msgid ""
+"For the banner image, pick one of the ready-made templates shown on the "
+"form, or upload your own further down — uploading a file always takes "
+"priority if you do both."
+msgstr ""
+"Pour l'image de bannière, choisissez l'un des modèles prêts à l'emploi "
+"proposés sur le formulaire, ou téléversez la vôtre plus bas — un fichier "
+"téléversé est toujours prioritaire si vous faites les deux."
+
+#: ../../source/dojo-team/running-a-session.rst:28
 msgid ""
 "A session always goes through three states, shown as a badge next to it "
 "on the **Events** list:"
 msgstr ""
-"Une séance passe toujours par trois états, affichés sous forme de badge "
-"à côté d'elle dans la liste **Événements** :"
+"Une séance passe toujours par trois états, affichés sous forme de badge à"
+" côté d'elle dans la liste **Événements** :"
 
-#: ../../source/dojo-team/running-a-session.rst:26
+#: ../../source/dojo-team/running-a-session.rst:31
 msgid ""
 "**Draft** — a new session starts here. It's completely hidden from the "
 "public site (the dojo-finder, the Events list, your dojo's own page) "
@@ -77,12 +91,12 @@ msgid ""
 "every field before it's ready to be seen."
 msgstr ""
 "**Brouillon** — une nouvelle séance commence dans cet état. Elle est "
-"totalement invisible sur le site public (le moteur de recherche de "
-"dojos, la liste des événements, la page de votre dojo) tant que vous "
-"êtes encore en train de la préparer, donc rien ne presse pour remplir "
-"tous les champs avant qu'elle ne soit prête à être vue."
+"totalement invisible sur le site public (le moteur de recherche de dojos,"
+" la liste des événements, la page de votre dojo) tant que vous êtes "
+"encore en train de la préparer, donc rien ne presse pour remplir tous les"
+" champs avant qu'elle ne soit prête à être vue."
 
-#: ../../source/dojo-team/running-a-session.rst:30
+#: ../../source/dojo-team/running-a-session.rst:35
 msgid ""
 "**Open** — once you're happy with it, **Publish** makes the session "
 "visible on the public site and open for families to sign up."
@@ -91,7 +105,7 @@ msgstr ""
 "séance visible sur le site public et ouverte aux inscriptions des "
 "familles."
 
-#: ../../source/dojo-team/running-a-session.rst:32
+#: ../../source/dojo-team/running-a-session.rst:37
 msgid ""
 "**Closed** — **Close registrations** turns off further sign-ups for that "
 "session, without hiding it. This is a manual step, normally done once "
@@ -99,27 +113,26 @@ msgid ""
 "ups trickling in afterwards."
 msgstr ""
 "**Fermée** — **Fermer les inscriptions** désactive toute nouvelle "
-"inscription pour cette séance, sans la masquer. C'est une étape "
-"manuelle, généralement effectuée une fois les présences vérifiées pour "
-"la séance, lorsque vous ne souhaitez plus recevoir d'inscriptions "
-"supplémentaires."
+"inscription pour cette séance, sans la masquer. C'est une étape manuelle,"
+" généralement effectuée une fois les présences vérifiées pour la séance, "
+"lorsque vous ne souhaitez plus recevoir d'inscriptions supplémentaires."
 
-#: ../../source/dojo-team/running-a-session.rst:37
+#: ../../source/dojo-team/running-a-session.rst:42
 msgid ""
 "Each of these is a one-way step forward (draft → open → closed) — there's"
 " currently no way to send a session back to an earlier state from the "
 "dashboard; get in touch with CoderDojo Belgium if you need one corrected."
 msgstr ""
-"Chacune de ces étapes n'avance que dans un seul sens (brouillon → "
-"ouverte → fermée) — il n'existe actuellement aucun moyen de faire "
-"revenir une séance à un état antérieur depuis le tableau de bord ; "
-"contactez CoderDojo Belgique si vous devez en corriger une."
+"Chacune de ces étapes n'avance que dans un seul sens (brouillon → ouverte"
+" → fermée) — il n'existe actuellement aucun moyen de faire revenir une "
+"séance à un état antérieur depuis le tableau de bord ; contactez "
+"CoderDojo Belgique si vous devez en corriger une."
 
-#: ../../source/dojo-team/running-a-session.rst:42
+#: ../../source/dojo-team/running-a-session.rst:47
 msgid "Team pages"
 msgstr "Pages d'équipe"
 
-#: ../../source/dojo-team/running-a-session.rst:44
+#: ../../source/dojo-team/running-a-session.rst:49
 msgid ""
 "A dojo's public team page (visible to anyone, not just the dojo team) "
 "shows its mentors, with the lead coach always listed first. Team member "

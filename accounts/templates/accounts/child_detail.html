@@ -73,7 +73,7 @@
               <th class="label" scope="col">Date</th>
               <th class="label" scope="col">Session</th>
               <th class="label" scope="col">Dojo</th>
-              <th class="label" scope="col">Mentor</th>
+              <th class="label" scope="col">Mentors</th>
             </tr>
           </thead>
           <tbody>
@@ -82,7 +82,7 @@
                 <td class="body-sm">{{ registration.event.start_time|date:"j M Y" }}</td>
                 <td class="body-sm">{{ registration.event.name }}</td>
                 <td class="body-sm">{{ registration.event.dojo.name }}</td>
-                <td class="body-sm">{{ registration.event.mentor.name|default:"—" }}</td>
+                <td class="body-sm">{% for mentor in registration.event.mentors.all %}{{ mentor.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
               </tr>
             {% empty %}
               <tr>

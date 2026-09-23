@@ -1,4 +1,5 @@
 {% extends "dojos/_admin_base.html" %}
+{% load static %}
 {% block admin_page_title %}Settings{% endblock %}
 {% block admin_heading %}Dojo profile{% endblock %}
 
@@ -41,12 +42,30 @@
           </div>
         </div>
         <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.icon.id_for_label }}">Icon</label>
+          <label class="cd-form__label label">Icon</label>
+          <p class="cd-form__help caption" style="margin-top:0;">Round icon shown at the top of the dojo page, next to its name.</p>
           {% if dojo.icon %}
             <img src="{{ dojo.icon.url }}" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;margin-bottom:var(--space-2);">
           {% endif %}
+          <div class="cd-template-picker cd-template-picker--round">
+            {% for radio in form.template_icon %}
+              <label class="cd-template-picker__option" for="{{ radio.id_for_label }}">
+                {{ radio.tag }}
+                {% if radio.data.value %}
+                  <img class="cd-template-picker__option-img" src="{% static 'dojos/template_icons/'|add:radio.data.value %}" alt="">
+                {% else %}
+                  <span class="cd-template-picker__option-none caption">No template</span>
+                {% endif %}
+                <span class="caption">{{ radio.choice_label }}</span>
+              </label>
+            {% endfor %}
+          </div>
+          <ul class="cd-form__errors">{% for error in form.template_icon.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        </div>
+        <div class="cd-form__field">
+          <label class="cd-form__label label" for="{{ form.icon.id_for_label }}">…or upload your own</label>
           {{ form.icon }}
-          <p class="cd-form__help caption">Round icon shown at the top of the dojo page, next to its name.</p>
+          <p class="cd-form__help caption">Uploading a file here overrides the template chosen above.</p>
           <ul class="cd-form__errors">{% for error in form.icon.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
         </div>
         <div class="cd-form__field">

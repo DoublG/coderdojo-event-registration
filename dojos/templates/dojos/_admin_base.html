@@ -20,15 +20,20 @@
      dojos/templates/dojos/partials/_notification_bell.html for why the bell itself stays separate. -->
 <div hx-ext="ws" ws-connect="/ws/dojos/{{ dojo.id }}/notifications/" style="display:none"></div>
 <style>
-  .admin-page-root { height: 760px; overflow: hidden; }
-  .admin-page-root .admin-main { flex: 1; min-width: 0; padding: var(--space-5) var(--space-6); overflow: auto; height: 100%; box-sizing: border-box; }
+  .admin-page-root .admin-main { flex: 1; min-width: 0; padding: var(--space-5) var(--space-6); box-sizing: border-box; }
   .admin-page-root .admin-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5); gap: var(--space-4); }
   .admin-page-root .admin-topbar h1 { color: var(--ink); margin: 0; }
+  /* The bell and any page-specific buttons (admin_topbar_extra) are one
+     flex item together, not two separate ones — with three top-level
+     children, .admin-topbar's justify-content: space-between would strand
+     the bell in the middle of the bar instead of next to the buttons on
+     the right, the moment a page actually fills admin_topbar_extra. */
+  .admin-page-root .admin-topbar__actions { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; justify-content: flex-end; }
 </style>
 {% block admin_extra_style %}{% endblock %}
 
 <div class="cd-root admin-page-root" style="padding: 0;">
-  <div class="cd-admin-nav-shell" style="display: flex; height: 100%;" id="adminnav-page">
+  <div class="cd-admin-nav-shell" style="display: flex;" id="adminnav-page">
 
     <div class="cd-admin-nav__backdrop" data-cd-adminnav-backdrop data-open="false"></div>
 
@@ -145,8 +150,10 @@
 
       <div class="admin-topbar">
         <h1 class="heading-lg">{% block admin_heading %}{% endblock %}</h1>
-        {% include "dojos/partials/_notification_bell.html" %}
-        {% block admin_topbar_extra %}{% endblock %}
+        <div class="admin-topbar__actions">
+          {% include "dojos/partials/_notification_bell.html" %}
+          {% block admin_topbar_extra %}{% endblock %}
+        </div>
       </div>
 
       {% block admin_content %}{% endblock %}

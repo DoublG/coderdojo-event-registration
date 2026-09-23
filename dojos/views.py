@@ -6,6 +6,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from content.models import FAQ
 from events.forms import EventForm
@@ -210,14 +211,45 @@ def dojo_event_create(request, dojo_id):
 
 
 @login_required
+def dojo_event_detail(request, dojo_id, event_id):
+    """Edit an existing event — same EventForm as dojo_event_create, just
+    bound to an existing instance (EventForm.__init__ pre-fills event_date/
+    start_time/end_time from it). Re-renders in place on success, same
+    "no redirect, just show a saved banner" convention as dojo_manage,
+    since this is an edit-in-place settings-style form, not a one-shot
+    creation. Status is changed separately, via dojo_event_set_status —
+    the status card at the top of the template posts there directly."""
+    dojo = _get_owned_dojo(request, dojo_id)
+    event = get_object_or_404(Event, id=event_id, dojo=dojo)
+    saved = False
+
+    if request.method == "POST":
+        form = EventForm(request.POST, request.FILES, instance=event, dojo=dojo)
+        if form.is_valid():
+            event = form.save()
+            saved = True
+    else:
+        form = EventForm(instance=event, dojo=dojo)
+
+    return render(request, "dojos/dojo_event_detail.html", {
+        "dojo": dojo, "event": event, "form": form, "saved": saved, "active": "events",
+        **_notification_context(request.user, dojo),
+    })
+
+
+@login_required
 def dojo_event_set_status(request, dojo_id, event_id):
-    """The two manual status transitions available from the events list:
-    "Publish" (draft -> open, makes the session visible and open for
-    registration) and "Close registrations" (open -> closed — normally
-    done once attendance for the session has been checked). Each only
-    fires from the specific status it's valid from, so a stale page (two
-    tabs open, a slow double-click) can't apply the same transition twice
-    or skip a state."""
+    """The two manual status transitions available from the events list and
+    the event detail page: "Publish" (draft -> open, makes the session
+    visible and open for registration) and "Close registrations" (open ->
+    closed — normally done once attendance for the session has been
+    checked). Each only fires from the specific status it's valid from, so
+    a stale page (two tabs open, a slow double-click) can't apply the same
+    transition twice or skip a state.
+
+    Redirects back to `next` (posted by whichever page linked here — the
+    list or the detail page) when it's a safe same-site URL, else falls
+    back to the events list."""
     dojo = _get_owned_dojo(request, dojo_id)
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
     transitions = {"publish": (Event.DRAFT, Event.OPEN), "close": (Event.OPEN, Event.CLOSED)}
@@ -228,6 +260,11 @@ def dojo_event_set_status(request, dojo_id, event_id):
             event.status = new_status
             event.save(update_fields=["status"])
 
+    next_url = request.POST.get("next")
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return redirect(next_url)
     return redirect("dojo_event_list", dojo_id=dojo.id)
 
 

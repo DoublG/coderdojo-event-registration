@@ -45,7 +45,7 @@ class Event(models.Model):
     description = models.TextField(blank=True, default="", help_text=MARKDOWN_HELP_TEXT)
     min_age = models.PositiveSmallIntegerField(null=True, blank=True)
     max_age = models.PositiveSmallIntegerField(null=True, blank=True)
-    mentor = models.ForeignKey("dojos.Mentor", on_delete=models.SET_NULL, null=True, blank=True, related_name="events")
+    mentors = models.ManyToManyField("dojos.Mentor", blank=True, related_name="events")
 
     participants = models.ManyToManyField("accounts.Participant", through="Registration")
 

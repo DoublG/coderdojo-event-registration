@@ -1,8 +1,13 @@
+from datetime import datetime
+
 from django import forms
+from django.core.files import File
+from django.utils import timezone
 
 from dojos.models import Dojo
 
 from .models import Event
+from .template_images import TEMPLATE_IMAGES, TEMPLATE_IMAGES_DIR
 
 DATE_ANY = ""
 DATE_WEEK = "week"
@@ -40,7 +45,14 @@ class EventSearchForm(forms.Form):
     )
 
 
-DATETIME_LOCAL_FORMAT = "%Y-%m-%dT%H:%M"
+# Belgium's own date/time notation — day before month, 24-hour clock — used
+# for EventForm's date/start_time/end_time fields regardless of the
+# visitor's own browser/OS locale (a native <input type="date"> can't be
+# forced to a fixed display order, so these are plain text fields instead).
+BELGIAN_DATE_FORMAT = "%d/%m/%Y"
+BELGIAN_TIME_FORMAT = "%H:%M"
+
+NO_TEMPLATE_IMAGE = ""
 
 
 class EventForm(forms.ModelForm):
@@ -49,22 +61,50 @@ class EventForm(forms.ModelForm):
     (Event.status' model default): the "Open" state that makes a session
     live for registration is a deliberate follow-up action from the
     events list, not something chosen here — matches the "closed" state,
-    which is only ever a manual action too (see dojos.views.dojo_event_set_status)."""
+    which is only ever a manual action too (see dojos.views.dojo_event_set_status).
+
+    A session is always a single day: rather than two separate start/end
+    *datetime* pickers (which could disagree on the date), this form has
+    one date field plus separate start/end *time* fields, both applied to
+    that same date in save() — spanning midnight simply isn't
+    representable through this form."""
+
+    event_date = forms.DateField(
+        input_formats=[BELGIAN_DATE_FORMAT],
+        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "dd/mm/yyyy", "inputmode": "numeric"}),
+    )
+    start_time = forms.TimeField(
+        input_formats=[BELGIAN_TIME_FORMAT],
+        widget=forms.TimeInput(
+            attrs={"class": "cd-form__input body", "type": "time", "step": "60", "placeholder": "HH:MM"},
+            format=BELGIAN_TIME_FORMAT,
+        ),
+    )
+    end_time = forms.TimeField(
+        input_formats=[BELGIAN_TIME_FORMAT],
+        widget=forms.TimeInput(
+            attrs={"class": "cd-form__input body", "type": "time", "step": "60", "placeholder": "HH:MM"},
+            format=BELGIAN_TIME_FORMAT,
+        ),
+    )
+    # Not a model field — a shortcut that, on save(), copies one of the
+    # bundled events/static/events/template_images/ files into `image`
+    # instead of requiring an upload. An uploaded file (see save()) always
+    # wins over this if both are somehow submitted at once.
+    template_image = forms.ChoiceField(
+        required=False,
+        choices=[(NO_TEMPLATE_IMAGE, "No template — I'll upload my own below")] + TEMPLATE_IMAGES,
+        widget=forms.RadioSelect,
+    )
 
     class Meta:
         model = Event
         fields = [
-            "name", "start_time", "end_time", "places", "venue_name", "image",
-            "description", "min_age", "max_age", "mentor",
+            "name", "places", "venue_name", "image",
+            "description", "min_age", "max_age", "mentors",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Coding Saturday"}),
-            "start_time": forms.DateTimeInput(
-                attrs={"class": "cd-form__input body", "type": "datetime-local"}, format=DATETIME_LOCAL_FORMAT,
-            ),
-            "end_time": forms.DateTimeInput(
-                attrs={"class": "cd-form__input body", "type": "datetime-local"}, format=DATETIME_LOCAL_FORMAT,
-            ),
             "places": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "20"}),
             "venue_name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": 'e.g. "Ghent Public Library"'}),
             "image": forms.ClearableFileInput(attrs={"class": "cd-form__input body"}),
@@ -74,15 +114,16 @@ class EventForm(forms.ModelForm):
             }),
             "min_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "7"}),
             "max_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "18"}),
-            "mentor": forms.Select(attrs={"class": "cd-form__select body"}),
+            "mentors": forms.CheckboxSelectMultiple,
         }
 
     def __init__(self, *args, dojo, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["start_time"].input_formats = [DATETIME_LOCAL_FORMAT]
-        self.fields["end_time"].input_formats = [DATETIME_LOCAL_FORMAT]
-        self.fields["mentor"].queryset = dojo.mentors.order_by("name")
-        self.fields["mentor"].empty_label = "Not set"
+        self.fields["mentors"].queryset = dojo.mentors.order_by("name")
+        if self.instance.pk:
+            self.fields["event_date"].initial = self.instance.start_time.date()
+            self.fields["start_time"].initial = self.instance.start_time.time()
+            self.fields["end_time"].initial = self.instance.end_time.time()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -91,3 +132,20 @@ class EventForm(forms.ModelForm):
         if start_time and end_time and end_time <= start_time:
             self.add_error("end_time", "End time must be after the start time.")
         return cleaned_data
+
+    def save(self, commit=True):
+        event = super().save(commit=False)
+        event_date = self.cleaned_data["event_date"]
+        event.start_time = timezone.make_aware(datetime.combine(event_date, self.cleaned_data["start_time"]))
+        event.end_time = timezone.make_aware(datetime.combine(event_date, self.cleaned_data["end_time"]))
+
+        template_image = self.cleaned_data.get("template_image")
+        if template_image and not self.files.get("image"):
+            image_path = TEMPLATE_IMAGES_DIR / template_image
+            with open(image_path, "rb") as f:
+                event.image.save(template_image, File(f), save=False)
+
+        if commit:
+            event.save()
+            self.save_m2m()
+        return event

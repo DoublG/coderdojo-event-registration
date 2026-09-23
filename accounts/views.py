@@ -358,7 +358,8 @@ def child_detail(request, guardian_id, child_id):
     now = timezone.now()
     history = (
         child.registration_set.filter(event__start_time__lt=now)
-        .select_related("event", "event__dojo", "event__mentor")
+        .select_related("event", "event__dojo")
+        .prefetch_related("event__mentors")
         .order_by("-event__start_time")
     )
 

@@ -7,6 +7,7 @@ from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
 from dojos.models import Dojo, Mentor
+from dojos.template_icons import TEMPLATE_ICONS, TEMPLATE_ICONS_DIR
 
 AVATARS_DIR = Path(__file__).resolve().parent.parent.parent / "seed_data" / "avatars"
 AVATAR_FILES = sorted(AVATARS_DIR.glob("*.svg"))
@@ -15,9 +16,6 @@ AVATAR_FILES = sorted(AVATARS_DIR.glob("*.svg"))
 # instead of the plain human avatars used for adult mentor roles.
 KID_AVATARS_DIR = Path(__file__).resolve().parent.parent.parent / "seed_data" / "kid_avatars"
 KID_AVATAR_FILES = sorted(KID_AVATARS_DIR.glob("*.svg"))
-
-DOJO_ICONS_DIR = Path(__file__).resolve().parent.parent.parent / "seed_data" / "dojo_icons"
-DOJO_ICON_FILES = sorted(DOJO_ICONS_DIR.glob("*.svg"))
 
 FIRST_NAMES = [
     "Emma", "Liam", "Olivia", "Noah", "Sophie", "Lucas", "Mila", "Finn",
@@ -113,8 +111,10 @@ def assign_avatar(mentor, rng):
 
 def assign_dojo_icon(dojo, rng):
     """Same idea as assign_avatar(), for the round icon at the top of a
-    dojo's own page (dojos/seed_data/dojo_icons/)."""
-    icon_path = rng.choice(DOJO_ICON_FILES)
+    dojo's own page — dojos.template_icons.TEMPLATE_ICONS, the same list
+    the dojo owner's own "choose from templates" icon picker uses."""
+    filename, _label = rng.choice(TEMPLATE_ICONS)
+    icon_path = TEMPLATE_ICONS_DIR / filename
     with open(icon_path, "rb") as f:
         dojo.icon.save(icon_path.name, File(f), save=True)
 

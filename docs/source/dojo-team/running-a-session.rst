@@ -16,9 +16,14 @@ Scheduling a session
 ----------------------
 
 From your dashboard's **Events** page, **New event** creates a new
-session for your dojo — name, date and time, how many places it has,
-and optionally a venue, banner image, description, age range and a
-leading mentor.
+session for your dojo — name, a date with a start and end time (a
+session always runs within a single day, entered as dd/mm/yyyy and a
+24-hour time, e.g. 20/07/2030 and 14:00), how many places it has, and
+optionally a venue, description, an age range and one or more mentors.
+
+For the banner image, pick one of the ready-made templates shown on the
+form, or upload your own further down — uploading a file always takes
+priority if you do both.
 
 A session always goes through three states, shown as a badge next to it
 on the **Events** list:

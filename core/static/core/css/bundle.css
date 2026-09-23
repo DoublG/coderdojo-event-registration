@@ -693,6 +693,59 @@
 }
 .cd-form__checkbox-row label { color: var(--ink); }
 
+/* A stack of .cd-form__checkbox-row's — e.g. a multi-select list of
+   mentors, as opposed to .cd-form__checkbox-row used bare for a single
+   consent checkbox. */
+.cd-form__checkbox-list { display: flex; flex-direction: column; gap: var(--space-2); }
+
+/* ---------- Template picker (a small gallery of bundled images to pick from,
+   as an alternative to uploading your own — event banners, dojo icons) ---------- */
+.cd-template-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-3);
+}
+.cd-template-picker__option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: center;
+}
+.cd-template-picker__option:has(input:checked) {
+  border-color: var(--primary);
+  background: var(--surface-sunken);
+}
+.cd-template-picker__option input[type="radio"] { accent-color: var(--primary); }
+.cd-template-picker__option-img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+}
+.cd-template-picker__option-none {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+}
+/* A round-icon picker (dojo icons) wants square/round tiles, not the
+   16:9 banner aspect ratio above — override just the aspect ratio+shape. */
+.cd-template-picker--round .cd-template-picker__option-img,
+.cd-template-picker--round .cd-template-picker__option-none {
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+}
+
 .cd-form__actions {
   display: flex;
   justify-content: flex-end;
@@ -1192,7 +1245,10 @@
   flex-direction: column;
   width: 240px;
   min-width: 240px;
-  height: 100%;
+  /* No explicit height — .cd-admin-nav-shell's default flex
+     align-items: stretch already grows this to match .admin-main's full
+     (natural, unconstrained) height, so the sidebar's background/border
+     run the whole length of the page instead of stopping at the viewport. */
   background: var(--surface-raised);
   border-right: 1px solid var(--border);
   padding: var(--space-4) 0;
@@ -1318,7 +1374,7 @@
 }
 
 .cd-admin-nav__footer {
-  margin-top: auto;
+  margin-bottom: auto;
   display: flex;
   align-items: center;
   gap: var(--space-3);

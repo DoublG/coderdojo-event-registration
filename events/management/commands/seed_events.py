@@ -2,7 +2,6 @@ import itertools
 import random
 from calendar import monthrange
 from datetime import date, datetime, time, timedelta
-from pathlib import Path
 
 from django.core.files import File
 from django.core.management.base import BaseCommand
@@ -10,8 +9,7 @@ from django.utils import timezone
 
 from dojos.models import Dojo
 from events.models import Event
-
-IMAGES_DIR = Path(__file__).resolve().parent.parent.parent / "seed_data" / "images"
+from events.template_images import TEMPLATE_IMAGES, TEMPLATE_IMAGES_DIR
 
 SATURDAY, SUNDAY, WEDNESDAY, FRIDAY = 5, 6, 2, 4
 
@@ -34,28 +32,14 @@ PATTERN_WEIGHTS = {"weekend": 60, "wednesday": 20, "friday": 20}
 # The event's own name — not the dojo's name and not the date, both of
 # which are already shown alongside it (see events/partials/_event_row.html
 # and event_detail.html), so baking either into the name would just repeat
-# it.
-SESSION_NAMES = [
-    "Coding Saturday", "Open Lab", "Scratch & Games", "Build & Code",
-    "Ninja Session", "Code Club", "Make Something Session", "Project Time",
-    "Beginner's Workshop", "Game Jam Session",
-]
+# it. Derived from events.template_images.TEMPLATE_IMAGES (the same list
+# the dojo owner's own "choose from templates" banner picker uses) so the
+# names and their banner images can't drift apart.
+SESSION_NAMES = [label for _filename, label in TEMPLATE_IMAGES]
 
-# One banner image per session name (events/seed_data/images/), shown on
-# the homepage's "Upcoming sessions" card — see
-# events/templates/events/partials/_upcoming_session_card.html.
-SESSION_IMAGES = {
-    "Coding Saturday": "coding-saturday.svg",
-    "Open Lab": "open-lab.svg",
-    "Scratch & Games": "scratch-games.svg",
-    "Build & Code": "build-code.svg",
-    "Ninja Session": "ninja-session.svg",
-    "Code Club": "code-club.svg",
-    "Make Something Session": "make-something.svg",
-    "Project Time": "project-time.svg",
-    "Beginner's Workshop": "beginners-workshop.svg",
-    "Game Jam Session": "game-jam.svg",
-}
+# One banner image per session name, shown on the homepage's "Upcoming
+# sessions" card — see events/templates/events/partials/_upcoming_session_card.html.
+SESSION_IMAGES = {label: filename for filename, label in TEMPLATE_IMAGES}
 
 
 def description_for(session_name):
@@ -77,7 +61,7 @@ def description_for(session_name):
 
 
 def assign_session_image(event, session_name):
-    image_path = IMAGES_DIR / SESSION_IMAGES[session_name]
+    image_path = TEMPLATE_IMAGES_DIR / SESSION_IMAGES[session_name]
     with open(image_path, "rb") as f:
         event.image.save(image_path.name, File(f), save=True)
 

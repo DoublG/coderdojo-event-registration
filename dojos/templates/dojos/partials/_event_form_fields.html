@@ -1,0 +1,132 @@
+{% load static %}
+{% comment %}
+The cd-form__group sections shared by dojo_event_create.html (a new,
+unsaved Event) and dojo_event_detail.html (editing an existing one).
+Expects `form` (an events.forms.EventForm) in context, and optionally
+`event` (the Event instance being edited — omitted/None when creating).
+{% endcomment %}
+<div class="cd-form__group">
+  <h3 class="cd-form__group-title heading-md">Basics</h3>
+  <p class="cd-form__group-desc body-sm">
+    {% if event.pk %}
+      A session's visibility and whether it's open for registration are controlled by its status above, not by these fields.
+    {% else %}
+      New sessions start as a draft, hidden from the public site — publish it from the events list once it's ready.
+    {% endif %}
+  </p>
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.name.id_for_label }}">Name<span class="cd-form__required" aria-hidden="true">*</span></label>
+    <ul class="cd-form__errors">{% for error in form.name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {{ form.name }}
+  </div>
+  <div class="cd-form__row">
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="{{ form.event_date.id_for_label }}">Date<span class="cd-form__required" aria-hidden="true">*</span></label>
+      <ul class="cd-form__errors">{% for error in form.event_date.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+      {{ form.event_date }}
+    </div>
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="{{ form.start_time.id_for_label }}">Starts<span class="cd-form__required" aria-hidden="true">*</span></label>
+      <ul class="cd-form__errors">{% for error in form.start_time.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+      {{ form.start_time }}
+    </div>
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="{{ form.end_time.id_for_label }}">Ends<span class="cd-form__required" aria-hidden="true">*</span></label>
+      <ul class="cd-form__errors">{% for error in form.end_time.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+      {{ form.end_time }}
+    </div>
+  </div>
+  <p class="cd-form__help caption">A session always runs within a single day.</p>
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.places.id_for_label }}">Places<span class="cd-form__required" aria-hidden="true">*</span></label>
+    <ul class="cd-form__errors">{% for error in form.places.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {{ form.places }}
+    <p class="cd-form__help caption">How many children can register before new sign-ups go on the waiting list.</p>
+  </div>
+</div>
+
+<div class="cd-form__group">
+  <h3 class="cd-form__group-title heading-md">Location</h3>
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.venue_name.id_for_label }}">Venue</label>
+    <ul class="cd-form__errors">{% for error in form.venue_name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {{ form.venue_name }}
+    <p class="cd-form__help caption">Leave blank to use the dojo's own address.</p>
+  </div>
+</div>
+
+<div class="cd-form__group">
+  <h3 class="cd-form__group-title heading-md">Banner image</h3>
+  <p class="cd-form__group-desc body-sm">Shown on the homepage's Upcoming sessions card.</p>
+  {% if event.image %}
+    <div class="cd-form__field">
+      <label class="cd-form__label label">Current banner</label>
+      <img src="{{ event.image.url }}" alt="" style="width:160px;aspect-ratio:16/9;object-fit:cover;border-radius:var(--radius-sm);">
+    </div>
+  {% endif %}
+  <div class="cd-form__field">
+    <label class="cd-form__label label">Choose a template</label>
+    <div class="cd-template-picker">
+      {% for radio in form.template_image %}
+        <label class="cd-template-picker__option" for="{{ radio.id_for_label }}">
+          {{ radio.tag }}
+          {% if radio.data.value %}
+            <img class="cd-template-picker__option-img" src="{% static 'events/template_images/'|add:radio.data.value %}" alt="">
+          {% else %}
+            <span class="cd-template-picker__option-none caption">No template</span>
+          {% endif %}
+          <span class="caption">{{ radio.choice_label }}</span>
+        </label>
+      {% endfor %}
+    </div>
+    <ul class="cd-form__errors">{% for error in form.template_image.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+  </div>
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.image.id_for_label }}">…or upload your own</label>
+    {{ form.image }}
+    <p class="cd-form__help caption">Uploading a file here overrides the template chosen above.</p>
+    <ul class="cd-form__errors">{% for error in form.image.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+  </div>
+</div>
+
+<div class="cd-form__group">
+  <h3 class="cd-form__group-title heading-md">About this session</h3>
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.description.id_for_label }}">Description</label>
+    {{ form.description }}
+    <p class="cd-form__help caption">Supports basic Markdown.</p>
+    <ul class="cd-form__errors">{% for error in form.description.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+  </div>
+</div>
+
+<div class="cd-form__group">
+  <h3 class="cd-form__group-title heading-md">Ages &amp; mentors</h3>
+  <div class="cd-form__row">
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="{{ form.min_age.id_for_label }}">Minimum age</label>
+      <ul class="cd-form__errors">{% for error in form.min_age.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+      {{ form.min_age }}
+    </div>
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="{{ form.max_age.id_for_label }}">Maximum age</label>
+      <ul class="cd-form__errors">{% for error in form.max_age.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+      {{ form.max_age }}
+    </div>
+  </div>
+  <div class="cd-form__field">
+    <label class="cd-form__label label">Mentors</label>
+    <ul class="cd-form__errors">{% for error in form.mentors.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {% if form.mentors.field.queryset.exists %}
+      <div class="cd-form__checkbox-list">
+        {% for checkbox in form.mentors %}
+          <label class="cd-form__checkbox-row" for="{{ checkbox.id_for_label }}">
+            {{ checkbox.tag }}
+            <span class="body-sm">{{ checkbox.choice_label }}</span>
+          </label>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="cd-form__help caption">No mentors added for this dojo yet.</p>
+    {% endif %}
+  </div>
+</div>

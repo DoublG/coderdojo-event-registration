@@ -129,10 +129,11 @@ class Command(BaseCommand):
                         "places": dojo_rng.choice([15, 20, 24, 30]),
                         "location": dojo.location,
                         "description": description_for(session_name),
-                        "mentor": lead_coach,
                     },
                 )
                 if was_created:
+                    if lead_coach:
+                        event.mentors.add(lead_coach)
                     assign_session_image(event, session_name)
                     events_created += 1
                 dojo_events.append(event)

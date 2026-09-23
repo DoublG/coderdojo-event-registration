@@ -1,0 +1,80 @@
+{% extends "dojos/_admin_base.html" %}
+{% block admin_page_title %}{{ event.name }}{% endblock %}
+{% block admin_heading %}{{ event.name }}{% endblock %}
+
+{% block admin_extra_style %}
+<style>
+  .event-detail-form { max-width: 720px; }
+  .event-status-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-5);
+    max-width: 720px;
+  }
+  .event-status-card__actions { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+
+  <div class="cd-card event-status-card">
+    <div>
+      <p class="cd-form__label label">Status</p>
+      {% if event.status == 'draft' %}
+        <span class="cd-badge cd-badge--outline caption">Draft</span>
+      {% elif event.status == 'open' %}
+        <span class="cd-badge cd-badge--success caption">Open</span>
+      {% else %}
+        <span class="cd-badge cd-badge--warning caption">Closed</span>
+      {% endif %}
+    </div>
+    <div class="event-status-card__actions">
+      {% if event.status == 'draft' %}
+        <form method="post" action="{% url 'dojo_event_set_status' dojo_id=dojo.id event_id=event.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="publish">
+          <input type="hidden" name="next" value="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">
+          <button type="submit" class="cd-btn cd-btn--secondary label">Publish</button>
+        </form>
+      {% elif event.status == 'open' %}
+        <form method="post" action="{% url 'dojo_event_set_status' dojo_id=dojo.id event_id=event.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="close">
+          <input type="hidden" name="next" value="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">
+          <button type="submit" class="cd-btn cd-btn--ghost label">Close registrations</button>
+        </form>
+      {% endif %}
+      {% if event.status != 'draft' %}
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=event.id %}" target="_blank" rel="noopener">View public page</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="event-detail-form">
+    <form class="cd-form" method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      {% if saved or form.non_field_errors %}
+        <div class="cd-form__notes">
+          {% if saved %}
+            <p class="cd-form__note cd-form__note--success">Saved.</p>
+          {% endif %}
+          {% for error in form.non_field_errors %}
+            <p class="cd-form__note cd-form__note--error">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% include "dojos/partials/_event_form_fields.html" %}
+
+      <div class="cd-form__actions">
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_list' dojo_id=dojo.id %}">Back to events</a>
+        <button type="submit" class="cd-btn cd-btn--primary label">Save changes</button>
+      </div>
+
+    </form>
+  </div>
+{% endblock %}
