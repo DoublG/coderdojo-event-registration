@@ -1,9 +1,9 @@
+import re
 from pathlib import Path
 
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, update_session_auth_hash
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
-from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.core.files import File
@@ -14,11 +14,19 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.text import slugify
 
 from events.models import Registration
 
-from .forms import ForcedPasswordChangeForm, LoginForm, StyledPasswordResetForm, StyledSetPasswordForm
+from .forms import (
+    ForcedPasswordChangeForm,
+    LoginForm,
+    RegisterGuardianForm,
+    StyledPasswordResetForm,
+    StyledSetPasswordForm,
+)
 from .models import Guardian, Participant
+from .provisioning import unique_username
 
 # Same pool as seed_guardians.py — a guardian adding a child through the
 # quick-add widget picks one of these instead of getting a random one.
@@ -30,6 +38,8 @@ KID_AVATAR_FILES = sorted(KID_AVATARS_DIR.glob("*.svg"))
 # pattern as the homepage's "Upcoming sessions", see
 # events.views.upcoming_sessions_widget) has something to demonstrate.
 AWARDS_PAGE_SIZE = 4
+
+CHILD_NAME_FIELD_RE = re.compile(r"^child_(\d+)_name$")
 
 
 def _icon_choices():
@@ -162,8 +172,80 @@ def register(request):
     return render(request, "accounts/register.html")
 
 
+def _parse_child_rows(post_data):
+    """Parses the family-registration form's dynamically-numbered child
+    fields (child_<n>_name/dob/level/notes) into a list of row dicts, one
+    per index actually present in the POST data. Not a Form/formset: the
+    page's "Add another child"/"Remove" buttons (see the template's
+    extra_script block) can leave gaps in the numbering (e.g. child_1,
+    child_3 after removing child_2), which doesn't map onto Django's
+    prefix-fieldname convention — same raw-POST-parsing approach as
+    add_child/edit_child above."""
+    indices = sorted({int(m.group(1)) for key in post_data if (m := CHILD_NAME_FIELD_RE.match(key))})
+
+    rows = []
+    valid_levels = dict(Participant.EXPERIENCE_CHOICES)
+    for n in indices:
+        name = post_data.get(f"child_{n}_name", "").strip()
+        dob_raw = post_data.get(f"child_{n}_dob", "")
+        level = post_data.get(f"child_{n}_level", "")
+        notes = post_data.get(f"child_{n}_notes", "").strip()
+
+        errors = {}
+        if not name:
+            errors["name"] = "First name is required."
+        date_of_birth = parse_date(dob_raw) if dob_raw else None
+        if not date_of_birth:
+            errors["dob"] = "Date of birth is required."
+        if level not in valid_levels:
+            level = ""
+
+        rows.append({
+            "index": n, "name": name, "dob": dob_raw, "date_of_birth": date_of_birth,
+            "level": level, "notes": notes, "errors": errors,
+        })
+    return rows
+
+
 def register_guardian(request):
-    return render(request, "accounts/register_guardian.html")
+    child_rows = None
+    children_error = None
+
+    if request.method == "POST":
+        form = RegisterGuardianForm(request.POST)
+        child_rows = _parse_child_rows(request.POST)
+        children_valid = bool(child_rows) and not any(row["errors"] for row in child_rows)
+        if not child_rows:
+            children_error = "Add at least one child."
+
+        if form.is_valid() and children_valid:
+            first_name, _, last_name = form.cleaned_data["name"].partition(" ")
+            guardian = Guardian(
+                username=unique_username(slugify(form.cleaned_data["name"])),
+                email=form.cleaned_data["email"],
+                first_name=first_name,
+                last_name=last_name,
+                phone=form.cleaned_data["phone"],
+            )
+            guardian.set_password(form.cleaned_data["password"])
+            guardian.save()
+
+            for row in child_rows:
+                Participant.objects.create(
+                    guardian=guardian, name=row["name"], date_of_birth=row["date_of_birth"],
+                    experience_level=row["level"], allergies_notes=row["notes"],
+                )
+
+            auth_login(request, guardian, backend="accounts.backends.EmailOrUsernameBackend")
+            return redirect("guardian_detail", guardian_id=guardian.id)
+    else:
+        form = RegisterGuardianForm()
+
+    return render(request, "accounts/register_guardian.html", {
+        "form": form,
+        "child_rows": child_rows or [{"index": 1, "name": "", "dob": "", "level": "", "notes": "", "errors": {}}],
+        "children_error": children_error,
+    })
 
 
 def _children_context(guardian):

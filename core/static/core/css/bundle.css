@@ -1168,7 +1168,7 @@
 .cd-admin-nav-shell { position: relative; }
 
 .cd-admin-nav__toggle {
-  display: none;
+  display: inline-flex;;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
@@ -1179,6 +1179,7 @@
   cursor: pointer;
 }
 .cd-admin-nav__toggle svg { width: 18px; height: 18px; }
+.cd-admin-nav__toggle:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .cd-admin-nav__backdrop { display: none; }
 
@@ -1196,14 +1197,37 @@
 
 .cd-admin-nav__brand {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
   padding: 0 var(--space-4) var(--space-4);
   margin-bottom: var(--space-3);
   border-bottom: 1px solid var(--border);
 }
+.cd-admin-nav__brand-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .cd-admin-nav__brand-name { color: var(--ink); margin: 0; }
 .cd-admin-nav__brand-role { color: var(--ink-muted); margin: 0; }
+
+/* Only meaningful once there's a collapse to lock against, so it only
+   shows at the same 901px+ width the collapse feature itself applies at. */
+.cd-admin-nav__pin {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.cd-admin-nav__pin svg { width: 16px; height: 16px; }
+.cd-admin-nav__pin:hover { background: var(--surface-sunken); }
+.cd-admin-nav__pin:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.cd-admin-nav__pin[aria-pressed="true"] { color: var(--primary); background: var(--surface-sunken); }
 
 /* A flex item (not cd-btn--block) so it stretches via the column's default
    align-items: stretch, which correctly subtracts these margins — combining
@@ -1316,7 +1340,25 @@
   }
   .cd-admin-nav[data-open="true"] { transform: translateX(0); }
 }
-
+/* At desktop widths the same toggle collapses the sidebar in place instead
+   of opening it as a drawer, so the content column can use the full width.
+   Collapsed to a zero-width column (not display:none) so it can transition;
+   JS also sets `inert` on the nav itself so it can't be focused while
+   collapsed, since a width/opacity collapse alone leaves it tabbable. */
+@media (min-width: 901px) {
+  .cd-admin-nav__pin { display: inline-flex; }
+  .cd-admin-nav {
+    transition: width 0.2s ease, min-width 0.2s ease, padding 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+  }
+  .cd-admin-nav-shell[data-collapsed="true"] .cd-admin-nav {
+    width: 0;
+    min-width: 0;
+    padding: 0;
+    opacity: 0;
+    overflow: hidden;
+    border-right-color: transparent;
+  }
+}
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .cd-faq__icon { transition: none; }

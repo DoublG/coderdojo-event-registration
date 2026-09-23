@@ -18,85 +18,97 @@
 {% block content %}
   <div class="page">
     <h1 class="display-lg page-title">Register for a dojo</h1>
+    <p class="body-lg page-subtitle">Create an account to register your children</p>
 
     <div class="form-card">
-      <form class="cd-form" id="registration-form-page" novalidate>
+      <form class="cd-form" id="registration-form-page" method="post" novalidate>
+        {% csrf_token %}
 
-        <!--
-          Form-level notes (.cd-form__note--error / --warning inside .cd-form__notes) and
-          field-level .cd-form__errors lists are how this form shows problems — this system
-          only supplies the markup and styling for them; validating anything is server-side
-          work (built to match how Django renders its own form/field errors), filled back in
-          from whatever your backend returns. Left empty here since a fresh form has nothing
-          to report yet — see Form/preview.html for what a note and an inline error look like filled in.
-        -->
-        <div class="cd-form__notes" hidden></div>
+        {% if form.non_field_errors %}
+          <div class="cd-form__notes">
+            {% for error in form.non_field_errors %}
+              <p class="cd-form__note cd-form__note--error caption">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
 
         <div class="cd-form__group">
           <h3 class="cd-form__group-title heading-md">Your details (parent/guardian)</h3>
           <div class="cd-form__row">
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="rp-pg-name">Full name<span class="cd-form__required" aria-hidden="true">*</span></label>
-              <ul class="cd-form__errors" aria-hidden="true"></ul>
-              <input class="cd-form__input body" id="rp-pg-name" name="guardian_name" type="text" placeholder="Jane Doe" required>
+              <label class="cd-form__label label" for="{{ form.name.id_for_label }}">Full name<span class="cd-form__required" aria-hidden="true">*</span></label>
+              <ul class="cd-form__errors">{% for error in form.name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+              {{ form.name }}
             </div>
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="rp-pg-email">Email<span class="cd-form__required" aria-hidden="true">*</span></label>
-              <ul class="cd-form__errors" aria-hidden="true"></ul>
-              <input class="cd-form__input body" id="rp-pg-email" name="guardian_email" type="email" placeholder="jane.doe@example.com" required>
+              <label class="cd-form__label label" for="{{ form.email.id_for_label }}">Email<span class="cd-form__required" aria-hidden="true">*</span></label>
+              <ul class="cd-form__errors">{% for error in form.email.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+              {{ form.email }}
             </div>
           </div>
           <div class="cd-form__row">
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="rp-pg-phone">Phone</label>
-              <input class="cd-form__input body" id="rp-pg-phone" name="guardian_phone" type="tel" placeholder="+32 4xx xx xx xx">
+              <label class="cd-form__label label" for="{{ form.phone.id_for_label }}">Phone</label>
+              {{ form.phone }}
               <p class="cd-form__help caption">Only used if we need to reach you during a session.</p>
+              <ul class="cd-form__errors">{% for error in form.phone.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="rp-pg-password">Password<span class="cd-form__required" aria-hidden="true">*</span></label>
-              <input class="cd-form__input body" id="rp-pg-password" name="guardian_password" type="password" required>
+              <label class="cd-form__label label" for="{{ form.password.id_for_label }}">Password<span class="cd-form__required" aria-hidden="true">*</span></label>
+              {{ form.password }}
+              <ul class="cd-form__errors">{% for error in form.password.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
           </div>
           <div class="cd-form__checkbox-row">
-            <input type="checkbox" id="rp-pg-consent" name="guardian_consent" required>
-            <label class="body-sm" for="rp-pg-consent">I am the parent or legal guardian of the children listed below.</label>
+            {{ form.consent }}
+            <label class="body-sm" for="{{ form.consent.id_for_label }}">I am the parent or legal guardian of the children listed below.</label>
           </div>
+          <ul class="cd-form__errors">{% for error in form.consent.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
         </div>
 
         <div class="cd-form__group">
           <h3 class="cd-form__group-title heading-md">Children</h3>
           <p class="cd-form__group-desc body-sm">Add each child who'll attend the dojo.</p>
 
-          <div id="rp-children" data-count="1">
-            <div class="cd-form__subgroup" data-child="1">
-              <div class="cd-form__subgroup-header">
-                <h4 class="cd-form__subgroup-title heading-sm">Child 1</h4>
+          {% if children_error %}
+            <p class="cd-form__note cd-form__note--error caption">{{ children_error }}</p>
+          {% endif %}
+
+          <div id="rp-children" data-count="{{ child_rows|length }}">
+            {% for row in child_rows %}
+              <div class="cd-form__subgroup" data-child="{{ row.index }}">
+                <div class="cd-form__subgroup-header">
+                  <h4 class="cd-form__subgroup-title heading-sm">Child {{ row.index }}</h4>
+                  {% if not forloop.first %}<button type="button" class="cd-form__remove body-sm">Remove</button>{% endif %}
+                </div>
+                <div class="cd-form__row">
+                  <div class="cd-form__field">
+                    <label class="cd-form__label label" for="rp-c{{ row.index }}-name">First name<span class="cd-form__required" aria-hidden="true">*</span></label>
+                    <ul class="cd-form__errors">{% if row.errors.name %}<li class="caption">{{ row.errors.name }}</li>{% endif %}</ul>
+                    <input class="cd-form__input body" id="rp-c{{ row.index }}-name" name="child_{{ row.index }}_name" type="text" placeholder="Sam" value="{{ row.name }}" required>
+                  </div>
+                  <div class="cd-form__field">
+                    <label class="cd-form__label label" for="rp-c{{ row.index }}-dob">Date of birth<span class="cd-form__required" aria-hidden="true">*</span></label>
+                    <ul class="cd-form__errors">{% if row.errors.dob %}<li class="caption">{{ row.errors.dob }}</li>{% endif %}</ul>
+                    <input class="cd-form__input body" id="rp-c{{ row.index }}-dob" name="child_{{ row.index }}_dob" type="date" value="{{ row.dob }}" required>
+                  </div>
+                </div>
+                <div class="cd-form__row">
+                  <div class="cd-form__field">
+                    <label class="cd-form__label label" for="rp-c{{ row.index }}-level">Experience level</label>
+                    <select class="cd-form__select body" id="rp-c{{ row.index }}-level" name="child_{{ row.index }}_level">
+                      <option value="new" {% if row.level == "new" %}selected{% endif %}>New to coding</option>
+                      <option value="some" {% if row.level == "some" %}selected{% endif %}>Some experience</option>
+                      <option value="confident" {% if row.level == "confident" %}selected{% endif %}>Confident</option>
+                    </select>
+                  </div>
+                  <div class="cd-form__field">
+                    <label class="cd-form__label label" for="rp-c{{ row.index }}-notes">Allergies or notes</label>
+                    <input class="cd-form__input body" id="rp-c{{ row.index }}-notes" name="child_{{ row.index }}_notes" type="text" placeholder="None" value="{{ row.notes }}">
+                  </div>
+                </div>
               </div>
-              <div class="cd-form__row">
-                <div class="cd-form__field">
-                  <label class="cd-form__label label" for="rp-c1-name">First name<span class="cd-form__required" aria-hidden="true">*</span></label>
-                  <input class="cd-form__input body" id="rp-c1-name" name="child_1_name" type="text" placeholder="Sam" required>
-                </div>
-                <div class="cd-form__field">
-                  <label class="cd-form__label label" for="rp-c1-dob">Date of birth<span class="cd-form__required" aria-hidden="true">*</span></label>
-                  <input class="cd-form__input body" id="rp-c1-dob" name="child_1_dob" type="date" required>
-                </div>
-              </div>
-              <div class="cd-form__row">
-                <div class="cd-form__field">
-                  <label class="cd-form__label label" for="rp-c1-level">Experience level</label>
-                  <select class="cd-form__select body" id="rp-c1-level" name="child_1_level">
-                    <option>New to coding</option>
-                    <option>Some experience</option>
-                    <option>Confident</option>
-                  </select>
-                </div>
-                <div class="cd-form__field">
-                  <label class="cd-form__label label" for="rp-c1-notes">Allergies or notes</label>
-                  <input class="cd-form__input body" id="rp-c1-notes" name="child_1_notes" type="text" placeholder="None">
-                </div>
-              </div>
-            </div>
+            {% endfor %}
           </div>
 
           <button type="button" class="cd-form__add-button label" id="rp-add-child">
@@ -117,8 +129,9 @@
 
 {% block extra_script %}
 <script>
-  // Sample glue code, not part of the design system — "Add another child" / "Remove"
-  // ship as plain buttons with no behavior, so this wires them up for the demo.
+  // Wires up "Add another child" / "Remove" — the rows themselves may
+  // start out server-rendered (re-showing a family's data after a
+  // validation error), this just handles adding/removing beyond that.
   (function () {
     var childrenEl = document.getElementById("rp-children");
     var addButton = document.getElementById("rp-add-child");
@@ -145,7 +158,7 @@
             '<div class="cd-form__field">' +
               '<label class="cd-form__label label" for="rp-c' + n + '-level">Experience level</label>' +
               '<select class="cd-form__select body" id="rp-c' + n + '-level" name="child_' + n + '_level">' +
-                '<option>New to coding</option><option>Some experience</option><option>Confident</option>' +
+                '<option value="new">New to coding</option><option value="some">Some experience</option><option value="confident">Confident</option>' +
               '</select>' +
             '</div>' +
             '<div class="cd-form__field">' +
@@ -180,8 +193,21 @@
       syncRemoveButtons();
     }
 
+    childrenEl.querySelectorAll(".cd-form__remove").forEach(function (btn) {
+      btn.addEventListener("click", onRemove);
+    });
+    syncRemoveButtons();
+
     addButton.addEventListener("click", function () {
-      var n = childrenEl.querySelectorAll(".cd-form__subgroup").length + 1;
+      // Max existing index + 1, not count + 1 — a server-rendered re-show
+      // after a validation error can have gaps (e.g. child_1 + child_3, if
+      // child_2 had been removed before submitting), and count + 1 could
+      // collide with an existing index in that case.
+      var existingIndexes = Array.prototype.map.call(
+        childrenEl.querySelectorAll(".cd-form__subgroup"),
+        function (sg) { return parseInt(sg.dataset.child, 10) || 0; }
+      );
+      var n = (existingIndexes.length ? Math.max.apply(null, existingIndexes) : 0) + 1;
       var wrapper = document.createElement("div");
       wrapper.innerHTML = subgroupHtml(n);
       var subgroup = wrapper.firstElementChild;

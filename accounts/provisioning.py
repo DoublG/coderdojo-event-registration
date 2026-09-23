@@ -7,7 +7,7 @@ from django.utils.text import slugify
 from .models import User
 
 
-def _unique_username(base):
+def unique_username(base):
     base = base or "user"
     username = base
     n = 1
@@ -26,7 +26,7 @@ def provision_account(account_model, name, email, login_url):
     login ForcePasswordChangeMiddleware will insist they replace it on
     first use."""
     first_name, _, last_name = name.partition(" ")
-    username = _unique_username(slugify(name) or slugify(email.split("@")[0]))
+    username = unique_username(slugify(name) or slugify(email.split("@")[0]))
     temp_password = secrets.token_urlsafe(9)
 
     account = account_model(

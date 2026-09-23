@@ -48,7 +48,38 @@
       "Bash(npm ls *)",
       "Bash(npm list *)",
       "Bash(sed -i \"s|puppeteer.launch\\({ headless: 'new', args: \\\\['--no-sandbox'\\\\] }\\)|puppeteer.launch\\({ headless: 'new', args: ['--no-sandbox'], executablePath: '/usr/bin/google-chrome' }\\)|\" /tmp/claude-1000/-home-erik-coderdojo-event-registration/ab551901-70bd-407e-a066-435ba38a7f41/scratchpad/scroll_test.js)",
-      "Bash(node /tmp/claude-1000/-home-erik-coderdojo-event-registration/ab551901-70bd-407e-a066-435ba38a7f41/scratchpad/scroll_test.js)"
+      "Bash(node /tmp/claude-1000/-home-erik-coderdojo-event-registration/ab551901-70bd-407e-a066-435ba38a7f41/scratchpad/scroll_test.js)",
+      "Bash(easyrsa help *)",
+      "Bash(cat ~/bin/easyrsa 2>/dev/null | grep -m1 \"^VERSION\\\\|EASYRSA_VERSION\" ; grep -rn \"subject-alt-name\\\\|SUBJECT_ALT_NAME\\\\|x509-types\" ~/bin/easyrsa 2>/dev/null | head -20; echo \"---\"; find / -xdev -iname \"x509-types\" -type d 2>/dev/null | head -5)",
+      "Read(//home/erik/easy-rsa/easyrsa3/**)",
+      "Bash(rm -rf pki)",
+      "Bash(export EASYRSA_BATCH=1)",
+      "Bash(easyrsa init-pki *)",
+      "Bash(easyrsa build-ca *)",
+      "Bash(easyrsa --subject-alt-name=\"DNS:coolregistration.localhost\" build-server-full coolregistration.localhost nopass)",
+      "Bash(cat pki/issued/coolregistration.localhost.crt pki/ca.crt)",
+      "Bash(cp pki/private/coolregistration.localhost.key server.key)",
+      "Bash(openssl verify *)",
+      "Bash(rm -f pki/server-ext.cnf pki/ca.srl && find . -maxdepth 3 -type f | sort)",
+      "Bash(chmod +x /home/erik/coderdojo-event-registration/.devcontainer/start.sh)",
+      "Bash(docker compose *)",
+      "Bash(docker exec *)",
+      "Bash(break)",
+      "Bash(docker volume *)",
+      "Bash(mysqldump -h 127.0.0.1 -P 13306 -ucoderdojo -pcoderdojo --single-transaction --routines --triggers --no-create-db coderdojo)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(echo \"import exit: $?\")",
+      "Bash(curl -s -b cookies.txt http://127.0.0.1:8123/guardian/200/ -o guardian_page.html -w \"GET /guardian/200/ -> %{http_code}\\\\n\")",
+      "Bash(docker port *)",
+      "Bash(getent hosts *)",
+      "Read(//etc/**)",
+      "Bash(curl -sk -o /dev/null -w \"HTTP %{http_code}\\\\n\" --max-time 5 https://coolregistration.localhost/)",
+      "Bash(curl -sk -D - -o /dev/null --max-time 5 https://coolregistration.localhost/)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} -> %{redirect_url}\\\\n\" --max-time 5 http://coolregistration.localhost/)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" --max-time 5 --cacert /home/erik/coderdojo-event-registration/.devcontainer/certs/pki/ca.crt https://coolregistration.localhost/)"
+    ],
+    "additionalDirectories": [
+      "/home/erik/coderdojo-event-registration/.devcontainer/certs/pki"
     ]
   }
 }

@@ -306,18 +306,56 @@
     }
   }
 
-  // Wires one admin sidebar: the mobile "Menu" toggle opens it as an
-  // off-canvas panel with a backdrop (only visible below the 900px
-  // breakpoint — at desktop widths this all sits inertly hidden), Escape
-  // and a backdrop click close it and return focus to the toggle, and
-  // clicking any nav link closes it too (a real navigation would leave the
-  // page anyway; this just keeps a stale open drawer from lingering when
-  // markup is reused as a single-page demo).
+  // Wires one admin sidebar. The same "Menu" toggle does two different
+  // things depending on viewport, since below 900px there's no spare width
+  // for a permanent sidebar and above it there is:
+  //  - Below 900px: opens/closes the nav as an off-canvas drawer with a
+  //    backdrop, Escape and a backdrop click close it and return focus to
+  //    the toggle, and clicking any nav link closes it too (a real
+  //    navigation would leave the page anyway; this just keeps a stale
+  //    open drawer from lingering when markup is reused as a single-page
+  //    demo).
+  //  - At 901px and up: collapses the sidebar to zero width in place (no
+  //    backdrop, nothing overlays the content) so the page content next to
+  //    it can expand to use the full width. `inert` is set on the nav
+  //    while collapsed so its links can't be tabbed to or found by a
+  //    screen reader while invisible, and cleared the moment the sidebar
+  //    is expanded again or the viewport drops back below 900px.
+  //
+  // A `.cd-admin-nav__pin` button (901px+ only, lives inside the nav
+  // itself) locks the sidebar open: while pinned, the Menu toggle is
+  // disabled so it can't be collapsed by mistake. Both the pinned flag and
+  // the collapsed/expanded choice are remembered in localStorage per
+  // shell (keyed by the shell's own id, so this design system's own
+  // catalog — which can show more than one AdminNav demo on one page at
+  // once — doesn't have one demo's toggle silently affect another's), and
+  // restored the next time this page loads. localStorage reads/writes are
+  // wrapped in try/catch since it can throw in a private window or with
+  // site data blocked; the sidebar still works, it just won't remember.
   function wireAdminNav(shell) {
     var toggle = shell.querySelector("[data-cd-adminnav-toggle]");
     var nav = shell.querySelector("[data-cd-adminnav]");
     var backdrop = shell.querySelector("[data-cd-adminnav-backdrop]");
+    var pinBtn = shell.querySelector("[data-cd-adminnav-pin]");
     if (!toggle || !nav) return;
+    var desktopQuery = window.matchMedia("(min-width: 901px)");
+    var storagePrefix = "cd-adminnav:" + (shell.id || "default") + ":";
+
+    function readStored(key, fallback) {
+      try {
+        var v = window.localStorage.getItem(storagePrefix + key);
+        return v === null ? fallback : v === "true";
+      } catch (e) {
+        return fallback;
+      }
+    }
+    function writeStored(key, value) {
+      try {
+        window.localStorage.setItem(storagePrefix + key, String(value));
+      } catch (e) {
+        // ignore — private window, blocked storage, etc.
+      }
+    }
 
     function onKeydown(e) {
       if (e.key === "Escape") closeNav(true);
@@ -337,15 +375,59 @@
       if (focusToggle) toggle.focus();
     }
 
+    function syncInert() {
+      var collapsed = shell.getAttribute("data-collapsed") === "true";
+      if (collapsed && desktopQuery.matches) nav.setAttribute("inert", "");
+      else nav.removeAttribute("inert");
+    }
+    function setCollapsed(collapsed, persist) {
+      shell.setAttribute("data-collapsed", collapsed ? "true" : "false");
+      toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      syncInert();
+      if (persist !== false) writeStored("collapsed", collapsed);
+    }
+    function setPinned(pinned, persist) {
+      shell.setAttribute("data-pinned", pinned ? "true" : "false");
+      if (pinBtn) {
+        pinBtn.setAttribute("aria-pressed", pinned ? "true" : "false");
+        pinBtn.setAttribute("aria-label", pinned ? "Unpin sidebar" : "Pin sidebar open");
+        pinBtn.title = pinned ? "Unpin sidebar" : "Pin sidebar open";
+      }
+      toggle.disabled = pinned;
+      toggle.title = pinned ? "Unpin the sidebar to hide it" : "";
+      if (pinned) setCollapsed(false, persist); // pinning always shows it, and locks it there
+      if (persist !== false) writeStored("pinned", pinned);
+    }
+    if (desktopQuery.addEventListener) desktopQuery.addEventListener("change", syncInert);
+    else if (desktopQuery.addListener) desktopQuery.addListener(syncInert); // older Safari
+
     toggle.addEventListener("click", function () {
-      if (nav.getAttribute("data-open") === "true") closeNav();
-      else openNav();
+      if (desktopQuery.matches) {
+        if (shell.getAttribute("data-pinned") === "true") return; // locked open
+        setCollapsed(shell.getAttribute("data-collapsed") !== "true");
+      } else if (nav.getAttribute("data-open") === "true") {
+        closeNav();
+      } else {
+        openNav();
+      }
     });
     if (backdrop) backdrop.addEventListener("click", function () { closeNav(); });
+    if (pinBtn) {
+      pinBtn.addEventListener("click", function () {
+        setPinned(shell.getAttribute("data-pinned") !== "true");
+      });
+    }
 
     var links = nav.querySelectorAll(".cd-admin-nav__link");
     for (var i = 0; i < links.length; i++) {
       links[i].addEventListener("click", function () { closeNav(); });
+    }
+
+    // Restore last session's choice. setPinned(..., false) / setCollapsed(...,
+    // false) apply the state without re-writing what was just read back.
+    setPinned(readStored("pinned", false), false);
+    if (shell.getAttribute("data-pinned") !== "true") {
+      setCollapsed(readStored("collapsed", false), false);
     }
   }
 
@@ -471,6 +553,6 @@
     initNotifications: initNotifications,
     initAdminNav: initAdminNav,
     initDojoLocationSearch: initDojoLocationSearch,
-    initCarousel: initCarousel
+    initCarousel: initCarousel,
   };
 })();

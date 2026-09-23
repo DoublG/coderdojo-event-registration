@@ -115,3 +115,11 @@ private_media/
 # **/migrations/**
 # !**/migrations
 # !**/migrations/__init__.py
+
+# Local dev TLS CA/cert (see .devcontainer/certs/README.md) - regenerate, never commit
+.devcontainer/certs/pki/
+.devcontainer/certs/fullchain.pem
+.devcontainer/certs/server.key
+
+# Sphinx build output (docs/) - regenerate with `make html`, never commit
+docs/build/

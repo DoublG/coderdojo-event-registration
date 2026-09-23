@@ -1,0 +1,39 @@
+Finding a dojo
+===============
+
+There are two ways to find a dojo near you:
+
+The homepage widget
+--------------------
+
+The homepage has a **Find a dojo near you** box. Type your postcode or
+city and press search, or use **Use my location** to let your browser
+supply your position instead. Results are sorted nearest-first, and each
+one shows its next upcoming session if it has one.
+
+The full dojo finder
+---------------------
+
+For every dojo rather than just the nearest handful, go to **Dojos**. It's
+the same search (postcode/city or your location), but with all matching
+dojos, paged as you scroll, and no limit on how many results you see.
+
+If a location doesn't match anything, the search falls back to showing
+dojos unsorted rather than an empty page — try a nearby town or the
+postcode instead of a street address.
+
+A dojo's page
+--------------
+
+Click through to a dojo to see:
+
+- Its address, schedule (e.g. "every 2nd Saturday"), and age range.
+- A description of the dojo and any visit notes (parking, entrance,
+  accessibility).
+- Its next upcoming session, if one is scheduled.
+- Its team — the lead coach is always shown first, followed by the other
+  mentors and volunteers.
+- Any FAQs specific to that dojo, alongside the site-wide ones.
+
+From there, click through to a session to see full details and sign your
+children up — see :doc:`signing-up-for-a-session`.

@@ -1,5 +1,5 @@
 {% load static %}<!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,15 +10,15 @@
   html, body { margin: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 </style>
+</head>
+<body>
+<script src="{% static 'core/js/bundle.js' %}"></script>
 <style>
   .admin-page-root { height: 760px; overflow: hidden; }
   .admin-page-root .admin-main { flex: 1; min-width: 0; padding: var(--space-5) var(--space-6); overflow: auto; height: 100%; box-sizing: border-box; }
   .admin-page-root .admin-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5); gap: var(--space-4); }
   .admin-page-root .admin-topbar h1 { color: var(--ink); margin: 0; }
 </style>
-</head>
-<body>
-<script src="{% static 'core/js/bundle.js' %}"></script>
 
 <div class="cd-root admin-page-root" style="padding: 0;">
   <div class="cd-admin-nav-shell" style="display: flex; height: 100%;" id="adminnav-page">
@@ -27,8 +27,13 @@
 
     <nav class="cd-admin-nav" data-cd-adminnav data-open="false" aria-label="Dojo admin">
       <div class="cd-admin-nav__brand">
-        <p class="cd-admin-nav__brand-name heading-sm">{{ dojo.name }}</p>
-        <p class="cd-admin-nav__brand-role caption">Owner</p>
+        <div class="cd-admin-nav__brand-text">
+          <p class="cd-admin-nav__brand-name heading-sm">CoderDojo Ghent</p>
+          <p class="cd-admin-nav__brand-role caption">Owner</p>
+        </div>
+        <button type="button" class="cd-admin-nav__pin" data-cd-adminnav-pin aria-pressed="false" aria-label="Pin sidebar open">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v4"/><path d="M8 3h8l-1 7 3 3v1H6v-1l3-3z"/></svg>
+        </button>
       </div>
 
       <a href="#" class="cd-btn cd-btn--primary cd-admin-nav__create label">
@@ -40,7 +45,7 @@
         <p class="cd-admin-nav__group-label caption">Overview</p>
         <ul class="cd-admin-nav__list">
           <li>
-            <a href="{% url 'dojo_dashboard' dojo_id=dojo.id %}" class="cd-admin-nav__link label">
+            <a href="#" class="cd-admin-nav__link label">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
               Dashboard
             </a>
@@ -52,15 +57,16 @@
         <p class="cd-admin-nav__group-label caption">Manage</p>
         <ul class="cd-admin-nav__list">
           <li>
-            <a href="{% url 'event_list' %}{% querystring dojo=dojo.id %}" class="cd-admin-nav__link label">
+            <a href="#" class="cd-admin-nav__link label">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>
               Events
             </a>
           </li>
           <li>
-            <a href="{% url 'dojo_team' dojo.id %}" class="cd-admin-nav__link label">
+            <a href="#" class="cd-admin-nav__link label">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 19c0-3.4 2.9-6 6.5-6s6.5 2.6 6.5 6"/><circle cx="18" cy="9" r="2.6"/><path d="M15.8 13.2c2.6.5 4.7 2.5 4.7 5.3"/></svg>
               Helpers &amp; Mentors
+              <span class="cd-admin-nav__count">2 new</span>
             </a>
           </li>
           <li>
@@ -73,6 +79,7 @@
             <a href="#" class="cd-admin-nav__link label">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c0-4.1 3.4-7 7.5-7s7.5 2.9 7.5 7"/></svg>
               Members
+              <span class="cd-admin-nav__count">48</span>
             </a>
           </li>
         </ul>
@@ -110,47 +117,169 @@
 
       <div class="admin-topbar">
         <h1 class="heading-lg">Attendance</h1>
+
+        <div class="cd-notif" id="notif-admin-page">
+          <button type="button" class="cd-notif__bell" data-cd-notif-toggle aria-haspopup="true" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span class="cd-notif__count" data-cd-notif-count>3</span>
+          </button>
+
+          <div class="cd-notif__panel" data-cd-notif-panel hidden role="menu" aria-label="Notifications">
+            <div class="cd-notif__header">
+              <h3 class="cd-notif__title heading-sm">Notifications</h3>
+              <button type="button" class="cd-notif__mark-all label" data-cd-notif-mark-all>Mark all as read</button>
+            </div>
+            <ul class="cd-notif__list">
+              <li class="cd-notif__item" data-cd-notif-item data-unread>
+                <button type="button" class="cd-notif__item-btn" data-cd-notif-item-btn>
+                  <span class="cd-notif__dot" aria-hidden="true"></span>
+                  <span class="cd-notif__body">
+                    <p class="cd-notif__text body-sm">A spot opened up in <strong>Saturday · Ghent Dojo</strong> — a waitlisted family is now confirmed.</p>
+                    <p class="cd-notif__time caption">2 hours ago</p>
+                  </span>
+                </button>
+              </li>
+              <li class="cd-notif__item" data-cd-notif-item data-unread>
+                <button type="button" class="cd-notif__item-btn" data-cd-notif-item-btn>
+                  <span class="cd-notif__dot" aria-hidden="true"></span>
+                  <span class="cd-notif__body">
+                    <p class="cd-notif__text body-sm">Priya Nair applied to mentor at Ghent Dojo.</p>
+                    <p class="cd-notif__time caption">Yesterday</p>
+                  </span>
+                </button>
+              </li>
+              <li class="cd-notif__item" data-cd-notif-item data-unread>
+                <button type="button" class="cd-notif__item-btn" data-cd-notif-item-btn>
+                  <span class="cd-notif__dot" aria-hidden="true"></span>
+                  <span class="cd-notif__body">
+                    <p class="cd-notif__text body-sm">Reminder: Saturday's session is 90% full.</p>
+                    <p class="cd-notif__time caption">2 days ago</p>
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       <div class="cd-attendance" id="attendance-admin-page">
 
         <div class="cd-attendance__header">
           <div>
-            <h3 class="cd-attendance__title heading-md">{{ session.name|default:"No upcoming session" }}</h3>
-            <p class="cd-attendance__summary caption" data-cd-attendance-summary>{{ present_count }} of {{ registrations|length }} present</p>
+            <h3 class="cd-attendance__title heading-md">Saturday session — Ghent Dojo</h3>
+            <p class="cd-attendance__summary caption" data-cd-attendance-summary>0 of 6 present</p>
           </div>
-          {% if registrations %}
-            <button type="button" class="cd-btn cd-btn--ghost label" data-cd-attendance-mark-all>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
-              Mark all present
-            </button>
-          {% endif %}
+          <button type="button" class="cd-btn cd-btn--ghost label" data-cd-attendance-mark-all>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+            Mark all present
+          </button>
         </div>
 
         <div class="cd-attendance__list">
-          {% for registration in registrations %}
-            <div class="cd-attendance__row" data-cd-attendance-row>
-              <div class="cd-attendance__person">
-                <span class="cd-attendance__name body">{{ registration.participant.name }}</span>
-                <span class="cd-attendance__meta caption">
-                  {% if registration.participant.age %}Age {{ registration.participant.age }}{% endif %}
-                  {% if registration.pathway %} · {{ registration.pathway.name }}{% endif %}
-                </span>
-              </div>
-              <div class="cd-attendance__toggle" role="group" aria-label="Attendance for {{ registration.participant.name }}">
-                <button type="button" class="cd-attendance__btn cd-attendance__btn--present label" data-cd-attendance-btn="present" aria-pressed="{% if registration.attended %}true{% else %}false{% endif %}">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
-                  Present
-                </button>
-                <button type="button" class="cd-attendance__btn cd-attendance__btn--absent label" data-cd-attendance-btn="absent" aria-pressed="{% if registration.attended == False %}true{% else %}false{% endif %}">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
-                  Absent
-                </button>
-              </div>
+          <div class="cd-attendance__row" data-cd-attendance-row>
+            <div class="cd-attendance__person">
+              <span class="cd-attendance__name body">Sam Vermeulen</span>
+              <span class="cd-attendance__meta caption">Age 10 · Scratch</span>
             </div>
-          {% empty %}
-            <p class="body-sm" style="color: var(--ink-muted);">No one is signed up for this session yet.</p>
-          {% endfor %}
+            <div class="cd-attendance__toggle" role="group" aria-label="Attendance for Sam Vermeulen">
+              <button type="button" class="cd-attendance__btn cd-attendance__btn--present label" data-cd-attendance-btn="present" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+                Present
+              </button>
+              <button type="button" class="cd-attendance__btn cd-attendance__btn--absent label" data-cd-attendance-btn="absent" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                Absent
+              </button>
+            </div>
+          </div>
+
+          <div class="cd-attendance__row" data-cd-attendance-row>
+            <div class="cd-attendance__person">
+              <span class="cd-attendance__name body">Alex De Wilde</span>
+              <span class="cd-attendance__meta caption">Age 12 · Python</span>
+            </div>
+            <div class="cd-attendance__toggle" role="group" aria-label="Attendance for Alex De Wilde">
+              <button type="button" class="cd-attendance__btn cd-attendance__btn--present label" data-cd-attendance-btn="present" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+                Present
+              </button>
+              <button type="button" class="cd-attendance__btn cd-attendance__btn--absent label" data-cd-attendance-btn="absent" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                Absent
+              </button>
+            </div>
+          </div>
+
+          <div class="cd-attendance__row" data-cd-attendance-row>
+            <div class="cd-attendance__person">
+              <span class="cd-attendance__name body">Noor El Idrissi</span>
+              <span class="cd-attendance__meta caption">Age 9 · Scratch</span>
+            </div>
+            <div class="cd-attendance__toggle" role="group" aria-label="Attendance for Noor El Idrissi">
+              <button type="button" class="cd-attendance__btn cd-attendance__btn--present label" data-cd-attendance-btn="present" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+                Present
+              </button>
+              <button type="button" class="cd-attendance__btn cd-attendance__btn--absent label" data-cd-attendance-btn="absent" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                Absent
+              </button>
+            </div>
+          </div>
+
+          <div class="cd-attendance__row" data-cd-attendance-row>
+            <div class="cd-attendance__person">
+              <span class="cd-attendance__name body">Liam Peeters</span>
+              <span class="cd-attendance__meta caption">Age 11 · Web</span>
+            </div>
+            <div class="cd-attendance__toggle" role="group" aria-label="Attendance for Liam Peeters">
+              <button type="button" class="cd-attendance__btn cd-attendance__btn--present label" data-cd-attendance-btn="present" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+                Present
+              </button>
+              <button type="button" class="cd-attendance__btn cd-attendance__btn--absent label" data-cd-attendance-btn="absent" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                Absent
+              </button>
+            </div>
+          </div>
+
+          <div class="cd-attendance__row" data-cd-attendance-row>
+            <div class="cd-attendance__person">
+              <span class="cd-attendance__name body">Fien Coppens</span>
+              <span class="cd-attendance__meta caption">Age 13 · Robotics</span>
+            </div>
+            <div class="cd-attendance__toggle" role="group" aria-label="Attendance for Fien Coppens">
+              <button type="button" class="cd-attendance__btn cd-attendance__btn--present label" data-cd-attendance-btn="present" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+                Present
+              </button>
+              <button type="button" class="cd-attendance__btn cd-attendance__btn--absent label" data-cd-attendance-btn="absent" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                Absent
+              </button>
+            </div>
+          </div>
+
+          <div class="cd-attendance__row" data-cd-attendance-row>
+            <div class="cd-attendance__person">
+              <span class="cd-attendance__name body">Youssef Bakkali</span>
+              <span class="cd-attendance__meta caption">Age 14 · Python</span>
+            </div>
+            <div class="cd-attendance__toggle" role="group" aria-label="Attendance for Youssef Bakkali">
+              <button type="button" class="cd-attendance__btn cd-attendance__btn--present label" data-cd-attendance-btn="present" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+                Present
+              </button>
+              <button type="button" class="cd-attendance__btn cd-attendance__btn--absent label" data-cd-attendance-btn="absent" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                Absent
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -160,6 +289,7 @@
 </div>
 <script>
   CoderDojo.initAdminNav(document.getElementById("adminnav-page"));
+  CoderDojo.initNotifications(document.getElementById("notif-admin-page"));
   CoderDojo.initAttendance(document.getElementById("attendance-admin-page"));
 </script>
 </body>

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +26,16 @@ SECRET_KEY = 'c8%og)f*3&xi&6l_s#ol%ctm7t9%ti&lko6x@^b&t8ow0d3-7m'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'coolregistration.localhost']
+
+CSRF_TRUSTED_ORIGINS = ['https://coolregistration.localhost']
+
+# Set by the .devcontainer workspace (COOKIE_DOMAIN env var) so session/CSRF
+# cookies scope correctly to coolregistration.localhost behind the nginx
+# proxy; unset (None) for plain host-based `runserver` dev, which is fine.
+COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN') or None
+SESSION_COOKIE_DOMAIN = COOKIE_DOMAIN
+CSRF_COOKIE_DOMAIN = COOKIE_DOMAIN
 
 INTERNAL_IPS = [
     '127.0.0.1',
@@ -39,11 +49,23 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-# Account-approval invite emails (see applications.admin) print to the
-# console in dev rather than actually sending — swap for a real backend
-# in production.
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'CoderDojo Belgium <no-reply@coderdojobelgium.example>'
+# Account-approval invite emails (see applications.admin). Inside the
+# .devcontainer workspace, EMAIL_HOST is set and mail goes to a Mailtrap
+# sandbox inbox (see .devcontainer/docker-compose.yml); outside it (plain
+# host-based `runserver`), EMAIL_HOST is unset and mail prints to the console.
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+if EMAIL_HOST:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 2525))
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'true').lower() == 'true'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = os.environ.get(
+    'DEFAULT_FROM_EMAIL', 'CoderDojo Belgium <no-reply@coderdojobelgium.example>'
+)
 
 
 # Application definition
@@ -107,17 +129,38 @@ WSGI_APPLICATION = 'website.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-# a78ef56c7cc4ede1037c19d19ff602b8000cb84c20dfdb1ab35bda3963e69912
+#
+# Defaults below match the standalone host-side MySQL container used before
+# the .devcontainer setup existed:
 # docker run --name mysql-coderdojo   -e MYSQL_DATABASE=coderdojo   -e MYSQL_USER=coderdojo   -e MYSQL_PASSWORD=coderdojo   -e MYSQL_ROOT_PASSWORD=rootpassword   -p 13306:3306   -d mysql
+# Inside the .devcontainer workspace, DB_* env vars (see docker-compose.yml)
+# point this at the `db` service instead.
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.mysql',
-        'NAME': 'coderdojo',
-        'USER': 'coderdojo',
-        'PASSWORD': 'coderdojo',
-        'HOST': '127.0.0.1',
-        'PORT': '13306',
+        'NAME': os.environ.get('DB_NAME', 'coderdojo'),
+        'USER': os.environ.get('DB_USER', 'coderdojo'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'coderdojo'),
+        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('DB_PORT', '13306'),
+    }
+}
+
+# Cache / Redis. Inside the .devcontainer workspace, REDIS_HOST points at
+# the `redis` service; outside it, this falls back to a local Redis on the
+# default port (or just won't connect until one exists — the cache is not
+# required for the app to boot).
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://{host}:{port}/0'.format(
+            host=os.environ.get('REDIS_HOST', '127.0.0.1'),
+            port=os.environ.get('REDIS_PORT', '6379'),
+        ),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
     }
 }
 

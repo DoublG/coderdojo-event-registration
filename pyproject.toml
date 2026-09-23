@@ -1,0 +1,27 @@
+[tool.ruff]
+line-length = 119
+target-version = "py312"
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "W",   # pycodestyle warnings
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "DJ",  # flake8-django
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line length is enforced by the formatter, not worth erroring twice
+]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "accounts", "applications", "content", "core", "dojos",
+    "events", "geo", "notifications", "pathways", "website",
+]
+
+[tool.ruff.format]
+quote-style = "double"

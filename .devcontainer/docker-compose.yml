@@ -1,0 +1,101 @@
+services:
+  workspace:
+    container_name: ${PROJECT_NAME:-coolregistration-dev}-workspace
+    build:
+      context: ..
+      dockerfile: .devcontainer/dockerfile_workspace/Dockerfile
+
+    environment:
+      # Trust the system CA store (installed by .devcontainer/start.sh from
+      # .devcontainer/certs/pki/ca.crt) so server-side HTTPS calls to
+      # coolregistration.localhost verify like a browser that trusted the same CA.
+      NODE_OPTIONS: "--use-system-ca"
+
+      # Database configuration - read by website/settings.py
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: coolregistration
+      DB_USER: coolregistration
+      DB_PASSWORD: Se84KCCCJlnfkdfv
+
+      COOKIE_DOMAIN: coolregistration.localhost
+
+      # Redis (cache) - read by website/settings.py
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      # Mailtrap (sandbox SMTP) - read by website/settings.py.
+      # This is a local-dev-only container, so credentials live here in
+      # plain env vars rather than a separate secrets file. Replace
+      # EMAIL_HOST_USER/EMAIL_HOST_PASSWORD with your own Mailtrap sandbox
+      # inbox credentials (https://mailtrap.io -> Sandbox -> SMTP Settings).
+      EMAIL_HOST: sandbox.smtp.mailtrap.io
+      EMAIL_PORT: 2525
+      EMAIL_HOST_USER: replace-with-your-mailtrap-username
+      EMAIL_HOST_PASSWORD: replace-with-your-mailtrap-password
+      EMAIL_USE_TLS: "true"
+      DEFAULT_FROM_EMAIL: "CoderDojo Belgium <noreply@coolregistration.localhost>"
+
+    volumes:
+      - ..:/workspace:cached
+
+    working_dir: /workspace
+
+    command: sleep infinity
+
+    ports:
+      - "8000:8000"
+      - "3000:3000"
+      - "3001:3001"
+      - "3002:3002"
+      - "3004:3004"
+      - "3005:3005"
+
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: mysql:latest
+    container_name: ${PROJECT_NAME:-coolregistration-dev}-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: coolregistration
+      MYSQL_DATABASE: coolregistration
+      MYSQL_USER: coolregistration
+      MYSQL_PASSWORD: Se84KCCCJlnfkdfv
+    volumes:
+      - db-data:/var/lib/mysql
+      # Runs once against a fresh volume — grants the app user rights on
+      # Django's test database too (see db-init/01-grant-test-db.sql).
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+
+  redis:
+    image: redis:latest
+    container_name: ${PROJECT_NAME:-coolregistration-dev}-redis
+    restart: unless-stopped
+
+  proxy:
+    image: nginx:1.27-alpine
+    container_name: ${PROJECT_NAME:-coolregistration-dev}-proxy
+    restart: unless-stopped
+    depends_on:
+      - workspace
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+
+  phpmyadmin:
+    container_name: ${PROJECT_NAME:-coolregistration-dev}-phpmyadmin
+    image: phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "3006:80"
+    environment:
+      PMA_HOST: db
+
+volumes:
+  db-data:
