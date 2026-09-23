@@ -97,7 +97,15 @@
       "Bash(curl -sk -o /dev/null https://coolregistration.localhost/)",
       "Bash(curl -sk -o /dev/null https://coolregistration.localhost/dojos/)",
       "Bash(curl -sk -o /dev/null https://coolregistration.localhost/events/upcoming-sessions-widget/)",
-      "Bash(time curl -sk -o /dev/null https://coolregistration.localhost/dojos/?location=Ghent)"
+      "Bash(time curl -sk -o /dev/null https://coolregistration.localhost/dojos/?location=Ghent)",
+      "Bash(curl -s -b /tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/smoke_cookies.txt -c /tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/smoke_cookies.txt http://127.0.0.1:8765/ -o /tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/home_loggedin.html)",
+      "Bash(curl -s -b /tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/smoke_cookies.txt -c /tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/smoke_cookies.txt http://127.0.0.1:8765/register/guardian/link/ -o /tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/link_guardian.html -w '%{http_code}\\\\n')",
+      "Bash(pip show *)",
+      "Bash(pip install *)",
+      "Bash(make html *)",
+      "Bash(sphinx-build -b gettext source locale/pot)",
+      "Bash(sphinx-intl update *)",
+      "Bash(make html-all *)"
     ],
     "additionalDirectories": [
       "/home/erik/coderdojo-event-registration/.devcontainer/certs/pki",

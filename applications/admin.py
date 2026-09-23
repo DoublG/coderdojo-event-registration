@@ -4,10 +4,10 @@ from django.utils import timezone
 from django.utils.html import format_html
 
 from accounts.models import DojoOwner, HelperAccount
-from accounts.provisioning import provision_account
+from accounts.provisioning import attach_role, provision_account
 
 from .models import BACKGROUND_CHECK_VALIDITY, BackgroundCheckMixin, DojoApplication, MentorApplication
-from .services import send_background_check_request
+from .services import send_background_check_request, send_role_activated_email
 
 
 def _linked_account(application):
@@ -79,6 +79,20 @@ def reject_background_check(modeladmin, request, queryset):
     modeladmin.message_user(request, f"Rejected {updated} background check document(s).")
 
 
+def _provision_or_promote(application, account_model, role_label, login_url):
+    """Shared by approve_and_provision_owner/helper. If the applicant was already logged in when
+    they applied (application.applicant_account set — e.g. a Guardian applying to also become a
+    DojoOwner/HelperAccount), promote that existing account in place via attach_role instead of
+    provisioning a disconnected new login, and tell them about the new role rather than emailing
+    a temp password they don't need. Otherwise, today's anonymous-applicant path is unchanged."""
+    if application.applicant_account_id is not None:
+        account = attach_role(application.applicant_account, account_model)
+        send_role_activated_email(application, role_label)
+    else:
+        account = provision_account(account_model, application.applicant_name, application.applicant_email, login_url)
+    return account
+
+
 @admin.action(description="Approve & email a DojoOwner login to the applicant")
 def approve_and_provision_owner(modeladmin, request, queryset):
     login_url = request.build_absolute_uri(reverse("login"))
@@ -87,7 +101,7 @@ def approve_and_provision_owner(modeladmin, request, queryset):
         if not application.has_valid_background_check:
             blocked += 1
             continue
-        account = provision_account(DojoOwner, application.applicant_name, application.applicant_email, login_url)
+        account = _provision_or_promote(application, DojoOwner, "dojo owner", login_url)
         # From here on it's the account, not the application, that
         # accounts.User.background_check_valid / BackgroundCheckMiddleware
         # check on every login and request.
@@ -98,7 +112,7 @@ def approve_and_provision_owner(modeladmin, request, queryset):
         application.provisioned_owner = account
         application.save(update_fields=["status", "provisioned_owner"])
         approved += 1
-    message = f"Provisioned {approved} DojoOwner account(s) and emailed their temp password."
+    message = f"Provisioned/updated {approved} DojoOwner account(s)."
     if blocked:
         message += f" Skipped {blocked} without a valid (non-expired) background check."
     modeladmin.message_user(request, message)
@@ -112,7 +126,7 @@ def approve_and_provision_helper(modeladmin, request, queryset):
         if not application.has_valid_background_check:
             blocked += 1
             continue
-        account = provision_account(HelperAccount, application.applicant_name, application.applicant_email, login_url)
+        account = _provision_or_promote(application, HelperAccount, "helper", login_url)
         account.background_check_required = True
         account.background_check_expires_at = application.background_check_expires_at
         account.save(update_fields=["background_check_required", "background_check_expires_at"])
@@ -120,7 +134,7 @@ def approve_and_provision_helper(modeladmin, request, queryset):
         application.provisioned_helper = account
         application.save(update_fields=["status", "provisioned_helper"])
         approved += 1
-    message = f"Provisioned {approved} helper account(s) and emailed their temp password."
+    message = f"Provisioned/updated {approved} helper account(s)."
     if blocked:
         message += f" Skipped {blocked} without a valid (non-expired) background check."
     modeladmin.message_user(request, message)

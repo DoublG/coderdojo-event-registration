@@ -30,6 +30,8 @@
   --shadow-sm: 0 1px 2px rgba(28,39,51,0.06); /* Resting elevation for buttons and tags — kept faint on purpose. */
   --shadow-md: 0 4px 12px rgba(28,39,51,0.08); /* Cards on hover, dropdowns, the sticky nav bar and ticket panel. */
   --shadow-lg: 0 12px 32px rgba(28,39,51,0.10); /* The hero image panel and the registration/ticket modal. */
+  --logo-ink: #1a1a1a; /* The CoderDojo yin-yang mark's ink color — the brand's own fixed black/white, inverted per theme rather than tied to --ink or --primary. */
+  --logo-bg: #ffffff; /* The mark's background half — inverts opposite --logo-ink so the swirl stays readable on both themes. */
 }
 [data-theme="dark"] {
   --surface: #12181f;
@@ -62,6 +64,8 @@
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.35);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
   --shadow-lg: 0 12px 32px rgba(0,0,0,0.5);
+  --logo-ink: #ffffff;
+  --logo-bg: #1a1a1a;
 }
 :root {
   --space-1: 4px; /* Icon-to-label gaps, tight badge padding. */

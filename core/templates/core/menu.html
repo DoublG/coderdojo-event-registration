@@ -1,6 +1,7 @@
 {% load i18n %}
 <nav class="cd-nav" style="{{ style }}">
   <a class="cd-nav__brand display-lg" href="{% url 'home' %}" style="font-size: 22px"
+    ><svg class="cd-nav__logo" viewBox="0 0 180 180" aria-hidden="true"><circle class="cd-nav__logo-bg" cx="90" cy="90" r="89"/><path class="cd-nav__logo-ink" d="M77.00,179.31 C39.04,173.01 9.44,145.10 1.88,108.50 C-7.81,61.52 20.57,15.46 66.98,2.87 C77.82,-0.07 95.07,-0.69 106.50,1.46 C142.22,8.17 170.82,36.13 178.12,71.50 C189.74,127.81 146.60,180.55 89.50,179.85 C84.00,179.78 78.38,179.54 77.00,179.31 Z M76.57,173.35 C51.70,165.71 39.68,137.22 51.36,113.59 C58.47,99.20 73.28,90.03 89.46,89.99 C109.97,89.94 127.76,74.37 131.23,53.43 C134.16,35.75 124.11,17.05 107.26,8.80 C100.56,5.53 100.38,5.50 86.50,5.57 C74.04,5.63 71.57,5.95 64.00,8.41 C33.82,18.23 11.90,42.39 5.42,72.98 C3.64,81.35 3.64,98.65 5.42,107.02 C12.51,140.47 37.83,165.94 71.50,173.49 C79.59,175.31 82.67,175.22 76.57,173.35 Z M107.50,148.00 C107.50,141.17 107.32,140.50 105.50,140.50 C103.79,140.50 103.46,141.27 103.20,145.75 C102.94,150.18 102.59,151.00 100.95,151.00 C99.10,151.00 99.00,150.19 99.00,135.50 L99.00,120.00 L91.97,120.00 C86.44,120.00 84.81,120.34 84.32,121.60 C83.51,123.73 85.67,124.97 90.25,124.98 L94.00,125.00 L94.00,138.00 L94.00,151.00 L90.25,151.02 C85.64,151.03 83.50,152.27 84.34,154.43 C84.87,155.83 86.56,156.03 96.23,155.78 L107.50,155.50 L107.50,148.00 Z M74.22,58.44 C72.10,56.95 72.00,56.25 72.00,42.00 C72.00,23.12 71.12,24.00 90.00,24.00 C108.88,24.00 108.00,23.12 108.00,42.00 C108.00,60.88 108.88,60.00 90.00,60.00 C79.35,60.00 75.97,59.67 74.22,58.44 Z M100.78,42.25 L101.06,29.00 L90.03,29.00 L79.00,29.00 L79.00,41.83 C79.00,48.89 79.31,54.98 79.70,55.37 C80.08,55.75 84.92,55.94 90.45,55.78 L100.50,55.50 L100.78,42.25 Z" fill-rule="evenodd"/></svg
     >CoderDojo Belgium</a
   >
   <ul class="cd-nav__links">
@@ -41,6 +42,13 @@
           {% endif %}
           {% if user_dojo_owner.dojos.first %}
             <a class="cd-nav__account-link body-sm" href="{% url 'dojo_dashboard' dojo_id=user_dojo_owner.dojos.first.id %}">Manage</a>
+          {% endif %}
+          {% if not user_guardian %}
+            <a class="cd-nav__account-link body-sm" href="{% url 'link_guardian_role' %}">Register your family</a>
+          {% endif %}
+          <a class="cd-nav__account-link body-sm" href="{% url 'register_dojo' %}">{% if user_dojo_owner.dojos.exists %}Start another dojo{% else %}Apply to start a dojo{% endif %}</a>
+          {% if not user_helper %}
+            <a class="cd-nav__account-link body-sm" href="{% url 'register_helper' %}">Apply to volunteer</a>
           {% endif %}
           <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}

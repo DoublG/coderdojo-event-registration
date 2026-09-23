@@ -10,7 +10,7 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from accounts.models import DojoOwner, HelperAccount, User
+from accounts.models import DojoOwner, Guardian, HelperAccount, User
 
 from .admin import (
     approve_and_provision_helper,
@@ -68,6 +68,50 @@ class RegisterDojoViewTests(TestCase):
         self.assertFalse(response.context["submitted"])
         self.assertEqual(DojoApplication.objects.count(), 0)
 
+    def test_authenticated_guardian_gets_prefilled_form(self):
+        guardian = Guardian.objects.create(
+            username="g1", email="g1@example.com", first_name="Jane", last_name="Doe", phone="0470000000",
+        )
+        self.client.force_login(guardian)
+
+        response = self.client.get(reverse("register_dojo"))
+
+        initial = response.context["form"].initial
+        self.assertEqual(initial["applicant_name"], "Jane Doe")
+        self.assertEqual(initial["applicant_email"], "g1@example.com")
+        self.assertEqual(initial["applicant_phone"], "0470000000")
+
+    def test_authenticated_submission_links_application_to_account(self):
+        guardian = Guardian.objects.create(username="g1", email="g1@example.com")
+        self.client.force_login(guardian)
+
+        self.client.post(
+            reverse("register_dojo"),
+            {
+                "applicant_name": "Jane Doe",
+                "applicant_email": "g1@example.com",
+                "area": "Leuven",
+                "consent": "on",
+                "background_check_consent": "on",
+            },
+        )
+
+        application = DojoApplication.objects.get()
+        self.assertEqual(application.applicant_account_id, guardian.pk)
+
+    def test_anonymous_submission_leaves_applicant_account_blank(self):
+        self.client.post(
+            reverse("register_dojo"),
+            {
+                "applicant_name": "Jane Doe",
+                "applicant_email": "jane@example.com",
+                "area": "Leuven",
+                "consent": "on",
+                "background_check_consent": "on",
+            },
+        )
+        self.assertIsNone(DojoApplication.objects.get().applicant_account_id)
+
 
 class RegisterHelperViewTests(TestCase):
     def test_get_renders_form(self):
@@ -87,6 +131,23 @@ class RegisterHelperViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["submitted"])
         self.assertEqual(MentorApplication.objects.count(), 1)
+
+    def test_authenticated_submission_links_application_to_account(self):
+        guardian = Guardian.objects.create(username="g1", email="g1@example.com")
+        self.client.force_login(guardian)
+
+        self.client.post(
+            reverse("register_helper"),
+            {
+                "applicant_name": "Guardian One",
+                "applicant_email": "g1@example.com",
+                "role": MentorApplication.VOLUNTEER_MENTOR,
+                "background_check_consent": "on",
+            },
+        )
+
+        application = MentorApplication.objects.get()
+        self.assertEqual(application.applicant_account_id, guardian.pk)
 
 
 class UploadBackgroundCheckViewTests(TestCase):
@@ -443,6 +504,40 @@ class ApproveAndProvisionOwnerActionTests(TestCase):
         self.assertFalse(DojoOwner.objects.exists())
         self.assertEqual(len(mail.outbox), 0)
 
+    def test_promotes_existing_account_instead_of_provisioning_a_new_one(self):
+        """A Guardian applied to start a dojo while already logged in — applicant_account is set,
+        so approval should attach the DojoOwner role to that same User row, not mint a second,
+        disconnected one with a mailed temp password (see accounts.provisioning.attach_role)."""
+        guardian = Guardian.objects.create(username="g1", email="jane@example.com")
+        application = self._validated_application(applicant_account=guardian)
+
+        approve_and_provision_owner(
+            Mock(), _request_as(self.staff_user), DojoApplication.objects.filter(pk=application.pk),
+        )
+
+        application.refresh_from_db()
+        self.assertEqual(application.status, DojoApplication.APPROVED)
+        self.assertEqual(User.objects.count(), 2)  # staff_user + guardian — no third row
+        owner = DojoOwner.objects.get(pk=guardian.pk)
+        self.assertTrue(owner.background_check_required)
+        self.assertFalse(owner.must_change_password)
+        # Still a Guardian too.
+        self.assertTrue(Guardian.objects.filter(pk=guardian.pk).exists())
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertNotIn("Temporary password", mail.outbox[0].body)
+
+    def test_second_dojo_application_from_an_existing_owner_is_a_safe_no_op(self):
+        """DojoOwner:Dojo is 1-to-n (dojos.Dojo.owner) — an account that's already a DojoOwner
+        can validly apply again for a second dojo."""
+        owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
+        application = self._validated_application(applicant_email="owner@example.com", applicant_account=owner)
+
+        approve_and_provision_owner(
+            Mock(), _request_as(self.staff_user), DojoApplication.objects.filter(pk=application.pk),
+        )
+
+        self.assertEqual(DojoOwner.objects.filter(pk=owner.pk).count(), 1)
+
 
 class ApproveAndProvisionHelperActionTests(TestCase):
     @classmethod
@@ -470,6 +565,25 @@ class ApproveAndProvisionHelperActionTests(TestCase):
         application.refresh_from_db()
         self.assertEqual(application.status, MentorApplication.PENDING)
         self.assertFalse(HelperAccount.objects.exists())
+
+    def test_promotes_existing_account_instead_of_provisioning_a_new_one(self):
+        guardian = Guardian.objects.create(username="g1", email="tom@example.com")
+        application = MentorApplication.objects.create(
+            applicant_name="Tom", applicant_email="tom@example.com", applicant_account=guardian,
+            background_check_status=BackgroundCheckMixin.VALIDATED,
+            background_check_expires_at=timezone.now() + timedelta(days=1),
+        )
+
+        approve_and_provision_helper(
+            Mock(), _request_as(self.staff_user), MentorApplication.objects.filter(pk=application.pk),
+        )
+
+        self.assertEqual(User.objects.count(), 2)  # staff_user + guardian — no third row
+        helper = HelperAccount.objects.get(pk=guardian.pk)
+        self.assertTrue(helper.background_check_required)
+        self.assertTrue(Guardian.objects.filter(pk=guardian.pk).exists())
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertNotIn("Temporary password", mail.outbox[0].body)
 
 
 class BackgroundCheckRequestEmailAndUploadFlowTests(TestCase):

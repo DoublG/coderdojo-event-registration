@@ -51,3 +51,26 @@ def provision_account(account_model, name, email, login_url):
         recipient_list=[email],
     )
     return account
+
+
+def attach_role(user, role_model, **extra_fields):
+    """Adds `role_model` (Guardian/DojoOwner/HelperAccount) to `user`'s existing pk instead of
+    provisioning a disconnected new User row — used when someone who's already logged in (as
+    another role, or as this same one — e.g. a DojoOwner starting a second dojo) gains a role
+    rather than applying as a stranger. Copies User's own fields (password, email, etc.) onto the
+    new instance field-by-field via getattr/setattr — NOT `role_obj.__dict__.update(user.__dict__)`,
+    which looks equivalent but silently corrupts the account (blanks password and logs the caller
+    out) when `user` is `request.user`: that's a SimpleLazyObject proxy, and `.__dict__` on it
+    returns the *proxy's own* internal attributes, not the wrapped User's field values, since
+    `__dict__` access bypasses `__getattr__`. getattr()/setattr() go through the proxy correctly.
+    `role_model`'s own table then gets a fresh INSERT for that same pk (or, if a row already
+    exists there — e.g. re-attaching a role the account already has — a harmless UPDATE, never a
+    duplicate-row error: see Model._save_table's insert-on-update-affecting-0-rows fallback for
+    why a fresh row inserts cleanly here)."""
+    role_obj = role_model(user_ptr_id=user.pk)
+    for field in User._meta.concrete_fields:
+        setattr(role_obj, field.attname, getattr(user, field.attname))
+    for field, value in extra_fields.items():
+        setattr(role_obj, field, value)
+    role_obj.save()
+    return role_obj

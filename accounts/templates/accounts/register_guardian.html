@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% block title %}Register · CoderDojo{% endblock %}
+{% block title %}Register · CoderDojo Belgium{% endblock %}
 {% block root_class %}register-root{% endblock %}
 {% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
 
@@ -66,56 +66,7 @@
           <ul class="cd-form__errors">{% for error in form.consent.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
         </div>
 
-        <div class="cd-form__group">
-          <h3 class="cd-form__group-title heading-md">Children</h3>
-          <p class="cd-form__group-desc body-sm">Add each child who'll attend the dojo.</p>
-
-          {% if children_error %}
-            <p class="cd-form__note cd-form__note--error caption">{{ children_error }}</p>
-          {% endif %}
-
-          <div id="rp-children" data-count="{{ child_rows|length }}">
-            {% for row in child_rows %}
-              <div class="cd-form__subgroup" data-child="{{ row.index }}">
-                <div class="cd-form__subgroup-header">
-                  <h4 class="cd-form__subgroup-title heading-sm">Child {{ row.index }}</h4>
-                  {% if not forloop.first %}<button type="button" class="cd-form__remove body-sm">Remove</button>{% endif %}
-                </div>
-                <div class="cd-form__row">
-                  <div class="cd-form__field">
-                    <label class="cd-form__label label" for="rp-c{{ row.index }}-name">First name<span class="cd-form__required" aria-hidden="true">*</span></label>
-                    <ul class="cd-form__errors">{% if row.errors.name %}<li class="caption">{{ row.errors.name }}</li>{% endif %}</ul>
-                    <input class="cd-form__input body" id="rp-c{{ row.index }}-name" name="child_{{ row.index }}_name" type="text" placeholder="Sam" value="{{ row.name }}" required>
-                  </div>
-                  <div class="cd-form__field">
-                    <label class="cd-form__label label" for="rp-c{{ row.index }}-dob">Date of birth<span class="cd-form__required" aria-hidden="true">*</span></label>
-                    <ul class="cd-form__errors">{% if row.errors.dob %}<li class="caption">{{ row.errors.dob }}</li>{% endif %}</ul>
-                    <input class="cd-form__input body" id="rp-c{{ row.index }}-dob" name="child_{{ row.index }}_dob" type="date" value="{{ row.dob }}" required>
-                  </div>
-                </div>
-                <div class="cd-form__row">
-                  <div class="cd-form__field">
-                    <label class="cd-form__label label" for="rp-c{{ row.index }}-level">Experience level</label>
-                    <select class="cd-form__select body" id="rp-c{{ row.index }}-level" name="child_{{ row.index }}_level">
-                      <option value="new" {% if row.level == "new" %}selected{% endif %}>New to coding</option>
-                      <option value="some" {% if row.level == "some" %}selected{% endif %}>Some experience</option>
-                      <option value="confident" {% if row.level == "confident" %}selected{% endif %}>Confident</option>
-                    </select>
-                  </div>
-                  <div class="cd-form__field">
-                    <label class="cd-form__label label" for="rp-c{{ row.index }}-notes">Allergies or notes</label>
-                    <input class="cd-form__input body" id="rp-c{{ row.index }}-notes" name="child_{{ row.index }}_notes" type="text" placeholder="None" value="{{ row.notes }}">
-                  </div>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-
-          <button type="button" class="cd-form__add-button label" id="rp-add-child">
-            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
-            Add another child
-          </button>
-        </div>
+        {% include "accounts/partials/_child_rows_fieldset.html" %}
 
         <div class="cd-form__actions">
           <a class="cd-btn cd-btn--ghost label" href="{% url 'register' %}">Cancel</a>
@@ -128,93 +79,5 @@
 {% endblock %}
 
 {% block extra_script %}
-<script>
-  // Wires up "Add another child" / "Remove" — the rows themselves may
-  // start out server-rendered (re-showing a family's data after a
-  // validation error), this just handles adding/removing beyond that.
-  (function () {
-    var childrenEl = document.getElementById("rp-children");
-    var addButton = document.getElementById("rp-add-child");
-    if (!childrenEl || !addButton) return;
-
-    function subgroupHtml(n) {
-      return (
-        '<div class="cd-form__subgroup" data-child="' + n + '">' +
-          '<div class="cd-form__subgroup-header">' +
-            '<h4 class="cd-form__subgroup-title heading-sm">Child ' + n + '</h4>' +
-            '<button type="button" class="cd-form__remove body-sm">Remove</button>' +
-          '</div>' +
-          '<div class="cd-form__row">' +
-            '<div class="cd-form__field">' +
-              '<label class="cd-form__label label" for="rp-c' + n + '-name">First name<span class="cd-form__required" aria-hidden="true">*</span></label>' +
-              '<input class="cd-form__input body" id="rp-c' + n + '-name" name="child_' + n + '_name" type="text" placeholder="Sam" required>' +
-            '</div>' +
-            '<div class="cd-form__field">' +
-              '<label class="cd-form__label label" for="rp-c' + n + '-dob">Date of birth<span class="cd-form__required" aria-hidden="true">*</span></label>' +
-              '<input class="cd-form__input body" id="rp-c' + n + '-dob" name="child_' + n + '_dob" type="date" required>' +
-            '</div>' +
-          '</div>' +
-          '<div class="cd-form__row">' +
-            '<div class="cd-form__field">' +
-              '<label class="cd-form__label label" for="rp-c' + n + '-level">Experience level</label>' +
-              '<select class="cd-form__select body" id="rp-c' + n + '-level" name="child_' + n + '_level">' +
-                '<option value="new">New to coding</option><option value="some">Some experience</option><option value="confident">Confident</option>' +
-              '</select>' +
-            '</div>' +
-            '<div class="cd-form__field">' +
-              '<label class="cd-form__label label" for="rp-c' + n + '-notes">Allergies or notes</label>' +
-              '<input class="cd-form__input body" id="rp-c' + n + '-notes" name="child_' + n + '_notes" type="text" placeholder="None">' +
-            '</div>' +
-          '</div>' +
-        '</div>'
-      );
-    }
-
-    function syncRemoveButtons() {
-      var subgroups = childrenEl.querySelectorAll(".cd-form__subgroup");
-      subgroups.forEach(function (sg) {
-        var removeBtn = sg.querySelector(".cd-form__remove");
-        if (subgroups.length > 1 && !removeBtn) {
-          var header = sg.querySelector(".cd-form__subgroup-header");
-          var btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "cd-form__remove body-sm";
-          btn.textContent = "Remove";
-          btn.addEventListener("click", onRemove);
-          header.appendChild(btn);
-        } else if (subgroups.length === 1 && removeBtn) {
-          removeBtn.remove();
-        }
-      });
-    }
-
-    function onRemove(e) {
-      e.target.closest(".cd-form__subgroup").remove();
-      syncRemoveButtons();
-    }
-
-    childrenEl.querySelectorAll(".cd-form__remove").forEach(function (btn) {
-      btn.addEventListener("click", onRemove);
-    });
-    syncRemoveButtons();
-
-    addButton.addEventListener("click", function () {
-      // Max existing index + 1, not count + 1 — a server-rendered re-show
-      // after a validation error can have gaps (e.g. child_1 + child_3, if
-      // child_2 had been removed before submitting), and count + 1 could
-      // collide with an existing index in that case.
-      var existingIndexes = Array.prototype.map.call(
-        childrenEl.querySelectorAll(".cd-form__subgroup"),
-        function (sg) { return parseInt(sg.dataset.child, 10) || 0; }
-      );
-      var n = (existingIndexes.length ? Math.max.apply(null, existingIndexes) : 0) + 1;
-      var wrapper = document.createElement("div");
-      wrapper.innerHTML = subgroupHtml(n);
-      var subgroup = wrapper.firstElementChild;
-      subgroup.querySelector(".cd-form__remove").addEventListener("click", onRemove);
-      childrenEl.appendChild(subgroup);
-      syncRemoveButtons();
-    });
-  })();
-</script>
+{% include "accounts/partials/_child_rows_script.html" %}
 {% endblock %}

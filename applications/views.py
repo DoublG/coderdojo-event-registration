@@ -65,16 +65,34 @@ def _upload_background_check_context(request, application):
     }
 
 
+def _applicant_initial(user):
+    """Prefill for register_dojo/register_helper when the applicant is already logged in (e.g. a
+    Guardian applying to also become a DojoOwner/HelperAccount). Django's auth always loads
+    `user` as the base accounts.User row, never a role subclass (see accounts.context_processors.
+    user_roles for the same pattern) — phone only exists on Guardian, so it's only there via the
+    reverse one-to-one accessor, not directly on `user`."""
+    guardian = getattr(user, "guardian", None)
+    return {
+        "applicant_name": f"{user.first_name} {user.last_name}".strip() or user.get_username(),
+        "applicant_email": user.email,
+        "applicant_phone": guardian.phone if guardian is not None else "",
+    }
+
+
 def register_dojo(request):
     submitted = False
     if request.method == "POST":
         form = DojoApplicationForm(request.POST)
         if form.is_valid():
-            form.save()
+            application = form.save(commit=False)
+            if request.user.is_authenticated:
+                application.applicant_account = request.user
+            application.save()
             submitted = True
             form = DojoApplicationForm()
     else:
-        form = DojoApplicationForm()
+        initial = _applicant_initial(request.user) if request.user.is_authenticated else None
+        form = DojoApplicationForm(initial=initial)
 
     return render(request, "applications/register_dojo.html", {"form": form, "submitted": submitted})
 
@@ -84,11 +102,15 @@ def register_helper(request):
     if request.method == "POST":
         form = MentorApplicationForm(request.POST)
         if form.is_valid():
-            form.save()
+            application = form.save(commit=False)
+            if request.user.is_authenticated:
+                application.applicant_account = request.user
+            application.save()
             submitted = True
             form = MentorApplicationForm()
     else:
-        form = MentorApplicationForm()
+        initial = _applicant_initial(request.user) if request.user.is_authenticated else None
+        form = MentorApplicationForm(initial=initial)
 
     return render(request, "applications/register_helper.html", {"form": form, "submitted": submitted})
 

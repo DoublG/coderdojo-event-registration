@@ -10,7 +10,7 @@ from dojos.models import Dojo
 from events.models import Event, Registration
 
 from .models import DojoOwner, Guardian, HelperAccount, Participant
-from .provisioning import provision_account, unique_username
+from .provisioning import attach_role, provision_account, unique_username
 
 PASSWORD = "correct-horse-battery-staple"
 
@@ -363,6 +363,75 @@ class RegisterGuardianViewTests(TestCase):
         self.assertFalse(Guardian.objects.filter(email="jane@example.com").exists())
 
 
+class LinkGuardianRoleViewTests(TestCase):
+    """accounts.views.link_guardian_role — the counterpart to register_guardian for someone
+    who's already logged in as another role (or as a DojoOwner who wants to add Guardian too)
+    rather than a stranger signing up."""
+
+    def setUp(self):
+        self.owner = DojoOwner.objects.create(
+            username="owner1", email="owner@example.com", first_name="Owner", last_name="One",
+        )
+        self.owner.set_password(PASSWORD)
+        self.owner.save()
+
+    def _valid_post_data(self, **overrides):
+        data = {
+            "phone": "",
+            "consent": "on",
+            "child_1_name": "Sam",
+            "child_1_dob": "2015-01-01",
+            "child_1_level": "new",
+            "child_1_notes": "",
+        }
+        data.update(overrides)
+        return data
+
+    def test_anonymous_redirected_to_login(self):
+        response = self.client.get(reverse("link_guardian_role"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response.url)
+
+    def test_valid_post_adds_guardian_role_to_same_account(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(reverse("link_guardian_role"), self._valid_post_data())
+
+        self.owner.refresh_from_db()
+        self.assertRedirects(response, reverse("guardian_detail", kwargs={"guardian_id": self.owner.pk}))
+        # Same underlying User row gained a Guardian row — not a second account.
+        self.assertEqual(DojoOwner.objects.count(), 1)
+        self.assertEqual(Guardian.objects.count(), 1)
+        guardian = Guardian.objects.get(pk=self.owner.pk)
+        self.assertEqual(guardian.email, "owner@example.com")
+        self.assertTrue(guardian.check_password(PASSWORD))
+        self.assertEqual(list(guardian.children.values_list("name", flat=True)), ["Sam"])
+        # The DojoOwner role is untouched.
+        self.assertTrue(DojoOwner.objects.filter(pk=self.owner.pk).exists())
+
+    def test_already_guardian_is_redirected_without_reprocessing(self):
+        attach_role(self.owner, Guardian, phone="0470000000")
+        self.client.force_login(self.owner)
+
+        response = self.client.get(reverse("link_guardian_role"))
+
+        self.assertRedirects(response, reverse("guardian_detail", kwargs={"guardian_id": self.owner.pk}))
+        self.assertEqual(Guardian.objects.count(), 1)
+
+    def test_no_children_is_rejected(self):
+        self.client.force_login(self.owner)
+        data = self._valid_post_data()
+        del data["child_1_name"]
+        del data["child_1_dob"]
+        del data["child_1_level"]
+        del data["child_1_notes"]
+
+        response = self.client.post(reverse("link_guardian_role"), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["children_error"])
+        self.assertFalse(Guardian.objects.filter(pk=self.owner.pk).exists())
+
+
 class UniqueUsernameTests(TestCase):
     def test_returns_base_when_free(self):
         self.assertEqual(unique_username("jane-doe"), "jane-doe")
@@ -427,6 +496,40 @@ class ProvisionAccountTests(TestCase):
         first = provision_account(DojoOwner, "Jane Doe", "jane1@example.com", self.LOGIN_URL)
         second = provision_account(DojoOwner, "Jane Doe", "jane2@example.com", self.LOGIN_URL)
         self.assertNotEqual(first.username, second.username)
+
+
+class AttachRoleTests(TestCase):
+    """accounts.provisioning.attach_role — the MTI "promote in place" trick used both by
+    accounts.views.link_guardian_role and applications.admin's approve_and_provision_owner/helper
+    when an application's applicant_account is set."""
+
+    def test_adds_role_to_existing_user_without_creating_a_new_one(self):
+        owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
+        owner.set_password(PASSWORD)
+        owner.save()
+
+        guardian = attach_role(owner, Guardian, phone="0470000000")
+
+        self.assertEqual(guardian.pk, owner.pk)
+        self.assertEqual(guardian.phone, "0470000000")
+        # Base User fields carried over untouched.
+        self.assertEqual(guardian.email, "owner@example.com")
+        self.assertTrue(guardian.check_password(PASSWORD))
+        # One User row, now resolving as both roles.
+        self.assertEqual(DojoOwner.objects.filter(pk=owner.pk).count(), 1)
+        self.assertEqual(Guardian.objects.filter(pk=owner.pk).count(), 1)
+        owner.refresh_from_db()
+        self.assertIsNotNone(getattr(owner, "guardian", None))
+
+    def test_reattaching_an_existing_role_is_a_safe_no_op(self):
+        """The 1-to-n DojoOwner:Dojo case — an already-DojoOwner account approved for a *second*
+        dojo application goes through attach_role again for a role it already has."""
+        owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
+
+        result = attach_role(owner, DojoOwner)
+
+        self.assertEqual(result.pk, owner.pk)
+        self.assertEqual(DojoOwner.objects.filter(pk=owner.pk).count(), 1)
 
 
 class BackgroundCheckValidPropertyTests(TestCase):

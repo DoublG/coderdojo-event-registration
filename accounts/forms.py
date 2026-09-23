@@ -81,3 +81,16 @@ class RegisterGuardianForm(forms.Form):
         # ones enforced everywhere else a password is set.
         validate_password(password)
         return password
+
+
+class LinkGuardianForm(forms.Form):
+    """Like RegisterGuardianForm, but for an already-authenticated user adding the Guardian role
+    to their existing account (accounts.views.link_guardian_role) — name/email/password already
+    exist on request.user, so this only asks for what Guardian adds beyond base User: phone."""
+
+    phone = forms.CharField(
+        required=False,
+        max_length=30,
+        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "+32 4xx xx xx xx"}),
+    )
+    consent = forms.BooleanField(required=True, widget=forms.CheckboxInput())

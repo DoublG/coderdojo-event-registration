@@ -26,6 +26,15 @@ clearly marked). From here you can:
   wristbands) they've earned or are working towards, and their session
   history.
 
+Already a dojo owner or volunteer?
+------------------------------------
+
+If you log in as a dojo owner or helper and don't yet have a family page,
+your account menu offers a **Register your family** link — it adds your
+children to the same login you already use, without creating a second
+account. Your name and email are carried over automatically; you only need
+to fill in the rest.
+
 Changing your password
 ------------------------
 

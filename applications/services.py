@@ -36,3 +36,21 @@ def send_background_check_request(application, request):
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[application.applicant_email],
     )
+
+
+def send_role_activated_email(application, role_label):
+    """Sent instead of provision_account's temp-password email when an application's
+    applicant_account was already set (applications.admin.approve_and_provision_owner/helper
+    promoted an existing, already-logged-in account via accounts.provisioning.attach_role rather
+    than creating a new login) — they already have a password, there's nothing to activate, just
+    a new role to tell them about."""
+    send_mail(
+        subject="Your CoderDojo account has a new role",
+        message=(
+            f"Hi {application.applicant_name},\n\n"
+            f"Your application has been approved — your existing CoderDojo account is now also "
+            f"a {role_label}. Log in as usual; no new password needed.\n"
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[application.applicant_email],
+    )

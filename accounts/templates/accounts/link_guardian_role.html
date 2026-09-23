@@ -1,0 +1,65 @@
+{% extends "core/base.html" %}
+{% block title %}Register your family · CoderDojo Belgium{% endblock %}
+{% block root_class %}register-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .register-root { background: var(--surface-sunken); }
+  .register-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .register-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) 0; }
+  .register-root .page-title { color: var(--ink); margin: 0 0 var(--space-2); }
+  .register-root .page-subtitle { color: var(--ink-muted); margin: 0 0 var(--space-5); }
+  .register-root .form-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
+  .register-root .signed-in-as { color: var(--ink-muted); margin: 0 0 var(--space-5); }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="page">
+    <h1 class="display-lg page-title">Register your family</h1>
+    <p class="body-lg page-subtitle">Add your children so they can join sessions at any dojo.</p>
+
+    <div class="form-card">
+      <p class="body signed-in-as">Signed in as {{ request.user.email }}.</p>
+
+      <form class="cd-form" id="link-guardian-form" method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <div class="cd-form__notes">
+            {% for error in form.non_field_errors %}
+              <p class="cd-form__note cd-form__note--error caption">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="cd-form__group">
+          <h3 class="cd-form__group-title heading-md">Your details</h3>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="{{ form.phone.id_for_label }}">Phone</label>
+            {{ form.phone }}
+            <p class="cd-form__help caption">Only used if we need to reach you during a session.</p>
+            <ul class="cd-form__errors">{% for error in form.phone.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+          </div>
+          <div class="cd-form__checkbox-row">
+            {{ form.consent }}
+            <label class="body-sm" for="{{ form.consent.id_for_label }}">I am the parent or legal guardian of the children listed below.</label>
+          </div>
+          <ul class="cd-form__errors">{% for error in form.consent.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        </div>
+
+        {% include "accounts/partials/_child_rows_fieldset.html" %}
+
+        <div class="cd-form__actions">
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'home' %}">Cancel</a>
+          <button type="submit" class="cd-btn cd-btn--primary label">Add family</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_script %}
+{% include "accounts/partials/_child_rows_script.html" %}
+{% endblock %}

@@ -9,15 +9,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"POT-Creation-Date: 2026-09-23 18:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
-"Language-Team: fr <LL@li.org>\n"
 "Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "Generated-By: Babel 2.18.0\n"
 
 #: ../../source/volunteering/become-a-mentor-or-volunteer.rst:2
@@ -30,33 +30,45 @@ msgid ""
 "supporting ninjas one-on-one, and general event-day support (board/comms "
 "roles are also welcome)."
 msgstr ""
-"Aucune expérience d'enseignement n'est requise : les dojos ont besoin d'aide"
-" pour animer les séances, accompagner les ninjas individuellement, et pour "
-"le soutien général le jour de l'événement (les rôles au conseil "
+"Aucune expérience d'enseignement n'est requise : les dojos ont besoin "
+"d'aide pour animer les séances, accompagner les ninjas individuellement, "
+"et pour le soutien général le jour de l'événement (les rôles au conseil "
 "d'administration/communication sont aussi les bienvenus)."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:8
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:10
+msgid ""
+"Already have a family/guardian account? Log in first, then use **Apply to"
+" volunteer** from your account menu — your name, email, and phone are "
+"pre-filled, and once approved the volunteer role is added to your "
+"existing login instead of a separate one being created."
+msgstr ""
+"Vous avez déjà un compte famille/parent ? Connectez-vous d'abord, puis "
+"utilisez **Candidater comme bénévole** dans le menu de votre compte : "
+"votre nom, votre e-mail et votre téléphone sont pré-remplis, et une fois "
+"la candidature approuvée, le rôle de bénévole est ajouté à votre compte "
+"existant plutôt que d'en créer un séparé."
+
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:15
 msgid "To apply:"
 msgstr "Pour poser votre candidature :"
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:10
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:17
 msgid "Go to **Get involved** and choose **Become a mentor or volunteer**."
-msgstr ""
-"Allez dans **Participer** et choisissez **Devenir mentor ou bénévole**."
+msgstr "Allez dans **Participer** et choisissez **Devenir mentor ou bénévole**."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:11
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:18
 msgid "Fill in your name, email, and phone."
 msgstr "Renseignez votre nom, votre e-mail et votre téléphone."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:12
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:19
 msgid ""
-"Pick a dojo if you already have one in mind, or leave it as \"not sure yet\""
-" if you're open to any."
+"Pick a dojo if you already have one in mind, or leave it as \"not sure "
+"yet\" if you're open to any."
 msgstr ""
-"Choisissez un dojo si vous en avez déjà un en tête, ou laissez « pas encore "
-"sûr » si vous êtes ouvert·e à n'importe lequel."
+"Choisissez un dojo si vous en avez déjà un en tête, ou laissez « pas "
+"encore sûr » si vous êtes ouvert·e à n'importe lequel."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:14
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:21
 msgid ""
 "Choose your role — volunteer mentor, or something else (board, events, "
 "comms)."
@@ -64,36 +76,45 @@ msgstr ""
 "Choisissez votre rôle : mentor bénévole, ou autre chose (conseil "
 "d'administration, événements, communication)."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:16
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:23
 msgid "Tell us a bit about yourself — skills, interests, availability."
 msgstr ""
-"Parlez-nous un peu de vous : compétences, centres d'intérêt, disponibilités."
+"Parlez-nous un peu de vous : compétences, centres d'intérêt, "
+"disponibilités."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:17
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:24
 msgid ""
-"Confirm you understand a background check will be required (see "
-":doc:`background-check`) and submit."
+"Confirm you understand a background check will be required (see :doc"
+":`background-check`) and submit."
 msgstr ""
 "Confirmez que vous comprenez qu'une vérification d'antécédents sera "
 "nécessaire (voir :doc:`background-check`) et envoyez le formulaire."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:21
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:28
 msgid "What happens next"
 msgstr "Et ensuite ?"
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:23
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:30
 msgid ""
-"A CoderDojo Belgium admin reviews your application. If approved for a role "
-"that works directly with minors, you'll be emailed a link to submit your "
-"background check document — the account you'll actually log in with is "
-"created only once that's cleared. You'll receive your login details by email"
-" at that point, with a temporary password you'll be asked to replace the "
-"first time you log in."
+"A CoderDojo Belgium admin reviews your application. If approved for a "
+"role that works directly with minors, you'll be emailed a link to submit "
+"your background check document — the account you'll actually log in with "
+"is created (or, if you applied while already logged in, updated) only "
+"once that's cleared. If you didn't already have an account, you'll "
+"receive your login details by email at that point, with a temporary "
+"password you'll be asked to replace the first time you log in; if you "
+"did, you'll simply be notified that the volunteer role is now active — no"
+" new password needed."
 msgstr ""
-"Un administrateur CoderDojo Belgique examine votre candidature. Si elle est "
-"approuvée pour un rôle en contact direct avec des mineurs, vous recevrez par"
-" e-mail un lien pour soumettre votre document de vérification d'antécédents "
-": le compte avec lequel vous vous connecterez réellement n'est créé qu'une "
-"fois cette vérification validée. Vous recevrez alors vos identifiants de "
+"Un administrateur CoderDojo Belgique examine votre candidature. Si elle "
+"est approuvée pour un rôle en contact direct avec des mineurs, vous "
+"recevrez par e-mail un lien pour soumettre votre document de vérification"
+" d'antécédents : le compte avec lequel vous vous connecterez réellement "
+"n'est créé (ou, si vous avez postulé alors que vous étiez déjà "
+"connecté·e, mis à jour) qu'une fois cette vérification validée. Si vous "
+"n'aviez pas encore de compte, vous recevrez alors vos identifiants de "
 "connexion par e-mail, avec un mot de passe temporaire que vous devrez "
-"remplacer lors de votre première connexion."
+"remplacer lors de votre première connexion ; si vous en aviez déjà un, "
+"vous serez simplement informé·e que le rôle de bénévole est désormais "
+"actif — sans nouveau mot de passe nécessaire."
+

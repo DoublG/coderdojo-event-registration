@@ -20,13 +20,14 @@ from events.models import Registration
 
 from .forms import (
     ForcedPasswordChangeForm,
+    LinkGuardianForm,
     LoginForm,
     RegisterGuardianForm,
     StyledPasswordResetForm,
     StyledSetPasswordForm,
 )
 from .models import Guardian, Participant
-from .provisioning import unique_username
+from .provisioning import attach_role, unique_username
 
 # Same pool as seed_guardians.py — a guardian adding a child through the
 # quick-add widget picks one of these instead of getting a random one.
@@ -251,6 +252,46 @@ def register_guardian(request):
         form = RegisterGuardianForm()
 
     return render(request, "accounts/register_guardian.html", {
+        "form": form,
+        "child_rows": child_rows or [{"index": 1, "name": "", "dob": "", "level": "", "notes": "", "errors": {}}],
+        "children_error": children_error,
+    })
+
+
+@login_required
+def link_guardian_role(request):
+    """Lets an already-logged-in account (DojoOwner, HelperAccount, or a DojoOwner who's already
+    a Guardian trying the link again) add the Guardian role to their existing login — the
+    counterpart to register_guardian for someone who already has an account instead of a stranger
+    signing up. Reuses _parse_child_rows exactly as register_guardian does; skips name/email/
+    password since those already live on request.user."""
+    if getattr(request.user, "guardian", None) is not None:
+        return redirect("guardian_detail", guardian_id=request.user.pk)
+
+    child_rows = None
+    children_error = None
+
+    if request.method == "POST":
+        form = LinkGuardianForm(request.POST)
+        child_rows = _parse_child_rows(request.POST)
+        children_valid = bool(child_rows) and not any(row["errors"] for row in child_rows)
+        if not child_rows:
+            children_error = "Add at least one child."
+
+        if form.is_valid() and children_valid:
+            guardian = attach_role(request.user, Guardian, phone=form.cleaned_data["phone"])
+
+            for row in child_rows:
+                Participant.objects.create(
+                    guardian=guardian, name=row["name"], date_of_birth=row["date_of_birth"],
+                    experience_level=row["level"], allergies_notes=row["notes"],
+                )
+
+            return redirect("guardian_detail", guardian_id=guardian.id)
+    else:
+        form = LinkGuardianForm()
+
+    return render(request, "accounts/link_guardian_role.html", {
         "form": form,
         "child_rows": child_rows or [{"index": 1, "name": "", "dob": "", "level": "", "notes": "", "errors": {}}],
         "children_error": children_error,

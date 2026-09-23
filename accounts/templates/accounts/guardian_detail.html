@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% block title %}My account · CoderDojo{% endblock %}
+{% block title %}My account · CoderDojo Belgium{% endblock %}
 {% block root_class %}guardian-root{% endblock %}
 
 {% block extra_style %}
@@ -86,6 +86,20 @@
         </div>
       </form>
     </details>
+
+    {% if not user_dojo_owner or not user_helper %}
+      <div class="cd-card add-child" style="margin-top: var(--space-5);">
+        <p class="body" style="margin: 0 0 var(--space-4);">Want to get more involved?</p>
+        <div class="cd-form__actions" style="justify-content: center;">
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'register_dojo' %}">
+            {% if user_dojo_owner.dojos.exists %}Start another dojo{% else %}Apply to start a dojo{% endif %}
+          </a>
+          {% if not user_helper %}
+            <a class="cd-btn cd-btn--ghost label" href="{% url 'register_helper' %}">Apply to volunteer</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
 
   </div>
 {% endblock %}

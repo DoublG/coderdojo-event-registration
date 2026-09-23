@@ -1,0 +1,89 @@
+<script>
+  // Wires up "Add another child" / "Remove" — the rows themselves may
+  // start out server-rendered (re-showing a family's data after a
+  // validation error), this just handles adding/removing beyond that.
+  (function () {
+    var childrenEl = document.getElementById("rp-children");
+    var addButton = document.getElementById("rp-add-child");
+    if (!childrenEl || !addButton) return;
+
+    function subgroupHtml(n) {
+      return (
+        '<div class="cd-form__subgroup" data-child="' + n + '">' +
+          '<div class="cd-form__subgroup-header">' +
+            '<h4 class="cd-form__subgroup-title heading-sm">Child ' + n + '</h4>' +
+            '<button type="button" class="cd-form__remove body-sm">Remove</button>' +
+          '</div>' +
+          '<div class="cd-form__row">' +
+            '<div class="cd-form__field">' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-name">First name<span class="cd-form__required" aria-hidden="true">*</span></label>' +
+              '<input class="cd-form__input body" id="rp-c' + n + '-name" name="child_' + n + '_name" type="text" placeholder="Sam" required>' +
+            '</div>' +
+            '<div class="cd-form__field">' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-dob">Date of birth<span class="cd-form__required" aria-hidden="true">*</span></label>' +
+              '<input class="cd-form__input body" id="rp-c' + n + '-dob" name="child_' + n + '_dob" type="date" required>' +
+            '</div>' +
+          '</div>' +
+          '<div class="cd-form__row">' +
+            '<div class="cd-form__field">' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-level">Experience level</label>' +
+              '<select class="cd-form__select body" id="rp-c' + n + '-level" name="child_' + n + '_level">' +
+                '<option value="new">New to coding</option><option value="some">Some experience</option><option value="confident">Confident</option>' +
+              '</select>' +
+            '</div>' +
+            '<div class="cd-form__field">' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-notes">Allergies or notes</label>' +
+              '<input class="cd-form__input body" id="rp-c' + n + '-notes" name="child_' + n + '_notes" type="text" placeholder="None">' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    function syncRemoveButtons() {
+      var subgroups = childrenEl.querySelectorAll(".cd-form__subgroup");
+      subgroups.forEach(function (sg) {
+        var removeBtn = sg.querySelector(".cd-form__remove");
+        if (subgroups.length > 1 && !removeBtn) {
+          var header = sg.querySelector(".cd-form__subgroup-header");
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "cd-form__remove body-sm";
+          btn.textContent = "Remove";
+          btn.addEventListener("click", onRemove);
+          header.appendChild(btn);
+        } else if (subgroups.length === 1 && removeBtn) {
+          removeBtn.remove();
+        }
+      });
+    }
+
+    function onRemove(e) {
+      e.target.closest(".cd-form__subgroup").remove();
+      syncRemoveButtons();
+    }
+
+    childrenEl.querySelectorAll(".cd-form__remove").forEach(function (btn) {
+      btn.addEventListener("click", onRemove);
+    });
+    syncRemoveButtons();
+
+    addButton.addEventListener("click", function () {
+      // Max existing index + 1, not count + 1 — a server-rendered re-show
+      // after a validation error can have gaps (e.g. child_1 + child_3, if
+      // child_2 had been removed before submitting), and count + 1 could
+      // collide with an existing index in that case.
+      var existingIndexes = Array.prototype.map.call(
+        childrenEl.querySelectorAll(".cd-form__subgroup"),
+        function (sg) { return parseInt(sg.dataset.child, 10) || 0; }
+      );
+      var n = (existingIndexes.length ? Math.max.apply(null, existingIndexes) : 0) + 1;
+      var wrapper = document.createElement("div");
+      wrapper.innerHTML = subgroupHtml(n);
+      var subgroup = wrapper.firstElementChild;
+      subgroup.querySelector(".cd-form__remove").addEventListener("click", onRemove);
+      childrenEl.appendChild(subgroup);
+      syncRemoveButtons();
+    });
+  })();
+</script>

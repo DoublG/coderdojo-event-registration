@@ -1,6 +1,7 @@
 import uuid
 from datetime import timedelta
 
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -99,6 +100,12 @@ class DojoApplication(BackgroundCheckMixin, models.Model):
     applicant_name = models.CharField(max_length=200)
     applicant_email = models.EmailField()
     applicant_phone = models.CharField(max_length=30, blank=True, default="")
+    applicant_account = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        help_text="Set when an already-logged-in user submitted this application, so approval "
+                  "(approve_and_provision_owner) can promote their existing account via "
+                  "accounts.provisioning.attach_role instead of provisioning a disconnected new one.",
+    )
     area = models.CharField(max_length=200, help_text="City/area where the dojo would run.")
     preferred_schedule = models.CharField(max_length=200, blank=True, default="", help_text='e.g. "Saturday mornings"')
     proposed_venue = models.CharField(max_length=200, blank=True, default="")
@@ -149,6 +156,12 @@ class MentorApplication(BackgroundCheckMixin, models.Model):
     applicant_name = models.CharField(max_length=200)
     applicant_email = models.EmailField()
     applicant_phone = models.CharField(max_length=30, blank=True, default="")
+    applicant_account = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        help_text="Set when an already-logged-in user submitted this application, so approval "
+                  "(approve_and_provision_helper) can promote their existing account via "
+                  "accounts.provisioning.attach_role instead of provisioning a disconnected new one.",
+    )
     dojo = models.ForeignKey(
         "dojos.Dojo", on_delete=models.SET_NULL, null=True, blank=True, related_name="mentor_applications",
         help_text="Blank if the applicant is open to any dojo.",

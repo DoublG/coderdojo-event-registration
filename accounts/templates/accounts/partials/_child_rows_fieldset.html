@@ -1,0 +1,55 @@
+{% comment %}
+  Shared by register_guardian.html and link_guardian_role.html — the dynamically-numbered
+  child_<n>_name/dob/level/notes rows (see accounts.views._parse_child_rows) plus the
+  "Add another child" button. Expects child_rows and children_error in context.
+{% endcomment %}
+<div class="cd-form__group">
+  <h3 class="cd-form__group-title heading-md">Children</h3>
+  <p class="cd-form__group-desc body-sm">Add each child who'll attend the dojo.</p>
+
+  {% if children_error %}
+    <p class="cd-form__note cd-form__note--error caption">{{ children_error }}</p>
+  {% endif %}
+
+  <div id="rp-children" data-count="{{ child_rows|length }}">
+    {% for row in child_rows %}
+      <div class="cd-form__subgroup" data-child="{{ row.index }}">
+        <div class="cd-form__subgroup-header">
+          <h4 class="cd-form__subgroup-title heading-sm">Child {{ row.index }}</h4>
+          {% if not forloop.first %}<button type="button" class="cd-form__remove body-sm">Remove</button>{% endif %}
+        </div>
+        <div class="cd-form__row">
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="rp-c{{ row.index }}-name">First name<span class="cd-form__required" aria-hidden="true">*</span></label>
+            <ul class="cd-form__errors">{% if row.errors.name %}<li class="caption">{{ row.errors.name }}</li>{% endif %}</ul>
+            <input class="cd-form__input body" id="rp-c{{ row.index }}-name" name="child_{{ row.index }}_name" type="text" placeholder="Sam" value="{{ row.name }}" required>
+          </div>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="rp-c{{ row.index }}-dob">Date of birth<span class="cd-form__required" aria-hidden="true">*</span></label>
+            <ul class="cd-form__errors">{% if row.errors.dob %}<li class="caption">{{ row.errors.dob }}</li>{% endif %}</ul>
+            <input class="cd-form__input body" id="rp-c{{ row.index }}-dob" name="child_{{ row.index }}_dob" type="date" value="{{ row.dob }}" required>
+          </div>
+        </div>
+        <div class="cd-form__row">
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="rp-c{{ row.index }}-level">Experience level</label>
+            <select class="cd-form__select body" id="rp-c{{ row.index }}-level" name="child_{{ row.index }}_level">
+              <option value="new" {% if row.level == "new" %}selected{% endif %}>New to coding</option>
+              <option value="some" {% if row.level == "some" %}selected{% endif %}>Some experience</option>
+              <option value="confident" {% if row.level == "confident" %}selected{% endif %}>Confident</option>
+            </select>
+          </div>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="rp-c{{ row.index }}-notes">Allergies or notes</label>
+            <input class="cd-form__input body" id="rp-c{{ row.index }}-notes" name="child_{{ row.index }}_notes" type="text" placeholder="None" value="{{ row.notes }}">
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <button type="button" class="cd-form__add-button label" id="rp-add-child">
+    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+    Add another child
+  </button>
+</div>
