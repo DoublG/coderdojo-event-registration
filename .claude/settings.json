@@ -92,7 +92,12 @@
       "Bash(curl -skL -o /dev/null -w \"GET /docs \\(follow\\) -> %{http_code}\\\\n\" --max-time 5 https://coolregistration.localhost/docs)",
       "Bash(curl -sk -D - -o /dev/null --max-time 5 https://coolregistration.localhost/docs/_static/styles/furo.css)",
       "Bash(curl -sk --max-time 5 https://coolregistration.localhost/docs/_static/styles/furo.css)",
-      "Bash(curl -sk -D - -o /dev/null --max-time 5 https://coolregistration.localhost/docs/_static/scripts/furo.js)"
+      "Bash(curl -sk -D - -o /dev/null --max-time 5 https://coolregistration.localhost/docs/_static/scripts/furo.js)",
+      "Bash(curl -sk --max-time 5 https://coolregistration.localhost/)",
+      "Bash(curl -sk -o /dev/null https://coolregistration.localhost/)",
+      "Bash(curl -sk -o /dev/null https://coolregistration.localhost/dojos/)",
+      "Bash(curl -sk -o /dev/null https://coolregistration.localhost/events/upcoming-sessions-widget/)",
+      "Bash(time curl -sk -o /dev/null https://coolregistration.localhost/dojos/?location=Ghent)"
     ],
     "additionalDirectories": [
       "/home/erik/coderdojo-event-registration/.devcontainer/certs/pki",

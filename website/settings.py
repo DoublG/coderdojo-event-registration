@@ -41,6 +41,34 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
+# debug_toolbar's default check is `REMOTE_ADDR in INTERNAL_IPS` — behind
+# the .devcontainer nginx proxy (coolregistration.localhost), Django sees
+# REMOTE_ADDR as the proxy container's own docker-network IP, not 127.0.0.1,
+# so the toolbar would otherwise silently fail to render there. This is
+# local dev only (DEBUG is never True in production), so just show it
+# whenever DEBUG is on rather than chasing the proxy's ever-changing IP.
+def _show_debug_toolbar(request):
+    # Deferred import, and reads django.conf.settings rather than closing
+    # over the DEBUG name above directly: Django's test runner overrides
+    # DEBUG to False at runtime (via django.conf.settings), but doesn't
+    # touch this module's own already-imported DEBUG=True constant — a
+    # closure over the bare name would keep returning True during tests,
+    # where website/urls.py (correctly reading the overridden value) never
+    # registers debug_toolbar's URLs at all, causing a NoReverseMatch.
+    from django.conf import settings as django_settings
+    return django_settings.DEBUG
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': _show_debug_toolbar,
+    # debug_toolbar's own system check (E001) otherwise refuses to run
+    # under `manage.py test` at all once DEBUG_TOOLBAR_CONFIG is set
+    # explicitly — safe to bypass since SHOW_TOOLBAR_CALLBACK above
+    # correctly evaluates to False under the test runner's DEBUG override,
+    # so the toolbar genuinely never activates during tests.
+    'IS_RUNNING_TESTS': False,
+}
+
 AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = 'login'
 
@@ -160,6 +188,14 @@ CACHES = {
         ),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            # Cache reads/writes fail open rather than raising — without a
+            # local Redis (e.g. host-based dev/tests outside the
+            # devcontainer, where REDIS_HOST defaults to 127.0.0.1 with
+            # nothing listening), every cache.get()/set() would otherwise
+            # hard-error instead of just skipping the cache.
+            'IGNORE_EXCEPTIONS': True,
+            'SOCKET_CONNECT_TIMEOUT': 2,
+            'SOCKET_TIMEOUT': 2,
         },
     }
 }

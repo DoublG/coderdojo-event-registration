@@ -1,5 +1,6 @@
 import requests
 from django.contrib.gis.geos import Point
+from django.core.cache import cache
 from django.db.models import ExpressionWrapper, F, FloatField
 from django.utils import timezone
 
@@ -13,6 +14,13 @@ from .models import Dojo
 # the dojo-finder search bar's old pre-filled example location.
 DEFAULT_SEARCH_ORIGIN = Point(3.7174, 51.0543, srid=4326)  # Ghent, Belgium
 DEFAULT_SEARCH_LABEL = "Ghent, Belgium"
+
+# Every homepage load and every bare (no search submitted) dojo_list visit
+# resolves to this exact origin — by far the most common case, so it's the
+# one worth caching. Short TTL: dojo data changes rarely, but this keeps a
+# newly-added dojo from being invisible for long.
+DEFAULT_SEARCH_CACHE_KEY = "dojos:by_distance:default_origin"
+DEFAULT_SEARCH_CACHE_TIMEOUT = 60
 
 
 def resolve_search_origin(form):
@@ -48,9 +56,21 @@ def resolve_search_origin(form):
 
 
 def dojos_by_distance(origin):
-    """Dojo queryset annotated with distance_km from `origin` and ordered
+    """Dojo list annotated with distance_km from `origin` and ordered
     nearest-first — or the plain unordered queryset if origin is None (a
-    failed geocode)."""
+    failed geocode).
+
+    Returns a plain (evaluated) list for the default origin, since that
+    result is cached — see DEFAULT_SEARCH_CACHE_KEY. Otherwise returns the
+    lazy queryset as before; caching every possible typed-in search would
+    have an unbounded key space for little benefit.
+    """
+    is_default = origin is DEFAULT_SEARCH_ORIGIN
+    if is_default:
+        cached = cache.get(DEFAULT_SEARCH_CACHE_KEY)
+        if cached is not None:
+            return cached
+
     qs = Dojo.objects.all()
     if origin is not None:
         qs = qs.annotate(
@@ -59,6 +79,10 @@ def dojos_by_distance(origin):
                 output_field=FloatField(),
             )
         ).order_by(F("distance_km").asc(nulls_last=True))
+
+    if is_default:
+        qs = list(qs)
+        cache.set(DEFAULT_SEARCH_CACHE_KEY, qs, DEFAULT_SEARCH_CACHE_TIMEOUT)
     return qs
 
 

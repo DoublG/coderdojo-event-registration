@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 from django.contrib.gis.geos import Point
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
@@ -14,6 +15,11 @@ class DojoListViewTests(TestCase):
     def setUpTestData(cls):
         Dojo.objects.create(name="Ghent", location=Point(3.7174, 51.0543, srid=4326))
         Dojo.objects.create(name="Antwerp", location=Point(4.4025, 51.2194, srid=4326))
+
+    def setUp(self):
+        # The default-origin search result is cached (dojos/search.py) — the
+        # test DB resets between tests/classes, the cache doesn't.
+        cache.clear()
 
     def test_default_search_orders_by_distance_from_ghent(self):
         """No search submitted yet — falls back to the default (Ghent)
@@ -48,6 +54,7 @@ class DojoListViewTests(TestCase):
 
 class DojoFinderWidgetViewTests(TestCase):
     def test_renders_partial(self):
+        cache.clear()  # see DojoListViewTests.setUp — same default-origin cache key
         Dojo.objects.create(name="Ghent", location=Point(3.7174, 51.0543, srid=4326))
         response = self.client.get(reverse("dojo_finder_widget"))
         self.assertEqual(response.status_code, 200)

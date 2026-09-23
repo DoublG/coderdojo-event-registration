@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -50,6 +51,7 @@ class EventListViewTests(TestCase):
 
 class UpcomingSessionsWidgetViewTests(TestCase):
     def test_renders_partial(self):
+        cache.clear()  # upcoming_available_events() is cached (events/search.py)
         dojo = Dojo.objects.create(name="Ghent")
         _future_event(dojo)
         response = self.client.get(reverse("upcoming_sessions_widget"))

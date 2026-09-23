@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.urls import reverse
@@ -10,20 +11,30 @@ from dojos.views import WIDGET_RESULTS_LIMIT
 from events.search import WIDGET_PAGE_SIZE, upcoming_available_events
 from pathways.models import Pathway
 
+# Site-wide content that barely ever changes and is identical for every
+# visitor (unlike, say, the dojo-finder widget's results, which vary by
+# origin) — cached here rather than via cache_page on the whole view, since
+# the page also renders per-user chrome (see core/templates/core/menu.html:
+# login state, account links) that must never be cached.
+HOME_CONTENT_CACHE_TIMEOUT = 300
+
 
 def home(request):
-    pathways = Pathway.objects.all()
+    pathways = cache.get_or_set("core:home:pathways", lambda: list(Pathway.objects.all()), HOME_CONTENT_CACHE_TIMEOUT)
 
     # The organisation-wide board — the homepage isn't tied to one dojo, so
     # "Meet the team" shows Mentor.BOARD rather than any single chapter's
     # mentors (see dojos.models.Mentor.dojo help text).
-    team = Mentor.objects.filter(role=Mentor.BOARD).public()
+    team = cache.get_or_set(
+        "core:home:team", lambda: list(Mentor.objects.filter(role=Mentor.BOARD).public()), HOME_CONTENT_CACHE_TIMEOUT
+    )
 
     # A different quote on every load — order_by("?") is fine at this size
-    # (a handful of site-wide testimonials, dojo=None).
+    # (a handful of site-wide testimonials, dojo=None). Deliberately *not*
+    # cached: that's the whole point of this query.
     testimonial = Testimonial.objects.filter(dojo=None).order_by("?").first()
 
-    faqs = FAQ.objects.global_faqs()
+    faqs = cache.get_or_set("core:home:faqs", lambda: list(FAQ.objects.global_faqs()), HOME_CONTENT_CACHE_TIMEOUT)
 
     # Initial state for the "Find a dojo near you" widget (dojos app) — its
     # own searches happen via htmx against dojos.views.dojo_finder_widget,
