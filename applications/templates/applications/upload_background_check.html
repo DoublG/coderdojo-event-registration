@@ -1,0 +1,84 @@
+{% extends "core/base.html" %}
+{% block title %}Upload background check · CoderDojo{% endblock %}
+{% block root_class %}upload-background-check-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .upload-background-check-root { background: var(--surface-sunken); }
+  .upload-background-check-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .upload-background-check-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) 0; }
+  .upload-background-check-root .page-title { color: var(--ink); margin: var(--space-2) 0 var(--space-2); }
+  .upload-background-check-root .page-subtitle { color: var(--ink-muted); margin: 0 0 var(--space-5); }
+  .upload-background-check-root .form-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
+  .upload-background-check-root .legal-quote { border-left: 3px solid var(--primary); padding-left: var(--space-3); margin: 0 0 var(--space-5); color: var(--ink-muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="page">
+
+    {% if submitted %}
+
+      <h1 class="display-lg page-title">Thanks — document received</h1>
+      <p class="body-lg page-subtitle">We've received your document. A reviewer will validate it before your account is set up.</p>
+      <div class="form-card">
+        <a class="cd-btn cd-btn--primary label" href="{% url 'home' %}">Back to home</a>
+      </div>
+
+    {% elif already_submitted %}
+
+      <h1 class="display-lg page-title">Already submitted</h1>
+      <p class="body-lg page-subtitle">We already have a document on file for this application — no need to upload another.</p>
+      <div class="form-card">
+        <a class="cd-btn cd-btn--primary label" href="{% url 'home' %}">Back to home</a>
+      </div>
+
+    {% else %}
+
+      <h1 class="display-lg page-title">Upload your background check</h1>
+      <p class="body-lg page-subtitle">Hi {{ application.applicant_name }} — one last step before we can confirm your application.</p>
+
+      <div class="form-card">
+        <blockquote class="body-sm legal-quote">
+          Artikel 596.2 ('minderjarigenmodel') is nodig voor specifieke activiteiten met contacten
+          met kinderen en jongeren, zoals opvoeding, psycho-medisch-sociale begeleiding,
+          hulpverlening aan de jeugd, kinderbescherming, animatie of begeleiding van minderjarigen.
+        </blockquote>
+        <p class="body-sm cd-form__help">
+          You can request this "uittreksel uit het strafregister, model 2" for free from your
+          local gemeente/commune, or online via mijndossier.rrn.fgov.be — mention it's for
+          volunteering with minors (model 2 / Artikel 596.2).
+        </p>
+        <p class="body-sm cd-form__help">
+          Only an approved reviewer can access this document. It's discarded from our systems as
+          soon as it's validated — we only keep the outcome, and that validation expires after a
+          year, after which it needs to be redone.
+        </p>
+
+        <form class="cd-form" id="upload-background-check-form" method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="cd-form__notes">
+              {% for error in form.non_field_errors %}
+                <p class="cd-form__note cd-form__note--error caption">{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="{{ form.document.id_for_label }}">Document<span class="cd-form__required" aria-hidden="true">*</span></label>
+            {{ form.document }}
+            <ul class="cd-form__errors">{% for error in form.document.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+          </div>
+
+          <div class="cd-form__actions">
+            <button type="submit" class="cd-btn cd-btn--primary label">Upload document</button>
+          </div>
+
+        </form>
+      </div>
+
+    {% endif %}
+  </div>
+{% endblock %}

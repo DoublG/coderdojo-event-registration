@@ -1,7 +1,80 @@
+import uuid
+from datetime import timedelta
+
 from django.db import models
+from django.utils import timezone
+
+from .storage import private_storage
+
+# How long a validated background check stays valid before it must be
+# redone — the criminal record extract is a snapshot at issue time, not a
+# standing clearance.
+BACKGROUND_CHECK_VALIDITY = timedelta(days=365)
+
+# The Belgian legal citation this whole flow exists for — quoted verbatim
+# (in Dutch, as the actual legal text) rather than paraphrased, since it's
+# what applicants need to ask their gemeente/mijndossier.rrn.fgov.be for.
+ARTICLE_596_2_TEXT = (
+    "Artikel 596.2 (‘minderjarigenmodel’) is nodig voor specifieke activiteiten met "
+    "contacten met kinderen en jongeren, zoals opvoeding, psycho-medisch-sociale begeleiding, "
+    "hulpverlening aan de jeugd, kinderbescherming, animatie of begeleiding van minderjarigen."
+)
 
 
-class DojoApplication(models.Model):
+class BackgroundCheckMixin(models.Model):
+    """Belgian law requires a specific extract from the criminal record
+    (uittreksel model 2, Artikel 596.2 — see ARTICLE_596_2_TEXT) for anyone
+    who'll be in contact with minors, so both DojoApplication (a dojo's
+    lead coach) and MentorApplication (any volunteer) go through this
+    after their initial submission: an admin requests it (which emails the
+    applicant a link built from background_check_token), they upload it at
+    that link, and an admin reviews the upload before the account gets
+    provisioned — see applications.admin and applications.services."""
+
+    NOT_REQUESTED = "not_requested"
+    REQUESTED = "requested"
+    SUBMITTED = "submitted"
+    VALIDATED = "validated"
+    REJECTED = "rejected"
+    BACKGROUND_CHECK_STATUS_CHOICES = [
+        (NOT_REQUESTED, "Not requested yet"),
+        (REQUESTED, "Requested — waiting on applicant"),
+        (SUBMITTED, "Submitted — awaiting review"),
+        (VALIDATED, "Validated"),
+        (REJECTED, "Rejected"),
+    ]
+
+    background_check_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    background_check_status = models.CharField(
+        max_length=20, choices=BACKGROUND_CHECK_STATUS_CHOICES, default=NOT_REQUESTED,
+    )
+    background_check_document = models.FileField(
+        upload_to="background_checks/", storage=private_storage, null=True, blank=True,
+        help_text="The applicant's uittreksel uit het strafregister, model 2 (Artikel 596.2). "
+                  "Only readable by an approved reviewer (applications.can_review_background_checks) "
+                  "via the protected download view — never a public media URL. The file itself is "
+                  "deleted once validated; only the decision and its expiry date are kept.",
+    )
+    background_check_requested_at = models.DateTimeField(null=True, blank=True)
+    background_check_submitted_at = models.DateTimeField(null=True, blank=True)
+    background_check_reviewed_at = models.DateTimeField(null=True, blank=True)
+    background_check_expires_at = models.DateTimeField(
+        null=True, blank=True, help_text="Set on validation; the check must be redone after this date.",
+    )
+
+    class Meta:
+        abstract = True
+
+    @property
+    def has_valid_background_check(self):
+        return (
+            self.background_check_status == self.VALIDATED
+            and self.background_check_expires_at is not None
+            and self.background_check_expires_at > timezone.now()
+        )
+
+
+class DojoApplication(BackgroundCheckMixin, models.Model):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -19,15 +92,25 @@ class DojoApplication(models.Model):
     proposed_venue = models.CharField(max_length=200, blank=True, default="")
     message = models.TextField(blank=True, default="")
     consent = models.BooleanField(default=False, help_text="Understands sessions are free and volunteer-run.")
+    background_check_consent = models.BooleanField(
+        default=False,
+        help_text="Understands a Belgian criminal record extract (model 2, Artikel 596.2) will be required, "
+                  "since a dojo's lead coach works directly with minors.",
+    )
 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
     submitted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        permissions = [
+            ("can_review_background_checks", "Can review background check documents"),
+        ]
 
     def __str__(self):
         return f"{self.applicant_name} - {self.area}"
 
 
-class MentorApplication(models.Model):
+class MentorApplication(BackgroundCheckMixin, models.Model):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -53,7 +136,11 @@ class MentorApplication(models.Model):
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=VOLUNTEER_MENTOR)
     about = models.TextField(blank=True, default="", help_text="Applicant's skills/interests.")
-    background_check_consent = models.BooleanField(default=False)
+    background_check_consent = models.BooleanField(
+        default=False,
+        help_text="Understands a Belgian criminal record extract (model 2, Artikel 596.2) will be required "
+                  "before working directly with minors.",
+    )
 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
     submitted_at = models.DateTimeField(auto_now_add=True)

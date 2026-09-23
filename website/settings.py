@@ -180,3 +180,10 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Background check documents (criminal record extracts) are sensitive and
+# must never be reachable via a public URL, unlike MEDIA_ROOT above which
+# website/urls.py serves directly under DEBUG. This directory has no
+# corresponding url() — the only way to read a file here is through the
+# permission-gated view in applications.views. See applications.storage.
+PRIVATE_MEDIA_ROOT = BASE_DIR / "private_media"
+

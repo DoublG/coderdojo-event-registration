@@ -16,72 +16,101 @@
 
 {% block content %}
   <div class="page">
-    <h1 class="display-lg page-title">Become a mentor or volunteer</h1>
-    <p class="body-lg page-subtitle">However much time you can give, we can use it — from mentoring most Saturdays to helping out at one big event a year.</p>
 
-    <div class="form-card">
-      <form class="cd-form" id="register-helper-form" novalidate>
+    {% if submitted %}
 
-        <div class="cd-form__notes" hidden></div>
+      <h1 class="display-lg page-title">Thanks — application sent!</h1>
+      <p class="body-lg page-subtitle">We've got your details. Someone from the team will follow up soon.</p>
+      <div class="form-card">
+        <a class="cd-btn cd-btn--primary label" href="{% url 'home' %}">Back to home</a>
+      </div>
 
-        <div class="cd-form__group">
-          <h3 class="cd-form__group-title heading-md">Your details</h3>
-          <div class="cd-form__row">
-            <div class="cd-form__field">
-              <label class="cd-form__label label" for="rh-name">Full name<span class="cd-form__required" aria-hidden="true">*</span></label>
-              <input class="cd-form__input body" id="rh-name" name="applicant_name" type="text" placeholder="Tom Verstraete" required>
+    {% else %}
+
+      <h1 class="display-lg page-title">Become a mentor or volunteer</h1>
+      <p class="body-lg page-subtitle">However much time you can give, we can use it — from mentoring most Saturdays to helping out at one big event a year.</p>
+
+      <div class="form-card">
+        <form class="cd-form" id="register-helper-form" method="post" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="cd-form__notes">
+              {% for error in form.non_field_errors %}
+                <p class="cd-form__note cd-form__note--error caption">{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="cd-form__group">
+            <h3 class="cd-form__group-title heading-md">Your details</h3>
+            <div class="cd-form__row">
+              <div class="cd-form__field">
+                <label class="cd-form__label label" for="{{ form.applicant_name.id_for_label }}">Full name<span class="cd-form__required" aria-hidden="true">*</span></label>
+                {{ form.applicant_name }}
+                <ul class="cd-form__errors">{% for error in form.applicant_name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+              </div>
+              <div class="cd-form__field">
+                <label class="cd-form__label label" for="{{ form.applicant_email.id_for_label }}">Email<span class="cd-form__required" aria-hidden="true">*</span></label>
+                {{ form.applicant_email }}
+                <ul class="cd-form__errors">{% for error in form.applicant_email.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+              </div>
             </div>
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="rh-email">Email<span class="cd-form__required" aria-hidden="true">*</span></label>
-              <input class="cd-form__input body" id="rh-email" name="applicant_email" type="email" placeholder="tom@example.com" required>
+              <label class="cd-form__label label" for="{{ form.applicant_phone.id_for_label }}">Phone</label>
+              {{ form.applicant_phone }}
+              <ul class="cd-form__errors">{% for error in form.applicant_phone.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
           </div>
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="rh-phone">Phone</label>
-            <input class="cd-form__input body" id="rh-phone" name="applicant_phone" type="tel" placeholder="+32 4xx xx xx xx">
-          </div>
-        </div>
 
-        <div class="cd-form__group">
-          <h3 class="cd-form__group-title heading-md">How you'd like to help</h3>
-          <div class="cd-form__row">
+          <div class="cd-form__group">
+            <h3 class="cd-form__group-title heading-md">How you'd like to help</h3>
+            <div class="cd-form__row">
+              <div class="cd-form__field">
+                <label class="cd-form__label label" for="{{ form.dojo.id_for_label }}">Which dojo?</label>
+                {{ form.dojo }}
+                <ul class="cd-form__errors">{% for error in form.dojo.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+              </div>
+              <div class="cd-form__field">
+                <label class="cd-form__label label" for="{{ form.role.id_for_label }}">Role</label>
+                {{ form.role }}
+                <ul class="cd-form__errors">{% for error in form.role.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="cd-form__group">
+            <h3 class="cd-form__group-title heading-md">A bit about you</h3>
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="rh-dojo">Which dojo?</label>
-              <select class="cd-form__select body" id="rh-dojo" name="dojo">
-                <option value="">Not sure yet — any dojo</option>
-                {% for dojo in dojo_choices %}
-                  <option value="{{ dojo.id }}">{{ dojo.name }}</option>
-                {% endfor %}
-              </select>
+              <label class="cd-form__label label" for="{{ form.about.id_for_label }}">What would you like to help with?</label>
+              {{ form.about }}
+              <ul class="cd-form__errors">{% for error in form.about.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
-            <div class="cd-form__field">
-              <label class="cd-form__label label" for="rh-role">Role</label>
-              <select class="cd-form__select body" id="rh-role" name="role">
-                <option value="volunteer_mentor">Volunteer mentor</option>
-                <option value="other">Something else (board, events, comms)</option>
-              </select>
+            <p class="cd-form__help caption">
+              Belgian law requires a specific criminal record extract for anyone in contact with
+              minors: <em>"Artikel 596.2 ('minderjarigenmodel') is nodig voor specifieke
+              activiteiten met contacten met kinderen en jongeren, zoals opvoeding,
+              psycho-medisch-sociale begeleiding, hulpverlening aan de jeugd, kinderbescherming,
+              animatie of begeleiding van minderjarigen."</em> We'll email you a private upload
+              link once your application is reviewed. Only an approved reviewer can access the
+              document, it's discarded as soon as it's validated, and the validation itself
+              expires after a year.
+            </p>
+            <div class="cd-form__checkbox-row">
+              {{ form.background_check_consent }}
+              <label class="body-sm" for="{{ form.background_check_consent.id_for_label }}">I understand a Belgian criminal record extract (model 2, Artikel 596.2) will be required.</label>
             </div>
+            <ul class="cd-form__errors">{% for error in form.background_check_consent.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
           </div>
-        </div>
 
-        <div class="cd-form__group">
-          <h3 class="cd-form__group-title heading-md">A bit about you</h3>
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="rh-about">What would you like to help with?</label>
-            <textarea class="cd-form__input body" id="rh-about" name="about" rows="4" placeholder="e.g. Python, Scratch, web, robotics, event-day support — no experience necessary."></textarea>
+          <div class="cd-form__actions">
+            <a class="cd-btn cd-btn--ghost label" href="{% url 'register' %}">Cancel</a>
+            <button type="submit" class="cd-btn cd-btn--primary label">Submit application</button>
           </div>
-          <div class="cd-form__checkbox-row">
-            <input type="checkbox" id="rh-consent" name="background_check_consent" required>
-            <label class="body-sm" for="rh-consent">I understand a background check is required before I can work directly with children.</label>
-          </div>
-        </div>
 
-        <div class="cd-form__actions">
-          <a class="cd-btn cd-btn--ghost label" href="{% url 'register' %}">Cancel</a>
-          <button type="submit" class="cd-btn cd-btn--primary label">Submit application</button>
-        </div>
+        </form>
+      </div>
 
-      </form>
-    </div>
+    {% endif %}
   </div>
 {% endblock %}
