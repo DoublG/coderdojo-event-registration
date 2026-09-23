@@ -17,6 +17,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import slugify
 
 from events.models import Registration
+from notifications.services import notify
 
 from .forms import (
     ForcedPasswordChangeForm,
@@ -460,5 +461,12 @@ def cancel_registration(request, guardian_id, registration_id):
             if next_in_line:
                 next_in_line.waiting_list = False
                 next_in_line.save(update_fields=["waiting_list"])
+                if event.dojo.owner_id:
+                    notify(
+                        event.dojo.owner,
+                        f"A spot opened up in {event.name} — a waitlisted family is now confirmed.",
+                        url=reverse("dojo_dashboard", kwargs={"dojo_id": event.dojo_id}),
+                        dojo=event.dojo,
+                    )
 
     return redirect("guardian_detail", guardian_id=guardian.id)

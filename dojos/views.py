@@ -1,15 +1,45 @@
+import requests
+from django.contrib.auth.decorators import login_required
+from django.contrib.gis.geos import Point
 from django.core.paginator import Paginator
-from django.shortcuts import get_object_or_404, render
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from content.models import FAQ
+from geo.geocoding import find_province, geocode
+from notifications.models import Notification
 
-from .forms import DojoSearchForm
+from .forms import DojoProfileForm, DojoSearchForm
 from .models import Dojo, Mentor
 from .search import attach_next_events, dojos_by_distance, resolve_search_origin
 
 RESULTS_PER_PAGE = 20
 WIDGET_RESULTS_LIMIT = 5
+NOTIFICATION_LIMIT = 10
+
+
+def _get_owned_dojo(request, dojo_id):
+    """A dojo owner's own admin pages (dashboard, manage): 404s rather than
+    403s for a mismatch, so a guessed id doesn't even confirm another
+    dojo's existence — same reasoning as accounts._get_own_guardian."""
+    dojo = get_object_or_404(Dojo, id=dojo_id)
+    if dojo.owner_id != request.user.pk:
+        raise Http404
+    return dojo
+
+
+def _notification_context(user, dojo):
+    """Shared by every admin view that renders dojos/templates/dojos/
+    partials/_notification_bell.html on initial page load — the exact
+    same query shape notifications.consumers.NotificationConsumer and
+    mark_all_notifications_read below use for their own re-renders, kept
+    in one place so "what counts as this dojo's notifications for this
+    user" can't drift between the three."""
+    notifications = Notification.objects.filter(recipient=user, dojo=dojo)[:NOTIFICATION_LIMIT]
+    unread_count = Notification.objects.filter(recipient=user, dojo=dojo, read=False).count()
+    return {"notifications": notifications, "unread_count": unread_count}
 
 
 def dojo_list(request):
@@ -73,8 +103,9 @@ def dojo_team(request, dojo_id):
     return render(request, "dojos/dojo_team.html", {"dojo": dojo, "mentors": dojo.mentors.lead_coach_first()})
 
 
+@login_required
 def dojo_dashboard(request, dojo_id):
-    dojo = get_object_or_404(Dojo, id=dojo_id)
+    dojo = _get_owned_dojo(request, dojo_id)
     # The session whose attendance we're managing: the next upcoming one, or
     # else the most recent past one, so the page still shows something once
     # a dojo's calendar has run out.
@@ -96,6 +127,84 @@ def dojo_dashboard(request, dojo_id):
         "session": session,
         "registrations": registrations,
         "present_count": present_count,
+        "active": "attendance",
+        **_notification_context(request.user, dojo),
+    })
+
+
+@login_required
+def dojo_manage(request, dojo_id):
+    """Lets a dojo owner edit everything shown on their dojo's public
+    profile (dojo_detail.html) — see DojoProfileForm for the exact field
+    list. Address changes are re-geocoded on save (same tolerant-failure
+    pattern as dojos.search.resolve_search_origin: a failed/no-match
+    geocode never blocks the save, it just leaves location/province as
+    they were), and a successful geocode also refreshes province via
+    geo.geocoding.find_province so distance search and the map link stay
+    accurate without the owner ever touching either field directly."""
+    dojo = _get_owned_dojo(request, dojo_id)
+    saved = False
+    geocode_failed = False
+
+    if request.method == "POST":
+        form = DojoProfileForm(request.POST, request.FILES, instance=dojo)
+        if form.is_valid():
+            address_changed = "address" in form.changed_data
+            dojo = form.save(commit=False)
+
+            if address_changed and dojo.address:
+                try:
+                    coords = geocode(dojo.address)
+                except requests.RequestException:
+                    coords = None
+                if coords:
+                    lat, lon = coords
+                    dojo.location = Point(lon, lat, srid=4326)
+                    dojo.province = find_province(dojo.location)
+                else:
+                    geocode_failed = True
+
+            dojo.save()
+            saved = True
+    else:
+        form = DojoProfileForm(instance=dojo)
+
+    return render(request, "dojos/dojo_manage.html", {
+        "dojo": dojo, "form": form, "saved": saved, "geocode_failed": geocode_failed, "active": "settings",
+        **_notification_context(request.user, dojo),
+    })
+
+
+@login_required
+def open_notification(request, dojo_id, notification_id):
+    """What a notification item's link actually points at (see
+    _notification_bell.html) — marks it read then sends the owner on to
+    wherever it's actually about, matching the design system's own "clicking
+    one should... typically navigate" guidance. A plain GET/redirect, not
+    htmx: this is a real navigation, not an in-place update.
+
+    recipient=request.user (on top of the usual dojo-ownership check) matters
+    here specifically — read state is per-recipient, so one owner must not
+    be able to mark a co-owner's copy of a dojo-level notification read."""
+    dojo = _get_owned_dojo(request, dojo_id)
+    notification = get_object_or_404(Notification, id=notification_id, recipient=request.user, dojo=dojo)
+    if not notification.read:
+        notification.read = True
+        notification.save(update_fields=["read"])
+    return redirect(notification.url or reverse("dojo_dashboard", kwargs={"dojo_id": dojo.id}))
+
+
+@login_required
+def mark_all_notifications_read(request, dojo_id):
+    """The bell panel's "Mark all as read" — htmx (hx-swap="none" on the
+    form, see _notification_bell.html): the response's own hx-swap-oob="true"
+    root is what actually places it, so no target/swap mode needs setting
+    here beyond suppressing htmx's normal (non-oob) placement."""
+    dojo = _get_owned_dojo(request, dojo_id)
+    if request.method == "POST":
+        Notification.objects.filter(recipient=request.user, dojo=dojo, read=False).update(read=True)
+    return render(request, "dojos/partials/_notification_bell.html", {
+        "dojo": dojo, **_notification_context(request.user, dojo),
     })
 
 

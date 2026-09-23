@@ -1,7 +1,10 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import FileResponse, Http404
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils import timezone
+
+from notifications.services import notify
 
 from .forms import BackgroundCheckUploadForm, DojoApplicationForm, MentorApplicationForm
 from .models import BackgroundCheckMixin, DojoApplication, MentorApplication
@@ -106,6 +109,13 @@ def register_helper(request):
             if request.user.is_authenticated:
                 application.applicant_account = request.user
             application.save()
+            if application.dojo_id and application.dojo.owner_id:
+                notify(
+                    application.dojo.owner,
+                    f"{application.applicant_name} applied to mentor at {application.dojo.name}.",
+                    url=reverse("dojo_dashboard", kwargs={"dojo_id": application.dojo_id}),
+                    dojo=application.dojo,
+                )
             submitted = True
             form = MentorApplicationForm()
     else:

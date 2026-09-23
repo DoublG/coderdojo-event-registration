@@ -18,6 +18,7 @@
   --on-accent: #ffffff; /* Text and icons on an accent fill (5.0:1 light, 7.3:1 dark). Now white in light theme to match the deepened accent fill — the old pale accent needed dark text, this one doesn't. */
   --success: #147a4f; /* Open sessions, confirmed sign-ups, ticket availability text on surface (4.5:1 in both themes). */
   --on-success: #ffffff; /* Text and icons on a success fill (4.5:1 in both themes). */
+  --success-surface: #e5f5ee; /* A soft success-tinted background for a banner or note whose text and border stay --success — e.g. Form's cd-form__note--success (4.7:1 in both themes, so --success text on it still clears small-text contrast). Never use this as a foreground/text color itself. */
   --danger: #c81e3a; /* Closed / full sessions, sold-out tickets, form errors on surface (4.5:1 in both themes). Always paired with the word 'Full' or 'Sold out', never color alone. */
   --on-danger: #ffffff; /* Text and icons on a danger fill (4.5:1 in both themes). */
   --danger-surface: #fae8eb; /* A soft danger-tinted background for a banner or note whose text and border stay --danger — e.g. Form's cd-form__note--error (4.8:1 in both themes, so --danger text on it still clears small-text contrast). Never use this as a foreground/text color itself. */
@@ -52,6 +53,7 @@
   --on-accent: #12181f;
   --success: #34c388;
   --on-success: #12181f;
+  --success-surface: #163a2c;
   --danger: #ff6b81;
   --on-danger: #12181f;
   --danger-surface: #412933;

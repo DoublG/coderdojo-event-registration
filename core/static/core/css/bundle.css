@@ -581,6 +581,7 @@
 .cd-form__note svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
 .cd-form__note--error { background: var(--danger-surface); border-color: var(--danger); color: var(--danger); }
 .cd-form__note--warning { background: var(--warning-surface); border-color: var(--warning); color: var(--warning); }
+.cd-form__note--success { background: var(--success-surface); border-color: var(--success); color: var(--success); }
 
 /* A named section of the form — "Your details", "Children" */
 .cd-form__group {
@@ -1210,6 +1211,38 @@
 .cd-admin-nav__brand-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .cd-admin-nav__brand-name { color: var(--ink); margin: 0; }
 .cd-admin-nav__brand-role { color: var(--ink-muted); margin: 0; }
+
+/* The dojo switcher replaces the plain .cd-admin-nav__brand-text with a
+   button when the signed-in owner has more than one dojo — same dropdown
+   panel look as .cd-nav__account-menu (core/templates/core/menu.html),
+   just anchored to the sidebar's brand area instead of the top nav. */
+.cd-admin-nav__switcher { position: relative; min-width: 0; flex: 1 1 auto; }
+.cd-admin-nav__switcher-toggle {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+}
+.cd-admin-nav__switcher-toggle:hover .cd-admin-nav__brand-name { color: var(--primary); }
+.cd-admin-nav__switcher-chevron { width: 16px; height: 16px; flex-shrink: 0; margin-top: 3px; color: var(--ink-muted); transition: transform 0.15s ease; }
+.cd-admin-nav__switcher-toggle[aria-expanded="true"] .cd-admin-nav__switcher-chevron { transform: rotate(180deg); }
+.cd-admin-nav__switcher-menu {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  min-width: 200px;
+  max-width: 260px;
+}
+.cd-admin-nav__switcher-menu[hidden] { display: none; }
+.cd-admin-nav__switcher-link--current { color: var(--primary); font-weight: 600; }
 
 /* Only meaningful once there's a collapse to lock against, so it only
    shows at the same 901px+ width the collapse feature itself applies at. */

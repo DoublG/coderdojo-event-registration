@@ -1,7 +1,7 @@
 import io
 import re
 from datetime import timedelta
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from urllib.parse import urlparse
 
 from django.contrib.auth.models import Permission
@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import DojoOwner, Guardian, HelperAccount, User
+from dojos.models import Dojo
 
 from .admin import (
     approve_and_provision_helper,
@@ -148,6 +149,58 @@ class RegisterHelperViewTests(TestCase):
 
         application = MentorApplication.objects.get()
         self.assertEqual(application.applicant_account_id, guardian.pk)
+
+    def test_notifies_the_dojo_owner_when_a_dojo_was_picked(self):
+        owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
+        dojo = Dojo.objects.create(name="Ghent", owner=owner)
+
+        with patch("applications.views.notify") as mock_notify:
+            self.client.post(
+                reverse("register_helper"),
+                {
+                    "applicant_name": "Priya Nair",
+                    "applicant_email": "priya@example.com",
+                    "dojo": dojo.id,
+                    "role": MentorApplication.VOLUNTEER_MENTOR,
+                    "background_check_consent": "on",
+                },
+            )
+
+        mock_notify.assert_called_once()
+        args, kwargs = mock_notify.call_args
+        self.assertEqual(args[0], owner)
+        self.assertIn("Priya Nair", args[1])
+        self.assertIn("Ghent", args[1])
+        self.assertEqual(kwargs["dojo"], dojo)
+
+    def test_no_notification_when_no_dojo_was_picked(self):
+        with patch("applications.views.notify") as mock_notify:
+            self.client.post(
+                reverse("register_helper"),
+                {
+                    "applicant_name": "Tom",
+                    "applicant_email": "tom@example.com",
+                    "role": MentorApplication.VOLUNTEER_MENTOR,
+                    "background_check_consent": "on",
+                },
+            )
+        mock_notify.assert_not_called()
+
+    def test_no_notification_when_the_dojo_has_no_owner(self):
+        dojo = Dojo.objects.create(name="Ghent")
+
+        with patch("applications.views.notify") as mock_notify:
+            self.client.post(
+                reverse("register_helper"),
+                {
+                    "applicant_name": "Tom",
+                    "applicant_email": "tom@example.com",
+                    "dojo": dojo.id,
+                    "role": MentorApplication.VOLUNTEER_MENTOR,
+                    "background_check_consent": "on",
+                },
+            )
+        mock_notify.assert_not_called()
 
 
 class UploadBackgroundCheckViewTests(TestCase):

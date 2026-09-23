@@ -69,6 +69,37 @@ DEBUG_TOOLBAR_CONFIG = {
     'IS_RUNNING_TESTS': False,
 }
 
+# The full default panel list (debug_toolbar.settings.PANELS_DEFAULTS) minus
+# CachePanel. CachePanel logs the exact args of every cache.get()/set() call
+# and, if one of them isn't JSON-serializable (e.g. a cached queryset of
+# model instances — see dojos.search's DEFAULT_SEARCH_CACHE_KEY), falls back
+# to str(obj) to log it anyway. That fallback lazily touches any
+# not-yet-fetched FK the model's __str__ references (Dojo.__str__ does, via
+# self.municipality) — harmless under plain WSGI, where that lazy fetch just
+# runs on the request's own sync thread, but now that daphne (see
+# INSTALLED_APPS) serves requests over ASGI, it happens inside an async
+# task and Django's SynchronousOnlyOperation guard correctly refuses it,
+# 500ing every single page. Not a fix for the app itself — just keeps this
+# dev-only tool (DEBUG_TOOLBAR_CONFIG above already gates it to DEBUG=True,
+# never production) from being the thing that breaks under async.
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.history.HistoryPanel',
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'debug_toolbar.panels.alerts.AlertsPanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.tasks.TasksPanel',
+    'debug_toolbar.panels.community.CommunityPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+    'debug_toolbar.panels.profiling.ProfilingPanel',
+]
+
 AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = 'login'
 
@@ -99,6 +130,11 @@ DEFAULT_FROM_EMAIL = os.environ.get(
 # Application definition
 
 INSTALLED_APPS = [
+    # Must be first — this is what makes `manage.py runserver` transparently
+    # serve over ASGI (via Daphne) instead of the default WSGI dev server,
+    # which is what lets notifications/consumers.py's WebSocket route work
+    # with zero changes to how the devcontainer/docs already invoke runserver.
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -154,6 +190,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'website.wsgi.application'
+# What `daphne` (see INSTALLED_APPS) actually serves `runserver` through —
+# website/asgi.py routes plain HTTP requests through Django as usual and
+# WebSocket connections (notifications/routing.py) through Channels.
+# WSGI_APPLICATION is left in place for any WSGI-only tooling; it's not
+# what's actually handling requests once daphne is installed.
+ASGI_APPLICATION = 'website.asgi.application'
 
 
 # Database
@@ -199,6 +241,25 @@ CACHES = {
             'SOCKET_TIMEOUT': 2,
         },
     }
+}
+
+# Channels' backing store for notifications/consumers.py — same Redis
+# instance as CACHES above (same REDIS_HOST/REDIS_PORT), but db 1 rather
+# than 0 so channel-layer keys never collide with cache keys. Unlike the
+# cache, there's no IGNORE_EXCEPTIONS-style fail-open option here: without
+# Redis, group_send() in notifications.services.notify() will raise, which
+# is caught there rather than here (a live push failing shouldn't break
+# the action that triggered the notification; the DB row is what matters).
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('redis://{host}:{port}/1'.format(
+                host=os.environ.get('REDIS_HOST', '127.0.0.1'),
+                port=os.environ.get('REDIS_PORT', '6379'),
+            ))],
+        },
+    },
 }
 
 

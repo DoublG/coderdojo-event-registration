@@ -220,28 +220,23 @@
     }
   }
 
-  // Wires one notification bell: toggling the dropdown, closing it on an
-  // outside click or Escape (returning focus to the bell), marking a single
-  // item read on click, "Mark all as read," and the unread count badge.
+  // Wires one notification bell's chrome: toggling the dropdown, closing it
+  // on an outside click or Escape (returning focus to the bell). That's all
+  // this does now — the content itself (unread count, item list, "Mark all
+  // as read"'s disabled state) is real server-rendered data
+  // (dojos/templates/dojos/partials/_notification_bell.html), pushed live
+  // over the WebSocket the panel connects (see _admin_base.html's
+  // ws-connect) and updated in place by "Mark all as read"'s own htmx
+  // request — both replace this element outright via an out-of-band swap
+  // matching its id, so this function is called again afterwards
+  // (hx-on::oob-after-swap="CoderDojo.initNotifications(this)" on the
+  // element itself) to re-wire the fresh DOM. Clicking an item is a plain
+  // navigating link (marks it read server-side, then redirects), not
+  // something this function handles.
   function wireNotifications(container) {
     var toggle = container.querySelector("[data-cd-notif-toggle]");
     var panel = container.querySelector("[data-cd-notif-panel]");
     if (!toggle || !panel) return;
-    var countEl = container.querySelector("[data-cd-notif-count]");
-    var markAllBtn = container.querySelector("[data-cd-notif-mark-all]");
-    var items = container.querySelectorAll("[data-cd-notif-item]");
-
-    function updateCount() {
-      var unread = 0;
-      for (var i = 0; i < items.length; i++) {
-        if (items[i].hasAttribute("data-unread")) unread++;
-      }
-      if (countEl) {
-        countEl.textContent = String(unread);
-        countEl.hidden = unread === 0;
-      }
-      if (markAllBtn) markAllBtn.disabled = unread === 0;
-    }
 
     function onDocClick(e) {
       if (!container.contains(e.target)) closePanel();
@@ -270,26 +265,6 @@
       if (panel.hidden) openPanel();
       else closePanel();
     });
-
-    for (var i = 0; i < items.length; i++) {
-      (function (item) {
-        var btn = item.querySelector("[data-cd-notif-item-btn]");
-        if (!btn) return;
-        btn.addEventListener("click", function () {
-          item.removeAttribute("data-unread");
-          updateCount();
-        });
-      })(items[i]);
-    }
-
-    if (markAllBtn) {
-      markAllBtn.addEventListener("click", function () {
-        for (var i = 0; i < items.length; i++) items[i].removeAttribute("data-unread");
-        updateCount();
-      });
-    }
-
-    updateCount();
   }
 
   // Wires every .cd-notif found under root (defaults to the whole document).
@@ -446,6 +421,58 @@
     }
   }
 
+  // Wires the "which dojo am I managing" dropdown in the admin sidebar's
+  // brand area (dojos/templates/dojos/_admin_base.html) — only rendered at
+  // all when the signed-in owner has more than one dojo. Same toggle-panel
+  // shape as wireNotifications (button + panel, close on outside click or
+  // Escape) rather than anything AdminNav-specific, since switching dojos
+  // is a plain link list, not another collapsible sidebar state.
+  function wireDojoSwitcher(container) {
+    var toggle = container.querySelector("[data-cd-adminnav-switcher-toggle]");
+    var panel = container.querySelector("[data-cd-adminnav-switcher-menu]");
+    if (!toggle || !panel) return;
+
+    function onDocClick(e) {
+      if (!container.contains(e.target)) closePanel();
+    }
+    function onKeydown(e) {
+      if (e.key === "Escape") closePanel(true);
+    }
+    function openPanel() {
+      panel.hidden = false;
+      toggle.setAttribute("aria-expanded", "true");
+      document.addEventListener("click", onDocClick);
+      document.addEventListener("keydown", onKeydown);
+    }
+    function closePanel(focusToggle) {
+      panel.hidden = true;
+      toggle.setAttribute("aria-expanded", "false");
+      document.removeEventListener("click", onDocClick);
+      document.removeEventListener("keydown", onKeydown);
+      if (focusToggle) toggle.focus();
+    }
+
+    toggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (panel.hidden) openPanel();
+      else closePanel();
+    });
+  }
+
+  // Wires every [data-cd-adminnav-switcher] found under root (defaults to
+  // the whole document) — same self-or-ancestor pattern as initNotifications.
+  function initDojoSwitcher(root) {
+    var scope = root || document;
+    if (scope.hasAttribute && scope.hasAttribute("data-cd-adminnav-switcher")) {
+      wireDojoSwitcher(scope);
+      return;
+    }
+    var switchers = scope.querySelectorAll("[data-cd-adminnav-switcher]");
+    for (var i = 0; i < switchers.length; i++) {
+      wireDojoSwitcher(switchers[i]);
+    }
+  }
+
   // Wires a dojo-search form's "Use my location" button to the browser
   // Geolocation API, filling the form's hidden lat/lon fields and
   // (re-)submitting. Shared between the full dojo-finder page and the
@@ -552,6 +579,7 @@
     initMagicLink: initMagicLink,
     initNotifications: initNotifications,
     initAdminNav: initAdminNav,
+    initDojoSwitcher: initDojoSwitcher,
     initDojoLocationSearch: initDojoLocationSearch,
     initCarousel: initCarousel,
   };

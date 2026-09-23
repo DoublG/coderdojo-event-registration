@@ -1,5 +1,6 @@
 import re
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.core import mail
 from django.test import TestCase
@@ -264,6 +265,44 @@ class CancelRegistrationViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 404)
         self.assertTrue(Registration.objects.filter(id=self.confirmed.id).exists())
+
+    def test_promotion_notifies_the_dojo_owner(self):
+        """The waitlist-promotion side of this view (see setUpTestData's
+        event/dojo) reuses a dojo with no owner — build one with an owner
+        here specifically to check the notify() call."""
+        owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
+        dojo = Dojo.objects.create(name="Antwerp", owner=owner)
+        event = Event.objects.create(
+            name="Antwerp Session", dojo=dojo,
+            start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=1,
+        )
+        confirmed = Registration.objects.create(event=event, participant=self.child, waiting_list=False, position=1)
+        Registration.objects.create(event=event, participant=self.waitlisted_child, waiting_list=True, position=2)
+        self.client.force_login(self.guardian)
+
+        with patch("accounts.views.notify") as mock_notify:
+            self.client.post(
+                reverse("cancel_registration", kwargs={"guardian_id": self.guardian.id, "registration_id": confirmed.id})
+            )
+
+        mock_notify.assert_called_once()
+        args, kwargs = mock_notify.call_args
+        self.assertEqual(args[0], owner)
+        self.assertIn("Antwerp Session", args[1])
+        self.assertEqual(kwargs["dojo"], dojo)
+
+    def test_no_notification_when_dojo_has_no_owner(self):
+        """setUpTestData's dojo has no owner — promoting from its waitlist
+        must not try to notify a None recipient."""
+        self.client.force_login(self.guardian)
+        with patch("accounts.views.notify") as mock_notify:
+            self.client.post(
+                reverse(
+                    "cancel_registration",
+                    kwargs={"guardian_id": self.guardian.id, "registration_id": self.confirmed.id},
+                )
+            )
+        mock_notify.assert_not_called()
 
 
 class RegisterGuardianViewTests(TestCase):

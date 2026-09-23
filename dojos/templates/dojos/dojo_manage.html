@@ -1,0 +1,137 @@
+{% extends "dojos/_admin_base.html" %}
+{% block admin_page_title %}Settings{% endblock %}
+{% block admin_heading %}Dojo profile{% endblock %}
+
+{% block admin_extra_style %}
+<style>
+  .dojo-manage-form { max-width: 720px; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+  <div class="dojo-manage-form">
+    <form class="cd-form" method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      {% if saved or geocode_failed or form.non_field_errors %}
+        <div class="cd-form__notes">
+          {% if saved %}
+            <p class="cd-form__note cd-form__note--success">Saved — your dojo's page is up to date.</p>
+          {% endif %}
+          {% if geocode_failed %}
+            <p class="cd-form__note cd-form__note--warning">
+              We couldn't find that address on the map, so the "Visit us" map link and distance
+              search still use the old location. Everything else was saved.
+            </p>
+          {% endif %}
+          {% for error in form.non_field_errors %}
+            <p class="cd-form__note cd-form__note--error">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="cd-form__group">
+        <h3 class="cd-form__group-title heading-md">Basics</h3>
+        <p class="cd-form__group-desc body-sm">The name, icon, and one-line tagline shown at the top of your dojo's page.</p>
+        <div class="cd-form__row">
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="{{ form.name.id_for_label }}">Name<span class="cd-form__required" aria-hidden="true">*</span></label>
+            <ul class="cd-form__errors">{% for error in form.name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+            {{ form.name }}
+          </div>
+        </div>
+        <div class="cd-form__field">
+          <label class="cd-form__label label" for="{{ form.icon.id_for_label }}">Icon</label>
+          {% if dojo.icon %}
+            <img src="{{ dojo.icon.url }}" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;margin-bottom:var(--space-2);">
+          {% endif %}
+          {{ form.icon }}
+          <p class="cd-form__help caption">Round icon shown at the top of the dojo page, next to its name.</p>
+          <ul class="cd-form__errors">{% for error in form.icon.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        </div>
+        <div class="cd-form__field">
+          <label class="cd-form__label label" for="{{ form.tagline.id_for_label }}">Tagline</label>
+          {{ form.tagline }}
+          <p class="cd-form__help caption">Shown right under the dojo's name. Supports basic Markdown.</p>
+          <ul class="cd-form__errors">{% for error in form.tagline.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        </div>
+      </div>
+
+      <div class="cd-form__group">
+        <h3 class="cd-form__group-title heading-md">About this dojo</h3>
+        <div class="cd-form__field">
+          <label class="cd-form__label label" for="{{ form.description.id_for_label }}">Description</label>
+          {{ form.description }}
+          <p class="cd-form__help caption">Shown further down the page, above the team. Supports basic Markdown.</p>
+          <ul class="cd-form__errors">{% for error in form.description.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        </div>
+      </div>
+
+      <div class="cd-form__group">
+        <h3 class="cd-form__group-title heading-md">Schedule &amp; ages</h3>
+        <div class="cd-form__row">
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="{{ form.schedule_description.id_for_label }}">Meets</label>
+            <ul class="cd-form__errors">{% for error in form.schedule_description.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+            {{ form.schedule_description }}
+          </div>
+        </div>
+        <div class="cd-form__row">
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="{{ form.min_age.id_for_label }}">Minimum age</label>
+            <ul class="cd-form__errors">{% for error in form.min_age.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+            {{ form.min_age }}
+          </div>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="{{ form.max_age.id_for_label }}">Maximum age</label>
+            <ul class="cd-form__errors">{% for error in form.max_age.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+            {{ form.max_age }}
+          </div>
+        </div>
+      </div>
+
+      <div class="cd-form__group">
+        <h3 class="cd-form__group-title heading-md">Contact &amp; location</h3>
+        <div class="cd-form__row">
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="{{ form.email.id_for_label }}">Email</label>
+            <ul class="cd-form__errors">{% for error in form.email.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+            {{ form.email }}
+          </div>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="{{ form.phone.id_for_label }}">Phone</label>
+            <ul class="cd-form__errors">{% for error in form.phone.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+            {{ form.phone }}
+          </div>
+        </div>
+        <div class="cd-form__field">
+          <label class="cd-form__label label" for="{{ form.municipality.id_for_label }}">Municipality</label>
+          <ul class="cd-form__errors">{% for error in form.municipality.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+          {{ form.municipality }}
+        </div>
+        <div class="cd-form__field">
+          <label class="cd-form__label label" for="{{ form.address.id_for_label }}">Address</label>
+          {{ form.address }}
+          <p class="cd-form__help caption">Used for the "Visit us" map link and for distance search — changing it updates the map location automatically.</p>
+          <ul class="cd-form__errors">{% for error in form.address.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        </div>
+      </div>
+
+      <div class="cd-form__group">
+        <h3 class="cd-form__group-title heading-md">Visit us notes</h3>
+        <div class="cd-form__field">
+          <label class="cd-form__label label" for="{{ form.visit_notes.id_for_label }}">Extra info</label>
+          {{ form.visit_notes }}
+          <p class="cd-form__help caption">Parking, entrance, accessibility — anything extra for the Visit us section. Supports basic Markdown.</p>
+          <ul class="cd-form__errors">{% for error in form.visit_notes.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        </div>
+      </div>
+
+      <div class="cd-form__actions">
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_detail' dojo_id=dojo.id %}" target="_blank" rel="noopener">View public page</a>
+        <button type="submit" class="cd-btn cd-btn--primary label">Save changes</button>
+      </div>
+
+    </form>
+  </div>
+{% endblock %}

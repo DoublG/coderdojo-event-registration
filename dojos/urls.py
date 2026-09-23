@@ -8,5 +8,16 @@ urlpatterns = [
     path("dojos/<int:dojo_id>/", views.dojo_detail, name="dojo_detail"),
     path("dojos/<int:dojo_id>/team/", views.dojo_team, name="dojo_team"),
     path("dojos/<int:dojo_id>/dashboard/", views.dojo_dashboard, name="dojo_dashboard"),
+    path("dojos/<int:dojo_id>/manage/", views.dojo_manage, name="dojo_manage"),
+    path(
+        "dojos/<int:dojo_id>/notifications/<int:notification_id>/open/",
+        views.open_notification,
+        name="open_notification",
+    ),
+    path(
+        "dojos/<int:dojo_id>/notifications/mark-all-read/",
+        views.mark_all_notifications_read,
+        name="mark_all_notifications_read",
+    ),
     path("team/<int:mentor_id>/", views.team_member_detail, name="team_member_detail"),
 ]

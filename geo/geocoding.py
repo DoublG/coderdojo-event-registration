@@ -1,5 +1,8 @@
 import requests
+from django.contrib.gis.db.models.functions import Distance
 from django.core.cache import cache
+
+from .models import AdministrativeBoundary
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 USER_AGENT = "coderdojo-event-registration/1.0 (erik@woidt.be)"
@@ -47,3 +50,24 @@ def geocode(address, session=None):
     coords = float(results[0]["lat"]), float(results[0]["lon"])
     cache.set(cache_key, coords, FOUND_CACHE_TIMEOUT)
     return coords
+
+
+def find_province(location):
+    """The Belgian province (AdministrativeBoundary, kind=PROVINCE) a point
+    falls inside — used to keep Dojo.province in sync with Dojo.location
+    (see dojos.views.dojo_manage and the one-time backfill this was
+    factored out of, dojos.management.commands.map_dojo_provinces)."""
+    province = AdministrativeBoundary.objects.filter(
+        kind=AdministrativeBoundary.PROVINCE, boundary__contains=location
+    ).first()
+    if province:
+        return province
+    # Falls back to nearest province for points just outside every polygon
+    # (e.g. a coastal/border dojo, or an edge simplified away by
+    # import_boundaries' tolerance).
+    return (
+        AdministrativeBoundary.objects.filter(kind=AdministrativeBoundary.PROVINCE)
+        .annotate(distance=Distance("boundary", location))
+        .order_by("distance")
+        .first()
+    )

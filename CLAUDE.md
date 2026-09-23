@@ -10,20 +10,26 @@ A Django site for CoderDojo Belgium: dojo discovery/search, event registration, 
 
 ## Workflow rules
 
+- **Always work inside the `.devcontainer`, never against the host Python/MySQL.** Before running `manage.py` commands (migrations, `runserver`, and especially `manage.py test`), check the stack is actually up — `docker ps` should show `coolregistration-dev-workspace`/`-db`/`-redis`/`-proxy` as `Up`; if it isn't, start it (`docker compose -f .devcontainer/docker-compose.yml up -d`) rather than falling back to a host-level run. Run commands via `docker compose -f .devcontainer/docker-compose.yml exec workspace <command>` (or `exec workspace bash` for a shell). This matters beyond convention: the notification bell's WebSocket support (Django Channels, see Architecture) depends on Redis and on `daphne` actually serving `runserver`'s ASGI app, both of which the devcontainer wires up for you — a host run can silently diverge (e.g. a stray host MySQL, or no Redis at all) without it being obvious from the command output alone.
+  - **One exception: testing nginx's own behavior, or any real end-to-end check, has to go through the host.** `docker compose exec workspace` talks to Django directly and never touches the `proxy` container at all — TLS termination, the `/docs/` alias, and (since adding WebSockets) the `Upgrade`/`Connection` proxy headers all live in nginx, not Django, so a workspace-only check can pass while the thing a real client actually hits is still broken. Verify those from the host against the real FQDN (`https://coolregistration.localhost`, `wss://coolregistration.localhost/ws/...`) — plain `127.0.0.1`/internal-port requests skip nginx *and* fail `ALLOWED_HOSTS`/origin checks that key off `coolregistration.localhost`. A hand-written test client also needs to send an `Origin` header matching that FQDN (a real browser always does this automatically) or Channels' `AllowedHostsOriginValidator` (see Architecture) rejects the connection with a 403 that has nothing to do with the thing you're actually testing.
+  - **Editing `.devcontainer/nginx/nginx.conf` needs a proxy recreate, not just a save.** It's a single-file bind mount (`docker-compose.yml`), which Docker pins to the file's *inode* — the same gotcha `docs/README.md` already documents for `docs/build/`. An editor/tool that replaces the file (rather than writing in place) leaves the running `proxy` container looking at the old, deleted inode forever; `nginx -s reload` inside it changes nothing because it's reloading that same stale content. Fix: `docker compose -f .devcontainer/docker-compose.yml up -d --force-recreate --no-deps proxy` (the `--no-deps` matters here too, same reason as `docs/README.md`'s note).
 - **New features need tests.** Any new view/route, model behavior, or non-trivial function added to this repo should come with a corresponding test in the relevant app's `tests.py` (see `accounts/tests.py`, `dojos/tests.py`, etc. for the established route-test style: status codes, template used, auth/permission gating, and the actual DB effect of a POST). Don't leave a new feature untested on the assumption someone will backfill it later.
 - **Keep the end-user docs current.** `docs/` (Sphinx, built with `make html-all` from inside `docs/` — en/fr/nl, see `docs/README.md`; deps in `docs/requirements.txt`) is the help-centre content for families/volunteers/dojo teams — not this file. If a change alters a user-facing flow this documents, update the relevant `docs/source/**/*.rst` page **and** its French/Dutch translations (`docs/source/locale/{fr,nl}/LC_MESSAGES/`, see `docs/README.md` for the extract/update workflow) in the same change. It intentionally only documents flows that are actually wired up end-to-end — see the note in `docs/source/dojo-team/running-a-session.rst` for what to do once dashboard attendance-marking is implemented.
 
 ## Commands
 
-Two ways to run this: directly against the host Python/MySQL, or inside `.devcontainer/` (nginx + TLS on `coolregistration.localhost`, containerized MySQL, Redis, Mailtrap). `website/settings.py` reads `DB_*`/`REDIS_*`/`EMAIL_*`/`COOKIE_DOMAIN` env vars with host-friendly defaults, so the same commands work either way — env vars set by `.devcontainer/docker-compose.yml` just override the defaults.
+Run everything inside `.devcontainer/` (nginx + TLS on `coolregistration.localhost`, containerized MySQL, Redis, Mailtrap) — see the workflow rule above. `website/settings.py` reads `DB_*`/`REDIS_*`/`EMAIL_*`/`COOKIE_DOMAIN` env vars with host-friendly defaults (so a host-level run isn't *broken*, just not what this repo's workflow expects — Redis/Channels behavior in particular can diverge, see above); `.devcontainer/docker-compose.yml` sets the real ones.
 
 ```sh
-# Host: activate the venv first
-source .venv/bin/activate
+docker compose -f .devcontainer/docker-compose.yml up -d          # db, redis, proxy, workspace — check first with `docker ps`
+docker compose -f .devcontainer/docker-compose.yml exec workspace bash    # a shell inside the workspace container
+```
 
-# Dev server
-python manage.py runserver              # http://127.0.0.1:8000
-# Inside the devcontainer workspace, also reachable via https://coolregistration.localhost through nginx
+From that shell (or prefix any of these with `docker compose -f .devcontainer/docker-compose.yml exec workspace`):
+
+```sh
+# Dev server — reachable via https://coolregistration.localhost through nginx
+python manage.py runserver 0.0.0.0:8000
 
 # Migrations
 python manage.py makemigrations <app>
@@ -42,14 +48,6 @@ python manage.py createsuperuser
 # mechanism is wired up per-request/session, but no .po catalogs exist yet)
 python manage.py makemessages -l nl_BE
 python manage.py compilemessages
-```
-
-Devcontainer stack (see `.devcontainer/`):
-
-```sh
-docker compose -f .devcontainer/docker-compose.yml up -d          # db, redis, proxy, workspace
-docker compose -f .devcontainer/docker-compose.yml run --rm workspace python manage.py migrate
-docker compose -f .devcontainer/docker-compose.yml exec workspace bash
 ```
 
 Regenerating the local dev TLS CA/cert for `coolregistration.localhost`: see `.devcontainer/certs/README.md`.
@@ -110,6 +108,24 @@ Dojo owners and helpers never set their own initial password: `accounts.provisio
 If you touch this flow, keep the "delete the document, keep only the decision" property — it's deliberate, not an oversight.
 
 **Renewal disables login until it's redone.** `accounts.User.background_check_required`/`background_check_expires_at` (only ever set for `DojoOwner`/`HelperAccount`) back a `background_check_valid` property; `accounts.views.login` refuses a correct password once it's `False`, and `accounts.middleware.BackgroundCheckMiddleware` blocks every request from an already-logged-in session the same way, redirecting to `applications.views.renew_background_check` (same upload template as the emailed-link flow, `applications/templates/applications/upload_background_check.html`, just resolving the application from the authenticated account instead of a token). `Guardian`/`ChildAccount` never set these fields and never go through this pipeline at all.
+
+### Dojo owner admin area
+
+A dojo owner's admin screens (`/dojos/<id>/dashboard/` = attendance, `/dojos/<id>/manage/` = profile settings, more to come — Events/Helpers & Mentors/Members are stubbed nav links with no view yet) all extend `dojos/templates/dojos/_admin_base.html`, which owns the whole `<!doctype html>` shell (it doesn't extend `core/base.html` — this is an app-like admin surface with its own fixed-height, collapsible-sidebar layout via `CoderDojo.initAdminNav`, not a scrollable marketing page) and the `AdminNav` sidebar markup, matching the CoderDojo design system's `AdminNav`/`AdminDashboard` components. A page extending it fills `admin_page_title`/`admin_heading`/`admin_content` (and optionally `admin_topbar_extra`, `admin_extra_style`/`admin_extra_script`) and passes an `active` context var (`"attendance"`, `"settings"`, ...) matching the sidebar link it should highlight. Every view here is `@login_required` and resolves its dojo through `dojos.views._get_owned_dojo` (404, not 403, on a mismatch — same reasoning as `accounts._get_own_guardian`) — **never `get_object_or_404(Dojo, ...)` alone** for an owner-facing admin view, or any other dojo owner can reach it by guessing an id.
+
+`dojos.views.dojo_manage` (`DojoProfileForm`) and the notification bell (below) are the only pieces of this wired to real data so far — the rest of `_admin_base.html`'s nav (Events, Helpers & Mentors, Members) are still stubbed links. `dojo_manage` covers everything shown on `dojo_detail.html` except `owner`/`location`/`province`, which aren't self-service: an address edit is re-geocoded on save (`geo.geocoding.geocode`, same tolerant-failure pattern as `dojos.search.resolve_search_origin` — a failed/no-match geocode never blocks the save) and a successful one also refreshes `province` via `geo.geocoding.find_province` (point-in-polygon against `geo.AdministrativeBoundary`, with a nearest-boundary fallback), so an owner never touches either field directly.
+
+### Live notifications: Django Channels over Redis
+
+The admin sidebar's notification bell (`dojos/templates/dojos/partials/_notification_bell.html`) is backed by `notifications.Notification` — `recipient` + `read` live on the same row, so per-user read state falls out for free; `dojo` (nullable FK) is what a multi-dojo owner's admin panel filters on, via `dojos.views._notification_context`. A dojo-level event that concerns more than one person fans out to one row per recipient sharing the same `dojo`/`text`/`url`, each independently read/unread.
+
+**Creating a notification**: always through `notifications.services.notify(recipient, text, url="", dojo=None)` — never `Notification.objects.create()` directly. It creates the row (the source of truth) and then best-effort nudges that recipient's live connection via the channel layer; a channel-layer failure is swallowed, same fail-open spirit as `CACHES`' `IGNORE_EXCEPTIONS`. Two real call sites exist: `applications.views.register_helper` (a mentor application against a specific dojo notifies that dojo's owner) and `accounts.views.cancel_registration` (a waitlist promotion notifies the dojo's owner) — both skip silently if the dojo has no owner yet.
+
+**Live push is WebSockets via Django Channels**, not SSE/polling — `daphne` (top of `INSTALLED_APPS`, so `manage.py runserver` transparently serves ASGI instead of WSGI), `ASGI_APPLICATION`/`CHANNEL_LAYERS` in `website/settings.py` (the latter is `channels_redis`, same `REDIS_HOST`/`REDIS_PORT` as `CACHES` but db 1, not 0), and `website/asgi.py`'s `ProtocolTypeRouter` (http → normal Django, websocket → `notifications.routing.websocket_urlpatterns` behind `AllowedHostsOriginValidator(AuthMiddlewareStack(...))`, so `scope["user"]` is the same session-authenticated user a normal request would see). `notifications.consumers.NotificationConsumer` checks dojo ownership once at `connect()` (closes the socket on a mismatch, same 404-not-403 reasoning as `dojos._get_owned_dojo`) and, on every group event, re-renders `_notification_bell.html` fresh from the DB and pushes it as one `hx-swap-oob="true"`-wrapped fragment — `htmx-ext-ws` (loaded in `_admin_base.html`) does the DOM swap from that alone, no client-side JSON handling. The bell's own `ws-connect` lives on a separate, never-swapped `<div>` in `_admin_base.html` specifically so the bell's own oob updates (and `mark_all_notifications_read`'s htmx response, which reuses the identical oob-id-matching trick) never tear down the socket that's delivering them.
+
+If you add a Channels consumer that touches the database, test it with `TransactionTestCase`, not `TestCase` — the consumer's DB access runs on a separate thread (`channels.db.database_sync_to_async`) with its own connection, which a `TestCase`'s wrapping transaction (held on the main thread's connection) is invisible to. `notifications.tests`/`dojos.tests.NotificationConsumerTests` are the reference examples, including `@override_settings(CHANNEL_LAYERS=...InMemoryChannelLayer...)` so consumer tests don't need a real Redis.
+
+`django-debug-toolbar`'s `CachePanel` is disabled (`DEBUG_TOOLBAR_PANELS` in `website/settings.py`, dev-only either way) — it does unsafe lazy model stringification while serializing cache-call args for display, which is merely wasteful under WSGI but hard-errors every single page (`SynchronousOnlyOperation`) now that requests are served over ASGI.
 
 ### Geo search: MySQL spherical distance
 

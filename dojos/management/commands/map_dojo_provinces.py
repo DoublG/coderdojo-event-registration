@@ -1,25 +1,7 @@
-from django.contrib.gis.db.models.functions import Distance
 from django.core.management.base import BaseCommand
 
 from dojos.models import Dojo
-from geo.models import AdministrativeBoundary
-
-
-def find_province(location):
-    province = AdministrativeBoundary.objects.filter(
-        kind=AdministrativeBoundary.PROVINCE, boundary__contains=location
-    ).first()
-    if province:
-        return province
-    # Falls back to nearest province for points just outside every polygon
-    # (e.g. a coastal/border dojo, or an edge simplified away by
-    # import_boundaries' tolerance).
-    return (
-        AdministrativeBoundary.objects.filter(kind=AdministrativeBoundary.PROVINCE)
-        .annotate(distance=Distance("boundary", location))
-        .order_by("distance")
-        .first()
-    )
+from geo.geocoding import find_province
 
 
 class Command(BaseCommand):

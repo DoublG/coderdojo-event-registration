@@ -105,7 +105,19 @@
       "Bash(make html *)",
       "Bash(sphinx-build -b gettext source locale/pot)",
       "Bash(sphinx-intl update *)",
-      "Bash(make html-all *)"
+      "Bash(make html-all *)",
+      "Bash(google-chrome --headless --disable-gpu --no-sandbox --window-size=1100,1400 --user-data-dir=/tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/chrome-profile-dojo --screenshot=/tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/dojo_manage_shot.png http://127.0.0.1:8765/dojos/117/manage/)",
+      "Bash(sed -e 's|href=\"/static/|href=\"http://127.0.0.1:8765/static/|g' -e 's|src=\"/static/|src=\"http://127.0.0.1:8765/static/|g' -e 's|href=\"/dojos/|href=\"http://127.0.0.1:8765/dojos/|g' /tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/dojo_manage.html)",
+      "Bash(google-chrome --headless --disable-gpu --no-sandbox --window-size=1100,1600 --screenshot=/tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/dojo_manage_shot.png file:///tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/dojo_manage_rewritten.html)",
+      "Bash(google-chrome --headless --disable-gpu --no-sandbox --window-size=1100,2200 --screenshot=/tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/dojo_manage_shot_full.png file:///tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/dojo_manage_full.html)",
+      "Bash(curl -s -b /tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/dojo_smoke_cookies.txt -c /tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/dojo_smoke_cookies.txt http://127.0.0.1:8765/dojos/117/dashboard/ -o /tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/dojo_dashboard.html)",
+      "Bash(sed -e 's|href=\"/static/|href=\"http://127.0.0.1:8765/static/|g' -e 's|src=\"/static/|src=\"http://127.0.0.1:8765/static/|g' -e 's|href=\"/dojos/|href=\"http://127.0.0.1:8765/dojos/|g' /tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/dojo_dashboard.html)",
+      "Bash(google-chrome --headless --disable-gpu --no-sandbox --window-size=1100,900 --screenshot=/tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/dojo_dashboard_shot.png file:///tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/dojo_dashboard_rewritten.html)",
+      "Bash(sed -e 's|href=\"/static/|href=\"http://127.0.0.1:8765/static/|g' -e 's|src=\"/static/|src=\"http://127.0.0.1:8765/static/|g' -e 's|href=\"/dojos/|href=\"http://127.0.0.1:8765/dojos/|g' /tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/switcher_dashboard.html)",
+      "Bash(google-chrome --headless --disable-gpu --no-sandbox --window-size=1100,900 --screenshot=/tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/switcher_shot.png file:///tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/switcher_dashboard_open.html)",
+      "Bash(redis-cli -h 127.0.0.1 -p 6379 ping)",
+      "Bash(curl -s -o /dev/null -w \"home status: %{http_code}\\\\n\" http://127.0.0.1:8765/)",
+      "Bash(curl -sk -o /dev/null -w \"https proxy home status: %{http_code}\\\\n\" https://coolregistration.localhost/)"
     ],
     "additionalDirectories": [
       "/home/erik/coderdojo-event-registration/.devcontainer/certs/pki",
