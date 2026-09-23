@@ -97,14 +97,17 @@ Dojo owners and helpers never set their own initial password: `accounts.provisio
 
 ### Applications → background check → provisioning pipeline
 
-`applications.DojoApplication` and `applications.MentorApplication` both mix in `applications.models.BackgroundCheckMixin`, which tracks Belgium's Article 596.2 criminal-record-extract requirement (`not_requested → requested → submitted → validated/rejected`) through admin actions in `applications/admin.py`:
+`applications.DojoApplication` and `applications.MentorApplication` both mix in `applications.models.BackgroundCheckMixin`, which tracks Belgium's Article 596.2 criminal-record-extract requirement (`not_requested → requested → submitted → validated/rejected`) through admin actions in `applications/admin.py`. It's mandatory for every applicant in this pipeline — both roles are adults; a younger volunteer (a ninja) would be promoted to a mentor role through a separate flow, not this one, so there's no age check here.
 
-1. Admin requests the check (`request_background_check`) → `applications.services.send_background_check_request` emails the applicant a link built from `background_check_token`.
+1. Admin requests the check (`request_background_check`) → `applications.services.send_background_check_request` emails the applicant a link built from `background_check_token`. Not limited to first-time requests: re-running this on an application whose check isn't *currently* valid (expired, or never was) is also how a renewal is requested — see step 5.
 2. Applicant uploads the document to `applications.storage.private_storage` — a `FileSystemStorage` pointed at `settings.PRIVATE_MEDIA_ROOT` with `base_url=None`, so it has no public URL; the only read path is the permission-gated view in `applications/views.py`.
 3. Reviewer (needs the `applications.can_review_background_checks` permission) validates or rejects it. On validation, the uploaded file is deleted immediately and only the decision + `background_check_expires_at` (now + `BACKGROUND_CHECK_VALIDITY`, 365 days) are kept — the document itself is never retained longer than needed for the decision.
-4. Approval (`approve_and_provision_owner` etc.) calls `accounts.provisioning.provision_account` to create the real login.
+4. Approval (`approve_and_provision_owner`/`approve_and_provision_helper`) calls `accounts.provisioning.provision_account` to create the real login, then copies `background_check_required`/`background_check_expires_at` onto that new `accounts.DojoOwner`/`HelperAccount` and links back via `DojoApplication.provisioned_owner`/`MentorApplication.provisioned_helper` — from here on **the account**, not the application, is what gates login (see below).
+5. The application row doubles as the account's permanent background-check record rather than a one-time thing: as `background_check_expires_at` nears/passes, an admin re-runs `request_background_check` → applicant re-uploads (also reachable without the emailed link, at `renew_background_check`, if they're already logged in — see below) → reviewer re-validates, and `validate_background_check` pushes the fresh expiry back onto the linked account (`provisioned_owner`/`provisioned_helper`).
 
 If you touch this flow, keep the "delete the document, keep only the decision" property — it's deliberate, not an oversight.
+
+**Renewal disables login until it's redone.** `accounts.User.background_check_required`/`background_check_expires_at` (only ever set for `DojoOwner`/`HelperAccount`) back a `background_check_valid` property; `accounts.views.login` refuses a correct password once it's `False`, and `accounts.middleware.BackgroundCheckMiddleware` blocks every request from an already-logged-in session the same way, redirecting to `applications.views.renew_background_check` (same upload template as the emailed-link flow, `applications/templates/applications/upload_background_check.html`, just resolving the application from the authenticated account instead of a token). `Guardian`/`ChildAccount` never set these fields and never go through this pipeline at all.
 
 ### Geo search: MySQL spherical distance
 

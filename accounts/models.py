@@ -2,6 +2,7 @@ from datetime import date
 
 from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -15,6 +16,29 @@ class User(AbstractUser):
                   "account (DojoOwner, HelperAccount) with a temporary password. Enforced by "
                   "accounts.middleware.ForcePasswordChangeMiddleware.",
     )
+
+    # Only ever set for DojoOwner/HelperAccount, whose applications
+    # (applications.DojoApplication/MentorApplication) went through the
+    # Belgian background-check pipeline — mirrors must_change_password in
+    # living on the base User even though it's only meaningful for those
+    # two roles. Guardian/ChildAccount never touch these fields; they never
+    # go through that pipeline at all (see applications.models.BackgroundCheckMixin).
+    background_check_required = models.BooleanField(
+        default=False,
+        help_text="Set at provisioning time from the linked application's "
+                  "background_check_required (age-based — see BACKGROUND_CHECK_MINIMUM_AGE). "
+                  "When true, login is refused once background_check_expires_at lapses — see "
+                  "accounts.backends and accounts.middleware.BackgroundCheckMiddleware — until "
+                  "a reviewer validates a fresh one (applications.admin.validate_background_check "
+                  "syncs the new expiry back here).",
+    )
+    background_check_expires_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def background_check_valid(self):
+        return not self.background_check_required or (
+            self.background_check_expires_at is not None and self.background_check_expires_at > timezone.now()
+        )
 
 
 class DojoOwner(User):

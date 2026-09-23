@@ -1,12 +1,34 @@
 import io
+import re
+from datetime import timedelta
+from unittest.mock import Mock
+from urllib.parse import urlparse
 
 from django.contrib.auth.models import Permission
-from django.test import TestCase
+from django.core import mail
+from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
-from accounts.models import User
+from accounts.models import DojoOwner, HelperAccount, User
 
+from .admin import (
+    approve_and_provision_helper,
+    approve_and_provision_owner,
+    reject_background_check,
+    request_background_check,
+    validate_background_check,
+)
 from .models import BackgroundCheckMixin, DojoApplication, MentorApplication
+
+
+def _request_as(user):
+    """A minimal admin-action request: RequestFactory gives us a real
+    HttpRequest (so request.build_absolute_uri works for the actions that
+    build an email link) without needing a live admin session."""
+    request = RequestFactory().get("/admin/")
+    request.user = user
+    return request
 
 
 class RegisterDojoViewTests(TestCase):
@@ -115,6 +137,26 @@ class UploadBackgroundCheckViewTests(TestCase):
         )
         self.assertTrue(response.context["already_submitted"])
 
+    def test_valid_upload_for_mentor_application_marks_submitted(self):
+        """_find_application_by_token checks both DojoApplication and
+        MentorApplication — cover the second branch too."""
+        mentor_application = MentorApplication.objects.create(
+            applicant_name="Tom",
+            applicant_email="tom@example.com",
+            background_check_status=BackgroundCheckMixin.REQUESTED,
+        )
+        document = io.BytesIO(b"pretend this is a pdf")
+        document.name = "extract.pdf"
+        response = self.client.post(
+            reverse("upload_background_check", kwargs={"token": mentor_application.background_check_token}),
+            {"document": document},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["submitted"])
+        mentor_application.refresh_from_db()
+        self.assertEqual(mentor_application.background_check_status, BackgroundCheckMixin.SUBMITTED)
+        self.addCleanup(mentor_application.background_check_document.delete, save=False)
+
 
 class DownloadBackgroundCheckViewTests(TestCase):
     @classmethod
@@ -166,3 +208,541 @@ class DownloadBackgroundCheckViewTests(TestCase):
         response = self.client.get(reverse("download_background_check", kwargs={"kind": "dojo", "pk": application.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Disposition"].startswith("attachment;"), True)
+
+    def test_reviewer_downloads_a_mentor_application_document(self):
+        """kind='mentor' takes a different branch of APPLICATION_MODELS_BY_KIND — cover it too."""
+        document = io.BytesIO(b"pretend this is a pdf")
+        document.name = "extract.pdf"
+        application = MentorApplication.objects.create(applicant_name="Tom", applicant_email="tom@example.com")
+        application.background_check_document.save("extract.pdf", document, save=True)
+        self.addCleanup(application.background_check_document.delete, save=False)
+
+        self.client.force_login(self.reviewer)
+        response = self.client.get(reverse("download_background_check", kwargs={"kind": "mentor", "pk": application.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Disposition"].startswith("attachment;"), True)
+
+
+class BackgroundCheckModelTests(TestCase):
+    def test_valid_when_validated_and_not_yet_expired(self):
+        application = DojoApplication.objects.create(
+            applicant_name="Jane", applicant_email="jane@example.com", area="Leuven",
+            background_check_status=BackgroundCheckMixin.VALIDATED,
+            background_check_expires_at=timezone.now() + timedelta(days=1),
+        )
+        self.assertTrue(application.has_valid_background_check)
+
+    def test_invalid_once_expired(self):
+        application = DojoApplication.objects.create(
+            applicant_name="Jane", applicant_email="jane@example.com", area="Leuven",
+            background_check_status=BackgroundCheckMixin.VALIDATED,
+            background_check_expires_at=timezone.now() - timedelta(days=1),
+        )
+        self.assertFalse(application.has_valid_background_check)
+
+    def test_invalid_when_not_validated(self):
+        application = DojoApplication.objects.create(
+            applicant_name="Jane", applicant_email="jane@example.com", area="Leuven",
+            background_check_status=BackgroundCheckMixin.SUBMITTED,
+            background_check_expires_at=timezone.now() + timedelta(days=1),
+        )
+        self.assertFalse(application.has_valid_background_check)
+
+
+class RequestBackgroundCheckActionTests(TestCase):
+    """applications.admin.request_background_check — the admin action that
+    starts the flow: email the applicant a link to upload their document."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff_user = User.objects.create(username="staffer", is_staff=True)
+
+    def test_emails_applicant_and_marks_requested(self):
+        application = DojoApplication.objects.create(
+            applicant_name="Jane", applicant_email="jane@example.com", area="Leuven",
+        )
+        request_background_check(
+            Mock(), _request_as(self.staff_user), DojoApplication.objects.filter(pk=application.pk),
+        )
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.REQUESTED)
+        self.assertIsNotNone(application.background_check_requested_at)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["jane@example.com"])
+        self.assertIn(str(application.background_check_token), mail.outbox[0].body)
+
+    def test_skips_a_currently_valid_application(self):
+        application = DojoApplication.objects.create(
+            applicant_name="Jane", applicant_email="jane@example.com", area="Leuven",
+            background_check_status=BackgroundCheckMixin.VALIDATED,
+            background_check_expires_at=timezone.now() + timedelta(days=1),
+        )
+        request_background_check(
+            Mock(), _request_as(self.staff_user), DojoApplication.objects.filter(pk=application.pk),
+        )
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.VALIDATED)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_renews_a_validated_but_expired_application(self):
+        """VALIDATED but past background_check_expires_at is exactly the
+        renewal case — re-requesting must still go out, not be skipped."""
+        application = DojoApplication.objects.create(
+            applicant_name="Jane", applicant_email="jane@example.com", area="Leuven",
+            background_check_status=BackgroundCheckMixin.VALIDATED,
+            background_check_expires_at=timezone.now() - timedelta(days=1),
+        )
+        request_background_check(
+            Mock(), _request_as(self.staff_user), DojoApplication.objects.filter(pk=application.pk),
+        )
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.REQUESTED)
+        self.assertEqual(len(mail.outbox), 1)
+
+
+class ValidateBackgroundCheckActionTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.permission = Permission.objects.get(
+            codename="can_review_background_checks", content_type__app_label="applications",
+        )
+        cls.reviewer = User.objects.create(username="reviewer")
+        cls.reviewer.user_permissions.add(cls.permission)
+        cls.plain_staff = User.objects.create(username="staffer", is_staff=True)
+
+    def _application_with_document(self):
+        application = DojoApplication.objects.create(
+            applicant_name="Jane", applicant_email="jane@example.com", area="Leuven",
+            background_check_status=BackgroundCheckMixin.SUBMITTED,
+        )
+        document = io.BytesIO(b"pretend this is a pdf")
+        document.name = "extract.pdf"
+        application.background_check_document.save("extract.pdf", document, save=True)
+        return application
+
+    def test_requires_the_review_permission(self):
+        application = self._application_with_document()
+        self.addCleanup(application.background_check_document.delete, save=False)
+
+        validate_background_check(
+            Mock(), _request_as(self.plain_staff), DojoApplication.objects.filter(pk=application.pk),
+        )
+
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.SUBMITTED)
+        self.assertTrue(application.background_check_document)
+
+    def test_validates_and_discards_the_document(self):
+        application = self._application_with_document()
+
+        validate_background_check(
+            Mock(), _request_as(self.reviewer), DojoApplication.objects.filter(pk=application.pk),
+        )
+
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.VALIDATED)
+        self.assertFalse(application.background_check_document)
+        self.assertIsNotNone(application.background_check_reviewed_at)
+        self.assertIsNotNone(application.background_check_expires_at)
+        self.assertTrue(application.has_valid_background_check)
+
+
+class RejectBackgroundCheckActionTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.permission = Permission.objects.get(
+            codename="can_review_background_checks", content_type__app_label="applications",
+        )
+        cls.reviewer = User.objects.create(username="reviewer")
+        cls.reviewer.user_permissions.add(cls.permission)
+        cls.plain_staff = User.objects.create(username="staffer", is_staff=True)
+
+    def _submitted_application(self):
+        return DojoApplication.objects.create(
+            applicant_name="Jane", applicant_email="jane@example.com", area="Leuven",
+            background_check_status=BackgroundCheckMixin.SUBMITTED,
+        )
+
+    def test_requires_the_review_permission(self):
+        application = self._submitted_application()
+        reject_background_check(
+            Mock(), _request_as(self.plain_staff), DojoApplication.objects.filter(pk=application.pk),
+        )
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.SUBMITTED)
+
+    def test_rejects_with_permission(self):
+        application = self._submitted_application()
+        reject_background_check(
+            Mock(), _request_as(self.reviewer), DojoApplication.objects.filter(pk=application.pk),
+        )
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.REJECTED)
+        self.assertIsNotNone(application.background_check_reviewed_at)
+
+
+class ApproveAndProvisionOwnerActionTests(TestCase):
+    """applications.admin.approve_and_provision_owner — the final step: an
+    approved, background-checked DojoApplication becomes a real DojoOwner
+    login (see accounts.provisioning.provision_account)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff_user = User.objects.create(username="staffer", is_staff=True)
+
+    def _validated_application(self, **overrides):
+        fields = {
+            "applicant_name": "Jane Doe",
+            "applicant_email": "jane@example.com",
+            "area": "Leuven",
+            "background_check_status": BackgroundCheckMixin.VALIDATED,
+            "background_check_expires_at": timezone.now() + timedelta(days=1),
+        }
+        fields.update(overrides)
+        return DojoApplication.objects.create(**fields)
+
+    def test_blocked_without_a_valid_background_check(self):
+        application = DojoApplication.objects.create(
+            applicant_name="Jane Doe", applicant_email="jane@example.com", area="Leuven",
+        )
+        approve_and_provision_owner(
+            Mock(), _request_as(self.staff_user), DojoApplication.objects.filter(pk=application.pk),
+        )
+        application.refresh_from_db()
+        self.assertEqual(application.status, DojoApplication.PENDING)
+        self.assertFalse(DojoOwner.objects.exists())
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_blocked_once_the_background_check_has_expired(self):
+        application = self._validated_application(background_check_expires_at=timezone.now() - timedelta(days=1))
+        approve_and_provision_owner(
+            Mock(), _request_as(self.staff_user), DojoApplication.objects.filter(pk=application.pk),
+        )
+        application.refresh_from_db()
+        self.assertEqual(application.status, DojoApplication.PENDING)
+        self.assertFalse(DojoOwner.objects.exists())
+
+    def test_provisions_account_and_emails_temp_password(self):
+        application = self._validated_application()
+        approve_and_provision_owner(
+            Mock(), _request_as(self.staff_user), DojoApplication.objects.filter(pk=application.pk),
+        )
+        application.refresh_from_db()
+        self.assertEqual(application.status, DojoApplication.APPROVED)
+        owner = DojoOwner.objects.get(email="jane@example.com")
+        self.assertTrue(owner.must_change_password)
+        self.assertTrue(owner.has_usable_password())
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["jane@example.com"])
+
+    def test_does_not_reprovision_an_already_approved_application(self):
+        application = self._validated_application(status=DojoApplication.APPROVED)
+        approve_and_provision_owner(
+            Mock(), _request_as(self.staff_user), DojoApplication.objects.filter(pk=application.pk),
+        )
+        self.assertFalse(DojoOwner.objects.exists())
+        self.assertEqual(len(mail.outbox), 0)
+
+
+class ApproveAndProvisionHelperActionTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff_user = User.objects.create(username="staffer", is_staff=True)
+
+    def test_provisions_helper_account(self):
+        application = MentorApplication.objects.create(
+            applicant_name="Tom", applicant_email="tom@example.com",
+            background_check_status=BackgroundCheckMixin.VALIDATED,
+            background_check_expires_at=timezone.now() + timedelta(days=1),
+        )
+        approve_and_provision_helper(
+            Mock(), _request_as(self.staff_user), MentorApplication.objects.filter(pk=application.pk),
+        )
+        application.refresh_from_db()
+        self.assertEqual(application.status, MentorApplication.APPROVED)
+        self.assertTrue(HelperAccount.objects.filter(email="tom@example.com").exists())
+
+    def test_blocked_without_a_valid_background_check(self):
+        application = MentorApplication.objects.create(applicant_name="Tom", applicant_email="tom@example.com")
+        approve_and_provision_helper(
+            Mock(), _request_as(self.staff_user), MentorApplication.objects.filter(pk=application.pk),
+        )
+        application.refresh_from_db()
+        self.assertEqual(application.status, MentorApplication.PENDING)
+        self.assertFalse(HelperAccount.objects.exists())
+
+
+class BackgroundCheckRequestEmailAndUploadFlowTests(TestCase):
+    """End-to-end version of the request -> email -> upload journey: unlike
+    RequestBackgroundCheckActionTests/UploadBackgroundCheckViewTests (which
+    call the admin action function or a known token directly), this drives
+    the real admin changelist action URL and then follows the link exactly
+    as it appears in the sent email — the same "mail server" Django's test
+    runner always swaps in for outgoing mail (django.core.mail.outbox),
+    regardless of the project's configured EMAIL_BACKEND."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff_user = User.objects.create_superuser(
+            username="reviewer-admin", email="reviewer-admin@example.com", password="irrelevant-99",
+        )
+
+    def _request_background_check_via_admin(self, application, model_name):
+        self.client.force_login(self.staff_user)
+        response = self.client.post(
+            reverse(f"admin:applications_{model_name}_changelist"),
+            {"action": "request_background_check", "_selected_action": [str(application.pk)]},
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+
+    def _upload_link_from(self, message):
+        match = re.search(r"https?://\S+/applications/background-check/\S+/", message.body)
+        self.assertIsNotNone(match, f"No upload link found in email body:\n{message.body}")
+        return urlparse(match.group(0)).path
+
+    def test_dojo_application_request_and_upload_via_the_emailed_link(self):
+        application = DojoApplication.objects.create(
+            applicant_name="Jane Doe", applicant_email="jane@example.com", area="Leuven",
+            consent=True, background_check_consent=True,
+        )
+
+        self._request_background_check_via_admin(application, "dojoapplication")
+
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.REQUESTED)
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(message.to, ["jane@example.com"])
+
+        upload_path = self._upload_link_from(message)
+        self.assertEqual(
+            upload_path,
+            reverse("upload_background_check", kwargs={"token": application.background_check_token}),
+        )
+
+        get_response = self.client.get(upload_path)
+        self.assertEqual(get_response.status_code, 200)
+        self.assertFalse(get_response.context["already_submitted"])
+
+        document = io.BytesIO(b"%PDF-1.4 pretend this is a real uittreksel document")
+        document.name = "extract.pdf"
+        post_response = self.client.post(upload_path, {"document": document})
+        self.assertEqual(post_response.status_code, 200)
+        self.assertTrue(post_response.context["submitted"])
+
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.SUBMITTED)
+        self.assertIsNotNone(application.background_check_submitted_at)
+        self.assertTrue(application.background_check_document)
+        self.addCleanup(application.background_check_document.delete, save=False)
+
+        # Revisiting the same emailed link afterwards must refuse a second upload.
+        second_get = self.client.get(upload_path)
+        self.assertTrue(second_get.context["already_submitted"])
+
+    def test_mentor_application_request_and_upload_via_the_emailed_link(self):
+        application = MentorApplication.objects.create(
+            applicant_name="Tom", applicant_email="tom@example.com", background_check_consent=True,
+        )
+
+        self._request_background_check_via_admin(application, "mentorapplication")
+
+        self.assertEqual(len(mail.outbox), 1)
+        upload_path = self._upload_link_from(mail.outbox[0])
+
+        document = io.BytesIO(b"%PDF-1.4 pretend this is a real uittreksel document")
+        document.name = "extract.pdf"
+        post_response = self.client.post(upload_path, {"document": document})
+        self.assertEqual(post_response.status_code, 200)
+        self.assertTrue(post_response.context["submitted"])
+
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.SUBMITTED)
+        self.addCleanup(application.background_check_document.delete, save=False)
+
+    def test_currently_valid_application_is_not_re_emailed(self):
+        """request_background_check skips an application whose check is
+        still currently valid — confirm that holds through the real admin
+        action too."""
+        application = DojoApplication.objects.create(
+            applicant_name="Jane Doe", applicant_email="jane@example.com", area="Leuven",
+            background_check_status=BackgroundCheckMixin.VALIDATED,
+            background_check_expires_at=timezone.now() + timedelta(days=1),
+        )
+
+        self._request_background_check_via_admin(application, "dojoapplication")
+
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.VALIDATED)
+        self.assertEqual(len(mail.outbox), 0)
+
+
+class ProvisioningSyncsAccountBackgroundCheckTests(TestCase):
+    """approve_and_provision_owner/helper carry the check onto the account
+    itself (accounts.User.background_check_required/expires_at) — that's
+    what accounts.views.login and BackgroundCheckMiddleware actually gate
+    on from here — and link the application back to the account
+    (provisioned_owner/provisioned_helper) so a later renewal can sync
+    back onto it (see ValidateBackgroundCheckSyncsRenewalToAccountTests)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff_user = User.objects.create(username="staffer", is_staff=True)
+
+    def test_provision_owner_sets_required_and_expiry_on_the_account(self):
+        expires_at = timezone.now() + timedelta(days=300)
+        application = DojoApplication.objects.create(
+            applicant_name="Jane Doe", applicant_email="jane@example.com", area="Leuven",
+            background_check_status=BackgroundCheckMixin.VALIDATED, background_check_expires_at=expires_at,
+        )
+
+        approve_and_provision_owner(
+            Mock(), _request_as(self.staff_user), DojoApplication.objects.filter(pk=application.pk),
+        )
+
+        owner = DojoOwner.objects.get(email="jane@example.com")
+        self.assertTrue(owner.background_check_required)
+        self.assertEqual(owner.background_check_expires_at, expires_at)
+        application.refresh_from_db()
+        self.assertEqual(application.provisioned_owner_id, owner.id)
+
+    def test_provision_helper_sets_required_and_expiry_on_the_account(self):
+        expires_at = timezone.now() + timedelta(days=300)
+        application = MentorApplication.objects.create(
+            applicant_name="Tom", applicant_email="tom@example.com",
+            background_check_status=BackgroundCheckMixin.VALIDATED, background_check_expires_at=expires_at,
+        )
+
+        approve_and_provision_helper(
+            Mock(), _request_as(self.staff_user), MentorApplication.objects.filter(pk=application.pk),
+        )
+
+        helper = HelperAccount.objects.get(email="tom@example.com")
+        self.assertTrue(helper.background_check_required)
+        self.assertEqual(helper.background_check_expires_at, expires_at)
+        application.refresh_from_db()
+        self.assertEqual(application.provisioned_helper_id, helper.id)
+
+
+class ValidateBackgroundCheckSyncsRenewalToAccountTests(TestCase):
+    """Renewal: validating a background check on an application that
+    already provisioned an account must push the fresh expiry onto that
+    account immediately, not just onto the application row."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.permission = Permission.objects.get(
+            codename="can_review_background_checks", content_type__app_label="applications",
+        )
+        cls.reviewer = User.objects.create(username="reviewer")
+        cls.reviewer.user_permissions.add(cls.permission)
+
+    def test_validating_a_renewal_updates_the_linked_owner_account(self):
+        owner = DojoOwner.objects.create(
+            username="owner1", background_check_required=True,
+            background_check_expires_at=timezone.now() - timedelta(days=1),
+        )
+        application = DojoApplication.objects.create(
+            applicant_name="Jane Doe", applicant_email="jane@example.com", area="Leuven",
+            background_check_status=BackgroundCheckMixin.SUBMITTED, provisioned_owner=owner,
+        )
+        document = io.BytesIO(b"pretend this is a pdf")
+        document.name = "extract.pdf"
+        application.background_check_document.save("extract.pdf", document, save=True)
+
+        validate_background_check(
+            Mock(), _request_as(self.reviewer), DojoApplication.objects.filter(pk=application.pk),
+        )
+
+        owner.refresh_from_db()
+        application.refresh_from_db()
+        self.assertEqual(owner.background_check_expires_at, application.background_check_expires_at)
+        self.assertTrue(owner.background_check_valid)
+
+    def test_validating_a_first_time_application_does_not_touch_any_account(self):
+        """No provisioned_owner/provisioned_helper yet — nothing to sync to,
+        and nothing should error trying."""
+        application = DojoApplication.objects.create(
+            applicant_name="Jane Doe", applicant_email="jane@example.com", area="Leuven",
+            background_check_status=BackgroundCheckMixin.SUBMITTED,
+        )
+        document = io.BytesIO(b"pretend this is a pdf")
+        document.name = "extract.pdf"
+        application.background_check_document.save("extract.pdf", document, save=True)
+
+        validate_background_check(
+            Mock(), _request_as(self.reviewer), DojoApplication.objects.filter(pk=application.pk),
+        )
+
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.VALIDATED)
+
+
+class RenewBackgroundCheckViewTests(TestCase):
+    """applications.views.renew_background_check — where
+    accounts.middleware.BackgroundCheckMiddleware sends a logged-in
+    DojoOwner/HelperAccount whose check has lapsed, to upload a fresh
+    document without needing the emailed token link."""
+
+    def test_anonymous_redirected_to_login(self):
+        response = self.client.get(reverse("renew_background_check"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response.url)
+
+    def test_account_with_no_linked_application_is_404(self):
+        owner = DojoOwner.objects.create(username="owner1", background_check_required=True)
+        self.client.force_login(owner)
+        response = self.client.get(reverse("renew_background_check"))
+        self.assertEqual(response.status_code, 404)
+
+    def test_owner_can_upload_without_a_token(self):
+        owner = DojoOwner.objects.create(
+            username="owner1", background_check_required=True,
+            background_check_expires_at=timezone.now() - timedelta(days=1),
+        )
+        application = DojoApplication.objects.create(
+            applicant_name="Jane Doe", applicant_email="jane@example.com", area="Leuven",
+            background_check_status=BackgroundCheckMixin.VALIDATED,
+            background_check_expires_at=timezone.now() - timedelta(days=1),
+            provisioned_owner=owner,
+        )
+        self.client.force_login(owner)
+
+        get_response = self.client.get(reverse("renew_background_check"))
+        self.assertEqual(get_response.status_code, 200)
+        self.assertFalse(get_response.context["already_submitted"])
+
+        document = io.BytesIO(b"pretend this is a pdf")
+        document.name = "extract.pdf"
+        post_response = self.client.post(reverse("renew_background_check"), {"document": document})
+
+        self.assertEqual(post_response.status_code, 200)
+        self.assertTrue(post_response.context["submitted"])
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.SUBMITTED)
+        self.addCleanup(application.background_check_document.delete, save=False)
+
+    def test_helper_can_upload_without_a_token(self):
+        helper = HelperAccount.objects.create(
+            username="helper1", background_check_required=True,
+            background_check_expires_at=timezone.now() - timedelta(days=1),
+        )
+        application = MentorApplication.objects.create(
+            applicant_name="Tom", applicant_email="tom@example.com",
+            background_check_status=BackgroundCheckMixin.VALIDATED,
+            background_check_expires_at=timezone.now() - timedelta(days=1),
+            provisioned_helper=helper,
+        )
+        self.client.force_login(helper)
+
+        document = io.BytesIO(b"pretend this is a pdf")
+        document.name = "extract.pdf"
+        post_response = self.client.post(reverse("renew_background_check"), {"document": document})
+
+        self.assertEqual(post_response.status_code, 200)
+        self.assertTrue(post_response.context["submitted"])
+        application.refresh_from_db()
+        self.assertEqual(application.background_check_status, BackgroundCheckMixin.SUBMITTED)
+        self.addCleanup(application.background_check_document.delete, save=False)

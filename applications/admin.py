@@ -10,10 +10,27 @@ from .models import BACKGROUND_CHECK_VALIDITY, BackgroundCheckMixin, DojoApplica
 from .services import send_background_check_request
 
 
+def _linked_account(application):
+    """The DojoOwner/HelperAccount this application already provisioned, if
+    any (set by approve_and_provision_owner/helper) — present once the
+    applicant is a real, logged-in account rather than still pending
+    approval, which is exactly when a background-check *renewal* (as
+    opposed to the original one) needs to sync back onto the account that
+    actually gates login. Works across both DojoApplication.provisioned_owner
+    and MentorApplication.provisioned_helper without the caller needing to
+    know which one applies."""
+    return getattr(application, "provisioned_owner", None) or getattr(application, "provisioned_helper", None)
+
+
 @admin.action(description="Request background check document from applicant")
 def request_background_check(modeladmin, request, queryset):
+    # Not excluding by status: a currently-valid check needs no action, but
+    # one that's VALIDATED yet expired (or about to expire) is exactly the
+    # renewal case — re-running this on the same row is how that's requested.
     sent = 0
-    for application in queryset.exclude(background_check_status=BackgroundCheckMixin.VALIDATED):
+    for application in queryset:
+        if application.has_valid_background_check:
+            continue
         send_background_check_request(application, request)
         sent += 1
     modeladmin.message_user(request, f"Emailed {sent} applicant(s) with the document upload link.")
@@ -39,6 +56,15 @@ def validate_background_check(modeladmin, request, queryset):
             "background_check_reviewed_at", "background_check_expires_at",
         ])
         validated += 1
+
+        # Renewal case: this application already has a live account
+        # (see _linked_account) — sync the fresh expiry onto it so
+        # accounts.User.background_check_valid (and BackgroundCheckMiddleware)
+        # see it as vetted again immediately, without waiting on a re-approval.
+        account = _linked_account(application)
+        if account is not None:
+            account.background_check_expires_at = application.background_check_expires_at
+            account.save(update_fields=["background_check_expires_at"])
     modeladmin.message_user(request, f"Validated {validated} background check(s); documents discarded.")
 
 
@@ -61,9 +87,16 @@ def approve_and_provision_owner(modeladmin, request, queryset):
         if not application.has_valid_background_check:
             blocked += 1
             continue
-        provision_account(DojoOwner, application.applicant_name, application.applicant_email, login_url)
+        account = provision_account(DojoOwner, application.applicant_name, application.applicant_email, login_url)
+        # From here on it's the account, not the application, that
+        # accounts.User.background_check_valid / BackgroundCheckMiddleware
+        # check on every login and request.
+        account.background_check_required = True
+        account.background_check_expires_at = application.background_check_expires_at
+        account.save(update_fields=["background_check_required", "background_check_expires_at"])
         application.status = DojoApplication.APPROVED
-        application.save(update_fields=["status"])
+        application.provisioned_owner = account
+        application.save(update_fields=["status", "provisioned_owner"])
         approved += 1
     message = f"Provisioned {approved} DojoOwner account(s) and emailed their temp password."
     if blocked:
@@ -79,9 +112,13 @@ def approve_and_provision_helper(modeladmin, request, queryset):
         if not application.has_valid_background_check:
             blocked += 1
             continue
-        provision_account(HelperAccount, application.applicant_name, application.applicant_email, login_url)
+        account = provision_account(HelperAccount, application.applicant_name, application.applicant_email, login_url)
+        account.background_check_required = True
+        account.background_check_expires_at = application.background_check_expires_at
+        account.save(update_fields=["background_check_required", "background_check_expires_at"])
         application.status = MentorApplication.APPROVED
-        application.save(update_fields=["status"])
+        application.provisioned_helper = account
+        application.save(update_fields=["status", "provisioned_helper"])
         approved += 1
     message = f"Provisioned {approved} helper account(s) and emailed their temp password."
     if blocked:

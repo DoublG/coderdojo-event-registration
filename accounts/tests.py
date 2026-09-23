@@ -1,10 +1,16 @@
+import re
+from datetime import timedelta
+
+from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from dojos.models import Dojo
 from events.models import Event, Registration
 
-from .models import Guardian, Participant
+from .models import DojoOwner, Guardian, HelperAccount, Participant
+from .provisioning import provision_account, unique_username
 
 PASSWORD = "correct-horse-battery-staple"
 
@@ -355,3 +361,172 @@ class RegisterGuardianViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["children_error"])
         self.assertFalse(Guardian.objects.filter(email="jane@example.com").exists())
+
+
+class UniqueUsernameTests(TestCase):
+    def test_returns_base_when_free(self):
+        self.assertEqual(unique_username("jane-doe"), "jane-doe")
+
+    def test_appends_suffix_on_collision(self):
+        Guardian.objects.create(username="jane-doe")
+        self.assertEqual(unique_username("jane-doe"), "jane-doe2")
+
+    def test_keeps_incrementing_past_multiple_collisions(self):
+        Guardian.objects.create(username="jane-doe")
+        Guardian.objects.create(username="jane-doe2")
+        self.assertEqual(unique_username("jane-doe"), "jane-doe3")
+
+    def test_falls_back_to_user_for_blank_base(self):
+        self.assertEqual(unique_username(""), "user")
+
+
+class ProvisionAccountTests(TestCase):
+    """accounts.provisioning.provision_account — how applications.admin's
+    "approve" actions turn an approved DojoApplication/MentorApplication
+    into a real DojoOwner/HelperAccount login."""
+
+    LOGIN_URL = "https://coolregistration.example/login"
+
+    def test_creates_account_with_forced_password_change(self):
+        account = provision_account(DojoOwner, "Jane Doe", "jane@example.com", self.LOGIN_URL)
+
+        self.assertIsInstance(account, DojoOwner)
+        self.assertEqual(account.email, "jane@example.com")
+        self.assertEqual(account.first_name, "Jane")
+        self.assertEqual(account.last_name, "Doe")
+        self.assertTrue(account.must_change_password)
+        self.assertTrue(account.has_usable_password())
+
+    def test_works_for_helper_accounts_too(self):
+        account = provision_account(HelperAccount, "Tom", "tom@example.com", self.LOGIN_URL)
+        self.assertIsInstance(account, HelperAccount)
+
+    def test_emails_the_temporary_password_and_login_link(self):
+        provision_account(DojoOwner, "Jane Doe", "jane@example.com", self.LOGIN_URL)
+
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(message.to, ["jane@example.com"])
+        self.assertIn(self.LOGIN_URL, message.body)
+
+        account = DojoOwner.objects.get(email="jane@example.com")
+        match = re.search(r"Temporary password: (\S+)", message.body)
+        self.assertIsNotNone(match)
+        self.assertTrue(account.check_password(match.group(1)))
+
+    def test_password_is_random_each_time(self):
+        provision_account(DojoOwner, "Jane Doe", "jane1@example.com", self.LOGIN_URL)
+        provision_account(DojoOwner, "Jane Doe", "jane2@example.com", self.LOGIN_URL)
+
+        passwords = [
+            re.search(r"Temporary password: (\S+)", message.body).group(1) for message in mail.outbox
+        ]
+        self.assertNotEqual(passwords[0], passwords[1])
+
+    def test_generates_distinct_usernames_for_the_same_name(self):
+        first = provision_account(DojoOwner, "Jane Doe", "jane1@example.com", self.LOGIN_URL)
+        second = provision_account(DojoOwner, "Jane Doe", "jane2@example.com", self.LOGIN_URL)
+        self.assertNotEqual(first.username, second.username)
+
+
+class BackgroundCheckValidPropertyTests(TestCase):
+    def test_valid_when_not_required(self):
+        owner = DojoOwner.objects.create(username="owner1", background_check_required=False)
+        self.assertTrue(owner.background_check_valid)
+
+    def test_invalid_when_required_and_never_set(self):
+        owner = DojoOwner.objects.create(username="owner1", background_check_required=True)
+        self.assertFalse(owner.background_check_valid)
+
+    def test_invalid_when_required_and_expired(self):
+        owner = DojoOwner.objects.create(
+            username="owner1", background_check_required=True,
+            background_check_expires_at=timezone.now() - timedelta(days=1),
+        )
+        self.assertFalse(owner.background_check_valid)
+
+    def test_valid_when_required_and_not_yet_expired(self):
+        owner = DojoOwner.objects.create(
+            username="owner1", background_check_required=True,
+            background_check_expires_at=timezone.now() + timedelta(days=1),
+        )
+        self.assertTrue(owner.background_check_valid)
+
+
+class BackgroundCheckLoginGateTests(TestCase):
+    """accounts.views.login refuses a correct password for a DojoOwner/
+    HelperAccount whose background check has lapsed — see
+    accounts.middleware.BackgroundCheckMiddleware for the same gate on an
+    already-open session."""
+
+    def _owner(self, **overrides):
+        owner = DojoOwner(username="owner1", email="owner1@example.com", **overrides)
+        owner.set_password(PASSWORD)
+        owner.save()
+        return owner
+
+    def test_blocked_when_required_and_expired(self):
+        self._owner(background_check_required=True, background_check_expires_at=timezone.now() - timedelta(days=1))
+
+        response = self.client.post(reverse("login"), {"email": "owner1@example.com", "password": PASSWORD})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("background check has expired", response.context["error"])
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_allowed_when_required_and_valid(self):
+        owner = self._owner(
+            background_check_required=True, background_check_expires_at=timezone.now() + timedelta(days=1),
+        )
+
+        response = self.client.post(reverse("login"), {"email": "owner1@example.com", "password": PASSWORD})
+
+        self.assertRedirects(response, reverse("home"))
+        self.assertEqual(int(self.client.session["_auth_user_id"]), owner.id)
+
+    def test_allowed_when_not_required(self):
+        owner = self._owner(background_check_required=False)
+
+        self.client.post(reverse("login"), {"email": "owner1@example.com", "password": PASSWORD})
+
+        self.assertEqual(int(self.client.session["_auth_user_id"]), owner.id)
+
+
+class BackgroundCheckMiddlewareTests(TestCase):
+    def _owner(self, **overrides):
+        owner = DojoOwner(username="owner1", email="owner1@example.com", **overrides)
+        owner.set_password(PASSWORD)
+        owner.save()
+        return owner
+
+    def test_expired_account_redirected_to_renewal_page(self):
+        owner = self._owner(background_check_required=True, background_check_expires_at=timezone.now() - timedelta(days=1))
+        self.client.force_login(owner)
+
+        response = self.client.get(reverse("home"))
+
+        # fetch_redirect_response=False: this owner has no linked
+        # application (see applications.tests.RenewBackgroundCheckViewTests
+        # for that page's own behavior), so the target 404s — here we only
+        # care that the middleware redirects there at all.
+        self.assertRedirects(
+            response, reverse("renew_background_check"), fetch_redirect_response=False,
+        )
+
+    def test_expired_account_can_still_reach_logout(self):
+        owner = self._owner(background_check_required=True, background_check_expires_at=timezone.now() - timedelta(days=1))
+        self.client.force_login(owner)
+
+        response = self.client.get(reverse("logout"))
+
+        self.assertRedirects(response, reverse("home"))
+
+    def test_valid_account_is_not_intercepted(self):
+        owner = self._owner(
+            background_check_required=True, background_check_expires_at=timezone.now() + timedelta(days=1),
+        )
+        self.client.force_login(owner)
+
+        response = self.client.get(reverse("home"))
+
+        self.assertEqual(response.status_code, 200)

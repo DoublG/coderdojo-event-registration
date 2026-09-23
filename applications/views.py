@@ -1,4 +1,4 @@
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.http import FileResponse, Http404
 from django.shortcuts import render
 from django.utils import timezone
@@ -15,6 +15,54 @@ def _find_application_by_token(token):
         if application is not None:
             return application
     return None
+
+
+def _find_application_for_account(user):
+    """The application a logged-in DojoOwner/HelperAccount was provisioned
+    from (DojoApplication.provisioned_owner / MentorApplication.provisioned_helper),
+    for renew_background_check — the counterpart to _find_application_by_token
+    for someone who's already authenticated rather than holding an emailed link."""
+    dojo_owner = getattr(user, "dojoowner", None)
+    if dojo_owner is not None:
+        return getattr(dojo_owner, "application", None)
+    helper_account = getattr(user, "helperaccount", None)
+    if helper_account is not None:
+        return getattr(helper_account, "application", None)
+    return None
+
+
+def _upload_background_check_context(request, application):
+    """Shared by upload_background_check (emailed token link, no login) and
+    renew_background_check (logged-in account whose check has lapsed —
+    accounts.middleware.BackgroundCheckMiddleware) — both just accept a
+    document against an already-resolved application, on the same template."""
+    # A VALIDATED check that's since expired is exactly the renewal case —
+    # only a *currently* valid one (or one already awaiting review) blocks
+    # a fresh upload.
+    already_submitted = (
+        application.background_check_status == BackgroundCheckMixin.SUBMITTED
+        or application.has_valid_background_check
+    )
+    submitted = False
+    if request.method == "POST" and not already_submitted:
+        form = BackgroundCheckUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            application.background_check_document = form.cleaned_data["document"]
+            application.background_check_status = BackgroundCheckMixin.SUBMITTED
+            application.background_check_submitted_at = timezone.now()
+            application.save(update_fields=[
+                "background_check_document", "background_check_status", "background_check_submitted_at",
+            ])
+            submitted = True
+    else:
+        form = BackgroundCheckUploadForm()
+
+    return {
+        "application": application,
+        "form": form,
+        "submitted": submitted,
+        "already_submitted": already_submitted,
+    }
 
 
 def register_dojo(request):
@@ -51,30 +99,22 @@ def upload_background_check(request, token):
     application = _find_application_by_token(token)
     if application is None:
         raise Http404
+    context = _upload_background_check_context(request, application)
+    return render(request, "applications/upload_background_check.html", context)
 
-    already_submitted = application.background_check_status in (
-        BackgroundCheckMixin.SUBMITTED, BackgroundCheckMixin.VALIDATED,
-    )
-    submitted = False
-    if request.method == "POST" and not already_submitted:
-        form = BackgroundCheckUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            application.background_check_document = form.cleaned_data["document"]
-            application.background_check_status = BackgroundCheckMixin.SUBMITTED
-            application.background_check_submitted_at = timezone.now()
-            application.save(update_fields=[
-                "background_check_document", "background_check_status", "background_check_submitted_at",
-            ])
-            submitted = True
-    else:
-        form = BackgroundCheckUploadForm()
 
-    return render(request, "applications/upload_background_check.html", {
-        "application": application,
-        "form": form,
-        "submitted": submitted,
-        "already_submitted": already_submitted,
-    })
+@login_required
+def renew_background_check(request):
+    """Where BackgroundCheckMiddleware sends a logged-in DojoOwner/HelperAccount
+    whose background check has lapsed: the same upload flow as
+    upload_background_check, but the application is resolved from the
+    authenticated account instead of an emailed token link, so there's no
+    need to wait on (or re-send) that email to renew."""
+    application = _find_application_for_account(request.user)
+    if application is None:
+        raise Http404
+    context = _upload_background_check_context(request, application)
+    return render(request, "applications/upload_background_check.html", context)
 
 
 @permission_required("applications.can_review_background_checks", raise_exception=True)

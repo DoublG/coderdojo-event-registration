@@ -29,7 +29,19 @@ class BackgroundCheckMixin(models.Model):
     after their initial submission: an admin requests it (which emails the
     applicant a link built from background_check_token), they upload it at
     that link, and an admin reviews the upload before the account gets
-    provisioned — see applications.admin and applications.services."""
+    provisioned — see applications.admin and applications.services.
+    Mandatory for every applicant here — both roles are adults; anyone
+    younger is a ninja (accounts.Participant) who'd be promoted to a
+    mentor role through a separate flow, not this one.
+
+    This same request/upload/review flow is also how a background check
+    gets *renewed*: DojoApplication/MentorApplication double as the
+    permanent background-check record for the account it provisioned
+    (see provisioned_owner/provisioned_helper), not just a one-time
+    application, so admins re-run "Request background check document" on
+    the same row as it nears/passes expiry. See accounts.User.background_check_valid
+    and accounts.middleware.BackgroundCheckMiddleware for how a lapsed
+    check disables that account's login."""
 
     NOT_REQUESTED = "not_requested"
     REQUESTED = "requested"
@@ -101,6 +113,13 @@ class DojoApplication(BackgroundCheckMixin, models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
+    provisioned_owner = models.OneToOneField(
+        "accounts.DojoOwner", on_delete=models.SET_NULL, null=True, blank=True, related_name="application",
+        help_text="Set by approve_and_provision_owner. Lets a later background-check renewal "
+                  "(validate_background_check, re-run on this same row) sync the new expiry "
+                  "back onto the account that logs in with it.",
+    )
+
     class Meta:
         permissions = [
             ("can_review_background_checks", "Can review background check documents"),
@@ -144,6 +163,13 @@ class MentorApplication(BackgroundCheckMixin, models.Model):
 
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
     submitted_at = models.DateTimeField(auto_now_add=True)
+
+    provisioned_helper = models.OneToOneField(
+        "accounts.HelperAccount", on_delete=models.SET_NULL, null=True, blank=True, related_name="application",
+        help_text="Set by approve_and_provision_helper. Lets a later background-check renewal "
+                  "(validate_background_check, re-run on this same row) sync the new expiry "
+                  "back onto the account that logs in with it.",
+    )
 
     def __str__(self):
         return f"{self.applicant_name} ({self.get_role_display()})"

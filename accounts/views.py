@@ -99,10 +99,19 @@ def login(request):
                 username=form.cleaned_data["email"],
                 password=form.cleaned_data["password"],
             )
-            if user is not None:
+            if user is not None and not user.background_check_valid:
+                # Correct password, but a DojoOwner/HelperAccount whose
+                # background check has lapsed — see BackgroundCheckMiddleware
+                # for the same gate on an already-open session.
+                error = (
+                    "Your background check has expired. You won't be able to log in until a "
+                    "new one has been submitted and approved — contact an admin."
+                )
+            elif user is not None:
                 auth_login(request, user)
                 return redirect(_post_login_redirect(request, user))
-            error = "That email/password combination doesn't match an account."
+            else:
+                error = "That email/password combination doesn't match an account."
     else:
         form = LoginForm()
 
