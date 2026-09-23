@@ -12,6 +12,11 @@ You'll need to be logged in to your family account to sign up (see
    already signed up for that session is skipped and flagged as such
    rather than double-booked.
 
+If a session shows **Registrations closed** instead of a sign-up option,
+the dojo has stopped taking new sign-ups for it (this normally happens
+once attendance for that session has already been checked) — get in
+touch with the dojo team directly if you still need a spot.
+
 Waiting lists
 --------------
 

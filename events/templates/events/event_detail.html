@@ -108,11 +108,13 @@
           <hr class="cd-ticket-panel__divider">
           {% if all_registered %}
             <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>Already signed up</button>
+          {% elif not event.registration_open %}
+            <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>Registrations closed</button>
           {% else %}
             <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{% url 'event_signup' event_id=event.id %}">Sign up now</a>
           {% endif %}
           <p class="cd-ticket-panel__note body-sm">
-            {% if all_registered %}Every child on your account is already signed up{% elif event.places_left > 0 %}{{ event.places_left }} of {{ event.places }} spots left{% else %}Full — join the waitlist{% endif %}
+            {% if all_registered %}Every child on your account is already signed up{% elif not event.registration_open %}This session isn't accepting new registrations{% elif event.places_left > 0 %}{{ event.places_left }} of {{ event.places }} spots left{% else %}Full — join the waitlist{% endif %}
           </p>
         </div>
       </aside>

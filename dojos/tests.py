@@ -8,6 +8,7 @@ from django.test import TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 
 from accounts.models import DojoOwner
+from events.models import Event
 from geo.models import AdministrativeBoundary
 from notifications.consumers import NotificationConsumer
 from notifications.services import notify
@@ -225,6 +226,159 @@ class DojoManageViewTests(TestCase):
                 self._valid_post_data(),  # address unchanged from setUp
             )
         mock_geocode.assert_not_called()
+
+
+class DojoEventListViewTests(TestCase):
+    def setUp(self):
+        self.owner = DojoOwner.objects.create(username="owner1")
+        self.dojo = Dojo.objects.create(name="Ghent", owner=self.owner)
+
+    def test_anonymous_redirected_to_login(self):
+        response = self.client.get(reverse("dojo_event_list", kwargs={"dojo_id": self.dojo.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response.url)
+
+    def test_another_owner_gets_404(self):
+        other_owner = DojoOwner.objects.create(username="owner2")
+        self.client.force_login(other_owner)
+        response = self.client.get(reverse("dojo_event_list", kwargs={"dojo_id": self.dojo.id}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_lists_events_including_drafts(self):
+        """Unlike the public event list, the owner's own list must show
+        every status — draft included — since this is where they'd publish
+        one from."""
+        draft = Event.objects.create(
+            name="Draft session", dojo=self.dojo, status=Event.DRAFT,
+            start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=10
+        )
+        self.client.force_login(self.owner)
+
+        response = self.client.get(reverse("dojo_event_list", kwargs={"dojo_id": self.dojo.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "dojos/dojo_event_list.html")
+        self.assertEqual(list(response.context["events"]), [draft])
+
+
+class DojoEventCreateViewTests(TestCase):
+    def setUp(self):
+        self.owner = DojoOwner.objects.create(username="owner1")
+        self.dojo = Dojo.objects.create(name="Ghent", owner=self.owner)
+
+    def _valid_post_data(self, **overrides):
+        data = {
+            "name": "Coding Saturday",
+            "start_time": "2030-01-01T10:00",
+            "end_time": "2030-01-01T12:00",
+            "places": "20",
+            "venue_name": "",
+            "description": "",
+            "min_age": "",
+            "max_age": "",
+            "mentor": "",
+        }
+        data.update(overrides)
+        return data
+
+    def test_anonymous_redirected_to_login(self):
+        response = self.client.get(reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response.url)
+
+    def test_another_owner_gets_404(self):
+        other_owner = DojoOwner.objects.create(username="owner2")
+        self.client.force_login(other_owner)
+        response = self.client.get(reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_valid_post_creates_draft_event_and_redirects_to_list(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.post(
+            reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}), self._valid_post_data()
+        )
+
+        self.assertRedirects(response, reverse("dojo_event_list", kwargs={"dojo_id": self.dojo.id}))
+        event = Event.objects.get(dojo=self.dojo)
+        self.assertEqual(event.name, "Coding Saturday")
+        self.assertEqual(event.status, Event.DRAFT)
+
+    def test_invalid_post_reshows_form_without_creating(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.post(
+            reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}),
+            self._valid_post_data(end_time="2030-01-01T09:00"),  # before start_time
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["form"].errors)
+        self.assertEqual(Event.objects.count(), 0)
+
+    def test_mentor_choices_scoped_to_dojo(self):
+        other_dojo = Dojo.objects.create(name="Antwerp")
+        Mentor.objects.create(name="Elsewhere", dojo=other_dojo, role=Mentor.VOLUNTEER)
+        own_mentor = Mentor.objects.create(name="Own Mentor", dojo=self.dojo, role=Mentor.VOLUNTEER)
+        self.client.force_login(self.owner)
+
+        response = self.client.get(reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}))
+
+        self.assertEqual(list(response.context["form"].fields["mentor"].queryset), [own_mentor])
+
+
+class DojoEventSetStatusViewTests(TestCase):
+    def setUp(self):
+        self.owner = DojoOwner.objects.create(username="owner1")
+        self.dojo = Dojo.objects.create(name="Ghent", owner=self.owner)
+        self.event = Event.objects.create(
+            name="Session", dojo=self.dojo, status=Event.DRAFT,
+            start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=10
+        )
+
+    def _url(self, event=None):
+        return reverse("dojo_event_set_status", kwargs={"dojo_id": self.dojo.id, "event_id": (event or self.event).id})
+
+    def test_another_owner_gets_404(self):
+        other_owner = DojoOwner.objects.create(username="owner2")
+        self.client.force_login(other_owner)
+        response = self.client.post(self._url(), {"action": "publish"})
+        self.assertEqual(response.status_code, 404)
+
+    def test_publish_moves_draft_to_open(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(self._url(), {"action": "publish"})
+        self.assertRedirects(response, reverse("dojo_event_list", kwargs={"dojo_id": self.dojo.id}))
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.OPEN)
+
+    def test_close_moves_open_to_closed(self):
+        self.event.status = Event.OPEN
+        self.event.save(update_fields=["status"])
+        self.client.force_login(self.owner)
+
+        self.client.post(self._url(), {"action": "close"})
+
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.CLOSED)
+
+    def test_close_is_a_noop_on_a_draft_event(self):
+        """The transition only fires from the status it's valid for — a
+        draft event can't jump straight to closed."""
+        self.client.force_login(self.owner)
+        self.client.post(self._url(), {"action": "close"})
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.DRAFT)
+
+    def test_publish_is_a_noop_on_an_already_open_event(self):
+        self.event.status = Event.OPEN
+        self.event.save(update_fields=["status"])
+        self.client.force_login(self.owner)
+
+        self.client.post(self._url(), {"action": "publish"})
+
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.OPEN)
 
 
 class AdminNavDojoSwitcherTests(TestCase):

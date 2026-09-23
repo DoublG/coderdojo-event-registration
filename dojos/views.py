@@ -8,6 +8,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 from content.models import FAQ
+from events.forms import EventForm
+from events.models import Event
 from geo.geocoding import find_province, geocode
 from notifications.models import Notification
 
@@ -90,7 +92,7 @@ def dojo_finder_widget(request):
 
 def dojo_detail(request, dojo_id):
     dojo = get_object_or_404(Dojo, id=dojo_id)
-    next_event = dojo.event_set.filter(start_time__gte=timezone.now()).order_by("start_time").first()
+    next_event = dojo.event_set.visible().filter(start_time__gte=timezone.now()).order_by("start_time").first()
     faqs = FAQ.objects.for_dojo(dojo)
     mentors = dojo.mentors.lead_coach_first()
     return render(request, "dojos/dojo_detail.html", {
@@ -173,6 +175,60 @@ def dojo_manage(request, dojo_id):
         "dojo": dojo, "form": form, "saved": saved, "geocode_failed": geocode_failed, "active": "settings",
         **_notification_context(request.user, dojo),
     })
+
+
+@login_required
+def dojo_event_list(request, dojo_id):
+    dojo = _get_owned_dojo(request, dojo_id)
+    events = dojo.event_set.order_by("-start_time")
+    return render(request, "dojos/dojo_event_list.html", {
+        "dojo": dojo, "events": events, "active": "events",
+        **_notification_context(request.user, dojo),
+    })
+
+
+@login_required
+def dojo_event_create(request, dojo_id):
+    """A new session always starts out Draft (Event.status' model default)
+    — see EventForm's docstring for why status isn't a field on this form
+    at all. The owner publishes it (draft -> open) from the events list
+    once it's ready, via dojo_event_set_status."""
+    dojo = _get_owned_dojo(request, dojo_id)
+
+    if request.method == "POST":
+        form = EventForm(request.POST, request.FILES, instance=Event(dojo=dojo), dojo=dojo)
+        if form.is_valid():
+            form.save()
+            return redirect("dojo_event_list", dojo_id=dojo.id)
+    else:
+        form = EventForm(instance=Event(dojo=dojo), dojo=dojo)
+
+    return render(request, "dojos/dojo_event_create.html", {
+        "dojo": dojo, "form": form, "active": "events",
+        **_notification_context(request.user, dojo),
+    })
+
+
+@login_required
+def dojo_event_set_status(request, dojo_id, event_id):
+    """The two manual status transitions available from the events list:
+    "Publish" (draft -> open, makes the session visible and open for
+    registration) and "Close registrations" (open -> closed — normally
+    done once attendance for the session has been checked). Each only
+    fires from the specific status it's valid from, so a stale page (two
+    tabs open, a slow double-click) can't apply the same transition twice
+    or skip a state."""
+    dojo = _get_owned_dojo(request, dojo_id)
+    event = get_object_or_404(Event, id=event_id, dojo=dojo)
+    transitions = {"publish": (Event.DRAFT, Event.OPEN), "close": (Event.OPEN, Event.CLOSED)}
+
+    if request.method == "POST":
+        required_status, new_status = transitions.get(request.POST.get("action"), (None, None))
+        if required_status is not None and event.status == required_status:
+            event.status = new_status
+            event.save(update_fields=["status"])
+
+    return redirect("dojo_event_list", dojo_id=dojo.id)
 
 
 @login_required

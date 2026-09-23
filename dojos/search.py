@@ -89,7 +89,7 @@ def dojos_by_distance(origin):
 def attach_next_events(dojos):
     """Annotate each dojo in this (already-sliced) list with .next_event —
     one extra query total, instead of one per dojo."""
-    upcoming = Event.objects.filter(
+    upcoming = Event.objects.visible().filter(
         dojo_id__in=[dojo.id for dojo in dojos], start_time__gte=timezone.now()
     ).order_by("start_time")
     next_event_by_dojo_id = {}

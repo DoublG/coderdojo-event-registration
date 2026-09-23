@@ -22,7 +22,7 @@ def event_list(request):
     form = EventSearchForm(request.GET)
     now = timezone.now()
 
-    base_events = Event.objects.filter(start_time__gte=now)
+    base_events = Event.objects.visible().filter(start_time__gte=now)
     dojo_choices = Dojo.objects.filter(event__in=base_events).distinct().order_by("name")
 
     events = base_events.select_related("dojo")
@@ -98,7 +98,7 @@ def upcoming_sessions_widget(request):
 
 
 def event_detail(request, event_id):
-    event = get_object_or_404(Event, id=event_id)
+    event = get_object_or_404(Event.objects.visible(), id=event_id)
     faqs = FAQ.objects.for_event(event)
 
     all_registered = False
@@ -116,7 +116,7 @@ def event_detail(request, event_id):
 
 @login_required
 def event_signup(request, event_id):
-    event = get_object_or_404(Event, id=event_id)
+    event = get_object_or_404(Event.objects.visible(), id=event_id)
     guardian = getattr(request.user, "guardian", None)
     results = None
     error = None
@@ -128,7 +128,9 @@ def event_signup(request, event_id):
             for r in Registration.objects.filter(event=event, participant__in=guardian.children.all())
         }
 
-    if request.method == "POST" and guardian:
+    if request.method == "POST" and guardian and not event.registration_open:
+        error = "Registrations for this session are closed."
+    elif request.method == "POST" and guardian:
         submitted_ids = request.POST.getlist("child")
         # The order children were *checked* in (tracked client-side, since
         # checkbox form submission is always DOM order regardless of click
@@ -176,7 +178,8 @@ def event_signup(request, event_id):
 
     any_waitlisted = bool(results) and any(r["waiting_list"] for r in results)
     return render(request, "events/event_signup.html", {
-        "event": event, "full": event.places_left <= 0, "guardian": guardian, "children": children,
+        "event": event, "full": event.places_left <= 0, "closed": not event.registration_open,
+        "guardian": guardian, "children": children,
         "all_registered": all_registered,
         "results": results, "any_waitlisted": any_waitlisted, "error": error,
     })

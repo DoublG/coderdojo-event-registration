@@ -12,6 +12,32 @@ confirmed for it.
    back, or ask CoderDojo Belgium if you need to track attendance in the
    meantime.
 
+Scheduling a session
+----------------------
+
+From your dashboard's **Events** page, **New event** creates a new
+session for your dojo — name, date and time, how many places it has,
+and optionally a venue, banner image, description, age range and a
+leading mentor.
+
+A session always goes through three states, shown as a badge next to it
+on the **Events** list:
+
+- **Draft** — a new session starts here. It's completely hidden from
+  the public site (the dojo-finder, the Events list, your dojo's own
+  page) while you're still putting it together, so there's no rush to
+  fill in every field before it's ready to be seen.
+- **Open** — once you're happy with it, **Publish** makes the session
+  visible on the public site and open for families to sign up.
+- **Closed** — **Close registrations** turns off further sign-ups for
+  that session, without hiding it. This is a manual step, normally done
+  once you've checked attendance for the session and don't want any
+  more sign-ups trickling in afterwards.
+
+Each of these is a one-way step forward (draft → open → closed) — there's
+currently no way to send a session back to an earlier state from the
+dashboard; get in touch with CoderDojo Belgium if you need one corrected.
+
 Team pages
 -----------
 

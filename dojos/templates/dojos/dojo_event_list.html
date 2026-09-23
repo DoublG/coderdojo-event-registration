@@ -1,0 +1,66 @@
+{% extends "dojos/_admin_base.html" %}
+{% block admin_page_title %}Events{% endblock %}
+{% block admin_heading %}Events{% endblock %}
+
+{% block admin_topbar_extra %}
+  <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_event_create' dojo_id=dojo.id %}">New event</a>
+{% endblock %}
+
+{% block admin_extra_style %}
+<style>
+  .event-list-actions { display: flex; gap: var(--space-2); justify-content: flex-end; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+  <div class="cd-table-wrap">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label" scope="col">Date</th>
+          <th class="label" scope="col">Name</th>
+          <th class="label" scope="col">Status</th>
+          <th class="label cd-table__num" scope="col">Places</th>
+          <th class="label" scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in events %}
+          <tr>
+            <td class="body-sm">{{ event.start_time|date:"D j M Y, H:i" }}</td>
+            <td class="body-sm">{{ event.name }}</td>
+            <td class="body-sm">
+              {% if event.status == 'draft' %}
+                <span class="cd-badge cd-badge--outline caption">Draft</span>
+              {% elif event.status == 'open' %}
+                <span class="cd-badge cd-badge--success caption">Open</span>
+              {% else %}
+                <span class="cd-badge cd-badge--warning caption">Closed</span>
+              {% endif %}
+            </td>
+            <td class="body-sm cd-table__num">{{ event.places_left }} / {{ event.places }}</td>
+            <td class="body-sm">
+              <div class="event-list-actions">
+                {% if event.status == 'draft' %}
+                  <form method="post" action="{% url 'dojo_event_set_status' dojo_id=dojo.id event_id=event.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="publish">
+                    <button type="submit" class="cd-btn cd-btn--secondary label">Publish</button>
+                  </form>
+                {% elif event.status == 'open' %}
+                  <form method="post" action="{% url 'dojo_event_set_status' dojo_id=dojo.id event_id=event.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="close">
+                    <button type="submit" class="cd-btn cd-btn--ghost label">Close registrations</button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td class="body-sm" colspan="5">No sessions yet — create one to get started.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

@@ -50,7 +50,9 @@
           {% if event.venue_name %} · {{ event.venue_name }}{% endif %}
         </p>
         <div class="badges">
-          {% if full %}
+          {% if closed %}
+            <span class="cd-badge cd-badge--outline caption">Registrations closed</span>
+          {% elif full %}
             <span class="cd-badge cd-badge--danger caption">Full</span>
           {% else %}
             <span class="cd-badge cd-badge--success caption">Open</span>
@@ -60,7 +62,16 @@
       </div>
 
       <div class="form-card">
-        {% if results %}
+        {% if closed and not results %}
+
+          <div class="cd-form__notes">
+            <p class="cd-form__note cd-form__note--warning caption">Registrations for this session are closed.</p>
+          </div>
+          <div class="cd-form__actions">
+            <a class="cd-btn cd-btn--primary label" href="{% url 'event_detail' event_id=event.id %}">Back to session</a>
+          </div>
+
+        {% elif results %}
 
           <h3 class="cd-form__group-title heading-md">You're all set</h3>
           <div class="confirmation-card">

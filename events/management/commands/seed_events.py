@@ -149,6 +149,7 @@ class Command(BaseCommand):
                     start_time=start_dt,
                     defaults={
                         "name": session_name,
+                        "status": Event.OPEN,
                         "end_time": end_dt,
                         "places": rng.choice(CAPACITY_CHOICES),
                         "location": dojo.location,

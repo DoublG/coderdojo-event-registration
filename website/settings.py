@@ -70,18 +70,23 @@ DEBUG_TOOLBAR_CONFIG = {
 }
 
 # The full default panel list (debug_toolbar.settings.PANELS_DEFAULTS) minus
-# CachePanel. CachePanel logs the exact args of every cache.get()/set() call
-# and, if one of them isn't JSON-serializable (e.g. a cached queryset of
-# model instances — see dojos.search's DEFAULT_SEARCH_CACHE_KEY), falls back
-# to str(obj) to log it anyway. That fallback lazily touches any
-# not-yet-fetched FK the model's __str__ references (Dojo.__str__ does, via
-# self.municipality) — harmless under plain WSGI, where that lazy fetch just
-# runs on the request's own sync thread, but now that daphne (see
-# INSTALLED_APPS) serves requests over ASGI, it happens inside an async
-# task and Django's SynchronousOnlyOperation guard correctly refuses it,
-# 500ing every single page. Not a fix for the app itself — just keeps this
-# dev-only tool (DEBUG_TOOLBAR_CONFIG above already gates it to DEBUG=True,
-# never production) from being the thing that breaks under async.
+# CachePanel and TemplatesPanel — both log call/context args by falling back
+# to str(obj) for anything that isn't JSON-serializable (a cached queryset of
+# model instances for CachePanel — see dojos.search's DEFAULT_SEARCH_CACHE_KEY
+# — or, for TemplatesPanel, any model instance passed into a template's
+# context, e.g. the dojo admin pages' `dojo` — dojo.owner specifically, since
+# accounts.User's DojoOwner.__str__ queries self.dojos to list its dojos by
+# name). That str(obj) fallback lazily touches whatever DB access the
+# model's __str__ needs — harmless under plain WSGI, where that lazy fetch
+# just runs on the request's own sync thread, but now that daphne (see
+# INSTALLED_APPS) serves requests over ASGI, it happens inside an async task
+# and Django's SynchronousOnlyOperation guard correctly refuses it, 500ing
+# every single page that panel touches. Not a fix for the app itself — just
+# keeps these dev-only tools (DEBUG_TOOLBAR_CONFIG above already gates them
+# to DEBUG=True, never production) from being the thing that breaks under
+# async. Any other panel that ends up stringifying arbitrary model instances
+# for display is a candidate for the same issue — this isn't unique to these
+# two, just the two actually hit so far.
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.history.HistoryPanel',
     'debug_toolbar.panels.versions.VersionsPanel',
@@ -91,7 +96,6 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.request.RequestPanel',
     'debug_toolbar.panels.sql.SQLPanel',
     'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-    'debug_toolbar.panels.templates.TemplatesPanel',
     'debug_toolbar.panels.alerts.AlertsPanel',
     'debug_toolbar.panels.signals.SignalsPanel',
     'debug_toolbar.panels.tasks.TasksPanel',

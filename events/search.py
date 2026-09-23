@@ -33,7 +33,7 @@ def upcoming_available_events():
 
     now = timezone.now()
     events = list(
-        Event.objects.filter(start_time__gte=now)
+        Event.objects.filter(start_time__gte=now, status=Event.OPEN)
         .annotate(confirmed_count=Count("registration", filter=Q(registration__waiting_list=False)))
         .filter(places__gt=F("confirmed_count"))
         .select_related("dojo")

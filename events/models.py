@@ -3,9 +3,33 @@ from django.contrib.gis.db import models
 MARKDOWN_HELP_TEXT = "Supports basic Markdown — # headings, **bold**, *italic*, links, lists."
 
 
+class EventQuerySet(models.QuerySet):
+    def visible(self):
+        """Everything except draft — what the public site (listings, the
+        homepage widget, a dojo's own page) is allowed to show. A draft
+        event is still fully readable by its owner via the dojo admin
+        events list; this only governs the public-facing side."""
+        return self.exclude(status=Event.DRAFT)
+
+
 class Event(models.Model):
+    DRAFT = "draft"
+    OPEN = "open"
+    CLOSED = "closed"
+    STATUS_CHOICES = [
+        (DRAFT, "Draft"),
+        (OPEN, "Open"),
+        (CLOSED, "Closed"),
+    ]
+
     name = models.CharField(max_length=200)
     dojo = models.ForeignKey("dojos.Dojo", on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default=DRAFT,
+        help_text="Draft: hidden from the public site while it's being put together. "
+                  "Open: visible, registrations open. Closed: visible, registrations closed — "
+                  "set manually, normally once attendance for the session has been checked."
+    )
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
@@ -25,6 +49,8 @@ class Event(models.Model):
 
     participants = models.ManyToManyField("accounts.Participant", through="Registration")
 
+    objects = EventQuerySet.as_manager()
+
     def __str__(self):
         return f"{self.name} ({self.dojo})"
 
@@ -32,6 +58,10 @@ class Event(models.Model):
     def places_left(self):
         confirmed = self.registration_set.filter(waiting_list=False).count()
         return self.places - confirmed
+
+    @property
+    def registration_open(self):
+        return self.status == self.OPEN
 
 
 class Registration(models.Model):

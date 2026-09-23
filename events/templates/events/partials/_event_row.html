@@ -24,7 +24,9 @@ with Django's built-in `regroup` tag:
       · {{ event.venue_name|default:event.dojo.address|default:event.dojo.name }}
     </p>
     <div class="badges">
-      {% if event.places_left <= 0 %}
+      {% if not event.registration_open %}
+        <span class="cd-badge cd-badge--outline caption">Registrations closed</span>
+      {% elif event.places_left <= 0 %}
         <span class="cd-badge cd-badge--danger caption">Full</span>
       {% else %}
         <span class="cd-badge cd-badge--success caption">Open</span>

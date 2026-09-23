@@ -125,7 +125,7 @@ The admin sidebar's notification bell (`dojos/templates/dojos/partials/_notifica
 
 If you add a Channels consumer that touches the database, test it with `TransactionTestCase`, not `TestCase` — the consumer's DB access runs on a separate thread (`channels.db.database_sync_to_async`) with its own connection, which a `TestCase`'s wrapping transaction (held on the main thread's connection) is invisible to. `notifications.tests`/`dojos.tests.NotificationConsumerTests` are the reference examples, including `@override_settings(CHANNEL_LAYERS=...InMemoryChannelLayer...)` so consumer tests don't need a real Redis.
 
-`django-debug-toolbar`'s `CachePanel` is disabled (`DEBUG_TOOLBAR_PANELS` in `website/settings.py`, dev-only either way) — it does unsafe lazy model stringification while serializing cache-call args for display, which is merely wasteful under WSGI but hard-errors every single page (`SynchronousOnlyOperation`) now that requests are served over ASGI.
+`django-debug-toolbar`'s `CachePanel` and `TemplatesPanel` are disabled (`DEBUG_TOOLBAR_PANELS` in `website/settings.py`, dev-only either way) — both do unsafe lazy model stringification while serializing call/context args for display (cache-call args for `CachePanel`; every template context value, including `dojo.owner`, for `TemplatesPanel` — `DojoOwner.__str__` queries `self.dojos`), which is merely wasteful under WSGI but hard-errors every single page it touches (`SynchronousOnlyOperation`) now that requests are served over ASGI. Any other panel that stringifies arbitrary model instances is a candidate for the same bug if it starts erroring — these two are just the ones actually hit so far.
 
 ### Geo search: MySQL spherical distance
 

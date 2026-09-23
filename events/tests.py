@@ -16,6 +16,7 @@ def _future_event(dojo, **kwargs):
     defaults = {
         "name": "Session",
         "dojo": dojo,
+        "status": Event.OPEN,
         "start_time": now + timedelta(days=7),
         "end_time": now + timedelta(days=7, hours=2),
         "places": 10,
@@ -48,6 +49,18 @@ class EventListViewTests(TestCase):
 
         self.assertEqual(list(response.context["events"]), [ghent_event])
 
+    def test_draft_event_is_hidden(self):
+        dojo = Dojo.objects.create(name="Ghent")
+        _future_event(dojo, status=Event.DRAFT)
+        response = self.client.get(reverse("event_list"))
+        self.assertEqual(len(response.context["events"]), 0)
+
+    def test_closed_event_still_shown(self):
+        dojo = Dojo.objects.create(name="Ghent")
+        event = _future_event(dojo, status=Event.CLOSED)
+        response = self.client.get(reverse("event_list"))
+        self.assertEqual(list(response.context["events"]), [event])
+
 
 class UpcomingSessionsWidgetViewTests(TestCase):
     def test_renders_partial(self):
@@ -69,6 +82,12 @@ class EventDetailViewTests(TestCase):
 
     def test_missing_event_is_404(self):
         response = self.client.get(reverse("event_detail", kwargs={"event_id": 999999}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_draft_event_is_404(self):
+        dojo = Dojo.objects.create(name="Ghent")
+        event = _future_event(dojo, status=Event.DRAFT)
+        response = self.client.get(reverse("event_detail", kwargs={"event_id": event.id}))
         self.assertEqual(response.status_code, 404)
 
 
@@ -132,3 +151,21 @@ class EventSignupViewTests(TestCase):
 
         self.assertIsNotNone(response.context["error"])
         self.assertEqual(Registration.objects.filter(event=event, participant=self.child).count(), 1)
+
+    def test_closed_event_blocks_signup(self):
+        event = _future_event(self.dojo, status=Event.CLOSED)
+        self.client.force_login(self.guardian)
+
+        response = self.client.post(
+            reverse("event_signup", kwargs={"event_id": event.id}),
+            {"child": [str(self.child.id)], "child_order": str(self.child.id)},
+        )
+
+        self.assertIsNotNone(response.context["error"])
+        self.assertEqual(Registration.objects.count(), 0)
+
+    def test_draft_event_signup_is_404(self):
+        event = _future_event(self.dojo, status=Event.DRAFT)
+        self.client.force_login(self.guardian)
+        response = self.client.get(reverse("event_signup", kwargs={"event_id": event.id}))
+        self.assertEqual(response.status_code, 404)
