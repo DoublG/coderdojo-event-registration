@@ -87,6 +87,9 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certs:/etc/nginx/certs:ro
+      # Sphinx end-user docs (docs/build/html) - rebuild with `make html`
+      # (from inside docs/) after changing anything under docs/source/.
+      - ../docs/build/html:/usr/share/nginx/html/docs:ro
 
   phpmyadmin:
     container_name: ${PROJECT_NAME:-coolregistration-dev}-phpmyadmin

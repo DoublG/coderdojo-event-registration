@@ -76,10 +76,27 @@
       "Bash(curl -sk -o /dev/null -w \"HTTP %{http_code}\\\\n\" --max-time 5 https://coolregistration.localhost/)",
       "Bash(curl -sk -D - -o /dev/null --max-time 5 https://coolregistration.localhost/)",
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} -> %{redirect_url}\\\\n\" --max-time 5 http://coolregistration.localhost/)",
-      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" --max-time 5 --cacert /home/erik/coderdojo-event-registration/.devcontainer/certs/pki/ca.crt https://coolregistration.localhost/)"
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" --max-time 5 --cacert /home/erik/coderdojo-event-registration/.devcontainer/certs/pki/ca.crt https://coolregistration.localhost/)",
+      "Bash(curl -sk -o /dev/null -w \"HTTP %{http_code}\\\\n\" --max-time 5 https://coolregistration.localhost/docs/)",
+      "Bash(curl -sk --max-time 5 https://coolregistration.localhost/docs/)",
+      "Bash(curl -sk -o /dev/null -w \"HTTP %{http_code}\\\\n\" --max-time 5 https://coolregistration.localhost/docs/families/creating-an-account.html)",
+      "Bash(curl -sk -o /dev/null -w \"HTTP %{http_code}\\\\n\" --max-time 5 https://coolregistration.localhost/docs/_static/basic.css)",
+      "Bash(curl -sk -D - -o /tmp/no_slash.html --max-time 5 https://coolregistration.localhost/docs)",
+      "Read(//tmp/**)",
+      "Bash(curl -sk -o /dev/null -w \"HTTP %{http_code}\\\\n\" --max-time 5 https://coolregistration.localhost/docs/_static/styles/furo.css)",
+      "Bash(curl -sk -D - -o /dev/null --max-time 5 https://coolregistration.localhost/docs)",
+      "Bash(curl -skL -o /dev/null -w \"HTTP %{http_code}\\\\n\" --max-time 5 https://coolregistration.localhost/docs)",
+      "Bash(curl -skL --max-time 5 https://coolregistration.localhost/docs)",
+      "Bash(echo \"# marker-$\\(date +%s\\)\" >> /home/erik/coderdojo-event-registration/.devcontainer/nginx/nginx.conf *)",
+      "Bash(curl -sk -o /dev/null -w \"GET /docs -> %{http_code}\\\\n\" --max-time 5 https://coolregistration.localhost/docs)",
+      "Bash(curl -skL -o /dev/null -w \"GET /docs \\(follow\\) -> %{http_code}\\\\n\" --max-time 5 https://coolregistration.localhost/docs)",
+      "Bash(curl -sk -D - -o /dev/null --max-time 5 https://coolregistration.localhost/docs/_static/styles/furo.css)",
+      "Bash(curl -sk --max-time 5 https://coolregistration.localhost/docs/_static/styles/furo.css)",
+      "Bash(curl -sk -D - -o /dev/null --max-time 5 https://coolregistration.localhost/docs/_static/scripts/furo.js)"
     ],
     "additionalDirectories": [
-      "/home/erik/coderdojo-event-registration/.devcontainer/certs/pki"
+      "/home/erik/coderdojo-event-registration/.devcontainer/certs/pki",
+      "/home/erik/coderdojo-event-registration/.devcontainer/nginx"
     ]
   }
 }
