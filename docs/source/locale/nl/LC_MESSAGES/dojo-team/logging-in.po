@@ -1,0 +1,59 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language-Team: nl <LL@li.org>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/dojo-team/logging-in.rst:2
+msgid "Logging in as a dojo team member"
+msgstr "Inloggen als lid van een dojoteam"
+
+#: ../../source/dojo-team/logging-in.rst:4
+msgid ""
+"Dojo owners and mentors/helpers don't self-register — your login is created "
+"for you once your application and background check are approved (see "
+":doc:`../volunteering/become-a-mentor-or-volunteer` and "
+":doc:`../volunteering/start-a-new-dojo`). You'll receive it by email: your "
+"login email and a temporary password."
+msgstr ""
+"Dojobeheerders en mentoren/helpers registreren zich niet zelf — uw login "
+"wordt voor u aangemaakt zodra uw sollicitatie en uittreksel uit het "
+"strafregister zijn goedgekeurd (zie :doc:`../volunteering/become-a-mentor-"
+"or-volunteer` en :doc:`../volunteering/start-a-new-dojo`). U ontvangt deze "
+"per e-mail: uw inlog-e-mailadres en een tijdelijk wachtwoord."
+
+#: ../../source/dojo-team/logging-in.rst:10
+msgid ""
+"Log in at **Log in** with those details. The first time you do, you'll be "
+"asked to set your own password before you can go anywhere else on the site —"
+" this isn't optional, and there's no way to skip past it."
+msgstr ""
+"Log in via **Inloggen** met die gegevens. De eerste keer wordt u gevraagd uw"
+" eigen wachtwoord in te stellen voordat u ergens anders op de site "
+"terechtkunt — dit is niet optioneel en kan niet worden overgeslagen."
+
+#: ../../source/dojo-team/logging-in.rst:14
+msgid ""
+"After that, logging in takes a dojo owner straight to their dojo's "
+"dashboard; a mentor/helper account without a dojo owner login lands on the "
+"regular homepage."
+msgstr ""
+"Daarna leidt inloggen een dojobeheerder rechtstreeks naar het dashboard van "
+"zijn dojo; een mentor-/helperaccount zonder dojobeheerder-login komt op de "
+"gewone startpagina terecht."

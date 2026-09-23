@@ -1,0 +1,118 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language-Team: nl <LL@li.org>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/families/finding-a-dojo.rst:2
+msgid "Finding a dojo"
+msgstr "Een dojo vinden"
+
+#: ../../source/families/finding-a-dojo.rst:4
+msgid "There are two ways to find a dojo near you:"
+msgstr "Er zijn twee manieren om een dojo in uw buurt te vinden:"
+
+#: ../../source/families/finding-a-dojo.rst:7
+msgid "The homepage widget"
+msgstr "De widget op de startpagina"
+
+#: ../../source/families/finding-a-dojo.rst:9
+msgid ""
+"The homepage has a **Find a dojo near you** box. Type your postcode or city "
+"and press search, or use **Use my location** to let your browser supply your"
+" position instead. Results are sorted nearest-first, and each one shows its "
+"next upcoming session if it has one."
+msgstr ""
+"De startpagina heeft een vak **Vind een dojo in uw buurt**. Typ uw postcode "
+"of gemeente en klik op zoeken, of gebruik **Gebruik mijn locatie** om uw "
+"browser uw positie te laten doorgeven. Resultaten worden gesorteerd van "
+"dichtstbij naar verst, en elk resultaat toont de eerstvolgende sessie, "
+"indien gepland."
+
+#: ../../source/families/finding-a-dojo.rst:15
+msgid "The full dojo finder"
+msgstr "De volledige dojozoeker"
+
+#: ../../source/families/finding-a-dojo.rst:17
+msgid ""
+"For every dojo rather than just the nearest handful, go to **Dojos**. It's "
+"the same search (postcode/city or your location), but with all matching "
+"dojos, paged as you scroll, and no limit on how many results you see."
+msgstr ""
+"Voor alle dojo's in plaats van enkel de dichtstbijzijnde, gaat u naar "
+"**Dojo's**. Het is dezelfde zoekopdracht (postcode/gemeente of uw locatie), "
+"maar met alle overeenkomende dojo's, die verder laden terwijl u scrolt, "
+"zonder limiet op het aantal resultaten."
+
+#: ../../source/families/finding-a-dojo.rst:21
+msgid ""
+"If a location doesn't match anything, the search falls back to showing dojos"
+" unsorted rather than an empty page — try a nearby town or the postcode "
+"instead of a street address."
+msgstr ""
+"Als een locatie nergens mee overeenkomt, toont de zoekopdracht bij wijze van"
+" terugval de dojo's ongesorteerd in plaats van een lege pagina — probeer een"
+" gemeente in de buurt of de postcode in plaats van een straatadres."
+
+#: ../../source/families/finding-a-dojo.rst:26
+msgid "A dojo's page"
+msgstr "De pagina van een dojo"
+
+#: ../../source/families/finding-a-dojo.rst:28
+msgid "Click through to a dojo to see:"
+msgstr "Klik door naar een dojo om het volgende te zien:"
+
+#: ../../source/families/finding-a-dojo.rst:30
+msgid "Its address, schedule (e.g. \"every 2nd Saturday\"), and age range."
+msgstr ""
+"Het adres, het schema (bv. \"elke 2de zaterdag\") en de leeftijdscategorie."
+
+#: ../../source/families/finding-a-dojo.rst:31
+msgid ""
+"A description of the dojo and any visit notes (parking, entrance, "
+"accessibility)."
+msgstr ""
+"Een beschrijving van de dojo en eventuele praktische informatie (parkeren, "
+"ingang, toegankelijkheid)."
+
+#: ../../source/families/finding-a-dojo.rst:33
+msgid "Its next upcoming session, if one is scheduled."
+msgstr "De eerstvolgende sessie, indien gepland."
+
+#: ../../source/families/finding-a-dojo.rst:34
+msgid ""
+"Its team — the lead coach is always shown first, followed by the other "
+"mentors and volunteers."
+msgstr ""
+"Het team: de hoofdcoach wordt altijd als eerste getoond, gevolgd door de "
+"andere mentoren en vrijwilligers."
+
+#: ../../source/families/finding-a-dojo.rst:36
+msgid "Any FAQs specific to that dojo, alongside the site-wide ones."
+msgstr ""
+"Eventuele veelgestelde vragen specifiek voor die dojo, naast de vragen die "
+"voor de hele site gelden."
+
+#: ../../source/families/finding-a-dojo.rst:38
+msgid ""
+"From there, click through to a session to see full details and sign your "
+"children up — see :doc:`signing-up-for-a-session`."
+msgstr ""
+"Klik van daaruit door naar een sessie om alle details te zien en uw kinderen"
+" in te schrijven — zie :doc:`signing-up-for-a-session`."

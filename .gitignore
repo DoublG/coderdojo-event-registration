@@ -121,5 +121,7 @@ private_media/
 .devcontainer/certs/fullchain.pem
 .devcontainer/certs/server.key
 
-# Sphinx build output (docs/) - regenerate with `make html`, never commit
+# Sphinx build output (docs/) - regenerate with `make html`/`make html-all`, never commit
 docs/build/
+docs/locale/
+docs/source/locale/*/LC_MESSAGES/**/*.mo

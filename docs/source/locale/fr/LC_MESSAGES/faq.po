@@ -1,0 +1,131 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language-Team: fr <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/faq.rst:2
+msgid "Frequently asked questions"
+msgstr "Foire aux questions"
+
+#: ../../source/faq.rst:4
+msgid "Is it really free?"
+msgstr "Est-ce vraiment gratuit ?"
+
+#: ../../source/faq.rst:5
+msgid "Yes — every dojo session is free, run entirely by volunteers."
+msgstr ""
+"Oui — chaque séance de dojo est gratuite et entièrement animée par des "
+"bénévoles."
+
+#: ../../source/faq.rst:7
+msgid "Does my child need coding experience?"
+msgstr "Mon enfant a-t-il besoin d'expérience en programmation ?"
+
+#: ../../source/faq.rst:8
+msgid ""
+"No experience needed — ninjas are grouped by age and skill on the day, not "
+"in advance."
+msgstr ""
+"Aucune expérience requise : les ninjas sont regroupés par âge et niveau le "
+"jour même, pas à l'avance."
+
+#: ../../source/faq.rst:11
+msgid "Do parents need to stay?"
+msgstr "Les parents doivent-ils rester sur place ?"
+
+#: ../../source/faq.rst:12
+msgid "Under-12s need an adult on site; older kids can be dropped off."
+msgstr ""
+"Les moins de 12 ans doivent avoir un adulte sur place ; les enfants plus "
+"âgés peuvent être déposés."
+
+#: ../../source/faq.rst:14
+msgid "Is there a waitlist if a session is full?"
+msgstr "Y a-t-il une liste d'attente si une séance est complète ?"
+
+#: ../../source/faq.rst:15
+msgid ""
+"Yes — sign up anyway. If a confirmed spot opens up, whoever's been waiting "
+"longest for that session is automatically moved up. See "
+":doc:`families/signing-up-for-a-session`."
+msgstr ""
+"Oui : inscrivez-vous quand même. Si une place confirmée se libère, la "
+"personne qui attend depuis le plus longtemps pour cette séance est "
+"automatiquement promue. Voir :doc:`families/signing-up-for-a-session`."
+
+#: ../../source/faq.rst:19
+msgid "I forgot my password — what do I do?"
+msgstr "J'ai oublié mon mot de passe, que dois-je faire ?"
+
+#: ../../source/faq.rst:20
+msgid ""
+"Use **Forgot password** on the login page to get a reset link by email. See "
+":doc:`families/managing-your-account`."
+msgstr ""
+"Utilisez **Mot de passe oublié** sur la page de connexion pour recevoir un "
+"lien de réinitialisation par e-mail. Voir :doc:`families/managing-your-"
+"account`."
+
+#: ../../source/faq.rst:23
+msgid "Do I need an account to apply to volunteer or start a dojo?"
+msgstr ""
+"Ai-je besoin d'un compte pour poser ma candidature comme bénévole ou pour "
+"lancer un dojo ?"
+
+#: ../../source/faq.rst:24
+msgid ""
+"No — those applications (and the background check upload, if you're asked "
+"for one) don't require logging in. An account is only created for you once "
+"you're approved. See :doc:`volunteering/become-a-mentor-or-volunteer` and "
+":doc:`volunteering/start-a-new-dojo`."
+msgstr ""
+"Non : ces candidatures (et le téléversement de la vérification "
+"d'antécédents, si elle vous est demandée) ne nécessitent pas de connexion. "
+"Un compte n'est créé pour vous qu'une fois votre candidature approuvée. Voir"
+" :doc:`volunteering/become-a-mentor-or-volunteer` et "
+":doc:`volunteering/start-a-new-dojo`."
+
+#: ../../source/faq.rst:30
+msgid "Why does the site ask for a criminal record extract?"
+msgstr "Pourquoi le site demande-t-il un extrait de casier judiciaire ?"
+
+#: ../../source/faq.rst:31
+msgid ""
+"Belgian law requires it for anyone in direct contact with minors — see "
+":doc:`volunteering/background-check` for exactly what's needed and how it's "
+"handled."
+msgstr ""
+"La loi belge l'exige pour toute personne en contact direct avec des mineurs "
+"— voir :doc:`volunteering/background-check` pour savoir exactement ce qui "
+"est requis et comment cela est traité."
+
+#: ../../source/faq.rst:35
+msgid "Can I change the site's language?"
+msgstr "Puis-je changer la langue du site ?"
+
+#: ../../source/faq.rst:36
+msgid ""
+"Yes — a language switcher is available in the site menu (English, "
+"Nederlands, Français, Deutsch). Translation of all page content into each "
+"language is still in progress."
+msgstr ""
+"Oui : un sélecteur de langue est disponible dans le menu du site (English, "
+"Nederlands, Français, Deutsch). La traduction de tout le contenu des pages "
+"dans chaque langue est encore en cours."

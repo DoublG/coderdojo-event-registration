@@ -1,0 +1,110 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language-Team: fr <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/volunteering/background-check.rst:2
+msgid "The background check"
+msgstr "La vérification d'antécédents"
+
+#: ../../source/volunteering/background-check.rst:4
+msgid ""
+"Belgian law requires anyone who'll be in direct contact with minors — a "
+"dojo's lead coach, or any mentor/volunteer working with ninjas — to provide "
+"a specific extract from the criminal record before they start: the "
+"**uittreksel uit het strafregister, model 2** (Article 596.2). This applies "
+"whether you're applying to start a dojo or to volunteer at one."
+msgstr ""
+"La loi belge exige que toute personne en contact direct avec des mineurs — "
+"le coach principal d'un dojo, ou tout mentor/bénévole travaillant avec des "
+"ninjas — fournisse, avant de commencer, un extrait spécifique du casier "
+"judiciaire : l'**uittreksel uit het strafregister, modèle 2** (article "
+"596.2). Cela s'applique que vous posiez votre candidature pour lancer un "
+"dojo ou pour y être bénévole."
+
+#: ../../source/volunteering/background-check.rst:11
+msgid "How it works"
+msgstr "Comment ça marche"
+
+#: ../../source/volunteering/background-check.rst:13
+msgid ""
+"After you submit your application (see :doc:`become-a-mentor-or-volunteer` "
+"or :doc:`start-a-new-dojo`), an admin reviews it and emails you a link to "
+"upload this document. You don't need an account yet to use that link."
+msgstr ""
+"Après l'envoi de votre candidature (voir :doc:`become-a-mentor-or-volunteer`"
+" ou :doc:`start-a-new-dojo`), un administrateur l'examine et vous envoie par"
+" e-mail un lien pour téléverser ce document. Vous n'avez pas encore besoin "
+"de compte pour utiliser ce lien."
+
+#: ../../source/volunteering/background-check.rst:17
+msgid ""
+"Request the extract for free from your local gemeente/commune, or online via"
+" `mijndossier.rrn.fgov.be <https://mijndossier.rrn.fgov.be>`_ — mention it's"
+" for volunteering with minors (model 2 / Artikel 596.2)."
+msgstr ""
+"Demandez l'extrait gratuitement auprès de votre commune, ou en ligne via "
+"`mijndossier.rrn.fgov.be <https://mijndossier.rrn.fgov.be>`_ — précisez que "
+"c'est pour du bénévolat avec des mineurs (modèle 2 / article 596.2)."
+
+#: ../../source/volunteering/background-check.rst:20
+msgid "Upload it at the link you were emailed."
+msgstr "Téléversez-le via le lien reçu par e-mail."
+
+#: ../../source/volunteering/background-check.rst:21
+msgid ""
+"An admin reviews it. Once validated, you'll be emailed your login details — "
+"see :doc:`become-a-mentor-or-volunteer` / :doc:`start-a-new-dojo` for what "
+"happens next."
+msgstr ""
+"Un administrateur l'examine. Une fois validé, vous recevrez vos identifiants"
+" de connexion par e-mail — voir :doc:`become-a-mentor-or-volunteer` / "
+":doc:`start-a-new-dojo` pour la suite."
+
+#: ../../source/volunteering/background-check.rst:25
+msgid "A few things worth knowing:"
+msgstr "Quelques informations utiles :"
+
+#: ../../source/volunteering/background-check.rst:27
+msgid ""
+"The document itself is only kept long enough to make this decision — once "
+"validated, it's deleted. Only the outcome and its expiry date are kept on "
+"file."
+msgstr ""
+"Le document lui-même n'est conservé que le temps nécessaire à cette décision"
+" : une fois validé, il est supprimé. Seuls le résultat et sa date "
+"d'expiration sont conservés."
+
+#: ../../source/volunteering/background-check.rst:30
+msgid ""
+"A validated check is valid for one year from when it's reviewed; you'll need"
+" to provide a fresh extract after that."
+msgstr ""
+"Une vérification validée est valable un an à partir de son examen ; vous "
+"devrez fournir un nouvel extrait après cette période."
+
+#: ../../source/volunteering/background-check.rst:32
+msgid ""
+"The upload link only works once your application has actually reached this "
+"stage — if you haven't been asked for it yet, there's nothing to upload."
+msgstr ""
+"Le lien de téléversement ne fonctionne qu'une fois que votre candidature a "
+"effectivement atteint cette étape : si cela ne vous a pas encore été "
+"demandé, il n'y a rien à téléverser."

@@ -1,0 +1,61 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language-Team: fr <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/dojo-team/logging-in.rst:2
+msgid "Logging in as a dojo team member"
+msgstr "Se connecter en tant que membre d'une équipe de dojo"
+
+#: ../../source/dojo-team/logging-in.rst:4
+msgid ""
+"Dojo owners and mentors/helpers don't self-register — your login is created "
+"for you once your application and background check are approved (see "
+":doc:`../volunteering/become-a-mentor-or-volunteer` and "
+":doc:`../volunteering/start-a-new-dojo`). You'll receive it by email: your "
+"login email and a temporary password."
+msgstr ""
+"Les responsables de dojo et les mentors/assistants ne s'inscrivent pas eux-"
+"mêmes : vos identifiants sont créés pour vous une fois votre candidature et "
+"votre vérification d'antécédents approuvées (voir "
+":doc:`../volunteering/become-a-mentor-or-volunteer` et "
+":doc:`../volunteering/start-a-new-dojo`). Vous les recevrez par e-mail : "
+"votre adresse de connexion et un mot de passe temporaire."
+
+#: ../../source/dojo-team/logging-in.rst:10
+msgid ""
+"Log in at **Log in** with those details. The first time you do, you'll be "
+"asked to set your own password before you can go anywhere else on the site —"
+" this isn't optional, and there's no way to skip past it."
+msgstr ""
+"Connectez-vous via **Se connecter** avec ces identifiants. La première fois,"
+" il vous sera demandé de définir votre propre mot de passe avant de pouvoir "
+"accéder au reste du site : cette étape n'est pas facultative et ne peut pas "
+"être contournée."
+
+#: ../../source/dojo-team/logging-in.rst:14
+msgid ""
+"After that, logging in takes a dojo owner straight to their dojo's "
+"dashboard; a mentor/helper account without a dojo owner login lands on the "
+"regular homepage."
+msgstr ""
+"Ensuite, la connexion mène directement un responsable de dojo à son tableau "
+"de bord ; un compte mentor/assistant sans accès responsable de dojo arrive "
+"sur la page d'accueil classique."

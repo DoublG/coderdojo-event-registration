@@ -1,0 +1,119 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language-Team: fr <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/families/managing-your-account.rst:2
+msgid "Managing your account"
+msgstr "Gérer votre compte"
+
+#: ../../source/families/managing-your-account.rst:5
+msgid "Logging in"
+msgstr "Se connecter"
+
+#: ../../source/families/managing-your-account.rst:7
+msgid ""
+"Use the **Log in** link and enter your email and password. (Your username "
+"also works if you know it, but email is what's asked for.)"
+msgstr ""
+"Utilisez le lien **Se connecter** et saisissez votre e-mail et votre mot de "
+"passe. (Votre nom d'utilisateur fonctionne aussi si vous le connaissez, mais"
+" c'est l'e-mail qui est demandé.)"
+
+#: ../../source/families/managing-your-account.rst:10
+msgid ""
+"Forgot your password? Use **Forgot password** on the login page — you'll get"
+" an email with a link to set a new one."
+msgstr ""
+"Mot de passe oublié ? Utilisez **Mot de passe oublié** sur la page de "
+"connexion : vous recevrez un e-mail avec un lien pour en définir un nouveau."
+
+#: ../../source/families/managing-your-account.rst:14
+msgid "Your family page"
+msgstr "Votre page famille"
+
+#: ../../source/families/managing-your-account.rst:16
+msgid ""
+"Once logged in, your family page lists each of your children and their "
+"upcoming sessions (including anything they're on the waiting list for, "
+"clearly marked). From here you can:"
+msgstr ""
+"Une fois connecté·e, votre page famille répertorie chacun de vos enfants et "
+"leurs séances à venir (y compris ce pour quoi ils sont sur liste d'attente, "
+"clairement indiqué). Depuis cette page, vous pouvez :"
+
+#: ../../source/families/managing-your-account.rst:20
+msgid ""
+"**Add a child** — name, date of birth, an optional icon, experience level, "
+"and any allergies or notes for mentors."
+msgstr ""
+"**Ajouter un enfant** : nom, date de naissance, une icône facultative, "
+"niveau d'expérience, et d'éventuelles allergies ou notes pour les mentors."
+
+#: ../../source/families/managing-your-account.rst:22
+msgid ""
+"**Edit a child's details** — click their name/header to edit it inline."
+msgstr ""
+"**Modifier les informations d'un enfant** : cliquez sur son nom/en-tête pour"
+" le modifier directement."
+
+#: ../../source/families/managing-your-account.rst:23
+msgid ""
+"**Cancel a registration** — frees the spot for the next child on that "
+"session's waiting list."
+msgstr ""
+"**Annuler une inscription** : libère la place pour l'enfant suivant sur la "
+"liste d'attente de cette séance."
+
+#: ../../source/families/managing-your-account.rst:25
+msgid ""
+"**View a child's awards** — badges and milestone awards (e.g. attendance "
+"wristbands) they've earned or are working towards, and their session "
+"history."
+msgstr ""
+"**Voir les récompenses d'un enfant** : badges et récompenses par palier (par"
+" ex. bracelets d'assiduité) obtenus ou en cours d'obtention, ainsi que son "
+"historique de séances."
+
+#: ../../source/families/managing-your-account.rst:30
+msgid "Changing your password"
+msgstr "Modifier votre mot de passe"
+
+#: ../../source/families/managing-your-account.rst:32
+msgid ""
+"Go to **Change password** (also linked from your account page). You'll need "
+"your current password to set a new one."
+msgstr ""
+"Allez dans **Modifier le mot de passe** (également accessible depuis la page"
+" de votre compte). Vous aurez besoin de votre mot de passe actuel pour en "
+"définir un nouveau."
+
+#: ../../source/families/managing-your-account.rst:37
+msgid ""
+"If your account was set up for you by CoderDojo Belgium (e.g. as a dojo "
+"owner or helper) rather than self-registered, you'll be asked to set a new "
+"password the first time you log in with the temporary one you were emailed —"
+" you can't skip past this step."
+msgstr ""
+"Si votre compte a été créé pour vous par CoderDojo Belgique (par ex. en tant"
+" que responsable de dojo ou assistant) plutôt qu'auto-inscrit, il vous sera "
+"demandé de définir un nouveau mot de passe lors de votre première connexion "
+"avec le mot de passe temporaire reçu par e-mail : cette étape ne peut pas "
+"être contournée."

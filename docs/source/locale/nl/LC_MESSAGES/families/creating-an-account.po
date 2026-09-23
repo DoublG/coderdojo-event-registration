@@ -1,0 +1,101 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language-Team: nl <LL@li.org>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/families/creating-an-account.rst:2
+msgid "Creating a family account"
+msgstr "Een gezinsaccount aanmaken"
+
+#: ../../source/families/creating-an-account.rst:4
+msgid ""
+"Before you can book a session, you need a family account. One account covers"
+" your whole family — you add each of your children (\"ninjas\") to it once, "
+"and can then sign any of them up for sessions at any dojo."
+msgstr ""
+"Voordat u een sessie kunt boeken, hebt u een gezinsaccount nodig. Eén "
+"account dekt uw hele gezin: u voegt elk van uw kinderen (de \"ninja's\") er "
+"eenmalig aan toe en kunt hen vervolgens inschrijven voor sessies bij eender "
+"welke dojo."
+
+#: ../../source/families/creating-an-account.rst:8
+msgid "To create an account:"
+msgstr "Een account aanmaken:"
+
+#: ../../source/families/creating-an-account.rst:10
+msgid ""
+"Go to **Get involved** and choose **Register your family**, or go directly "
+"to the registration page."
+msgstr ""
+"Ga naar **Doe mee** en kies **Registreer uw gezin**, of ga rechtstreeks naar"
+" de registratiepagina."
+
+#: ../../source/families/creating-an-account.rst:12
+msgid "Fill in your own details (name, email, and a password)."
+msgstr "Vul uw eigen gegevens in (naam, e-mailadres en wachtwoord)."
+
+#: ../../source/families/creating-an-account.rst:13
+msgid ""
+"Add each child who'll be attending — their name and date of birth are "
+"required; experience level and any allergies/notes are optional but help the"
+" mentors running the session. Use **Add another child** if you have more "
+"than one."
+msgstr ""
+"Voeg elk kind toe dat zal deelnemen: naam en geboortedatum zijn verplicht; "
+"ervaringsniveau en eventuele allergieën/opmerkingen zijn optioneel maar "
+"helpen de mentoren die de sessie begeleiden. Gebruik **Nog een kind "
+"toevoegen** als u er meerdere hebt."
+
+#: ../../source/families/creating-an-account.rst:17
+msgid "Submit the form."
+msgstr "Verstuur het formulier."
+
+#: ../../source/families/creating-an-account.rst:19
+msgid ""
+"Unlike applying to volunteer or start a dojo, there's no review step — your "
+"account is created immediately and you're taken straight to your family's "
+"page, signed in."
+msgstr ""
+"In tegenstelling tot een sollicitatie om vrijwilliger te worden of een dojo "
+"te starten, is er geen beoordelingsstap: uw account wordt onmiddellijk "
+"aangemaakt en u wordt meteen, ingelogd, naar de pagina van uw gezin "
+"gebracht."
+
+#: ../../source/families/creating-an-account.rst:25
+msgid ""
+"Only a parent or legal guardian should create the family account and add "
+"children to it — you'll be asked to confirm this when registering. The email"
+" you register with can't already be in use by another account."
+msgstr ""
+"Alleen een ouder of wettelijke voogd mag het gezinsaccount aanmaken en er "
+"kinderen aan toevoegen — dit wordt u gevraagd te bevestigen bij de "
+"registratie. Het e-mailadres waarmee u zich registreert mag nog niet in "
+"gebruik zijn bij een ander account."
+
+#: ../../source/families/creating-an-account.rst:29
+msgid ""
+"Once your account exists, see :doc:`../families/finding-a-dojo` to find a "
+"session, or go straight to :doc:`../families/managing-your-account` to see "
+"your family's page."
+msgstr ""
+"Zodra uw account bestaat, raadpleegt u :doc:`../families/finding-a-dojo` om "
+"een sessie te vinden, of gaat u rechtstreeks naar "
+":doc:`../families/managing-your-account` om de pagina van uw gezin te "
+"bekijken."

@@ -1,0 +1,87 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language-Team: fr <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/volunteering/start-a-new-dojo.rst:2
+msgid "Starting a new dojo"
+msgstr "Lancer un nouveau dojo"
+
+#: ../../source/volunteering/start-a-new-dojo.rst:4
+msgid ""
+"Bringing CoderDojo to a new city or town starts with an application, not a "
+"login — you don't need an account first."
+msgstr ""
+"Faire venir CoderDojo dans une nouvelle ville commence par une candidature, "
+"pas par une connexion : vous n'avez pas besoin de compte au préalable."
+
+#: ../../source/volunteering/start-a-new-dojo.rst:7
+msgid "Go to **Get involved** and choose **Start a new dojo**."
+msgstr "Allez dans **Participer** et choisissez **Lancer un nouveau dojo**."
+
+#: ../../source/volunteering/start-a-new-dojo.rst:8
+msgid "Fill in your name, email, and phone."
+msgstr "Renseignez votre nom, votre e-mail et votre téléphone."
+
+#: ../../source/volunteering/start-a-new-dojo.rst:9
+msgid ""
+"Tell us the area/city the dojo would run in, your preferred schedule (e.g. "
+"\"Saturday mornings\"), and a proposed venue if you have one."
+msgstr ""
+"Indiquez-nous la région/ville où le dojo se tiendrait, votre horaire préféré"
+" (par ex. « le samedi matin ») et un lieu proposé si vous en avez un."
+
+#: ../../source/volunteering/start-a-new-dojo.rst:11
+msgid ""
+"Add any relevant experience, a connection at the venue, or anything else "
+"useful for us to know."
+msgstr ""
+"Ajoutez toute expérience pertinente, un contact au niveau du lieu, ou toute "
+"autre information utile pour nous."
+
+#: ../../source/volunteering/start-a-new-dojo.rst:13
+msgid ""
+"Confirm you understand sessions are free and volunteer-run, and that a "
+"background check will be required (see :doc:`background-check`) since a "
+"dojo's lead coach works directly with minors — then submit."
+msgstr ""
+"Confirmez que vous comprenez que les séances sont gratuites et animées par "
+"des bénévoles, et qu'une vérification d'antécédents sera nécessaire (voir "
+":doc:`background-check`) puisque le coach principal d'un dojo est en contact"
+" direct avec des mineurs, puis envoyez le formulaire."
+
+#: ../../source/volunteering/start-a-new-dojo.rst:18
+msgid "What happens next"
+msgstr "Et ensuite ?"
+
+#: ../../source/volunteering/start-a-new-dojo.rst:20
+msgid ""
+"A CoderDojo Belgium admin reviews your application. Once your background "
+"check clears, you'll be emailed your dojo-owner login with a temporary "
+"password, which you'll be asked to replace the first time you log in. From "
+"your dojo owner login, you'll be able to manage your dojo's page and run its"
+" sessions — see :doc:`../dojo-team/running-a-session`."
+msgstr ""
+"Un administrateur CoderDojo Belgique examine votre candidature. Une fois "
+"votre vérification d'antécédents validée, vous recevrez par e-mail vos "
+"identifiants de responsable de dojo avec un mot de passe temporaire, que "
+"vous devrez remplacer lors de votre première connexion. Depuis votre compte "
+"responsable de dojo, vous pourrez gérer la page de votre dojo et animer ses "
+"séances — voir :doc:`../dojo-team/running-a-session`."

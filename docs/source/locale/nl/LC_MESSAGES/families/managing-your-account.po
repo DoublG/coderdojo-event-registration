@@ -1,0 +1,118 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language-Team: nl <LL@li.org>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/families/managing-your-account.rst:2
+msgid "Managing your account"
+msgstr "Uw account beheren"
+
+#: ../../source/families/managing-your-account.rst:5
+msgid "Logging in"
+msgstr "Inloggen"
+
+#: ../../source/families/managing-your-account.rst:7
+msgid ""
+"Use the **Log in** link and enter your email and password. (Your username "
+"also works if you know it, but email is what's asked for.)"
+msgstr ""
+"Gebruik de link **Inloggen** en voer uw e-mailadres en wachtwoord in. (Uw "
+"gebruikersnaam werkt ook als u die kent, maar er wordt om het e-mailadres "
+"gevraagd.)"
+
+#: ../../source/families/managing-your-account.rst:10
+msgid ""
+"Forgot your password? Use **Forgot password** on the login page — you'll get"
+" an email with a link to set a new one."
+msgstr ""
+"Wachtwoord vergeten? Gebruik **Wachtwoord vergeten** op de inlogpagina — u "
+"ontvangt een e-mail met een link om een nieuw wachtwoord in te stellen."
+
+#: ../../source/families/managing-your-account.rst:14
+msgid "Your family page"
+msgstr "Uw gezinspagina"
+
+#: ../../source/families/managing-your-account.rst:16
+msgid ""
+"Once logged in, your family page lists each of your children and their "
+"upcoming sessions (including anything they're on the waiting list for, "
+"clearly marked). From here you can:"
+msgstr ""
+"Eens ingelogd, toont uw gezinspagina elk van uw kinderen en hun aankomende "
+"sessies (inclusief alles waarvoor ze op de wachtlijst staan, duidelijk "
+"aangeduid). Van hieruit kunt u:"
+
+#: ../../source/families/managing-your-account.rst:20
+msgid ""
+"**Add a child** — name, date of birth, an optional icon, experience level, "
+"and any allergies or notes for mentors."
+msgstr ""
+"**Een kind toevoegen** — naam, geboortedatum, een optioneel icoon, "
+"ervaringsniveau, en eventuele allergieën of opmerkingen voor mentoren."
+
+#: ../../source/families/managing-your-account.rst:22
+msgid ""
+"**Edit a child's details** — click their name/header to edit it inline."
+msgstr ""
+"**De gegevens van een kind bewerken** — klik op de naam/kop om deze "
+"rechtstreeks te bewerken."
+
+#: ../../source/families/managing-your-account.rst:23
+msgid ""
+"**Cancel a registration** — frees the spot for the next child on that "
+"session's waiting list."
+msgstr ""
+"**Een inschrijving annuleren** — maakt de plaats vrij voor het volgende kind"
+" op de wachtlijst van die sessie."
+
+#: ../../source/families/managing-your-account.rst:25
+msgid ""
+"**View a child's awards** — badges and milestone awards (e.g. attendance "
+"wristbands) they've earned or are working towards, and their session "
+"history."
+msgstr ""
+"**De badges van een kind bekijken** — badges en mijlpaalbeloningen (bv. "
+"aanwezigheidsbandjes) die ze hebben verdiend of aan het verdienen zijn, en "
+"hun sessiegeschiedenis."
+
+#: ../../source/families/managing-your-account.rst:30
+msgid "Changing your password"
+msgstr "Uw wachtwoord wijzigen"
+
+#: ../../source/families/managing-your-account.rst:32
+msgid ""
+"Go to **Change password** (also linked from your account page). You'll need "
+"your current password to set a new one."
+msgstr ""
+"Ga naar **Wachtwoord wijzigen** (ook toegankelijk via uw accountpagina). U "
+"hebt uw huidige wachtwoord nodig om een nieuw wachtwoord in te stellen."
+
+#: ../../source/families/managing-your-account.rst:37
+msgid ""
+"If your account was set up for you by CoderDojo Belgium (e.g. as a dojo "
+"owner or helper) rather than self-registered, you'll be asked to set a new "
+"password the first time you log in with the temporary one you were emailed —"
+" you can't skip past this step."
+msgstr ""
+"Als uw account door CoderDojo België voor u werd aangemaakt (bv. als "
+"dojobeheerder of helper) in plaats van zelf geregistreerd, wordt u gevraagd "
+"een nieuw wachtwoord in te stellen wanneer u voor het eerst inlogt met het "
+"tijdelijke wachtwoord dat u per e-mail ontving — deze stap kan niet worden "
+"overgeslagen."

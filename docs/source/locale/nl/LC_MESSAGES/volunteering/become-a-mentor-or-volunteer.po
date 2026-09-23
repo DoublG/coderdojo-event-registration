@@ -1,0 +1,97 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language-Team: nl <LL@li.org>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:2
+msgid "Becoming a mentor or volunteer"
+msgstr "Mentor of vrijwilliger worden"
+
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:4
+msgid ""
+"No teaching experience is required — dojos need help running sessions, "
+"supporting ninjas one-on-one, and general event-day support (board/comms "
+"roles are also welcome)."
+msgstr ""
+"Leservaring is niet vereist — dojo's hebben hulp nodig bij het begeleiden "
+"van sessies, het één-op-één ondersteunen van ninja's, en algemene "
+"ondersteuning op de dag zelf (bestuurs-/communicatierollen zijn ook welkom)."
+
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:8
+msgid "To apply:"
+msgstr "Om te solliciteren:"
+
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:10
+msgid "Go to **Get involved** and choose **Become a mentor or volunteer**."
+msgstr "Ga naar **Doe mee** en kies **Word mentor of vrijwilliger**."
+
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:11
+msgid "Fill in your name, email, and phone."
+msgstr "Vul uw naam, e-mailadres en telefoonnummer in."
+
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:12
+msgid ""
+"Pick a dojo if you already have one in mind, or leave it as \"not sure yet\""
+" if you're open to any."
+msgstr ""
+"Kies een dojo als u er al één in gedachten hebt, of laat \"nog niet zeker\" "
+"staan als u openstaat voor eender welke."
+
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:14
+msgid ""
+"Choose your role — volunteer mentor, or something else (board, events, "
+"comms)."
+msgstr ""
+"Kies uw rol — vrijwillige mentor, of iets anders (bestuur, evenementen, "
+"communicatie)."
+
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:16
+msgid "Tell us a bit about yourself — skills, interests, availability."
+msgstr ""
+"Vertel ons iets over uzelf — vaardigheden, interesses, beschikbaarheid."
+
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:17
+msgid ""
+"Confirm you understand a background check will be required (see "
+":doc:`background-check`) and submit."
+msgstr ""
+"Bevestig dat u begrijpt dat een uittreksel uit het strafregister vereist zal"
+" zijn (zie :doc:`background-check`) en verstuur het formulier."
+
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:21
+msgid "What happens next"
+msgstr "Wat gebeurt er daarna?"
+
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:23
+msgid ""
+"A CoderDojo Belgium admin reviews your application. If approved for a role "
+"that works directly with minors, you'll be emailed a link to submit your "
+"background check document — the account you'll actually log in with is "
+"created only once that's cleared. You'll receive your login details by email"
+" at that point, with a temporary password you'll be asked to replace the "
+"first time you log in."
+msgstr ""
+"Een beheerder van CoderDojo België beoordeelt uw sollicitatie. Als u wordt "
+"goedgekeurd voor een rol met rechtstreeks contact met minderjarigen, "
+"ontvangt u een e-mail met een link om uw uittreksel uit het strafregister in"
+" te dienen — het account waarmee u effectief zult inloggen wordt pas "
+"aangemaakt zodra dit is goedgekeurd. Op dat moment ontvangt u uw "
+"inloggegevens per e-mail, met een tijdelijk wachtwoord dat u bij uw eerste "
+"keer inloggen moet vervangen."

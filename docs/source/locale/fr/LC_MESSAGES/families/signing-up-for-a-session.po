@@ -1,0 +1,95 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language-Team: fr <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/families/signing-up-for-a-session.rst:2
+msgid "Signing up for a session"
+msgstr "S'inscrire à une séance"
+
+#: ../../source/families/signing-up-for-a-session.rst:4
+msgid ""
+"You'll need to be logged in to your family account to sign up (see "
+":doc:`creating-an-account`)."
+msgstr ""
+"Vous devez être connecté·e à votre compte famille pour vous inscrire (voir "
+":doc:`creating-an-account`)."
+
+#: ../../source/families/signing-up-for-a-session.rst:7
+msgid ""
+"Find the session — via a dojo's page, the **Events** list, or the homepage's"
+" **Upcoming sessions**."
+msgstr ""
+"Trouvez la séance : via la page d'un dojo, la liste **Événements**, ou la "
+"rubrique **Prochaines séances** de la page d'accueil."
+
+#: ../../source/families/signing-up-for-a-session.rst:9
+msgid ""
+"Open the session and tick which of your children you'd like to sign up for "
+"it. You can select more than one at a time."
+msgstr ""
+"Ouvrez la séance et cochez les enfants que vous souhaitez y inscrire. Vous "
+"pouvez en sélectionner plusieurs à la fois."
+
+#: ../../source/families/signing-up-for-a-session.rst:11
+msgid ""
+"Submit. Each selected child is registered individually — a child already "
+"signed up for that session is skipped and flagged as such rather than "
+"double-booked."
+msgstr ""
+"Validez. Chaque enfant sélectionné est inscrit individuellement : un enfant "
+"déjà inscrit à cette séance est ignoré et signalé comme tel plutôt que "
+"d'être inscrit deux fois."
+
+#: ../../source/families/signing-up-for-a-session.rst:16
+msgid "Waiting lists"
+msgstr "Listes d'attente"
+
+#: ../../source/families/signing-up-for-a-session.rst:18
+msgid ""
+"Sessions have a limited number of places. If a session is full when you sign"
+" up, your child is placed on the **waiting list** instead of being turned "
+"away outright — you'll see this clearly on the confirmation. If a confirmed "
+"spot later opens up (someone cancels), the longest-waiting child for that "
+"session is automatically promoted to confirmed. No action is needed on your "
+"part for that to happen."
+msgstr ""
+"Les séances ont un nombre limité de places. Si une séance est complète au "
+"moment de votre inscription, votre enfant est placé sur la **liste "
+"d'attente** plutôt que d'être simplement refusé : cela apparaît clairement "
+"sur la confirmation. Si une place confirmée se libère ensuite (annulation), "
+"l'enfant qui attend depuis le plus longtemps pour cette séance est "
+"automatiquement confirmé. Aucune action de votre part n'est nécessaire pour "
+"cela."
+
+#: ../../source/families/signing-up-for-a-session.rst:26
+msgid "Cancelling"
+msgstr "Annuler"
+
+#: ../../source/families/signing-up-for-a-session.rst:28
+msgid ""
+"If your plans change, cancel from your family account page (see "
+":doc:`managing-your-account`) rather than just not turning up — that's also "
+"what frees the spot for whoever's next on the waiting list."
+msgstr ""
+"Si vos projets changent, annulez depuis la page de votre compte famille "
+"(voir :doc:`managing-your-account`) plutôt que de simplement ne pas vous "
+"présenter : c'est aussi ce qui libère la place pour la personne suivante sur"
+" la liste d'attente."

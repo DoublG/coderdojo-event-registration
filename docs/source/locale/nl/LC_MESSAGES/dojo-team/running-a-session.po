@@ -1,0 +1,63 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language-Team: nl <LL@li.org>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/dojo-team/running-a-session.rst:2
+msgid "Running a session"
+msgstr "Een sessie begeleiden"
+
+#: ../../source/dojo-team/running-a-session.rst:4
+msgid ""
+"A dojo owner's dashboard is built around the dojo's next upcoming session "
+"(or its most recent past one, if nothing's scheduled), showing who's "
+"confirmed for it."
+msgstr ""
+"Het dashboard van een dojobeheerder is opgebouwd rond de eerstvolgende "
+"sessie van de dojo (of de meest recente sessie uit het verleden, als er "
+"niets gepland is), en toont wie hiervoor bevestigd is."
+
+#: ../../source/dojo-team/running-a-session.rst:10
+msgid ""
+"The attendance dashboard is under active development. This page will be "
+"updated as marking attendance for a session is wired up — check back, or ask"
+" CoderDojo Belgium if you need to track attendance in the meantime."
+msgstr ""
+"Het aanwezigheidsdashboard wordt momenteel actief ontwikkeld. Deze pagina "
+"wordt bijgewerkt zodra het aanvinken van aanwezigheid voor een sessie is "
+"ingebouwd — kom later terug, of neem contact op met CoderDojo België als u "
+"intussen de aanwezigheid moet bijhouden."
+
+#: ../../source/dojo-team/running-a-session.rst:16
+msgid "Team pages"
+msgstr "Teampagina's"
+
+#: ../../source/dojo-team/running-a-session.rst:18
+msgid ""
+"A dojo's public team page (visible to anyone, not just the dojo team) shows "
+"its mentors, with the lead coach always listed first. Team member details — "
+"bio, title, focus areas — are currently managed on your behalf by CoderDojo "
+"Belgium rather than self-service; get in touch to update yours."
+msgstr ""
+"De openbare teampagina van een dojo (zichtbaar voor iedereen, niet alleen "
+"het dojoteam) toont de mentoren, met de hoofdcoach altijd als eerste "
+"vermeld. Gegevens van teamleden — bio, titel, aandachtsgebieden — worden "
+"momenteel namens u beheerd door CoderDojo België in plaats van "
+"zelfbediening; neem contact op om de uwe bij te werken."

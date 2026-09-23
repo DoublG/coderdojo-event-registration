@@ -1,0 +1,67 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-23 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language-Team: fr <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/index.rst:15
+msgid "For families"
+msgstr "Pour les familles"
+
+#: ../../source/index.rst:24
+msgid "Volunteering & new dojos"
+msgstr "Bénévolat et nouveaux dojos"
+
+#: ../../source/index.rst:32
+msgid "For dojo teams"
+msgstr "Pour les équipes de dojo"
+
+#: ../../source/index.rst:39
+msgid "More"
+msgstr "Plus"
+
+#: ../../source/index.rst:2
+msgid "CoderDojo Belgium — Help Centre"
+msgstr "CoderDojo Belgique — Centre d'aide"
+
+#: ../../source/index.rst:4
+msgid ""
+"`CoderDojo <https://coderdojobelgium.example>`_ is a free, volunteer-run "
+"coding club for young people aged 7–18 (\"ninjas\"). This site is where "
+"families find a local dojo and sign their kids up for sessions, where "
+"volunteers and new dojos get set up, and where dojo teams run their sessions"
+" day-to-day."
+msgstr ""
+"`CoderDojo <https://coderdojobelgium.example>`_ est un club de programmation"
+" gratuit, animé par des bénévoles, destiné aux jeunes de 7 à 18 ans (les « "
+"ninjas »). Ce site permet aux familles de trouver un dojo local et "
+"d'inscrire leurs enfants aux séances, aux bénévoles et nouveaux dojos de se "
+"mettre en place, et aux équipes de dojo de gérer leurs séances au quotidien."
+
+#: ../../source/index.rst:10
+msgid ""
+"This help centre covers the website itself — creating an account, finding "
+"and booking a session, applying to volunteer or start a dojo, and running a "
+"session as a mentor. It's written for the people using the site, not for the"
+" people building it."
+msgstr ""
+"Ce centre d'aide porte sur le site lui-même : créer un compte, trouver et "
+"réserver une séance, poser sa candidature pour devenir bénévole ou lancer un"
+" dojo, et animer une séance en tant que mentor. Il s'adresse aux personnes "
+"qui utilisent le site, pas à celles qui le développent."
