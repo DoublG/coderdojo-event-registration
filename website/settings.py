@@ -18,11 +18,10 @@ env = environ.Env(
     DEBUG=(bool, False),
 )
 
-environ.Env.read_env()
-
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+environ.Env.read_env(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -49,68 +48,17 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
-# debug_toolbar's default check is `REMOTE_ADDR in INTERNAL_IPS` — behind
-# the .devcontainer nginx proxy (coolregistration.localhost), Django sees
-# REMOTE_ADDR as the proxy container's own docker-network IP, not 127.0.0.1,
-# so the toolbar would otherwise silently fail to render there. This is
-# local dev only (DEBUG is never True in production), so just show it
-# whenever DEBUG is on rather than chasing the proxy's ever-changing IP.
+# Show the Debug Toolbar whenever Django's effective DEBUG setting is true.
+# Reading django.conf.settings here is intentional: test overrides such as
+# override_settings(DEBUG=False) should be respected by the callback.
 def _show_debug_toolbar(request):
-    # Deferred import, and reads django.conf.settings rather than closing
-    # over the DEBUG name above directly: Django's test runner overrides
-    # DEBUG to False at runtime (via django.conf.settings), but doesn't
-    # touch this module's own already-imported DEBUG=True constant — a
-    # closure over the bare name would keep returning True during tests,
-    # where website/urls.py (correctly reading the overridden value) never
-    # registers debug_toolbar's URLs at all, causing a NoReverseMatch.
-    from django.conf import settings as django_settings
-    return django_settings.DEBUG
-
+    from django.conf import settings
+    return settings.DEBUG
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': _show_debug_toolbar,
-    # debug_toolbar's own system check (E001) otherwise refuses to run
-    # under `manage.py test` at all once DEBUG_TOOLBAR_CONFIG is set
-    # explicitly — safe to bypass since SHOW_TOOLBAR_CALLBACK above
-    # correctly evaluates to False under the test runner's DEBUG override,
-    # so the toolbar genuinely never activates during tests.
-    'IS_RUNNING_TESTS': False,
 }
 
-# The full default panel list (debug_toolbar.settings.PANELS_DEFAULTS) minus
-# CachePanel and TemplatesPanel — both log call/context args by falling back
-# to str(obj) for anything that isn't JSON-serializable (a cached queryset of
-# model instances for CachePanel — see dojos.search's DEFAULT_SEARCH_CACHE_KEY
-# — or, for TemplatesPanel, any model instance passed into a template's
-# context, e.g. the dojo admin pages' `dojo` — dojo.owner specifically, since
-# accounts.User's DojoOwner.__str__ queries self.dojos to list its dojos by
-# name). That str(obj) fallback lazily touches whatever DB access the
-# model's __str__ needs — harmless under plain WSGI, where that lazy fetch
-# just runs on the request's own sync thread, but now that daphne (see
-# INSTALLED_APPS) serves requests over ASGI, it happens inside an async task
-# and Django's SynchronousOnlyOperation guard correctly refuses it, 500ing
-# every single page that panel touches. Not a fix for the app itself — just
-# keeps these dev-only tools (DEBUG_TOOLBAR_CONFIG above already gates them
-# to DEBUG=True, never production) from being the thing that breaks under
-# async. Any other panel that ends up stringifying arbitrary model instances
-# for display is a candidate for the same issue — this isn't unique to these
-# two, just the two actually hit so far.
-DEBUG_TOOLBAR_PANELS = [
-    'debug_toolbar.panels.history.HistoryPanel',
-    'debug_toolbar.panels.versions.VersionsPanel',
-    'debug_toolbar.panels.timer.TimerPanel',
-    'debug_toolbar.panels.settings.SettingsPanel',
-    'debug_toolbar.panels.headers.HeadersPanel',
-    'debug_toolbar.panels.request.RequestPanel',
-    'debug_toolbar.panels.sql.SQLPanel',
-    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-    'debug_toolbar.panels.alerts.AlertsPanel',
-    'debug_toolbar.panels.signals.SignalsPanel',
-    'debug_toolbar.panels.tasks.TasksPanel',
-    'debug_toolbar.panels.community.CommunityPanel',
-    'debug_toolbar.panels.redirects.RedirectsPanel',
-    'debug_toolbar.panels.profiling.ProfilingPanel',
-]
 
 AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = 'login'
@@ -135,7 +83,7 @@ else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEFAULT_FROM_EMAIL = env(
-    'DEFAULT_FROM_EMAIL', 'CoderDojo Belgium <no-reply@coderdojobelgium.example>'
+    'DEFAULT_FROM_EMAIL', default='CoderDojo Belgium <no-reply@coderdojobelgium.example>'
 )
 
 
@@ -238,8 +186,8 @@ CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': 'redis://{host}:{port}/0'.format(
-            host= env('REDIS_HOST', '127.0.0.1'),
-            port= env('REDIS_PORT', '6379'),
+            host= env('REDIS_HOST', default='127.0.0.1'),
+            port= env('REDIS_PORT', default='6379'),
         ),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',

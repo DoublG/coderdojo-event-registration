@@ -1,16 +1,9 @@
 Running a session
 ====================
 
-A dojo owner's dashboard is built around the dojo's next upcoming session
+A dojo's dashboard (for its owner and helpers) is built around the dojo's next upcoming session
 (or its most recent past one, if nothing's scheduled), showing who's
 confirmed for it.
-
-.. note::
-
-   The attendance dashboard is under active development. This page will
-   be updated as marking attendance for a session is wired up — check
-   back, or ask CoderDojo Belgium if you need to track attendance in the
-   meantime.
 
 Scheduling a session
 ----------------------
@@ -25,7 +18,18 @@ For the banner image, pick one of the ready-made templates shown on the
 form, or upload your own further down — uploading a file always takes
 priority if you do both.
 
-A session always goes through three states, shown as a badge next to it
+Editing a session
+------------------
+
+Click a session's name (or **Edit**) on the **Events** list to open its
+page, where you can change any of the details you entered when creating
+it. **Save changes** keeps you on the same page, so you can check the
+result straight away.
+
+Session status
+---------------
+
+A session is always in one of three states, shown as a badge next to it
 on the **Events** list:
 
 - **Draft** — a new session starts here. It's completely hidden from
@@ -39,9 +43,28 @@ on the **Events** list:
   once you've checked attendance for the session and don't want any
   more sign-ups trickling in afterwards.
 
-Each of these is a one-way step forward (draft → open → closed) — there's
-currently no way to send a session back to an earlier state from the
-dashboard; get in touch with CoderDojo Belgium if you need one corrected.
+You can switch a session between any of these states at any time, from
+the status card at the top of its page: a closed session can be
+reopened (**Reopen registrations**), and an open or closed one can be
+taken off the public site again with **Back to draft**. The **Events**
+list also has a quick button for the most common next step (**Publish**,
+**Close registrations** or **Reopen**). Changing the status never
+removes anyone who has already signed up.
+
+Taking attendance
+------------------
+
+On a session's page, **Take attendance** opens the list of everyone with
+a confirmed place (children on the waiting list aren't shown). Tap
+**Present** or **Absent** next to each child; it's saved straight away,
+and the count at the top ("3 of 12 present") updates as you go. Tapping
+the highlighted button again clears the mark, in case you tapped the
+wrong one. **Mark all present** marks everyone present in one go, after
+which you can switch the few who didn't come to **Absent**.
+
+Your dashboard's **Attendance** page shows the same list for your next
+upcoming session (or your most recent one, if nothing's scheduled), so on
+the day itself you can start marking without looking the session up.
 
 Team pages
 -----------

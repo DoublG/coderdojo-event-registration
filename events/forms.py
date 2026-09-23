@@ -56,12 +56,11 @@ NO_TEMPLATE_IMAGE = ""
 
 
 class EventForm(forms.ModelForm):
-    """A dojo owner creating a session on their own admin dashboard — see
-    dojos.views.dojo_event_create. New events always start out Draft
-    (Event.status' model default): the "Open" state that makes a session
-    live for registration is a deliberate follow-up action from the
-    events list, not something chosen here — matches the "closed" state,
-    which is only ever a manual action too (see dojos.views.dojo_event_set_status).
+    """A dojo owner creating or editing a session on their own admin
+    dashboard — see dojos.views.dojo_event_create/dojo_event_detail. Status
+    isn't a field here: new events always start out Draft (Event.status'
+    model default), and any later change (publish, close, reopen, back to
+    draft) is its own deliberate action via dojos.views.dojo_event_set_status.
 
     A session is always a single day: rather than two separate start/end
     *datetime* pickers (which could disagree on the date), this form has

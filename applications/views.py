@@ -24,13 +24,16 @@ def _find_application_for_account(user):
     """The application a logged-in DojoOwner/HelperAccount was provisioned
     from (DojoApplication.provisioned_owner / MentorApplication.provisioned_helper),
     for renew_background_check — the counterpart to _find_application_by_token
-    for someone who's already authenticated rather than holding an emailed link."""
+    for someone who's already authenticated rather than holding an emailed link.
+    An account approved for several dojos has one application per dojo; the
+    most recent one carries the renewal (validating it pushes the new
+    expiry onto the account, which is what gates login)."""
     dojo_owner = getattr(user, "dojoowner", None)
     if dojo_owner is not None:
-        return getattr(dojo_owner, "application", None)
+        return dojo_owner.applications.order_by("-submitted_at").first()
     helper_account = getattr(user, "helperaccount", None)
     if helper_account is not None:
-        return getattr(helper_account, "application", None)
+        return helper_account.applications.order_by("-submitted_at").first()
     return None
 
 

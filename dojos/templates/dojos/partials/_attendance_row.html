@@ -1,0 +1,40 @@
+{% comment %}
+One participant's Present/Absent toggle. Clicking the already-pressed button
+posts "none", clearing the mark back to "not yet marked" (Registration.attended
+is tri-state). htmx swaps just this row; without JS it's a plain form post.
+{% endcomment %}
+{% with participant=registration.participant %}
+<div class="cd-attendance__row" id="attendance-row-{{ registration.id }}">
+  <div class="cd-attendance__person">
+    <span class="cd-attendance__name body">{{ participant.name }}</span>
+    {% with age=participant.age %}
+      {% if age is not None or registration.pathway %}
+        <span class="cd-attendance__meta caption">{% if age is not None %}Age {{ age }}{% endif %}{% if age is not None and registration.pathway %} · {% endif %}{% if registration.pathway %}{{ registration.pathway.name }}{% endif %}</span>
+      {% endif %}
+    {% endwith %}
+  </div>
+  {% if dojo_access.can_take_attendance %}
+  <form method="post" action="{% url 'dojo_event_attendance_mark' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
+        hx-post="{% url 'dojo_event_attendance_mark' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
+        hx-target="#attendance-row-{{ registration.id }}" hx-swap="outerHTML">
+    {% csrf_token %}
+    <div class="cd-attendance__toggle" role="group" aria-label="Attendance for {{ participant.name }}">
+      <button type="submit" name="attended" value="{% if registration.attended %}none{% else %}present{% endif %}"
+              class="cd-attendance__btn cd-attendance__btn--present label" aria-pressed="{% if registration.attended %}true{% else %}false{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+        Present
+      </button>
+      <button type="submit" name="attended" value="{% if registration.attended is False %}none{% else %}absent{% endif %}"
+              class="cd-attendance__btn cd-attendance__btn--absent label" aria-pressed="{% if registration.attended is False %}true{% else %}false{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        Absent
+      </button>
+    </div>
+  </form>
+  {% else %}
+    <span class="cd-badge {% if registration.attended %}cd-badge--success{% elif registration.attended is False %}cd-badge--warning{% else %}cd-badge--outline{% endif %} caption">
+      {% if registration.attended %}Present{% elif registration.attended is False %}Absent{% else %}Not marked{% endif %}
+    </span>
+  {% endif %}
+</div>
+{% endwith %}

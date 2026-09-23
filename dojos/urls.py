@@ -11,6 +11,22 @@ urlpatterns = [
     path("dojos/<int:dojo_id>/manage/", views.dojo_manage, name="dojo_manage"),
     path("dojos/<int:dojo_id>/events/", views.dojo_event_list, name="dojo_event_list"),
     path("dojos/<int:dojo_id>/events/new/", views.dojo_event_create, name="dojo_event_create"),
+    path("dojos/<int:dojo_id>/events/<int:event_id>/", views.dojo_event_detail, name="dojo_event_detail"),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/attendance/",
+        views.dojo_event_attendance,
+        name="dojo_event_attendance",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/attendance/mark-all/",
+        views.dojo_event_attendance_mark_all,
+        name="dojo_event_attendance_mark_all",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/attendance/<int:registration_id>/",
+        views.dojo_event_attendance_mark,
+        name="dojo_event_attendance_mark",
+    ),
     path(
         "dojos/<int:dojo_id>/events/<int:event_id>/status/",
         views.dojo_event_set_status,

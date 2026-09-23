@@ -2,6 +2,12 @@
 {% block admin_page_title %}{{ event.name }}{% endblock %}
 {% block admin_heading %}{{ event.name }}{% endblock %}
 
+{% block admin_topbar_extra %}
+  {% if dojo_access.can_take_attendance %}
+    <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_event_attendance' dojo_id=dojo.id event_id=event.id %}">Take attendance</a>
+  {% endif %}
+{% endblock %}
+
 {% block admin_extra_style %}
 <style>
   .event-detail-form { max-width: 720px; }
@@ -15,6 +21,7 @@
     max-width: 720px;
   }
   .event-status-card__actions { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+  .event-status-card__help { flex-basis: 100%; margin: 0; }
 </style>
 {% endblock %}
 
@@ -32,25 +39,35 @@
       {% endif %}
     </div>
     <div class="event-status-card__actions">
-      {% if event.status == 'draft' %}
-        <form method="post" action="{% url 'dojo_event_set_status' dojo_id=dojo.id event_id=event.id %}">
-          {% csrf_token %}
-          <input type="hidden" name="action" value="publish">
-          <input type="hidden" name="next" value="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">
-          <button type="submit" class="cd-btn cd-btn--secondary label">Publish</button>
-        </form>
-      {% elif event.status == 'open' %}
-        <form method="post" action="{% url 'dojo_event_set_status' dojo_id=dojo.id event_id=event.id %}">
-          {% csrf_token %}
-          <input type="hidden" name="action" value="close">
-          <input type="hidden" name="next" value="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">
-          <button type="submit" class="cd-btn cd-btn--ghost label">Close registrations</button>
-        </form>
-      {% endif %}
+      <form class="event-status-card__actions" method="post" action="{% url 'dojo_event_set_status' dojo_id=dojo.id event_id=event.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">
+        {% if event.status != 'open' %}
+          <button type="submit" name="status" value="open" class="cd-btn cd-btn--secondary label">
+            {% if event.status == 'closed' %}Reopen registrations{% else %}Publish{% endif %}
+          </button>
+        {% endif %}
+        {% if event.status != 'closed' %}
+          <button type="submit" name="status" value="closed" class="cd-btn cd-btn--ghost label">Close registrations</button>
+        {% endif %}
+        {% if event.status != 'draft' %}
+          <button type="submit" name="status" value="draft" class="cd-btn cd-btn--ghost label">Back to draft</button>
+        {% endif %}
+      </form>
       {% if event.status != 'draft' %}
         <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=event.id %}" target="_blank" rel="noopener">View public page</a>
       {% endif %}
     </div>
+    <p class="event-status-card__help caption">
+      {% if event.status == 'draft' %}
+        Hidden from the public site. Publish to make it visible and open for sign-ups.
+      {% elif event.status == 'open' %}
+        Visible on the public site and open for sign-ups.
+      {% else %}
+        Visible on the public site, but no new sign-ups. Reopen to accept sign-ups again.
+      {% endif %}
+      You can switch between any of these at any time — existing registrations are always kept.
+    </p>
   </div>
 
   <div class="event-detail-form">

@@ -5,6 +5,7 @@ from django.utils.html import format_html
 
 from accounts.models import DojoOwner, HelperAccount
 from accounts.provisioning import attach_role, provision_account
+from dojos.models import Mentor
 
 from .models import BACKGROUND_CHECK_VALIDITY, BackgroundCheckMixin, DojoApplication, MentorApplication
 from .services import send_background_check_request, send_role_activated_email
@@ -93,6 +94,18 @@ def _provision_or_promote(application, account_model, role_label, login_url):
     return account
 
 
+def _apply_background_check(account, application):
+    """From here on it's the account, not the application, that
+    accounts.User.background_check_valid / BackgroundCheckMiddleware check
+    on every login and request. An account approved for a second dojo
+    (another application) keeps whichever check expires last, so approving
+    an application whose check is older never shortens it."""
+    expiries = [e for e in (account.background_check_expires_at, application.background_check_expires_at) if e]
+    account.background_check_required = True
+    account.background_check_expires_at = max(expiries) if expiries else None
+    account.save(update_fields=["background_check_required", "background_check_expires_at"])
+
+
 @admin.action(description="Approve & email a DojoOwner login to the applicant")
 def approve_and_provision_owner(modeladmin, request, queryset):
     login_url = request.build_absolute_uri(reverse("login"))
@@ -102,12 +115,7 @@ def approve_and_provision_owner(modeladmin, request, queryset):
             blocked += 1
             continue
         account = _provision_or_promote(application, DojoOwner, "dojo owner", login_url)
-        # From here on it's the account, not the application, that
-        # accounts.User.background_check_valid / BackgroundCheckMiddleware
-        # check on every login and request.
-        account.background_check_required = True
-        account.background_check_expires_at = application.background_check_expires_at
-        account.save(update_fields=["background_check_required", "background_check_expires_at"])
+        _apply_background_check(account, application)
         application.status = DojoApplication.APPROVED
         application.provisioned_owner = account
         application.save(update_fields=["status", "provisioned_owner"])
@@ -116,6 +124,25 @@ def approve_and_provision_owner(modeladmin, request, queryset):
     if blocked:
         message += f" Skipped {blocked} without a valid (non-expired) background check."
     modeladmin.message_user(request, message)
+
+
+def _link_helper_to_dojo(application, account):
+    """An application for a specific dojo gets the new helper a Mentor
+    profile at that dojo — the link dojos.access uses to open that dojo's
+    admin area to them. Kept off the public team pages (is_public=False)
+    until someone opts them in. A helper can help at several dojos (one
+    profile each), so this only skips when the application is open to any
+    dojo or they already have a profile at this one."""
+    if application.dojo_id is None or Mentor.objects.filter(helper_account=account, dojo_id=application.dojo_id).exists():
+        return
+    Mentor.objects.create(
+        name=application.applicant_name,
+        dojo_id=application.dojo_id,
+        role=Mentor.VOLUNTEER,
+        email=application.applicant_email,
+        helper_account=account,
+        is_public=False,
+    )
 
 
 @admin.action(description="Approve & email a helper login to the applicant")
@@ -127,12 +154,11 @@ def approve_and_provision_helper(modeladmin, request, queryset):
             blocked += 1
             continue
         account = _provision_or_promote(application, HelperAccount, "helper", login_url)
-        account.background_check_required = True
-        account.background_check_expires_at = application.background_check_expires_at
-        account.save(update_fields=["background_check_required", "background_check_expires_at"])
+        _apply_background_check(account, application)
         application.status = MentorApplication.APPROVED
         application.provisioned_helper = account
         application.save(update_fields=["status", "provisioned_helper"])
+        _link_helper_to_dojo(application, account)
         approved += 1
     message = f"Provisioned/updated {approved} helper account(s)."
     if blocked:

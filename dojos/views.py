@@ -2,18 +2,20 @@ import requests
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import Point
 from django.core.paginator import Paginator
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from content.models import FAQ
 from events.forms import EventForm
-from events.models import Event
+from events.models import Event, Registration
 from geo.geocoding import find_province, geocode
 from notifications.models import Notification
 
+from .access import EDIT_SETTINGS, MANAGE_EVENTS, TAKE_ATTENDANCE, accessible_dojos, require_dojo_access
 from .forms import DojoProfileForm, DojoSearchForm
 from .models import Dojo, Mentor
 from .search import attach_next_events, dojos_by_distance, resolve_search_origin
@@ -23,14 +25,17 @@ WIDGET_RESULTS_LIMIT = 5
 NOTIFICATION_LIMIT = 10
 
 
-def _get_owned_dojo(request, dojo_id):
-    """A dojo owner's own admin pages (dashboard, manage): 404s rather than
-    403s for a mismatch, so a guessed id doesn't even confirm another
-    dojo's existence — same reasoning as accounts._get_own_guardian."""
-    dojo = get_object_or_404(Dojo, id=dojo_id)
-    if dojo.owner_id != request.user.pk:
-        raise Http404
-    return dojo
+def _admin_context(request, access):
+    """What every page extending dojos/_admin_base.html needs besides its
+    own content: the dojo, the viewer's role/capabilities (`dojo_access`,
+    see dojos.access), the dojos they can switch between, and the
+    notification bell."""
+    return {
+        "dojo": access.dojo,
+        "dojo_access": access,
+        "admin_dojos": accessible_dojos(request.user),
+        **_notification_context(request.user, access.dojo),
+    }
 
 
 def _notification_context(user, dojo):
@@ -106,9 +111,27 @@ def dojo_team(request, dojo_id):
     return render(request, "dojos/dojo_team.html", {"dojo": dojo, "mentors": dojo.mentors.lead_coach_first()})
 
 
+def _attendance_context(event):
+    """What dojos/partials/_attendance.html needs for one event: its
+    confirmed (not waitlisted) registrations, alphabetical, plus how many
+    are already marked present. Shared by the dashboard, the per-event
+    attendance page and the htmx endpoints that re-render parts of it."""
+    registrations = list(
+        event.registration_set.filter(waiting_list=False)
+        .select_related("participant", "pathway")
+        .order_by("participant__name")
+    )
+    return {
+        "event": event,
+        "registrations": registrations,
+        "present_count": sum(1 for r in registrations if r.attended),
+    }
+
+
 @login_required
 def dojo_dashboard(request, dojo_id):
-    dojo = _get_owned_dojo(request, dojo_id)
+    access = require_dojo_access(request, dojo_id)
+    dojo = access.dojo
     # The session whose attendance we're managing: the next upcoming one, or
     # else the most recent past one, so the page still shows something once
     # a dojo's calendar has run out.
@@ -116,22 +139,11 @@ def dojo_dashboard(request, dojo_id):
     if session is None:
         session = dojo.event_set.order_by("-start_time").first()
 
-    registrations = []
-    if session is not None:
-        registrations = (
-            session.registration_set.filter(waiting_list=False)
-            .select_related("participant", "pathway")
-            .order_by("participant__name")
-        )
-    present_count = sum(1 for r in registrations if r.attended)
-
     return render(request, "dojos/dojo_dashboard.html", {
-        "dojo": dojo,
         "session": session,
-        "registrations": registrations,
-        "present_count": present_count,
+        **(_attendance_context(session) if session is not None else {}),
         "active": "attendance",
-        **_notification_context(request.user, dojo),
+        **_admin_context(request, access),
     })
 
 
@@ -145,7 +157,8 @@ def dojo_manage(request, dojo_id):
     they were), and a successful geocode also refreshes province via
     geo.geocoding.find_province so distance search and the map link stay
     accurate without the owner ever touching either field directly."""
-    dojo = _get_owned_dojo(request, dojo_id)
+    access = require_dojo_access(request, dojo_id, EDIT_SETTINGS)
+    dojo = access.dojo
     saved = False
     geocode_failed = False
 
@@ -173,18 +186,19 @@ def dojo_manage(request, dojo_id):
         form = DojoProfileForm(instance=dojo)
 
     return render(request, "dojos/dojo_manage.html", {
-        "dojo": dojo, "form": form, "saved": saved, "geocode_failed": geocode_failed, "active": "settings",
-        **_notification_context(request.user, dojo),
+        "form": form, "saved": saved, "geocode_failed": geocode_failed, "active": "settings",
+        **_admin_context(request, access),
     })
 
 
 @login_required
 def dojo_event_list(request, dojo_id):
-    dojo = _get_owned_dojo(request, dojo_id)
+    access = require_dojo_access(request, dojo_id)
+    dojo = access.dojo
     events = dojo.event_set.order_by("-start_time")
     return render(request, "dojos/dojo_event_list.html", {
-        "dojo": dojo, "events": events, "active": "events",
-        **_notification_context(request.user, dojo),
+        "events": events, "active": "events",
+        **_admin_context(request, access),
     })
 
 
@@ -193,8 +207,9 @@ def dojo_event_create(request, dojo_id):
     """A new session always starts out Draft (Event.status' model default)
     — see EventForm's docstring for why status isn't a field on this form
     at all. The owner publishes it (draft -> open) from the events list
-    once it's ready, via dojo_event_set_status."""
-    dojo = _get_owned_dojo(request, dojo_id)
+    or its detail page once it's ready, via dojo_event_set_status."""
+    access = require_dojo_access(request, dojo_id, MANAGE_EVENTS)
+    dojo = access.dojo
 
     if request.method == "POST":
         form = EventForm(request.POST, request.FILES, instance=Event(dojo=dojo), dojo=dojo)
@@ -205,8 +220,8 @@ def dojo_event_create(request, dojo_id):
         form = EventForm(instance=Event(dojo=dojo), dojo=dojo)
 
     return render(request, "dojos/dojo_event_create.html", {
-        "dojo": dojo, "form": form, "active": "events",
-        **_notification_context(request.user, dojo),
+        "form": form, "active": "events",
+        **_admin_context(request, access),
     })
 
 
@@ -218,8 +233,10 @@ def dojo_event_detail(request, dojo_id, event_id):
     "no redirect, just show a saved banner" convention as dojo_manage,
     since this is an edit-in-place settings-style form, not a one-shot
     creation. Status is changed separately, via dojo_event_set_status —
-    the status card at the top of the template posts there directly."""
-    dojo = _get_owned_dojo(request, dojo_id)
+    the status card at the top of the template posts there directly, so
+    saving the form never touches status and vice versa."""
+    access = require_dojo_access(request, dojo_id, MANAGE_EVENTS)
+    dojo = access.dojo
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
     saved = False
 
@@ -232,31 +249,31 @@ def dojo_event_detail(request, dojo_id, event_id):
         form = EventForm(instance=event, dojo=dojo)
 
     return render(request, "dojos/dojo_event_detail.html", {
-        "dojo": dojo, "event": event, "form": form, "saved": saved, "active": "events",
-        **_notification_context(request.user, dojo),
+        "event": event, "form": form, "saved": saved, "active": "events",
+        **_admin_context(request, access),
     })
 
 
 @login_required
 def dojo_event_set_status(request, dojo_id, event_id):
-    """The two manual status transitions available from the events list and
-    the event detail page: "Publish" (draft -> open, makes the session
-    visible and open for registration) and "Close registrations" (open ->
-    closed — normally done once attendance for the session has been
-    checked). Each only fires from the specific status it's valid from, so
-    a stale page (two tabs open, a slow double-click) can't apply the same
-    transition twice or skip a state.
+    """Sets an event's status directly — any of draft/open/closed, from any
+    other one. Not a one-way lifecycle: an owner can reopen a closed
+    session, or pull a published one back to draft (hiding it from the
+    public site again — existing registrations are kept, not cancelled).
+    Posting an absolute target status (rather than a "next step" action)
+    keeps a stale page or double-click harmless: it just re-applies the
+    same status. An unknown status value is ignored.
 
     Redirects back to `next` (posted by whichever page linked here — the
     list or the detail page) when it's a safe same-site URL, else falls
     back to the events list."""
-    dojo = _get_owned_dojo(request, dojo_id)
+    access = require_dojo_access(request, dojo_id, MANAGE_EVENTS)
+    dojo = access.dojo
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
-    transitions = {"publish": (Event.DRAFT, Event.OPEN), "close": (Event.OPEN, Event.CLOSED)}
 
     if request.method == "POST":
-        required_status, new_status = transitions.get(request.POST.get("action"), (None, None))
-        if required_status is not None and event.status == required_status:
+        new_status = request.POST.get("status")
+        if new_status in dict(Event.STATUS_CHOICES) and new_status != event.status:
             event.status = new_status
             event.save(update_fields=["status"])
 
@@ -266,6 +283,67 @@ def dojo_event_set_status(request, dojo_id, event_id):
     ):
         return redirect(next_url)
     return redirect("dojo_event_list", dojo_id=dojo.id)
+
+
+ATTENDANCE_VALUES = {"present": True, "absent": False, "none": None}
+
+
+@login_required
+def dojo_event_attendance(request, dojo_id, event_id):
+    """Take attendance for one specific session — reached from that event's
+    detail page. Same list as the dashboard's (dojos/partials/_attendance.html),
+    which only ever shows the next/most recent session."""
+    access = require_dojo_access(request, dojo_id, TAKE_ATTENDANCE)
+    dojo = access.dojo
+    event = get_object_or_404(Event, id=event_id, dojo=dojo)
+    return render(request, "dojos/dojo_event_attendance.html", {
+        **_attendance_context(event),
+        "active": "events",
+        **_admin_context(request, access),
+    })
+
+
+@login_required
+def dojo_event_attendance_mark(request, dojo_id, event_id, registration_id):
+    """Set one confirmed registration's `attended` to present/absent/none
+    (POST `attended`). An htmx request gets back just that row, plus the
+    "N of M present" summary out-of-band; a plain form post (no JS)
+    redirects back to the event's attendance page. Waitlisted registrations
+    404 — only confirmed places are listed, so only those can be marked."""
+    access = require_dojo_access(request, dojo_id, TAKE_ATTENDANCE)
+    dojo = access.dojo
+    event = get_object_or_404(Event, id=event_id, dojo=dojo)
+    registration = get_object_or_404(
+        Registration.objects.select_related("participant", "pathway"),
+        id=registration_id, event=event, waiting_list=False,
+    )
+
+    if request.method == "POST" and request.POST.get("attended") in ATTENDANCE_VALUES:
+        registration.attended = ATTENDANCE_VALUES[request.POST["attended"]]
+        registration.save(update_fields=["attended"])
+
+    if request.headers.get("HX-Request"):
+        context = {"dojo": dojo, "dojo_access": access, **_attendance_context(event), "registration": registration}
+        row = render_to_string("dojos/partials/_attendance_row.html", context, request=request)
+        summary = render_to_string("dojos/partials/_attendance_summary.html", {**context, "oob": True}, request=request)
+        return HttpResponse(row + summary)
+    return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
+
+
+@login_required
+def dojo_event_attendance_mark_all(request, dojo_id, event_id):
+    """The "Mark all present" button — every confirmed registration for the event. An
+    htmx request gets the whole re-rendered attendance block back."""
+    access = require_dojo_access(request, dojo_id, TAKE_ATTENDANCE)
+    dojo = access.dojo
+    event = get_object_or_404(Event, id=event_id, dojo=dojo)
+
+    if request.method == "POST":
+        event.registration_set.filter(waiting_list=False).update(attended=True)
+
+    if request.headers.get("HX-Request"):
+        return render(request, "dojos/partials/_attendance.html", {"dojo": dojo, "dojo_access": access, **_attendance_context(event)})
+    return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
 
 
 @login_required
@@ -279,7 +357,8 @@ def open_notification(request, dojo_id, notification_id):
     recipient=request.user (on top of the usual dojo-ownership check) matters
     here specifically — read state is per-recipient, so one owner must not
     be able to mark a co-owner's copy of a dojo-level notification read."""
-    dojo = _get_owned_dojo(request, dojo_id)
+    access = require_dojo_access(request, dojo_id)
+    dojo = access.dojo
     notification = get_object_or_404(Notification, id=notification_id, recipient=request.user, dojo=dojo)
     if not notification.read:
         notification.read = True
@@ -293,7 +372,8 @@ def mark_all_notifications_read(request, dojo_id):
     form, see _notification_bell.html): the response's own hx-swap-oob="true"
     root is what actually places it, so no target/swap mode needs setting
     here beyond suppressing htmx's normal (non-oob) placement."""
-    dojo = _get_owned_dojo(request, dojo_id)
+    access = require_dojo_access(request, dojo_id)
+    dojo = access.dojo
     if request.method == "POST":
         Notification.objects.filter(recipient=request.user, dojo=dojo, read=False).update(read=True)
     return render(request, "dojos/partials/_notification_bell.html", {

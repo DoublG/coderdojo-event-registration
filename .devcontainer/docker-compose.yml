@@ -42,8 +42,17 @@ services:
       EMAIL_USE_TLS: "true"
       DEFAULT_FROM_EMAIL: "CoderDojo Belgium <noreply@coolregistration.localhost>"
 
+      # Claude Code keeps its login, settings, memory and session history
+      # under this dir. Setting it explicitly also moves its global config
+      # file (normally ~/.claude.json, outside ~/.claude) into the same dir,
+      # so everything lands on the claude-config volume below and survives
+      # a container rebuild.
+      CLAUDE_CONFIG_DIR: /root/.claude
+
     volumes:
       - ..:/workspace:cached
+      # Persist Claude Code auth/sessions across rebuilds (see CLAUDE_CONFIG_DIR).
+      - claude-config:/root/.claude
 
     working_dir: /workspace
 
@@ -108,3 +117,4 @@ services:
 
 volumes:
   db-data:
+  claude-config:

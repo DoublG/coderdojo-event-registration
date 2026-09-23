@@ -52,6 +52,36 @@ class Dojo(models.Model):
     def __str__(self):
         return f"{self.name} ({self.municipality})"
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.sync_lead_coach()
+
+    def sync_lead_coach(self):
+        """The dojo's owner *is* its Lead Coach: keeps exactly one LEAD_COACH
+        Mentor here, linked to the current owner. Runs on every save, so
+        setting or changing Dojo.owner anywhere (Django admin, seed data,
+        future self-service flows) keeps the team page in step. Idempotent.
+
+        A previous owner's Lead Coach profile isn't deleted when ownership
+        changes — events it's linked to (Event.mentors) would lose their
+        history — it's demoted to a plain volunteer profile with no login
+        link instead."""
+        stale = self.mentors.filter(role=Mentor.LEAD_COACH)
+        if self.owner_id:
+            stale = stale.exclude(owner_account_id=self.owner_id)
+        stale.update(role=Mentor.VOLUNTEER, owner_account=None)
+
+        if not self.owner_id or self.mentors.filter(role=Mentor.LEAD_COACH).exists():
+            return
+        owner = self.owner
+        Mentor.objects.create(
+            dojo=self,
+            role=Mentor.LEAD_COACH,
+            owner_account=owner,
+            name=owner.get_full_name() or owner.get_username(),
+            email=owner.email,
+        )
+
 
 class MentorQuerySet(models.QuerySet):
     def public(self):
@@ -68,8 +98,10 @@ class MentorQuerySet(models.QuerySet):
 
 class Mentor(models.Model):
     """A public team-page profile. Exactly one role per dojo carries real
-    operational authority — LEAD_COACH — and that one must be linked to the
-    dojo's own DojoOwner login (owner_account); it's always shown first.
+    operational authority — LEAD_COACH — and that one is the dojo's owner:
+    linked to the dojo's own DojoOwner login (owner_account), created and
+    kept in step with Dojo.owner automatically (Dojo.sync_lead_coach), and
+    always shown first.
     CHAMPION is a distinct, separate role: an honorary/promoted status (e.g.
     a stand-out ninja recognised by someone with admin rights) with no
     account requirement of its own. Every non-lead-coach role (champion,
@@ -112,12 +144,20 @@ class Mentor(models.Model):
     # Exactly one of these four should be set — see the class docstring
     # and clean(). All nullable/optional: plenty of mentor profiles (e.g.
     # seed/demo data, or a dojo's ninjas in general) have no login at all.
-    owner_account = models.OneToOneField(
-        "accounts.DojoOwner", on_delete=models.SET_NULL, null=True, blank=True, related_name="mentor_profile",
-        help_text="Required for the LEAD_COACH mentor — must be this mentor's dojo's own owner login.",
+    # A ForeignKey: an owner of several dojos is the Lead Coach of each
+    # (one profile per dojo — see Dojo.sync_lead_coach, which keeps this in
+    # step with Dojo.owner automatically).
+    owner_account = models.ForeignKey(
+        "accounts.DojoOwner", on_delete=models.SET_NULL, null=True, blank=True, related_name="mentor_profiles",
+        help_text="Required for the LEAD_COACH mentor — must be this mentor's dojo's own owner login. "
+                  "Set automatically from the dojo's owner.",
     )
-    helper_account = models.OneToOneField(
-        "accounts.HelperAccount", on_delete=models.SET_NULL, null=True, blank=True, related_name="mentor_profile",
+    # A ForeignKey, not a one-to-one like the other three: a helper can
+    # help at several dojos (one Mentor profile per dojo), the same way a
+    # DojoOwner can own several (Dojo.owner). Each profile is also what
+    # opens that dojo's admin area to them — see dojos.access.
+    helper_account = models.ForeignKey(
+        "accounts.HelperAccount", on_delete=models.SET_NULL, null=True, blank=True, related_name="mentor_profiles",
     )
     guardian_account = models.OneToOneField(
         "accounts.Guardian", on_delete=models.SET_NULL, null=True, blank=True, related_name="mentor_profile",
@@ -133,6 +173,15 @@ class Mentor(models.Model):
     )
 
     objects = MentorQuerySet.as_manager()
+
+    class Meta:
+        constraints = [
+            # One profile per helper per dojo. Rows without a helper login
+            # (NULL helper_account) never collide — NULLs are distinct in a
+            # unique index.
+            models.UniqueConstraint(fields=["dojo", "helper_account"], name="unique_helper_per_dojo"),
+            models.UniqueConstraint(fields=["dojo", "owner_account"], name="unique_owner_profile_per_dojo"),
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.get_role_display()})"
@@ -150,5 +199,8 @@ class Mentor(models.Model):
                 raise ValidationError("The Lead Coach must be linked to the dojo's owner account.")
             if self.dojo_id and self.owner_account.dojos.filter(id=self.dojo_id).count() == 0:
                 raise ValidationError("The linked owner account must own this mentor's dojo.")
+            other_lead = Mentor.objects.filter(dojo_id=self.dojo_id, role=self.LEAD_COACH).exclude(pk=self.pk)
+            if self.dojo_id and other_lead.exists():
+                raise ValidationError("This dojo already has a Lead Coach — its owner.")
         elif self.owner_account_id:
             raise ValidationError("Only the Lead Coach can be linked to a dojo owner account.")

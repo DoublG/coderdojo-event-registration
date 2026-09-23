@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 18:04+0000\n"
+"POT-Creation-Date: 2026-09-23 22:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -26,30 +26,20 @@ msgstr "Een sessie begeleiden"
 
 #: ../../source/dojo-team/running-a-session.rst:4
 msgid ""
-"A dojo owner's dashboard is built around the dojo's next upcoming session"
-" (or its most recent past one, if nothing's scheduled), showing who's "
-"confirmed for it."
+"A dojo's dashboard (for its owner and helpers) is built around the dojo's"
+" next upcoming session (or its most recent past one, if nothing's "
+"scheduled), showing who's confirmed for it."
 msgstr ""
-"Het dashboard van een dojobeheerder is opgebouwd rond de eerstvolgende "
-"sessie van de dojo (of de meest recente sessie uit het verleden, als er "
-"niets gepland is), en toont wie hiervoor bevestigd is."
+"Het dashboard van een dojo (voor de dojobeheerder en de helpers) is "
+"opgebouwd rond de eerstvolgende sessie van de dojo (of de meest recente "
+"sessie uit het verleden, als er niets gepland is), en toont wie hiervoor "
+"bevestigd is."
 
-#: ../../source/dojo-team/running-a-session.rst:10
-msgid ""
-"The attendance dashboard is under active development. This page will be "
-"updated as marking attendance for a session is wired up — check back, or "
-"ask CoderDojo Belgium if you need to track attendance in the meantime."
-msgstr ""
-"Het aanwezigheidsdashboard wordt momenteel actief ontwikkeld. Deze pagina"
-" wordt bijgewerkt zodra het aanvinken van aanwezigheid voor een sessie is"
-" ingebouwd — kom later terug, of neem contact op met CoderDojo België als"
-" u intussen de aanwezigheid moet bijhouden."
-
-#: ../../source/dojo-team/running-a-session.rst:16
+#: ../../source/dojo-team/running-a-session.rst:9
 msgid "Scheduling a session"
 msgstr "Een sessie inplannen"
 
-#: ../../source/dojo-team/running-a-session.rst:18
+#: ../../source/dojo-team/running-a-session.rst:11
 msgid ""
 "From your dashboard's **Events** page, **New event** creates a new "
 "session for your dojo — name, a date with a start and end time (a session"
@@ -58,13 +48,13 @@ msgid ""
 "a venue, description, an age range and one or more mentors."
 msgstr ""
 "Vanaf de pagina **Evenementen** van uw dashboard maakt **Nieuw "
-"evenement** een nieuwe sessie aan voor uw dojo — naam, een datum met "
-"een begin- en eindtijd (een sessie speelt zich altijd binnen één dag "
-"af, in te voeren als dd/mm/jjjj en een 24-uurstijd, bijvoorbeeld "
-"20/07/2030 en 14:00), het aantal plaatsen, en optioneel een locatie, "
-"beschrijving, leeftijdscategorie en een of meer mentoren."
+"evenement** een nieuwe sessie aan voor uw dojo — naam, een datum met een "
+"begin- en eindtijd (een sessie speelt zich altijd binnen één dag af, in "
+"te voeren als dd/mm/jjjj en een 24-uurstijd, bijvoorbeeld 20/07/2030 en "
+"14:00), het aantal plaatsen, en optioneel een locatie, beschrijving, "
+"leeftijdscategorie en een of meer mentoren."
 
-#: ../../source/dojo-team/running-a-session.rst:24
+#: ../../source/dojo-team/running-a-session.rst:17
 msgid ""
 "For the banner image, pick one of the ready-made templates shown on the "
 "form, or upload your own further down — uploading a file always takes "
@@ -74,15 +64,36 @@ msgstr ""
 "formulier, of upload er zelf een verder naar beneden — een geüpload "
 "bestand krijgt altijd voorrang als u beide doet."
 
-#: ../../source/dojo-team/running-a-session.rst:28
+#: ../../source/dojo-team/running-a-session.rst:22
+msgid "Editing a session"
+msgstr "Een sessie bewerken"
+
+#: ../../source/dojo-team/running-a-session.rst:24
 msgid ""
-"A session always goes through three states, shown as a badge next to it "
+"Click a session's name (or **Edit**) on the **Events** list to open its "
+"page, where you can change any of the details you entered when creating "
+"it. **Save changes** keeps you on the same page, so you can check the "
+"result straight away."
+msgstr ""
+"Klik op de naam van een sessie (of op **Bewerken**) in de lijst "
+"**Evenementen** om de pagina ervan te openen, waar u alle gegevens kunt "
+"wijzigen die u bij het aanmaken hebt ingevuld. **Wijzigingen opslaan** "
+"houdt u op dezelfde pagina, zodat u het resultaat meteen kunt "
+"controleren."
+
+#: ../../source/dojo-team/running-a-session.rst:30
+msgid "Session status"
+msgstr "Status van een sessie"
+
+#: ../../source/dojo-team/running-a-session.rst:32
+msgid ""
+"A session is always in one of three states, shown as a badge next to it "
 "on the **Events** list:"
 msgstr ""
-"Een sessie doorloopt altijd drie statussen, weergegeven als een badge "
-"ernaast in de lijst **Evenementen**:"
+"Een sessie heeft altijd een van deze drie statussen, weergegeven als een "
+"badge ernaast in de lijst **Evenementen**:"
 
-#: ../../source/dojo-team/running-a-session.rst:31
+#: ../../source/dojo-team/running-a-session.rst:35
 msgid ""
 "**Draft** — a new session starts here. It's completely hidden from the "
 "public site (the dojo-finder, the Events list, your dojo's own page) "
@@ -95,7 +106,7 @@ msgstr ""
 " er is geen haast om alle velden in te vullen voordat ze klaar is om "
 "getoond te worden."
 
-#: ../../source/dojo-team/running-a-session.rst:35
+#: ../../source/dojo-team/running-a-session.rst:39
 msgid ""
 "**Open** — once you're happy with it, **Publish** makes the session "
 "visible on the public site and open for families to sign up."
@@ -103,7 +114,7 @@ msgstr ""
 "**Open** — zodra u tevreden bent, maakt **Publiceren** de sessie "
 "zichtbaar op de openbare site en open voor inschrijvingen door gezinnen."
 
-#: ../../source/dojo-team/running-a-session.rst:37
+#: ../../source/dojo-team/running-a-session.rst:41
 msgid ""
 "**Closed** — **Close registrations** turns off further sign-ups for that "
 "session, without hiding it. This is a manual step, normally done once "
@@ -115,22 +126,63 @@ msgstr ""
 " meestal uitgevoerd nadat u de aanwezigheid voor de sessie hebt "
 "gecontroleerd en er geen nieuwe inschrijvingen meer bij wilt."
 
-#: ../../source/dojo-team/running-a-session.rst:42
+#: ../../source/dojo-team/running-a-session.rst:46
 msgid ""
-"Each of these is a one-way step forward (draft → open → closed) — there's"
-" currently no way to send a session back to an earlier state from the "
-"dashboard; get in touch with CoderDojo Belgium if you need one corrected."
+"You can switch a session between any of these states at any time, from "
+"the status card at the top of its page: a closed session can be reopened "
+"(**Reopen registrations**), and an open or closed one can be taken off "
+"the public site again with **Back to draft**. The **Events** list also "
+"has a quick button for the most common next step (**Publish**, **Close "
+"registrations** or **Reopen**). Changing the status never removes anyone "
+"who has already signed up."
 msgstr ""
-"Elk van deze stappen gaat slechts in één richting vooruit (concept → open"
-" → gesloten) — er is momenteel geen manier om een sessie vanuit het "
-"dashboard terug naar een eerdere status te zetten; neem contact op met "
-"CoderDojo België als u er een moet corrigeren."
+"U kunt een sessie op elk moment tussen al deze statussen laten wisselen, "
+"via de statuskaart bovenaan de pagina ervan: een gesloten sessie kan "
+"opnieuw worden geopend (**Inschrijvingen heropenen**), en een open of "
+"gesloten sessie kan met **Terug naar concept** weer van de openbare site "
+"worden gehaald. De lijst **Evenementen** heeft ook een snelknop voor de "
+"meest voorkomende volgende stap (**Publiceren**, **Inschrijvingen "
+"sluiten** of **Heropenen**). Een statuswijziging verwijdert nooit iemand "
+"die zich al heeft ingeschreven."
 
-#: ../../source/dojo-team/running-a-session.rst:47
+#: ../../source/dojo-team/running-a-session.rst:55
+msgid "Taking attendance"
+msgstr "Aanwezigheden bijhouden"
+
+#: ../../source/dojo-team/running-a-session.rst:57
+msgid ""
+"On a session's page, **Take attendance** opens the list of everyone with "
+"a confirmed place (children on the waiting list aren't shown). Tap "
+"**Present** or **Absent** next to each child; it's saved straight away, "
+"and the count at the top (\"3 of 12 present\") updates as you go. Tapping"
+" the highlighted button again clears the mark, in case you tapped the "
+"wrong one. **Mark all present** marks everyone present in one go, after "
+"which you can switch the few who didn't come to **Absent**."
+msgstr ""
+"Op de pagina van een sessie opent **Aanwezigheden bijhouden** de lijst "
+"van iedereen met een bevestigde plaats (kinderen op de wachtlijst worden "
+"niet getoond). Tik op **Aanwezig** of **Afwezig** naast elk kind; dat "
+"wordt meteen opgeslagen, en de teller bovenaan (\"3 van 12 aanwezig\") "
+"wordt gaandeweg bijgewerkt. Tik nogmaals op de gemarkeerde knop om de "
+"keuze te wissen, voor het geval u zich vergist hebt. **Iedereen "
+"aanwezig** markeert iedereen in één keer als aanwezig, waarna u de "
+"enkelen die niet kwamen op **Afwezig** kunt zetten."
+
+#: ../../source/dojo-team/running-a-session.rst:65
+msgid ""
+"Your dashboard's **Attendance** page shows the same list for your next "
+"upcoming session (or your most recent one, if nothing's scheduled), so on"
+" the day itself you can start marking without looking the session up."
+msgstr ""
+"De pagina **Aanwezigheid** van uw dashboard toont dezelfde lijst voor uw "
+"volgende sessie (of de meest recente, als er niets gepland is), zodat u "
+"op de dag zelf meteen kunt beginnen zonder de sessie te moeten opzoeken."
+
+#: ../../source/dojo-team/running-a-session.rst:70
 msgid "Team pages"
 msgstr "Teampagina's"
 
-#: ../../source/dojo-team/running-a-session.rst:49
+#: ../../source/dojo-team/running-a-session.rst:72
 msgid ""
 "A dojo's public team page (visible to anyone, not just the dojo team) "
 "shows its mentors, with the lead coach always listed first. Team member "
@@ -143,4 +195,40 @@ msgstr ""
 "vermeld. Gegevens van teamleden — bio, titel, aandachtsgebieden — worden "
 "momenteel namens u beheerd door CoderDojo België in plaats van "
 "zelfbediening; neem contact op om de uwe bij te werken."
+
+#~ msgid ""
+#~ "Each of these is a one-way "
+#~ "step forward (draft → open → "
+#~ "closed) — there's currently no way "
+#~ "to send a session back to an "
+#~ "earlier state from the dashboard; get"
+#~ " in touch with CoderDojo Belgium if"
+#~ " you need one corrected."
+#~ msgstr ""
+#~ "Elk van deze stappen gaat slechts "
+#~ "in één richting vooruit (concept → "
+#~ "open → gesloten) — er is momenteel"
+#~ " geen manier om een sessie vanuit "
+#~ "het dashboard terug naar een eerdere "
+#~ "status te zetten; neem contact op "
+#~ "met CoderDojo België als u er een"
+#~ " moet corrigeren."
+
+#~ msgid ""
+#~ "The attendance dashboard is under active"
+#~ " development. This page will be "
+#~ "updated as marking attendance for a "
+#~ "session is wired up — check back,"
+#~ " or ask CoderDojo Belgium if you "
+#~ "need to track attendance in the "
+#~ "meantime."
+#~ msgstr ""
+#~ "Het aanwezigheidsdashboard wordt momenteel "
+#~ "actief ontwikkeld. Deze pagina wordt "
+#~ "bijgewerkt zodra het aanvinken van "
+#~ "aanwezigheid voor een sessie is "
+#~ "ingebouwd — kom later terug, of "
+#~ "neem contact op met CoderDojo België "
+#~ "als u intussen de aanwezigheid moet "
+#~ "bijhouden."
 

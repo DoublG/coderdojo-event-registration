@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import DojoOwner, Guardian, HelperAccount, User
-from dojos.models import Dojo
+from dojos.models import Dojo, Mentor
 
 from .admin import (
     approve_and_provision_helper,
@@ -592,6 +592,25 @@ class ApproveAndProvisionOwnerActionTests(TestCase):
         self.assertEqual(DojoOwner.objects.filter(pk=owner.pk).count(), 1)
 
 
+    def test_existing_owner_approved_for_a_second_dojo_application(self):
+        """Both applications keep pointing at the same owner — the link is a
+        ForeignKey, so the second approval doesn't collide with the first."""
+        owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
+        first = self._validated_application(applicant_email="owner@example.com", applicant_account=owner)
+        second = self._validated_application(applicant_email="owner@example.com", applicant_account=owner)
+
+        for application in (first, second):
+            approve_and_provision_owner(
+                Mock(), _request_as(self.staff_user), DojoApplication.objects.filter(pk=application.pk),
+            )
+
+        first.refresh_from_db()
+        second.refresh_from_db()
+        self.assertEqual(first.provisioned_owner, owner)
+        self.assertEqual(second.provisioned_owner, owner)
+        self.assertEqual(set(owner.applications.all()), {first, second})
+
+
 class ApproveAndProvisionHelperActionTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -609,6 +628,98 @@ class ApproveAndProvisionHelperActionTests(TestCase):
         application.refresh_from_db()
         self.assertEqual(application.status, MentorApplication.APPROVED)
         self.assertTrue(HelperAccount.objects.filter(email="tom@example.com").exists())
+
+    def test_application_for_a_dojo_links_the_helper_to_it(self):
+        """The Mentor link is what gives a helper access to that dojo's
+        admin area (dojos.access) — kept off the public team page."""
+        dojo = Dojo.objects.create(name="Ghent")
+        application = MentorApplication.objects.create(
+            applicant_name="Tom", applicant_email="tom@example.com", dojo=dojo,
+            background_check_status=BackgroundCheckMixin.VALIDATED,
+            background_check_expires_at=timezone.now() + timedelta(days=1),
+        )
+
+        approve_and_provision_helper(
+            Mock(), _request_as(self.staff_user), MentorApplication.objects.filter(pk=application.pk),
+        )
+
+        helper = HelperAccount.objects.get(email="tom@example.com")
+        mentor = Mentor.objects.get(helper_account=helper)
+        self.assertEqual(mentor.dojo, dojo)
+        self.assertEqual(mentor.role, Mentor.VOLUNTEER)
+        self.assertFalse(mentor.is_public)
+
+    def test_application_open_to_any_dojo_creates_no_link(self):
+        application = MentorApplication.objects.create(
+            applicant_name="Tom", applicant_email="tom@example.com",
+            background_check_status=BackgroundCheckMixin.VALIDATED,
+            background_check_expires_at=timezone.now() + timedelta(days=1),
+        )
+
+        approve_and_provision_helper(
+            Mock(), _request_as(self.staff_user), MentorApplication.objects.filter(pk=application.pk),
+        )
+
+        self.assertFalse(Mentor.objects.exists())
+
+    def _validated_helper_application(self, **fields):
+        return MentorApplication.objects.create(
+            applicant_name="Tom", applicant_email="tom@example.com",
+            background_check_status=BackgroundCheckMixin.VALIDATED,
+            background_check_expires_at=timezone.now() + timedelta(days=1),
+            **fields,
+        )
+
+    def _approve(self, application):
+        approve_and_provision_helper(
+            Mock(), _request_as(self.staff_user), MentorApplication.objects.filter(pk=application.pk),
+        )
+
+    def test_existing_helper_approved_for_a_second_dojo(self):
+        """Helpers can help at several dojos, like owners can own several:
+        a second approved application adds a second Mentor link (and a
+        second provisioned_helper pointer) instead of failing or moving
+        the first."""
+        ghent = Dojo.objects.create(name="Ghent")
+        antwerp = Dojo.objects.create(name="Antwerp")
+        first = self._validated_helper_application(dojo=ghent)
+        self._approve(first)
+        helper = HelperAccount.objects.get(email="tom@example.com")
+
+        second = self._validated_helper_application(dojo=antwerp, applicant_account=helper)
+        self._approve(second)
+
+        self.assertEqual(HelperAccount.objects.count(), 1)
+        self.assertEqual(
+            set(Mentor.objects.filter(helper_account=helper).values_list("dojo__name", flat=True)),
+            {"Ghent", "Antwerp"},
+        )
+        first.refresh_from_db()
+        second.refresh_from_db()
+        self.assertEqual(first.provisioned_helper, helper)
+        self.assertEqual(second.provisioned_helper, helper)
+        self.assertEqual(second.status, MentorApplication.APPROVED)
+
+    def test_second_application_for_the_same_dojo_adds_no_duplicate_link(self):
+        ghent = Dojo.objects.create(name="Ghent")
+        helper = HelperAccount.objects.create(username="tom", email="tom@example.com")
+        existing = Mentor.objects.create(name="Tom", dojo=ghent, role=Mentor.VOLUNTEER, helper_account=helper)
+
+        self._approve(self._validated_helper_application(dojo=ghent, applicant_account=helper))
+
+        self.assertEqual(list(Mentor.objects.all()), [existing])
+
+    def test_second_approval_never_shortens_the_accounts_check(self):
+        later = timezone.now() + timedelta(days=300)
+        helper = HelperAccount.objects.create(
+            username="tom", email="tom@example.com",
+            background_check_required=True, background_check_expires_at=later,
+        )
+
+        self._approve(self._validated_helper_application(dojo=Dojo.objects.create(name="Ghent"), applicant_account=helper))
+
+        helper.refresh_from_db()
+        self.assertEqual(helper.background_check_expires_at, later)
 
     def test_blocked_without_a_valid_background_check(self):
         application = MentorApplication.objects.create(applicant_name="Tom", applicant_email="tom@example.com")
@@ -890,6 +1001,28 @@ class RenewBackgroundCheckViewTests(TestCase):
         application.refresh_from_db()
         self.assertEqual(application.background_check_status, BackgroundCheckMixin.SUBMITTED)
         self.addCleanup(application.background_check_document.delete, save=False)
+
+    def test_helper_with_several_applications_renews_the_most_recent(self):
+        """A helper approved for several dojos has one application each; the
+        renewal goes onto the most recently submitted one."""
+        helper = HelperAccount.objects.create(
+            username="helper1", background_check_required=True,
+            background_check_expires_at=timezone.now() - timedelta(days=1),
+        )
+        common = {
+            "applicant_name": "Tom", "applicant_email": "tom@example.com", "provisioned_helper": helper,
+            "background_check_status": BackgroundCheckMixin.VALIDATED,
+            "background_check_expires_at": timezone.now() - timedelta(days=1),
+        }
+        older = MentorApplication.objects.create(**common)
+        newer = MentorApplication.objects.create(**common)
+        MentorApplication.objects.filter(pk=older.pk).update(submitted_at=timezone.now() - timedelta(days=30))
+        self.client.force_login(helper)
+
+        response = self.client.get(reverse("renew_background_check"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["application"], newer)
 
     def test_helper_can_upload_without_a_token(self):
         helper = HelperAccount.objects.create(

@@ -3,7 +3,9 @@
 {% block admin_heading %}Events{% endblock %}
 
 {% block admin_topbar_extra %}
-  <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_event_create' dojo_id=dojo.id %}">New event</a>
+  {% if dojo_access.can_manage_events %}
+    <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_event_create' dojo_id=dojo.id %}">New event</a>
+  {% endif %}
 {% endblock %}
 
 {% block admin_extra_style %}
@@ -28,7 +30,7 @@
         {% for event in events %}
           <tr>
             <td class="body-sm">{{ event.start_time|date:"D j M Y, H:i" }}</td>
-            <td class="body-sm">{{ event.name }}</td>
+            <td class="body-sm">{% if dojo_access.can_manage_events %}<a href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">{{ event.name }}</a>{% else %}{{ event.name }}{% endif %}</td>
             <td class="body-sm">
               {% if event.status == 'draft' %}
                 <span class="cd-badge cd-badge--outline caption">Draft</span>
@@ -41,18 +43,21 @@
             <td class="body-sm cd-table__num">{{ event.places_left }} / {{ event.places }}</td>
             <td class="body-sm">
               <div class="event-list-actions">
-                {% if event.status == 'draft' %}
+                {% if dojo_access.can_manage_events %}
                   <form method="post" action="{% url 'dojo_event_set_status' dojo_id=dojo.id event_id=event.id %}">
                     {% csrf_token %}
-                    <input type="hidden" name="action" value="publish">
-                    <button type="submit" class="cd-btn cd-btn--secondary label">Publish</button>
+                    {% if event.status == 'draft' %}
+                      <button type="submit" name="status" value="open" class="cd-btn cd-btn--secondary label">Publish</button>
+                    {% elif event.status == 'open' %}
+                      <button type="submit" name="status" value="closed" class="cd-btn cd-btn--ghost label">Close registrations</button>
+                    {% else %}
+                      <button type="submit" name="status" value="open" class="cd-btn cd-btn--ghost label">Reopen</button>
+                    {% endif %}
                   </form>
-                {% elif event.status == 'open' %}
-                  <form method="post" action="{% url 'dojo_event_set_status' dojo_id=dojo.id event_id=event.id %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="close">
-                    <button type="submit" class="cd-btn cd-btn--ghost label">Close registrations</button>
-                  </form>
+                  <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">Edit</a>
+                {% endif %}
+                {% if dojo_access.can_take_attendance %}
+                  <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_attendance' dojo_id=dojo.id event_id=event.id %}">Attendance</a>
                 {% endif %}
               </div>
             </td>

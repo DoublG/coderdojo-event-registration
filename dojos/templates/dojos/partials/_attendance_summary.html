@@ -1,0 +1,7 @@
+{% comment %}
+"N of M present" — rendered inside _attendance.html, and re-sent out-of-band
+(`oob`) alongside each single-row update from dojo_event_attendance_mark.
+{% endcomment %}
+<p class="cd-attendance__summary caption" id="attendance-summary-{{ event.id }}"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {{ present_count }} of {{ registrations|length }} present
+</p>

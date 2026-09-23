@@ -35,3 +35,8 @@ that's cleared. If you didn't already have an account, you'll receive your
 login details by email at that point, with a temporary password you'll be
 asked to replace the first time you log in; if you did, you'll simply be
 notified that the volunteer role is now active — no new password needed.
+
+Already helping at one dojo and want to help at another too? Choose
+**Help at another dojo** from your account menu while logged in and apply
+again, picking the new dojo. Once it's approved, both dojos appear in your
+dashboard's dojo switcher — you keep a single login for all of them.

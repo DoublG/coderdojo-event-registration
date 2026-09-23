@@ -15,10 +15,12 @@ def _notification_context(user, dojo_id):
 
 
 @database_sync_to_async
-def _owns_dojo(user, dojo_id):
+def _has_dojo_access(user, dojo_id):
+    from dojos.access import dojo_role
     from dojos.models import Dojo
 
-    return Dojo.objects.filter(id=dojo_id, owner_id=user.pk).exists()
+    dojo = Dojo.objects.filter(id=dojo_id).first()
+    return dojo is not None and dojo_role(user, dojo) is not None
 
 
 class NotificationConsumer(AsyncWebsocketConsumer):
@@ -33,16 +35,17 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     _notification_bell.html, the same partial the initial page load and
     the mark-all-read htmx endpoint both render from.
 
-    Ownership is checked once, at connect time, the same 404-not-403
-    reasoning as dojos._get_owned_dojo: a mismatch just refuses the
+    Admin access (owner or helper — see dojos.access) is checked once, at
+    connect time, the same 404-not-403 reasoning as
+    dojos.access.require_dojo_access: a mismatch just refuses the
     connection rather than accepting it, so a guessed dojo_id doesn't even
-    confirm that dojo exists to someone who doesn't own it."""
+    confirm that dojo exists to someone without access to it."""
 
     async def connect(self):
         user = self.scope["user"]
         self.dojo_id = self.scope["url_route"]["kwargs"]["dojo_id"]
 
-        if not user.is_authenticated or not await _owns_dojo(user, self.dojo_id):
+        if not user.is_authenticated or not await _has_dojo_access(user, self.dojo_id):
             await self.close()
             return
 

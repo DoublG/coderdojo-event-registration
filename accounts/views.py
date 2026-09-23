@@ -16,6 +16,7 @@ from django.utils.dateparse import parse_date
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import slugify
 
+from dojos.access import accessible_dojos
 from events.models import Registration
 from notifications.services import notify
 
@@ -69,11 +70,11 @@ def _post_login_redirect(request, user):
     if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
         return next_url
 
-    dojo_owner = getattr(user, "dojoowner", None)
-    if dojo_owner is not None:
-        first_dojo = dojo_owner.dojos.first()
-        if first_dojo is not None:
-            return reverse("dojo_dashboard", kwargs={"dojo_id": first_dojo.id})
+    # Owners and helpers land on the admin area of the first dojo they can
+    # open — see dojos.access for who counts.
+    admin_dojo = accessible_dojos(user).first()
+    if admin_dojo is not None:
+        return reverse("dojo_dashboard", kwargs={"dojo_id": admin_dojo.id})
 
     guardian = getattr(user, "guardian", None)
     if guardian is not None:

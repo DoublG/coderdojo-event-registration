@@ -1,0 +1,37 @@
+{% comment %}
+The attendance list for one event — shared by dojo_event_attendance.html
+(a specific session) and dojo_dashboard.html (the next/most recent one).
+Expects `dojo`, `event`, `registrations` (confirmed, not waitlisted) and
+`present_count` — see dojos.views._attendance_context — and `dojo_access`
+(without TAKE_ATTENDANCE the list is read-only). Also the htmx
+response of dojo_event_attendance_mark_all, which swaps this whole block.
+Server-driven (htmx), so CoderDojo.initAttendance's client-only toggling
+is deliberately not wired up here.
+{% endcomment %}
+<div class="cd-attendance" id="attendance-{{ event.id }}">
+  <div class="cd-attendance__header">
+    <div>
+      <h3 class="cd-attendance__title heading-md">{{ event.name }} — {{ event.start_time|date:"D j M Y, H:i" }}</h3>
+      {% include "dojos/partials/_attendance_summary.html" %}
+    </div>
+    {% if registrations and dojo_access.can_take_attendance %}
+      <form method="post" action="{% url 'dojo_event_attendance_mark_all' dojo_id=dojo.id event_id=event.id %}"
+            hx-post="{% url 'dojo_event_attendance_mark_all' dojo_id=dojo.id event_id=event.id %}"
+            hx-target="#attendance-{{ event.id }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <button type="submit" class="cd-btn cd-btn--ghost label">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+          Mark all present
+        </button>
+      </form>
+    {% endif %}
+  </div>
+
+  <div class="cd-attendance__list">
+    {% for registration in registrations %}
+      {% include "dojos/partials/_attendance_row.html" %}
+    {% empty %}
+      <p class="body-sm">Nobody has a confirmed place for this session yet.</p>
+    {% endfor %}
+  </div>
+</div>

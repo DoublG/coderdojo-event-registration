@@ -120,8 +120,10 @@ class DojoApplication(BackgroundCheckMixin, models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
-    provisioned_owner = models.OneToOneField(
-        "accounts.DojoOwner", on_delete=models.SET_NULL, null=True, blank=True, related_name="application",
+    # A ForeignKey: one owner can be provisioned/promoted by several
+    # applications (one per dojo they start).
+    provisioned_owner = models.ForeignKey(
+        "accounts.DojoOwner", on_delete=models.SET_NULL, null=True, blank=True, related_name="applications",
         help_text="Set by approve_and_provision_owner. Lets a later background-check renewal "
                   "(validate_background_check, re-run on this same row) sync the new expiry "
                   "back onto the account that logs in with it.",
@@ -177,8 +179,10 @@ class MentorApplication(BackgroundCheckMixin, models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
-    provisioned_helper = models.OneToOneField(
-        "accounts.HelperAccount", on_delete=models.SET_NULL, null=True, blank=True, related_name="application",
+    # A ForeignKey: one helper can be approved for several dojos, one
+    # application each (see dojos.Mentor.helper_account).
+    provisioned_helper = models.ForeignKey(
+        "accounts.HelperAccount", on_delete=models.SET_NULL, null=True, blank=True, related_name="applications",
         help_text="Set by approve_and_provision_helper. Lets a later background-check renewal "
                   "(validate_background_check, re-run on this same row) sync the new expiry "
                   "back onto the account that logs in with it.",

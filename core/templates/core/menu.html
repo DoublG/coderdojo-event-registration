@@ -40,16 +40,14 @@
           {% if user_guardian %}
             <a class="cd-nav__account-link body-sm" href="{% url 'guardian_detail' guardian_id=user_guardian.id %}">My Account</a>
           {% endif %}
-          {% if user_dojo_owner.dojos.first %}
-            <a class="cd-nav__account-link body-sm" href="{% url 'dojo_dashboard' dojo_id=user_dojo_owner.dojos.first.id %}">Manage</a>
+          {% if user_admin_dojo %}
+            <a class="cd-nav__account-link body-sm" href="{% url 'dojo_dashboard' dojo_id=user_admin_dojo.id %}">Manage</a>
           {% endif %}
           {% if not user_guardian %}
             <a class="cd-nav__account-link body-sm" href="{% url 'link_guardian_role' %}">Register your family</a>
           {% endif %}
           <a class="cd-nav__account-link body-sm" href="{% url 'register_dojo' %}">{% if user_dojo_owner.dojos.exists %}Start another dojo{% else %}Apply to start a dojo{% endif %}</a>
-          {% if not user_helper %}
-            <a class="cd-nav__account-link body-sm" href="{% url 'register_helper' %}">Apply to volunteer</a>
-          {% endif %}
+          <a class="cd-nav__account-link body-sm" href="{% url 'register_helper' %}">{% if user_helper %}Help at another dojo{% else %}Apply to volunteer{% endif %}</a>
           <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
             <button type="submit" class="cd-nav__account-link body-sm">Log out</button>
