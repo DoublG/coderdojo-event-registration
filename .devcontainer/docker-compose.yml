@@ -18,11 +18,17 @@ services:
       DB_USER: coolregistration
       DB_PASSWORD: Se84KCCCJlnfkdfv
 
+      SECRET_KEY: c8%og)f*3&xi&6l_s#ol%ctm7t9%ti&lko6x@^b&t8ow0d3-7m
+      ALLOWED_HOSTS: localhost,127.0.0.1,coolregistration.localhost
+
       COOKIE_DOMAIN: coolregistration.localhost
+      CSRF_TRUSTED_ORIGINS: https://coolregistration.localhost
 
       # Redis (cache) - read by website/settings.py
       REDIS_HOST: redis
       REDIS_PORT: 6379
+
+      DEBUG: true
 
       # Mailtrap (sandbox SMTP) - read by website/settings.py.
       # This is a local-dev-only container, so credentials live here in

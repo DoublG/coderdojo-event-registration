@@ -12,6 +12,14 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 import os
 from pathlib import Path
+import environ
+
+env = environ.Env(
+    DEBUG=(bool, False),
+)
+
+environ.Env.read_env()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,19 +29,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'c8%og)f*3&xi&6l_s#ol%ctm7t9%ti&lko6x@^b&t8ow0d3-7m'
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env("DEBUG", default=False)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'coolregistration.localhost']
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
-CSRF_TRUSTED_ORIGINS = ['https://coolregistration.localhost']
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
 
 # Set by the .devcontainer workspace (COOKIE_DOMAIN env var) so session/CSRF
 # cookies scope correctly to coolregistration.localhost behind the nginx
 # proxy; unset (None) for plain host-based `runserver` dev, which is fine.
-COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN') or None
+COOKIE_DOMAIN = env('COOKIE_DOMAIN')
 SESSION_COOKIE_DOMAIN = COOKIE_DOMAIN
 CSRF_COOKIE_DOMAIN = COOKIE_DOMAIN
 
@@ -116,17 +124,17 @@ AUTHENTICATION_BACKENDS = [
 # .devcontainer workspace, EMAIL_HOST is set and mail goes to a Mailtrap
 # sandbox inbox (see .devcontainer/docker-compose.yml); outside it (plain
 # host-based `runserver`), EMAIL_HOST is unset and mail prints to the console.
-EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_HOST = env('EMAIL_HOST')
 if EMAIL_HOST:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 2525))
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'true').lower() == 'true'
+    EMAIL_PORT = env('EMAIL_PORT', default=2525)
+    EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+    EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True)
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-DEFAULT_FROM_EMAIL = os.environ.get(
+DEFAULT_FROM_EMAIL = env(
     'DEFAULT_FROM_EMAIL', 'CoderDojo Belgium <no-reply@coderdojobelgium.example>'
 )
 
@@ -214,11 +222,11 @@ ASGI_APPLICATION = 'website.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME', 'coderdojo'),
-        'USER': os.environ.get('DB_USER', 'coderdojo'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'coderdojo'),
-        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DB_PORT', '13306'),
+        'NAME': env('DB_NAME', default='coderdojo'),
+        'USER': env('DB_USER', default='coderdojo'),
+        'PASSWORD': env('DB_PASSWORD', default='coderdojo'),
+        'HOST': env('DB_HOST', default='127.0.0.1'),
+        'PORT': env('DB_PORT', default='13306'),
     }
 }
 
@@ -230,8 +238,8 @@ CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': 'redis://{host}:{port}/0'.format(
-            host=os.environ.get('REDIS_HOST', '127.0.0.1'),
-            port=os.environ.get('REDIS_PORT', '6379'),
+            host= env('REDIS_HOST', '127.0.0.1'),
+            port= env('REDIS_PORT', '6379'),
         ),
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
@@ -259,8 +267,8 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             'hosts': [('redis://{host}:{port}/1'.format(
-                host=os.environ.get('REDIS_HOST', '127.0.0.1'),
-                port=os.environ.get('REDIS_PORT', '6379'),
+                host=env('REDIS_HOST', default='127.0.0.1'),
+                port=env('REDIS_PORT', default='6379'),
             ))],
         },
     },
