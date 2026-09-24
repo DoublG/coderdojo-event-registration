@@ -1,15 +1,10 @@
 Logging in as a dojo team member
 ===================================
 
-Dojo owners and mentors/helpers don't self-register — your login is
-created for you once your application and background check are approved
-(see :doc:`../volunteering/become-a-mentor-or-volunteer` and
-:doc:`../volunteering/start-a-new-dojo`). You'll receive it by email:
-your login email and a temporary password.
-
-Log in at **Log in** with those details. The first time you do, you'll be
-asked to set your own password before you can go anywhere else on the
-site — this isn't optional, and there's no way to skip past it.
+Champions and mentors use their own CoderDojo account — the same account
+they applied with (see :doc:`../volunteering/become-a-mentor-or-volunteer`
+and :doc:`../volunteering/start-a-new-dojo`). There's no separate login
+for your dojo work: log in at **Log in** as usual.
 
 After that, logging in takes you straight to your dojo's dashboard — as
 its **champion** (the person who runs the dojo), or as a **mentor** once

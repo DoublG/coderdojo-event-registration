@@ -92,3 +92,18 @@ class DojoSearchForm(forms.Form):
     # text geocoding entirely once present.
     lat = forms.FloatField(required=False, widget=forms.HiddenInput())
     lon = forms.FloatField(required=False, widget=forms.HiddenInput())
+
+
+class DojoCreateForm(forms.ModelForm):
+    """What an approved champion fills in to create a dojo (dojos.views.
+    dojo_create): just enough to identify it. It starts as a draft; the rest
+    of the profile is filled in on the Settings page before launching."""
+
+    class Meta:
+        model = Dojo
+        fields = ["name", "address", "email"]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "e.g. CoderDojo Leuven"}),
+            "address": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Street and number, postcode, city"}),
+            "email": forms.EmailInput(attrs={"class": "cd-form__input body", "placeholder": "hello@yourdojo.example"}),
+        }

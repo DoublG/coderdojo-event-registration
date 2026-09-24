@@ -5,7 +5,9 @@ from django.utils.text import slugify
 
 from django.utils import timezone
 
-from accounts.models import DojoOwner
+from accounts.models import User
+from applications.models import Application
+from applications.seeding import approve_for_seeding
 from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
 from dojos.models import Dojo, DojoMembership
 
@@ -22,8 +24,9 @@ LAST_NAMES = [
 class Command(BaseCommand):
     help = (
         "Seed a demo champion (the dojo's owner) for every dojo that doesn't have "
-        "one yet: a DojoOwner login plus an active champion membership. Reuses an "
-        "existing owner-<id>-<slug> login if there is one."
+        "one yet: an adult login approved as a champion (validated background check + "
+        "approved application) plus an active champion membership. Reuses an existing "
+        "owner-<id>-<slug> login if there is one."
     )
 
     def handle(self, *args, **options):
@@ -39,11 +42,11 @@ class Command(BaseCommand):
         ):
             slug = slugify(dojo.name) or f"dojo-{dojo.id}"
             username = f"owner-{dojo.id}-{slug}"[:150]
-            owner = DojoOwner.objects.filter(username=username).first()
+            owner = User.objects.filter(username=username).first()
             if owner is None:
                 email = f"{slug}@coderdojo-demo.example"
                 password = generate_password()
-                owner = DojoOwner(
+                owner = User(
                     username=username,
                     email=email,
                     first_name=rng.choice(FIRST_NAMES),
@@ -56,6 +59,7 @@ class Command(BaseCommand):
             else:
                 reused += 1
 
+            approve_for_seeding(owner, Application.CHAMPION, rng, area=dojo.name)
             DojoMembership.objects.update_or_create(
                 dojo=dojo, user=owner,
                 defaults={
@@ -65,10 +69,20 @@ class Command(BaseCommand):
                 },
             )
 
+        # Every seeded champion is approved the way the real flow would leave
+        # them (valid check + approved application), including champions seeded
+        # before the onboarding redesign — without it they'd have no dashboard.
+        approved = 0
+        for membership in DojoMembership.objects.filter(role=DojoMembership.CHAMPION).select_related("user", "dojo"):
+            if not Application.objects.filter(account=membership.user, kind=Application.CHAMPION, status=Application.APPROVED).exists():
+                approve_for_seeding(membership.user, Application.CHAMPION, rng, area=membership.dojo.name)
+                approved += 1
+
         if credential_rows:
             write_credentials("dojo_owner", credential_rows)
 
         self.stdout.write(self.style.SUCCESS(
-            f"Done. created={created} reused={reused} skipped={skipped} (already had a champion). "
+            f"Done. created={created} reused={reused} skipped={skipped} (already had a champion), "
+            f"approved={approved}. "
             f"Credentials for newly seeded owners written to {CREDENTIALS_FILE}"
         ))

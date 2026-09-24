@@ -16,7 +16,7 @@ urlpatterns = [
         name="renew_background_check",
     ),
     path(
-        "applications/background-check/<str:kind>/<int:pk>/document/",
+        "applications/background-check/<int:user_id>/document/",
         views.download_background_check,
         name="download_background_check",
     ),

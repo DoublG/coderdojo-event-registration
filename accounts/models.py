@@ -5,37 +5,63 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models
 from django.utils import timezone
 
+from applications.storage import get_private_storage
+
 
 class User(AbstractUser):
     """Every login: a normal adult account or a ninja's own login
     (account_type). Parents are adult accounts with Guardianship rows to
-    their ninjas. DojoOwner/HelperAccount below are the last role
-    subclasses; the redesign replaces them with dojo memberships
+    their ninjas; champions and mentors are adult accounts with dojo
+    memberships (dojos.DojoMembership) and an approved application
+    (applications.Application). There are no role subclasses
     (DATA_MODEL.md §10)."""
 
     must_change_password = models.BooleanField(
         default=False,
-        help_text="Forces a password change on next login — set when an admin provisions an "
-                  "account (DojoOwner, HelperAccount) with a temporary password. Enforced by "
-                  "accounts.middleware.ForcePasswordChangeMiddleware.",
+        help_text="Forces a password change on next login (e.g. set by an admin who reset it). "
+                  "Enforced by accounts.middleware.ForcePasswordChangeMiddleware.",
     )
 
-    # Only ever set for DojoOwner/HelperAccount, whose applications
-    # (applications.DojoApplication/MentorApplication) went through the
-    # Belgian background-check pipeline — mirrors must_change_password in
-    # living on the base User even though it's only meaningful for those
-    # two roles. Parent and ninja accounts never touch these fields; they never
-    # go through that pipeline at all (see applications.models.BackgroundCheckMixin).
-    background_check_required = models.BooleanField(
-        default=False,
-        help_text="Set at provisioning time from the linked application's "
-                  "background_check_required (age-based — see BACKGROUND_CHECK_MINIMUM_AGE). "
-                  "When true, login is refused once background_check_expires_at lapses — see "
-                  "accounts.backends and accounts.middleware.BackgroundCheckMiddleware — until "
-                  "a reviewer validates a fresh one (applications.admin.validate_background_check "
-                  "syncs the new expiry back here).",
+    # The account's *current* Belgian background check (uittreksel model 2,
+    # Artikel 596.2 — see applications.models.ARTICLE_596_2_TEXT). Only
+    # needed to become a champion or mentor: a parent using the site never
+    # goes through it. Every review decision is also appended to
+    # applications.BackgroundCheckHistory (who decided, when); the flow
+    # itself lives in applications.services. A valid check is what lets
+    # champion/mentor memberships grant dojo access (dojos.access) — a
+    # lapsed one removes that access, never the login.
+    CHECK_NOT_REQUESTED = "not_requested"
+    CHECK_REQUESTED = "requested"
+    CHECK_SUBMITTED = "submitted"
+    CHECK_VALIDATED = "validated"
+    CHECK_REJECTED = "rejected"
+    CHECK_STATUS_CHOICES = [
+        (CHECK_NOT_REQUESTED, "Not requested yet"),
+        (CHECK_REQUESTED, "Requested — waiting on the account holder"),
+        (CHECK_SUBMITTED, "Submitted — awaiting review"),
+        (CHECK_VALIDATED, "Validated"),
+        (CHECK_REJECTED, "Rejected"),
+    ]
+    background_check_status = models.CharField(
+        max_length=20, choices=CHECK_STATUS_CHOICES, default=CHECK_NOT_REQUESTED,
     )
-    background_check_expires_at = models.DateTimeField(null=True, blank=True)
+    background_check_token = models.UUIDField(
+        null=True, blank=True, unique=True, editable=False,
+        help_text="Set when a check is requested; builds the emailed upload link.",
+    )
+    background_check_document = models.FileField(
+        upload_to="background_checks/", storage=get_private_storage, null=True, blank=True,
+        help_text="The uploaded uittreksel uit het strafregister, model 2 (Artikel 596.2). Only "
+                  "readable by a reviewer (applications.can_review_background_checks) via the "
+                  "protected download view — never a public media URL. Deleted as soon as a "
+                  "decision is made; only the decision is kept.",
+    )
+    background_check_requested_at = models.DateTimeField(null=True, blank=True)
+    background_check_submitted_at = models.DateTimeField(null=True, blank=True)
+    background_check_reviewed_at = models.DateTimeField(null=True, blank=True)
+    background_check_expires_at = models.DateTimeField(
+        null=True, blank=True, help_text="Set on validation; the check must be redone after this date.",
+    )
 
     # The redesign's two account types (DATA_MODEL.md §10): a normal adult
     # account, or a ninja's own login. One table for both, so login and
@@ -74,37 +100,21 @@ class User(AbstractUser):
 
     @property
     def background_check_valid(self):
-        return not self.background_check_required or (
-            self.background_check_expires_at is not None and self.background_check_expires_at > timezone.now()
+        """A validated check that hasn't expired — needed for champion/mentor
+        dojo access (dojos.access)."""
+        return (
+            self.background_check_status == self.CHECK_VALIDATED
+            and self.background_check_expires_at is not None
+            and self.background_check_expires_at > timezone.now()
         )
 
-
-class DojoOwner(User):
-    """Marks an adult account as an approved dojo owner (from an approved
-    DojoApplication). Being a dojo's champion is a dojos.DojoMembership;
-    this role subclass goes away in redesign phase 3."""
-
-    class Meta:
-        verbose_name = "dojo owner"
-        verbose_name_plural = "dojo owners"
-
-    def __str__(self):
-        return self.get_username()
-
-
-class HelperAccount(User):
-    """Marks an adult account as an approved mentor (from an approved
-    MentorApplication): what lets it ask to join, or be added to, a dojo's
-    team (dojos.access.is_approved_mentor). The team roles themselves live
-    on dojos.DojoMembership. Replaced by the account-level Application in
-    redesign phase 3."""
-
-    class Meta:
-        verbose_name = "helper account"
-        verbose_name_plural = "helper accounts"
-
-    def __str__(self):
-        return self.get_username()
+    @property
+    def background_check_can_upload(self):
+        """Whether the account can upload a (new) document right now: a check
+        was requested or rejected, or a validated one has expired."""
+        if self.background_check_status in (self.CHECK_REQUESTED, self.CHECK_REJECTED):
+            return True
+        return self.background_check_status == self.CHECK_VALIDATED and not self.background_check_valid
 
 
 class ParticipantQuerySet(models.QuerySet):

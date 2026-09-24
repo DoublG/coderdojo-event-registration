@@ -7,12 +7,13 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from applications.models import Application
 from dojos.models import Dojo, DojoMembership
-from dojos.testing import add_member, make_dojo
+from dojos.testing import add_member, make_champion, make_dojo, make_mentor
 from events.models import Event, Registration
 
-from .models import DojoOwner, Guardianship, HelperAccount, Participant, User
-from .provisioning import attach_role, provision_account, unique_username
+from .models import Guardianship, Participant, User
+from .provisioning import unique_username
 
 PASSWORD = "correct-horse-battery-staple"
 
@@ -170,7 +171,7 @@ class AddChildViewTests(TestCase):
     def test_any_adult_account_can_add_children(self):
         """No separate "guardian" role any more — e.g. a dojo owner adds
         their own child from their account page directly."""
-        owner = DojoOwner.objects.create(username="owner1")
+        owner = make_champion(username="owner1")
         self.client.force_login(owner)
         self.client.post(reverse("add_ninja"), {"name": "Owner Kid"})
         self.assertEqual(list(Participant.objects.of_guardian(owner).values_list("name", flat=True)), ["Owner Kid"])
@@ -329,8 +330,8 @@ class CancelRegistrationViewTests(TestCase):
         event/dojo) reuses a dojo with no team — build one with a champion,
         a mentor and a youth mentor here to check who gets notified: the
         people running the dojo, never a youth mentor."""
-        owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
-        mentor = HelperAccount.objects.create(username="mentor1")
+        owner = make_champion(username="owner1", email="owner@example.com")
+        mentor = make_mentor(username="mentor1")
         youth = User.objects.create(username="kid", account_type=User.NINJA)
         dojo = make_dojo("Antwerp", champion=owner)
         add_member(dojo, mentor)
@@ -470,7 +471,7 @@ class RegisterGuardianWhenLoggedInTests(TestCase):
     there's no separate guardian role to attach any more."""
 
     def test_logged_in_account_is_sent_to_account_page(self):
-        owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
+        owner = make_champion(username="owner1", email="owner@example.com")
         self.client.force_login(owner)
         response = self.client.get(reverse("register_guardian"))
         self.assertRedirects(response, reverse("account_home"))
@@ -493,186 +494,79 @@ class UniqueUsernameTests(TestCase):
         self.assertEqual(unique_username(""), "user")
 
 
-class ProvisionAccountTests(TestCase):
-    """accounts.provisioning.provision_account — how applications.admin's
-    "approve" actions turn an approved DojoApplication/MentorApplication
-    into a real DojoOwner/HelperAccount login."""
-
-    LOGIN_URL = "https://coolregistration.example/login"
-
-    def test_creates_account_with_forced_password_change(self):
-        account = provision_account(DojoOwner, "Jane Doe", "jane@example.com", self.LOGIN_URL)
-
-        self.assertIsInstance(account, DojoOwner)
-        self.assertEqual(account.email, "jane@example.com")
-        self.assertEqual(account.first_name, "Jane")
-        self.assertEqual(account.last_name, "Doe")
-        self.assertTrue(account.must_change_password)
-        self.assertTrue(account.has_usable_password())
-
-    def test_works_for_helper_accounts_too(self):
-        account = provision_account(HelperAccount, "Tom", "tom@example.com", self.LOGIN_URL)
-        self.assertIsInstance(account, HelperAccount)
-
-    def test_emails_the_temporary_password_and_login_link(self):
-        provision_account(DojoOwner, "Jane Doe", "jane@example.com", self.LOGIN_URL)
-
-        self.assertEqual(len(mail.outbox), 1)
-        message = mail.outbox[0]
-        self.assertEqual(message.to, ["jane@example.com"])
-        self.assertIn(self.LOGIN_URL, message.body)
-
-        account = DojoOwner.objects.get(email="jane@example.com")
-        match = re.search(r"Temporary password: (\S+)", message.body)
-        self.assertIsNotNone(match)
-        self.assertTrue(account.check_password(match.group(1)))
-
-    def test_password_is_random_each_time(self):
-        provision_account(DojoOwner, "Jane Doe", "jane1@example.com", self.LOGIN_URL)
-        provision_account(DojoOwner, "Jane Doe", "jane2@example.com", self.LOGIN_URL)
-
-        passwords = [
-            re.search(r"Temporary password: (\S+)", message.body).group(1) for message in mail.outbox
-        ]
-        self.assertNotEqual(passwords[0], passwords[1])
-
-    def test_generates_distinct_usernames_for_the_same_name(self):
-        first = provision_account(DojoOwner, "Jane Doe", "jane1@example.com", self.LOGIN_URL)
-        second = provision_account(DojoOwner, "Jane Doe", "jane2@example.com", self.LOGIN_URL)
-        self.assertNotEqual(first.username, second.username)
-
-
-class AttachRoleTests(TestCase):
-    """accounts.provisioning.attach_role — the MTI "promote in place" trick used both by
-    applications.admin's approve_and_provision_owner/helper
-    when an application's applicant_account is set."""
-
-    def test_adds_role_to_existing_user_without_creating_a_new_one(self):
-        owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
-        owner.set_password(PASSWORD)
-        owner.save()
-
-        helper = attach_role(owner, HelperAccount)
-
-        self.assertEqual(helper.pk, owner.pk)
-        # Base User fields carried over untouched.
-        self.assertEqual(helper.email, "owner@example.com")
-        self.assertTrue(helper.check_password(PASSWORD))
-        # One User row, now resolving as both roles.
-        self.assertEqual(DojoOwner.objects.filter(pk=owner.pk).count(), 1)
-        self.assertEqual(HelperAccount.objects.filter(pk=owner.pk).count(), 1)
-        owner.refresh_from_db()
-        self.assertIsNotNone(getattr(owner, "helperaccount", None))
-
-    def test_reattaching_an_existing_role_is_a_safe_no_op(self):
-        """The 1-to-n DojoOwner:Dojo case — an already-DojoOwner account approved for a *second*
-        dojo application goes through attach_role again for a role it already has."""
-        owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
-
-        result = attach_role(owner, DojoOwner)
-
-        self.assertEqual(result.pk, owner.pk)
-        self.assertEqual(DojoOwner.objects.filter(pk=owner.pk).count(), 1)
-
-
 class BackgroundCheckValidPropertyTests(TestCase):
-    def test_valid_when_not_required(self):
-        owner = DojoOwner.objects.create(username="owner1", background_check_required=False)
-        self.assertTrue(owner.background_check_valid)
+    """User.background_check_valid: a validated check that hasn't expired —
+    what champion/mentor dojo access needs (dojos.access)."""
 
-    def test_invalid_when_required_and_never_set(self):
-        owner = DojoOwner.objects.create(username="owner1", background_check_required=True)
-        self.assertFalse(owner.background_check_valid)
+    def _user(self, **fields):
+        return User.objects.create(username="u1", **fields)
 
-    def test_invalid_when_required_and_expired(self):
-        owner = DojoOwner.objects.create(
-            username="owner1", background_check_required=True,
-            background_check_expires_at=timezone.now() - timedelta(days=1),
-        )
-        self.assertFalse(owner.background_check_valid)
+    def test_invalid_when_never_done(self):
+        self.assertFalse(self._user().background_check_valid)
 
-    def test_valid_when_required_and_not_yet_expired(self):
-        owner = DojoOwner.objects.create(
-            username="owner1", background_check_required=True,
-            background_check_expires_at=timezone.now() + timedelta(days=1),
-        )
-        self.assertTrue(owner.background_check_valid)
+    def test_invalid_when_only_requested_or_submitted(self):
+        for status in (User.CHECK_REQUESTED, User.CHECK_SUBMITTED, User.CHECK_REJECTED):
+            with self.subTest(status=status):
+                user = User(username=status, background_check_status=status,
+                            background_check_expires_at=timezone.now() + timedelta(days=1))
+                self.assertFalse(user.background_check_valid)
+
+    def test_invalid_when_validated_but_expired(self):
+        user = self._user(background_check_status=User.CHECK_VALIDATED,
+                          background_check_expires_at=timezone.now() - timedelta(days=1))
+        self.assertFalse(user.background_check_valid)
+        self.assertTrue(user.background_check_can_upload)
+
+    def test_valid_when_validated_and_not_expired(self):
+        user = self._user(background_check_status=User.CHECK_VALIDATED,
+                          background_check_expires_at=timezone.now() + timedelta(days=1))
+        self.assertTrue(user.background_check_valid)
+        self.assertFalse(user.background_check_can_upload)
 
 
-class BackgroundCheckLoginGateTests(TestCase):
-    """accounts.views.login refuses a correct password for a DojoOwner/
-    HelperAccount whose background check has lapsed — see
-    accounts.middleware.BackgroundCheckMiddleware for the same gate on an
-    already-open session."""
+class LapsedCheckNeverBlocksLoginTests(TestCase):
+    """A lapsed background check removes dojo-team access (dojos.access),
+    never the login itself (DATA_MODEL.md §10, decision A)."""
 
-    def _owner(self, **overrides):
-        owner = DojoOwner(username="owner1", email="owner1@example.com", **overrides)
+    def test_champion_with_expired_check_can_log_in_but_not_open_the_dashboard(self):
+        owner = make_champion(username="owner1", email="owner1@example.com")
         owner.set_password(PASSWORD)
+        owner.background_check_expires_at = timezone.now() - timedelta(days=1)
         owner.save()
-        return owner
-
-    def test_blocked_when_required_and_expired(self):
-        self._owner(background_check_required=True, background_check_expires_at=timezone.now() - timedelta(days=1))
+        dojo = make_dojo("Ghent", champion=owner)
 
         response = self.client.post(reverse("login"), {"email": "owner1@example.com", "password": PASSWORD})
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("background check has expired", response.context["error"])
-        self.assertNotIn("_auth_user_id", self.client.session)
-
-    def test_allowed_when_required_and_valid(self):
-        owner = self._owner(
-            background_check_required=True, background_check_expires_at=timezone.now() + timedelta(days=1),
-        )
-
-        response = self.client.post(reverse("login"), {"email": "owner1@example.com", "password": PASSWORD})
-
+        self.assertEqual(int(self.client.session["_auth_user_id"]), owner.id)
         self.assertRedirects(response, reverse("account_home"))
-        self.assertEqual(int(self.client.session["_auth_user_id"]), owner.id)
-
-    def test_allowed_when_not_required(self):
-        owner = self._owner(background_check_required=False)
-
-        self.client.post(reverse("login"), {"email": "owner1@example.com", "password": PASSWORD})
-
-        self.assertEqual(int(self.client.session["_auth_user_id"]), owner.id)
+        dashboard = self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": dojo.id}))
+        self.assertEqual(dashboard.status_code, 404)
+        account = self.client.get(reverse("account_home"))
+        self.assertContains(account, reverse("renew_background_check"))
 
 
-class BackgroundCheckMiddlewareTests(TestCase):
-    def _owner(self, **overrides):
-        owner = DojoOwner(username="owner1", email="owner1@example.com", **overrides)
-        owner.set_password(PASSWORD)
-        owner.save()
-        return owner
+class VolunteeringCardTests(TestCase):
+    """The account page's Volunteering card: applications, check status and
+    the next step the account can take."""
 
-    def test_expired_account_redirected_to_renewal_page(self):
-        owner = self._owner(background_check_required=True, background_check_expires_at=timezone.now() - timedelta(days=1))
-        self.client.force_login(owner)
+    def test_plain_parent_is_offered_both_applications(self):
+        parent = User.objects.create(username="parent")
+        self.client.force_login(parent)
+        response = self.client.get(reverse("account_home"))
+        self.assertContains(response, reverse("register_dojo"))
+        self.assertContains(response, reverse("register_helper"))
 
-        response = self.client.get(reverse("home"))
+    def test_approved_champion_is_offered_create_a_dojo(self):
+        champion = make_champion(username="c1")
+        self.client.force_login(champion)
+        response = self.client.get(reverse("account_home"))
+        self.assertContains(response, reverse("dojo_create"))
+        self.assertNotContains(response, f'href="{reverse("register_dojo")}"')
 
-        # fetch_redirect_response=False: this owner has no linked
-        # application (see applications.tests.RenewBackgroundCheckViewTests
-        # for that page's own behavior), so the target 404s — here we only
-        # care that the middleware redirects there at all.
-        self.assertRedirects(
-            response, reverse("renew_background_check"), fetch_redirect_response=False,
-        )
-
-    def test_expired_account_can_still_reach_logout(self):
-        owner = self._owner(background_check_required=True, background_check_expires_at=timezone.now() - timedelta(days=1))
-        self.client.force_login(owner)
-
-        response = self.client.get(reverse("logout"))
-
-        self.assertRedirects(response, reverse("home"))
-
-    def test_valid_account_is_not_intercepted(self):
-        owner = self._owner(
-            background_check_required=True, background_check_expires_at=timezone.now() + timedelta(days=1),
-        )
-        self.client.force_login(owner)
-
-        response = self.client.get(reverse("home"))
-
-        self.assertEqual(response.status_code, 200)
+    def test_requested_check_links_to_the_upload_page(self):
+        applicant = User.objects.create(username="a1", background_check_status=User.CHECK_REQUESTED)
+        Application.objects.create(account=applicant, kind=Application.MENTOR)
+        self.client.force_login(applicant)
+        response = self.client.get(reverse("account_home"))
+        self.assertContains(response, reverse("renew_background_check"))
+        self.assertNotContains(response, f'href="{reverse("register_helper")}"')

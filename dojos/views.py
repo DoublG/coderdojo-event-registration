@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import Point
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -13,6 +14,7 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from accounts.models import Participant, User
+from applications.services import is_approved_champion
 from content.models import FAQ, OrganisationTeamMember
 from events.forms import EventForm
 from events.models import Event, Registration
@@ -30,7 +32,7 @@ from .access import (
     is_approved_mentor,
     require_dojo_access,
 )
-from .forms import DojoProfileForm, DojoSearchForm
+from .forms import DojoCreateForm, DojoProfileForm, DojoSearchForm
 from .models import Dojo, DojoMembership
 from .search import attach_next_events, dojos_by_distance, resolve_search_origin
 
@@ -191,6 +193,53 @@ def dojo_dashboard(request, dojo_id):
     })
 
 
+def _geocode_address(dojo):
+    """Set dojo.location (and province) from dojo.address. Tolerant: a failed
+    or no-match geocode never blocks a save — returns False and leaves the
+    location as it was (same pattern as dojos.search.resolve_search_origin)."""
+    try:
+        coords = geocode(dojo.address)
+    except requests.RequestException:
+        coords = None
+    if not coords:
+        return False
+    lat, lon = coords
+    dojo.location = Point(lon, lat, srid=4326)
+    dojo.province = find_province(dojo.location)
+    return True
+
+
+@login_required
+def dojo_create(request):
+    """An approved champion creates a dojo (DATA_MODEL.md §10): it starts as
+    a draft, hidden from the public site, with them as its champion. They
+    fill in the rest on the Settings page and launch it from there."""
+    if not is_approved_champion(request.user):
+        messages.error(request, "Only approved champions with a valid background check can create a dojo.")
+        return redirect("account_home")
+
+    if request.method == "POST":
+        form = DojoCreateForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                dojo = form.save(commit=False)
+                dojo.status = Dojo.DRAFT
+                dojo.created_by = request.user
+                geocode_failed = bool(dojo.address) and not _geocode_address(dojo)
+                dojo.save()
+                DojoMembership.objects.create(
+                    dojo=dojo, user=request.user, role=DojoMembership.CHAMPION,
+                    status=DojoMembership.ACTIVE, joined_at=timezone.now(), requested_by=request.user,
+                )
+            messages.success(request, f"{dojo.name} has been created as a draft. Fill in its profile, then launch it.")
+            if geocode_failed:
+                messages.error(request, "We couldn't find that address on the map; check it on this page.")
+            return redirect("dojo_manage", dojo_id=dojo.id)
+    else:
+        form = DojoCreateForm()
+    return render(request, "dojos/dojo_create.html", {"form": form})
+
+
 @login_required
 def dojo_manage(request, dojo_id):
     """Lets a dojo owner edit everything shown on their dojo's public
@@ -213,16 +262,7 @@ def dojo_manage(request, dojo_id):
             dojo = form.save(commit=False)
 
             if address_changed and dojo.address:
-                try:
-                    coords = geocode(dojo.address)
-                except requests.RequestException:
-                    coords = None
-                if coords:
-                    lat, lon = coords
-                    dojo.location = Point(lon, lat, srid=4326)
-                    dojo.province = find_province(dojo.location)
-                else:
-                    geocode_failed = True
+                geocode_failed = not _geocode_address(dojo)
 
             dojo.save()
             saved = True

@@ -2,31 +2,41 @@ from django import forms
 
 from dojos.models import Dojo
 
-from .models import DojoApplication, MentorApplication
+from .models import Application
 
 
 class BackgroundCheckUploadForm(forms.Form):
-    # A plain Form, not a ModelForm: the upload view resolves a token to
-    # either a DojoApplication or a MentorApplication, so this needs to
-    # work against whichever one it finds rather than being tied to one.
     document = forms.FileField(
         label="Uittreksel uit het strafregister (model 2)",
         widget=forms.ClearableFileInput(attrs={"class": "cd-form__input body"}),
     )
 
 
-class DojoApplicationForm(forms.ModelForm):
+class _ApplicationForm(forms.ModelForm):
+    """Shared by both application kinds. The applicant's name and email come
+    from their account (applying requires being logged in); only the phone
+    number is asked for here, and saved onto the account."""
+
+    phone = forms.CharField(
+        required=False, max_length=30,
+        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "+32 4xx xx xx xx"}),
+    )
+
+    def __init__(self, *args, account, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.account = account
+        self.fields["phone"].initial = account.phone
+        # A ModelForm BooleanField is optional by default; these have to be ticked.
+        for name in ("consent", "background_check_consent"):
+            if name in self.fields:
+                self.fields[name].required = True
+
+
+class ChampionApplicationForm(_ApplicationForm):
     class Meta:
-        model = DojoApplication
-        fields = [
-            "applicant_name", "applicant_email", "applicant_phone",
-            "area", "preferred_schedule", "proposed_venue",
-            "message", "consent", "background_check_consent",
-        ]
+        model = Application
+        fields = ["area", "preferred_schedule", "proposed_venue", "message", "consent", "background_check_consent"]
         widgets = {
-            "applicant_name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Jane Doe"}),
-            "applicant_email": forms.EmailInput(attrs={"class": "cd-form__input body", "placeholder": "jane.doe@example.com"}),
-            "applicant_phone": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "+32 4xx xx xx xx"}),
             "area": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Leuven"}),
             "preferred_schedule": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "e.g. Saturday mornings"}),
             "proposed_venue": forms.TextInput(attrs={
@@ -43,24 +53,17 @@ class DojoApplicationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # BooleanField defaults to required=False on a ModelForm regardless
-        # of the model field's own blank= setting (an unchecked box is a
-        # valid "False") — these actually have to be ticked to submit.
-        self.fields["consent"].required = True
-        self.fields["background_check_consent"].required = True
+        self.fields["area"].required = True
 
 
-class MentorApplicationForm(forms.ModelForm):
+class MentorApplicationForm(_ApplicationForm):
     class Meta:
-        model = MentorApplication
-        fields = ["applicant_name", "applicant_email", "applicant_phone", "dojo", "role", "about", "background_check_consent"]
+        model = Application
+        fields = ["dojo", "mentor_role", "message", "background_check_consent"]
         widgets = {
-            "applicant_name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Tom Verstraete"}),
-            "applicant_email": forms.EmailInput(attrs={"class": "cd-form__input body", "placeholder": "tom@example.com"}),
-            "applicant_phone": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "+32 4xx xx xx xx"}),
             "dojo": forms.Select(attrs={"class": "cd-form__select body"}),
-            "role": forms.Select(attrs={"class": "cd-form__select body"}),
-            "about": forms.Textarea(attrs={
+            "mentor_role": forms.Select(attrs={"class": "cd-form__select body"}),
+            "message": forms.Textarea(attrs={
                 "class": "cd-form__input body", "rows": 4,
                 "placeholder": "e.g. Python, Scratch, web, robotics, event-day support — no experience necessary.",
             }),
@@ -69,6 +72,7 @@ class MentorApplicationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["dojo"].queryset = Dojo.objects.order_by("name")
+        self.fields["dojo"].queryset = Dojo.objects.public().order_by("name")
         self.fields["dojo"].empty_label = "Not sure yet — any dojo"
-        self.fields["background_check_consent"].required = True
+        self.fields["mentor_role"].required = True
+        self.fields["mentor_role"].choices = Application.MENTOR_ROLE_CHOICES

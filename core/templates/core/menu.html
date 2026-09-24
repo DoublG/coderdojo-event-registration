@@ -43,11 +43,15 @@
           {% if user_admin_dojo %}
             <a class="cd-nav__account-link body-sm" href="{% url 'dojo_dashboard' dojo_id=user_admin_dojo.id %}">Manage</a>
           {% endif %}
-          <a class="cd-nav__account-link body-sm" href="{% url 'register_dojo' %}">{% if user_dojo_owner %}Start another dojo{% else %}Apply to start a dojo{% endif %}</a>
-          {% if user_helper %}
+          {% if user_is_approved_champion %}
+            <a class="cd-nav__account-link body-sm" href="{% url 'dojo_create' %}">Create a dojo</a>
+          {% elif not request.user.is_ninja and not user_applied_champion %}
+            <a class="cd-nav__account-link body-sm" href="{% url 'register_dojo' %}">Apply to start a dojo</a>
+          {% endif %}
+          {% if user_is_approved_mentor %}
             {# Approved mentors ask to join a dojo from its own page — no new application needed. #}
             <a class="cd-nav__account-link body-sm" href="{% url 'dojo_list' %}">Help at another dojo</a>
-          {% else %}
+          {% elif not request.user.is_ninja and not user_applied_mentor %}
             <a class="cd-nav__account-link body-sm" href="{% url 'register_helper' %}">Apply to volunteer</a>
           {% endif %}
           <form method="post" action="{% url 'logout' %}">

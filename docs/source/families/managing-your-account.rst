@@ -43,9 +43,11 @@ Changing your password
 Go to **Change password** (also linked from your account page). You'll
 need your current password to set a new one.
 
-.. note::
+Volunteering
+--------------
 
-   If your account was set up for you by CoderDojo Belgium (e.g. as a dojo
-   owner or helper) rather than self-registered, you'll be asked to set a
-   new password the first time you log in with the temporary one you were
-   emailed — you can't skip past this step.
+The **Volunteering** section of your account page shows any application
+you've made to become a mentor or start a dojo, and where your background
+check stands (see :doc:`../volunteering/background-check`), with a link to
+upload your document whenever one is needed. Once you're approved, it's
+also where you'll find **Create a dojo** or **Find a dojo to help at**.

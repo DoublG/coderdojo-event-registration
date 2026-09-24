@@ -144,11 +144,9 @@ def require_dojo_access(request, dojo_id, capability=None):
 
 
 def is_approved_mentor(user):
-    """Whether `user` may ask to join a dojo's team, or be added to one.
-    Until the redesign's onboarding phase lands (one account-level
-    Application), "approved" means holding the HelperAccount or DojoOwner
-    role from an approved application — this is the one place to change
-    when that happens."""
-    if not user.is_authenticated or user.is_ninja or not user.background_check_valid:
-        return False
-    return hasattr(user, "helperaccount") or hasattr(user, "dojoowner")
+    """Whether `user` may ask to join a dojo's team, or be added to one: an
+    adult account with an approved mentor (or champion) application and a
+    valid background check — see applications.services."""
+    from applications.services import is_approved_mentor as _is_approved_mentor
+
+    return _is_approved_mentor(user)

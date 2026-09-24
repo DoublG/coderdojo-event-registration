@@ -11,14 +11,13 @@ display fields (descriptions, taglines, photos, …) are left out; the models
 in each app's `models.py` have the full field lists. If you change a model,
 update its diagram in the same change.
 
-> **A redesign is planned.** Sections 1–9 describe the model as it is
-> today. [Section 10](#10-planned-redesign-in-progress) describes
-> where it's meant to go: two account types, and dojo roles (Champion,
-> Mentor, Youth mentor) stored on a User↔Dojo relation instead of the
-> `Mentor` table and the `DojoOwner`/`HelperAccount`/`Guardian`
-> subclasses. It also sets the [nomenclature](#nomenclature) (Champion,
-> Mentor/Coach, Ninja, Youth mentor, Badge, Belt). Read it before building
-> more on those parts.
+> **A redesign is in progress.** Sections 1–9 describe the model as it is
+> in the code today. [Section 10](#10-planned-redesign-in-progress)
+> describes the target and tracks which phases have landed: accounts,
+> dojo teams and onboarding are done; pathways, badges and belts, the
+> organisation role, naming and seeders follow. It also sets the
+> [nomenclature](#nomenclature) (Champion, Mentor/Coach, Ninja, Youth
+> mentor, Badge, Belt). Read it before building more on those parts.
 
 **Contents**
 
@@ -43,8 +42,6 @@ The main entities and how they connect, grouped by the Django app that owns them
 flowchart LR
     subgraph accounts
         User
-        DojoOwner
-        HelperAccount
         Guardianship
         Participant
     end
@@ -58,8 +55,8 @@ flowchart LR
         Award
     end
     subgraph applications
-        DojoApplication
-        MentorApplication
+        Application
+        BackgroundCheckHistory
     end
     subgraph pathways
         Pathway
@@ -69,7 +66,6 @@ flowchart LR
         AdministrativeBoundary
     end
 
-    User -. "is-a (MTI)" .-> DojoOwner & HelperAccount
     User -- "champion / mentor / youth mentor" --> DojoMembership
     DojoMembership -- "team of" --> Dojo
     User -- "parent of" --> Guardianship
@@ -80,9 +76,9 @@ flowchart LR
     Registration -- of --> Participant
     Registration -. "worked on" .-> Pathway
     Participant -- earns --> Award
-    DojoApplication -- provisions --> DojoOwner
-    MentorApplication -- provisions --> HelperAccount
-    MentorApplication -. "for" .-> Dojo
+    User -- "applies (mentor / champion)" --> Application
+    User -- "check decisions" --> BackgroundCheckHistory
+    Application -. "mentor: preferred dojo" .-> Dojo
     Dojo -. located in .-> Municipality & AdministrativeBoundary
 ```
 
@@ -91,18 +87,16 @@ flowchart LR
 ## 2. Accounts and roles
 
 `accounts.User` is every login, with `account_type` telling the two kinds
-apart: a normal **adult** account, or a **ninja**'s own login.
+apart: a normal **adult** account, or a **ninja**'s own login. There are no
+role subclasses (redesign phases 1–3, section 10).
 
 - **Parents** are plain adult accounts linked to their children through
   `Guardianship`. A child can have more than one guardian, and any adult
-  account (including a dojo owner or helper) can add children from its
-  account page.
-- **`DojoOwner` and `HelperAccount`** are still **multi-table-inheritance
-  children** of `User`: the last role subclasses, until redesign phases
-  2–3 replace them with dojo memberships (section 10). One `User` row can
-  hold both; `accounts.provisioning.attach_role` adds one to an existing
-  account, and a child role row shares the `User`'s primary key
-  (`helperaccount.pk == user.pk`).
+  account can add children from its account page. No background check is
+  ever needed for that.
+- **Champions and mentors** are adult accounts with an approved
+  `Application` (section 6) and a **valid background check on the
+  account**; what they do at a dojo is a `DojoMembership` (section 3).
 - A **`Participant`** (a ninja attending sessions) is **not** a user. It
   gets a login (a `User` with `account_type="ninja"`, linked through
   `Participant.account`) only if a parent opts it in.
@@ -115,18 +109,12 @@ classDiagram
         +email
         +phone
         +account_type  adult | ninja
-        +must_change_password
-        +background_check_required
+        +display_name, title, bio, photo  team-page profile
+        +background_check_status
+        +background_check_token
+        +background_check_document  private, deleted on decision
         +background_check_expires_at
         +background_check_valid() bool
-    }
-    class DojoOwner {
-        background-checked
-        admin-provisioned
-    }
-    class HelperAccount {
-        background-checked
-        admin-provisioned
     }
     class Guardianship {
         +relation  parent | legal_guardian | other
@@ -140,9 +128,6 @@ classDiagram
         +age() int
     }
 
-    User <|-- DojoOwner
-    User <|-- HelperAccount
-
     User "1" --> "*" Guardianship : guardianships (parent)
     Participant "1" --> "*" Guardianship : guardianships
     Participant "0..1" --> "0..1" User : account (ninja login)
@@ -153,9 +138,8 @@ Which account does what:
 
 | Account | Created by | Background check | Lands on after login |
 |---|---|---|---|
-| adult with `DojoOwner` | admin approval of a `DojoApplication` | required (gates login) | first accessible dojo's dashboard |
-| adult with `HelperAccount` | admin approval of a `MentorApplication` | required (gates login) | first accessible dojo's dashboard |
-| adult (parent) | self-service family sign-up (`register_guardian`) | none | their account page (`/account/`) |
+| adult (parent) | self-service sign-up (`register_guardian`) | never needed | their account page (`/account/`) |
+| adult champion / mentor | the same self-service sign-up, then an approved `Application` | required for dojo access (a lapsed check blocks the dashboards, never the login) | first accessible dojo's dashboard |
 | ninja | a parent opts a child in | none | the ninja's own page (`/account/ninja/<id>/`) |
 
 ---
@@ -247,9 +231,9 @@ flowchart TD
 | *(champion only)* | hand over the champion role | ✓ | — |
 
 To restrict mentors, remove entries from `ROLE_CAPABILITIES[MENTOR]`.
-Who may *join* a team at all is `access.is_approved_mentor`: currently an
-account holding the `HelperAccount` or `DojoOwner` role from an approved
-application, which becomes the account-level `Application` in phase 3.
+Who may *join* a team at all is `access.is_approved_mentor`: an adult account
+with an approved mentor (or champion) `Application` and a valid background
+check (`applications.services`).
 
 ---
 
@@ -352,76 +336,77 @@ classDiagram
 
 ## 6. Applications and background checks
 
-Both application types mix in `BackgroundCheckMixin`, which tracks Belgium's
-Article 596.2 criminal-record-extract requirement. When a check is
-validated, the uploaded document is **deleted** and only the decision and
-its expiry are kept.
+Onboarding is **account-level** (redesign phase 3): an adult account applies
+**once** to become a **mentor** or a **champion** (`Application`), not once
+per dojo. The Belgian Article 596.2 criminal-record extract is checked **on
+the account** (the `background_check_*` fields on `User`). Every review
+decision is appended to `BackgroundCheckHistory`: who decided and when. The
+uploaded document is **deleted as soon as a decision is made**, validate or
+reject; the history never stores it. All of this lives in
+`applications/services.py`.
 
 ```mermaid
 erDiagram
-    USER |o--o{ DOJO_APPLICATION : "applicant_account (if logged in)"
-    USER |o--o{ MENTOR_APPLICATION : "applicant_account (if logged in)"
-    DOJO_OWNER |o--o{ DOJO_APPLICATION : "provisioned_owner (one per dojo started)"
-    HELPER_ACCOUNT |o--o{ MENTOR_APPLICATION : "provisioned_helper (one per dojo)"
-    DOJO |o--o{ MENTOR_APPLICATION : "dojo (blank = any)"
+    USER ||--o{ APPLICATION : "applications"
+    USER ||--o{ BACKGROUND_CHECK_HISTORY : "background_check_history"
+    USER |o--o{ BACKGROUND_CHECK_HISTORY : "reviewed_by"
+    USER |o--o{ APPLICATION : "decided_by"
+    DOJO |o--o{ APPLICATION : "dojo (mentor, blank = any)"
 
-    DOJO_APPLICATION {
+    APPLICATION {
         bigint id PK
-        string applicant_name
-        string applicant_email
-        string area
+        bigint account_id FK
+        string kind "mentor, champion"
         string status "pending, approved, rejected"
-        string background_check_status
-        datetime background_check_expires_at
-        uuid background_check_token "emailed upload link"
-        file background_check_document "private, deleted on validation"
+        bigint decided_by_id FK
+        datetime decided_at
+        bigint dojo_id FK "mentor: preferred dojo"
+        string area "champion"
+        string message
     }
-    MENTOR_APPLICATION {
-        bigint id PK
-        string applicant_name
-        string applicant_email
-        bigint dojo_id FK
-        string role "volunteer_mentor, other"
-        string status "pending, approved, rejected"
-        string background_check_status
-        datetime background_check_expires_at
+    BACKGROUND_CHECK_HISTORY {
+        bigint account_id FK
+        string decision "validated, rejected"
+        bigint reviewed_by_id FK
+        datetime reviewed_at
+        datetime expires_at "validated only"
+        string note
     }
 ```
 
-### Background check lifecycle
+### Background check lifecycle (on the account)
 
 ```mermaid
 stateDiagram-v2
     [*] --> not_requested
-    not_requested --> requested : admin "Request background check"
-    requested --> submitted : applicant uploads (emailed link)
-    submitted --> validated : reviewer validates<br/>(document deleted, expiry = now + 365 days)
-    submitted --> rejected : reviewer rejects
-    validated --> requested : renewal requested (expiring/expired)
-    rejected --> requested : request again
+    not_requested --> requested : reviewer requests it<br/>(token set, upload link emailed)
+    requested --> submitted : account holder uploads<br/>(emailed link or account page)
+    submitted --> validated : reviewer validates<br/>(document deleted, expiry = now + 365 days, history row)
+    submitted --> rejected : reviewer rejects<br/>(document deleted, history row)
+    rejected --> submitted : uploads a new document
+    validated --> submitted : expired → uploads a renewal
+    validated --> requested : renewal requested
 ```
 
-### From approval to a login
+### From application to a dojo
 
 ```mermaid
 flowchart TD
-    A[Admin approves application] --> V{Valid background check?}
-    V -- no --> S[Skipped]
-    V -- yes --> E{applicant_account set?<br/>applied while logged in}
-    E -- yes --> P["attach_role(existing account)<br/>+ 'new role' email"]
-    E -- no --> N["provision_account()<br/>random temp password emailed<br/>must_change_password = True"]
-    P --> X["Copy background-check expiry onto the account<br/>(keeps the later of old and new)"]
-    N --> X
-    X --> K{MentorApplication with a dojo?}
-    K -- yes --> M["File a join request at that dojo<br/>(requested mentor membership),<br/>accepted by its team"]
-    K -- no --> D[Done]
-    M --> D
+    A["Adult account applies<br/>(logged in; one per kind)"] --> R[Reviewer requests the check]
+    R --> U[Account holder uploads the document]
+    U --> V{Reviewer validates?}
+    V -- no --> U
+    V -- yes --> P{Reviewer approves the application?}
+    P -- no --> X[Rejected]
+    P -- yes --> K{Kind}
+    K -- mentor --> M["Approved mentor: can ask to join<br/>any dojo's team (a dojo named in the<br/>application gets a join request)"]
+    K -- champion --> C["Approved champion: Create a dojo<br/>(draft, with them as champion)"]
 ```
 
-After approval, **the account** gates login: once
-`background_check_valid` is false, `BackgroundCheckMiddleware` blocks every
-request and sends the user to `renew_background_check`. The renewal is
-uploaded against the account's most recently submitted application.
+A lapsed check (validated, then expired) **never blocks login**. It makes
+`background_check_valid` false, so the account's champion/mentor memberships
+stop granting dojo access (section 3) until a renewal is validated. The
+account page links to the upload.
 
 ---
 
@@ -1340,7 +1325,7 @@ at every step:
     (`access.is_approved_mentor`); approving a `MentorApplication` that
     names a dojo files a join request there. Lifecycle actions are
     champion-only (`MANAGE_LIFECYCLE`).
-- [ ] **3. Onboarding** (`applications`)
+- [x] **3. Onboarding** (`applications`), *done 2026-09-24*
   - A single `Application` (`mentor` / `champion`) on the account; the
     check fields, flow and `BackgroundCheckHistory` on the account (moved
     here from phase 1); the check stops blocking login and only gates
@@ -1348,6 +1333,12 @@ at every step:
   - "Create dojo" for approved champions (the dojo starts as a draft);
     "Request to join" for approved mentors.
   - Emails, renewal and admin actions reworked.
+  - Also: `DojoOwner` / `HelperAccount`, `provision_account` / `attach_role`
+    and `BackgroundCheckMiddleware` removed (accounts exist before applying,
+    so no more emailed temporary passwords); `background_check_required`
+    dropped (`background_check_valid` = validated and unexpired); the
+    private document storage is referenced through a callable so migrations
+    don't embed a machine-specific path; `seed_applications` added.
 - [ ] **4. Pathways:** dojo, event and registration links, each pre-filled
   from the level above; shown on the event page and the attendance list.
 - [ ] **5. Badges and belts:** `Badge` (one-off / milestone, optional

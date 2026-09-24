@@ -1,0 +1,42 @@
+{% extends "core/base.html" %}
+{% block title %}Create your dojo · CoderDojo Belgium{% endblock %}
+{% block root_class %}create-dojo-root{% endblock %}
+{% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
+
+{% block extra_style %}
+<style>
+  .create-dojo-root { background: var(--surface-sunken); }
+  .create-dojo-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+  .create-dojo-root .page-title { color: var(--ink); margin: var(--space-2) 0 var(--space-2); }
+  .create-dojo-root .page-subtitle { color: var(--ink-muted); margin: 0 0 var(--space-5); }
+  .create-dojo-root .form-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
+</style>
+{% endblock %}
+
+{% block content %}
+{% comment %}
+dojos.views.dojo_create — an approved champion creates a dojo. It starts
+as a draft (hidden from the public site) with them as its champion.
+{% endcomment %}
+  <div class="page">
+    <h1 class="display-lg page-title">Create your dojo</h1>
+    <p class="body-lg page-subtitle">Your dojo starts as a draft, hidden from the public site. You'll fill in the rest of its profile, add your team and plan sessions, then launch it when it's ready.</p>
+
+    <div class="form-card">
+      <form class="cd-form" method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="cd-form__required" aria-hidden="true">*</span>{% endif %}</label>
+            {{ field }}
+            <ul class="cd-form__errors">{% for error in field.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+          </div>
+        {% endfor %}
+        <div class="cd-form__actions">
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">Cancel</a>
+          <button type="submit" class="cd-btn cd-btn--primary label">Create dojo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import DojoOwner, Guardianship, HelperAccount, Participant, User
+from .models import Guardianship, Participant, User
 
 
 class GuardianshipInline(admin.TabularInline):
@@ -16,8 +16,8 @@ class UserAdmin(BaseUserAdmin):
     list_display = ["username", "email", "first_name", "last_name", "account_type", "is_staff"]
     list_filter = ["account_type", "is_staff", "is_active"]
     fieldsets = BaseUserAdmin.fieldsets + (
-        ("CoderDojo", {"fields": ("account_type", "phone", "must_change_password",
-                                  "background_check_required", "background_check_expires_at")}),
+        ("CoderDojo", {"fields": ("account_type", "phone", "must_change_password")}),
+        ("Team-page profile", {"fields": ("display_name", "title", "bio", "photo", "show_on_team_pages")}),
     )
     inlines = [GuardianshipInline]
 
@@ -33,7 +33,3 @@ class ParticipantAdmin(admin.ModelAdmin):
     list_display = ["name", "date_of_birth", "home_dojo", "account"]
     search_fields = ["name"]
     inlines = [NinjaGuardianshipInline]
-
-
-admin.site.register(DojoOwner, BaseUserAdmin)
-admin.site.register(HelperAccount, BaseUserAdmin)

@@ -98,15 +98,9 @@ def login(request):
                 username=form.cleaned_data["email"],
                 password=form.cleaned_data["password"],
             )
-            if user is not None and not user.background_check_valid:
-                # Correct password, but a DojoOwner/HelperAccount whose
-                # background check has lapsed — see BackgroundCheckMiddleware
-                # for the same gate on an already-open session.
-                error = (
-                    "Your background check has expired. You won't be able to log in until a "
-                    "new one has been submitted and approved — contact an admin."
-                )
-            elif user is not None:
+            # A lapsed background check never blocks login — it only removes
+            # dojo-team access (dojos.access); see the account page.
+            if user is not None:
                 auth_login(request, user)
                 return redirect(_post_login_redirect(request, user))
             else:
@@ -292,8 +286,13 @@ def account_home(request):
     if request.user.is_ninja:
         return redirect(_post_login_redirect(request, request.user))
     children = _children_context(request.user)
+    applications = list(request.user.applications.all())
+    active_kinds = {a.kind for a in applications if a.status != "rejected"}
     return render(request, "accounts/guardian_detail.html", {
         "guardian": request.user, "children": children, "icon_choices": _icon_choices(),
+        "applications": applications,
+        "has_champion_application": "champion" in active_kinds,
+        "has_mentor_application": "mentor" in active_kinds,
     })
 
 

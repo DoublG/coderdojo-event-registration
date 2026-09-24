@@ -2,9 +2,8 @@ from unittest.mock import AsyncMock, Mock, patch
 
 from django.test import TestCase
 
-from accounts.models import DojoOwner
 from dojos.models import Dojo
-from dojos.testing import make_dojo
+from dojos.testing import make_champion, make_dojo
 
 from .models import Notification
 from .services import notify
@@ -13,7 +12,7 @@ from .services import notify
 class NotifyTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
+        cls.owner = make_champion(username="owner1", email="owner@example.com")
         cls.dojo = make_dojo("Ghent", champion=cls.owner)
 
     def test_creates_notification_row(self):

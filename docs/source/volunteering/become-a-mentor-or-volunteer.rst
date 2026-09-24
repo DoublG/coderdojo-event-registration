@@ -5,17 +5,16 @@ No teaching experience is required — dojos need help running sessions,
 supporting ninjas one-on-one, and general event-day support (board/comms
 roles are also welcome).
 
-.. note::
-
-   Already have a family/guardian account? Log in first, then use **Apply
-   to volunteer** from your account menu — your name, email, and phone are
-   pre-filled, and once approved the volunteer role is added to your
-   existing login instead of a separate one being created.
+You apply with your own CoderDojo account: if you don't have one yet,
+create one first (the same kind of account families use), then log in.
+Your application, background check and the dojos you help at all stay on
+that one login.
 
 To apply:
 
-#. Go to **Get involved** and choose **Become a mentor or volunteer**.
-#. Fill in your name, email, and phone.
+#. Log in and choose **Apply to volunteer** from your account menu (or
+   **Get involved** → **Become a mentor or volunteer**). Your name and
+   email come from your account; add a phone number if you like.
 #. Pick a dojo if you already have one in mind, or leave it as "not sure
    yet" if you're open to any.
 #. Choose your role — volunteer mentor, or something else (board, events,
@@ -27,14 +26,11 @@ To apply:
 What happens next
 -------------------
 
-A CoderDojo Belgium admin reviews your application. If approved for a role
-that works directly with minors, you'll be emailed a link to submit your
-background check document — the account you'll actually log in with is
-created (or, if you applied while already logged in, updated) only once
-that's cleared. If you didn't already have an account, you'll receive your
-login details by email at that point, with a temporary password you'll be
-asked to replace the first time you log in; if you did, you'll simply be
-notified that the volunteer role is now active — no new password needed.
+A CoderDojo Belgium admin looks at your application and emails you a link
+to upload your background check document (see :doc:`background-check`).
+Once it's validated, your application can be approved, and you'll get an
+email when it is. Your account page's **Volunteering** section shows where
+things stand at every step.
 
 Once you're approved, you join a dojo's team through the dojo itself: if
 you picked a dojo in your application, a request to join its team is sent

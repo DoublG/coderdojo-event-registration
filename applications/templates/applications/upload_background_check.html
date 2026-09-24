@@ -22,21 +22,21 @@
       <h1 class="display-lg page-title">Thanks — document received</h1>
       <p class="body-lg page-subtitle">We've received your document. A reviewer will validate it before your account is set up.</p>
       <div class="form-card">
-        <a class="cd-btn cd-btn--primary label" href="{% url 'home' %}">Back to home</a>
+        <a class="cd-btn cd-btn--primary label" href="{% if request.user.is_authenticated %}{% url 'account_home' %}{% else %}{% url 'home' %}{% endif %}">{% if request.user.is_authenticated %}Go to your account{% else %}Back to home{% endif %}</a>
       </div>
 
     {% elif already_submitted %}
 
       <h1 class="display-lg page-title">Already submitted</h1>
-      <p class="body-lg page-subtitle">We already have a document on file for this application — no need to upload another.</p>
+      <p class="body-lg page-subtitle">{% if account.background_check_valid %}Your background check is valid until {{ account.background_check_expires_at|date:"d/m/Y" }} — nothing to upload right now.{% else %}We already have your document and it's waiting for review — no need to upload another.{% endif %}</p>
       <div class="form-card">
-        <a class="cd-btn cd-btn--primary label" href="{% url 'home' %}">Back to home</a>
+        <a class="cd-btn cd-btn--primary label" href="{% if request.user.is_authenticated %}{% url 'account_home' %}{% else %}{% url 'home' %}{% endif %}">{% if request.user.is_authenticated %}Go to your account{% else %}Back to home{% endif %}</a>
       </div>
 
     {% else %}
 
       <h1 class="display-lg page-title">Upload your background check</h1>
-      <p class="body-lg page-subtitle">Hi {{ application.applicant_name }} — one last step before we can confirm your application.</p>
+      <p class="body-lg page-subtitle">Hi {{ account.first_name|default:account.username }} — {% if account.background_check_status == 'rejected' %}we couldn't accept your last document; please upload a new one.{% elif account.background_check_status == 'validated' %}your background check has expired; upload a new one to keep helping at your dojo.{% else %}one last step before we can confirm your application.{% endif %}</p>
 
       <div class="form-card">
         <blockquote class="body-sm legal-quote">

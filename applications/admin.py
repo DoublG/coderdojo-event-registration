@@ -1,171 +1,128 @@
 from django.contrib import admin
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.html import format_html
 
-from accounts.models import DojoOwner, HelperAccount
-from accounts.provisioning import attach_role, provision_account
-from dojos.team import TeamError, request_to_join
+from accounts.models import User
 
-from .models import BACKGROUND_CHECK_VALIDITY, BackgroundCheckMixin, DojoApplication, MentorApplication
-from .services import send_background_check_request, send_role_activated_email
+from . import services
+from .models import Application, BackgroundCheck, BackgroundCheckHistory
 
-
-def _linked_account(application):
-    """The DojoOwner/HelperAccount this application already provisioned, if
-    any (set by approve_and_provision_owner/helper) — present once the
-    applicant is a real, logged-in account rather than still pending
-    approval, which is exactly when a background-check *renewal* (as
-    opposed to the original one) needs to sync back onto the account that
-    actually gates login. Works across both DojoApplication.provisioned_owner
-    and MentorApplication.provisioned_helper without the caller needing to
-    know which one applies."""
-    return getattr(application, "provisioned_owner", None) or getattr(application, "provisioned_helper", None)
+REVIEW_PERMISSION = "applications.can_review_background_checks"
 
 
-@admin.action(description="Request background check document from applicant")
-def request_background_check(modeladmin, request, queryset):
-    # Not excluding by status: a currently-valid check needs no action, but
-    # one that's VALIDATED yet expired (or about to expire) is exactly the
-    # renewal case — re-running this on the same row is how that's requested.
-    sent = 0
-    for application in queryset:
-        if application.has_valid_background_check:
-            continue
-        send_background_check_request(application, request)
-        sent += 1
-    modeladmin.message_user(request, f"Emailed {sent} applicant(s) with the document upload link.")
+def _run(modeladmin, request, queryset, action, done_label):
+    done, errors = 0, []
+    for obj in queryset:
+        try:
+            action(obj)
+            done += 1
+        except services.OnboardingError as exc:
+            errors.append(str(exc))
+    modeladmin.message_user(request, f"{done_label}: {done}.")
+    for error in errors:
+        modeladmin.message_user(request, error, level="warning")
 
 
-@admin.action(description="Mark background check as validated")
-def validate_background_check(modeladmin, request, queryset):
-    if not request.user.has_perm("applications.can_review_background_checks"):
+# --- applications -------------------------------------------------------------------
+
+@admin.action(description="Request a background check from the applicant")
+def request_check_for_applicants(modeladmin, request, queryset):
+    _run(modeladmin, request, queryset,
+         lambda application: services.request_background_check(application.account, request),
+         "Background check requested")
+
+
+@admin.action(description="Approve (needs a valid background check)")
+def approve_applications(modeladmin, request, queryset):
+    _run(modeladmin, request, queryset,
+         lambda application: services.approve_application(application, request.user), "Approved")
+
+
+@admin.action(description="Reject")
+def reject_applications(modeladmin, request, queryset):
+    _run(modeladmin, request, queryset,
+         lambda application: services.reject_application(application, request.user), "Rejected")
+
+
+@admin.register(Application)
+class ApplicationAdmin(admin.ModelAdmin):
+    list_display = ["account", "kind", "status", "dojo", "area", "check_status", "submitted_at", "decided_by"]
+    list_filter = ["kind", "status", "account__background_check_status"]
+    search_fields = ["account__username", "account__email", "account__first_name", "account__last_name", "area"]
+    readonly_fields = ["account", "submitted_at", "decided_by", "decided_at", "check_status"]
+    actions = [request_check_for_applicants, approve_applications, reject_applications]
+
+    @admin.display(description="Background check")
+    def check_status(self, obj):
+        account = obj.account
+        if account.background_check_valid:
+            return f"Valid until {account.background_check_expires_at:%d/%m/%Y}"
+        return account.get_background_check_status_display()
+
+
+# --- background checks (on the account) ----------------------------------------------
+
+class BackgroundCheckHistoryInline(admin.TabularInline):
+    """The append-only audit log: who decided, when. Read-only."""
+
+    model = BackgroundCheckHistory
+    fk_name = "account"
+    extra = 0
+    can_delete = False
+    fields = ["decision", "reviewed_by", "reviewed_at", "requested_at", "submitted_at", "expires_at", "note"]
+    readonly_fields = fields
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+@admin.action(description="Request a (new) background check document")
+def request_checks(modeladmin, request, queryset):
+    _run(modeladmin, request, queryset, lambda user: services.request_background_check(user, request),
+         "Background check requested")
+
+
+@admin.action(description="Validate the uploaded document (deletes it)")
+def validate_checks(modeladmin, request, queryset):
+    if not request.user.has_perm(REVIEW_PERMISSION):
         modeladmin.message_user(request, "You don't have permission to review background checks.", level="error")
         return
-    now = timezone.now()
-    validated = 0
-    for application in queryset.exclude(background_check_document=""):
-        # The document (a criminal record extract) is only needed for this
-        # decision, not afterwards — keep the outcome and its expiry, drop
-        # the file itself.
-        application.background_check_document.delete(save=False)
-        application.background_check_status = BackgroundCheckMixin.VALIDATED
-        application.background_check_reviewed_at = now
-        application.background_check_expires_at = now + BACKGROUND_CHECK_VALIDITY
-        application.save(update_fields=[
-            "background_check_document", "background_check_status",
-            "background_check_reviewed_at", "background_check_expires_at",
-        ])
-        validated += 1
-
-        # Renewal case: this application already has a live account
-        # (see _linked_account) — sync the fresh expiry onto it so
-        # accounts.User.background_check_valid (and BackgroundCheckMiddleware)
-        # see it as vetted again immediately, without waiting on a re-approval.
-        account = _linked_account(application)
-        if account is not None:
-            account.background_check_expires_at = application.background_check_expires_at
-            account.save(update_fields=["background_check_expires_at"])
-    modeladmin.message_user(request, f"Validated {validated} background check(s); documents discarded.")
+    _run(modeladmin, request, queryset, lambda user: services.validate_background_check(user, request.user),
+         "Validated (documents deleted)")
 
 
-@admin.action(description="Reject background check document")
-def reject_background_check(modeladmin, request, queryset):
-    if not request.user.has_perm("applications.can_review_background_checks"):
+@admin.action(description="Reject the uploaded document (deletes it)")
+def reject_checks(modeladmin, request, queryset):
+    if not request.user.has_perm(REVIEW_PERMISSION):
         modeladmin.message_user(request, "You don't have permission to review background checks.", level="error")
         return
-    updated = queryset.update(
-        background_check_status=BackgroundCheckMixin.REJECTED, background_check_reviewed_at=timezone.now(),
-    )
-    modeladmin.message_user(request, f"Rejected {updated} background check document(s).")
+    _run(modeladmin, request, queryset, lambda user: services.reject_background_check(user, request.user),
+         "Rejected (documents deleted)")
 
 
-def _provision_or_promote(application, account_model, role_label, login_url):
-    """Shared by approve_and_provision_owner/helper. If the applicant was already logged in when
-    they applied (application.applicant_account set — e.g. a parent applying to also become a
-    DojoOwner/HelperAccount), promote that existing account in place via attach_role instead of
-    provisioning a disconnected new login, and tell them about the new role rather than emailing
-    a temp password they don't need. Otherwise, today's anonymous-applicant path is unchanged."""
-    if application.applicant_account_id is not None:
-        account = attach_role(application.applicant_account, account_model)
-        send_role_activated_email(application, role_label)
-    else:
-        account = provision_account(account_model, application.applicant_name, application.applicant_email, login_url)
-    return account
+@admin.register(BackgroundCheck)
+class BackgroundCheckAdmin(admin.ModelAdmin):
+    """Reviewers' list of accounts with a background check in progress or on
+    record. The document is on private storage with no public URL: the only
+    way to see it — even from here — is the permission-gated download link."""
 
+    list_display = ["username", "email", "background_check_status", "background_check_submitted_at", "background_check_expires_at"]
+    list_filter = ["background_check_status"]
+    search_fields = ["username", "email", "first_name", "last_name"]
+    fields = [
+        "username", "email", "background_check_status", "background_check_requested_at",
+        "background_check_submitted_at", "background_check_reviewed_at", "background_check_expires_at",
+        "document_link",
+    ]
+    readonly_fields = fields
+    inlines = [BackgroundCheckHistoryInline]
+    actions = [request_checks, validate_checks, reject_checks]
 
-def _apply_background_check(account, application):
-    """From here on it's the account, not the application, that
-    accounts.User.background_check_valid / BackgroundCheckMiddleware check
-    on every login and request. An account approved for a second dojo
-    (another application) keeps whichever check expires last, so approving
-    an application whose check is older never shortens it."""
-    expiries = [e for e in (account.background_check_expires_at, application.background_check_expires_at) if e]
-    account.background_check_required = True
-    account.background_check_expires_at = max(expiries) if expiries else None
-    account.save(update_fields=["background_check_required", "background_check_expires_at"])
+    def get_queryset(self, request):
+        return super().get_queryset(request).exclude(background_check_status=User.CHECK_NOT_REQUESTED)
 
-
-@admin.action(description="Approve & email a DojoOwner login to the applicant")
-def approve_and_provision_owner(modeladmin, request, queryset):
-    login_url = request.build_absolute_uri(reverse("login"))
-    approved, blocked = 0, 0
-    for application in queryset.exclude(status=DojoApplication.APPROVED):
-        if not application.has_valid_background_check:
-            blocked += 1
-            continue
-        account = _provision_or_promote(application, DojoOwner, "dojo owner", login_url)
-        _apply_background_check(account, application)
-        application.status = DojoApplication.APPROVED
-        application.provisioned_owner = account
-        application.save(update_fields=["status", "provisioned_owner"])
-        approved += 1
-    message = f"Provisioned/updated {approved} DojoOwner account(s)."
-    if blocked:
-        message += f" Skipped {blocked} without a valid (non-expired) background check."
-    modeladmin.message_user(request, message)
-
-
-def _link_helper_to_dojo(application, account):
-    """An application for a specific dojo files a join request at that dojo
-    for the newly approved helper (dojos.team.request_to_join): its
-    champion/mentors accept it from their Team page, which is what opens the
-    dojo's admin area to them. Skipped when the application is open to any
-    dojo, or when a request can't be made (already on that team or waiting,
-    or the dojo isn't active)."""
-    if application.dojo_id is None:
-        return
-    try:
-        request_to_join(application.dojo, account)
-    except TeamError:
-        pass
-
-
-@admin.action(description="Approve & email a helper login to the applicant")
-def approve_and_provision_helper(modeladmin, request, queryset):
-    login_url = request.build_absolute_uri(reverse("login"))
-    approved, blocked = 0, 0
-    for application in queryset.exclude(status=MentorApplication.APPROVED):
-        if not application.has_valid_background_check:
-            blocked += 1
-            continue
-        account = _provision_or_promote(application, HelperAccount, "helper", login_url)
-        _apply_background_check(account, application)
-        application.status = MentorApplication.APPROVED
-        application.provisioned_helper = account
-        application.save(update_fields=["status", "provisioned_helper"])
-        _link_helper_to_dojo(application, account)
-        approved += 1
-    message = f"Provisioned/updated {approved} helper account(s)."
-    if blocked:
-        message += f" Skipped {blocked} without a valid (non-expired) background check."
-    modeladmin.message_user(request, message)
-
-
-class BackgroundCheckAdminMixin:
-    """Shared with both application admins: the document is on private
-    storage with no public URL, so the only way to see it — even from here
-    — is this permission-gated link to the protected download view."""
+    def has_add_permission(self, request):
+        return False
 
     def get_readonly_fields(self, request, obj=None):
         # document_link needs request.user but ModelAdmin field methods only
@@ -173,30 +130,11 @@ class BackgroundCheckAdminMixin:
         self._current_request = request
         return super().get_readonly_fields(request, obj)
 
+    @admin.display(description="Document")
     def document_link(self, obj):
-        if not self._current_request.user.has_perm("applications.can_review_background_checks"):
+        if not self._current_request.user.has_perm(REVIEW_PERMISSION):
             return "Restricted — requires the background-check reviewer permission"
         if not obj.background_check_document:
-            return "No document (discarded once validated, or none uploaded)"
-        url = reverse("download_background_check", kwargs={"kind": self.download_kind, "pk": obj.pk})
+            return "No document (deleted once decided, or none uploaded)"
+        url = reverse("download_background_check", kwargs={"user_id": obj.pk})
         return format_html('<a href="{}">Download document</a>', url)
-
-    document_link.short_description = "Background check document"
-
-
-@admin.register(DojoApplication)
-class DojoApplicationAdmin(BackgroundCheckAdminMixin, admin.ModelAdmin):
-    download_kind = "dojo"
-    list_display = ["applicant_name", "applicant_email", "area", "status", "background_check_status", "background_check_expires_at", "submitted_at"]
-    list_filter = ["status", "background_check_status"]
-    readonly_fields = ["document_link"]
-    actions = [request_background_check, validate_background_check, reject_background_check, approve_and_provision_owner]
-
-
-@admin.register(MentorApplication)
-class MentorApplicationAdmin(BackgroundCheckAdminMixin, admin.ModelAdmin):
-    download_kind = "mentor"
-    list_display = ["applicant_name", "applicant_email", "role", "dojo", "status", "background_check_status", "background_check_expires_at", "submitted_at"]
-    list_filter = ["status", "role", "background_check_status"]
-    readonly_fields = ["document_link"]
-    actions = [request_background_check, validate_background_check, reject_background_check, approve_and_provision_helper]

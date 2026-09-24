@@ -1,11 +1,10 @@
-import uuid
 from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
-from django.utils import timezone
 
-from .storage import private_storage
+from accounts.models import User
+
 
 # How long a validated background check stays valid before it must be
 # redone — the criminal record extract is a snapshot at issue time, not a
@@ -22,171 +21,108 @@ ARTICLE_596_2_TEXT = (
 )
 
 
-class BackgroundCheckMixin(models.Model):
-    """Belgian law requires a specific extract from the criminal record
-    (uittreksel model 2, Artikel 596.2 — see ARTICLE_596_2_TEXT) for anyone
-    who'll be in contact with minors, so both DojoApplication (a dojo's
-    lead coach) and MentorApplication (any volunteer) go through this
-    after their initial submission: an admin requests it (which emails the
-    applicant a link built from background_check_token), they upload it at
-    that link, and an admin reviews the upload before the account gets
-    provisioned — see applications.admin and applications.services.
-    Mandatory for every applicant here — both roles are adults; anyone
-    younger is a ninja (accounts.Participant) who'd be promoted to a
-    mentor role through a separate flow, not this one.
+class Application(models.Model):
+    """An account asking to become a **mentor** (help at dojos) or a
+    **champion** (start and run a dojo) — once per account and kind, not
+    per dojo (DATA_MODEL.md §10). Approval needs the applicant's account to
+    have a valid background check (accounts.User.background_check_valid);
+    an approved mentor can then ask to join any dojo's team (or be added),
+    an approved champion can create a dojo. See applications.services for
+    the flow and applications.admin for the review actions."""
 
-    This same request/upload/review flow is also how a background check
-    gets *renewed*: DojoApplication/MentorApplication double as the
-    permanent background-check record for the account it provisioned
-    (see provisioned_owner/provisioned_helper), not just a one-time
-    application, so admins re-run "Request background check document" on
-    the same row as it nears/passes expiry. See accounts.User.background_check_valid
-    and accounts.middleware.BackgroundCheckMiddleware for how a lapsed
-    check disables that account's login."""
+    MENTOR = "mentor"
+    CHAMPION = "champion"
+    KIND_CHOICES = [(MENTOR, "Mentor"), (CHAMPION, "Champion (start a dojo)")]
 
-    NOT_REQUESTED = "not_requested"
-    REQUESTED = "requested"
-    SUBMITTED = "submitted"
-    VALIDATED = "validated"
-    REJECTED = "rejected"
-    BACKGROUND_CHECK_STATUS_CHOICES = [
-        (NOT_REQUESTED, "Not requested yet"),
-        (REQUESTED, "Requested — waiting on applicant"),
-        (SUBMITTED, "Submitted — awaiting review"),
-        (VALIDATED, "Validated"),
-        (REJECTED, "Rejected"),
-    ]
-
-    background_check_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    background_check_status = models.CharField(
-        max_length=20, choices=BACKGROUND_CHECK_STATUS_CHOICES, default=NOT_REQUESTED,
-    )
-    background_check_document = models.FileField(
-        upload_to="background_checks/", storage=private_storage, null=True, blank=True,
-        help_text="The applicant's uittreksel uit het strafregister, model 2 (Artikel 596.2). "
-                  "Only readable by an approved reviewer (applications.can_review_background_checks) "
-                  "via the protected download view — never a public media URL. The file itself is "
-                  "deleted once validated; only the decision and its expiry date are kept.",
-    )
-    background_check_requested_at = models.DateTimeField(null=True, blank=True)
-    background_check_submitted_at = models.DateTimeField(null=True, blank=True)
-    background_check_reviewed_at = models.DateTimeField(null=True, blank=True)
-    background_check_expires_at = models.DateTimeField(
-        null=True, blank=True, help_text="Set on validation; the check must be redone after this date.",
-    )
-
-    class Meta:
-        abstract = True
-
-    @property
-    def has_valid_background_check(self):
-        return (
-            self.background_check_status == self.VALIDATED
-            and self.background_check_expires_at is not None
-            and self.background_check_expires_at > timezone.now()
-        )
-
-
-class DojoApplication(BackgroundCheckMixin, models.Model):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
-    STATUS_CHOICES = [
-        (PENDING, "Pending"),
-        (APPROVED, "Approved"),
-        (REJECTED, "Rejected"),
+    STATUS_CHOICES = [(PENDING, "Pending"), (APPROVED, "Approved"), (REJECTED, "Rejected")]
+
+    VOLUNTEER_MENTOR = "volunteer_mentor"
+    OTHER = "other"
+    MENTOR_ROLE_CHOICES = [
+        (VOLUNTEER_MENTOR, "Volunteer mentor"),
+        (OTHER, "Something else (board, events, comms)"),
     ]
 
-    applicant_name = models.CharField(max_length=200)
-    applicant_email = models.EmailField()
-    applicant_phone = models.CharField(max_length=30, blank=True, default="")
-    applicant_account = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
-        help_text="Set when an already-logged-in user submitted this application, so approval "
-                  "(approve_and_provision_owner) can promote their existing account via "
-                  "accounts.provisioning.attach_role instead of provisioning a disconnected new one.",
-    )
-    area = models.CharField(max_length=200, help_text="City/area where the dojo would run.")
-    preferred_schedule = models.CharField(max_length=200, blank=True, default="", help_text='e.g. "Saturday mornings"')
-    proposed_venue = models.CharField(max_length=200, blank=True, default="")
-    message = models.TextField(blank=True, default="")
-    consent = models.BooleanField(default=False, help_text="Understands sessions are free and volunteer-run.")
-    background_check_consent = models.BooleanField(
-        default=False,
-        help_text="Understands a Belgian criminal record extract (model 2, Artikel 596.2) will be required, "
-                  "since a dojo's lead coach works directly with minors.",
-    )
-
+    account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="applications")
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
     submitted_at = models.DateTimeField(auto_now_add=True)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
 
-    # A ForeignKey: one owner can be provisioned/promoted by several
-    # applications (one per dojo they start).
-    provisioned_owner = models.ForeignKey(
-        "accounts.DojoOwner", on_delete=models.SET_NULL, null=True, blank=True, related_name="applications",
-        help_text="Set by approve_and_provision_owner. Lets a later background-check renewal "
-                  "(validate_background_check, re-run on this same row) sync the new expiry "
-                  "back onto the account that logs in with it.",
+    # Mentor applications.
+    dojo = models.ForeignKey(
+        "dojos.Dojo", on_delete=models.SET_NULL, null=True, blank=True, related_name="applications",
+        help_text="Mentor applications: the dojo they'd like to help at (blank = any). Approval "
+                  "files a join request there.",
+    )
+    mentor_role = models.CharField(max_length=20, choices=MENTOR_ROLE_CHOICES, blank=True, default="")
+
+    # Champion applications.
+    area = models.CharField(max_length=200, blank=True, default="", help_text="City/area where the dojo would run.")
+    preferred_schedule = models.CharField(max_length=200, blank=True, default="", help_text='e.g. "Saturday mornings"')
+    proposed_venue = models.CharField(max_length=200, blank=True, default="")
+
+    message = models.TextField(blank=True, default="", help_text="Skills, interests, experience, anything useful.")
+    consent = models.BooleanField(default=False, help_text="Champions: understands sessions are free and volunteer-run.")
+    background_check_consent = models.BooleanField(
+        default=False,
+        help_text="Understands a Belgian criminal record extract (model 2, Artikel 596.2) is required "
+                  "before working with minors.",
     )
 
     class Meta:
         permissions = [
             ("can_review_background_checks", "Can review background check documents"),
         ]
+        ordering = ["-submitted_at"]
 
     def __str__(self):
-        return f"{self.applicant_name} - {self.area}"
+        return f"{self.account} — {self.get_kind_display()} ({self.get_status_display()})"
 
 
-class MentorApplication(BackgroundCheckMixin, models.Model):
-    PENDING = "pending"
-    APPROVED = "approved"
+class BackgroundCheckHistory(models.Model):
+    """Append-only audit log of background-check decisions: one row per
+    validation or rejection of an account's check, recording who reviewed
+    it and when. Nothing reads it to decide access — the current check on
+    accounts.User does that. Never stores the document itself (that's
+    deleted as soon as the decision is made)."""
+
+    VALIDATED = "validated"
     REJECTED = "rejected"
-    STATUS_CHOICES = [
-        (PENDING, "Pending"),
-        (APPROVED, "Approved"),
-        (REJECTED, "Rejected"),
-    ]
+    DECISION_CHOICES = [(VALIDATED, "Validated"), (REJECTED, "Rejected")]
 
-    VOLUNTEER_MENTOR = "volunteer_mentor"
-    OTHER = "other"
-    ROLE_CHOICES = [
-        (VOLUNTEER_MENTOR, "Volunteer mentor"),
-        (OTHER, "Something else (board, events, comms)"),
-    ]
-
-    applicant_name = models.CharField(max_length=200)
-    applicant_email = models.EmailField()
-    applicant_phone = models.CharField(max_length=30, blank=True, default="")
-    applicant_account = models.ForeignKey(
+    account = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="background_check_history",
+    )
+    decision = models.CharField(max_length=10, choices=DECISION_CHOICES)
+    reviewed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
-        help_text="Set when an already-logged-in user submitted this application, so approval "
-                  "(approve_and_provision_helper) can promote their existing account via "
-                  "accounts.provisioning.attach_role instead of provisioning a disconnected new one.",
     )
-    dojo = models.ForeignKey(
-        "dojos.Dojo", on_delete=models.SET_NULL, null=True, blank=True, related_name="mentor_applications",
-        help_text="Blank if the applicant is open to any dojo.",
-    )
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=VOLUNTEER_MENTOR)
-    about = models.TextField(blank=True, default="", help_text="Applicant's skills/interests.")
-    background_check_consent = models.BooleanField(
-        default=False,
-        help_text="Understands a Belgian criminal record extract (model 2, Artikel 596.2) will be required "
-                  "before working directly with minors.",
-    )
+    reviewed_at = models.DateTimeField()
+    requested_at = models.DateTimeField(null=True, blank=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True, help_text="Validated checks only.")
+    note = models.TextField(blank=True, default="", help_text="Optional reviewer remark — never the document.")
 
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
-    submitted_at = models.DateTimeField(auto_now_add=True)
-
-    # A ForeignKey: one helper can be approved for several dojos, one
-    # application each (see dojos.DojoMembership).
-    provisioned_helper = models.ForeignKey(
-        "accounts.HelperAccount", on_delete=models.SET_NULL, null=True, blank=True, related_name="applications",
-        help_text="Set by approve_and_provision_helper. Lets a later background-check renewal "
-                  "(validate_background_check, re-run on this same row) sync the new expiry "
-                  "back onto the account that logs in with it.",
-    )
+    class Meta:
+        ordering = ["-reviewed_at"]
+        verbose_name_plural = "background check history"
 
     def __str__(self):
-        return f"{self.applicant_name} ({self.get_role_display()})"
+        return f"{self.account} — {self.get_decision_display()} {self.reviewed_at:%Y-%m-%d}"
+
+
+class BackgroundCheck(User):
+    """Admin-only proxy over accounts.User: the reviewers' "Background checks"
+    list (applications.admin). Same rows, no extra table."""
+
+    class Meta:
+        proxy = True
+        verbose_name = "background check"
+        verbose_name_plural = "background checks"

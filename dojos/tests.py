@@ -11,8 +11,7 @@ from django.test import TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from accounts.models import DojoOwner, HelperAccount, Participant, User
-from accounts.provisioning import attach_role
+from accounts.models import Participant, User
 from content.models import OrganisationTeamMember
 from events.models import Event, Registration
 from geo.models import AdministrativeBoundary
@@ -21,7 +20,7 @@ from notifications.services import notify
 
 from . import access, team
 from .models import Dojo, DojoMembership
-from .testing import add_member, make_dojo
+from .testing import add_member, make_champion, make_dojo, make_mentor
 
 IN_MEMORY_CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 
@@ -91,10 +90,10 @@ class DojoDetailViewTests(TestCase):
 
 class DojoTeamViewTests(TestCase):
     def test_lists_champion_first_then_mentors_and_youth_mentors(self):
-        owner = DojoOwner.objects.create(username="owner1", first_name="Zoe")
+        owner = make_champion(username="owner1", first_name="Zoe")
         dojo = make_dojo("Ghent", champion=owner)
         # "Aaron" sorts before "Zoe" — the champion still comes first.
-        add_member(dojo, HelperAccount.objects.create(username="m1", first_name="Aaron"))
+        add_member(dojo, make_mentor(username="m1", first_name="Aaron"))
         add_member(dojo, User.objects.create(username="kid", first_name="Kid", account_type=User.NINJA),
                    DojoMembership.YOUTH_MENTOR)
 
@@ -107,16 +106,16 @@ class DojoTeamViewTests(TestCase):
 
     def test_hides_opted_out_requested_and_former_members(self):
         dojo = make_dojo("Ghent")
-        add_member(dojo, HelperAccount.objects.create(username="shy", show_on_team_pages=False))
-        add_member(dojo, HelperAccount.objects.create(username="asking"), status=DojoMembership.REQUESTED)
-        add_member(dojo, HelperAccount.objects.create(username="gone"), status=DojoMembership.DORMANT)
+        add_member(dojo, make_mentor(username="shy", show_on_team_pages=False))
+        add_member(dojo, make_mentor(username="asking"), status=DojoMembership.REQUESTED)
+        add_member(dojo, make_mentor(username="gone"), status=DojoMembership.DORMANT)
 
         response = self.client.get(reverse("dojo_team", kwargs={"dojo_id": dojo.id}))
 
         self.assertEqual(list(response.context["mentors"]), [])
 
     def test_profile_is_shared_across_dojos(self):
-        mentor = HelperAccount.objects.create(username="m1", first_name="Ann", last_name="Lee", title="Teacher")
+        mentor = make_mentor(username="m1", first_name="Ann", last_name="Lee", title="Teacher")
         for name in ("Ghent", "Antwerp"):
             dojo = make_dojo(name)
             add_member(dojo, mentor)
@@ -160,11 +159,11 @@ class PublicDojoVisibilityTests(TestCase):
 
 class DojoMembershipRulesTests(TestCase):
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
 
     def test_only_one_active_champion(self):
-        other = DojoMembership(dojo=self.dojo, user=DojoOwner.objects.create(username="owner2"),
+        other = DojoMembership(dojo=self.dojo, user=make_champion(username="owner2"),
                                role=DojoMembership.CHAMPION, status=DojoMembership.ACTIVE)
         with self.assertRaises(ValidationError):
             other.clean()
@@ -182,7 +181,7 @@ class DojoMembershipRulesTests(TestCase):
             kid.clean()
 
     def test_youth_mentor_promoted_by_another_dojos_team_is_invalid(self):
-        elsewhere = make_dojo("Antwerp", champion=DojoOwner.objects.create(username="owner2"))
+        elsewhere = make_dojo("Antwerp", champion=make_champion(username="owner2"))
         kid = DojoMembership(dojo=self.dojo, user=User.objects.create(username="kid", account_type=User.NINJA),
                              role=DojoMembership.YOUTH_MENTOR, promoted_by=elsewhere.champion_membership)
         with self.assertRaises(ValidationError):
@@ -193,7 +192,7 @@ class DojoMembershipRulesTests(TestCase):
             add_member(self.dojo, self.owner)
 
     def test_former_member_stays_on_past_event_teams(self):
-        mentor = add_member(self.dojo, HelperAccount.objects.create(username="m1"))
+        mentor = add_member(self.dojo, make_mentor(username="m1"))
         event = Event.objects.create(
             name="Past", dojo=self.dojo, start_time="2020-01-01T10:00:00Z", end_time="2020-01-01T12:00:00Z", places=10,
         )
@@ -208,7 +207,7 @@ class DojoMembershipRulesTests(TestCase):
 
 class DojoDashboardViewTests(TestCase):
     def test_dojo_with_no_sessions_still_renders(self):
-        owner = DojoOwner.objects.create(username="owner1")
+        owner = make_champion(username="owner1")
         dojo = make_dojo("Ghent", champion=owner)
         self.client.force_login(owner)
 
@@ -218,7 +217,7 @@ class DojoDashboardViewTests(TestCase):
         self.assertIsNone(response.context["session"])
 
     def test_shows_real_registrations_for_next_session(self):
-        owner = DojoOwner.objects.create(username="owner1")
+        owner = make_champion(username="owner1")
         dojo = make_dojo("Ghent", champion=owner)
         event = Event.objects.create(
             name="Session", dojo=dojo, status=Event.OPEN,
@@ -238,7 +237,7 @@ class DojoDashboardViewTests(TestCase):
         self.assertContains(response, "1 of 1 present")
 
     def test_missing_dojo_is_404(self):
-        owner = DojoOwner.objects.create(username="owner1")
+        owner = make_champion(username="owner1")
         self.client.force_login(owner)
         response = self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": 999999}))
         self.assertEqual(response.status_code, 404)
@@ -250,8 +249,8 @@ class DojoDashboardViewTests(TestCase):
         self.assertIn(reverse("login"), response.url)
 
     def test_another_owner_gets_404(self):
-        owner = DojoOwner.objects.create(username="owner1")
-        other_owner = DojoOwner.objects.create(username="owner2")
+        owner = make_champion(username="owner1")
+        other_owner = make_champion(username="owner2")
         dojo = make_dojo("Ghent", champion=owner)
         self.client.force_login(other_owner)
 
@@ -262,7 +261,7 @@ class DojoDashboardViewTests(TestCase):
 
 class DojoManageViewTests(TestCase):
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner, address="Oude Vismijn 3, Ghent")
 
     def _valid_post_data(self, **overrides):
@@ -288,7 +287,7 @@ class DojoManageViewTests(TestCase):
         self.assertIn(reverse("login"), response.url)
 
     def test_another_owner_gets_404(self):
-        other_owner = DojoOwner.objects.create(username="owner2")
+        other_owner = make_champion(username="owner2")
         self.client.force_login(other_owner)
         response = self.client.get(reverse("dojo_manage", kwargs={"dojo_id": self.dojo.id}))
         self.assertEqual(response.status_code, 404)
@@ -373,7 +372,7 @@ class DojoManageViewTests(TestCase):
 
 class DojoEventListViewTests(TestCase):
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
 
     def test_anonymous_redirected_to_login(self):
@@ -382,7 +381,7 @@ class DojoEventListViewTests(TestCase):
         self.assertIn(reverse("login"), response.url)
 
     def test_another_owner_gets_404(self):
-        other_owner = DojoOwner.objects.create(username="owner2")
+        other_owner = make_champion(username="owner2")
         self.client.force_login(other_owner)
         response = self.client.get(reverse("dojo_event_list", kwargs={"dojo_id": self.dojo.id}))
         self.assertEqual(response.status_code, 404)
@@ -406,7 +405,7 @@ class DojoEventListViewTests(TestCase):
 
 class DojoEventCreateViewTests(TestCase):
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
 
     def _valid_post_data(self, **overrides):
@@ -432,7 +431,7 @@ class DojoEventCreateViewTests(TestCase):
         self.assertIn(reverse("login"), response.url)
 
     def test_another_owner_gets_404(self):
-        other_owner = DojoOwner.objects.create(username="owner2")
+        other_owner = make_champion(username="owner2")
         self.client.force_login(other_owner)
         response = self.client.get(reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}))
         self.assertEqual(response.status_code, 404)
@@ -467,10 +466,10 @@ class DojoEventCreateViewTests(TestCase):
         """Anyone active on this dojo's team — including the champion
         themselves — can be put on a session; other dojos' members, requested
         and former members can't."""
-        add_member(make_dojo("Antwerp"), HelperAccount.objects.create(username="elsewhere"))
-        own_mentor = add_member(self.dojo, HelperAccount.objects.create(username="own"))
-        add_member(self.dojo, HelperAccount.objects.create(username="asking"), status=DojoMembership.REQUESTED)
-        add_member(self.dojo, HelperAccount.objects.create(username="gone"), status=DojoMembership.DORMANT)
+        add_member(make_dojo("Antwerp"), make_mentor(username="elsewhere"))
+        own_mentor = add_member(self.dojo, make_mentor(username="own"))
+        add_member(self.dojo, make_mentor(username="asking"), status=DojoMembership.REQUESTED)
+        add_member(self.dojo, make_mentor(username="gone"), status=DojoMembership.DORMANT)
         self.client.force_login(self.owner)
 
         response = self.client.get(reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}))
@@ -480,8 +479,8 @@ class DojoEventCreateViewTests(TestCase):
         )
 
     def test_several_team_members_can_be_assigned(self):
-        mentor_a = add_member(self.dojo, HelperAccount.objects.create(username="a"))
-        mentor_b = add_member(self.dojo, HelperAccount.objects.create(username="b"))
+        mentor_a = add_member(self.dojo, make_mentor(username="a"))
+        mentor_b = add_member(self.dojo, make_mentor(username="b"))
         self.client.force_login(self.owner)
 
         self.client.post(
@@ -508,7 +507,7 @@ class DojoEventCreateViewTests(TestCase):
 
 class DojoEventDetailViewTests(TestCase):
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
         self.event = Event.objects.create(
             name="Session", dojo=self.dojo, status=Event.OPEN,
@@ -543,7 +542,7 @@ class DojoEventDetailViewTests(TestCase):
         self.assertIn(reverse("login"), response.url)
 
     def test_another_owner_gets_404(self):
-        other_owner = DojoOwner.objects.create(username="owner2")
+        other_owner = make_champion(username="owner2")
         self.client.force_login(other_owner)
         response = self.client.get(self._url())
         self.assertEqual(response.status_code, 404)
@@ -608,7 +607,7 @@ class DojoEventDetailViewTests(TestCase):
 
 class DojoEventAttendanceViewTests(TestCase):
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
         self.event = Event.objects.create(
             name="Session", dojo=self.dojo, status=Event.OPEN,
@@ -641,7 +640,7 @@ class DojoEventAttendanceViewTests(TestCase):
         self.assertIn(reverse("login"), response.url)
 
     def test_another_owner_gets_404_everywhere(self):
-        other_owner = DojoOwner.objects.create(username="owner2")
+        other_owner = make_champion(username="owner2")
         self.client.force_login(other_owner)
         self.assertEqual(self.client.get(self._page_url()).status_code, 404)
         self.assertEqual(self.client.post(self._mark_url(self.zoe), {"attended": "present"}).status_code, 404)
@@ -756,7 +755,7 @@ class DojoEventAttendanceViewTests(TestCase):
 
 class DojoEventSetStatusViewTests(TestCase):
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
         self.event = Event.objects.create(
             name="Session", dojo=self.dojo, status=Event.DRAFT,
@@ -778,7 +777,7 @@ class DojoEventSetStatusViewTests(TestCase):
         self.assertEqual(self.event.status, Event.DRAFT)
 
     def test_another_owner_gets_404(self):
-        other_owner = DojoOwner.objects.create(username="owner2")
+        other_owner = make_champion(username="owner2")
         self.client.force_login(other_owner)
         response = self.client.post(self._url(), {"status": Event.OPEN})
         self.assertEqual(response.status_code, 404)
@@ -863,7 +862,7 @@ class AdminNavDojoSwitcherTests(TestCase):
     something to switch to."""
 
     def test_single_dojo_owner_sees_no_switcher(self):
-        owner = DojoOwner.objects.create(username="owner1")
+        owner = make_champion(username="owner1")
         dojo = make_dojo("Ghent", champion=owner)
         self.client.force_login(owner)
 
@@ -873,7 +872,7 @@ class AdminNavDojoSwitcherTests(TestCase):
         self.assertContains(response, "Ghent")
 
     def test_multi_dojo_owner_sees_switcher_listing_every_dojo(self):
-        owner = DojoOwner.objects.create(username="owner1")
+        owner = make_champion(username="owner1")
         ghent = make_dojo("Ghent", champion=owner)
         antwerp = make_dojo("Antwerp", champion=owner)
         self.client.force_login(owner)
@@ -888,7 +887,7 @@ class AdminNavDojoSwitcherTests(TestCase):
         self.assertContains(response, reverse("dojo_dashboard", kwargs={"dojo_id": antwerp.id}))
 
     def test_switch_links_go_to_manage_when_on_settings(self):
-        owner = DojoOwner.objects.create(username="owner1")
+        owner = make_champion(username="owner1")
         ghent = make_dojo("Ghent", champion=owner)
         antwerp = make_dojo("Antwerp", champion=owner)
         self.client.force_login(owner)
@@ -898,8 +897,8 @@ class AdminNavDojoSwitcherTests(TestCase):
         self.assertContains(response, reverse("dojo_manage", kwargs={"dojo_id": antwerp.id}))
 
     def test_dojos_owned_by_someone_else_are_not_listed(self):
-        owner = DojoOwner.objects.create(username="owner1")
-        other_owner = DojoOwner.objects.create(username="owner2")
+        owner = make_champion(username="owner1")
+        other_owner = make_champion(username="owner2")
         dojo = make_dojo("Ghent", champion=owner)
         make_dojo("Antwerp", champion=other_owner)
         self.client.force_login(owner)
@@ -917,9 +916,9 @@ class HelperDojoAccessTests(TestCase):
     ROLE_CAPABILITIES."""
 
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
-        self.helper = HelperAccount.objects.create(username="helper1", first_name="Hanna", last_name="Helper")
+        self.helper = make_mentor(username="helper1", first_name="Hanna", last_name="Helper")
         add_member(self.dojo, self.helper)
         self.event = Event.objects.create(
             name="Session", dojo=self.dojo, status=Event.DRAFT,
@@ -987,7 +986,7 @@ class HelperDojoAccessTests(TestCase):
     def test_helper_at_several_dojos_can_open_and_switch_between_each(self):
         """Same flexibility as an owner of several dojos: one membership per
         dojo, each opening that dojo's admin area."""
-        antwerp = make_dojo("Antwerp", champion=DojoOwner.objects.create(username="owner2"))
+        antwerp = make_dojo("Antwerp", champion=make_champion(username="owner2"))
         add_member(antwerp, self.helper)
         self.client.force_login(self.helper)
 
@@ -1017,16 +1016,15 @@ class HelperDojoAccessTests(TestCase):
     def test_requested_or_former_membership_gets_no_access(self):
         for status in (DojoMembership.REQUESTED, DojoMembership.DORMANT):
             with self.subTest(status=status):
-                user = HelperAccount.objects.create(username=f"u-{status}")
+                user = make_mentor(username=f"u-{status}")
                 add_member(self.dojo, user, status=status)
                 self.client.force_login(user)
                 response = self.client.get(reverse("dojo_dashboard", kwargs=self._kw()))
                 self.assertEqual(response.status_code, 404)
 
     def test_mentor_with_lapsed_check_gets_no_access(self):
-        self.helper.background_check_required = True
         self.helper.background_check_expires_at = timezone.now() - timedelta(days=1)
-        self.helper.save(update_fields=["background_check_required", "background_check_expires_at"])
+        self.helper.save(update_fields=["background_check_expires_at"])
         self.assertIsNone(access.dojo_role(self.helper, self.dojo))
         self.assertEqual(list(access.accessible_dojos(self.helper)), [])
 
@@ -1042,11 +1040,11 @@ class HelperDojoAccessTests(TestCase):
     def test_switcher_lists_owned_and_helped_dojos(self):
         """One account that owns one dojo and helps at another can switch
         between both, with the right role shown on each."""
-        antwerp = make_dojo("Antwerp", champion=DojoOwner.objects.create(username="owner2"))
-        bruges_owner = DojoOwner.objects.create(username="both")
+        antwerp = make_dojo("Antwerp", champion=make_champion(username="owner2"))
+        bruges_owner = make_champion(username="both")
         bruges = make_dojo("Bruges", champion=bruges_owner)
-        as_helper = attach_role(bruges_owner, HelperAccount)
-        add_member(antwerp, as_helper)
+        # One account: champion of Bruges, mentor at Antwerp — no second login.
+        add_member(antwerp, bruges_owner)
         self.client.force_login(bruges_owner)
 
         bruges_page = self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": bruges.id}))
@@ -1135,7 +1133,7 @@ class NotificationBellTests(TestCase):
     below for the live-push side."""
 
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
+        self.owner = make_champion(username="owner1", email="owner@example.com")
         self.dojo = make_dojo("Ghent", champion=self.owner)
         self.other_dojo = make_dojo("Antwerp", champion=self.owner)
 
@@ -1156,7 +1154,7 @@ class NotificationBellTests(TestCase):
         self.assertContains(response, "You're all caught up.")
 
     def test_another_recipients_notifications_never_show(self):
-        other_owner = DojoOwner.objects.create(username="owner2")
+        other_owner = make_champion(username="owner2")
         notify(other_owner, "Not yours", dojo=self.dojo)
         self.client.force_login(self.owner)
 
@@ -1167,7 +1165,7 @@ class NotificationBellTests(TestCase):
 
 class MarkAllNotificationsReadTests(TestCase):
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
         self.other_dojo = make_dojo("Antwerp", champion=self.owner)
 
@@ -1193,7 +1191,7 @@ class MarkAllNotificationsReadTests(TestCase):
         self.assertIn(reverse("login"), response.url)
 
     def test_another_owner_gets_404(self):
-        other_owner = DojoOwner.objects.create(username="owner2")
+        other_owner = make_champion(username="owner2")
         self.client.force_login(other_owner)
         response = self.client.post(reverse("mark_all_notifications_read", kwargs={"dojo_id": self.dojo.id}))
         self.assertEqual(response.status_code, 404)
@@ -1201,7 +1199,7 @@ class MarkAllNotificationsReadTests(TestCase):
 
 class OpenNotificationViewTests(TestCase):
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
 
     def test_marks_read_and_redirects_to_its_url(self):
@@ -1230,7 +1228,7 @@ class OpenNotificationViewTests(TestCase):
         """Read state is per-recipient — one owner must not be able to mark
         a co-owner's copy of a dojo-level notification read, even though
         they both legitimately manage this dojo."""
-        other_owner = DojoOwner.objects.create(username="owner2")
+        other_owner = make_champion(username="owner2")
         notification = notify(other_owner, "Not yours", dojo=self.dojo)
         self.client.force_login(self.owner)
 
@@ -1260,7 +1258,7 @@ class NotificationConsumerTests(TransactionTestCase):
     that touch the database)."""
 
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
 
     async def test_owner_connection_is_accepted(self):
@@ -1274,7 +1272,7 @@ class NotificationConsumerTests(TransactionTestCase):
         await communicator.disconnect()
 
     async def test_helper_connection_is_accepted(self):
-        helper = await sync_to_async(HelperAccount.objects.create)(username="helper1")
+        helper = await sync_to_async(make_mentor)(username="helper1")
         await sync_to_async(add_member)(self.dojo, helper)
         communicator = WebsocketCommunicator(
             NotificationConsumer.as_asgi(), f"/ws/dojos/{self.dojo.id}/notifications/"
@@ -1286,7 +1284,7 @@ class NotificationConsumerTests(TransactionTestCase):
         await communicator.disconnect()
 
     async def test_non_owner_connection_is_refused(self):
-        other_owner = await sync_to_async(DojoOwner.objects.create)(username="owner2")
+        other_owner = await sync_to_async(make_champion)(username="owner2")
         communicator = WebsocketCommunicator(
             NotificationConsumer.as_asgi(), f"/ws/dojos/{self.dojo.id}/notifications/"
         )
@@ -1343,9 +1341,9 @@ class TeamMemberDetailViewTests(TestCase):
 
 class JoinRequestTests(TestCase):
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
-        self.mentor = HelperAccount.objects.create(username="mentor1", first_name="Mia")
+        self.mentor = make_mentor(username="mentor1", first_name="Mia")
         self.url = reverse("dojo_join_request", kwargs={"dojo_id": self.dojo.id})
 
     def test_approved_mentor_sees_button_and_can_ask(self):
@@ -1385,9 +1383,9 @@ class JoinRequestTests(TestCase):
 
 class TeamManagementTests(TestCase):
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
-        self.mentor_account = HelperAccount.objects.create(username="mentor1", email="mentor1@example.com")
+        self.mentor_account = make_mentor(username="mentor1", email="mentor1@example.com")
         self.mentor = add_member(self.dojo, self.mentor_account)
         self.action_url = reverse("dojo_team_action", kwargs={"dojo_id": self.dojo.id})
 
@@ -1402,8 +1400,8 @@ class TeamManagementTests(TestCase):
         self.assertEqual(set(response.context["active_members"]), {self.dojo.champion_membership, self.mentor})
 
     def test_mentor_can_accept_and_decline_requests(self):
-        asking = add_member(self.dojo, HelperAccount.objects.create(username="a"), status=DojoMembership.REQUESTED)
-        first_timer = add_member(self.dojo, HelperAccount.objects.create(username="b"), status=DojoMembership.REQUESTED)
+        asking = add_member(self.dojo, make_mentor(username="a"), status=DojoMembership.REQUESTED)
+        first_timer = add_member(self.dojo, make_mentor(username="b"), status=DojoMembership.REQUESTED)
 
         self._post(self.mentor_account, action="accept", membership_id=asking.id)
         self._post(self.mentor_account, action="decline", membership_id=first_timer.id)
@@ -1416,7 +1414,7 @@ class TeamManagementTests(TestCase):
         self.assertFalse(DojoMembership.objects.filter(id=first_timer.id).exists())
 
     def test_add_mentor_by_email_requires_an_approved_mentor(self):
-        approved = HelperAccount.objects.create(username="c", email="approved@example.com")
+        approved = make_mentor(username="c", email="approved@example.com")
         User.objects.create(username="d", email="plain@example.com")
 
         self._post(self.owner, action="add_mentor", email="approved@example.com")
@@ -1468,13 +1466,13 @@ class TeamManagementTests(TestCase):
         self.assertEqual((old.role, old.status), (DojoMembership.MENTOR, DojoMembership.ACTIVE))
 
     def test_only_the_champion_can_transfer(self):
-        other = add_member(self.dojo, HelperAccount.objects.create(username="e"))
+        other = add_member(self.dojo, make_mentor(username="e"))
         response = self._post(self.mentor_account, action="transfer", membership_id=other.id)
         self.assertEqual(response.status_code, 403)
         self.assertEqual(self.dojo.champion.pk, self.owner.pk)
 
     def test_mentor_without_manage_team_is_blocked(self):
-        asking = add_member(self.dojo, HelperAccount.objects.create(username="f"), status=DojoMembership.REQUESTED)
+        asking = add_member(self.dojo, make_mentor(username="f"), status=DojoMembership.REQUESTED)
         with patch.dict(access.ROLE_CAPABILITIES, {access.MENTOR: frozenset()}):
             response = self._post(self.mentor_account, action="accept", membership_id=asking.id)
         self.assertEqual(response.status_code, 403)
@@ -1484,7 +1482,7 @@ class TeamManagementTests(TestCase):
 
 class DojoLifecycleTests(TestCase):
     def setUp(self):
-        self.owner = DojoOwner.objects.create(username="owner1")
+        self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner, status=Dojo.DRAFT)
         self.url = reverse("dojo_set_lifecycle", kwargs={"dojo_id": self.dojo.id})
         self.client.force_login(self.owner)
@@ -1528,7 +1526,7 @@ class DojoLifecycleTests(TestCase):
 
     def test_going_dormant_auto_declines_pending_requests(self):
         self._act("launch")
-        asking = add_member(self.dojo, HelperAccount.objects.create(username="a"), status=DojoMembership.REQUESTED)
+        asking = add_member(self.dojo, make_mentor(username="a"), status=DojoMembership.REQUESTED)
         with patch("dojos.team.notify") as mock_notify:
             self._act("go_dormant")
         self.assertFalse(DojoMembership.objects.filter(id=asking.id).exists())
@@ -1572,7 +1570,7 @@ class DormancyNudgeTests(TestCase):
         self.assertFalse(team.needs_dormancy_nudge(self.dojo))
 
     def test_dashboard_shows_the_banner(self):
-        owner = DojoOwner.objects.create(username="owner1")
+        owner = make_champion(username="owner1")
         add_member(self.dojo, owner, DojoMembership.CHAMPION)
         self._event(-200)
         self.client.force_login(owner)

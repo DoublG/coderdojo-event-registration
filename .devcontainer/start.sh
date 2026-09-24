@@ -39,6 +39,7 @@ if python manage.py shell -c "import sys; from events.models import Event; sys.e
     python manage.py seed_pathways
     python manage.py seed_events
     python manage.py seed_guardians
+    python manage.py seed_applications
     python manage.py seed_participant_history
     python manage.py seed_faqs
     python manage.py seed_testimonials

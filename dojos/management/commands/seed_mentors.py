@@ -7,7 +7,9 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.text import slugify
 
-from accounts.models import HelperAccount
+from accounts.models import User
+from applications.models import Application
+from applications.seeding import approve_for_seeding
 from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
 from content.models import OrganisationTeamMember
 from dojos.models import Dojo, DojoMembership
@@ -124,7 +126,7 @@ def assign_dojo_icon(dojo, rng):
 class Command(BaseCommand):
     help = (
         "Seed the organisation's team listing, each dojo champion's team-page profile, "
-        "and a few mentor accounts per dojo (approved HelperAccount logins with active "
+        "and a few mentor accounts per dojo (adult logins approved as mentors, with active "
         "memberships; some help at two dojos). Also a pending join request and a former "
         "team member here and there, to exercise the Team page."
     )
@@ -179,12 +181,12 @@ class Command(BaseCommand):
                 continue
             for n in range(1, rng.randint(*MENTORS_PER_DOJO) + 1):
                 username = f"mentor-{dojo.id}-{n}"
-                mentor = HelperAccount.objects.filter(username=username).first()
+                mentor = User.objects.filter(username=username).first()
                 if mentor is None:
                     first, last = rng.choice(FIRST_NAMES), rng.choice(LAST_NAMES)
                     email = email_for(f"{first} {last} {dojo.id} {n}", "coderdojo-demo.example")
                     password = generate_password()
-                    mentor = HelperAccount(
+                    mentor = User(
                         username=username, email=email, first_name=first, last_name=last,
                         title=rng.choice(TITLES),
                     )
@@ -193,6 +195,7 @@ class Command(BaseCommand):
                     assign_avatar(mentor, rng)
                     credential_rows.append((username, email, password))
                     created += 1
+                approve_for_seeding(mentor, Application.MENTOR, rng, mentor_role=Application.VOLUNTEER_MENTOR)
                 DojoMembership.objects.get_or_create(
                     dojo=dojo, user=mentor,
                     defaults={
@@ -227,6 +230,12 @@ class Command(BaseCommand):
                 membership.status = DojoMembership.DORMANT
                 membership.left_at = timezone.now()
                 membership.save(update_fields=["status", "left_at"])
+
+        # Every seeded mentor is approved (valid check + approved application),
+        # including mentors seeded before the onboarding redesign.
+        for membership in DojoMembership.objects.filter(role=DojoMembership.MENTOR).select_related("user"):
+            if not membership.user.applications.filter(status=Application.APPROVED).exists():
+                approve_for_seeding(membership.user, Application.MENTOR, rng, mentor_role=Application.VOLUNTEER_MENTOR)
 
         if credential_rows:
             write_credentials("mentor", credential_rows)

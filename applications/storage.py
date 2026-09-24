@@ -5,3 +5,10 @@ from django.core.files.storage import FileSystemStorage
 # nothing can build a direct link to them. They're only ever read from disk
 # by the permission-gated view in applications.views.
 private_storage = FileSystemStorage(location=settings.PRIVATE_MEDIA_ROOT, base_url=None)
+
+
+def get_private_storage():
+    """What model fields pass as `storage=`: a callable, so migrations
+    reference this function instead of baking PRIVATE_MEDIA_ROOT's absolute
+    path (which differs per machine) into the migration file."""
+    return private_storage

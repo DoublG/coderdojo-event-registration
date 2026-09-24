@@ -18,12 +18,18 @@
 {% block content %}
   <div class="page">
 
-    {% if submitted %}
+    {% if error %}
+      <h1 class="display-lg page-title">Already applied</h1>
+      <p class="body-lg page-subtitle">{{ error }}</p>
+      <div class="form-card">
+        <a class="cd-btn cd-btn--primary label" href="{% url 'account_home' %}">Go to your account</a>
+      </div>
+    {% elif submitted %}
 
       <h1 class="display-lg page-title">Thanks — application sent!</h1>
       <p class="body-lg page-subtitle">We've got your details. A board member will follow up within a week.</p>
       <div class="form-card">
-        <a class="cd-btn cd-btn--primary label" href="{% url 'home' %}">Back to home</a>
+        <a class="cd-btn cd-btn--primary label" href="{% url 'account_home' %}">Go to your account</a>
       </div>
 
     {% else %}
@@ -45,22 +51,13 @@
 
           <div class="cd-form__group">
             <h3 class="cd-form__group-title heading-md">Your details</h3>
-            <div class="cd-form__row">
-              <div class="cd-form__field">
-                <label class="cd-form__label label" for="{{ form.applicant_name.id_for_label }}">Full name<span class="cd-form__required" aria-hidden="true">*</span></label>
-                {{ form.applicant_name }}
-                <ul class="cd-form__errors">{% for error in form.applicant_name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-              </div>
-              <div class="cd-form__field">
-                <label class="cd-form__label label" for="{{ form.applicant_email.id_for_label }}">Email<span class="cd-form__required" aria-hidden="true">*</span></label>
-                {{ form.applicant_email }}
-                <ul class="cd-form__errors">{% for error in form.applicant_email.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-              </div>
-            </div>
+            <p class="body-sm" style="margin: 0 0 var(--space-3);">
+              Applying as <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>{% if request.user.email %} ({{ request.user.email }}){% endif %}.
+            </p>
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.applicant_phone.id_for_label }}">Phone</label>
-              {{ form.applicant_phone }}
-              <ul class="cd-form__errors">{% for error in form.applicant_phone.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+              <label class="cd-form__label label" for="{{ form.phone.id_for_label }}">Phone</label>
+              {{ form.phone }}
+              <ul class="cd-form__errors">{% for error in form.phone.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
           </div>
 
