@@ -46,3 +46,7 @@ typing_extensions==4.16.0
 ujson==6.0.0
 urllib3==2.8.0
 zope.interface==8.6
+
+# background jobs
+celery==5.6.3
+django_celery_results==2.6.0

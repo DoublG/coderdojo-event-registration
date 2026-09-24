@@ -49,5 +49,8 @@ else
     echo "Demo data already present (events exist) - skipping demo seed."
 fi
 
+# start background worker
+celery -A website worker -l INFO > background_job.log 2>&1 &
+
 # start server
 python manage.py runserver 0.0.0.0:8000

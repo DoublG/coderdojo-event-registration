@@ -30,16 +30,13 @@ services:
 
       DEBUG: true
 
-      # Mailtrap (sandbox SMTP) - read by website/settings.py.
-      # This is a local-dev-only container, so credentials live here in
-      # plain env vars rather than a separate secrets file. Replace
-      # EMAIL_HOST_USER/EMAIL_HOST_PASSWORD with your own Mailtrap sandbox
-      # inbox credentials (https://mailtrap.io -> Sandbox -> SMTP Settings).
-      EMAIL_HOST: sandbox.smtp.mailtrap.io
-      EMAIL_PORT: 2525
-      EMAIL_HOST_USER: replace-with-your-mailtrap-username
-      EMAIL_HOST_PASSWORD: replace-with-your-mailtrap-password
-      EMAIL_USE_TLS: "true"
+      # Test mailcient
+      EMAIL_HOST: mailpit
+      EMAIL_PORT: 1025
+      EMAIL_HOST_USER: ""
+      EMAIL_HOST_PASSWORD: ""
+      EMAIL_USE_TLS: "false"
+      EMAIL_USE_SSL: "false"
       DEFAULT_FROM_EMAIL: "CoderDojo Belgium <noreply@coolregistration.localhost>"
 
       # Claude Code keeps its login, settings, memory and session history
@@ -115,6 +112,22 @@ services:
     environment:
       PMA_HOST: db
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: ${PROJECT_NAME:-coolregistration-dev}-mailpit
+    restart: unless-stopped
+    volumes:
+      - mailpit-data:/data
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: 5000
+      MP_WEBROOT: /mails
+
+    ports:
+      - "1025:1025"
+      - "8025:8025"             
+    
 volumes:
   db-data:
   claude-config:
+  mailpit-data:
