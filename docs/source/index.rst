@@ -2,7 +2,7 @@ CoderDojo Belgium — Help Centre
 ================================
 
 `CoderDojo <https://coderdojobelgium.example>`_ is a free, volunteer-run
-coding club for young people aged 7–18 ("ninjas"). This site is where
+coding club for young people aged 7–17 ("ninjas"). This site is where
 families find a local dojo and sign their kids up for sessions, where
 volunteers and new dojos get set up, and where dojo teams run their
 sessions day-to-day.

@@ -11,8 +11,9 @@ To create an account:
    directly to the registration page.
 #. Fill in your own details (name, email, and a password).
 #. Add each child who'll be attending — their name and date of birth are
-   required; experience level and any allergies/notes are optional but
-   help the mentors running the session. Use **Add another child** if
+   required (dojos are for ninjas aged 7 to 17, so a date of birth outside
+   that range is flagged); experience level and any allergies/notes are
+   optional but help the mentors running the session. Use **Add another child** if
    you have more than one.
 #. Submit the form.
 

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 09:56+0000\n"
+"POT-Creation-Date: 2026-09-24 14:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -62,18 +62,25 @@ msgstr ""
 #: ../../source/families/managing-your-account.rst:20
 msgid ""
 "**Add a child** — name, date of birth, an optional icon, experience "
-"level, and any allergies or notes for mentors."
+"level, and any allergies or notes for mentors. Ninjas are 7 to 17, so a "
+"date of birth outside that range isn't accepted."
 msgstr ""
 "**Een kind toevoegen** — naam, geboortedatum, een optioneel icoon, "
-"ervaringsniveau, en eventuele allergieën of opmerkingen voor mentoren."
-
-#: ../../source/families/managing-your-account.rst:22
-msgid "**Edit a child's details** — click their name/header to edit it inline."
-msgstr ""
-"**De gegevens van een kind bewerken** — klik op de naam/kop om deze "
-"rechtstreeks te bewerken."
+"ervaringsniveau, en eventuele allergieën of opmerkingen voor mentoren. "
+"Ninja's zijn 7 tot 17 jaar, dus een geboortedatum buiten die leeftijd "
+"wordt niet aanvaard."
 
 #: ../../source/families/managing-your-account.rst:23
+msgid ""
+"**Edit a child's details** — click their name/header to edit it inline. A"
+" child who has turned 18 stays on your account; only a newly entered date"
+" of birth is checked."
+msgstr ""
+"**De gegevens van een kind wijzigen** — klik op de naam/kop om die ter "
+"plaatse te bewerken. Een kind dat 18 is geworden blijft op uw account; "
+"alleen een nieuw ingevoerde geboortedatum wordt gecontroleerd."
+
+#: ../../source/families/managing-your-account.rst:26
 msgid ""
 "**Cancel a registration** — frees the spot for the next child on that "
 "session's waiting list."
@@ -81,7 +88,7 @@ msgstr ""
 "**Een inschrijving annuleren** — maakt de plaats vrij voor het volgende "
 "kind op de wachtlijst van die sessie."
 
-#: ../../source/families/managing-your-account.rst:25
+#: ../../source/families/managing-your-account.rst:28
 msgid ""
 "**View a child's belt and badges** — their current belt (their coding "
 "level, awarded by their dojo's champion or mentors) with the belts they "
@@ -95,7 +102,7 @@ msgstr ""
 "waaraan het werkt (bv. de aanwezigheidspolsbandjes, die bijgewerkt worden"
 " wanneer de dojo de aanwezigheid bijhoudt), en de sessiegeschiedenis."
 
-#: ../../source/families/managing-your-account.rst:31
+#: ../../source/families/managing-your-account.rst:34
 msgid ""
 "If your child has their own login, they see their own page (their belt, "
 "badges and session history) when they log in, but can't change their "
@@ -106,11 +113,11 @@ msgstr ""
 "gegevens niet wijzigen en zich niet zelf inschrijven voor sessies; dat "
 "blijft uw taak."
 
-#: ../../source/families/managing-your-account.rst:36
+#: ../../source/families/managing-your-account.rst:39
 msgid "Already a champion or mentor?"
 msgstr "Al champion of mentor?"
 
-#: ../../source/families/managing-your-account.rst:38
+#: ../../source/families/managing-your-account.rst:41
 msgid ""
 "Every account has a family page: open **My Account** from your account "
 "menu and use **Add a child** there. Your children are added to the same "
@@ -121,11 +128,11 @@ msgstr ""
 "toegevoegd aan dezelfde login die u al gebruikt, zonder aparte "
 "registratie of tweede account."
 
-#: ../../source/families/managing-your-account.rst:43
+#: ../../source/families/managing-your-account.rst:46
 msgid "Changing your password"
 msgstr "Uw wachtwoord wijzigen"
 
-#: ../../source/families/managing-your-account.rst:45
+#: ../../source/families/managing-your-account.rst:48
 msgid ""
 "Go to **Change password** (also linked from your account page). You'll "
 "need your current password to set a new one."
@@ -133,11 +140,11 @@ msgstr ""
 "Ga naar **Wachtwoord wijzigen** (ook toegankelijk via uw accountpagina). "
 "U hebt uw huidige wachtwoord nodig om een nieuw wachtwoord in te stellen."
 
-#: ../../source/families/managing-your-account.rst:49
+#: ../../source/families/managing-your-account.rst:52
 msgid "Volunteering"
 msgstr "Vrijwilligerswerk"
 
-#: ../../source/families/managing-your-account.rst:51
+#: ../../source/families/managing-your-account.rst:54
 msgid ""
 "The **Volunteering** section of your account page shows any application "
 "you've made to become a mentor or start a dojo, and where your background"
@@ -208,4 +215,10 @@ msgstr ""
 #~ "aanwezigheidsbandjes) die ze hebben verdiend"
 #~ " of aan het verdienen zijn, en "
 #~ "hun sessiegeschiedenis."
+
+#~ msgid "**Edit a child's details** — click their name/header to edit it inline."
+#~ msgstr ""
+#~ "**De gegevens van een kind bewerken**"
+#~ " — klik op de naam/kop om deze"
+#~ " rechtstreeks te bewerken."
 
