@@ -1,7 +1,7 @@
 """Ready-made session banner images shipped with the app — under
 events/static/events/template_images/ so they're reachable via {% static %}
 as well as plain filesystem access. Shared by the demo-data seeder
-(seed_events.py, seed_participant_history.py) and the dojo owner's own
+(seed_events.py, seed_ninja_history.py) and the dojo owner's own
 "choose from templates" banner option on the event-create form
 (events.forms.EventForm) — a single source of truth so the two never
 drift out of sync on which files/names exist.

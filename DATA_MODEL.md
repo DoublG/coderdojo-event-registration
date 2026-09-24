@@ -11,11 +11,10 @@ display fields (descriptions, taglines, photos, …) are left out; the models
 in each app's `models.py` have the full field lists. If you change a model,
 update its diagram in the same change.
 
-> **The redesign has landed** (phases 1–7). Sections 1–9 describe the
+> **The redesign has landed** (all eight phases). Sections 1–9 describe the
 > model as it is in the code today. [Section 10](#10-redesign-rationale-and-plan)
 > keeps the design rationale, the decisions behind it and the
-> [implementation plan](#implementation-plan); only phase 8 (rewriting the
-> seeders and resetting the migrations) is still open. It also sets the
+> [implementation plan](#implementation-plan). It also sets the
 > [nomenclature](#nomenclature) (Champion, Mentor/Coach, Ninja, Youth
 > mentor, Badge, Belt) that the code and the UI use.
 
@@ -621,8 +620,7 @@ erDiagram
 
 ## 10. Redesign: rationale and plan
 
-> **Status: landed** (phases 1–7; phase 8, the seeder rewrite and
-> migration reset, is open). Sections 1–9 are the current model; this
+> **Status: landed** (all eight phases, 2026-09-24). Sections 1–9 are the current model; this
 > section keeps *why* it looks the way it does: the problems with the old
 > model, the decisions taken and the plan. Where it says "today", read
 > "before the redesign".
@@ -1299,17 +1297,22 @@ Instead:
 - **Adapt the seed commands** so they produce the new model directly.
   Rebuild with `docker compose -f .devcontainer/docker-compose.yml down -v`
   followed by a fresh `up` (`start.sh` reseeds on an empty database).
+  Note that `-v` also wipes the `claude-config` volume (Claude Code's
+  login and sessions); to reset only the database, remove just the
+  `db-data` volume (`docker volume ls` shows its project-prefixed name), or
+  drop and recreate the `coolregistration` database from inside the
+  workspace and rerun `start.sh`'s seed sequence.
 
 Seeders to adapt:
 
 | Seeder | Today | In the redesign |
 |---|---|---|
-| `seed_dojos` | dojos from the bundled JSON | same, plus a `status` (mostly `active`, a few `draft`/`dormant`/`archived` to exercise the lifecycle) and each dojo's provided pathways |
-| `seed_dojo_owners` | a `DojoOwner` per dojo | **champion** accounts (with a validated check and a `BACKGROUND_CHECK_HISTORY` row) + a `champion` membership per dojo; replaces `seed_dojo_owners` |
+| `seed_dojos` | dojos from the bundled JSON | same, plus a `status` (mostly `active`, a few `draft`/`dormant`/`archived` to exercise the lifecycle); each dojo's provided pathways are set by `seed_events`, which runs after `seed_pathways` |
+| `seed_champions` (was `seed_dojo_owners`) | a `DojoOwner` per dojo | **champion** accounts (with a validated check and a `BACKGROUND_CHECK_HISTORY` row) + a `champion` membership per dojo; replaces `seed_dojo_owners` |
 | `seed_mentors` | `Mentor` profiles (mostly login-less) + board rows | **mentor** accounts (validated check) with `active` memberships, some at several dojos, a few `requested`/`dormant`; **youth mentor** memberships on ninja accounts (with `promoted_by`); `ORGANISATION_TEAM_MEMBER` rows (position "Member of the board", ...) and a few `ORGANISATION_ROLE` accounts |
 | `seed_guardians` | `Guardian` accounts + `Participant` children (+ optional `ChildAccount`) | **parent** accounts (no check needed) + `GUARDIANSHIP` + **ninjas** aged 7–17 (+ optional ninja accounts) |
 | `seed_events` | upcoming events per dojo | same, plus **event pathways** (pre-filled from the dojo's) and an **event team** of memberships |
-| `seed_participant_history` | past events, registrations, awards | past events with event teams, registrations with **registration pathways**, **badges** (one-off and milestone) and a **belt history** awarded by champion/mentor memberships |
+| `seed_ninja_history` (was `seed_participant_history`) | past events, registrations, awards | past events with event teams, registrations with **registration pathways**, **badges** (one-off and milestone) and a **belt history** awarded by champion/mentor memberships |
 | `seed_pathways`, `seed_faqs`, `seed_testimonials`, `seed_geo` | unchanged | unchanged (FAQs keep their dojo/event/pathway scoping) |
 | *(new)* applications | none | a few `APPLICATION` rows (`mentor`/`champion`, pending/approved/rejected) to exercise the approval flow |
 
@@ -1318,8 +1321,8 @@ mentors, parents, ninja accounts).
 
 ### Implementation plan
 
-**Status: in progress** (started 2026-09-24 on the `redesign/data-model`
-branch). Tick a phase off here when it lands.
+**Status: done** (2026-09-24, on the `redesign/data-model` branch). All
+phases are ticked off below.
 
 #### Implementation decisions
 
@@ -1463,6 +1466,25 @@ at every step:
     "child", which is what a parent calls them.
   - This document's sections 1–9 describe the redesigned model; §10 is now
     the rationale and plan. CLAUDE.md's architecture section updated.
-- [ ] **8. Seeders and reset:** seeders rewritten as in the table above,
-  migrations regenerated, `start.sh` updated, and a fresh
-  `down -v` rebuild with a full test run.
+- [x] **8. Seeders and reset**, *done 2026-09-24*
+  - Seeders as in the table above: `seed_dojo_owners` → `seed_champions`
+    and `seed_participant_history` → `seed_ninja_history` (`start.sh`
+    updated); `seed_dojos` makes the last three dojos draft / dormant /
+    archived, and the later seeders give those no upcoming sessions (a
+    draft one no history either); `seed_events` gives each session a
+    team (champion plus up to two mentors, `assign_event_team`), and
+    belts are awarded by a session's champion or mentor. Every seeder is
+    rerun-safe: choices made only for new rows use their own RNG, so a
+    rerun creates nothing.
+  - Migrations reset to a fresh initial set for `accounts`,
+    `applications`, `content`, `dojos`, `events` and `notifications`
+    (`geo` and `pathways` were untouched by the redesign and keep their
+    `0001`). Cross-app foreign keys split some apps' initial migration in
+    two or three. **An existing dev database has to be recreated**
+    after pulling this (see "No data migration" above).
+  - Verified by a fresh migrate plus the full `start.sh` seed sequence
+    on an empty database (twice, to check reruns), the full test suite,
+    and a smoke test of the public, parent, champion and organisation
+    pages. Not verified: a `docker compose down -v` rebuild itself (no
+    Docker CLI inside the workspace; this was done as a database-only
+    reset instead).

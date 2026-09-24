@@ -1,6 +1,6 @@
 """Shared helpers for seed commands that create login accounts.
 
-Seed commands (seed_dojo_owners, seed_guardians, ...) each create real
+Seed commands (seed_champions, seed_guardians, ...) each create real
 User-subclass rows with a login password. Passwords must be randomly
 generated (never a shared hardcoded demo password) and every created
 username/email/password/role needs to end up somewhere a developer can

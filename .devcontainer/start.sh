@@ -22,25 +22,26 @@ python manage.py migrate
 python manage.py seed_geo
 python manage.py seed_dojos
 
-# Demo data (owners, mentors, pathways, events, guardians/children, history,
-# FAQs, testimonials). Order matters: seed_mentors needs dojo owners (Lead
-# Coach = the owner's login), seed_participant_history needs participants
-# (seed_guardians), mentors and pathways, and seed_faqs needs events.
+# Demo data (champions, mentors + the organisation team, pathways, events,
+# parents/ninjas, applications, ninja history with badges and belts, FAQs,
+# testimonials). Order matters: seed_mentors needs each dojo's champion,
+# seed_events needs pathways and the dojo teams (event teams), seed_ninja_history
+# needs ninjas (seed_guardians), teams and pathways, and seed_faqs needs events.
 #
 # Only on a fresh DB (no Event rows yet): the db-data volume survives a
-# container rebuild, and seed_events/seed_participant_history generate dates
+# container rebuild, and seed_events/seed_ninja_history generate dates
 # relative to *today*, so re-running them on a later day would keep piling
 # extra events onto the existing demo data. Wipe the DB (`docker compose
 # down -v`) or run the commands by hand to reseed.
 # Logins for the seeded accounts land in seed_credentials.csv (gitignored).
 if python manage.py shell -c "import sys; from events.models import Event; sys.exit(1 if Event.objects.exists() else 0)"; then
-    python manage.py seed_dojo_owners
+    python manage.py seed_champions
     python manage.py seed_mentors
     python manage.py seed_pathways
     python manage.py seed_events
     python manage.py seed_guardians
     python manage.py seed_applications
-    python manage.py seed_participant_history
+    python manage.py seed_ninja_history
     python manage.py seed_faqs
     python manage.py seed_testimonials
 else

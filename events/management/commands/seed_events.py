@@ -95,6 +95,16 @@ def weekly_dates(start_date, weekday):
         current += timedelta(days=7)
 
 
+def assign_event_team(event, max_mentors=2):
+    """Who runs the session: the dojo's champion plus a few of its active
+    mentors. Its own RNG per event, so it doesn't shift any other choices."""
+    team_rng = random.Random(f"event-team-{event.id}")
+    managers = list(event.dojo.memberships.managers().order_by("id"))
+    champion = [m for m in managers if m.role == m.CHAMPION]
+    mentors = [m for m in managers if m.role != m.CHAMPION]
+    event.team.set(champion + team_rng.sample(mentors, k=min(len(mentors), team_rng.randint(0, max_mentors))))
+
+
 class Command(BaseCommand):
     help = (
         f"Seed {EVENTS_PER_DOJO} demo upcoming Events for every Dojo that has a "
@@ -110,9 +120,11 @@ class Command(BaseCommand):
         all_pathways = list(Pathway.objects.order_by("id"))
         for dojo in Dojo.objects.exclude(location=None):
             # The pathways this dojo provides (a few of them), which its new
-            # sessions pre-select.
+            # sessions pre-select. Own RNG: drawing from `rng` only when unset
+            # would shift every later choice on a rerun (duplicate events).
             if all_pathways and not dojo.pathways.exists():
-                dojo.pathways.set(rng.sample(all_pathways, k=min(len(all_pathways), rng.randint(1, 3))))
+                pathway_rng = random.Random(f"dojo-pathways-{dojo.id}")
+                dojo.pathways.set(pathway_rng.sample(all_pathways, k=min(len(all_pathways), pathway_rng.randint(1, 3))))
             dojo_pathways = list(dojo.pathways.all())
             pattern = rng.choices(
                 list(PATTERN_WEIGHTS), weights=list(PATTERN_WEIGHTS.values())
@@ -135,6 +147,12 @@ class Command(BaseCommand):
                 end_dt = timezone.make_aware(datetime.combine(event_date, end_t))
                 min_age, max_age = rng.choice(AGE_RANGE_CHOICES)
                 session_name = rng.choice(SESSION_NAMES)
+                capacity = rng.choice(CAPACITY_CHOICES)
+                # A draft/dormant/archived dojo has no upcoming sessions (the
+                # lifecycle rules); the draws above still happen so the other
+                # dojos' choices don't shift.
+                if dojo.status != Dojo.ACTIVE:
+                    continue
                 event, was_created = Event.objects.get_or_create(
                     dojo=dojo,
                     start_time=start_dt,
@@ -142,7 +160,7 @@ class Command(BaseCommand):
                         "name": session_name,
                         "status": Event.OPEN,
                         "end_time": end_dt,
-                        "places": rng.choice(CAPACITY_CHOICES),
+                        "places": capacity,
                         "location": dojo.location,
                         "min_age": min_age,
                         "max_age": max_age,
@@ -152,6 +170,7 @@ class Command(BaseCommand):
                 if was_created:
                     assign_session_image(event, session_name)
                     event.pathways.set(dojo_pathways)
+                    assign_event_team(event)
                 created += 1 if was_created else 0
                 skipped += 1 if not was_created else 0
 

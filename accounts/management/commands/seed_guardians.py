@@ -45,7 +45,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         rng = random.Random(7)
         guardians_created = children_created = child_logins_created = 0
-        dojos = list(Dojo.objects.exclude(location=None))
+        dojos = list(Dojo.objects.public().exclude(location=None))
         today = timezone.localdate()
         guardian_credential_rows = []
         child_credential_rows = []

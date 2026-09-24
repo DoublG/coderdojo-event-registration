@@ -10,8 +10,8 @@ from accounts.models import Ninja
 from dojos.models import Dojo
 from pathways.models import Pathway
 
-from .seed_events import SESSION_NAMES, assign_session_image, description_for
 from ...models import Badge, Belt, Event, NinjaBadge, NinjaBelt, Registration
+from .seed_events import SESSION_NAMES, assign_event_team, assign_session_image, description_for
 
 HISTORY_START = date(2020, 1, 1)
 SESSION_SLOT = (14, 0, 3)  # 14:00 start, 3 hours long — matches a typical Saturday workshop
@@ -132,9 +132,10 @@ class Command(BaseCommand):
         # actually makes get_or_create()'s idempotency hold in practice.
         past_events_by_dojo = {}
         events_created = 0
-        for dojo in Dojo.objects.exclude(location=None).order_by("id"):
+        # Not draft dojos: they haven't run anything yet. Dormant and archived
+        # ones keep their history (it stays in ninjas' own pages).
+        for dojo in Dojo.objects.exclude(location=None).exclude(status=Dojo.DRAFT).order_by("id"):
             dojo_rng = random.Random(f"history-dojo-{dojo.id}")
-            champion = dojo.champion_membership
             # ~6 years of history at roughly monthly cadence per dojo.
             dojo_events = []
             for event_date in dojo_rng.sample(dates, k=min(len(dates), dojo_rng.randint(30, 45))):
@@ -154,8 +155,7 @@ class Command(BaseCommand):
                     },
                 )
                 if was_created:
-                    if champion:
-                        event.team.add(champion)
+                    assign_event_team(event, max_mentors=1)
                     event.pathways.set(dojo.pathways.all())
                     assign_session_image(event, session_name)
                     events_created += 1
@@ -181,6 +181,8 @@ class Command(BaseCommand):
                     "description": "A CoderDojo for Girls session, run for the International Day of Women and Girls in Science.",
                 },
             )
+            if was_created:
+                assign_event_team(girls_event)
             special_created += 1 if was_created else 0
 
             projects_dojo = all_past_events[-1].dojo
@@ -193,6 +195,8 @@ class Command(BaseCommand):
                     "description": "CoderDojo's yearly showcase — ninjas demo the projects they've been building all year.",
                 },
             )
+            if was_created:
+                assign_event_team(coolest_event)
             special_created += 1 if was_created else 0
         else:
             coolest_event = None
@@ -232,25 +236,28 @@ class Command(BaseCommand):
                     attended_events.append(event)
 
             # Belt history: roughly one belt per four sessions attended, each
-            # awarded at one of those sessions by its dojo's champion. The
+            # awarded at one of those sessions by its team. The
             # coin flip is drawn every time so reruns keep the same RNG stream.
             extra_belt = p_rng.random() < 0.5
             if belts and attended_events and not ninja.belts.exists():
                 attended_events.sort(key=lambda e: e.start_time)
                 reached = min(len(belts), len(attended_events) // 4 + extra_belt)
                 for belt, event in zip(belts[:reached], attended_events[::4], strict=False):
-                    champion = event.dojo.champion_membership
-                    if champion is None:
+                    # Awarded by one of that session's champion/mentors (own RNG,
+                    # so it doesn't shift the ninja's other choices).
+                    awarders = [m for m in event.team.all() if m.role in m.MANAGER_ROLES]
+                    if not awarders:
                         break
+                    awarder = random.Random(f"belt-{ninja.id}-{belt.level}").choice(awarders)
                     NinjaBelt.objects.create(
                         ninja=ninja, belt=belt, awarded_on=event.start_time.date(),
-                        awarded_by=champion.user, awarded_as_membership=champion, awarded_as_role=champion.role,
+                        awarded_by=awarder.user, awarded_as_membership=awarder, awarded_as_role=awarder.role,
                     )
                     belts_created += 1
 
             # Every wristband tier actually reached is earned; the very
             # next tier up (if any) shows as locked-with-progress.
-            for i, milestone in enumerate(milestones):
+            for milestone in milestones:
                 if attended_count >= milestone.threshold:
                     _, was_created = NinjaBadge.objects.get_or_create(
                         ninja=ninja, badge=milestone,

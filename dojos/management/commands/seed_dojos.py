@@ -8,6 +8,12 @@ from geo.models import AdministrativeBoundary, Municipality
 
 DOJOS_FIXTURE = Path(__file__).resolve().parent.parent.parent / "seed_data" / "dojos.json"
 
+# Statuses given to the last few dojos (by id), so the draft / dormant /
+# archived states have something to show; all others are active. The
+# later seeders give these no upcoming sessions (and a draft one no
+# history), matching the lifecycle rules.
+LIFECYCLE_EXAMPLES = [Dojo.DRAFT, Dojo.DORMANT, Dojo.ARCHIVED]
+
 
 class Command(BaseCommand):
     help = (
@@ -31,7 +37,15 @@ class Command(BaseCommand):
             )
 
         call_command("loaddata", str(DOJOS_FIXTURE))
-        # The fixture predates Dojo.status; these are real, running dojos.
+        # The fixture predates Dojo.status; these are real, running dojos —
+        # except the last few, which exercise the lifecycle (DATA_MODEL.md §3).
         Dojo.objects.update(status=Dojo.ACTIVE)
+        lifecycle_examples = list(Dojo.objects.order_by("-id")[:len(LIFECYCLE_EXAMPLES)])
+        for dojo, status in zip(lifecycle_examples, LIFECYCLE_EXAMPLES, strict=False):
+            dojo.status = status
+            dojo.save(update_fields=["status"])
 
-        self.stdout.write(self.style.SUCCESS(f"Done. dojos={Dojo.objects.count()}"))
+        self.stdout.write(self.style.SUCCESS(
+            f"Done. dojos={Dojo.objects.count()} "
+            f"(non-active: {', '.join(f'{d.name}={d.status}' for d in lifecycle_examples)})"
+        ))
