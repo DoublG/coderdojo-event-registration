@@ -3,7 +3,6 @@ from django.core.mail import send_mail
 
 from accounts.models import User
 
-
 @shared_task
 def send_email_to_user(user_id, subject, message):
     try:

@@ -122,7 +122,8 @@ INSTALLED_APPS = [
     'applications',
     'notifications',
     'django_celery_results',
-    'mailing'
+    'mailing',
+    'django_celery_beat'
 ]
 
 MIDDLEWARE = [

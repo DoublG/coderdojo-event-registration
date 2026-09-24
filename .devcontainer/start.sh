@@ -51,6 +51,7 @@ fi
 
 # start background worker
 celery -A website worker -l INFO > background_job.log 2>&1 &
+celery -A website beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler > background_job_beats.log 2>&1 &
 
 # start server
 python manage.py runserver 0.0.0.0:8000
