@@ -6,7 +6,7 @@ from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from accounts.models import Participant
+from accounts.models import Ninja
 from dojos.models import Dojo
 from pathways.models import Pathway
 
@@ -76,7 +76,7 @@ def past_saturdays(start, end):
 class Command(BaseCommand):
     help = (
         "Seed past Events (2020 onwards) plus Registration, badge and belt history for "
-        "existing Participants, so the child detail page's Event history, Belt and Badges "
+        "existing Ninjas, so the child detail page's Event history, Belt and Badges "
         "sections have something to show."
     )
 
@@ -127,7 +127,7 @@ class Command(BaseCommand):
 
         # Deterministic per-entity RNGs (seeded from the object's own id)
         # rather than one shared sequential Random — that way each dojo's/
-        # participant's choices stay identical across reruns regardless of
+        # ninja's choices stay identical across reruns regardless of
         # queryset ordering or how many rows already exist, which is what
         # actually makes get_or_create()'s idempotency hold in practice.
         past_events_by_dojo = {}
@@ -202,9 +202,11 @@ class Command(BaseCommand):
         awards_created = 0
         belts_created = 0
 
-        for participant in Participant.objects.order_by("id"):
-            p_rng = random.Random(f"history-participant-{participant.id}")
-            candidate_events = past_events_by_dojo.get(participant.home_dojo_id) or all_past_events
+        for ninja in Ninja.objects.order_by("id"):
+            # Seed string kept from before the Participant → Ninja rename, so reruns
+            # on an existing database reproduce the same choices.
+            p_rng = random.Random(f"history-participant-{ninja.id}")
+            candidate_events = past_events_by_dojo.get(ninja.home_dojo_id) or all_past_events
             if not candidate_events:
                 continue
 
@@ -213,14 +215,17 @@ class Command(BaseCommand):
             for event in p_rng.sample(candidate_events, k=min(len(candidate_events), p_rng.randint(0, 25))):
                 attended = p_rng.random() < 0.85  # the odd no-show, otherwise present
                 registration, was_created = Registration.objects.get_or_create(
-                    event=event, participant=participant,
+                    event=event, ninja=ninja,
                     defaults={"waiting_list": False, "position": 1, "attended": attended},
                 )
                 if was_created:
-                    # What this ninja worked on: a subset of what the session covered.
+                    # What this ninja worked on: a subset of what the session
+                    # covered. Its own RNG: drawing from p_rng only for new
+                    # rows would shift every later choice on a rerun.
+                    r_rng = random.Random(f"history-registration-{event.id}-{ninja.id}")
                     covered = list(event.pathways.all()) or pathways
-                    if covered and p_rng.random() < 0.8:
-                        registration.pathways.set(p_rng.sample(covered, k=p_rng.randint(1, min(2, len(covered)))))
+                    if covered and r_rng.random() < 0.8:
+                        registration.pathways.set(r_rng.sample(covered, k=r_rng.randint(1, min(2, len(covered)))))
                 registrations_created += 1 if was_created else 0
                 attended_count += attended
                 if attended:
@@ -230,7 +235,7 @@ class Command(BaseCommand):
             # awarded at one of those sessions by its dojo's champion. The
             # coin flip is drawn every time so reruns keep the same RNG stream.
             extra_belt = p_rng.random() < 0.5
-            if belts and attended_events and not participant.belts.exists():
+            if belts and attended_events and not ninja.belts.exists():
                 attended_events.sort(key=lambda e: e.start_time)
                 reached = min(len(belts), len(attended_events) // 4 + extra_belt)
                 for belt, event in zip(belts[:reached], attended_events[::4], strict=False):
@@ -238,7 +243,7 @@ class Command(BaseCommand):
                     if champion is None:
                         break
                     NinjaBelt.objects.create(
-                        participant=participant, belt=belt, awarded_on=event.start_time.date(),
+                        ninja=ninja, belt=belt, awarded_on=event.start_time.date(),
                         awarded_by=champion.user, awarded_as_membership=champion, awarded_as_role=champion.role,
                     )
                     belts_created += 1
@@ -248,7 +253,7 @@ class Command(BaseCommand):
             for i, milestone in enumerate(milestones):
                 if attended_count >= milestone.threshold:
                     _, was_created = NinjaBadge.objects.get_or_create(
-                        participant=participant, badge=milestone,
+                        ninja=ninja, badge=milestone,
                         defaults={
                             "earned_date": today - timedelta(days=p_rng.randint(10, 5 * 365)),
                             "progress_current": milestone.threshold,
@@ -258,7 +263,7 @@ class Command(BaseCommand):
                     awards_created += 1 if was_created else 0
                 else:
                     _, was_created = NinjaBadge.objects.get_or_create(
-                        participant=participant, badge=milestone,
+                        ninja=ninja, badge=milestone,
                         defaults={"progress_current": attended_count, "progress_total": milestone.threshold},
                     )
                     awards_created += 1 if was_created else 0
@@ -267,7 +272,7 @@ class Command(BaseCommand):
             if pathways and p_rng.random() < 0.5:
                 skill_award = p_rng.choice(skill_badges)
                 _, was_created = NinjaBadge.objects.get_or_create(
-                    participant=participant, badge=skill_award,
+                    ninja=ninja, badge=skill_award,
                     defaults={
                         "earned_date": (
                             today - timedelta(days=p_rng.randint(5, 5 * 365)) if p_rng.random() < 0.5 else None
@@ -281,24 +286,24 @@ class Command(BaseCommand):
             # wristbands work off real Registration rows too.
             if girls_event and p_rng.random() < 1 / 6:
                 _, was_created = Registration.objects.get_or_create(
-                    event=girls_event, participant=participant,
+                    event=girls_event, ninja=ninja,
                     defaults={"waiting_list": False, "position": 1, "attended": True},
                 )
                 registrations_created += 1 if was_created else 0
                 _, was_created = NinjaBadge.objects.get_or_create(
-                    participant=participant, badge=girls_badge,
+                    ninja=ninja, badge=girls_badge,
                     defaults={"earned_date": girls_event.start_time.date()},
                 )
                 awards_created += 1 if was_created else 0
 
             if coolest_event and p_rng.random() < 1 / 6 and coolest_event.start_time.date() <= today:
                 _, was_created = Registration.objects.get_or_create(
-                    event=coolest_event, participant=participant,
+                    event=coolest_event, ninja=ninja,
                     defaults={"waiting_list": False, "position": 1, "attended": True},
                 )
                 registrations_created += 1 if was_created else 0
                 _, was_created = NinjaBadge.objects.get_or_create(
-                    participant=participant, badge=coolest_badge,
+                    ninja=ninja, badge=coolest_badge,
                     defaults={"earned_date": coolest_event.start_time.date()},
                 )
                 awards_created += 1 if was_created else 0

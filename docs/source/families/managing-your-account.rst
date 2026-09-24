@@ -32,8 +32,8 @@ If your child has their own login, they see their own page (their belt,
 badges and session history) when they log in, but can't change their details or
 sign up for sessions themselves; that stays with you.
 
-Already a dojo owner or volunteer?
-------------------------------------
+Already a champion or mentor?
+-------------------------------
 
 Every account has a family page: open **My Account** from your account
 menu and use **Add a child** there. Your children are added to the same

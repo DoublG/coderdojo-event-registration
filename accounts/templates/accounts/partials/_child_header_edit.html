@@ -19,6 +19,7 @@ Expects `guardian`, `child`, `icon_choices` and `current_icon` in context.
       <div class="cd-form__field">
         <label class="cd-form__label label" for="ec-dob">Date of birth</label>
         <input class="cd-form__input body" type="date" id="ec-dob" name="date_of_birth" value="{{ child.date_of_birth|date:'Y-m-d' }}">
+        {% if dob_error %}<ul class="cd-form__errors"><li class="caption" role="alert">{{ dob_error }}</li></ul>{% endif %}
       </div>
       <div class="cd-form__field">
         <label class="cd-form__label label" for="ec-icon">Avatar</label>

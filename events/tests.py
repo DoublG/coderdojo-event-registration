@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from accounts.models import Guardianship, Participant, User
+from accounts.models import Guardianship, Ninja, User
 from dojos.models import Dojo
 from dojos.testing import make_dojo
 
@@ -97,7 +97,7 @@ class EventSignupViewTests(TestCase):
     def setUpTestData(cls):
         cls.dojo = make_dojo("Ghent")
         cls.guardian = User.objects.create(username="g1", email="g1@example.com")
-        cls.child = Participant.objects.create(name="Kid One")
+        cls.child = Ninja.objects.create(name="Kid One")
         Guardianship.objects.create(guardian=cls.guardian, ninja=cls.child)
 
     def test_login_required(self):
@@ -116,7 +116,7 @@ class EventSignupViewTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        registration = Registration.objects.get(event=event, participant=self.child)
+        registration = Registration.objects.get(event=event, ninja=self.child)
         self.assertFalse(registration.waiting_list)
         self.assertEqual(response.context["results"][0]["waiting_list"], False)
 
@@ -159,7 +159,7 @@ class EventSignupViewTests(TestCase):
             {"child": [str(self.child.id)], "child_order": str(self.child.id)},
         )
 
-        registration = Registration.objects.get(event=event, participant=self.child)
+        registration = Registration.objects.get(event=event, ninja=self.child)
         self.assertTrue(registration.waiting_list)
 
     def test_signup_with_no_children_selected_shows_error(self):
@@ -173,7 +173,7 @@ class EventSignupViewTests(TestCase):
 
     def test_already_registered_child_cannot_double_signup(self):
         event = _future_event(self.dojo)
-        Registration.objects.create(event=event, participant=self.child, waiting_list=False, position=1)
+        Registration.objects.create(event=event, ninja=self.child, waiting_list=False, position=1)
         self.client.force_login(self.guardian)
 
         response = self.client.post(
@@ -182,7 +182,7 @@ class EventSignupViewTests(TestCase):
         )
 
         self.assertIsNotNone(response.context["error"])
-        self.assertEqual(Registration.objects.filter(event=event, participant=self.child).count(), 1)
+        self.assertEqual(Registration.objects.filter(event=event, ninja=self.child).count(), 1)
 
     def test_closed_event_blocks_signup(self):
         event = _future_event(self.dojo, status=Event.CLOSED)
@@ -219,9 +219,9 @@ class BeltAndBadgeTests(TestCase):
         self.dojo = make_dojo("Ghent", champion=self.champion_user)
         self.champion = self.dojo.champion_membership
         self.mentor = add_member(self.dojo, make_mentor(username="mentor"))
-        self.ninja = Participant.objects.create(name="Mila")
+        self.ninja = Ninja.objects.create(name="Mila")
         self.event = _future_event(self.dojo)
-        self.registration = Registration.objects.create(event=self.event, participant=self.ninja, waiting_list=False, position=1)
+        self.registration = Registration.objects.create(event=self.event, ninja=self.ninja, waiting_list=False, position=1)
 
     def test_award_records_who_and_in_which_role(self):
         from .awards import award_belt

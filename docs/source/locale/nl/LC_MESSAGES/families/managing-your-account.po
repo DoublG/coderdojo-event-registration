@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 09:42+0000\n"
+"POT-Creation-Date: 2026-09-24 09:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -107,8 +107,8 @@ msgstr ""
 "blijft uw taak."
 
 #: ../../source/families/managing-your-account.rst:36
-msgid "Already a dojo owner or volunteer?"
-msgstr "Al dojobeheerder of vrijwilliger?"
+msgid "Already a champion or mentor?"
+msgstr "Al champion of mentor?"
 
 #: ../../source/families/managing-your-account.rst:38
 msgid ""

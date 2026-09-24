@@ -11,13 +11,13 @@ display fields (descriptions, taglines, photos, …) are left out; the models
 in each app's `models.py` have the full field lists. If you change a model,
 update its diagram in the same change.
 
-> **A redesign is in progress.** Sections 1–9 describe the model as it is
-> in the code today. [Section 10](#10-planned-redesign-in-progress)
-> describes the target and tracks which phases have landed: accounts,
-> dojo teams, onboarding, pathways, badges and belts, and the organisation
-> role are done; naming and seeders follow. It also sets the
+> **The redesign has landed** (phases 1–7). Sections 1–9 describe the
+> model as it is in the code today. [Section 10](#10-redesign-rationale-and-plan)
+> keeps the design rationale, the decisions behind it and the
+> [implementation plan](#implementation-plan); only phase 8 (rewriting the
+> seeders and resetting the migrations) is still open. It also sets the
 > [nomenclature](#nomenclature) (Champion, Mentor/Coach, Ninja, Youth
-> mentor, Badge, Belt). Read it before building more on those parts.
+> mentor, Badge, Belt) that the code and the UI use.
 
 **Contents**
 
@@ -30,7 +30,7 @@ update its diagram in the same change.
 7. [Learning pathways and content](#7-learning-pathways-and-content)
 8. [Notifications](#8-notifications)
 9. [Geo reference data](#9-geo-reference-data)
-10. [Planned redesign (not implemented yet)](#10-planned-redesign-not-implemented-yet)
+10. [Redesign: rationale and plan](#10-redesign-rationale-and-plan)
 
 ---
 
@@ -43,7 +43,7 @@ flowchart LR
     subgraph accounts
         User
         Guardianship
-        Participant
+        Ninja
     end
     subgraph dojos
         Dojo
@@ -70,16 +70,16 @@ flowchart LR
     User -- "champion / mentor / youth mentor" --> DojoMembership
     DojoMembership -- "team of" --> Dojo
     User -- "parent of" --> Guardianship
-    Guardianship --> Participant
-    Participant -. "optional login (ninja account)" .-> User
+    Guardianship --> Ninja
+    Ninja -. "optional login (ninja account)" .-> User
     Dojo -- runs --> Event
     Registration -- for --> Event
-    Registration -- of --> Participant
+    Registration -- of --> Ninja
     Dojo -. "provides" .-> Pathway
     Event -. "covers" .-> Pathway
     Registration -. "works on" .-> Pathway
-    Participant -- earns --> Badge
-    Participant -- "belt history" --> Belt
+    Ninja -- earns --> Badge
+    Ninja -- "belt history" --> Belt
     User -- "applies (mentor / champion)" --> Application
     User -- "check decisions" --> BackgroundCheckHistory
     Application -. "mentor: preferred dojo" .-> Dojo
@@ -101,9 +101,10 @@ role subclasses (redesign phases 1–3, section 10).
 - **Champions and mentors** are adult accounts with an approved
   `Application` (section 6) and a **valid background check on the
   account**; what they do at a dojo is a `DojoMembership` (section 3).
-- A **`Participant`** (a ninja attending sessions) is **not** a user. It
+- A **`Ninja`** (a child aged 7–17 attending sessions; the age rule is
+  checked whenever a date of birth is entered or changed) is **not** a user. It
   gets a login (a `User` with `account_type="ninja"`, linked through
-  `Participant.account`) only if a parent opts it in.
+  `Ninja.account`) only if a parent opts it in.
 - **Organisation accounts** are adult accounts with an `OrganisationRole`
   (`board` or `admin`): access to the organisation's management
   dashboards, which for now are the Django admin. A role makes the account
@@ -134,8 +135,8 @@ classDiagram
     class Guardianship {
         +relation  parent | legal_guardian | other
     }
-    class Participant {
-        +name
+    class Ninja {
+        +name  a child aged 7–17
         +date_of_birth
         +experience_level
         +allergies_notes
@@ -144,9 +145,9 @@ classDiagram
     }
 
     User "1" --> "*" Guardianship : guardianships (parent)
-    Participant "1" --> "*" Guardianship : guardianships
-    Participant "0..1" --> "0..1" User : account (ninja login)
-    Participant "*" --> "0..1" Dojo : home_dojo
+    Ninja "1" --> "*" Guardianship : guardianships
+    Ninja "0..1" --> "0..1" User : account (ninja login)
+    Ninja "*" --> "0..1" Dojo : home_dojo
     class OrganisationRole {
         +role  board | admin
         +granted_at
@@ -264,7 +265,7 @@ check (`applications.services`).
 erDiagram
     DOJO ||--o{ EVENT : "runs"
     EVENT ||--o{ REGISTRATION : "registration_set"
-    PARTICIPANT ||--o{ REGISTRATION : "signs up via"
+    NINJA ||--o{ REGISTRATION : "signs up via"
     EVENT }o--o{ PATHWAY : "covers (M2M, optional)"
     REGISTRATION }o--o{ PATHWAY : "works on (M2M, optional)"
     EVENT }o--o{ DOJO_MEMBERSHIP : "team (M2M)"
@@ -284,8 +285,8 @@ erDiagram
     }
     REGISTRATION {
         bigint id PK
-        bigint event_id FK "unique with participant"
-        bigint participant_id FK
+        bigint event_id FK "unique with ninja"
+        bigint ninja_id FK
         bool waiting_list
         int position "first-come queue"
         bool attended "null = not marked"
@@ -342,7 +343,7 @@ with their rules in `events/awards.py`:
   badge stays earned if a mark is later undone.
 - A **belt** is a ninja's **proficiency level**: one overall track ordered
   by `Belt.level`, not linked to pathways. `NinjaBelt` is an append-only
-  history (current belt = the highest level, `Participant.current_belt`).
+  history (current belt = the highest level, `Ninja.current_belt`).
   Only an **active champion or mentor** with a valid check
   (`AWARD_BELTS`) can award one (`award_belt`), from the attendance list,
   to a ninja who has been to one of that dojo's sessions, and only a belt
@@ -357,9 +358,9 @@ badges carousel. The attendance list shows each ninja's current belt.
 
 ```mermaid
 erDiagram
-    PARTICIPANT ||--o{ NINJA_BADGE : "badges"
+    NINJA ||--o{ NINJA_BADGE : "badges"
     BADGE ||--o{ NINJA_BADGE : "ninja_badges"
-    PARTICIPANT ||--o{ NINJA_BELT : "belts (history)"
+    NINJA ||--o{ NINJA_BELT : "belts (history)"
     BELT ||--o{ NINJA_BELT : "ninja_belts"
     BELT |o--o{ BADGE : "grants_belt (milestones, optional)"
     USER |o--o{ NINJA_BELT : "awarded_by"
@@ -374,7 +375,7 @@ erDiagram
         bigint grants_belt_id FK "nullable"
     }
     NINJA_BADGE {
-        bigint participant_id FK "unique with badge"
+        bigint ninja_id FK "unique with badge"
         bigint badge_id FK
         date earned_date "null = in progress"
         int progress_current "milestone"
@@ -388,7 +389,7 @@ erDiagram
         string requirements
     }
     NINJA_BELT {
-        bigint participant_id FK
+        bigint ninja_id FK
         bigint belt_id FK
         date awarded_on
         bigint awarded_by_id FK "required when awarded; kept null if deleted"
@@ -618,13 +619,13 @@ erDiagram
 
 ---
 
-## 10. Planned redesign (in progress)
+## 10. Redesign: rationale and plan
 
-> **Status: direction agreed, implementation started**; see the
-> [Implementation plan](#implementation-plan) for which phases have landed.
-> Until a phase is ticked off there, sections 1–9 still describe what's
-> actually in the code. This section records the direction, so that new
-> work doesn't add more to structures that are due to go.
+> **Status: landed** (phases 1–7; phase 8, the seeder rewrite and
+> migration reset, is open). Sections 1–9 are the current model; this
+> section keeps *why* it looks the way it does: the problems with the old
+> model, the decisions taken and the plan. Where it says "today", read
+> "before the redesign".
 
 ### Nomenclature
 
@@ -1449,9 +1450,19 @@ at every step:
   - *Still future work:* the board dashboard, and with it the board's
     dormancy notifications (decision 5). `OrganisationTeamMember` and its
     team page landed in phase 2.
-- [ ] **7. Names and docs:** `Participant` → `Ninja` (with 7–17 validation, moved here from phase 1) and the new names in the UI; the help-centre
-  pages in EN/FR/NL; `DATA_MODEL.md` §10 promoted to "current", and
-  CLAUDE.md's architecture section updated.
+- [x] **7. Names and docs**, *done 2026-09-24*
+  - `Participant` → `Ninja` (model, the `ninja` links on `Registration`,
+    `NinjaBadge` and `NinjaBelt`, `Event.ninjas`, `Dojo.home_ninjas`),
+    via rename migrations. The 7–17 rule (`ninja_birth_date_error`) is
+    checked by `Ninja.clean()` and the family sign-up / add / edit forms
+    whenever a date of birth is entered or changed (a ninja who has since
+    turned 18 stays editable); `seed_guardians` gives ninjas a 7–17 date
+    of birth.
+  - Remaining old names in the UI and help centre (EN/FR/NL) replaced
+    ("lead coach", "dojo owner"). Parent-facing pages keep saying
+    "child", which is what a parent calls them.
+  - This document's sections 1–9 describe the redesigned model; §10 is now
+    the rationale and plan. CLAUDE.md's architecture section updated.
 - [ ] **8. Seeders and reset:** seeders rewritten as in the table above,
   migrations regenerated, `start.sh` updated, and a fresh
   `down -v` rebuild with a full test run.

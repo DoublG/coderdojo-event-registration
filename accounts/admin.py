@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import Guardianship, OrganisationRole, Participant, User
+from .models import Guardianship, Ninja, OrganisationRole, User
 
 
 class GuardianshipInline(admin.TabularInline):
@@ -45,8 +45,8 @@ class NinjaGuardianshipInline(admin.TabularInline):
     extra = 0
 
 
-@admin.register(Participant)
-class ParticipantAdmin(admin.ModelAdmin):
+@admin.register(Ninja)
+class NinjaAdmin(admin.ModelAdmin):
     list_display = ["name", "date_of_birth", "home_dojo", "account"]
     search_fields = ["name"]
     inlines = [NinjaGuardianshipInline]

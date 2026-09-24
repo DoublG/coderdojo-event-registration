@@ -27,7 +27,7 @@ from .forms import (
     StyledPasswordResetForm,
     StyledSetPasswordForm,
 )
-from .models import Guardianship, Participant, User
+from .models import Guardianship, Ninja, User, ninja_birth_date_error
 from .provisioning import unique_username
 
 # Same pool as seed_guardians.py — a guardian adding a child through the
@@ -59,7 +59,7 @@ def _get_own_ninja(request, ninja_id, allow_self=False):
     allow_self, the ninja's own login looking at their own page. 404s
     rather than 403s on a mismatch, so a guessed id doesn't even confirm
     another family's child exists."""
-    ninja = get_object_or_404(Participant, id=ninja_id)
+    ninja = get_object_or_404(Ninja, id=ninja_id)
     is_guardian = ninja.guardianships.filter(guardian=request.user).exists()
     is_self = allow_self and ninja.account_id == request.user.pk
     if not (is_guardian or is_self):
@@ -79,7 +79,7 @@ def _post_login_redirect(request, user):
         return reverse("dojo_dashboard", kwargs={"dojo_id": admin_dojo.id})
 
     if user.is_ninja:
-        ninja = Participant.objects.filter(account=user).first()
+        ninja = Ninja.objects.filter(account=user).first()
         return reverse("ninja_detail", kwargs={"ninja_id": ninja.id}) if ninja else reverse("home")
 
     return reverse("account_home")
@@ -186,7 +186,7 @@ def _parse_child_rows(post_data):
     indices = sorted({int(m.group(1)) for key in post_data if (m := CHILD_NAME_FIELD_RE.match(key))})
 
     rows = []
-    valid_levels = dict(Participant.EXPERIENCE_CHOICES)
+    valid_levels = dict(Ninja.EXPERIENCE_CHOICES)
     for n in indices:
         name = post_data.get(f"child_{n}_name", "").strip()
         dob_raw = post_data.get(f"child_{n}_dob", "")
@@ -199,6 +199,8 @@ def _parse_child_rows(post_data):
         date_of_birth = parse_date(dob_raw) if dob_raw else None
         if not date_of_birth:
             errors["dob"] = "Date of birth is required."
+        elif dob_error := ninja_birth_date_error(date_of_birth):
+            errors["dob"] = dob_error
         if level not in valid_levels:
             level = ""
 
@@ -211,7 +213,7 @@ def _parse_child_rows(post_data):
 
 def _create_ninjas(parent, child_rows):
     for row in child_rows:
-        ninja = Participant.objects.create(
+        ninja = Ninja.objects.create(
             name=row["name"], date_of_birth=row["date_of_birth"],
             experience_level=row["level"], allergies_notes=row["notes"],
         )
@@ -263,7 +265,7 @@ def register_guardian(request):
 def _children_context(parent):
     now = timezone.now()
     children = []
-    for child in Participant.objects.of_guardian(parent):
+    for child in Ninja.objects.of_guardian(parent):
         # All upcoming registrations, not just the nearest one — a child
         # can be signed up for more than one session at a time. Not
         # filtering on waiting_list either — a waitlisted registration is
@@ -305,19 +307,22 @@ def add_ninja(request):
     if request.user.is_ninja:
         raise Http404
     guardian = request.user
+    add_error = None
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
-        if name:
-            participant = Participant.objects.create(
-                name=name, date_of_birth=parse_date(request.POST.get("date_of_birth", "")),
-            )
-            Guardianship.objects.create(guardian=guardian, ninja=participant)
+        date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
+        add_error = ninja_birth_date_error(date_of_birth)
+        if name and not add_error:
+            ninja = Ninja.objects.create(name=name, date_of_birth=date_of_birth)
+            Guardianship.objects.create(guardian=guardian, ninja=ninja)
             icon_path = KID_AVATARS_DIR / request.POST.get("icon", "")
             if icon_path.exists() and icon_path.parent == KID_AVATARS_DIR:
                 with open(icon_path, "rb") as f:
-                    participant.photo.save(icon_path.name, File(f), save=True)
+                    ninja.photo.save(icon_path.name, File(f), save=True)
     children = _children_context(guardian)
-    return render(request, "accounts/partials/_children_list.html", {"guardian": guardian, "children": children})
+    return render(request, "accounts/partials/_children_list.html", {
+        "guardian": guardian, "children": children, "add_error": add_error,
+    })
 
 
 def _badges_queryset(child):
@@ -383,7 +388,13 @@ def edit_ninja(request, ninja_id):
         name = request.POST.get("name", "").strip()
         if name:
             child.name = name
-        child.date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
+        date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
+        if date_of_birth != child.date_of_birth and (dob_error := ninja_birth_date_error(date_of_birth)):
+            return render(request, "accounts/partials/_child_header_edit.html", {
+                "child": child, "dob_error": dob_error,
+                "icon_choices": _icon_choices(), "current_icon": _current_icon_value(child),
+            })
+        child.date_of_birth = date_of_birth
 
         icon_path = KID_AVATARS_DIR / request.POST.get("icon", "")
         if icon_path.exists() and icon_path.parent == KID_AVATARS_DIR:
@@ -424,7 +435,7 @@ def ninja_badges(request, ninja_id):
 @login_required
 def cancel_registration(request, registration_id):
     registration = get_object_or_404(
-        Registration, id=registration_id, participant__guardianships__guardian=request.user,
+        Registration, id=registration_id, ninja__guardianships__guardian=request.user,
     )
 
     if request.method == "POST":

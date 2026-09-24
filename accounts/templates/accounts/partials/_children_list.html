@@ -9,6 +9,7 @@ a full page reload).
 {% endcomment %}
 <section id="children-list">
   <h2 class="heading-lg section-title">Your children</h2>
+  {% if add_error %}<p class="caption" role="alert" style="color: var(--danger, #b3261e);">{{ add_error }}</p>{% endif %}
 
   {% for entry in children %}
     <div class="cd-card child-card">

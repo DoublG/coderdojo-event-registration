@@ -12,15 +12,21 @@ from dojos.models import Dojo, DojoMembership
 from dojos.testing import add_member, make_champion, make_dojo, make_mentor
 from events.models import Event, Registration
 
-from .models import Guardianship, Participant, User
+from .models import Guardianship, Ninja, User
 from .provisioning import unique_username
 
 PASSWORD = "correct-horse-battery-staple"
 
 
+def _dob(age):
+    """An ISO date of birth for a child of `age` today (mid-year, so it
+    never sits on a birthday boundary)."""
+    return (timezone.localdate() - timedelta(days=int(age * 365.25) + 180)).isoformat()
+
+
 def make_ninja(guardian, name, **fields):
     """A ninja linked to `guardian` through a Guardianship."""
-    ninja = Participant.objects.create(name=name, **fields)
+    ninja = Ninja.objects.create(name=name, **fields)
     Guardianship.objects.create(guardian=guardian, ninja=ninja)
     return ninja
 
@@ -163,10 +169,10 @@ class AddChildViewTests(TestCase):
         self.client.force_login(self.guardian)
         response = self.client.post(
             reverse("add_ninja"),
-            {"name": "New Kid", "date_of_birth": "2015-01-01"},
+            {"name": "New Kid", "date_of_birth": _dob(10)},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(Participant.objects.of_guardian(self.guardian).filter(name="New Kid").exists())
+        self.assertTrue(Ninja.objects.of_guardian(self.guardian).filter(name="New Kid").exists())
 
     def test_any_adult_account_can_add_children(self):
         """No separate "guardian" role any more — e.g. a dojo owner adds
@@ -174,19 +180,19 @@ class AddChildViewTests(TestCase):
         owner = make_champion(username="owner1")
         self.client.force_login(owner)
         self.client.post(reverse("add_ninja"), {"name": "Owner Kid"})
-        self.assertEqual(list(Participant.objects.of_guardian(owner).values_list("name", flat=True)), ["Owner Kid"])
+        self.assertEqual(list(Ninja.objects.of_guardian(owner).values_list("name", flat=True)), ["Owner Kid"])
 
     def test_ninja_login_cannot_add_children(self):
         ninja_login = User.objects.create(username="kid", account_type=User.NINJA)
         self.client.force_login(ninja_login)
         response = self.client.post(reverse("add_ninja"), {"name": "Nope"})
         self.assertEqual(response.status_code, 404)
-        self.assertFalse(Participant.objects.exists())
+        self.assertFalse(Ninja.objects.exists())
 
     def test_blank_name_creates_nothing(self):
         self.client.force_login(self.guardian)
         self.client.post(reverse("add_ninja"), {"name": "  "})
-        self.assertEqual(Participant.objects.of_guardian(self.guardian).count(), 0)
+        self.assertEqual(Ninja.objects.of_guardian(self.guardian).count(), 0)
 
 
 class ChildDetailViewTests(TestCase):
@@ -291,13 +297,13 @@ class CancelRegistrationViewTests(TestCase):
         )
         cls.confirmed = Registration.objects.create(
             event=cls.event,
-            participant=cls.child,
+            ninja=cls.child,
             waiting_list=False,
             position=1,
         )
         cls.waitlisted = Registration.objects.create(
             event=cls.event,
-            participant=cls.waitlisted_child,
+            ninja=cls.waitlisted_child,
             waiting_list=True,
             position=2,
         )
@@ -340,8 +346,8 @@ class CancelRegistrationViewTests(TestCase):
             name="Antwerp Session", dojo=dojo,
             start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=1,
         )
-        confirmed = Registration.objects.create(event=event, participant=self.child, waiting_list=False, position=1)
-        Registration.objects.create(event=event, participant=self.waitlisted_child, waiting_list=True, position=2)
+        confirmed = Registration.objects.create(event=event, ninja=self.child, waiting_list=False, position=1)
+        Registration.objects.create(event=event, ninja=self.waitlisted_child, waiting_list=True, position=2)
         self.client.force_login(self.guardian)
 
         with patch("dojos.team.notify") as mock_notify:
@@ -379,7 +385,7 @@ class RegisterGuardianViewTests(TestCase):
             "password": self.valid_password,
             "consent": "on",
             "child_1_name": "Sam",
-            "child_1_dob": "2015-01-01",
+            "child_1_dob": _dob(10),
             "child_1_level": "new",
             "child_1_notes": "",
         }
@@ -399,20 +405,20 @@ class RegisterGuardianViewTests(TestCase):
         self.assertTrue(guardian.check_password(self.valid_password))
         self.assertEqual(guardian.first_name, "Jane")
         self.assertEqual(guardian.last_name, "Doe")
-        self.assertEqual(list(Participant.objects.of_guardian(guardian).values_list("name", flat=True)), ["Sam"])
+        self.assertEqual(list(Ninja.objects.of_guardian(guardian).values_list("name", flat=True)), ["Sam"])
         self.assertEqual(int(self.client.session["_auth_user_id"]), guardian.id)
 
     def test_valid_post_with_non_contiguous_child_indices_creates_both(self):
         """Simulates a family who added a 2nd/3rd child then removed the
         middle one client-side, leaving gaps in the field numbering."""
         data = self._valid_post_data(
-            child_3_name="Alex", child_3_dob="2013-06-15", child_3_level="confident", child_3_notes="Peanut allergy",
+            child_3_name="Alex", child_3_dob=_dob(12), child_3_level="confident", child_3_notes="Peanut allergy",
         )
         self.client.post(reverse("register_guardian"), data)
 
         guardian = User.objects.get(email="jane@example.com")
-        self.assertEqual(Participant.objects.of_guardian(guardian).count(), 2)
-        alex = Participant.objects.of_guardian(guardian).get(name="Alex")
+        self.assertEqual(Ninja.objects.of_guardian(guardian).count(), 2)
+        alex = Ninja.objects.of_guardian(guardian).get(name="Alex")
         self.assertEqual(alex.experience_level, "confident")
         self.assertEqual(alex.allergies_notes, "Peanut allergy")
 
@@ -449,7 +455,7 @@ class RegisterGuardianViewTests(TestCase):
         self.assertIn("name", row["errors"])
         self.assertIn("dob", row["errors"])
         self.assertFalse(User.objects.filter(email="jane@example.com").exists())
-        self.assertFalse(Participant.objects.exists())
+        self.assertFalse(Ninja.objects.exists())
 
     def test_no_children_is_rejected(self):
         data = self._valid_post_data()
@@ -586,7 +592,7 @@ class NinjaBeltDisplayTests(TestCase):
         event = Event.objects.create(
             name="Session", dojo=dojo, start_time="2020-01-01T10:00:00Z", end_time="2020-01-01T12:00:00Z", places=5,
         )
-        Registration.objects.create(event=event, participant=child, waiting_list=False, position=1)
+        Registration.objects.create(event=event, ninja=child, waiting_list=False, position=1)
         award_belt(child, white, dojo.champion_membership)
         award_belt(child, yellow, dojo.champion_membership, note="Built a game")
 
@@ -634,7 +640,7 @@ class OrganisationRoleTests(TestCase):
         self.assertTrue(user.has_perm("content.change_organisationteammember"))
         self.assertFalse(user.has_perm("dojos.change_dojo"))
         self.assertFalse(user.has_perm("events.add_ninjabelt"))
-        self.assertFalse(user.has_perm("accounts.view_participant"))
+        self.assertFalse(user.has_perm("accounts.view_ninja"))
         self.assertFalse(user.has_perm("applications.can_review_background_checks"))
 
     def test_admin_role_edits_the_catalogue(self):
@@ -691,4 +697,54 @@ class OrganisationRoleTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "approve_applications")
         self.assertEqual(self.client.get(reverse("admin:events_ninjabelt_changelist")).status_code, 200)
-        self.assertEqual(self.client.get(reverse("admin:accounts_participant_changelist")).status_code, 403)
+        self.assertEqual(self.client.get(reverse("admin:accounts_ninja_changelist")).status_code, 403)
+
+
+class NinjaAgeRuleTests(TestCase):
+    """A ninja is 7–17 (DATA_MODEL.md nomenclature): enforced whenever a date
+    of birth is entered or changed, never retroactively."""
+
+    def setUp(self):
+        self.guardian = User.objects.create(username="g1", email="g1@example.com")
+        self.client.force_login(self.guardian)
+
+    def test_model_clean_checks_new_and_changed_dates_only(self):
+        from django.core.exceptions import ValidationError
+
+        with self.assertRaises(ValidationError):
+            Ninja(name="Toddler", date_of_birth=timezone.localdate() - timedelta(days=3 * 365)).full_clean()
+        Ninja(name="Kid", date_of_birth=timezone.localdate() - timedelta(days=10 * 365)).full_clean()
+
+        grown_up = Ninja.objects.create(name="Now 19", date_of_birth=timezone.localdate() - timedelta(days=19 * 365))
+        grown_up.name = "Renamed"
+        grown_up.full_clean()  # unchanged date: still editable
+
+    def test_add_child_rejects_an_out_of_range_age(self):
+        response = self.client.post(reverse("add_ninja"), {"name": "Baby", "date_of_birth": _dob(3)})
+        self.assertContains(response, "Ninjas are 7 to 17 years old")
+        self.assertFalse(Ninja.objects.of_guardian(self.guardian).exists())
+
+    def test_family_sign_up_flags_the_child_row(self):
+        self.client.logout()
+        response = self.client.post(reverse("register_guardian"), {
+            "name": "Jane Doe", "email": "jane@example.com", "phone": "",
+            "password": PASSWORD, "password_confirm": PASSWORD,
+            "child_1_name": "Old", "child_1_dob": _dob(19), "child_1_level": "", "child_1_notes": "",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Ninjas are 7 to 17 years old")
+        self.assertFalse(User.objects.filter(email="jane@example.com").exists())
+
+    def test_edit_rejects_a_changed_out_of_range_date_but_keeps_an_old_one(self):
+        grown_up = make_ninja(self.guardian, "Now 19", date_of_birth=timezone.localdate() - timedelta(days=19 * 365))
+        url = reverse("edit_ninja", kwargs={"ninja_id": grown_up.id})
+
+        response = self.client.post(url, {"name": "Renamed", "date_of_birth": grown_up.date_of_birth.isoformat()})
+        self.assertTemplateUsed(response, "accounts/partials/_child_header_display.html")
+
+        original = grown_up.date_of_birth
+        response = self.client.post(url, {"name": "Renamed", "date_of_birth": _dob(4)})
+        self.assertTemplateUsed(response, "accounts/partials/_child_header_edit.html")
+        self.assertContains(response, "Ninjas are 7 to 17 years old")
+        grown_up.refresh_from_db()
+        self.assertEqual(grown_up.date_of_birth, original)

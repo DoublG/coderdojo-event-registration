@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 
-from accounts.models import Participant
+from accounts.models import Ninja
 from content.models import FAQ
 from dojos.models import Dojo
 
@@ -104,9 +104,9 @@ def event_detail(request, event_id):
 
     all_registered = False
     if request.user.is_authenticated:
-        children = list(Participant.objects.of_guardian(request.user))
+        children = list(Ninja.objects.of_guardian(request.user))
         if children:
-            registered_count = Registration.objects.filter(event=event, participant__in=children).count()
+            registered_count = Registration.objects.filter(event=event, ninja__in=children).count()
             all_registered = registered_count == len(children)
 
     return render(request, "events/event_detail.html", {
@@ -125,8 +125,8 @@ def event_signup(request, event_id):
     existing_registrations = {}
     if guardian:
         existing_registrations = {
-            r.participant_id: r
-            for r in Registration.objects.filter(event=event, participant__in=Participant.objects.of_guardian(guardian))
+            r.ninja_id: r
+            for r in Registration.objects.filter(event=event, ninja__in=Ninja.objects.of_guardian(guardian))
         }
 
     if request.method == "POST" and guardian and not event.registration_open:
@@ -141,7 +141,7 @@ def event_signup(request, event_id):
         if set(ordered_ids) != set(submitted_ids):
             ordered_ids = submitted_ids
 
-        children_by_id = {str(c.id): c for c in Participant.objects.of_guardian(guardian).filter(id__in=submitted_ids)}
+        children_by_id = {str(c.id): c for c in Ninja.objects.of_guardian(guardian).filter(id__in=submitted_ids)}
         selected = [children_by_id[cid] for cid in dict.fromkeys(ordered_ids) if cid in children_by_id]
         new_children = [c for c in selected if c.id not in existing_registrations]
 
@@ -158,7 +158,7 @@ def event_signup(request, event_id):
                     next_position += 1
                     waiting_list = confirmed_count >= event.places
                     registration = Registration.objects.create(
-                        event=event, participant=child, waiting_list=waiting_list, position=next_position,
+                        event=event, ninja=child, waiting_list=waiting_list, position=next_position,
                     )
                     # What the ninja works on starts as everything the session
                     # covers; the dojo team narrows it on the attendance list.
@@ -170,13 +170,13 @@ def event_signup(request, event_id):
             # as greyed-out/already-registered if the guardian lands back
             # on this form (e.g. via the browser back button).
             existing_registrations = {
-                r.participant_id: r
-                for r in Registration.objects.filter(event=event, participant__in=Participant.objects.of_guardian(guardian))
+                r.ninja_id: r
+                for r in Registration.objects.filter(event=event, ninja__in=Ninja.objects.of_guardian(guardian))
             }
 
     children = [
         {"child": child, "registration": existing_registrations.get(child.id)}
-        for child in Participant.objects.of_guardian(guardian)
+        for child in Ninja.objects.of_guardian(guardian)
     ] if guardian else []
     all_registered = bool(children) and all(entry["registration"] for entry in children)
 

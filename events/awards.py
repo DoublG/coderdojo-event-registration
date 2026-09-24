@@ -40,13 +40,13 @@ def award_belt(ninja, belt, membership, note="", awarded_on=None):
     at one of that dojo's sessions, and the belt must be above their
     current one."""
     _check_can_award(membership)
-    if not Registration.objects.filter(participant=ninja, event__dojo_id=membership.dojo_id).exists():
+    if not Registration.objects.filter(ninja=ninja, event__dojo_id=membership.dojo_id).exists():
         raise BeltError(f"{ninja.name} hasn't been to a session at {membership.dojo.name}.")
     current = ninja.current_belt
     if current and belt.level <= current.level:
         raise BeltError(f"{ninja.name} already has the {current.name} (or higher).")
     return NinjaBelt.objects.create(
-        participant=ninja, belt=belt, awarded_on=awarded_on or timezone.localdate(),
+        ninja=ninja, belt=belt, awarded_on=awarded_on or timezone.localdate(),
         awarded_by=membership.user, awarded_as_membership=membership, awarded_as_role=membership.role,
         note=note.strip(),
     )
@@ -59,7 +59,7 @@ def sync_milestones(ninja, membership=None):
     attendance is later unmarked), and the next one up shows progress.
     Reaching one that `grants_belt` awards that belt as `membership`, if
     given and allowed to; otherwise the badge is still earned."""
-    attended = Registration.objects.filter(participant=ninja, attended=True).count()
+    attended = Registration.objects.filter(ninja=ninja, attended=True).count()
     today = timezone.localdate()
     existing = {nb.badge_id: nb for nb in ninja.badges.filter(badge__kind=Badge.MILESTONE)}
 
@@ -68,7 +68,7 @@ def sync_milestones(ninja, membership=None):
         if ninja_badge and ninja_badge.earned_date:
             continue
         if attended >= badge.threshold:
-            ninja_badge = ninja_badge or NinjaBadge(participant=ninja, badge=badge)
+            ninja_badge = ninja_badge or NinjaBadge(ninja=ninja, badge=badge)
             ninja_badge.earned_date = today
             ninja_badge.progress_current = ninja_badge.progress_total = badge.threshold
             ninja_badge.save()
@@ -79,7 +79,7 @@ def sync_milestones(ninja, membership=None):
                     pass  # already at that belt or higher, or not theirs to award
             continue
         # The next milestone up: show progress toward it, then stop.
-        ninja_badge = ninja_badge or NinjaBadge(participant=ninja, badge=badge)
+        ninja_badge = ninja_badge or NinjaBadge(ninja=ninja, badge=badge)
         ninja_badge.progress_current, ninja_badge.progress_total = attended, badge.threshold
         ninja_badge.save()
         break

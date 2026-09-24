@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from accounts.models import Participant, User
+from accounts.models import Ninja, User
 from applications.services import is_approved_champion
 from content.models import FAQ, OrganisationTeamMember
 from events.awards import BeltError, award_belt, sync_milestones
@@ -166,9 +166,9 @@ def _attendance_context(event):
     attendance page and the htmx endpoints that re-render parts of it."""
     registrations = list(
         event.registration_set.filter(waiting_list=False)
-        .select_related("participant")
-        .prefetch_related("pathways", "participant__belts__belt")
-        .order_by("participant__name")
+        .select_related("ninja")
+        .prefetch_related("pathways", "ninja__belts__belt")
+        .order_by("ninja__name")
     )
     event_pathway_ids = set(event.pathways.values_list("id", flat=True))
     return {
@@ -308,7 +308,7 @@ def _youth_mentor_candidates(dojo):
     its sessions, and who aren't already on the team."""
     on_team = dojo.memberships.active().values("user_id")
     ninjas = (
-        Participant.objects.exclude(account=None)
+        Ninja.objects.exclude(account=None)
         .filter(Q(home_dojo=dojo) | Q(registration__event__dojo=dojo))
         .exclude(account_id__in=on_team)
         .select_related("account")
@@ -521,7 +521,7 @@ def dojo_event_attendance_mark(request, dojo_id, event_id, registration_id):
     dojo = access.dojo
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
     registration = get_object_or_404(
-        Registration.objects.select_related("participant").prefetch_related("pathways"),
+        Registration.objects.select_related("ninja").prefetch_related("pathways"),
         id=registration_id, event=event, waiting_list=False,
     )
 
@@ -530,7 +530,7 @@ def dojo_event_attendance_mark(request, dojo_id, event_id, registration_id):
         registration.save(update_fields=["attended"])
         # Milestone badges count sessions attended; one that grants a belt
         # awards it as whoever marked the attendance.
-        sync_milestones(registration.participant, access.membership)
+        sync_milestones(registration.ninja, access.membership)
 
     if request.headers.get("HX-Request"):
         context = {"dojo": dojo, "dojo_access": access, **_attendance_context(event), "registration": registration}
@@ -550,7 +550,7 @@ def dojo_event_registration_pathways(request, dojo_id, event_id, registration_id
     dojo = access.dojo
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
     registration = get_object_or_404(
-        Registration.objects.select_related("participant"),
+        Registration.objects.select_related("ninja"),
         id=registration_id, event=event, waiting_list=False,
     )
     if request.method == "POST":
@@ -576,7 +576,7 @@ def dojo_event_award_belt(request, dojo_id, event_id, registration_id):
     dojo = access.dojo
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
     registration = get_object_or_404(
-        Registration.objects.select_related("participant"),
+        Registration.objects.select_related("ninja"),
         id=registration_id, event=event, waiting_list=False,
     )
     belt_error = None
@@ -585,7 +585,7 @@ def dojo_event_award_belt(request, dojo_id, event_id, registration_id):
         try:
             if belt is None:
                 raise BeltError("Pick a belt to award.")
-            award_belt(registration.participant, belt, access.membership, note=request.POST.get("note", ""))
+            award_belt(registration.ninja, belt, access.membership, note=request.POST.get("note", ""))
         except BeltError as error:
             belt_error = str(error)
             if not request.headers.get("HX-Request"):
@@ -594,7 +594,7 @@ def dojo_event_award_belt(request, dojo_id, event_id, registration_id):
     if request.headers.get("HX-Request"):
         context = {
             "dojo": dojo, "dojo_access": access, **_attendance_context(event), "belt_error": belt_error,
-            "registration": Registration.objects.select_related("participant").prefetch_related("pathways").get(
+            "registration": Registration.objects.select_related("ninja").prefetch_related("pathways").get(
                 pk=registration.pk,
             ),
         }
@@ -613,8 +613,8 @@ def dojo_event_attendance_mark_all(request, dojo_id, event_id):
     if request.method == "POST":
         confirmed = event.registration_set.filter(waiting_list=False)
         confirmed.update(attended=True)
-        for participant in Participant.objects.filter(registration__in=confirmed):
-            sync_milestones(participant, access.membership)
+        for ninja in Ninja.objects.filter(registration__in=confirmed):
+            sync_milestones(ninja, access.membership)
 
     if request.headers.get("HX-Request"):
         return render(request, "dojos/partials/_attendance.html", {"dojo": dojo, "dojo_access": access, **_attendance_context(event)})

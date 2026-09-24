@@ -58,7 +58,7 @@ class Event(models.Model):
                   "Pre-filled from the dojo's; registrations pre-select these.",
     )
 
-    participants = models.ManyToManyField("accounts.Participant", through="Registration")
+    ninjas = models.ManyToManyField("accounts.Ninja", through="Registration")
 
     objects = EventQuerySet.as_manager()
 
@@ -77,7 +77,7 @@ class Event(models.Model):
 
 class Registration(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    participant = models.ForeignKey("accounts.Participant", on_delete=models.CASCADE)
+    ninja = models.ForeignKey("accounts.Ninja", on_delete=models.CASCADE)
     waiting_list = models.BooleanField()
     position = models.IntegerField()
 
@@ -94,7 +94,7 @@ class Registration(models.Model):
         # see events.views.event_signup, which assigns it sequentially and
         # uses it to decide who's confirmed vs waitlisted.
         ordering = ["position"]
-        unique_together = [("event", "participant")]
+        unique_together = [("event", "ninja")]
 
 
 class Belt(models.Model):
@@ -159,7 +159,7 @@ class NinjaBadge(models.Model):
     milestone tracks attended sessions toward its threshold (see
     events.awards.sync_milestones) and is earned once it's reached."""
 
-    participant = models.ForeignKey("accounts.Participant", on_delete=models.CASCADE, related_name="badges")
+    ninja = models.ForeignKey("accounts.Ninja", on_delete=models.CASCADE, related_name="badges")
     badge = models.ForeignKey(Badge, on_delete=models.CASCADE, related_name="ninja_badges")
 
     earned_date = models.DateField(null=True, blank=True, help_text="Blank if still in progress.")
@@ -167,10 +167,10 @@ class NinjaBadge(models.Model):
     progress_total = models.PositiveIntegerField(null=True, blank=True, help_text="Milestone only.")
 
     class Meta:
-        unique_together = [("participant", "badge")]
+        unique_together = [("ninja", "badge")]
 
     def __str__(self):
-        return f"{self.participant} - {self.badge}"
+        return f"{self.ninja} - {self.badge}"
 
 
 class NinjaBelt(models.Model):
@@ -183,7 +183,7 @@ class NinjaBelt(models.Model):
     Both links are required when a belt is awarded; they're nullable only so
     the history survives the account or dojo being deleted."""
 
-    participant = models.ForeignKey("accounts.Participant", on_delete=models.CASCADE, related_name="belts")
+    ninja = models.ForeignKey("accounts.Ninja", on_delete=models.CASCADE, related_name="belts")
     belt = models.ForeignKey(Belt, on_delete=models.PROTECT, related_name="ninja_belts")
     awarded_on = models.DateField()
     awarded_by = models.ForeignKey(
@@ -199,7 +199,7 @@ class NinjaBelt(models.Model):
         ordering = ["-awarded_on", "-id"]
 
     def __str__(self):
-        return f"{self.participant} - {self.belt}"
+        return f"{self.ninja} - {self.belt}"
 
     @property
     def awarded_by_label(self):

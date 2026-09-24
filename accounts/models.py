@@ -118,13 +118,37 @@ class User(AbstractUser):
         return self.background_check_status == self.CHECK_VALIDATED and not self.background_check_valid
 
 
-class ParticipantQuerySet(models.QuerySet):
+NINJA_MIN_AGE, NINJA_MAX_AGE = 7, 17
+
+
+def age_on(date_of_birth, day):
+    had_birthday = (day.month, day.day) >= (date_of_birth.month, date_of_birth.day)
+    return day.year - date_of_birth.year - (0 if had_birthday else 1)
+
+
+def ninja_birth_date_error(date_of_birth):
+    """A user-facing message if `date_of_birth` doesn't make a ninja
+    (a child aged 7–17 today), else None. A missing date is fine here —
+    whether it's required is up to the form."""
+    if date_of_birth is None:
+        return None
+    if not NINJA_MIN_AGE <= age_on(date_of_birth, date.today()) <= NINJA_MAX_AGE:
+        return f"Ninjas are {NINJA_MIN_AGE} to {NINJA_MAX_AGE} years old — check the date of birth."
+    return None
+
+
+class NinjaQuerySet(models.QuerySet):
     def of_guardian(self, user):
         """The ninjas `user` is a parent/guardian of (via Guardianship)."""
         return self.filter(guardianships__guardian=user).distinct()
 
 
-class Participant(models.Model):
+class Ninja(models.Model):
+    """A child aged 7–17 who visits a dojo (DATA_MODEL.md nomenclature).
+    Not a login: a parent can give them one (`account`, a ninja-type User).
+    The age rule applies when a date of birth is entered or changed, so a
+    ninja who has since turned 18 can still be edited."""
+
     NEW = "new"
     SOME = "some"
     CONFIDENT = "confident"
@@ -148,14 +172,14 @@ class Participant(models.Model):
 
     date_of_birth = models.DateField(null=True, blank=True)
     home_dojo = models.ForeignKey(
-        "dojos.Dojo", on_delete=models.SET_NULL, null=True, blank=True, related_name="home_participants"
+        "dojos.Dojo", on_delete=models.SET_NULL, null=True, blank=True, related_name="home_ninjas"
     )
     member_since = models.DateField(null=True, blank=True)
     experience_level = models.CharField(max_length=10, choices=EXPERIENCE_CHOICES, blank=True, default="")
     allergies_notes = models.TextField(blank=True, default="", help_text="Allergies or other notes for mentors.")
     photo = models.ImageField(upload_to="participants/", null=True, blank=True)
 
-    objects = ParticipantQuerySet.as_manager()
+    objects = NinjaQuerySet.as_manager()
 
     def __str__(self):
         return self.name
@@ -164,10 +188,12 @@ class Participant(models.Model):
     def age(self):
         if not self.date_of_birth:
             return None
-        today = date.today()
-        years = today.year - self.date_of_birth.year
-        had_birthday = (today.month, today.day) >= (self.date_of_birth.month, self.date_of_birth.day)
-        return years if had_birthday else years - 1
+        return age_on(self.date_of_birth, date.today())
+
+    def clean(self):
+        stored = Ninja.objects.filter(pk=self.pk).values_list("date_of_birth", flat=True).first() if self.pk else None
+        if self.date_of_birth != stored and (error := ninja_birth_date_error(self.date_of_birth)):
+            raise ValidationError({"date_of_birth": error})
 
     @property
     def current_belt(self):
@@ -191,7 +217,7 @@ class Guardianship(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="guardianships",
         limit_choices_to={"account_type": "adult"},
     )
-    ninja = models.ForeignKey(Participant, on_delete=models.CASCADE, related_name="guardianships")
+    ninja = models.ForeignKey(Ninja, on_delete=models.CASCADE, related_name="guardianships")
     relation = models.CharField(max_length=20, choices=RELATION_CHOICES, default=PARENT)
     created_at = models.DateTimeField(auto_now_add=True)
 

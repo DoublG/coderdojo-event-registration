@@ -6,7 +6,7 @@ from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from accounts.models import Guardianship, Participant, User
+from accounts.models import Guardianship, Ninja, User
 from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
 from dojos.models import Dojo, DojoMembership
 
@@ -37,7 +37,7 @@ CHILD_LOGIN_PROBABILITY = 0.5
 class Command(BaseCommand):
     help = (
         f"Seed {NUM_GUARDIANS} demo parent accounts, each with 1-3 ninjas "
-        "(Participants, linked through Guardianship). About half the ninjas get "
+        "(Ninjas, linked through Guardianship). About half the ninjas get "
         "their own optional login (an account of type ninja), simulating a "
         "parent opting them in."
     )
@@ -85,41 +85,46 @@ class Command(BaseCommand):
                     child_logins_created += 1
                     child_credential_rows.append((child_username, "", child_password))
 
-                participant = Participant.objects.create(
+                ninja = Ninja.objects.create(
                     name=f"{child_first_name} {last_name}",
                     account=account,
                     home_dojo=rng.choice(dojos) if dojos else None,
                     member_since=today - timedelta(days=rng.randint(30, 5 * 365)),
                 )
-                Guardianship.objects.create(guardian=guardian, ninja=participant)
+                Guardianship.objects.create(guardian=guardian, ninja=ninja)
                 avatar_path = rng.choice(KID_AVATAR_FILES)
                 with open(avatar_path, "rb") as f:
-                    participant.photo.save(avatar_path.name, File(f), save=True)
+                    ninja.photo.save(avatar_path.name, File(f), save=True)
                 children_created += 1
 
-        # Backfill: children seeded before Participant.photo/home_dojo/
+        # Backfill: children seeded before Ninja.photo/home_dojo/
         # member_since were set this way (guardians already existing skip
         # the loop above entirely, so this is the only path that reaches them).
-        for participant in Participant.objects.all():
+        for ninja in Ninja.objects.all():
             dirty_fields = []
-            if not participant.photo:
+            if not ninja.photo:
                 avatar_path = rng.choice(KID_AVATAR_FILES)
                 with open(avatar_path, "rb") as f:
-                    participant.photo.save(avatar_path.name, File(f), save=False)
+                    ninja.photo.save(avatar_path.name, File(f), save=False)
                 dirty_fields.append("photo")
-            if not participant.home_dojo_id and dojos:
-                participant.home_dojo = rng.choice(dojos)
+            if not ninja.home_dojo_id and dojos:
+                ninja.home_dojo = rng.choice(dojos)
                 dirty_fields.append("home_dojo")
-            if not participant.member_since:
-                participant.member_since = today - timedelta(days=rng.randint(30, 5 * 365))
+            if not ninja.date_of_birth:
+                # Per-ninja RNG, so adding this didn't shift the shared stream.
+                ninja_rng = random.Random(f"ninja-dob-{ninja.id}")
+                ninja.date_of_birth = today - timedelta(days=ninja_rng.randint(7 * 365 + 2, 17 * 365))
+                dirty_fields.append("date_of_birth")
+            if not ninja.member_since:
+                ninja.member_since = today - timedelta(days=rng.randint(30, 5 * 365))
                 dirty_fields.append("member_since")
             if dirty_fields:
-                participant.save(update_fields=dirty_fields)
+                ninja.save(update_fields=dirty_fields)
 
         # A couple of ninjas with their own login help out at their home
         # dojo: youth mentors, promoted by that dojo's champion.
         promoted = 0
-        for ninja in Participant.objects.exclude(account=None).exclude(home_dojo=None).order_by("id")[:3]:
+        for ninja in Ninja.objects.exclude(account=None).exclude(home_dojo=None).order_by("id")[:3]:
             champion = ninja.home_dojo.champion_membership
             if champion is None or DojoMembership.objects.filter(dojo=ninja.home_dojo, user=ninja.account).exists():
                 continue

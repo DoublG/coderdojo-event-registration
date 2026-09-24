@@ -11,7 +11,7 @@ from django.test import TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from accounts.models import Participant, User
+from accounts.models import Ninja, User
 from content.models import OrganisationTeamMember
 from events.models import Event, Registration
 from geo.models import AdministrativeBoundary
@@ -224,7 +224,7 @@ class DojoDashboardViewTests(TestCase):
             start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10
         )
         registration = Registration.objects.create(
-            event=event, participant=Participant.objects.create(name="Mila"), waiting_list=False,
+            event=event, ninja=Ninja.objects.create(name="Mila"), waiting_list=False,
             position=1, attended=True,
         )
         self.client.force_login(owner)
@@ -614,13 +614,13 @@ class DojoEventAttendanceViewTests(TestCase):
             start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=10
         )
         self.zoe = Registration.objects.create(
-            event=self.event, participant=Participant.objects.create(name="Zoe"), waiting_list=False, position=1
+            event=self.event, ninja=Ninja.objects.create(name="Zoe"), waiting_list=False, position=1
         )
         self.anna = Registration.objects.create(
-            event=self.event, participant=Participant.objects.create(name="Anna"), waiting_list=False, position=2
+            event=self.event, ninja=Ninja.objects.create(name="Anna"), waiting_list=False, position=2
         )
         self.waitlisted = Registration.objects.create(
-            event=self.event, participant=Participant.objects.create(name="Waitlisted"), waiting_list=True, position=3
+            event=self.event, ninja=Ninja.objects.create(name="Waitlisted"), waiting_list=True, position=3
         )
 
     def _page_url(self, event=None):
@@ -664,7 +664,7 @@ class DojoEventAttendanceViewTests(TestCase):
             start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=10
         )
         other_registration = Registration.objects.create(
-            event=other_event, participant=Participant.objects.create(name="Other"), waiting_list=False, position=1
+            event=other_event, ninja=Ninja.objects.create(name="Other"), waiting_list=False, position=1
         )
         self.client.force_login(self.owner)
 
@@ -817,8 +817,8 @@ class DojoEventSetStatusViewTests(TestCase):
 
     def test_back_to_draft_keeps_registrations(self):
         self._set_status(Event.OPEN)
-        participant = Participant.objects.create(name="Kid")
-        Registration.objects.create(event=self.event, participant=participant, waiting_list=False, position=1)
+        ninja = Ninja.objects.create(name="Kid")
+        Registration.objects.create(event=self.event, ninja=ninja, waiting_list=False, position=1)
         self.client.force_login(self.owner)
 
         self.client.post(self._url(), {"status": Event.DRAFT})
@@ -925,7 +925,7 @@ class HelperDojoAccessTests(TestCase):
             start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10
         )
         self.registration = Registration.objects.create(
-            event=self.event, participant=Participant.objects.create(name="Mila"), waiting_list=False, position=1
+            event=self.event, ninja=Ninja.objects.create(name="Mila"), waiting_list=False, position=1
         )
 
     def _kw(self, **extra):
@@ -1425,8 +1425,8 @@ class TeamManagementTests(TestCase):
 
     def test_promote_ninja_to_youth_mentor(self):
         kid_login = User.objects.create(username="kid", account_type=User.NINJA)
-        Participant.objects.create(name="Kid", account=kid_login, home_dojo=self.dojo)
-        ninja = Participant.objects.get(account=kid_login)
+        Ninja.objects.create(name="Kid", account=kid_login, home_dojo=self.dojo)
+        ninja = Ninja.objects.get(account=kid_login)
 
         self._post(self.mentor_account, action="promote", ninja_id=ninja.id)
 
@@ -1436,7 +1436,7 @@ class TeamManagementTests(TestCase):
 
     def test_cannot_promote_a_ninja_unrelated_to_this_dojo(self):
         kid_login = User.objects.create(username="kid", account_type=User.NINJA)
-        ninja = Participant.objects.create(name="Kid", account=kid_login, home_dojo=make_dojo("Elsewhere"))
+        ninja = Ninja.objects.create(name="Kid", account=kid_login, home_dojo=make_dojo("Elsewhere"))
         response = self._post(self.owner, action="promote", ninja_id=ninja.id)
         self.assertEqual(response.status_code, 404)
         self.assertFalse(DojoMembership.objects.filter(user=kid_login).exists())
@@ -1622,7 +1622,7 @@ class PathwayScopeTests(TestCase):
         event = self._event()
         event.pathways.set([self.scratch, self.web])
         parent = User.objects.create(username="parent")
-        ninja = Participant.objects.create(name="Mila")
+        ninja = Ninja.objects.create(name="Mila")
         from accounts.models import Guardianship
 
         Guardianship.objects.create(guardian=parent, ninja=ninja)
@@ -1630,13 +1630,13 @@ class PathwayScopeTests(TestCase):
 
         self.client.post(reverse("event_signup", kwargs={"event_id": event.id}), {"child": [ninja.id]})
 
-        registration = Registration.objects.get(event=event, participant=ninja)
+        registration = Registration.objects.get(event=event, ninja=ninja)
         self.assertEqual(set(registration.pathways.all()), {self.scratch, self.web})
 
     def test_team_narrows_what_a_ninja_works_on(self):
         event = self._event()
         registration = Registration.objects.create(
-            event=event, participant=Participant.objects.create(name="Mila"), waiting_list=False, position=1,
+            event=event, ninja=Ninja.objects.create(name="Mila"), waiting_list=False, position=1,
         )
         registration.pathways.set([self.scratch, self.python])
         url = reverse("dojo_event_registration_pathways", kwargs={
@@ -1652,7 +1652,7 @@ class PathwayScopeTests(TestCase):
     def test_pathway_editing_needs_take_attendance_and_the_right_event(self):
         event = self._event()
         registration = Registration.objects.create(
-            event=event, participant=Participant.objects.create(name="Mila"), waiting_list=False, position=1,
+            event=event, ninja=Ninja.objects.create(name="Mila"), waiting_list=False, position=1,
         )
         mentor = make_mentor(username="m1")
         add_member(self.dojo, mentor)
@@ -1700,8 +1700,8 @@ class AwardBeltViewTests(TestCase):
             name="Session", dojo=self.dojo, status=Event.OPEN,
             start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10,
         )
-        self.ninja = Participant.objects.create(name="Mila")
-        self.registration = Registration.objects.create(event=self.event, participant=self.ninja, waiting_list=False, position=1)
+        self.ninja = Ninja.objects.create(name="Mila")
+        self.registration = Registration.objects.create(event=self.event, ninja=self.ninja, waiting_list=False, position=1)
         self.url = reverse("dojo_event_award_belt", kwargs={
             "dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.registration.id,
         })

@@ -21,7 +21,7 @@ class BeltAdmin(admin.ModelAdmin):
 
 @admin.register(NinjaBadge)
 class NinjaBadgeAdmin(admin.ModelAdmin):
-    list_display = ["participant", "badge", "earned_date", "progress_current", "progress_total"]
+    list_display = ["ninja", "badge", "earned_date", "progress_current", "progress_total"]
     list_filter = ["badge"]
 
 
@@ -31,7 +31,7 @@ class NinjaBeltAdmin(admin.ModelAdmin):
     with delete rights, to undo a mistake), never edited. Belts are awarded
     from the dojo's attendance list, where the rules are enforced."""
 
-    list_display = ["participant", "belt", "awarded_on", "awarded_by_label"]
+    list_display = ["ninja", "belt", "awarded_on", "awarded_by_label"]
     list_filter = ["belt"]
 
     def has_add_permission(self, request):
