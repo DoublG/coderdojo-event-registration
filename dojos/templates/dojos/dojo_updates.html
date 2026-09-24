@@ -1,0 +1,64 @@
+{% extends "dojos/_admin_base.html" %}
+{% block admin_page_title %}Updates{% endblock %}
+{% block admin_heading %}Updates{% endblock %}
+
+{% block admin_extra_style %}
+<style>
+  .updates-manage { max-width: 820px; display: flex; flex-direction: column; gap: var(--space-5); }
+  .updates-manage h2 { color: var(--ink); margin: 0 0 var(--space-3); }
+  .updates-manage .cd-card { padding: var(--space-5); }
+  .updates-manage .muted { color: var(--ink-muted); }
+  .update-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--border); }
+  .update-row:last-child { border-bottom: none; }
+  .update-row__date { color: var(--ink-muted); margin: 0 0 var(--space-1); }
+  .update-row__text { color: var(--ink); margin: 0; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+{% comment %}
+The dojo's "From this dojo" updates (content.Announcement), shown newest
+first on its public page (dojos/dojo_detail.html) — see
+dojos.views.dojo_updates / dojo_update_delete. Posting and removing need
+POST_UPDATES; anyone with admin access can read the list.
+{% endcomment %}
+<div class="updates-manage">
+  {% if dojo_access.can_post_updates %}
+    <section class="cd-card">
+      <h2 class="heading-md">Post an update</h2>
+      <p class="body-sm muted">A short, dated note on the dojo's public page: a room change, a call for mentors, news from a session. Recurring facts belong in the FAQ; dates of sessions on the events list.</p>
+      <form class="cd-form" method="post" action="{% url 'dojo_updates' dojo_id=dojo.id %}">
+        {% csrf_token %}
+        <div class="cd-form__field">
+          <label class="cd-form__label label" for="{{ form.text.id_for_label }}">{{ form.text.label }}</label>
+          <ul class="cd-form__errors">{% for error in form.text.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+          {{ form.text }}
+        </div>
+        <button type="submit" class="cd-btn cd-btn--primary label">Post update</button>
+      </form>
+    </section>
+  {% endif %}
+
+  <section class="cd-card">
+    <h2 class="heading-md">Posted updates</h2>
+    <p class="body-sm muted">The dojo's page shows the {{ public_limit }} newest.</p>
+    {% for announcement in announcements %}
+      <div class="update-row">
+        <div>
+          <p class="caption update-row__date">{{ announcement.date|date:"j F Y" }}{% if forloop.counter > public_limit %} · no longer shown{% endif %}</p>
+          <p class="body update-row__text">{{ announcement.text|linebreaksbr }}</p>
+        </div>
+        {% if dojo_access.can_post_updates %}
+          <form method="post" action="{% url 'dojo_update_delete' dojo_id=dojo.id announcement_id=announcement.id %}"
+                onsubmit="return confirm('Remove this update from the dojo\'s page?');">
+            {% csrf_token %}
+            <button type="submit" class="cd-btn cd-btn--ghost label">Remove</button>
+          </form>
+        {% endif %}
+      </div>
+    {% empty %}
+      <p class="body-sm">No updates yet.</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

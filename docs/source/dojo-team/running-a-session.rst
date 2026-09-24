@@ -140,6 +140,20 @@ sessions in draft or open for sign-ups; any pending join requests are
 declined. If no sessions have been planned for over six months, the
 dashboard reminds you to plan one or mark the dojo dormant.
 
+Posting updates
+-----------------
+
+The **Updates** page in your dashboard's sidebar is where your dojo posts
+short, dated notes, shown under **From this dojo** on its public page: a
+room change, a call for an extra mentor, news from a session. Write the
+text and choose **Post update**; it's dated the day you post it. The
+dojo's page shows the five newest updates, and **Remove** takes one down.
+Both the champion and the mentors can post and remove updates.
+
+Keep updates to news: something that's always true (parking, what to
+bring) belongs in the dojo's FAQ, and session dates are already on the
+events list.
+
 Team pages
 -----------
 

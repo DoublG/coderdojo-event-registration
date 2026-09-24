@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 09:42+0000\n"
+"POT-Creation-Date: 2026-09-24 15:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -388,10 +388,42 @@ msgstr ""
 "planifier une ou de mettre le dojo en sommeil."
 
 #: ../../source/dojo-team/running-a-session.rst:144
+msgid "Posting updates"
+msgstr "Publier des nouvelles"
+
+#: ../../source/dojo-team/running-a-session.rst:146
+msgid ""
+"The **Updates** page in your dashboard's sidebar is where your dojo posts"
+" short, dated notes, shown under **From this dojo** on its public page: a"
+" room change, a call for an extra mentor, news from a session. Write the "
+"text and choose **Post update**; it's dated the day you post it. The "
+"dojo's page shows the five newest updates, and **Remove** takes one down."
+" Both the champion and the mentors can post and remove updates."
+msgstr ""
+"La page **Nouvelles** dans la barre latérale de votre tableau de bord permet"
+" à votre dojo de publier de courtes notes datées, affichées sous **Du dojo**"
+" sur sa page publique : un changement de salle, un appel à un mentor "
+"supplémentaire, des nouvelles d'une séance. Écrivez le texte et choisissez "
+"**Publier** ; la nouvelle porte la date du jour de publication. La page du "
+"dojo affiche les cinq nouvelles les plus récentes, et **Retirer** en "
+"supprime une. Le champion comme les mentors peuvent publier et retirer des "
+"nouvelles."
+
+#: ../../source/dojo-team/running-a-session.rst:153
+msgid ""
+"Keep updates to news: something that's always true (parking, what to "
+"bring) belongs in the dojo's FAQ, and session dates are already on the "
+"events list."
+msgstr ""
+"Réservez les nouvelles à l'actualité : ce qui est toujours vrai (parking, "
+"quoi apporter) a sa place dans la FAQ du dojo, et les dates des séances "
+"figurent déjà dans la liste des événements."
+
+#: ../../source/dojo-team/running-a-session.rst:158
 msgid "Team pages"
 msgstr "Pages d'équipe"
 
-#: ../../source/dojo-team/running-a-session.rst:146
+#: ../../source/dojo-team/running-a-session.rst:160
 msgid ""
 "A dojo's public team page (visible to anyone, not just the dojo team) "
 "shows its champion first, followed by its mentors and youth mentors. "

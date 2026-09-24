@@ -44,6 +44,7 @@ if python manage.py shell -c "import sys; from events.models import Event; sys.e
     python manage.py seed_ninja_history
     python manage.py seed_faqs
     python manage.py seed_testimonials
+    python manage.py seed_announcements
 else
     echo "Demo data already present (events exist) - skipping demo seed."
 fi

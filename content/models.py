@@ -79,7 +79,7 @@ class Announcement(models.Model):
     objects = AnnouncementManager()
 
     class Meta:
-        ordering = ["-date"]
+        ordering = ["-date", "-id"]
 
     def __str__(self):
         return f"{self.dojo} - {self.date}"

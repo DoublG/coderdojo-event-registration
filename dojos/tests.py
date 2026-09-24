@@ -1796,3 +1796,85 @@ class AwardBeltViewTests(TestCase):
     def test_mark_all_present_updates_milestone_badges(self):
         self.client.post(reverse("dojo_event_attendance_mark_all", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id}))
         self.assertIsNotNone(self.ninja.badges.get(badge=self.band).earned_date)
+
+
+class DojoUpdatesTests(TestCase):
+    """The admin "Updates" page (dojo_updates / dojo_update_delete) and the
+    public page's "From this dojo" list."""
+
+    def setUp(self):
+        from content.models import Announcement
+
+        self.Announcement = Announcement
+        self.champion = make_champion(username="champ")
+        self.dojo = make_dojo("Ghent", champion=self.champion)
+        self.url = reverse("dojo_updates", kwargs={"dojo_id": self.dojo.id})
+
+    def _post(self, text):
+        return self.client.post(self.url, {"text": text})
+
+    def test_anonymous_redirected_to_login(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response.url)
+
+    def test_account_without_a_role_gets_404(self):
+        self.client.force_login(make_mentor(username="outsider"))
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+        self.assertEqual(self._post("Hi").status_code, 404)
+
+    def test_champion_sees_page_and_posts_an_update_dated_today(self):
+        self.client.force_login(self.champion)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "dojos/dojo_updates.html")
+
+        response = self._post("  We've moved to the big room.  ")
+
+        self.assertRedirects(response, self.url)
+        update = self.Announcement.objects.get(dojo=self.dojo)
+        self.assertEqual(update.text, "We've moved to the big room.")
+        self.assertEqual(update.date, timezone.localdate())
+
+    def test_mentor_can_post(self):
+        mentor = make_mentor(username="mentor")
+        add_member(self.dojo, mentor)
+        self.client.force_login(mentor)
+        self._post("Looking for a Python mentor.")
+        self.assertTrue(self.Announcement.objects.filter(dojo=self.dojo).exists())
+
+    def test_empty_or_too_long_text_is_rejected(self):
+        self.client.force_login(self.champion)
+        for text in ["   ", "x" * 501]:
+            response = self._post(text)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(response.context["form"].errors)
+        self.assertFalse(self.Announcement.objects.exists())
+
+    def test_delete_only_within_own_dojo(self):
+        own = self.Announcement.objects.create(dojo=self.dojo, date=date(2026, 1, 1), text="Mine")
+        other_dojo = make_dojo("Antwerp", champion=make_champion(username="other"))
+        other = self.Announcement.objects.create(dojo=other_dojo, date=date(2026, 1, 1), text="Theirs")
+        self.client.force_login(self.champion)
+
+        response = self.client.post(
+            reverse("dojo_update_delete", kwargs={"dojo_id": self.dojo.id, "announcement_id": other.id})
+        )
+        self.assertEqual(response.status_code, 404)
+        self.client.post(reverse("dojo_update_delete", kwargs={"dojo_id": self.dojo.id, "announcement_id": own.id}))
+
+        self.assertEqual(list(self.Announcement.objects.values_list("text", flat=True)), ["Theirs"])
+
+    def test_public_page_shows_the_five_newest(self):
+        for day in range(1, 8):
+            self.Announcement.objects.create(dojo=self.dojo, date=date(2026, 1, day), text=f"Update {day}")
+
+        response = self.client.get(reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}))
+
+        self.assertContains(response, "From this dojo")
+        self.assertEqual([a.text for a in response.context["announcements"]], [f"Update {d}" for d in range(7, 2, -1)])
+        self.assertNotContains(response, "Update 2")
+
+    def test_public_page_hides_the_section_without_updates(self):
+        response = self.client.get(reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}))
+        self.assertNotContains(response, "From this dojo")

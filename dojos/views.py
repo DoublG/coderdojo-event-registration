@@ -30,18 +30,21 @@ from .access import (
     MANAGE_EVENTS,
     MANAGE_LIFECYCLE,
     MANAGE_TEAM,
+    POST_UPDATES,
     TAKE_ATTENDANCE,
     accessible_dojos,
     is_approved_mentor,
     require_dojo_access,
 )
-from .forms import DojoCreateForm, DojoProfileForm, DojoSearchForm
+from .forms import AnnouncementForm, DojoCreateForm, DojoProfileForm, DojoSearchForm
 from .models import Dojo, DojoMembership
 from .search import attach_next_events, dojos_by_distance, resolve_search_origin
 
 RESULTS_PER_PAGE = 20
 WIDGET_RESULTS_LIMIT = 5
 NOTIFICATION_LIMIT = 10
+# How many of a dojo's newest updates its public page shows ("From this dojo").
+PUBLIC_UPDATES_LIMIT = 5
 
 
 def _admin_context(request, access):
@@ -135,6 +138,7 @@ def dojo_detail(request, dojo_id):
     faqs = FAQ.objects.for_dojo(dojo)
     return render(request, "dojos/dojo_detail.html", {
         "dojo": dojo, "next_event": next_event, "faqs": faqs,
+        "announcements": dojo.announcements.all()[:PUBLIC_UPDATES_LIMIT],
         "mentors": dojo.memberships.for_team_page(),
         "join_state": _join_state(request.user, dojo),
     })
@@ -316,6 +320,44 @@ def _youth_mentor_candidates(dojo):
         .order_by("name")
     )
     return ninjas
+
+
+@login_required
+def dojo_updates(request, dojo_id):
+    """The admin sidebar's "Updates" page: the dojo's "From this dojo"
+    updates (content.Announcement), newest first, and with POST_UPDATES a
+    form to post a new one, dated today."""
+    access = require_dojo_access(request, dojo_id)
+    dojo = access.dojo
+    form = AnnouncementForm()
+    if request.method == "POST":
+        if not access.can_post_updates:
+            raise PermissionDenied
+        form = AnnouncementForm(request.POST)
+        if form.is_valid():
+            announcement = form.save(commit=False)
+            announcement.dojo = dojo
+            announcement.date = timezone.localdate()
+            announcement.save()
+            messages.success(request, "Update posted on the dojo's page.")
+            return redirect("dojo_updates", dojo_id=dojo.id)
+    return render(request, "dojos/dojo_updates.html", {
+        "form": form,
+        "announcements": dojo.announcements.all(),
+        "public_limit": PUBLIC_UPDATES_LIMIT,
+        "active": "updates",
+        **_admin_context(request, access),
+    })
+
+
+@login_required
+def dojo_update_delete(request, dojo_id, announcement_id):
+    """Remove one update (POST only, POST_UPDATES)."""
+    access = require_dojo_access(request, dojo_id, POST_UPDATES)
+    if request.method == "POST":
+        get_object_or_404(access.dojo.announcements, id=announcement_id).delete()
+        messages.success(request, "Update removed.")
+    return redirect("dojo_updates", dojo_id=access.dojo.id)
 
 
 @login_required

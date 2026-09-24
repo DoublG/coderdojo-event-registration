@@ -14,6 +14,12 @@ urlpatterns = [
     path("dojos/<int:dojo_id>/manage/lifecycle/", views.dojo_set_lifecycle, name="dojo_set_lifecycle"),
     path("dojos/<int:dojo_id>/manage/team/", views.dojo_team_manage, name="dojo_team_manage"),
     path("dojos/<int:dojo_id>/manage/team/action/", views.dojo_team_action, name="dojo_team_action"),
+    path("dojos/<int:dojo_id>/manage/updates/", views.dojo_updates, name="dojo_updates"),
+    path(
+        "dojos/<int:dojo_id>/manage/updates/<int:announcement_id>/delete/",
+        views.dojo_update_delete,
+        name="dojo_update_delete",
+    ),
     path("dojos/<int:dojo_id>/events/", views.dojo_event_list, name="dojo_event_list"),
     path("dojos/<int:dojo_id>/events/new/", views.dojo_event_create, name="dojo_event_create"),
     path("dojos/<int:dojo_id>/events/<int:event_id>/", views.dojo_event_detail, name="dojo_event_detail"),

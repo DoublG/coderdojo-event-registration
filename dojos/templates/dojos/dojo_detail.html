@@ -199,19 +199,17 @@
       </section>
     {% endif %}
 
-    {% with announcements=dojo.announcements.all %}
-      {% if announcements %}
-        <section class="section col">
-          <h2 class="heading-lg section-title">From this dojo</h2>
-          {% for announcement in announcements %}
-            <div class="announcement">
-              <p class="caption date">{{ announcement.date|date:"j F" }}</p>
-              <p class="body-text body">{{ announcement.text }}</p>
-            </div>
-          {% endfor %}
-        </section>
-      {% endif %}
-    {% endwith %}
+    {% if announcements %}
+      <section class="section col">
+        <h2 class="heading-lg section-title">From this dojo</h2>
+        {% for announcement in announcements %}
+          <div class="announcement">
+            <p class="caption date">{{ announcement.date|date:"j F Y" }}</p>
+            <p class="body-text body">{{ announcement.text|linebreaksbr }}</p>
+          </div>
+        {% endfor %}
+      </section>
+    {% endif %}
 
     <section class="section">
       <h2 class="heading-lg section-title">Visit us</h2>

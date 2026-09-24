@@ -14,8 +14,9 @@ account menu.
 
 The sidebar shows your role at that dojo under its name — **Champion** or
 **Mentor**. Mentors can do everything a champion can on the dashboard —
-take attendance, create and edit sessions, edit the dojo's settings and
-manage its team — except change the dojo's status (launching it, making
-it dormant, archiving it), which stays with the champion. If you help at,
+take attendance, create and edit sessions, edit the dojo's settings,
+manage its team and post updates on the dojo's page — except change the
+dojo's status (launching it, making it dormant, archiving it), which stays
+with the champion. If you help at,
 or run, more than one dojo, click the dojo's name at the top of the
 sidebar to switch between them.

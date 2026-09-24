@@ -40,8 +40,9 @@ EDIT_SETTINGS = "edit_settings"  # dojo_manage (the dojo's public profile)
 MANAGE_TEAM = "manage_team"  # accept/decline join requests, add/remove mentors, promote youth mentors
 AWARD_BELTS = "award_belts"  # award a ninja a belt (redesign phase 5)
 MANAGE_LIFECYCLE = "manage_lifecycle"  # launch / dormant / archive / reopen the dojo
+POST_UPDATES = "post_updates"  # post/delete the "From this dojo" updates (content.Announcement)
 ALL_CAPABILITIES = frozenset({
-    TAKE_ATTENDANCE, MANAGE_EVENTS, EDIT_SETTINGS, MANAGE_TEAM, AWARD_BELTS, MANAGE_LIFECYCLE,
+    TAKE_ATTENDANCE, MANAGE_EVENTS, EDIT_SETTINGS, MANAGE_TEAM, AWARD_BELTS, MANAGE_LIFECYCLE, POST_UPDATES,
 })
 
 ROLE_CAPABILITIES = {
@@ -94,6 +95,10 @@ class DojoAccess:
     @property
     def can_manage_lifecycle(self):
         return self.can(MANAGE_LIFECYCLE)
+
+    @property
+    def can_post_updates(self):
+        return self.can(POST_UPDATES)
 
 
 def managing_membership(user, dojo):

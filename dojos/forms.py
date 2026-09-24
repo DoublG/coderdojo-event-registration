@@ -1,5 +1,6 @@
 from django import forms
 
+from content.models import Announcement
 from core.image_library import library_filename, use_library_image
 
 from .models import Dojo
@@ -108,3 +109,25 @@ class DojoCreateForm(forms.ModelForm):
             "address": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Street and number, postcode, city"}),
             "email": forms.EmailInput(attrs={"class": "cd-form__input body", "placeholder": "hello@yourdojo.example"}),
         }
+
+
+class AnnouncementForm(forms.ModelForm):
+    """One "From this dojo" update (dojos.views.dojo_updates). Dated the
+    day it's posted; the team writes only the text."""
+
+    class Meta:
+        model = Announcement
+        fields = ["text"]
+        widgets = {
+            "text": forms.Textarea(attrs={
+                "class": "cd-form__input body", "rows": 3, "maxlength": 500,
+                "placeholder": "e.g. We've moved to the bigger room from October, same time, same entrance.",
+            }),
+        }
+        labels = {"text": "New update"}
+
+    def clean_text(self):
+        text = self.cleaned_data["text"].strip()
+        if len(text) > 500:
+            raise forms.ValidationError("Keep it short: 500 characters at most.")
+        return text
