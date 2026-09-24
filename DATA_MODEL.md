@@ -137,7 +137,6 @@ classDiagram
     class Ninja {
         +name  a child aged 7–17
         +date_of_birth
-        +experience_level
         +allergies_notes
         +member_since
         +age() int
@@ -976,6 +975,12 @@ Decided:
     mentors (who can also award belts there), and the organisation's
     management dashboards (read-only), to see a ninja's level and
     progression over time.
+
+  The belt is the *only* record of a ninja's coding level: the old
+  self-reported `experience_level` on `NINJA` (new / some / confident,
+  asked at family sign-up) was removed, and the current belt is shown
+  wherever that level needs to be visible (the ninja's page, the family
+  page's child cards, the attendance list and the ninja admin list).
 - ~~**Belts: remaining details.**~~ *Decided:*
   - **Belts aren't connected to pathways (yet).** A belt is one overall
     proficiency level per ninja, a single track of levels. Linking belts to

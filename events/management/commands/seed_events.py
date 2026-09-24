@@ -3,13 +3,13 @@ import random
 from calendar import monthrange
 from datetime import date, datetime, time, timedelta
 
-from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
+from core.image_library import use_library_image
 from dojos.models import Dojo
 from events.models import Event
-from events.template_images import TEMPLATE_IMAGES, TEMPLATE_IMAGES_DIR
+from events.template_images import TEMPLATE_IMAGES
 from pathways.models import Pathway
 
 SATURDAY, SUNDAY, WEDNESDAY, FRIDAY = 5, 6, 2, 4
@@ -62,9 +62,7 @@ def description_for(session_name):
 
 
 def assign_session_image(event, session_name):
-    image_path = TEMPLATE_IMAGES_DIR / SESSION_IMAGES[session_name]
-    with open(image_path, "rb") as f:
-        event.image.save(image_path.name, File(f), save=True)
+    use_library_image(event, "image", "events", SESSION_IMAGES[session_name], save=True)
 
 
 def nth_weekday_dates(start_date, weekday, n_occurrence):

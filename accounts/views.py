@@ -1,12 +1,10 @@
 import re
-from pathlib import Path
 
 from django.contrib.auth import authenticate, update_session_auth_hash
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
-from django.core.files import File
 from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
@@ -16,6 +14,7 @@ from django.utils.dateparse import parse_date
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import slugify
 
+from core.image_library import library_filename, use_library_image
 from dojos.access import accessible_dojos
 from events.models import Registration
 from dojos.team import notify_managers
@@ -29,11 +28,8 @@ from .forms import (
 )
 from .models import Guardianship, Ninja, User, ninja_birth_date_error
 from .provisioning import unique_username
+from .template_avatars import TEMPLATE_KID_AVATARS
 
-# Same pool as seed_guardians.py — a guardian adding a child through the
-# quick-add widget picks one of these instead of getting a random one.
-KID_AVATARS_DIR = Path(__file__).resolve().parent.parent / "dojos" / "seed_data" / "kid_avatars"
-KID_AVATAR_FILES = sorted(KID_AVATARS_DIR.glob("*.svg"))
 
 # Small on purpose — small enough that most children's award shelf
 # actually spans more than one page, so the lazy-load carousel (same
@@ -45,13 +41,9 @@ CHILD_NAME_FIELD_RE = re.compile(r"^child_(\d+)_name$")
 
 
 def _icon_choices():
-    choices = []
-    for path in KID_AVATAR_FILES:
-        category, _, descriptor = path.stem.split("-", 2)
-        descriptor = descriptor.replace("-", " ").title()
-        label = descriptor if category == "animal" else f"{descriptor} {category.title()}"
-        choices.append((path.name, label))
-    return choices
+    # Same set as seed_guardians.py — a guardian adding a child through the
+    # quick-add widget picks one of these instead of getting a random one.
+    return TEMPLATE_KID_AVATARS
 
 
 def _get_own_ninja(request, ninja_id, allow_self=False):
@@ -176,7 +168,7 @@ def register(request):
 
 def _parse_child_rows(post_data):
     """Parses the family-registration form's dynamically-numbered child
-    fields (child_<n>_name/dob/level/notes) into a list of row dicts, one
+    fields (child_<n>_name/dob/notes) into a list of row dicts, one
     per index actually present in the POST data. Not a Form/formset: the
     page's "Add another child"/"Remove" buttons (see the template's
     extra_script block) can leave gaps in the numbering (e.g. child_1,
@@ -186,11 +178,9 @@ def _parse_child_rows(post_data):
     indices = sorted({int(m.group(1)) for key in post_data if (m := CHILD_NAME_FIELD_RE.match(key))})
 
     rows = []
-    valid_levels = dict(Ninja.EXPERIENCE_CHOICES)
     for n in indices:
         name = post_data.get(f"child_{n}_name", "").strip()
         dob_raw = post_data.get(f"child_{n}_dob", "")
-        level = post_data.get(f"child_{n}_level", "")
         notes = post_data.get(f"child_{n}_notes", "").strip()
 
         errors = {}
@@ -201,12 +191,10 @@ def _parse_child_rows(post_data):
             errors["dob"] = "Date of birth is required."
         elif dob_error := ninja_birth_date_error(date_of_birth):
             errors["dob"] = dob_error
-        if level not in valid_levels:
-            level = ""
 
         rows.append({
             "index": n, "name": name, "dob": dob_raw, "date_of_birth": date_of_birth,
-            "level": level, "notes": notes, "errors": errors,
+            "notes": notes, "errors": errors,
         })
     return rows
 
@@ -214,8 +202,7 @@ def _parse_child_rows(post_data):
 def _create_ninjas(parent, child_rows):
     for row in child_rows:
         ninja = Ninja.objects.create(
-            name=row["name"], date_of_birth=row["date_of_birth"],
-            experience_level=row["level"], allergies_notes=row["notes"],
+            name=row["name"], date_of_birth=row["date_of_birth"], allergies_notes=row["notes"],
         )
         Guardianship.objects.create(guardian=parent, ninja=ninja)
 
@@ -257,7 +244,7 @@ def register_guardian(request):
 
     return render(request, "accounts/register_guardian.html", {
         "form": form,
-        "child_rows": child_rows or [{"index": 1, "name": "", "dob": "", "level": "", "notes": "", "errors": {}}],
+        "child_rows": child_rows or [{"index": 1, "name": "", "dob": "", "notes": "", "errors": {}}],
         "children_error": children_error,
     })
 
@@ -265,7 +252,7 @@ def register_guardian(request):
 def _children_context(parent):
     now = timezone.now()
     children = []
-    for child in Ninja.objects.of_guardian(parent):
+    for child in Ninja.objects.of_guardian(parent).prefetch_related("belts__belt"):
         # All upcoming registrations, not just the nearest one — a child
         # can be signed up for more than one session at a time. Not
         # filtering on waiting_list either — a waitlisted registration is
@@ -313,12 +300,10 @@ def add_ninja(request):
         date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
         add_error = ninja_birth_date_error(date_of_birth)
         if name and not add_error:
-            ninja = Ninja.objects.create(name=name, date_of_birth=date_of_birth)
+            ninja = Ninja(name=name, date_of_birth=date_of_birth)
+            _set_icon(ninja, request.POST.get("icon", ""))
+            ninja.save()
             Guardianship.objects.create(guardian=guardian, ninja=ninja)
-            icon_path = KID_AVATARS_DIR / request.POST.get("icon", "")
-            if icon_path.exists() and icon_path.parent == KID_AVATARS_DIR:
-                with open(icon_path, "rb") as f:
-                    ninja.photo.save(icon_path.name, File(f), save=True)
     children = _children_context(guardian)
     return render(request, "accounts/partials/_children_list.html", {
         "guardian": guardian, "children": children, "add_error": add_error,
@@ -363,17 +348,18 @@ def ninja_detail(request, ninja_id):
     })
 
 
+def _set_icon(child, icon):
+    """Point the child's photo at the picked standard avatar — linked from
+    the shared image library (core.image_library), never copied. An
+    unknown/empty choice leaves the photo as it was."""
+    if icon in dict(TEMPLATE_KID_AVATARS):
+        use_library_image(child, "photo", "ninjas", icon)
+
+
 def _current_icon_value(child):
-    """Best-effort match of a child's current photo back to one of the
-    dropdown's filenames, so the edit form can preselect it — the saved
-    file has a randomised suffix (avatar-01-xyz123.svg), so this matches
-    on the stem rather than the exact name."""
-    if not child.photo:
-        return None
-    for path in KID_AVATAR_FILES:
-        if path.stem in child.photo.name:
-            return path.name
-    return None
+    """The dropdown's filename for the child's current photo, so the edit
+    form can preselect it (None for an uploaded photo or none at all)."""
+    return library_filename(child.photo, "ninjas")
 
 
 @login_required
@@ -396,10 +382,7 @@ def edit_ninja(request, ninja_id):
             })
         child.date_of_birth = date_of_birth
 
-        icon_path = KID_AVATARS_DIR / request.POST.get("icon", "")
-        if icon_path.exists() and icon_path.parent == KID_AVATARS_DIR:
-            with open(icon_path, "rb") as f:
-                child.photo.save(icon_path.name, File(f), save=False)
+        _set_icon(child, request.POST.get("icon", ""))
         child.save()
 
         return render(request, "accounts/partials/_child_header_display.html", {

@@ -66,10 +66,17 @@ class Testimonial(models.Model):
         return f"{self.author} — {self.quote[:40]}"
 
 
+class AnnouncementManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("dojo__municipality")
+
+
 class Announcement(models.Model):
     dojo = models.ForeignKey("dojos.Dojo", on_delete=models.CASCADE, related_name="announcements")
     date = models.DateField()
     text = models.TextField()
+
+    objects = AnnouncementManager()
 
     class Meta:
         ordering = ["-date"]

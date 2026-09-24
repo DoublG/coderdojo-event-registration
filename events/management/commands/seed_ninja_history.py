@@ -1,12 +1,11 @@
 import random
 from datetime import date, datetime, timedelta
-from pathlib import Path
 
-from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from accounts.models import Ninja
+from core.image_library import use_library_image
 from dojos.models import Dojo
 from pathways.models import Pathway
 
@@ -16,7 +15,6 @@ from .seed_events import SESSION_NAMES, assign_event_team, assign_session_image,
 HISTORY_START = date(2020, 1, 1)
 SESSION_SLOT = (14, 0, 3)  # 14:00 start, 3 hours long — matches a typical Saturday workshop
 
-AWARDS_DIR = Path(__file__).resolve().parent.parent.parent / "seed_data" / "awards"
 
 # The attendance wristbands — first visit gets white, then green/red/black
 # at 5/10/15 visits. Each is a milestone Badge: unlocked by a repeat-count
@@ -59,9 +57,7 @@ BELTS = [
 
 
 def assign_icon(award, filename):
-    icon_path = AWARDS_DIR / filename
-    with open(icon_path, "rb") as f:
-        award.icon.save(icon_path.name, File(f), save=True)
+    use_library_image(award, "icon", "awards", filename, save=True)
 
 
 def past_saturdays(start, end):

@@ -149,15 +149,6 @@ class Ninja(models.Model):
     The age rule applies when a date of birth is entered or changed, so a
     ninja who has since turned 18 can still be edited."""
 
-    NEW = "new"
-    SOME = "some"
-    CONFIDENT = "confident"
-    EXPERIENCE_CHOICES = [
-        (NEW, "New to coding"),
-        (SOME, "Some experience"),
-        (CONFIDENT, "Confident"),
-    ]
-
     name = models.CharField(max_length=200)
     account = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -175,7 +166,6 @@ class Ninja(models.Model):
         "dojos.Dojo", on_delete=models.SET_NULL, null=True, blank=True, related_name="home_ninjas"
     )
     member_since = models.DateField(null=True, blank=True)
-    experience_level = models.CharField(max_length=10, choices=EXPERIENCE_CHOICES, blank=True, default="")
     allergies_notes = models.TextField(blank=True, default="", help_text="Allergies or other notes for mentors.")
     photo = models.ImageField(upload_to="participants/", null=True, blank=True)
 
@@ -203,6 +193,11 @@ class Ninja(models.Model):
         return max(awards, key=lambda a: a.belt.level).belt if awards else None
 
 
+class GuardianshipManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("guardian", "ninja")
+
+
 class Guardianship(models.Model):
     """Links a parent's (adult) account to a ninja they're responsible for.
     Replaces the old Guardian account subclass: any adult account can have
@@ -221,11 +216,18 @@ class Guardianship(models.Model):
     relation = models.CharField(max_length=20, choices=RELATION_CHOICES, default=PARENT)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = GuardianshipManager()
+
     class Meta:
         constraints = [models.UniqueConstraint(fields=["guardian", "ninja"], name="unique_guardianship")]
 
     def __str__(self):
         return f"{self.guardian} → {self.ninja}"
+
+
+class OrganisationRoleManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("account")
 
 
 class OrganisationRole(models.Model):
@@ -248,6 +250,8 @@ class OrganisationRole(models.Model):
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
     granted_at = models.DateTimeField(auto_now_add=True)
+
+    objects = OrganisationRoleManager()
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["account", "role"], name="unique_organisation_role")]

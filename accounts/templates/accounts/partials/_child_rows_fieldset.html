@@ -1,6 +1,6 @@
 {% comment %}
   Used by register_guardian.html — the dynamically-numbered
-  child_<n>_name/dob/level/notes rows (see accounts.views._parse_child_rows) plus the
+  child_<n>_name/dob/notes rows (see accounts.views._parse_child_rows) plus the
   "Add another child" button. Expects child_rows and children_error in context.
 {% endcomment %}
 <div class="cd-form__group">
@@ -31,14 +31,6 @@
           </div>
         </div>
         <div class="cd-form__row">
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="rp-c{{ row.index }}-level">Experience level</label>
-            <select class="cd-form__select body" id="rp-c{{ row.index }}-level" name="child_{{ row.index }}_level">
-              <option value="new" {% if row.level == "new" %}selected{% endif %}>New to coding</option>
-              <option value="some" {% if row.level == "some" %}selected{% endif %}>Some experience</option>
-              <option value="confident" {% if row.level == "confident" %}selected{% endif %}>Confident</option>
-            </select>
-          </div>
           <div class="cd-form__field">
             <label class="cd-form__label label" for="rp-c{{ row.index }}-notes">Allergies or notes</label>
             <input class="cd-form__input body" id="rp-c{{ row.index }}-notes" name="child_{{ row.index }}_notes" type="text" placeholder="None" value="{{ row.notes }}">

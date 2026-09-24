@@ -47,6 +47,13 @@ class NinjaGuardianshipInline(admin.TabularInline):
 
 @admin.register(Ninja)
 class NinjaAdmin(admin.ModelAdmin):
-    list_display = ["name", "date_of_birth", "home_dojo", "account"]
+    list_display = ["name", "date_of_birth", "home_dojo", "current_belt", "account"]
     search_fields = ["name"]
     inlines = [NinjaGuardianshipInline]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("belts__belt")
+
+    @admin.display(description="Current belt")
+    def current_belt(self, obj):
+        return obj.current_belt or "—"

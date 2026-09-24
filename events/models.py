@@ -15,6 +15,11 @@ class EventQuerySet(models.QuerySet):
         return self.exclude(status=Event.DRAFT).filter(dojo__status="active")
 
 
+class EventManager(models.Manager.from_queryset(EventQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().select_related("dojo__municipality")
+
+
 class Event(models.Model):
     DRAFT = "draft"
     OPEN = "open"
@@ -60,7 +65,7 @@ class Event(models.Model):
 
     ninjas = models.ManyToManyField("accounts.Ninja", through="Registration")
 
-    objects = EventQuerySet.as_manager()
+    objects = EventManager()
 
     def __str__(self):
         return f"{self.name} ({self.dojo})"
@@ -154,6 +159,11 @@ class Badge(models.Model):
             raise ValidationError("Only milestone badges have a threshold or grant a belt.")
 
 
+class NinjaBadgeManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("ninja", "badge")
+
+
 class NinjaBadge(models.Model):
     """One ninja's progress on one badge. A one-off is earned or not; a
     milestone tracks attended sessions toward its threshold (see
@@ -166,11 +176,18 @@ class NinjaBadge(models.Model):
     progress_current = models.PositiveIntegerField(null=True, blank=True, help_text="Milestone only.")
     progress_total = models.PositiveIntegerField(null=True, blank=True, help_text="Milestone only.")
 
+    objects = NinjaBadgeManager()
+
     class Meta:
         unique_together = [("ninja", "badge")]
 
     def __str__(self):
         return f"{self.ninja} - {self.badge}"
+
+
+class NinjaBeltManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("ninja", "belt")
 
 
 class NinjaBelt(models.Model):
@@ -194,6 +211,8 @@ class NinjaBelt(models.Model):
     )
     awarded_as_role = models.CharField(max_length=20, blank=True, default="", help_text="The membership's role when awarding.")
     note = models.CharField(max_length=300, blank=True, default="", help_text="Optional: what the ninja showed.")
+
+    objects = NinjaBeltManager()
 
     class Meta:
         ordering = ["-awarded_on", "-id"]

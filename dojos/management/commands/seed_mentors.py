@@ -1,8 +1,6 @@
 import random
 from datetime import date
-from pathlib import Path
 
-from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.text import slugify
@@ -12,16 +10,16 @@ from applications.models import Application
 from applications.seeding import approve_for_seeding
 from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
 from content.models import OrganisationTeamMember
+from accounts.template_avatars import TEMPLATE_AVATARS, TEMPLATE_KID_AVATARS
+from core.image_library import use_library_image
 from dojos.models import Dojo, DojoMembership
-from dojos.template_icons import TEMPLATE_ICONS, TEMPLATE_ICONS_DIR
+from dojos.template_icons import TEMPLATE_ICONS
 
-AVATARS_DIR = Path(__file__).resolve().parent.parent.parent / "seed_data" / "avatars"
-AVATAR_FILES = sorted(AVATARS_DIR.glob("*.svg"))
+AVATAR_FILES = [filename for filename, _label in TEMPLATE_AVATARS]
 
 # Ninjas (the kids) get a more playful pool — aliens, robots, animals —
 # instead of the plain human avatars used for adult mentor roles.
-KID_AVATARS_DIR = Path(__file__).resolve().parent.parent.parent / "seed_data" / "kid_avatars"
-KID_AVATAR_FILES = sorted(KID_AVATARS_DIR.glob("*.svg"))
+KID_AVATAR_FILES = [filename for filename, _label in TEMPLATE_KID_AVATARS]
 
 FIRST_NAMES = [
     "Emma", "Liam", "Olivia", "Noah", "Sophie", "Lucas", "Mila", "Finn",
@@ -103,14 +101,13 @@ def email_for(name, domain):
 
 
 def assign_avatar(obj, rng, kid=False):
-    """Give a profile without a photo one of the placeholder avatar SVGs
-    (dojos/seed_data/avatars/ for adults, dojos/seed_data/kid_avatars/ for
-    ninjas), the way seed_pathways.py assigns pathway icons from
-    pathways/seed_data/images/. Works for an account's team-page profile
-    (User.photo) and an OrganisationTeamMember alike."""
-    avatar_path = rng.choice(KID_AVATAR_FILES if kid else AVATAR_FILES)
-    with open(avatar_path, "rb") as f:
-        obj.photo.save(avatar_path.name, File(f), save=True)
+    """Give a profile without a photo one of the template avatars
+    (accounts.template_avatars: TEMPLATE_AVATARS for adults,
+    TEMPLATE_KID_AVATARS for ninjas). Works for an account's team-page
+    profile (User.photo) and an OrganisationTeamMember alike. Links the
+    shared standard image (core.image_library), no copy made."""
+    filename = rng.choice(KID_AVATAR_FILES if kid else AVATAR_FILES)
+    use_library_image(obj, "photo", "ninjas" if kid else "mentors", filename, save=True)
 
 
 def assign_dojo_icon(dojo, rng):
@@ -118,9 +115,7 @@ def assign_dojo_icon(dojo, rng):
     dojo's own page — dojos.template_icons.TEMPLATE_ICONS, the same list
     the dojo owner's own "choose from templates" icon picker uses."""
     filename, _label = rng.choice(TEMPLATE_ICONS)
-    icon_path = TEMPLATE_ICONS_DIR / filename
-    with open(icon_path, "rb") as f:
-        dojo.icon.save(icon_path.name, File(f), save=True)
+    use_library_image(dojo, "icon", "dojos", filename, save=True)
 
 
 # A few board members also get a login with an organisation role (access to

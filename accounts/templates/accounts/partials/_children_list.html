@@ -21,6 +21,7 @@ a full page reload).
             <p class="body-sm child-card__meta">
               {% if entry.child.age %}Age {{ entry.child.age }}{% endif %}
               {% if entry.child.home_dojo %} · {{ entry.child.home_dojo.name }}{% endif %}
+              {% with current_belt=entry.child.current_belt %}{% if current_belt %} · {{ current_belt.name }}{% endif %}{% endwith %}
             </p>
           </div>
         </div>

@@ -1,12 +1,8 @@
-from pathlib import Path
-
-from django.core.files import File
 from django.core.management.base import BaseCommand
 
 from content.models import FAQ
+from core.image_library import use_library_image
 from pathways.models import Pathway, PathwayProject, PathwayStep, Skill
-
-IMAGES_DIR = Path(__file__).resolve().parent.parent.parent / "seed_data" / "images"
 
 # Modelled on the real learning paths CoderDojo chapters run today via the
 # Raspberry Pi Foundation's own project library (projects.raspberrypi.org) —
@@ -228,9 +224,7 @@ class Command(BaseCommand):
             created += 1 if was_created else 0
             updated += 1 if not was_created else 0
 
-            image_path = IMAGES_DIR / entry["image"]
-            with image_path.open("rb") as image_file:
-                pathway.image.save(entry["image"], File(image_file), save=True)
+            use_library_image(pathway, "image", "pathways", entry["image"], save=True)
 
             skills = [Skill.objects.get_or_create(name=name)[0] for name in entry["skills"]]
             pathway.skills.set(skills)

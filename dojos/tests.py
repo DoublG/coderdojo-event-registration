@@ -13,6 +13,7 @@ from django.utils import timezone
 
 from accounts.models import Ninja, User
 from content.models import OrganisationTeamMember
+from core.testing import TempMediaMixin
 from events.models import Event, Registration
 from geo.models import AdministrativeBoundary
 from notifications.consumers import NotificationConsumer
@@ -259,8 +260,9 @@ class DojoDashboardViewTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class DojoManageViewTests(TestCase):
+class DojoManageViewTests(TempMediaMixin, TestCase):
     def setUp(self):
+        super().setUp()
         self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner, address="Oude Vismijn 3, Ghent")
 
@@ -366,8 +368,47 @@ class DojoManageViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["saved"])
         self.dojo.refresh_from_db()
-        self.assertTrue(self.dojo.icon)
-        self.assertIn("icon-02-robot", self.dojo.icon.name)
+        self.assertEqual(self.dojo.icon.name, "library/dojos/icon-02-robot.svg")
+
+    def test_template_icon_is_linked_not_copied(self):
+        """Two dojos picking the same template icon share the one library
+        file, and the edit form preselects it."""
+        other = make_dojo("Antwerp", champion=make_champion(username="owner2"))
+        self.client.force_login(self.owner)
+        self.client.post(
+            reverse("dojo_manage", kwargs={"dojo_id": self.dojo.id}),
+            self._valid_post_data(template_icon="icon-02-robot.svg"),
+        )
+        self.client.force_login(other.champion)
+        self.client.post(
+            reverse("dojo_manage", kwargs={"dojo_id": other.id}),
+            self._valid_post_data(name="CoderDojo Antwerp", template_icon="icon-02-robot.svg"),
+        )
+
+        other.refresh_from_db()
+        self.assertEqual(other.icon.name, "library/dojos/icon-02-robot.svg")
+        self.assertEqual(list((self.media_root / "library" / "dojos").iterdir()), [self.media_root / "library/dojos/icon-02-robot.svg"])
+        self.assertFalse((self.media_root / "dojos").exists())
+        response = self.client.get(reverse("dojo_manage", kwargs={"dojo_id": other.id}))
+        self.assertEqual(response.context["form"]["template_icon"].value(), "icon-02-robot.svg")
+
+    def test_uploaded_icon_gets_its_own_copy(self):
+        import io
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+
+        png = io.BytesIO()
+        Image.new("RGB", (4, 4)).save(png, "PNG")
+        self.client.force_login(self.owner)
+        upload = SimpleUploadedFile("mine.png", png.getvalue(), content_type="image/png")
+        self.client.post(
+            reverse("dojo_manage", kwargs={"dojo_id": self.dojo.id}),
+            {**self._valid_post_data(template_icon="icon-02-robot.svg"), "icon": upload},
+        )
+
+        self.dojo.refresh_from_db()
+        self.assertTrue(self.dojo.icon.name.startswith("dojos/"), self.dojo.icon.name)
 
 
 class DojoEventListViewTests(TestCase):
@@ -403,8 +444,9 @@ class DojoEventListViewTests(TestCase):
         self.assertEqual(list(response.context["events"]), [draft])
 
 
-class DojoEventCreateViewTests(TestCase):
+class DojoEventCreateViewTests(TempMediaMixin, TestCase):
     def setUp(self):
+        super().setUp()
         self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
 
@@ -501,8 +543,7 @@ class DojoEventCreateViewTests(TestCase):
 
         self.assertRedirects(response, reverse("dojo_event_list", kwargs={"dojo_id": self.dojo.id}))
         event = Event.objects.get(dojo=self.dojo)
-        self.assertTrue(event.image)
-        self.assertIn("coding-saturday", event.image.name)
+        self.assertEqual(event.image.name, "library/events/coding-saturday.svg")
 
 
 class DojoEventDetailViewTests(TestCase):

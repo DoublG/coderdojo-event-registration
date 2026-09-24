@@ -1,8 +1,9 @@
 from django import forms
-from django.core.files import File
+
+from core.image_library import library_filename, use_library_image
 
 from .models import Dojo
-from .template_icons import TEMPLATE_ICONS, TEMPLATE_ICONS_DIR
+from .template_icons import TEMPLATE_ICONS
 
 NO_TEMPLATE_ICON = ""
 
@@ -17,11 +18,11 @@ class DojoProfileForm(forms.ModelForm):
     dojo_manage always calls save(commit=False) itself (it still has its
     own dojo.save() to do afterwards, once the address/geocoding fields
     are settled) — save() below still works with that: the template_icon
-    copy just sets a pending value on the instance's `icon` field, same as
+    link just sets a pending value on the instance's `icon` field, same as
     any other field, for whichever save() call actually commits it."""
 
-    # Not a model field — a shortcut that, on save(), copies one of the
-    # bundled dojos/static/dojos/template_icons/ files into `icon` instead
+    # Not a model field — a shortcut that, on save(), points `icon` at one
+    # of the standard dojo icons (core.image_library, no copy made) instead
     # of requiring an upload. An uploaded file (see save()) always wins
     # over this if both are somehow submitted at once.
     template_icon = forms.ChoiceField(
@@ -66,14 +67,13 @@ class DojoProfileForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["municipality"].queryset = self.fields["municipality"].queryset.order_by("name")
         self.fields["municipality"].empty_label = "Not set"
+        self.fields["template_icon"].initial = library_filename(self.instance.icon, "dojos") or NO_TEMPLATE_ICON
 
     def save(self, commit=True):
         dojo = super().save(commit=False)
         template_icon = self.cleaned_data.get("template_icon")
         if template_icon and not self.files.get("icon"):
-            icon_path = TEMPLATE_ICONS_DIR / template_icon
-            with open(icon_path, "rb") as f:
-                dojo.icon.save(template_icon, File(f), save=False)
+            use_library_image(dojo, "icon", "dojos", template_icon)
         if commit:
             dojo.save()
         return dojo

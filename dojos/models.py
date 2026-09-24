@@ -18,6 +18,7 @@ class DojoManager(models.Manager.from_queryset(DojoQuerySet)):
     def get_queryset(self):
         return super().get_queryset().select_related("municipality")
 
+
 class Dojo(models.Model):
     name = models.CharField(max_length=200)
     municipality = models.ForeignKey(Municipality, on_delete=models.CASCADE, null=True, blank=True)
@@ -122,6 +123,11 @@ class DojoMembershipQuerySet(models.QuerySet):
         )
 
 
+class DojoMembershipManager(models.Manager.from_queryset(DojoMembershipQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().select_related("user", "dojo")
+
+
 class DojoMembership(models.Model):
     """One account's place on one dojo's team (DATA_MODEL.md §10): its role
     there and where it is in the join → leave lifecycle. Replaces Dojo.owner
@@ -166,7 +172,7 @@ class DojoMembership(models.Model):
     left_at = models.DateTimeField(null=True, blank=True, help_text="When it became dormant; empty while active.")
     created_at = models.DateTimeField(auto_now_add=True)
 
-    objects = DojoMembershipQuerySet.as_manager()
+    objects = DojoMembershipManager()
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["dojo", "user"], name="unique_membership_per_dojo")]

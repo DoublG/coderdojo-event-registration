@@ -1,21 +1,18 @@
 import random
 from datetime import timedelta
-from pathlib import Path
 
-from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from accounts.models import Guardianship, Ninja, User
 from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
+from accounts.template_avatars import TEMPLATE_KID_AVATARS
+from core.image_library import use_library_image
 from dojos.models import Dojo, DojoMembership
 
 # Reuse the same fun alien/robot/animal avatars seeded for ninja mentors
-# (dojos/seed_data/kid_avatars/) — same audience, same round .cd-mentor__avatar.
-KID_AVATARS_DIR = (
-    Path(__file__).resolve().parent.parent.parent.parent / "dojos" / "seed_data" / "kid_avatars"
-)
-KID_AVATAR_FILES = sorted(KID_AVATARS_DIR.glob("*.svg"))
+# (accounts.template_avatars) — same audience, same round .cd-mentor__avatar.
+KID_AVATAR_FILES = [filename for filename, _label in TEMPLATE_KID_AVATARS]
 
 GUARDIAN_FIRST_NAMES = [
     "Ellen", "Tom", "Sarah", "Bram", "Nathalie", "Wouter", "Julie", "Kevin",
@@ -92,9 +89,7 @@ class Command(BaseCommand):
                     member_since=today - timedelta(days=rng.randint(30, 5 * 365)),
                 )
                 Guardianship.objects.create(guardian=guardian, ninja=ninja)
-                avatar_path = rng.choice(KID_AVATAR_FILES)
-                with open(avatar_path, "rb") as f:
-                    ninja.photo.save(avatar_path.name, File(f), save=True)
+                use_library_image(ninja, "photo", "ninjas", rng.choice(KID_AVATAR_FILES), save=True)
                 children_created += 1
 
         # Backfill: children seeded before Ninja.photo/home_dojo/
@@ -103,9 +98,7 @@ class Command(BaseCommand):
         for ninja in Ninja.objects.all():
             dirty_fields = []
             if not ninja.photo:
-                avatar_path = rng.choice(KID_AVATAR_FILES)
-                with open(avatar_path, "rb") as f:
-                    ninja.photo.save(avatar_path.name, File(f), save=False)
+                use_library_image(ninja, "photo", "ninjas", rng.choice(KID_AVATAR_FILES))
                 dirty_fields.append("photo")
             if not ninja.home_dojo_id and dojos:
                 ninja.home_dojo = rng.choice(dojos)

@@ -30,6 +30,11 @@ class Pathway(models.Model):
         return self.name
 
 
+class PathwayStepManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("pathway")
+
+
 class PathwayStep(models.Model):
     """One step of "how a session works" for a Pathway, in order."""
 
@@ -38,11 +43,18 @@ class PathwayStep(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, default="")
 
+    objects = PathwayStepManager()
+
     class Meta:
         ordering = ["pathway", "order"]
 
     def __str__(self):
         return f"{self.pathway} step {self.order}: {self.title}"
+
+
+class PathwayProjectManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("pathway")
 
 
 class PathwayProject(models.Model):
@@ -51,6 +63,8 @@ class PathwayProject(models.Model):
     pathway = models.ForeignKey(Pathway, on_delete=models.CASCADE, related_name="projects")
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, default="")
+
+    objects = PathwayProjectManager()
 
     def __str__(self):
         return f"{self.pathway}: {self.title}"

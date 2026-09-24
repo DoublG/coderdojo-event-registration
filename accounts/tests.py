@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from applications.models import Application
+from core.testing import TempMediaMixin
 from dojos.models import Dojo, DojoMembership
 from dojos.testing import add_member, make_champion, make_dojo, make_mentor
 from events.models import Event, Registration
@@ -156,7 +157,7 @@ class GuardianDetailViewTests(TestCase):
         self.assertRedirects(response, reverse("ninja_detail", kwargs={"ninja_id": ninja.id}))
 
 
-class AddChildViewTests(TestCase):
+class AddChildViewTests(TempMediaMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.guardian = User.objects.create(username="g1", email="g1@example.com")
@@ -173,6 +174,19 @@ class AddChildViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Ninja.objects.of_guardian(self.guardian).filter(name="New Kid").exists())
+
+    def test_picked_icon_links_the_standard_avatar(self):
+        self.client.force_login(self.guardian)
+        self.client.post(reverse("add_ninja"), {"name": "A", "date_of_birth": _dob(10), "icon": "alien-01-green.svg"})
+        self.client.post(reverse("add_ninja"), {"name": "B", "date_of_birth": _dob(10), "icon": "alien-01-green.svg"})
+        photos = set(Ninja.objects.of_guardian(self.guardian).values_list("photo", flat=True))
+        self.assertEqual(photos, {"library/ninjas/alien-01-green.svg"})
+        self.assertFalse((self.media_root / "participants").exists())
+
+    def test_unknown_icon_is_ignored(self):
+        self.client.force_login(self.guardian)
+        self.client.post(reverse("add_ninja"), {"name": "A", "date_of_birth": _dob(10), "icon": "../../settings.py"})
+        self.assertFalse(Ninja.objects.get(name="A").photo)
 
     def test_any_adult_account_can_add_children(self):
         """No separate "guardian" role any more — e.g. a dojo owner adds
@@ -386,7 +400,6 @@ class RegisterGuardianViewTests(TestCase):
             "consent": "on",
             "child_1_name": "Sam",
             "child_1_dob": _dob(10),
-            "child_1_level": "new",
             "child_1_notes": "",
         }
         data.update(overrides)
@@ -412,14 +425,13 @@ class RegisterGuardianViewTests(TestCase):
         """Simulates a family who added a 2nd/3rd child then removed the
         middle one client-side, leaving gaps in the field numbering."""
         data = self._valid_post_data(
-            child_3_name="Alex", child_3_dob=_dob(12), child_3_level="confident", child_3_notes="Peanut allergy",
+            child_3_name="Alex", child_3_dob=_dob(12), child_3_notes="Peanut allergy",
         )
         self.client.post(reverse("register_guardian"), data)
 
         guardian = User.objects.get(email="jane@example.com")
         self.assertEqual(Ninja.objects.of_guardian(guardian).count(), 2)
         alex = Ninja.objects.of_guardian(guardian).get(name="Alex")
-        self.assertEqual(alex.experience_level, "confident")
         self.assertEqual(alex.allergies_notes, "Peanut allergy")
 
     def test_duplicate_email_is_rejected(self):
@@ -461,7 +473,6 @@ class RegisterGuardianViewTests(TestCase):
         data = self._valid_post_data()
         del data["child_1_name"]
         del data["child_1_dob"]
-        del data["child_1_level"]
         del data["child_1_notes"]
 
         response = self.client.post(reverse("register_guardian"), data)
@@ -612,6 +623,29 @@ class NinjaBeltDisplayTests(TestCase):
         self.assertIsNone(response.context["current_belt"])
         self.assertNotContains(response, 'id="belt-heading"')
 
+    def test_account_page_shows_each_childs_current_belt(self):
+        from events.awards import award_belt
+        from events.models import Belt
+
+        white = Belt.objects.create(level=1, name="White belt")
+        yellow = Belt.objects.create(level=2, name="Yellow belt")
+        dojo = make_dojo("Ghent", champion=make_champion(username="champ"))
+        guardian = User.objects.create(username="g1", email="g1@example.com")
+        belted = make_ninja(guardian, "Belted")
+        make_ninja(guardian, "Unbelted")
+        event = Event.objects.create(
+            name="Session", dojo=dojo, start_time="2020-01-01T10:00:00Z", end_time="2020-01-01T12:00:00Z", places=5,
+        )
+        Registration.objects.create(event=event, ninja=belted, waiting_list=False, position=1)
+        award_belt(belted, white, dojo.champion_membership)
+        award_belt(belted, yellow, dojo.champion_membership)
+
+        self.client.force_login(guardian)
+        response = self.client.get(reverse("account_home"))
+
+        self.assertContains(response, "Yellow belt")
+        self.assertNotContains(response, "White belt")
+
 
 class OrganisationRoleTests(TestCase):
     """OrganisationRole → staff status + a permission group (accounts.organisation):
@@ -729,7 +763,7 @@ class NinjaAgeRuleTests(TestCase):
         response = self.client.post(reverse("register_guardian"), {
             "name": "Jane Doe", "email": "jane@example.com", "phone": "",
             "password": PASSWORD, "password_confirm": PASSWORD,
-            "child_1_name": "Old", "child_1_dob": _dob(19), "child_1_level": "", "child_1_notes": "",
+            "child_1_name": "Old", "child_1_dob": _dob(19), "child_1_notes": "",
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Ninjas are 7 to 17 years old")

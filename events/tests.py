@@ -312,3 +312,26 @@ class BeltAndBadgeTests(TestCase):
             self.Badge(name="Broken", kind=self.Badge.MILESTONE).full_clean()
         with self.assertRaises(ValidationError):
             self.Badge(name="One-off", kind=self.Badge.ONE_OFF, threshold=3).full_clean()
+
+
+class StrNeverQueriesTests(TestCase):
+    """__str__ can run where the database can't be hit (under ASGI): the
+    default managers preload the dojo and municipality it reads."""
+
+    def setUp(self):
+        from django.contrib.gis.geos import Point
+
+        from geo.models import Municipality
+
+        self.municipality = Municipality.objects.create(postal_code="9000", name="Gent", center=Point(3.72, 51.05, srid=4326))
+        self.dojo = make_dojo("Ghent", municipality=self.municipality)
+        self.event = Event.objects.create(
+            name="Session", dojo=self.dojo, start_time=timezone.now(), end_time=timezone.now() + timedelta(hours=2), places=5,
+        )
+
+    def test_default_manager_preloads_dojo_and_municipality(self):
+        event = Event.objects.get(pk=self.event.pk)
+        with self.assertNumQueries(0):
+            self.assertEqual(str(event), "Session (Ghent (9000 Gent))")
+            self.assertEqual(str(event.dojo), "Ghent (9000 Gent)")
+

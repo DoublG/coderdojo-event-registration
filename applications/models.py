@@ -5,7 +5,6 @@ from django.db import models
 
 from accounts.models import User
 
-
 # How long a validated background check stays valid before it must be
 # redone — the criminal record extract is a snapshot at issue time, not a
 # standing clearance.
@@ -19,6 +18,11 @@ ARTICLE_596_2_TEXT = (
     "contacten met kinderen en jongeren, zoals opvoeding, psycho-medisch-sociale begeleiding, "
     "hulpverlening aan de jeugd, kinderbescherming, animatie of begeleiding van minderjarigen."
 )
+
+
+class ApplicationManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("account")
 
 
 class Application(models.Model):
@@ -76,6 +80,8 @@ class Application(models.Model):
                   "before working with minors.",
     )
 
+    objects = ApplicationManager()
+
     class Meta:
         permissions = [
             ("can_review_background_checks", "Can review background check documents"),
@@ -84,6 +90,11 @@ class Application(models.Model):
 
     def __str__(self):
         return f"{self.account} — {self.get_kind_display()} ({self.get_status_display()})"
+
+
+class BackgroundCheckHistoryManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("account")
 
 
 class BackgroundCheckHistory(models.Model):
@@ -109,6 +120,8 @@ class BackgroundCheckHistory(models.Model):
     submitted_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True, help_text="Validated checks only.")
     note = models.TextField(blank=True, default="", help_text="Optional reviewer remark — never the document.")
+
+    objects = BackgroundCheckHistoryManager()
 
     class Meta:
         ordering = ["-reviewed_at"]

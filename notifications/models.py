@@ -2,6 +2,11 @@ from django.conf import settings
 from django.db import models
 
 
+class NotificationManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("recipient")
+
+
 class Notification(models.Model):
     recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
     dojo = models.ForeignKey(
@@ -17,6 +22,8 @@ class Notification(models.Model):
     url = models.CharField(max_length=300, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)
+
+    objects = NotificationManager()
 
     class Meta:
         ordering = ["-created_at"]

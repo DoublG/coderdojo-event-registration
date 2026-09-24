@@ -1,14 +1,14 @@
 from datetime import datetime
 
 from django import forms
-from django.core.files import File
 from django.utils import timezone
 
+from core.image_library import library_filename, use_library_image
 from dojos.models import Dojo
 from pathways.models import Pathway
 
 from .models import Event
-from .template_images import TEMPLATE_IMAGES, TEMPLATE_IMAGES_DIR
+from .template_images import TEMPLATE_IMAGES
 
 DATE_ANY = ""
 DATE_WEEK = "week"
@@ -87,8 +87,8 @@ class EventForm(forms.ModelForm):
             format=BELGIAN_TIME_FORMAT,
         ),
     )
-    # Not a model field — a shortcut that, on save(), copies one of the
-    # bundled events/static/events/template_images/ files into `image`
+    # Not a model field — a shortcut that, on save(), points `image` at one
+    # of the standard event banners (core.image_library, no copy made)
     # instead of requiring an upload. An uploaded file (see save()) always
     # wins over this if both are somehow submitted at once.
     template_image = forms.ChoiceField(
@@ -129,6 +129,7 @@ class EventForm(forms.ModelForm):
         self.fields["pathways"].queryset = Pathway.objects.order_by("name")
         if not self.instance.pk:
             self.fields["pathways"].initial = list(dojo.pathways.values_list("pk", flat=True))
+        self.fields["template_image"].initial = library_filename(self.instance.image, "events") or NO_TEMPLATE_IMAGE
         if self.instance.pk:
             self.fields["event_date"].initial = self.instance.start_time.date()
             self.fields["start_time"].initial = self.instance.start_time.time()
@@ -150,9 +151,7 @@ class EventForm(forms.ModelForm):
 
         template_image = self.cleaned_data.get("template_image")
         if template_image and not self.files.get("image"):
-            image_path = TEMPLATE_IMAGES_DIR / template_image
-            with open(image_path, "rb") as f:
-                event.image.save(template_image, File(f), save=False)
+            use_library_image(event, "image", "events", template_image)
 
         if commit:
             event.save()
