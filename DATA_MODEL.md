@@ -14,7 +14,7 @@ update its diagram in the same change.
 > **A redesign is in progress.** Sections 1–9 describe the model as it is
 > in the code today. [Section 10](#10-planned-redesign-in-progress)
 > describes the target and tracks which phases have landed: accounts,
-> dojo teams, onboarding and pathways are done; badges and belts, the
+> dojo teams, onboarding, pathways, and badges and belts are done; the
 > organisation role, naming and seeders follow. It also sets the
 > [nomenclature](#nomenclature) (Champion, Mentor/Coach, Ninja, Youth
 > mentor, Badge, Belt). Read it before building more on those parts.
@@ -25,7 +25,7 @@ update its diagram in the same change.
 2. [Accounts and roles](#2-accounts-and-roles)
 3. [Dojos, team pages and admin access](#3-dojos-team-pages-and-admin-access)
 4. [Events, registrations and attendance](#4-events-registrations-and-attendance)
-5. [Awards](#5-awards)
+5. [Badges and belts](#5-badges-and-belts)
 6. [Applications and background checks](#6-applications-and-background-checks)
 7. [Learning pathways and content](#7-learning-pathways-and-content)
 8. [Notifications](#8-notifications)
@@ -52,7 +52,8 @@ flowchart LR
     subgraph events
         Event
         Registration
-        Award
+        Badge
+        Belt
     end
     subgraph applications
         Application
@@ -77,7 +78,8 @@ flowchart LR
     Dojo -. "provides" .-> Pathway
     Event -. "covers" .-> Pathway
     Registration -. "works on" .-> Pathway
-    Participant -- earns --> Award
+    Participant -- earns --> Badge
+    Participant -- "belt history" --> Belt
     User -- "applies (mentor / champion)" --> Application
     User -- "check decisions" --> BackgroundCheckHistory
     Application -. "mentor: preferred dojo" .-> Dojo
@@ -228,7 +230,7 @@ flowchart TD
 | `MANAGE_EVENTS` | create/edit events, change status | ✓ | ✓ |
 | `EDIT_SETTINGS` | dojo profile settings | ✓ | ✓ |
 | `MANAGE_TEAM` | accept/decline join requests, add/remove mentors, promote youth mentors | ✓ | ✓ |
-| `AWARD_BELTS` | award belts (redesign phase 5) | ✓ | ✓ |
+| `AWARD_BELTS` | award a ninja a belt (from the attendance list) | ✓ | ✓ |
 | `MANAGE_LIFECYCLE` | launch / dormant / archive / reopen the dojo | ✓ | — |
 | *(champion only)* | hand over the champion role | ✓ | — |
 
@@ -310,34 +312,73 @@ stateDiagram-v2
 
 ---
 
-## 5. Awards
+## 5. Badges and belts
 
-`Award` uses the same multi-table-inheritance pattern as the account
-roles. There are two separate kinds: a milestone reached by a repeat count
-(for example the attendance wristbands), and a one-off badge.
+Two separate things a ninja collects (redesign phase 5), both in `events`
+with their rules in `events/awards.py`:
+
+- A **badge** is an award: either a **one-off** ("did the thing", e.g.
+  attended a CoderDojo for Girls session) or a **milestone** reached by a
+  number of sessions attended (the attendance wristbands). `NinjaBadge`
+  holds one ninja's progress on one badge. Milestones are recomputed
+  (`sync_milestones`) whenever the dojo team marks attendance; an earned
+  badge stays earned if a mark is later undone.
+- A **belt** is a ninja's **proficiency level**: one overall track ordered
+  by `Belt.level`, not linked to pathways. `NinjaBelt` is an append-only
+  history (current belt = the highest level, `Participant.current_belt`).
+  Only an **active champion or mentor** with a valid check
+  (`AWARD_BELTS`) can award one (`award_belt`), from the attendance list,
+  to a ninja who has been to one of that dojo's sessions, and only a belt
+  above the ninja's current one. Each row records the account, the
+  membership and that membership's role at the time ("Jan, as mentor of
+  CoderDojo Ghent"). A milestone badge can optionally `grants_belt`:
+  reaching it awards that belt as the membership that marked the
+  attendance.
+
+The ninja's page shows the current belt with its history, and the
+badges carousel. The attendance list shows each ninja's current belt.
 
 ```mermaid
-classDiagram
-    class Award {
-        +name
-        +description
-        +icon
+erDiagram
+    PARTICIPANT ||--o{ NINJA_BADGE : "badges"
+    BADGE ||--o{ NINJA_BADGE : "ninja_badges"
+    PARTICIPANT ||--o{ NINJA_BELT : "belts (history)"
+    BELT ||--o{ NINJA_BELT : "ninja_belts"
+    BELT |o--o{ BADGE : "grants_belt (milestones, optional)"
+    USER |o--o{ NINJA_BELT : "awarded_by"
+    DOJO_MEMBERSHIP |o--o{ NINJA_BELT : "awarded_as_membership"
+
+    BADGE {
+        bigint id PK
+        string name
+        string kind "one_off, milestone"
+        string criteria "one_off"
+        int threshold "milestone: sessions attended"
+        bigint grants_belt_id FK "nullable"
     }
-    class MilestoneAward {
-        +threshold
+    NINJA_BADGE {
+        bigint participant_id FK "unique with badge"
+        bigint badge_id FK
+        date earned_date "null = in progress"
+        int progress_current "milestone"
+        int progress_total "milestone"
     }
-    class BadgeAward {
-        +criteria
+    BELT {
+        bigint id PK
+        string name
+        int level "unique; the track's order"
+        string colour
+        string requirements
     }
-    class ParticipantAward {
-        +earned_date
-        +progress_current
-        +progress_total
+    NINJA_BELT {
+        bigint participant_id FK
+        bigint belt_id FK
+        date awarded_on
+        bigint awarded_by_id FK "required when awarded; kept null if deleted"
+        bigint awarded_as_membership_id FK "same"
+        string awarded_as_role "role at the time"
+        string note
     }
-    Award <|-- MilestoneAward
-    Award <|-- BadgeAward
-    Participant "1" --> "*" ParticipantAward : awards
-    Award "1" --> "*" ParticipantAward : participant_awards
 ```
 
 ---
@@ -1362,10 +1403,21 @@ at every step:
   - Shown on the public dojo and event pages, the attendance list and the
     ninja's history. Seeders give dojos, events and registrations
     pathways.
-- [ ] **5. Badges and belts:** `Badge` (one-off / milestone, optional
-  `grants_belt`), `NinjaBadge`, `Belt`, and the `NinjaBelt` history
-  (awarding account + membership). "Award belt" in the dojo dashboard;
-  current belt and history on the ninja page.
+- [x] **5. Badges and belts** (`events`), *done 2026-09-24*
+  - `Badge` (one-off / milestone, optional `grants_belt`), `NinjaBadge`,
+    `Belt` and the append-only `NinjaBelt` history (awarding account,
+    membership, and the membership's role at the time, snapshotted so a
+    later champion handover doesn't rewrite it). `Award` /
+    `MilestoneAward` / `BadgeAward` / `ParticipantAward` removed.
+  - Rules in `events/awards.py`: `award_belt` (active champion/mentor
+    with a valid check, ninja has been to that dojo, only a higher belt)
+    and `sync_milestones` (milestones follow attendance marks, and a
+    `grants_belt` milestone awards its belt as the marker's membership).
+  - "Award belt" on each attendance row (`dojo_event_award_belt`,
+    `AWARD_BELTS`), which also shows the ninja's current belt; current
+    belt and history on the ninja page; the awards carousel is now
+    "Badges" (`ninja_badges`). Seeder adds the belt track and a belt
+    history.
 - [ ] **6. Organisation:** `OrganisationRole` (management-dashboard
   access). `OrganisationTeamMember` and its team page already landed in
   phase 2.

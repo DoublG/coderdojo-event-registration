@@ -20,7 +20,7 @@ urlpatterns = [
     path("account/ninja/add/", views.add_ninja, name="add_ninja"),
     path("account/ninja/<int:ninja_id>/", views.ninja_detail, name="ninja_detail"),
     path("account/ninja/<int:ninja_id>/edit/", views.edit_ninja, name="edit_ninja"),
-    path("account/ninja/<int:ninja_id>/awards/", views.ninja_awards, name="ninja_awards"),
+    path("account/ninja/<int:ninja_id>/badges/", views.ninja_badges, name="ninja_badges"),
     path(
         "account/registration/<int:registration_id>/cancel/",
         views.cancel_registration,

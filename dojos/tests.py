@@ -1682,3 +1682,76 @@ class PathwayScopeTests(TestCase):
         dojo_page = self.client.get(reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}))
         self.assertContains(dojo_page, "Scratch")
         self.assertContains(dojo_page, "Python")
+
+
+class AwardBeltViewTests(TestCase):
+    """Awarding a belt from the attendance list (AWARD_BELTS), and milestone
+    badges following attendance marks."""
+
+    def setUp(self):
+        from events.models import Badge, Belt
+
+        self.white = Belt.objects.create(level=1, name="White belt")
+        self.yellow = Belt.objects.create(level=2, name="Yellow belt")
+        self.band = Badge.objects.create(name="White Band", kind=Badge.MILESTONE, threshold=1)
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.event = Event.objects.create(
+            name="Session", dojo=self.dojo, status=Event.OPEN,
+            start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10,
+        )
+        self.ninja = Participant.objects.create(name="Mila")
+        self.registration = Registration.objects.create(event=self.event, participant=self.ninja, waiting_list=False, position=1)
+        self.url = reverse("dojo_event_award_belt", kwargs={
+            "dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.registration.id,
+        })
+        self.client.force_login(self.owner)
+
+    def test_awards_the_belt_and_rerenders_the_row(self):
+        response = self.client.post(self.url, {"belt": self.white.id, "note": "Built a game"}, HTTP_HX_REQUEST="true")
+
+        self.assertTemplateUsed(response, "dojos/partials/_attendance_row.html")
+        award = self.ninja.belts.get()
+        self.assertEqual((award.belt, award.awarded_by, award.note), (self.white, self.owner, "Built a game"))
+        self.assertEqual(award.awarded_as_membership, self.dojo.champion_membership)
+        # The row now offers only the belts above it.
+        self.assertContains(response, "Yellow belt")
+        self.assertNotContains(response, f'<option value="{self.white.id}">')
+
+    def test_a_lower_belt_is_refused_with_a_message(self):
+        self.client.post(self.url, {"belt": self.yellow.id}, HTTP_HX_REQUEST="true")
+        response = self.client.post(self.url, {"belt": self.white.id}, HTTP_HX_REQUEST="true")
+
+        self.assertEqual(response.context["belt_error"], "Mila already has the Yellow belt (or higher).")
+        self.assertEqual(self.ninja.belts.count(), 1)
+
+    def test_needs_award_belts_and_the_right_event(self):
+        mentor = make_mentor(username="m1")
+        add_member(self.dojo, mentor)
+        self.client.force_login(mentor)
+        with patch.dict(access.ROLE_CAPABILITIES, {access.MENTOR: frozenset({access.TAKE_ATTENDANCE})}):
+            self.assertEqual(self.client.post(self.url, {"belt": self.white.id}).status_code, 403)
+            page = self.client.get(reverse("dojo_event_attendance", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id}))
+            self.assertNotContains(page, "Award belt")
+
+        other_event = Event.objects.create(
+            name="Other", dojo=make_dojo("Antwerp"), start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z", places=10,
+        )
+        wrong = reverse("dojo_event_award_belt", kwargs={
+            "dojo_id": self.dojo.id, "event_id": other_event.id, "registration_id": self.registration.id,
+        })
+        self.client.force_login(self.owner)
+        self.assertEqual(self.client.post(wrong, {"belt": self.white.id}).status_code, 404)
+        self.assertFalse(self.ninja.belts.exists())
+
+    def test_marking_present_updates_milestone_badges(self):
+        mark = reverse("dojo_event_attendance_mark", kwargs={
+            "dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.registration.id,
+        })
+        self.client.post(mark, {"attended": "present"})
+        self.assertIsNotNone(self.ninja.badges.get(badge=self.band).earned_date)
+
+    def test_mark_all_present_updates_milestone_badges(self):
+        self.client.post(reverse("dojo_event_attendance_mark_all", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id}))
+        self.assertIsNotNone(self.ninja.badges.get(badge=self.band).earned_date)

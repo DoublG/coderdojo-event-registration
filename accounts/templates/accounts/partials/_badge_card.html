@@ -1,0 +1,56 @@
+{% comment %}
+One card in the child detail page's Badges carousel. When this is the
+last card of a lazy-loaded batch and there's another page, it carries the
+htmx trigger that fetches the next batch as the carousel is scrolled into
+it — see accounts.views.ninja_badges. Same approach as the homepage's
+"Upcoming sessions" carousel (events/partials/_upcoming_session_card.html).
+{% endcomment %}
+{% if ninja_badge.earned_date %}
+  <article class="cd-card cd-award"
+    {% if is_last and badges_next_page_url %}
+      hx-get="{{ badges_next_page_url }}"
+      hx-trigger="intersect root:#badges-track once"
+      hx-swap="afterend"
+    {% endif %}>
+    <div class="cd-award__badge{% if not ninja_badge.badge.icon %} cd-award__badge--milestone{% endif %}">
+      {% if ninja_badge.badge.icon %}
+        <img src="{{ ninja_badge.badge.icon.url }}" alt="">
+      {% else %}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <polygon fill="currentColor" points="12.00,2.50 14.23,8.93 21.04,9.06 15.61,13.17 17.58,19.69 12.00,15.80 6.42,19.69 8.39,13.17 2.96,9.06 9.77,8.93"/>
+        </svg>
+      {% endif %}
+    </div>
+    <h3 class="cd-award__title heading-sm">{{ ninja_badge.badge.name }}</h3>
+    <p class="cd-award__desc body-sm">{{ ninja_badge.badge.description }}</p>
+    <p class="cd-award__meta caption">Earned {{ ninja_badge.earned_date|date:"j F Y" }}</p>
+  </article>
+{% else %}
+  <article class="cd-card cd-award cd-award--locked"
+    aria-label="{{ ninja_badge.badge.name }}, locked, {{ ninja_badge.progress_current }} of {{ ninja_badge.progress_total }}"
+    {% if is_last and badges_next_page_url %}
+      hx-get="{{ badges_next_page_url }}"
+      hx-trigger="intersect root:#badges-track once"
+      hx-swap="afterend"
+    {% endif %}>
+    <div class="cd-award__badge cd-award__badge--locked">
+      {% if ninja_badge.badge.icon %}
+        <img src="{{ ninja_badge.badge.icon.url }}" alt="" style="opacity: 0.4;">
+      {% else %}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <polygon fill="currentColor" points="12.00,2.50 14.23,8.93 21.04,9.06 15.61,13.17 17.58,19.69 12.00,15.80 6.42,19.69 8.39,13.17 2.96,9.06 9.77,8.93"/>
+        </svg>
+      {% endif %}
+    </div>
+    <h3 class="cd-award__title heading-sm">{{ ninja_badge.badge.name }}</h3>
+    <p class="cd-award__desc body-sm">{{ ninja_badge.badge.description }}</p>
+    {% if ninja_badge.progress_total %}
+      <div class="cd-award__progress">
+        <div class="cd-award__progress-track">
+          <div class="cd-award__progress-fill" style="width: {% widthratio ninja_badge.progress_current ninja_badge.progress_total 100 %}%;"></div>
+        </div>
+        <p class="cd-award__meta caption">{{ ninja_badge.progress_current }} of {{ ninja_badge.progress_total }} sessions · <span class="cd-badge cd-badge--outline caption">Locked</span></p>
+      </div>
+    {% endif %}
+  </article>
+{% endif %}

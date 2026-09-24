@@ -260,18 +260,18 @@ class EditChildViewTests(TestCase):
         self.assertEqual(self.child.name, "Renamed Kid")
 
 
-class AwardWidgetViewTests(TestCase):
+class BadgeWidgetViewTests(TestCase):
     def test_login_required(self):
         guardian = User.objects.create(username="g1", email="g1@example.com")
         child = make_ninja(guardian, "Kid")
-        response = self.client.get(reverse("ninja_awards", kwargs={"ninja_id": child.id}))
+        response = self.client.get(reverse("ninja_badges", kwargs={"ninja_id": child.id}))
         self.assertEqual(response.status_code, 302)
 
     def test_renders_for_owning_guardian(self):
         guardian = User.objects.create(username="g1", email="g1@example.com")
         child = make_ninja(guardian, "Kid")
         self.client.force_login(guardian)
-        response = self.client.get(reverse("ninja_awards", kwargs={"ninja_id": child.id}))
+        response = self.client.get(reverse("ninja_badges", kwargs={"ninja_id": child.id}))
         self.assertEqual(response.status_code, 200)
 
 
@@ -570,3 +570,38 @@ class VolunteeringCardTests(TestCase):
         response = self.client.get(reverse("account_home"))
         self.assertContains(response, reverse("renew_background_check"))
         self.assertNotContains(response, f'href="{reverse("register_helper")}"')
+
+
+class NinjaBeltDisplayTests(TestCase):
+    def test_ninja_page_shows_current_belt_and_history(self):
+        from events.awards import award_belt
+        from events.models import Belt
+
+        white = Belt.objects.create(level=1, name="White belt")
+        yellow = Belt.objects.create(level=2, name="Yellow belt")
+        champion = make_champion(username="champ", first_name="Jan")
+        dojo = make_dojo("Ghent", champion=champion)
+        guardian = User.objects.create(username="g1", email="g1@example.com")
+        child = make_ninja(guardian, "Kid")
+        event = Event.objects.create(
+            name="Session", dojo=dojo, start_time="2020-01-01T10:00:00Z", end_time="2020-01-01T12:00:00Z", places=5,
+        )
+        Registration.objects.create(event=event, participant=child, waiting_list=False, position=1)
+        award_belt(child, white, dojo.champion_membership)
+        award_belt(child, yellow, dojo.champion_membership, note="Built a game")
+
+        self.client.force_login(guardian)
+        response = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": child.id}))
+
+        self.assertEqual(response.context["current_belt"], yellow)
+        self.assertEqual([a.belt for a in response.context["belt_history"]], [yellow, white])
+        self.assertContains(response, "as champion of Ghent")
+        self.assertContains(response, "Built a game")
+
+    def test_no_belt_section_without_belts(self):
+        guardian = User.objects.create(username="g1", email="g1@example.com")
+        child = make_ninja(guardian, "Kid")
+        self.client.force_login(guardian)
+        response = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": child.id}))
+        self.assertIsNone(response.context["current_belt"])
+        self.assertNotContains(response, 'id="belt-heading"')

@@ -19,6 +19,15 @@
   .child-page-root .child-header__fields .cd-form__field { flex: 1 1 160px; }
   .child-page-root .section { margin: var(--space-7) 0; }
   .child-page-root h2.section-title { color: var(--ink); margin: 0 0 var(--space-4); }
+  .child-page-root .belt-current { display: flex; align-items: center; gap: var(--space-4); margin: 0 0 var(--space-5); }
+  .child-page-root .belt-current h3 { color: var(--ink); margin: 0 0 2px; }
+  .child-page-root .belt-current p { color: var(--ink-muted); margin: 0; }
+  .child-page-root .belt-swatch {
+    display: inline-block; width: 48px; height: 16px; flex-shrink: 0;
+    border-radius: var(--radius-pill); border: 1px solid var(--border);
+    background: var(--belt-colour, var(--surface-sunken));
+  }
+  .child-page-root .belt-swatch--sm { width: 28px; height: 10px; vertical-align: middle; margin-right: var(--space-2); }
   .child-page-root .cd-award__badge img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
 
   .child-page-root .carousel-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin: 0 0 var(--space-5); }
@@ -45,21 +54,56 @@
 
     {% include "accounts/partials/_child_header_display.html" %}
 
-    {% if awards %}
+    {% if current_belt %}
+      <section class="section" aria-labelledby="belt-heading">
+        <h2 class="heading-lg section-title" id="belt-heading">Belt</h2>
+        <div class="belt-current">
+          <span class="belt-swatch" style="--belt-colour: {{ current_belt.colour|default:'var(--surface-sunken)' }};" aria-hidden="true"></span>
+          <div>
+            <h3 class="heading-md">{{ current_belt.name }}</h3>
+            {% if current_belt.requirements %}<p class="body-sm">{{ current_belt.requirements }}</p>{% endif %}
+          </div>
+        </div>
+        <div class="cd-table-wrap">
+          <table class="cd-table cd-table--zebra">
+            <thead>
+              <tr>
+                <th class="label" scope="col">Belt</th>
+                <th class="label" scope="col">Date</th>
+                <th class="label" scope="col">Awarded by</th>
+                <th class="label" scope="col">Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for award in belt_history %}
+                <tr>
+                  <td class="body-sm"><span class="belt-swatch belt-swatch--sm" style="--belt-colour: {{ award.belt.colour|default:'var(--surface-sunken)' }};" aria-hidden="true"></span>{{ award.belt.name }}</td>
+                  <td class="body-sm">{{ award.awarded_on|date:"j M Y" }}</td>
+                  <td class="body-sm">{{ award.awarded_by_label|default:"—" }}</td>
+                  <td class="body-sm">{{ award.note|default:"—" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% endif %}
+
+    {% if badges %}
       <section class="section">
         <div class="section-head carousel-section-head">
-          <h2 class="heading-lg section-title">Awards</h2>
+          <h2 class="heading-lg section-title">Badges</h2>
           <div class="carousel__controls">
-            <button type="button" class="carousel__nav" id="awards-carousel-prev" aria-label="Previous awards">
+            <button type="button" class="carousel__nav" id="badges-carousel-prev" aria-label="Previous badges">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
-            <button type="button" class="carousel__nav" id="awards-carousel-next" aria-label="Next awards">
+            <button type="button" class="carousel__nav" id="badges-carousel-next" aria-label="Next badges">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
             </button>
           </div>
         </div>
-        <div class="cd-award-grid" id="awards-track">
-          {% include "accounts/partials/_awards_page.html" %}
+        <div class="cd-award-grid" id="badges-track">
+          {% include "accounts/partials/_badges_page.html" %}
         </div>
       </section>
     {% endif %}
@@ -102,9 +146,9 @@
 {% block extra_script %}
 <script>
   CoderDojo.initCarousel(
-    document.getElementById("awards-track"),
-    document.getElementById("awards-carousel-prev"),
-    document.getElementById("awards-carousel-next"),
+    document.getElementById("badges-track"),
+    document.getElementById("badges-carousel-prev"),
+    document.getElementById("badges-carousel-next"),
     ".cd-award"
   );
 </script>

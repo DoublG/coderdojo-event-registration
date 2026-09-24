@@ -69,6 +69,20 @@ or untick pathways to match what this child actually did, then **Save
 pathways**. These are what the family sees in their child's session
 history.
 
+Marking a child present also keeps their attendance badges (the
+wristbands) up to date.
+
+Awarding belts
+---------------
+
+A belt shows a child's coding level (white, yellow, orange, and so on), not
+how often they came. On the attendance list, each child's row shows their
+current belt; **Award belt** lets you pick the next belt (only belts above
+their current one are offered) and add an optional note about what they
+showed. Belts are never taken away or changed afterwards: the family sees
+the full history on their child's page, including who awarded each belt
+and for which dojo.
+
 Your dashboard's **Attendance** page shows the same list for your next
 upcoming session (or your most recent one, if nothing's scheduled), so on
 the day itself you can start marking without looking the session up.

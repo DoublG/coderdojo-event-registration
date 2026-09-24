@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 06:26+0000\n"
+"POT-Creation-Date: 2026-09-24 09:42+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -83,30 +83,34 @@ msgstr ""
 
 #: ../../source/families/managing-your-account.rst:25
 msgid ""
-"**View a child's awards** — badges and milestone awards (e.g. attendance "
-"wristbands) they've earned or are working towards, and their session "
-"history."
+"**View a child's belt and badges** — their current belt (their coding "
+"level, awarded by their dojo's champion or mentors) with the belts they "
+"had before, the badges they've earned or are working towards (e.g. the "
+"attendance wristbands, which update as the dojo takes attendance), and "
+"their session history."
 msgstr ""
-"**De badges van een kind bekijken** — badges en mijlpaalbeloningen (bv. "
-"aanwezigheidsbandjes) die ze hebben verdiend of aan het verdienen zijn, "
-"en hun sessiegeschiedenis."
+"**De gordel en badges van een kind bekijken** — de huidige gordel (het "
+"programmeerniveau, toegekend door de champion of mentors van de dojo) met"
+" de gordels van daarvoor, de badges die het kind verdiend heeft of "
+"waaraan het werkt (bv. de aanwezigheidspolsbandjes, die bijgewerkt worden"
+" wanneer de dojo de aanwezigheid bijhoudt), en de sessiegeschiedenis."
 
-#: ../../source/families/managing-your-account.rst:29
+#: ../../source/families/managing-your-account.rst:31
 msgid ""
-"If your child has their own login, they see their own page (their awards "
-"and session history) when they log in, but can't change their details or "
-"sign up for sessions themselves; that stays with you."
+"If your child has their own login, they see their own page (their belt, "
+"badges and session history) when they log in, but can't change their "
+"details or sign up for sessions themselves; that stays with you."
 msgstr ""
 "Als uw kind een eigen login heeft, ziet het bij het inloggen zijn eigen "
-"pagina (zijn onderscheidingen en sessiegeschiedenis), maar kan het zelf "
-"geen gegevens wijzigen of zich inschrijven voor sessies; dat blijft bij "
-"u."
+"pagina (zijn gordel, badges en sessiegeschiedenis), maar kan het zijn "
+"gegevens niet wijzigen en zich niet zelf inschrijven voor sessies; dat "
+"blijft uw taak."
 
-#: ../../source/families/managing-your-account.rst:34
+#: ../../source/families/managing-your-account.rst:36
 msgid "Already a dojo owner or volunteer?"
 msgstr "Al dojobeheerder of vrijwilliger?"
 
-#: ../../source/families/managing-your-account.rst:36
+#: ../../source/families/managing-your-account.rst:38
 msgid ""
 "Every account has a family page: open **My Account** from your account "
 "menu and use **Add a child** there. Your children are added to the same "
@@ -117,11 +121,11 @@ msgstr ""
 "toegevoegd aan dezelfde login die u al gebruikt, zonder aparte "
 "registratie of tweede account."
 
-#: ../../source/families/managing-your-account.rst:41
+#: ../../source/families/managing-your-account.rst:43
 msgid "Changing your password"
 msgstr "Uw wachtwoord wijzigen"
 
-#: ../../source/families/managing-your-account.rst:43
+#: ../../source/families/managing-your-account.rst:45
 msgid ""
 "Go to **Change password** (also linked from your account page). You'll "
 "need your current password to set a new one."
@@ -129,11 +133,11 @@ msgstr ""
 "Ga naar **Wachtwoord wijzigen** (ook toegankelijk via uw accountpagina). "
 "U hebt uw huidige wachtwoord nodig om een nieuw wachtwoord in te stellen."
 
-#: ../../source/families/managing-your-account.rst:47
+#: ../../source/families/managing-your-account.rst:49
 msgid "Volunteering"
 msgstr "Vrijwilligerswerk"
 
-#: ../../source/families/managing-your-account.rst:49
+#: ../../source/families/managing-your-account.rst:51
 msgid ""
 "The **Volunteering** section of your account page shows any application "
 "you've made to become a mentor or start a dojo, and where your background"
@@ -191,4 +195,17 @@ msgstr ""
 #~ "met het tijdelijke wachtwoord dat u "
 #~ "per e-mail ontving — deze stap kan"
 #~ " niet worden overgeslagen."
+
+#~ msgid ""
+#~ "**View a child's awards** — badges "
+#~ "and milestone awards (e.g. attendance "
+#~ "wristbands) they've earned or are "
+#~ "working towards, and their session "
+#~ "history."
+#~ msgstr ""
+#~ "**De badges van een kind bekijken** "
+#~ "— badges en mijlpaalbeloningen (bv. "
+#~ "aanwezigheidsbandjes) die ze hebben verdiend"
+#~ " of aan het verdienen zijn, en "
+#~ "hun sessiegeschiedenis."
 

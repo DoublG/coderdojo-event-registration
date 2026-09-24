@@ -168,6 +168,13 @@ class Participant(models.Model):
         had_birthday = (today.month, today.day) >= (self.date_of_birth.month, self.date_of_birth.day)
         return years if had_birthday else years - 1
 
+    @property
+    def current_belt(self):
+        """The highest belt in this ninja's belt history (events.NinjaBelt),
+        or None. Reads `belts.all()` so a prefetch of `belts__belt` covers it."""
+        awards = list(self.belts.all())
+        return max(awards, key=lambda a: a.belt.level).belt if awards else None
+
 
 class Guardianship(models.Model):
     """Links a parent's (adult) account to a ninja they're responsible for.

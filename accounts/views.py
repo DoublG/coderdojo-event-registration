@@ -39,7 +39,7 @@ KID_AVATAR_FILES = sorted(KID_AVATARS_DIR.glob("*.svg"))
 # actually spans more than one page, so the lazy-load carousel (same
 # pattern as the homepage's "Upcoming sessions", see
 # events.views.upcoming_sessions_widget) has something to demonstrate.
-AWARDS_PAGE_SIZE = 4
+BADGES_PAGE_SIZE = 4
 
 CHILD_NAME_FIELD_RE = re.compile(r"^child_(\d+)_name$")
 
@@ -320,8 +320,8 @@ def add_ninja(request):
     return render(request, "accounts/partials/_children_list.html", {"guardian": guardian, "children": children})
 
 
-def _awards_queryset(child):
-    return child.awards.select_related("award").order_by("id")
+def _badges_queryset(child):
+    return child.badges.select_related("badge").order_by("id")
 
 
 @login_required
@@ -334,22 +334,27 @@ def ninja_detail(request, ninja_id):
         .prefetch_related("event__team__user", "pathways")
         .order_by("-event__start_time")
     )
+    belt_history = list(child.belts.select_related(
+        "belt", "awarded_by", "awarded_as_membership__user", "awarded_as_membership__dojo",
+    ))
 
-    # Initial batch for the Awards carousel — further batches are
+    # Initial batch for the Badges carousel — further batches are
     # lazy-loaded over htmx as it's scrolled, against award_widget below
     # (same approach as the homepage's "Upcoming sessions" carousel).
-    awards_page = Paginator(_awards_queryset(child), AWARDS_PAGE_SIZE).get_page(1)
-    awards_next_page_url = None
-    if awards_page.has_next():
-        awards_next_page_url = (
-            f"{reverse('ninja_awards', kwargs={'ninja_id': child.id})}"
-            f"?page={awards_page.next_page_number()}"
+    badges_page = Paginator(_badges_queryset(child), BADGES_PAGE_SIZE).get_page(1)
+    badges_next_page_url = None
+    if badges_page.has_next():
+        badges_next_page_url = (
+            f"{reverse('ninja_badges', kwargs={'ninja_id': child.id})}"
+            f"?page={badges_page.next_page_number()}"
         )
 
     return render(request, "accounts/child_detail.html", {
         "child": child, "history": history,
         "can_edit": child.guardianships.filter(guardian=request.user).exists(),
-        "awards": awards_page.object_list, "awards_next_page_url": awards_next_page_url,
+        "badges": badges_page.object_list, "badges_next_page_url": badges_next_page_url,
+        # Current belt = the highest in the history (newest first).
+        "belt_history": belt_history, "current_belt": child.current_belt,
     })
 
 
@@ -397,22 +402,22 @@ def edit_ninja(request, ninja_id):
 
 
 @login_required
-def ninja_awards(request, ninja_id):
-    """Lazy-loaded batches for the child detail page's Awards carousel —
-    returns just the next batch of cards (see partials/_awards_page.html),
+def ninja_badges(request, ninja_id):
+    """Lazy-loaded batches for the child detail page's Badges carousel —
+    returns just the next batch of cards (see partials/_badges_page.html),
     triggered by htmx as the carousel is scrolled."""
     child = _get_own_ninja(request, ninja_id, allow_self=True)
 
-    page = Paginator(_awards_queryset(child), AWARDS_PAGE_SIZE).get_page(request.GET.get("page"))
+    page = Paginator(_badges_queryset(child), BADGES_PAGE_SIZE).get_page(request.GET.get("page"))
     next_page_url = None
     if page.has_next():
         next_page_url = (
-            f"{reverse('ninja_awards', kwargs={'ninja_id': child.id})}"
+            f"{reverse('ninja_badges', kwargs={'ninja_id': child.id})}"
             f"?page={page.next_page_number()}"
         )
 
-    return render(request, "accounts/partials/_awards_page.html", {
-        "awards": page.object_list, "awards_next_page_url": next_page_url,
+    return render(request, "accounts/partials/_badges_page.html", {
+        "badges": page.object_list, "badges_next_page_url": next_page_url,
     })
 
 

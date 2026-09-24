@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.contrib.gis.db import models
+from django.core.exceptions import ValidationError
 
 MARKDOWN_HELP_TEXT = "Supports basic Markdown — # headings, **bold**, *italic*, links, lists."
 
@@ -95,55 +97,116 @@ class Registration(models.Model):
         unique_together = [("event", "participant")]
 
 
-class Award(models.Model):
-    """Base award — shared name/description/icon. Every real award is one
-    of the two subclasses below (multi-table inheritance, same pattern as
-    the old accounts role subclasses):
-    MilestoneAward, unlocked by reaching a repeat-count threshold (e.g.
-    the attendance wristbands), or BadgeAward, a one-off with no counter
-    — you either did the specific thing or you haven't."""
+class Belt(models.Model):
+    """A ninja's proficiency level: how skilled they are, not how often they
+    came (that's a milestone Badge). One overall track, ordered by `level`;
+    not linked to pathways (yet). A ninja's belts are an append-only history
+    (NinjaBelt) and their current belt is the highest level in it."""
 
-    name = models.CharField(max_length=200)
-    description = models.CharField(max_length=300, blank=True, default="")
-    icon = models.ImageField(upload_to="awards/", null=True, blank=True)
+    name = models.CharField(max_length=100, help_text='e.g. "Yellow belt".')
+    level = models.PositiveSmallIntegerField(unique=True, help_text="Order on the track: 1 is the first belt.")
+    colour = models.CharField(max_length=7, blank=True, default="", help_text='Hex colour for the belt swatch, e.g. "#f5c518".')
+    requirements = models.TextField(blank=True, default="", help_text="What a ninja must be able to do to get this belt.")
+    icon = models.ImageField(upload_to="belts/", null=True, blank=True)
+
+    class Meta:
+        ordering = ["level"]
 
     def __str__(self):
         return self.name
 
 
-class MilestoneAward(Award):
-    """Needs an unlock counter — e.g. the attendance wristbands (white at
-    1 visit, green at 5, red at 10, black at 15). ParticipantAward's
-    progress_current/progress_total track one participant's count toward
-    this award's threshold."""
+class Badge(models.Model):
+    """An award a ninja can achieve: a one-off ("did the thing", e.g.
+    attended a CoderDojo for Girls session) or a milestone reached by a
+    count of sessions attended (e.g. the attendance wristbands). A
+    milestone can optionally also grant a belt when it's reached."""
 
-    threshold = models.PositiveIntegerField(
-        help_text='How many times something must happen to unlock this — e.g. 5 for "attend 5 sessions".'
-    )
+    ONE_OFF = "one_off"
+    MILESTONE = "milestone"
+    KIND_CHOICES = [(ONE_OFF, "One-off"), (MILESTONE, "Milestone")]
 
-    def __str__(self):
-        return f"{self.name} ({self.threshold})"
-
-
-class BadgeAward(Award):
-    """No counter needed — a one-off you either have or don't (attended a
-    specific event, submitted to a specific challenge)."""
-
+    name = models.CharField(max_length=200)
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES, default=ONE_OFF)
+    description = models.CharField(max_length=300, blank=True, default="")
     criteria = models.CharField(
-        max_length=200, blank=True, default="", help_text='e.g. "Attended a CoderDojo for Girls session."'
+        max_length=200, blank=True, default="", help_text='One-off: what earns it, e.g. "Attend a CoderDojo for Girls session."',
     )
-
-
-class ParticipantAward(models.Model):
-    participant = models.ForeignKey("accounts.Participant", on_delete=models.CASCADE, related_name="awards")
-    award = models.ForeignKey(Award, on_delete=models.CASCADE, related_name="participant_awards")
-
-    earned_date = models.DateField(null=True, blank=True, help_text="Blank if still in progress.")
-    progress_current = models.PositiveIntegerField(null=True, blank=True)
-    progress_total = models.PositiveIntegerField(null=True, blank=True)
+    threshold = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Milestone: how many sessions a ninja must attend to reach it.",
+    )
+    grants_belt = models.ForeignKey(
+        Belt, on_delete=models.SET_NULL, null=True, blank=True, related_name="granted_by_badges",
+        help_text="Milestone (optional): reaching it also grants this belt.",
+    )
+    icon = models.ImageField(upload_to="awards/", null=True, blank=True)
 
     class Meta:
-        unique_together = [("participant", "award")]
+        ordering = ["kind", "threshold", "name"]
 
     def __str__(self):
-        return f"{self.participant} - {self.award}"
+        return f"{self.name} ({self.threshold})" if self.kind == self.MILESTONE else self.name
+
+    def clean(self):
+        if self.kind == self.MILESTONE and not self.threshold:
+            raise ValidationError({"threshold": "A milestone badge needs a threshold."})
+        if self.kind == self.ONE_OFF and (self.threshold or self.grants_belt_id):
+            raise ValidationError("Only milestone badges have a threshold or grant a belt.")
+
+
+class NinjaBadge(models.Model):
+    """One ninja's progress on one badge. A one-off is earned or not; a
+    milestone tracks attended sessions toward its threshold (see
+    events.awards.sync_milestones) and is earned once it's reached."""
+
+    participant = models.ForeignKey("accounts.Participant", on_delete=models.CASCADE, related_name="badges")
+    badge = models.ForeignKey(Badge, on_delete=models.CASCADE, related_name="ninja_badges")
+
+    earned_date = models.DateField(null=True, blank=True, help_text="Blank if still in progress.")
+    progress_current = models.PositiveIntegerField(null=True, blank=True, help_text="Milestone only.")
+    progress_total = models.PositiveIntegerField(null=True, blank=True, help_text="Milestone only.")
+
+    class Meta:
+        unique_together = [("participant", "badge")]
+
+    def __str__(self):
+        return f"{self.participant} - {self.badge}"
+
+
+class NinjaBelt(models.Model):
+    """One belt a ninja reached: an append-only history, never overwritten
+    (the current belt is the highest level). Only an active champion or
+    mentor can award one (events.awards.award_belt), recorded as both the
+    account and the membership they acted in, plus that membership's role
+    at the time (a role can change later, e.g. a champion handover).
+
+    Both links are required when a belt is awarded; they're nullable only so
+    the history survives the account or dojo being deleted."""
+
+    participant = models.ForeignKey("accounts.Participant", on_delete=models.CASCADE, related_name="belts")
+    belt = models.ForeignKey(Belt, on_delete=models.PROTECT, related_name="ninja_belts")
+    awarded_on = models.DateField()
+    awarded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="belts_awarded",
+    )
+    awarded_as_membership = models.ForeignKey(
+        "dojos.DojoMembership", on_delete=models.SET_NULL, null=True, related_name="belts_awarded",
+    )
+    awarded_as_role = models.CharField(max_length=20, blank=True, default="", help_text="The membership's role when awarding.")
+    note = models.CharField(max_length=300, blank=True, default="", help_text="Optional: what the ninja showed.")
+
+    class Meta:
+        ordering = ["-awarded_on", "-id"]
+
+    def __str__(self):
+        return f"{self.participant} - {self.belt}"
+
+    @property
+    def awarded_by_label(self):
+        """ "Jan, as mentor of CoderDojo Ghent" (or as much of it as survives)."""
+        membership = self.awarded_as_membership
+        who = membership.name if membership else (self.awarded_by.get_full_name() if self.awarded_by else "")
+        if not membership:
+            return who
+        role = dict(membership.ROLE_CHOICES).get(self.awarded_as_role or membership.role, "").lower()
+        return f"{who}, as {role} of {membership.dojo.name}"

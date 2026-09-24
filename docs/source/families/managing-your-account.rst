@@ -22,12 +22,14 @@ clearly marked). From here you can:
 - **Edit a child's details** — click their name/header to edit it inline.
 - **Cancel a registration** — frees the spot for the next child on that
   session's waiting list.
-- **View a child's awards** — badges and milestone awards (e.g. attendance
-  wristbands) they've earned or are working towards, and their session
-  history.
+- **View a child's belt and badges** — their current belt (their coding
+  level, awarded by their dojo's champion or mentors) with the belts they
+  had before, the badges they've earned or are working towards (e.g. the
+  attendance wristbands, which update as the dojo takes attendance), and
+  their session history.
 
-If your child has their own login, they see their own page (their awards
-and session history) when they log in, but can't change their details or
+If your child has their own login, they see their own page (their belt,
+badges and session history) when they log in, but can't change their details or
 sign up for sessions themselves; that stays with you.
 
 Already a dojo owner or volunteer?

@@ -201,3 +201,114 @@ class EventSignupViewTests(TestCase):
         self.client.force_login(self.guardian)
         response = self.client.get(reverse("event_signup", kwargs={"event_id": event.id}))
         self.assertEqual(response.status_code, 404)
+
+
+class BeltAndBadgeTests(TestCase):
+    """events.awards: belts are an append-only history awarded by a dojo's
+    active champion/mentors; milestone badges follow sessions attended."""
+
+    def setUp(self):
+        from dojos.testing import add_member, make_champion, make_mentor
+
+        from .models import Badge, Belt
+
+        self.Badge = Badge
+        self.white = Belt.objects.create(level=1, name="White belt")
+        self.yellow = Belt.objects.create(level=2, name="Yellow belt")
+        self.champion_user = make_champion(username="champ", first_name="Jan")
+        self.dojo = make_dojo("Ghent", champion=self.champion_user)
+        self.champion = self.dojo.champion_membership
+        self.mentor = add_member(self.dojo, make_mentor(username="mentor"))
+        self.ninja = Participant.objects.create(name="Mila")
+        self.event = _future_event(self.dojo)
+        self.registration = Registration.objects.create(event=self.event, participant=self.ninja, waiting_list=False, position=1)
+
+    def test_award_records_who_and_in_which_role(self):
+        from .awards import award_belt
+
+        award = award_belt(self.ninja, self.white, self.mentor, note=" Finished a game ")
+
+        self.assertEqual(award.awarded_by, self.mentor.user)
+        self.assertEqual(award.awarded_as_membership, self.mentor)
+        self.assertEqual(award.awarded_as_role, "mentor")
+        self.assertEqual(award.note, "Finished a game")
+        self.assertEqual(self.ninja.current_belt, self.white)
+        self.assertIn("as mentor of Ghent", award.awarded_by_label)
+
+    def test_current_belt_is_the_highest_and_history_is_kept(self):
+        from .awards import award_belt
+
+        award_belt(self.ninja, self.white, self.champion)
+        award_belt(self.ninja, self.yellow, self.champion)
+
+        self.assertEqual(self.ninja.current_belt, self.yellow)
+        self.assertEqual(self.ninja.belts.count(), 2)
+
+    def test_cannot_award_a_belt_at_or_below_the_current_one(self):
+        from .awards import BeltError, award_belt
+
+        award_belt(self.ninja, self.yellow, self.champion)
+        with self.assertRaises(BeltError):
+            award_belt(self.ninja, self.white, self.champion)
+        with self.assertRaises(BeltError):
+            award_belt(self.ninja, self.yellow, self.champion)
+
+    def test_only_active_managers_with_a_valid_check_can_award(self):
+        from dojos.models import DojoMembership
+        from dojos.testing import add_member, make_mentor
+
+        from .awards import BeltError, award_belt
+
+        dormant = add_member(self.dojo, make_mentor(username="gone"), status=DojoMembership.DORMANT)
+        lapsed_user = make_mentor(username="lapsed")
+        lapsed = add_member(self.dojo, lapsed_user)
+        lapsed_user.background_check_expires_at = timezone.now() - timedelta(days=1)
+        lapsed_user.save()
+        for membership in (dormant, lapsed):
+            with self.assertRaises(BeltError):
+                award_belt(self.ninja, self.white, membership)
+        self.assertFalse(self.ninja.belts.exists())
+
+    def test_ninja_must_have_been_to_the_dojo(self):
+        from dojos.testing import make_champion
+
+        from .awards import BeltError, award_belt
+
+        other = make_dojo("Antwerp", champion=make_champion(username="other"))
+        with self.assertRaises(BeltError):
+            award_belt(self.ninja, self.white, other.champion_membership)
+
+    def test_milestones_follow_attendance_and_can_grant_a_belt(self):
+        from .awards import sync_milestones
+
+        first = self.Badge.objects.create(name="White Band", kind=self.Badge.MILESTONE, threshold=1, grants_belt=self.white)
+        second = self.Badge.objects.create(name="Green Band", kind=self.Badge.MILESTONE, threshold=2)
+
+        sync_milestones(self.ninja, self.mentor)
+        self.assertIsNone(self.ninja.badges.get(badge=first).earned_date)
+        self.assertFalse(self.ninja.badges.filter(badge=second).exists())
+
+        self.registration.attended = True
+        self.registration.save()
+        sync_milestones(self.ninja, self.mentor)
+
+        self.assertIsNotNone(self.ninja.badges.get(badge=first).earned_date)
+        progress = self.ninja.badges.get(badge=second)
+        self.assertEqual((progress.progress_current, progress.progress_total, progress.earned_date), (1, 2, None))
+        belt = self.ninja.belts.get()
+        self.assertEqual((belt.belt, belt.awarded_as_membership), (self.white, self.mentor))
+
+        # Unmarking never takes an earned badge (or belt) away.
+        self.registration.attended = None
+        self.registration.save()
+        sync_milestones(self.ninja, self.mentor)
+        self.assertIsNotNone(self.ninja.badges.get(badge=first).earned_date)
+        self.assertEqual(self.ninja.belts.count(), 1)
+
+    def test_milestone_needs_a_threshold(self):
+        from django.core.exceptions import ValidationError
+
+        with self.assertRaises(ValidationError):
+            self.Badge(name="Broken", kind=self.Badge.MILESTONE).full_clean()
+        with self.assertRaises(ValidationError):
+            self.Badge(name="One-off", kind=self.Badge.ONE_OFF, threshold=3).full_clean()

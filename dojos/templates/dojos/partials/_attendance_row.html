@@ -7,10 +7,35 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
 <div class="cd-attendance__row" id="attendance-row-{{ registration.id }}">
   <div class="cd-attendance__person">
     <span class="cd-attendance__name body">{{ participant.name }}</span>
-    {% with age=participant.age pathways=registration.pathways.all %}
-      {% if age is not None or pathways %}
-        <span class="cd-attendance__meta caption">{% if age is not None %}Age {{ age }}{% endif %}{% if age is not None and pathways %} · {% endif %}{% for pathway in pathways %}{{ pathway.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+    {% with age=participant.age pathways=registration.pathways.all current_belt=participant.current_belt %}
+      {% if age is not None or pathways or current_belt %}
+        <span class="cd-attendance__meta caption">{% if age is not None %}Age {{ age }}{% endif %}{% if age is not None and pathways %} · {% endif %}{% for pathway in pathways %}{{ pathway.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if current_belt %}{% if age is not None or pathways %} · {% endif %}{{ current_belt.name }}{% endif %}</span>
       {% endif %}
+      {% with top_belt=all_belts|last %}
+      {% if dojo_access.can_award_belts and top_belt and top_belt.level > current_belt.level|default:0 %}
+        {# A ninja's proficiency level: only belts above their current one can be awarded (events.awards.award_belt). #}
+        <details class="cd-attendance__belt caption"{% if belt_error %} open{% endif %}>
+          <summary>Award belt</summary>
+          <form method="post" action="{% url 'dojo_event_award_belt' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
+                hx-post="{% url 'dojo_event_award_belt' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
+                hx-target="#attendance-row-{{ registration.id }}" hx-swap="outerHTML">
+            {% csrf_token %}
+            {% if belt_error %}<p class="caption" role="alert" style="color: var(--danger, #b3261e); margin: var(--space-2) 0;">{{ belt_error }}</p>{% endif %}
+            <label class="label" for="belt-{{ registration.id }}" style="display: block; margin-top: var(--space-2);">Belt</label>
+            <select class="cd-form__input body" name="belt" id="belt-{{ registration.id }}" required>
+              {% for belt in all_belts %}
+                {% if not current_belt or belt.level > current_belt.level %}
+                  <option value="{{ belt.id }}">{{ belt.name }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+            <label class="label" for="belt-note-{{ registration.id }}" style="display: block; margin-top: var(--space-2);">Note (optional)</label>
+            <input class="cd-form__input body" type="text" name="note" id="belt-note-{{ registration.id }}" maxlength="300" placeholder="What {{ participant.name }} showed">
+            <button type="submit" class="cd-btn cd-btn--ghost label" style="margin-top: var(--space-2);">Award belt</button>
+          </form>
+        </details>
+      {% endif %}
+      {% endwith %}
     {% endwith %}
     {% if dojo_access.can_take_attendance and all_pathways %}
       {# What this ninja works on: pre-filled from the session's pathways at signup, narrowed here. #}

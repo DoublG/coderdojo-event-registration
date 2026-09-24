@@ -16,14 +16,16 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from accounts.models import Participant, User
 from applications.services import is_approved_champion
 from content.models import FAQ, OrganisationTeamMember
+from events.awards import BeltError, award_belt, sync_milestones
 from events.forms import EventForm
-from events.models import Event, Registration
+from events.models import Belt, Event, Registration
 from geo.geocoding import find_province, geocode
 from notifications.models import Notification
 from pathways.models import Pathway
 
 from . import team
 from .access import (
+    AWARD_BELTS,
     EDIT_SETTINGS,
     MANAGE_EVENTS,
     MANAGE_LIFECYCLE,
@@ -165,7 +167,7 @@ def _attendance_context(event):
     registrations = list(
         event.registration_set.filter(waiting_list=False)
         .select_related("participant")
-        .prefetch_related("pathways")
+        .prefetch_related("pathways", "participant__belts__belt")
         .order_by("participant__name")
     )
     event_pathway_ids = set(event.pathways.values_list("id", flat=True))
@@ -176,6 +178,8 @@ def _attendance_context(event):
         # For each row's pathway picker: every pathway, the session's own first.
         "event_pathway_ids": event_pathway_ids,
         "all_pathways": sorted(Pathway.objects.all(), key=lambda p: (p.id not in event_pathway_ids, p.name)),
+        # For each row's "Award belt" picker (only belts above the ninja's current one are offered).
+        "all_belts": list(Belt.objects.all()),
     }
 
 
@@ -524,6 +528,9 @@ def dojo_event_attendance_mark(request, dojo_id, event_id, registration_id):
     if request.method == "POST" and request.POST.get("attended") in ATTENDANCE_VALUES:
         registration.attended = ATTENDANCE_VALUES[request.POST["attended"]]
         registration.save(update_fields=["attended"])
+        # Milestone badges count sessions attended; one that grants a belt
+        # awards it as whoever marked the attendance.
+        sync_milestones(registration.participant, access.membership)
 
     if request.headers.get("HX-Request"):
         context = {"dojo": dojo, "dojo_access": access, **_attendance_context(event), "registration": registration}
@@ -559,6 +566,43 @@ def dojo_event_registration_pathways(request, dojo_id, event_id, registration_id
 
 
 @login_required
+def dojo_event_award_belt(request, dojo_id, event_id, registration_id):
+    """Award the ninja on this attendance row a belt (POST `belt`, optional
+    `note`), as the viewer's champion/mentor membership. The rules (a belt
+    above their current one; see events.awards.award_belt) raise BeltError,
+    shown inside the row. Same htmx/no-JS handling as
+    dojo_event_attendance_mark."""
+    access = require_dojo_access(request, dojo_id, AWARD_BELTS)
+    dojo = access.dojo
+    event = get_object_or_404(Event, id=event_id, dojo=dojo)
+    registration = get_object_or_404(
+        Registration.objects.select_related("participant"),
+        id=registration_id, event=event, waiting_list=False,
+    )
+    belt_error = None
+    if request.method == "POST":
+        belt = Belt.objects.filter(id=request.POST.get("belt") or None).first()
+        try:
+            if belt is None:
+                raise BeltError("Pick a belt to award.")
+            award_belt(registration.participant, belt, access.membership, note=request.POST.get("note", ""))
+        except BeltError as error:
+            belt_error = str(error)
+            if not request.headers.get("HX-Request"):
+                messages.error(request, belt_error)
+
+    if request.headers.get("HX-Request"):
+        context = {
+            "dojo": dojo, "dojo_access": access, **_attendance_context(event), "belt_error": belt_error,
+            "registration": Registration.objects.select_related("participant").prefetch_related("pathways").get(
+                pk=registration.pk,
+            ),
+        }
+        return render(request, "dojos/partials/_attendance_row.html", context)
+    return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
+
+
+@login_required
 def dojo_event_attendance_mark_all(request, dojo_id, event_id):
     """The "Mark all present" button — every confirmed registration for the event. An
     htmx request gets the whole re-rendered attendance block back."""
@@ -567,7 +611,10 @@ def dojo_event_attendance_mark_all(request, dojo_id, event_id):
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
 
     if request.method == "POST":
-        event.registration_set.filter(waiting_list=False).update(attended=True)
+        confirmed = event.registration_set.filter(waiting_list=False)
+        confirmed.update(attended=True)
+        for participant in Participant.objects.filter(registration__in=confirmed):
+            sync_milestones(participant, access.membership)
 
     if request.headers.get("HX-Request"):
         return render(request, "dojos/partials/_attendance.html", {"dojo": dojo, "dojo_access": access, **_attendance_context(event)})

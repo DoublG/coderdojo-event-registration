@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 06:26+0000\n"
+"POT-Creation-Date: 2026-09-24 09:42+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -85,30 +85,35 @@ msgstr ""
 
 #: ../../source/families/managing-your-account.rst:25
 msgid ""
-"**View a child's awards** — badges and milestone awards (e.g. attendance "
-"wristbands) they've earned or are working towards, and their session "
-"history."
+"**View a child's belt and badges** — their current belt (their coding "
+"level, awarded by their dojo's champion or mentors) with the belts they "
+"had before, the badges they've earned or are working towards (e.g. the "
+"attendance wristbands, which update as the dojo takes attendance), and "
+"their session history."
 msgstr ""
-"**Voir les récompenses d'un enfant** : badges et récompenses par palier "
-"(par ex. bracelets d'assiduité) obtenus ou en cours d'obtention, ainsi "
-"que son historique de séances."
+"**Voir la ceinture et les badges d'un enfant** — sa ceinture actuelle "
+"(son niveau de programmation, attribué par le champion ou les mentors de "
+"son dojo) avec les ceintures qu'il avait avant, les badges qu'il a "
+"obtenus ou qu'il est en train d'obtenir (par exemple les bracelets de "
+"présence, mis à jour lorsque le dojo note les présences), et l'historique"
+" de ses séances."
 
-#: ../../source/families/managing-your-account.rst:29
+#: ../../source/families/managing-your-account.rst:31
 msgid ""
-"If your child has their own login, they see their own page (their awards "
-"and session history) when they log in, but can't change their details or "
-"sign up for sessions themselves; that stays with you."
+"If your child has their own login, they see their own page (their belt, "
+"badges and session history) when they log in, but can't change their "
+"details or sign up for sessions themselves; that stays with you."
 msgstr ""
-"Si votre enfant a son propre identifiant, il voit sa propre page (ses "
-"récompenses et l'historique de ses séances) lorsqu'il se connecte, mais "
-"ne peut pas modifier ses informations ni s'inscrire lui-même à des "
-"séances ; cela reste votre rôle."
+"Si votre enfant a son propre identifiant, il voit sa propre page (sa "
+"ceinture, ses badges et l'historique de ses séances) lorsqu'il se "
+"connecte, mais ne peut pas modifier ses informations ni s'inscrire lui-"
+"même à des séances ; cela reste votre rôle."
 
-#: ../../source/families/managing-your-account.rst:34
+#: ../../source/families/managing-your-account.rst:36
 msgid "Already a dojo owner or volunteer?"
 msgstr "Déjà responsable de dojo ou bénévole ?"
 
-#: ../../source/families/managing-your-account.rst:36
+#: ../../source/families/managing-your-account.rst:38
 msgid ""
 "Every account has a family page: open **My Account** from your account "
 "menu and use **Add a child** there. Your children are added to the same "
@@ -119,11 +124,11 @@ msgstr ""
 "au même identifiant que vous utilisez déjà, sans inscription séparée ni "
 "second compte."
 
-#: ../../source/families/managing-your-account.rst:41
+#: ../../source/families/managing-your-account.rst:43
 msgid "Changing your password"
 msgstr "Modifier votre mot de passe"
 
-#: ../../source/families/managing-your-account.rst:43
+#: ../../source/families/managing-your-account.rst:45
 msgid ""
 "Go to **Change password** (also linked from your account page). You'll "
 "need your current password to set a new one."
@@ -132,11 +137,11 @@ msgstr ""
 "page de votre compte). Vous aurez besoin de votre mot de passe actuel "
 "pour en définir un nouveau."
 
-#: ../../source/families/managing-your-account.rst:47
+#: ../../source/families/managing-your-account.rst:49
 msgid "Volunteering"
 msgstr "Bénévolat"
 
-#: ../../source/families/managing-your-account.rst:49
+#: ../../source/families/managing-your-account.rst:51
 msgid ""
 "The **Volunteering** section of your account page shows any application "
 "you've made to become a mentor or start a dojo, and where your background"
@@ -197,4 +202,17 @@ msgstr ""
 #~ " passe temporaire reçu par e-mail :"
 #~ " cette étape ne peut pas être "
 #~ "contournée."
+
+#~ msgid ""
+#~ "**View a child's awards** — badges "
+#~ "and milestone awards (e.g. attendance "
+#~ "wristbands) they've earned or are "
+#~ "working towards, and their session "
+#~ "history."
+#~ msgstr ""
+#~ "**Voir les récompenses d'un enfant** :"
+#~ " badges et récompenses par palier "
+#~ "(par ex. bracelets d'assiduité) obtenus "
+#~ "ou en cours d'obtention, ainsi que "
+#~ "son historique de séances."
 
