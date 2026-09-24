@@ -50,6 +50,11 @@ class Event(models.Model):
         "dojos.DojoMembership", blank=True, related_name="events",
         help_text="Who ran (or will run) this session: members of the dojo's team.",
     )
+    pathways = models.ManyToManyField(
+        "pathways.Pathway", blank=True, related_name="events",
+        help_text="The pathways this session covers (optional; shown on its public page). "
+                  "Pre-filled from the dojo's; registrations pre-select these.",
+    )
 
     participants = models.ManyToManyField("accounts.Participant", through="Registration")
 
@@ -76,8 +81,10 @@ class Registration(models.Model):
 
     # Tri-state: None = not yet marked, True = present, False = absent.
     attended = models.BooleanField(null=True, blank=True)
-    pathway = models.ForeignKey(
-        "pathways.Pathway", on_delete=models.SET_NULL, null=True, blank=True, related_name="registrations"
+    pathways = models.ManyToManyField(
+        "pathways.Pathway", blank=True, related_name="registrations",
+        help_text="What this ninja works on at this session — usually a subset of the event's "
+                  "pathways, which it's pre-filled from.",
     )
 
     class Meta:

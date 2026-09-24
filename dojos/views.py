@@ -20,6 +20,7 @@ from events.forms import EventForm
 from events.models import Event, Registration
 from geo.geocoding import find_province, geocode
 from notifications.models import Notification
+from pathways.models import Pathway
 
 from . import team
 from .access import (
@@ -163,13 +164,18 @@ def _attendance_context(event):
     attendance page and the htmx endpoints that re-render parts of it."""
     registrations = list(
         event.registration_set.filter(waiting_list=False)
-        .select_related("participant", "pathway")
+        .select_related("participant")
+        .prefetch_related("pathways")
         .order_by("participant__name")
     )
+    event_pathway_ids = set(event.pathways.values_list("id", flat=True))
     return {
         "event": event,
         "registrations": registrations,
         "present_count": sum(1 for r in registrations if r.attended),
+        # For each row's pathway picker: every pathway, the session's own first.
+        "event_pathway_ids": event_pathway_ids,
+        "all_pathways": sorted(Pathway.objects.all(), key=lambda p: (p.id not in event_pathway_ids, p.name)),
     }
 
 
@@ -265,6 +271,7 @@ def dojo_manage(request, dojo_id):
                 geocode_failed = not _geocode_address(dojo)
 
             dojo.save()
+            form.save_m2m()  # pathways — commit=False above skipped them
             saved = True
     else:
         form = DojoProfileForm(instance=dojo)
@@ -510,7 +517,7 @@ def dojo_event_attendance_mark(request, dojo_id, event_id, registration_id):
     dojo = access.dojo
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
     registration = get_object_or_404(
-        Registration.objects.select_related("participant", "pathway"),
+        Registration.objects.select_related("participant").prefetch_related("pathways"),
         id=registration_id, event=event, waiting_list=False,
     )
 
@@ -523,6 +530,31 @@ def dojo_event_attendance_mark(request, dojo_id, event_id, registration_id):
         row = render_to_string("dojos/partials/_attendance_row.html", context, request=request)
         summary = render_to_string("dojos/partials/_attendance_summary.html", {**context, "oob": True}, request=request)
         return HttpResponse(row + summary)
+    return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
+
+
+@login_required
+def dojo_event_registration_pathways(request, dojo_id, event_id, registration_id):
+    """Set which pathways a ninja works on at this session (POST `pathway`,
+    repeated) — pre-filled from the event's pathways at signup, narrowed
+    here by the team. Any pathway may be picked; the event's are just the
+    default. Same htmx/no-JS handling as dojo_event_attendance_mark."""
+    access = require_dojo_access(request, dojo_id, TAKE_ATTENDANCE)
+    dojo = access.dojo
+    event = get_object_or_404(Event, id=event_id, dojo=dojo)
+    registration = get_object_or_404(
+        Registration.objects.select_related("participant"),
+        id=registration_id, event=event, waiting_list=False,
+    )
+    if request.method == "POST":
+        registration.pathways.set(Pathway.objects.filter(id__in=request.POST.getlist("pathway")))
+
+    if request.headers.get("HX-Request"):
+        context = {
+            "dojo": dojo, "dojo_access": access, **_attendance_context(event),
+            "registration": Registration.objects.prefetch_related("pathways").get(pk=registration.pk),
+        }
+        return render(request, "dojos/partials/_attendance_row.html", context)
     return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
 
 

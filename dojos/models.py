@@ -14,6 +14,9 @@ class DojoQuerySet(models.QuerySet):
         admin area) and in ninjas' own history, never in public listings."""
         return self.filter(status=Dojo.ACTIVE)
 
+class DojoManager(models.Manager.from_queryset(DojoQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().select_related("municipality")
 
 class Dojo(models.Model):
     name = models.CharField(max_length=200)
@@ -39,6 +42,10 @@ class Dojo(models.Model):
     created_by = models.ForeignKey(
         "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
         help_text="The approved champion who created this dojo.",
+    )
+    pathways = models.ManyToManyField(
+        "pathways.Pathway", blank=True, related_name="dojos",
+        help_text="The pathways this dojo provides (optional). New events pre-select these.",
     )
     icon = models.ImageField(
         upload_to="dojos/", null=True, blank=True,
@@ -66,10 +73,7 @@ class Dojo(models.Model):
                   f"accessibility, whatever this chapter needs to add. {MARKDOWN_HELP_TEXT}",
     )
 
-    def __str__(self):
-        return f"{self.name} ({self.municipality})"
-
-    objects = DojoQuerySet.as_manager()
+    objects = DojoManager()
 
     def __str__(self):
         return f"{self.name} ({self.municipality})"

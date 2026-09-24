@@ -331,7 +331,7 @@ def ninja_detail(request, ninja_id):
     history = (
         child.registration_set.filter(event__start_time__lt=now)
         .select_related("event", "event__dojo")
-        .prefetch_related("event__team__user")
+        .prefetch_related("event__team__user", "pathways")
         .order_by("-event__start_time")
     )
 

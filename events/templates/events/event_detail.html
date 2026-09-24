@@ -72,6 +72,19 @@
           </section>
         {% endif %}
 
+        {% with pathways=event.pathways.all %}
+          {% if pathways %}
+            <section>
+              <h2 class="heading-lg section-title">Pathways this session covers</h2>
+              <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                {% for pathway in pathways %}
+                  <a class="cd-badge cd-badge--outline caption" href="{% url 'pathway_detail' pathway_id=pathway.id %}">{{ pathway.name }}</a>
+                {% endfor %}
+              </div>
+            </section>
+          {% endif %}
+        {% endwith %}
+
         {% if faqs %}
           <section>
             <h2 class="heading-lg section-title">Questions</h2>

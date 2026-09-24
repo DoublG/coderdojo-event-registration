@@ -93,7 +93,7 @@ Until it fully lands (see the plan's ticked phases), keep new work easy to move 
 - **`dojos`** — `Dojo` (with its lifecycle status), `DojoMembership` (dojo teams; rules in `dojos/team.py`, access in `dojos/access.py`), geo-search.
 - **`events`** — `Event`, `Registration`, awards (attendance badges/wristbands).
 - **`applications`** — the account-level onboarding: `Application` (mentor / champion), the background-check flow on the account and its `BackgroundCheckHistory` audit log (`applications/services.py`), and the reviewers' admin.
-- **`pathways`** — the learning-track catalog (`Pathway`, `PathwayStep`, `PathwayProject`, `Skill`); read-mostly, no user-facing enrollment state.
+- **`pathways`** — the learning-track catalog (`Pathway`, `PathwayStep`, `PathwayProject`, `Skill`); read-mostly, no user-facing enrollment state. Linked (redesign phase 4) at three optional M2M levels, each pre-filled from the one above but never restricted to it: `Dojo.pathways` (Settings page) → `Event.pathways` (`EventForm` pre-selects the dojo's on a new event) → `Registration.pathways` (copied from the event at `event_signup`, narrowed per row on the attendance list via `dojo_event_registration_pathways`).
 - **`content`** — `FAQ`, `Testimonial`, `Announcement`, each optionally scoped to a Dojo/Event/Pathway or global when the scoping FK(s) are blank.
 - **`notifications`** — a minimal per-user `Notification` model (no views/urls of its own — read directly by whatever renders it).
 - **`geo`** — `AdministrativeBoundary` / `Municipality` reference data, the Nominatim geocoding client, and the custom `DistanceSphere` GIS function (see below). No urls.py.

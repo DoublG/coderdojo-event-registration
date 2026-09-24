@@ -10,6 +10,7 @@ from django.utils import timezone
 from dojos.models import Dojo
 from events.models import Event
 from events.template_images import TEMPLATE_IMAGES, TEMPLATE_IMAGES_DIR
+from pathways.models import Pathway
 
 SATURDAY, SUNDAY, WEDNESDAY, FRIDAY = 5, 6, 2, 4
 
@@ -106,7 +107,13 @@ class Command(BaseCommand):
         today = timezone.localdate()
         created, skipped = 0, 0
 
+        all_pathways = list(Pathway.objects.order_by("id"))
         for dojo in Dojo.objects.exclude(location=None):
+            # The pathways this dojo provides (a few of them), which its new
+            # sessions pre-select.
+            if all_pathways and not dojo.pathways.exists():
+                dojo.pathways.set(rng.sample(all_pathways, k=min(len(all_pathways), rng.randint(1, 3))))
+            dojo_pathways = list(dojo.pathways.all())
             pattern = rng.choices(
                 list(PATTERN_WEIGHTS), weights=list(PATTERN_WEIGHTS.values())
             )[0]
@@ -144,6 +151,7 @@ class Command(BaseCommand):
                 )
                 if was_created:
                     assign_session_image(event, session_name)
+                    event.pathways.set(dojo_pathways)
                 created += 1 if was_created else 0
                 skipped += 1 if not was_created else 0
 

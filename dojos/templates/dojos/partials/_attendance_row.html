@@ -7,11 +7,29 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
 <div class="cd-attendance__row" id="attendance-row-{{ registration.id }}">
   <div class="cd-attendance__person">
     <span class="cd-attendance__name body">{{ participant.name }}</span>
-    {% with age=participant.age %}
-      {% if age is not None or registration.pathway %}
-        <span class="cd-attendance__meta caption">{% if age is not None %}Age {{ age }}{% endif %}{% if age is not None and registration.pathway %} · {% endif %}{% if registration.pathway %}{{ registration.pathway.name }}{% endif %}</span>
+    {% with age=participant.age pathways=registration.pathways.all %}
+      {% if age is not None or pathways %}
+        <span class="cd-attendance__meta caption">{% if age is not None %}Age {{ age }}{% endif %}{% if age is not None and pathways %} · {% endif %}{% for pathway in pathways %}{{ pathway.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
       {% endif %}
     {% endwith %}
+    {% if dojo_access.can_take_attendance and all_pathways %}
+      {# What this ninja works on: pre-filled from the session's pathways at signup, narrowed here. #}
+      <details class="cd-attendance__pathways caption">
+        <summary>Pathways</summary>
+        <form method="post" action="{% url 'dojo_event_registration_pathways' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
+              hx-post="{% url 'dojo_event_registration_pathways' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
+              hx-target="#attendance-row-{{ registration.id }}" hx-swap="outerHTML">
+          {% csrf_token %}
+          {% for pathway in all_pathways %}
+            <label style="display: block;">
+              <input type="checkbox" name="pathway" value="{{ pathway.id }}"{% if pathway in registration.pathways.all %} checked{% endif %}>
+              {{ pathway.name }}{% if pathway.id in event_pathway_ids %} <span style="color: var(--ink-muted);">(this session)</span>{% endif %}
+            </label>
+          {% endfor %}
+          <button type="submit" class="cd-btn cd-btn--ghost label" style="margin-top: var(--space-2);">Save pathways</button>
+        </form>
+      </details>
+    {% endif %}
   </div>
   {% if dojo_access.can_take_attendance %}
   <form method="post" action="{% url 'dojo_event_attendance_mark' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"

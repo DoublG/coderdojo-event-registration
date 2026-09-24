@@ -132,6 +132,23 @@
       </div>
 
       <div class="cd-form__group">
+        <h3 class="cd-form__group-title heading-md">Pathways</h3>
+          <div class="cd-form__field">
+            <label class="cd-form__label label">Pathways your dojo provides</label>
+            <ul class="cd-form__errors">{% for error in form.pathways.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+            <div class="cd-form__checkbox-list">
+              {% for checkbox in form.pathways %}
+                <label class="cd-form__checkbox-row" for="{{ checkbox.id_for_label }}">
+                  {{ checkbox.tag }}
+                  <span class="body-sm">{{ checkbox.choice_label }}</span>
+                </label>
+              {% endfor %}
+            </div>
+            <p class="cd-form__help caption">Optional — shown on your dojo's page, and pre-selected for new sessions.</p>
+          </div>
+      </div>
+
+      <div class="cd-form__group">
         <h3 class="cd-form__group-title heading-md">Schedule &amp; ages</h3>
         <div class="cd-form__row">
           <div class="cd-form__field">

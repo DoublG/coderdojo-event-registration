@@ -35,9 +35,10 @@ class DojoProfileForm(forms.ModelForm):
         fields = [
             "name", "icon", "tagline", "description",
             "schedule_description", "min_age", "max_age",
-            "email", "phone", "municipality", "address", "visit_notes",
+            "email", "phone", "municipality", "address", "visit_notes", "pathways",
         ]
         widgets = {
+            "pathways": forms.CheckboxSelectMultiple,
             "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "CoderDojo Ghent"}),
             "icon": forms.ClearableFileInput(attrs={"class": "cd-form__input body"}),
             "tagline": forms.Textarea(attrs={

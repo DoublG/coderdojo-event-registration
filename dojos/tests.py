@@ -1577,3 +1577,108 @@ class DormancyNudgeTests(TestCase):
         response = self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": self.dojo.id}))
         self.assertTrue(response.context["dormancy_nudge"])
         self.assertContains(response, "No sessions have been planned for over six months")
+
+
+class PathwayScopeTests(TestCase):
+    """Pathways at three levels, each pre-filled from the one above: dojo
+    ("provides") → event ("covers", public) → registration ("works on")."""
+
+    def setUp(self):
+        from pathways.models import Pathway
+
+        self.scratch = Pathway.objects.create(name="Scratch")
+        self.python = Pathway.objects.create(name="Python")
+        self.web = Pathway.objects.create(name="Web")
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.dojo.pathways.set([self.scratch, self.python])
+        self.client.force_login(self.owner)
+
+    def _event(self, **fields):
+        return Event.objects.create(
+            name="Session", dojo=self.dojo, status=Event.OPEN,
+            start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10, **fields,
+        )
+
+    def test_new_event_preselects_the_dojos_pathways(self):
+        response = self.client.get(reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}))
+        self.assertEqual(set(response.context["form"].fields["pathways"].initial), {self.scratch.id, self.python.id})
+
+    def test_existing_event_keeps_its_own_pathways(self):
+        event = self._event()
+        event.pathways.set([self.web])
+        response = self.client.get(reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": event.id}))
+        self.assertEqual(list(response.context["form"]["pathways"].value()), [self.web.id])
+
+    def test_settings_save_the_dojos_pathways(self):
+        response = self.client.post(
+            reverse("dojo_manage", kwargs={"dojo_id": self.dojo.id}),
+            {"name": "Ghent", "pathways": [self.web.id], "template_icon": ""},
+        )
+        self.assertTrue(response.context["saved"], response.context["form"].errors)
+        self.assertEqual(list(self.dojo.pathways.all()), [self.web])
+
+    def test_signup_prefills_registration_pathways_from_the_event(self):
+        event = self._event()
+        event.pathways.set([self.scratch, self.web])
+        parent = User.objects.create(username="parent")
+        ninja = Participant.objects.create(name="Mila")
+        from accounts.models import Guardianship
+
+        Guardianship.objects.create(guardian=parent, ninja=ninja)
+        self.client.force_login(parent)
+
+        self.client.post(reverse("event_signup", kwargs={"event_id": event.id}), {"child": [ninja.id]})
+
+        registration = Registration.objects.get(event=event, participant=ninja)
+        self.assertEqual(set(registration.pathways.all()), {self.scratch, self.web})
+
+    def test_team_narrows_what_a_ninja_works_on(self):
+        event = self._event()
+        registration = Registration.objects.create(
+            event=event, participant=Participant.objects.create(name="Mila"), waiting_list=False, position=1,
+        )
+        registration.pathways.set([self.scratch, self.python])
+        url = reverse("dojo_event_registration_pathways", kwargs={
+            "dojo_id": self.dojo.id, "event_id": event.id, "registration_id": registration.id,
+        })
+
+        # Any pathway may be picked — the event's are only the default.
+        response = self.client.post(url, {"pathway": [self.web.id]}, HTTP_HX_REQUEST="true")
+
+        self.assertTemplateUsed(response, "dojos/partials/_attendance_row.html")
+        self.assertEqual(list(registration.pathways.all()), [self.web])
+
+    def test_pathway_editing_needs_take_attendance_and_the_right_event(self):
+        event = self._event()
+        registration = Registration.objects.create(
+            event=event, participant=Participant.objects.create(name="Mila"), waiting_list=False, position=1,
+        )
+        mentor = make_mentor(username="m1")
+        add_member(self.dojo, mentor)
+        url = reverse("dojo_event_registration_pathways", kwargs={
+            "dojo_id": self.dojo.id, "event_id": event.id, "registration_id": registration.id,
+        })
+        self.client.force_login(mentor)
+        with patch.dict(access.ROLE_CAPABILITIES, {access.MENTOR: frozenset()}):
+            self.assertEqual(self.client.post(url, {"pathway": [self.web.id]}).status_code, 403)
+
+        other_event = Event.objects.create(
+            name="Other", dojo=make_dojo("Antwerp"), start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z", places=10,
+        )
+        wrong = reverse("dojo_event_registration_pathways", kwargs={
+            "dojo_id": self.dojo.id, "event_id": other_event.id, "registration_id": registration.id,
+        })
+        self.client.force_login(self.owner)
+        self.assertEqual(self.client.post(wrong, {"pathway": [self.web.id]}).status_code, 404)
+        self.assertFalse(registration.pathways.exists())
+
+    def test_public_pages_show_pathways(self):
+        event = self._event()
+        event.pathways.set([self.web])
+        self.client.logout()
+        self.assertContains(self.client.get(reverse("event_detail", kwargs={"event_id": event.id})), "Pathways this session covers")
+        dojo_page = self.client.get(reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}))
+        self.assertContains(dojo_page, "Scratch")
+        self.assertContains(dojo_page, "Python")

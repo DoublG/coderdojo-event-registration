@@ -14,7 +14,7 @@ update its diagram in the same change.
 > **A redesign is in progress.** Sections 1–9 describe the model as it is
 > in the code today. [Section 10](#10-planned-redesign-in-progress)
 > describes the target and tracks which phases have landed: accounts,
-> dojo teams and onboarding are done; pathways, badges and belts, the
+> dojo teams, onboarding and pathways are done; badges and belts, the
 > organisation role, naming and seeders follow. It also sets the
 > [nomenclature](#nomenclature) (Champion, Mentor/Coach, Ninja, Youth
 > mentor, Badge, Belt). Read it before building more on those parts.
@@ -74,7 +74,9 @@ flowchart LR
     Dojo -- runs --> Event
     Registration -- for --> Event
     Registration -- of --> Participant
-    Registration -. "worked on" .-> Pathway
+    Dojo -. "provides" .-> Pathway
+    Event -. "covers" .-> Pathway
+    Registration -. "works on" .-> Pathway
     Participant -- earns --> Award
     User -- "applies (mentor / champion)" --> Application
     User -- "check decisions" --> BackgroundCheckHistory
@@ -244,7 +246,8 @@ erDiagram
     DOJO ||--o{ EVENT : "runs"
     EVENT ||--o{ REGISTRATION : "registration_set"
     PARTICIPANT ||--o{ REGISTRATION : "signs up via"
-    PATHWAY |o--o{ REGISTRATION : "worked on"
+    EVENT }o--o{ PATHWAY : "covers (M2M, optional)"
+    REGISTRATION }o--o{ PATHWAY : "works on (M2M, optional)"
     EVENT }o--o{ DOJO_MEMBERSHIP : "team (M2M)"
 
     EVENT {
@@ -267,7 +270,6 @@ erDiagram
         bool waiting_list
         int position "first-come queue"
         bool attended "null = not marked"
-        bigint pathway_id FK "nullable"
     }
 ```
 
@@ -279,6 +281,12 @@ erDiagram
 - **Attendance:** `Registration.attended` has three states: `None` (not
   marked yet), `True` (present), `False` (absent). Only confirmed
   registrations can be marked.
+- **Pathways:** `Event.pathways` (what the session covers, shown on its
+  public page) is pre-selected from `Dojo.pathways` on a new event;
+  `Registration.pathways` (what this ninja works on) is set to the
+  event's at signup and narrowed by the team from the attendance list
+  (`dojo_event_registration_pathways`, `TAKE_ATTENDANCE`). Neither is
+  restricted to the level above. See section 7.
 
 ### Event status
 
@@ -412,8 +420,12 @@ account page links to the upload.
 
 ## 7. Learning pathways and content
 
-`pathways` is a read-mostly catalogue with no enrolment state. The only
-place it's linked to a child is `Registration.pathway`. The `content`
+`pathways` is a read-mostly catalogue with no enrolment state. It's
+linked at three optional levels, each pre-filled from the one above:
+`Dojo.pathways` (what the dojo provides, set on its Settings page and
+shown on its public page) → `Event.pathways` (what a session covers) →
+`Registration.pathways` (what one ninja works on; it feeds the ninja's
+history and the attendance list). The `content`
 models are each optionally scoped to one dojo, event or pathway, or
 site-wide when the scoping key is blank.
 
@@ -427,6 +439,7 @@ erDiagram
     PATHWAY ||--o{ PATHWAY_STEP : "steps (ordered)"
     PATHWAY ||--o{ PATHWAY_PROJECT : "projects"
     PATHWAY }o--o{ SKILL : "skills (M2M)"
+    DOJO }o--o{ PATHWAY : "provides (M2M, optional)"
     DOJO |o--o{ FAQ : "scoped to"
     EVENT |o--o{ FAQ : "scoped to"
     PATHWAY |o--o{ FAQ : "scoped to"
@@ -1339,8 +1352,16 @@ at every step:
     dropped (`background_check_valid` = validated and unexpired); the
     private document storage is referenced through a callable so migrations
     don't embed a machine-specific path; `seed_applications` added.
-- [ ] **4. Pathways:** dojo, event and registration links, each pre-filled
-  from the level above; shown on the event page and the attendance list.
+- [x] **4. Pathways** (`dojos`, `events`), *done 2026-09-24*
+  - `Dojo.pathways`, `Event.pathways` and `Registration.pathways`
+    (many-to-many, optional); `Registration.pathway` dropped.
+  - Dojo settings pick the dojo's pathways; a new event pre-selects them;
+    signup copies the event's onto each registration; the attendance
+    list's per-row **Pathways** picker narrows them
+    (`dojo_event_registration_pathways`, `TAKE_ATTENDANCE`).
+  - Shown on the public dojo and event pages, the attendance list and the
+    ninja's history. Seeders give dojos, events and registrations
+    pathways.
 - [ ] **5. Badges and belts:** `Badge` (one-off / milestone, optional
   `grants_belt`), `NinjaBadge`, `Belt`, and the `NinjaBelt` history
   (awarding account + membership). "Award belt" in the dojo dashboard;

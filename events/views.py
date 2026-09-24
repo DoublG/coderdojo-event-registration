@@ -157,9 +157,12 @@ def event_signup(request, event_id):
                 for child in new_children:
                     next_position += 1
                     waiting_list = confirmed_count >= event.places
-                    Registration.objects.create(
+                    registration = Registration.objects.create(
                         event=event, participant=child, waiting_list=waiting_list, position=next_position,
                     )
+                    # What the ninja works on starts as everything the session
+                    # covers; the dojo team narrows it on the attendance list.
+                    registration.pathways.set(event.pathways.all())
                     if not waiting_list:
                         confirmed_count += 1
                     results.append({"child": child, "waiting_list": waiting_list})

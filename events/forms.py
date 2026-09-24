@@ -5,6 +5,7 @@ from django.core.files import File
 from django.utils import timezone
 
 from dojos.models import Dojo
+from pathways.models import Pathway
 
 from .models import Event
 from .template_images import TEMPLATE_IMAGES, TEMPLATE_IMAGES_DIR
@@ -100,7 +101,7 @@ class EventForm(forms.ModelForm):
         model = Event
         fields = [
             "name", "places", "venue_name", "image",
-            "description", "min_age", "max_age", "team",
+            "description", "min_age", "max_age", "team", "pathways",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Coding Saturday"}),
@@ -114,6 +115,7 @@ class EventForm(forms.ModelForm):
             "min_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "7"}),
             "max_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "18"}),
             "team": forms.CheckboxSelectMultiple,
+            "pathways": forms.CheckboxSelectMultiple,
         }
 
     def __init__(self, *args, dojo, **kwargs):
@@ -122,6 +124,11 @@ class EventForm(forms.ModelForm):
         # mentors and youth mentors), shown as "Name (Role)".
         self.fields["team"].queryset = dojo.memberships.active().select_related("user").order_by("user__first_name")
         self.fields["team"].label_from_instance = lambda m: f"{m.name} ({m.get_role_display()})"
+        # A new session pre-selects the pathways its dojo provides; the team
+        # can still pick any pathway for this particular session.
+        self.fields["pathways"].queryset = Pathway.objects.order_by("name")
+        if not self.instance.pk:
+            self.fields["pathways"].initial = list(dojo.pathways.values_list("pk", flat=True))
         if self.instance.pk:
             self.fields["event_date"].initial = self.instance.start_time.date()
             self.fields["start_time"].initial = self.instance.start_time.time()

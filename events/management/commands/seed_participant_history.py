@@ -134,6 +134,7 @@ class Command(BaseCommand):
                 if was_created:
                     if champion:
                         event.team.add(champion)
+                    event.pathways.set(dojo.pathways.all())
                     assign_session_image(event, session_name)
                     events_created += 1
                 dojo_events.append(event)
@@ -187,15 +188,15 @@ class Command(BaseCommand):
             attended_count = 0
             for event in p_rng.sample(candidate_events, k=min(len(candidate_events), p_rng.randint(0, 25))):
                 attended = p_rng.random() < 0.85  # the odd no-show, otherwise present
-                _, was_created = Registration.objects.get_or_create(
+                registration, was_created = Registration.objects.get_or_create(
                     event=event, participant=participant,
-                    defaults={
-                        "waiting_list": False,
-                        "position": 1,
-                        "attended": attended,
-                        "pathway": p_rng.choice(pathways) if pathways and p_rng.random() < 0.6 else None,
-                    },
+                    defaults={"waiting_list": False, "position": 1, "attended": attended},
                 )
+                if was_created:
+                    # What this ninja worked on: a subset of what the session covered.
+                    covered = list(event.pathways.all()) or pathways
+                    if covered and p_rng.random() < 0.8:
+                        registration.pathways.set(p_rng.sample(covered, k=p_rng.randint(1, min(2, len(covered)))))
                 registrations_created += 1 if was_created else 0
                 attended_count += attended
 

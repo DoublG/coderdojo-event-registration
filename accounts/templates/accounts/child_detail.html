@@ -73,6 +73,7 @@
               <th class="label" scope="col">Date</th>
               <th class="label" scope="col">Session</th>
               <th class="label" scope="col">Dojo</th>
+              <th class="label" scope="col">Worked on</th>
               <th class="label" scope="col">Mentors</th>
             </tr>
           </thead>
@@ -82,11 +83,12 @@
                 <td class="body-sm">{{ registration.event.start_time|date:"j M Y" }}</td>
                 <td class="body-sm">{{ registration.event.name }}</td>
                 <td class="body-sm">{{ registration.event.dojo.name }}</td>
+                <td class="body-sm">{% for pathway in registration.pathways.all %}{{ pathway.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
                 <td class="body-sm">{% for mentor in registration.event.team.all %}{{ mentor.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
               </tr>
             {% empty %}
               <tr>
-                <td class="body-sm" colspan="4">No past sessions yet.</td>
+                <td class="body-sm" colspan="5">No past sessions yet.</td>
               </tr>
             {% endfor %}
           </tbody>

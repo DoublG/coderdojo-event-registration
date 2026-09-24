@@ -137,6 +137,19 @@
       </section>
     {% endif %}
 
+    {% with pathways=dojo.pathways.all %}
+      {% if pathways %}
+        <section class="section">
+          <h2 class="heading-lg section-title">Pathways</h2>
+          <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+            {% for pathway in pathways %}
+              <a class="cd-badge cd-badge--outline caption" href="{% url 'pathway_detail' pathway_id=pathway.id %}">{{ pathway.name }}</a>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+    {% endwith %}
+
     <section class="section">
       <h2 class="heading-lg section-title">Run by</h2>
       <div class="row">

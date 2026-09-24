@@ -12,8 +12,8 @@ From your dashboard's **Events** page, **New event** creates a new
 session for your dojo — name, a date with a start and end time (a
 session always runs within a single day, entered as dd/mm/yyyy and a
 24-hour time, e.g. 20/07/2030 and 14:00), how many places it has, and
-optionally a venue, description, an age range, and who from your dojo's
-team runs it.
+optionally a venue, description, an age range, who from your dojo's
+team runs it, and which pathways it covers (see below).
 
 For the banner image, pick one of the ready-made templates shown on the
 form, or upload your own further down — uploading a file always takes
@@ -63,9 +63,30 @@ the highlighted button again clears the mark, in case you tapped the
 wrong one. **Mark all present** marks everyone present in one go, after
 which you can switch the few who didn't come to **Absent**.
 
+Each child's row also has a **Pathways** menu, listing what they work on
+at that session. It starts out as every pathway the session covers; tick
+or untick pathways to match what this child actually did, then **Save
+pathways**. These are what the family sees in their child's session
+history.
+
 Your dashboard's **Attendance** page shows the same list for your next
 upcoming session (or your most recent one, if nothing's scheduled), so on
 the day itself you can start marking without looking the session up.
+
+Pathways
+---------
+
+Pathways (Scratch, Python, micro:bit, ...) can be set at three levels,
+each one pre-filled from the level above. All of them are optional:
+
+- **Your dojo** — on the **Settings** page, tick the pathways your dojo
+  provides. They're shown on your dojo's public page.
+- **A session** — a new session starts with your dojo's pathways ticked.
+  You can add or remove any pathway for that particular session; they're
+  shown on the session's public page.
+- **Each child at a session** — when a family signs up, their child's
+  pathways start as the session's. You can narrow them down while taking
+  attendance (see above).
 
 Managing your team
 --------------------
