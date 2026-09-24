@@ -46,9 +46,31 @@ class User(AbstractUser):
     account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default=ADULT)
     phone = models.CharField(max_length=30, blank=True, default="")
 
+    # The team-page profile: shown wherever this person appears on a dojo's
+    # team (dojos.DojoMembership), and shared by every dojo they're on.
+    display_name = models.CharField(
+        max_length=150, blank=True, default="",
+        help_text="How this person is named on team pages; defaults to their full name.",
+    )
+    title = models.CharField(max_length=200, blank=True, default="", help_text='e.g. "Software engineer"')
+    bio = models.TextField(blank=True, default="")
+    photo = models.ImageField(upload_to="profiles/", null=True, blank=True)
+    show_on_team_pages = models.BooleanField(
+        default=True, help_text="Uncheck to keep this person off the public team pages.",
+    )
+
     @property
     def is_ninja(self):
         return self.account_type == self.NINJA
+
+    @property
+    def team_name(self):
+        """The name shown on team pages: display_name, else full name
+        (first name only for a ninja), else the username."""
+        if self.display_name:
+            return self.display_name
+        name = self.first_name if self.is_ninja else self.get_full_name()
+        return name or self.get_username()
 
     @property
     def background_check_valid(self):
@@ -58,21 +80,24 @@ class User(AbstractUser):
 
 
 class DojoOwner(User):
+    """Marks an adult account as an approved dojo owner (from an approved
+    DojoApplication). Being a dojo's champion is a dojos.DojoMembership;
+    this role subclass goes away in redesign phase 3."""
+
     class Meta:
         verbose_name = "dojo owner"
         verbose_name_plural = "dojo owners"
 
     def __str__(self):
-        dojo_names = ", ".join(self.dojos.values_list("name", flat=True)) or "no dojos"
-        return f"{self.get_username()} ({dojo_names})"
+        return self.get_username()
 
 
 class HelperAccount(User):
-    """A login for an adult who helps out at a dojo but isn't its
-    registered owner and isn't a participant's guardian — e.g. a plain
-    volunteer or board mentor. See dojos.Mentor for how this, a parent's
-    account and a ninja's account are the account types a non-lead mentor profile can
-    be linked to."""
+    """Marks an adult account as an approved mentor (from an approved
+    MentorApplication): what lets it ask to join, or be added to, a dojo's
+    team (dojos.access.is_approved_mentor). The team roles themselves live
+    on dojos.DojoMembership. Replaced by the account-level Application in
+    redesign phase 3."""
 
     class Meta:
         verbose_name = "helper account"

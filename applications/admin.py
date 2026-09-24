@@ -5,7 +5,7 @@ from django.utils.html import format_html
 
 from accounts.models import DojoOwner, HelperAccount
 from accounts.provisioning import attach_role, provision_account
-from dojos.models import Mentor
+from dojos.team import TeamError, request_to_join
 
 from .models import BACKGROUND_CHECK_VALIDITY, BackgroundCheckMixin, DojoApplication, MentorApplication
 from .services import send_background_check_request, send_role_activated_email
@@ -127,22 +127,18 @@ def approve_and_provision_owner(modeladmin, request, queryset):
 
 
 def _link_helper_to_dojo(application, account):
-    """An application for a specific dojo gets the new helper a Mentor
-    profile at that dojo — the link dojos.access uses to open that dojo's
-    admin area to them. Kept off the public team pages (is_public=False)
-    until someone opts them in. A helper can help at several dojos (one
-    profile each), so this only skips when the application is open to any
-    dojo or they already have a profile at this one."""
-    if application.dojo_id is None or Mentor.objects.filter(helper_account=account, dojo_id=application.dojo_id).exists():
+    """An application for a specific dojo files a join request at that dojo
+    for the newly approved helper (dojos.team.request_to_join): its
+    champion/mentors accept it from their Team page, which is what opens the
+    dojo's admin area to them. Skipped when the application is open to any
+    dojo, or when a request can't be made (already on that team or waiting,
+    or the dojo isn't active)."""
+    if application.dojo_id is None:
         return
-    Mentor.objects.create(
-        name=application.applicant_name,
-        dojo_id=application.dojo_id,
-        role=Mentor.VOLUNTEER,
-        email=application.applicant_email,
-        helper_account=account,
-        is_public=False,
-    )
+    try:
+        request_to_join(application.dojo, account)
+    except TeamError:
+        pass
 
 
 @admin.action(description="Approve & email a helper login to the applicant")

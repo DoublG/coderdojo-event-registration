@@ -7,6 +7,14 @@ from geo.models import AdministrativeBoundary, Municipality
 MARKDOWN_HELP_TEXT = "Supports basic Markdown — # headings, **bold**, *italic*, links, lists."
 
 
+class DojoQuerySet(models.QuerySet):
+    def public(self):
+        """What the public site may show: `active` dojos only. Draft,
+        dormant and archived dojos stay reachable for their own team (the
+        admin area) and in ninjas' own history, never in public listings."""
+        return self.filter(status=Dojo.ACTIVE)
+
+
 class Dojo(models.Model):
     name = models.CharField(max_length=200)
     municipality = models.ForeignKey(Municipality, on_delete=models.CASCADE, null=True, blank=True)
@@ -20,8 +28,17 @@ class Dojo(models.Model):
     )
     address = models.CharField(max_length=200, blank=True, default="")
     location = models.PointField(srid=4326, null=True, blank=True, spatial_index=False)
-    owner = models.ForeignKey(
-        "accounts.DojoOwner", on_delete=models.SET_NULL, null=True, blank=True, related_name="dojos"
+    # Lifecycle (DATA_MODEL.md §10). A new dojo starts as a draft its
+    # champion sets up; only `active` dojos (and their events) are public.
+    DRAFT = "draft"
+    ACTIVE = "active"
+    DORMANT = "dormant"
+    ARCHIVED = "archived"
+    STATUS_CHOICES = [(DRAFT, "Draft"), (ACTIVE, "Active"), (DORMANT, "Dormant"), (ARCHIVED, "Archived")]
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=DRAFT)
+    created_by = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        help_text="The approved champion who created this dojo.",
     )
     icon = models.ImageField(
         upload_to="dojos/", null=True, blank=True,
@@ -52,155 +69,149 @@ class Dojo(models.Model):
     def __str__(self):
         return f"{self.name} ({self.municipality})"
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.sync_lead_coach()
+    objects = DojoQuerySet.as_manager()
 
-    def sync_lead_coach(self):
-        """The dojo's owner *is* its Lead Coach: keeps exactly one LEAD_COACH
-        Mentor here, linked to the current owner. Runs on every save, so
-        setting or changing Dojo.owner anywhere (Django admin, seed data,
-        future self-service flows) keeps the team page in step. Idempotent.
+    def __str__(self):
+        return f"{self.name} ({self.municipality})"
 
-        A previous owner's Lead Coach profile isn't deleted when ownership
-        changes — events it's linked to (Event.mentors) would lose their
-        history — it's demoted to a plain volunteer profile with no login
-        link instead."""
-        stale = self.mentors.filter(role=Mentor.LEAD_COACH)
-        if self.owner_id:
-            stale = stale.exclude(owner_account_id=self.owner_id)
-        stale.update(role=Mentor.VOLUNTEER, owner_account=None)
+    @property
+    def is_public(self):
+        return self.status == self.ACTIVE
 
-        if not self.owner_id or self.mentors.filter(role=Mentor.LEAD_COACH).exists():
-            return
-        owner = self.owner
-        Mentor.objects.create(
-            dojo=self,
-            role=Mentor.LEAD_COACH,
-            owner_account=owner,
-            name=owner.get_full_name() or owner.get_username(),
-            email=owner.email,
+    @property
+    def champion_membership(self):
+        return self.memberships.filter(role=DojoMembership.CHAMPION, status=DojoMembership.ACTIVE).first()
+
+    @property
+    def champion(self):
+        """The dojo's champion (owner) account, or None."""
+        membership = self.champion_membership
+        return membership.user if membership else None
+
+
+class DojoMembershipQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(status=DojoMembership.ACTIVE)
+
+    def managers(self):
+        """Active champion/mentor memberships: the people who run the dojo
+        (admin access, notifications). Youth mentors are on the team, but
+        never manage it."""
+        return self.active().filter(role__in=DojoMembership.MANAGER_ROLES)
+
+    def for_team_page(self):
+        """What a dojo's public team listing shows: active members who
+        haven't opted out, the champion first, then mentors, then youth
+        mentors, each alphabetically."""
+        return (
+            self.active()
+            .filter(user__show_on_team_pages=True)
+            .select_related("user")
+            .order_by(
+                Case(
+                    When(role=DojoMembership.CHAMPION, then=0),
+                    When(role=DojoMembership.MENTOR, then=1),
+                    default=2,
+                ),
+                "user__first_name", "user__username",
+            )
         )
 
 
-class MentorQuerySet(models.QuerySet):
-    def public(self):
-        """Excludes mentors who've opted out of appearing on the public
-        team pages (dojo page, team page, homepage) — see Mentor.is_public."""
-        return self.filter(is_public=True)
+class DojoMembership(models.Model):
+    """One account's place on one dojo's team (DATA_MODEL.md §10): its role
+    there and where it is in the join → leave lifecycle. Replaces Dojo.owner
+    and the old Mentor profile table — the team-page profile itself (name,
+    title, bio, photo) lives on the account and is shared by every dojo the
+    person is on.
 
-    def lead_coach_first(self):
-        """A dojo's LEAD_COACH is always shown first — see the Mentor
-        docstring for why that's the one role tied to a real DojoOwner
-        login rather than an optional helper account."""
-        return self.public().order_by(Case(When(role=Mentor.LEAD_COACH, then=0), default=1), "name")
+    Roles: `champion` (the dojo's owner — exactly one active per dojo),
+    `mentor` (an adult helper) and `youth_mentor` (a ninja helping run
+    sessions, promoted by a champion/mentor of the same dojo). Rows are
+    never deleted when someone leaves: they go `dormant`, so past events'
+    teams (Event.team) keep their history."""
 
-
-class Mentor(models.Model):
-    """A public team-page profile. Exactly one role per dojo carries real
-    operational authority — LEAD_COACH — and that one is the dojo's owner:
-    linked to the dojo's own DojoOwner login (owner_account), created and
-    kept in step with Dojo.owner automatically (Dojo.sync_lead_coach), and
-    always shown first.
-    CHAMPION is a distinct, separate role: an honorary/promoted status (e.g.
-    a stand-out ninja recognised by someone with admin rights) with no
-    account requirement of its own. Every non-lead-coach role (champion,
-    ninja, volunteer, board — the "helpers") may optionally be linked to
-    whichever of the three account types actually holds their login:
-    a HelperAccount (a plain adult volunteer), a parent's account (someone
-    who helps out at their own kid's dojo), or a ninja's own account. At
-    most one of the four account fields may be set; see clean()."""
-
-    LEAD_COACH = "lead_coach"
     CHAMPION = "champion"
-    NINJA = "ninja"
-    VOLUNTEER = "volunteer"
-    BOARD = "board"
-    ROLE_CHOICES = [
-        (LEAD_COACH, "Lead Coach"),
-        (CHAMPION, "Dojo champion"),
-        (NINJA, "Ninja mentor"),
-        (VOLUNTEER, "Volunteer mentor"),
-        (BOARD, "Board member"),
-    ]
+    MENTOR = "mentor"
+    YOUTH_MENTOR = "youth_mentor"
+    ROLE_CHOICES = [(CHAMPION, "Champion"), (MENTOR, "Mentor"), (YOUTH_MENTOR, "Youth mentor")]
+    MANAGER_ROLES = (CHAMPION, MENTOR)
 
-    name = models.CharField(max_length=200)
-    dojo = models.ForeignKey(
-        Dojo, on_delete=models.SET_NULL, null=True, blank=True, related_name="mentors",
-        help_text="Left blank for board members, who work across dojos.",
-    )
+    REQUESTED = "requested"
+    ACTIVE = "active"
+    DORMANT = "dormant"
+    STATUS_CHOICES = [(REQUESTED, "Requested"), (ACTIVE, "Active"), (DORMANT, "Dormant")]
+
+    dojo = models.ForeignKey(Dojo, on_delete=models.CASCADE, related_name="memberships")
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="dojo_memberships")
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    title = models.CharField(max_length=200, blank=True, default="", help_text='e.g. "Software engineer"')
-    email = models.EmailField(blank=True, default="", help_text="Shown on their team detail page, if set.")
-    bio = models.TextField(blank=True, default="")
-    photo = models.ImageField(upload_to="mentors/", null=True, blank=True)
-    joined_date = models.DateField(null=True, blank=True)
-    sessions_run = models.PositiveIntegerField(null=True, blank=True)
-    focus_areas = models.CharField(
-        max_length=300, blank=True, default="",
-        help_text="Comma-separated, board members only, e.g. \"Volunteer recruitment, Partnerships\"",
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=ACTIVE)
+    requested_by = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        help_text="Who asked (the mentor themselves) or added them (a champion/mentor).",
     )
+    decided_by = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        help_text="The champion/mentor who accepted or declined a join request.",
+    )
+    promoted_by = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        help_text="Youth mentors only: the champion/mentor membership that promoted them.",
+    )
+    joined_at = models.DateTimeField(null=True, blank=True, help_text="When this membership (last) became active.")
+    left_at = models.DateTimeField(null=True, blank=True, help_text="When it became dormant; empty while active.")
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    # Exactly one of these four should be set — see the class docstring
-    # and clean(). All nullable/optional: plenty of mentor profiles (e.g.
-    # seed/demo data, or a dojo's ninjas in general) have no login at all.
-    # A ForeignKey: an owner of several dojos is the Lead Coach of each
-    # (one profile per dojo — see Dojo.sync_lead_coach, which keeps this in
-    # step with Dojo.owner automatically).
-    owner_account = models.ForeignKey(
-        "accounts.DojoOwner", on_delete=models.SET_NULL, null=True, blank=True, related_name="mentor_profiles",
-        help_text="Required for the LEAD_COACH mentor — must be this mentor's dojo's own owner login. "
-                  "Set automatically from the dojo's owner.",
-    )
-    # A ForeignKey, not a one-to-one like the other three: a helper can
-    # help at several dojos (one Mentor profile per dojo), the same way a
-    # DojoOwner can own several (Dojo.owner). Each profile is also what
-    # opens that dojo's admin area to them — see dojos.access.
-    helper_account = models.ForeignKey(
-        "accounts.HelperAccount", on_delete=models.SET_NULL, null=True, blank=True, related_name="mentor_profiles",
-    )
-    guardian_account = models.OneToOneField(
-        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="guardian_mentor_profile",
-        help_text="A parent helping out at their own child's dojo.",
-    )
-    child_account = models.OneToOneField(
-        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="ninja_mentor_profile",
-        help_text="A ninja's own login — only meaningful once they've been promoted to CHAMPION.",
-    )
-
-    is_public = models.BooleanField(
-        default=True, help_text="Uncheck to opt this person out of the public team pages."
-    )
-
-    objects = MentorQuerySet.as_manager()
+    objects = DojoMembershipQuerySet.as_manager()
 
     class Meta:
-        constraints = [
-            # One profile per helper per dojo. Rows without a helper login
-            # (NULL helper_account) never collide — NULLs are distinct in a
-            # unique index.
-            models.UniqueConstraint(fields=["dojo", "helper_account"], name="unique_helper_per_dojo"),
-            models.UniqueConstraint(fields=["dojo", "owner_account"], name="unique_owner_profile_per_dojo"),
-        ]
+        constraints = [models.UniqueConstraint(fields=["dojo", "user"], name="unique_membership_per_dojo")]
 
     def __str__(self):
-        return f"{self.name} ({self.get_role_display()})"
+        return f"{self.name} ({self.get_role_display()}, {self.dojo.name})"
 
     def clean(self):
-        linked_accounts = [
-            f for f in ("owner_account", "helper_account", "guardian_account", "child_account")
-            if getattr(self, f"{f}_id")
-        ]
-        if len(linked_accounts) > 1:
-            raise ValidationError("A mentor can be linked to only one account.")
+        if self.role == self.YOUTH_MENTOR:
+            if not self.user.is_ninja:
+                raise ValidationError("Only a ninja account can be a youth mentor.")
+        elif self.user.is_ninja:
+            raise ValidationError("A ninja account can only be a youth mentor.")
+        if self.role == self.CHAMPION and self.status == self.ACTIVE:
+            others = DojoMembership.objects.filter(
+                dojo_id=self.dojo_id, role=self.CHAMPION, status=self.ACTIVE,
+            ).exclude(pk=self.pk)
+            if others.exists():
+                raise ValidationError("This dojo already has an active champion.")
+        if self.promoted_by_id:
+            promoter = self.promoted_by
+            if promoter.dojo_id != self.dojo_id or promoter.role not in self.MANAGER_ROLES:
+                raise ValidationError("A youth mentor must be promoted by a champion or mentor of the same dojo.")
 
-        if self.role == self.LEAD_COACH:
-            if not self.owner_account_id:
-                raise ValidationError("The Lead Coach must be linked to the dojo's owner account.")
-            if self.dojo_id and self.owner_account.dojos.filter(id=self.dojo_id).count() == 0:
-                raise ValidationError("The linked owner account must own this mentor's dojo.")
-            other_lead = Mentor.objects.filter(dojo_id=self.dojo_id, role=self.LEAD_COACH).exclude(pk=self.pk)
-            if self.dojo_id and other_lead.exists():
-                raise ValidationError("This dojo already has a Lead Coach — its owner.")
-        elif self.owner_account_id:
-            raise ValidationError("Only the Lead Coach can be linked to a dojo owner account.")
+    # Display fields for the team pages and shared avatar partial — the
+    # profile itself lives on the account (shared by all its dojos).
+    @property
+    def name(self):
+        return self.user.team_name
+
+    @property
+    def title(self):
+        return self.user.title
+
+    @property
+    def bio(self):
+        return self.user.bio
+
+    @property
+    def photo(self):
+        return self.user.photo
+
+    @property
+    def email(self):
+        return "" if self.user.is_ninja else self.user.email
+
+    @property
+    def sessions_run(self):
+        """Past sessions this member was on the team of."""
+        from django.utils import timezone
+
+        return self.events.filter(start_time__lt=timezone.now()).count()

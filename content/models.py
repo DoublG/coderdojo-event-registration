@@ -76,3 +76,42 @@ class Announcement(models.Model):
 
     def __str__(self):
         return f"{self.dojo} - {self.date}"
+
+
+class OrganisationTeamMember(models.Model):
+    """Someone listed on the organisation's team details page (the
+    homepage's "Meet the team" and team/<id>/) — display only, with a
+    position; "Member of the board" is just one possible position. Separate
+    from access: being listed grants nothing, and not everyone with access
+    to the management dashboards is listed. Maintained by staff; there's no
+    self-service (DATA_MODEL.md §10)."""
+
+    name = models.CharField(max_length=200)
+    position = models.CharField(max_length=200, help_text='e.g. "Member of the board", "Volunteer coordinator"')
+    email = models.EmailField(blank=True, default="", help_text="Shown on their detail page, if set.")
+    bio = models.TextField(blank=True, default="")
+    photo = models.ImageField(upload_to="team/", null=True, blank=True)
+    focus_areas = models.CharField(
+        max_length=300, blank=True, default="", help_text='Comma-separated, e.g. "Partnerships, Events"',
+    )
+    joined_date = models.DateField(null=True, blank=True)
+    order = models.PositiveSmallIntegerField(default=0, help_text="Lower comes first.")
+    is_public = models.BooleanField(default=True)
+    account = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        help_text="Optional: the person's own account, if they have one.",
+    )
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.position})"
+
+    # Shared avatar partial (dojos/partials/_mentor_avatar.html) colours the
+    # ring by role; organisation team members all use the "board" ring.
+    role = "board"
+
+    @property
+    def focus_area_list(self):
+        return [area.strip() for area in self.focus_areas.split(",") if area.strip()]

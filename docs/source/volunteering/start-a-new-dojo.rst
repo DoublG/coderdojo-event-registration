@@ -19,7 +19,7 @@ login — you don't need an account first.
    else useful for us to know.
 #. Confirm you understand sessions are free and volunteer-run, and that a
    background check will be required (see :doc:`background-check`) since
-   a dojo's lead coach works directly with minors — then submit.
+   a dojo's champion works directly with minors — then submit.
 
 What happens next
 -------------------

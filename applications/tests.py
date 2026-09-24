@@ -11,7 +11,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import DojoOwner, HelperAccount, User
-from dojos.models import Dojo, Mentor
+from dojos.models import Dojo, DojoMembership
+from dojos.testing import make_dojo
 
 from .admin import (
     approve_and_provision_helper,
@@ -150,11 +151,11 @@ class RegisterHelperViewTests(TestCase):
         application = MentorApplication.objects.get()
         self.assertEqual(application.applicant_account_id, guardian.pk)
 
-    def test_notifies_the_dojo_owner_when_a_dojo_was_picked(self):
+    def test_notifies_the_dojo_team_when_a_dojo_was_picked(self):
         owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
-        dojo = Dojo.objects.create(name="Ghent", owner=owner)
+        dojo = make_dojo("Ghent", champion=owner)
 
-        with patch("applications.views.notify") as mock_notify:
+        with patch("dojos.team.notify") as mock_notify:
             self.client.post(
                 reverse("register_helper"),
                 {
@@ -168,13 +169,13 @@ class RegisterHelperViewTests(TestCase):
 
         mock_notify.assert_called_once()
         args, kwargs = mock_notify.call_args
-        self.assertEqual(args[0], owner)
+        self.assertEqual(args[0].pk, owner.pk)
         self.assertIn("Priya Nair", args[1])
         self.assertIn("Ghent", args[1])
         self.assertEqual(kwargs["dojo"], dojo)
 
     def test_no_notification_when_no_dojo_was_picked(self):
-        with patch("applications.views.notify") as mock_notify:
+        with patch("dojos.team.notify") as mock_notify:
             self.client.post(
                 reverse("register_helper"),
                 {
@@ -186,10 +187,10 @@ class RegisterHelperViewTests(TestCase):
             )
         mock_notify.assert_not_called()
 
-    def test_no_notification_when_the_dojo_has_no_owner(self):
-        dojo = Dojo.objects.create(name="Ghent")
+    def test_no_notification_when_the_dojo_has_no_team(self):
+        dojo = make_dojo("Ghent")
 
-        with patch("applications.views.notify") as mock_notify:
+        with patch("dojos.team.notify") as mock_notify:
             self.client.post(
                 reverse("register_helper"),
                 {
@@ -629,10 +630,11 @@ class ApproveAndProvisionHelperActionTests(TestCase):
         self.assertEqual(application.status, MentorApplication.APPROVED)
         self.assertTrue(HelperAccount.objects.filter(email="tom@example.com").exists())
 
-    def test_application_for_a_dojo_links_the_helper_to_it(self):
-        """The Mentor link is what gives a helper access to that dojo's
-        admin area (dojos.access) — kept off the public team page."""
-        dojo = Dojo.objects.create(name="Ghent")
+    def test_application_for_a_dojo_files_a_join_request_there(self):
+        """Approval makes the helper an approved mentor and files a join
+        request at the dojo they picked; that dojo's team accepts it (which
+        is what opens the dojo's admin area to them)."""
+        dojo = make_dojo("Ghent")
         application = MentorApplication.objects.create(
             applicant_name="Tom", applicant_email="tom@example.com", dojo=dojo,
             background_check_status=BackgroundCheckMixin.VALIDATED,
@@ -644,10 +646,10 @@ class ApproveAndProvisionHelperActionTests(TestCase):
         )
 
         helper = HelperAccount.objects.get(email="tom@example.com")
-        mentor = Mentor.objects.get(helper_account=helper)
-        self.assertEqual(mentor.dojo, dojo)
-        self.assertEqual(mentor.role, Mentor.VOLUNTEER)
-        self.assertFalse(mentor.is_public)
+        membership = DojoMembership.objects.get(user=helper)
+        self.assertEqual(membership.dojo, dojo)
+        self.assertEqual(membership.role, DojoMembership.MENTOR)
+        self.assertEqual(membership.status, DojoMembership.REQUESTED)
 
     def test_application_open_to_any_dojo_creates_no_link(self):
         application = MentorApplication.objects.create(
@@ -660,7 +662,7 @@ class ApproveAndProvisionHelperActionTests(TestCase):
             Mock(), _request_as(self.staff_user), MentorApplication.objects.filter(pk=application.pk),
         )
 
-        self.assertFalse(Mentor.objects.exists())
+        self.assertFalse(DojoMembership.objects.exists())
 
     def _validated_helper_application(self, **fields):
         return MentorApplication.objects.create(
@@ -677,11 +679,11 @@ class ApproveAndProvisionHelperActionTests(TestCase):
 
     def test_existing_helper_approved_for_a_second_dojo(self):
         """Helpers can help at several dojos, like owners can own several:
-        a second approved application adds a second Mentor link (and a
+        a second approved application files a second join request (and a
         second provisioned_helper pointer) instead of failing or moving
         the first."""
-        ghent = Dojo.objects.create(name="Ghent")
-        antwerp = Dojo.objects.create(name="Antwerp")
+        ghent = make_dojo("Ghent")
+        antwerp = make_dojo("Antwerp")
         first = self._validated_helper_application(dojo=ghent)
         self._approve(first)
         helper = HelperAccount.objects.get(email="tom@example.com")
@@ -691,7 +693,7 @@ class ApproveAndProvisionHelperActionTests(TestCase):
 
         self.assertEqual(HelperAccount.objects.count(), 1)
         self.assertEqual(
-            set(Mentor.objects.filter(helper_account=helper).values_list("dojo__name", flat=True)),
+            set(DojoMembership.objects.filter(user=helper).values_list("dojo__name", flat=True)),
             {"Ghent", "Antwerp"},
         )
         first.refresh_from_db()
@@ -701,13 +703,17 @@ class ApproveAndProvisionHelperActionTests(TestCase):
         self.assertEqual(second.status, MentorApplication.APPROVED)
 
     def test_second_application_for_the_same_dojo_adds_no_duplicate_link(self):
-        ghent = Dojo.objects.create(name="Ghent")
+        ghent = make_dojo("Ghent")
         helper = HelperAccount.objects.create(username="tom", email="tom@example.com")
-        existing = Mentor.objects.create(name="Tom", dojo=ghent, role=Mentor.VOLUNTEER, helper_account=helper)
+        existing = DojoMembership.objects.create(
+            dojo=ghent, user=helper, role=DojoMembership.MENTOR, status=DojoMembership.ACTIVE,
+        )
 
         self._approve(self._validated_helper_application(dojo=ghent, applicant_account=helper))
 
-        self.assertEqual(list(Mentor.objects.all()), [existing])
+        self.assertEqual(list(DojoMembership.objects.all()), [existing])
+        existing.refresh_from_db()
+        self.assertEqual(existing.status, DojoMembership.ACTIVE)
 
     def test_second_approval_never_shortens_the_accounts_check(self):
         later = timezone.now() + timedelta(days=300)
@@ -716,7 +722,7 @@ class ApproveAndProvisionHelperActionTests(TestCase):
             background_check_required=True, background_check_expires_at=later,
         )
 
-        self._approve(self._validated_helper_application(dojo=Dojo.objects.create(name="Ghent"), applicant_account=helper))
+        self._approve(self._validated_helper_application(dojo=make_dojo("Ghent"), applicant_account=helper))
 
         helper.refresh_from_db()
         self.assertEqual(helper.background_check_expires_at, later)

@@ -180,7 +180,7 @@ class MentorApplication(BackgroundCheckMixin, models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     # A ForeignKey: one helper can be approved for several dojos, one
-    # application each (see dojos.Mentor.helper_account).
+    # application each (see dojos.DojoMembership).
     provisioned_helper = models.ForeignKey(
         "accounts.HelperAccount", on_delete=models.SET_NULL, null=True, blank=True, related_name="applications",
         help_text="Set by approve_and_provision_helper. Lets a later background-check renewal "

@@ -1,9 +1,10 @@
 {% comment %}
-Renders one mentor's round avatar: their seeded/uploaded photo if they have
-one, else the plain placeholder circle. Expects a `mentor` Mentor instance;
-the role-ring modifier class (cd-mentor__avatar--lead_coach/champion/ninja/
-volunteer/board — one per Mentor.ROLE_CHOICES) is computed here from
-mentor.role so every call site stays in sync.
+Renders one team member's round avatar: their uploaded photo if they have
+one, else the plain placeholder circle. Expects `mentor` to be either a
+dojos.DojoMembership (a dojo's team) or a content.OrganisationTeamMember
+(the organisation's team); both expose .photo and .role. The role-ring
+modifier class (cd-mentor__avatar--champion/mentor/youth_mentor/board) is
+computed here from mentor.role so every call site stays in sync.
 Usage:
   {% include "dojos/partials/_mentor_avatar.html" with mentor=mentor %}
 {% endcomment %}

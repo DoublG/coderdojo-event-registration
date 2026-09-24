@@ -1,7 +1,7 @@
 Running a session
 ====================
 
-A dojo's dashboard (for its owner and helpers) is built around the dojo's next upcoming session
+A dojo's dashboard (for its champion and mentors) is built around the dojo's next upcoming session
 (or its most recent past one, if nothing's scheduled), showing who's
 confirmed for it.
 
@@ -12,7 +12,8 @@ From your dashboard's **Events** page, **New event** creates a new
 session for your dojo — name, a date with a start and end time (a
 session always runs within a single day, entered as dd/mm/yyyy and a
 24-hour time, e.g. 20/07/2030 and 14:00), how many places it has, and
-optionally a venue, description, an age range and one or more mentors.
+optionally a venue, description, an age range, and who from your dojo's
+team runs it.
 
 For the banner image, pick one of the ready-made templates shown on the
 form, or upload your own further down — uploading a file always takes
@@ -66,11 +67,50 @@ Your dashboard's **Attendance** page shows the same list for your next
 upcoming session (or your most recent one, if nothing's scheduled), so on
 the day itself you can start marking without looking the session up.
 
+Managing your team
+--------------------
+
+The **Team** page in the sidebar lists everyone on your dojo's team — its
+champion, mentors and youth mentors — and lets you:
+
+- **Accept or decline join requests.** Approved mentors can ask to join
+  from your dojo's public page; you'll get a notification when they do.
+- **Add a mentor** directly, by the email address of their account. Only
+  mentors whose application and background check have been approved can
+  be added.
+- **Promote a youth mentor** — a ninja with their own login who helps run
+  sessions at your dojo.
+- **Remove someone** from the team, or **leave** it yourself. People who
+  leave stay listed on the past sessions they helped run.
+- **Hand over the champion role** (champion only) to one of your mentors.
+  You stay on the team as a mentor.
+
+Your dojo's status
+---------------------
+
+The **Settings** page shows your dojo's status, which only its champion
+can change:
+
+- **Draft** — a new dojo starts here, hidden from the public site while
+  you set it up. **Launch dojo** makes it public.
+- **Active** — listed in the dojo finder, with its sessions open for
+  sign-ups.
+- **Dormant** — not running for now: hidden from the public site, but
+  still in ninjas' history. **Restart dojo** brings it back.
+- **Archived** — closed: hidden from the public site. **Reopen as draft**
+  brings it back as a draft.
+
+A dojo can only be made dormant or archived when it has no upcoming
+sessions in draft or open for sign-ups; any pending join requests are
+declined. If no sessions have been planned for over six months, the
+dashboard reminds you to plan one or mark the dojo dormant.
+
 Team pages
 -----------
 
 A dojo's public team page (visible to anyone, not just the dojo team)
-shows its mentors, with the lead coach always listed first. Team member
-details — bio, title, focus areas — are currently managed on your behalf
-by CoderDojo Belgium rather than self-service; get in touch to update
-yours.
+shows its champion first, followed by its mentors and youth mentors.
+Everyone's name, title, bio and photo come from their own account and are
+the same on every dojo they're part of; these details are currently
+managed on your behalf by CoderDojo Belgium rather than self-service — get
+in touch to update yours.

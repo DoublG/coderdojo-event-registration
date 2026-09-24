@@ -2,7 +2,7 @@ The background check
 =======================
 
 Belgian law requires anyone who'll be in direct contact with minors —
-a dojo's lead coach, or any mentor/volunteer working with ninjas — to
+a dojo's champion, or any mentor/volunteer working with ninjas — to
 provide a specific extract from the criminal record before they start:
 the **uittreksel uit het strafregister, model 2** (Article 596.2). This
 applies whether you're applying to start a dojo or to volunteer at one.

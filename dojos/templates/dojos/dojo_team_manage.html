@@ -1,0 +1,174 @@
+{% extends "dojos/_admin_base.html" %}
+{% block admin_page_title %}Team{% endblock %}
+{% block admin_heading %}Team{% endblock %}
+
+{% block admin_extra_style %}
+<style>
+  .team-manage { max-width: 820px; display: flex; flex-direction: column; gap: var(--space-5); }
+  .team-manage h2 { color: var(--ink); margin: 0 0 var(--space-3); }
+  .team-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; padding: var(--space-3) 0; border-bottom: 1px solid var(--border); }
+  .team-row:last-child { border-bottom: none; }
+  .team-row__person { display: flex; align-items: center; gap: var(--space-3); }
+  .team-row__person .cd-mentor__avatar { width: 40px; height: 40px; flex-shrink: 0; }
+  .team-row__meta { color: var(--ink-muted); margin: 0; }
+  .team-row__actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .team-manage .cd-card { padding: var(--space-5); }
+  .team-manage .inline-form { display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end; }
+  .team-manage .inline-form .cd-form__field { flex: 1 1 240px; margin: 0; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+{% comment %}
+A dojo's team (dojos.DojoMembership) and every change to it — see
+dojos.views.dojo_team_manage / dojo_team_action and dojos.team for the rules.
+Actions need MANAGE_TEAM, except leaving (any team manager) and
+transferring the champion role (the champion only).
+{% endcomment %}
+<div class="team-manage">
+
+  {% if requests %}
+    <section class="cd-card">
+      <h2 class="heading-md">Join requests</h2>
+      {% for membership in requests %}
+        <div class="team-row">
+          <div class="team-row__person">
+            {% include "dojos/partials/_mentor_avatar.html" with mentor=membership %}
+            <div>
+              <p class="body" style="margin: 0;">{{ membership.name }}</p>
+              <p class="caption team-row__meta">Asked {{ membership.created_at|date:"j M Y" }}{% if membership.user.email %} · {{ membership.user.email }}{% endif %}</p>
+            </div>
+          </div>
+          {% if dojo_access.can_manage_team %}
+            <form class="team-row__actions" method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}">
+              {% csrf_token %}
+              <input type="hidden" name="membership_id" value="{{ membership.id }}">
+              <button type="submit" name="action" value="accept" class="cd-btn cd-btn--secondary label">Accept</button>
+              <button type="submit" name="action" value="decline" class="cd-btn cd-btn--ghost label">Decline</button>
+            </form>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </section>
+  {% endif %}
+
+  <section class="cd-card">
+    <h2 class="heading-md">Current team</h2>
+    {% for membership in active_members %}
+      <div class="team-row">
+        <div class="team-row__person">
+          {% include "dojos/partials/_mentor_avatar.html" with mentor=membership %}
+          <div>
+            <p class="body" style="margin: 0;">{{ membership.name }}{% if membership.user_id == request.user.id %} (you){% endif %}</p>
+            <p class="caption team-row__meta">
+              {{ membership.get_role_display }}
+              {% if membership.joined_at %} · since {{ membership.joined_at|date:"M Y" }}{% endif %}
+              {% if membership.promoted_by %} · promoted by {{ membership.promoted_by.name }}{% endif %}
+            </p>
+          </div>
+        </div>
+        <div class="team-row__actions">
+          {% if membership.user_id == request.user.id and membership.role != 'champion' %}
+            <form method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}"
+                  onsubmit="return confirm('Leave the {{ dojo.name }} team? You lose access to this dashboard.');">
+              {% csrf_token %}
+              <button type="submit" name="action" value="leave" class="cd-btn cd-btn--ghost label">Leave team</button>
+            </form>
+          {% elif dojo_access.can_manage_team and membership.role != 'champion' %}
+            <form method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}"
+                  onsubmit="return confirm('Remove {{ membership.name }} from the team?');">
+              {% csrf_token %}
+              <input type="hidden" name="membership_id" value="{{ membership.id }}">
+              <button type="submit" name="action" value="remove" class="cd-btn cd-btn--ghost label">Remove</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <p class="body-sm">Nobody on the team yet.</p>
+    {% endfor %}
+  </section>
+
+  {% if dojo_access.can_manage_team %}
+    <section class="cd-card">
+      <h2 class="heading-md">Add a mentor</h2>
+      <p class="body-sm" style="color: var(--ink-muted);">Only approved mentors (with a valid background check) can be added. They can also ask to join from the dojo's public page.</p>
+      <form class="cd-form inline-form" method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_mentor">
+        <div class="cd-form__field">
+          <label class="cd-form__label label" for="add-mentor-email">Their account's email</label>
+          <input class="cd-form__input body" type="email" id="add-mentor-email" name="email" required placeholder="mentor@example.com">
+        </div>
+        <button type="submit" class="cd-btn cd-btn--primary label">Add to team</button>
+      </form>
+    </section>
+
+    <section class="cd-card">
+      <h2 class="heading-md">Promote a youth mentor</h2>
+      {% if youth_mentor_candidates %}
+        <p class="body-sm" style="color: var(--ink-muted);">A ninja with their own login who helps run sessions here.</p>
+        <form class="cd-form inline-form" method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="promote">
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="promote-ninja">Ninja</label>
+            <select class="cd-form__select body" id="promote-ninja" name="ninja_id">
+              {% for ninja in youth_mentor_candidates %}
+                <option value="{{ ninja.id }}">{{ ninja.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="cd-btn cd-btn--secondary label">Promote</button>
+        </form>
+      {% else %}
+        <p class="body-sm" style="color: var(--ink-muted);">No ninjas with their own login are linked to this dojo yet (through their home dojo or a session sign-up).</p>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  {% if dojo_access.is_champion %}
+    <section class="cd-card">
+      <h2 class="heading-md">Hand over the champion role</h2>
+      {% if transfer_candidates %}
+        <p class="body-sm" style="color: var(--ink-muted);">Make one of your mentors this dojo's champion. You stay on the team as a mentor.</p>
+        <form class="cd-form inline-form" method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}"
+              onsubmit="return confirm('Hand over the champion role? You become a mentor.');">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="transfer">
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="transfer-to">New champion</label>
+            <select class="cd-form__select body" id="transfer-to" name="membership_id">
+              {% for membership in transfer_candidates %}
+                <option value="{{ membership.id }}">{{ membership.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="cd-btn cd-btn--ghost label">Hand over</button>
+        </form>
+      {% else %}
+        <p class="body-sm" style="color: var(--ink-muted);">You need at least one active mentor on the team to hand the champion role to.</p>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  {% if former_members %}
+    <section class="cd-card">
+      <h2 class="heading-md">Former team members</h2>
+      <p class="body-sm" style="color: var(--ink-muted);">No longer on the team, but still shown on the sessions they helped run.</p>
+      {% for membership in former_members %}
+        <div class="team-row">
+          <div class="team-row__person">
+            {% include "dojos/partials/_mentor_avatar.html" with mentor=membership %}
+            <div>
+              <p class="body" style="margin: 0;">{{ membership.name }}</p>
+              <p class="caption team-row__meta">{{ membership.get_role_display }}{% if membership.left_at %} · left {{ membership.left_at|date:"M Y" }}{% endif %}</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </section>
+  {% endif %}
+
+</div>
+{% endblock %}

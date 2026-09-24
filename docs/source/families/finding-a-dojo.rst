@@ -31,8 +31,8 @@ Click through to a dojo to see:
 - A description of the dojo and any visit notes (parking, entrance,
   accessibility).
 - Its next upcoming session, if one is scheduled.
-- Its team — the lead coach is always shown first, followed by the other
-  mentors and volunteers.
+- Its team — the champion (who runs the dojo) is always shown first,
+  followed by its mentors and youth mentors.
 - Any FAQs specific to that dojo, alongside the site-wide ones.
 
 From there, click through to a session to see full details and sign your

@@ -98,9 +98,9 @@
             </a>
           </li>
           <li>
-            <a href="#" class="cd-admin-nav__link label">
+            <a href="{% url 'dojo_team_manage' dojo_id=dojo.id %}" class="cd-admin-nav__link label{% if active == 'team' %} cd-admin-nav__link--active{% endif %}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 19c0-3.4 2.9-6 6.5-6s6.5 2.6 6.5 6"/><circle cx="18" cy="9" r="2.6"/><path d="M15.8 13.2c2.6.5 4.7 2.5 4.7 5.3"/></svg>
-              Helpers &amp; Mentors
+              Team
             </a>
           </li>
           <li>
@@ -158,6 +158,13 @@
         </div>
       </div>
 
+      {% if messages %}
+        <div class="cd-form__notes" style="margin-bottom: var(--space-4);">
+          {% for message in messages %}
+            <p class="cd-form__note {% if message.level_tag == 'error' %}cd-form__note--error{% else %}cd-form__note--success{% endif %}">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
       {% block admin_content %}{% endblock %}
     </div>
 

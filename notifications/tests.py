@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from accounts.models import DojoOwner
 from dojos.models import Dojo
+from dojos.testing import make_dojo
 
 from .models import Notification
 from .services import notify
@@ -13,7 +14,7 @@ class NotifyTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
-        cls.dojo = Dojo.objects.create(name="Ghent", owner=cls.owner)
+        cls.dojo = make_dojo("Ghent", champion=cls.owner)
 
     def test_creates_notification_row(self):
         notification = notify(self.owner, "Something happened.", url="/somewhere/", dojo=self.dojo)

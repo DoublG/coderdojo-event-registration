@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from accounts.models import Participant
-from dojos.models import Dojo, Mentor
+from dojos.models import Dojo
 from pathways.models import Pathway
 
 from .seed_events import SESSION_NAMES, assign_session_image, description_for
@@ -112,7 +112,7 @@ class Command(BaseCommand):
         events_created = 0
         for dojo in Dojo.objects.exclude(location=None).order_by("id"):
             dojo_rng = random.Random(f"history-dojo-{dojo.id}")
-            lead_coach = dojo.mentors.filter(role=Mentor.LEAD_COACH).first()
+            champion = dojo.champion_membership
             # ~6 years of history at roughly monthly cadence per dojo.
             dojo_events = []
             for event_date in dojo_rng.sample(dates, k=min(len(dates), dojo_rng.randint(30, 45))):
@@ -132,8 +132,8 @@ class Command(BaseCommand):
                     },
                 )
                 if was_created:
-                    if lead_coach:
-                        event.mentors.add(lead_coach)
+                    if champion:
+                        event.team.add(champion)
                     assign_session_image(event, session_name)
                     events_created += 1
                 dojo_events.append(event)

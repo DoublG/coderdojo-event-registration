@@ -6,10 +6,55 @@
 {% block admin_extra_style %}
 <style>
   .dojo-manage-form { max-width: 720px; }
+  .dojo-status-card { max-width: 720px; margin-bottom: var(--space-5); display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; justify-content: space-between; }
+  .dojo-status-card__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .dojo-status-card__help { flex-basis: 100%; margin: 0; }
 </style>
 {% endblock %}
 
 {% block admin_content %}
+  {% comment %}
+  The dojo's lifecycle (dojos.team.change_status): draft → active ⇄ dormant
+  → archived → draft. Only the champion can change it (MANAGE_LIFECYCLE).
+  {% endcomment %}
+  <div class="cd-card dojo-status-card">
+    <div>
+      <p class="cd-form__label label">Dojo status</p>
+      <span class="cd-badge {% if dojo.status == 'active' %}cd-badge--success{% elif dojo.status == 'draft' %}cd-badge--outline{% else %}cd-badge--warning{% endif %} caption">{{ dojo.get_status_display }}</span>
+    </div>
+    {% if dojo_access.can_manage_lifecycle %}
+      <form class="dojo-status-card__actions" method="post" action="{% url 'dojo_set_lifecycle' dojo_id=dojo.id %}">
+        {% csrf_token %}
+        {% if dojo.status == 'draft' %}
+          <button type="submit" name="action" value="launch" class="cd-btn cd-btn--primary label">Launch dojo</button>
+        {% elif dojo.status == 'active' %}
+          <button type="submit" name="action" value="go_dormant" class="cd-btn cd-btn--ghost label"{% if active_event_count %} disabled{% endif %}>Mark dormant</button>
+          <button type="submit" name="action" value="archive" class="cd-btn cd-btn--ghost label"{% if active_event_count %} disabled{% endif %}
+                  onclick="return confirm('Archive {{ dojo.name }}? It disappears from the public site until you reopen it.');">Archive</button>
+        {% elif dojo.status == 'dormant' %}
+          <button type="submit" name="action" value="restart" class="cd-btn cd-btn--primary label">Restart dojo</button>
+          <button type="submit" name="action" value="archive" class="cd-btn cd-btn--ghost label"{% if active_event_count %} disabled{% endif %}
+                  onclick="return confirm('Archive {{ dojo.name }}? It disappears from the public site until you reopen it.');">Archive</button>
+        {% else %}
+          <button type="submit" name="action" value="reopen" class="cd-btn cd-btn--secondary label">Reopen as draft</button>
+        {% endif %}
+      </form>
+    {% endif %}
+    <p class="dojo-status-card__help caption">
+      {% if dojo.status == 'draft' %}
+        Hidden from the public site while you set it up. Launch it when your profile, team and first sessions are ready.
+      {% elif dojo.status == 'active' %}
+        Public: listed in the dojo finder, with its sessions open for sign-ups.
+        {% if active_event_count %}It has {{ active_event_count }} upcoming session{{ active_event_count|pluralize }} in draft or open, so it can't be made dormant or archived yet.{% endif %}
+      {% elif dojo.status == 'dormant' %}
+        Not running for now: hidden from the public site, but kept in ninjas' history. Restart it any time.
+      {% else %}
+        Closed: hidden from the public site, kept in ninjas' history. Reopening brings it back as a draft.
+      {% endif %}
+      {% if not dojo_access.can_manage_lifecycle %}Only the dojo's champion can change its status.{% endif %}
+    </p>
+  </div>
+
   <div class="dojo-manage-form">
     <form class="cd-form" method="post" enctype="multipart/form-data" novalidate>
       {% csrf_token %}

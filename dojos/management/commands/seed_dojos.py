@@ -31,5 +31,7 @@ class Command(BaseCommand):
             )
 
         call_command("loaddata", str(DOJOS_FIXTURE))
+        # The fixture predates Dojo.status; these are real, running dojos.
+        Dojo.objects.update(status=Dojo.ACTIVE)
 
         self.stdout.write(self.style.SUCCESS(f"Done. dojos={Dojo.objects.count()}"))

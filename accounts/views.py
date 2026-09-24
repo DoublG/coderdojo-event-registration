@@ -18,7 +18,7 @@ from django.utils.text import slugify
 
 from dojos.access import accessible_dojos
 from events.models import Registration
-from notifications.services import notify
+from dojos.team import notify_managers
 
 from .forms import (
     ForcedPasswordChangeForm,
@@ -332,7 +332,7 @@ def ninja_detail(request, ninja_id):
     history = (
         child.registration_set.filter(event__start_time__lt=now)
         .select_related("event", "event__dojo")
-        .prefetch_related("event__mentors")
+        .prefetch_related("event__team__user")
         .order_by("-event__start_time")
     )
 
@@ -436,12 +436,10 @@ def cancel_registration(request, registration_id):
             if next_in_line:
                 next_in_line.waiting_list = False
                 next_in_line.save(update_fields=["waiting_list"])
-                if event.dojo.owner_id:
-                    notify(
-                        event.dojo.owner,
-                        f"A spot opened up in {event.name} — a waitlisted family is now confirmed.",
-                        url=reverse("dojo_dashboard", kwargs={"dojo_id": event.dojo_id}),
-                        dojo=event.dojo,
-                    )
+                notify_managers(
+                    event.dojo,
+                    f"A spot opened up in {event.name} — a waitlisted family is now confirmed.",
+                    url=reverse("dojo_dashboard", kwargs={"dojo_id": event.dojo_id}),
+                )
 
     return redirect("account_home")

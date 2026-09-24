@@ -12,13 +12,15 @@ asked to set your own password before you can go anywhere else on the
 site — this isn't optional, and there's no way to skip past it.
 
 After that, logging in takes you straight to your dojo's dashboard — as
-its owner, or as a helper if you applied to help at a specific dojo.
-(If you applied without picking a dojo, you'll land on the regular
-homepage until CoderDojo Belgium links you to one.) You can always get
-back to the dashboard from **Manage** in your account menu.
+its **champion** (the person who runs the dojo), or as a **mentor** once
+a dojo's team has accepted you. Until then you'll land on your account
+page. You can always get back to the dashboard from **Manage** in your
+account menu.
 
-The sidebar shows your role at that dojo under its name — **Owner** or
-**Helper**. Helpers can currently do everything an owner can on the
-dashboard: take attendance, create and edit sessions, and edit the dojo's
-settings. If you help at, or own, more than one dojo, click the dojo's
-name at the top of the sidebar to switch between them.
+The sidebar shows your role at that dojo under its name — **Champion** or
+**Mentor**. Mentors can do everything a champion can on the dashboard —
+take attendance, create and edit sessions, edit the dojo's settings and
+manage its team — except change the dojo's status (launching it, making
+it dormant, archiving it), which stays with the champion. If you help at,
+or run, more than one dojo, click the dojo's name at the top of the
+sidebar to switch between them.

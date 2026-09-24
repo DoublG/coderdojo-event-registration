@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from accounts.models import Guardianship, Participant, User
 from dojos.models import Dojo
+from dojos.testing import make_dojo
 
 from .models import Event, Registration
 
@@ -27,7 +28,7 @@ def _future_event(dojo, **kwargs):
 
 class EventListViewTests(TestCase):
     def test_renders_upcoming_events(self):
-        dojo = Dojo.objects.create(name="Ghent")
+        dojo = make_dojo("Ghent")
         _future_event(dojo)
         response = self.client.get(reverse("event_list"))
         self.assertEqual(response.status_code, 200)
@@ -40,8 +41,8 @@ class EventListViewTests(TestCase):
         self.assertTemplateUsed(response, "events/partials/_event_results_page.html")
 
     def test_filters_by_dojo(self):
-        ghent = Dojo.objects.create(name="Ghent")
-        antwerp = Dojo.objects.create(name="Antwerp")
+        ghent = make_dojo("Ghent")
+        antwerp = make_dojo("Antwerp")
         ghent_event = _future_event(ghent)
         _future_event(antwerp)
 
@@ -50,13 +51,13 @@ class EventListViewTests(TestCase):
         self.assertEqual(list(response.context["events"]), [ghent_event])
 
     def test_draft_event_is_hidden(self):
-        dojo = Dojo.objects.create(name="Ghent")
+        dojo = make_dojo("Ghent")
         _future_event(dojo, status=Event.DRAFT)
         response = self.client.get(reverse("event_list"))
         self.assertEqual(len(response.context["events"]), 0)
 
     def test_closed_event_still_shown(self):
-        dojo = Dojo.objects.create(name="Ghent")
+        dojo = make_dojo("Ghent")
         event = _future_event(dojo, status=Event.CLOSED)
         response = self.client.get(reverse("event_list"))
         self.assertEqual(list(response.context["events"]), [event])
@@ -65,7 +66,7 @@ class EventListViewTests(TestCase):
 class UpcomingSessionsWidgetViewTests(TestCase):
     def test_renders_partial(self):
         cache.clear()  # upcoming_available_events() is cached (events/search.py)
-        dojo = Dojo.objects.create(name="Ghent")
+        dojo = make_dojo("Ghent")
         _future_event(dojo)
         response = self.client.get(reverse("upcoming_sessions_widget"))
         self.assertEqual(response.status_code, 200)
@@ -74,7 +75,7 @@ class UpcomingSessionsWidgetViewTests(TestCase):
 
 class EventDetailViewTests(TestCase):
     def test_existing_event_renders(self):
-        dojo = Dojo.objects.create(name="Ghent")
+        dojo = make_dojo("Ghent")
         event = _future_event(dojo)
         response = self.client.get(reverse("event_detail", kwargs={"event_id": event.id}))
         self.assertEqual(response.status_code, 200)
@@ -85,7 +86,7 @@ class EventDetailViewTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_draft_event_is_404(self):
-        dojo = Dojo.objects.create(name="Ghent")
+        dojo = make_dojo("Ghent")
         event = _future_event(dojo, status=Event.DRAFT)
         response = self.client.get(reverse("event_detail", kwargs={"event_id": event.id}))
         self.assertEqual(response.status_code, 404)
@@ -94,7 +95,7 @@ class EventDetailViewTests(TestCase):
 class EventSignupViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.dojo = Dojo.objects.create(name="Ghent")
+        cls.dojo = make_dojo("Ghent")
         cls.guardian = User.objects.create(username="g1", email="g1@example.com")
         cls.child = Participant.objects.create(name="Kid One")
         Guardianship.objects.create(guardian=cls.guardian, ninja=cls.child)

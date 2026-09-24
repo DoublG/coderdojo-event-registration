@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from accounts.models import Guardianship, Participant, User
 from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
-from dojos.models import Dojo
+from dojos.models import Dojo, DojoMembership
 
 # Reuse the same fun alien/robot/animal avatars seeded for ninja mentors
 # (dojos/seed_data/kid_avatars/) — same audience, same round .cd-mentor__avatar.
@@ -115,6 +115,20 @@ class Command(BaseCommand):
                 dirty_fields.append("member_since")
             if dirty_fields:
                 participant.save(update_fields=dirty_fields)
+
+        # A couple of ninjas with their own login help out at their home
+        # dojo: youth mentors, promoted by that dojo's champion.
+        promoted = 0
+        for ninja in Participant.objects.exclude(account=None).exclude(home_dojo=None).order_by("id")[:3]:
+            champion = ninja.home_dojo.champion_membership
+            if champion is None or DojoMembership.objects.filter(dojo=ninja.home_dojo, user=ninja.account).exists():
+                continue
+            DojoMembership.objects.create(
+                dojo=ninja.home_dojo, user=ninja.account, role=DojoMembership.YOUTH_MENTOR,
+                status=DojoMembership.ACTIVE, promoted_by=champion, requested_by=champion.user,
+                joined_at=timezone.now(),
+            )
+            promoted += 1
 
         if guardian_credential_rows:
             write_credentials("guardian", guardian_credential_rows)

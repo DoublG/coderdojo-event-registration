@@ -23,7 +23,7 @@ AGE_RANGES = {
 
 class EventSearchForm(forms.Form):
     dojo = forms.ModelChoiceField(
-        queryset=Dojo.objects.order_by("name"),
+        queryset=Dojo.objects.public().order_by("name"),
         required=False,
         empty_label="All dojos",
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-dojo"}),
@@ -100,7 +100,7 @@ class EventForm(forms.ModelForm):
         model = Event
         fields = [
             "name", "places", "venue_name", "image",
-            "description", "min_age", "max_age", "mentors",
+            "description", "min_age", "max_age", "team",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Coding Saturday"}),
@@ -113,12 +113,15 @@ class EventForm(forms.ModelForm):
             }),
             "min_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "7"}),
             "max_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "18"}),
-            "mentors": forms.CheckboxSelectMultiple,
+            "team": forms.CheckboxSelectMultiple,
         }
 
     def __init__(self, *args, dojo, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["mentors"].queryset = dojo.mentors.order_by("name")
+        # Who runs this session: anyone active on the dojo's team (champion,
+        # mentors and youth mentors), shown as "Name (Role)".
+        self.fields["team"].queryset = dojo.memberships.active().select_related("user").order_by("user__first_name")
+        self.fields["team"].label_from_instance = lambda m: f"{m.name} ({m.get_role_display()})"
         if self.instance.pk:
             self.fields["event_date"].initial = self.instance.start_time.date()
             self.fields["start_time"].initial = self.instance.start_time.time()

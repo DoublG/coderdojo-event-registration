@@ -71,7 +71,7 @@ def dojos_by_distance(origin):
         if cached is not None:
             return cached
 
-    qs = Dojo.objects.all()
+    qs = Dojo.objects.public()
     if origin is not None:
         qs = qs.annotate(
             distance_km=ExpressionWrapper(

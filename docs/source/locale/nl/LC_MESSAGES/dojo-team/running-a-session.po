@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 22:41+0000\n"
+"POT-Creation-Date: 2026-09-24 06:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -26,14 +26,14 @@ msgstr "Een sessie begeleiden"
 
 #: ../../source/dojo-team/running-a-session.rst:4
 msgid ""
-"A dojo's dashboard (for its owner and helpers) is built around the dojo's"
-" next upcoming session (or its most recent past one, if nothing's "
+"A dojo's dashboard (for its champion and mentors) is built around the "
+"dojo's next upcoming session (or its most recent past one, if nothing's "
 "scheduled), showing who's confirmed for it."
 msgstr ""
-"Het dashboard van een dojo (voor de dojobeheerder en de helpers) is "
-"opgebouwd rond de eerstvolgende sessie van de dojo (of de meest recente "
-"sessie uit het verleden, als er niets gepland is), en toont wie hiervoor "
-"bevestigd is."
+"Het dashboard van een dojo (voor de champion en de mentoren) is opgebouwd"
+" rond de eerstvolgende sessie van de dojo (of de meest recente sessie uit"
+" het verleden, als er niets gepland is), en toont wie hiervoor bevestigd "
+"is."
 
 #: ../../source/dojo-team/running-a-session.rst:9
 msgid "Scheduling a session"
@@ -45,16 +45,17 @@ msgid ""
 "session for your dojo — name, a date with a start and end time (a session"
 " always runs within a single day, entered as dd/mm/yyyy and a 24-hour "
 "time, e.g. 20/07/2030 and 14:00), how many places it has, and optionally "
-"a venue, description, an age range and one or more mentors."
+"a venue, description, an age range, and who from your dojo's team runs "
+"it."
 msgstr ""
 "Vanaf de pagina **Evenementen** van uw dashboard maakt **Nieuw "
 "evenement** een nieuwe sessie aan voor uw dojo — naam, een datum met een "
 "begin- en eindtijd (een sessie speelt zich altijd binnen één dag af, in "
 "te voeren als dd/mm/jjjj en een 24-uurstijd, bijvoorbeeld 20/07/2030 en "
 "14:00), het aantal plaatsen, en optioneel een locatie, beschrijving, "
-"leeftijdscategorie en een of meer mentoren."
+"leeftijdscategorie en wie van het dojoteam de sessie leidt."
 
-#: ../../source/dojo-team/running-a-session.rst:17
+#: ../../source/dojo-team/running-a-session.rst:18
 msgid ""
 "For the banner image, pick one of the ready-made templates shown on the "
 "form, or upload your own further down — uploading a file always takes "
@@ -64,11 +65,11 @@ msgstr ""
 "formulier, of upload er zelf een verder naar beneden — een geüpload "
 "bestand krijgt altijd voorrang als u beide doet."
 
-#: ../../source/dojo-team/running-a-session.rst:22
+#: ../../source/dojo-team/running-a-session.rst:23
 msgid "Editing a session"
 msgstr "Een sessie bewerken"
 
-#: ../../source/dojo-team/running-a-session.rst:24
+#: ../../source/dojo-team/running-a-session.rst:25
 msgid ""
 "Click a session's name (or **Edit**) on the **Events** list to open its "
 "page, where you can change any of the details you entered when creating "
@@ -81,11 +82,11 @@ msgstr ""
 "houdt u op dezelfde pagina, zodat u het resultaat meteen kunt "
 "controleren."
 
-#: ../../source/dojo-team/running-a-session.rst:30
+#: ../../source/dojo-team/running-a-session.rst:31
 msgid "Session status"
 msgstr "Status van een sessie"
 
-#: ../../source/dojo-team/running-a-session.rst:32
+#: ../../source/dojo-team/running-a-session.rst:33
 msgid ""
 "A session is always in one of three states, shown as a badge next to it "
 "on the **Events** list:"
@@ -93,7 +94,7 @@ msgstr ""
 "Een sessie heeft altijd een van deze drie statussen, weergegeven als een "
 "badge ernaast in de lijst **Evenementen**:"
 
-#: ../../source/dojo-team/running-a-session.rst:35
+#: ../../source/dojo-team/running-a-session.rst:36
 msgid ""
 "**Draft** — a new session starts here. It's completely hidden from the "
 "public site (the dojo-finder, the Events list, your dojo's own page) "
@@ -106,7 +107,7 @@ msgstr ""
 " er is geen haast om alle velden in te vullen voordat ze klaar is om "
 "getoond te worden."
 
-#: ../../source/dojo-team/running-a-session.rst:39
+#: ../../source/dojo-team/running-a-session.rst:40
 msgid ""
 "**Open** — once you're happy with it, **Publish** makes the session "
 "visible on the public site and open for families to sign up."
@@ -114,7 +115,7 @@ msgstr ""
 "**Open** — zodra u tevreden bent, maakt **Publiceren** de sessie "
 "zichtbaar op de openbare site en open voor inschrijvingen door gezinnen."
 
-#: ../../source/dojo-team/running-a-session.rst:41
+#: ../../source/dojo-team/running-a-session.rst:42
 msgid ""
 "**Closed** — **Close registrations** turns off further sign-ups for that "
 "session, without hiding it. This is a manual step, normally done once "
@@ -126,7 +127,7 @@ msgstr ""
 " meestal uitgevoerd nadat u de aanwezigheid voor de sessie hebt "
 "gecontroleerd en er geen nieuwe inschrijvingen meer bij wilt."
 
-#: ../../source/dojo-team/running-a-session.rst:46
+#: ../../source/dojo-team/running-a-session.rst:47
 msgid ""
 "You can switch a session between any of these states at any time, from "
 "the status card at the top of its page: a closed session can be reopened "
@@ -145,11 +146,11 @@ msgstr ""
 "sluiten** of **Heropenen**). Een statuswijziging verwijdert nooit iemand "
 "die zich al heeft ingeschreven."
 
-#: ../../source/dojo-team/running-a-session.rst:55
+#: ../../source/dojo-team/running-a-session.rst:56
 msgid "Taking attendance"
 msgstr "Aanwezigheden bijhouden"
 
-#: ../../source/dojo-team/running-a-session.rst:57
+#: ../../source/dojo-team/running-a-session.rst:58
 msgid ""
 "On a session's page, **Take attendance** opens the list of everyone with "
 "a confirmed place (children on the waiting list aren't shown). Tap "
@@ -168,7 +169,7 @@ msgstr ""
 "aanwezig** markeert iedereen in één keer als aanwezig, waarna u de "
 "enkelen die niet kwamen op **Afwezig** kunt zetten."
 
-#: ../../source/dojo-team/running-a-session.rst:65
+#: ../../source/dojo-team/running-a-session.rst:66
 msgid ""
 "Your dashboard's **Attendance** page shows the same list for your next "
 "upcoming session (or your most recent one, if nothing's scheduled), so on"
@@ -178,23 +179,140 @@ msgstr ""
 "volgende sessie (of de meest recente, als er niets gepland is), zodat u "
 "op de dag zelf meteen kunt beginnen zonder de sessie te moeten opzoeken."
 
-#: ../../source/dojo-team/running-a-session.rst:70
+#: ../../source/dojo-team/running-a-session.rst:71
+msgid "Managing your team"
+msgstr "Uw team beheren"
+
+#: ../../source/dojo-team/running-a-session.rst:73
+msgid ""
+"The **Team** page in the sidebar lists everyone on your dojo's team — its"
+" champion, mentors and youth mentors — and lets you:"
+msgstr ""
+"De pagina **Team** in de zijbalk toont iedereen in het team van uw dojo —"
+" de champion, de mentoren en de jeugdmentoren — en laat u:"
+
+#: ../../source/dojo-team/running-a-session.rst:76
+msgid ""
+"**Accept or decline join requests.** Approved mentors can ask to join "
+"from your dojo's public page; you'll get a notification when they do."
+msgstr ""
+"**Aanvragen om toe te treden aanvaarden of weigeren.** Goedgekeurde "
+"mentoren kunnen via de openbare pagina van uw dojo vragen om bij het team"
+" te komen; u krijgt dan een melding."
+
+#: ../../source/dojo-team/running-a-session.rst:78
+msgid ""
+"**Add a mentor** directly, by the email address of their account. Only "
+"mentors whose application and background check have been approved can be "
+"added."
+msgstr ""
+"**Een mentor toevoegen**, rechtstreeks via het e-mailadres van diens "
+"account. Alleen mentoren van wie de aanmelding en het uittreksel uit het "
+"strafregister zijn goedgekeurd, kunnen worden toegevoegd."
+
+#: ../../source/dojo-team/running-a-session.rst:81
+msgid ""
+"**Promote a youth mentor** — a ninja with their own login who helps run "
+"sessions at your dojo."
+msgstr ""
+"**Een jeugdmentor aanstellen** — een ninja met een eigen login die helpt "
+"sessies in uw dojo te leiden."
+
+#: ../../source/dojo-team/running-a-session.rst:83
+msgid ""
+"**Remove someone** from the team, or **leave** it yourself. People who "
+"leave stay listed on the past sessions they helped run."
+msgstr ""
+"**Iemand uit het team verwijderen**, of het zelf **verlaten**. Wie "
+"vertrekt, blijft vermeld bij de voorbije sessies die hij of zij mee "
+"leidde."
+
+#: ../../source/dojo-team/running-a-session.rst:85
+msgid ""
+"**Hand over the champion role** (champion only) to one of your mentors. "
+"You stay on the team as a mentor."
+msgstr ""
+"**De rol van champion overdragen** (alleen voor de champion) aan een van "
+"uw mentoren. U blijft als mentor in het team."
+
+#: ../../source/dojo-team/running-a-session.rst:89
+msgid "Your dojo's status"
+msgstr "De status van uw dojo"
+
+#: ../../source/dojo-team/running-a-session.rst:91
+msgid ""
+"The **Settings** page shows your dojo's status, which only its champion "
+"can change:"
+msgstr ""
+"De pagina **Instellingen** toont de status van uw dojo, die alleen de "
+"champion kan wijzigen:"
+
+#: ../../source/dojo-team/running-a-session.rst:94
+msgid ""
+"**Draft** — a new dojo starts here, hidden from the public site while you"
+" set it up. **Launch dojo** makes it public."
+msgstr ""
+"**Concept** — een nieuwe dojo begint in deze status, verborgen voor de "
+"openbare site terwijl u hem opzet. **Dojo lanceren** maakt hem openbaar."
+
+#: ../../source/dojo-team/running-a-session.rst:96
+msgid ""
+"**Active** — listed in the dojo finder, with its sessions open for sign-"
+"ups."
+msgstr ""
+"**Actief** — zichtbaar in de dojozoeker, met sessies die open zijn voor "
+"inschrijvingen."
+
+#: ../../source/dojo-team/running-a-session.rst:98
+msgid ""
+"**Dormant** — not running for now: hidden from the public site, but still"
+" in ninjas' history. **Restart dojo** brings it back."
+msgstr ""
+"**Slapend** — voorlopig niet actief: verborgen voor de openbare site, "
+"maar nog steeds zichtbaar in de geschiedenis van de ninja's. **Dojo "
+"herstarten** brengt hem terug."
+
+#: ../../source/dojo-team/running-a-session.rst:100
+msgid ""
+"**Archived** — closed: hidden from the public site. **Reopen as draft** "
+"brings it back as a draft."
+msgstr ""
+"**Gearchiveerd** — gesloten: verborgen voor de openbare site. **Heropenen"
+" als concept** brengt hem terug als concept."
+
+#: ../../source/dojo-team/running-a-session.rst:103
+msgid ""
+"A dojo can only be made dormant or archived when it has no upcoming "
+"sessions in draft or open for sign-ups; any pending join requests are "
+"declined. If no sessions have been planned for over six months, the "
+"dashboard reminds you to plan one or mark the dojo dormant."
+msgstr ""
+"Een dojo kan alleen slapend gezet of gearchiveerd worden als hij geen "
+"komende sessies meer heeft die in concept staan of open zijn voor "
+"inschrijvingen; openstaande aanvragen om toe te treden worden dan "
+"geweigerd. Is er al meer dan zes maanden geen sessie gepland, dan "
+"herinnert het dashboard u eraan er een te plannen of de dojo slapend te "
+"zetten."
+
+#: ../../source/dojo-team/running-a-session.rst:109
 msgid "Team pages"
 msgstr "Teampagina's"
 
-#: ../../source/dojo-team/running-a-session.rst:72
+#: ../../source/dojo-team/running-a-session.rst:111
 msgid ""
 "A dojo's public team page (visible to anyone, not just the dojo team) "
-"shows its mentors, with the lead coach always listed first. Team member "
-"details — bio, title, focus areas — are currently managed on your behalf "
-"by CoderDojo Belgium rather than self-service; get in touch to update "
-"yours."
+"shows its champion first, followed by its mentors and youth mentors. "
+"Everyone's name, title, bio and photo come from their own account and are"
+" the same on every dojo they're part of; these details are currently "
+"managed on your behalf by CoderDojo Belgium rather than self-service — "
+"get in touch to update yours."
 msgstr ""
 "De openbare teampagina van een dojo (zichtbaar voor iedereen, niet alleen"
-" het dojoteam) toont de mentoren, met de hoofdcoach altijd als eerste "
-"vermeld. Gegevens van teamleden — bio, titel, aandachtsgebieden — worden "
-"momenteel namens u beheerd door CoderDojo België in plaats van "
-"zelfbediening; neem contact op om de uwe bij te werken."
+" het dojoteam) toont eerst de champion, gevolgd door de mentoren en "
+"jeugdmentoren. Naam, titel, bio en foto van elke persoon komen uit diens "
+"eigen account en zijn dezelfde bij elke dojo waarvan die deel uitmaakt; "
+"deze gegevens worden momenteel namens u beheerd door CoderDojo België in "
+"plaats van zelfbediening — neem contact op om de uwe bij te werken."
 
 #~ msgid ""
 #~ "Each of these is a one-way "

@@ -50,7 +50,7 @@ flowchart LR
     end
     subgraph dojos
         Dojo
-        Mentor
+        DojoMembership
     end
     subgraph events
         Event
@@ -70,9 +70,8 @@ flowchart LR
     end
 
     User -. "is-a (MTI)" .-> DojoOwner & HelperAccount
-    DojoOwner -- owns --> Dojo
-    Mentor -- "team profile at" --> Dojo
-    Mentor -. "login (at most one)" .-> DojoOwner & HelperAccount & User
+    User -- "champion / mentor / youth mentor" --> DojoMembership
+    DojoMembership -- "team of" --> Dojo
     User -- "parent of" --> Guardianship
     Guardianship --> Participant
     Participant -. "optional login (ninja account)" .-> User
@@ -161,86 +160,96 @@ Which account does what:
 
 ---
 
-## 3. Dojos, team pages and admin access
+## 3. Dojos, teams and admin access
 
-`Mentor` is a public team-page profile at one dojo. It may point to the
-login of the person behind it, through at most one of four account links
-(enforced in `Mentor.clean()`).
+A dojo's team is a set of **memberships** (`DojoMembership`), one per
+account and dojo (redesign phase 2, section 10). Each membership has a role
+and a status:
 
-- **Owner = Lead Coach.** `Dojo.save()` calls `Dojo.sync_lead_coach()`, so
-  every owned dojo has exactly one `LEAD_COACH` Mentor, linked to its
-  current owner. When ownership changes, the previous owner's profile
-  becomes a plain volunteer profile. It isn't deleted, so past
-  `Event.mentors` links keep their history.
-- **Owners and helpers can be linked to several dojos.** `owner_account` and
-  `helper_account` are ForeignKeys, with one profile per dojo enforced by a
-  unique constraint on each. `guardian_account` and `child_account` are
-  one-to-one.
+- **Roles:** `champion` (the dojo's owner, exactly one active per dojo),
+  `mentor` (an adult helper) and `youth_mentor` (a ninja account, promoted by
+  a champion/mentor of the same dojo, recorded in `promoted_by`).
+- **Status:** `requested` → `active` → `dormant`. People who leave go
+  `dormant` and are never deleted, so past events' teams (`Event.team`) keep
+  their history. Rejoining reuses the same row.
+- **Profiles:** the team-page profile (display name, title, bio, photo,
+  `show_on_team_pages`) lives on the **account** and is shared by every dojo
+  the person is on.
+- **Dojo status:** `draft` → `active` ⇄ `dormant` → `archived` → `draft`.
+  Only `active` dojos, and their events, are public (`Dojo.objects.public()`,
+  `Event.objects.visible()`). All changes go through `dojos/team.py`.
 
 ```mermaid
 erDiagram
-    DOJO_OWNER ||--o{ DOJO : "owns (Dojo.owner)"
-    DOJO ||--o{ MENTOR : "mentors"
-    DOJO_OWNER |o--o{ MENTOR : "owner_account (Lead Coach, one per dojo)"
-    HELPER_ACCOUNT |o--o{ MENTOR : "helper_account (one per dojo)"
-    USER |o--o| MENTOR : "guardian_account (a parent) / child_account (a ninja)"
+    DOJO ||--o{ DOJO_MEMBERSHIP : "memberships (team)"
+    USER ||--o{ DOJO_MEMBERSHIP : "dojo_memberships"
+    DOJO_MEMBERSHIP |o--o{ DOJO_MEMBERSHIP : "promoted_by (youth mentors)"
     MUNICIPALITY |o--o{ DOJO : "municipality"
     ADMINISTRATIVE_BOUNDARY |o--o{ DOJO : "province"
 
     DOJO {
         bigint id PK
         string name
+        string status "draft, active, dormant, archived"
+        bigint created_by_id FK "nullable"
         string address
         point location "geocoded from address"
-        bigint owner_id FK "nullable"
         bigint municipality_id FK
         bigint province_id FK "set from location"
         int min_age
         int max_age
     }
-    MENTOR {
+    DOJO_MEMBERSHIP {
         bigint id PK
-        bigint dojo_id FK "blank for board members"
-        string role "lead_coach, champion, ninja, volunteer, board"
-        bigint owner_account_id FK "LEAD_COACH only"
-        bigint helper_account_id FK
-        bigint guardian_account_id FK "unique; a parent's User"
-        bigint child_account_id FK "unique; a ninja's User"
-        bool is_public "shown on team pages"
+        bigint dojo_id FK "unique with user"
+        bigint user_id FK
+        string role "champion, mentor, youth_mentor"
+        string status "requested, active, dormant"
+        bigint requested_by_id FK
+        bigint decided_by_id FK
+        bigint promoted_by_id FK "youth mentors only"
+        datetime joined_at
+        datetime left_at
     }
 ```
 
 ### Who can use a dojo's admin area
 
-`dojos/access.py` resolves the viewer's role at a dojo, and each role maps
-to a set of capabilities. With no role at all the dojo gives a **404**; a
-role that lacks the view's capability gets a **403**.
+`dojos/access.py` gives admin access to an account with an **active
+`champion` or `mentor` membership** at the dojo, and only while its
+background check is valid. Youth mentors never get admin access, and
+neither do requested or dormant memberships. Each role maps to a set of
+capabilities. With no role at all the dojo gives a **404**; a role that
+lacks the view's capability gets a **403**.
 
 ```mermaid
 flowchart TD
     R[Request to /dojos/ID/...] --> A{Logged in?}
     A -- no --> L[Redirect to login]
-    A -- yes --> O{"Dojo.owner == user?"}
-    O -- yes --> OWNER[Role: OWNER]
-    O -- no --> H{"Mentor at this dojo with<br/>helper_account == user?"}
-    H -- yes --> HELPER[Role: HELPER]
-    H -- no --> N404[404 Not Found]
-    OWNER --> C{"Capability in<br/>ROLE_CAPABILITIES[role]?"}
-    HELPER --> C
+    A -- yes --> M{"Active champion or mentor<br/>membership at this dojo?"}
+    M -- no --> N404[404 Not Found]
+    M -- yes --> V{Background check valid?}
+    V -- no --> N404
+    V -- yes --> C{"Capability in<br/>ROLE_CAPABILITIES[role]?"}
     C -- yes --> OK[Render the page]
     C -- no --> N403[403 Forbidden]
 ```
 
-| Capability | Gates | OWNER | HELPER (today) |
+| Capability | Gates | CHAMPION | MENTOR |
 |---|---|:-:|:-:|
 | *(any role)* | dashboard, events list, notification bell | ✓ | ✓ |
 | `TAKE_ATTENDANCE` | attendance pages, marking present/absent | ✓ | ✓ |
 | `MANAGE_EVENTS` | create/edit events, change status | ✓ | ✓ |
 | `EDIT_SETTINGS` | dojo profile settings | ✓ | ✓ |
+| `MANAGE_TEAM` | accept/decline join requests, add/remove mentors, promote youth mentors | ✓ | ✓ |
+| `AWARD_BELTS` | award belts (redesign phase 5) | ✓ | ✓ |
+| `MANAGE_LIFECYCLE` | launch / dormant / archive / reopen the dojo | ✓ | — |
+| *(champion only)* | hand over the champion role | ✓ | — |
 
-To restrict helpers, remove entries from `ROLE_CAPABILITIES[HELPER]`.
-Parent- and ninja-account-linked mentor profiles never get admin access, because
-those accounts aren't background-checked.
+To restrict mentors, remove entries from `ROLE_CAPABILITIES[MENTOR]`.
+Who may *join* a team at all is `access.is_approved_mentor`: currently an
+account holding the `HelperAccount` or `DojoOwner` role from an approved
+application, which becomes the account-level `Application` in phase 3.
 
 ---
 
@@ -252,7 +261,7 @@ erDiagram
     EVENT ||--o{ REGISTRATION : "registration_set"
     PARTICIPANT ||--o{ REGISTRATION : "signs up via"
     PATHWAY |o--o{ REGISTRATION : "worked on"
-    EVENT }o--o{ MENTOR : "mentors (M2M)"
+    EVENT }o--o{ DOJO_MEMBERSHIP : "team (M2M)"
 
     EVENT {
         bigint id PK
@@ -280,7 +289,8 @@ erDiagram
 
 - **Places:** `Event.places_left` = `places` − confirmed registrations
   (those with `waiting_list=False`). When a confirmed place is cancelled,
-  the next person on the waiting list is promoted and the dojo owner is
+  the next person on the waiting list is promoted and the dojo's team (its
+  active champion and mentors) is
   notified.
 - **Attendance:** `Registration.attended` has three states: `None` (not
   marked yet), `True` (present), `False` (absent). Only confirmed
@@ -288,7 +298,7 @@ erDiagram
 
 ### Event status
 
-The owner sets any status directly (`dojo_event_set_status`); it isn't a
+The dojo's team sets any status directly (`dojo_event_set_status`); it isn't a
 one-way lifecycle. Existing registrations are kept whatever the status.
 
 ```mermaid
@@ -403,7 +413,7 @@ flowchart TD
     P --> X["Copy background-check expiry onto the account<br/>(keeps the later of old and new)"]
     N --> X
     X --> K{MentorApplication with a dojo?}
-    K -- yes --> M["Create Mentor at that dojo<br/>(helper_account, volunteer, not public)<br/>unless one already exists there"]
+    K -- yes --> M["File a join request at that dojo<br/>(requested mentor membership),<br/>accepted by its team"]
     K -- no --> D[Done]
     M --> D
 ```
@@ -422,6 +432,11 @@ place it's linked to a child is `Registration.pathway`. The `content`
 models are each optionally scoped to one dojo, event or pathway, or
 site-wide when the scoping key is blank.
 
+`content.OrganisationTeamMember` is the organisation's team listing (the
+homepage's "Meet the team" and `team/<id>/`). It's display only, each entry
+with a position ("Member of the board" is one of them), and it's separate
+from any access.
+
 ```mermaid
 erDiagram
     PATHWAY ||--o{ PATHWAY_STEP : "steps (ordered)"
@@ -432,6 +447,7 @@ erDiagram
     PATHWAY |o--o{ FAQ : "scoped to"
     DOJO |o--o{ TESTIMONIAL : "scoped to (blank = site-wide)"
     DOJO ||--o{ ANNOUNCEMENT : "posts"
+    USER |o--o{ ORGANISATION_TEAM_MEMBER : "account (optional)"
 
     PATHWAY {
         bigint id PK
@@ -457,6 +473,12 @@ erDiagram
         bigint dojo_id FK "nullable"
         string quote
         string author
+    }
+    ORGANISATION_TEAM_MEMBER {
+        string name "display only"
+        string position "e.g. Member of the board"
+        int order
+        bool is_public
     }
     ANNOUNCEMENT {
         bigint dojo_id FK
@@ -1297,7 +1319,7 @@ at every step:
     the shared team-page profile → phase 2, and `Participant` → `Ninja`
     (7–17) → phase 7 (naming). `DojoOwner` / `HelperAccount` /
     `attach_role` stay until phases 2–3 replace them.
-- [ ] **2. Dojo team** (`dojos`)
+- [x] **2. Dojo team** (`dojos`), *done 2026-09-24*
   - `DojoMembership`, `Dojo.status` and `Dojo.created_by`, plus the shared
     team-page profile on `User` (moved here from phase 1); drop
     `Dojo.owner`, `Mentor` and `sync_lead_coach()`.
@@ -1310,6 +1332,14 @@ at every step:
   - Dojo lifecycle actions and their rules; public querysets show active
     dojos only.
   - Team pages built from memberships; `Event.mentors` → `Event.team`.
+  - *Pulled forward from phase 6:* `OrganisationTeamMember` (in the
+    `content` app) replaces the board `Mentor` rows, so the homepage's
+    "Meet the team" keeps working without `Mentor`.
+  - *Interim, until phase 3:* "approved mentor" (who may join or be
+    added) = holding the `HelperAccount` / `DojoOwner` role
+    (`access.is_approved_mentor`); approving a `MentorApplication` that
+    names a dojo files a join request there. Lifecycle actions are
+    champion-only (`MANAGE_LIFECYCLE`).
 - [ ] **3. Onboarding** (`applications`)
   - A single `Application` (`mentor` / `champion`) on the account; the
     check fields, flow and `BackgroundCheckHistory` on the account (moved
@@ -1324,8 +1354,9 @@ at every step:
   `grants_belt`), `NinjaBadge`, `Belt`, and the `NinjaBelt` history
   (awarding account + membership). "Award belt" in the dojo dashboard;
   current belt and history on the ninja page.
-- [ ] **6. Organisation:** `OrganisationRole` and `OrganisationTeamMember`,
-  plus the organisation team page.
+- [ ] **6. Organisation:** `OrganisationRole` (management-dashboard
+  access). `OrganisationTeamMember` and its team page already landed in
+  phase 2.
 - [ ] **7. Names and docs:** `Participant` → `Ninja` (with 7–17 validation, moved here from phase 1) and the new names in the UI; the help-centre
   pages in EN/FR/NL; `DATA_MODEL.md` §10 promoted to "current", and
   CLAUDE.md's architecture section updated.

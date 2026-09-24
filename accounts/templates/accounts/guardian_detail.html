@@ -91,11 +91,13 @@
       <p class="body" style="margin: 0 0 var(--space-4);">Want to get more involved?</p>
       <div class="cd-form__actions" style="justify-content: center;">
         <a class="cd-btn cd-btn--ghost label" href="{% url 'register_dojo' %}">
-          {% if user_dojo_owner.dojos.exists %}Start another dojo{% else %}Apply to start a dojo{% endif %}
+          {% if user_dojo_owner %}Start another dojo{% else %}Apply to start a dojo{% endif %}
         </a>
-        <a class="cd-btn cd-btn--ghost label" href="{% url 'register_helper' %}">
-          {% if user_helper %}Help at another dojo{% else %}Apply to volunteer{% endif %}
-        </a>
+        {% if user_helper %}
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_list' %}">Help at another dojo</a>
+        {% else %}
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'register_helper' %}">Apply to volunteer</a>
+        {% endif %}
       </div>
     </div>
 

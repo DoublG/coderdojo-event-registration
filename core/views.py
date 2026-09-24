@@ -3,9 +3,8 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.urls import reverse
 
-from content.models import FAQ, Testimonial
+from content.models import FAQ, OrganisationTeamMember, Testimonial
 from dojos.forms import DojoSearchForm
-from dojos.models import Mentor
 from dojos.search import attach_next_events, dojos_by_distance, resolve_search_origin
 from dojos.views import WIDGET_RESULTS_LIMIT
 from events.search import WIDGET_PAGE_SIZE, upcoming_available_events
@@ -22,11 +21,11 @@ HOME_CONTENT_CACHE_TIMEOUT = 300
 def home(request):
     pathways = cache.get_or_set("core:home:pathways", lambda: list(Pathway.objects.all()), HOME_CONTENT_CACHE_TIMEOUT)
 
-    # The organisation-wide board — the homepage isn't tied to one dojo, so
-    # "Meet the team" shows Mentor.BOARD rather than any single chapter's
-    # mentors (see dojos.models.Mentor.dojo help text).
+    # The organisation's own team — the homepage isn't tied to one dojo, so
+    # "Meet the team" lists content.OrganisationTeamMember (display only,
+    # each with a position, e.g. "Member of the board").
     team = cache.get_or_set(
-        "core:home:team", lambda: list(Mentor.objects.filter(role=Mentor.BOARD).public()), HOME_CONTENT_CACHE_TIMEOUT
+        "core:home:team", lambda: list(OrganisationTeamMember.objects.filter(is_public=True)), HOME_CONTENT_CACHE_TIMEOUT
     )
 
     # A different quote on every load — order_by("?") is fine at this size

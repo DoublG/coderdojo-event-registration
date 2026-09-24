@@ -114,11 +114,11 @@ Expects `form` (an events.forms.EventForm) in context, and optionally
     </div>
   </div>
   <div class="cd-form__field">
-    <label class="cd-form__label label">Mentors</label>
-    <ul class="cd-form__errors">{% for error in form.mentors.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-    {% if form.mentors.field.queryset.exists %}
+    <label class="cd-form__label label">Team for this session</label>
+    <ul class="cd-form__errors">{% for error in form.team.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {% if form.team.field.queryset.exists %}
       <div class="cd-form__checkbox-list">
-        {% for checkbox in form.mentors %}
+        {% for checkbox in form.team %}
           <label class="cd-form__checkbox-row" for="{{ checkbox.id_for_label }}">
             {{ checkbox.tag }}
             <span class="body-sm">{{ checkbox.choice_label }}</span>
@@ -126,7 +126,7 @@ Expects `form` (an events.forms.EventForm) in context, and optionally
         {% endfor %}
       </div>
     {% else %}
-      <p class="cd-form__help caption">No mentors added for this dojo yet.</p>
+      <p class="cd-form__help caption">Nobody on this dojo's team yet — add people from the Team page.</p>
     {% endif %}
   </div>
 </div>

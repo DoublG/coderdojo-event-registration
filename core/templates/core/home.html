@@ -39,10 +39,9 @@
   /* role rings — see dojos/dojo_team.html for the full five-role writeup. Reused
      verbatim wherever .cd-mentor__avatar appears; the role is always also spelled
      out in .cd-mentor__role, so the ring is never the only signal. */
-  .home-root .cd-mentor__avatar--ninja { outline: 3px solid #0e7c6b; outline-offset: 2px; }
-  .home-root .cd-mentor__avatar--lead_coach { outline: 3px solid #d1990a; outline-offset: 2px; }
-  .home-root .cd-mentor__avatar--champion { outline: 3px solid #c1274a; outline-offset: 2px; }
-  .home-root .cd-mentor__avatar--volunteer { outline: 3px solid #4a5fc1; outline-offset: 2px; }
+  .home-root .cd-mentor__avatar--champion { outline: 3px solid #d1990a; outline-offset: 2px; }
+  .home-root .cd-mentor__avatar--mentor { outline: 3px solid #4a5fc1; outline-offset: 2px; }
+  .home-root .cd-mentor__avatar--youth_mentor { outline: 3px solid #0e7c6b; outline-offset: 2px; }
   .home-root .cd-mentor__avatar--board { outline: 3px solid #4a5568; outline-offset: 2px; }
   .home-root .row a.mentor-link { text-decoration: none; }
 </style>
@@ -122,12 +121,12 @@
     </div>
     <div class="row">
       {% for mentor in team %}
-        <a class="mentor-link" href="{% url 'team_member_detail' mentor_id=mentor.id %}">
+        <a class="mentor-link" href="{% url 'team_member_detail' member_id=mentor.id %}">
           <div class="cd-mentor">
             {% include "dojos/partials/_mentor_avatar.html" with mentor=mentor %}
             <div>
               <p class="cd-mentor__name heading-sm">{{ mentor.name }}</p>
-              <p class="cd-mentor__role body-sm">{{ mentor.get_role_display }}{% if mentor.title %}, {{ mentor.title }}{% endif %}</p>
+              <p class="cd-mentor__role body-sm">{{ mentor.position }}</p>
             </div>
           </div>
         </a>

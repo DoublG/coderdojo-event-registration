@@ -9,6 +9,20 @@
 {% endblock %}
 
 {% block admin_content %}
+  {% if dojo.status != 'active' %}
+    <div class="cd-card" style="margin-bottom: var(--space-5); padding: var(--space-4);">
+      <p class="body" style="margin: 0;">
+        {{ dojo.name }} is <strong>{{ dojo.get_status_display|lower }}</strong>, so it and its sessions are hidden from the public site.
+        {% if dojo_access.can_manage_lifecycle %}Change that under <a href="{% url 'dojo_manage' dojo_id=dojo.id %}">Settings</a>.{% endif %}
+      </p>
+    </div>
+  {% elif dormancy_nudge %}
+    <div class="cd-card" style="margin-bottom: var(--space-5); padding: var(--space-4);">
+      <p class="body" style="margin: 0;">
+        No sessions have been planned for over six months. Plan your next session{% if dojo_access.can_manage_events %} under <a href="{% url 'dojo_event_create' dojo_id=dojo.id %}">New event</a>{% endif %}, or mark the dojo dormant{% if dojo_access.can_manage_lifecycle %} under <a href="{% url 'dojo_manage' dojo_id=dojo.id %}">Settings</a>{% endif %}.
+      </p>
+    </div>
+  {% endif %}
   {% if event %}
     {% include "dojos/partials/_attendance.html" %}
   {% else %}

@@ -5,11 +5,12 @@ MARKDOWN_HELP_TEXT = "Supports basic Markdown — # headings, **bold**, *italic*
 
 class EventQuerySet(models.QuerySet):
     def visible(self):
-        """Everything except draft — what the public site (listings, the
-        homepage widget, a dojo's own page) is allowed to show. A draft
-        event is still fully readable by its owner via the dojo admin
-        events list; this only governs the public-facing side."""
-        return self.exclude(status=Event.DRAFT)
+        """What the public site (listings, the homepage widget, a dojo's own
+        page) may show: not draft, and only for an `active` dojo — a draft,
+        dormant or archived dojo's events are hidden with it. Both stay fully
+        readable by the dojo's team via its admin events list; this only
+        governs the public-facing side."""
+        return self.exclude(status=Event.DRAFT).filter(dojo__status="active")
 
 
 class Event(models.Model):
@@ -45,7 +46,10 @@ class Event(models.Model):
     description = models.TextField(blank=True, default="", help_text=MARKDOWN_HELP_TEXT)
     min_age = models.PositiveSmallIntegerField(null=True, blank=True)
     max_age = models.PositiveSmallIntegerField(null=True, blank=True)
-    mentors = models.ManyToManyField("dojos.Mentor", blank=True, related_name="events")
+    team = models.ManyToManyField(
+        "dojos.DojoMembership", blank=True, related_name="events",
+        help_text="Who ran (or will run) this session: members of the dojo's team.",
+    )
 
     participants = models.ManyToManyField("accounts.Participant", through="Registration")
 

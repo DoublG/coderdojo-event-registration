@@ -7,7 +7,8 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from dojos.models import Dojo
+from dojos.models import Dojo, DojoMembership
+from dojos.testing import add_member, make_dojo
 from events.models import Event, Registration
 
 from .models import DojoOwner, Guardianship, HelperAccount, Participant, User
@@ -323,12 +324,17 @@ class CancelRegistrationViewTests(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertTrue(Registration.objects.filter(id=self.confirmed.id).exists())
 
-    def test_promotion_notifies_the_dojo_owner(self):
+    def test_promotion_notifies_the_dojo_team(self):
         """The waitlist-promotion side of this view (see setUpTestData's
-        event/dojo) reuses a dojo with no owner — build one with an owner
-        here specifically to check the notify() call."""
+        event/dojo) reuses a dojo with no team — build one with a champion,
+        a mentor and a youth mentor here to check who gets notified: the
+        people running the dojo, never a youth mentor."""
         owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
-        dojo = Dojo.objects.create(name="Antwerp", owner=owner)
+        mentor = HelperAccount.objects.create(username="mentor1")
+        youth = User.objects.create(username="kid", account_type=User.NINJA)
+        dojo = make_dojo("Antwerp", champion=owner)
+        add_member(dojo, mentor)
+        add_member(dojo, youth, DojoMembership.YOUTH_MENTOR)
         event = Event.objects.create(
             name="Antwerp Session", dojo=dojo,
             start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=1,
@@ -337,22 +343,22 @@ class CancelRegistrationViewTests(TestCase):
         Registration.objects.create(event=event, participant=self.waitlisted_child, waiting_list=True, position=2)
         self.client.force_login(self.guardian)
 
-        with patch("accounts.views.notify") as mock_notify:
+        with patch("dojos.team.notify") as mock_notify:
             self.client.post(
                 reverse("cancel_registration", kwargs={"registration_id": confirmed.id})
             )
 
-        mock_notify.assert_called_once()
+        recipient_ids = {call.args[0].pk for call in mock_notify.call_args_list}
+        self.assertEqual(recipient_ids, {owner.pk, mentor.pk})
         args, kwargs = mock_notify.call_args
-        self.assertEqual(args[0], owner)
         self.assertIn("Antwerp Session", args[1])
         self.assertEqual(kwargs["dojo"], dojo)
 
-    def test_no_notification_when_dojo_has_no_owner(self):
-        """setUpTestData's dojo has no owner — promoting from its waitlist
-        must not try to notify a None recipient."""
+    def test_no_notification_when_dojo_has_no_team(self):
+        """setUpTestData's dojo has nobody on its team — promoting from its
+        waitlist notifies no one (and doesn't fail)."""
         self.client.force_login(self.guardian)
-        with patch("accounts.views.notify") as mock_notify:
+        with patch("dojos.team.notify") as mock_notify:
             self.client.post(
                 reverse(
                     "cancel_registration", kwargs={"registration_id": self.confirmed.id},

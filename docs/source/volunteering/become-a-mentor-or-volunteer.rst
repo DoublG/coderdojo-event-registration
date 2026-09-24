@@ -36,7 +36,13 @@ login details by email at that point, with a temporary password you'll be
 asked to replace the first time you log in; if you did, you'll simply be
 notified that the volunteer role is now active — no new password needed.
 
-Already helping at one dojo and want to help at another too? Choose
-**Help at another dojo** from your account menu while logged in and apply
-again, picking the new dojo. Once it's approved, both dojos appear in your
-dashboard's dojo switcher — you keep a single login for all of them.
+Once you're approved, you join a dojo's team through the dojo itself: if
+you picked a dojo in your application, a request to join its team is sent
+for you; otherwise, open the dojo's page and choose **Ask to join the
+team**. The dojo's champion or one of its mentors accepts your request,
+and from then on the dojo's dashboard is open to you.
+
+Want to help at another dojo too? You don't need to apply again: choose
+**Help at another dojo** from your account menu, find the dojo and ask to
+join its team. Every dojo you're part of appears in your dashboard's dojo
+switcher — you keep a single login for all of them.

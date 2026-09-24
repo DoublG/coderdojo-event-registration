@@ -1,7 +1,10 @@
 import requests
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import Point
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -9,15 +12,26 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from content.models import FAQ
+from accounts.models import Participant, User
+from content.models import FAQ, OrganisationTeamMember
 from events.forms import EventForm
 from events.models import Event, Registration
 from geo.geocoding import find_province, geocode
 from notifications.models import Notification
 
-from .access import EDIT_SETTINGS, MANAGE_EVENTS, TAKE_ATTENDANCE, accessible_dojos, require_dojo_access
+from . import team
+from .access import (
+    EDIT_SETTINGS,
+    MANAGE_EVENTS,
+    MANAGE_LIFECYCLE,
+    MANAGE_TEAM,
+    TAKE_ATTENDANCE,
+    accessible_dojos,
+    is_approved_mentor,
+    require_dojo_access,
+)
 from .forms import DojoProfileForm, DojoSearchForm
-from .models import Dojo, Mentor
+from .models import Dojo, DojoMembership
 from .search import attach_next_events, dojos_by_distance, resolve_search_origin
 
 RESULTS_PER_PAGE = 20
@@ -96,19 +110,48 @@ def dojo_finder_widget(request):
     })
 
 
+def _join_state(user, dojo):
+    """For the public dojo page's "Join the team" box: "member" (already on
+    the team), "requested" (waiting for an answer), "can_request" (an
+    approved mentor who can ask), or None (nothing to show)."""
+    if not user.is_authenticated:
+        return None
+    membership = dojo.memberships.filter(user=user).first()
+    if membership is not None and membership.status == DojoMembership.ACTIVE:
+        return "member"
+    if membership is not None and membership.status == DojoMembership.REQUESTED:
+        return "requested"
+    return "can_request" if is_approved_mentor(user) else None
+
+
 def dojo_detail(request, dojo_id):
-    dojo = get_object_or_404(Dojo, id=dojo_id)
+    dojo = get_object_or_404(Dojo.objects.public(), id=dojo_id)
     next_event = dojo.event_set.visible().filter(start_time__gte=timezone.now()).order_by("start_time").first()
     faqs = FAQ.objects.for_dojo(dojo)
-    mentors = dojo.mentors.lead_coach_first()
     return render(request, "dojos/dojo_detail.html", {
-        "dojo": dojo, "next_event": next_event, "faqs": faqs, "mentors": mentors,
+        "dojo": dojo, "next_event": next_event, "faqs": faqs,
+        "mentors": dojo.memberships.for_team_page(),
+        "join_state": _join_state(request.user, dojo),
     })
 
 
 def dojo_team(request, dojo_id):
-    dojo = get_object_or_404(Dojo, id=dojo_id)
-    return render(request, "dojos/dojo_team.html", {"dojo": dojo, "mentors": dojo.mentors.lead_coach_first()})
+    dojo = get_object_or_404(Dojo.objects.public(), id=dojo_id)
+    return render(request, "dojos/dojo_team.html", {"dojo": dojo, "mentors": dojo.memberships.for_team_page()})
+
+
+@login_required
+def dojo_join_request(request, dojo_id):
+    """An approved mentor asks to join a dojo's team (POST only); its
+    champion/mentors accept or decline from their Team page."""
+    dojo = get_object_or_404(Dojo.objects.public(), id=dojo_id)
+    if request.method == "POST":
+        try:
+            team.request_to_join(dojo, request.user)
+            messages.success(request, f"Your request to join {dojo.name} has been sent to its team.")
+        except team.TeamError as error:
+            messages.error(request, str(error))
+    return redirect("dojo_detail", dojo_id=dojo.id)
 
 
 def _attendance_context(event):
@@ -141,6 +184,7 @@ def dojo_dashboard(request, dojo_id):
 
     return render(request, "dojos/dojo_dashboard.html", {
         "session": session,
+        "dormancy_nudge": team.needs_dormancy_nudge(dojo),
         **(_attendance_context(session) if session is not None else {}),
         "active": "attendance",
         **_admin_context(request, access),
@@ -187,8 +231,120 @@ def dojo_manage(request, dojo_id):
 
     return render(request, "dojos/dojo_manage.html", {
         "form": form, "saved": saved, "geocode_failed": geocode_failed, "active": "settings",
+        "active_event_count": team.active_events(dojo).count(),
         **_admin_context(request, access),
     })
+
+
+@login_required
+def dojo_set_lifecycle(request, dojo_id):
+    """The champion's lifecycle buttons on the settings page (POST only):
+    launch, go dormant, restart, archive, reopen — see dojos.team for the
+    rules (no active events before dormant/archived, etc.)."""
+    access = require_dojo_access(request, dojo_id, MANAGE_LIFECYCLE)
+    if request.method == "POST":
+        try:
+            team.change_status(access.dojo, request.POST.get("action", ""))
+            messages.success(request, f"{access.dojo.name} is now {access.dojo.get_status_display().lower()}.")
+        except team.TeamError as error:
+            messages.error(request, str(error))
+    return redirect("dojo_manage", dojo_id=access.dojo.id)
+
+
+def _youth_mentor_candidates(dojo):
+    """Ninja accounts that can be promoted to youth mentor here: ninjas with
+    their own login whose home dojo this is, or who've signed up for one of
+    its sessions, and who aren't already on the team."""
+    on_team = dojo.memberships.active().values("user_id")
+    ninjas = (
+        Participant.objects.exclude(account=None)
+        .filter(Q(home_dojo=dojo) | Q(registration__event__dojo=dojo))
+        .exclude(account_id__in=on_team)
+        .select_related("account")
+        .distinct()
+        .order_by("name")
+    )
+    return ninjas
+
+
+@login_required
+def dojo_team_manage(request, dojo_id):
+    """The admin sidebar's "Team" page: the dojo's team, pending join
+    requests, and (for MANAGE_TEAM) the forms to act on them."""
+    access = require_dojo_access(request, dojo_id)
+    dojo = access.dojo
+    memberships = dojo.memberships.select_related("user", "promoted_by__user")
+    return render(request, "dojos/dojo_team_manage.html", {
+        "active_members": memberships.filter(status=DojoMembership.ACTIVE).order_by("role", "user__first_name"),
+        "requests": memberships.filter(status=DojoMembership.REQUESTED).order_by("created_at"),
+        "former_members": memberships.filter(status=DojoMembership.DORMANT).order_by("-left_at"),
+        "transfer_candidates": memberships.filter(
+            status=DojoMembership.ACTIVE, role=DojoMembership.MENTOR,
+        ).order_by("user__first_name"),
+        "youth_mentor_candidates": _youth_mentor_candidates(dojo) if access.can_manage_team else [],
+        "active": "team",
+        **_admin_context(request, access),
+    })
+
+
+@login_required
+def dojo_team_action(request, dojo_id):
+    """Every change posted from the Team page (POST only; `action` says which):
+    accept / decline a request, add a mentor (by email), promote a ninja to
+    youth mentor, remove a member, leave, and transfer the champion role.
+    Leaving is open to any team manager; transfer is champion-only; the rest
+    need MANAGE_TEAM."""
+    access = require_dojo_access(request, dojo_id)
+    dojo = access.dojo
+    if request.method != "POST":
+        return redirect("dojo_team_manage", dojo_id=dojo.id)
+
+    action = request.POST.get("action", "")
+    membership = None
+    if request.POST.get("membership_id"):
+        membership = get_object_or_404(DojoMembership, id=request.POST["membership_id"], dojo=dojo)
+
+    try:
+        if action == "leave":
+            team.leave(access.membership)
+            messages.success(request, f"You've left the {dojo.name} team.")
+            return redirect("account_home")
+        if action == "transfer":
+            if not access.is_champion or membership is None:
+                raise PermissionDenied
+            team.transfer_champion(dojo, access.membership, membership)
+            messages.success(request, f"{membership.name} is now the champion of {dojo.name}.")
+            return redirect("dojo_team_manage", dojo_id=dojo.id)
+
+        if not access.can_manage_team:
+            raise PermissionDenied
+        if action in ("accept", "decline", "remove") and membership is None:
+            raise Http404
+        if action == "accept":
+            team.accept_request(membership, by=request.user)
+            messages.success(request, f"{membership.name} is now on the team.")
+        elif action == "decline":
+            team.decline_request(membership, by=request.user)
+            messages.success(request, "Request declined.")
+        elif action == "remove":
+            team.remove_member(membership)
+            messages.success(request, f"{membership.name} has been removed from the team.")
+        elif action == "add_mentor":
+            email = request.POST.get("email", "").strip()
+            user = User.objects.filter(email__iexact=email).first() if email else None
+            if user is None:
+                raise team.TeamError("No account uses that email address.")
+            team.add_mentor(dojo, user, by=request.user)
+            messages.success(request, f"{user.team_name} has been added to the team.")
+        elif action == "promote":
+            ninja = get_object_or_404(_youth_mentor_candidates(dojo), id=request.POST.get("ninja_id"))
+            team.promote_youth_mentor(dojo, ninja.account, by_membership=access.membership)
+            messages.success(request, f"{ninja.account.team_name} is now a youth mentor.")
+        else:
+            messages.error(request, "Unknown action.")
+    except team.TeamError as error:
+        messages.error(request, str(error))
+    return redirect("dojo_team_manage", dojo_id=dojo.id)
 
 
 @login_required
@@ -381,12 +537,11 @@ def mark_all_notifications_read(request, dojo_id):
     })
 
 
-def team_member_detail(request, mentor_id):
-    """A detail page of their own is for the global team only — not a
-    specific role, but Mentor.dojo being blank (see its help_text: "left
-    blank for board members, who work across dojos"). A dojo's own
-    mentors (lead coach, champion, ninja, volunteer) are shown inline on
-    dojo_team.html instead, whatever their role."""
-    mentor = get_object_or_404(Mentor, id=mentor_id, dojo__isnull=True)
-    focus_areas = [area.strip() for area in mentor.focus_areas.split(",") if area.strip()]
-    return render(request, "dojos/team_member_detail.html", {"mentor": mentor, "focus_areas": focus_areas})
+def team_member_detail(request, member_id):
+    """The organisation's team details page for one listed person
+    (content.OrganisationTeamMember — display only, e.g. "Member of the
+    board"). A dojo's own team is shown on dojo_team.html instead."""
+    member = get_object_or_404(OrganisationTeamMember, id=member_id, is_public=True)
+    return render(request, "dojos/team_member_detail.html", {
+        "mentor": member, "focus_areas": member.focus_area_list,
+    })

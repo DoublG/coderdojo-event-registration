@@ -4,9 +4,13 @@ from pathlib import Path
 
 from django.core.files import File
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from django.utils.text import slugify
 
-from dojos.models import Dojo, Mentor
+from accounts.models import HelperAccount
+from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
+from content.models import OrganisationTeamMember
+from dojos.models import Dojo, DojoMembership
 from dojos.template_icons import TEMPLATE_ICONS, TEMPLATE_ICONS_DIR
 
 AVATARS_DIR = Path(__file__).resolve().parent.parent.parent / "seed_data" / "avatars"
@@ -31,9 +35,9 @@ TITLES = [
     "Teacher", "Systems administrator", "Student", "Freelance developer",
 ]
 
-# The organisation-wide board (Mentor.dojo=None) — these are the people
-# shown in "Meet the team" on the homepage, since that page isn't tied to
-# a single dojo.
+# The organisation's own team (content.OrganisationTeamMember) — shown in
+# "Meet the team" on the homepage, since that page isn't tied to a single
+# dojo. `title` becomes each person's position.
 BOARD_MEMBERS = [
     {
         "name": "Priya Nair",
@@ -69,8 +73,8 @@ BOARD_MEMBERS = [
     },
 ]
 
-# Per-dojo mentors that fill out each chapter's own "Run by" section.
-ROLE_WEIGHTS = {Mentor.NINJA: 40, Mentor.VOLUNTEER: 60}
+# Mentors per dojo, and how many of them also help at a second dojo.
+MENTORS_PER_DOJO = (1, 3)
 
 # The dojo's own personalized tagline (shown between the title and the
 # buttons — see dojos/dojo_detail.html) and, for a couple of dojos, a longer
@@ -93,20 +97,18 @@ DOJO_VISIT_NOTES = (
 
 
 def email_for(name, domain):
-    # Ninjas (minors, first-name-only) never get one — see the role check
-    # at each call site.
     return f"{slugify(name).replace('-', '.')}@{domain}"
 
 
-def assign_avatar(mentor, rng):
-    """Give a mentor without a photo one of the placeholder avatar SVGs
+def assign_avatar(obj, rng, kid=False):
+    """Give a profile without a photo one of the placeholder avatar SVGs
     (dojos/seed_data/avatars/ for adults, dojos/seed_data/kid_avatars/ for
     ninjas), the way seed_pathways.py assigns pathway icons from
-    pathways/seed_data/images/."""
-    pool = KID_AVATAR_FILES if mentor.role == Mentor.NINJA else AVATAR_FILES
-    avatar_path = rng.choice(pool)
+    pathways/seed_data/images/. Works for an account's team-page profile
+    (User.photo) and an OrganisationTeamMember alike."""
+    avatar_path = rng.choice(KID_AVATAR_FILES if kid else AVATAR_FILES)
     with open(avatar_path, "rb") as f:
-        mentor.photo.save(avatar_path.name, File(f), save=True)
+        obj.photo.save(avatar_path.name, File(f), save=True)
 
 
 def assign_dojo_icon(dojo, rng):
@@ -120,28 +122,35 @@ def assign_dojo_icon(dojo, rng):
 
 
 class Command(BaseCommand):
-    help = "Seed the organisation-wide board and a handful of mentors for every dojo."
+    help = (
+        "Seed the organisation's team listing, each dojo champion's team-page profile, "
+        "and a few mentor accounts per dojo (approved HelperAccount logins with active "
+        "memberships; some help at two dojos). Also a pending join request and a former "
+        "team member here and there, to exercise the Team page."
+    )
 
     def handle(self, *args, **options):
         rng = random.Random(7)
         created = 0
+        credential_rows = []
 
-        for member in BOARD_MEMBERS:
-            mentor, was_created = Mentor.objects.get_or_create(
-                name=member["name"], dojo=None, role=Mentor.BOARD,
+        for order, member in enumerate(BOARD_MEMBERS):
+            listed, was_created = OrganisationTeamMember.objects.get_or_create(
+                name=member["name"],
                 defaults={
-                    "title": member["title"],
+                    "position": member["title"],
                     "email": email_for(member["name"], "coderdojobelgium.example"),
                     "bio": member["bio"],
                     "joined_date": member["joined_date"],
                     "focus_areas": member["focus_areas"],
+                    "order": order,
                 },
             )
             if was_created:
-                assign_avatar(mentor, rng)
-            created += 1 if was_created else 0
+                assign_avatar(listed, rng)
 
-        for i, dojo in enumerate(Dojo.objects.all()):
+        mentors_pool = []
+        for i, dojo in enumerate(Dojo.objects.order_by("id")):
             dojo_dirty_fields = []
             if not dojo.tagline:
                 dojo.tagline = DOJO_TAGLINE
@@ -157,57 +166,70 @@ class Command(BaseCommand):
             if not dojo.icon:
                 assign_dojo_icon(dojo, rng)
 
-            if dojo.owner and not dojo.mentors.filter(role=Mentor.LEAD_COACH).exists():
-                # The Lead Coach is always the dojo's real owner login, not
-                # a made-up name — see Mentor's docstring on owner_account.
-                first, last = dojo.owner.first_name, dojo.owner.last_name
-                lead_coach = Mentor.objects.create(
-                    name=f"{first} {last}".strip() or dojo.owner.get_username(),
-                    dojo=dojo,
-                    role=Mentor.LEAD_COACH,
-                    owner_account=dojo.owner,
-                    title=rng.choice(TITLES),
-                    email=dojo.owner.email,
-                    bio=f"{first} founded {dojo.name} and has run it ever since.",
-                    joined_date=date(rng.randint(2018, 2023), rng.randint(1, 12), 1),
-                    sessions_run=rng.randint(20, 120),
-                )
-                assign_avatar(lead_coach, rng)
-                created += 1
+            # The champion's own team-page profile (shared by all their dojos).
+            champion = dojo.champion
+            if champion is not None and not champion.bio:
+                champion.title = rng.choice(TITLES)
+                champion.bio = f"{champion.first_name or champion.username} founded {dojo.name} and has run it ever since."
+                champion.save(update_fields=["title", "bio"])
+                if not champion.photo:
+                    assign_avatar(champion, rng)
 
-            if dojo.mentors.exclude(role=Mentor.LEAD_COACH).exists():
+            if dojo.memberships.filter(role=DojoMembership.MENTOR).exists():
                 continue
-            for _ in range(rng.randint(2, 4)):
-                first, last = rng.choice(FIRST_NAMES), rng.choice(LAST_NAMES)
-                # Ninjas are the kids: first name only, no job title.
-                role = rng.choices(list(ROLE_WEIGHTS), weights=list(ROLE_WEIGHTS.values()))[0]
-                is_ninja = role == Mentor.NINJA
-                mentor = Mentor.objects.create(
-                    name=first if is_ninja else f"{first} {last}",
-                    dojo=dojo,
-                    role=role,
-                    title="" if is_ninja else rng.choice(TITLES),
-                    email="" if is_ninja else email_for(f"{first} {last}", "coderdojo-demo.example"),
-                    joined_date=date(rng.randint(2020, 2025), rng.randint(1, 12), 1),
-                    sessions_run=rng.randint(1, 40),
+            for n in range(1, rng.randint(*MENTORS_PER_DOJO) + 1):
+                username = f"mentor-{dojo.id}-{n}"
+                mentor = HelperAccount.objects.filter(username=username).first()
+                if mentor is None:
+                    first, last = rng.choice(FIRST_NAMES), rng.choice(LAST_NAMES)
+                    email = email_for(f"{first} {last} {dojo.id} {n}", "coderdojo-demo.example")
+                    password = generate_password()
+                    mentor = HelperAccount(
+                        username=username, email=email, first_name=first, last_name=last,
+                        title=rng.choice(TITLES),
+                    )
+                    mentor.set_password(password)
+                    mentor.save()
+                    assign_avatar(mentor, rng)
+                    credential_rows.append((username, email, password))
+                    created += 1
+                DojoMembership.objects.get_or_create(
+                    dojo=dojo, user=mentor,
+                    defaults={
+                        "role": DojoMembership.MENTOR,
+                        "status": DojoMembership.ACTIVE,
+                        "joined_at": timezone.now().replace(year=rng.randint(2020, 2025)),
+                    },
                 )
-                assign_avatar(mentor, rng)
-                created += 1
+                mentors_pool.append(mentor)
 
-        # A single demo example of the other promotion path: a ninja can be
-        # flagged CHAMPION too (a distinct, honorary role — not the Lead
-        # Coach) once someone with admin rights decides to recognise them.
-        # No account link here — that'd need a real ninja account, which
-        # this seed data doesn't fabricate.
-        first_dojo = Dojo.objects.first()
-        if first_dojo and not first_dojo.mentors.filter(role=Mentor.CHAMPION).exists():
-            standout_ninja = first_dojo.mentors.filter(role=Mentor.NINJA).first()
-            if standout_ninja:
-                standout_ninja.role = Mentor.CHAMPION
-                standout_ninja.bio = (
-                    f"{standout_ninja.name} has been coming to {first_dojo.name} for years and now "
-                    "helps run sessions — promoted to Dojo champion in recognition of that."
+        # A few mentors help at a second dojo too, and a few dojos have a
+        # pending join request and a former (dormant) team member — so the
+        # Team page and the dojo switcher have something to show.
+        dojos = list(Dojo.objects.order_by("id"))
+        for k, mentor in enumerate(mentors_pool[:3]):
+            other = dojos[(k * 7 + 3) % len(dojos)] if dojos else None
+            if other is not None and not DojoMembership.objects.filter(dojo=other, user=mentor).exists():
+                DojoMembership.objects.create(
+                    dojo=other, user=mentor, role=DojoMembership.MENTOR, status=DojoMembership.ACTIVE,
+                    joined_at=timezone.now(),
                 )
-                standout_ninja.save(update_fields=["role", "bio"])
+        for k, mentor in enumerate(mentors_pool[3:6]):
+            other = dojos[(k * 5 + 1) % len(dojos)] if dojos else None
+            if other is not None and not DojoMembership.objects.filter(dojo=other, user=mentor).exists():
+                DojoMembership.objects.create(
+                    dojo=other, user=mentor, role=DojoMembership.MENTOR,
+                    status=DojoMembership.REQUESTED, requested_by=mentor,
+                )
+        for mentor in mentors_pool[6:8]:
+            membership = DojoMembership.objects.filter(user=mentor, status=DojoMembership.ACTIVE).first()
+            if membership is not None:
+                membership.status = DojoMembership.DORMANT
+                membership.left_at = timezone.now()
+                membership.save(update_fields=["status", "left_at"])
 
-        self.stdout.write(self.style.SUCCESS(f"Done. created={created} mentors."))
+        if credential_rows:
+            write_credentials("mentor", credential_rows)
+        self.stdout.write(self.style.SUCCESS(
+            f"Done. created={created} mentor accounts. Credentials written to {CREDENTIALS_FILE}"
+        ))
