@@ -47,3 +47,6 @@ if python manage.py shell -c "import sys; from events.models import Event; sys.e
 else
     echo "Demo data already present (events exist) - skipping demo seed."
 fi
+
+# start server
+python manage.py runserver 0.0.0.0:8000
