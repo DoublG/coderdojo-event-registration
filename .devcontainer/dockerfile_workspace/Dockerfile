@@ -22,5 +22,7 @@ RUN apt-get update && apt-get install -y \
     gettext \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+# requirements-dev.txt = requirements.txt (production runtime) + dev tools and
+# the data-loading libraries (geopandas etc.) — the container needs both.
+COPY requirements.txt requirements-dev.txt /tmp/
+RUN pip install --no-cache-dir -r /tmp/requirements-dev.txt

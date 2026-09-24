@@ -57,6 +57,8 @@ Claude Code's login/settings/session history in the `workspace` container live o
 
 Regenerating the local dev TLS CA/cert for `coolregistration.localhost`: see `.devcontainer/certs/README.md`.
 
+**Requirements are split:** `requirements.txt` holds only the **production runtime** dependencies (what the running site imports, plus their pinned transitive deps; `scripts/deploy.sh` installs this on the server). `requirements-dev.txt` includes it via `-r` and adds ruff, the data-loading stack used only by the `import_*` commands (`geopandas`, `pandas`, `shapely`, `bs4`, ...; imported *inside* those commands, never at module level). The devcontainer image installs `requirements-dev.txt`. A new package the site imports at runtime goes in `requirements.txt`; anything only needed locally goes in `requirements-dev.txt`.
+
 Lint/format — `ruff` (config in `pyproject.toml`; tool itself in `requirements-dev.txt`, not `requirements.txt`):
 
 ```sh
@@ -64,6 +66,10 @@ pip install -r requirements-dev.txt
 ruff check .              # lint
 ruff format .             # format
 ```
+
+### Deploying (Level27)
+
+Production is Level27 Python hosting, reached over SSH with key auth (`py10102@c40a7b15f.l27powered.eu`). `scripts/deploy.sh --check` is a read-only preflight; `scripts/deploy.sh` does the real deploy. It bundles the working tree (dev-only paths excluded), installs `requirements.txt` into the **pyenv env gunicorn runs from** (`~/.pyenv/versions/py10102-3.14.7`, *not* `~/app/.venv`), runs `manage.py check` on the new code *before* touching the live app, rsyncs into `~/app` (keeping `.env`, `media/`, `private_media/`), migrates, then reloads gunicorn (HUP to its master) and smoke-tests over the unix socket. Level27 runs `gunicorn -k uvicorn.workers.UvicornWorker main:app` from `~/app`; that command is managed on their side, so the repo-root `main.py` just re-exports `website.asgi.application` as `app`. Production env vars live in `~/app/.env` on the server. To replace it, put a local `.env.production` (gitignored via `.env.*`) next to the script and it gets uploaded. The server has **no MySQL client headers and no GDAL/GEOS**, so `mysqlclient` and `django.contrib.gis` can't work there until that's solved; the script's `manage.py check` step stops a deploy before it can break the live site.
 
 No CI (`.github/workflows` doesn't exist) — these run locally only, on demand.
 

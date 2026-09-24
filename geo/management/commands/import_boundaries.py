@@ -1,6 +1,3 @@
-import geopandas
-import pandas as pd
-import shapely
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 from django.core.management.base import BaseCommand
 
@@ -13,8 +10,14 @@ GEOPACKAGE_PATH = "/home/erik/territorialdivisions_4326.gpkg"
 # 2D and simplify to keep them light to transfer and render in-browser.
 SIMPLIFY_TOLERANCE_DEGREES = 0.002
 
+# geopandas / pandas / shapely are imported inside the functions below, not
+# at module level: they're only needed when this data-loading command
+# actually runs, so the web app itself never imports them.
+
 
 def load_geometry(shapely_geometry):
+    import shapely
+
     simplified = shapely.force_2d(shapely_geometry).simplify(
         SIMPLIFY_TOLERANCE_DEGREES, preserve_topology=True
     )
@@ -34,6 +37,9 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
+        import geopandas
+        import pandas as pd
+
         AdministrativeBoundary.objects.all().delete()
 
         territory = geopandas.read_file(GEOPACKAGE_PATH, layer="belgianterritory")[["namedut", "namefre", "geometry"]]

@@ -1,3 +1,48 @@
+# Local development: everything in requirements.txt plus tools and libraries
+# that only run on a developer machine / in the .devcontainer, never on the
+# production server.
 -r requirements.txt
 
+# Lint/format (config in pyproject.toml)
 ruff==0.16.8
+
+# Data loading: the import_* management commands (import_boundaries,
+# import_municipalities, import_dojos) and their dependencies. Imported
+# inside those commands only, never by the running site.
+beautifulsoup4==4.15.0
+geopandas==1.1.4
+narwhals==2.26.0
+numpy==2.5.3
+pandas==3.0.6
+platformdirs==4.11.12
+pyarrow==25.0.1
+pyogrio==0.13.0
+pyproj==3.8.0
+python-dateutil==2.9.0.post0
+shapely==2.1.2
+six==1.17.0
+soupsieve==2.9.2
+
+# Geo/analysis stack used when preparing data (not imported by the site).
+branca==0.8.2
+cloudpickle==3.1.2
+contourpy==1.4.0
+cycler==0.12.1
+folium==0.20.0
+fonttools==4.65.0
+geographiclib==2.1
+geopy==2.5.0
+Jinja2==3.1.6
+joblib==1.6.0
+kiwisolver==1.5.1
+libpysal==4.15.0
+mapclassify==2.11.0
+MarkupSafe==3.0.3
+matplotlib==3.11.2
+networkx==3.7
+pointpats==2.6.0
+pyparsing==3.3.3
+scikit-learn==1.9.1
+scipy==1.18.1
+threadpoolctl==3.7.0
+xyzservices==2026.9.1

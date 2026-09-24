@@ -1,5 +1,3 @@
-import geopandas
-import pandas as pd
 from django.contrib.gis.geos import Point
 from django.core.management.base import BaseCommand
 
@@ -17,6 +15,11 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
+        # Imported here rather than at module level: only this data-loading
+        # command needs geopandas/pandas, never the web app itself.
+        import geopandas
+        import pandas as pd
+
         municipalsectioncenter = geopandas.read_file(GEOPACKAGE_PATH, layer="municipalsectioncenter")[['namedut', 'namefre', 'geometry']]
         postaldistrict = geopandas.read_file(GEOPACKAGE_PATH, layer="postaldistrict")[['postcode', 'geometry']]
         frame = municipalsectioncenter.sjoin(postaldistrict)
