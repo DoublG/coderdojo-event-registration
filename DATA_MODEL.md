@@ -14,8 +14,8 @@ update its diagram in the same change.
 > **A redesign is in progress.** Sections 1–9 describe the model as it is
 > in the code today. [Section 10](#10-planned-redesign-in-progress)
 > describes the target and tracks which phases have landed: accounts,
-> dojo teams, onboarding, pathways, and badges and belts are done; the
-> organisation role, naming and seeders follow. It also sets the
+> dojo teams, onboarding, pathways, badges and belts, and the organisation
+> role are done; naming and seeders follow. It also sets the
 > [nomenclature](#nomenclature) (Champion, Mentor/Coach, Ninja, Youth
 > mentor, Badge, Belt). Read it before building more on those parts.
 
@@ -104,6 +104,17 @@ role subclasses (redesign phases 1–3, section 10).
 - A **`Participant`** (a ninja attending sessions) is **not** a user. It
   gets a login (a `User` with `account_type="ninja"`, linked through
   `Participant.account`) only if a parent opts it in.
+- **Organisation accounts** are adult accounts with an `OrganisationRole`
+  (`board` or `admin`): access to the organisation's management
+  dashboards, which for now are the Django admin. A role makes the account
+  staff and puts it in a matching permission group (`accounts.organisation`,
+  kept in sync by signals): the **board** gets read-only oversight (dojos,
+  teams, events, applications, badges and belts) and maintains the
+  organisation's team listing; **admins** also edit dojos, events, site
+  content and the pathway/badge/belt catalogues. Neither can award belts,
+  review background checks (a separate permission) or see families'
+  personal data. Being listed on the organisation's team page
+  (`content.OrganisationTeamMember`) is separate from having a role.
 
 ```mermaid
 classDiagram
@@ -136,6 +147,11 @@ classDiagram
     Participant "1" --> "*" Guardianship : guardianships
     Participant "0..1" --> "0..1" User : account (ninja login)
     Participant "*" --> "0..1" Dojo : home_dojo
+    class OrganisationRole {
+        +role  board | admin
+        +granted_at
+    }
+    User "1" --> "*" OrganisationRole : organisation_roles
 ```
 
 Which account does what:
@@ -145,6 +161,7 @@ Which account does what:
 | adult (parent) | self-service sign-up (`register_guardian`) | never needed | their account page (`/account/`) |
 | adult champion / mentor | the same self-service sign-up, then an approved `Application` | required for dojo access (a lapsed check blocks the dashboards, never the login) | first accessible dojo's dashboard |
 | ninja | a parent opts a child in | none | the ninja's own page (`/account/ninja/<id>/`) |
+| adult with an `OrganisationRole` | the same sign-up; the role is granted in the admin | not for the role itself | as any adult; the menu's **Organisation** link opens the admin |
 
 ---
 
@@ -1418,9 +1435,20 @@ at every step:
     belt and history on the ninja page; the awards carousel is now
     "Badges" (`ninja_badges`). Seeder adds the belt track and a belt
     history.
-- [ ] **6. Organisation:** `OrganisationRole` (management-dashboard
-  access). `OrganisationTeamMember` and its team page already landed in
-  phase 2.
+- [x] **6. Organisation** (`accounts`), *done 2026-09-24*
+  - `OrganisationRole` (`board` / `admin`, unique per account and role;
+    adult accounts only). `accounts/organisation.py` maps each role to a
+    permission group and keeps `is_staff` plus the groups in sync through
+    signals; losing the last role only drops staff status when nothing
+    else needs it. Granted from the user's admin page (inline) or the
+    role's own admin list.
+  - The menu's **Organisation** link (`user_has_organisation_role`) opens
+    the Django admin. Application admin actions now need change
+    permission, so view-only roles can't approve/reject.
+  - `seed_mentors` gives two listed board members a login with a role.
+  - *Still future work:* the board dashboard, and with it the board's
+    dormancy notifications (decision 5). `OrganisationTeamMember` and its
+    team page landed in phase 2.
 - [ ] **7. Names and docs:** `Participant` → `Ninja` (with 7–17 validation, moved here from phase 1) and the new names in the UI; the help-centre
   pages in EN/FR/NL; `DATA_MODEL.md` §10 promoted to "current", and
   CLAUDE.md's architecture section updated.

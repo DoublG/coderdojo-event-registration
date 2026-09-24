@@ -24,21 +24,24 @@ def _run(modeladmin, request, queryset, action, done_label):
 
 
 # --- applications -------------------------------------------------------------------
+# Every action needs change permission: without it Django offers an action
+# to anyone who can merely view the list (e.g. the board's read-only
+# organisation role, accounts.organisation).
 
-@admin.action(description="Request a background check from the applicant")
+@admin.action(description="Request a background check from the applicant", permissions=["change"])
 def request_check_for_applicants(modeladmin, request, queryset):
     _run(modeladmin, request, queryset,
          lambda application: services.request_background_check(application.account, request),
          "Background check requested")
 
 
-@admin.action(description="Approve (needs a valid background check)")
+@admin.action(description="Approve (needs a valid background check)", permissions=["change"])
 def approve_applications(modeladmin, request, queryset):
     _run(modeladmin, request, queryset,
          lambda application: services.approve_application(application, request.user), "Approved")
 
 
-@admin.action(description="Reject")
+@admin.action(description="Reject", permissions=["change"])
 def reject_applications(modeladmin, request, queryset):
     _run(modeladmin, request, queryset,
          lambda application: services.reject_application(application, request.user), "Rejected")
@@ -76,7 +79,7 @@ class BackgroundCheckHistoryInline(admin.TabularInline):
         return False
 
 
-@admin.action(description="Request a (new) background check document")
+@admin.action(description="Request a (new) background check document", permissions=["change"])
 def request_checks(modeladmin, request, queryset):
     _run(modeladmin, request, queryset, lambda user: services.request_background_check(user, request),
          "Background check requested")

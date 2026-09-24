@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.text import slugify
 
-from accounts.models import User
+from accounts.models import OrganisationRole, User
 from applications.models import Application
 from applications.seeding import approve_for_seeding
 from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
@@ -123,9 +123,19 @@ def assign_dojo_icon(dojo, rng):
         dojo.icon.save(icon_path.name, File(f), save=True)
 
 
+# A few board members also get a login with an organisation role (access to
+# the management dashboards — the Django admin for now, accounts.organisation).
+# Not everyone listed has access, and vice versa.
+ORGANISATION_ACCOUNTS = [
+    ("Priya Nair", OrganisationRole.ADMIN),
+    ("Tom Vermeulen", OrganisationRole.BOARD),
+]
+
+
 class Command(BaseCommand):
     help = (
-        "Seed the organisation's team listing, each dojo champion's team-page profile, "
+        "Seed the organisation's team listing (two of them with an organisation-role login), "
+        "each dojo champion's team-page profile, "
         "and a few mentor accounts per dojo (adult logins approved as mentors, with active "
         "memberships; some help at two dojos). Also a pending join request and a former "
         "team member here and there, to exercise the Team page."
@@ -150,6 +160,24 @@ class Command(BaseCommand):
             )
             if was_created:
                 assign_avatar(listed, rng)
+
+        organisation_rows = []
+        for name, role in ORGANISATION_ACCOUNTS:
+            username = f"org-{slugify(name)}"
+            account = User.objects.filter(username=username).first()
+            if account is None:
+                first, last = name.split(" ", 1)
+                email = email_for(name, "coderdojobelgium.example")
+                password = generate_password()
+                account = User(username=username, email=email, first_name=first, last_name=last)
+                account.set_password(password)
+                account.save()
+                organisation_rows.append((username, email, password))
+                created += 1
+            OrganisationRole.objects.get_or_create(account=account, role=role)
+            OrganisationTeamMember.objects.filter(name=name, account=None).update(account=account)
+        if organisation_rows:
+            write_credentials("organisation", organisation_rows)
 
         mentors_pool = []
         for i, dojo in enumerate(Dojo.objects.order_by("id")):

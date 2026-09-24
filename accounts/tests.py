@@ -605,3 +605,90 @@ class NinjaBeltDisplayTests(TestCase):
         response = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": child.id}))
         self.assertIsNone(response.context["current_belt"])
         self.assertNotContains(response, 'id="belt-heading"')
+
+
+class OrganisationRoleTests(TestCase):
+    """OrganisationRole → staff status + a permission group (accounts.organisation):
+    the board is read-only (plus the team listing), admins edit the catalogue."""
+
+    def setUp(self):
+        self.user = User.objects.create(username="board1", email="b@example.com")
+
+    def _grant(self, role):
+        from .models import OrganisationRole
+
+        return OrganisationRole.objects.create(account=self.user, role=role)
+
+    def _fresh(self):
+        return User.objects.get(pk=self.user.pk)  # has_perm caches per instance
+
+    def test_board_role_is_read_only_staff(self):
+        from .models import OrganisationRole
+
+        self._grant(OrganisationRole.BOARD)
+        user = self._fresh()
+
+        self.assertTrue(user.is_staff)
+        self.assertTrue(user.has_perm("dojos.view_dojo"))
+        self.assertTrue(user.has_perm("events.view_ninjabelt"))
+        self.assertTrue(user.has_perm("content.change_organisationteammember"))
+        self.assertFalse(user.has_perm("dojos.change_dojo"))
+        self.assertFalse(user.has_perm("events.add_ninjabelt"))
+        self.assertFalse(user.has_perm("accounts.view_participant"))
+        self.assertFalse(user.has_perm("applications.can_review_background_checks"))
+
+    def test_admin_role_edits_the_catalogue(self):
+        from .models import OrganisationRole
+
+        self._grant(OrganisationRole.ADMIN)
+        user = self._fresh()
+        self.assertTrue(user.has_perm("dojos.change_dojo"))
+        self.assertTrue(user.has_perm("events.add_belt"))
+        self.assertTrue(user.has_perm("pathways.change_pathway"))
+        self.assertFalse(user.has_perm("events.add_ninjabelt"))
+
+    def test_revoking_the_last_role_drops_staff_and_group(self):
+        from .models import OrganisationRole
+
+        role = self._grant(OrganisationRole.BOARD)
+        role.delete()
+        user = self._fresh()
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.groups.exists())
+
+    def test_revoking_keeps_staff_that_is_needed_for_something_else(self):
+        from django.contrib.auth.models import Permission
+
+        from .models import OrganisationRole
+
+        self.user.user_permissions.add(Permission.objects.get(codename="can_review_background_checks"))
+        self._grant(OrganisationRole.BOARD).delete()
+        self.assertTrue(self._fresh().is_staff)
+
+    def test_ninja_accounts_cannot_hold_a_role(self):
+        from django.core.exceptions import ValidationError
+
+        from .models import OrganisationRole
+
+        ninja = User.objects.create(username="n1", account_type=User.NINJA)
+        with self.assertRaises(ValidationError):
+            OrganisationRole(account=ninja, role=OrganisationRole.BOARD).full_clean()
+
+    def test_menu_links_role_holders_to_the_management_dashboards(self):
+        from .models import OrganisationRole
+
+        self.client.force_login(self.user)
+        self.assertNotContains(self.client.get(reverse("account_home")), reverse("admin:index"))
+        self._grant(OrganisationRole.BOARD)
+        self.assertContains(self.client.get(reverse("account_home")), reverse("admin:index"))
+
+    def test_board_sees_applications_but_cannot_run_the_review_actions(self):
+        from .models import OrganisationRole
+
+        self._grant(OrganisationRole.BOARD)
+        self.client.force_login(self._fresh())
+        response = self.client.get(reverse("admin:applications_application_changelist"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "approve_applications")
+        self.assertEqual(self.client.get(reverse("admin:events_ninjabelt_changelist")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("admin:accounts_participant_changelist")).status_code, 403)

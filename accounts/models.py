@@ -3,6 +3,7 @@ from datetime import date
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from applications.storage import get_private_storage
@@ -199,3 +200,35 @@ class Guardianship(models.Model):
 
     def __str__(self):
         return f"{self.guardian} → {self.ninja}"
+
+
+class OrganisationRole(models.Model):
+    """Access to the organisation's management dashboards — for now the
+    Django admin (DATA_MODEL.md §10, decision 4). Separate from being
+    *listed* on the organisation's team page (content.OrganisationTeamMember):
+    not everyone with access is listed, and vice versa.
+
+    A role makes the account staff and puts it in the matching group, whose
+    permissions are defined in accounts.organisation (kept in sync by the
+    signals there — don't set is_staff or these groups by hand)."""
+
+    BOARD = "board"
+    ADMIN = "admin"
+    ROLE_CHOICES = [(BOARD, "Board (read-only)"), (ADMIN, "Admin")]
+
+    account = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="organisation_roles",
+        limit_choices_to={"account_type": "adult"},
+    )
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    granted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["account", "role"], name="unique_organisation_role")]
+
+    def __str__(self):
+        return f"{self.account} ({self.get_role_display()})"
+
+    def clean(self):
+        if self.account_id and self.account.is_ninja:
+            raise ValidationError("Only an adult account can have an organisation role.")
