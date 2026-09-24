@@ -6,7 +6,7 @@ Two roles have access to a dojo's admin area:
 - OWNER — the dojo's own DojoOwner login (Dojo.owner).
 - HELPER — a HelperAccount linked to the dojo through its Mentor profile
   (Mentor.helper_account + Mentor.dojo). Only HelperAccount counts: a
-  Guardian- or ChildAccount-linked mentor profile never gets admin access,
+  parent- or ninja-account-linked mentor profile never gets admin access,
   since only DojoOwner/HelperAccount go through the background-check
   pipeline (see applications.models.BackgroundCheckMixin).
 

@@ -1,7 +1,7 @@
 {% comment %}
 A batch of cards for the child detail page's Awards carousel — either the
-initial batch (rendered inline by accounts.views.child_detail) or a
-lazy-loaded next one (returned by accounts.views.award_widget over htmx).
+initial batch (rendered inline by accounts.views.ninja_detail) or a
+lazy-loaded next one (returned by accounts.views.ninja_awards over htmx).
 {% endcomment %}
 {% for participant_award in awards %}
   {% include "accounts/partials/_award_card.html" with participant_award=participant_award is_last=forloop.last %}

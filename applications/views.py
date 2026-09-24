@@ -73,15 +73,11 @@ def _upload_background_check_context(request, application):
 
 def _applicant_initial(user):
     """Prefill for register_dojo/register_helper when the applicant is already logged in (e.g. a
-    Guardian applying to also become a DojoOwner/HelperAccount). Django's auth always loads
-    `user` as the base accounts.User row, never a role subclass (see accounts.context_processors.
-    user_roles for the same pattern) — phone only exists on Guardian, so it's only there via the
-    reverse one-to-one accessor, not directly on `user`."""
-    guardian = getattr(user, "guardian", None)
+    parent applying to also start or help at a dojo)."""
     return {
         "applicant_name": f"{user.first_name} {user.last_name}".strip() or user.get_username(),
         "applicant_email": user.email,
-        "applicant_phone": guardian.phone if guardian is not None else "",
+        "applicant_phone": user.phone,
     }
 
 

@@ -10,16 +10,23 @@ from django.utils import timezone
 from dojos.models import Dojo
 from events.models import Event, Registration
 
-from .models import DojoOwner, Guardian, HelperAccount, Participant
+from .models import DojoOwner, Guardianship, HelperAccount, Participant, User
 from .provisioning import attach_role, provision_account, unique_username
 
 PASSWORD = "correct-horse-battery-staple"
 
 
+def make_ninja(guardian, name, **fields):
+    """A ninja linked to `guardian` through a Guardianship."""
+    ninja = Participant.objects.create(name=name, **fields)
+    Guardianship.objects.create(guardian=guardian, ninja=ninja)
+    return ninja
+
+
 class LoginViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.guardian = Guardian.objects.create(username="g1", email="g1@example.com")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
         cls.guardian.set_password(PASSWORD)
         cls.guardian.save()
 
@@ -30,13 +37,13 @@ class LoginViewTests(TestCase):
 
     def test_valid_login_by_email_redirects_to_account_page(self):
         response = self.client.post(reverse("login"), {"email": self.guardian.email, "password": PASSWORD})
-        self.assertRedirects(response, reverse("guardian_detail", kwargs={"guardian_id": self.guardian.id}))
+        self.assertRedirects(response, reverse("account_home"))
 
     def test_valid_login_by_username(self):
         """EmailOrUsernameBackend accepts either — seeded demo accounts are
         keyed by username."""
         response = self.client.post(reverse("login"), {"email": self.guardian.username, "password": PASSWORD})
-        self.assertRedirects(response, reverse("guardian_detail", kwargs={"guardian_id": self.guardian.id}))
+        self.assertRedirects(response, reverse("account_home"))
 
     def test_invalid_password_shows_error(self):
         response = self.client.post(reverse("login"), {"email": self.guardian.email, "password": "wrong"})
@@ -46,12 +53,12 @@ class LoginViewTests(TestCase):
     def test_already_authenticated_redirects_away_from_form(self):
         self.client.force_login(self.guardian)
         response = self.client.get(reverse("login"))
-        self.assertRedirects(response, reverse("guardian_detail", kwargs={"guardian_id": self.guardian.id}))
+        self.assertRedirects(response, reverse("account_home"))
 
 
 class LogoutViewTests(TestCase):
     def test_logout_redirects_home_and_clears_session(self):
-        guardian = Guardian.objects.create(username="g1", email="g1@example.com")
+        guardian = User.objects.create(username="g1", email="g1@example.com")
         self.client.force_login(guardian)
 
         response = self.client.get(reverse("logout"))
@@ -63,7 +70,7 @@ class LogoutViewTests(TestCase):
 class ChangePasswordViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.guardian = Guardian.objects.create(username="g1", email="g1@example.com", must_change_password=True)
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com", must_change_password=True)
         cls.guardian.set_password(PASSWORD)
         cls.guardian.save()
 
@@ -107,84 +114,134 @@ class RegisterPagesTests(TestCase):
 class GuardianDetailViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.guardian = Guardian.objects.create(username="g1", email="g1@example.com")
-        cls.other_guardian = Guardian.objects.create(username="g2", email="g2@example.com")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
+        cls.other_guardian = User.objects.create(username="g2", email="g2@example.com")
 
     def test_anonymous_redirected_to_login(self):
-        response = self.client.get(reverse("guardian_detail", kwargs={"guardian_id": self.guardian.id}))
+        response = self.client.get(reverse("account_home"))
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("login"), response.url)
 
     def test_own_account_renders(self):
         self.client.force_login(self.guardian)
-        response = self.client.get(reverse("guardian_detail", kwargs={"guardian_id": self.guardian.id}))
+        response = self.client.get(reverse("account_home"))
         self.assertEqual(response.status_code, 200)
 
-    def test_another_guardians_account_is_404(self):
-        """404, not 403 — see _get_own_guardian's docstring: a guessed id
-        shouldn't even confirm another family's account exists."""
+    def test_lists_only_own_ninjas(self):
+        """The account page has no id in its URL — it always shows the
+        logged-in account's own ninjas, never another family's."""
+        mine = make_ninja(self.guardian, "Mine")
+        make_ninja(self.other_guardian, "Theirs")
         self.client.force_login(self.guardian)
-        response = self.client.get(reverse("guardian_detail", kwargs={"guardian_id": self.other_guardian.id}))
-        self.assertEqual(response.status_code, 404)
+
+        response = self.client.get(reverse("account_home"))
+
+        self.assertEqual([entry["child"] for entry in response.context["children"]], [mine])
+
+    def test_ninja_login_is_sent_to_its_own_page(self):
+        ninja_login = User.objects.create(username="kid", account_type=User.NINJA)
+        ninja = make_ninja(self.guardian, "Kid", account=ninja_login)
+        self.client.force_login(ninja_login)
+
+        response = self.client.get(reverse("account_home"))
+
+        self.assertRedirects(response, reverse("ninja_detail", kwargs={"ninja_id": ninja.id}))
 
 
 class AddChildViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.guardian = Guardian.objects.create(username="g1", email="g1@example.com")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
 
     def test_login_required(self):
-        response = self.client.post(reverse("add_child", kwargs={"guardian_id": self.guardian.id}), {"name": "Kid"})
+        response = self.client.post(reverse("add_ninja"), {"name": "Kid"})
         self.assertEqual(response.status_code, 302)
 
     def test_post_creates_participant(self):
         self.client.force_login(self.guardian)
         response = self.client.post(
-            reverse("add_child", kwargs={"guardian_id": self.guardian.id}),
+            reverse("add_ninja"),
             {"name": "New Kid", "date_of_birth": "2015-01-01"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(self.guardian.children.filter(name="New Kid").exists())
+        self.assertTrue(Participant.objects.of_guardian(self.guardian).filter(name="New Kid").exists())
+
+    def test_any_adult_account_can_add_children(self):
+        """No separate "guardian" role any more — e.g. a dojo owner adds
+        their own child from their account page directly."""
+        owner = DojoOwner.objects.create(username="owner1")
+        self.client.force_login(owner)
+        self.client.post(reverse("add_ninja"), {"name": "Owner Kid"})
+        self.assertEqual(list(Participant.objects.of_guardian(owner).values_list("name", flat=True)), ["Owner Kid"])
+
+    def test_ninja_login_cannot_add_children(self):
+        ninja_login = User.objects.create(username="kid", account_type=User.NINJA)
+        self.client.force_login(ninja_login)
+        response = self.client.post(reverse("add_ninja"), {"name": "Nope"})
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(Participant.objects.exists())
 
     def test_blank_name_creates_nothing(self):
         self.client.force_login(self.guardian)
-        self.client.post(reverse("add_child", kwargs={"guardian_id": self.guardian.id}), {"name": "  "})
-        self.assertEqual(self.guardian.children.count(), 0)
+        self.client.post(reverse("add_ninja"), {"name": "  "})
+        self.assertEqual(Participant.objects.of_guardian(self.guardian).count(), 0)
 
 
 class ChildDetailViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.guardian = Guardian.objects.create(username="g1", email="g1@example.com")
-        cls.other_guardian = Guardian.objects.create(username="g2", email="g2@example.com")
-        cls.child = Participant.objects.create(guardian=cls.guardian, name="Kid One")
-        cls.other_child = Participant.objects.create(guardian=cls.other_guardian, name="Kid Two")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
+        cls.other_guardian = User.objects.create(username="g2", email="g2@example.com")
+        cls.child = make_ninja(cls.guardian, "Kid One")
+        cls.other_child = make_ninja(cls.other_guardian, "Kid Two")
 
     def test_own_child_renders(self):
         self.client.force_login(self.guardian)
         response = self.client.get(
-            reverse("child_detail", kwargs={"guardian_id": self.guardian.id, "child_id": self.child.id})
+            reverse("ninja_detail", kwargs={"ninja_id": self.child.id})
         )
         self.assertEqual(response.status_code, 200)
 
     def test_another_familys_child_is_404(self):
         self.client.force_login(self.guardian)
         response = self.client.get(
-            reverse("child_detail", kwargs={"guardian_id": self.guardian.id, "child_id": self.other_child.id})
+            reverse("ninja_detail", kwargs={"ninja_id": self.other_child.id})
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_second_guardian_can_see_the_ninja_too(self):
+        """A ninja can have more than one parent/guardian."""
+        Guardianship.objects.create(guardian=self.other_guardian, ninja=self.child)
+        self.client.force_login(self.other_guardian)
+        response = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_ninja_can_see_own_page_but_not_edit_it(self):
+        ninja_login = User.objects.create(username="kid", account_type=User.NINJA)
+        self.child.account = ninja_login
+        self.child.save(update_fields=["account"])
+        self.client.force_login(ninja_login)
+
+        page = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
+        edit = self.client.get(reverse("edit_ninja", kwargs={"ninja_id": self.child.id}))
+        other = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.other_child.id}))
+
+        self.assertEqual(page.status_code, 200)
+        self.assertFalse(page.context["can_edit"])
+        self.assertEqual(edit.status_code, 404)
+        self.assertEqual(other.status_code, 404)
 
 
 class EditChildViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.guardian = Guardian.objects.create(username="g1", email="g1@example.com")
-        cls.child = Participant.objects.create(guardian=cls.guardian, name="Kid One")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
+        cls.child = make_ninja(cls.guardian, "Kid One")
 
     def test_get_returns_edit_form_partial(self):
         self.client.force_login(self.guardian)
         response = self.client.get(
-            reverse("edit_child", kwargs={"guardian_id": self.guardian.id, "child_id": self.child.id})
+            reverse("edit_ninja", kwargs={"ninja_id": self.child.id})
         )
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "accounts/partials/_child_header_edit.html")
@@ -192,7 +249,7 @@ class EditChildViewTests(TestCase):
     def test_post_updates_name(self):
         self.client.force_login(self.guardian)
         response = self.client.post(
-            reverse("edit_child", kwargs={"guardian_id": self.guardian.id, "child_id": self.child.id}),
+            reverse("edit_ninja", kwargs={"ninja_id": self.child.id}),
             {"name": "Renamed Kid", "date_of_birth": ""},
         )
         self.assertEqual(response.status_code, 200)
@@ -203,25 +260,25 @@ class EditChildViewTests(TestCase):
 
 class AwardWidgetViewTests(TestCase):
     def test_login_required(self):
-        guardian = Guardian.objects.create(username="g1", email="g1@example.com")
-        child = Participant.objects.create(guardian=guardian, name="Kid")
-        response = self.client.get(reverse("award_widget", kwargs={"guardian_id": guardian.id, "child_id": child.id}))
+        guardian = User.objects.create(username="g1", email="g1@example.com")
+        child = make_ninja(guardian, "Kid")
+        response = self.client.get(reverse("ninja_awards", kwargs={"ninja_id": child.id}))
         self.assertEqual(response.status_code, 302)
 
     def test_renders_for_owning_guardian(self):
-        guardian = Guardian.objects.create(username="g1", email="g1@example.com")
-        child = Participant.objects.create(guardian=guardian, name="Kid")
+        guardian = User.objects.create(username="g1", email="g1@example.com")
+        child = make_ninja(guardian, "Kid")
         self.client.force_login(guardian)
-        response = self.client.get(reverse("award_widget", kwargs={"guardian_id": guardian.id, "child_id": child.id}))
+        response = self.client.get(reverse("ninja_awards", kwargs={"ninja_id": child.id}))
         self.assertEqual(response.status_code, 200)
 
 
 class CancelRegistrationViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.guardian = Guardian.objects.create(username="g1", email="g1@example.com")
-        cls.child = Participant.objects.create(guardian=cls.guardian, name="Kid One")
-        cls.waitlisted_child = Participant.objects.create(guardian=cls.guardian, name="Kid Two")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
+        cls.child = make_ninja(cls.guardian, "Kid One")
+        cls.waitlisted_child = make_ninja(cls.guardian, "Kid Two")
         dojo = Dojo.objects.create(name="Ghent")
         cls.event = Event.objects.create(
             name="Session",
@@ -247,20 +304,20 @@ class CancelRegistrationViewTests(TestCase):
         self.client.force_login(self.guardian)
         response = self.client.post(
             reverse(
-                "cancel_registration", kwargs={"guardian_id": self.guardian.id, "registration_id": self.confirmed.id}
+                "cancel_registration", kwargs={"registration_id": self.confirmed.id}
             )
         )
-        self.assertRedirects(response, reverse("guardian_detail", kwargs={"guardian_id": self.guardian.id}))
+        self.assertRedirects(response, reverse("account_home"))
         self.assertFalse(Registration.objects.filter(id=self.confirmed.id).exists())
         self.waitlisted.refresh_from_db()
         self.assertFalse(self.waitlisted.waiting_list)
 
     def test_cannot_cancel_another_familys_registration(self):
-        other_guardian = Guardian.objects.create(username="g2", email="g2@example.com")
+        other_guardian = User.objects.create(username="g2", email="g2@example.com")
         self.client.force_login(other_guardian)
         response = self.client.post(
             reverse(
-                "cancel_registration", kwargs={"guardian_id": other_guardian.id, "registration_id": self.confirmed.id}
+                "cancel_registration", kwargs={"registration_id": self.confirmed.id}
             )
         )
         self.assertEqual(response.status_code, 404)
@@ -282,7 +339,7 @@ class CancelRegistrationViewTests(TestCase):
 
         with patch("accounts.views.notify") as mock_notify:
             self.client.post(
-                reverse("cancel_registration", kwargs={"guardian_id": self.guardian.id, "registration_id": confirmed.id})
+                reverse("cancel_registration", kwargs={"registration_id": confirmed.id})
             )
 
         mock_notify.assert_called_once()
@@ -298,8 +355,7 @@ class CancelRegistrationViewTests(TestCase):
         with patch("accounts.views.notify") as mock_notify:
             self.client.post(
                 reverse(
-                    "cancel_registration",
-                    kwargs={"guardian_id": self.guardian.id, "registration_id": self.confirmed.id},
+                    "cancel_registration", kwargs={"registration_id": self.confirmed.id},
                 )
             )
         mock_notify.assert_not_called()
@@ -331,12 +387,12 @@ class RegisterGuardianViewTests(TestCase):
     def test_valid_post_creates_account_logs_in_and_redirects(self):
         response = self.client.post(reverse("register_guardian"), self._valid_post_data())
 
-        guardian = Guardian.objects.get(email="jane@example.com")
-        self.assertRedirects(response, reverse("guardian_detail", kwargs={"guardian_id": guardian.id}))
+        guardian = User.objects.get(email="jane@example.com")
+        self.assertRedirects(response, reverse("account_home"))
         self.assertTrue(guardian.check_password(self.valid_password))
         self.assertEqual(guardian.first_name, "Jane")
         self.assertEqual(guardian.last_name, "Doe")
-        self.assertEqual(list(guardian.children.values_list("name", flat=True)), ["Sam"])
+        self.assertEqual(list(Participant.objects.of_guardian(guardian).values_list("name", flat=True)), ["Sam"])
         self.assertEqual(int(self.client.session["_auth_user_id"]), guardian.id)
 
     def test_valid_post_with_non_contiguous_child_indices_creates_both(self):
@@ -347,34 +403,34 @@ class RegisterGuardianViewTests(TestCase):
         )
         self.client.post(reverse("register_guardian"), data)
 
-        guardian = Guardian.objects.get(email="jane@example.com")
-        self.assertEqual(guardian.children.count(), 2)
-        alex = guardian.children.get(name="Alex")
+        guardian = User.objects.get(email="jane@example.com")
+        self.assertEqual(Participant.objects.of_guardian(guardian).count(), 2)
+        alex = Participant.objects.of_guardian(guardian).get(name="Alex")
         self.assertEqual(alex.experience_level, "confident")
         self.assertEqual(alex.allergies_notes, "Peanut allergy")
 
     def test_duplicate_email_is_rejected(self):
-        Guardian.objects.create(username="existing", email="jane@example.com")
+        User.objects.create(username="existing", email="jane@example.com")
 
         response = self.client.post(reverse("register_guardian"), self._valid_post_data())
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["form"].errors.get("email"))
-        self.assertEqual(Guardian.objects.filter(email="jane@example.com").count(), 1)
+        self.assertEqual(User.objects.filter(email="jane@example.com").count(), 1)
 
     def test_weak_password_is_rejected(self):
         response = self.client.post(reverse("register_guardian"), self._valid_post_data(password="password"))
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["form"].errors.get("password"))
-        self.assertFalse(Guardian.objects.filter(email="jane@example.com").exists())
+        self.assertFalse(User.objects.filter(email="jane@example.com").exists())
 
     def test_missing_consent_is_rejected(self):
         response = self.client.post(reverse("register_guardian"), self._valid_post_data(consent=""))
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["form"].errors.get("consent"))
-        self.assertFalse(Guardian.objects.filter(email="jane@example.com").exists())
+        self.assertFalse(User.objects.filter(email="jane@example.com").exists())
 
     def test_child_missing_required_fields_is_rejected(self):
         response = self.client.post(
@@ -385,7 +441,7 @@ class RegisterGuardianViewTests(TestCase):
         row = response.context["child_rows"][0]
         self.assertIn("name", row["errors"])
         self.assertIn("dob", row["errors"])
-        self.assertFalse(Guardian.objects.filter(email="jane@example.com").exists())
+        self.assertFalse(User.objects.filter(email="jane@example.com").exists())
         self.assertFalse(Participant.objects.exists())
 
     def test_no_children_is_rejected(self):
@@ -399,76 +455,19 @@ class RegisterGuardianViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["children_error"])
-        self.assertFalse(Guardian.objects.filter(email="jane@example.com").exists())
+        self.assertFalse(User.objects.filter(email="jane@example.com").exists())
 
 
-class LinkGuardianRoleViewTests(TestCase):
-    """accounts.views.link_guardian_role — the counterpart to register_guardian for someone
-    who's already logged in as another role (or as a DojoOwner who wants to add Guardian too)
-    rather than a stranger signing up."""
+class RegisterGuardianWhenLoggedInTests(TestCase):
+    """Family sign-up is only for people without an account: a logged-in
+    account (any kind) adds its children from its account page instead —
+    there's no separate guardian role to attach any more."""
 
-    def setUp(self):
-        self.owner = DojoOwner.objects.create(
-            username="owner1", email="owner@example.com", first_name="Owner", last_name="One",
-        )
-        self.owner.set_password(PASSWORD)
-        self.owner.save()
-
-    def _valid_post_data(self, **overrides):
-        data = {
-            "phone": "",
-            "consent": "on",
-            "child_1_name": "Sam",
-            "child_1_dob": "2015-01-01",
-            "child_1_level": "new",
-            "child_1_notes": "",
-        }
-        data.update(overrides)
-        return data
-
-    def test_anonymous_redirected_to_login(self):
-        response = self.client.get(reverse("link_guardian_role"))
-        self.assertEqual(response.status_code, 302)
-        self.assertIn(reverse("login"), response.url)
-
-    def test_valid_post_adds_guardian_role_to_same_account(self):
-        self.client.force_login(self.owner)
-        response = self.client.post(reverse("link_guardian_role"), self._valid_post_data())
-
-        self.owner.refresh_from_db()
-        self.assertRedirects(response, reverse("guardian_detail", kwargs={"guardian_id": self.owner.pk}))
-        # Same underlying User row gained a Guardian row — not a second account.
-        self.assertEqual(DojoOwner.objects.count(), 1)
-        self.assertEqual(Guardian.objects.count(), 1)
-        guardian = Guardian.objects.get(pk=self.owner.pk)
-        self.assertEqual(guardian.email, "owner@example.com")
-        self.assertTrue(guardian.check_password(PASSWORD))
-        self.assertEqual(list(guardian.children.values_list("name", flat=True)), ["Sam"])
-        # The DojoOwner role is untouched.
-        self.assertTrue(DojoOwner.objects.filter(pk=self.owner.pk).exists())
-
-    def test_already_guardian_is_redirected_without_reprocessing(self):
-        attach_role(self.owner, Guardian, phone="0470000000")
-        self.client.force_login(self.owner)
-
-        response = self.client.get(reverse("link_guardian_role"))
-
-        self.assertRedirects(response, reverse("guardian_detail", kwargs={"guardian_id": self.owner.pk}))
-        self.assertEqual(Guardian.objects.count(), 1)
-
-    def test_no_children_is_rejected(self):
-        self.client.force_login(self.owner)
-        data = self._valid_post_data()
-        del data["child_1_name"]
-        del data["child_1_dob"]
-        del data["child_1_level"]
-        del data["child_1_notes"]
-
-        response = self.client.post(reverse("link_guardian_role"), data)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context["children_error"])
-        self.assertFalse(Guardian.objects.filter(pk=self.owner.pk).exists())
+    def test_logged_in_account_is_sent_to_account_page(self):
+        owner = DojoOwner.objects.create(username="owner1", email="owner@example.com")
+        self.client.force_login(owner)
+        response = self.client.get(reverse("register_guardian"))
+        self.assertRedirects(response, reverse("account_home"))
 
 
 class UniqueUsernameTests(TestCase):
@@ -476,12 +475,12 @@ class UniqueUsernameTests(TestCase):
         self.assertEqual(unique_username("jane-doe"), "jane-doe")
 
     def test_appends_suffix_on_collision(self):
-        Guardian.objects.create(username="jane-doe")
+        User.objects.create(username="jane-doe")
         self.assertEqual(unique_username("jane-doe"), "jane-doe2")
 
     def test_keeps_incrementing_past_multiple_collisions(self):
-        Guardian.objects.create(username="jane-doe")
-        Guardian.objects.create(username="jane-doe2")
+        User.objects.create(username="jane-doe")
+        User.objects.create(username="jane-doe2")
         self.assertEqual(unique_username("jane-doe"), "jane-doe3")
 
     def test_falls_back_to_user_for_blank_base(self):
@@ -539,7 +538,7 @@ class ProvisionAccountTests(TestCase):
 
 class AttachRoleTests(TestCase):
     """accounts.provisioning.attach_role — the MTI "promote in place" trick used both by
-    accounts.views.link_guardian_role and applications.admin's approve_and_provision_owner/helper
+    applications.admin's approve_and_provision_owner/helper
     when an application's applicant_account is set."""
 
     def test_adds_role_to_existing_user_without_creating_a_new_one(self):
@@ -547,18 +546,17 @@ class AttachRoleTests(TestCase):
         owner.set_password(PASSWORD)
         owner.save()
 
-        guardian = attach_role(owner, Guardian, phone="0470000000")
+        helper = attach_role(owner, HelperAccount)
 
-        self.assertEqual(guardian.pk, owner.pk)
-        self.assertEqual(guardian.phone, "0470000000")
+        self.assertEqual(helper.pk, owner.pk)
         # Base User fields carried over untouched.
-        self.assertEqual(guardian.email, "owner@example.com")
-        self.assertTrue(guardian.check_password(PASSWORD))
+        self.assertEqual(helper.email, "owner@example.com")
+        self.assertTrue(helper.check_password(PASSWORD))
         # One User row, now resolving as both roles.
         self.assertEqual(DojoOwner.objects.filter(pk=owner.pk).count(), 1)
-        self.assertEqual(Guardian.objects.filter(pk=owner.pk).count(), 1)
+        self.assertEqual(HelperAccount.objects.filter(pk=owner.pk).count(), 1)
         owner.refresh_from_db()
-        self.assertIsNotNone(getattr(owner, "guardian", None))
+        self.assertIsNotNone(getattr(owner, "helperaccount", None))
 
     def test_reattaching_an_existing_role_is_a_safe_no_op(self):
         """The 1-to-n DojoOwner:Dojo case — an already-DojoOwner account approved for a *second*
@@ -623,7 +621,7 @@ class BackgroundCheckLoginGateTests(TestCase):
 
         response = self.client.post(reverse("login"), {"email": "owner1@example.com", "password": PASSWORD})
 
-        self.assertRedirects(response, reverse("home"))
+        self.assertRedirects(response, reverse("account_home"))
         self.assertEqual(int(self.client.session["_auth_user_id"]), owner.id)
 
     def test_allowed_when_not_required(self):

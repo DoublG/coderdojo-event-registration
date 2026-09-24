@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from accounts.models import Guardian, Participant
+from accounts.models import Guardianship, Participant, User
 from dojos.models import Dojo
 
 from .models import Event, Registration
@@ -95,8 +95,9 @@ class EventSignupViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.dojo = Dojo.objects.create(name="Ghent")
-        cls.guardian = Guardian.objects.create(username="g1", email="g1@example.com")
-        cls.child = Participant.objects.create(guardian=cls.guardian, name="Kid One")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
+        cls.child = Participant.objects.create(name="Kid One")
+        Guardianship.objects.create(guardian=cls.guardian, ninja=cls.child)
 
     def test_login_required(self):
         event = _future_event(self.dojo)
@@ -117,6 +118,36 @@ class EventSignupViewTests(TestCase):
         registration = Registration.objects.get(event=event, participant=self.child)
         self.assertFalse(registration.waiting_list)
         self.assertEqual(response.context["results"][0]["waiting_list"], False)
+
+    def test_cannot_sign_up_another_familys_ninja(self):
+        """Only ninjas the account is a guardian of can be signed up — a
+        foreign child id in the POST is silently ignored."""
+        other_parent = User.objects.create(username="g2", email="g2@example.com")
+        event = _future_event(self.dojo, places=10)
+        self.client.force_login(other_parent)
+
+        response = self.client.post(
+            reverse("event_signup", kwargs={"event_id": event.id}),
+            {"child": [str(self.child.id)], "child_order": str(self.child.id)},
+        )
+
+        self.assertEqual(response.context["error"], "Please select at least one child.")
+        self.assertFalse(Registration.objects.filter(event=event).exists())
+
+    def test_ninja_login_cannot_sign_anyone_up(self):
+        ninja_login = User.objects.create(username="kid", account_type=User.NINJA)
+        self.child.account = ninja_login
+        self.child.save(update_fields=["account"])
+        event = _future_event(self.dojo, places=10)
+        self.client.force_login(ninja_login)
+
+        response = self.client.post(
+            reverse("event_signup", kwargs={"event_id": event.id}),
+            {"child": [str(self.child.id)], "child_order": str(self.child.id)},
+        )
+
+        self.assertEqual(response.context["children"], [])
+        self.assertFalse(Registration.objects.filter(event=event).exists())
 
     def test_signup_waitlists_when_full(self):
         event = _future_event(self.dojo, places=0)

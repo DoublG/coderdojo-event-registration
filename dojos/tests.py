@@ -11,7 +11,7 @@ from django.test import TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from accounts.models import DojoOwner, Guardian, HelperAccount, Participant
+from accounts.models import DojoOwner, HelperAccount, Participant, User
 from accounts.provisioning import attach_role
 from events.models import Event, Registration
 from geo.models import AdministrativeBoundary
@@ -966,7 +966,7 @@ class HelperDojoAccessTests(TestCase):
     def test_guardian_linked_mentor_gets_no_access(self):
         """Only HelperAccount counts — guardians never went through the
         background-check pipeline."""
-        guardian = Guardian.objects.create(username="parent1")
+        guardian = User.objects.create(username="parent1")
         Mentor.objects.create(name="Parent", dojo=self.dojo, role=Mentor.VOLUNTEER, guardian_account=guardian)
         self.client.force_login(guardian)
         response = self.client.get(reverse("dojo_dashboard", kwargs=self._kw()))

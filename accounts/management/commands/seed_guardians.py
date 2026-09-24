@@ -6,7 +6,7 @@ from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from accounts.models import ChildAccount, Guardian, Participant
+from accounts.models import Guardianship, Participant, User
 from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
 from dojos.models import Dojo
 
@@ -36,9 +36,10 @@ CHILD_LOGIN_PROBABILITY = 0.5
 
 class Command(BaseCommand):
     help = (
-        f"Seed {NUM_GUARDIANS} demo Guardian accounts, each with 1-3 children "
-        "(Participants). About half the children get their own optional "
-        "login (ChildAccount), simulating a guardian opting them in."
+        f"Seed {NUM_GUARDIANS} demo parent accounts, each with 1-3 ninjas "
+        "(Participants, linked through Guardianship). About half the ninjas get "
+        "their own optional login (an account of type ninja), simulating a "
+        "parent opting them in."
     )
 
     def handle(self, *args, **options):
@@ -51,13 +52,13 @@ class Command(BaseCommand):
 
         for i in range(1, NUM_GUARDIANS + 1):
             username = f"guardian-{i}"
-            if Guardian.objects.filter(username=username).exists():
+            if User.objects.filter(username=username).exists():
                 continue
 
             last_name = rng.choice(GUARDIAN_LAST_NAMES)
             email = f"{username}@coderdojo-demo.example"
             guardian_password = generate_password()
-            guardian = Guardian(
+            guardian = User(
                 username=username,
                 first_name=rng.choice(GUARDIAN_FIRST_NAMES),
                 last_name=last_name,
@@ -74,9 +75,10 @@ class Command(BaseCommand):
                 if rng.random() < CHILD_LOGIN_PROBABILITY:
                     child_username = f"{username}-child-{child_index}"
                     child_password = generate_password()
-                    account = ChildAccount(
+                    account = User(
                         username=child_username,
                         first_name=child_first_name,
+                        account_type=User.NINJA,
                     )
                     account.set_password(child_password)
                     account.save()
@@ -85,11 +87,11 @@ class Command(BaseCommand):
 
                 participant = Participant.objects.create(
                     name=f"{child_first_name} {last_name}",
-                    guardian=guardian,
                     account=account,
                     home_dojo=rng.choice(dojos) if dojos else None,
                     member_since=today - timedelta(days=rng.randint(30, 5 * 365)),
                 )
+                Guardianship.objects.create(guardian=guardian, ninja=participant)
                 avatar_path = rng.choice(KID_AVATAR_FILES)
                 with open(avatar_path, "rb") as f:
                     participant.photo.save(avatar_path.name, File(f), save=True)

@@ -12,7 +12,7 @@ in each app's `models.py` have the full field lists. If you change a model,
 update its diagram in the same change.
 
 > **A redesign is planned.** Sections 1–9 describe the model as it is
-> today. [Section 10](#10-planned-redesign-not-implemented-yet) describes
+> today. [Section 10](#10-planned-redesign-in-progress) describes
 > where it's meant to go: two account types, and dojo roles (Champion,
 > Mentor, Youth mentor) stored on a User↔Dojo relation instead of the
 > `Mentor` table and the `DojoOwner`/`HelperAccount`/`Guardian`
@@ -45,8 +45,7 @@ flowchart LR
         User
         DojoOwner
         HelperAccount
-        Guardian
-        ChildAccount
+        Guardianship
         Participant
     end
     subgraph dojos
@@ -70,12 +69,13 @@ flowchart LR
         AdministrativeBoundary
     end
 
-    User -. "is-a (MTI)" .-> DojoOwner & HelperAccount & Guardian & ChildAccount
+    User -. "is-a (MTI)" .-> DojoOwner & HelperAccount
     DojoOwner -- owns --> Dojo
     Mentor -- "team profile at" --> Dojo
-    Mentor -. "login (at most one)" .-> DojoOwner & HelperAccount & Guardian & ChildAccount
-    Guardian -- "parent of" --> Participant
-    Participant -. "optional login" .-> ChildAccount
+    Mentor -. "login (at most one)" .-> DojoOwner & HelperAccount & User
+    User -- "parent of" --> Guardianship
+    Guardianship --> Participant
+    Participant -. "optional login (ninja account)" .-> User
     Dojo -- runs --> Event
     Registration -- for --> Event
     Registration -- of --> Participant
@@ -91,14 +91,22 @@ flowchart LR
 
 ## 2. Accounts and roles
 
-`accounts.User` is the login. Each role is a **multi-table-inheritance
-child** of it, not a `role` field, and one `User` row can hold several roles
-at once. `accounts.provisioning.attach_role` adds a role to an existing
-account. A child role row shares the `User`'s primary key, so
-`helperaccount.pk == user.pk`.
+`accounts.User` is every login, with `account_type` telling the two kinds
+apart: a normal **adult** account, or a **ninja**'s own login.
 
-A `Participant` (a child attending sessions) is **not** a user. It gets a
-login (`ChildAccount`) only if its guardian opts it in.
+- **Parents** are plain adult accounts linked to their children through
+  `Guardianship`. A child can have more than one guardian, and any adult
+  account (including a dojo owner or helper) can add children from its
+  account page.
+- **`DojoOwner` and `HelperAccount`** are still **multi-table-inheritance
+  children** of `User`: the last role subclasses, until redesign phases
+  2–3 replace them with dojo memberships (section 10). One `User` row can
+  hold both; `accounts.provisioning.attach_role` adds one to an existing
+  account, and a child role row shares the `User`'s primary key
+  (`helperaccount.pk == user.pk`).
+- A **`Participant`** (a ninja attending sessions) is **not** a user. It
+  gets a login (a `User` with `account_type="ninja"`, linked through
+  `Participant.account`) only if a parent opts it in.
 
 ```mermaid
 classDiagram
@@ -106,6 +114,8 @@ classDiagram
     class User {
         +username
         +email
+        +phone
+        +account_type  adult | ninja
         +must_change_password
         +background_check_required
         +background_check_expires_at
@@ -119,12 +129,8 @@ classDiagram
         background-checked
         admin-provisioned
     }
-    class Guardian {
-        +phone
-        self-service sign-up
-    }
-    class ChildAccount {
-        opt-in by guardian
+    class Guardianship {
+        +relation  parent | legal_guardian | other
     }
     class Participant {
         +name
@@ -137,22 +143,21 @@ classDiagram
 
     User <|-- DojoOwner
     User <|-- HelperAccount
-    User <|-- Guardian
-    User <|-- ChildAccount
 
-    Guardian "0..1" --> "*" Participant : children
-    Participant "0..1" --> "0..1" ChildAccount : account
+    User "1" --> "*" Guardianship : guardianships (parent)
+    Participant "1" --> "*" Guardianship : guardianships
+    Participant "0..1" --> "0..1" User : account (ninja login)
     Participant "*" --> "0..1" Dojo : home_dojo
 ```
 
-Which role does what:
+Which account does what:
 
-| Role | Created by | Background check | Lands on after login |
+| Account | Created by | Background check | Lands on after login |
 |---|---|---|---|
-| `DojoOwner` | admin approval of a `DojoApplication` | required (gates login) | first accessible dojo's dashboard |
-| `HelperAccount` | admin approval of a `MentorApplication` | required (gates login) | first accessible dojo's dashboard |
-| `Guardian` | self-service (`register_guardian`, `link_guardian_role`) | none | their family page |
-| `ChildAccount` | guardian opts a child in | none | the child's page |
+| adult with `DojoOwner` | admin approval of a `DojoApplication` | required (gates login) | first accessible dojo's dashboard |
+| adult with `HelperAccount` | admin approval of a `MentorApplication` | required (gates login) | first accessible dojo's dashboard |
+| adult (parent) | self-service family sign-up (`register_guardian`) | none | their account page (`/account/`) |
+| ninja | a parent opts a child in | none | the ninja's own page (`/account/ninja/<id>/`) |
 
 ---
 
@@ -178,8 +183,7 @@ erDiagram
     DOJO ||--o{ MENTOR : "mentors"
     DOJO_OWNER |o--o{ MENTOR : "owner_account (Lead Coach, one per dojo)"
     HELPER_ACCOUNT |o--o{ MENTOR : "helper_account (one per dojo)"
-    GUARDIAN |o--o| MENTOR : "guardian_account"
-    CHILD_ACCOUNT |o--o| MENTOR : "child_account"
+    USER |o--o| MENTOR : "guardian_account (a parent) / child_account (a ninja)"
     MUNICIPALITY |o--o{ DOJO : "municipality"
     ADMINISTRATIVE_BOUNDARY |o--o{ DOJO : "province"
 
@@ -200,8 +204,8 @@ erDiagram
         string role "lead_coach, champion, ninja, volunteer, board"
         bigint owner_account_id FK "LEAD_COACH only"
         bigint helper_account_id FK
-        bigint guardian_account_id FK "unique"
-        bigint child_account_id FK "unique"
+        bigint guardian_account_id FK "unique; a parent's User"
+        bigint child_account_id FK "unique; a ninja's User"
         bool is_public "shown on team pages"
     }
 ```
@@ -235,7 +239,7 @@ flowchart TD
 | `EDIT_SETTINGS` | dojo profile settings | ✓ | ✓ |
 
 To restrict helpers, remove entries from `ROLE_CAPABILITIES[HELPER]`.
-Guardian- and child-linked mentor profiles never get admin access, because
+Parent- and ninja-account-linked mentor profiles never get admin access, because
 those accounts aren't background-checked.
 
 ---
@@ -536,12 +540,13 @@ erDiagram
 
 ---
 
-## 10. Planned redesign (not implemented yet)
+## 10. Planned redesign (in progress)
 
-> **Status: direction agreed, not started.** Nothing in this section exists
-> in the code yet. Sections 1–9 describe what's actually there. This section
-> records the direction, so that new work doesn't add more to structures
-> that are due to go.
+> **Status: direction agreed, implementation started**; see the
+> [Implementation plan](#implementation-plan) for which phases have landed.
+> Until a phase is ticked off there, sections 1–9 still describe what's
+> actually in the code. This section records the direction, so that new
+> work doesn't add more to structures that are due to go.
 
 ### Nomenclature
 
@@ -1232,29 +1237,98 @@ Seeders to adapt:
 `seed_credentials.csv` keeps listing every seeded login (champions,
 mentors, parents, ninja accounts).
 
-### Build order
+### Implementation plan
 
-The old migration outline, without its data steps, as an order for building
-the redesign:
+**Status: in progress** (started 2026-09-24 on the `redesign/data-model`
+branch). Tick a phase off here when it lands.
 
-1. **Accounts:** the normal account and `NINJA_ACCOUNT`, `GUARDIANSHIP`,
-   the current-check fields on the account and `BACKGROUND_CHECK_HISTORY`.
-   Drop the `DojoOwner`/`HelperAccount`/`Guardian` subclasses.
-2. **Dojo team:** `Dojo.status`, `DOJO_MEMBERSHIP` with its lifecycle, and
-   `dojos/access.py` switched to memberships (`CHAMPION` / `MENTOR` /
-   `YOUTH_MENTOR`, plus `AWARD_BELTS`). Drop `Mentor`, `Dojo.owner` and
-   `Dojo.sync_lead_coach()`. The event team (replacing `Event.mentors`)
-   points at memberships.
-3. **Onboarding:** the single `APPLICATION` (mentor / champion) and the
-   join-request, add-mentor, leave and champion-transfer actions.
-4. **Pathways:** dojo, event and registration pathway links, each
-   pre-filled from the level above; shown on the event details page.
-5. **Badges and belts:** `BADGE` (one-off / milestone), `NINJA_BADGE`,
-   `BELT`, and the `NINJA_BELT` history, shown on the ninja's page and in
-   the management tooling.
-6. **Organisation:** `ORGANISATION_ROLE` (management-dashboard access) and
-   `ORGANISATION_TEAM_MEMBER` (team details page listing).
-7. **Naming:** the new nomenclature in the UI and the help-centre docs
-   (EN/FR/NL): Champion, Mentor/Coach, Ninja, Youth mentor, Badge, Belt.
-8. **Seeders:** adapt them as in the table above, and update the tests
-   along the way.
+#### Implementation decisions
+
+These settle details the diagrams above leave open:
+
+1. **One user table.** Normal and ninja accounts are both
+   `accounts.User` (still `AUTH_USER_MODEL`), told apart by
+   `User.account_type` (`adult` / `ninja`). There are no role subclasses
+   any more. Where the diagrams show `ACCOUNT` / `NINJA_ACCOUNT` as two
+   tables, read one `User` table with a type: memberships, belt awards and
+   notifications each need a single user link, and login stays exactly as
+   it is.
+2. **Applying requires being logged in.** An `Application` always belongs
+   to an existing account, so the anonymous "start a dojo" / "become a
+   mentor" forms go away. Visitors sign up first.
+3. **URLs change.** `/guardian/<id>/…` becomes `/account/…` (the family
+   page), and the pages for a parent's ninjas live under it.
+4. **Management dashboards = Django admin, for now.** `ORGANISATION_ROLE`
+   maps to staff status plus a group. The board dashboard is future work.
+5. **Dormancy nudge** (six months with no events): computed when the dojo
+   dashboard loads and shown as a banner, not stored as notifications,
+   until the board dashboard exists.
+6. **Non-`active` dojos** (draft, dormant, archived) are hidden from the
+   public site **together with their events**.
+
+#### Approach
+
+Work on the feature branch in three stages, keeping the test suite green
+at every step:
+
+- **A:** add the new models alongside the old ones.
+- **B:** switch features over one at a time.
+- **C:** remove the old models, reset the migrations to a fresh `0001`
+  per app (no data to keep; see "No data migration"), and apply the new
+  names.
+
+#### Phases
+
+- [x] **1. Accounts** (`accounts`), *done 2026-09-24*
+  - `User.account_type` (`adult` / `ninja`) and `User.phone`.
+  - `Guardianship` (parent account ↔ `Participant`; a ninja can have
+    several guardians). `Participant.account` now points at a ninja-type
+    `User`.
+  - Dropped `Guardian`, `ChildAccount`, `Participant.guardian` and
+    `link_guardian_role`; any adult account adds children from its account
+    page.
+  - Family page and ninja pages moved under `/account/`
+    (`account_home`, `ninja_detail`, `edit_ninja`, `ninja_awards`,
+    `add_ninja`). A ninja's own login sees its own page read-only. Menu,
+    context processor, event signup and seeder updated.
+  - *Moved to later phases, where they're first used:* the check fields
+    on the account and `BackgroundCheckHistory` → phase 3 (together with
+    the check flow; the "check gates team access, not login" change too),
+    the shared team-page profile → phase 2, and `Participant` → `Ninja`
+    (7–17) → phase 7 (naming). `DojoOwner` / `HelperAccount` /
+    `attach_role` stay until phases 2–3 replace them.
+- [ ] **2. Dojo team** (`dojos`)
+  - `DojoMembership`, `Dojo.status` and `Dojo.created_by`, plus the shared
+    team-page profile on `User` (moved here from phase 1); drop
+    `Dojo.owner`, `Mentor` and `sync_lead_coach()`.
+  - `dojos/access.py` reads active memberships with a valid check. Roles
+    become `CHAMPION` / `MENTOR` / `YOUTH_MENTOR`; new capabilities are
+    `MANAGE_TEAM`, `AWARD_BELTS` and `MANAGE_LIFECYCLE`, and the champion
+    transfer is champion-only.
+  - The "Helpers & Mentors" admin page: team list, requests, add, promote,
+    leave and transfer.
+  - Dojo lifecycle actions and their rules; public querysets show active
+    dojos only.
+  - Team pages built from memberships; `Event.mentors` → `Event.team`.
+- [ ] **3. Onboarding** (`applications`)
+  - A single `Application` (`mentor` / `champion`) on the account; the
+    check fields, flow and `BackgroundCheckHistory` on the account (moved
+    here from phase 1); the check stops blocking login and only gates
+    dojo-team access.
+  - "Create dojo" for approved champions (the dojo starts as a draft);
+    "Request to join" for approved mentors.
+  - Emails, renewal and admin actions reworked.
+- [ ] **4. Pathways:** dojo, event and registration links, each pre-filled
+  from the level above; shown on the event page and the attendance list.
+- [ ] **5. Badges and belts:** `Badge` (one-off / milestone, optional
+  `grants_belt`), `NinjaBadge`, `Belt`, and the `NinjaBelt` history
+  (awarding account + membership). "Award belt" in the dojo dashboard;
+  current belt and history on the ninja page.
+- [ ] **6. Organisation:** `OrganisationRole` and `OrganisationTeamMember`,
+  plus the organisation team page.
+- [ ] **7. Names and docs:** `Participant` → `Ninja` (with 7–17 validation, moved here from phase 1) and the new names in the UI; the help-centre
+  pages in EN/FR/NL; `DATA_MODEL.md` §10 promoted to "current", and
+  CLAUDE.md's architecture section updated.
+- [ ] **8. Seeders and reset:** seeders rewritten as in the table above,
+  migrations regenerated, `start.sh` updated, and a fresh
+  `down -v` rebuild with a full test run.

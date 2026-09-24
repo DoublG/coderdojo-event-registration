@@ -197,7 +197,7 @@ class Command(BaseCommand):
         # A single demo example of the other promotion path: a ninja can be
         # flagged CHAMPION too (a distinct, honorary role — not the Lead
         # Coach) once someone with admin rights decides to recognise them.
-        # No account link here — that'd need a real ChildAccount, which
+        # No account link here — that'd need a real ninja account, which
         # this seed data doesn't fabricate.
         first_dojo = Dojo.objects.first()
         if first_dojo and not first_dojo.mentors.filter(role=Mentor.CHAMPION).exists():

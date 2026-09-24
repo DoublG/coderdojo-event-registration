@@ -22,14 +22,13 @@ from notifications.services import notify
 
 from .forms import (
     ForcedPasswordChangeForm,
-    LinkGuardianForm,
     LoginForm,
     RegisterGuardianForm,
     StyledPasswordResetForm,
     StyledSetPasswordForm,
 )
-from .models import Guardian, Participant
-from .provisioning import attach_role, unique_username
+from .models import Guardianship, Participant, User
+from .provisioning import unique_username
 
 # Same pool as seed_guardians.py — a guardian adding a child through the
 # quick-add widget picks one of these instead of getting a random one.
@@ -55,14 +54,17 @@ def _icon_choices():
     return choices
 
 
-def _get_own_guardian(request, guardian_id):
-    """A Guardian's own pages (account overview, cancelling a
-    registration): 404s rather than 403s for a mismatch, so a guessed id
-    doesn't even confirm another family's account exists."""
-    guardian = get_object_or_404(Guardian, id=guardian_id)
-    if guardian.pk != request.user.pk:
+def _get_own_ninja(request, ninja_id, allow_self=False):
+    """A ninja the logged-in account is a guardian of — or, with
+    allow_self, the ninja's own login looking at their own page. 404s
+    rather than 403s on a mismatch, so a guessed id doesn't even confirm
+    another family's child exists."""
+    ninja = get_object_or_404(Participant, id=ninja_id)
+    is_guardian = ninja.guardianships.filter(guardian=request.user).exists()
+    is_self = allow_self and ninja.account_id == request.user.pk
+    if not (is_guardian or is_self):
         raise Http404
-    return guardian
+    return ninja
 
 
 def _post_login_redirect(request, user):
@@ -76,17 +78,11 @@ def _post_login_redirect(request, user):
     if admin_dojo is not None:
         return reverse("dojo_dashboard", kwargs={"dojo_id": admin_dojo.id})
 
-    guardian = getattr(user, "guardian", None)
-    if guardian is not None:
-        return reverse("guardian_detail", kwargs={"guardian_id": guardian.id})
+    if user.is_ninja:
+        ninja = Participant.objects.filter(account=user).first()
+        return reverse("ninja_detail", kwargs={"ninja_id": ninja.id}) if ninja else reverse("home")
 
-    child_account = getattr(user, "childaccount", None)
-    if child_account is not None and hasattr(child_account, "participant"):
-        participant = child_account.participant
-        if participant.guardian_id:
-            return reverse("child_detail", kwargs={"guardian_id": participant.guardian_id, "child_id": participant.id})
-
-    return reverse("home")
+    return reverse("account_home")
 
 
 def login(request):
@@ -219,7 +215,22 @@ def _parse_child_rows(post_data):
     return rows
 
 
+def _create_ninjas(parent, child_rows):
+    for row in child_rows:
+        ninja = Participant.objects.create(
+            name=row["name"], date_of_birth=row["date_of_birth"],
+            experience_level=row["level"], allergies_notes=row["notes"],
+        )
+        Guardianship.objects.create(guardian=parent, ninja=ninja)
+
+
 def register_guardian(request):
+    """Family sign-up for someone without an account. Already logged in?
+    Any adult account can add its children from the account page, so
+    there's nothing to register."""
+    if request.user.is_authenticated:
+        return redirect("account_home")
+
     child_rows = None
     children_error = None
 
@@ -232,24 +243,19 @@ def register_guardian(request):
 
         if form.is_valid() and children_valid:
             first_name, _, last_name = form.cleaned_data["name"].partition(" ")
-            guardian = Guardian(
+            parent = User(
                 username=unique_username(slugify(form.cleaned_data["name"])),
                 email=form.cleaned_data["email"],
                 first_name=first_name,
                 last_name=last_name,
                 phone=form.cleaned_data["phone"],
             )
-            guardian.set_password(form.cleaned_data["password"])
-            guardian.save()
+            parent.set_password(form.cleaned_data["password"])
+            parent.save()
+            _create_ninjas(parent, child_rows)
 
-            for row in child_rows:
-                Participant.objects.create(
-                    guardian=guardian, name=row["name"], date_of_birth=row["date_of_birth"],
-                    experience_level=row["level"], allergies_notes=row["notes"],
-                )
-
-            auth_login(request, guardian, backend="accounts.backends.EmailOrUsernameBackend")
-            return redirect("guardian_detail", guardian_id=guardian.id)
+            auth_login(request, parent, backend="accounts.backends.EmailOrUsernameBackend")
+            return redirect("account_home")
     else:
         form = RegisterGuardianForm()
 
@@ -260,50 +266,10 @@ def register_guardian(request):
     })
 
 
-@login_required
-def link_guardian_role(request):
-    """Lets an already-logged-in account (DojoOwner, HelperAccount, or a DojoOwner who's already
-    a Guardian trying the link again) add the Guardian role to their existing login — the
-    counterpart to register_guardian for someone who already has an account instead of a stranger
-    signing up. Reuses _parse_child_rows exactly as register_guardian does; skips name/email/
-    password since those already live on request.user."""
-    if getattr(request.user, "guardian", None) is not None:
-        return redirect("guardian_detail", guardian_id=request.user.pk)
-
-    child_rows = None
-    children_error = None
-
-    if request.method == "POST":
-        form = LinkGuardianForm(request.POST)
-        child_rows = _parse_child_rows(request.POST)
-        children_valid = bool(child_rows) and not any(row["errors"] for row in child_rows)
-        if not child_rows:
-            children_error = "Add at least one child."
-
-        if form.is_valid() and children_valid:
-            guardian = attach_role(request.user, Guardian, phone=form.cleaned_data["phone"])
-
-            for row in child_rows:
-                Participant.objects.create(
-                    guardian=guardian, name=row["name"], date_of_birth=row["date_of_birth"],
-                    experience_level=row["level"], allergies_notes=row["notes"],
-                )
-
-            return redirect("guardian_detail", guardian_id=guardian.id)
-    else:
-        form = LinkGuardianForm()
-
-    return render(request, "accounts/link_guardian_role.html", {
-        "form": form,
-        "child_rows": child_rows or [{"index": 1, "name": "", "dob": "", "level": "", "notes": "", "errors": {}}],
-        "children_error": children_error,
-    })
-
-
-def _children_context(guardian):
+def _children_context(parent):
     now = timezone.now()
     children = []
-    for child in guardian.children.all():
+    for child in Participant.objects.of_guardian(parent):
         # All upcoming registrations, not just the nearest one — a child
         # can be signed up for more than one session at a time. Not
         # filtering on waiting_list either — a waitlisted registration is
@@ -319,27 +285,34 @@ def _children_context(guardian):
 
 
 @login_required
-def guardian_detail(request, guardian_id):
-    guardian = _get_own_guardian(request, guardian_id)
-    children = _children_context(guardian)
+def account_home(request):
+    """The logged-in account's own page: their ninjas and what's coming up.
+    Any adult account has one (children are optional); a ninja's own login
+    is sent to its ninja page instead."""
+    if request.user.is_ninja:
+        return redirect(_post_login_redirect(request, request.user))
+    children = _children_context(request.user)
     return render(request, "accounts/guardian_detail.html", {
-        "guardian": guardian, "children": children, "icon_choices": _icon_choices(),
+        "guardian": request.user, "children": children, "icon_choices": _icon_choices(),
     })
 
 
 @login_required
-def add_child(request, guardian_id):
+def add_ninja(request):
     """The "+ Add a child" widget on the account page (see
     accounts/partials/_children_list.html) — posts here via htmx and
     swaps in the freshly rendered list, so the page updates without a
     full reload."""
-    guardian = _get_own_guardian(request, guardian_id)
+    if request.user.is_ninja:
+        raise Http404
+    guardian = request.user
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
         if name:
             participant = Participant.objects.create(
-                guardian=guardian, name=name, date_of_birth=parse_date(request.POST.get("date_of_birth", "")),
+                name=name, date_of_birth=parse_date(request.POST.get("date_of_birth", "")),
             )
+            Guardianship.objects.create(guardian=guardian, ninja=participant)
             icon_path = KID_AVATARS_DIR / request.POST.get("icon", "")
             if icon_path.exists() and icon_path.parent == KID_AVATARS_DIR:
                 with open(icon_path, "rb") as f:
@@ -353,9 +326,8 @@ def _awards_queryset(child):
 
 
 @login_required
-def child_detail(request, guardian_id, child_id):
-    guardian = _get_own_guardian(request, guardian_id)
-    child = get_object_or_404(Participant, id=child_id, guardian=guardian)
+def ninja_detail(request, ninja_id):
+    child = _get_own_ninja(request, ninja_id, allow_self=True)
     now = timezone.now()
     history = (
         child.registration_set.filter(event__start_time__lt=now)
@@ -371,12 +343,13 @@ def child_detail(request, guardian_id, child_id):
     awards_next_page_url = None
     if awards_page.has_next():
         awards_next_page_url = (
-            f"{reverse('award_widget', kwargs={'guardian_id': guardian.id, 'child_id': child.id})}"
+            f"{reverse('ninja_awards', kwargs={'ninja_id': child.id})}"
             f"?page={awards_page.next_page_number()}"
         )
 
     return render(request, "accounts/child_detail.html", {
-        "guardian": guardian, "child": child, "history": history,
+        "child": child, "history": history,
+        "can_edit": child.guardianships.filter(guardian=request.user).exists(),
         "awards": awards_page.object_list, "awards_next_page_url": awards_next_page_url,
     })
 
@@ -395,12 +368,12 @@ def _current_icon_value(child):
 
 
 @login_required
-def edit_child(request, guardian_id, child_id):
+def edit_ninja(request, ninja_id):
     """Click-to-edit for the child detail page's header (see
     partials/_child_header_display.html) — GET swaps the display header
-    for a small inline form over htmx; POST saves it and swaps back."""
-    guardian = _get_own_guardian(request, guardian_id)
-    child = get_object_or_404(Participant, id=child_id, guardian=guardian)
+    for a small inline form over htmx; POST saves it and swaps back.
+    Guardians only; a ninja's own login can't edit its profile."""
+    child = _get_own_ninja(request, ninja_id)
 
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
@@ -415,28 +388,27 @@ def edit_child(request, guardian_id, child_id):
         child.save()
 
         return render(request, "accounts/partials/_child_header_display.html", {
-            "guardian": guardian, "child": child,
+            "child": child, "can_edit": True,
         })
 
     return render(request, "accounts/partials/_child_header_edit.html", {
-        "guardian": guardian, "child": child,
+        "child": child,
         "icon_choices": _icon_choices(), "current_icon": _current_icon_value(child),
     })
 
 
 @login_required
-def award_widget(request, guardian_id, child_id):
+def ninja_awards(request, ninja_id):
     """Lazy-loaded batches for the child detail page's Awards carousel —
     returns just the next batch of cards (see partials/_awards_page.html),
     triggered by htmx as the carousel is scrolled."""
-    guardian = _get_own_guardian(request, guardian_id)
-    child = get_object_or_404(Participant, id=child_id, guardian=guardian)
+    child = _get_own_ninja(request, ninja_id, allow_self=True)
 
     page = Paginator(_awards_queryset(child), AWARDS_PAGE_SIZE).get_page(request.GET.get("page"))
     next_page_url = None
     if page.has_next():
         next_page_url = (
-            f"{reverse('award_widget', kwargs={'guardian_id': guardian.id, 'child_id': child.id})}"
+            f"{reverse('ninja_awards', kwargs={'ninja_id': child.id})}"
             f"?page={page.next_page_number()}"
         )
 
@@ -446,9 +418,10 @@ def award_widget(request, guardian_id, child_id):
 
 
 @login_required
-def cancel_registration(request, guardian_id, registration_id):
-    guardian = _get_own_guardian(request, guardian_id)
-    registration = get_object_or_404(Registration, id=registration_id, participant__guardian=guardian)
+def cancel_registration(request, registration_id):
+    registration = get_object_or_404(
+        Registration, id=registration_id, participant__guardianships__guardian=request.user,
+    )
 
     if request.method == "POST":
         event = registration.event
@@ -471,4 +444,4 @@ def cancel_registration(request, guardian_id, registration_id):
                         dojo=event.dojo,
                     )
 
-    return redirect("guardian_detail", guardian_id=guardian.id)
+    return redirect("account_home")

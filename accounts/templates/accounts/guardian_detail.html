@@ -58,8 +58,8 @@
         <p class="body">Registering another child?</p>
         <span class="cd-btn cd-btn--primary label">Register another child</span>
       </summary>
-      <form class="cd-form" method="post" action="{% url 'add_child' guardian_id=guardian.id %}"
-            hx-post="{% url 'add_child' guardian_id=guardian.id %}" hx-target="#children-list" hx-swap="outerHTML"
+      <form class="cd-form" method="post" action="{% url 'add_ninja' %}"
+            hx-post="{% url 'add_ninja' %}" hx-target="#children-list" hx-swap="outerHTML"
             hx-on::after-request="if(event.detail.successful){this.reset(); this.closest('details').open=false;}">
         {% csrf_token %}
         <div class="cd-form__row">

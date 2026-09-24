@@ -4,15 +4,16 @@ the name swaps this whole block for _child_header_edit.html over htmx —
 same click-to-edit approach used nowhere else in the app yet, but the
 request/response shape matches every other htmx widget here (GET renders
 the next state, POST saves and renders the state after that).
-Expects `guardian` and `child` in context.
+Expects `child`, and `can_edit` (true for the ninja's guardians, false when
+the ninja views their own page — then the name isn't clickable).
 {% endcomment %}
 <div class="child-header" id="child-header">
   {% include "accounts/partials/_child_avatar.html" with child=child %}
   <div>
     <h1 class="display-lg child-header__name"
-        title="Click to edit"
-        hx-get="{% url 'edit_child' guardian_id=guardian.id child_id=child.id %}"
-        hx-target="#child-header" hx-swap="outerHTML">
+        {% if can_edit %}title="Click to edit"
+        hx-get="{% url 'edit_ninja' ninja_id=child.id %}"
+        hx-target="#child-header" hx-swap="outerHTML"{% endif %}>
       {{ child.name }}
     </h1>
     <p class="body">

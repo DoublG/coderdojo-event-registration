@@ -10,7 +10,7 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from accounts.models import DojoOwner, Guardian, HelperAccount, User
+from accounts.models import DojoOwner, HelperAccount, User
 from dojos.models import Dojo, Mentor
 
 from .admin import (
@@ -69,8 +69,8 @@ class RegisterDojoViewTests(TestCase):
         self.assertFalse(response.context["submitted"])
         self.assertEqual(DojoApplication.objects.count(), 0)
 
-    def test_authenticated_guardian_gets_prefilled_form(self):
-        guardian = Guardian.objects.create(
+    def test_authenticated_parent_gets_prefilled_form(self):
+        guardian = User.objects.create(
             username="g1", email="g1@example.com", first_name="Jane", last_name="Doe", phone="0470000000",
         )
         self.client.force_login(guardian)
@@ -83,7 +83,7 @@ class RegisterDojoViewTests(TestCase):
         self.assertEqual(initial["applicant_phone"], "0470000000")
 
     def test_authenticated_submission_links_application_to_account(self):
-        guardian = Guardian.objects.create(username="g1", email="g1@example.com")
+        guardian = User.objects.create(username="g1", email="g1@example.com")
         self.client.force_login(guardian)
 
         self.client.post(
@@ -134,7 +134,7 @@ class RegisterHelperViewTests(TestCase):
         self.assertEqual(MentorApplication.objects.count(), 1)
 
     def test_authenticated_submission_links_application_to_account(self):
-        guardian = Guardian.objects.create(username="g1", email="g1@example.com")
+        guardian = User.objects.create(username="g1", email="g1@example.com")
         self.client.force_login(guardian)
 
         self.client.post(
@@ -558,10 +558,10 @@ class ApproveAndProvisionOwnerActionTests(TestCase):
         self.assertEqual(len(mail.outbox), 0)
 
     def test_promotes_existing_account_instead_of_provisioning_a_new_one(self):
-        """A Guardian applied to start a dojo while already logged in — applicant_account is set,
+        """A parent applied to start a dojo while already logged in — applicant_account is set,
         so approval should attach the DojoOwner role to that same User row, not mint a second,
         disconnected one with a mailed temp password (see accounts.provisioning.attach_role)."""
-        guardian = Guardian.objects.create(username="g1", email="jane@example.com")
+        guardian = User.objects.create(username="g1", email="jane@example.com")
         application = self._validated_application(applicant_account=guardian)
 
         approve_and_provision_owner(
@@ -574,8 +574,8 @@ class ApproveAndProvisionOwnerActionTests(TestCase):
         owner = DojoOwner.objects.get(pk=guardian.pk)
         self.assertTrue(owner.background_check_required)
         self.assertFalse(owner.must_change_password)
-        # Still a Guardian too.
-        self.assertTrue(Guardian.objects.filter(pk=guardian.pk).exists())
+        # Still the same (parent) account.
+        self.assertTrue(User.objects.filter(pk=guardian.pk).exists())
         self.assertEqual(len(mail.outbox), 1)
         self.assertNotIn("Temporary password", mail.outbox[0].body)
 
@@ -731,7 +731,7 @@ class ApproveAndProvisionHelperActionTests(TestCase):
         self.assertFalse(HelperAccount.objects.exists())
 
     def test_promotes_existing_account_instead_of_provisioning_a_new_one(self):
-        guardian = Guardian.objects.create(username="g1", email="tom@example.com")
+        guardian = User.objects.create(username="g1", email="tom@example.com")
         application = MentorApplication.objects.create(
             applicant_name="Tom", applicant_email="tom@example.com", applicant_account=guardian,
             background_check_status=BackgroundCheckMixin.VALIDATED,
@@ -745,7 +745,6 @@ class ApproveAndProvisionHelperActionTests(TestCase):
         self.assertEqual(User.objects.count(), 2)  # staff_user + guardian — no third row
         helper = HelperAccount.objects.get(pk=guardian.pk)
         self.assertTrue(helper.background_check_required)
-        self.assertTrue(Guardian.objects.filter(pk=guardian.pk).exists())
         self.assertEqual(len(mail.outbox), 1)
         self.assertNotIn("Temporary password", mail.outbox[0].body)
 

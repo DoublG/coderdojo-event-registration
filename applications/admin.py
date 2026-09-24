@@ -82,7 +82,7 @@ def reject_background_check(modeladmin, request, queryset):
 
 def _provision_or_promote(application, account_model, role_label, login_url):
     """Shared by approve_and_provision_owner/helper. If the applicant was already logged in when
-    they applied (application.applicant_account set — e.g. a Guardian applying to also become a
+    they applied (application.applicant_account set — e.g. a parent applying to also become a
     DojoOwner/HelperAccount), promote that existing account in place via attach_role instead of
     provisioning a disconnected new login, and tell them about the new role rather than emailing
     a temp password they don't need. Otherwise, today's anonymous-applicant path is unchanged."""

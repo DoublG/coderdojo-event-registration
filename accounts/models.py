@@ -1,14 +1,17 @@
 from datetime import date
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models
 from django.utils import timezone
 
 
 class User(AbstractUser):
-    """Base user model, so role-specific accounts (DojoOwner, Guardian,
-    ChildAccount, and future roles) can subclass it via multi-table
-    inheritance while sharing the same login/auth machinery."""
+    """Every login: a normal adult account or a ninja's own login
+    (account_type). Parents are adult accounts with Guardianship rows to
+    their ninjas. DojoOwner/HelperAccount below are the last role
+    subclasses; the redesign replaces them with dojo memberships
+    (DATA_MODEL.md §10)."""
 
     must_change_password = models.BooleanField(
         default=False,
@@ -21,7 +24,7 @@ class User(AbstractUser):
     # (applications.DojoApplication/MentorApplication) went through the
     # Belgian background-check pipeline — mirrors must_change_password in
     # living on the base User even though it's only meaningful for those
-    # two roles. Guardian/ChildAccount never touch these fields; they never
+    # two roles. Parent and ninja accounts never touch these fields; they never
     # go through that pipeline at all (see applications.models.BackgroundCheckMixin).
     background_check_required = models.BooleanField(
         default=False,
@@ -33,6 +36,19 @@ class User(AbstractUser):
                   "syncs the new expiry back here).",
     )
     background_check_expires_at = models.DateTimeField(null=True, blank=True)
+
+    # The redesign's two account types (DATA_MODEL.md §10): a normal adult
+    # account, or a ninja's own login. One table for both, so login and
+    # every link to "an account" stay a single foreign key.
+    ADULT = "adult"
+    NINJA = "ninja"
+    ACCOUNT_TYPE_CHOICES = [(ADULT, "Adult"), (NINJA, "Ninja")]
+    account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default=ADULT)
+    phone = models.CharField(max_length=30, blank=True, default="")
+
+    @property
+    def is_ninja(self):
+        return self.account_type == self.NINJA
 
     @property
     def background_check_valid(self):
@@ -51,34 +67,11 @@ class DojoOwner(User):
         return f"{self.get_username()} ({dojo_names})"
 
 
-class Guardian(User):
-    phone = models.CharField(max_length=30, blank=True, default="")
-
-    class Meta:
-        verbose_name = "guardian"
-        verbose_name_plural = "guardians"
-
-    def __str__(self):
-        return self.get_username()
-
-
-class ChildAccount(User):
-    """A child's own login. Only created when their guardian has opted
-    them in (see Participant.account) — most participants have none."""
-
-    class Meta:
-        verbose_name = "child account"
-        verbose_name_plural = "child accounts"
-
-    def __str__(self):
-        return self.get_username()
-
-
 class HelperAccount(User):
     """A login for an adult who helps out at a dojo but isn't its
     registered owner and isn't a participant's guardian — e.g. a plain
-    volunteer or board mentor. See dojos.Mentor for how this, Guardian and
-    ChildAccount are the three account types a non-lead mentor profile can
+    volunteer or board mentor. See dojos.Mentor for how this, a parent's
+    account and a ninja's account are the account types a non-lead mentor profile can
     be linked to."""
 
     class Meta:
@@ -87,6 +80,12 @@ class HelperAccount(User):
 
     def __str__(self):
         return self.get_username()
+
+
+class ParticipantQuerySet(models.QuerySet):
+    def of_guardian(self, user):
+        """The ninjas `user` is a parent/guardian of (via Guardianship)."""
+        return self.filter(guardianships__guardian=user).distinct()
 
 
 class Participant(models.Model):
@@ -100,14 +99,15 @@ class Participant(models.Model):
     ]
 
     name = models.CharField(max_length=200)
-    guardian = models.ForeignKey(Guardian, on_delete=models.SET_NULL, null=True, blank=True, related_name="children")
     account = models.OneToOneField(
-        ChildAccount,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="participant",
-        help_text="Set only if the guardian has allowed this child to have their own login.",
+        related_name="ninja",
+        limit_choices_to={"account_type": "ninja"},
+        help_text="The child's own login (an account of type ninja) — set only if a "
+                  "parent has allowed it.",
     )
 
     date_of_birth = models.DateField(null=True, blank=True)
@@ -118,6 +118,8 @@ class Participant(models.Model):
     experience_level = models.CharField(max_length=10, choices=EXPERIENCE_CHOICES, blank=True, default="")
     allergies_notes = models.TextField(blank=True, default="", help_text="Allergies or other notes for mentors.")
     photo = models.ImageField(upload_to="participants/", null=True, blank=True)
+
+    objects = ParticipantQuerySet.as_manager()
 
     def __str__(self):
         return self.name
@@ -130,3 +132,28 @@ class Participant(models.Model):
         years = today.year - self.date_of_birth.year
         had_birthday = (today.month, today.day) >= (self.date_of_birth.month, self.date_of_birth.day)
         return years if had_birthday else years - 1
+
+
+class Guardianship(models.Model):
+    """Links a parent's (adult) account to a ninja they're responsible for.
+    Replaces the old Guardian account subclass: any adult account can have
+    children, and a child can have more than one parent/guardian."""
+
+    PARENT = "parent"
+    LEGAL_GUARDIAN = "legal_guardian"
+    OTHER = "other"
+    RELATION_CHOICES = [(PARENT, "Parent"), (LEGAL_GUARDIAN, "Legal guardian"), (OTHER, "Other")]
+
+    guardian = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="guardianships",
+        limit_choices_to={"account_type": "adult"},
+    )
+    ninja = models.ForeignKey(Participant, on_delete=models.CASCADE, related_name="guardianships")
+    relation = models.CharField(max_length=20, choices=RELATION_CHOICES, default=PARENT)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["guardian", "ninja"], name="unique_guardianship")]
+
+    def __str__(self):
+        return f"{self.guardian} → {self.ninja}"

@@ -107,8 +107,8 @@ class Mentor(models.Model):
     account requirement of its own. Every non-lead-coach role (champion,
     ninja, volunteer, board — the "helpers") may optionally be linked to
     whichever of the three account types actually holds their login:
-    a HelperAccount (a plain adult volunteer), a Guardian (a parent who
-    helps out at their own kid's dojo), or a ChildAccount (a ninja). At
+    a HelperAccount (a plain adult volunteer), a parent's account (someone
+    who helps out at their own kid's dojo), or a ninja's own account. At
     most one of the four account fields may be set; see clean()."""
 
     LEAD_COACH = "lead_coach"
@@ -160,11 +160,11 @@ class Mentor(models.Model):
         "accounts.HelperAccount", on_delete=models.SET_NULL, null=True, blank=True, related_name="mentor_profiles",
     )
     guardian_account = models.OneToOneField(
-        "accounts.Guardian", on_delete=models.SET_NULL, null=True, blank=True, related_name="mentor_profile",
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="guardian_mentor_profile",
         help_text="A parent helping out at their own child's dojo.",
     )
     child_account = models.OneToOneField(
-        "accounts.ChildAccount", on_delete=models.SET_NULL, null=True, blank=True, related_name="mentor_profile",
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="ninja_mentor_profile",
         help_text="A ninja's own login — only meaningful once they've been promoted to CHAMPION.",
     )
 

@@ -37,14 +37,11 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="cd-nav__account-menu" id="cd-account-menu" hidden>
-          {% if user_guardian %}
-            <a class="cd-nav__account-link body-sm" href="{% url 'guardian_detail' guardian_id=user_guardian.id %}">My Account</a>
+          {% if not request.user.is_ninja %}
+            <a class="cd-nav__account-link body-sm" href="{% url 'account_home' %}">My Account</a>
           {% endif %}
           {% if user_admin_dojo %}
             <a class="cd-nav__account-link body-sm" href="{% url 'dojo_dashboard' dojo_id=user_admin_dojo.id %}">Manage</a>
-          {% endif %}
-          {% if not user_guardian %}
-            <a class="cd-nav__account-link body-sm" href="{% url 'link_guardian_role' %}">Register your family</a>
           {% endif %}
           <a class="cd-nav__account-link body-sm" href="{% url 'register_dojo' %}">{% if user_dojo_owner.dojos.exists %}Start another dojo{% else %}Apply to start a dojo{% endif %}</a>
           <a class="cd-nav__account-link body-sm" href="{% url 'register_helper' %}">{% if user_helper %}Help at another dojo{% else %}Apply to volunteer{% endif %}</a>

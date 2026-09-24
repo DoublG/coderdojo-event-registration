@@ -87,7 +87,7 @@ class Registration(models.Model):
 class Award(models.Model):
     """Base award — shared name/description/icon. Every real award is one
     of the two subclasses below (multi-table inheritance, same pattern as
-    accounts.User's DojoOwner/Guardian/ChildAccount/HelperAccount):
+    accounts.User's DojoOwner/HelperAccount):
     MilestoneAward, unlocked by reaching a repeat-count threshold (e.g.
     the attendance wristbands), or BadgeAward, a one-off with no counter
     — you either did the specific thing or you haven't."""

@@ -26,14 +26,16 @@ clearly marked). From here you can:
   wristbands) they've earned or are working towards, and their session
   history.
 
+If your child has their own login, they see their own page (their awards
+and session history) when they log in, but can't change their details or
+sign up for sessions themselves; that stays with you.
+
 Already a dojo owner or volunteer?
 ------------------------------------
 
-If you log in as a dojo owner or helper and don't yet have a family page,
-your account menu offers a **Register your family** link — it adds your
-children to the same login you already use, without creating a second
-account. Your name and email are carried over automatically; you only need
-to fill in the rest.
+Every account has a family page: open **My Account** from your account
+menu and use **Add a child** there. Your children are added to the same
+login you already use, with no separate registration or second account.
 
 Changing your password
 ------------------------

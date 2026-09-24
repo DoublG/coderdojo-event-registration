@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 18:00+0200\n"
+"POT-Creation-Date: 2026-09-24 05:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -91,29 +91,37 @@ msgstr ""
 "aanwezigheidsbandjes) die ze hebben verdiend of aan het verdienen zijn, "
 "en hun sessiegeschiedenis."
 
-#: ../../source/families/managing-your-account.rst:30
+#: ../../source/families/managing-your-account.rst:29
+msgid ""
+"If your child has their own login, they see their own page (their awards "
+"and session history) when they log in, but can't change their details or "
+"sign up for sessions themselves; that stays with you."
+msgstr ""
+"Als uw kind een eigen login heeft, ziet het bij het inloggen zijn eigen "
+"pagina (zijn onderscheidingen en sessiegeschiedenis), maar kan het zelf "
+"geen gegevens wijzigen of zich inschrijven voor sessies; dat blijft bij "
+"u."
+
+#: ../../source/families/managing-your-account.rst:34
 msgid "Already a dojo owner or volunteer?"
 msgstr "Al dojobeheerder of vrijwilliger?"
 
-#: ../../source/families/managing-your-account.rst:32
+#: ../../source/families/managing-your-account.rst:36
 msgid ""
-"If you log in as a dojo owner or helper and don't yet have a family page,"
-" your account menu offers a **Register your family** link — it adds your "
-"children to the same login you already use, without creating a second "
-"account. Your name and email are carried over automatically; you only "
-"need to fill in the rest."
+"Every account has a family page: open **My Account** from your account "
+"menu and use **Add a child** there. Your children are added to the same "
+"login you already use, with no separate registration or second account."
 msgstr ""
-"Als u inlogt als dojobeheerder of helper en nog geen gezinspagina hebt, "
-"biedt het menu van uw account een link **Uw gezin registreren** — dit "
-"voegt uw kinderen toe aan hetzelfde account dat u al gebruikt, zonder een"
-" tweede account aan te maken. Uw naam en e-mailadres worden automatisch "
-"overgenomen; u hoeft alleen de rest in te vullen."
+"Elk account heeft een gezinspagina: open **Mijn account** in uw "
+"accountmenu en gebruik daar **Kind toevoegen**. Uw kinderen worden "
+"toegevoegd aan dezelfde login die u al gebruikt, zonder aparte "
+"registratie of tweede account."
 
-#: ../../source/families/managing-your-account.rst:39
+#: ../../source/families/managing-your-account.rst:41
 msgid "Changing your password"
 msgstr "Uw wachtwoord wijzigen"
 
-#: ../../source/families/managing-your-account.rst:41
+#: ../../source/families/managing-your-account.rst:43
 msgid ""
 "Go to **Change password** (also linked from your account page). You'll "
 "need your current password to set a new one."
@@ -121,7 +129,7 @@ msgstr ""
 "Ga naar **Wachtwoord wijzigen** (ook toegankelijk via uw accountpagina). "
 "U hebt uw huidige wachtwoord nodig om een nieuw wachtwoord in te stellen."
 
-#: ../../source/families/managing-your-account.rst:46
+#: ../../source/families/managing-your-account.rst:48
 msgid ""
 "If your account was set up for you by CoderDojo Belgium (e.g. as a dojo "
 "owner or helper) rather than self-registered, you'll be asked to set a "
@@ -133,4 +141,27 @@ msgstr ""
 "gevraagd een nieuw wachtwoord in te stellen wanneer u voor het eerst "
 "inlogt met het tijdelijke wachtwoord dat u per e-mail ontving — deze stap"
 " kan niet worden overgeslagen."
+
+#~ msgid ""
+#~ "If you log in as a dojo "
+#~ "owner or helper and don't yet have"
+#~ " a family page, your account menu "
+#~ "offers a **Register your family** link"
+#~ " — it adds your children to the"
+#~ " same login you already use, without"
+#~ " creating a second account. Your name"
+#~ " and email are carried over "
+#~ "automatically; you only need to fill "
+#~ "in the rest."
+#~ msgstr ""
+#~ "Als u inlogt als dojobeheerder of "
+#~ "helper en nog geen gezinspagina hebt,"
+#~ " biedt het menu van uw account "
+#~ "een link **Uw gezin registreren** — "
+#~ "dit voegt uw kinderen toe aan "
+#~ "hetzelfde account dat u al gebruikt, "
+#~ "zonder een tweede account aan te "
+#~ "maken. Uw naam en e-mailadres worden "
+#~ "automatisch overgenomen; u hoeft alleen "
+#~ "de rest in te vullen."
 

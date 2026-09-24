@@ -2,8 +2,8 @@
 The guardian account page's "Your children" section. Expects `guardian`
 and `children` (list of {child, registrations} dicts, one row per
 *upcoming* registration — a child can be signed up for more than one
-session) in context — see accounts.views.guardian_detail and
-accounts.views.add_child, which both render this same partial (the latter
+session) in context — see accounts.views.account_home and
+accounts.views.add_ninja, which both render this same partial (the latter
 as an htmx swap target after adding a child, so the list updates without
 a full page reload).
 {% endcomment %}
@@ -23,7 +23,7 @@ a full page reload).
             </p>
           </div>
         </div>
-        <a class="body-sm child-card__link" href="{% url 'child_detail' guardian_id=guardian.id child_id=entry.child.id %}">View {{ entry.child.name }}'s awards &amp; history →</a>
+        <a class="body-sm child-card__link" href="{% url 'ninja_detail' ninja_id=entry.child.id %}">View {{ entry.child.name }}'s awards &amp; history →</a>
       </div>
       {% for registration in entry.registrations %}
         <div class="next-row">
@@ -45,7 +45,7 @@ a full page reload).
           </div>
           <div class="action">
             <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=registration.event.id %}">View event</a>
-            <form method="post" action="{% url 'cancel_registration' guardian_id=guardian.id registration_id=registration.id %}"
+            <form method="post" action="{% url 'cancel_registration' registration_id=registration.id %}"
                   onsubmit="return confirm('Remove {{ entry.child.name }} from {{ registration.event.name }}?');">
               {% csrf_token %}
               <button type="submit" class="cd-btn cd-btn--danger label">{% if registration.waiting_list %}Leave waiting list{% else %}Cancel{% endif %}</button>

@@ -54,7 +54,7 @@ def provision_account(account_model, name, email, login_url):
 
 
 def attach_role(user, role_model, **extra_fields):
-    """Adds `role_model` (Guardian/DojoOwner/HelperAccount) to `user`'s existing pk instead of
+    """Adds `role_model` (DojoOwner/HelperAccount) to `user`'s existing pk instead of
     provisioning a disconnected new User row — used when someone who's already logged in (as
     another role, or as this same one — e.g. a DojoOwner starting a second dojo) gains a role
     rather than applying as a stranger. Copies User's own fields (password, email, etc.) onto the

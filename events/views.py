@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 
+from accounts.models import Participant
 from content.models import FAQ
 from dojos.models import Dojo
 
@@ -102,9 +103,8 @@ def event_detail(request, event_id):
     faqs = FAQ.objects.for_event(event)
 
     all_registered = False
-    guardian = getattr(request.user, "guardian", None)
-    if guardian is not None:
-        children = list(guardian.children.all())
+    if request.user.is_authenticated:
+        children = list(Participant.objects.of_guardian(request.user))
         if children:
             registered_count = Registration.objects.filter(event=event, participant__in=children).count()
             all_registered = registered_count == len(children)
@@ -117,7 +117,8 @@ def event_detail(request, event_id):
 @login_required
 def event_signup(request, event_id):
     event = get_object_or_404(Event.objects.visible(), id=event_id)
-    guardian = getattr(request.user, "guardian", None)
+    # Any adult account can sign up its own ninjas (a ninja's own login can't).
+    guardian = request.user if not request.user.is_ninja else None
     results = None
     error = None
 
@@ -125,7 +126,7 @@ def event_signup(request, event_id):
     if guardian:
         existing_registrations = {
             r.participant_id: r
-            for r in Registration.objects.filter(event=event, participant__in=guardian.children.all())
+            for r in Registration.objects.filter(event=event, participant__in=Participant.objects.of_guardian(guardian))
         }
 
     if request.method == "POST" and guardian and not event.registration_open:
@@ -140,7 +141,7 @@ def event_signup(request, event_id):
         if set(ordered_ids) != set(submitted_ids):
             ordered_ids = submitted_ids
 
-        children_by_id = {str(c.id): c for c in guardian.children.filter(id__in=submitted_ids)}
+        children_by_id = {str(c.id): c for c in Participant.objects.of_guardian(guardian).filter(id__in=submitted_ids)}
         selected = [children_by_id[cid] for cid in dict.fromkeys(ordered_ids) if cid in children_by_id]
         new_children = [c for c in selected if c.id not in existing_registrations]
 
@@ -167,12 +168,12 @@ def event_signup(request, event_id):
             # on this form (e.g. via the browser back button).
             existing_registrations = {
                 r.participant_id: r
-                for r in Registration.objects.filter(event=event, participant__in=guardian.children.all())
+                for r in Registration.objects.filter(event=event, participant__in=Participant.objects.of_guardian(guardian))
             }
 
     children = [
         {"child": child, "registration": existing_registrations.get(child.id)}
-        for child in guardian.children.all()
+        for child in Participant.objects.of_guardian(guardian)
     ] if guardian else []
     all_registered = bool(children) and all(entry["registration"] for entry in children)
 
