@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 08:49+0000\n"
+"POT-Creation-Date: 2026-09-25 09:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -58,7 +58,25 @@ msgstr ""
 " dat al voor die sessie is ingeschreven, wordt overgeslagen en als "
 "dusdanig gemarkeerd in plaats van dubbel geboekt."
 
-#: ../../source/families/signing-up-for-a-session.rst:15
+#: ../../source/families/signing-up-for-a-session.rst:16
+msgid "Mails about your booking"
+msgstr "E-mails over uw boeking"
+
+#: ../../source/families/signing-up-for-a-session.rst:18
+msgid ""
+"After you sign up, you (and any other parent on the account, plus a child"
+" with their own login and email) get a confirmation mail, or a waiting-"
+"list mail if the session was full. Two days before the session you get a "
+"reminder; you can switch reminders off on your **Mail preferences** page "
+"(see :doc:`mail-preferences`)."
+msgstr ""
+"Na uw inschrijving krijgt u (en elke andere ouder op het account, plus "
+"een kind met een eigen login en e-mailadres) een bevestiging per e-mail, "
+"of een wachtlijstmail als de sessie volzet was. Twee dagen voor de sessie"
+" krijgt u een herinnering; herinneringen kunt u uitzetten op uw pagina "
+"**E-mailvoorkeuren** (zie :doc:`mail-preferences`)."
+
+#: ../../source/families/signing-up-for-a-session.rst:24
 msgid ""
 "If a session shows **Registrations closed** instead of a sign-up option, "
 "the dojo has stopped taking new sign-ups for it (this normally happens "
@@ -71,11 +89,11 @@ msgstr ""
 "gecontroleerd is) — neem rechtstreeks contact op met het dojoteam als u "
 "toch nog een plaats nodig hebt."
 
-#: ../../source/families/signing-up-for-a-session.rst:21
+#: ../../source/families/signing-up-for-a-session.rst:30
 msgid "Girls' sessions"
 msgstr "Meisjessessies"
 
-#: ../../source/families/signing-up-for-a-session.rst:23
+#: ../../source/families/signing-up-for-a-session.rst:32
 msgid ""
 "Some sessions are labelled **Girls' session**. They're aimed at girls, "
 "but the label never stops anyone from signing up."
@@ -83,31 +101,32 @@ msgstr ""
 "Sommige sessies hebben het label **Meisjessessie**. Ze zijn bedoeld voor "
 "meisjes, maar het label houdt nooit iemand tegen om zich in te schrijven."
 
-#: ../../source/families/signing-up-for-a-session.rst:27
+#: ../../source/families/signing-up-for-a-session.rst:36
 msgid "Waiting lists"
 msgstr "Wachtlijsten"
 
-#: ../../source/families/signing-up-for-a-session.rst:29
+#: ../../source/families/signing-up-for-a-session.rst:38
 msgid ""
 "Sessions have a limited number of places. If a session is full when you "
 "sign up, your child is placed on the **waiting list** instead of being "
 "turned away outright — you'll see this clearly on the confirmation. If a "
 "confirmed spot later opens up (someone cancels), the longest-waiting "
-"child for that session is automatically promoted to confirmed. No action "
-"is needed on your part for that to happen."
+"child for that session is automatically promoted to confirmed, and we "
+"mail you when that happens. No action is needed on your part."
 msgstr ""
 "Sessies hebben een beperkt aantal plaatsen. Als een sessie volzet is op "
 "het moment dat u zich inschrijft, wordt uw kind op de **wachtlijst** "
 "geplaatst in plaats van gewoon geweigerd — dit is duidelijk zichtbaar op "
 "de bevestiging. Als er later een bevestigde plaats vrijkomt (iemand "
 "annuleert), wordt het kind dat het langst wacht voor die sessie "
-"automatisch bevestigd. Hiervoor hoeft u zelf niets te doen."
+"automatisch bevestigd, en krijgt u daarover een e-mail. Hiervoor hoeft u "
+"zelf niets te doen."
 
-#: ../../source/families/signing-up-for-a-session.rst:37
+#: ../../source/families/signing-up-for-a-session.rst:46
 msgid "Cancelling"
 msgstr "Annuleren"
 
-#: ../../source/families/signing-up-for-a-session.rst:39
+#: ../../source/families/signing-up-for-a-session.rst:48
 msgid ""
 "If your plans change, cancel from your family account page (see :doc"
 ":`managing-your-account`) rather than just not turning up — that's also "

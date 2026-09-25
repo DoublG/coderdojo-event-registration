@@ -195,3 +195,20 @@ def process_bounces():
     from .bounce import BounceProcessor
 
     return BounceProcessor().process()
+
+
+@shared_task
+def send_session_reminders():
+    """Daily: reminders for sessions MAILING_REMINDER_DAYS_BEFORE days ahead."""
+    from .automated import send_session_reminders as run
+
+    return run()
+
+
+@shared_task
+def announce_new_sessions():
+    """Daily: one "new sessions at your dojo" mail per family and dojo."""
+    from .automated import announce_new_sessions as run
+
+    return run()
+

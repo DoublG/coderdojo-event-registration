@@ -11,6 +11,7 @@ from django.utils import timezone
 from accounts.models import Ninja
 from content.models import FAQ
 from dojos.models import Dojo
+from mailing.automated import booking_mail
 
 from .forms import AGE_RANGES, EventSearchForm
 from .models import Event, Registration
@@ -166,6 +167,9 @@ def event_signup(request, event_id):
                     if not waiting_list:
                         confirmed_count += 1
                     results.append({"child": child, "waiting_list": waiting_list})
+                    # Queued in the same transaction: no mail for a sign-up
+                    # that didn't happen, and none lost for one that did.
+                    booking_mail(registration)
             # Re-fetch: the children just registered above should now show
             # as greyed-out/already-registered if the guardian lands back
             # on this form (e.g. via the browser back button).

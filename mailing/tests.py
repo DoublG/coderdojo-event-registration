@@ -873,3 +873,144 @@ class Pop3MailboxTests(TestCase):
             self.assertEqual(BounceProcessor().process(), 1)
         self.assertTrue(ProcessedImapMessage.objects.filter(mailbox="pop3:mailpit", uid="bbb").exists())
         pop.dele.assert_not_called()
+
+
+# --- phase 5: automated mail ----------------------------------------------------
+
+
+class AutomatedMailTests(TestCase):
+    def setUp(self):
+        call_command("load_mail_templates", stdout=StringIO())
+        self.dojo = make_dojo("Ghent")
+        self.parent = User.objects.create(username="parent", first_name="Ellen", email="p@example.com",
+                                          preferred_language="nl-be")
+        self.co_parent = User.objects.create(username="co", email="co@example.com")
+        self.teen_login = User.objects.create(username="teen", email="t@example.com", account_type=User.NINJA)
+        self.kid = Ninja.objects.create(name="Emma Peeters", account=self.teen_login, home_dojo=self.dojo)
+        for guardian in (self.parent, self.co_parent):
+            Guardianship.objects.create(guardian=guardian, ninja=self.kid)
+
+    def _event(self, days_ahead=2, status=Event.OPEN, places=10, dojo=None, name="Scratch"):
+        start = timezone.now().replace(hour=14, minute=0, second=0, microsecond=0) + timedelta(days=days_ahead)
+        return Event.objects.create(name=name, dojo=dojo or self.dojo, status=status, places=places,
+                                    start_time=start, end_time=start + timedelta(hours=2))
+
+    def _mails(self, **filters):
+        return list(EmailMessage.objects.filter(**filters).order_by("id").values_list("recipient", "template_key", "status"))
+
+    def test_family_is_guardians_and_own_login_with_email(self):
+        from .automated import family_of
+
+        User.objects.filter(pk=self.co_parent.pk).update(email="")
+        self.assertEqual([u.username for u in family_of(self.kid)], ["parent", "teen"])
+
+    def test_signup_confirms_to_the_whole_family(self):
+        event = self._event(days_ahead=10)
+        self.client.force_login(self.parent)
+        self.client.post(reverse("event_signup", kwargs={"event_id": event.id}),
+                         {"child": [str(self.kid.id)], "child_order": str(self.kid.id)})
+        self.assertEqual(self._mails(), [
+            ("p@example.com", "registration_confirmed", Status.PENDING),
+            ("co@example.com", "registration_confirmed", Status.PENDING),
+            ("t@example.com", "registration_confirmed", Status.PENDING),
+        ])
+        dutch = EmailMessage.objects.get(recipient="p@example.com")
+        self.assertEqual(dutch.subject, "Emma is ingeschreven voor Scratch")
+
+    def test_signup_for_a_full_session_sends_the_waiting_list_notice(self):
+        event = self._event(days_ahead=10, places=0)
+        self.client.force_login(self.parent)
+        self.client.post(reverse("event_signup", kwargs={"event_id": event.id}),
+                         {"child": [str(self.kid.id)], "child_order": str(self.kid.id)})
+        self.assertEqual({key for _r, key, _s in self._mails()}, {"registration_waitlisted"})
+
+    def test_moving_up_from_the_waiting_list_mails_the_family(self):
+        event = self._event(days_ahead=10, places=1)
+        other_parent = User.objects.create(username="other", email="o@example.com")
+        other_kid = Ninja.objects.create(name="Liam")
+        Guardianship.objects.create(guardian=other_parent, ninja=other_kid)
+        confirmed = Registration.objects.create(event=event, ninja=other_kid, waiting_list=False, position=1)
+        Registration.objects.create(event=event, ninja=self.kid, waiting_list=True, position=2)
+
+        self.client.force_login(other_parent)
+        self.client.post(reverse("cancel_registration", kwargs={"registration_id": confirmed.id}))
+
+        self.assertEqual({(r, k) for r, k, _s in self._mails()},
+                         {("p@example.com", "waitlist_promoted"), ("co@example.com", "waitlist_promoted"),
+                          ("t@example.com", "waitlist_promoted")})
+
+    def test_a_missing_template_never_breaks_a_signup(self):
+        EmailTemplate.objects.all().delete()
+        event = self._event(days_ahead=10)
+        self.client.force_login(self.parent)
+        with self.assertLogs("mailing.automated", level="ERROR"):
+            self.client.post(reverse("event_signup", kwargs={"event_id": event.id}),
+                             {"child": [str(self.kid.id)], "child_order": str(self.kid.id)})
+        self.assertTrue(Registration.objects.filter(event=event, ninja=self.kid).exists())
+        self.assertEqual(EmailMessage.objects.count(), 0)
+
+    def test_session_reminders_two_days_before_once(self):
+        from .automated import send_session_reminders
+
+        in_two_days, in_three_days = self._event(2), self._event(3, name="Later")
+        waitlisted_kid = Ninja.objects.create(name="Waitlisted")
+        Guardianship.objects.create(guardian=self.co_parent, ninja=waitlisted_kid)
+        Registration.objects.create(event=in_two_days, ninja=self.kid, waiting_list=False, position=1)
+        Registration.objects.create(event=in_two_days, ninja=waitlisted_kid, waiting_list=True, position=2)
+        Registration.objects.create(event=in_three_days, ninja=self.kid, waiting_list=False, position=1)
+        set_preference(self.teen_login, MailCategory.REMINDER, False, ConsentEvent.PREFERENCES)
+
+        self.assertEqual(send_session_reminders(), 2)  # parent + co-parent; the teen opted out
+        self.assertEqual(send_session_reminders(), 0)  # idempotent
+        self.assertEqual(self._mails(template_key="session_reminder"), [
+            ("p@example.com", "session_reminder", Status.PENDING),
+            ("co@example.com", "session_reminder", Status.PENDING),
+            ("t@example.com", "session_reminder", Status.SUPPRESSED),
+        ])
+
+    def test_new_sessions_digest_per_family_and_dojo(self):
+        from .automated import announce_new_sessions
+
+        other_dojo = make_dojo("Antwerp")
+        a, b = self._event(10, name="A"), self._event(17, name="B")
+        self._event(12, dojo=other_dojo, name="Elsewhere")
+        self._event(20, status=Event.DRAFT, name="Draft")
+        # A family whose child came to a session at this dojo also hears about it.
+        visitor = User.objects.create(username="visitor", email="v@example.com")
+        visiting_kid = Ninja.objects.create(name="Visitor", home_dojo=other_dojo)
+        Guardianship.objects.create(guardian=visitor, ninja=visiting_kid)
+        past = self._event(-30, status=Event.CLOSED, name="Past")
+        Registration.objects.create(event=past, ninja=visiting_kid, waiting_list=False, position=1, attended=True)
+
+        announce_new_sessions()
+
+        ghent = EmailMessage.objects.filter(template_key="new_sessions_at_dojo", body__contains="Ghent")
+        self.assertEqual(set(ghent.values_list("recipient", flat=True)),
+                         {"p@example.com", "co@example.com", "t@example.com", "v@example.com"})
+        body = ghent.get(recipient="co@example.com").body
+        self.assertIn("A,", body)
+        self.assertIn("B,", body)
+        self.assertNotIn("Elsewhere", body)
+        self.assertIsNotNone(Event.objects.get(pk=a.pk).announced_at)
+        self.assertIsNotNone(Event.objects.get(pk=b.pk).announced_at)
+        count = EmailMessage.objects.count()
+        announce_new_sessions()
+        self.assertEqual(EmailMessage.objects.count(), count)
+
+    def test_published_at_is_set_the_first_time_a_session_opens(self):
+        event = self._event(10, status=Event.DRAFT)
+        self.assertIsNone(event.published_at)
+        event.status = Event.OPEN
+        event.save(update_fields=["status"])
+        first = Event.objects.get(pk=event.pk).published_at
+        self.assertIsNotNone(first)
+        event.status = Event.CLOSED
+        event.save(update_fields=["status"])
+        event.status = Event.OPEN
+        event.save(update_fields=["status"])
+        self.assertEqual(Event.objects.get(pk=event.pk).published_at, first)
+
+    def test_load_mail_templates_never_overwrites(self):
+        EmailTemplate.objects.filter(key="session_reminder", language="en-us").update(subject="Edited")
+        call_command("load_mail_templates", stdout=StringIO())
+        self.assertEqual(EmailTemplate.objects.get(key="session_reminder", language="en-us").subject, "Edited")

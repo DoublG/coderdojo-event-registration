@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 import environ
+from celery.schedules import crontab
 
 env = environ.Env(
     DEBUG=(bool, False),
@@ -100,6 +101,9 @@ MAILING_BATCH_SIZE = env.int('MAILING_BATCH_SIZE', default=20)  # rows per send_
 # worker). Throughput is at most this many batches times MAILING_BATCH_SIZE.
 MAILING_BATCH_RATE_LIMIT = env('MAILING_BATCH_RATE_LIMIT', default='6/m')
 MAILING_CLAIM_TIMEOUT_MINUTES = env.int('MAILING_CLAIM_TIMEOUT_MINUTES', default=60)
+# Automated mail (mailing.automated).
+MAILING_REMINDER_DAYS_BEFORE = 2  # the session reminder goes out this many days before
+MAILING_DOJO_NEWS_ACTIVE_DAYS = 365  # a family belongs to a dojo that long after a visit
 
 # Bounces (mailing.bounce): the envelope sender of every mail, so bounces land
 # in that mailbox. "{id}" is replaced by the EmailMessage id when the mail
@@ -173,8 +177,24 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 15 * 60.0,
         "options": {"expires": 15 * 60},
     },
+    # Heavier daily jobs run on the default queue (the mailing worker), so
+    # they never hold up the 10-second dispatcher: an explicit "queue".
+    "session-reminders": {
+        "task": "mailing.tasks.send_session_reminders",
+        "schedule": crontab(hour=9, minute=0),
+        "options": {"queue": "celery", "expires": 6 * 3600},
+    },
+    "new-sessions-digest": {
+        "task": "mailing.tasks.announce_new_sessions",
+        "schedule": crontab(hour=17, minute=0),
+        "options": {"queue": "celery", "expires": 6 * 3600},
+    },
 }
-CELERY_TASK_ROUTES = {entry["task"]: {"queue": PERIODIC_QUEUE} for entry in CELERY_BEAT_SCHEDULE.values()}
+CELERY_TASK_ROUTES = {
+    entry["task"]: {"queue": PERIODIC_QUEUE}
+    for entry in CELERY_BEAT_SCHEDULE.values()
+    if "queue" not in entry.get("options", {})
+}
 
 # Application definition
 

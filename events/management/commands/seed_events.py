@@ -117,6 +117,7 @@ class Command(BaseCommand):
         rng = random.Random(42)
         today = timezone.localdate()
         created, skipped = 0, 0
+        created_ids = []
 
         all_pathways = list(Pathway.objects.order_by("id"))
         for dojo in Dojo.objects.exclude(location=None):
@@ -169,11 +170,16 @@ class Command(BaseCommand):
                     },
                 )
                 if was_created:
+                    created_ids.append(event.id)
                     assign_session_image(event, session_name)
                     event.pathways.set(dojo_pathways)
                     assign_event_team(event)
                 created += 1 if was_created else 0
                 skipped += 1 if not was_created else 0
+
+        # Seeded sessions are demo data, not news: mark them announced so the
+        # daily "new sessions" mail doesn't write to every seeded family.
+        Event.objects.filter(pk__in=created_ids, announced_at=None).update(announced_at=timezone.now())
 
         # Some upcoming sessions are CoderDojo Girlz sessions (Event.audience,
         # a label only). Per-event RNG, so the pick is the same on every run

@@ -92,6 +92,49 @@ pour quelqu'un de la liste d'attente : {{ account_url }}
         },
     },
     {
+        "key": "registration_waitlisted",
+        "category": MailCategory.REGISTRATION,
+        "description": "After signing a ninja up for a full session: they're on the waiting list. "
+                       "Variables: ninja_name, event_name, dojo_name, start_time, event_url, account_url.",
+        "subject": {
+            "en-us": "{{ ninja_name }} is on the waiting list for {{ event_name }}",
+            "nl-be": "{{ ninja_name }} staat op de wachtlijst voor {{ event_name }}",
+            "fr-be": "{{ ninja_name }} est sur la liste d'attente pour {{ event_name }}",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{{ event_name }} at {{ dojo_name }} ({{ start_time|date:"l j F" }}) is full, so
+{{ ninja_name }} is on the waiting list. If a place comes free, it goes to whoever
+has waited longest, and we'll mail you straight away.
+
+Session details: {{ event_url }}
+Your registrations: {{ account_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{{ event_name }} bij {{ dojo_name }} ({{ start_time|date:"l j F" }}) is volzet, dus
+{{ ninja_name }} staat op de wachtlijst. Komt er een plaats vrij, dan gaat die naar
+wie het langst wacht, en mailen we je meteen.
+
+Details van de sessie: {{ event_url }}
+Je inschrijvingen: {{ account_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{{ event_name }} au {{ dojo_name }} ({{ start_time|date:"l j F" }}) est complet :
+{{ ninja_name }} est donc sur la liste d'attente. Si une place se libère, elle va à
+la personne qui attend depuis le plus longtemps, et nous vous écrivons aussitôt.
+
+Détails de la session : {{ event_url }}
+Vos inscriptions : {{ account_url }}
+""",
+        },
+    },
+    {
         "key": "waitlist_promoted",
         "category": MailCategory.REGISTRATION,
         "description": "A place came free and a waitlisted ninja moved up. "
@@ -500,6 +543,7 @@ _common = {
 SAMPLE_CONTEXT = {
     "registration_confirmed": {**_common, **_event},
     "waitlist_promoted": {**_common, **_event},
+    "registration_waitlisted": {**_common, **_event},
     "session_reminder": {**_common, **_event},
     "new_sessions_at_dojo": {
         **_common,

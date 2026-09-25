@@ -23,7 +23,8 @@ kind of mail:
 - **Reminders**: a reminder before a session you signed up for. On unless
   you switch it off.
 - **News from your dojo**: new sessions and news from the dojos your family
-  goes to. On unless you switch it off.
+  goes to (your child's home dojo, or a dojo they came to in the last
+  year), at most once a day. On unless you switch it off.
 - **Volunteering**: news for champions and mentors, and calls for
   volunteers. On unless you switch it off.
 - **Newsletter and campaigns**: the CoderDojo Belgium newsletter and events

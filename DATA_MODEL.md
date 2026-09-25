@@ -2158,6 +2158,16 @@ Each phase ships with tests (the repo rule) and updates this section and
   Every mail goes out with the bounce address as envelope sender.
   `simulate_bounce` exercises the whole path against Mailpit.
 
+- phase 5: done.
+  - booking mail at sign-up (confirmed, or the waiting-list notice)
+  - a mail when a child moves up from the waiting list
+  - the reminder two days before (daily, 09:00)
+  - "new sessions at your dojo" (daily digest, 17:00)
+
+  All go to the whole family. `Event.published_at`/`announced_at` drive
+  the digest (existing sessions were marked announced by the migration).
+  `load_mail_templates` runs on every deploy.
+
 `User.postal_code`, with the dojo finder starting from it, came in on
 the side.
 

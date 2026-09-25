@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 MARKDOWN_HELP_TEXT = "Supports basic Markdown — # headings, **bold**, *italic*, links, lists."
 
@@ -72,7 +73,20 @@ class Event(models.Model):
 
     ninjas = models.ManyToManyField("accounts.Ninja", through="Registration")
 
+    # When the session first opened for sign-ups, and when families of its
+    # dojo were told about it (the daily "new sessions" mail,
+    # mailing.automated.announce_new_sessions).
+    published_at = models.DateTimeField(null=True, blank=True, editable=False)
+    announced_at = models.DateTimeField(null=True, blank=True, editable=False)
+
     objects = EventManager()
+
+    def save(self, *args, **kwargs):
+        if self.status == self.OPEN and self.published_at is None:
+            self.published_at = timezone.now()
+            if kwargs.get("update_fields") is not None:
+                kwargs["update_fields"] = {*kwargs["update_fields"], "published_at"}
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} ({self.dojo})"

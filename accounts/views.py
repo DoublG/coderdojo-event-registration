@@ -18,6 +18,7 @@ from django.utils.text import slugify
 from core.image_library import library_filename, use_library_image
 from dojos.access import accessible_dojos
 from events.models import Registration
+from mailing.automated import waitlist_promoted_mail
 from mailing.categories import MailCategory
 from mailing.models import ConsentEvent
 from mailing.preferences import set_preference
@@ -463,6 +464,7 @@ def cancel_registration(request, registration_id):
             if next_in_line:
                 next_in_line.waiting_list = False
                 next_in_line.save(update_fields=["waiting_list"])
+                waitlist_promoted_mail(next_in_line)
                 notify_managers(
                     event.dojo,
                     f"A spot opened up in {event.name} — a waitlisted family is now confirmed.",

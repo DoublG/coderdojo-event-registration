@@ -77,7 +77,7 @@ def categories_for(user):
 DESCRIPTIONS = {
     MailCategory.SERVICE: "Password resets, background-check requests and other mail about your account.",
     MailCategory.REGISTRATION: "Confirmations and changes for the sessions you signed up for.",
-    MailCategory.REMINDER: "A reminder before a session you signed up for, and before your background check expires.",
+    MailCategory.REMINDER: "A reminder two days before a session you signed up for.",
     MailCategory.DOJO_NEWS: "New sessions and news from the dojos your family goes to.",
     MailCategory.VOLUNTEER: "News for champions and mentors, and calls for volunteers.",
     MailCategory.NEWSLETTER: "The CoderDojo Belgium newsletter and events like Coolest Projects and CoderDojo Girlz.",

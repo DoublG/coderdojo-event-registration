@@ -1,12 +1,13 @@
 import copy
 
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.urls import reverse
 
 from dojos.models import Dojo
-from mailing.models import Campaign, EmailTemplate, Segment, SegmentGroup, SegmentRule
-from mailing.seed_templates import CAMPAIGNS, NEW_DOJO, template_rows
+from mailing.models import Campaign, Segment, SegmentGroup, SegmentRule
+from mailing.seed_templates import CAMPAIGNS, NEW_DOJO
 
 
 class Command(BaseCommand):
@@ -20,11 +21,7 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        templates_created = 0
-        for row in template_rows():
-            key, language = row.pop("key"), row.pop("language")
-            _template, created = EmailTemplate.objects.get_or_create(key=key, language=language, defaults=row)
-            templates_created += created
+        call_command("load_mail_templates", stdout=self.stdout)
 
         campaigns_created = 0
         for spec in CAMPAIGNS:
@@ -40,9 +37,7 @@ class Command(BaseCommand):
             )
             campaigns_created += 1
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Done. templates={templates_created} campaigns={campaigns_created} (new rows only)."
-        ))
+        self.stdout.write(self.style.SUCCESS(f"Done. campaigns={campaigns_created} (new rows only)."))
 
     def _fill_in_new_dojo(self, spec):
         """Point the new-dojo campaign at a real dojo: the newest draft dojo

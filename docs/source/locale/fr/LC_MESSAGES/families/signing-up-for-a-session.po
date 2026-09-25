@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 08:49+0000\n"
+"POT-Creation-Date: 2026-09-25 09:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -58,7 +58,26 @@ msgstr ""
 "enfant déjà inscrit à cette séance est ignoré et signalé comme tel plutôt"
 " que d'être inscrit deux fois."
 
-#: ../../source/families/signing-up-for-a-session.rst:15
+#: ../../source/families/signing-up-for-a-session.rst:16
+msgid "Mails about your booking"
+msgstr "E-mails concernant votre réservation"
+
+#: ../../source/families/signing-up-for-a-session.rst:18
+msgid ""
+"After you sign up, you (and any other parent on the account, plus a child"
+" with their own login and email) get a confirmation mail, or a waiting-"
+"list mail if the session was full. Two days before the session you get a "
+"reminder; you can switch reminders off on your **Mail preferences** page "
+"(see :doc:`mail-preferences`)."
+msgstr ""
+"Après votre inscription, vous (ainsi que tout autre parent du compte, et "
+"un enfant ayant son propre compte et une adresse e-mail) recevez un "
+"e-mail de confirmation, ou un e-mail de liste d'attente si la séance "
+"était complète. Deux jours avant la séance, vous recevez un rappel ; vous"
+" pouvez désactiver les rappels sur votre page **Préférences d'e-mail** "
+"(voir :doc:`mail-preferences`)."
+
+#: ../../source/families/signing-up-for-a-session.rst:24
 msgid ""
 "If a session shows **Registrations closed** instead of a sign-up option, "
 "the dojo has stopped taking new sign-ups for it (this normally happens "
@@ -71,11 +90,11 @@ msgstr ""
 "séance) — contactez directement l'équipe du dojo si vous avez encore "
 "besoin d'une place."
 
-#: ../../source/families/signing-up-for-a-session.rst:21
+#: ../../source/families/signing-up-for-a-session.rst:30
 msgid "Girls' sessions"
 msgstr "Séances pour filles"
 
-#: ../../source/families/signing-up-for-a-session.rst:23
+#: ../../source/families/signing-up-for-a-session.rst:32
 msgid ""
 "Some sessions are labelled **Girls' session**. They're aimed at girls, "
 "but the label never stops anyone from signing up."
@@ -84,32 +103,32 @@ msgstr ""
 "s'adressent aux filles, mais l'étiquette n'empêche jamais personne de "
 "s'inscrire."
 
-#: ../../source/families/signing-up-for-a-session.rst:27
+#: ../../source/families/signing-up-for-a-session.rst:36
 msgid "Waiting lists"
 msgstr "Listes d'attente"
 
-#: ../../source/families/signing-up-for-a-session.rst:29
+#: ../../source/families/signing-up-for-a-session.rst:38
 msgid ""
 "Sessions have a limited number of places. If a session is full when you "
 "sign up, your child is placed on the **waiting list** instead of being "
 "turned away outright — you'll see this clearly on the confirmation. If a "
 "confirmed spot later opens up (someone cancels), the longest-waiting "
-"child for that session is automatically promoted to confirmed. No action "
-"is needed on your part for that to happen."
+"child for that session is automatically promoted to confirmed, and we "
+"mail you when that happens. No action is needed on your part."
 msgstr ""
 "Les séances ont un nombre limité de places. Si une séance est complète au"
 " moment de votre inscription, votre enfant est placé sur la **liste "
 "d'attente** plutôt que d'être simplement refusé : cela apparaît "
 "clairement sur la confirmation. Si une place confirmée se libère ensuite "
 "(annulation), l'enfant qui attend depuis le plus longtemps pour cette "
-"séance est automatiquement confirmé. Aucune action de votre part n'est "
-"nécessaire pour cela."
+"séance est automatiquement confirmé, et nous vous l'annonçons par e-mail."
+" Aucune action de votre part n'est nécessaire."
 
-#: ../../source/families/signing-up-for-a-session.rst:37
+#: ../../source/families/signing-up-for-a-session.rst:46
 msgid "Cancelling"
 msgstr "Annuler"
 
-#: ../../source/families/signing-up-for-a-session.rst:39
+#: ../../source/families/signing-up-for-a-session.rst:48
 msgid ""
 "If your plans change, cancel from your family account page (see :doc"
 ":`managing-your-account`) rather than just not turning up — that's also "
