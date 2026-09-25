@@ -159,7 +159,7 @@
               <p class="cd-form__help caption">No children on your account yet — register one below to sign them up.</p>
             {% endfor %}
 
-            {% if not request.user.is_ninja %}<p class="cd-form__help caption" style="margin-top: var(--space-3);">Signing up on someone else's behalf? <a href="{% url 'register_guardian' %}">Register another child</a> first.</p>{% endif %}{% endif %}{% endif %}
+            {% if not request.user.is_ninja %}<p class="cd-form__help caption" style="margin-top: var(--space-3);">Signing up on someone else's behalf? <a href="{% url 'register_guardian' %}">Register another child</a> first.</p>{% endif %}
           </div>
 
           <p class="cd-form__help caption signup-summary" id="signup-summary" hidden></p>
