@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html_join
 
 from .models import (
+    BounceRecord,
     Campaign,
     ConsentEvent,
     EmailMessage,
@@ -141,6 +142,21 @@ class ConsentEventAdmin(admin.ModelAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(BounceRecord)
+class BounceRecordAdmin(admin.ModelAdmin):
+    """What came back from the bounce mailbox (append-only)."""
+
+    list_display = ["created_at", "email", "kind", "status_code", "diagnostic"]
+    list_filter = ["kind"]
+    search_fields = ["email", "diagnostic"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
         return False
 
 

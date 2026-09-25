@@ -91,12 +91,16 @@ def _build(row):
     unsubscribe headers (RFC 8058)."""
     domain = urlparse(settings.SITE_URL).hostname or "localhost"
     message_id = row.message_id or make_msgid(domain=domain)
-    headers = {"Message-ID": message_id}
+    # The envelope sender is the bounce mailbox (with this row's id when it
+    # takes plus-addressing), so bounces come back to process_bounces; the
+    # From header people see stays DEFAULT_FROM_EMAIL.
+    headers = {"Message-ID": message_id, "From": settings.DEFAULT_FROM_EMAIL}
+    envelope_from = settings.MAILING_BOUNCE_ADDRESS.replace("{id}", str(row.pk)) or settings.DEFAULT_FROM_EMAIL
     if CAN_OPT_OUT[row.category] and row.user_id:
         headers["List-Unsubscribe"] = f"<{unsubscribe_url(row.user, row.category)}>"
         headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
     message = QueuedEmail(
-        subject=row.subject, body=row.body, from_email=settings.DEFAULT_FROM_EMAIL,
+        subject=row.subject, body=row.body, from_email=envelope_from,
         to=[row.recipient], headers=headers,
     )
     return message, message_id
@@ -184,5 +188,10 @@ def requeue_stuck_emails():
 
 @shared_task
 def process_bounces():
-    # Phase 4: read DSNs from the IMAP bounce mailbox (mailing.bounce).
-    pass
+    """Read new bounces and complaints from the bounce mailbox (mailing.bounce).
+    Off while MAILING_BOUNCE_IMAP_HOST is empty."""
+    if not settings.MAILING_BOUNCE_IMAP_HOST:
+        return 0
+    from .bounce import BounceProcessor
+
+    return BounceProcessor().process()

@@ -1856,8 +1856,10 @@ retries and scheduled sends are all just rows.
    SMTP to send and IMAP to receive, with no provider webhooks). It matches
    each DSN to our `message_id`, and to a VERP return path if the mailbox
    supports plus-addressing.
-   - A permanent failure (5.x.x) or a complaint marks the row `bounced`,
-     adds an `EmailSuppression` and logs a `ConsentEvent(source=bounce)`.
+   - A permanent failure (5.x.x) marks the row `bounced` and adds an
+     `EmailSuppression`. A complaint switches off the account's optional
+     categories (`ConsentEvent(source=bounce)`) but doesn't block the
+     address, so account and booking mail still arrive.
    - A temporary failure (4.x.x) only counts; three in 30 days suppress
      the address.
    - `ProcessedImapMessage` keeps each message from being handled twice.
@@ -2145,8 +2147,19 @@ Each phase ships with tests (the repo rule) and updates this section and
   audience preview, and the Tier 1 attributes listed above
 - phase 8: three seeded draft campaigns (`seed_mailing`)
 
+- phase 4: done in the code. `process_bounces` reads the bounce mailbox
+  over IMAP (production) or POP3 (Mailpit in the devcontainer), parses
+  DSNs, complaint reports and plain-text bounces, and records a
+  `BounceRecord` for each.
+  - hard bounce: the mail is marked `bounced` and the address blocked
+  - soft bounces: counted; the limit within the window blocks the address
+  - complaint: all optional mail is switched off, nothing is blocked
+
+  Every mail goes out with the bounce address as envelope sender.
+  `simulate_bounce` exercises the whole path against Mailpit.
+
 `User.postal_code`, with the dojo finder starting from it, came in on
-the side. Nothing sends mail yet.
+the side.
 
 1. **Foundations.** Fix the current skeleton so it's coherent:
    - `SegmentRule.group`, `SegmentGroup.scope` and the pending

@@ -64,6 +64,10 @@ ADMIN_PERMISSIONS = {
     "mailing.segmentrule": _EDIT,
     "mailing.campaign": _EDIT,
     "mailing.emailmessage": _VIEW,
+    "mailing.mailpreference": _VIEW,
+    "mailing.consentevent": _VIEW,
+    "mailing.emailsuppression": _EDIT,
+    "mailing.bouncerecord": _VIEW,
 }
 ROLE_PERMISSIONS = {OrganisationRole.BOARD: BOARD_PERMISSIONS, OrganisationRole.ADMIN: ADMIN_PERMISSIONS}
 

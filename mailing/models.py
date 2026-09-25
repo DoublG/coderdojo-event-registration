@@ -306,9 +306,15 @@ class EmailSuppression(models.Model):
     a hard bounce, a spam complaint, or blocked by hand."""
 
     HARD_BOUNCE = "hard_bounce"
+    SOFT_BOUNCES = "soft_bounces"
     COMPLAINT = "complaint"
     MANUAL = "manual"
-    REASON_CHOICES = [(HARD_BOUNCE, "Hard bounce"), (COMPLAINT, "Spam complaint"), (MANUAL, "Blocked by hand")]
+    REASON_CHOICES = [
+        (HARD_BOUNCE, "Hard bounce"),
+        (SOFT_BOUNCES, "Repeated soft bounces"),
+        (COMPLAINT, "Spam complaint"),
+        (MANUAL, "Blocked by hand"),
+    ]
 
     email = models.EmailField(unique=True, help_text="Stored lower-case.")
     reason = models.CharField(max_length=20, choices=REASON_CHOICES)
@@ -323,7 +329,35 @@ class EmailSuppression(models.Model):
         super().save(*args, **kwargs)
 
 
+class BounceRecord(models.Model):
+    """One bounce or complaint read from the bounce mailbox (append-only):
+    what came back, for which address and, when it could be matched, which
+    mail. Soft bounces are counted from here."""
+
+    HARD = "hard"
+    SOFT = "soft"
+    COMPLAINT = "complaint"
+    KIND_CHOICES = [(HARD, "Hard bounce (5.x.x)"), (SOFT, "Soft bounce (4.x.x)"), (COMPLAINT, "Spam complaint")]
+
+    email = models.EmailField(db_index=True, help_text="Stored lower-case.")
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES)
+    status_code = models.CharField(max_length=20, blank=True, help_text="e.g. 5.1.1")
+    diagnostic = models.CharField(max_length=255, blank=True)
+    message = models.ForeignKey(EmailMessage, null=True, blank=True, on_delete=models.SET_NULL, related_name="bounces")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.email} ({self.kind} {self.status_code})"
+
+
 class ProcessedImapMessage(models.Model):
+    """A message in the bounce mailbox that process_bounces has handled, so
+    it's never handled twice. `mailbox` is "<name>:<UIDVALIDITY>" for IMAP,
+    or "pop3:<host>" (with the message's UIDL as `uid`) for POP3."""
+
     mailbox = models.CharField(max_length=255)
     uid = models.CharField(max_length=255)
 

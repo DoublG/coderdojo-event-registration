@@ -767,6 +767,24 @@ class OrganisationRoleTests(TestCase):
         self.assertTrue(user.has_perm("pathways.change_pathway"))
         self.assertFalse(user.has_perm("events.add_ninjabelt"))
 
+    def test_migrate_refreshes_the_role_groups(self):
+        """A permission added to ADMIN_PERMISSIONS reaches existing admins at
+        the next migrate (i.e. deploy), not only when a role changes."""
+        from django.contrib.auth.models import Group, Permission
+        from django.core.management import call_command
+
+        from .models import OrganisationRole
+        from .organisation import GROUP_NAMES
+
+        self._grant(OrganisationRole.ADMIN)
+        group = Group.objects.get(name=GROUP_NAMES[OrganisationRole.ADMIN])
+        group.permissions.remove(Permission.objects.get(codename="view_bouncerecord"))
+        self.assertFalse(self._fresh().has_perm("mailing.view_bouncerecord"))
+
+        call_command("migrate", verbosity=0)
+
+        self.assertTrue(self._fresh().has_perm("mailing.view_bouncerecord"))
+
     def test_only_the_admin_role_runs_campaigns(self):
         from .models import OrganisationRole
 
@@ -777,6 +795,9 @@ class OrganisationRoleTests(TestCase):
         self.assertTrue(user.has_perm("mailing.change_emailtemplate"))
         self.assertTrue(user.has_perm("mailing.view_emailmessage"))
         self.assertFalse(user.has_perm("mailing.change_emailmessage"))
+        self.assertTrue(user.has_perm("mailing.view_consentevent"))
+        self.assertTrue(user.has_perm("mailing.add_emailsuppression"))
+        self.assertTrue(user.has_perm("mailing.view_bouncerecord"))
 
     def test_revoking_the_last_role_drops_staff_and_group(self):
         from .models import OrganisationRole

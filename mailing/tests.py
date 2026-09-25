@@ -20,12 +20,14 @@ from geo.models import AdministrativeBoundary, Municipality
 
 from .categories import MailCategory
 from .models import (
+    BounceRecord,
     Campaign,
     ConsentEvent,
     EmailMessage,
     EmailSuppression,
     EmailTemplate,
     MailPreference,
+    ProcessedImapMessage,
     Segment,
     SegmentGroup,
     SegmentRule,
@@ -44,6 +46,7 @@ from .tasks import (
     send_email_batch,
     send_pending_emails,
 )
+from .testing import complaint_report, dsn_report
 
 
 def _family(username, *genders, **fields):
@@ -684,3 +687,189 @@ class UnsubscribeViewTests(TestCase):
         self.assertEqual(self.client.get(reverse("mail_unsubscribe", kwargs={"token": "nope"})).status_code, 404)
         service = reverse("mail_unsubscribe", kwargs={"token": unsubscribe_token(self.user, MailCategory.SERVICE)})
         self.assertEqual(self.client.post(service).status_code, 404)
+
+
+# --- phase 4: bounces -----------------------------------------------------------
+
+
+def _dsn(action="failed", status="5.1.1", recipient="u0@example.com", message_id="", to="bounces@example.org"):
+    return dsn_report(recipient, message_id=message_id, action=action, status=status, to=to)
+
+
+def _complaint(recipient="u0@example.com", message_id=""):
+    return complaint_report(recipient, message_id=message_id)
+
+
+class _FakeMailbox:
+    """Stands in for ImapMailbox: `messages` maps uid -> raw bytes."""
+
+    messages = {}
+    key = "INBOX:1"
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def unprocessed_uids(self):
+        seen = set(ProcessedImapMessage.objects.filter(mailbox=self.key).values_list("uid", flat=True))
+        return sorted(uid for uid in self.messages if str(uid) not in seen)
+
+    def fetch(self, uid):
+        import email as email_lib
+
+        return email_lib.message_from_bytes(self.messages[uid], policy=email_lib.policy.default)
+
+
+@override_settings(MAILING_BOUNCE_ADDRESS="bounces@example.org")
+class BounceTests(TestCase):
+    def setUp(self):
+        _templates()
+        self.user = User.objects.create(username="u0", email="u0@example.com")
+        self.row = send(self.user, MailCategory.REMINDER, "note")
+        EmailMessage.objects.filter(pk=self.row.pk).update(
+            status=Status.SENT, message_id="<123.456.789@coolregistration.localhost>")
+        self.row.refresh_from_db()
+
+    def _process(self, *raw_messages, start=1):
+        from .bounce import BounceProcessor
+
+        _FakeMailbox.messages = {start + i: raw for i, raw in enumerate(raw_messages)}
+        return BounceProcessor(mailbox_class=_FakeMailbox).process()
+
+    def test_hard_bounce_matched_by_message_id(self):
+        self._process(_dsn(message_id=self.row.message_id))
+        self.row.refresh_from_db()
+        self.assertEqual(self.row.status, Status.BOUNCED)
+        self.assertEqual(EmailSuppression.objects.get().reason, EmailSuppression.HARD_BOUNCE)
+        record = BounceRecord.objects.get()
+        self.assertEqual((record.kind, record.status_code, record.message_id), (BounceRecord.HARD, "5.1.1", self.row.pk))
+        # The next mail to that address isn't sent.
+        self.assertEqual(send(self.user, MailCategory.REMINDER, "note").status, Status.SUPPRESSED)
+
+    def test_each_imap_message_is_handled_once(self):
+        self.assertEqual(self._process(_dsn(message_id=self.row.message_id)), 1)
+        self.assertEqual(self._process(_dsn(message_id=self.row.message_id)), 0)  # same uid again
+        self.assertEqual(BounceRecord.objects.count(), 1)
+
+    @override_settings(MAILING_BOUNCE_ADDRESS="bounces+{id}@example.org")
+    def test_matched_by_verp_address(self):
+        self._process(_dsn(recipient="u0@example.com", to=f"bounces+{self.row.pk}@example.org"))
+        self.assertEqual(BounceRecord.objects.get().message_id, self.row.pk)
+
+    @override_settings(MAILING_SOFT_BOUNCE_LIMIT=3)
+    def test_soft_bounces_block_only_after_the_limit(self):
+        self._process(_dsn(action="delayed", status="4.2.2"), _dsn(action="delayed", status="4.2.2"))
+        self.assertFalse(EmailSuppression.objects.exists())
+        self.row.refresh_from_db()
+        self.assertEqual(self.row.status, Status.SENT)
+        self._process(_dsn(action="delayed", status="4.2.2"), start=3)
+        self.assertEqual(EmailSuppression.objects.get().reason, EmailSuppression.SOFT_BOUNCES)
+
+    def test_complaint_switches_off_optional_mail_but_does_not_block(self):
+        set_preference(self.user, MailCategory.NEWSLETTER, True, ConsentEvent.SIGNUP)
+        self._process(_complaint(message_id=self.row.message_id))
+        self.assertEqual({c for c, on in preferences_for(self.user).items() if on},
+                         {MailCategory.SERVICE, MailCategory.REGISTRATION})
+        self.assertEqual(ConsentEvent.objects.latest("id").source, ConsentEvent.BOUNCE)
+        self.assertFalse(EmailSuppression.objects.exists())
+
+    def test_plain_text_bounce_quoting_our_message(self):
+        raw = f"""From: postmaster@old.example
+To: bounces@example.org
+Subject: Mail delivery failed: returning message to sender
+
+A message that you sent could not be delivered.
+  u0@example.com: 550 5.1.1 user unknown
+
+------ This is a copy of the message's headers. ------
+Message-ID: {self.row.message_id}
+""".encode()
+        self._process(raw)
+        self.assertEqual(BounceRecord.objects.get().kind, BounceRecord.HARD)
+
+    def test_auto_replies_and_other_mail_are_ignored(self):
+        auto = f"""From: someone@example.com
+To: bounces@example.org
+Subject: Out of office
+Auto-Submitted: auto-replied
+In-Reply-To: {self.row.message_id}
+
+I'm away until Monday.
+""".encode()
+        other = b"From: a@example.com\nTo: bounces@example.org\nSubject: Hello\n\nJust a mail.\n"
+        self.assertEqual(self._process(auto, other), 2)
+        self.assertFalse(BounceRecord.objects.exists())
+        self.assertEqual(ProcessedImapMessage.objects.count(), 2)
+
+    @override_settings(MAILING_BOUNCE_ADDRESS="bounces+{id}@example.org", DEFAULT_FROM_EMAIL="CoderDojo <noreply@example.org>")
+    def test_mail_goes_out_with_the_bounce_address_as_envelope_sender(self):
+        from .tasks import _build
+
+        message, _message_id = _build(self.row)
+        self.assertEqual(message.from_email, f"bounces+{self.row.pk}@example.org")
+        self.assertEqual(message.message()["From"], "CoderDojo <noreply@example.org>")
+
+    @override_settings(MAILING_BOUNCE_IMAP_HOST="")
+    def test_off_without_a_mailbox(self):
+        from .tasks import process_bounces
+
+        self.assertEqual(process_bounces(), 0)
+
+
+@override_settings(MAILING_BOUNCE_IMAP_HOST="imap.example.org", MAILING_BOUNCE_IMAP_MAILBOX="Bounces")
+class ImapMailboxTests(TestCase):
+    """ImapMailbox against a mocked imaplib connection (no IMAP server in
+    the devcontainer)."""
+
+    def _imap(self):
+        from unittest.mock import MagicMock
+
+        imap = MagicMock()
+        imap.response.return_value = ("OK", [b"4711"])
+
+        def uid(command, *args):
+            if command == "SEARCH":
+                return "OK", [b"7"]  # "8:*" still returns the newest message, uid 7
+            return "OK", [(b"7 (BODY[] {10}", b"Subject: x\n\nhello\n"), b")"]
+
+        imap.uid.side_effect = uid
+        return imap
+
+    def test_key_includes_uidvalidity_and_old_uids_are_skipped(self):
+        from .bounce import ImapMailbox
+
+        imap = self._imap()
+        with patch("mailing.bounce.imaplib.IMAP4_SSL", return_value=imap):
+            with ImapMailbox() as mailbox:
+                self.assertEqual(mailbox.key, "Bounces:4711")
+                self.assertEqual(mailbox.uids_after(7), [])
+                self.assertEqual(mailbox.uids_after(6), [7])
+                self.assertEqual(mailbox.fetch(7)["Subject"], "x")
+        imap.select.assert_called_once_with("Bounces", readonly=True)
+        imap.logout.assert_called_once()
+
+
+@override_settings(MAILING_BOUNCE_PROTOCOL="pop3", MAILING_BOUNCE_IMAP_HOST="mailpit", MAILING_BOUNCE_IMAP_SSL=False)
+class Pop3MailboxTests(TestCase):
+    """Pop3Mailbox (Mailpit in the devcontainer) against a mocked poplib."""
+
+    def test_new_messages_are_the_unprocessed_uidls(self):
+        from unittest.mock import MagicMock
+
+        from .bounce import BounceProcessor, Pop3Mailbox
+
+        pop = MagicMock()
+        pop.uidl.return_value = (b"+OK", [b"1 aaa", b"2 bbb"], 0)
+        pop.retr.side_effect = lambda n: (b"+OK", [b"Subject: m%d" % n, b"", b"hi"], 0)
+        ProcessedImapMessage.objects.create(mailbox="pop3:mailpit", uid="aaa")
+
+        with patch("mailing.bounce.poplib.POP3", return_value=pop):
+            self.assertIs(BounceProcessor().mailbox_class, Pop3Mailbox)
+            with Pop3Mailbox() as mailbox:
+                self.assertEqual(mailbox.unprocessed_uids(), ["bbb"])
+                self.assertEqual(mailbox.fetch("bbb")["Subject"], "m2")
+            self.assertEqual(BounceProcessor().process(), 1)
+        self.assertTrue(ProcessedImapMessage.objects.filter(mailbox="pop3:mailpit", uid="bbb").exists())
+        pop.dele.assert_not_called()

@@ -101,6 +101,29 @@ MAILING_BATCH_SIZE = env.int('MAILING_BATCH_SIZE', default=20)  # rows per send_
 MAILING_BATCH_RATE_LIMIT = env('MAILING_BATCH_RATE_LIMIT', default='6/m')
 MAILING_CLAIM_TIMEOUT_MINUTES = env.int('MAILING_CLAIM_TIMEOUT_MINUTES', default=60)
 
+# Bounces (mailing.bounce): the envelope sender of every mail, so bounces land
+# in that mailbox. "{id}" is replaced by the EmailMessage id when the mail
+# host supports plus-addressing (VERP), e.g. "bounces+{id}@example.org";
+# empty sends bounces to DEFAULT_FROM_EMAIL as before.
+MAILING_BOUNCE_ADDRESS = env('MAILING_BOUNCE_ADDRESS', default='')
+# The mailbox process_bounces reads; empty host = bounce processing is off.
+# IMAP in production; POP3 is there for the devcontainer, where Mailpit
+# (which only speaks POP3) is the bounce mailbox.
+MAILING_BOUNCE_PROTOCOL = env('MAILING_BOUNCE_PROTOCOL', default='imap')
+MAILING_BOUNCE_IMAP_HOST = env('MAILING_BOUNCE_IMAP_HOST', default='')
+MAILING_BOUNCE_IMAP_PORT = env.int('MAILING_BOUNCE_IMAP_PORT', default=993)
+# Plain (no TLS) only for the devcontainer's Mailpit.
+MAILING_BOUNCE_IMAP_SSL = env.bool('MAILING_BOUNCE_IMAP_SSL', default=True)
+MAILING_BOUNCE_IMAP_USER = env('MAILING_BOUNCE_IMAP_USER', default='')
+MAILING_BOUNCE_IMAP_PASSWORD = env('MAILING_BOUNCE_IMAP_PASSWORD', default='')
+MAILING_BOUNCE_IMAP_MAILBOX = env('MAILING_BOUNCE_IMAP_MAILBOX', default='INBOX')
+MAILING_BOUNCE_IMAP_TIMEOUT = env.int('MAILING_BOUNCE_IMAP_TIMEOUT', default=30)
+MAILING_BOUNCE_BATCH = 200  # messages per run, so the periodic worker stays quick
+# This many temporary failures (4.x.x) for one address within the window
+# block it, like a hard bounce.
+MAILING_SOFT_BOUNCE_LIMIT = 3
+MAILING_SOFT_BOUNCE_WINDOW_DAYS = 30
+
 # Celery (website/celery.py). Two workers, see DATA_MODEL.md §11
 # "Production: two Celery workers under systemd": a `periodic` worker with
 # beat embedded runs the jobs beat triggers, and a mailing worker runs
