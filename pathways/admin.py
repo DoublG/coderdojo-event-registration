@@ -1,8 +1,11 @@
 from django.contrib import admin
 
+from core.admin_translations import TranslationAdminMixin
+
 from .models import Pathway, PathwayProject, PathwayStep, Skill
 
-admin.site.register(Pathway)
-admin.site.register(PathwayStep)
-admin.site.register(PathwayProject)
-admin.site.register(Skill)
+
+@admin.register(Pathway, PathwayStep, PathwayProject, Skill)
+class OrganisationContentAdmin(TranslationAdminMixin, admin.ModelAdmin):
+    """The organisation's pathway catalogue, with its texts per language
+    (core.content_languages, settings.ORGANISATION_LANGUAGES)."""

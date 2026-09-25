@@ -47,6 +47,9 @@ For each promotion you choose:
   ranks.
 - **Title**, **Short pitch** and **Image** (all optional): replace the
   event's name and banner, and add a line of text.
+- **In Nederlands** and **In Français** (optional): the title and pitch in
+  those languages. Visitors see the version in their own language, else
+  the English one.
 
 The list shows each promotion's status: **Showing**, **Scheduled** (it
 starts later), **Event not public** (the event is still a draft, or its

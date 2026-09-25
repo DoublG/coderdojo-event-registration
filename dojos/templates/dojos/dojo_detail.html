@@ -147,7 +147,7 @@
           <h2 class="heading-lg section-title">{% translate "Pathways" %}</h2>
           <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
             {% for pathway in pathways %}
-              <a class="cd-badge cd-badge--outline caption" href="{% url 'pathway_detail' pathway_id=pathway.id %}">{{ pathway.name }}</a>
+              <a class="cd-badge cd-badge--outline caption" href="{% url 'pathway_detail' pathway_id=pathway.id %}">{{ pathway|localized:"name" }}</a>
             {% endfor %}
           </div>
         </section>
@@ -193,10 +193,10 @@
           {% for faq in faqs %}
             <div class="cd-faq__item" data-open="false">
               <button class="cd-faq__question heading-sm">
-                <span>{{ faq.question }}</span>
+                <span>{{ faq|localized:"question" }}</span>
                 <span class="cd-faq__icon" aria-hidden="true">+</span>
               </button>
-              <p class="cd-faq__answer body" hidden>{{ faq.answer }}</p>
+              <p class="cd-faq__answer body" hidden>{% with answer=faq|localized:"answer" %}{{ answer }} {% only_in answer %}{% endwith %}</p>
             </div>
           {% endfor %}
         </div>

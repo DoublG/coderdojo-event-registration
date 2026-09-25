@@ -158,3 +158,36 @@ def bound_translation_groups(form, groups):
     """add_translation_fields' groups with bound fields, for templates:
     [{"code", "name", "fields": [BoundField, ...]}]."""
     return [{"code": code, "name": name, "fields": [form[n] for n in names]} for code, name, names in groups]
+
+
+def organisation_languages():
+    """The languages the organisation writes its own content in (pathways,
+    FAQs, badges, belts, ...): settings.ORGANISATION_LANGUAGES, main first."""
+    return clean_languages(getattr(settings, "ORGANISATION_LANGUAGES", None)) or [settings.LANGUAGE_CODE]
+
+
+class OrganisationContent(TranslatableModel):
+    """Content the organisation writes, in organisation_languages()."""
+
+    class Meta:
+        abstract = True
+
+    def content_languages(self):
+        return organisation_languages()
+
+
+class ScopedContent(TranslatableModel):
+    """Content that belongs to a dojo (or a dojo's session) when scoped to
+    one, and to the organisation otherwise (FAQ, Testimonial)."""
+
+    class Meta:
+        abstract = True
+
+    def content_languages(self):
+        dojo = getattr(self, "dojo", None)
+        event = getattr(self, "event", None)
+        if dojo is not None:
+            return dojo.content_languages()
+        if event is not None:
+            return event.content_languages()
+        return organisation_languages()

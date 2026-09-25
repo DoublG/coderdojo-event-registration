@@ -1,4 +1,4 @@
-{% load i18n %}{% comment %}
+{% load content_i18n %}{% load i18n %}{% comment %}
 One card in the child detail page's Badges carousel. When this is the
 last card of a lazy-loaded batch and there's another page, it carries the
 htmx trigger that fetches the next batch as the carousel is scrolled into
@@ -21,13 +21,13 @@ it — see accounts.views.ninja_badges. Same approach as the homepage's
         </svg>
       {% endif %}
     </div>
-    <h3 class="cd-award__title heading-sm">{{ ninja_badge.badge.name }}</h3>
-    <p class="cd-award__desc body-sm">{{ ninja_badge.badge.description }}</p>
+    <h3 class="cd-award__title heading-sm">{{ ninja_badge.badge|localized:"name" }}</h3>
+    <p class="cd-award__desc body-sm">{{ ninja_badge.badge|localized:"description" }}</p>
     <p class="cd-award__meta caption">{% blocktranslate with date=ninja_badge.earned_date|date:"j F Y" %}Earned {{ date }}{% endblocktranslate %}</p>
   </article>
 {% else %}
   <article class="cd-card cd-award cd-award--locked"
-    aria-label="{% blocktranslate with name=ninja_badge.badge.name current=ninja_badge.progress_current total=ninja_badge.progress_total %}{{ name }}, locked, {{ current }} of {{ total }}{% endblocktranslate %}"
+    aria-label="{% blocktranslate with name=ninja_badge.badge|localized:"name" current=ninja_badge.progress_current total=ninja_badge.progress_total %}{{ name }}, locked, {{ current }} of {{ total }}{% endblocktranslate %}"
     {% if is_last and badges_next_page_url %}
       hx-get="{{ badges_next_page_url }}"
       hx-trigger="intersect root:#badges-track once"
@@ -42,8 +42,8 @@ it — see accounts.views.ninja_badges. Same approach as the homepage's
         </svg>
       {% endif %}
     </div>
-    <h3 class="cd-award__title heading-sm">{{ ninja_badge.badge.name }}</h3>
-    <p class="cd-award__desc body-sm">{{ ninja_badge.badge.description }}</p>
+    <h3 class="cd-award__title heading-sm">{{ ninja_badge.badge|localized:"name" }}</h3>
+    <p class="cd-award__desc body-sm">{{ ninja_badge.badge|localized:"description" }}</p>
     {% if ninja_badge.progress_total %}
       <div class="cd-award__progress">
         <div class="cd-award__progress-track">

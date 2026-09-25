@@ -386,6 +386,11 @@ LANGUAGES = [
     ('fr-be', 'Français (Belgique)'),
 ]
 LOCALE_PATHS = [BASE_DIR / "locale"]
+# The languages the organisation writes its own content in (pathways, FAQs,
+# badges, belts, team listing, promotions; core.content_languages), main
+# language first: the normal fields hold it, the others are translations
+# edited in the admin. A dojo picks its own (Dojo.languages).
+ORGANISATION_LANGUAGES = ["en-us", "nl-be", "fr-be"]
 
 TIME_ZONE = 'UTC'
 

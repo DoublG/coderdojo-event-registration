@@ -93,6 +93,7 @@ class DojoProfileForm(forms.ModelForm):
         self.fields["municipality"].queryset = self.fields["municipality"].queryset.order_by("name")
         self.fields["municipality"].empty_label = _("Not set")
         self.fields["template_icon"].initial = library_filename(self.instance.icon, "dojos") or NO_TEMPLATE_ICON
+        self.fields["pathways"].label_from_instance = lambda pathway: pathway.localized("name")
         languages = self.instance.content_languages()
         self.fields["languages"].initial = languages
         self.fields["main_language"].initial = languages[0]

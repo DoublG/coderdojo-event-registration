@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from core.admin_translations import TranslationAdminMixin
 from geo.widgets import BelgiumGISModelAdmin
 
 from .models import Dojo, DojoMembership
@@ -17,7 +18,7 @@ class DojoMembershipInline(admin.TabularInline):
 
 
 @admin.register(Dojo)
-class DojoAdmin(BelgiumGISModelAdmin):
+class DojoAdmin(TranslationAdminMixin, BelgiumGISModelAdmin):
     list_display = ["name", "kind", "status", "municipality"]
     list_filter = ["kind", "status"]
     search_fields = ["name"]

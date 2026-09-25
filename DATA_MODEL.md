@@ -2712,6 +2712,16 @@ sees the **main language**, with an "Only in ..." note.
   **Language** row, and the dojo finder and events list filter on language
   (`languages__contains`). Mails use the session's name in the recipient's
   mail language (`mailing.automated`).
-- **Not per-dojo yet:** the organisation's catalogue content (pathways, FAQs,
-  badges, belts, testimonials, team bios, promotion texts) is still shown as
-  written.
+- **The organisation's content** works the same way, in
+  `settings.ORGANISATION_LANGUAGES` (English first, then Dutch and French):
+  `OrganisationContent` models are `Pathway`, `PathwayStep`,
+  `PathwayProject`, `Skill`, `Belt`, `Badge`, `OrganisationTeamMember` and
+  `Promotion`; `FAQ` and `Testimonial` are `ScopedContent` (the dojo's
+  languages when scoped to a dojo or its session, else the organisation's).
+  They're edited in the Django admin (`core.admin_translations.
+  TranslationAdminMixin`: a collapsible "In <language>" fieldset per extra
+  language; the raw `translations` JSON stays editable too, and the
+  per-language fields are applied after it), promotions also on the
+  Promotions dashboard page. An untranslated FAQ answer shows its note
+  ("Only in English"); names and titles don't. The seeded demo content is
+  English only.

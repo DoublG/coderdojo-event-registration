@@ -4,7 +4,7 @@ from django.db.models import Case, Q, When
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.content_languages import TranslatableModel
+from core.content_languages import OrganisationContent, ScopedContent, TranslatableModel
 
 
 class FAQQuerySet(models.QuerySet):
@@ -30,10 +30,13 @@ class FAQQuerySet(models.QuerySet):
         )
 
 
-class FAQ(models.Model):
+class FAQ(ScopedContent):
     """A question/answer entry. Scoped to a Dojo, Event, or Pathway when
     one of those FKs is set; site-wide (e.g. shown on the homepage) when
-    all three are blank."""
+    all three are blank. In the dojo's languages when scoped to a dojo or
+    its session, else in the organisation's."""
+
+    TRANSLATABLE_FIELDS = ("question", "answer")
 
     dojo = models.ForeignKey("dojos.Dojo", on_delete=models.CASCADE, null=True, blank=True, related_name="faqs")
     event = models.ForeignKey("events.Event", on_delete=models.CASCADE, null=True, blank=True, related_name="faqs")
@@ -56,7 +59,9 @@ class FAQ(models.Model):
         return self.question
 
 
-class Testimonial(models.Model):
+class Testimonial(ScopedContent):
+    TRANSLATABLE_FIELDS = ("quote", "role")
+
     """A quote from a parent, ninja or mentor. Scoped to a Dojo when set;
     site-wide (e.g. the homepage, which picks one at random) when blank."""
 
@@ -95,13 +100,15 @@ class Announcement(TranslatableModel):
         return f"{self.dojo} - {self.date}"
 
 
-class OrganisationTeamMember(models.Model):
+class OrganisationTeamMember(OrganisationContent):
     """Someone listed on the organisation's team details page (the
     homepage's "Meet the team" and team/<id>/) — display only, with a
     position; "Member of the board" is just one possible position. Separate
     from access: being listed grants nothing, and not everyone with access
     to the management dashboards is listed. Maintained by staff; there's no
     self-service (DATA_MODEL.md §10)."""
+
+    TRANSLATABLE_FIELDS = ("position", "bio", "focus_areas")
 
     name = models.CharField(max_length=200)
     position = models.CharField(max_length=200, help_text='e.g. "Member of the board", "Volunteer coordinator"')
@@ -131,7 +138,8 @@ class OrganisationTeamMember(models.Model):
 
     @property
     def focus_area_list(self):
-        return [area.strip() for area in self.focus_areas.split(",") if area.strip()]
+        """In the page's language (core.content_languages)."""
+        return [area.strip() for area in self.localized("focus_areas").split(",") if area.strip()]
 
 
 def _clear_upcoming_cache():
@@ -164,11 +172,13 @@ class PromotionManager(models.Manager.from_queryset(PromotionQuerySet)):
         return super().get_queryset().select_related("event__dojo__municipality")
 
 
-class Promotion(models.Model):
+class Promotion(OrganisationContent):
     """An event featured somewhere on the public site, for a while
     (DATA_MODEL.md §12). Separate from the event, so it can be switched on
     and off, ordered and pointed at different places without editing the
     event. Managed by the organisation's admin role (/manage/promotions/)."""
+
+    TRANSLATABLE_FIELDS = ("title", "text")
 
     HOMEPAGE_HERO = "homepage_hero"
     EVENT_LIST_TOP = "event_list_top"
@@ -220,7 +230,7 @@ class Promotion(models.Model):
 
     @property
     def display_title(self):
-        return self.title or self.event.localized("name")
+        return self.localized("title") or self.event.localized("name")
 
     @property
     def display_image(self):

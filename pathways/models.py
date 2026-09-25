@@ -1,7 +1,11 @@
 from django.db import models
 
+from core.content_languages import OrganisationContent
 
-class Skill(models.Model):
+
+class Skill(OrganisationContent):
+    TRANSLATABLE_FIELDS = ("name",)
+
     """A single skill/topic a Pathway teaches, e.g. "Loops", "Conditionals"."""
 
     name = models.CharField(max_length=100, unique=True)
@@ -13,7 +17,9 @@ class Skill(models.Model):
         return self.name
 
 
-class Pathway(models.Model):
+class Pathway(OrganisationContent):
+    TRANSLATABLE_FIELDS = ("name", "subtitle", "description")
+
     name = models.CharField(max_length=200)
     subtitle = models.CharField(max_length=300, blank=True, default="")
     description = models.TextField(blank=True, default="")
@@ -35,8 +41,10 @@ class PathwayStepManager(models.Manager):
         return super().get_queryset().select_related("pathway")
 
 
-class PathwayStep(models.Model):
+class PathwayStep(OrganisationContent):
     """One step of "how a session works" for a Pathway, in order."""
+
+    TRANSLATABLE_FIELDS = ("title", "description")
 
     pathway = models.ForeignKey(Pathway, on_delete=models.CASCADE, related_name="steps")
     order = models.PositiveSmallIntegerField(default=0)
@@ -57,8 +65,10 @@ class PathwayProjectManager(models.Manager):
         return super().get_queryset().select_related("pathway")
 
 
-class PathwayProject(models.Model):
+class PathwayProject(OrganisationContent):
     """One example of "what you'll build" on a Pathway."""
+
+    TRANSLATABLE_FIELDS = ("title", "description")
 
     pathway = models.ForeignKey(Pathway, on_delete=models.CASCADE, related_name="projects")
     title = models.CharField(max_length=200)

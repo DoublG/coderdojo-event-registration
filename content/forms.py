@@ -2,6 +2,12 @@ from django import forms
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from core.content_languages import (
+    add_translation_fields,
+    bound_translation_groups,
+    optional_copy,
+    save_translation_fields,
+)
 from events.models import Event
 
 from .models import Promotion
@@ -42,13 +48,26 @@ class PromotionForm(forms.ModelForm):
         self.fields["ends_at"].help_text = _("Empty: the promotion ends when the event starts.")
         self.fields["rank"].help_text = _("Lower shows first within a placement.")
         self.fields["image"].help_text = _("Optional: replaces the event's banner.")
+        # The title and pitch in the organisation's other languages.
+        labels = {"title": _("Title"), "text": _("Short pitch")}
+        self.translation_groups = bound_translation_groups(self, add_translation_fields(
+            self, self.instance, lambda field: optional_copy(self.fields[field], labels[field]),
+        ))
         upcoming = Event.objects.filter(end_time__gt=timezone.now())
         if self.instance.event_id:
             upcoming = upcoming | Event.objects.filter(pk=self.instance.event_id)
         self.fields["event"].queryset = upcoming.order_by("start_time")
         self.fields["event"].label_from_instance = _event_label
 
+    def save(self, commit=True):
+        promotion = super().save(commit=False)
+        save_translation_fields(self, promotion)
+        if commit:
+            promotion.save()
+            self.save_m2m()
+        return promotion
+
 
 def _event_label(event):
     label = f"{event.name} — {event.dojo.name}, {timezone.localtime(event.start_time):%d/%m/%Y %H:%M}"
-    return f"{label} (draft)" if event.status == Event.DRAFT else label
+    return _("%(label)s (draft)") % {"label": label} if event.status == Event.DRAFT else label

@@ -1,4 +1,4 @@
-{% load i18n %}{% comment %}
+{% load content_i18n %}{% load i18n %}{% comment %}
 One ninja's Present/Absent toggle. Clicking the already-pressed button
 posts "none", clearing the mark back to "not yet marked" (Registration.attended
 is tri-state). htmx swaps just this row; without JS it's a plain form post.
@@ -18,7 +18,7 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
     </span>
     {% with age=ninja.age pathways=registration.pathways.all current_belt=ninja.current_belt %}
       {% if age is not None or pathways or current_belt %}
-        <span class="cd-attendance__meta caption">{% if age is not None %}{% blocktranslate %}Age {{ age }}{% endblocktranslate %}{% endif %}{% if age is not None and pathways %} · {% endif %}{% for pathway in pathways %}{{ pathway.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if current_belt %}{% if age is not None or pathways %} · {% endif %}{{ current_belt.name }}{% endif %}</span>
+        <span class="cd-attendance__meta caption">{% if age is not None %}{% blocktranslate %}Age {{ age }}{% endblocktranslate %}{% endif %}{% if age is not None and pathways %} · {% endif %}{% for pathway in pathways %}{{ pathway|localized:"name" }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if current_belt %}{% if age is not None or pathways %} · {% endif %}{{ current_belt|localized:"name" }}{% endif %}</span>
       {% endif %}
       {% with top_belt=all_belts|last %}
       {% if dojo_access.can_award_belts and top_belt and top_belt.level > current_belt.level|default:0 %}
@@ -34,7 +34,7 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
             <select class="cd-form__input body" name="belt" id="belt-{{ registration.id }}" required>
               {% for belt in all_belts %}
                 {% if not current_belt or belt.level > current_belt.level %}
-                  <option value="{{ belt.id }}">{{ belt.name }}</option>
+                  <option value="{{ belt.id }}">{{ belt|localized:"name" }}</option>
                 {% endif %}
               {% endfor %}
             </select>
@@ -57,7 +57,7 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
           {% for pathway in all_pathways %}
             <label style="display: block;">
               <input type="checkbox" name="pathway" value="{{ pathway.id }}"{% if pathway in registration.pathways.all %} checked{% endif %}>
-              {{ pathway.name }}{% if pathway.id in event_pathway_ids %} <span style="color: var(--ink-muted);">{% translate "(this session)" %}</span>{% endif %}
+              {{ pathway|localized:"name" }}{% if pathway.id in event_pathway_ids %} <span style="color: var(--ink-muted);">{% translate "(this session)" %}</span>{% endif %}
             </label>
           {% endfor %}
           <button type="submit" class="cd-btn cd-btn--ghost label" style="margin-top: var(--space-2);">{% translate "Save pathways" %}</button>

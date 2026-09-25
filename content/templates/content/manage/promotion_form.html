@@ -58,6 +58,8 @@
       {{ form.image }}
       <p class="cd-form__help caption">{{ form.image.help_text }}</p>
     </div>
+    {% include "dojos/partials/_translation_fields.html" %}
+
     <div class="cd-form__actions">
       <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_promotion_list' %}">{% translate "Cancel" %}</a>
       <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button>

@@ -154,6 +154,7 @@ class EventForm(forms.ModelForm):
         # A new session pre-selects the pathways its dojo provides; the team
         # can still pick any pathway for this particular session.
         self.fields["pathways"].queryset = Pathway.objects.order_by("name")
+        self.fields["pathways"].label_from_instance = lambda pathway: pathway.localized("name")
         if not self.instance.pk:
             self.fields["pathways"].initial = list(dojo.pathways.values_list("pk", flat=True))
         self.fields["template_image"].initial = library_filename(self.instance.image, "events") or NO_TEMPLATE_IMAGE

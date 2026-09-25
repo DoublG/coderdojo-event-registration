@@ -1,6 +1,7 @@
 {% extends "core/base.html" %}
+{% load content_i18n %}
 {% load i18n %}
-{% block title %}{% blocktranslate with name=pathway.name %}{{ name }} pathway{% endblocktranslate %} · CoderDojo Belgium{% endblock %}
+{% block title %}{% blocktranslate with name=pathway|localized:"name" %}{{ name }} pathway{% endblocktranslate %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}pathwaydetail-root{% endblock %}
 
 {% block extra_style %}
@@ -42,8 +43,8 @@
   <div class="shell">
 
     <div class="pathway-header">
-      <h1 class="display-2xl">{{ pathway.name }}</h1>
-      {% if pathway.subtitle %}<p class="body-lg subtitle">{{ pathway.subtitle }}</p>{% endif %}
+      <h1 class="display-2xl">{{ pathway|localized:"name" }}</h1>
+      {% if pathway|localized:"subtitle" %}<p class="body-lg subtitle">{{ pathway|localized:"subtitle" }}</p>{% endif %}
       <div class="tags">
         {% if pathway.min_age or pathway.max_age %}
           <span class="cd-badge cd-badge--accent caption">{% blocktranslate with min=pathway.min_age|default:"7" max=pathway.max_age|default:"18" %}Ages {{ min }}–{{ max }}{% endblocktranslate %}</span>
@@ -65,8 +66,8 @@
           <div class="row">
             {% for project in projects %}
               <article class="cd-card build-card">
-                <h3 class="heading-md">{{ project.title }}</h3>
-                <p class="body-sm">{{ project.description }}</p>
+                <h3 class="heading-md">{{ project|localized:"title" }}</h3>
+                <p class="body-sm">{{ project|localized:"description" }}</p>
               </article>
             {% endfor %}
           </div>
@@ -83,8 +84,8 @@
             {% for step in steps %}
               <article class="cd-card step-card">
                 <span class="caption step-num">{{ forloop.counter }}</span>
-                <h3 class="heading-md">{{ step.title }}</h3>
-                <p class="body-sm">{{ step.description }}</p>
+                <h3 class="heading-md">{{ step|localized:"title" }}</h3>
+                <p class="body-sm">{{ step|localized:"description" }}</p>
               </article>
             {% endfor %}
           </div>
@@ -99,7 +100,7 @@
           <p class="section-desc body">{% translate "The building blocks every later pathway builds on." %}</p>
           <div class="skills">
             {% for skill in skills %}
-              <span class="cd-badge cd-badge--outline caption">{{ skill.name }}</span>
+              <span class="cd-badge cd-badge--outline caption">{{ skill|localized:"name" }}</span>
             {% endfor %}
           </div>
         </section>
@@ -114,10 +115,10 @@
             {% for faq in faqs %}
               <div class="cd-faq__item" data-open="false">
                 <button class="cd-faq__question heading-sm">
-                  <span>{{ faq.question }}</span>
+                  <span>{{ faq|localized:"question" }}</span>
                   <span class="cd-faq__icon" aria-hidden="true">+</span>
                 </button>
-                <p class="cd-faq__answer body" hidden>{{ faq.answer }}</p>
+                <p class="cd-faq__answer body" hidden>{% with answer=faq|localized:"answer" %}{{ answer }} {% only_in answer %}{% endwith %}</p>
               </div>
             {% endfor %}
           </div>
@@ -142,9 +143,9 @@
         <div class="row">
           {% for other in other_pathways %}
             <article class="cd-card other-pathway-card">
-              <h3 class="heading-md">{{ other.name }}</h3>
+              <h3 class="heading-md">{{ other|localized:"name" }}</h3>
               <p class="body-sm">{{ other.subtitle }}</p>
-              <a class="label" href="{% url 'pathway_detail' pathway_id=other.id %}">{% blocktranslate with name=other.name %}Explore {{ name }} →{% endblocktranslate %}</a>
+              <a class="label" href="{% url 'pathway_detail' pathway_id=other.id %}">{% blocktranslate with name=other|localized:"name" %}Explore {{ name }} →{% endblocktranslate %}</a>
             </article>
           {% endfor %}
         </div>

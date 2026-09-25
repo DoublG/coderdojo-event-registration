@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.content_languages import TranslatableModel
+from core.content_languages import OrganisationContent, TranslatableModel
 
 MARKDOWN_HELP_TEXT = "Supports basic Markdown — # headings, **bold**, *italic*, links, lists."
 
@@ -179,11 +179,13 @@ class RegistrationCancellation(models.Model):
         return f"{self.ninja} cancelled {self.event}"
 
 
-class Belt(models.Model):
+class Belt(OrganisationContent):
     """A ninja's proficiency level: how skilled they are, not how often they
     came (that's a milestone Badge). One overall track, ordered by `level`;
     not linked to pathways (yet). A ninja's belts are an append-only history
     (NinjaBelt) and their current belt is the highest level in it."""
+
+    TRANSLATABLE_FIELDS = ("name", "requirements")
 
     name = models.CharField(max_length=100, help_text='e.g. "Yellow belt".')
     level = models.PositiveSmallIntegerField(unique=True, help_text="Order on the track: 1 is the first belt.")
@@ -198,7 +200,7 @@ class Belt(models.Model):
         return self.name
 
 
-class Badge(models.Model):
+class Badge(OrganisationContent):
     """An award a ninja can achieve: a one-off ("did the thing", e.g.
     attended a CoderDojo for Girls session) or a milestone reached by a
     count of sessions attended (e.g. the attendance wristbands). A
@@ -207,6 +209,7 @@ class Badge(models.Model):
     ONE_OFF = "one_off"
     MILESTONE = "milestone"
     KIND_CHOICES = [(ONE_OFF, _("One-off")), (MILESTONE, _("Milestone"))]
+    TRANSLATABLE_FIELDS = ("name", "description", "criteria")
 
     name = models.CharField(max_length=200)
     kind = models.CharField(max_length=10, choices=KIND_CHOICES, default=ONE_OFF)

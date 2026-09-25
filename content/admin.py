@@ -1,14 +1,18 @@
 from django.contrib import admin
 
+from core.admin_translations import TranslationAdminMixin
+
 from .models import FAQ, Announcement, OrganisationTeamMember, Promotion, Testimonial
 
-admin.site.register(FAQ)
-admin.site.register(Announcement)
-admin.site.register(Testimonial)
+
+@admin.register(Announcement)
+class AnnouncementAdmin(TranslationAdminMixin, admin.ModelAdmin):
+    """A dojo's "From this dojo" updates, with their texts in the dojo's other
+    languages; normally posted on the dojo's Updates page."""
 
 
 @admin.register(Promotion)
-class PromotionAdmin(admin.ModelAdmin):
+class PromotionAdmin(TranslationAdminMixin, admin.ModelAdmin):
     """Day-to-day, promotions are managed on the organisation dashboard
     (/manage/promotions/); this page is for fixing things by hand."""
 
@@ -20,7 +24,15 @@ class PromotionAdmin(admin.ModelAdmin):
 
 
 @admin.register(OrganisationTeamMember)
-class OrganisationTeamMemberAdmin(admin.ModelAdmin):
+class OrganisationTeamMemberAdmin(TranslationAdminMixin, admin.ModelAdmin):
     list_display = ["name", "position", "order", "is_public"]
     list_editable = ["order", "is_public"]
     search_fields = ["name", "position"]
+
+
+@admin.register(FAQ, Testimonial)
+class ScopedContentAdmin(TranslationAdminMixin, admin.ModelAdmin):
+    """FAQs and testimonials, with their texts per language: the dojo's
+    languages when scoped to a dojo (or its session), else the
+    organisation's. Pick the dojo and save first; its other languages then
+    get their own sections."""

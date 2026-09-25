@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load content_i18n %}
 {% load i18n %}
 {% block title %}{{ mentor.name }} · CoderDojo Belgium{% endblock %}
 {% block root_class %}team-details-root{% endblock %}
@@ -47,7 +48,7 @@
       {% include "dojos/partials/_mentor_avatar.html" with mentor=mentor %}
       <div>
         <h1 class="display-lg">{{ mentor.name }}</h1>
-        <p class="body role-line">{{ mentor.position }}</p>
+        <p class="body role-line">{{ mentor|localized:"position" }}</p>
         <p class="body-sm facts-line">
           CoderDojo Belgium
           {% if mentor.joined_date %} · {% blocktranslate with year=mentor.joined_date|date:"Y" %}On the team since {{ year }}{% endblocktranslate %}{% endif %}
@@ -55,10 +56,10 @@
       </div>
     </div>
 
-    {% if mentor.bio %}
+    {% if mentor|localized:"bio" %}
       <div class="col about">
         <h2 class="heading-md">{% blocktranslate with name=mentor.name %}About {{ name }}{% endblocktranslate %}</h2>
-        <p class="body">{{ mentor.bio }}</p>
+        <p class="body">{{ mentor|localized:"bio" }}</p>
       </div>
     {% endif %}
 

@@ -1,4 +1,4 @@
-{% load i18n %}{% comment %}
+{% load content_i18n %}{% load i18n %}{% comment %}
 A slim banner per active promotion, rank first: the event_list_top and
 dojo_finder_banner placements (content.Promotion). Expects `promotions`
 (Promotion.objects.showing(...)).
@@ -14,7 +14,7 @@ dojo_finder_banner placements (content.Promotion). Expects `promotions`
           <div class="cd-promo__body">
             <p class="cd-promo__eyebrow caption">{% translate "Featured" %} · {{ event.start_time|date:"D j M" }} · {{ event.start_time|time:"H:i" }}</p>
             <h2 class="cd-promo__title heading-md">{{ promotion.display_title }}</h2>
-            {% if promotion.text %}<p class="cd-promo__text body-sm">{{ promotion.text }}</p>{% endif %}
+            {% if promotion|localized:"text" %}<p class="cd-promo__text body-sm">{{ promotion|localized:"text" }}</p>{% endif %}
             <p class="cd-promo__meta caption">{% include "events/partials/_organiser.html" %}</p>
           </div>
           <a class="cd-btn cd-btn--secondary label cd-promo__link" href="{% url 'event_detail' event_id=event.id %}">{% translate "View event" %}</a>

@@ -21,7 +21,7 @@ a full page reload).
             <p class="body-sm child-card__meta">
               {% if entry.child.age %}{% blocktranslate with age=entry.child.age %}Age {{ age }}{% endblocktranslate %}{% endif %}
               {% if entry.child.home_dojo %} · {{ entry.child.home_dojo.name }}{% endif %}
-              {% with current_belt=entry.child.current_belt %}{% if current_belt %} · {{ current_belt.name }}{% endif %}{% endwith %}
+              {% with current_belt=entry.child.current_belt %}{% if current_belt %} · {{ current_belt|localized:"name" }}{% endif %}{% endwith %}
               {% if entry.child.account and entry.child.account.is_active %} · {% translate "Has own login" %}{% endif %}
               {% for membership in entry.child.youth_mentor_memberships %} · {% blocktranslate with dojo=membership.dojo.name %}Youth mentor at {{ dojo }}{% endblocktranslate %}{% endfor %}
             </p>

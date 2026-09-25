@@ -67,7 +67,7 @@ class CurrentBeltAttribute(SegmentAttribute):
     scope = NINJA
 
     def choices(self):
-        return [SegmentChoice(NO_BELT, _("No belt yet"))] + [SegmentChoice(b.level, b.name) for b in Belt.objects.order_by("level")]
+        return [SegmentChoice(NO_BELT, _("No belt yet"))] + [SegmentChoice(b.level, b.localized("name")) for b in Belt.objects.order_by("level")]
 
     def build_q(self, operator, value):
         levels = [value] if operator == "equals" else list(value)
@@ -85,7 +85,7 @@ class HasBadgeAttribute(SegmentAttribute):
     scope = NINJA
 
     def choices(self):
-        return [SegmentChoice(b.pk, b.name) for b in Badge.objects.order_by("name")]
+        return [SegmentChoice(b.pk, b.localized("name")) for b in Badge.objects.order_by("name")]
 
     def build_q(self, operator, value):
         ids = [value] if operator == "equals" else value
@@ -102,7 +102,7 @@ class PathwayAttribute(SegmentAttribute):
     scope = NINJA
 
     def choices(self):
-        return [SegmentChoice(p.pk, p.name) for p in Pathway.objects.order_by("name")]
+        return [SegmentChoice(p.pk, p.localized("name")) for p in Pathway.objects.order_by("name")]
 
     def build_q(self, operator, value):
         ids = [value] if operator == "equals" else value

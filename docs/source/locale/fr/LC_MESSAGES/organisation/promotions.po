@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 16:00+0000\n"
+"POT-Creation-Date: 2026-09-25 19:20+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -156,7 +156,17 @@ msgstr ""
 "**Titre**, **Accroche** et **Image** (tous facultatifs) : remplacent le "
 "nom et la bannière de l'événement, et ajoutent une ligne de texte."
 
-#: ../../source/organisation/promotions.rst:51
+#: ../../source/organisation/promotions.rst:50
+msgid ""
+"**In Nederlands** and **In Français** (optional): the title and pitch in "
+"those languages. Visitors see the version in their own language, else the"
+" English one."
+msgstr ""
+"**En Nederlands** et **En Français** (facultatif) : le titre et "
+"l'accroche dans ces langues. Les visiteurs voient la version dans leur "
+"langue, sinon l'anglaise."
+
+#: ../../source/organisation/promotions.rst:54
 msgid ""
 "The list shows each promotion's status: **Showing**, **Scheduled** (it "
 "starts later), **Event not public** (the event is still a draft, or its "
@@ -168,7 +178,7 @@ msgstr ""
 "(l'événement est encore en brouillon, ou son dojo n'est pas actif) ou "
 "**Terminée**. Ouvrez une promotion pour la modifier ou la retirer."
 
-#: ../../source/organisation/promotions.rst:56
+#: ../../source/organisation/promotions.rst:59
 msgid ""
 "A promotion only changes where an event is shown, never who can sign up. "
 "To reach people by mail as well, send a campaign that links to the event."

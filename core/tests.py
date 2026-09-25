@@ -160,9 +160,11 @@ class StrNeverQueriesTests(TestCase):
                 name="Run", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()),
                 membership=add_member(dojo, User.objects.create(username="piet")), attended=True), "piet at Run"),
         ]
+        from django.utils import translation
+
         for row, expected in rows:
             model = type(row)
-            with self.subTest(model=model.__name__):
+            with self.subTest(model=model.__name__), translation.override("en-us"):
                 loaded = model.objects.get(pk=row.pk)
                 with self.assertNumQueries(0):
                     self.assertIn(expected, str(loaded))
@@ -261,3 +263,54 @@ class ContentLanguagesTests(TestCase):
         dojo.set_translation("fr-be", "tagline", "Salut")
         dojo.set_translation("fr-be", "tagline", "")
         self.assertEqual(dojo.translations, {})
+
+
+
+class OrganisationContentLanguagesTests(TestCase):
+    """The organisation's own content (settings.ORGANISATION_LANGUAGES, main
+    first) gets a version per language, edited in the admin and on the
+    Promotions page; dojo-scoped FAQs follow the dojo's languages."""
+
+    def setUp(self):
+        from accounts.models import User
+
+        self.superuser = User.objects.create(username="root", is_staff=True, is_superuser=True)
+        self.pathway = Pathway.objects.create(name="Web", subtitle="Build websites", description="HTML and CSS.")
+
+    def test_pathway_page_uses_the_visitors_language(self):
+        self.pathway.set_translation("nl-be", "name", "Websites")
+        self.pathway.save()
+        url = reverse("pathway_detail", kwargs={"pathway_id": self.pathway.id})
+        self.assertContains(self.client.get(url, HTTP_ACCEPT_LANGUAGE="nl-be"), "Websites")
+        self.assertContains(self.client.get(url, HTTP_ACCEPT_LANGUAGE="fr-be"), "Web")
+
+    def test_admin_edits_translations_per_language(self):
+        self.client.force_login(self.superuser)
+        url = reverse("admin:pathways_pathway_change", args=[self.pathway.id])
+        page = self.client.get(url)
+        self.assertContains(page, "tr__nl-be__name")
+        self.assertContains(page, "tr__fr-be__description")
+        self.assertNotContains(page, "tr__en-us__name")
+
+        data = {"name": "Web", "subtitle": "Build websites", "description": "HTML and CSS.", "min_age": "", "max_age": "",
+                "no_experience_needed": "on", "translations": "{}", "tr__nl-be__name": "Websites", "tr__fr-be__name": "Sites web"}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302, response.content[:3000])
+        self.pathway.refresh_from_db()
+        self.assertEqual(self.pathway.translations, {"nl-be": {"name": "Websites"}, "fr-be": {"name": "Sites web"}})
+
+    def test_dojo_faq_follows_the_dojo_languages(self):
+        from content.models import FAQ
+
+        dojo = make_dojo("Ghent", languages=["nl-be"])
+        self.assertEqual(FAQ(dojo=dojo, question="?", answer="!").content_languages(), ["nl-be"])
+        self.assertEqual(FAQ(question="?", answer="!").content_languages(), ["en-us", "nl-be", "fr-be"])
+
+    def test_untranslated_faq_answer_says_only_in_english(self):
+        from content.models import FAQ
+
+        FAQ.objects.create(question="Is it free?", answer="Yes, always.")
+        cache.clear()  # the homepage caches its FAQs
+        response = self.client.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="nl-be")
+        self.assertContains(response, "Yes, always.")
+        self.assertContains(response, "Alleen in het English")

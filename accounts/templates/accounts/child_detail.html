@@ -113,8 +113,8 @@
         <div class="belt-current">
           <span class="belt-swatch" style="--belt-colour: {{ current_belt.colour|default:'var(--surface-sunken)' }};" aria-hidden="true"></span>
           <div>
-            <h3 class="heading-md">{{ current_belt.name }}</h3>
-            {% if current_belt.requirements %}<p class="body-sm">{{ current_belt.requirements }}</p>{% endif %}
+            <h3 class="heading-md">{{ current_belt|localized:"name" }}</h3>
+            {% if current_belt|localized:"requirements" %}<p class="body-sm">{{ current_belt|localized:"requirements" }}</p>{% endif %}
           </div>
         </div>
         <div class="cd-table-wrap">
@@ -130,7 +130,7 @@
             <tbody>
               {% for award in belt_history %}
                 <tr>
-                  <td class="body-sm"><span class="belt-swatch belt-swatch--sm" style="--belt-colour: {{ award.belt.colour|default:'var(--surface-sunken)' }};" aria-hidden="true"></span>{{ award.belt.name }}</td>
+                  <td class="body-sm"><span class="belt-swatch belt-swatch--sm" style="--belt-colour: {{ award.belt.colour|default:'var(--surface-sunken)' }};" aria-hidden="true"></span>{{ award.belt|localized:"name" }}</td>
                   <td class="body-sm">{{ award.awarded_on|date:"j M Y" }}</td>
                   <td class="body-sm">{{ award.awarded_by_label|default:"—" }}</td>
                   <td class="body-sm">{{ award.note|default:"—" }}</td>
@@ -180,7 +180,7 @@
                 <td class="body-sm">{{ registration.event.start_time|date:"j M Y" }}</td>
                 <td class="body-sm">{{ registration.event|localized:"name" }}</td>
                 <td class="body-sm">{{ registration.event.dojo.name }}</td>
-                <td class="body-sm">{% for pathway in registration.pathways.all %}{{ pathway.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
+                <td class="body-sm">{% for pathway in registration.pathways.all %}{{ pathway|localized:"name" }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
                 <td class="body-sm">{% for mentor in registration.event.team.all %}{{ mentor.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
               </tr>
             {% empty %}

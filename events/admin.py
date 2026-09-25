@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from core.admin_translations import TranslationAdminMixin
 from geo.widgets import BelgiumGISModelAdmin
 
 from .models import (
@@ -17,7 +18,7 @@ from .models import (
 
 
 @admin.register(Event)
-class EventAdmin(BelgiumGISModelAdmin):
+class EventAdmin(TranslationAdminMixin, BelgiumGISModelAdmin):
     list_display = ["name", "dojo", "start_time", "status", "audience"]
     list_filter = ["status", "audience"]
     search_fields = ["name", "dojo__name"]
@@ -25,13 +26,13 @@ admin.site.register(Registration)
 
 
 @admin.register(Badge)
-class BadgeAdmin(admin.ModelAdmin):
+class BadgeAdmin(TranslationAdminMixin, admin.ModelAdmin):
     list_display = ["name", "kind", "threshold", "grants_belt"]
     list_filter = ["kind"]
 
 
 @admin.register(Belt)
-class BeltAdmin(admin.ModelAdmin):
+class BeltAdmin(TranslationAdminMixin, admin.ModelAdmin):
     list_display = ["level", "name", "colour"]
 
 
