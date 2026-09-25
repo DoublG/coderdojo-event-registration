@@ -122,6 +122,21 @@ def is_organisation_member(user):
     return user.is_authenticated and user.organisation_roles.exists()
 
 
+def is_organisation_admin(user):
+    """Holds the `admin` organisation role: may use the organisation's
+    management dashboard (/manage/, e.g. campaigns)."""
+    return user.is_authenticated and user.organisation_roles.filter(role=OrganisationRole.ADMIN).exists()
+
+
+def require_organisation_admin(request):
+    """For every view of the organisation dashboard: 404 unless the account
+    holds the admin role (same no-leak reasoning as dojos.access)."""
+    from django.http import Http404
+
+    if not is_organisation_admin(request.user):
+        raise Http404
+
+
 @receiver(post_save, sender=OrganisationRole)
 @receiver(post_delete, sender=OrganisationRole)
 def _role_changed(sender, instance, **kwargs):

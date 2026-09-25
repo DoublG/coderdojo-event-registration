@@ -19,6 +19,7 @@ from dojos.testing import add_member, make_dojo
 from events.models import Event, Registration
 from geo.models import AdministrativeBoundary, Municipality
 
+from . import campaigns
 from .categories import MailCategory
 from .models import (
     BounceRecord,
@@ -52,7 +53,8 @@ from .testing import complaint_report, dsn_report
 
 def _family(username, *genders, **fields):
     """An adult account with one child per gender given."""
-    guardian = User.objects.create(username=username, email=f"{username}@example.com", **fields)
+    fields.setdefault("email", f"{username}@example.com")
+    guardian = User.objects.create(username=username, **fields)
     for index, gender in enumerate(genders):
         ninja = Ninja.objects.create(name=f"{username}-kid-{index}", gender=gender)
         Guardianship.objects.create(guardian=guardian, ninja=ninja)
@@ -827,7 +829,8 @@ I'm away until Monday.
         self.assertEqual(process_bounces(), 0)
 
 
-@override_settings(MAILING_BOUNCE_IMAP_HOST="imap.example.org", MAILING_BOUNCE_IMAP_MAILBOX="Bounces")
+@override_settings(MAILING_BOUNCE_IMAP_HOST="imap.example.org", MAILING_BOUNCE_IMAP_MAILBOX="Bounces",
+                   MAILING_BOUNCE_IMAP_SSL=True, MAILING_BOUNCE_PROTOCOL="imap")
 class ImapMailboxTests(TestCase):
     """ImapMailbox against a mocked imaplib connection (no IMAP server in
     the devcontainer)."""
@@ -1051,3 +1054,181 @@ class EveryMailGoesThroughTheEngineTests(TestCase):
                 if self.DIRECT_SEND.search(line) and not line.lstrip().startswith("#"):
                     offenders.append(f"{relative}:{number}: {line.strip()}")
         self.assertEqual(offenders, [], "send mail through mailing.services.send() instead")
+
+
+# --- phase 8: campaigns from the organisation dashboard ---------------------------
+
+
+class CampaignDashboardTests(TestCase):
+    def setUp(self):
+        from accounts.models import OrganisationRole
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.admin = User.objects.create(username="orgadmin", first_name="Ann", email="ann@example.com")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.girl_family = _family("girlfam", Ninja.GIRL, email="g@example.com")
+        self.boy_family = _family("boyfam", Ninja.BOY, email="b@example.com")
+        for family in (self.girl_family, self.boy_family):
+            set_preference(family, MailCategory.NEWSLETTER, True, ConsentEvent.SIGNUP)
+        self.segment = _segment(("ninja", "and", [("ninja_gender", "in", [Ninja.GIRL])]))
+        self.segment.name = "Girls"
+        self.segment.save()
+        self.client.force_login(self.admin)
+
+    def _campaign(self, **fields):
+        return Campaign.objects.create(**{
+            "name": "Girlz", "segment": self.segment, "template_key": "campaign_girlz",
+            "context": {"signup_url": "https://example.org"}, **fields,
+        })
+
+    # access
+
+    def test_only_the_organisation_admin_role_gets_in(self):
+        from accounts.models import OrganisationRole
+
+        urls = [reverse("manage_campaign_list"), reverse("manage_segment_list"), reverse("manage_campaign_create")]
+        self.client.logout()
+        for url in urls:
+            self.assertEqual(self.client.get(url).status_code, 302)  # to login
+        board = User.objects.create(username="board", email="bo@example.com")
+        OrganisationRole.objects.create(account=board, role=OrganisationRole.BOARD)
+        for user in (board, self.girl_family):
+            self.client.force_login(user)
+            for url in urls:
+                self.assertEqual(self.client.get(url).status_code, 404)
+        self.client.force_login(self.admin)
+        for url in urls:
+            self.assertEqual(self.client.get(url).status_code, 200)
+
+    def test_nav_links_admins_to_the_dashboard_and_the_board_to_the_admin(self):
+        from accounts.models import OrganisationRole
+
+        self.assertContains(self.client.get(reverse("account_home")), f'href="{reverse("manage_home")}"')
+        board = User.objects.create(username="board", email="bo@example.com")
+        OrganisationRole.objects.create(account=board, role=OrganisationRole.BOARD)
+        self.client.force_login(board)
+        response = self.client.get(reverse("account_home"))
+        self.assertNotContains(response, f'href="{reverse("manage_home")}"')
+        self.assertContains(response, 'href="/admin/"')
+
+    # the draft
+
+    def test_create_a_draft_with_template_variables(self):
+        response = self.client.post(reverse("manage_campaign_create"), {
+            "name": "Girlz spring", "category": "newsletter", "template_key": "campaign_girlz",
+            "segment": self.segment.pk, "variables": "signup_url: https://example.org/girlz\n\n", "scheduled_at": "",
+        })
+        campaign = Campaign.objects.get(name="Girlz spring")
+        self.assertRedirects(response, reverse("manage_campaign_detail", kwargs={"campaign_id": campaign.pk}))
+        self.assertEqual(campaign.context, {"signup_url": "https://example.org/girlz"})
+        self.assertEqual(campaign.status, Campaign.Status.DRAFT)
+
+    def test_form_only_offers_mail_people_can_switch_off_and_future_times(self):
+        from .forms import CampaignForm
+
+        form = CampaignForm()
+        self.assertNotIn("service", dict(form.fields["category"].choices))
+        self.assertNotIn("registration", dict(form.fields["category"].choices))
+        bad = CampaignForm({"name": "x", "category": "newsletter", "template_key": "campaign_girlz",
+                            "segment": self.segment.pk, "variables": "Bad Name: x",
+                            "scheduled_at": "2001-01-01T10:00"})
+        self.assertFalse(bad.is_valid())
+        self.assertIn("variables", bad.errors)
+        self.assertIn("scheduled_at", bad.errors)
+
+    def test_detail_shows_preview_in_every_language_and_the_audience(self):
+        campaign = self._campaign()
+        response = self.client.get(reverse("manage_campaign_detail", kwargs={"campaign_id": campaign.pk}))
+        self.assertEqual(len(response.context["previews"]), 3)
+        self.assertContains(response, "https://example.org")
+        self.assertEqual(response.context["stats"]["audience"], 1)
+        self.assertContains(response, "g@example.com")
+        self.assertNotContains(response, "b@example.com")
+
+    def test_test_mail_goes_to_the_author_whatever_their_preferences(self):
+        campaign = self._campaign()
+        self.client.post(reverse("manage_campaign_test", kwargs={"campaign_id": campaign.pk}))
+        row = EmailMessage.objects.get(is_test=True)
+        self.assertEqual((row.recipient, row.status), ("ann@example.com", Status.PENDING))
+        self.assertTrue(row.subject.startswith("[Test] "))
+        # Not dropped at send time either, although Ann never opted in.
+        EmailMessage.objects.filter(pk=row.pk).update(status=Status.SENDING)
+        with patch("mailing.tasks.mail.get_connection", return_value=_FakeConnection()):
+            send_email_batch([row.pk])
+        self.assertEqual(EmailMessage.objects.get(pk=row.pk).status, Status.SENT)
+        self.assertEqual(campaigns.stats(campaign)["queued"], 0)  # tests don't count
+
+    # launching
+
+    def test_launch_refuses_what_can_not_go_out(self):
+        for fields, problem in [
+            ({"segment": None}, "Pick a segment"),
+            ({"template_key": "nope"}, "no English template"),
+            ({"category": "service"}, "switch off"),
+        ]:
+            with self.subTest(problem):
+                campaign = self._campaign(**fields)
+                response = self.client.post(reverse("manage_campaign_launch", kwargs={"campaign_id": campaign.pk}), follow=True)
+                self.assertContains(response, problem)
+                self.assertEqual(Campaign.objects.get(pk=campaign.pk).status, Campaign.Status.DRAFT)
+
+    def test_launch_freezes_the_segment_and_queues_only_those_who_want_it(self):
+        campaign = self._campaign()
+        extra_girl_family = _family("unsubscribed", Ninja.GIRL, email="u@example.com")  # never opted in
+        self.client.post(reverse("manage_campaign_launch", kwargs={"campaign_id": campaign.pk}))
+        campaign.refresh_from_db()
+        self.assertEqual((campaign.status, campaign.launched_by), (Campaign.Status.QUEUED, self.admin))
+        self.assertEqual(campaign.segment_snapshot["groups"][0]["rules"][0]["attribute"], "ninja_gender")
+
+        # Editing the segment afterwards changes nothing for this campaign.
+        SegmentRule.objects.filter(group__segment=self.segment).update(value=[Ninja.BOY])
+        with patch("mailing.tasks.launch_campaign.delay") as delay:
+            campaigns.launch_due()
+        delay.assert_called_once_with(campaign.pk)
+        self.assertEqual(campaigns.queue_mail(campaign.pk), 1)
+        self.assertEqual(list(EmailMessage.objects.values_list("recipient", flat=True)), ["g@example.com"])
+        self.assertNotEqual(extra_girl_family.email, "")
+        # Safe to run again: nothing new.
+        Campaign.objects.filter(pk=campaign.pk).update(queued_at=None)
+        self.assertEqual(campaigns.queue_mail(campaign.pk), 0)
+        self.assertEqual(Campaign.objects.get(pk=campaign.pk).status, Campaign.Status.SENDING)
+
+        # Completed once everything is out.
+        EmailMessage.objects.update(status=Status.SENT)
+        campaigns.launch_due()
+        self.assertEqual(Campaign.objects.get(pk=campaign.pk).status, Campaign.Status.COMPLETED)
+        # A launched campaign can't be edited any more.
+        response = self.client.post(reverse("manage_campaign_detail", kwargs={"campaign_id": campaign.pk}), {"name": "Changed"})
+        self.assertIsNone(response.context["form"])
+        self.assertEqual(Campaign.objects.get(pk=campaign.pk).name, "Girlz")
+
+    def test_a_scheduled_campaign_waits_for_its_time(self):
+        later = timezone.now() + timedelta(hours=3)
+        campaign = self._campaign(scheduled_at=later)
+        campaigns.launch(campaign, self.admin)
+        with patch("mailing.tasks.launch_campaign.delay") as delay:
+            campaigns.launch_due()
+            delay.assert_not_called()
+            campaigns.launch_due(now=later + timedelta(minutes=1))
+            delay.assert_called_once_with(campaign.pk)
+
+    def test_cancel_withdraws_mail_that_has_not_gone_out(self):
+        campaign = self._campaign()
+        campaigns.launch(campaign, self.admin)
+        campaigns.queue_mail(campaign.pk)
+        self.client.post(reverse("manage_campaign_cancel", kwargs={"campaign_id": campaign.pk}))
+        self.assertEqual(Campaign.objects.get(pk=campaign.pk).status, Campaign.Status.CANCELLED)
+        self.assertEqual(set(EmailMessage.objects.values_list("status", flat=True)), {Status.SUPPRESSED})
+
+    def test_unsubscribing_after_queuing_stops_the_mail_and_shows_in_the_results(self):
+        campaign = self._campaign()
+        campaigns.launch(campaign, self.admin)
+        campaigns.queue_mail(campaign.pk)
+        set_preference(self.girl_family, MailCategory.NEWSLETTER, False, ConsentEvent.UNSUBSCRIBE_LINK)
+        row = EmailMessage.objects.get()
+        EmailMessage.objects.filter(pk=row.pk).update(status=Status.SENDING)
+        with patch("mailing.tasks.mail.get_connection", return_value=_FakeConnection()) as connection:
+            send_email_batch([row.pk])
+        self.assertEqual(EmailMessage.objects.get(pk=row.pk).status, Status.SUPPRESSED)
+        self.assertEqual(connection.return_value.sent, [])
+        self.assertEqual(campaigns.stats(campaign)["unsubscribed"], 1)

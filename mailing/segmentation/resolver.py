@@ -5,13 +5,42 @@ from django.db.models import Q
 
 from accounts.models import Guardianship, Ninja, User
 
-from ..models import SegmentGroup, SegmentRule
+from ..models import SegmentGroup
 from .base import NINJA
 from .registry import get_attribute
 
 
+def serialize_segment(segment):
+    """A segment's definition as plain data: what a Campaign freezes in
+    `segment_snapshot` at launch, and what the resolver works on.
+
+    {"name": ..., "groups": [{"scope", "operator", "rules": [{"attribute",
+    "operator", "value"}], "children": [...]}]}, the root groups first."""
+    groups = list(segment.groups.prefetch_related("rules").order_by("id"))
+    children = {}
+    for group in groups:
+        children.setdefault(group.parent_id, []).append(group)
+
+    def node(group):
+        return {
+            "scope": group.scope,
+            "operator": group.operator,
+            "rules": [
+                {"attribute": rule.attribute, "operator": rule.operator, "value": rule.value}
+                for rule in sorted(group.rules.all(), key=lambda r: r.pk)
+            ],
+            "children": [node(child) for child in children.get(group.pk, [])],
+        }
+
+    return {"name": segment.name, "groups": [node(root) for root in children.get(None, [])]}
+
+
+def _has_rules(nodes):
+    return any(n["rules"] or _has_rules(n["children"]) for n in nodes)
+
+
 class SegmentResolver:
-    """Turns a Segment into the accounts it describes.
+    """Turns a segment definition into the accounts it describes.
 
     Every rule becomes its own `pk__in` subquery, never a join in one big
     filter(): two rules crossing the same to-many relation ("registered for
@@ -25,16 +54,15 @@ class SegmentResolver:
     resolves to nobody, never to everyone."""
 
     def resolve(self, segment):
-        if not SegmentRule.objects.filter(group__segment=segment).exists():
+        return self.resolve_definition(serialize_segment(segment))
+
+    def resolve_definition(self, definition):
+        """The accounts for a serialized definition (serialize_segment), e.g. a
+        campaign's frozen `segment_snapshot`."""
+        roots = (definition or {}).get("groups", [])
+        if not _has_rules(roots):
             return User.objects.none()
-
-        groups = list(segment.groups.prefetch_related("rules"))
-        children = {}
-        for group in groups:
-            children.setdefault(group.parent_id, []).append(group)
-
-        query = reduce(and_, (self._user_q(root, children) for root in children.get(None, [])), Q())
-
+        query = reduce(and_, (self._user_q(root) for root in roots), Q())
         return (
             User.objects
             .filter(is_active=True, account_type=User.ADULT)
@@ -42,38 +70,38 @@ class SegmentResolver:
             .filter(query)
         )
 
-    def _user_q(self, group, children):
+    def _user_q(self, group):
         """A Q on User for any group (a ninja group is projected to guardians)."""
-        if group.scope == NINJA:
-            ninjas = Ninja.objects.filter(self._ninja_q(group, children))
+        if group["scope"] == NINJA:
+            ninjas = Ninja.objects.filter(self._ninja_q(group))
             return Q(pk__in=Guardianship.objects.filter(ninja__in=ninjas).values("guardian_id"))
 
-        parts = [self._rule_q(rule, User) for rule in group.rules.all()]
-        parts += [self._user_q(child, children) for child in children.get(group.pk, [])]
+        parts = [self._rule_q(rule, User) for rule in group["rules"]]
+        parts += [self._user_q(child) for child in group["children"]]
         return self._combine(group, parts)
 
-    def _ninja_q(self, group, children):
-        parts = [self._rule_q(rule, Ninja) for rule in group.rules.all()]
-        for child in children.get(group.pk, []):
-            if child.scope != NINJA:
+    def _ninja_q(self, group):
+        parts = [self._rule_q(rule, Ninja) for rule in group["rules"]]
+        for child in group["children"]:
+            if child["scope"] != NINJA:
                 raise ValueError("A group inside a child group must also be about the child.")
-            parts.append(self._ninja_q(child, children))
+            parts.append(self._ninja_q(child))
         return self._combine(group, parts)
 
     def _rule_q(self, rule, model):
-        attribute = get_attribute(rule.attribute)
+        attribute = get_attribute(rule["attribute"])
         expected = NINJA if model is Ninja else "user"
         if attribute.scope != expected:
             raise ValueError(f"“{attribute.label}” can't be used in a {expected} group.")
-        return Q(pk__in=model.objects.filter(attribute.build_q(rule.operator, rule.value)).values("pk"))
+        return Q(pk__in=model.objects.filter(attribute.build_q(rule["operator"], rule["value"])).values("pk"))
 
     def _combine(self, group, parts):
         if not parts:
             return Q()
-        if group.operator == SegmentGroup.Operator.AND:
+        if group["operator"] == SegmentGroup.Operator.AND:
             return reduce(and_, parts)
-        if group.operator == SegmentGroup.Operator.OR:
+        if group["operator"] == SegmentGroup.Operator.OR:
             return reduce(or_, parts)
         raise ValueError(
-            f"Unsupported group operator: {group.operator}"
+            f"Unsupported group operator: {group['operator']}"
         )

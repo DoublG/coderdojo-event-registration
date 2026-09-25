@@ -1,0 +1,40 @@
+{% comment %}The draft campaign's fields (mailing.forms.CampaignForm), shared by the create and detail pages.{% endcomment %}
+<div class="cd-form__row">
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.name.id_for_label }}">Name<span class="cd-form__required" aria-hidden="true">*</span></label>
+    <ul class="cd-form__errors">{% for error in form.name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {{ form.name }}
+  </div>
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.category.id_for_label }}">Kind of mail</label>
+    {{ form.category }}
+    <p class="cd-form__help caption">Only people who want this kind of mail get it.</p>
+  </div>
+</div>
+<div class="cd-form__row">
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.segment.id_for_label }}">Segment<span class="cd-form__required" aria-hidden="true">*</span></label>
+    <ul class="cd-form__errors">{% for error in form.segment.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {{ form.segment }}
+    <p class="cd-form__help caption"><a href="{% url 'manage_segment_list' %}">Segments</a> describe who gets it.</p>
+  </div>
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.template_key.id_for_label }}">Template<span class="cd-form__required" aria-hidden="true">*</span></label>
+    <ul class="cd-form__errors">{% for error in form.template_key.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {{ form.template_key }}
+  </div>
+</div>
+<div class="cd-form__row">
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.variables.id_for_label }}">{{ form.variables.label }}</label>
+    <ul class="cd-form__errors">{% for error in form.variables.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {{ form.variables }}
+    <p class="cd-form__help caption">{{ form.variables.help_text }}</p>
+  </div>
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.scheduled_at.id_for_label }}">{{ form.scheduled_at.label }}</label>
+    <ul class="cd-form__errors">{% for error in form.scheduled_at.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {{ form.scheduled_at }}
+    <p class="cd-form__help caption">{{ form.scheduled_at.help_text }}</p>
+  </div>
+</div>

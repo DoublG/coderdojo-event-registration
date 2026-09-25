@@ -1,10 +1,14 @@
+import re
+
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from geo.models import Municipality
 
-from .categories import CAN_OPT_OUT, DESCRIPTIONS, categories_for
+from .categories import CAN_OPT_OUT, DESCRIPTIONS, MailCategory, categories_for
+from .models import Campaign, EmailTemplate, Segment
 from .preferences import preferences_for
 
 
@@ -56,3 +60,68 @@ class MailPreferencesForm(forms.Form):
         """{category: subscribed} from the submitted checkboxes."""
         return {name.removeprefix("category_"): value for name, value in self.cleaned_data.items()
                 if name.startswith("category_")}
+
+
+# --- the organisation dashboard (mailing.manage) --------------------------------
+
+VARIABLE_RE = re.compile(r"^[a-z_][a-z0-9_]*$")
+
+
+class CampaignForm(forms.ModelForm):
+    """A draft campaign: what (template + variables), to whom (segment),
+    which kind of mail (only ones people can switch off) and when."""
+
+    variables = forms.CharField(
+        label="Template variables", required=False,
+        widget=forms.Textarea(attrs={"class": "cd-form__input body", "rows": 3,
+                                     "placeholder": "signup_url: https://coolestprojects.org"}),
+        help_text="One per line, as name: value. The template uses them as {{ name }}.",
+    )
+
+    class Meta:
+        model = Campaign
+        fields = ["name", "category", "template_key", "segment", "scheduled_at"]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Coolest Projects 2027"}),
+            "category": forms.Select(attrs={"class": "cd-form__select body"}),
+            "segment": forms.Select(attrs={"class": "cd-form__select body"}),
+            "scheduled_at": forms.DateTimeInput(attrs={"class": "cd-form__input body", "type": "datetime-local"},
+                                                format="%Y-%m-%dT%H:%M"),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["category"].choices = [(c.value, c.label) for c in MailCategory if CAN_OPT_OUT[c]]
+        keys = EmailTemplate.objects.order_by("key").values_list("key", flat=True).distinct()
+        self.fields["template_key"] = forms.ChoiceField(
+            label="Template", choices=[(k, k) for k in keys],
+            widget=forms.Select(attrs={"class": "cd-form__select body"}),
+        )
+        self.fields["segment"].queryset = Segment.objects.filter(is_active=True).order_by("name")
+        self.fields["segment"].required = True
+        self.fields["scheduled_at"].input_formats = ["%Y-%m-%dT%H:%M"]
+        self.fields["scheduled_at"].label = "Send at"
+        if not self.is_bound:
+            self.initial["variables"] = "\n".join(f"{k}: {v}" for k, v in (self.instance.context or {}).items())
+
+    def clean_variables(self):
+        variables = {}
+        for number, line in enumerate(self.cleaned_data["variables"].splitlines(), 1):
+            if not line.strip():
+                continue
+            name, sep, value = line.partition(":")
+            name = name.strip()
+            if not sep or not VARIABLE_RE.match(name):
+                raise ValidationError(f"Line {number}: write it as name: value (a name in lowercase letters and _).")
+            variables[name] = value.strip()
+        return variables
+
+    def clean_scheduled_at(self):
+        when = self.cleaned_data["scheduled_at"]
+        if when and when <= timezone.now():
+            raise ValidationError("Pick a time in the future, or leave it empty to send when launched.")
+        return when
+
+    def save(self, commit=True):
+        self.instance.context = self.cleaned_data["variables"]
+        return super().save(commit)

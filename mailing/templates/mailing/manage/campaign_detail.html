@@ -1,0 +1,99 @@
+{% extends "core/_manage_base.html" %}
+{% block manage_page_title %}{{ campaign.name }}{% endblock %}
+{% block manage_heading %}{{ campaign.name }} {% include "mailing/manage/_status_badge.html" %}{% endblock %}
+
+{% block manage_extra_style %}
+<style>
+  .campaign-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-5); align-items: start; }
+  @media (max-width: 960px) { .campaign-grid { grid-template-columns: 1fr; } }
+  .campaign-card { padding: var(--space-5); margin-bottom: var(--space-5); }
+  .campaign-card h2 { margin-top: 0; }
+  .campaign-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: var(--space-3); }
+  .campaign-stats div { border: 1px solid var(--border); border-radius: var(--radius-md, 8px); padding: var(--space-3); }
+  .campaign-stats strong { display: block; font-size: 1.4rem; color: var(--ink); }
+  .campaign-preview { white-space: pre-wrap; background: var(--surface-sunken); padding: var(--space-4); border-radius: var(--radius-md, 8px); font-family: inherit; margin: var(--space-2) 0 var(--space-4); }
+  .campaign-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+  .campaign-actions form { margin: 0; }
+</style>
+{% endblock %}
+
+{% block manage_content %}
+<div class="campaign-grid">
+  <div>
+    {% if form %}
+      <form method="post" class="cd-card cd-form campaign-card" novalidate>
+        {% csrf_token %}
+        <h2 class="heading-md">Draft</h2>
+        {% include "mailing/manage/_campaign_fields.html" %}
+        <div class="cd-form__actions"><button type="submit" class="cd-btn cd-btn--primary label">Save</button></div>
+      </form>
+    {% else %}
+      <div class="cd-card campaign-card">
+        <h2 class="heading-md">Campaign</h2>
+        <p class="body-sm">
+          {{ campaign.get_category_display }} · template <strong>{{ campaign.template_key }}</strong> ·
+          segment <strong>{{ campaign.segment_snapshot.name|default:campaign.segment.name }}</strong> (as it was at launch)
+        </p>
+        <p class="body-sm">
+          Launched {{ campaign.launched_at|date:"d/m/Y H:i" }}{% if campaign.launched_by %} by {{ campaign.launched_by.get_full_name|default:campaign.launched_by.get_username }}{% endif %}{% if campaign.scheduled_at %}, to go out {{ campaign.scheduled_at|date:"d/m/Y H:i" }}{% endif %}.
+        </p>
+      </div>
+    {% endif %}
+
+    <div class="cd-card campaign-card">
+      <h2 class="heading-md">Preview</h2>
+      {% for preview in previews %}
+        <p class="label">{{ preview.language }}: {{ preview.subject }}</p>
+        <pre class="campaign-preview body-sm">{{ preview.body }}</pre>
+      {% empty %}
+        <p class="body-sm">No template “{{ campaign.template_key }}” exists yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div>
+    <div class="cd-card campaign-card">
+      <h2 class="heading-md">{% if campaign.launched_at %}Results{% else %}Audience{% endif %}</h2>
+      <div class="campaign-stats">
+        <div><strong>{{ stats.audience }}</strong><span class="caption">want this kind of mail</span></div>
+        {% if campaign.launched_at %}
+          <div><strong>{{ stats.queued }}</strong><span class="caption">queued</span></div>
+          <div><strong>{{ stats.sent }}</strong><span class="caption">sent</span></div>
+          <div><strong>{{ stats.pending|add:stats.sending }}</strong><span class="caption">waiting</span></div>
+          <div><strong>{{ stats.suppressed }}</strong><span class="caption">held back</span></div>
+          <div><strong>{{ stats.bounced }}</strong><span class="caption">bounced</span></div>
+          <div><strong>{{ stats.failed }}</strong><span class="caption">failed</span></div>
+          <div><strong>{{ stats.unsubscribed }}</strong><span class="caption">unsubscribed since</span></div>
+        {% endif %}
+      </div>
+      {% if not campaign.launched_at %}
+        <p class="caption" style="margin-top: var(--space-3);">For example:</p>
+        <ul class="body-sm">{% for account in audience_sample %}<li>{{ account.get_full_name|default:account.get_username }} · {{ account.email }}</li>{% empty %}<li>Nobody yet.</li>{% endfor %}</ul>
+      {% endif %}
+      <p class="caption">Goes out at up to {{ stats.rate_limit }} batches a minute; held-back mail is for people who unsubscribed, blocked addresses or inactive accounts.</p>
+    </div>
+
+    <div class="cd-card campaign-card">
+      <h2 class="heading-md">Actions</h2>
+      {% for problem in problems %}<p class="cd-form__note cd-form__note--error caption">{{ problem }}</p>{% endfor %}
+      <div class="campaign-actions">
+        <form method="post" action="{% url 'manage_campaign_test' campaign_id=campaign.id %}">
+          {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">Send a test to me</button>
+        </form>
+        {% if campaign.is_editable %}
+          <form method="post" action="{% url 'manage_campaign_launch' campaign_id=campaign.id %}"
+                onsubmit="return confirm('Send “{{ campaign.name|escapejs }}” to {{ stats.audience }} people{% if campaign.scheduled_at %} on {{ campaign.scheduled_at|date:"d/m/Y H:i" }}{% endif %}?');">
+            {% csrf_token %}<button type="submit" class="cd-btn cd-btn--primary label"{% if problems %} disabled{% endif %}>Launch</button>
+          </form>
+        {% endif %}
+        {% if campaign.status == 'draft' or campaign.status == 'queued' or campaign.status == 'sending' %}
+          <form method="post" action="{% url 'manage_campaign_cancel' campaign_id=campaign.id %}"
+                onsubmit="return confirm('Cancel this campaign? Mail that hasn\'t gone out yet won\'t be sent.');">
+            {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">Cancel campaign</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

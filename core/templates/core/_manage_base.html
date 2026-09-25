@@ -1,0 +1,110 @@
+{% load static %}<!doctype html>
+{% comment %}
+The organisation's management dashboard (/manage/…): the same app-like
+shell as a dojo's admin area (dojos/_admin_base.html), with the
+organisation's sections in the sidebar instead of a dojo's. Pages fill
+manage_page_title / manage_heading / manage_content (and optionally
+manage_topbar_extra, manage_extra_style, manage_extra_script) and pass
+`active` for the sidebar link to highlight. Every view behind it checks
+accounts.organisation.require_organisation_admin. Non-technical
+organisation work lives here, not in the Django admin (CLAUDE.md).
+{% endcomment %}
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoderDojo Belgium · {% block manage_page_title %}{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'core/css/bundle.css' %}">
+<style>
+  html, body { margin: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .admin-page-root .admin-main { flex: 1; min-width: 0; padding: var(--space-5) var(--space-6); box-sizing: border-box; }
+  .admin-page-root .admin-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5); gap: var(--space-4); }
+  .admin-page-root .admin-topbar h1 { color: var(--ink); margin: 0; }
+  .admin-page-root .admin-topbar__actions { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; justify-content: flex-end; }
+</style>
+{% block manage_extra_style %}{% endblock %}
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
+<script src="{% static 'core/js/bundle.js' %}"></script>
+
+<div class="cd-root admin-page-root" style="padding: 0;">
+  <div class="cd-admin-nav-shell" style="display: flex;" id="adminnav-page">
+    <div class="cd-admin-nav__backdrop" data-cd-adminnav-backdrop data-open="false"></div>
+
+    <nav class="cd-admin-nav" data-cd-adminnav data-open="false" aria-label="Organisation dashboard">
+      <div class="cd-admin-nav__brand">
+        <div class="cd-admin-nav__brand-text">
+          <p class="cd-admin-nav__brand-name heading-sm">CoderDojo Belgium</p>
+          <p class="cd-admin-nav__brand-role caption">Organisation</p>
+        </div>
+        <button type="button" class="cd-admin-nav__pin" data-cd-adminnav-pin aria-pressed="false" aria-label="Pin sidebar open">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+        </button>
+      </div>
+
+      <a href="{% url 'manage_campaign_create' %}" class="cd-btn cd-btn--primary cd-admin-nav__create label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        New campaign
+      </a>
+
+      <div class="cd-admin-nav__group">
+        <p class="cd-admin-nav__group-label caption">Communication</p>
+        <ul class="cd-admin-nav__list">
+          <li>
+            <a href="{% url 'manage_campaign_list' %}" class="cd-admin-nav__link label{% if active == 'campaigns' %} cd-admin-nav__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M4 7l8 6 8-6"/></svg>
+              Campaigns
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'manage_segment_list' %}" class="cd-admin-nav__link label{% if active == 'segments' %} cd-admin-nav__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M15 20c0-2 1.5-3.5 4-3.5"/></svg>
+              Segments
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="cd-admin-nav__footer">
+        <div class="cd-admin-nav__avatar" aria-hidden="true">{{ request.user.first_name|first }}{{ request.user.last_name|first }}</div>
+        <div class="cd-admin-nav__footer-info">
+          <p class="cd-admin-nav__footer-name body-sm">{{ request.user.get_full_name|default:request.user.get_username }}</p>
+          <p class="caption">Organisation admin</p>
+        </div>
+        <a href="{% url 'logout' %}" class="cd-admin-nav__signout" aria-label="Sign out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        </a>
+      </div>
+    </nav>
+
+    <div class="admin-main">
+      <button type="button" class="cd-admin-nav__toggle label" data-cd-adminnav-toggle aria-expanded="false" style="margin-bottom: var(--space-4);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        Menu
+      </button>
+
+      <div class="admin-topbar">
+        <h1 class="heading-lg">{% block manage_heading %}{% endblock %}</h1>
+        <div class="admin-topbar__actions">{% block manage_topbar_extra %}{% endblock %}</div>
+      </div>
+
+      {% if messages %}
+        <div class="cd-form__notes" style="margin-bottom: var(--space-4);">
+          {% for message in messages %}
+            <p class="cd-form__note {% if message.level_tag == 'error' %}cd-form__note--error{% else %}cd-form__note--success{% endif %}">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block manage_content %}{% endblock %}
+    </div>
+  </div>
+</div>
+<script>
+  CoderDojo.initAdminNav(document.getElementById("adminnav-page"));
+</script>
+{% block manage_extra_script %}{% endblock %}
+</body>
+</html>

@@ -39,12 +39,16 @@ def is_suppressed_address(email):
     return EmailSuppression.objects.filter(email=email.strip().lower()).exists()
 
 
-def _suppressed_reason(user, category, address):
+def suppressed_reason(user, category, address, test=False):
+    """Why `user` mustn't get mail in `category` at `address` right now, or
+    "". Checked when a mail is queued and again right before it's sent (a
+    campaign can take a while to go out, and people unsubscribe meanwhile).
+    A test mail skips the preference check, never the blocks."""
     if not user.is_active:
         return "The account is inactive."
     if category not in categories_for(user):
         return "This kind of mail isn't sent to this kind of account."
-    if not is_subscribed(user, category):
+    if not test and not is_subscribed(user, category):
         return "The recipient hasn't subscribed to this kind of mail."
     if not address:
         return "The account has no email address."
@@ -53,12 +57,15 @@ def _suppressed_reason(user, category, address):
     return ""
 
 
-def send(user, category, template_key, context=None, *, idempotency_key=None, campaign=None, send_after=None):
+def send(user, category, template_key, context=None, *, idempotency_key=None, campaign=None, send_after=None,
+         test=False):
     """Queue one mail to `user`. Renders `template_key` in the account's
     language now (so the row records exactly what was sent) and returns
     the EmailMessage: `pending`, or `suppressed` with the reason when the
     account can't or doesn't want to get it. With `idempotency_key`, a
-    second call with the same key returns the first row and queues nothing."""
+    second call with the same key returns the first row and queues nothing.
+    `test` is for a campaign's test mail to its own author: marked
+    "[Test]", and the author's preferences don't apply (blocks still do)."""
     if idempotency_key and (existing := EmailMessage.objects.filter(idempotency_key=idempotency_key).first()):
         return existing
 
@@ -71,7 +78,9 @@ def send(user, category, template_key, context=None, *, idempotency_key=None, ca
         **(context or {}),
     }
     subject, body = render(template_key, language, context)
-    reason = _suppressed_reason(user, category, address)
+    if test:
+        subject = f"[Test] {subject}"
+    reason = suppressed_reason(user, category, address, test=test)
 
     try:
         with transaction.atomic():
@@ -80,7 +89,7 @@ def send(user, category, template_key, context=None, *, idempotency_key=None, ca
                 language=language, subject=subject, body=body, campaign=campaign,
                 status=EmailMessage.Status.SUPPRESSED if reason else EmailMessage.Status.PENDING,
                 status_reason=reason, priority=PRIORITY[category], send_after=send_after,
-                idempotency_key=idempotency_key,
+                idempotency_key=idempotency_key, is_test=test,
             )
     except IntegrityError:
         # The same idempotency key queued concurrently: that row wins.

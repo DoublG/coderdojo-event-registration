@@ -26,7 +26,7 @@ from django.utils import timezone
 
 from .categories import CAN_OPT_OUT
 from .models import EmailMessage
-from .services import unsubscribe_url
+from .services import suppressed_reason, unsubscribe_url
 
 logger = logging.getLogger(__name__)
 
@@ -149,6 +149,11 @@ def send_email_batch(self, ids):
     try:
         with mail.get_connection(fail_silently=False) as connection:
             for row in rows:
+                # Again right before it goes out: a campaign drips out under
+                # the rate limit, and people unsubscribe (or bounce) meanwhile.
+                if row.user_id and (reason := suppressed_reason(row.user, row.category, row.recipient, test=row.is_test)):
+                    EmailMessage.objects.filter(pk=row.pk).update(status=Status.SUPPRESSED, status_reason=reason)
+                    continue
                 message, message_id = _build(row)
                 EmailMessage.objects.filter(pk=row.pk).update(attempts=row.attempts + 1, message_id=message_id)
                 try:
@@ -221,3 +226,20 @@ def announce_new_sessions():
 
     return run()
 
+
+
+@shared_task
+def launch_campaign(campaign_id):
+    """Queue a launched campaign's mail (default queue: it can be long)."""
+    from .campaigns import queue_mail
+
+    return queue_mail(campaign_id)
+
+
+@shared_task
+def launch_due_campaigns():
+    """Beat, every minute (periodic queue, so it stays quick): hands due and
+    interrupted campaigns to launch_campaign and completes finished ones."""
+    from .campaigns import launch_due
+
+    return len(launch_due())

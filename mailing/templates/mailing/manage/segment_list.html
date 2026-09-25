@@ -1,0 +1,29 @@
+{% extends "core/_manage_base.html" %}
+{% block manage_page_title %}Segments{% endblock %}
+{% block manage_heading %}Segments{% endblock %}
+
+{% block manage_content %}
+  <div class="cd-table-wrap">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label" scope="col">Name</th>
+          <th class="label" scope="col">Description</th>
+          <th class="label cd-table__num" scope="col">Accounts</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for segment, count in rows %}
+          <tr>
+            <td class="body-sm">{{ segment.name }}{% if not segment.is_active %} <span class="cd-badge cd-badge--outline caption">Inactive</span>{% endif %}</td>
+            <td class="body-sm">{{ segment.description }}</td>
+            <td class="body-sm cd-table__num">{{ count }}</td>
+          </tr>
+        {% empty %}
+          <tr><td class="body-sm" colspan="3">No segments yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="caption" style="margin-top: var(--space-3);">Accounts: active adults with an email the segment describes, before anyone's mail preferences.</p>
+{% endblock %}

@@ -172,6 +172,11 @@ CELERY_BEAT_SCHEDULE = {
         # A worker that was down doesn't come back to a pile of stale runs.
         "options": {"expires": 10},
     },
+    "launch-due-campaigns": {
+        "task": "mailing.tasks.launch_due_campaigns",
+        "schedule": 60.0,
+        "options": {"expires": 60},
+    },
     "requeue-stuck-emails": {
         "task": "mailing.tasks.requeue_stuck_emails",
         "schedule": 15 * 60.0,

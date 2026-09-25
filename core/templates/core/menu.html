@@ -43,8 +43,10 @@
           {% if user_admin_dojo %}
             <a class="cd-nav__account-link body-sm" href="{% url 'dojo_dashboard' dojo_id=user_admin_dojo.id %}">Manage</a>
           {% endif %}
-          {% if user_has_organisation_role %}
-            {# The organisation's management dashboards — the Django admin for now (accounts.organisation). #}
+          {% if user_is_organisation_admin %}
+            {# The organisation's management dashboard (core/_manage_base.html); the board still uses the Django admin for its read-only oversight until that has dashboard pages too. #}
+            <a class="cd-nav__account-link body-sm" href="{% url 'manage_home' %}">Organisation</a>
+          {% elif user_has_organisation_role %}
             <a class="cd-nav__account-link body-sm" href="{% url 'admin:index' %}">Organisation</a>
           {% endif %}
           {% if user_is_approved_champion %}

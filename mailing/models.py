@@ -150,10 +150,24 @@ class Campaign(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
-    scheduled_at = models.DateTimeField(null=True, blank=True)
+    scheduled_at = models.DateTimeField(
+        null=True, blank=True, help_text="Leave empty to send as soon as it's launched.",
+    )
+    # Set by mailing.campaigns.launch / the launch_campaign task.
+    launched_at = models.DateTimeField(null=True, blank=True, editable=False)
+    launched_by = models.ForeignKey(
+        "accounts.User", null=True, blank=True, on_delete=models.SET_NULL, editable=False, related_name="+",
+    )
+    queued_at = models.DateTimeField(
+        null=True, blank=True, editable=False, help_text="When every recipient's mail was queued.",
+    )
 
     def __str__(self):
         return self.name
+
+    @property
+    def is_editable(self):
+        return self.status == self.Status.DRAFT
 
 
 class EmailTemplate(models.Model):
@@ -223,6 +237,9 @@ class EmailMessage(models.Model):
     # (e.g. "reminder:event42:ninja7"). Null for mail that can repeat.
     idempotency_key = models.CharField(max_length=200, null=True, blank=True, unique=True)
     message_id = models.CharField(max_length=255, blank=True, db_index=True, help_text="Our Message-ID header.")
+    is_test = models.BooleanField(
+        default=False, help_text="A campaign test sent to its author: preferences don't apply (blocks still do).",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     sent_at = models.DateTimeField(null=True, blank=True)

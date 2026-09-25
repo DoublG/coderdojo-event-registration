@@ -13,6 +13,7 @@ def user_roles(request):
     applied_kinds = set()
     admin_dojo = None
     organisation_role = False
+    organisation_admin = False
     if request.user.is_authenticated and not request.user.is_ninja:
         approved_champion = is_approved_champion(request.user)
         approved_mentor = is_approved_mentor(request.user)
@@ -23,6 +24,7 @@ def user_roles(request):
         )
         admin_dojo = accessible_dojos(request.user).first()
         organisation_role = request.user.organisation_roles.exists()
+        organisation_admin = request.user.organisation_roles.filter(role="admin").exists()
     return {
         "user_is_approved_champion": approved_champion,
         "user_is_approved_mentor": approved_mentor,
@@ -30,4 +32,5 @@ def user_roles(request):
         "user_applied_mentor": "mentor" in applied_kinds,
         "user_admin_dojo": admin_dojo,
         "user_has_organisation_role": organisation_role,
+        "user_is_organisation_admin": organisation_admin,
     }
