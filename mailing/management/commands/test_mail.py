@@ -7,5 +7,6 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        send_mail_to_all_users.delay("some subject", "some message")
+        pass
+        #send_mail_to_all_users.delay("some subject", "some message")
 

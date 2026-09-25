@@ -96,6 +96,18 @@ CELERY_CACHE_BACKEND = 'default'
 
 CELERY_BROKER_URL = f"redis://{ env('REDIS_HOST', default='127.0.0.1') }:{ env('REDIS_PORT', default='6379') }/0"
 
+CELERY_BEAT_SCHEDULE = {
+    "process-mail-bounces-every-minute": {
+        "task": "mailer.tasks.process_bounces",
+        "schedule": 60.0,
+    },
+
+    "send-pending-emails-every-10-seconds": {
+        "task": "mailer.tasks.send_pending_emails",
+        "schedule": 10.0,
+    },
+}
+
 # Application definition
 
 INSTALLED_APPS = [
