@@ -21,26 +21,28 @@ document is validated.
 import uuid
 
 from django.conf import settings
-from django.core.mail import send_mail
 from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import User
+from mailing.categories import MailCategory
+from mailing.services import send_or_log
 
-from .models import ARTICLE_596_2_TEXT, BACKGROUND_CHECK_VALIDITY, Application, BackgroundCheckHistory
+from .models import BACKGROUND_CHECK_VALIDITY, Application, BackgroundCheckHistory
 
 
 class OnboardingError(Exception):
     pass
 
 
-def _send(user, subject, message):
-    if user.email:
-        send_mail(subject=subject, message=message, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[user.email])
+def _send(user, template_key, context=None):
+    """Every onboarding mail is account (`service`) mail through the mail
+    engine (mailing.services.send): queued, in the account's language."""
+    send_or_log(user, MailCategory.SERVICE, template_key, context or {})
 
 
-def _greeting(user):
-    return f"Hi {user.first_name or user.get_username()},\n\n"
+def _account_url():
+    return settings.SITE_URL + reverse("account_home")
 
 
 # --- background check -----------------------------------------------------------
@@ -62,19 +64,7 @@ def request_background_check(user, request):
     upload_url = request.build_absolute_uri(
         reverse("upload_background_check", kwargs={"token": user.background_check_token})
     )
-    _send(user, "Action needed: background check document", (
-        _greeting(user)
-        + "Thanks for volunteering with CoderDojo — before you can work with a dojo's team, "
-        "Belgian law requires a specific extract from the criminal record for anyone in "
-        "contact with minors:\n\n"
-        f"  {ARTICLE_596_2_TEXT}\n\n"
-        "You can request this “uittreksel uit het strafregister, model 2” for free from your "
-        "local gemeente/commune, or online via mijndossier.rrn.fgov.be — mention it's for "
-        "volunteering with minors (model 2 / Artikel 596.2).\n\n"
-        "Once you have it, upload it here (or from your account page when logged in):\n\n"
-        f"  {upload_url}\n\n"
-        "We'll follow up once it's been reviewed."
-    ))
+    _send(user, "background_check_requested", {"upload_url": upload_url})
 
 
 def submit_background_check(user, document):
@@ -116,11 +106,7 @@ def validate_background_check(user, reviewer, note=""):
         "background_check_document", "background_check_status",
         "background_check_reviewed_at", "background_check_expires_at",
     ])
-    _send(user, "Your background check has been approved", (
-        _greeting(user)
-        + f"Your background check has been validated. It's valid until "
-        f"{timezone.localtime(user.background_check_expires_at):%d/%m/%Y}.\n"
-    ))
+    _send(user, "background_check_validated", {"expires_at": timezone.localtime(user.background_check_expires_at)})
 
 
 def reject_background_check(user, reviewer, note=""):
@@ -130,11 +116,7 @@ def reject_background_check(user, reviewer, note=""):
     user.background_check_reviewed_at = timezone.now()
     _record_decision(user, reviewer, BackgroundCheckHistory.REJECTED, note)
     user.save(update_fields=["background_check_document", "background_check_status", "background_check_reviewed_at"])
-    _send(user, "Your background check document", (
-        _greeting(user)
-        + "We couldn't accept the document you uploaded for your background check. You can upload "
-        "a new one from your account page; get in touch if you're unsure what's needed.\n"
-    ))
+    _send(user, "background_check_rejected", {"account_url": _account_url()})
 
 
 # --- applications ----------------------------------------------------------------
@@ -167,26 +149,18 @@ def approve_application(application, reviewer):
     application.decided_at = timezone.now()
     application.save(update_fields=["status", "decided_by", "decided_at"])
 
-    if application.kind == Application.MENTOR:
-        next_step = "You can now ask to join a dojo's team from its page on the site."
-        if application.dojo_id:
-            from dojos.team import TeamError, request_to_join
+    join_dojo_name = ""
+    if application.kind == Application.MENTOR and application.dojo_id:
+        from dojos.team import TeamError, request_to_join
 
-            try:
-                request_to_join(application.dojo, application.account)
-                next_step = (
-                    f"We've sent your request to join the {application.dojo.name} team; "
-                    "they'll let you know."
-                )
-            except TeamError:
-                pass
-    else:
-        next_step = "You can now create your dojo from your account page."
-    _send(application.account, "Your CoderDojo application has been approved", (
-        _greeting(application.account)
-        + f"Your application to become a {application.get_kind_display().lower()} has been approved. "
-        f"{next_step}\n"
-    ))
+        try:
+            request_to_join(application.dojo, application.account)
+            join_dojo_name = application.dojo.name
+        except TeamError:
+            pass
+    _send(application.account, "application_approved", {
+        "kind": application.kind, "join_dojo_name": join_dojo_name, "account_url": _account_url(),
+    })
 
 
 def reject_application(application, reviewer):
@@ -196,11 +170,7 @@ def reject_application(application, reviewer):
     application.decided_by = reviewer
     application.decided_at = timezone.now()
     application.save(update_fields=["status", "decided_by", "decided_at"])
-    _send(application.account, "Your CoderDojo application", (
-        _greeting(application.account)
-        + "Thank you for applying. Unfortunately we can't approve your application at this time; "
-        "get in touch if you'd like to know more.\n"
-    ))
+    _send(application.account, "application_rejected")
 
 
 # --- who is approved --------------------------------------------------------------

@@ -4,8 +4,8 @@ from unittest.mock import Mock, patch
 
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import Permission
-from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -13,6 +13,7 @@ from django.utils import timezone
 from accounts.models import User
 from dojos.models import Dojo, DojoMembership
 from dojos.testing import make_champion, make_dojo, make_mentor
+from mailing.models import EmailMessage
 
 from . import services
 from .admin import (
@@ -139,6 +140,7 @@ class ApplyViewTests(TestCase):
 
 class BackgroundCheckFlowTests(_CleanupDocumentsMixin, TestCase):
     def setUp(self):
+        call_command("load_mail_templates", stdout=io.StringIO())
         self.reviewer = User.objects.create(username="reviewer", is_staff=True)
         self.user = User.objects.create(username="tom", first_name="Tom", email="tom@example.com")
 
@@ -148,9 +150,10 @@ class BackgroundCheckFlowTests(_CleanupDocumentsMixin, TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.background_check_status, User.CHECK_REQUESTED)
         self.assertIsNotNone(self.user.background_check_token)
-        self.assertEqual(mail.outbox[0].to, ["tom@example.com"])
+        queued = EmailMessage.objects.get(template_key="background_check_requested")
+        self.assertEqual((queued.recipient, queued.category, queued.status), ("tom@example.com", "service", "pending"))
         self.assertIn(reverse("upload_background_check", kwargs={"token": self.user.background_check_token}),
-                      mail.outbox[0].body)
+                      queued.body)
 
     def test_request_refused_while_valid_or_awaiting_review(self):
         valid = make_mentor(username="valid")
@@ -239,6 +242,7 @@ class BackgroundCheckFlowTests(_CleanupDocumentsMixin, TestCase):
 
 class ApprovalTests(TestCase):
     def setUp(self):
+        call_command("load_mail_templates", stdout=io.StringIO())
         self.reviewer = User.objects.create(username="reviewer", is_staff=True)
         self.applicant = User.objects.create(username="tom", email="tom@example.com")
 
@@ -265,7 +269,28 @@ class ApprovalTests(TestCase):
         self.assertEqual((application.status, application.decided_by), (Application.APPROVED, self.reviewer))
         self.assertTrue(services.is_approved_mentor(self.applicant))
         self.assertFalse(services.is_approved_champion(self.applicant))
-        self.assertIn("approved", mail.outbox[-1].subject)
+        self.assertIn("approved", EmailMessage.objects.get(template_key="application_approved").subject)
+
+    def test_decision_mails_are_queued_in_the_applicants_language(self):
+        self._validate(self.applicant)
+        User.objects.filter(pk=self.applicant.pk).update(preferred_language="fr-be")
+        self.applicant.refresh_from_db()
+        champion = Application.objects.create(account=self.applicant, kind=Application.CHAMPION)
+        services.approve_application(champion, self.reviewer)
+        queued = EmailMessage.objects.get(template_key="application_approved")
+        self.assertEqual((queued.language, queued.category), ("fr-be", "service"))
+        self.assertIn("créer votre dojo", queued.body)
+
+    def test_a_missing_template_never_blocks_a_decision(self):
+        from mailing.models import EmailTemplate
+
+        EmailTemplate.objects.all().delete()
+        self._validate(self.applicant)
+        application = Application.objects.create(account=self.applicant, kind=Application.MENTOR)
+        with self.assertLogs("mailing.services", level="ERROR"):
+            services.approve_application(application, self.reviewer)
+        application.refresh_from_db()
+        self.assertEqual(application.status, Application.APPROVED)
 
     def test_mentor_approval_for_a_dojo_files_a_join_request(self):
         self._validate(self.applicant)

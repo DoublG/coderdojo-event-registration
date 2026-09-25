@@ -14,11 +14,10 @@
 #      runs migrations (+ collectstatic when STATIC_ROOT is configured).
 #   5. Gracefully reloads gunicorn (HUP to its master process) and does a
 #      smoke-test request over the app's unix socket.
-#   6. When ~/app/.env sets CELERY_WORKERS_ENABLED=true: installs the two
-#      Celery worker units (scripts/systemd/, systemd *user* units), restarts
-#      them so they run the new code, and pings them. Otherwise it only says
-#      it skipped them (DATA_MODEL.md §11, "Production: two Celery workers
-#      under systemd").
+#   6. Installs the two Celery worker units (scripts/systemd/, systemd *user*
+#      units), restarts them so they run the new code, and pings them. All
+#      mail goes through them, so a deploy that can't start them fails
+#      (DATA_MODEL.md §11, "Production: two Celery workers under systemd").
 #
 # Usage:
 #   scripts/deploy.sh             # deploy (asks for confirmation)
@@ -121,7 +120,6 @@ die() { printf '\033[31m[server] error:\033[0m %s\n' "\$*" >&2; exit 1; }
 
 # systemctl --user over a non-login ssh session needs the user's runtime dir.
 [ -n "\${XDG_RUNTIME_DIR:-}" ] || [ ! -d "/run/user/\$(id -u)" ] || export XDG_RUNTIME_DIR="/run/user/\$(id -u)"
-celery_enabled() { grep -qiE '^CELERY_WORKERS_ENABLED=(true|1|yes)\s*\$' "\$APP/.env" 2>/dev/null; }
 user_systemd() { systemctl --user show-environment >/dev/null 2>&1; }
 
 missing_env_keys() {
@@ -142,10 +140,8 @@ if [ "\$MODE" = check ]; then
         echo ".env: MISSING"
     fi
     step "Celery workers"
-    if ! celery_enabled; then
-        echo "celery: not enabled (set CELERY_WORKERS_ENABLED=true in .env once Redis and lingering are in place)"
-    elif ! user_systemd; then
-        echo "celery: enabled, but systemd --user isn't reachable for \$USER (ask Level27 to enable lingering)"
+    if ! user_systemd; then
+        echo "celery: systemd --user isn't reachable for \$USER, so a deploy can't start the workers (ask Level27 to enable lingering)"
     else
         for unit in \$CELERY_UNITS; do echo "\$unit: \$(systemctl --user is-active "\$unit" 2>/dev/null || true)"; done
     fi
@@ -212,9 +208,7 @@ echo "GET / (Host: \${HOST:-localhost}) -> \$CODE"
 case "\$CODE" in 2??|3??) ;; *) die "smoke test failed (HTTP \$CODE) — check ~/logs and 'manage.py check --deploy'";; esac
 
 step "Celery workers"
-if ! celery_enabled; then
-    echo "skipped: CELERY_WORKERS_ENABLED isn't true in .env (queued mail is not sent until it is)"
-elif ! user_systemd; then
+if ! user_systemd; then
     die "the site is live, but systemd --user isn't reachable for \$USER, so the Celery workers were NOT started (ask Level27 to enable lingering)"
 else
     UNIT_DIR="\$HOME/.config/systemd/user"
@@ -264,7 +258,7 @@ if [ -f "$ENV_FILE" ]; then
     scp -q -o BatchMode=yes "$ENV_FILE" "$REMOTE:deploy/incoming.env"
 fi
 # The Celery units live in scripts/ (never bundled): uploaded on their own,
-# installed by the remote script only when the workers are enabled.
+# installed by the remote script.
 "${SSH[@]}" 'rm -rf ~/deploy/systemd && mkdir -p ~/deploy/systemd'
 scp -q -o BatchMode=yes scripts/systemd/*.service "$REMOTE:deploy/systemd/"
 

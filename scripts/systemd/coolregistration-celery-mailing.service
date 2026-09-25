@@ -1,6 +1,6 @@
 # Celery for coolregistration: the mailing worker (default queue: sending mail, anything not scheduled).
-# A systemd *user* unit, installed by scripts/deploy.sh into
-# ~/.config/systemd/user/ when ~/app/.env sets CELERY_WORKERS_ENABLED=true.
+# A systemd *user* unit, installed (and restarted) by scripts/deploy.sh into
+# ~/.config/systemd/user/ on every deploy.
 # Design: DATA_MODEL.md §11, "Production: two Celery workers under systemd".
 # The settings read ~/app/.env themselves, so no EnvironmentFile= here.
 

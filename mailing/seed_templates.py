@@ -338,6 +338,189 @@ Nous vous tiendrons au courant après la vérification.
         },
     },
     {
+        "key": "background_check_validated",
+        "category": MailCategory.SERVICE,
+        "description": "A reviewer validated the volunteer's criminal record extract. Variables: expires_at (date).",
+        "subject": {
+            "en-us": "Your background check has been approved",
+            "nl-be": "Je uittreksel uit het strafregister is goedgekeurd",
+            "fr-be": "Votre extrait de casier judiciaire a été validé",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+Your background check has been validated. It's valid until {{ expires_at|date:"d/m/Y" }}.
+We'll let you know in time when it needs renewing.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Je uittreksel uit het strafregister is goedgekeurd. Het is geldig tot {{ expires_at|date:"d/m/Y" }}.
+We laten je tijdig weten wanneer het vernieuwd moet worden.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Votre extrait de casier judiciaire a été validé. Il est valable jusqu'au {{ expires_at|date:"d/m/Y" }}.
+Nous vous préviendrons à temps lorsqu'il faudra le renouveler.
+""",
+        },
+    },
+    {
+        "key": "background_check_rejected",
+        "category": MailCategory.SERVICE,
+        "description": "A reviewer couldn't accept the uploaded document. Variables: account_url.",
+        "subject": {
+            "en-us": "Your background check document",
+            "nl-be": "Je uittreksel uit het strafregister",
+            "fr-be": "Votre extrait de casier judiciaire",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+We couldn't accept the document you uploaded for your background check. You can upload
+a new one from your account page; get in touch if you're unsure what's needed.
+
+{{ account_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+We konden het document dat je voor je uittreksel uit het strafregister opgeladen hebt,
+niet aanvaarden. Je kan een nieuw opladen via je accountpagina; neem contact op als je
+niet zeker bent wat er nodig is.
+
+{{ account_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Nous n'avons pas pu accepter le document que vous avez déposé pour votre extrait de casier
+judiciaire. Vous pouvez en déposer un nouveau depuis votre page de compte ; contactez-nous
+si vous n'êtes pas sûr·e de ce qu'il faut.
+
+{{ account_url }}
+""",
+        },
+    },
+    {
+        "key": "application_approved",
+        "category": MailCategory.SERVICE,
+        "description": "A reviewer approved a mentor or champion application. "
+                       "Variables: kind (mentor | champion), join_dojo_name (the dojo a join request was "
+                       "sent to, or empty), account_url.",
+        "subject": {
+            "en-us": "Your CoderDojo application has been approved",
+            "nl-be": "Je aanvraag bij CoderDojo is goedgekeurd",
+            "fr-be": "Votre candidature chez CoderDojo a été acceptée",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+Your application to become a {% if kind == "champion" %}champion{% else %}mentor{% endif %} has been approved.
+{% if kind == "champion" %}You can now create your dojo from your account page.{% elif join_dojo_name %}We've sent your request to join the {{ join_dojo_name }} team; they'll let you know.{% else %}You can now ask to join a dojo's team from its page on the site.{% endif %}
+
+{{ account_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Je aanvraag om {% if kind == "champion" %}champion{% else %}mentor{% endif %} te worden is goedgekeurd.
+{% if kind == "champion" %}Je kan nu je dojo aanmaken via je accountpagina.{% elif join_dojo_name %}We hebben je vraag om bij het team van {{ join_dojo_name }} te komen doorgestuurd; zij laten je iets weten.{% else %}Je kan nu vragen om bij het team van een dojo te komen, via de pagina van die dojo.{% endif %}
+
+{{ account_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Votre candidature pour devenir {% if kind == "champion" %}champion{% else %}mentor{% endif %} a été acceptée.
+{% if kind == "champion" %}Vous pouvez maintenant créer votre dojo depuis votre page de compte.{% elif join_dojo_name %}Nous avons transmis votre demande pour rejoindre l'équipe de {{ join_dojo_name }} ; elle vous répondra.{% else %}Vous pouvez maintenant demander à rejoindre l'équipe d'un dojo depuis sa page sur le site.{% endif %}
+
+{{ account_url }}
+""",
+        },
+    },
+    {
+        "key": "application_rejected",
+        "category": MailCategory.SERVICE,
+        "description": "A reviewer rejected a mentor or champion application. No extra variables.",
+        "subject": {
+            "en-us": "Your CoderDojo application",
+            "nl-be": "Je aanvraag bij CoderDojo",
+            "fr-be": "Votre candidature chez CoderDojo",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+Thank you for applying. Unfortunately we can't approve your application at this time;
+get in touch if you'd like to know more.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Bedankt voor je aanvraag. Helaas kunnen we ze op dit moment niet goedkeuren; neem
+contact op als je meer wil weten.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Merci pour votre candidature. Malheureusement, nous ne pouvons pas l'accepter pour le
+moment ; contactez-nous si vous souhaitez en savoir plus.
+""",
+        },
+    },
+    {
+        "key": "password_reset",
+        "category": MailCategory.SERVICE,
+        "description": "Someone asked to reset the account's password. Variables: reset_url.",
+        "subject": {
+            "en-us": "Reset your CoderDojo password",
+            "nl-be": "Stel je CoderDojo-wachtwoord opnieuw in",
+            "fr-be": "Réinitialisez votre mot de passe CoderDojo",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+Someone (hopefully you) asked to reset the password on your CoderDojo account.
+
+Set a new password here:
+
+{{ reset_url }}
+
+If you didn't ask for this, you can ignore this email: your password won't change.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Iemand (hopelijk jij) vroeg om het wachtwoord van je CoderDojo-account opnieuw in te
+stellen.
+
+Kies hier een nieuw wachtwoord:
+
+{{ reset_url }}
+
+Heb je dit niet gevraagd? Dan kan je deze e-mail negeren: je wachtwoord blijft hetzelfde.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Quelqu'un (vous, espérons-le) a demandé à réinitialiser le mot de passe de votre compte
+CoderDojo.
+
+Choisissez un nouveau mot de passe ici :
+
+{{ reset_url }}
+
+Si vous n'avez rien demandé, vous pouvez ignorer cet e-mail : votre mot de passe ne change pas.
+""",
+        },
+    },
+    {
         "key": "campaign_coolest_projects",
         "category": MailCategory.NEWSLETTER,
         "description": "Campaign: invite every active family and volunteer to Coolest Projects. "
@@ -556,6 +739,12 @@ SAMPLE_CONTEXT = {
         ],
     },
     "background_check_requested": {**_common, "upload_url": "https://coolregistration.localhost/background-check/example/"},
+    "background_check_validated": {**_common, "expires_at": datetime(2027, 9, 25)},
+    "background_check_rejected": {**_common, "account_url": "https://coolregistration.localhost/account/"},
+    "application_approved": {**_common, "kind": "mentor", "join_dojo_name": "CoderDojo Ghent",
+                             "account_url": "https://coolregistration.localhost/account/"},
+    "application_rejected": {**_common},
+    "password_reset": {**_common, "reset_url": "https://coolregistration.localhost/password-reset/confirm/MQ/abc-123/"},
     "campaign_coolest_projects": {**_common, "signup_url": "https://coolestprojects.org"},
     "campaign_girlz": {**_common, "signup_url": "https://coolregistration.localhost/events/"},
     "campaign_new_dojo": {**_common, "dojo_name": "CoderDojo Aalter", "dojo_path": "/dojos/1/"},

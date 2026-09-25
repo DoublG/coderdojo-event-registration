@@ -1,7 +1,9 @@
 """The one way to send mail: send() renders the template and queues an
 EmailMessage row; the Celery dispatcher (mailing.tasks) does the actual
-sending. Nothing calls send_mail() or a task's .delay() to send a mail
+sending. Nothing uses Django's send_mail or a task's .delay to send a mail
 (DATA_MODEL.md §11, "Sending pipeline")."""
+
+import logging
 
 from django.conf import settings
 from django.core import signing
@@ -11,7 +13,9 @@ from django.urls import reverse
 from .categories import CAN_OPT_OUT, PRIORITY, categories_for
 from .models import EmailMessage, EmailSuppression
 from .preferences import is_subscribed
-from .rendering import FALLBACK_LANGUAGE, render
+from .rendering import FALLBACK_LANGUAGE, TemplateMissing, render
+
+logger = logging.getLogger(__name__)
 
 UNSUBSCRIBE_SALT = "mailing.unsubscribe"
 
@@ -83,3 +87,15 @@ def send(user, category, template_key, context=None, *, idempotency_key=None, ca
         if idempotency_key:
             return EmailMessage.objects.get(idempotency_key=idempotency_key)
         raise
+
+
+def send_or_log(user, category, template_key, context=None, **kwargs):
+    """send(), but a missing template is logged instead of raised: for mail
+    sent as a side effect of something else (a reviewer's decision, a
+    password reset), which must never fail because of the mail."""
+    try:
+        return send(user, category, template_key, context, **kwargs)
+    except TemplateMissing:
+        logger.exception("mail template %s is missing: nothing sent to %s", template_key, user)
+        return None
+

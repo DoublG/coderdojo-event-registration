@@ -78,6 +78,39 @@ class LogoutViewTests(TestCase):
         self.assertNotIn("_auth_user_id", self.client.session)
 
 
+class PasswordResetMailTests(TestCase):
+    """The reset mail goes through the mail engine like every mail: queued
+    as account mail, in the account's language, with a working link."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.user = User.objects.create(username="jan", email="jan@example.com", preferred_language="nl-be")
+        self.user.set_password("an-old-password-77")
+        self.user.save()
+
+    def test_reset_is_queued_with_a_working_link(self):
+        from mailing.models import EmailMessage
+
+        response = self.client.post(reverse("password_reset"), {"email": "jan@example.com"})
+
+        self.assertRedirects(response, reverse("password_reset_done"))
+        self.assertEqual(len(mail.outbox), 0)
+        queued = EmailMessage.objects.get(template_key="password_reset")
+        self.assertEqual((queued.recipient, queued.category, queued.language), ("jan@example.com", "service", "nl-be"))
+        link = next(line.strip() for line in queued.body.splitlines() if "/password-reset/confirm/" in line)
+        self.assertEqual(self.client.get(link.replace("http://testserver", ""), follow=True).status_code, 200)
+
+    def test_unknown_address_queues_nothing(self):
+        from mailing.models import EmailMessage
+
+        self.client.post(reverse("password_reset"), {"email": "nobody@example.com"})
+        self.assertFalse(EmailMessage.objects.exists())
+
+
 class ChangePasswordViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):

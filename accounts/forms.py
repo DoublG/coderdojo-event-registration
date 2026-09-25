@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 
 from geo.models import Municipality
 
@@ -27,7 +28,17 @@ class ForcedPasswordChangeForm(StyledFormMixin, PasswordChangeForm):
 
 
 class StyledPasswordResetForm(StyledFormMixin, PasswordResetForm):
-    pass
+    def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email,
+                  html_email_template_name=None):
+        """Every mail goes through the mail engine (mailing.services.send):
+        queued as account (`service`) mail, in the account's language, with
+        the reset link built from the request's own domain."""
+        from mailing.categories import MailCategory
+        from mailing.services import send_or_log
+
+        path = reverse("password_reset_confirm", kwargs={"uidb64": context["uid"], "token": context["token"]})
+        send_or_log(context["user"], MailCategory.SERVICE, "password_reset",
+             {"reset_url": f"{context['protocol']}://{context['domain']}{path}"})
 
 
 class StyledSetPasswordForm(StyledFormMixin, SetPasswordForm):

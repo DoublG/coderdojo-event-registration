@@ -136,8 +136,8 @@ def change_password(request):
 
 class PasswordResetView(auth_views.PasswordResetView):
     template_name = "accounts/password_reset.html"
-    email_template_name = "accounts/password_reset_email.txt"
-    subject_template_name = "accounts/password_reset_subject.txt"
+    # The mail itself: StyledPasswordResetForm.send_mail → the mail engine
+    # (template "password_reset").
     success_url = reverse_lazy("password_reset_done")
     form_class = StyledPasswordResetForm
 

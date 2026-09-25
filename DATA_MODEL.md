@@ -2138,11 +2138,11 @@ Each phase ships with tests (the repo rule) and updates this section and
     unsubscribe (tested through nginx), and the newsletter opt-in on
     sign-up.
 
-  The production side is written: the two unit files in
-  `scripts/systemd/`, and `deploy.sh` installs, restarts and pings them
-  when `~/app/.env` sets `CELERY_WORKERS_ENABLED=true`. It's not switched
-  on yet: that needs the Level27 answers under "Still open". After that,
-  `applications.services` mail moves to `send()`.
+  The production side is done: the two unit files in `scripts/systemd/`,
+  and every `deploy.sh` run installs, restarts and pings them (it fails
+  if it can't). **Every mail goes through the engine** (decided
+  2026-09-25): the onboarding mails and the password reset are `service`
+  templates too, so production mail depends on the workers running.
 - phase 7: scopes, a subquery per rule, rule validation, the admin
   audience preview, and the Tier 1 attributes listed above
 - phase 8: three seeded draft campaigns (`seed_mailing`)
@@ -2251,7 +2251,8 @@ the side.
    they have an account with an email, they get the mail about their own
    bookings and manage those preferences on their own account page.
    Campaigns and the newsletter still go only to adults.
-8. **Celery is the mail engine and the database is the queue.** Every mail
+8. **Celery is the mail engine and the database is the queue, for every
+   mail** (including password resets and background-check mail). Every mail
    is an `EmailMessage` row first. The `send_pending_emails` beat job claims
    and dispatches them as `send_email_batch` subtasks. Celery handles the
    rate limiting and the retries, and nothing sends mail directly from a

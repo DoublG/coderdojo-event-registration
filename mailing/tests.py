@@ -1,3 +1,4 @@
+import re
 import smtplib
 from datetime import timedelta
 from io import StringIO
@@ -1014,3 +1015,31 @@ class AutomatedMailTests(TestCase):
         EmailTemplate.objects.filter(key="session_reminder", language="en-us").update(subject="Edited")
         call_command("load_mail_templates", stdout=StringIO())
         self.assertEqual(EmailTemplate.objects.get(key="session_reminder", language="en-us").subject, "Edited")
+
+
+class EveryMailGoesThroughTheEngineTests(TestCase):
+    """Guard for the rule "every mail goes through mailing.services.send":
+    only the engine's own sender (mailing/tasks.py) may hand mail to
+    Django's mail backend."""
+
+    DIRECT_SEND = re.compile(
+        r"(?<!def )\b(send_mail|send_mass_mail|mail_admins|mail_managers)\(|EmailMultiAlternatives\(|\.send_messages\("
+    )
+    ALLOWED = {"mailing/tasks.py", "mailing/management/commands/simulate_bounce.py"}
+
+    def test_no_direct_mail_sending_outside_the_engine(self):
+        from pathlib import Path
+
+        from django.conf import settings
+
+        root = Path(settings.BASE_DIR)
+        offenders = []
+        for path in root.rglob("*.py"):
+            relative = path.relative_to(root).as_posix()
+            if (relative in self.ALLOWED or "/migrations/" in relative or relative.endswith("tests.py")
+                    or relative.startswith((".", "docs/", "static/", "media/"))):
+                continue
+            for number, line in enumerate(path.read_text(errors="ignore").splitlines(), 1):
+                if self.DIRECT_SEND.search(line) and not line.lstrip().startswith("#"):
+                    offenders.append(f"{relative}:{number}: {line.strip()}")
+        self.assertEqual(offenders, [], "send mail through mailing.services.send() instead")
