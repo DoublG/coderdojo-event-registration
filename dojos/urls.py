@@ -14,6 +14,7 @@ urlpatterns = [
     path("dojos/<int:dojo_id>/manage/lifecycle/", views.dojo_set_lifecycle, name="dojo_set_lifecycle"),
     path("dojos/<int:dojo_id>/manage/team/", views.dojo_team_manage, name="dojo_team_manage"),
     path("dojos/<int:dojo_id>/manage/team/action/", views.dojo_team_action, name="dojo_team_action"),
+    path("dojos/<int:dojo_id>/manage/members/", views.dojo_members, name="dojo_members"),
     path("dojos/<int:dojo_id>/manage/updates/", views.dojo_updates, name="dojo_updates"),
     path(
         "dojos/<int:dojo_id>/manage/updates/<int:announcement_id>/delete/",
@@ -42,6 +43,11 @@ urlpatterns = [
         "dojos/<int:dojo_id>/events/<int:event_id>/attendance/<int:registration_id>/pathways/",
         views.dojo_event_registration_pathways,
         name="dojo_event_registration_pathways",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/attendance/team/<int:membership_id>/",
+        views.dojo_event_team_attendance_mark,
+        name="dojo_event_team_attendance_mark",
     ),
     path(
         "dojos/<int:dojo_id>/events/<int:event_id>/attendance/<int:registration_id>/",

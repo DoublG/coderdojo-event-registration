@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 12:57+0000\n"
+"POT-Creation-Date: 2026-09-25 16:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -200,6 +200,31 @@ msgstr ""
 
 #: ../../source/dojo-team/running-a-session.rst:77
 msgid ""
+"A child whose home dojo is another dojo is marked **Visiting**; hover "
+"over it to see which dojo."
+msgstr ""
+"Un enfant dont le dojo d'attache est un autre dojo est marqué "
+"**Visiting** ; survolez-le pour voir lequel."
+
+#: ../../source/dojo-team/running-a-session.rst:80
+msgid ""
+"Under the children, **Session team** lists everyone you picked as the "
+"session's team (champion, mentors and youth mentors). Mark them "
+"**Present** or **Absent** the same way: the list of who was actually "
+"there is what the insurance needs. **Mark all present** marks the team "
+"present too. Someone who isn't on the list yet can be added to the "
+"session's team on the session's page."
+msgstr ""
+"Sous les enfants, **Session team** liste toutes les personnes choisies "
+"comme équipe de la session (champion, mentors et jeunes mentors). "
+"Marquez-les **Present** ou **Absent** de la même façon : la liste des "
+"personnes réellement présentes est ce dont l'assurance a besoin. **Mark "
+"all present** marque aussi l'équipe présente. Une personne qui n'est pas "
+"encore sur la liste peut être ajoutée à l'équipe de la session sur la "
+"page de la session."
+
+#: ../../source/dojo-team/running-a-session.rst:87
+msgid ""
 "Next to each child's name, a label shows how they come to your dojo: "
 "**New**, **Regular**, **Occasional**, **At risk** (missed the last three "
 "sessions meant for them), **Lapsed** (not in the last six months), "
@@ -218,11 +243,11 @@ msgstr ""
 "uniquement pour les filles) : indiquer les présences la garde donc "
 "exacte."
 
-#: ../../source/dojo-team/running-a-session.rst:86
+#: ../../source/dojo-team/running-a-session.rst:96
 msgid "Awarding belts"
 msgstr "Attribuer des ceintures"
 
-#: ../../source/dojo-team/running-a-session.rst:88
+#: ../../source/dojo-team/running-a-session.rst:98
 msgid ""
 "A belt shows a child's coding level (white, yellow, orange, and so on), "
 "not how often they came. On the attendance list, each child's row shows "
@@ -242,7 +267,7 @@ msgstr ""
 "l'historique sur la page de son enfant, y compris qui a attribué chaque "
 "ceinture et pour quel dojo."
 
-#: ../../source/dojo-team/running-a-session.rst:96
+#: ../../source/dojo-team/running-a-session.rst:106
 msgid ""
 "Your dashboard's **Attendance** page shows the same list for your next "
 "upcoming session (or your most recent one, if nothing's scheduled), so on"
@@ -253,11 +278,11 @@ msgstr ""
 "que vous puissiez commencer à noter les présences le jour même sans "
 "devoir chercher la séance."
 
-#: ../../source/dojo-team/running-a-session.rst:101
+#: ../../source/dojo-team/running-a-session.rst:111
 msgid "Pathways"
 msgstr "Parcours"
 
-#: ../../source/dojo-team/running-a-session.rst:103
+#: ../../source/dojo-team/running-a-session.rst:113
 msgid ""
 "Pathways (Scratch, Python, micro:bit, ...) can be set at three levels, "
 "each one pre-filled from the level above. All of them are optional:"
@@ -266,7 +291,7 @@ msgstr ""
 "trois niveaux, chacun étant pré-rempli à partir du niveau supérieur. Tous"
 " sont facultatifs :"
 
-#: ../../source/dojo-team/running-a-session.rst:106
+#: ../../source/dojo-team/running-a-session.rst:116
 msgid ""
 "**Your dojo** — on the **Settings** page, tick the pathways your dojo "
 "provides. They're shown on your dojo's public page."
@@ -274,7 +299,7 @@ msgstr ""
 "**Votre dojo** — sur la page **Paramètres**, cochez les parcours que "
 "propose votre dojo. Ils sont affichés sur la page publique de votre dojo."
 
-#: ../../source/dojo-team/running-a-session.rst:108
+#: ../../source/dojo-team/running-a-session.rst:118
 msgid ""
 "**A session** — a new session starts with your dojo's pathways ticked. "
 "You can add or remove any pathway for that particular session; they're "
@@ -285,7 +310,7 @@ msgstr ""
 "cette séance en particulier ; ils sont affichés sur la page publique de "
 "la séance."
 
-#: ../../source/dojo-team/running-a-session.rst:111
+#: ../../source/dojo-team/running-a-session.rst:121
 msgid ""
 "**Each child at a session** — when a family signs up, their child's "
 "pathways start as the session's. You can narrow them down while taking "
@@ -295,11 +320,11 @@ msgstr ""
 "enfant, ses parcours reprennent d'abord ceux de la séance. Vous pouvez "
 "les affiner en notant les présences (voir ci-dessus)."
 
-#: ../../source/dojo-team/running-a-session.rst:116
+#: ../../source/dojo-team/running-a-session.rst:126
 msgid "Managing your team"
 msgstr "Gérer votre équipe"
 
-#: ../../source/dojo-team/running-a-session.rst:118
+#: ../../source/dojo-team/running-a-session.rst:128
 msgid ""
 "The **Team** page in the sidebar lists everyone on your dojo's team — its"
 " champion, mentors and youth mentors — and lets you:"
@@ -308,7 +333,7 @@ msgstr ""
 "l'équipe de votre dojo — son champion, ses mentors et ses jeunes mentors "
 "— et vous permet de :"
 
-#: ../../source/dojo-team/running-a-session.rst:121
+#: ../../source/dojo-team/running-a-session.rst:131
 msgid ""
 "**Accept or decline join requests.** Approved mentors can ask to join "
 "from your dojo's public page; you'll get a notification when they do."
@@ -317,7 +342,7 @@ msgstr ""
 "peuvent demander à rejoindre l'équipe depuis la page publique de votre "
 "dojo ; vous recevez une notification quand ils le font."
 
-#: ../../source/dojo-team/running-a-session.rst:123
+#: ../../source/dojo-team/running-a-session.rst:133
 msgid ""
 "**Add a mentor** directly, by the email address of their account. Only "
 "mentors whose application and background check have been approved can be "
@@ -327,15 +352,19 @@ msgstr ""
 "Seuls les mentors dont la candidature et la vérification d'antécédents "
 "ont été approuvées peuvent être ajoutés."
 
-#: ../../source/dojo-team/running-a-session.rst:126
+#: ../../source/dojo-team/running-a-session.rst:136
 msgid ""
 "**Promote a youth mentor** — a ninja with their own login who helps run "
-"sessions at your dojo."
+"sessions at your dojo. Their family gets an email saying so; they don't "
+"need to approve it. A child without their own login can't be promoted: "
+"their parent can create one on the child's page."
 msgstr ""
-"**Promouvoir un jeune mentor** — un ninja ayant son propre identifiant "
-"qui aide à animer les séances de votre dojo."
+"**Promote a youth mentor** — un ninja avec son propre compte qui aide à "
+"animer les sessions de votre dojo. Sa famille en est informée par e-mail "
+"; elle n'a pas à l'approuver. Un enfant sans compte ne peut pas être "
+"promu : son parent peut en créer un sur la page de l'enfant."
 
-#: ../../source/dojo-team/running-a-session.rst:128
+#: ../../source/dojo-team/running-a-session.rst:140
 msgid ""
 "**Remove someone** from the team, or **leave** it yourself. People who "
 "leave stay listed on the past sessions they helped run."
@@ -344,7 +373,7 @@ msgstr ""
 "personnes qui partent restent mentionnées sur les séances passées "
 "qu'elles ont aidé à animer."
 
-#: ../../source/dojo-team/running-a-session.rst:130
+#: ../../source/dojo-team/running-a-session.rst:142
 msgid ""
 "**Hand over the champion role** (champion only) to one of your mentors. "
 "You stay on the team as a mentor."
@@ -352,11 +381,36 @@ msgstr ""
 "**Transmettre le rôle de champion** (champion uniquement) à l'un de vos "
 "mentors. Vous restez dans l'équipe en tant que mentor."
 
-#: ../../source/dojo-team/running-a-session.rst:134
+#: ../../source/dojo-team/running-a-session.rst:146
+msgid "Your dojo's members"
+msgstr "Les membres de votre dojo"
+
+#: ../../source/dojo-team/running-a-session.rst:148
+msgid ""
+"The **Members** page in the sidebar lists the children whose home dojo is"
+" yours: their age, belt, how they come (the same labels as on the "
+"attendance list), how many sessions they came to, their last visit, and "
+"since when this is their home dojo. A child gets a home dojo at their "
+"first sign-up for a session; after that only their parents can change it."
+" Children with their own login can be promoted to youth mentor straight "
+"from this list. Children visiting from another dojo aren't listed here; "
+"they're marked **Visiting** on the attendance list."
+msgstr ""
+"La page **Members** dans la barre latérale liste les enfants dont votre "
+"dojo est le dojo d'attache : leur âge, leur ceinture, leur assiduité (les"
+" mêmes étiquettes que sur la liste de présences), le nombre de sessions "
+"suivies, leur dernière visite et depuis quand c'est leur dojo d'attache. "
+"Un enfant reçoit un dojo d'attache à sa première inscription à une "
+"session ; ensuite, seuls ses parents peuvent le changer. Les enfants qui "
+"ont leur propre compte peuvent être promus jeunes mentors directement "
+"depuis cette liste. Les enfants venant d'un autre dojo n'y figurent pas ;"
+" ils sont marqués **Visiting** sur la liste de présences."
+
+#: ../../source/dojo-team/running-a-session.rst:158
 msgid "Your dojo's status"
 msgstr "Le statut de votre dojo"
 
-#: ../../source/dojo-team/running-a-session.rst:136
+#: ../../source/dojo-team/running-a-session.rst:160
 msgid ""
 "The **Settings** page shows your dojo's status, which only its champion "
 "can change:"
@@ -364,7 +418,7 @@ msgstr ""
 "La page **Paramètres** affiche le statut de votre dojo, que seul son "
 "champion peut modifier :"
 
-#: ../../source/dojo-team/running-a-session.rst:139
+#: ../../source/dojo-team/running-a-session.rst:163
 msgid ""
 "**Draft** — a new dojo starts here, hidden from the public site while you"
 " set it up. **Launch dojo** makes it public."
@@ -373,7 +427,7 @@ msgstr ""
 "site public pendant que vous le préparez. **Lancer le dojo** le rend "
 "public."
 
-#: ../../source/dojo-team/running-a-session.rst:141
+#: ../../source/dojo-team/running-a-session.rst:165
 msgid ""
 "**Active** — listed in the dojo finder, with its sessions open for sign-"
 "ups."
@@ -381,7 +435,7 @@ msgstr ""
 "**Actif** — affiché dans le moteur de recherche de dojos, avec ses "
 "séances ouvertes aux inscriptions."
 
-#: ../../source/dojo-team/running-a-session.rst:143
+#: ../../source/dojo-team/running-a-session.rst:167
 msgid ""
 "**Dormant** — not running for now: hidden from the public site, but still"
 " in ninjas' history. **Restart dojo** brings it back."
@@ -390,7 +444,7 @@ msgstr ""
 " mais toujours présent dans l'historique des ninjas. **Relancer le dojo**"
 " le réactive."
 
-#: ../../source/dojo-team/running-a-session.rst:145
+#: ../../source/dojo-team/running-a-session.rst:169
 msgid ""
 "**Archived** — closed: hidden from the public site. **Reopen as draft** "
 "brings it back as a draft."
@@ -398,7 +452,7 @@ msgstr ""
 "**Archivé** — fermé : invisible sur le site public. **Rouvrir en "
 "brouillon** le fait revenir à l'état de brouillon."
 
-#: ../../source/dojo-team/running-a-session.rst:148
+#: ../../source/dojo-team/running-a-session.rst:172
 msgid ""
 "A dojo can only be made dormant or archived when it has no upcoming "
 "sessions in draft or open for sign-ups; any pending join requests are "
@@ -411,11 +465,11 @@ msgstr ""
 "planifiée depuis plus de six mois, le tableau de bord vous rappelle d'en "
 "planifier une ou de mettre le dojo en sommeil."
 
-#: ../../source/dojo-team/running-a-session.rst:154
+#: ../../source/dojo-team/running-a-session.rst:178
 msgid "Posting updates"
 msgstr "Publier des nouvelles"
 
-#: ../../source/dojo-team/running-a-session.rst:156
+#: ../../source/dojo-team/running-a-session.rst:180
 msgid ""
 "The **Updates** page in your dashboard's sidebar is where your dojo posts"
 " short, dated notes, shown under **From this dojo** on its public page: a"
@@ -433,7 +487,7 @@ msgstr ""
 "récentes, et **Retirer** en supprime une. Le champion comme les mentors "
 "peuvent publier et retirer des nouvelles."
 
-#: ../../source/dojo-team/running-a-session.rst:163
+#: ../../source/dojo-team/running-a-session.rst:187
 msgid ""
 "Keep updates to news: something that's always true (parking, what to "
 "bring) belongs in the dojo's FAQ, and session dates are already on the "
@@ -443,11 +497,11 @@ msgstr ""
 " quoi apporter) a sa place dans la FAQ du dojo, et les dates des séances "
 "figurent déjà dans la liste des événements."
 
-#: ../../source/dojo-team/running-a-session.rst:168
+#: ../../source/dojo-team/running-a-session.rst:192
 msgid "Team pages"
 msgstr "Pages d'équipe"
 
-#: ../../source/dojo-team/running-a-session.rst:170
+#: ../../source/dojo-team/running-a-session.rst:194
 msgid ""
 "A dojo's public team page (visible to anyone, not just the dojo team) "
 "shows its champion first, followed by its mentors and youth mentors. "
@@ -499,4 +553,14 @@ msgstr ""
 #~ "revenez plus tard, ou contactez "
 #~ "CoderDojo Belgique si vous devez suivre"
 #~ " les présences entre-temps."
+
+#~ msgid ""
+#~ "**Promote a youth mentor** — a "
+#~ "ninja with their own login who "
+#~ "helps run sessions at your dojo."
+#~ msgstr ""
+#~ "**Promouvoir un jeune mentor** — un "
+#~ "ninja ayant son propre identifiant qui"
+#~ " aide à animer les séances de "
+#~ "votre dojo."
 

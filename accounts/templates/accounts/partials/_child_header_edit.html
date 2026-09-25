@@ -3,7 +3,8 @@ The child detail page's header, swapped in over htmx when the name is
 clicked (see _child_header_display.html). Submitting saves the name,
 avatar and birthday and swaps back to the display header; Cancel just
 reloads, since nothing's been saved yet.
-Expects `guardian`, `child`, `icon_choices`, `current_icon` and `gender_choices` in context.
+Expects `child`, `icon_choices`, `current_icon`, `gender_choices` and
+`home_dojo_choices` (public dojos, accounts.home_dojo) in context.
 {% endcomment %}
 <form class="child-header child-header--editing" id="child-header" method="post"
       hx-post="{% url 'edit_ninja' ninja_id=child.id %}"
@@ -25,6 +26,14 @@ Expects `guardian`, `child`, `icon_choices`, `current_icon` and `gender_choices`
         <label class="cd-form__label label" for="ec-gender">Gender (optional)</label>
         <select class="cd-form__select body" id="ec-gender" name="gender">
           {% for value, label in gender_choices %}<option value="{{ value }}"{% if value == child.gender %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="ec-home-dojo">Home dojo</label>
+        <select class="cd-form__select body" id="ec-home-dojo" name="home_dojo">
+          <option value="">None yet</option>
+          {% if child.home_dojo and child.home_dojo not in home_dojo_choices %}<option value="{{ child.home_dojo_id }}" selected>{{ child.home_dojo.name }}</option>{% endif %}
+          {% for dojo in home_dojo_choices %}<option value="{{ dojo.id }}"{% if dojo.id == child.home_dojo_id %} selected{% endif %}>{{ dojo.name }}</option>{% endfor %}
         </select>
       </div>
       <div class="cd-form__field">

@@ -127,6 +127,8 @@ def add_mentor(dojo, user, by):
 def promote_youth_mentor(dojo, ninja_user, by_membership):
     if not ninja_user.is_ninja:
         raise TeamError("Only a ninja's own account can be promoted to youth mentor.")
+    if not ninja_user.is_active:
+        raise TeamError(f"{ninja_user.team_name}'s login is switched off; their guardian can switch it back on.")
     membership = DojoMembership.objects.filter(dojo=dojo, user=ninja_user).first()
     if membership is not None and membership.status == DojoMembership.ACTIVE:
         raise TeamError(f"{ninja_user.team_name} is already on this team.")
@@ -137,6 +139,10 @@ def promote_youth_mentor(dojo, ninja_user, by_membership):
     membership.requested_by = by_membership.user
     _activate(membership, by=by_membership.user)
     membership.save()
+    # The family is informed, not asked (DATA_MODEL.md §18).
+    from mailing.automated import youth_mentor_promoted_mail
+
+    youth_mentor_promoted_mail(membership)
     return membership
 
 

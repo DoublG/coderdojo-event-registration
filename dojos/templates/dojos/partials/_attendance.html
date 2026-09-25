@@ -1,8 +1,10 @@
 {% comment %}
 The attendance list for one event — shared by dojo_event_attendance.html
 (a specific session) and dojo_dashboard.html (the next/most recent one).
-Expects `dojo`, `event`, `registrations` (confirmed, not waitlisted) and
-`present_count` — see dojos.views._attendance_context — and `dojo_access`
+Expects `dojo`, `event`, `registrations` (confirmed, not waitlisted),
+`present_count`, and the session's team as `team_rows`/`team_present_count`
+(marked here too: the record of who was there, for the insurance) — see
+dojos.views._attendance_context — and `dojo_access`
 (without TAKE_ATTENDANCE the list is read-only). Also the htmx
 response of dojo_event_attendance_mark_all, which swaps this whole block.
 Server-driven (htmx), so CoderDojo.initAttendance's client-only toggling
@@ -14,7 +16,7 @@ is deliberately not wired up here.
       <h3 class="cd-attendance__title heading-md">{{ event.name }} — {{ event.start_time|date:"D j M Y, H:i" }}</h3>
       {% include "dojos/partials/_attendance_summary.html" %}
     </div>
-    {% if registrations and dojo_access.can_take_attendance %}
+    {% if registrations or team_rows %}{% if dojo_access.can_take_attendance %}
       <form method="post" action="{% url 'dojo_event_attendance_mark_all' dojo_id=dojo.id event_id=event.id %}"
             hx-post="{% url 'dojo_event_attendance_mark_all' dojo_id=dojo.id event_id=event.id %}"
             hx-target="#attendance-{{ event.id }}" hx-swap="outerHTML">
@@ -24,7 +26,7 @@ is deliberately not wired up here.
           Mark all present
         </button>
       </form>
-    {% endif %}
+    {% endif %}{% endif %}
   </div>
 
   <div class="cd-attendance__list">
@@ -32,6 +34,15 @@ is deliberately not wired up here.
       {% include "dojos/partials/_attendance_row.html" %}
     {% empty %}
       <p class="body-sm">Nobody has a confirmed place for this session yet.</p>
+    {% endfor %}
+  </div>
+
+  <h4 class="cd-attendance__team-title label">Session team</h4>
+  <div class="cd-attendance__list">
+    {% for row in team_rows %}
+      {% include "dojos/partials/_attendance_team_row.html" %}
+    {% empty %}
+      <p class="body-sm">Nobody from the team is assigned to this session yet{% if dojo_access.can_manage_events %} — <a href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">pick the team on the session's page</a>{% endif %}.</p>
     {% endfor %}
   </div>
 </div>

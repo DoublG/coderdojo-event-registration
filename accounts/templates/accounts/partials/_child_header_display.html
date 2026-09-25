@@ -21,5 +21,8 @@ the ninja views their own page — then the name isn't clickable).
       {% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}
       {% if child.member_since %} · Member since {{ child.member_since|date:"F Y" }}{% endif %}
     </p>
+    {% for membership in child.youth_mentor_memberships %}
+      <p class="body-sm"><span class="cd-badge cd-badge--accent caption">Youth mentor</span> at {{ membership.dojo.name }}</p>
+    {% endfor %}
   </div>
 </div>

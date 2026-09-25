@@ -1,0 +1,37 @@
+{% comment %}
+One person on the session's team (Event.team) on the attendance list, with
+the same Present/Absent toggle as a ninja's row (events.TeamAttendance;
+re-clicking the pressed button clears the mark). Who was there is what the
+insurance needs. Expects `row` ({membership, attended}), `dojo`, `event`
+and `dojo_access`; see dojos.views._team_attendance_rows.
+{% endcomment %}
+{% with membership=row.membership %}
+<div class="cd-attendance__row" id="attendance-team-row-{{ membership.id }}">
+  <div class="cd-attendance__person">
+    <span class="cd-attendance__name body">{{ membership.name }}
+      <span class="cd-badge cd-badge--outline caption">{{ membership.get_role_display }}</span>
+    </span>
+  </div>
+  {% if dojo_access.can_take_attendance %}
+  <form method="post" action="{% url 'dojo_event_team_attendance_mark' dojo_id=dojo.id event_id=event.id membership_id=membership.id %}"
+        hx-post="{% url 'dojo_event_team_attendance_mark' dojo_id=dojo.id event_id=event.id membership_id=membership.id %}"
+        hx-target="#attendance-team-row-{{ membership.id }}" hx-swap="outerHTML">
+    {% csrf_token %}
+    <div class="cd-attendance__toggle" role="group" aria-label="Attendance for {{ membership.name }}">
+      <button type="submit" name="attended" value="{% if row.attended %}none{% else %}present{% endif %}"
+              class="cd-attendance__btn cd-attendance__btn--present label" aria-pressed="{% if row.attended %}true{% else %}false{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+        Present
+      </button>
+      <button type="submit" name="attended" value="{% if row.attended is False %}none{% else %}absent{% endif %}"
+              class="cd-attendance__btn cd-attendance__btn--absent label" aria-pressed="{% if row.attended is False %}true{% else %}false{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        Absent
+      </button>
+    </div>
+  </form>
+  {% else %}
+    <span class="cd-badge {% if row.attended %}cd-badge--success{% elif row.attended is False %}cd-badge--warning{% else %}cd-badge--outline{% endif %} caption">{% if row.attended %}Present{% elif row.attended is False %}Absent{% else %}Not marked{% endif %}</span>
+  {% endif %}
+</div>
+{% endwith %}

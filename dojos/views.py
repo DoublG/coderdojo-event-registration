@@ -18,7 +18,7 @@ from applications.services import is_approved_champion
 from content.models import FAQ, OrganisationTeamMember, Promotion
 from events.awards import BeltError, award_belt, sync_milestones
 from events.forms import EventForm
-from events.models import Belt, Event, NinjaEngagement, Registration
+from events.models import Belt, Event, NinjaEngagement, Registration, TeamAttendance
 from geo.geocoding import find_province, geocode
 from notifications.models import Notification
 from pathways.models import Pathway
@@ -171,15 +171,19 @@ def _attendance_context(event):
     attendance page and the htmx endpoints that re-render parts of it."""
     registrations = list(
         event.registration_set.filter(waiting_list=False)
-        .select_related("ninja")
+        .select_related("ninja", "ninja__home_dojo")
         .prefetch_related("pathways", "ninja__belts__belt")
         .order_by("ninja__name")
     )
     event_pathway_ids = set(event.pathways.values_list("id", flat=True))
+    team_rows = _team_attendance_rows(event)
     return {
         "event": event,
         "registrations": registrations,
         "present_count": sum(1 for r in registrations if r.attended),
+        # The session's team, on the same list (who was there: insurance).
+        "team_rows": team_rows,
+        "team_present_count": sum(1 for row in team_rows if row["attended"]),
         # For each row's pathway picker: every pathway, the session's own first.
         "event_pathway_ids": event_pathway_ids,
         "all_pathways": sorted(Pathway.objects.all(), key=lambda p: (p.id not in event_pathway_ids, p.name)),
@@ -192,6 +196,15 @@ def _attendance_context(event):
                                                       ninja_id__in=[r.ninja_id for r in registrations])
         },
     }
+
+
+def _team_attendance_rows(event):
+    """One {membership, attended} per person on the session's team
+    (`Event.team`), champion first; `attended` from TeamAttendance, None
+    when not marked yet."""
+    marks = dict(TeamAttendance.objects.filter(event=event).values_list("membership_id", "attended"))
+    memberships = event.team.select_related("user", "dojo").order_by("role", "user__first_name")
+    return [{"membership": m, "attended": marks.get(m.id)} for m in memberships]
 
 
 @login_required
@@ -315,11 +328,11 @@ def dojo_set_lifecycle(request, dojo_id):
 
 def _youth_mentor_candidates(dojo):
     """Ninja accounts that can be promoted to youth mentor here: ninjas with
-    their own login whose home dojo this is, or who've signed up for one of
-    its sessions, and who aren't already on the team."""
+    their own (switched-on) login whose home dojo this is, or who've signed
+    up for one of its sessions, and who aren't already on the team."""
     on_team = dojo.memberships.active().values("user_id")
     ninjas = (
-        Ninja.objects.exclude(account=None)
+        Ninja.objects.exclude(account=None).filter(account__is_active=True)
         .filter(Q(home_dojo=dojo) | Q(registration__event__dojo=dojo))
         .exclude(account_id__in=on_team)
         .select_related("account")
@@ -327,6 +340,36 @@ def _youth_mentor_candidates(dojo):
         .order_by("name")
     )
     return ninjas
+
+
+@login_required
+def dojo_members(request, dojo_id):
+    """The admin sidebar's "Members" page: the children whose home dojo this
+    is (accounts.home_dojo), with their belt, how they come (the engagement
+    snapshot), their own login and youth mentor role. With MANAGE_TEAM, a
+    child with a login can be promoted to youth mentor from here (posted to
+    dojo_team_action). Children visiting from another dojo show up on each
+    session's attendance list instead."""
+    access = require_dojo_access(request, dojo_id)
+    dojo = access.dojo
+    ninjas = list(
+        Ninja.objects.filter(home_dojo=dojo).select_related("account").prefetch_related("belts__belt").order_by("name")
+    )
+    engagement = {row.ninja_id: row for row in NinjaEngagement.objects.filter(dojo=dojo, ninja__in=ninjas)}
+    youth_mentor_ids = set(dojo.memberships.active().filter(role=DojoMembership.YOUTH_MENTOR).values_list("user_id", flat=True))
+    candidate_ids = set(_youth_mentor_candidates(dojo).values_list("id", flat=True)) if access.can_manage_team else set()
+    rows = [{
+        "ninja": ninja,
+        "engagement": engagement.get(ninja.id),
+        "has_login": bool(ninja.account_id and ninja.account.is_active),
+        "is_youth_mentor": ninja.account_id in youth_mentor_ids,
+        "can_promote": ninja.id in candidate_ids,
+    } for ninja in ninjas]
+    return render(request, "dojos/dojo_members.html", {
+        "rows": rows,
+        "active": "members",
+        **_admin_context(request, access),
+    })
 
 
 @login_required
@@ -444,6 +487,10 @@ def dojo_team_action(request, dojo_id):
             messages.error(request, "Unknown action.")
     except team.TeamError as error:
         messages.error(request, str(error))
+    # The Members page posts its "Promote" here too, and comes back to itself.
+    next_url = request.POST.get("next", "")
+    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        return redirect(next_url)
     return redirect("dojo_team_manage", dojo_id=dojo.id)
 
 
@@ -590,6 +637,31 @@ def dojo_event_attendance_mark(request, dojo_id, event_id, registration_id):
 
 
 @login_required
+def dojo_event_team_attendance_mark(request, dojo_id, event_id, membership_id):
+    """Present/absent/none for one person on the session's team (POST
+    `attended`), same toggle as a ninja's row. htmx gets the row back plus
+    the team count out-of-band; a plain post redirects to the attendance page."""
+    access = require_dojo_access(request, dojo_id, TAKE_ATTENDANCE)
+    dojo = access.dojo
+    event = get_object_or_404(Event, id=event_id, dojo=dojo)
+    membership = get_object_or_404(event.team.select_related("user"), id=membership_id)
+
+    if request.method == "POST" and request.POST.get("attended") in ATTENDANCE_VALUES:
+        TeamAttendance.objects.update_or_create(
+            event=event, membership=membership,
+            defaults={"attended": ATTENDANCE_VALUES[request.POST["attended"]], "marked_by": request.user},
+        )
+
+    if request.headers.get("HX-Request"):
+        context = {"dojo": dojo, "dojo_access": access, **_attendance_context(event)}
+        row = next(r for r in context["team_rows"] if r["membership"].id == membership.id)
+        html = render_to_string("dojos/partials/_attendance_team_row.html", {**context, "row": row}, request=request)
+        summary = render_to_string("dojos/partials/_attendance_summary.html", {**context, "oob": True}, request=request)
+        return HttpResponse(html + summary)
+    return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
+
+
+@login_required
 def dojo_event_registration_pathways(request, dojo_id, event_id, registration_id):
     """Set which pathways a ninja works on at this session (POST `pathway`,
     repeated) — pre-filled from the event's pathways at signup, narrowed
@@ -653,8 +725,9 @@ def dojo_event_award_belt(request, dojo_id, event_id, registration_id):
 
 @login_required
 def dojo_event_attendance_mark_all(request, dojo_id, event_id):
-    """The "Mark all present" button — every confirmed registration for the event. An
-    htmx request gets the whole re-rendered attendance block back."""
+    """The "Mark all present" button — every confirmed registration for the
+    event, and everyone on its team. An htmx request gets the whole
+    re-rendered attendance block back."""
     access = require_dojo_access(request, dojo_id, TAKE_ATTENDANCE)
     dojo = access.dojo
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
@@ -664,6 +737,10 @@ def dojo_event_attendance_mark_all(request, dojo_id, event_id):
         confirmed.update(attended=True)
         for ninja in Ninja.objects.filter(registration__in=confirmed):
             sync_milestones(ninja, access.membership)
+        for membership in event.team.all():
+            TeamAttendance.objects.update_or_create(
+                event=event, membership=membership, defaults={"attended": True, "marked_by": request.user},
+            )
 
     if request.headers.get("HX-Request"):
         return render(request, "dojos/partials/_attendance.html", {"dojo": dojo, "dojo_access": access, **_attendance_context(event)})

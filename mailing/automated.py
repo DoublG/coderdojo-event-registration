@@ -88,6 +88,24 @@ def waitlist_promoted_mail(registration):
                            _session_context(registration), f"promoted:{registration.pk}")
 
 
+def youth_mentor_promoted_mail(membership):
+    """A dojo's team made the child a youth mentor: the family is told (no
+    approval needed). One mail per promotion, so a re-promotion after
+    leaving mails again."""
+    ninja = Ninja.objects.filter(account_id=membership.user_id).first()
+    if ninja is None:
+        return 0
+    context = {
+        "ninja_name": ninja.name.split()[0],
+        "dojo_name": membership.dojo.name,
+        "promoted_by": membership.promoted_by.name if membership.promoted_by_id else "",
+        "ninja_url": settings.SITE_URL + reverse("ninja_detail", kwargs={"ninja_id": ninja.pk}),
+    }
+    stamp = membership.joined_at.isoformat() if membership.joined_at else ""
+    return _send_to_family(ninja, MailCategory.SERVICE, "youth_mentor_promoted", context,
+                           f"youth_mentor:{membership.pk}:{stamp}")
+
+
 def send_session_reminders(today=None):
     """A reminder for every confirmed place at a session that starts
     MAILING_REMINDER_DAYS_BEFORE days from `today` (Belgian date).

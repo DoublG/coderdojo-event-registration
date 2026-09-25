@@ -1,0 +1,91 @@
+{% extends "dojos/_admin_base.html" %}
+{% block admin_page_title %}Members{% endblock %}
+{% block admin_heading %}Members{% endblock %}
+
+{% block admin_extra_style %}
+<style>
+  .members-page { display: flex; flex-direction: column; gap: var(--space-4); }
+  .members-page .muted { color: var(--ink-muted); margin: 0; }
+  .members-page .member-person { display: flex; align-items: center; gap: var(--space-3); }
+  .members-page .member-person .cd-mentor__avatar { width: 36px; height: 36px; flex-shrink: 0; }
+  .members-page .member-person p { margin: 0; }
+  .members-page td form { margin: 0; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+{% comment %}
+The children whose home dojo this is (Ninja.home_dojo, set at a child's
+first sign-up or by their guardian; accounts.home_dojo) — see
+dojos.views.dojo_members. Children visiting from another dojo are on each
+session's attendance list instead. "Promote" posts to dojo_team_action
+(MANAGE_TEAM) and comes back here.
+{% endcomment %}
+<div class="members-page">
+  <p class="body-sm muted">
+    Children who have {{ dojo.name }} as their home dojo: set at their first sign-up here, and changeable by their parents.
+    Children visiting from another dojo are marked "Visiting" on each session's attendance list.
+  </p>
+
+  <div class="cd-table-wrap">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label" scope="col">Ninja</th>
+          <th class="label" scope="col">Belt</th>
+          <th class="label" scope="col">Comes</th>
+          <th class="label" scope="col">Sessions</th>
+          <th class="label" scope="col">Last visit</th>
+          <th class="label" scope="col">Member since</th>
+          <th class="label" scope="col">Youth mentor</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          {% with ninja=row.ninja engagement=row.engagement %}
+          <tr>
+            <td class="body-sm">
+              <div class="member-person">
+                {% include "accounts/partials/_child_avatar.html" with child=ninja %}
+                <div>
+                  <p>{{ ninja.name }}</p>
+                  <p class="caption muted">{% if ninja.age %}Age {{ ninja.age }}{% endif %}{% if row.has_login %}{% if ninja.age %} · {% endif %}Own login{% endif %}</p>
+                </div>
+              </div>
+            </td>
+            <td class="body-sm">{{ ninja.current_belt.name|default:"—" }}</td>
+            <td class="body-sm">
+              {% if engagement %}
+                <span class="cd-badge caption {% if engagement.stage == 'regular' %}cd-badge--success{% elif engagement.stage == 'at_risk' %}cd-badge--warning{% elif engagement.stage == 'new' %}cd-badge--accent{% else %}cd-badge--outline{% endif %}"
+                      title="Came to {{ engagement.attended_180d }} of the {{ engagement.offered_180d }} sessions meant for them in the last 180 days{% if engagement.missed_in_a_row %}; missed the last {{ engagement.missed_in_a_row }}{% endif %}.">{{ engagement.get_stage_display }}</span>
+              {% else %}—{% endif %}
+            </td>
+            <td class="body-sm">{{ engagement.attended_total|default:"0" }}</td>
+            <td class="body-sm">{{ engagement.last_attended|date:"j M Y"|default:"—" }}</td>
+            <td class="body-sm">{{ ninja.member_since|date:"M Y"|default:"—" }}</td>
+            <td class="body-sm">
+              {% if row.is_youth_mentor %}
+                <span class="cd-badge cd-badge--accent caption">Youth mentor</span>
+              {% elif row.can_promote %}
+                <form method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}"
+                      onsubmit="return confirm('Make {{ ninja.name }} a youth mentor at {{ dojo.name }}? Their family gets a mail about it.');">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="promote">
+                  <input type="hidden" name="ninja_id" value="{{ ninja.id }}">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="cd-btn cd-btn--ghost label">Promote</button>
+                </form>
+              {% elif not row.has_login %}
+                <span class="caption muted" title="A youth mentor needs their own login; their parent can create one on the child's page.">Needs own login</span>
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endwith %}
+        {% empty %}
+          <tr><td class="body-sm" colspan="7">No children have {{ dojo.name }} as their home dojo yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

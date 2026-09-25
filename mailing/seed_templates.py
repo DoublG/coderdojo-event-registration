@@ -578,6 +578,66 @@ Tu ne t'attendais pas à cet e-mail ? Tu peux l'ignorer.
         },
     },
     {
+        "key": "youth_mentor_promoted",
+        "category": MailCategory.SERVICE,
+        "description": "A dojo's team made a child a youth mentor; sent to the family (guardians, plus the "
+                       "child's own login). Variables: ninja_name, dojo_name, promoted_by, ninja_url.",
+        "subject": {
+            "en-us": "{{ ninja_name }} is now a youth mentor at {{ dojo_name }}",
+            "nl-be": "{{ ninja_name }} is nu youth mentor bij {{ dojo_name }}",
+            "fr-be": "{{ ninja_name }} est maintenant jeune mentor à {{ dojo_name }}",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{% if promoted_by %}{{ promoted_by }}, from the {{ dojo_name }} team,{% else %}The {{ dojo_name }} team{% endif %} has made
+{{ ninja_name }} a youth mentor. Youth mentors help other ninjas during sessions and can
+be listed on a session's team. They don't get access to the dojo's dashboard.
+
+You can see it on {{ ninja_name }}'s page:
+
+{{ ninja_url }}
+
+Questions, or would you rather {{ ninja_name }} didn't take this role? Get in touch with
+the dojo's team, or remove {{ ninja_name }}'s own login on that page: that also ends the
+role.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{% if promoted_by %}{{ promoted_by }}, van het team van {{ dojo_name }},{% else %}Het team van {{ dojo_name }}{% endif %} heeft
+{{ ninja_name }} youth mentor gemaakt. Youth mentors helpen andere ninja's tijdens de
+sessies en kunnen in het team van een sessie staan. Ze krijgen geen toegang tot het
+dashboard van de dojo.
+
+Je ziet het op de pagina van {{ ninja_name }}:
+
+{{ ninja_url }}
+
+Vragen, of heb je liever dat {{ ninja_name }} deze rol niet opneemt? Neem contact op met
+het team van de dojo, of verwijder de eigen login van {{ ninja_name }} op die pagina:
+dan stopt de rol ook.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{% if promoted_by %}{{ promoted_by }}, de l'équipe de {{ dojo_name }},{% else %}L'équipe de {{ dojo_name }}{% endif %} a fait de
+{{ ninja_name }} un jeune mentor. Les jeunes mentors aident les autres ninjas pendant les
+sessions et peuvent faire partie de l'équipe d'une session. Ils n'ont pas accès au
+tableau de bord du dojo.
+
+Vous le voyez sur la page de {{ ninja_name }} :
+
+{{ ninja_url }}
+
+Des questions, ou vous préférez que {{ ninja_name }} ne prenne pas ce rôle ? Contactez
+l'équipe du dojo, ou supprimez le compte de {{ ninja_name }} sur cette page : le rôle
+prend fin aussi.
+""",
+        },
+    },
+    {
         "key": "campaign_coolest_projects",
         "category": MailCategory.NEWSLETTER,
         "description": "Campaign: invite every active family and volunteer to Coolest Projects. "
@@ -802,6 +862,10 @@ SAMPLE_CONTEXT = {
                              "account_url": "https://coolregistration.localhost/account/"},
     "application_rejected": {**_common},
     "password_reset": {**_common, "reset_url": "https://coolregistration.localhost/password-reset/confirm/MQ/abc-123/"},
+    "youth_mentor_promoted": {
+        **_common, "ninja_name": "Emma", "dojo_name": "CoderDojo Ghent", "promoted_by": "Jan Peeters",
+        "ninja_url": "https://coolregistration.localhost/account/ninja/1/",
+    },
     "ninja_account_created": {
         **_common, "recipient_name": "Emma", "guardian_name": "Ellen Peeters", "username": "emma",
         "set_password_url": "https://coolregistration.localhost/password-reset/confirm/MQ/abc-123/",

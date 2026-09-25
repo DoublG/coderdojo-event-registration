@@ -2637,3 +2637,45 @@ carries the message for the guardian); the views
 The original request, kept for reference:
 
 > enable the guardian account to manage the accounts for childs. Add a create button on the manage screen, email address is required than and allow the sending of the initial account creation mail. Allow the parent to remove the account again. **Decide `deletion`** if a child account has the helper role the account needs to be disabled not deleted and the role assigments must end. Recreating an account is then a password reset and reenablement of the user account. User accounts need to be able to be disabled. With the creation of a child account the Child gains the capability to register for sessions on his own. Guardian account can still review **Decide `changing`** does the editing capabilty still remain or is it switched to read-only if a child account is present.
+
+## 18. Home dojo, the Members page and the session team's attendance (built)
+
+**Built.**
+
+- **Home dojo — hybrid (decided).** `Ninja.home_dojo` is the dojo the family
+  belongs to; `member_since` is when the child got it. Rules in
+  `accounts/home_dojo.py`: a child without one gets it at their **first
+  sign-up**, from that session's dojo (`assign_on_signup`, in
+  `event_signup`); an organisation dojo never becomes a home dojo. After
+  that nothing moves it automatically: the **guardian** changes or clears it
+  on the child's edit form (`set_home_dojo`, public dojos only; a change
+  restarts `member_since`). The dojo team only reads it. `manage.py
+  assign_home_dojos` (`backfill`) gives children without one their most
+  attended dojo, for data from before this rule.
+- **Members page** (`/dojos/<id>/manage/members/`, `dojo_members`, any team
+  role): the children whose home dojo it is, with age, belt, engagement
+  stage, sessions, last visit, member since, own login and youth mentor
+  role, and a **Promote** button (MANAGE_TEAM, posted to
+  `dojo_team_action` with `next`). Visiting children aren't listed there
+  **(decided)**: they're labelled **Visiting** on the attendance list.
+- **Youth mentor promotion — inform only (decided).** Promotion stays on
+  `dojos.team.promote_youth_mentor`; it now refuses a switched-off login
+  (§17) and queues `youth_mentor_promoted` (service mail) to the family
+  (`mailing.automated.youth_mentor_promoted_mail`: guardians plus the
+  child's own login). No approval step. The role shows on the child's page
+  and family card (`Ninja.youth_mentor_memberships`).
+- **The session team's attendance (insurance).** Everyone on `Event.team`
+  (champion, mentors, youth mentors) is listed under the children on the
+  attendance list and marked present/absent the same way:
+  `events.TeamAttendance` (event, membership, tri-state `attended`,
+  `marked_by`, unique per event+membership; no row = not marked),
+  `dojo_event_team_attendance_mark`; **Mark all present** includes the
+  team. Only memberships on that session's team can be marked.
+
+```mermaid
+erDiagram
+    EVENT ||--o{ TEAM_ATTENDANCE : "who of the team was there"
+    DOJO_MEMBERSHIP ||--o{ TEAM_ATTENDANCE : ""
+    NINJA }o--o| DOJO : "home_dojo (first sign-up, then the guardian)"
+```
+

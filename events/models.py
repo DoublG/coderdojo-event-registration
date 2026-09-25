@@ -382,3 +382,31 @@ class NinjaEngagementChange(models.Model):
 
     def __str__(self):
         return f"{self.ninja}: {self.from_stage} → {self.to_stage} ({self.changed_on})"
+
+
+class TeamAttendanceManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("event", "membership__user")
+
+
+class TeamAttendance(models.Model):
+    """Whether someone on a session's team (`Event.team`: champion, mentors,
+    youth mentors) was actually there, marked on the attendance list next
+    to the ninjas. The record of who was present, for the insurance
+    (DATA_MODEL.md §18). No row = not marked yet."""
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="team_attendance")
+    membership = models.ForeignKey("dojos.DojoMembership", on_delete=models.CASCADE, related_name="attendance")
+    attended = models.BooleanField(null=True, blank=True)
+    marked_at = models.DateTimeField(auto_now=True)
+    marked_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+    )
+
+    objects = TeamAttendanceManager()
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["event", "membership"], name="unique_team_attendance")]
+
+    def __str__(self):
+        return f"{self.membership.user} at {self.event.name}: {self.attended}"

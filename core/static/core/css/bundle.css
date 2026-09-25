@@ -1024,6 +1024,7 @@
 .cd-attendance__summary { color: var(--ink-muted); margin: 0; }
 
 .cd-attendance__list { display: flex; flex-direction: column; }
+.cd-attendance__team-title { color: var(--ink-muted); margin: var(--space-5) 0 var(--space-2); text-transform: uppercase; letter-spacing: 0.04em; }
 .cd-attendance__row {
   display: flex;
   align-items: center;

@@ -214,6 +214,14 @@ class Ninja(models.Model):
             raise ValidationError({"date_of_birth": error})
 
     @property
+    def youth_mentor_memberships(self):
+        """The dojo teams this child is an active youth mentor on (through
+        their own login), dojo loaded."""
+        if not self.account_id:
+            return []
+        return list(self.account.dojo_memberships.filter(role="youth_mentor", status="active").select_related("dojo"))
+
+    @property
     def current_belt(self):
         """The highest belt in this ninja's belt history (events.NinjaBelt),
         or None. Reads `belts.all()` so a prefetch of `belts__belt` covers it."""

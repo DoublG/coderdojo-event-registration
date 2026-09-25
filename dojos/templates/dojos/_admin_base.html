@@ -116,7 +116,7 @@
             </a>
           </li>
           <li>
-            <a href="#" class="cd-admin-nav__link label">
+            <a href="{% url 'dojo_members' dojo_id=dojo.id %}" class="cd-admin-nav__link label{% if active == 'members' %} cd-admin-nav__link--active{% endif %}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c0-4.1 3.4-7 7.5-7s7.5 2.9 7.5 7"/></svg>
               Members
             </a>

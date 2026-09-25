@@ -25,6 +25,11 @@ From here you can:
 - **Edit a child's details** — click their name/header to edit it inline.
   A child who has turned 18 stays on your account; only a newly entered
   date of birth is checked.
+- **Choose their home dojo** — the dojo your child mainly goes to, which
+  gets news about its sessions to you and lists your child with that
+  dojo's team. It's set automatically at your child's first sign-up, and
+  signing up somewhere else never changes it; you can change it (or clear
+  it) when editing their details.
 - **Cancel a registration** — frees the spot for the next child on that
   session's waiting list.
 - **View a child's belt and badges** — their current belt (their coding
@@ -55,6 +60,12 @@ With their own login, your child sees their own page (their belt, badges,
 upcoming sessions and session history) and can sign themselves up for
 sessions or cancel their own places. Their details stay yours to manage:
 they can't change them, you still can.
+
+A dojo's team can make a child with their own login a **youth mentor**:
+they help other ninjas during sessions. You get an email when that
+happens, and it shows on your child's page. If you'd rather they didn't,
+talk to the dojo's team, or remove your child's login, which also ends
+the role.
 
 Already a champion or mentor?
 -------------------------------

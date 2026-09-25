@@ -1087,3 +1087,87 @@ class NinjaLoginTests(TestCase):
         self.assertEqual(list(page.context["upcoming"]), [registration])
         self.client.post(reverse("cancel_registration", kwargs={"registration_id": registration.id}))
         self.assertFalse(Registration.objects.filter(pk=registration.pk).exists())
+
+
+class HomeDojoTests(TestCase):
+    """Hybrid home dojo (accounts.home_dojo): set at the first sign-up,
+    changeable by the guardian, never moved automatically."""
+
+    def setUp(self):
+        self.guardian = User.objects.create(username="g1", email="g1@example.com")
+        self.child = make_ninja(self.guardian, "Kid", date_of_birth=_dob(10))
+        self.ghent = make_dojo("Ghent")
+        self.aalst = make_dojo("Aalst")
+        self.client.force_login(self.guardian)
+
+    def _signup(self, dojo):
+        now = timezone.now()
+        event = Event.objects.create(
+            name="S", dojo=dojo, status=Event.OPEN, places=5,
+            start_time=now + timedelta(days=3), end_time=now + timedelta(days=3, hours=2),
+        )
+        self.client.post(reverse("event_signup", kwargs={"event_id": event.id}), {"child": [str(self.child.id)]})
+        self.child.refresh_from_db()
+
+    def test_first_signup_sets_home_dojo_and_later_ones_dont_move_it(self):
+        self._signup(self.ghent)
+        self.assertEqual((self.child.home_dojo, self.child.member_since), (self.ghent, timezone.localdate()))
+        self._signup(self.aalst)
+        self.assertEqual(self.child.home_dojo, self.ghent)
+
+    def test_organisation_dojo_never_becomes_home_dojo(self):
+        self._signup(make_dojo("Coolest Projects", kind=Dojo.ORGANISATION))
+        self.assertIsNone(self.child.home_dojo)
+
+    def _edit(self, home_dojo):
+        return self.client.post(reverse("edit_ninja", kwargs={"ninja_id": self.child.id}), {
+            "name": "Kid", "date_of_birth": self.child.date_of_birth, "home_dojo": home_dojo,
+        })
+
+    def test_guardian_changes_or_clears_it(self):
+        self.child.home_dojo, self.child.member_since = self.ghent, timezone.localdate() - timedelta(days=400)
+        self.child.save()
+        self._edit(self.aalst.id)
+        self.child.refresh_from_db()
+        self.assertEqual((self.child.home_dojo, self.child.member_since), (self.aalst, timezone.localdate()))
+
+        self._edit("")
+        self.child.refresh_from_db()
+        self.assertEqual((self.child.home_dojo, self.child.member_since), (None, None))
+
+    def test_same_dojo_keeps_member_since_and_hidden_dojo_is_refused(self):
+        since = timezone.localdate() - timedelta(days=400)
+        self.child.home_dojo, self.child.member_since = self.ghent, since
+        self.child.save()
+        self._edit(self.ghent.id)
+        self._edit(make_dojo("Draft", status=Dojo.DRAFT).id)
+        self.child.refresh_from_db()
+        self.assertEqual((self.child.home_dojo, self.child.member_since), (self.ghent, since))
+
+    def test_edit_form_offers_public_dojos(self):
+        response = self.client.get(reverse("edit_ninja", kwargs={"ninja_id": self.child.id}))
+        self.assertEqual(set(response.context["home_dojo_choices"]), {self.ghent, self.aalst})
+
+    def test_backfill_picks_the_most_attended_dojo(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        past = timezone.now() - timedelta(days=30)
+        for n, dojo in enumerate([self.aalst, self.ghent, self.ghent]):
+            event = Event.objects.create(name=f"S{n}", dojo=dojo, places=5, start_time=past + timedelta(days=n),
+                                         end_time=past + timedelta(days=n, hours=2))
+            Registration.objects.create(event=event, ninja=self.child, position=1, waiting_list=False, attended=True)
+
+        call_command("assign_home_dojos", stdout=StringIO())
+        self.child.refresh_from_db()
+        self.assertEqual(self.child.home_dojo, self.ghent)
+        self.assertEqual(self.child.member_since, timezone.localdate(past + timedelta(days=1)))
+
+    def test_youth_mentor_role_shows_on_the_childs_page(self):
+        login = User.objects.create(username="kid", account_type=User.NINJA)
+        self.child.account = login
+        self.child.save()
+        add_member(self.ghent, login, role=DojoMembership.YOUTH_MENTOR)
+        response = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
+        self.assertContains(response, "Youth mentor")

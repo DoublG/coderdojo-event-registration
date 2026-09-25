@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
+from accounts.home_dojo import assign_on_signup
 from accounts.models import Ninja
 from content.models import FAQ, Promotion
 from dojos.models import Dojo
@@ -171,6 +172,8 @@ def event_signup(request, event_id):
                     # What the ninja works on starts as everything the session
                     # covers; the dojo team narrows it on the attendance list.
                     registration.pathways.set(event.pathways.all())
+                    # A child's first sign-up gives them their home dojo.
+                    assign_on_signup(child, event.dojo)
                     if not waiting_list:
                         confirmed_count += 1
                     results.append({"child": child, "waiting_list": waiting_list})

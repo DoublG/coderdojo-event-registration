@@ -23,6 +23,7 @@ a full page reload).
               {% if entry.child.home_dojo %} · {{ entry.child.home_dojo.name }}{% endif %}
               {% with current_belt=entry.child.current_belt %}{% if current_belt %} · {{ current_belt.name }}{% endif %}{% endwith %}
               {% if entry.child.account and entry.child.account.is_active %} · Has own login{% endif %}
+              {% for membership in entry.child.youth_mentor_memberships %} · Youth mentor at {{ membership.dojo.name }}{% endfor %}
             </p>
           </div>
         </div>

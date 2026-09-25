@@ -12,6 +12,7 @@ from .models import (
     NinjaEngagementChange,
     Registration,
     RegistrationCancellation,
+    TeamAttendance,
 )
 
 
@@ -76,3 +77,15 @@ class NinjaEngagementChangeAdmin(admin.ModelAdmin):
     list_display = ["changed_on", "ninja", "from_stage", "to_stage"]
     list_filter = ["to_stage", "from_stage", "changed_on"]
     search_fields = ["ninja__name"]
+
+
+@admin.register(TeamAttendance)
+class TeamAttendanceAdmin(admin.ModelAdmin):
+    """Who of a session's team was there (the attendance list, insurance).
+    Set on the dojo's attendance page; an edit here bypasses that page's
+    check that the person is on the session's team."""
+
+    list_display = ["event", "membership", "attended", "marked_at", "marked_by"]
+    list_filter = ["attended"]
+    search_fields = ["event__name", "membership__user__first_name", "membership__user__last_name"]
+    raw_id_fields = ["event", "membership", "marked_by"]

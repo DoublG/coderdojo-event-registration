@@ -74,6 +74,16 @@ history.
 Marking a child present also keeps their attendance badges (the
 wristbands) up to date.
 
+A child whose home dojo is another dojo is marked **Visiting**; hover over
+it to see which dojo.
+
+Under the children, **Session team** lists everyone you picked as the
+session's team (champion, mentors and youth mentors). Mark them
+**Present** or **Absent** the same way: the list of who was actually
+there is what the insurance needs. **Mark all present** marks the team
+present too. Someone who isn't on the list yet can be added to the
+session's team on the session's page.
+
 Next to each child's name, a label shows how they come to your dojo:
 **New**, **Regular**, **Occasional**, **At risk** (missed the last three
 sessions meant for them), **Lapsed** (not in the last six months),
@@ -124,11 +134,25 @@ champion, mentors and youth mentors — and lets you:
   mentors whose application and background check have been approved can
   be added.
 - **Promote a youth mentor** — a ninja with their own login who helps run
-  sessions at your dojo.
+  sessions at your dojo. Their family gets an email saying so; they don't
+  need to approve it. A child without their own login can't be promoted:
+  their parent can create one on the child's page.
 - **Remove someone** from the team, or **leave** it yourself. People who
   leave stay listed on the past sessions they helped run.
 - **Hand over the champion role** (champion only) to one of your mentors.
   You stay on the team as a mentor.
+
+Your dojo's members
+----------------------
+
+The **Members** page in the sidebar lists the children whose home dojo is
+yours: their age, belt, how they come (the same labels as on the
+attendance list), how many sessions they came to, their last visit, and
+since when this is their home dojo. A child gets a home dojo at their
+first sign-up for a session; after that only their parents can change it.
+Children with their own login can be promoted to youth mentor straight
+from this list. Children visiting from another dojo aren't listed here;
+they're marked **Visiting** on the attendance list.
 
 Your dojo's status
 ---------------------

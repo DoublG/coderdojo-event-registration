@@ -2029,3 +2029,121 @@ class OrganisationEventFormTests(TempMediaMixin, TestCase):
         self.assertNotContains(response, "external_registration_url")
         self._post(dojo, places="20", external_registration_url="https://example.org/")
         self.assertEqual(Event.objects.get(dojo=dojo).external_registration_url, "")
+
+
+class MembersPageTests(TestCase):
+    """The Members page: children whose home dojo this is, and promoting one
+    to youth mentor from there (the family is informed, not asked)."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from accounts.models import Guardianship
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.other_dojo = make_dojo("Aalst")
+        self.parent = User.objects.create(username="parent", email="parent@example.com")
+        self.kid_login = User.objects.create(username="kid", email="kid@example.com", account_type=User.NINJA)
+        self.kid = Ninja.objects.create(name="Emma", home_dojo=self.dojo, account=self.kid_login)
+        Guardianship.objects.create(guardian=self.parent, ninja=self.kid)
+        self.no_login = Ninja.objects.create(name="Bram", home_dojo=self.dojo)
+        self.elsewhere = Ninja.objects.create(name="Visitor", home_dojo=self.other_dojo)
+        self.url = reverse("dojo_members", kwargs={"dojo_id": self.dojo.id})
+
+    def test_lists_home_dojo_children_only(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "dojos/dojo_members.html")
+        self.assertEqual([row["ninja"] for row in response.context["rows"]], [self.no_login, self.kid])
+        rows = {row["ninja"]: row for row in response.context["rows"]}
+        self.assertTrue(rows[self.kid]["can_promote"])
+        self.assertFalse(rows[self.no_login]["can_promote"])
+
+    def test_404_for_anyone_not_on_the_team(self):
+        self.client.force_login(self.parent)
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    def test_promote_from_members_page_comes_back_and_mails_the_family(self):
+        from mailing.models import EmailMessage
+
+        self.client.force_login(self.owner)
+        response = self.client.post(reverse("dojo_team_action", kwargs={"dojo_id": self.dojo.id}), {
+            "action": "promote", "ninja_id": self.kid.id, "next": self.url,
+        })
+
+        self.assertRedirects(response, self.url)
+        self.assertTrue(self.dojo.memberships.active().filter(user=self.kid_login, role=DojoMembership.YOUTH_MENTOR).exists())
+        mails = EmailMessage.objects.filter(template_key="youth_mentor_promoted")
+        self.assertEqual(set(mails.values_list("recipient", flat=True)), {"parent@example.com", "kid@example.com"})
+        self.assertIn("Emma", mails.first().subject)
+        rows = {row["ninja"]: row for row in self.client.get(self.url).context["rows"]}
+        self.assertTrue(rows[self.kid]["is_youth_mentor"])
+
+    def test_switched_off_login_cannot_be_promoted(self):
+        self.kid_login.is_active = False
+        self.kid_login.save()
+        self.client.force_login(self.owner)
+        rows = {row["ninja"]: row for row in self.client.get(self.url).context["rows"]}
+        self.assertFalse(rows[self.kid]["can_promote"])
+        with self.assertRaises(team.TeamError):
+            team.promote_youth_mentor(self.dojo, self.kid_login, by_membership=self.dojo.champion_membership)
+
+
+class TeamAttendanceTests(TestCase):
+    """The session's team is on the attendance list too (who was there:
+    insurance), marked like the ninjas."""
+
+    def setUp(self):
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.mentor = add_member(self.dojo, make_mentor(username="m1"))
+        self.not_on_session = add_member(self.dojo, make_mentor(username="m2"))
+        now = timezone.now()
+        self.event = Event.objects.create(
+            name="Scratch", dojo=self.dojo, status=Event.OPEN, places=5,
+            start_time=now + timedelta(days=1), end_time=now + timedelta(days=1, hours=2),
+        )
+        self.event.team.set([self.dojo.champion_membership, self.mentor])
+        self.client.force_login(self.owner)
+
+    def _url(self, name, **kwargs):
+        return reverse(name, kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id, **kwargs})
+
+    def test_team_is_listed_on_the_attendance_page(self):
+        response = self.client.get(self._url("dojo_event_attendance"))
+        members = [row["membership"] for row in response.context["team_rows"]]
+        self.assertEqual(set(members), {self.dojo.champion_membership, self.mentor})
+        self.assertContains(response, "Session team")
+
+    def test_mark_a_team_member(self):
+        from events.models import TeamAttendance
+
+        url = self._url("dojo_event_team_attendance_mark", membership_id=self.mentor.id)
+        response = self.client.post(url, {"attended": "present"}, HTTP_HX_REQUEST="true")
+        self.assertTemplateUsed(response, "dojos/partials/_attendance_team_row.html")
+        mark = TeamAttendance.objects.get(event=self.event, membership=self.mentor)
+        self.assertEqual((mark.attended, mark.marked_by), (True, self.owner))
+
+        self.client.post(url, {"attended": "none"})
+        mark.refresh_from_db()
+        self.assertIsNone(mark.attended)
+
+    def test_only_the_sessions_team_can_be_marked(self):
+        url = self._url("dojo_event_team_attendance_mark", membership_id=self.not_on_session.id)
+        self.assertEqual(self.client.post(url, {"attended": "present"}).status_code, 404)
+
+    def test_mark_all_includes_the_team(self):
+        from events.models import TeamAttendance
+
+        self.client.post(self._url("dojo_event_attendance_mark_all"))
+        self.assertEqual(TeamAttendance.objects.filter(event=self.event, attended=True).count(), 2)
+
+    def test_visiting_ninja_is_labelled(self):
+        visitor = Ninja.objects.create(name="Visitor", home_dojo=make_dojo("Aalst"))
+        Registration.objects.create(event=self.event, ninja=visitor, position=1, waiting_list=False)
+        response = self.client.get(self._url("dojo_event_attendance"))
+        self.assertContains(response, "Visiting")

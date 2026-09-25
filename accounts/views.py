@@ -26,7 +26,7 @@ from mailing.categories import MailCategory
 from mailing.models import ConsentEvent
 from mailing.preferences import set_preference
 
-from . import child_accounts
+from . import child_accounts, home_dojo
 from .forms import (
     ForcedPasswordChangeForm,
     LoginForm,
@@ -391,6 +391,14 @@ def _set_icon(child, icon):
         use_library_image(child, "photo", "ninjas", icon)
 
 
+def _edit_context(child, **extra):
+    return {
+        "child": child, "gender_choices": Ninja.GENDER_CHOICES,
+        "icon_choices": _icon_choices(), "current_icon": _current_icon_value(child),
+        "home_dojo_choices": home_dojo.home_dojo_choices(), **extra,
+    }
+
+
 def _current_icon_value(child):
     """The dropdown's filename for the child's current photo, so the edit
     form can preselect it (None for an uploaded photo or none at all)."""
@@ -411,13 +419,18 @@ def edit_ninja(request, ninja_id):
             child.name = name
         date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
         if date_of_birth != child.date_of_birth and (dob_error := ninja_birth_date_error(date_of_birth)):
-            return render(request, "accounts/partials/_child_header_edit.html", {
-                "child": child, "dob_error": dob_error, "gender_choices": Ninja.GENDER_CHOICES,
-                "icon_choices": _icon_choices(), "current_icon": _current_icon_value(child),
-            })
+            return render(request, "accounts/partials/_child_header_edit.html", _edit_context(child, dob_error=dob_error))
         child.date_of_birth = date_of_birth
         if "gender" in request.POST:
             child.gender = _clean_gender(request.POST["gender"])
+        # Like gender: a form without the field keeps what's stored, and an
+        # unknown id (not a public dojo) changes nothing.
+        if "home_dojo" in request.POST:
+            dojo_id = request.POST["home_dojo"]
+            if not dojo_id:
+                home_dojo.set_home_dojo(child, None)
+            elif dojo := home_dojo.home_dojo_choices().filter(pk=dojo_id).first():
+                home_dojo.set_home_dojo(child, dojo)
 
         _set_icon(child, request.POST.get("icon", ""))
         child.save()
@@ -426,10 +439,7 @@ def edit_ninja(request, ninja_id):
             "child": child, "can_edit": True,
         })
 
-    return render(request, "accounts/partials/_child_header_edit.html", {
-        "child": child, "gender_choices": Ninja.GENDER_CHOICES,
-        "icon_choices": _icon_choices(), "current_icon": _current_icon_value(child),
-    })
+    return render(request, "accounts/partials/_child_header_edit.html", _edit_context(child))
 
 
 def _login_card(request, child, error=None, notice=None):

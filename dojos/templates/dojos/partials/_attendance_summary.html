@@ -1,7 +1,8 @@
 {% comment %}
-"N of M present" — rendered inside _attendance.html, and re-sent out-of-band
-(`oob`) alongside each single-row update from dojo_event_attendance_mark.
+"N of M present" (ninjas, then the session's team) — rendered inside
+_attendance.html, and re-sent out-of-band (`oob`) alongside each
+single-row update from dojo_event_attendance_mark / _team_attendance_mark.
 {% endcomment %}
 <p class="cd-attendance__summary caption" id="attendance-summary-{{ event.id }}"{% if oob %} hx-swap-oob="true"{% endif %}>
-  {{ present_count }} of {{ registrations|length }} present
+  {{ present_count }} of {{ registrations|length }} present{% if team_rows %} · team: {{ team_present_count }} of {{ team_rows|length }}{% endif %}
 </p>
