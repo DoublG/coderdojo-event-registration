@@ -192,9 +192,18 @@ def process_bounces():
     Off while MAILING_BOUNCE_IMAP_HOST is empty."""
     if not settings.MAILING_BOUNCE_IMAP_HOST:
         return 0
+    import imaplib
+    import poplib
+
     from .bounce import BounceProcessor
 
-    return BounceProcessor().process()
+    try:
+        return BounceProcessor().process()
+    except (OSError, imaplib.IMAP4.error, poplib.error_proto) as error:
+        # The mailbox is down or refuses the login: a warning, not a crash
+        # every five minutes. Nothing is lost; the next run catches up.
+        logger.warning("bounce mailbox %s unreachable: %s", settings.MAILING_BOUNCE_IMAP_HOST, error)
+        return 0
 
 
 @shared_task

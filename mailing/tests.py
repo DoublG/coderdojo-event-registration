@@ -812,6 +812,14 @@ I'm away until Monday.
         self.assertEqual(message.from_email, f"bounces+{self.row.pk}@example.org")
         self.assertEqual(message.message()["From"], "CoderDojo <noreply@example.org>")
 
+    @override_settings(MAILING_BOUNCE_IMAP_HOST="mailpit", MAILING_BOUNCE_PROTOCOL="pop3")
+    def test_an_unreachable_mailbox_is_a_warning_not_a_crash(self):
+        from .tasks import process_bounces
+
+        with patch("mailing.bounce.poplib.POP3", side_effect=ConnectionRefusedError(111, "refused")):
+            with self.assertLogs("mailing.tasks", level="WARNING"):
+                self.assertEqual(process_bounces(), 0)
+
     @override_settings(MAILING_BOUNCE_IMAP_HOST="")
     def test_off_without_a_mailbox(self):
         from .tasks import process_bounces
