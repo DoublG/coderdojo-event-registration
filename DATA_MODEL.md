@@ -2170,10 +2170,13 @@ Each phase ships with tests (the repo rule) and updates this section and
 
 - phase 6: done. `events.NinjaEngagement`, rebuilt nightly
   (`events/engagement.py`, 03:00), with stages as specified above and the
-  stage shown on the dojo team's attendance rows. The `registration
-  created_at` and cancellation log from the plan aren't built yet.
-- phase 7: the segment builder is in the organisation dashboard, and the
-  Tier 2 attributes are built on the snapshot.
+  stage shown on the dojo team's attendance rows. `Registration.created_at`
+  and the `RegistrationCancellation` log are in place too.
+- phase 7: done. The segment builder is in the organisation dashboard,
+  with every Tier 1 attribute (as `account_role`, `joined_within_days`,
+  `ninja_age`, `ninja_home_dojo`, `current_belt`, `has_badge`, `pathway`,
+  `waitlisted_for_event`, `cancellations`) and the Tier 2 attributes on
+  the snapshot.
 - phase 8: done, in the organisation dashboard (`/manage/`), not the
   Django admin.
   - campaigns: create, preview, test, launch or schedule, cancel, results

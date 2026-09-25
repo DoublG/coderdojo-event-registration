@@ -1400,3 +1400,59 @@ class EngagementAttributeTests(TestCase):
             "missed_in_a_row": 3,
             "engagement_stage_at_dojo": {"dojo": self.ghent.pk, "stages": ["at_risk", "lapsed"]},
         })
+
+
+class ProfileAttributeTests(TestCase):
+    """Tier 1 attributes read straight from the site's data."""
+
+    def setUp(self):
+        from events.models import Belt, NinjaBelt
+
+        today = timezone.localdate()
+        self.dojo = make_dojo("Ghent")
+        self.ten = _family("tenfam", Ninja.GIRL)
+        self.fifteen = _family("fifteenfam", Ninja.BOY)
+        Ninja.objects.filter(guardianships__guardian=self.ten).update(
+            date_of_birth=today.replace(year=today.year - 10), home_dojo=self.dojo)
+        Ninja.objects.filter(guardianships__guardian=self.fifteen).update(date_of_birth=today.replace(year=today.year - 15))
+        yellow = Belt.objects.create(level=2, name="Yellow")
+        NinjaBelt.objects.create(ninja=Ninja.objects.of_guardian(self.fifteen).get(), belt=yellow, awarded_on=today)
+        self.champion = User.objects.create(username="champ", email="c@example.com")
+        add_member(self.dojo, self.champion, DojoMembership.CHAMPION)
+
+    def _one(self, scope, attribute, operator, value):
+        return _resolve(_segment((scope, "and", [(attribute, operator, value)])))
+
+    def test_age_home_dojo_and_belt(self):
+        self.assertEqual(self._one("ninja", "ninja_age", "gte", 10), {"tenfam", "fifteenfam"})
+        self.assertEqual(self._one("ninja", "ninja_age", "lte", 10), {"tenfam"})
+        self.assertEqual(self._one("ninja", "ninja_age", "gte", 11), {"fifteenfam"})
+        self.assertEqual(self._one("ninja", "ninja_home_dojo", "in", [self.dojo.pk]), {"tenfam"})
+        self.assertEqual(self._one("ninja", "current_belt", "in", [0]), {"tenfam"})
+        self.assertEqual(self._one("ninja", "current_belt", "in", [2]), {"fifteenfam"})
+
+    def test_roles_and_new_accounts(self):
+        self.assertEqual(self._one("user", "account_role", "in", ["champion"]), {"champ"})
+        self.assertEqual(self._one("user", "account_role", "in", ["guardian"]), {"tenfam", "fifteenfam"})
+        self.assertEqual(self._one("user", "account_role", "not_in", ["guardian"]), {"champ"})
+        User.objects.filter(username="champ").update(date_joined=timezone.now() - timedelta(days=400))
+        self.assertEqual(self._one("user", "joined_within_days", "within_days", 30), {"tenfam", "fifteenfam"})
+
+    def test_waiting_list_and_cancellations(self):
+        start = timezone.now() + timedelta(days=5)
+        event = Event.objects.create(name="Full", dojo=self.dojo, status=Event.OPEN, places=0,
+                                     start_time=start, end_time=start + timedelta(hours=2))
+        ten_kid = Ninja.objects.of_guardian(self.ten).get()
+        registration = Registration.objects.create(event=event, ninja=ten_kid, waiting_list=True, position=1)
+        self.assertEqual(self._one("ninja", "waitlisted_for_event", "in", [event.pk]), {"tenfam"})
+
+        self.client.force_login(self.ten)
+        self.client.post(reverse("cancel_registration", kwargs={"registration_id": registration.pk}))
+        from events.models import RegistrationCancellation
+
+        logged = RegistrationCancellation.objects.get()
+        self.assertEqual((logged.ninja, logged.event, logged.was_waitlisted, logged.cancelled_by),
+                         (ten_kid, event, True, self.ten))
+        self.assertIsNotNone(logged.signed_up_at)
+        self.assertEqual(self._one("ninja", "cancellations", "gte", 1), {"tenfam"})
+        self.assertEqual(self._one("ninja", "cancellations", "lte", 0), {"fifteenfam"})

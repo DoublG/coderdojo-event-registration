@@ -98,7 +98,7 @@ class StrNeverQueriesTests(TestCase):
         from applications.models import Application, BackgroundCheckHistory
         from content.models import Announcement
         from dojos.testing import add_member, make_dojo
-        from events.models import Badge, Belt, NinjaBadge, NinjaBelt, NinjaEngagement
+        from events.models import Badge, Belt, Event, NinjaBadge, NinjaBelt, NinjaEngagement, RegistrationCancellation
         from mailing.models import ConsentEvent, EmailMessage, MailPreference, Segment, SegmentGroup
         from notifications.models import Notification
         from pathways.models import PathwayProject, PathwayStep
@@ -120,6 +120,9 @@ class StrNeverQueriesTests(TestCase):
             (PathwayStep.objects.create(pathway=pathway, title="Start"), "Scratch step 0: Start"),
             (PathwayProject.objects.create(pathway=pathway, title="Game"), "Scratch: Game"),
             (SegmentGroup.objects.create(segment=Segment.objects.create(name="Girlz")), "Girlz ("),
+            (RegistrationCancellation.objects.create(ninja=ninja, event=Event.objects.create(
+                name="Gone", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()),
+                was_waitlisted=False), "Kid cancelled Gone"),
             (NinjaEngagement.objects.create(ninja=ninja, dojo=dojo, stage="regular", computed_on=date(2026, 1, 1)),
              "Kid @ Ghent"),
             (EmailMessage.objects.create(user=user, category="service", subject="Hi", body=""), "jan — Hi"),

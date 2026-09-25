@@ -113,6 +113,7 @@ class Registration(models.Model):
 
     # Tri-state: None = not yet marked, True = present, False = absent.
     attended = models.BooleanField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now, editable=False, help_text="When the ninja was signed up.")
     pathways = models.ManyToManyField(
         "pathways.Pathway", blank=True, related_name="registrations",
         help_text="What this ninja works on at this session — usually a subset of the event's "
@@ -125,6 +126,30 @@ class Registration(models.Model):
         # uses it to decide who's confirmed vs waitlisted.
         ordering = ["position"]
         unique_together = [("event", "ninja")]
+
+
+class RegistrationCancellationManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("ninja", "event__dojo")
+
+
+class RegistrationCancellation(models.Model):
+    """A cancelled place (append-only log). Cancelling still deletes the
+    Registration, so places and the waiting list work as before; this keeps
+    the fact for the engagement figures and segments."""
+
+    ninja = models.ForeignKey("accounts.Ninja", on_delete=models.CASCADE, related_name="cancellations")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="cancellations")
+    was_waitlisted = models.BooleanField()
+    signed_up_at = models.DateTimeField(null=True, blank=True)
+    cancelled_at = models.DateTimeField(default=timezone.now)
+    cancelled_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                                     related_name="+")
+
+    objects = RegistrationCancellationManager()
+
+    def __str__(self):
+        return f"{self.ninja} cancelled {self.event}"
 
 
 class Belt(models.Model):

@@ -14,18 +14,38 @@ from .attributes.engagement import (
 from .attributes.event import EventAttribute
 from .attributes.locality import LanguageAttribute, NearDojoAttribute, ProvinceAttribute
 from .attributes.ninja import NinjaGenderAttribute
+from .attributes.profile import (
+    AccountRoleAttribute,
+    CancellationsAttribute,
+    CurrentBeltAttribute,
+    HasBadgeAttribute,
+    HomeDojoAttribute,
+    JoinedAttribute,
+    NinjaAgeAttribute,
+    PathwayAttribute,
+    WaitlistedForEventAttribute,
+)
 from .attributes.registration import AttendedEventAttribute
 
 SEGMENT_ATTRIBUTES = {
     attribute.key: attribute
     for attribute in [
+        AccountRoleAttribute,
         AccountTypeAttribute,
+        JoinedAttribute,
         HasChildrenAttribute,
         ActiveTeamMemberAttribute,
         LanguageAttribute,
         ProvinceAttribute,
         NearDojoAttribute,
         NinjaGenderAttribute,
+        NinjaAgeAttribute,
+        HomeDojoAttribute,
+        CurrentBeltAttribute,
+        HasBadgeAttribute,
+        PathwayAttribute,
+        WaitlistedForEventAttribute,
+        CancellationsAttribute,
         AttendedWithinDaysAttribute,
         EngagementStageAttribute,
         StageAtDojoAttribute,

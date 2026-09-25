@@ -17,7 +17,7 @@ from django.utils.text import slugify
 
 from core.image_library import library_filename, use_library_image
 from dojos.access import accessible_dojos
-from events.models import Registration
+from events.models import Registration, RegistrationCancellation
 from mailing.automated import waitlist_promoted_mail
 from mailing.categories import MailCategory
 from mailing.models import ConsentEvent
@@ -454,6 +454,10 @@ def cancel_registration(request, registration_id):
     if request.method == "POST":
         event = registration.event
         was_confirmed = not registration.waiting_list
+        RegistrationCancellation.objects.create(
+            ninja=registration.ninja, event=event, was_waitlisted=registration.waiting_list,
+            signed_up_at=registration.created_at, cancelled_by=request.user,
+        )
         registration.delete()
 
         if was_confirmed:

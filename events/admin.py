@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from geo.widgets import BelgiumGISModelAdmin
 
-from .models import Badge, Belt, Event, NinjaBadge, NinjaBelt, NinjaEngagement, Registration
+from .models import Badge, Belt, Event, NinjaBadge, NinjaBelt, NinjaEngagement, Registration, RegistrationCancellation
 
 
 @admin.register(Event)
@@ -48,3 +48,12 @@ class NinjaEngagementAdmin(admin.ModelAdmin):
     list_display = ["ninja", "dojo", "stage", "attended_180d", "offered_180d", "missed_in_a_row", "last_attended"]
     list_filter = ["stage", "computed_on"]
     search_fields = ["ninja__name"]
+
+
+@admin.register(RegistrationCancellation)
+class RegistrationCancellationAdmin(admin.ModelAdmin):
+    """The cancellation log (append-only in normal use: accounts.views.cancel_registration)."""
+
+    list_display = ["cancelled_at", "ninja", "event", "was_waitlisted", "cancelled_by"]
+    list_filter = ["was_waitlisted"]
+    search_fields = ["ninja__name", "event__name"]
