@@ -2136,8 +2136,11 @@ Each phase ships with tests (the repo rule) and updates this section and
     unsubscribe (tested through nginx), and the newsletter opt-in on
     sign-up.
 
-  Still open: the production systemd units and `deploy.sh`, then moving
-  `applications.services` mail to `send()`.
+  The production side is written: the two unit files in
+  `scripts/systemd/`, and `deploy.sh` installs, restarts and pings them
+  when `~/app/.env` sets `CELERY_WORKERS_ENABLED=true`. It's not switched
+  on yet: that needs the Level27 answers under "Still open". After that,
+  `applications.services` mail moves to `send()`.
 - phase 7: scopes, a subquery per rule, rule validation, the admin
   audience preview, and the Tier 1 attributes listed above
 - phase 8: three seeded draft campaigns (`seed_mailing`)

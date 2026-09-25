@@ -1,0 +1,28 @@
+# Celery for coolregistration: the periodic worker, with beat embedded (the only beat).
+# A systemd *user* unit, installed by scripts/deploy.sh into
+# ~/.config/systemd/user/ when ~/app/.env sets CELERY_WORKERS_ENABLED=true.
+# Design: DATA_MODEL.md §11, "Production: two Celery workers under systemd".
+# The settings read ~/app/.env themselves, so no EnvironmentFile= here.
+
+[Unit]
+Description=coolregistration Celery periodic worker
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/app
+# %%h is Celery's own hostname placeholder (a literal %h after systemd's
+# specifier expansion). Concurrency 1, children recycled at 100 tasks or
+# ~200 MB: the workers share the machine's memory with gunicorn.
+ExecStart=%h/.pyenv/versions/py10102-3.14.7/bin/python -m celery -A website worker -n periodic@%%h -Q periodic -c 1 -B --scheduler django_celery_beat.schedulers:DatabaseScheduler --max-tasks-per-child 100 --max-memory-per-child 200000 -l INFO
+Restart=always
+RestartSec=5
+# SIGTERM is Celery's warm shutdown: finish the task in hand, take no new
+# ones. Longer than the slowest mail batch.
+KillSignal=SIGTERM
+TimeoutStopSec=120
+# Web requests first under CPU pressure.
+Nice=10
+
+[Install]
+WantedBy=default.target

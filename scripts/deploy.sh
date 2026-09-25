@@ -14,6 +14,11 @@
 #      runs migrations (+ collectstatic when STATIC_ROOT is configured).
 #   5. Gracefully reloads gunicorn (HUP to its master process) and does a
 #      smoke-test request over the app's unix socket.
+#   6. When ~/app/.env sets CELERY_WORKERS_ENABLED=true: installs the two
+#      Celery worker units (scripts/systemd/, systemd *user* units), restarts
+#      them so they run the new code, and pings them. Otherwise it only says
+#      it skipped them (DATA_MODEL.md §11, "Production: two Celery workers
+#      under systemd").
 #
 # Usage:
 #   scripts/deploy.sh             # deploy (asks for confirmation)
@@ -41,6 +46,7 @@ KEEP="${DEPLOY_KEEP:-5}"
 REMOTE_APP="app"
 REMOTE_PY='$HOME/.pyenv/versions/py10102-3.14.7/bin/python'
 REMOTE_SOCKET="/var/run/socket/py10102.socket"
+CELERY_UNITS="coolregistration-celery-periodic coolregistration-celery-mailing"
 
 # Never shipped: dev tooling and local-only material.
 EXCLUDES_RE='^(\.devcontainer/|\.claude/|\.vscode/|docs/|scripts/|AGENTS\.md$|CLAUDE\.md$|DATA_MODEL\.md$|requirements-dev\.txt$|pyproject\.toml$|\.env\.example$)'
@@ -108,10 +114,15 @@ remote_script() {
 cat <<REMOTE
 set -euo pipefail
 MODE="$MODE"; RELEASE="$RELEASE"; KEEP="$KEEP"; EXAMPLE_KEYS="$EXAMPLE_KEYS"
-APP="\$HOME/$REMOTE_APP"; PY="$REMOTE_PY"; SOCKET="$REMOTE_SOCKET"
+APP="\$HOME/$REMOTE_APP"; PY="$REMOTE_PY"; SOCKET="$REMOTE_SOCKET"; CELERY_UNITS="$CELERY_UNITS"
 REL="\$HOME/deploy/releases/\$RELEASE"
 step() { printf '\n\033[1m[server] %s\033[0m\n' "\$*"; }
 die() { printf '\033[31m[server] error:\033[0m %s\n' "\$*" >&2; exit 1; }
+
+# systemctl --user over a non-login ssh session needs the user's runtime dir.
+[ -n "\${XDG_RUNTIME_DIR:-}" ] || [ ! -d "/run/user/\$(id -u)" ] || export XDG_RUNTIME_DIR="/run/user/\$(id -u)"
+celery_enabled() { grep -qiE '^CELERY_WORKERS_ENABLED=(true|1|yes)\s*\$' "\$APP/.env" 2>/dev/null; }
+user_systemd() { systemctl --user show-environment >/dev/null 2>&1; }
 
 missing_env_keys() {
     local k missing=""
@@ -129,6 +140,14 @@ if [ "\$MODE" = check ]; then
         M="\$(missing_env_keys)"; echo ".env: present\${M:+, missing keys from .env.example:\$M}"
     else
         echo ".env: MISSING"
+    fi
+    step "Celery workers"
+    if ! celery_enabled; then
+        echo "celery: not enabled (set CELERY_WORKERS_ENABLED=true in .env once Redis and lingering are in place)"
+    elif ! user_systemd; then
+        echo "celery: enabled, but systemd --user isn't reachable for \$USER (ask Level27 to enable lingering)"
+    else
+        for unit in \$CELERY_UNITS; do echo "\$unit: \$(systemctl --user is-active "\$unit" 2>/dev/null || true)"; done
     fi
     step "Would-be requirements install (dry run)"
     "\$PY" -m pip install --dry-run --quiet -r /dev/stdin < "\$HOME/deploy/check-requirements.txt" \
@@ -190,6 +209,30 @@ CODE="\$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 --unix-socket "\$S
 echo "GET / (Host: \${HOST:-localhost}) -> \$CODE"
 case "\$CODE" in 2??|3??) ;; *) die "smoke test failed (HTTP \$CODE) — check ~/logs and 'manage.py check --deploy'";; esac
 
+step "Celery workers"
+if ! celery_enabled; then
+    echo "skipped: CELERY_WORKERS_ENABLED isn't true in .env (queued mail is not sent until it is)"
+elif ! user_systemd; then
+    die "the site is live, but systemd --user isn't reachable for \$USER, so the Celery workers were NOT started (ask Level27 to enable lingering)"
+else
+    UNIT_DIR="\$HOME/.config/systemd/user"
+    mkdir -p "\$UNIT_DIR"
+    for unit in \$CELERY_UNITS; do
+        install -m 644 "\$HOME/deploy/systemd/\$unit.service" "\$UNIT_DIR/\$unit.service"
+    done
+    rm -rf "\$HOME/deploy/systemd"
+    systemctl --user daemon-reload
+    systemctl --user enable --quiet \$CELERY_UNITS
+    # A restart, not a reload: a worker keeps running the code it started with.
+    systemctl --user restart \$CELERY_UNITS
+    for unit in \$CELERY_UNITS; do echo "\$unit: \$(systemctl --user is-active "\$unit" || true)"; done
+    if ( cd "\$APP" && "\$PY" -m celery -A website inspect ping --timeout 20 ) >/dev/null 2>&1; then
+        echo "celery: both workers answer"
+    else
+        die "the site is live, but the Celery workers don't answer a ping — check: journalctl --user -u coolregistration-celery-mailing"
+    fi
+fi
+
 step "Cleaning old releases (keeping \$KEEP)"
 ls -1dt "\$HOME/deploy/releases"/*/ 2>/dev/null | tail -n +\$((KEEP + 1)) | xargs -r rm -rf
 echo "deployed \$RELEASE"
@@ -218,6 +261,10 @@ scp -q -o BatchMode=yes "$BUNDLE" "$REMOTE:deploy/incoming.tar.gz"
 if [ -f "$ENV_FILE" ]; then
     scp -q -o BatchMode=yes "$ENV_FILE" "$REMOTE:deploy/incoming.env"
 fi
+# The Celery units live in scripts/ (never bundled): uploaded on their own,
+# installed by the remote script only when the workers are enabled.
+"${SSH[@]}" 'rm -rf ~/deploy/systemd && mkdir -p ~/deploy/systemd'
+scp -q -o BatchMode=yes scripts/systemd/*.service "$REMOTE:deploy/systemd/"
 
 # --- 3-5. install, verify, go live -------------------------------------------------
 remote_script | "${SSH[@]}" bash -s
