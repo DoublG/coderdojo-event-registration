@@ -15,7 +15,7 @@ from accounts.models import Ninja, User
 from content.models import OrganisationTeamMember
 from core.testing import TempMediaMixin
 from events.models import Event, Registration
-from geo.models import AdministrativeBoundary
+from geo.models import AdministrativeBoundary, Municipality
 from notifications.consumers import NotificationConsumer
 from notifications.services import notify
 
@@ -66,6 +66,58 @@ class DojoListViewTests(TestCase):
         response = self.client.get(reverse("dojo_list"), {"location": "Nowhereville"})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["geocode_failed"])
+
+
+class PostcodeSearchOriginTests(TestCase):
+    """A logged-in account with a postcode (User.postal_code) starts the dojo
+    finder there instead of Ghent; a search or "use my location" still wins."""
+
+    @classmethod
+    def setUpTestData(cls):
+        make_dojo("Ghent", location=Point(3.7174, 51.0543, srid=4326))
+        make_dojo("Hasselt", location=Point(5.3378, 50.9307, srid=4326))
+        Municipality.objects.create(postal_code="3500", name="Hasselt", center=Point(5.3378, 50.9307, srid=4326))
+        Municipality.objects.create(postal_code="3500", name="Sint-Lambrechts-Herk", center=Point(5.29, 50.94, srid=4326))
+        cls.limburger = User.objects.create(username="limburg", postal_code="3500")
+
+    def setUp(self):
+        cache.clear()
+
+    def _names(self, response):
+        return [dojo.name for dojo in response.context["dojos"]]
+
+    def test_logged_in_account_with_a_postcode_starts_there(self):
+        self.client.force_login(self.limburger)
+        response = self.client.get(reverse("dojo_list"))
+        self.assertEqual(self._names(response), ["Hasselt", "Ghent"])
+        self.assertEqual(response.context["search_label"], "3500 Hasselt")
+
+    def test_homepage_widget_uses_the_postcode_too(self):
+        self.client.force_login(self.limburger)
+        response = self.client.get(reverse("dojo_finder_widget"))
+        self.assertEqual(self._names(response), ["Hasselt", "Ghent"])
+
+    def test_without_a_postcode_or_login_it_is_still_ghent(self):
+        self.assertEqual(self._names(self.client.get(reverse("dojo_list"))), ["Ghent", "Hasselt"])
+        self.client.force_login(User.objects.create(username="no-postcode"))
+        self.assertEqual(self._names(self.client.get(reverse("dojo_list"))), ["Ghent", "Hasselt"])
+
+    def test_unknown_postcode_falls_back_to_ghent(self):
+        self.client.force_login(User.objects.create(username="abroad", postal_code="9999"))
+        self.assertEqual(self._names(self.client.get(reverse("dojo_list"))), ["Ghent", "Hasselt"])
+
+    def test_postcode_default_is_not_cached_for_other_visitors(self):
+        self.client.force_login(self.limburger)
+        self.client.get(reverse("dojo_list"))
+        self.client.logout()
+        self.assertEqual(self._names(self.client.get(reverse("dojo_list"))), ["Ghent", "Hasselt"])
+
+    @patch("dojos.search.geocode")
+    def test_a_typed_search_still_wins(self, mock_geocode):
+        mock_geocode.return_value = (51.0543, 3.7174)  # Ghent
+        self.client.force_login(self.limburger)
+        response = self.client.get(reverse("dojo_list"), {"location": "Gent"})
+        self.assertEqual(self._names(response), ["Ghent", "Hasselt"])
 
 
 class DojoFinderWidgetViewTests(TestCase):

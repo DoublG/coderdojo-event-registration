@@ -144,6 +144,7 @@ class Command(BaseCommand):
                     dojo=dojo, start_time=start_dt,
                     defaults={
                         "name": session_name,
+                        "status": Event.CLOSED,
                         "end_time": end_dt,
                         "places": dojo_rng.choice([15, 20, 24, 30]),
                         "location": dojo.location,
@@ -173,7 +174,7 @@ class Command(BaseCommand):
                 start_time=timezone.make_aware(datetime(2023, 2, 11, 10, 0)),
                 defaults={
                     "end_time": timezone.make_aware(datetime(2023, 2, 11, 13, 0)),
-                    "places": 30, "location": girls_dojo.location,
+                    "places": 30, "location": girls_dojo.location, "status": Event.CLOSED,
                     "description": "A CoderDojo for Girls session, run for the International Day of Women and Girls in Science.",
                 },
             )
@@ -187,7 +188,7 @@ class Command(BaseCommand):
                 start_time=timezone.make_aware(datetime(2026, 6, 6, 10, 0)),
                 defaults={
                     "end_time": timezone.make_aware(datetime(2026, 6, 6, 17, 0)),
-                    "places": 200, "location": projects_dojo.location,
+                    "places": 200, "location": projects_dojo.location, "status": Event.CLOSED,
                     "description": "CoderDojo's yearly showcase — ninjas demo the projects they've been building all year.",
                 },
             )
@@ -196,6 +197,12 @@ class Command(BaseCommand):
             special_created += 1 if was_created else 0
         else:
             coolest_event = None
+
+        # Past sessions took place: closed, not draft (the model default, which
+        # hides a session from the public site and from "active" segments).
+        # Backfills history seeded before status was set here.
+        past_ids = [e.id for e in all_past_events] + [e.id for e in (girls_event, coolest_event) if e is not None]
+        Event.objects.filter(pk__in=past_ids, status=Event.DRAFT).update(status=Event.CLOSED)
 
         pathways = list(Pathway.objects.order_by("id"))
         registrations_created = 0

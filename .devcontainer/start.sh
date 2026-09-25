@@ -49,6 +49,10 @@ else
     echo "Demo data already present (events exist) - skipping demo seed."
 fi
 
+# Example email templates (en/nl/fr) and two draft campaigns. No dates, only
+# creates what's missing, so it's safe to run on every start.
+python manage.py seed_mailing
+
 # start background worker
 celery -A website worker -l INFO > background_job.log 2>&1 &
 celery -A website beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler > background_job_beats.log 2>&1 &

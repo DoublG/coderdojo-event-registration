@@ -27,6 +27,19 @@ CHILD_FIRST_NAMES = [
     "Lotte", "Milan", "Fien", "Arthur", "Marie", "Louis", "Anna", "Jules", "Mara"
 ]
 
+# The gender that goes with each first name above (kept as a separate map so
+# the name list, and so the shared RNG stream, stays unchanged).
+CHILD_GENDERS = {
+    "Emma": Ninja.GIRL, "Liam": Ninja.BOY, "Olivia": Ninja.GIRL, "Noah": Ninja.BOY, "Sophie": Ninja.GIRL,
+    "Lucas": Ninja.BOY, "Mila": Ninja.GIRL, "Finn": Ninja.BOY, "Nina": Ninja.GIRL, "Lotte": Ninja.GIRL,
+    "Milan": Ninja.BOY, "Fien": Ninja.GIRL, "Arthur": Ninja.BOY, "Marie": Ninja.GIRL, "Louis": Ninja.BOY,
+    "Anna": Ninja.GIRL, "Jules": Ninja.BOY, "Mara": Ninja.GIRL,
+}
+# Share of seeded children whose parents leave gender as "Prefer not to say",
+# or pick "Other".
+GENDER_UNSPECIFIED_SHARE = 0.12
+GENDER_OTHER_SHARE = 0.03
+
 NUM_GUARDIANS = 40
 CHILD_LOGIN_PROBABILITY = 0.5
 
@@ -114,6 +127,20 @@ class Command(BaseCommand):
             if dirty_fields:
                 ninja.save(update_fields=dirty_fields)
 
+        # Gender per child and, per family, a postcode near their child's
+        # dojo and a mail language that fits the region. Per-row RNGs: the
+        # result is the same on every run, so this is rerun-safe.
+        for ninja in Ninja.objects.filter(gender=Ninja.UNSPECIFIED):
+            gender = _seed_gender(ninja)
+            if gender != Ninja.UNSPECIFIED:
+                ninja.gender = gender
+                ninja.save(update_fields=["gender"])
+        for guardian in User.objects.filter(guardianships__isnull=False, postal_code="").distinct():
+            first_child = Ninja.objects.of_guardian(guardian).exclude(home_dojo=None).order_by("id").first()
+            dojo = first_child.home_dojo if first_child else None
+            guardian.postal_code, guardian.preferred_language = _seed_locale(guardian, dojo)
+            guardian.save(update_fields=["postal_code", "preferred_language"])
+
         # A couple of ninjas with their own login help out at their home
         # dojo: youth mentors, promoted by that dojo's champion.
         promoted = 0
@@ -138,3 +165,41 @@ class Command(BaseCommand):
             f"child_logins={child_logins_created}. Credentials for newly seeded accounts "
             f"written to {CREDENTIALS_FILE}"
         ))
+
+
+def _seed_gender(ninja):
+    rng = random.Random(f"ninja-gender-{ninja.id}")
+    roll = rng.random()
+    if roll < GENDER_UNSPECIFIED_SHARE:
+        return Ninja.UNSPECIFIED
+    if roll < GENDER_UNSPECIFIED_SHARE + GENDER_OTHER_SHARE:
+        return Ninja.OTHER
+    return CHILD_GENDERS.get(ninja.name.split()[0], Ninja.UNSPECIFIED)
+
+
+def _seed_locale(guardian, dojo):
+    """(postal_code, preferred_language): the postcode of one of the five
+    municipalities closest to the dojo, and Dutch or French by province
+    (either in Brussels), with some English."""
+    from django.db.models import F
+
+    from geo.functions import DistanceSphere
+    from geo.models import Municipality
+
+    rng = random.Random(f"guardian-locale-{guardian.id}")
+    if dojo is None or dojo.location is None:
+        return "", rng.choice(["nl-be", "fr-be"])
+    nearby = list(
+        Municipality.objects.annotate(distance=DistanceSphere(F("center"), dojo.location))
+        .order_by("distance").values_list("postal_code", flat=True)[:5]
+    )
+    province = dojo.province.name if dojo.province_id else ""
+    if rng.random() < 0.1:
+        language = "en-us"
+    elif province.startswith("Provincie"):
+        language = "nl-be"
+    elif province.startswith("Province"):
+        language = "fr-be"
+    else:
+        language = rng.choice(["nl-be", "fr-be"])
+    return rng.choice(nearby), language

@@ -10,6 +10,10 @@ To create an account:
 #. Go to **Get involved** and choose **Register your family**, or go
    directly to the registration page.
 #. Fill in your own details (name, email, and a password).
+#. Optionally add your postcode. The dojo finder then starts from where you
+   live, and we can let you know about dojos and sessions near you. Pick
+   the language you'd like to receive emails in; it starts as the language
+   you're browsing the site in.
 #. Add each child who'll be attending — their name and date of birth are
    required (dojos are for ninjas aged 7 to 17, so a date of birth outside
    that range is flagged); allergies/notes are optional but help the

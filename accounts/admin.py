@@ -30,9 +30,9 @@ class OrganisationRoleAdmin(admin.ModelAdmin):
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = ["username", "email", "first_name", "last_name", "account_type", "is_staff"]
-    list_filter = ["account_type", "is_staff", "is_active"]
+    list_filter = ["account_type", "is_staff", "is_active", "preferred_language"]
     fieldsets = BaseUserAdmin.fieldsets + (
-        ("CoderDojo", {"fields": ("account_type", "phone", "must_change_password")}),
+        ("CoderDojo", {"fields": ("account_type", "phone", "preferred_language", "postal_code", "must_change_password")}),
         ("Team-page profile", {"fields": ("display_name", "title", "bio", "photo", "show_on_team_pages")}),
     )
     search_fields = ["username", "email", "first_name", "last_name"]
@@ -47,7 +47,8 @@ class NinjaGuardianshipInline(admin.TabularInline):
 
 @admin.register(Ninja)
 class NinjaAdmin(admin.ModelAdmin):
-    list_display = ["name", "date_of_birth", "home_dojo", "current_belt", "account"]
+    list_display = ["name", "date_of_birth", "gender", "home_dojo", "current_belt", "account"]
+    list_filter = ["gender"]
     search_fields = ["name"]
     inlines = [NinjaGuardianshipInline]
 

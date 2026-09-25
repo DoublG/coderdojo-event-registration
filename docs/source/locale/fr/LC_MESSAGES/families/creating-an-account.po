@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 15:07+0000\n"
+"POT-Creation-Date: 2026-09-25 08:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -53,6 +53,19 @@ msgstr "Renseignez vos propres coordonnées (nom, e-mail et mot de passe)."
 
 #: ../../source/families/creating-an-account.rst:13
 msgid ""
+"Optionally add your postcode. The dojo finder then starts from where you "
+"live, and we can let you know about dojos and sessions near you. Pick the"
+" language you'd like to receive emails in; it starts as the language "
+"you're browsing the site in."
+msgstr ""
+"Ajoutez éventuellement votre code postal. Le moteur de recherche des "
+"dojos part alors de chez vous, et nous pouvons vous informer des dojos et"
+" des sessions près de chez vous. Choisissez la langue dans laquelle vous "
+"souhaitez recevoir les e-mails ; par défaut, c'est la langue dans "
+"laquelle vous consultez le site."
+
+#: ../../source/families/creating-an-account.rst:17
+msgid ""
 "Add each child who'll be attending — their name and date of birth are "
 "required (dojos are for ninjas aged 7 to 17, so a date of birth outside "
 "that range is flagged); allergies/notes are optional but help the mentors"
@@ -60,19 +73,19 @@ msgid ""
 "level: that's shown by the belt their dojo awards them. Use **Add another"
 " child** if you have more than one."
 msgstr ""
-"Ajoutez chaque enfant qui participera : son nom et sa date de naissance sont"
-" obligatoires (les dojos accueillent les ninjas de 7 à 17 ans, une date de "
-"naissance hors de cette tranche est donc signalée) ; les éventuelles "
-"allergies/notes sont facultatives mais aident les mentors qui animent la "
-"séance. Inutile de décrire le niveau de programmation de votre enfant : "
-"c'est la ceinture que lui décerne son dojo qui l'indique. Utilisez **Ajouter"
-" un autre enfant** si vous en avez plusieurs."
+"Ajoutez chaque enfant qui participera : son nom et sa date de naissance "
+"sont obligatoires (les dojos accueillent les ninjas de 7 à 17 ans, une "
+"date de naissance hors de cette tranche est donc signalée) ; les "
+"éventuelles allergies/notes sont facultatives mais aident les mentors qui"
+" animent la séance. Inutile de décrire le niveau de programmation de "
+"votre enfant : c'est la ceinture que lui décerne son dojo qui l'indique. "
+"Utilisez **Ajouter un autre enfant** si vous en avez plusieurs."
 
-#: ../../source/families/creating-an-account.rst:19
+#: ../../source/families/creating-an-account.rst:23
 msgid "Submit the form."
 msgstr "Envoyez le formulaire."
 
-#: ../../source/families/creating-an-account.rst:21
+#: ../../source/families/creating-an-account.rst:25
 msgid ""
 "Unlike applying to volunteer or start a dojo, there's no review step — "
 "your account is created immediately and you're taken straight to your "
@@ -83,7 +96,7 @@ msgstr ""
 "et vous êtes directement dirigé·e, connecté·e, vers la page de votre "
 "famille."
 
-#: ../../source/families/creating-an-account.rst:27
+#: ../../source/families/creating-an-account.rst:31
 msgid ""
 "Only a parent or legal guardian should create the family account and add "
 "children to it — you'll be asked to confirm this when registering. The "
@@ -94,7 +107,7 @@ msgstr ""
 "l'inscription. L'adresse e-mail utilisée pour l'inscription ne doit pas "
 "déjà être associée à un autre compte."
 
-#: ../../source/families/creating-an-account.rst:31
+#: ../../source/families/creating-an-account.rst:35
 msgid ""
 "Once your account exists, see :doc:`../families/finding-a-dojo` to find a"
 " session, or go straight to :doc:`../families/managing-your-account` to "

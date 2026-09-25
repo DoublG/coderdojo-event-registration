@@ -7,6 +7,7 @@ from django.utils import timezone
 from events.models import Event
 from geo.functions import DistanceSphere
 from geo.geocoding import geocode
+from geo.models import Municipality
 
 from .models import Dojo
 
@@ -23,13 +24,32 @@ DEFAULT_SEARCH_CACHE_KEY = "dojos:by_distance:default_origin"
 DEFAULT_SEARCH_CACHE_TIMEOUT = 60
 
 
-def resolve_search_origin(form):
+def postal_code_origin(postal_code):
+    """(Point, label) for a Belgian postcode: the average of its
+    municipality centres (a postcode can cover several localities), or
+    None for an unknown or empty postcode."""
+    if not postal_code:
+        return None
+    municipalities = list(Municipality.objects.filter(postal_code=postal_code).order_by("id"))
+    if not municipalities:
+        return None
+    lon = sum(m.center.x for m in municipalities) / len(municipalities)
+    lat = sum(m.center.y for m in municipalities) / len(municipalities)
+    return Point(lon, lat, srid=4326), f"{postal_code} {municipalities[0].name}"
+
+
+def resolve_search_origin(form, user=None):
     """Given a bound DojoSearchForm, return (origin, search_label,
     geocode_failed) following the priority rules: typed address > browser
-    lat/lon > default (Ghent). Shared by the full dojo-finder page and the
+    lat/lon > the logged-in account's postcode (User.postal_code, optional)
+    > default (Ghent). Shared by the full dojo-finder page and the
     homepage's embedded widget.
     """
     origin, search_label, geocode_failed = DEFAULT_SEARCH_ORIGIN, DEFAULT_SEARCH_LABEL, False
+    if user is not None and user.is_authenticated and (home := postal_code_origin(user.postal_code)):
+        # Not cached like the Ghent default (dojos_by_distance checks the
+        # origin's identity), so one family's list never leaks to another.
+        origin, search_label = home
 
     # A typed address always wins over lat/lon, even if both are present in
     # the request: the lat/lon hidden fields are re-rendered with their old

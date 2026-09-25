@@ -74,7 +74,7 @@ def _notification_context(user, dojo):
 
 def dojo_list(request):
     form = DojoSearchForm(request.GET)
-    origin, search_label, geocode_failed = resolve_search_origin(form)
+    origin, search_label, geocode_failed = resolve_search_origin(form, request.user)
     dojos_qs = dojos_by_distance(origin)
 
     paginator = Paginator(dojos_qs, RESULTS_PER_PAGE)
@@ -108,7 +108,7 @@ def dojo_finder_widget(request):
     result list fragment — this view has no full-page mode of its own, it's
     only ever reached via the widget's initial render or its htmx search."""
     form = DojoSearchForm(request.GET)
-    origin, search_label, geocode_failed = resolve_search_origin(form)
+    origin, search_label, geocode_failed = resolve_search_origin(form, request.user)
     dojos = attach_next_events(list(dojos_by_distance(origin)[:WIDGET_RESULTS_LIMIT]))
 
     return render(request, "dojos/partials/_dojo_finder_widget_results.html", {

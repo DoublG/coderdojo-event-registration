@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 15:07+0000\n"
+"POT-Creation-Date: 2026-09-25 08:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -53,6 +53,18 @@ msgstr "Vul uw eigen gegevens in (naam, e-mailadres en wachtwoord)."
 
 #: ../../source/families/creating-an-account.rst:13
 msgid ""
+"Optionally add your postcode. The dojo finder then starts from where you "
+"live, and we can let you know about dojos and sessions near you. Pick the"
+" language you'd like to receive emails in; it starts as the language "
+"you're browsing the site in."
+msgstr ""
+"Voeg eventueel uw postcode toe. De dojozoeker start dan vanaf waar u "
+"woont, en we kunnen u laten weten welke dojo's en sessies er bij u in de "
+"buurt zijn. Kies in welke taal u e-mails wilt ontvangen; standaard is dat"
+" de taal waarin u de site bekijkt."
+
+#: ../../source/families/creating-an-account.rst:17
+msgid ""
 "Add each child who'll be attending — their name and date of birth are "
 "required (dojos are for ninjas aged 7 to 17, so a date of birth outside "
 "that range is flagged); allergies/notes are optional but help the mentors"
@@ -60,18 +72,19 @@ msgid ""
 "level: that's shown by the belt their dojo awards them. Use **Add another"
 " child** if you have more than one."
 msgstr ""
-"Voeg elk kind toe dat zal deelnemen: naam en geboortedatum zijn verplicht "
-"(dojo's zijn er voor ninja's van 7 tot 17 jaar, dus een geboortedatum "
-"daarbuiten wordt gemeld); eventuele allergieën/opmerkingen zijn optioneel "
-"maar helpen de mentoren die de sessie begeleiden. Het programmeerniveau van "
-"uw kind hoeft u niet op te geven: dat blijkt uit de gordel die de dojo "
-"toekent. Gebruik **Nog een kind toevoegen** als u er meer dan één hebt."
+"Voeg elk kind toe dat zal deelnemen: naam en geboortedatum zijn verplicht"
+" (dojo's zijn er voor ninja's van 7 tot 17 jaar, dus een geboortedatum "
+"daarbuiten wordt gemeld); eventuele allergieën/opmerkingen zijn optioneel"
+" maar helpen de mentoren die de sessie begeleiden. Het programmeerniveau "
+"van uw kind hoeft u niet op te geven: dat blijkt uit de gordel die de "
+"dojo toekent. Gebruik **Nog een kind toevoegen** als u er meer dan één "
+"hebt."
 
-#: ../../source/families/creating-an-account.rst:19
+#: ../../source/families/creating-an-account.rst:23
 msgid "Submit the form."
 msgstr "Verstuur het formulier."
 
-#: ../../source/families/creating-an-account.rst:21
+#: ../../source/families/creating-an-account.rst:25
 msgid ""
 "Unlike applying to volunteer or start a dojo, there's no review step — "
 "your account is created immediately and you're taken straight to your "
@@ -82,7 +95,7 @@ msgstr ""
 "onmiddellijk aangemaakt en u wordt meteen, ingelogd, naar de pagina van "
 "uw gezin gebracht."
 
-#: ../../source/families/creating-an-account.rst:27
+#: ../../source/families/creating-an-account.rst:31
 msgid ""
 "Only a parent or legal guardian should create the family account and add "
 "children to it — you'll be asked to confirm this when registering. The "
@@ -93,7 +106,7 @@ msgstr ""
 "registratie. Het e-mailadres waarmee u zich registreert mag nog niet in "
 "gebruik zijn bij een ander account."
 
-#: ../../source/families/creating-an-account.rst:31
+#: ../../source/families/creating-an-account.rst:35
 msgid ""
 "Once your account exists, see :doc:`../families/finding-a-dojo` to find a"
 " session, or go straight to :doc:`../families/managing-your-account` to "

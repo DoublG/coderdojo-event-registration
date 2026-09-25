@@ -39,7 +39,7 @@ def home(request):
     # own searches happen via htmx against dojos.views.dojo_finder_widget,
     # this is just what renders before anyone has searched.
     dojo_widget_form = DojoSearchForm()
-    origin, dojo_widget_search_label, dojo_widget_geocode_failed = resolve_search_origin(dojo_widget_form)
+    origin, dojo_widget_search_label, dojo_widget_geocode_failed = resolve_search_origin(dojo_widget_form, request.user)
     dojos = attach_next_events(list(dojos_by_distance(origin)[:WIDGET_RESULTS_LIMIT]))
 
     # Initial batch for the "Upcoming sessions" carousel (events app) —

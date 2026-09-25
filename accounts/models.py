@@ -72,6 +72,16 @@ class User(AbstractUser):
     ACCOUNT_TYPE_CHOICES = [(ADULT, "Adult"), (NINJA, "Ninja")]
     account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default=ADULT)
     phone = models.CharField(max_length=30, blank=True, default="")
+    preferred_language = models.CharField(
+        max_length=10, choices=settings.LANGUAGES, blank=True, default="",
+        help_text="The language mails are sent in. Set from the site's language at sign-up; "
+                  "empty means the default (English).",
+    )
+    postal_code = models.CharField(
+        max_length=4, blank=True, default="",
+        help_text="Belgian postcode where the family lives (geo.Municipality.postal_code). Used to "
+                  "tell families about dojos and sessions near them, never shown publicly.",
+    )
 
     # The team-page profile: shown wherever this person appears on a dojo's
     # team (dojos.DojoMembership), and shared by every dojo they're on.
@@ -149,7 +159,18 @@ class Ninja(models.Model):
     The age rule applies when a date of birth is entered or changed, so a
     ninja who has since turned 18 can still be edited."""
 
+    GIRL = "girl"
+    BOY = "boy"
+    OTHER = "other"
+    UNSPECIFIED = "unspecified"
+    GENDER_CHOICES = [(GIRL, "Girl"), (BOY, "Boy"), (OTHER, "Other"), (UNSPECIFIED, "Prefer not to say")]
+
     name = models.CharField(max_length=200)
+    gender = models.CharField(
+        max_length=12, choices=GENDER_CHOICES, default=UNSPECIFIED,
+        help_text="Optional, never shown publicly. Used to let families know about girls' sessions "
+                  "(Event.audience), never to restrict who can sign up.",
+    )
     account = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

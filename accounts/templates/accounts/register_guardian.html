@@ -59,6 +59,19 @@
               <ul class="cd-form__errors">{% for error in form.password.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
           </div>
+          <div class="cd-form__row">
+            <div class="cd-form__field">
+              <label class="cd-form__label label" for="{{ form.postal_code.id_for_label }}">Postcode</label>
+              {{ form.postal_code }}
+              <p class="cd-form__help caption">So we can tell you about dojos and sessions near you.</p>
+              <ul class="cd-form__errors">{% for error in form.postal_code.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+            </div>
+            <div class="cd-form__field">
+              <label class="cd-form__label label" for="{{ form.preferred_language.id_for_label }}">Language for emails<span class="cd-form__required" aria-hidden="true">*</span></label>
+              {{ form.preferred_language }}
+              <ul class="cd-form__errors">{% for error in form.preferred_language.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+            </div>
+          </div>
           <div class="cd-form__checkbox-row">
             {{ form.consent }}
             <label class="body-sm" for="{{ form.consent.id_for_label }}">I am the parent or legal guardian of the children listed below.</label>

@@ -1,7 +1,10 @@
 from django import forms
+from django.conf import settings
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+
+from geo.models import Municipality
 
 from .models import User
 
@@ -66,6 +69,16 @@ class RegisterGuardianForm(forms.Form):
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={"class": "cd-form__input body"}),
     )
+    postal_code = forms.CharField(
+        required=False,
+        max_length=4,
+        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "9000", "inputmode": "numeric"}),
+    )
+    preferred_language = forms.ChoiceField(
+        required=False,
+        choices=settings.LANGUAGES,
+        widget=forms.Select(attrs={"class": "cd-form__input body"}),
+    )
     consent = forms.BooleanField(required=True, widget=forms.CheckboxInput())
 
     def clean_email(self):
@@ -73,6 +86,12 @@ class RegisterGuardianForm(forms.Form):
         if User.objects.filter(email__iexact=email).exists():
             raise ValidationError("An account already exists with this email.")
         return email
+
+    def clean_postal_code(self):
+        postal_code = self.cleaned_data["postal_code"].strip()
+        if postal_code and not Municipality.objects.filter(postal_code=postal_code).exists():
+            raise ValidationError("That isn't a Belgian postcode we know.")
+        return postal_code
 
     def clean_password(self):
         password = self.cleaned_data["password"]

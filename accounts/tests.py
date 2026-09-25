@@ -2,6 +2,7 @@ import re
 from datetime import timedelta
 from unittest.mock import patch
 
+from django.contrib.gis.geos import Point
 from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
@@ -12,6 +13,7 @@ from core.testing import TempMediaMixin
 from dojos.models import Dojo, DojoMembership
 from dojos.testing import add_member, make_champion, make_dojo, make_mentor
 from events.models import Event, Registration
+from geo.models import Municipality
 
 from .models import Guardianship, Ninja, User
 from .provisioning import unique_username
@@ -434,6 +436,25 @@ class RegisterGuardianViewTests(TestCase):
         alex = Ninja.objects.of_guardian(guardian).get(name="Alex")
         self.assertEqual(alex.allergies_notes, "Peanut allergy")
 
+    def test_postcode_and_mail_language_are_saved(self):
+        Municipality.objects.create(postal_code="9000", name="Gent", center=Point(3.7174, 51.0543, srid=4326))
+        self.client.post(reverse("register_guardian"), self._valid_post_data(postal_code="9000", preferred_language="fr-be"))
+
+        guardian = User.objects.get(email="jane@example.com")
+        self.assertEqual((guardian.postal_code, guardian.preferred_language), ("9000", "fr-be"))
+
+    def test_postcode_is_optional_and_language_defaults_to_the_page_language(self):
+        self.client.post(reverse("register_guardian"), self._valid_post_data(), HTTP_ACCEPT_LANGUAGE="nl-be")
+
+        guardian = User.objects.get(email="jane@example.com")
+        self.assertEqual((guardian.postal_code, guardian.preferred_language), ("", "nl-be"))
+
+    def test_unknown_postcode_is_rejected(self):
+        response = self.client.post(reverse("register_guardian"), self._valid_post_data(postal_code="0000"))
+
+        self.assertFalse(User.objects.filter(email="jane@example.com").exists())
+        self.assertTrue(response.context["form"].errors.get("postal_code"))
+
     def test_duplicate_email_is_rejected(self):
         User.objects.create(username="existing", email="jane@example.com")
 
@@ -676,6 +697,8 @@ class OrganisationRoleTests(TestCase):
         self.assertFalse(user.has_perm("events.add_ninjabelt"))
         self.assertFalse(user.has_perm("accounts.view_ninja"))
         self.assertFalse(user.has_perm("applications.can_review_background_checks"))
+        self.assertFalse(user.has_perm("mailing.view_campaign"))
+        self.assertFalse(user.has_perm("mailing.view_emailmessage"))
 
     def test_admin_role_edits_the_catalogue(self):
         from .models import OrganisationRole
@@ -686,6 +709,17 @@ class OrganisationRoleTests(TestCase):
         self.assertTrue(user.has_perm("events.add_belt"))
         self.assertTrue(user.has_perm("pathways.change_pathway"))
         self.assertFalse(user.has_perm("events.add_ninjabelt"))
+
+    def test_only_the_admin_role_runs_campaigns(self):
+        from .models import OrganisationRole
+
+        self._grant(OrganisationRole.ADMIN)
+        user = self._fresh()
+        self.assertTrue(user.has_perm("mailing.add_campaign"))
+        self.assertTrue(user.has_perm("mailing.change_segmentrule"))
+        self.assertTrue(user.has_perm("mailing.change_emailtemplate"))
+        self.assertTrue(user.has_perm("mailing.view_emailmessage"))
+        self.assertFalse(user.has_perm("mailing.change_emailmessage"))
 
     def test_revoking_the_last_role_drops_staff_and_group(self):
         from .models import OrganisationRole

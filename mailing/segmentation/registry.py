@@ -1,12 +1,24 @@
+from .attributes.account import AccountTypeAttribute, HasChildrenAttribute
+from .attributes.activity import ActiveTeamMemberAttribute, AttendedWithinDaysAttribute
 from .attributes.event import EventAttribute
-from .attributes.registration import (
-    RegistrationStatusAttribute
-)
-
+from .attributes.locality import LanguageAttribute, NearDojoAttribute, ProvinceAttribute
+from .attributes.ninja import NinjaGenderAttribute
+from .attributes.registration import AttendedEventAttribute
 
 SEGMENT_ATTRIBUTES = {
-    "event": EventAttribute,
-    "registration_status": RegistrationStatusAttribute,
+    attribute.key: attribute
+    for attribute in [
+        AccountTypeAttribute,
+        HasChildrenAttribute,
+        ActiveTeamMemberAttribute,
+        LanguageAttribute,
+        ProvinceAttribute,
+        NearDojoAttribute,
+        NinjaGenderAttribute,
+        AttendedWithinDaysAttribute,
+        EventAttribute,
+        AttendedEventAttribute,
+    ]
 }
 
 
@@ -16,7 +28,7 @@ def get_attribute(key: str):
     except KeyError:
         raise ValueError(
             f"Unknown segment attribute: {key}"
-        )
+        ) from None
 
     return attribute_class()
 

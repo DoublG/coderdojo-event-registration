@@ -1,5 +1,6 @@
 import re
 
+from django.conf import settings
 from django.contrib.auth import authenticate, update_session_auth_hash
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
@@ -207,6 +208,16 @@ def _create_ninjas(parent, child_rows):
         Guardianship.objects.create(guardian=parent, ninja=ninja)
 
 
+def _site_language(request):
+    """The LANGUAGES code of the language the page is shown in, as the
+    default for a new account's mail language."""
+    codes = [code for code, _name in settings.LANGUAGES]
+    current = (getattr(request, "LANGUAGE_CODE", "") or "").lower()
+    return next((code for code in codes if code == current), None) or next(
+        (code for code in codes if code.split("-")[0] == current.split("-")[0]), codes[0]
+    )
+
+
 def register_guardian(request):
     """Family sign-up for someone without an account. Already logged in?
     Any adult account can add its children from the account page, so
@@ -232,6 +243,8 @@ def register_guardian(request):
                 first_name=first_name,
                 last_name=last_name,
                 phone=form.cleaned_data["phone"],
+                postal_code=form.cleaned_data["postal_code"],
+                preferred_language=form.cleaned_data["preferred_language"] or _site_language(request),
             )
             parent.set_password(form.cleaned_data["password"])
             parent.save()
@@ -240,7 +253,7 @@ def register_guardian(request):
             auth_login(request, parent, backend="accounts.backends.EmailOrUsernameBackend")
             return redirect("account_home")
     else:
-        form = RegisterGuardianForm()
+        form = RegisterGuardianForm(initial={"preferred_language": _site_language(request)})
 
     return render(request, "accounts/register_guardian.html", {
         "form": form,

@@ -1,38 +1,11 @@
-from django.db.models import QuerySet
+from events.models import Registration
 
-from ..base import SegmentAttribute, SegmentChoice
+from .event import EventAttribute
 
 
-class RegistrationStatusAttribute(SegmentAttribute):
-    key = "registration_status"
-    label = "Registration status"
-    value_type = "choice"
+class AttendedEventAttribute(EventAttribute):
+    """The child was marked present at the event (Registration.attended)."""
 
-    def choices(self) -> list[SegmentChoice]:
-        return [
-            SegmentChoice("pending", "Pending"),
-            SegmentChoice("confirmed", "Confirmed"),
-            SegmentChoice("cancelled", "Cancelled"),
-            SegmentChoice("attended", "Attended"),
-        ]
-
-    def apply(
-        self,
-        queryset: QuerySet,
-        operator: str,
-        value,
-    ) -> QuerySet:
-
-        if operator == "equals":
-            return queryset.filter(
-                registrations__status=value,
-            )
-
-        if operator == "in":
-            return queryset.filter(
-                registrations__status__in=value,
-            )
-
-        raise ValueError(
-            f"Unsupported operator: {operator}"
-        )
+    key = "attended_event"
+    label = "Attended event"
+    registrations = Registration.objects.filter(attended=True)

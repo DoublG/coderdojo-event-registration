@@ -11,6 +11,10 @@ city and press search, or use **Use my location** to let your browser
 supply your position instead. Results are sorted nearest-first, and each
 one shows its next upcoming session if it has one.
 
+Before you search, the list starts from Ghent. If you're signed in and your
+account has a postcode, it starts from your postcode instead. Typing a
+location or using **Use my location** always takes priority.
+
 The full dojo finder
 ---------------------
 
