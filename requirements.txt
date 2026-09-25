@@ -74,3 +74,10 @@ tzdata==2026.4
 tzlocal==5.4.4
 vine==5.1.0
 wcwidth==0.9.1
+
+# The external registration/attendance API (website/api.py), and what it pulls in:
+django-ninja==1.7.1
+pydantic==2.13.5
+pydantic_core==2.46.5
+annotated-types==0.8.0
+typing-inspection==0.4.4
