@@ -1,8 +1,10 @@
 {% comment %}
   Used by register_guardian.html — the dynamically-numbered
-  child_<n>_name/dob/notes rows (see accounts.views._parse_child_rows) plus the
-  "Add another child" button. Expects child_rows and children_error in context.
+  child_<n>_name/dob/notes/gender rows (see accounts.views._parse_child_rows)
+  plus the "Add another child" button. Expects child_rows, children_error and
+  gender_choices in context.
 {% endcomment %}
+{{ gender_choices|json_script:"rp-gender-choices" }}
 <div class="cd-form__group">
   <h3 class="cd-form__group-title heading-md">Children</h3>
   <p class="cd-form__group-desc body-sm">Add each child who'll attend the dojo.</p>
@@ -34,6 +36,13 @@
           <div class="cd-form__field">
             <label class="cd-form__label label" for="rp-c{{ row.index }}-notes">Allergies or notes</label>
             <input class="cd-form__input body" id="rp-c{{ row.index }}-notes" name="child_{{ row.index }}_notes" type="text" placeholder="None" value="{{ row.notes }}">
+          </div>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="rp-c{{ row.index }}-gender">Gender</label>
+            <select class="cd-form__select body" id="rp-c{{ row.index }}-gender" name="child_{{ row.index }}_gender">
+              {% for value, label in gender_choices %}<option value="{{ value }}"{% if value == row.gender %} selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+            <p class="cd-form__help caption">Optional, never shown publicly. Lets us tell you about girls' sessions.</p>
           </div>
         </div>
       </div>

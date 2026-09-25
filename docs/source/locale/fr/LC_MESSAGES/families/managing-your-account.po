@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 15:07+0000\n"
+"POT-Creation-Date: 2026-09-25 08:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -57,21 +57,25 @@ msgid ""
 "clearly marked), along with each child's current belt once they have one."
 " From here you can:"
 msgstr ""
-"Une fois connecté·e, votre page famille répertorie chacun de vos enfants et "
-"leurs séances à venir (y compris ce pour quoi ils sont sur liste d'attente, "
-"clairement indiqué), ainsi que la ceinture actuelle de chaque enfant dès "
-"qu'il en a une. Depuis cette page, vous pouvez :"
+"Une fois connecté·e, votre page famille répertorie chacun de vos enfants "
+"et leurs séances à venir (y compris ce pour quoi ils sont sur liste "
+"d'attente, clairement indiqué), ainsi que la ceinture actuelle de chaque "
+"enfant dès qu'il en a une. Depuis cette page, vous pouvez :"
 
 #: ../../source/families/managing-your-account.rst:21
 msgid ""
-"**Add a child** — name, date of birth and an optional icon. Ninjas are 7 "
-"to 17, so a date of birth outside that range isn't accepted."
+"**Add a child** — name, date of birth, an optional icon and an optional "
+"gender. Ninjas are 7 to 17, so a date of birth outside that range isn't "
+"accepted. Gender is never shown publicly; it lets us tell you about "
+"girls' sessions."
 msgstr ""
-"**Ajouter un enfant** — nom, date de naissance et une icône facultative. Les"
-" ninjas ont de 7 à 17 ans, une date de naissance hors de cette tranche n'est"
-" donc pas acceptée."
+"**Ajouter un enfant** — nom, date de naissance, une icône facultative et "
+"un genre facultatif. Les ninjas ont de 7 à 17 ans, une date de naissance "
+"hors de cette tranche n'est donc pas acceptée. Le genre n'est jamais "
+"affiché publiquement ; il nous permet de vous informer des séances pour "
+"filles."
 
-#: ../../source/families/managing-your-account.rst:23
+#: ../../source/families/managing-your-account.rst:25
 msgid ""
 "**Edit a child's details** — click their name/header to edit it inline. A"
 " child who has turned 18 stays on your account; only a newly entered date"
@@ -81,7 +85,7 @@ msgstr ""
 "pour le modifier directement. Un enfant qui a eu 18 ans reste sur votre "
 "compte ; seule une date de naissance nouvellement saisie est vérifiée."
 
-#: ../../source/families/managing-your-account.rst:26
+#: ../../source/families/managing-your-account.rst:28
 msgid ""
 "**Cancel a registration** — frees the spot for the next child on that "
 "session's waiting list."
@@ -89,7 +93,7 @@ msgstr ""
 "**Annuler une inscription** : libère la place pour l'enfant suivant sur "
 "la liste d'attente de cette séance."
 
-#: ../../source/families/managing-your-account.rst:28
+#: ../../source/families/managing-your-account.rst:30
 msgid ""
 "**View a child's belt and badges** — their current belt (their coding "
 "level, awarded by their dojo's champion or mentors) with the belts they "
@@ -104,7 +108,7 @@ msgstr ""
 "présence, mis à jour lorsque le dojo note les présences), et l'historique"
 " de ses séances."
 
-#: ../../source/families/managing-your-account.rst:34
+#: ../../source/families/managing-your-account.rst:36
 msgid ""
 "If your child has their own login, they see their own page (their belt, "
 "badges and session history) when they log in, but can't change their "
@@ -115,11 +119,11 @@ msgstr ""
 "connecte, mais ne peut pas modifier ses informations ni s'inscrire lui-"
 "même à des séances ; cela reste votre rôle."
 
-#: ../../source/families/managing-your-account.rst:39
+#: ../../source/families/managing-your-account.rst:41
 msgid "Already a champion or mentor?"
 msgstr "Déjà champion ou mentor ?"
 
-#: ../../source/families/managing-your-account.rst:41
+#: ../../source/families/managing-your-account.rst:43
 msgid ""
 "Every account has a family page: open **My Account** from your account "
 "menu and use **Add a child** there. Your children are added to the same "
@@ -130,11 +134,11 @@ msgstr ""
 "au même identifiant que vous utilisez déjà, sans inscription séparée ni "
 "second compte."
 
-#: ../../source/families/managing-your-account.rst:46
+#: ../../source/families/managing-your-account.rst:48
 msgid "Changing your password"
 msgstr "Modifier votre mot de passe"
 
-#: ../../source/families/managing-your-account.rst:48
+#: ../../source/families/managing-your-account.rst:50
 msgid ""
 "Go to **Change password** (also linked from your account page). You'll "
 "need your current password to set a new one."
@@ -143,11 +147,11 @@ msgstr ""
 "page de votre compte). Vous aurez besoin de votre mot de passe actuel "
 "pour en définir un nouveau."
 
-#: ../../source/families/managing-your-account.rst:52
+#: ../../source/families/managing-your-account.rst:54
 msgid "Volunteering"
 msgstr "Bénévolat"
 
-#: ../../source/families/managing-your-account.rst:54
+#: ../../source/families/managing-your-account.rst:56
 msgid ""
 "The **Volunteering** section of your account page shows any application "
 "you've made to become a mentor or start a dojo, and where your background"

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 17:38+0000\n"
+"POT-Creation-Date: 2026-09-25 08:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -72,10 +72,23 @@ msgstr ""
 "besoin d'une place."
 
 #: ../../source/families/signing-up-for-a-session.rst:21
+msgid "Girls' sessions"
+msgstr "Séances pour filles"
+
+#: ../../source/families/signing-up-for-a-session.rst:23
+msgid ""
+"Some sessions are labelled **Girls' session**. They're aimed at girls, "
+"but the label never stops anyone from signing up."
+msgstr ""
+"Certaines séances portent l'étiquette **Séance pour filles**. Elles "
+"s'adressent aux filles, mais l'étiquette n'empêche jamais personne de "
+"s'inscrire."
+
+#: ../../source/families/signing-up-for-a-session.rst:27
 msgid "Waiting lists"
 msgstr "Listes d'attente"
 
-#: ../../source/families/signing-up-for-a-session.rst:23
+#: ../../source/families/signing-up-for-a-session.rst:29
 msgid ""
 "Sessions have a limited number of places. If a session is full when you "
 "sign up, your child is placed on the **waiting list** instead of being "
@@ -92,11 +105,11 @@ msgstr ""
 "séance est automatiquement confirmé. Aucune action de votre part n'est "
 "nécessaire pour cela."
 
-#: ../../source/families/signing-up-for-a-session.rst:31
+#: ../../source/families/signing-up-for-a-session.rst:37
 msgid "Cancelling"
 msgstr "Annuler"
 
-#: ../../source/families/signing-up-for-a-session.rst:33
+#: ../../source/families/signing-up-for-a-session.rst:39
 msgid ""
 "If your plans change, cancel from your family account page (see :doc"
 ":`managing-your-account`) rather than just not turning up — that's also "

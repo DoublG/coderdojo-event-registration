@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 08:25+0000\n"
+"POT-Creation-Date: 2026-09-25 08:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -70,8 +70,10 @@ msgid ""
 "required (dojos are for ninjas aged 7 to 17, so a date of birth outside "
 "that range is flagged); allergies/notes are optional but help the mentors"
 " running the session. There's no need to describe your child's coding "
-"level: that's shown by the belt their dojo awards them. Use **Add another"
-" child** if you have more than one."
+"level: that's shown by the belt their dojo awards them. Gender is "
+"optional (\"Prefer not to say\" is the default) and never shown publicly;"
+" it lets us tell you about girls' sessions. Use **Add another child** if "
+"you have more than one."
 msgstr ""
 "Ajoutez chaque enfant qui participera : son nom et sa date de naissance "
 "sont obligatoires (les dojos accueillent les ninjas de 7 à 17 ans, une "
@@ -79,13 +81,16 @@ msgstr ""
 "éventuelles allergies/notes sont facultatives mais aident les mentors qui"
 " animent la séance. Inutile de décrire le niveau de programmation de "
 "votre enfant : c'est la ceinture que lui décerne son dojo qui l'indique. "
-"Utilisez **Ajouter un autre enfant** si vous en avez plusieurs."
+"Le genre est facultatif (« Je préfère ne pas le dire » par défaut) et "
+"n'est jamais affiché publiquement ; il nous permet de vous informer des "
+"séances pour filles. Utilisez **Ajouter un autre enfant** si vous en avez"
+" plusieurs."
 
-#: ../../source/families/creating-an-account.rst:23
+#: ../../source/families/creating-an-account.rst:25
 msgid "Submit the form."
 msgstr "Envoyez le formulaire."
 
-#: ../../source/families/creating-an-account.rst:25
+#: ../../source/families/creating-an-account.rst:27
 msgid ""
 "Unlike applying to volunteer or start a dojo, there's no review step — "
 "your account is created immediately and you're taken straight to your "
@@ -96,7 +101,7 @@ msgstr ""
 "et vous êtes directement dirigé·e, connecté·e, vers la page de votre "
 "famille."
 
-#: ../../source/families/creating-an-account.rst:31
+#: ../../source/families/creating-an-account.rst:33
 msgid ""
 "Only a parent or legal guardian should create the family account and add "
 "children to it — you'll be asked to confirm this when registering. The "
@@ -107,7 +112,7 @@ msgstr ""
 "l'inscription. L'adresse e-mail utilisée pour l'inscription ne doit pas "
 "déjà être associée à un autre compte."
 
-#: ../../source/families/creating-an-account.rst:35
+#: ../../source/families/creating-an-account.rst:37
 msgid ""
 "Once your account exists, see :doc:`../families/finding-a-dojo` to find a"
 " session, or go straight to :doc:`../families/managing-your-account` to "

@@ -26,6 +26,7 @@ Usage:
     <p class="cd-dojo-finder__next caption">
       {% if dojo.next_event %}
         Next session: {{ dojo.next_event.start_time|date:"D j M, H:i" }}
+        {% include "events/partials/_audience_badge.html" with event=dojo.next_event %}
         {% if dojo.next_event.places_left <= 0 %}
           <span class="cd-badge cd-badge--warning caption">Waitlist</span>
         {% else %}

@@ -17,6 +17,12 @@ the dojo has stopped taking new sign-ups for it (this normally happens
 once attendance for that session has already been checked) — get in
 touch with the dojo team directly if you still need a spot.
 
+Girls' sessions
+----------------
+
+Some sessions are labelled **Girls' session**. They're aimed at girls, but
+the label never stops anyone from signing up.
+
 Waiting lists
 --------------
 

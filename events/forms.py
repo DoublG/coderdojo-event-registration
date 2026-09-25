@@ -101,7 +101,7 @@ class EventForm(forms.ModelForm):
         model = Event
         fields = [
             "name", "places", "venue_name", "image",
-            "description", "min_age", "max_age", "team", "pathways",
+            "description", "min_age", "max_age", "audience", "team", "pathways",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Coding Saturday"}),
@@ -114,12 +114,15 @@ class EventForm(forms.ModelForm):
             }),
             "min_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "7"}),
             "max_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "18"}),
+            "audience": forms.Select(attrs={"class": "cd-form__select body"}),
             "team": forms.CheckboxSelectMultiple,
             "pathways": forms.CheckboxSelectMultiple,
         }
 
     def __init__(self, *args, dojo, **kwargs):
         super().__init__(*args, **kwargs)
+        # Not sent (an older form, a script): keep the model default.
+        self.fields["audience"].required = False
         # Who runs this session: anyone active on the dojo's team (champion,
         # mentors and youth mentors), shown as "Name (Role)".
         self.fields["team"].queryset = dojo.memberships.active().select_related("user").order_by("user__first_name")
@@ -134,6 +137,9 @@ class EventForm(forms.ModelForm):
             self.fields["event_date"].initial = self.instance.start_time.date()
             self.fields["start_time"].initial = self.instance.start_time.time()
             self.fields["end_time"].initial = self.instance.end_time.time()
+
+    def clean_audience(self):
+        return self.cleaned_data.get("audience") or Event.EVERYONE
 
     def clean(self):
         cleaned_data = super().clean()

@@ -53,6 +53,13 @@ class Event(models.Model):
     description = models.TextField(blank=True, default="", help_text=MARKDOWN_HELP_TEXT)
     min_age = models.PositiveSmallIntegerField(null=True, blank=True)
     max_age = models.PositiveSmallIntegerField(null=True, blank=True)
+    EVERYONE = "everyone"
+    GIRLS = "girls"
+    AUDIENCE_CHOICES = [(EVERYONE, "Everyone"), (GIRLS, "Girls' session")]
+    audience = models.CharField(
+        max_length=10, choices=AUDIENCE_CHOICES, default=EVERYONE,
+        help_text="Who the session is aimed at, shown as a label. It never restricts who can sign up.",
+    )
     team = models.ManyToManyField(
         "dojos.DojoMembership", blank=True, related_name="events",
         help_text="Who ran (or will run) this session: members of the dojo's team.",
@@ -74,6 +81,10 @@ class Event(models.Model):
     def places_left(self):
         confirmed = self.registration_set.filter(waiting_list=False).count()
         return self.places - confirmed
+
+    @property
+    def is_girls_session(self):
+        return self.audience == self.GIRLS
 
     @property
     def registration_open(self):

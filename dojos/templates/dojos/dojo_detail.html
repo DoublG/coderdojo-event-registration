@@ -117,6 +117,7 @@
           <div>
             <p class="label next-session-full__label">Next session · {% if next_event.places_left > 0 %}Open{% else %}Waitlist{% endif %}</p>
             <h3 class="heading-sm next-session-full__title">{{ next_event.name }}</h3>
+            {% include "events/partials/_audience_badge.html" with event=next_event %}
             <p class="body-sm next-session-full__meta">
               {{ next_event.start_time|date:"D j M" }} · {{ next_event.start_time|time:"H:i" }}
               {% if next_event.places_left > 0 %} · {{ next_event.places_left }} spot{{ next_event.places_left|pluralize }} left{% endif %}

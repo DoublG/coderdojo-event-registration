@@ -38,6 +38,9 @@ PATTERN_WEIGHTS = {"weekend": 60, "wednesday": 20, "friday": 20}
 # names and their banner images can't drift apart.
 SESSION_NAMES = [label for _filename, label in TEMPLATE_IMAGES]
 
+# Share of upcoming seeded sessions labelled as girls' sessions.
+GIRLS_SESSION_SHARE = 0.06
+
 # One banner image per session name, shown on the homepage's "Upcoming
 # sessions" card — see events/templates/events/partials/_upcoming_session_card.html.
 SESSION_IMAGES = {label: filename for filename, label in TEMPLATE_IMAGES}
@@ -171,6 +174,15 @@ class Command(BaseCommand):
                     assign_event_team(event)
                 created += 1 if was_created else 0
                 skipped += 1 if not was_created else 0
+
+        # Some upcoming sessions are CoderDojo Girlz sessions (Event.audience,
+        # a label only). Per-event RNG, so the pick is the same on every run
+        # and doesn't shift the shared stream; flipped once, never back.
+        for event in Event.objects.filter(status=Event.OPEN, audience=Event.EVERYONE, start_time__gte=timezone.now()):
+            if random.Random(f"event-audience-{event.id}").random() < GIRLS_SESSION_SHARE:
+                event.audience = Event.GIRLS
+                event.name = f"CoderDojo Girlz: {event.name}"
+                event.save(update_fields=["audience", "name"])
 
         # Backfill: events seeded before Event.image existed have no
         # banner yet — give them one based on their (already-set) name.

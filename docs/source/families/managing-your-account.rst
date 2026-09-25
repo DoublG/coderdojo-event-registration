@@ -18,8 +18,10 @@ upcoming sessions (including anything they're on the waiting list for,
 clearly marked), along with each child's current belt once they have one.
 From here you can:
 
-- **Add a child** — name, date of birth and an optional icon. Ninjas are
-  7 to 17, so a date of birth outside that range isn't accepted.
+- **Add a child** — name, date of birth, an optional icon and an optional
+  gender. Ninjas are 7 to 17, so a date of birth outside that range isn't
+  accepted. Gender is never shown publicly; it lets us tell you about
+  girls' sessions.
 - **Edit a child's details** — click their name/header to edit it inline.
   A child who has turned 18 stays on your account; only a newly entered
   date of birth is checked.

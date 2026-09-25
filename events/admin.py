@@ -4,7 +4,12 @@ from geo.widgets import BelgiumGISModelAdmin
 
 from .models import Badge, Belt, Event, NinjaBadge, NinjaBelt, Registration
 
-admin.site.register(Event, BelgiumGISModelAdmin)
+
+@admin.register(Event)
+class EventAdmin(BelgiumGISModelAdmin):
+    list_display = ["name", "dojo", "start_time", "status", "audience"]
+    list_filter = ["status", "audience"]
+    search_fields = ["name", "dojo__name"]
 admin.site.register(Registration)
 
 

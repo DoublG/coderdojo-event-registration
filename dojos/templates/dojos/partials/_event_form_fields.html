@@ -129,6 +129,12 @@ Expects `form` (an events.forms.EventForm) in context, and optionally
       <ul class="cd-form__errors">{% for error in form.max_age.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
       {{ form.max_age }}
     </div>
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="{{ form.audience.id_for_label }}">Aimed at</label>
+      <ul class="cd-form__errors">{% for error in form.audience.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+      {{ form.audience }}
+      <p class="cd-form__help caption">A girls' session gets a label on the site. Anyone can still sign up.</p>
+    </div>
   </div>
   <div class="cd-form__field">
     <label class="cd-form__label label">Team for this session</label>

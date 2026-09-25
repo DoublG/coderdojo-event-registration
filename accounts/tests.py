@@ -210,6 +210,14 @@ class AddChildViewTests(TempMediaMixin, TestCase):
         self.client.post(reverse("add_ninja"), {"name": "  "})
         self.assertEqual(Ninja.objects.of_guardian(self.guardian).count(), 0)
 
+    def test_gender_is_saved_and_optional(self):
+        self.client.force_login(self.guardian)
+        self.client.post(reverse("add_ninja"), {"name": "A", "gender": Ninja.GIRL})
+        self.client.post(reverse("add_ninja"), {"name": "B"})
+        self.client.post(reverse("add_ninja"), {"name": "C", "gender": "dragon"})
+        genders = dict(Ninja.objects.of_guardian(self.guardian).values_list("name", "gender"))
+        self.assertEqual(genders, {"A": Ninja.GIRL, "B": Ninja.UNSPECIFIED, "C": Ninja.UNSPECIFIED})
+
 
 class ChildDetailViewTests(TestCase):
     @classmethod
@@ -280,6 +288,23 @@ class EditChildViewTests(TestCase):
         self.assertTemplateUsed(response, "accounts/partials/_child_header_display.html")
         self.child.refresh_from_db()
         self.assertEqual(self.child.name, "Renamed Kid")
+
+    def test_post_updates_gender_and_keeps_it_when_not_sent(self):
+        self.client.force_login(self.guardian)
+        url = reverse("edit_ninja", kwargs={"ninja_id": self.child.id})
+        self.client.post(url, {"name": "Kid One", "date_of_birth": "", "gender": Ninja.GIRL})
+        self.child.refresh_from_db()
+        self.assertEqual(self.child.gender, Ninja.GIRL)
+
+        self.client.post(url, {"name": "Kid One", "date_of_birth": ""})
+        self.child.refresh_from_db()
+        self.assertEqual(self.child.gender, Ninja.GIRL)
+
+    def test_edit_form_preselects_the_gender(self):
+        Ninja.objects.filter(pk=self.child.pk).update(gender=Ninja.OTHER)
+        self.client.force_login(self.guardian)
+        response = self.client.get(reverse("edit_ninja", kwargs={"ninja_id": self.child.id}))
+        self.assertContains(response, '<option value="other" selected>')
 
 
 class BadgeWidgetViewTests(TestCase):
@@ -435,6 +460,19 @@ class RegisterGuardianViewTests(TestCase):
         self.assertEqual(Ninja.objects.of_guardian(guardian).count(), 2)
         alex = Ninja.objects.of_guardian(guardian).get(name="Alex")
         self.assertEqual(alex.allergies_notes, "Peanut allergy")
+
+    def test_child_gender_is_saved_per_row(self):
+        data = self._valid_post_data(child_1_gender=Ninja.GIRL, child_2_name="Alex", child_2_dob=_dob(9))
+        self.client.post(reverse("register_guardian"), data)
+
+        guardian = User.objects.get(email="jane@example.com")
+        genders = dict(Ninja.objects.of_guardian(guardian).values_list("name", "gender"))
+        self.assertEqual(genders, {"Sam": Ninja.GIRL, "Alex": Ninja.UNSPECIFIED})
+
+    def test_form_offers_the_gender_choices(self):
+        response = self.client.get(reverse("register_guardian"))
+        self.assertContains(response, 'name="child_1_gender"')
+        self.assertContains(response, 'id="rp-gender-choices"')
 
     def test_postcode_and_mail_language_are_saved(self):
         Municipality.objects.create(postal_code="9000", name="Gent", center=Point(3.7174, 51.0543, srid=4326))

@@ -18,7 +18,9 @@ To create an account:
    required (dojos are for ninjas aged 7 to 17, so a date of birth outside
    that range is flagged); allergies/notes are optional but help the
    mentors running the session. There's no need to describe your child's
-   coding level: that's shown by the belt their dojo awards them. Use
+   coding level: that's shown by the belt their dojo awards them. Gender
+   is optional ("Prefer not to say" is the default) and never shown
+   publicly; it lets us tell you about girls' sessions. Use
    **Add another child** if you have more than one.
 #. Submit the form.
 

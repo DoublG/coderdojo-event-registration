@@ -55,6 +55,7 @@
         {% endif %}
         <h1 class="display-xl">{{ event.name }}</h1>
       </div>
+      {% if event.is_girls_session %}<p>{% include "events/partials/_audience_badge.html" %}</p>{% endif %}
       <p class="body-lg meta">
         {{ event.start_time|date:"D j M" }} · {{ event.start_time|time:"H:i" }}–{{ event.end_time|time:"H:i" }}
         {% if event.venue_name %} · {{ event.venue_name }}{% endif %}

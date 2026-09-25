@@ -79,6 +79,12 @@
             <label class="cd-form__label label" for="ac-dob">Date of birth (optional)</label>
             <input class="cd-form__input body" type="date" id="ac-dob" name="date_of_birth">
           </div>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="ac-gender">Gender (optional)</label>
+            <select class="cd-form__select body" id="ac-gender" name="gender">
+              {% for value, label in gender_choices %}<option value="{{ value }}"{% if value == "unspecified" %} selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+          </div>
         </div>
         <div class="cd-form__actions">
           <button type="button" class="cd-btn cd-btn--ghost label" onclick="this.closest('details').open=false;">Cancel</button>

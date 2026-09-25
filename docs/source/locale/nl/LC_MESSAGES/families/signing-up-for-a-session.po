@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 17:38+0000\n"
+"POT-Creation-Date: 2026-09-25 08:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -67,15 +67,27 @@ msgid ""
 msgstr ""
 "Als een sessie **Inschrijvingen gesloten** toont in plaats van een "
 "inschrijfoptie, neemt de dojo geen nieuwe inschrijvingen meer aan voor "
-"die sessie (dit gebeurt meestal nadat de aanwezigheid voor die sessie al"
-" gecontroleerd is) — neem rechtstreeks contact op met het dojoteam als u"
-" toch nog een plaats nodig hebt."
+"die sessie (dit gebeurt meestal nadat de aanwezigheid voor die sessie al "
+"gecontroleerd is) — neem rechtstreeks contact op met het dojoteam als u "
+"toch nog een plaats nodig hebt."
 
 #: ../../source/families/signing-up-for-a-session.rst:21
+msgid "Girls' sessions"
+msgstr "Meisjessessies"
+
+#: ../../source/families/signing-up-for-a-session.rst:23
+msgid ""
+"Some sessions are labelled **Girls' session**. They're aimed at girls, "
+"but the label never stops anyone from signing up."
+msgstr ""
+"Sommige sessies hebben het label **Meisjessessie**. Ze zijn bedoeld voor "
+"meisjes, maar het label houdt nooit iemand tegen om zich in te schrijven."
+
+#: ../../source/families/signing-up-for-a-session.rst:27
 msgid "Waiting lists"
 msgstr "Wachtlijsten"
 
-#: ../../source/families/signing-up-for-a-session.rst:23
+#: ../../source/families/signing-up-for-a-session.rst:29
 msgid ""
 "Sessions have a limited number of places. If a session is full when you "
 "sign up, your child is placed on the **waiting list** instead of being "
@@ -91,11 +103,11 @@ msgstr ""
 "annuleert), wordt het kind dat het langst wacht voor die sessie "
 "automatisch bevestigd. Hiervoor hoeft u zelf niets te doen."
 
-#: ../../source/families/signing-up-for-a-session.rst:31
+#: ../../source/families/signing-up-for-a-session.rst:37
 msgid "Cancelling"
 msgstr "Annuleren"
 
-#: ../../source/families/signing-up-for-a-session.rst:33
+#: ../../source/families/signing-up-for-a-session.rst:39
 msgid ""
 "If your plans change, cancel from your family account page (see :doc"
 ":`managing-your-account`) rather than just not turning up — that's also "

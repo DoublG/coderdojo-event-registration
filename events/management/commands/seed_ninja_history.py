@@ -175,6 +175,7 @@ class Command(BaseCommand):
                 defaults={
                     "end_time": timezone.make_aware(datetime(2023, 2, 11, 13, 0)),
                     "places": 30, "location": girls_dojo.location, "status": Event.CLOSED,
+                    "audience": Event.GIRLS,
                     "description": "A CoderDojo for Girls session, run for the International Day of Women and Girls in Science.",
                 },
             )
@@ -203,6 +204,9 @@ class Command(BaseCommand):
         # Backfills history seeded before status was set here.
         past_ids = [e.id for e in all_past_events] + [e.id for e in (girls_event, coolest_event) if e is not None]
         Event.objects.filter(pk__in=past_ids, status=Event.DRAFT).update(status=Event.CLOSED)
+        if girls_event is not None and girls_event.audience != Event.GIRLS:
+            girls_event.audience = Event.GIRLS
+            girls_event.save(update_fields=["audience"])
 
         pathways = list(Pathway.objects.order_by("id"))
         registrations_created = 0

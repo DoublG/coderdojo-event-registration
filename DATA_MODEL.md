@@ -284,6 +284,7 @@ erDiagram
         string venue_name
         int min_age
         int max_age
+        string audience "everyone | girls (a label, never a restriction)"
     }
     REGISTRATION {
         bigint id PK
@@ -1740,8 +1741,7 @@ Changes to existing models:
   and `unspecified` (the default, shown as "Prefer not to say"). Parents
   fill it in on the sign-up child rows, `add_ninja` and `edit_ninja`, with
   help text saying why it's asked (girls' sessions). It's optional and
-  never shown publicly. *Done: the field, the admin and the seeders. The
-  family forms are still to do.*
+  never shown publicly. *Done.*
 - **`events.Event.audience`**: `everyone` (the default) or `girls`. Set on
   the `EventForm`, and shown as a "Girls' session" label on public event
   cards and on the dojo finder's next-session line. It **describes who a
@@ -1749,7 +1749,7 @@ Changes to existing models:
   `event_signup` doesn't look at it or at the child's gender, the same way
   it doesn't enforce `min_age`/`max_age` today. Its uses are promotion
   (segments that target girls for these sessions) and the engagement
-  statistics below.
+  statistics below. *Done (the label, the form field, the admin filter).*
 - **`events.Registration.created_at`** (it doesn't exist today). This gives
   signup lead time and recency of intent.
 - **`events.RegistrationCancellation`**: a cancellation still deletes the
@@ -2119,7 +2119,9 @@ Each phase ships with tests (the repo rule) and updates this section and
   correct task names, a broker db of its own, the two queues and workers
   (also in `start.sh`), and the scaffolding (`test_mail`, the hourly test
   task, the old reminders draft) removed
-- phase 2: `Ninja.gender` in the model, the admin and the seeders
+- phase 2: done. `Ninja.gender` on the family forms (sign-up rows, add and
+  edit a child) and `Event.audience` with its "Girls' session" label on the
+  public pages. Seeders mark some upcoming sessions as CoderDojo Girlz
 - phase 3: `mailing.categories`, `User.preferred_language` and templates
   per language
 - phase 7: scopes, a subquery per rule, rule validation, the admin

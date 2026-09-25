@@ -544,6 +544,13 @@ class DojoEventCreateViewTests(TempMediaMixin, TestCase):
         self.assertEqual(event.start_time.strftime("%d/%m/%Y %H:%M"), "01/01/2030 10:00")
         self.assertEqual(event.end_time.strftime("%d/%m/%Y %H:%M"), "01/01/2030 12:00")
 
+    def test_audience_defaults_to_everyone_and_can_be_girls(self):
+        self.client.force_login(self.owner)
+        url = reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id})
+        self.client.post(url, self._valid_post_data(name="A"))
+        self.client.post(url, self._valid_post_data(name="B", event_date="02/01/2030", audience=Event.GIRLS))
+        self.assertEqual(dict(Event.objects.values_list("name", "audience")), {"A": Event.EVERYONE, "B": Event.GIRLS})
+
     def test_invalid_post_reshows_form_without_creating(self):
         self.client.force_login(self.owner)
 

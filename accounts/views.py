@@ -183,6 +183,7 @@ def _parse_child_rows(post_data):
         name = post_data.get(f"child_{n}_name", "").strip()
         dob_raw = post_data.get(f"child_{n}_dob", "")
         notes = post_data.get(f"child_{n}_notes", "").strip()
+        gender = _clean_gender(post_data.get(f"child_{n}_gender"))
 
         errors = {}
         if not name:
@@ -195,15 +196,21 @@ def _parse_child_rows(post_data):
 
         rows.append({
             "index": n, "name": name, "dob": dob_raw, "date_of_birth": date_of_birth,
-            "notes": notes, "errors": errors,
+            "notes": notes, "gender": gender, "errors": errors,
         })
     return rows
+
+
+def _clean_gender(value):
+    """A posted gender, or "Prefer not to say" for anything else (including
+    a form that didn't send one). Optional everywhere, never an error."""
+    return value if value in dict(Ninja.GENDER_CHOICES) else Ninja.UNSPECIFIED
 
 
 def _create_ninjas(parent, child_rows):
     for row in child_rows:
         ninja = Ninja.objects.create(
-            name=row["name"], date_of_birth=row["date_of_birth"], allergies_notes=row["notes"],
+            name=row["name"], date_of_birth=row["date_of_birth"], allergies_notes=row["notes"], gender=row["gender"],
         )
         Guardianship.objects.create(guardian=parent, ninja=ninja)
 
@@ -257,8 +264,9 @@ def register_guardian(request):
 
     return render(request, "accounts/register_guardian.html", {
         "form": form,
-        "child_rows": child_rows or [{"index": 1, "name": "", "dob": "", "notes": "", "errors": {}}],
+        "child_rows": child_rows or [{"index": 1, "name": "", "dob": "", "notes": "", "gender": Ninja.UNSPECIFIED, "errors": {}}],
         "children_error": children_error,
+        "gender_choices": Ninja.GENDER_CHOICES,
     })
 
 
@@ -292,6 +300,7 @@ def account_home(request):
     active_kinds = {a.kind for a in applications if a.status != "rejected"}
     return render(request, "accounts/guardian_detail.html", {
         "guardian": request.user, "children": children, "icon_choices": _icon_choices(),
+        "gender_choices": Ninja.GENDER_CHOICES,
         "applications": applications,
         "has_champion_application": "champion" in active_kinds,
         "has_mentor_application": "mentor" in active_kinds,
@@ -313,7 +322,7 @@ def add_ninja(request):
         date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
         add_error = ninja_birth_date_error(date_of_birth)
         if name and not add_error:
-            ninja = Ninja(name=name, date_of_birth=date_of_birth)
+            ninja = Ninja(name=name, date_of_birth=date_of_birth, gender=_clean_gender(request.POST.get("gender")))
             _set_icon(ninja, request.POST.get("icon", ""))
             ninja.save()
             Guardianship.objects.create(guardian=guardian, ninja=ninja)
@@ -390,10 +399,12 @@ def edit_ninja(request, ninja_id):
         date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
         if date_of_birth != child.date_of_birth and (dob_error := ninja_birth_date_error(date_of_birth)):
             return render(request, "accounts/partials/_child_header_edit.html", {
-                "child": child, "dob_error": dob_error,
+                "child": child, "dob_error": dob_error, "gender_choices": Ninja.GENDER_CHOICES,
                 "icon_choices": _icon_choices(), "current_icon": _current_icon_value(child),
             })
         child.date_of_birth = date_of_birth
+        if "gender" in request.POST:
+            child.gender = _clean_gender(request.POST["gender"])
 
         _set_icon(child, request.POST.get("icon", ""))
         child.save()
@@ -403,7 +414,7 @@ def edit_ninja(request, ninja_id):
         })
 
     return render(request, "accounts/partials/_child_header_edit.html", {
-        "child": child,
+        "child": child, "gender_choices": Ninja.GENDER_CHOICES,
         "icon_choices": _icon_choices(), "current_icon": _current_icon_value(child),
     })
 

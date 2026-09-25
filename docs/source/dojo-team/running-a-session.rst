@@ -13,7 +13,9 @@ session for your dojo — name, a date with a start and end time (a
 session always runs within a single day, entered as dd/mm/yyyy and a
 24-hour time, e.g. 20/07/2030 and 14:00), how many places it has, and
 optionally a venue, description, an age range, who from your dojo's
-team runs it, and which pathways it covers (see below).
+team runs it, and which pathways it covers (see below). **Aimed at**
+can mark it as a girls' session: it gets a "Girls' session" label on the
+site, but anyone can still sign up.
 
 For the banner image, pick one of the ready-made templates shown on the
 form, or upload your own further down — uploading a file always takes

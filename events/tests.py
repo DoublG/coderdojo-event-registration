@@ -92,6 +92,36 @@ class EventDetailViewTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+class GirlsSessionLabelTests(TestCase):
+    """Event.audience = girls is a label on the public pages; it never
+    restricts who can sign up."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.dojo = make_dojo("Ghent")
+        cls.girls = _future_event(cls.dojo, name="Girlz", audience=Event.GIRLS)
+        cls.everyone = _future_event(cls.dojo, name="Everyone", start_time=timezone.now() + timedelta(days=8),
+                                     end_time=timezone.now() + timedelta(days=8, hours=2))
+
+    def test_label_on_event_detail_only_for_girls_sessions(self):
+        self.assertContains(self.client.get(reverse("event_detail", kwargs={"event_id": self.girls.id})), "Girls' session")
+        self.assertNotContains(self.client.get(reverse("event_detail", kwargs={"event_id": self.everyone.id})), "Girls' session")
+
+    def test_label_on_event_list(self):
+        self.assertContains(self.client.get(reverse("event_list")), "Girls' session", count=1)
+
+    def test_a_boy_can_sign_up_for_a_girls_session(self):
+        guardian = User.objects.create(username="g1", email="g1@example.com")
+        boy = Ninja.objects.create(name="Boy", gender=Ninja.BOY)
+        Guardianship.objects.create(guardian=guardian, ninja=boy)
+        self.client.force_login(guardian)
+
+        self.client.post(reverse("event_signup", kwargs={"event_id": self.girls.id}),
+                         {"child": [str(boy.id)], "child_order": str(boy.id)})
+
+        self.assertTrue(Registration.objects.filter(event=self.girls, ninja=boy, waiting_list=False).exists())
+
+
 class EventSignupViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):

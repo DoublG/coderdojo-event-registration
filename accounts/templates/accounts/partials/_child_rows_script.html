@@ -6,6 +6,15 @@
     var childrenEl = document.getElementById("rp-children");
     var addButton = document.getElementById("rp-add-child");
     if (!childrenEl || !addButton) return;
+    // [[value, label], ...] from Ninja.GENDER_CHOICES (json_script in the fieldset partial).
+    var genderChoices = JSON.parse(document.getElementById("rp-gender-choices").textContent);
+    var genderOptions = genderChoices.map(function (choice) {
+      var option = document.createElement("option");
+      option.value = choice[0];
+      option.textContent = choice[1];
+      if (choice[0] === "unspecified") option.selected = true;
+      return option.outerHTML;
+    }).join("");
 
     function subgroupHtml(n) {
       return (
@@ -28,6 +37,11 @@
             '<div class="cd-form__field">' +
               '<label class="cd-form__label label" for="rp-c' + n + '-notes">Allergies or notes</label>' +
               '<input class="cd-form__input body" id="rp-c' + n + '-notes" name="child_' + n + '_notes" type="text" placeholder="None">' +
+            '</div>' +
+            '<div class="cd-form__field">' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-gender">Gender</label>' +
+              '<select class="cd-form__select body" id="rp-c' + n + '-gender" name="child_' + n + '_gender">' + genderOptions + '</select>' +
+              '<p class="cd-form__help caption">Optional, never shown publicly. Lets us tell you about girls\' sessions.</p>' +
             '</div>' +
           '</div>' +
         '</div>'

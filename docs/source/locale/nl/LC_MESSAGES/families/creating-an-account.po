@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 08:25+0000\n"
+"POT-Creation-Date: 2026-09-25 08:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -69,22 +69,26 @@ msgid ""
 "required (dojos are for ninjas aged 7 to 17, so a date of birth outside "
 "that range is flagged); allergies/notes are optional but help the mentors"
 " running the session. There's no need to describe your child's coding "
-"level: that's shown by the belt their dojo awards them. Use **Add another"
-" child** if you have more than one."
+"level: that's shown by the belt their dojo awards them. Gender is "
+"optional (\"Prefer not to say\" is the default) and never shown publicly;"
+" it lets us tell you about girls' sessions. Use **Add another child** if "
+"you have more than one."
 msgstr ""
 "Voeg elk kind toe dat zal deelnemen: naam en geboortedatum zijn verplicht"
 " (dojo's zijn er voor ninja's van 7 tot 17 jaar, dus een geboortedatum "
 "daarbuiten wordt gemeld); eventuele allergieën/opmerkingen zijn optioneel"
 " maar helpen de mentoren die de sessie begeleiden. Het programmeerniveau "
 "van uw kind hoeft u niet op te geven: dat blijkt uit de gordel die de "
-"dojo toekent. Gebruik **Nog een kind toevoegen** als u er meer dan één "
-"hebt."
+"dojo toekent. Gender is optioneel („Zeg ik liever niet” is de standaard) "
+"en wordt nooit publiek getoond; zo kunnen we u laten weten wanneer er "
+"meisjessessies zijn. Gebruik **Nog een kind toevoegen** als u er meer dan"
+" één hebt."
 
-#: ../../source/families/creating-an-account.rst:23
+#: ../../source/families/creating-an-account.rst:25
 msgid "Submit the form."
 msgstr "Verstuur het formulier."
 
-#: ../../source/families/creating-an-account.rst:25
+#: ../../source/families/creating-an-account.rst:27
 msgid ""
 "Unlike applying to volunteer or start a dojo, there's no review step — "
 "your account is created immediately and you're taken straight to your "
@@ -95,7 +99,7 @@ msgstr ""
 "onmiddellijk aangemaakt en u wordt meteen, ingelogd, naar de pagina van "
 "uw gezin gebracht."
 
-#: ../../source/families/creating-an-account.rst:31
+#: ../../source/families/creating-an-account.rst:33
 msgid ""
 "Only a parent or legal guardian should create the family account and add "
 "children to it — you'll be asked to confirm this when registering. The "
@@ -106,7 +110,7 @@ msgstr ""
 "registratie. Het e-mailadres waarmee u zich registreert mag nog niet in "
 "gebruik zijn bij een ander account."
 
-#: ../../source/families/creating-an-account.rst:35
+#: ../../source/families/creating-an-account.rst:37
 msgid ""
 "Once your account exists, see :doc:`../families/finding-a-dojo` to find a"
 " session, or go straight to :doc:`../families/managing-your-account` to "
