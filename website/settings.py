@@ -195,6 +195,12 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=3, minute=0),
         "options": {"queue": "celery", "expires": 6 * 3600},
     },
+    # After the nightly engagement rebuild, so "became at risk" is fresh.
+    "journeys": {
+        "task": "mailing.tasks.run_journeys",
+        "schedule": crontab(hour=18, minute=0),
+        "options": {"queue": "celery", "expires": 6 * 3600},
+    },
     "new-sessions-digest": {
         "task": "mailing.tasks.announce_new_sessions",
         "schedule": crontab(hour=17, minute=0),

@@ -1,0 +1,39 @@
+{% comment %}A journey's fields (mailing.forms.JourneyForm): the campaign fields, with a cool-down instead of a send time.{% endcomment %}
+<div class="cd-form__row">
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.name.id_for_label }}">Name<span class="cd-form__required" aria-hidden="true">*</span></label>
+    <ul class="cd-form__errors">{% for error in form.name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {{ form.name }}
+  </div>
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.category.id_for_label }}">Kind of mail</label>
+    {{ form.category }}
+    <p class="cd-form__help caption">Only people who want this kind of mail get it.</p>
+  </div>
+</div>
+<div class="cd-form__row">
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.segment.id_for_label }}">Segment<span class="cd-form__required" aria-hidden="true">*</span></label>
+    <ul class="cd-form__errors">{% for error in form.segment.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {{ form.segment }}
+    <p class="cd-form__help caption">Tip: a rule like "How the child comes to sessions changed: became At risk in the last 7 days" makes it a triggered mail.</p>
+  </div>
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.template_key.id_for_label }}">Template<span class="cd-form__required" aria-hidden="true">*</span></label>
+    {{ form.template_key }}
+  </div>
+</div>
+<div class="cd-form__row">
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.variables.id_for_label }}">{{ form.variables.label }}</label>
+    <ul class="cd-form__errors">{% for error in form.variables.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {{ form.variables }}
+    <p class="cd-form__help caption">{{ form.variables.help_text }}</p>
+  </div>
+  <div class="cd-form__field">
+    <label class="cd-form__label label" for="{{ form.cooldown_days.id_for_label }}">Not again for (days)</label>
+    <ul class="cd-form__errors">{% for error in form.cooldown_days.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {{ form.cooldown_days }}
+    <p class="cd-form__help caption">{{ form.cooldown_days.help_text }}</p>
+  </div>
+</div>

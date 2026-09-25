@@ -1,5 +1,6 @@
 from .attributes.account import AccountTypeAttribute, HasChildrenAttribute
 from .attributes.activity import ActiveTeamMemberAttribute, AttendedWithinDaysAttribute
+from .attributes.changes import NoNewBeltAttribute, NotOnATeamAttribute, StageChangedAttribute
 from .attributes.engagement import (
     AttendanceRateAttribute,
     DaysSinceLastVisitAttribute,
@@ -33,6 +34,7 @@ SEGMENT_ATTRIBUTES = {
         AccountRoleAttribute,
         AccountTypeAttribute,
         JoinedAttribute,
+        NotOnATeamAttribute,
         HasChildrenAttribute,
         ActiveTeamMemberAttribute,
         LanguageAttribute,
@@ -49,6 +51,8 @@ SEGMENT_ATTRIBUTES = {
         AttendedWithinDaysAttribute,
         EngagementStageAttribute,
         StageAtDojoAttribute,
+        StageChangedAttribute,
+        NoNewBeltAttribute,
         AttendanceRateAttribute,
         SessionsAttendedAttribute,
         MissedInARowAttribute,

@@ -1,0 +1,14 @@
+{% extends "core/_manage_base.html" %}
+{% block manage_page_title %}New journey{% endblock %}
+{% block manage_heading %}New journey{% endblock %}
+
+{% block manage_content %}
+  <form method="post" class="cd-card cd-form" style="padding: var(--space-5);" novalidate>
+    {% csrf_token %}
+    {% include "mailing/manage/_journey_fields.html" %}
+    <div class="cd-form__actions">
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_journey_list' %}">Cancel</a>
+      <button type="submit" class="cd-btn cd-btn--primary label">Save (paused)</button>
+    </div>
+  </form>
+{% endblock %}

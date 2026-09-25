@@ -98,8 +98,12 @@ class StrNeverQueriesTests(TestCase):
         from applications.models import Application, BackgroundCheckHistory
         from content.models import Announcement
         from dojos.testing import add_member, make_dojo
-        from events.models import Badge, Belt, Event, NinjaBadge, NinjaBelt, NinjaEngagement, RegistrationCancellation
-        from mailing.models import ConsentEvent, EmailMessage, MailPreference, Segment, SegmentGroup
+        from events.models import (
+            Badge, Belt, Event, NinjaBadge, NinjaBelt, NinjaEngagement, NinjaEngagementChange, RegistrationCancellation,
+        )
+        from mailing.models import (
+            ConsentEvent, EmailMessage, Journey, JourneyDelivery, MailPreference, Segment, SegmentGroup,
+        )
         from notifications.models import Notification
         from pathways.models import PathwayProject, PathwayStep
 
@@ -123,6 +127,10 @@ class StrNeverQueriesTests(TestCase):
             (RegistrationCancellation.objects.create(ninja=ninja, event=Event.objects.create(
                 name="Gone", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()),
                 was_waitlisted=False), "Kid cancelled Gone"),
+            (NinjaEngagementChange.objects.create(ninja=ninja, from_stage="regular", to_stage="at_risk",
+                                                  changed_on=date(2026, 1, 1)), "Kid: regular"),
+            (JourneyDelivery.objects.create(journey=Journey.objects.create(name="Hi", template_key="x"), user=user),
+             "Hi → jan"),
             (NinjaEngagement.objects.create(ninja=ninja, dojo=dojo, stage="regular", computed_on=date(2026, 1, 1)),
              "Kid @ Ghent"),
             (EmailMessage.objects.create(user=user, category="service", subject="Hi", body=""), "jan — Hi"),

@@ -170,6 +170,51 @@ class Campaign(models.Model):
         return self.status == self.Status.DRAFT
 
 
+class Journey(models.Model):
+    """A standing campaign (DATA_MODEL.md §11, Tier 3): every day, everyone
+    who newly matches its segment gets its mail, at most once per
+    `cooldown_days`. E.g. "we miss you" when a child becomes at risk. Run by
+    mailing.journeys.run (beat, daily); managed in the organisation
+    dashboard."""
+
+    name = models.CharField(max_length=200)
+    segment = models.ForeignKey(Segment, null=True, blank=True, on_delete=models.SET_NULL, related_name="journeys")
+    category = models.CharField(max_length=20, choices=MailCategory.choices, default=MailCategory.DOJO_NEWS)
+    template_key = models.CharField(max_length=100)
+    context = models.JSONField(default=dict, blank=True)
+    cooldown_days = models.PositiveIntegerField(
+        default=365, help_text="Someone who got it doesn't get it again for this many days.",
+    )
+    is_active = models.BooleanField(default=False)
+    activated_at = models.DateTimeField(null=True, blank=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class JourneyDeliveryManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("journey", "user")
+
+
+class JourneyDelivery(models.Model):
+    """One journey mail to one account: what the cool-down is checked against."""
+
+    journey = models.ForeignKey(Journey, on_delete=models.CASCADE, related_name="deliveries")
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="+")
+    email = models.ForeignKey("EmailMessage", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = JourneyDeliveryManager()
+
+    class Meta:
+        indexes = [models.Index(fields=["journey", "user", "created_at"], name="mailing_journey_delivery_idx")]
+
+    def __str__(self):
+        return f"{self.journey} → {self.user}"
+
+
 class EmailTemplate(models.Model):
     """Subject and plain-text body in Django template syntax, one row per
     key and language. Rendered by mailing.rendering.render(), which falls

@@ -8,6 +8,8 @@ from .models import (
     EmailMessage,
     EmailSuppression,
     EmailTemplate,
+    Journey,
+    JourneyDelivery,
     MailPreference,
     Segment,
     SegmentGroup,
@@ -141,3 +143,21 @@ class EmailSuppressionAdmin(admin.ModelAdmin):
     list_display = ["email", "reason", "note", "created_at"]
     list_filter = ["reason"]
     search_fields = ["email"]
+
+
+@admin.register(Journey)
+class JourneyAdmin(admin.ModelAdmin):
+    """Run day to day from the organisation dashboard (/manage/journeys/)."""
+
+    list_display = ["name", "segment", "template_key", "is_active", "cooldown_days"]
+    list_filter = ["is_active"]
+
+
+@admin.register(JourneyDelivery)
+class JourneyDeliveryAdmin(admin.ModelAdmin):
+    """Who got which journey when: what the cool-down is checked against."""
+
+    list_display = ["created_at", "journey", "user", "email"]
+    list_filter = ["journey"]
+    search_fields = ["user__email"]
+

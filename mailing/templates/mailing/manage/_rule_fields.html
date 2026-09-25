@@ -31,6 +31,17 @@ match SegmentAttribute.value_from_form.
     <input class="cd-form__input body" type="number" name="value" min="1" value="365" style="max-width: 8rem;" aria-label="Days"> <span class="body-sm">days</span>
   {% elif attribute.value_type == "number" %}
     <input class="cd-form__input body" type="number" name="value" min="0" step="any" value="3" style="max-width: 8rem;" aria-label="Number">{% if attribute.unit %} <span class="body-sm">{{ attribute.unit }}</span>{% endif %}
+  {% elif attribute.value_type == "stage_change" %}
+    <span class="body-sm">became</span>
+    <div class="cd-form__checkbox-list">
+      {% for choice in choices %}<label class="cd-form__checkbox-row body-sm"><input type="checkbox" name="value" value="{{ choice.value }}"> {{ choice.label }}</label>{% endfor %}
+    </div>
+    <span class="body-sm">from (optional)</span>
+    <div class="cd-form__checkbox-list">
+      {% for choice in choices %}<label class="cd-form__checkbox-row body-sm"><input type="checkbox" name="from" value="{{ choice.value }}"> {{ choice.label }}</label>{% endfor %}
+    </div>
+    <span class="body-sm">in the last</span>
+    <input class="cd-form__input body" type="number" name="days" min="1" value="7" style="max-width: 6rem;" aria-label="Days"> <span class="body-sm">days</span>
   {% elif attribute.value_type == "dojo_stage" %}
     <span class="body-sm">at</span>
     <select class="cd-form__select body" name="dojo" aria-label="Dojo">

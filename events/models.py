@@ -340,3 +340,27 @@ class NinjaEngagement(models.Model):
 
     def __str__(self):
         return f"{self.ninja} @ {self.dojo or 'overall'}: {self.get_stage_display()}"
+
+
+class NinjaEngagementChangeManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("ninja")
+
+
+class NinjaEngagementChange(models.Model):
+    """A change in a ninja's overall stage between two nightly rebuilds
+    (append-only). What journeys trigger on: "became at risk this week",
+    "came back after lapsing"."""
+
+    ninja = models.ForeignKey("accounts.Ninja", on_delete=models.CASCADE, related_name="engagement_changes")
+    from_stage = models.CharField(max_length=20, choices=NinjaEngagement.STAGE_CHOICES)
+    to_stage = models.CharField(max_length=20, choices=NinjaEngagement.STAGE_CHOICES)
+    changed_on = models.DateField()
+
+    objects = NinjaEngagementChangeManager()
+
+    class Meta:
+        indexes = [models.Index(fields=["changed_on", "to_stage"], name="events_engagement_change_idx")]
+
+    def __str__(self):
+        return f"{self.ninja}: {self.from_stage} → {self.to_stage} ({self.changed_on})"

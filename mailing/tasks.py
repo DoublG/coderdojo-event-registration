@@ -243,3 +243,11 @@ def launch_due_campaigns():
     from .campaigns import launch_due
 
     return len(launch_due())
+
+
+@shared_task
+def run_journeys():
+    """Daily (default queue): send each active journey to those newly due."""
+    from .journeys import run
+
+    return run()

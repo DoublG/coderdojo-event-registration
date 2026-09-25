@@ -1,8 +1,9 @@
 """The engagement snapshot (DATA_MODEL.md §11, "Engagement snapshot"):
 how each ninja comes to sessions, measured against the sessions their dojo
 actually ran, so a regular at a monthly dojo is as regular as one at a
-weekly dojo. rebuild() recomputes every NinjaEngagement row; the
-rebuild_engagement task runs it nightly.
+weekly dojo. rebuild() recomputes every NinjaEngagement row and records
+each overall stage change as a NinjaEngagementChange (what journeys
+trigger on); the rebuild_engagement task runs it nightly.
 
 - Offered: sessions that aren't drafts, have started, and were meant for
   the ninja (is_aimed_at: age range; a girls' session only for girls).
@@ -25,7 +26,7 @@ from django.utils import timezone
 
 from accounts.models import Ninja, age_on
 
-from .models import Event, NinjaEngagement, Registration
+from .models import Event, NinjaEngagement, NinjaEngagementChange, Registration
 
 WINDOW_DAYS = 180
 HISTORY_DAYS = 365
@@ -165,7 +166,16 @@ def rebuild(today=None):
         rows.append(_row(ninja, None, main, True, **shared))
         rows.extend(_row(ninja, dojo, main, False, **shared) for dojo in dojos.values())
 
+    previous = dict(NinjaEngagement.objects.filter(dojo__isnull=True).values_list("ninja_id", "stage"))
+    changes = [
+        NinjaEngagementChange(ninja=row.ninja, from_stage=previous[row.ninja.pk], to_stage=row.stage, changed_on=today)
+        for row in rows
+        if row.dojo is None and row.ninja.pk in previous and previous[row.ninja.pk] != row.stage
+    ]
     with transaction.atomic():
         NinjaEngagement.objects.all().delete()
         NinjaEngagement.objects.bulk_create(rows, batch_size=500)
+        # Rebuilding twice on a day doesn't record the same change twice.
+        NinjaEngagementChange.objects.filter(changed_on=today, ninja_id__in=[c.ninja_id for c in changes]).delete()
+        NinjaEngagementChange.objects.bulk_create(changes, batch_size=500)
     return len(rows)

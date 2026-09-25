@@ -19,7 +19,7 @@ from dojos.testing import add_member, make_dojo
 from events.models import Event, Registration
 from geo.models import AdministrativeBoundary, Municipality
 
-from . import campaigns
+from . import campaigns, journeys
 from .categories import MailCategory
 from .models import (
     BounceRecord,
@@ -1529,3 +1529,101 @@ class TemplateDashboardTests(TestCase):
 
         self.client.post(delete_key("campaign_girlz"))
         self.assertFalse(EmailTemplate.objects.filter(key="campaign_girlz").exists())
+
+
+# --- phase 9: change over time, journeys -------------------------------------------
+
+
+class Tier3Tests(TestCase):
+    def setUp(self):
+        call_command("load_mail_templates", stdout=StringIO())
+        self.dojo = make_dojo("Ghent")
+        self.family = _family("fam", Ninja.GIRL)
+        self.kid = Ninja.objects.of_guardian(self.family).get()
+        self.other = _family("other", Ninja.BOY)
+
+    def _session(self, days_ago):
+        start = timezone.now() - timedelta(days=days_ago)
+        return Event.objects.create(name=f"S{days_ago}", dojo=self.dojo, status=Event.CLOSED, places=20,
+                                    start_time=start, end_time=start + timedelta(hours=2))
+
+    def test_rebuild_records_stage_changes_once_a_day(self):
+        from events.engagement import rebuild
+        from events.models import NinjaEngagementChange
+
+        for days in (170, 150, 130, 110):
+            Registration.objects.create(event=self._session(days), ninja=self.kid, waiting_list=False, position=1,
+                                        attended=True)
+        rebuild()
+        self.assertFalse(NinjaEngagementChange.objects.exists())  # the first build records nothing
+        for days in (60, 40, 20):
+            self._session(days)
+        rebuild()
+        rebuild()
+        change = NinjaEngagementChange.objects.get(ninja=self.kid)
+        self.assertEqual(change.to_stage, "at_risk")
+        self.assertEqual(_resolve(_segment(("ninja", "and", [
+            ("stage_changed", "within_days", {"from": [], "to": ["at_risk"], "days": 7})]))), {"fam"})
+        self.assertEqual(_resolve(_segment(("ninja", "and", [
+            ("stage_changed", "within_days", {"from": ["lapsed"], "to": ["at_risk"], "days": 7})]))), set())
+
+    def test_no_new_belt_and_not_on_a_team(self):
+        from events.models import Belt, NinjaBelt
+
+        NinjaBelt.objects.create(ninja=Ninja.objects.of_guardian(self.other).get(),
+                                 belt=Belt.objects.create(level=1, name="White"), awarded_on=timezone.localdate())
+        self.assertEqual(_resolve(_segment(("ninja", "and", [("no_new_belt_within_days", "within_days", 365)]))), {"fam"})
+
+        busy, idle = User.objects.create(username="busy", email="bu@example.com"), User.objects.create(username="idle", email="i@example.com")
+        busy_membership = add_member(self.dojo, busy)
+        add_member(self.dojo, idle)
+        self._session(10).team.add(busy_membership)
+        segment = _segment(("user", "and", [("account_role", "in", ["mentor"]), ("not_on_team_within_days", "within_days", 90)]))
+        self.assertEqual(_resolve(segment), {"idle"})
+
+    def test_journey_sends_once_per_cooldown_to_those_who_want_it(self):
+        from .models import Journey, JourneyDelivery
+
+        segment = _segment(("ninja", "and", [("ninja_gender", "in", [Ninja.GIRL, Ninja.BOY])]))
+        journey = Journey.objects.create(name="Hello", segment=segment, category="dojo_news",
+                                         template_key="campaign_girlz", cooldown_days=30)
+        set_preference(self.other, MailCategory.DOJO_NEWS, False, ConsentEvent.PREFERENCES)
+        with self.assertRaises(campaigns.CampaignError):  # no English template
+            Journey.objects.filter(pk=journey.pk).update(template_key="nope")
+            journey.refresh_from_db()
+            journeys.activate(journey)
+        Journey.objects.filter(pk=journey.pk).update(template_key="campaign_girlz")
+        journey.refresh_from_db()
+        journeys.activate(journey)
+
+        self.assertEqual(journeys.run(), {journey.pk: 1})
+        self.assertEqual(list(JourneyDelivery.objects.values_list("user__username", flat=True)), ["fam"])
+        self.assertEqual(journeys.run(), {journey.pk: 0})  # within the cool-down
+        JourneyDelivery.objects.update(created_at=timezone.now() - timedelta(days=31))
+        self.assertEqual(journeys.run(), {journey.pk: 1})
+        journeys.pause(journey)
+        self.assertEqual(journeys.run(), {})
+
+    def test_journey_pages(self):
+        from accounts.models import OrganisationRole
+
+        from .models import Journey
+
+        admin = User.objects.create(username="orgadmin", email="ann@example.com")
+        OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
+        self.client.force_login(admin)
+        segment = _segment(("ninja", "and", [("ninja_gender", "in", [Ninja.GIRL])]))
+        response = self.client.post(reverse("manage_journey_create"), {
+            "name": "We miss you", "category": "dojo_news", "template_key": "campaign_girlz",
+            "segment": segment.pk, "variables": "signup_url: https://example.org", "cooldown_days": "365",
+        })
+        journey = Journey.objects.get()
+        self.assertRedirects(response, reverse("manage_journey_detail", kwargs={"journey_id": journey.pk}))
+        self.assertFalse(journey.is_active)
+        page = self.client.get(reverse("manage_journey_detail", kwargs={"journey_id": journey.pk}))
+        self.assertEqual(page.context["stats"]["due"], 1)
+        self.client.post(reverse("manage_journey_activate", kwargs={"journey_id": journey.pk}))
+        self.assertTrue(Journey.objects.get().is_active)
+        self.assertEqual(self.client.get(reverse("manage_journey_list")).status_code, 200)
+        self.client.force_login(self.family)
+        self.assertEqual(self.client.get(reverse("manage_journey_list")).status_code, 404)

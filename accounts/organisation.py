@@ -66,6 +66,8 @@ ADMIN_PERMISSIONS = {
     "mailing.segmentgroup": _EDIT,
     "mailing.segmentrule": _EDIT,
     "mailing.campaign": _EDIT,
+    "mailing.journey": _EDIT,
+    "mailing.journeydelivery": _VIEW,
     "mailing.emailmessage": _VIEW,
     "mailing.mailpreference": _VIEW,
     "mailing.consentevent": _VIEW,

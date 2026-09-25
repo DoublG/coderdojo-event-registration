@@ -1,0 +1,36 @@
+{% extends "core/_manage_base.html" %}
+{% block manage_page_title %}Journeys{% endblock %}
+{% block manage_heading %}Journeys{% endblock %}
+{% block manage_topbar_extra %}<a class="cd-btn cd-btn--primary label" href="{% url 'manage_journey_create' %}">New journey</a>{% endblock %}
+
+{% block manage_content %}
+  <p class="body-sm">A journey runs every day at 18:00: everyone who newly matches its segment gets its mail once (then not again during its cool-down).</p>
+  <div class="cd-table-wrap">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label" scope="col">Name</th>
+          <th class="label" scope="col">Status</th>
+          <th class="label" scope="col">Segment</th>
+          <th class="label cd-table__num" scope="col">Next run</th>
+          <th class="label cd-table__num" scope="col">Last 30 days</th>
+          <th class="label cd-table__num" scope="col">In total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for journey, stats in rows %}
+          <tr>
+            <td class="body-sm"><a href="{% url 'manage_journey_detail' journey_id=journey.id %}">{{ journey.name }}</a></td>
+            <td class="body-sm">{% if journey.is_active %}<span class="cd-badge cd-badge--success caption">Active</span>{% else %}<span class="cd-badge cd-badge--outline caption">Paused</span>{% endif %}</td>
+            <td class="body-sm">{{ journey.segment.name|default:"—" }}</td>
+            <td class="body-sm cd-table__num">{{ stats.due }}</td>
+            <td class="body-sm cd-table__num">{{ stats.recent }}</td>
+            <td class="body-sm cd-table__num">{{ stats.total }}</td>
+          </tr>
+        {% empty %}
+          <tr><td class="body-sm" colspan="6">No journeys yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

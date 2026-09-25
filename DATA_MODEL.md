@@ -2183,6 +2183,15 @@ Each phase ships with tests (the repo rule) and updates this section and
   - the segment is frozen at launch and the audience resolved from it
   - consent and blocks are re-checked right before each mail goes out
 
+- phase 9: done. `NinjaEngagementChange` records stage changes night by
+  night, the `stage_changed`, `no_new_belt_within_days` and
+  `not_on_team_within_days` attributes are built, and journeys
+  (standing, triggered campaigns with a cool-down) are run from the
+  organisation dashboard every day at 18:00. The weighted churn score
+  stays for later, as planned, once the rule-based stages have been
+  checked against real data.
+- Mail templates can be edited in the organisation dashboard too.
+
 `User.postal_code`, with the dojo finder starting from it, came in on
 the side.
 
