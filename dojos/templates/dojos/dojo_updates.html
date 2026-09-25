@@ -1,6 +1,7 @@
 {% extends "dojos/_admin_base.html" %}
-{% block admin_page_title %}Updates{% endblock %}
-{% block admin_heading %}Updates{% endblock %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "Updates" %}{% endblock %}
+{% block admin_heading %}{% translate "Updates" %}{% endblock %}
 
 {% block admin_extra_style %}
 <style>
@@ -25,8 +26,8 @@ POST_UPDATES; anyone with admin access can read the list.
 <div class="updates-manage">
   {% if dojo_access.can_post_updates %}
     <section class="cd-card">
-      <h2 class="heading-md">Post an update</h2>
-      <p class="body-sm muted">A short, dated note on the dojo's public page: a room change, a call for mentors, news from a session. Recurring facts belong in the FAQ; dates of sessions on the events list.</p>
+      <h2 class="heading-md">{% translate "Post an update" %}</h2>
+      <p class="body-sm muted">{% translate "A short, dated note on the dojo's public page: a room change, a call for mentors, news from a session. Recurring facts belong in the FAQ; dates of sessions on the events list." %}</p>
       <form class="cd-form" method="post" action="{% url 'dojo_updates' dojo_id=dojo.id %}">
         {% csrf_token %}
         <div class="cd-form__field">
@@ -34,30 +35,30 @@ POST_UPDATES; anyone with admin access can read the list.
           <ul class="cd-form__errors">{% for error in form.text.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
           {{ form.text }}
         </div>
-        <button type="submit" class="cd-btn cd-btn--primary label">Post update</button>
+        <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Post update" %}</button>
       </form>
     </section>
   {% endif %}
 
   <section class="cd-card">
-    <h2 class="heading-md">Posted updates</h2>
-    <p class="body-sm muted">The dojo's page shows the {{ public_limit }} newest.</p>
+    <h2 class="heading-md">{% translate "Posted updates" %}</h2>
+    <p class="body-sm muted">{% blocktranslate %}The dojo's page shows the {{ public_limit }} newest.{% endblocktranslate %}</p>
     {% for announcement in announcements %}
       <div class="update-row">
         <div>
-          <p class="caption update-row__date">{{ announcement.date|date:"j F Y" }}{% if forloop.counter > public_limit %} · no longer shown{% endif %}</p>
+          <p class="caption update-row__date">{{ announcement.date|date:"j F Y" }}{% if forloop.counter > public_limit %} · {% translate "no longer shown" %}{% endif %}</p>
           <p class="body update-row__text">{{ announcement.text|linebreaksbr }}</p>
         </div>
         {% if dojo_access.can_post_updates %}
           <form method="post" action="{% url 'dojo_update_delete' dojo_id=dojo.id announcement_id=announcement.id %}"
-                onsubmit="return confirm('Remove this update from the dojo\'s page?');">
+                onsubmit="{% translate "Remove this update from the dojo's page?" as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
             {% csrf_token %}
-            <button type="submit" class="cd-btn cd-btn--ghost label">Remove</button>
+            <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Remove" %}</button>
           </form>
         {% endif %}
       </div>
     {% empty %}
-      <p class="body-sm">No updates yet.</p>
+      <p class="body-sm">{% translate "No updates yet." %}</p>
     {% endfor %}
   </section>
 </div>

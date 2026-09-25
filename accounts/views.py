@@ -17,6 +17,7 @@ from django.utils.dateparse import parse_date
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from core.image_library import library_filename, use_library_image
 from dojos.access import accessible_dojos
@@ -553,8 +554,9 @@ def cancel_registration(request, registration_id):
                 waitlist_promoted_mail(next_in_line)
                 notify_managers(
                     event.dojo,
-                    f"A spot opened up in {event.name} — a waitlisted family is now confirmed.",
+                    gettext_lazy("A spot opened up in %(event)s — a waitlisted family is now confirmed."),
                     url=reverse("dojo_dashboard", kwargs={"dojo_id": event.dojo_id}),
+                    params={"event": event.name},
                 )
 
     return redirect("account_home")

@@ -1,5 +1,6 @@
 from django import forms
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from events.models import Event
 
@@ -27,8 +28,8 @@ class PromotionForm(forms.ModelForm):
             "rank": forms.NumberInput(attrs={"class": "cd-form__input body", "min": 0}),
             "starts_at": _datetime_input(),
             "ends_at": _datetime_input(),
-            "title": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Leave empty to use the event's name"}),
-            "text": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Show your project to the world!"}),
+            "title": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Leave empty to use the event's name")}),
+            "text": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Show your project to the world!")}),
             "image": forms.ClearableFileInput(attrs={"class": "cd-form__input body"}),
         }
 
@@ -36,8 +37,11 @@ class PromotionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for name in ("starts_at", "ends_at"):
             self.fields[name].input_formats = [DATETIME_FORMAT]
-        self.fields["starts_at"].label = "Show from"
-        self.fields["ends_at"].label = "Show until"
+        self.fields["starts_at"].label = _("Show from")
+        self.fields["ends_at"].label = _("Show until")
+        self.fields["ends_at"].help_text = _("Empty: the promotion ends when the event starts.")
+        self.fields["rank"].help_text = _("Lower shows first within a placement.")
+        self.fields["image"].help_text = _("Optional: replaces the event's banner.")
         upcoming = Event.objects.filter(end_time__gt=timezone.now())
         if self.instance.event_id:
             upcoming = upcoming | Event.objects.filter(pk=self.instance.event_id)

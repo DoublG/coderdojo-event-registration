@@ -24,6 +24,7 @@ from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from .categories import CAN_OPT_OUT
 from .models import Campaign, ConsentEvent, EmailMessage, EmailTemplate
@@ -72,7 +73,7 @@ def audience(campaign):
 
 def launch(campaign, user):
     if problems := launch_problems(campaign):
-        raise CampaignError(" ".join(problems))
+        raise CampaignError(_(" ").join(problems))
     campaign.segment_snapshot = serialize_segment(campaign.segment)
     campaign.status = Status.QUEUED
     campaign.launched_at = timezone.now()
@@ -84,7 +85,7 @@ def cancel(campaign):
     """Stop a campaign that hasn't finished. Mail already queued but not yet
     sent is withdrawn; what's already out stays out."""
     if campaign.status not in (Status.DRAFT, Status.QUEUED, Status.SENDING):
-        raise CampaignError("This campaign has already finished.")
+        raise CampaignError(_("This campaign has already finished."))
     with transaction.atomic():
         campaign.status = Status.CANCELLED
         campaign.save(update_fields=["status"])
@@ -96,9 +97,9 @@ def cancel(campaign):
 def send_test(campaign, user):
     """The campaign's mail to its author, now, in their own language."""
     if not EmailTemplate.objects.filter(key=campaign.template_key).exists():
-        raise CampaignError(f"There's no template “{campaign.template_key}”.")
+        raise CampaignError(_("There's no template “%(template_key)s”.") % {"template_key": campaign.template_key})
     if not user.email:
-        raise CampaignError("Your account has no email address to send the test to.")
+        raise CampaignError(_("Your account has no email address to send the test to."))
     return send(user, campaign.category, campaign.template_key, campaign.context, campaign=campaign, test=True)
 
 

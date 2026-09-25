@@ -72,19 +72,19 @@ class EventForm(forms.ModelForm):
 
     event_date = forms.DateField(
         input_formats=[BELGIAN_DATE_FORMAT],
-        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "dd/mm/yyyy", "inputmode": "numeric"}),
+        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("dd/mm/yyyy"), "inputmode": "numeric"}),
     )
     start_time = forms.TimeField(
         input_formats=[BELGIAN_TIME_FORMAT],
         widget=forms.TimeInput(
-            attrs={"class": "cd-form__input body", "type": "time", "step": "60", "placeholder": "HH:MM"},
+            attrs={"class": "cd-form__input body", "type": "time", "step": "60", "placeholder": _("HH:MM")},
             format=BELGIAN_TIME_FORMAT,
         ),
     )
     end_time = forms.TimeField(
         input_formats=[BELGIAN_TIME_FORMAT],
         widget=forms.TimeInput(
-            attrs={"class": "cd-form__input body", "type": "time", "step": "60", "placeholder": "HH:MM"},
+            attrs={"class": "cd-form__input body", "type": "time", "step": "60", "placeholder": _("HH:MM")},
             format=BELGIAN_TIME_FORMAT,
         ),
     )
@@ -94,7 +94,7 @@ class EventForm(forms.ModelForm):
     # wins over this if both are somehow submitted at once.
     template_image = forms.ChoiceField(
         required=False,
-        choices=[(NO_TEMPLATE_IMAGE, "No template — I'll upload my own below")] + TEMPLATE_IMAGES,
+        choices=[(NO_TEMPLATE_IMAGE, _("No template — I'll upload my own below"))] + TEMPLATE_IMAGES,
         widget=forms.RadioSelect,
     )
 
@@ -105,19 +105,19 @@ class EventForm(forms.ModelForm):
             "description", "min_age", "max_age", "audience", "team", "pathways",
         ]
         widgets = {
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Coding Saturday"}),
-            "places": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "20"}),
+            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Coding Saturday")}),
+            "places": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": _("20")}),
             "external_registration_url": forms.URLInput(attrs={
-                "class": "cd-form__input body", "placeholder": "https://www.coolestprojects.org/…",
+                "class": "cd-form__input body", "placeholder": _("https://www.coolestprojects.org/…"),
             }),
-            "venue_name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": 'e.g. "Ghent Public Library"'}),
+            "venue_name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _('e.g. "Ghent Public Library"')}),
             "image": forms.ClearableFileInput(attrs={"class": "cd-form__input body"}),
             "description": forms.Textarea(attrs={
                 "class": "cd-form__input body", "rows": 6,
-                "placeholder": "What this session is about, what to bring — shown on the session's public page.",
+                "placeholder": _("What this session is about, what to bring — shown on the session's public page."),
             }),
-            "min_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "7"}),
-            "max_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "18"}),
+            "min_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": _("7")}),
+            "max_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": _("18")}),
             "audience": forms.Select(attrs={"class": "cd-form__select body"}),
             "team": forms.CheckboxSelectMultiple,
             "pathways": forms.CheckboxSelectMultiple,

@@ -1,6 +1,7 @@
 {% extends "core/_manage_base.html" %}
-{% block manage_page_title %}New template{% endblock %}
-{% block manage_heading %}New template{% endblock %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "New template" %}{% endblock %}
+{% block manage_heading %}{% translate "New template" %}{% endblock %}
 
 {% block manage_content %}
   <form method="post" class="cd-card cd-form" style="padding: var(--space-5); max-width: 640px;" novalidate>
@@ -14,8 +15,8 @@
       </div>
     {% endfor %}
     <div class="cd-form__actions">
-      <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_template_list' %}">Cancel</a>
-      <button type="submit" class="cd-btn cd-btn--primary label">Create</button>
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_template_list' %}">{% translate "Cancel" %}</a>
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Create" %}</button>
     </div>
   </form>
 {% endblock %}

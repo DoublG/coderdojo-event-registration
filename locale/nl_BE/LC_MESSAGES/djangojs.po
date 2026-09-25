@@ -1,0 +1,54 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 18:37+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: nl_BE\n"
+"Language-Team: nl_BE <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: core/static/core/js/bundle.js:205
+msgid "Sending…"
+msgstr "Versturen…"
+
+#: core/static/core/js/bundle.js:209
+msgid "Link resent."
+msgstr "Link opnieuw verstuurd."
+
+#: core/static/core/js/bundle.js:374 core/static/core/js/bundle.js:375
+msgid "Unpin sidebar"
+msgstr "Zijbalk losmaken"
+
+#: core/static/core/js/bundle.js:374 core/static/core/js/bundle.js:375
+msgid "Pin sidebar open"
+msgstr "Zijbalk vastzetten"
+
+#: core/static/core/js/bundle.js:378
+msgid "Unpin the sidebar to hide it"
+msgstr "Maak de zijbalk los om hem te verbergen"
+
+#: core/static/core/js/bundle.js:515
+msgid "Your browser doesn't support location lookup."
+msgstr "Je browser ondersteunt het opzoeken van je locatie niet."
+
+#: core/static/core/js/bundle.js:520
+msgid "Locating…"
+msgstr "Locatie zoeken…"
+
+#: core/static/core/js/bundle.js:539
+msgid "Couldn't get your location — check your browser's location permission for this site and try again."
+msgstr ""
+"We konden je locatie niet ophalen. Kijk de locatietoestemming van je browser voor deze site na en"
+" probeer opnieuw."
+

@@ -213,6 +213,19 @@ class TranslationTests(TestCase):
             self.assertContains(response, heading)
             self.assertContains(response, f'<html lang="{language}"')
 
+    def test_javascript_catalog_serves_bundle_texts(self):
+        response = self.client.get(reverse("javascript-catalog"), HTTP_ACCEPT_LANGUAGE="nl-be")
+        self.assertContains(response, "Zijbalk vastzetten")
+
+    def test_dashboards_follow_the_language_too(self):
+        from dojos.testing import make_champion, make_dojo
+
+        champion = make_champion(username="champ")
+        dojo = make_dojo("Ghent", champion=champion)
+        self.client.force_login(champion)
+        response = self.client.get(reverse("dojo_team_manage", kwargs={"dojo_id": dojo.id}), HTTP_ACCEPT_LANGUAGE="fr-be")
+        self.assertContains(response, "Équipe actuelle")
+
     def test_python_texts_are_translated_too(self):
         from django.utils import translation
 

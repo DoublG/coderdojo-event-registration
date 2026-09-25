@@ -3,6 +3,7 @@ cover several localities (geo.Municipality rows), so every test here asks
 "does any municipality with this postcode match?"."""
 
 from django.db.models import Exists, ExpressionWrapper, F, FloatField, OuterRef, Q
+from django.utils.translation import gettext_lazy as _
 
 from dojos.models import Dojo
 from geo.functions import DistanceSphere
@@ -26,13 +27,13 @@ class ProvinceAttribute(SegmentAttribute):
     polygon too (e.g. 7040 Goegnies-Chaussée) and match no province."""
 
     key = "province"
-    label = "Lives in province"
+    label = _("Lives in province")
     value_type = "choice"
     scope = USER
 
     def choices(self):
         provinces = AdministrativeBoundary.objects.filter(kind=AdministrativeBoundary.PROVINCE).order_by("name")
-        return [SegmentChoice(p.pk, p.name) for p in provinces] + [SegmentChoice(BRUSSELS, "Brussels-Capital Region")]
+        return [SegmentChoice(p.pk, p.name) for p in provinces] + [SegmentChoice(BRUSSELS, _("Brussels-Capital Region"))]
 
     def build_q(self, operator, value):
         values = [value] if operator == "equals" else value
@@ -51,14 +52,14 @@ class ProvinceAttribute(SegmentAttribute):
 
 class LanguageAttribute(SegmentAttribute):
     key = "language"
-    label = "Mail language"
+    label = _("Mail language")
     value_type = "choice"
     scope = USER
 
     def choices(self):
         from django.conf import settings
 
-        return [SegmentChoice(code, name) for code, name in settings.LANGUAGES] + [SegmentChoice("", "Not set")]
+        return [SegmentChoice(code, name) for code, name in settings.LANGUAGES] + [SegmentChoice("", _("Not set"))]
 
     def build_q(self, operator, value):
         return choice_q("preferred_language", operator, value)
@@ -69,7 +70,7 @@ class NearDojoAttribute(SegmentAttribute):
     from the postcode's municipality centres). Value: {"dojo": id, "km": n}."""
 
     key = "near_dojo"
-    label = "Lives near dojo"
+    label = _("Lives near dojo")
     value_type = "distance"
     scope = USER
 
@@ -78,15 +79,15 @@ class NearDojoAttribute(SegmentAttribute):
 
     def validate(self, operator, value):
         if operator not in self.operators:
-            raise ValueError(f"“{self.label}” supports {', '.join(self.operators)}, not “{operator}”.")
+            raise ValueError(_("“%(label)s” supports %(join)s, not “%(operator)s”.") % {"label": self.label, "join": ', '.join(self.operators), "operator": operator})
         if not isinstance(value, dict) or not isinstance(value.get("km"), (int, float)) or value["km"] <= 0:
-            raise ValueError('“Lives near dojo” needs a value like {"dojo": 12, "km": 25}.')
+            raise ValueError(_('“Lives near dojo” needs a value like {"dojo": 12, "km": 25}.'))
         if value.get("dojo") not in {choice.value for choice in self.choices()}:
-            raise ValueError("Pick a dojo that has a location.")
+            raise ValueError(_("Pick a dojo that has a location."))
 
     def describe(self, operator, value):
         names = {c.value: c.label for c in self.choices()}
-        return f"Lives within {value.get('km')} km of {names.get(value.get('dojo'), 'a dojo')}"
+        return _("Lives within %(km)s km of %(dojo)s") % {"km": value.get("km"), "dojo": names.get(value.get("dojo"), _("a dojo"))}
 
     def value_from_form(self, operator, data):
         try:
@@ -96,7 +97,7 @@ class NearDojoAttribute(SegmentAttribute):
 
     def build_q(self, operator, value):
         if operator != "within":
-            raise ValueError(f"Unsupported operator: {operator}")
+            raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         origin = Dojo.objects.get(pk=value["dojo"]).location
         nearby = Municipality.objects.annotate(
             distance_km=ExpressionWrapper(DistanceSphere(F("center"), origin) / 1000.0, output_field=FloatField())

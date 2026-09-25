@@ -23,6 +23,8 @@ import uuid
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from accounts.models import User
 from mailing.categories import MailCategory
@@ -52,9 +54,9 @@ def request_background_check(user, request):
     requests: re-running it on an account whose check isn't currently valid
     (never done, rejected, or expired) is how a renewal is requested."""
     if user.background_check_valid:
-        raise OnboardingError(f"{user} already has a valid background check.")
+        raise OnboardingError(_("%(user)s already has a valid background check.") % {"user": user})
     if user.background_check_status == User.CHECK_SUBMITTED:
-        raise OnboardingError(f"{user} has already uploaded a document that's awaiting review.")
+        raise OnboardingError(_("%(user)s has already uploaded a document that's awaiting review.") % {"user": user})
     user.background_check_status = User.CHECK_REQUESTED
     user.background_check_requested_at = timezone.now()
     if user.background_check_token is None:
@@ -69,7 +71,7 @@ def request_background_check(user, request):
 
 def submit_background_check(user, document):
     if not user.background_check_can_upload:
-        raise OnboardingError("There's no background check waiting for a document right now.")
+        raise OnboardingError(_("There's no background check waiting for a document right now."))
     user.background_check_document = document
     user.background_check_status = User.CHECK_SUBMITTED
     user.background_check_submitted_at = timezone.now()
@@ -96,7 +98,7 @@ def _record_decision(user, reviewer, decision, note=""):
 
 def validate_background_check(user, reviewer, note=""):
     if user.background_check_status != User.CHECK_SUBMITTED:
-        raise OnboardingError(f"{user} has no uploaded document awaiting review.")
+        raise OnboardingError(_("%(user)s has no uploaded document awaiting review.") % {"user": user})
     now = timezone.now()
     user.background_check_status = User.CHECK_VALIDATED
     user.background_check_reviewed_at = now
@@ -111,7 +113,7 @@ def validate_background_check(user, reviewer, note=""):
 
 def reject_background_check(user, reviewer, note=""):
     if user.background_check_status != User.CHECK_SUBMITTED:
-        raise OnboardingError(f"{user} has no uploaded document awaiting review.")
+        raise OnboardingError(_("%(user)s has no uploaded document awaiting review.") % {"user": user})
     user.background_check_status = User.CHECK_REJECTED
     user.background_check_reviewed_at = timezone.now()
     _record_decision(user, reviewer, BackgroundCheckHistory.REJECTED, note)
@@ -124,26 +126,27 @@ def reject_background_check(user, reviewer, note=""):
 def submit_application(account, kind, **fields):
     """One pending (or approved) application per account and kind."""
     if account.is_ninja:
-        raise OnboardingError("Only adult accounts can apply.")
+        raise OnboardingError(_("Only adult accounts can apply."))
     if account.applications.filter(kind=kind, status__in=[Application.PENDING, Application.APPROVED]).exists():
-        raise OnboardingError("You've already applied for this — see your account page for its status.")
+        raise OnboardingError(_("You've already applied for this — see your account page for its status."))
     application = Application.objects.create(account=account, kind=kind, **fields)
     if kind == Application.MENTOR and application.dojo_id:
         from dojos.team import notify_managers
 
         notify_managers(
             application.dojo,
-            f"{account.team_name} applied to mentor at {application.dojo.name}.",
+            gettext_lazy("%(name)s applied to mentor at %(dojo)s."),
             url=reverse("dojo_team_manage", kwargs={"dojo_id": application.dojo_id}),
+            params={"name": account.team_name, "dojo": application.dojo.name},
         )
     return application
 
 
 def approve_application(application, reviewer):
     if application.status != Application.PENDING:
-        raise OnboardingError(f"Application {application.pk} has already been decided.")
+        raise OnboardingError(_("Application %(application)s has already been decided.") % {"application": application.pk})
     if not application.account.background_check_valid:
-        raise OnboardingError(f"{application.account} doesn't have a valid background check yet.")
+        raise OnboardingError(_("%(account)s doesn't have a valid background check yet.") % {"account": application.account})
     application.status = Application.APPROVED
     application.decided_by = reviewer
     application.decided_at = timezone.now()
@@ -165,7 +168,7 @@ def approve_application(application, reviewer):
 
 def reject_application(application, reviewer):
     if application.status != Application.PENDING:
-        raise OnboardingError(f"Application {application.pk} has already been decided.")
+        raise OnboardingError(_("Application %(application)s has already been decided.") % {"application": application.pk})
     application.status = Application.REJECTED
     application.decided_by = reviewer
     application.decided_at = timezone.now()

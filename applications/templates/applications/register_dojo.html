@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}Start a new dojo · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Start a new dojo" %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}register-dojo-root{% endblock %}
 {% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
 
@@ -19,23 +20,23 @@
   <div class="page">
 
     {% if error %}
-      <h1 class="display-lg page-title">Already applied</h1>
+      <h1 class="display-lg page-title">{% translate "Already applied" %}</h1>
       <p class="body-lg page-subtitle">{{ error }}</p>
       <div class="form-card">
-        <a class="cd-btn cd-btn--primary label" href="{% url 'account_home' %}">Go to your account</a>
+        <a class="cd-btn cd-btn--primary label" href="{% url 'account_home' %}">{% translate "Go to your account" %}</a>
       </div>
     {% elif submitted %}
 
-      <h1 class="display-lg page-title">Thanks — application sent!</h1>
-      <p class="body-lg page-subtitle">We've got your details. A board member will follow up within a week.</p>
+      <h1 class="display-lg page-title">{% translate "Thanks — application sent!" %}</h1>
+      <p class="body-lg page-subtitle">{% translate "We've got your details. A board member will follow up within a week." %}</p>
       <div class="form-card">
-        <a class="cd-btn cd-btn--primary label" href="{% url 'account_home' %}">Go to your account</a>
+        <a class="cd-btn cd-btn--primary label" href="{% url 'account_home' %}">{% translate "Go to your account" %}</a>
       </div>
 
     {% else %}
 
-      <h1 class="display-lg page-title">Start a new dojo</h1>
-      <p class="body-lg page-subtitle">Tell us about your venue and we'll help take it from there — every dojo starts with someone like you saying yes. A board member will follow up within a week.</p>
+      <h1 class="display-lg page-title">{% translate "Start a new dojo" %}</h1>
+      <p class="body-lg page-subtitle">{% translate "Tell us about your venue and we'll help take it from there — every dojo starts with someone like you saying yes. A board member will follow up within a week." %}</p>
 
       <div class="form-card">
         <form class="cd-form" id="register-dojo-form" method="post" novalidate>
@@ -50,54 +51,54 @@
           {% endif %}
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">Your details</h3>
+            <h3 class="cd-form__group-title heading-md">{% translate "Your details" %}</h3>
             <p class="body-sm" style="margin: 0 0 var(--space-3);">
-              Applying as <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>{% if request.user.email %} ({{ request.user.email }}){% endif %}.
+              {% blocktranslate with name=request.user.get_full_name|default:request.user.username %}Applying as <strong>{{ name }}</strong>{% endblocktranslate %}{% if request.user.email %} ({{ request.user.email }}){% endif %}.
             </p>
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.phone.id_for_label }}">Phone</label>
+              <label class="cd-form__label label" for="{{ form.phone.id_for_label }}">{% translate "Phone" %}</label>
               {{ form.phone }}
               <ul class="cd-form__errors">{% for error in form.phone.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
           </div>
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">Your proposed dojo</h3>
+            <h3 class="cd-form__group-title heading-md">{% translate "Your proposed dojo" %}</h3>
             <div class="cd-form__row">
               <div class="cd-form__field">
-                <label class="cd-form__label label" for="{{ form.area.id_for_label }}">City or area<span class="cd-form__required" aria-hidden="true">*</span></label>
+                <label class="cd-form__label label" for="{{ form.area.id_for_label }}">{% translate "City or area" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
                 {{ form.area }}
                 <ul class="cd-form__errors">{% for error in form.area.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
               </div>
               <div class="cd-form__field">
-                <label class="cd-form__label label" for="{{ form.preferred_schedule.id_for_label }}">Preferred day &amp; time</label>
+                <label class="cd-form__label label" for="{{ form.preferred_schedule.id_for_label }}">{% translate "Preferred day &amp; time" %}</label>
                 {{ form.preferred_schedule }}
                 <ul class="cd-form__errors">{% for error in form.preferred_schedule.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
               </div>
             </div>
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.proposed_venue.id_for_label }}">Proposed venue</label>
+              <label class="cd-form__label label" for="{{ form.proposed_venue.id_for_label }}">{% translate "Proposed venue" %}</label>
               {{ form.proposed_venue }}
-              <p class="cd-form__help caption">Not confirmed yet? That's fine — we can help you find one.</p>
+              <p class="cd-form__help caption">{% translate "Not confirmed yet? That's fine — we can help you find one." %}</p>
               <ul class="cd-form__errors">{% for error in form.proposed_venue.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
           </div>
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">Tell us more</h3>
+            <h3 class="cd-form__group-title heading-md">{% translate "Tell us more" %}</h3>
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.message.id_for_label }}">What made you want to start a dojo?</label>
+              <label class="cd-form__label label" for="{{ form.message.id_for_label }}">{% translate "What made you want to start a dojo?" %}</label>
               {{ form.message }}
               <ul class="cd-form__errors">{% for error in form.message.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
             <div class="cd-form__checkbox-row">
               {{ form.consent }}
-              <label class="body-sm" for="{{ form.consent.id_for_label }}">I understand CoderDojo sessions are always free and run by volunteers.</label>
+              <label class="body-sm" for="{{ form.consent.id_for_label }}">{% translate "I understand CoderDojo sessions are always free and run by volunteers." %}</label>
             </div>
             <ul class="cd-form__errors">{% for error in form.consent.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
 
             <p class="cd-form__help caption">
-              As a dojo's champion works directly with minors, Belgian law requires a specific
+              {% blocktranslate trimmed %}As a dojo's champion works directly with minors, Belgian law requires a specific
               criminal record extract: <em>"Artikel 596.2 ('minderjarigenmodel') is nodig voor
               specifieke activiteiten met contacten met kinderen en jongeren, zoals opvoeding,
               psycho-medisch-sociale begeleiding, hulpverlening aan de jeugd, kinderbescherming,
@@ -105,18 +106,18 @@
               link once your application is reviewed. Only an approved reviewer can access the
               document, it's discarded as soon as it's validated, and the validation itself
               expires after a year — we'll email you again to renew it, and your login is
-              disabled until it's back in order.
+              disabled until it's back in order.{% endblocktranslate %}
             </p>
             <div class="cd-form__checkbox-row">
               {{ form.background_check_consent }}
-              <label class="body-sm" for="{{ form.background_check_consent.id_for_label }}">I understand a Belgian criminal record extract (model 2, Artikel 596.2) will be required.</label>
+              <label class="body-sm" for="{{ form.background_check_consent.id_for_label }}">{% translate "I understand a Belgian criminal record extract (model 2, Artikel 596.2) will be required." %}</label>
             </div>
             <ul class="cd-form__errors">{% for error in form.background_check_consent.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
           </div>
 
           <div class="cd-form__actions">
-            <a class="cd-btn cd-btn--ghost label" href="{% url 'register' %}">Cancel</a>
-            <button type="submit" class="cd-btn cd-btn--primary label">Submit application</button>
+            <a class="cd-btn cd-btn--ghost label" href="{% url 'register' %}">{% translate "Cancel" %}</a>
+            <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Submit application" %}</button>
           </div>
 
         </form>

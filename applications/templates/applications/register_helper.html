@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}Volunteer with us · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Volunteer with us" %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}register-helper-root{% endblock %}
 
 {% block extra_style %}
@@ -18,23 +19,23 @@
   <div class="page">
 
     {% if error %}
-      <h1 class="display-lg page-title">Already applied</h1>
+      <h1 class="display-lg page-title">{% translate "Already applied" %}</h1>
       <p class="body-lg page-subtitle">{{ error }}</p>
       <div class="form-card">
-        <a class="cd-btn cd-btn--primary label" href="{% url 'account_home' %}">Go to your account</a>
+        <a class="cd-btn cd-btn--primary label" href="{% url 'account_home' %}">{% translate "Go to your account" %}</a>
       </div>
     {% elif submitted %}
 
-      <h1 class="display-lg page-title">Thanks — application sent!</h1>
-      <p class="body-lg page-subtitle">We've got your application. Next, we'll email you to ask for your background check — you can follow along on your account page.</p>
+      <h1 class="display-lg page-title">{% translate "Thanks — application sent!" %}</h1>
+      <p class="body-lg page-subtitle">{% translate "We've got your application. Next, we'll email you to ask for your background check — you can follow along on your account page." %}</p>
       <div class="form-card">
-        <a class="cd-btn cd-btn--primary label" href="{% url 'account_home' %}">Go to your account</a>
+        <a class="cd-btn cd-btn--primary label" href="{% url 'account_home' %}">{% translate "Go to your account" %}</a>
       </div>
 
     {% else %}
 
-      <h1 class="display-lg page-title">Become a mentor or volunteer</h1>
-      <p class="body-lg page-subtitle">However much time you can give, we can use it — from mentoring most Saturdays to helping out at one big event a year.</p>
+      <h1 class="display-lg page-title">{% translate "Become a mentor or volunteer" %}</h1>
+      <p class="body-lg page-subtitle">{% translate "However much time you can give, we can use it — from mentoring most Saturdays to helping out at one big event a year." %}</p>
 
       <div class="form-card">
         <form class="cd-form" id="register-helper-form" method="post" novalidate>
@@ -49,27 +50,27 @@
           {% endif %}
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">Your details</h3>
+            <h3 class="cd-form__group-title heading-md">{% translate "Your details" %}</h3>
             <p class="body-sm" style="margin: 0 0 var(--space-3);">
-              Applying as <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>{% if request.user.email %} ({{ request.user.email }}){% endif %}.
+              {% blocktranslate with name=request.user.get_full_name|default:request.user.username %}Applying as <strong>{{ name }}</strong>{% endblocktranslate %}{% if request.user.email %} ({{ request.user.email }}){% endif %}.
             </p>
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.phone.id_for_label }}">Phone</label>
+              <label class="cd-form__label label" for="{{ form.phone.id_for_label }}">{% translate "Phone" %}</label>
               {{ form.phone }}
               <ul class="cd-form__errors">{% for error in form.phone.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
           </div>
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">How you'd like to help</h3>
+            <h3 class="cd-form__group-title heading-md">{% translate "How you'd like to help" %}</h3>
             <div class="cd-form__row">
               <div class="cd-form__field">
-                <label class="cd-form__label label" for="{{ form.dojo.id_for_label }}">Which dojo?</label>
+                <label class="cd-form__label label" for="{{ form.dojo.id_for_label }}">{% translate "Which dojo?" %}</label>
                 {{ form.dojo }}
                 <ul class="cd-form__errors">{% for error in form.dojo.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
               </div>
               <div class="cd-form__field">
-                <label class="cd-form__label label" for="{{ form.mentor_role.id_for_label }}">Role</label>
+                <label class="cd-form__label label" for="{{ form.mentor_role.id_for_label }}">{% translate "Role" %}</label>
                 {{ form.mentor_role }}
                 <ul class="cd-form__errors">{% for error in form.mentor_role.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
               </div>
@@ -77,14 +78,14 @@
           </div>
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">A bit about you</h3>
+            <h3 class="cd-form__group-title heading-md">{% translate "A bit about you" %}</h3>
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.message.id_for_label }}">What would you like to help with?</label>
+              <label class="cd-form__label label" for="{{ form.message.id_for_label }}">{% translate "What would you like to help with?" %}</label>
               {{ form.message }}
               <ul class="cd-form__errors">{% for error in form.message.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
             <p class="cd-form__help caption">
-              Belgian law requires a specific criminal record extract for anyone in contact with
+              {% blocktranslate trimmed %}Belgian law requires a specific criminal record extract for anyone in contact with
               minors: <em>"Artikel 596.2 ('minderjarigenmodel') is nodig voor specifieke
               activiteiten met contacten met kinderen en jongeren, zoals opvoeding,
               psycho-medisch-sociale begeleiding, hulpverlening aan de jeugd, kinderbescherming,
@@ -92,18 +93,18 @@
               link once your application is reviewed. Only an approved reviewer can access the
               document, it's discarded as soon as it's validated, and the validation itself
               expires after a year — we'll email you again to renew it, and your login is
-              disabled until it's back in order.
+              disabled until it's back in order.{% endblocktranslate %}
             </p>
             <div class="cd-form__checkbox-row">
               {{ form.background_check_consent }}
-              <label class="body-sm" for="{{ form.background_check_consent.id_for_label }}">I understand a Belgian criminal record extract (model 2, Artikel 596.2) will be required.</label>
+              <label class="body-sm" for="{{ form.background_check_consent.id_for_label }}">{% translate "I understand a Belgian criminal record extract (model 2, Artikel 596.2) will be required." %}</label>
             </div>
             <ul class="cd-form__errors">{% for error in form.background_check_consent.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
           </div>
 
           <div class="cd-form__actions">
-            <a class="cd-btn cd-btn--ghost label" href="{% url 'register' %}">Cancel</a>
-            <button type="submit" class="cd-btn cd-btn--primary label">Submit application</button>
+            <a class="cd-btn cd-btn--ghost label" href="{% url 'register' %}">{% translate "Cancel" %}</a>
+            <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Submit application" %}</button>
           </div>
 
         </form>

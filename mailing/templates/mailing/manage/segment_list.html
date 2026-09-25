@@ -1,30 +1,31 @@
 {% extends "core/_manage_base.html" %}
-{% block manage_page_title %}Segments{% endblock %}
-{% block manage_heading %}Segments{% endblock %}
-{% block manage_topbar_extra %}<a class="cd-btn cd-btn--primary label" href="{% url 'manage_segment_create' %}">New segment</a>{% endblock %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Segments" %}{% endblock %}
+{% block manage_heading %}{% translate "Segments" %}{% endblock %}
+{% block manage_topbar_extra %}<a class="cd-btn cd-btn--primary label" href="{% url 'manage_segment_create' %}">{% translate "New segment" %}</a>{% endblock %}
 
 {% block manage_content %}
   <div class="cd-table-wrap">
     <table class="cd-table cd-table--zebra">
       <thead>
         <tr>
-          <th class="label" scope="col">Name</th>
-          <th class="label" scope="col">Description</th>
-          <th class="label cd-table__num" scope="col">Accounts</th>
+          <th class="label" scope="col">{% translate "Name" %}</th>
+          <th class="label" scope="col">{% translate "Description" %}</th>
+          <th class="label cd-table__num" scope="col">{% translate "Accounts" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for segment, count in rows %}
           <tr>
-            <td class="body-sm"><a href="{% url 'manage_segment_detail' segment_id=segment.id %}">{{ segment.name }}</a>{% if not segment.is_active %} <span class="cd-badge cd-badge--outline caption">Inactive</span>{% endif %}</td>
+            <td class="body-sm"><a href="{% url 'manage_segment_detail' segment_id=segment.id %}">{{ segment.name }}</a>{% if not segment.is_active %} <span class="cd-badge cd-badge--outline caption">{% translate "Inactive" %}</span>{% endif %}</td>
             <td class="body-sm">{{ segment.description }}</td>
             <td class="body-sm cd-table__num">{{ count }}</td>
           </tr>
         {% empty %}
-          <tr><td class="body-sm" colspan="3">No segments yet.</td></tr>
+          <tr><td class="body-sm" colspan="3">{% translate "No segments yet." %}</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-  <p class="caption" style="margin-top: var(--space-3);">Accounts: active adults with an email the segment describes, before anyone's mail preferences.</p>
+  <p class="caption" style="margin-top: var(--space-3);">{% translate "Accounts: active adults with an email the segment describes, before anyone's mail preferences." %}</p>
 {% endblock %}

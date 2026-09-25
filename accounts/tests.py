@@ -432,7 +432,8 @@ class CancelRegistrationViewTests(TestCase):
         recipient_ids = {call.args[0].pk for call in mock_notify.call_args_list}
         self.assertEqual(recipient_ids, {owner.pk, mentor.pk})
         args, kwargs = mock_notify.call_args
-        self.assertIn("Antwerp Session", args[1])
+        self.assertIn("A spot opened up in", str(args[1]))
+        self.assertEqual(kwargs["params"], {"event": "Antwerp Session"})
         self.assertEqual(kwargs["dojo"], dojo)
 
     def test_no_notification_when_dojo_has_no_team(self):

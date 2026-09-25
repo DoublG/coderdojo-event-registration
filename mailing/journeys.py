@@ -8,6 +8,7 @@ journey goes through here; the dashboard views only call these."""
 from datetime import timedelta
 
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from .campaigns import CampaignError, launch_problems
 from .models import Campaign, JourneyDelivery
@@ -37,7 +38,7 @@ def due(journey, now=None):
 
 def activate(journey):
     if found := problems(journey):
-        raise CampaignError(" ".join(found))
+        raise CampaignError(_(" ").join(found))
     journey.is_active = True
     journey.activated_at = timezone.now()
     journey.save(update_fields=["is_active", "activated_at"])
@@ -50,7 +51,7 @@ def pause(journey):
 
 def send_test(journey, user):
     if not user.email:
-        raise CampaignError("Your account has no email address to send the test to.")
+        raise CampaignError(_("Your account has no email address to send the test to."))
     return send(user, journey.category, journey.template_key, journey.context, test=True)
 
 

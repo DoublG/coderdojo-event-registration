@@ -11,6 +11,7 @@ flow call these; nothing else creates NinjaBelt rows (seeders aside).
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from .models import Badge, NinjaBadge, NinjaBelt, Registration
 
@@ -31,7 +32,7 @@ def _check_can_award(membership):
         or AWARD_BELTS not in ROLE_CAPABILITIES.get(membership.role, ())
         or not membership.user.background_check_valid
     ):
-        raise BeltError("Only a dojo's active champion or mentors can award belts.")
+        raise BeltError(_("Only a dojo's active champion or mentors can award belts."))
 
 
 def award_belt(ninja, belt, membership, note="", awarded_on=None):
@@ -41,10 +42,10 @@ def award_belt(ninja, belt, membership, note="", awarded_on=None):
     current one."""
     _check_can_award(membership)
     if not Registration.objects.filter(ninja=ninja, event__dojo_id=membership.dojo_id).exists():
-        raise BeltError(f"{ninja.name} hasn't been to a session at {membership.dojo.name}.")
+        raise BeltError(_("%(ninja)s hasn't been to a session at %(dojo)s.") % {"ninja": ninja.name, "dojo": membership.dojo.name})
     current = ninja.current_belt
     if current and belt.level <= current.level:
-        raise BeltError(f"{ninja.name} already has the {current.name} (or higher).")
+        raise BeltError(_("%(ninja)s already has the %(current)s (or higher).") % {"ninja": ninja.name, "current": current.name})
     return NinjaBelt.objects.create(
         ninja=ninja, belt=belt, awarded_on=awarded_on or timezone.localdate(),
         awarded_by=membership.user, awarded_as_membership=membership, awarded_as_role=membership.role,

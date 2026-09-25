@@ -6,6 +6,7 @@ from datetime import timedelta
 
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from dojos.models import Dojo, DojoMembership
 from events.models import Event, Registration
@@ -25,7 +26,7 @@ class ActiveTeamMemberAttribute(SegmentAttribute):
     considered: it decides admin access, not whether someone volunteers."""
 
     key = "active_team_member"
-    label = "Champion or mentor at a dojo with sessions in the last N days"
+    label = _("Champion or mentor at a dojo with sessions in the last N days")
     value_type = "days"
     scope = USER
 
@@ -34,7 +35,7 @@ class ActiveTeamMemberAttribute(SegmentAttribute):
 
     def build_q(self, operator, value):
         if operator != "within_days":
-            raise ValueError(f"Unsupported operator: {operator}")
+            raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         memberships = DojoMembership.objects.managers().filter(
             dojo__status=Dojo.ACTIVE, dojo_id__in=_held_sessions(value).values("dojo_id"),
         )
@@ -48,7 +49,7 @@ class AttendedWithinDaysAttribute(SegmentAttribute):
     would make every child look inactive."""
 
     key = "attended_within_days"
-    label = "Came to a session in the last N days"
+    label = _("Came to a session in the last N days")
     value_type = "days"
     scope = NINJA
 
@@ -57,7 +58,7 @@ class AttendedWithinDaysAttribute(SegmentAttribute):
 
     def build_q(self, operator, value):
         if operator != "within_days":
-            raise ValueError(f"Unsupported operator: {operator}")
+            raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         sessions = _held_sessions(value)
         unmarked = sessions.exclude(registration__attended__isnull=False)
         came = Registration.objects.filter(event__in=sessions.values("pk")).filter(

@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from django.db.models import Count, Max, Q
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Guardianship
 from dojos.models import Dojo, DojoMembership
@@ -26,10 +27,10 @@ def _years_ago(years, today):
 
 class NinjaAgeAttribute(SegmentAttribute):
     key = "ninja_age"
-    label = "Child's age"
+    label = _("Child's age")
     value_type = "number"
     scope = NINJA
-    unit = " years"
+    unit = _(" years")
 
     def choices(self):
         return []
@@ -41,12 +42,12 @@ class NinjaAgeAttribute(SegmentAttribute):
             return Q(date_of_birth__lte=_years_ago(years, today))
         if operator == "lte":  # at most N: born after N+1 years ago
             return Q(date_of_birth__gt=_years_ago(years + 1, today))
-        raise ValueError(f"Unsupported operator: {operator}")
+        raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
 
 
 class HomeDojoAttribute(SegmentAttribute):
     key = "ninja_home_dojo"
-    label = "Child's home dojo"
+    label = _("Child's home dojo")
     value_type = "choice"
     scope = NINJA
 
@@ -61,12 +62,12 @@ class CurrentBeltAttribute(SegmentAttribute):
     """The child's current belt (the highest in their belt history)."""
 
     key = "current_belt"
-    label = "Child's current belt"
+    label = _("Child's current belt")
     value_type = "choice"
     scope = NINJA
 
     def choices(self):
-        return [SegmentChoice(NO_BELT, "No belt yet")] + [SegmentChoice(b.level, b.name) for b in Belt.objects.order_by("level")]
+        return [SegmentChoice(NO_BELT, _("No belt yet"))] + [SegmentChoice(b.level, b.name) for b in Belt.objects.order_by("level")]
 
     def build_q(self, operator, value):
         levels = [value] if operator == "equals" else list(value)
@@ -79,7 +80,7 @@ class CurrentBeltAttribute(SegmentAttribute):
 
 class HasBadgeAttribute(SegmentAttribute):
     key = "has_badge"
-    label = "Child has earned the badge"
+    label = _("Child has earned the badge")
     value_type = "choice"
     scope = NINJA
 
@@ -96,7 +97,7 @@ class PathwayAttribute(SegmentAttribute):
     """Worked on the pathway at a session (Registration.pathways)."""
 
     key = "pathway"
-    label = "Child worked on the pathway"
+    label = _("Child worked on the pathway")
     value_type = "choice"
     scope = NINJA
 
@@ -113,13 +114,13 @@ class WaitlistedForEventAttribute(EventAttribute):
     """On the waiting list for the event, e.g. to announce an extra session."""
 
     key = "waitlisted_for_event"
-    label = "On the waiting list for event"
+    label = _("On the waiting list for event")
     registrations = Registration.objects.filter(waiting_list=True)
 
 
 class CancellationsAttribute(SegmentAttribute):
     key = "cancellations"
-    label = "Cancelled places (last 90 days)"
+    label = _("Cancelled places (last 90 days)")
     value_type = "number"
     scope = NINJA
 
@@ -134,14 +135,14 @@ class CancellationsAttribute(SegmentAttribute):
             return Q(pk__in=counts.filter(n__gte=value).values("ninja_id")) if value > 0 else Q()
         if operator == "lte":
             return ~Q(pk__in=counts.filter(n__gt=value).values("ninja_id"))
-        raise ValueError(f"Unsupported operator: {operator}")
+        raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
 
 
 ROLE_CHOICES = [
-    ("guardian", "Parent (has children on the site)"),
-    ("mentor", "Mentor (active)"),
-    ("champion", "Champion (active)"),
-    ("organisation", "Organisation role"),
+    ("guardian", _("Parent (has children on the site)")),
+    ("mentor", _("Mentor (active)")),
+    ("champion", _("Champion (active)")),
+    ("organisation", _("Organisation role")),
 ]
 
 
@@ -149,7 +150,7 @@ class AccountRoleAttribute(SegmentAttribute):
     """What the account is on the site; one account can be several."""
 
     key = "account_role"
-    label = "Account's role"
+    label = _("Account's role")
     value_type = "choice"
     scope = USER
 
@@ -173,7 +174,7 @@ class AccountRoleAttribute(SegmentAttribute):
 
 class JoinedAttribute(SegmentAttribute):
     key = "joined_within_days"
-    label = "Account created in the last N days"
+    label = _("Account created in the last N days")
     value_type = "days"
     scope = USER
 
@@ -182,7 +183,7 @@ class JoinedAttribute(SegmentAttribute):
 
     def build_q(self, operator, value):
         if operator != "within_days":
-            raise ValueError(f"Unsupported operator: {operator}")
+            raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         return Q(date_joined__gte=timezone.now() - timedelta(days=value))
 
 

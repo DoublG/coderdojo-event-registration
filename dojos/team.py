@@ -22,6 +22,8 @@ from django.core.cache import cache
 from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from events.models import Event
 from notifications.services import notify
@@ -43,12 +45,13 @@ def _team_url(dojo):
     return reverse("dojo_team_manage", kwargs={"dojo_id": dojo.id})
 
 
-def notify_managers(dojo, text, url="", exclude=None):
-    """One notification per active champion/mentor of `dojo`."""
+def notify_managers(dojo, text, url="", exclude=None, params=None):
+    """One notification per active champion/mentor of `dojo`, each in its
+    recipient's language (see notifications.services.notify)."""
     for membership in dojo.memberships.managers().select_related("user"):
         if exclude is not None and membership.user_id == exclude.pk:
             continue
-        notify(membership.user, text, url=url, dojo=dojo)
+        notify(membership.user, text, url=url, dojo=dojo, params=params)
 
 
 def _activate(membership, by=None):
@@ -63,12 +66,12 @@ def _activate(membership, by=None):
 
 def request_to_join(dojo, user):
     if not is_approved_mentor(user):
-        raise TeamError("Only approved mentors can ask to join a dojo's team.")
+        raise TeamError(_("Only approved mentors can ask to join a dojo's team."))
     if not dojo.is_public:
-        raise TeamError("This dojo isn't accepting join requests right now.")
+        raise TeamError(_("This dojo isn't accepting join requests right now."))
     membership = DojoMembership.objects.filter(dojo=dojo, user=user).first()
     if membership is not None and membership.status != DojoMembership.DORMANT:
-        raise TeamError("You're already on this team, or your request is pending.")
+        raise TeamError(_("You're already on this team, or your request is pending."))
     if membership is None:
         membership = DojoMembership(dojo=dojo, user=user, role=DojoMembership.MENTOR)
     membership.role = DojoMembership.MENTOR
@@ -76,16 +79,17 @@ def request_to_join(dojo, user):
     membership.requested_by = user
     membership.decided_by = None
     membership.save()
-    notify_managers(dojo, f"{user.team_name} asked to join the {dojo.name} team.", url=_team_url(dojo))
+    notify_managers(dojo, gettext_lazy("%(name)s asked to join the %(dojo)s team."), url=_team_url(dojo),
+                    params={"name": user.team_name, "dojo": dojo.name})
     return membership
 
 
 def accept_request(membership, by):
     if membership.status != DojoMembership.REQUESTED:
-        raise TeamError("That request has already been handled.")
+        raise TeamError(_("That request has already been handled."))
     _activate(membership, by=by)
     membership.save()
-    notify(membership.user, f"You're now on the {membership.dojo.name} team.", dojo=None)
+    notify(membership.user, gettext_lazy("You're now on the %(dojo)s team."), dojo=None, params={"dojo": membership.dojo.name})
     return membership
 
 
@@ -93,7 +97,7 @@ def decline_request(membership, by, reason="declined"):
     """A declined request goes back to `dormant` if the person was on the
     team before (keeping their history), otherwise it's removed."""
     if membership.status != DojoMembership.REQUESTED:
-        raise TeamError("That request has already been handled.")
+        raise TeamError(_("That request has already been handled."))
     dojo = membership.dojo
     if membership.joined_at:
         membership.status = DojoMembership.DORMANT
@@ -102,36 +106,36 @@ def decline_request(membership, by, reason="declined"):
     else:
         membership.delete()
     text = (
-        f"Your request to join {dojo.name} was declined."
+        gettext_lazy("Your request to join %(dojo)s was declined.")
         if reason == "declined"
-        else f"Your request to join {dojo.name} was closed: the dojo is no longer active."
+        else gettext_lazy("Your request to join %(dojo)s was closed: the dojo is no longer active.")
     )
-    notify(membership.user, text)
+    notify(membership.user, text, params={"dojo": dojo.name})
 
 
 def add_mentor(dojo, user, by):
     if not is_approved_mentor(user):
-        raise TeamError("Only approved mentors can be added to a dojo's team.")
+        raise TeamError(_("Only approved mentors can be added to a dojo's team."))
     membership = DojoMembership.objects.filter(dojo=dojo, user=user).first()
     if membership is not None and membership.status == DojoMembership.ACTIVE:
-        raise TeamError(f"{user.team_name} is already on this team.")
+        raise TeamError(_("%(name)s is already on this team.") % {"name": user.team_name})
     if membership is None:
         membership = DojoMembership(dojo=dojo, user=user, requested_by=by)
     membership.role = DojoMembership.MENTOR
     _activate(membership, by=by)
     membership.save()
-    notify(user, f"You've been added to the {dojo.name} team.")
+    notify(user, gettext_lazy("You've been added to the %(dojo)s team."), params={"dojo": dojo.name})
     return membership
 
 
 def promote_youth_mentor(dojo, ninja_user, by_membership):
     if not ninja_user.is_ninja:
-        raise TeamError("Only a ninja's own account can be promoted to youth mentor.")
+        raise TeamError(_("Only a ninja's own account can be promoted to youth mentor."))
     if not ninja_user.is_active:
-        raise TeamError(f"{ninja_user.team_name}'s login is switched off; their guardian can switch it back on.")
+        raise TeamError(_("%(name)s's login is switched off; their guardian can switch it back on.") % {"name": ninja_user.team_name})
     membership = DojoMembership.objects.filter(dojo=dojo, user=ninja_user).first()
     if membership is not None and membership.status == DojoMembership.ACTIVE:
-        raise TeamError(f"{ninja_user.team_name} is already on this team.")
+        raise TeamError(_("%(name)s is already on this team.") % {"name": ninja_user.team_name})
     if membership is None:
         membership = DojoMembership(dojo=dojo, user=ninja_user)
     membership.role = DojoMembership.YOUTH_MENTOR
@@ -156,34 +160,35 @@ def _make_dormant(membership):
 
 def remove_member(membership):
     if membership.role == DojoMembership.CHAMPION:
-        raise TeamError("The champion can't be removed; transfer the champion role first.")
+        raise TeamError(_("The champion can't be removed; transfer the champion role first."))
     if membership.status != DojoMembership.ACTIVE:
-        raise TeamError("Only active team members can be removed.")
+        raise TeamError(_("Only active team members can be removed."))
     _make_dormant(membership)
 
 
 def leave(membership):
     if membership.role == DojoMembership.CHAMPION:
-        raise TeamError("As champion you can't leave; transfer the champion role to a mentor first.")
+        raise TeamError(_("As champion you can't leave; transfer the champion role to a mentor first."))
     _make_dormant(membership)
 
 
 @transaction.atomic
 def transfer_champion(dojo, from_membership, to_membership):
     if from_membership.role != DojoMembership.CHAMPION or from_membership.dojo_id != dojo.id:
-        raise TeamError("Only the champion can hand over the champion role.")
+        raise TeamError(_("Only the champion can hand over the champion role."))
     if (
         to_membership.dojo_id != dojo.id
         or to_membership.role != DojoMembership.MENTOR
         or to_membership.status != DojoMembership.ACTIVE
         or not to_membership.user.background_check_valid
     ):
-        raise TeamError("The champion role can only go to an active mentor of this dojo with a valid background check.")
+        raise TeamError(_("The champion role can only go to an active mentor of this dojo with a valid background check."))
     from_membership.role = DojoMembership.MENTOR
     from_membership.save(update_fields=["role"])
     to_membership.role = DojoMembership.CHAMPION
     to_membership.save(update_fields=["role"])
-    notify(to_membership.user, f"You're now the champion of {dojo.name}.", url=_team_url(dojo), dojo=dojo)
+    notify(to_membership.user, gettext_lazy("You're now the champion of %(dojo)s."), url=_team_url(dojo), dojo=dojo,
+           params={"dojo": dojo.name})
 
 
 # --- dojo lifecycle ------------------------------------------------------------
@@ -205,14 +210,13 @@ def active_events(dojo):
 
 def change_status(dojo, action):
     if action not in LIFECYCLE_ACTIONS:
-        raise TeamError("Unknown action.")
+        raise TeamError(_("Unknown action."))
     sources, target = LIFECYCLE_ACTIONS[action]
     if dojo.status not in sources:
-        raise TeamError("That change isn't possible from the dojo's current status.")
+        raise TeamError(_("That change isn't possible from the dojo's current status."))
     if target in (Dojo.DORMANT, Dojo.ARCHIVED) and active_events(dojo).exists():
         raise TeamError(
-            "This dojo still has upcoming events that are in draft or open for sign-ups. "
-            "Close or finish those first."
+            _("This dojo still has upcoming events that are in draft or open for sign-ups. Close or finish those first.")
         )
     with transaction.atomic():
         dojo.status = target

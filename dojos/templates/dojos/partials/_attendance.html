@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
 The attendance list for one event — shared by dojo_event_attendance.html
 (a specific session) and dojo_dashboard.html (the next/most recent one).
 Expects `dojo`, `event`, `registrations` (confirmed, not waitlisted),
@@ -23,7 +23,7 @@ is deliberately not wired up here.
         {% csrf_token %}
         <button type="submit" class="cd-btn cd-btn--ghost label">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
-          Mark all present
+          {% translate "Mark all present" %}
         </button>
       </form>
     {% endif %}{% endif %}
@@ -33,16 +33,16 @@ is deliberately not wired up here.
     {% for registration in registrations %}
       {% include "dojos/partials/_attendance_row.html" %}
     {% empty %}
-      <p class="body-sm">Nobody has a confirmed place for this session yet.</p>
+      <p class="body-sm">{% translate "Nobody has a confirmed place for this session yet." %}</p>
     {% endfor %}
   </div>
 
-  <h4 class="cd-attendance__team-title label">Session team</h4>
+  <h4 class="cd-attendance__team-title label">{% translate "Session team" %}</h4>
   <div class="cd-attendance__list">
     {% for row in team_rows %}
       {% include "dojos/partials/_attendance_team_row.html" %}
     {% empty %}
-      <p class="body-sm">Nobody from the team is assigned to this session yet{% if dojo_access.can_manage_events %} — <a href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">pick the team on the session's page</a>{% endif %}.</p>
+      <p class="body-sm">{% if dojo_access.can_manage_events %}{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id as event_url %}{% blocktranslate %}Nobody from the team is assigned to this session yet — <a href="{{ event_url }}">pick the team on the session's page</a>.{% endblocktranslate %}{% else %}{% translate "Nobody from the team is assigned to this session yet." %}{% endif %}</p>
     {% endfor %}
   </div>
 </div>

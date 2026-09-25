@@ -41,7 +41,7 @@ class Dojo(models.Model):
     ACTIVE = "active"
     DORMANT = "dormant"
     ARCHIVED = "archived"
-    STATUS_CHOICES = [(DRAFT, "Draft"), (ACTIVE, "Active"), (DORMANT, "Dormant"), (ARCHIVED, "Archived")]
+    STATUS_CHOICES = [(DRAFT, _("Draft")), (ACTIVE, _("Active")), (DORMANT, _("Dormant")), (ARCHIVED, _("Archived"))]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=DRAFT)
     # An organisation dojo (DATA_MODEL.md §12) runs the organisation's own
     # events (CoderDojo Girlz, Coolest Projects). It has a team and an admin
@@ -49,7 +49,7 @@ class Dojo(models.Model):
     # it's never listed itself: no dojo finder, dojo page or dojo pickers.
     DOJO = "dojo"
     ORGANISATION = "organisation"
-    KIND_CHOICES = [(DOJO, "Dojo"), (ORGANISATION, "Organisation")]
+    KIND_CHOICES = [(DOJO, _("Dojo")), (ORGANISATION, _("Organisation"))]
     kind = models.CharField(
         max_length=12, choices=KIND_CHOICES, default=DOJO,
         help_text="Organisation: runs the organisation's own events. Never shown in the dojo finder or "
@@ -169,7 +169,7 @@ class DojoMembership(models.Model):
     REQUESTED = "requested"
     ACTIVE = "active"
     DORMANT = "dormant"
-    STATUS_CHOICES = [(REQUESTED, "Requested"), (ACTIVE, "Active"), (DORMANT, "Dormant")]
+    STATUS_CHOICES = [(REQUESTED, _("Requested")), (ACTIVE, _("Active")), (DORMANT, _("Dormant"))]
 
     dojo = models.ForeignKey(Dojo, on_delete=models.CASCADE, related_name="memberships")
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="dojo_memberships")
@@ -202,19 +202,19 @@ class DojoMembership(models.Model):
     def clean(self):
         if self.role == self.YOUTH_MENTOR:
             if not self.user.is_ninja:
-                raise ValidationError("Only a ninja account can be a youth mentor.")
+                raise ValidationError(_("Only a ninja account can be a youth mentor."))
         elif self.user.is_ninja:
-            raise ValidationError("A ninja account can only be a youth mentor.")
+            raise ValidationError(_("A ninja account can only be a youth mentor."))
         if self.role == self.CHAMPION and self.status == self.ACTIVE:
             others = DojoMembership.objects.filter(
                 dojo_id=self.dojo_id, role=self.CHAMPION, status=self.ACTIVE,
             ).exclude(pk=self.pk)
             if others.exists():
-                raise ValidationError("This dojo already has an active champion.")
+                raise ValidationError(_("This dojo already has an active champion."))
         if self.promoted_by_id:
             promoter = self.promoted_by
             if promoter.dojo_id != self.dojo_id or promoter.role not in self.MANAGER_ROLES:
-                raise ValidationError("A youth mentor must be promoted by a champion or mentor of the same dojo.")
+                raise ValidationError(_("A youth mentor must be promoted by a champion or mentor of the same dojo."))
 
     # Display fields for the team pages and shared avatar partial — the
     # profile itself lives on the account (shared by all its dojos).

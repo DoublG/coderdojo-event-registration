@@ -29,7 +29,7 @@ class DojoProfileForm(forms.ModelForm):
     # over this if both are somehow submitted at once.
     template_icon = forms.ChoiceField(
         required=False,
-        choices=[(NO_TEMPLATE_ICON, "No template — I'll upload my own below")] + TEMPLATE_ICONS,
+        choices=[(NO_TEMPLATE_ICON, _("No template — I'll upload my own below"))] + TEMPLATE_ICONS,
         widget=forms.RadioSelect,
     )
 
@@ -42,33 +42,33 @@ class DojoProfileForm(forms.ModelForm):
         ]
         widgets = {
             "pathways": forms.CheckboxSelectMultiple,
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "CoderDojo Ghent"}),
+            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("CoderDojo Ghent")}),
             "icon": forms.ClearableFileInput(attrs={"class": "cd-form__input body"}),
             "tagline": forms.Textarea(attrs={
                 "class": "cd-form__input body", "rows": 2,
-                "placeholder": "A short line shown right under the dojo's name.",
+                "placeholder": _("A short line shown right under the dojo's name."),
             }),
             "description": forms.Textarea(attrs={
                 "class": "cd-form__input body", "rows": 6,
-                "placeholder": "Shown further down the page, above the team — what makes this dojo worth joining.",
+                "placeholder": _("Shown further down the page, above the team — what makes this dojo worth joining."),
             }),
-            "schedule_description": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "e.g. Every 2nd Saturday"}),
-            "min_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "7"}),
-            "max_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "18"}),
-            "email": forms.EmailInput(attrs={"class": "cd-form__input body", "placeholder": "hello@example.org"}),
-            "phone": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "+32 4xx xx xx xx"}),
+            "schedule_description": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("e.g. Every 2nd Saturday")}),
+            "min_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": _("7")}),
+            "max_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": _("18")}),
+            "email": forms.EmailInput(attrs={"class": "cd-form__input body", "placeholder": _("hello@example.org")}),
+            "phone": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("+32 4xx xx xx xx")}),
             "municipality": forms.Select(attrs={"class": "cd-form__select body"}),
-            "address": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Street, number, postcode, city"}),
+            "address": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Street, number, postcode, city")}),
             "visit_notes": forms.Textarea(attrs={
                 "class": "cd-form__input body", "rows": 4,
-                "placeholder": "Parking, entrance, accessibility — anything extra for the Visit us section.",
+                "placeholder": _("Parking, entrance, accessibility — anything extra for the Visit us section."),
             }),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["municipality"].queryset = self.fields["municipality"].queryset.order_by("name")
-        self.fields["municipality"].empty_label = "Not set"
+        self.fields["municipality"].empty_label = _("Not set")
         self.fields["template_icon"].initial = library_filename(self.instance.icon, "dojos") or NO_TEMPLATE_ICON
 
     def save(self, commit=True):
@@ -105,10 +105,11 @@ class DojoCreateForm(forms.ModelForm):
     class Meta:
         model = Dojo
         fields = ["name", "address", "email"]
+        labels = {"name": _("Name"), "address": _("Address"), "email": _("Email")}
         widgets = {
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "e.g. CoderDojo Leuven"}),
-            "address": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Street and number, postcode, city"}),
-            "email": forms.EmailInput(attrs={"class": "cd-form__input body", "placeholder": "hello@yourdojo.example"}),
+            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("e.g. CoderDojo Leuven")}),
+            "address": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Street and number, postcode, city")}),
+            "email": forms.EmailInput(attrs={"class": "cd-form__input body", "placeholder": _("hello@yourdojo.example")}),
         }
 
 
@@ -122,13 +123,13 @@ class AnnouncementForm(forms.ModelForm):
         widgets = {
             "text": forms.Textarea(attrs={
                 "class": "cd-form__input body", "rows": 3, "maxlength": 500,
-                "placeholder": "e.g. We've moved to the bigger room from October, same time, same entrance.",
+                "placeholder": _("e.g. We've moved to the bigger room from October, same time, same entrance."),
             }),
         }
-        labels = {"text": "New update"}
+        labels = {"text": _("New update")}
 
     def clean_text(self):
         text = self.cleaned_data["text"].strip()
         if len(text) > 500:
-            raise forms.ValidationError("Keep it short: 500 characters at most.")
+            raise forms.ValidationError(_("Keep it short: 500 characters at most."))
         return text

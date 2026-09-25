@@ -1,10 +1,10 @@
-<div class="cd-form__field">
-  <label class="cd-form__label label" for="{{ form.name.id_for_label }}">Name<span class="cd-form__required" aria-hidden="true">*</span></label>
+{% load i18n %}<div class="cd-form__field">
+  <label class="cd-form__label label" for="{{ form.name.id_for_label }}">{% translate "Name" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
   <ul class="cd-form__errors">{% for error in form.name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
   {{ form.name }}
 </div>
 <div class="cd-form__field">
-  <label class="cd-form__label label" for="{{ form.description.id_for_label }}">Description</label>
+  <label class="cd-form__label label" for="{{ form.description.id_for_label }}">{% translate "Description" %}</label>
   {{ form.description }}
 </div>
 <div class="cd-form__checkbox-row">

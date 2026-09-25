@@ -1,10 +1,11 @@
 {% extends "dojos/_admin_base.html" %}
-{% block admin_page_title %}Events{% endblock %}
-{% block admin_heading %}Events{% endblock %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "Events" %}{% endblock %}
+{% block admin_heading %}{% translate "Events" %}{% endblock %}
 
 {% block admin_topbar_extra %}
   {% if dojo_access.can_manage_events %}
-    <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_event_create' dojo_id=dojo.id %}">New event</a>
+    <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_event_create' dojo_id=dojo.id %}">{% translate "New event" %}</a>
   {% endif %}
 {% endblock %}
 
@@ -19,10 +20,10 @@
     <table class="cd-table cd-table--zebra">
       <thead>
         <tr>
-          <th class="label" scope="col">Date</th>
-          <th class="label" scope="col">Name</th>
-          <th class="label" scope="col">Status</th>
-          <th class="label cd-table__num" scope="col">Places</th>
+          <th class="label" scope="col">{% translate "Date" %}</th>
+          <th class="label" scope="col">{% translate "Name" %}</th>
+          <th class="label" scope="col">{% translate "Status" %}</th>
+          <th class="label cd-table__num" scope="col">{% translate "Places" %}</th>
           <th class="label" scope="col"></th>
         </tr>
       </thead>
@@ -33,11 +34,11 @@
             <td class="body-sm">{% if dojo_access.can_manage_events %}<a href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">{{ event.name }}</a>{% else %}{{ event.name }}{% endif %}</td>
             <td class="body-sm">
               {% if event.status == 'draft' %}
-                <span class="cd-badge cd-badge--outline caption">Draft</span>
+                <span class="cd-badge cd-badge--outline caption">{% translate "Draft" %}</span>
               {% elif event.status == 'open' %}
-                <span class="cd-badge cd-badge--success caption">Open</span>
+                <span class="cd-badge cd-badge--success caption">{% translate "Open" %}</span>
               {% else %}
-                <span class="cd-badge cd-badge--warning caption">Closed</span>
+                <span class="cd-badge cd-badge--warning caption">{% translate "Closed" %}</span>
               {% endif %}
             </td>
             <td class="body-sm cd-table__num">{{ event.places_left }} / {{ event.places }}</td>
@@ -47,23 +48,23 @@
                   <form method="post" action="{% url 'dojo_event_set_status' dojo_id=dojo.id event_id=event.id %}">
                     {% csrf_token %}
                     {% if event.status == 'draft' %}
-                      <button type="submit" name="status" value="open" class="cd-btn cd-btn--secondary label">Publish</button>
+                      <button type="submit" name="status" value="open" class="cd-btn cd-btn--secondary label">{% translate "Publish" %}</button>
                     {% elif event.status == 'open' %}
-                      <button type="submit" name="status" value="closed" class="cd-btn cd-btn--ghost label">Close registrations</button>
+                      <button type="submit" name="status" value="closed" class="cd-btn cd-btn--ghost label">{% translate "Close registrations" %}</button>
                     {% else %}
-                      <button type="submit" name="status" value="open" class="cd-btn cd-btn--ghost label">Reopen</button>
+                      <button type="submit" name="status" value="open" class="cd-btn cd-btn--ghost label">{% translate "Reopen" %}</button>
                     {% endif %}
                   </form>
-                  <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">Edit</a>
+                  <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">{% translate "Edit" %}</a>
                 {% endif %}
                 {% if dojo_access.can_take_attendance %}
-                  <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_attendance' dojo_id=dojo.id event_id=event.id %}">Attendance</a>
+                  <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_attendance' dojo_id=dojo.id event_id=event.id %}">{% translate "Attendance" %}</a>
                 {% endif %}
               </div>
             </td>
           </tr>
         {% empty %}
-          <tr><td class="body-sm" colspan="5">No sessions yet — create one to get started.</td></tr>
+          <tr><td class="body-sm" colspan="5">{% translate "No sessions yet — create one to get started." %}</td></tr>
         {% endfor %}
       </tbody>
     </table>

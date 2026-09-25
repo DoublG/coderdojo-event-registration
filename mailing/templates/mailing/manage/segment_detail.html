@@ -1,4 +1,5 @@
 {% extends "core/_manage_base.html" %}
+{% load i18n %}
 {% block manage_page_title %}{{ segment.name }}{% endblock %}
 {% block manage_heading %}{{ segment.name }}{% endblock %}
 
@@ -23,42 +24,42 @@
 <div class="segment-grid">
   <div>
     <div class="cd-card segment-card">
-      <h2 class="heading-md">Who's in it</h2>
-      <p class="caption">Groups at the top level must all match. Inside a group, choose whether all or any of its rules must match. A "Parents of a child who…" group describes one child: all its rules are about the same child.</p>
+      <h2 class="heading-md">{% translate "Who's in it" %}</h2>
+      <p class="caption">{% blocktranslate %}Groups at the top level must all match. Inside a group, choose whether all or any of its rules must match. A "Parents of a child who…" group describes one child: all its rules are about the same child.{% endblocktranslate %}</p>
       {% for node in tree %}
         {% include "mailing/manage/_segment_group.html" %}
       {% empty %}
-        <p class="body-sm">No groups yet. Start with one:</p>
+        <p class="body-sm">{% translate "No groups yet. Start with one:" %}</p>
       {% endfor %}
       <form method="post" action="{% url 'manage_segment_add_group' segment_id=segment.id %}" class="segment-inline segment-add-group">
         {% csrf_token %}
-        <select class="cd-form__select body" name="scope" aria-label="New group about">
+        <select class="cd-form__select body" name="scope" aria-label="{% translate "New group about" %}">
           {% for value, label in scopes %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
         </select>
-        <button type="submit" class="cd-btn cd-btn--secondary label">+ Add group</button>
+        <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "+ Add group" %}</button>
       </form>
     </div>
 
     <form method="post" class="cd-card cd-form segment-card" novalidate>
       {% csrf_token %}
-      <h2 class="heading-md">Details</h2>
+      <h2 class="heading-md">{% translate "Details" %}</h2>
       {% include "mailing/manage/_segment_fields.html" %}
-      <div class="cd-form__actions"><button type="submit" class="cd-btn cd-btn--primary label">Save</button></div>
+      <div class="cd-form__actions"><button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button></div>
     </form>
   </div>
 
   <div>
     <div class="cd-card segment-card">
-      <h2 class="heading-md">{{ count }} account{{ count|pluralize }}</h2>
-      <p class="caption">Active adults with an email address, before their mail preferences (a campaign only reaches those who want its kind of mail).</p>
-      <ul class="body-sm">{% for account in sample %}<li>{{ account.get_full_name|default:account.get_username }} · {{ account.email }}</li>{% empty %}<li>Nobody matches yet.</li>{% endfor %}</ul>
+      <h2 class="heading-md">{% blocktranslate count counter=count %}{{ counter }} account{% plural %}{{ counter }} accounts{% endblocktranslate %}</h2>
+      <p class="caption">{% translate "Active adults with an email address, before their mail preferences (a campaign only reaches those who want its kind of mail)." %}</p>
+      <ul class="body-sm">{% for account in sample %}<li>{{ account.get_full_name|default:account.get_username }} · {{ account.email }}</li>{% empty %}<li>{% translate "Nobody matches yet." %}</li>{% endfor %}</ul>
     </div>
     <div class="cd-card segment-card">
-      <h2 class="heading-md">Delete</h2>
-      {% if draft_campaigns %}<p class="caption">Used by draft campaign{{ draft_campaigns|pluralize }}: {% for c in draft_campaigns %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% endfor %}. They'd need a new segment.</p>{% endif %}
-      <p class="caption">Launched campaigns keep their own copy of who they went to.</p>
-      <form method="post" action="{% url 'manage_segment_delete' segment_id=segment.id %}" onsubmit="return confirm('Delete this segment?');">
-        {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">Delete segment</button>
+      <h2 class="heading-md">{% translate "Delete" %}</h2>
+      {% if draft_campaigns %}<p class="caption">{% translate "Used by draft campaigns:" %} {% for c in draft_campaigns %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% endfor %}. {% translate "They'd need a new segment." %}</p>{% endif %}
+      <p class="caption">{% translate "Launched campaigns keep their own copy of who they went to." %}</p>
+      <form method="post" action="{% url 'manage_segment_delete' segment_id=segment.id %}" onsubmit="{% translate "Delete this segment?" as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
+        {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Delete segment" %}</button>
       </form>
     </div>
   </div>

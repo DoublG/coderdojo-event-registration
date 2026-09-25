@@ -1,11 +1,11 @@
-{% comment %}
+{% load i18n %}{% comment %}
 htmx partial (mailing.manage.segment_rule_fields): the operator and value
 fields for the attribute picked in a group's "Add a rule" form. Field names
 match SegmentAttribute.value_from_form.
 {% endcomment %}
 {% if attribute %}
   {% if operators|length > 1 %}
-    <select class="cd-form__select body" name="operator" aria-label="How">
+    <select class="cd-form__select body" name="operator" aria-label="{% translate "How" %}">
       {% for value, label in operators %}{% if not attribute.value_type == "choice" or value != "equals" %}<option value="{{ value }}">{{ label }}</option>{% endif %}{% endfor %}
     </select>
   {% else %}
@@ -14,10 +14,10 @@ match SegmentAttribute.value_from_form.
 
   {% if attribute.value_type == "choice" %}
     {% if choices|length > 12 %}
-      <select class="cd-form__select body segment-multi" name="value" multiple size="8" aria-label="Values">
+      <select class="cd-form__select body segment-multi" name="value" multiple size="8" aria-label="{% translate "Values" %}">
         {% for choice in choices %}<option value="{{ choice.value }}">{{ choice.label }}</option>{% endfor %}
       </select>
-      <p class="caption">Ctrl/Cmd-click to pick several.</p>
+      <p class="caption">{% translate "Ctrl/Cmd-click to pick several." %}</p>
     {% else %}
       <div class="cd-form__checkbox-list">
         {% for choice in choices %}
@@ -26,25 +26,25 @@ match SegmentAttribute.value_from_form.
       </div>
     {% endif %}
   {% elif attribute.value_type == "boolean" %}
-    <select class="cd-form__select body" name="value" aria-label="Value"><option value="true">Yes</option><option value="false">No</option></select>
+    <select class="cd-form__select body" name="value" aria-label="{% translate "Value" %}"><option value="true">{% translate "Yes" %}</option><option value="false">{% translate "No" %}</option></select>
   {% elif attribute.value_type == "days" %}
-    <input class="cd-form__input body" type="number" name="value" min="1" value="365" style="max-width: 8rem;" aria-label="Days"> <span class="body-sm">days</span>
+    <input class="cd-form__input body" type="number" name="value" min="1" value="365" style="max-width: 8rem;" aria-label="{% translate "Days" %}"> <span class="body-sm">{% translate "days" %}</span>
   {% elif attribute.value_type == "number" %}
-    <input class="cd-form__input body" type="number" name="value" min="0" step="any" value="3" style="max-width: 8rem;" aria-label="Number">{% if attribute.unit %} <span class="body-sm">{{ attribute.unit }}</span>{% endif %}
+    <input class="cd-form__input body" type="number" name="value" min="0" step="any" value="3" style="max-width: 8rem;" aria-label="{% translate "Number" %}">{% if attribute.unit %} <span class="body-sm">{{ attribute.unit }}</span>{% endif %}
   {% elif attribute.value_type == "stage_change" %}
-    <span class="body-sm">became</span>
+    <span class="body-sm">{% translate "became" %}</span>
     <div class="cd-form__checkbox-list">
       {% for choice in choices %}<label class="cd-form__checkbox-row body-sm"><input type="checkbox" name="value" value="{{ choice.value }}"> {{ choice.label }}</label>{% endfor %}
     </div>
-    <span class="body-sm">from (optional)</span>
+    <span class="body-sm">{% translate "from (optional)" %}</span>
     <div class="cd-form__checkbox-list">
       {% for choice in choices %}<label class="cd-form__checkbox-row body-sm"><input type="checkbox" name="from" value="{{ choice.value }}"> {{ choice.label }}</label>{% endfor %}
     </div>
-    <span class="body-sm">in the last</span>
-    <input class="cd-form__input body" type="number" name="days" min="1" value="7" style="max-width: 6rem;" aria-label="Days"> <span class="body-sm">days</span>
+    <span class="body-sm">{% translate "in the last" %}</span>
+    <input class="cd-form__input body" type="number" name="{% translate "days" %}" min="1" value="7" style="max-width: 6rem;" aria-label="{% translate "Days" %}"> <span class="body-sm">{% translate "days" %}</span>
   {% elif attribute.value_type == "dojo_stage" %}
-    <span class="body-sm">at</span>
-    <select class="cd-form__select body" name="dojo" aria-label="Dojo">
+    <span class="body-sm">{% translate "at" %}</span>
+    <select class="cd-form__select body" name="dojo" aria-label="{% translate "Dojo" %}">
       {% for choice in attribute.dojo_choices %}<option value="{{ choice.value }}">{{ choice.label }}</option>{% endfor %}
     </select>
     <div class="cd-form__checkbox-list">
@@ -53,10 +53,10 @@ match SegmentAttribute.value_from_form.
       {% endfor %}
     </div>
   {% elif attribute.value_type == "distance" %}
-    <input class="cd-form__input body" type="number" name="km" min="1" step="1" value="20" style="max-width: 6rem;" aria-label="Kilometres"> <span class="body-sm">km of</span>
-    <select class="cd-form__select body" name="dojo" aria-label="Dojo">
+    <input class="cd-form__input body" type="number" name="km" min="1" step="1" value="20" style="max-width: 6rem;" aria-label="{% translate "Kilometres" %}"> <span class="body-sm">{% translate "km of" %}</span>
+    <select class="cd-form__select body" name="dojo" aria-label="{% translate "Dojo" %}">
       {% for choice in choices %}<option value="{{ choice.value }}">{{ choice.label }}</option>{% endfor %}
     </select>
   {% endif %}
-  <button type="submit" class="cd-btn cd-btn--secondary label">Add rule</button>
+  <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Add rule" %}</button>
 {% endif %}

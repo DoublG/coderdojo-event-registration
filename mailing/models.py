@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from .categories import MailCategory
 
@@ -36,13 +37,11 @@ class SegmentGroup(models.Model):
     directly. A ninja group can only contain ninja groups."""
 
     class Operator(models.TextChoices):
-        AND = "and", "AND"
-        OR = "or", "OR"
-
+        AND = "and", _("AND")
+        OR = "or", _("OR")
     class Scope(models.TextChoices):
-        USER = "user", "Accounts"
-        NINJA = "ninja", "Parents of a child who …"
-
+        USER = "user", _("Accounts")
+        NINJA = "ninja", _("Parents of a child who …")
     segment = models.ForeignKey(
         Segment,
         on_delete=models.CASCADE,
@@ -251,13 +250,12 @@ class EmailMessage(models.Model):
     also the record of exactly what was sent."""
 
     class Status(models.TextChoices):
-        PENDING = "pending", "Pending"
-        SENDING = "sending", "Sending"
-        SENT = "sent", "Sent"
-        FAILED = "failed", "Failed"
-        BOUNCED = "bounced", "Bounced"
-        SUPPRESSED = "suppressed", "Not sent (no consent, no address or blocked)"
-
+        PENDING = "pending", _("Pending")
+        SENDING = "sending", _("Sending")
+        SENT = "sent", _("Sent")
+        FAILED = "failed", _("Failed")
+        BOUNCED = "bounced", _("Bounced")
+        SUPPRESSED = "suppressed", _("Not sent (no consent, no address or blocked)")
     category = models.CharField(max_length=20, choices=MailCategory.choices)
     template_key = models.CharField(max_length=100, blank=True)
     user = models.ForeignKey(
@@ -340,11 +338,11 @@ class ConsentEvent(models.Model):
     ADMIN = "admin"
     BOUNCE = "bounce"
     SOURCE_CHOICES = [
-        (SIGNUP, "Sign-up form"),
-        (PREFERENCES, "Mail preferences page"),
-        (UNSUBSCRIBE_LINK, "Unsubscribe link"),
-        (ADMIN, "Admin"),
-        (BOUNCE, "Bounce or complaint"),
+        (SIGNUP, _("Sign-up form")),
+        (PREFERENCES, _("Mail preferences page")),
+        (UNSUBSCRIBE_LINK, _("Unsubscribe link")),
+        (ADMIN, _("Admin")),
+        (BOUNCE, _("Bounce or complaint")),
     ]
 
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="consent_events")
@@ -372,10 +370,10 @@ class EmailSuppression(models.Model):
     COMPLAINT = "complaint"
     MANUAL = "manual"
     REASON_CHOICES = [
-        (HARD_BOUNCE, "Hard bounce"),
-        (SOFT_BOUNCES, "Repeated soft bounces"),
-        (COMPLAINT, "Spam complaint"),
-        (MANUAL, "Blocked by hand"),
+        (HARD_BOUNCE, _("Hard bounce")),
+        (SOFT_BOUNCES, _("Repeated soft bounces")),
+        (COMPLAINT, _("Spam complaint")),
+        (MANUAL, _("Blocked by hand")),
     ]
 
     email = models.EmailField(unique=True, help_text="Stored lower-case.")
@@ -399,7 +397,7 @@ class BounceRecord(models.Model):
     HARD = "hard"
     SOFT = "soft"
     COMPLAINT = "complaint"
-    KIND_CHOICES = [(HARD, "Hard bounce (5.x.x)"), (SOFT, "Soft bounce (4.x.x)"), (COMPLAINT, "Spam complaint")]
+    KIND_CHOICES = [(HARD, _("Hard bounce (5.x.x)")), (SOFT, _("Soft bounce (4.x.x)")), (COMPLAINT, _("Spam complaint"))]
 
     email = models.EmailField(db_index=True, help_text="Stored lower-case.")
     kind = models.CharField(max_length=10, choices=KIND_CHOICES)

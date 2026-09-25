@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}Upload background check · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Upload background check" %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}upload-background-check-root{% endblock %}
 
 {% block extra_style %}
@@ -19,24 +20,24 @@
 
     {% if submitted %}
 
-      <h1 class="display-lg page-title">Thanks — document received</h1>
-      <p class="body-lg page-subtitle">We've received your document. A reviewer will validate it before your account is set up.</p>
+      <h1 class="display-lg page-title">{% translate "Thanks — document received" %}</h1>
+      <p class="body-lg page-subtitle">{% translate "We've received your document. A reviewer will validate it before your account is set up." %}</p>
       <div class="form-card">
-        <a class="cd-btn cd-btn--primary label" href="{% if request.user.is_authenticated %}{% url 'account_home' %}{% else %}{% url 'home' %}{% endif %}">{% if request.user.is_authenticated %}Go to your account{% else %}Back to home{% endif %}</a>
+        <a class="cd-btn cd-btn--primary label" href="{% if request.user.is_authenticated %}{% url 'account_home' %}{% else %}{% url 'home' %}{% endif %}">{% if request.user.is_authenticated %}{% translate "Go to your account" %}{% else %}{% translate "Back to home" %}{% endif %}</a>
       </div>
 
     {% elif already_submitted %}
 
-      <h1 class="display-lg page-title">Already submitted</h1>
-      <p class="body-lg page-subtitle">{% if account.background_check_valid %}Your background check is valid until {{ account.background_check_expires_at|date:"d/m/Y" }} — nothing to upload right now.{% else %}We already have your document and it's waiting for review — no need to upload another.{% endif %}</p>
+      <h1 class="display-lg page-title">{% translate "Already submitted" %}</h1>
+      <p class="body-lg page-subtitle">{% if account.background_check_valid %}{% blocktranslate with date=account.background_check_expires_at|date:"d/m/Y" %}Your background check is valid until {{ date }} — nothing to upload right now.{% endblocktranslate %}{% else %}{% translate "We already have your document and it's waiting for review — no need to upload another." %}{% endif %}</p>
       <div class="form-card">
-        <a class="cd-btn cd-btn--primary label" href="{% if request.user.is_authenticated %}{% url 'account_home' %}{% else %}{% url 'home' %}{% endif %}">{% if request.user.is_authenticated %}Go to your account{% else %}Back to home{% endif %}</a>
+        <a class="cd-btn cd-btn--primary label" href="{% if request.user.is_authenticated %}{% url 'account_home' %}{% else %}{% url 'home' %}{% endif %}">{% if request.user.is_authenticated %}{% translate "Go to your account" %}{% else %}{% translate "Back to home" %}{% endif %}</a>
       </div>
 
     {% else %}
 
-      <h1 class="display-lg page-title">Upload your background check</h1>
-      <p class="body-lg page-subtitle">Hi {{ account.first_name|default:account.username }} — {% if account.background_check_status == 'rejected' %}we couldn't accept your last document; please upload a new one.{% elif account.background_check_status == 'validated' %}your background check has expired; upload a new one to keep helping at your dojo.{% else %}one last step before we can confirm your application.{% endif %}</p>
+      <h1 class="display-lg page-title">{% translate "Upload your background check" %}</h1>
+      <p class="body-lg page-subtitle">{% with name=account.first_name|default:account.username %}{% if account.background_check_status == 'rejected' %}{% blocktranslate %}Hi {{ name }} — we couldn't accept your last document; please upload a new one.{% endblocktranslate %}{% elif account.background_check_status == 'validated' %}{% blocktranslate %}Hi {{ name }} — your background check has expired; upload a new one to keep helping at your dojo.{% endblocktranslate %}{% else %}{% blocktranslate %}Hi {{ name }} — one last step before we can confirm your application.{% endblocktranslate %}{% endif %}{% endwith %}</p>
 
       <div class="form-card">
         <blockquote class="body-sm legal-quote">
@@ -45,14 +46,14 @@
           hulpverlening aan de jeugd, kinderbescherming, animatie of begeleiding van minderjarigen.
         </blockquote>
         <p class="body-sm cd-form__help">
-          You can request this "uittreksel uit het strafregister, model 2" for free from your
+          {% blocktranslate trimmed %}You can request this "uittreksel uit het strafregister, model 2" for free from your
           local gemeente/commune, or online via mijndossier.rrn.fgov.be — mention it's for
-          volunteering with minors (model 2 / Artikel 596.2).
+          volunteering with minors (model 2 / Artikel 596.2).{% endblocktranslate %}
         </p>
         <p class="body-sm cd-form__help">
-          Only an approved reviewer can access this document. It's discarded from our systems as
+          {% blocktranslate trimmed %}Only an approved reviewer can access this document. It's discarded from our systems as
           soon as it's validated — we only keep the outcome, and that validation expires after a
-          year, after which it needs to be redone.
+          year, after which it needs to be redone.{% endblocktranslate %}
         </p>
 
         <form class="cd-form" id="upload-background-check-form" method="post" enctype="multipart/form-data" novalidate>
@@ -67,13 +68,13 @@
           {% endif %}
 
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.document.id_for_label }}">Document<span class="cd-form__required" aria-hidden="true">*</span></label>
+            <label class="cd-form__label label" for="{{ form.document.id_for_label }}">{% translate "Document" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
             {{ form.document }}
             <ul class="cd-form__errors">{% for error in form.document.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
           </div>
 
           <div class="cd-form__actions">
-            <button type="submit" class="cd-btn cd-btn--primary label">Upload document</button>
+            <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Upload document" %}</button>
           </div>
 
         </form>

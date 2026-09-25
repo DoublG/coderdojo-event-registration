@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 
 USER = "user"
 NINJA = "ninja"
@@ -12,14 +14,14 @@ NINJA = "ninja"
 # The operators each value type supports. A rule's operator is validated
 # against its attribute's type when the rule is saved (SegmentRule.clean).
 OPERATOR_LABELS = {
-    "equals": "is",
-    "in": "is one of",
-    "not_in": "is none of",
-    "is": "is",
-    "within": "within",
-    "within_days": "in the last",
-    "gte": "at least",
-    "lte": "at most",
+    "equals": _("is"),
+    "in": _("is one of"),
+    "not_in": _("is none of"),
+    "is": _("is"),
+    "within": _("within"),
+    "within_days": _("in the last"),
+    "gte": _("at least"),
+    "lte": _("at most"),
 }
 
 OPERATORS = {
@@ -68,25 +70,25 @@ class SegmentAttribute(ABC):
     def validate(self, operator: str, value: Any) -> None:
         """Raise ValueError with a readable message for a rule that can't work."""
         if operator not in self.operators:
-            raise ValueError(f"“{self.label}” supports {', '.join(self.operators)}, not “{operator}”.")
+            raise ValueError(_("“%(label)s” supports %(join)s, not “%(operator)s”.") % {"label": self.label, "join": ', '.join(self.operators), "operator": operator})
         if self.value_type == "days":
             if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
-                raise ValueError(f"“{self.label}” needs a whole number of days, e.g. 365.")
+                raise ValueError(_("“%(label)s” needs a whole number of days, e.g. 365.") % {"label": self.label})
             return
         if self.value_type == "number":
             if not isinstance(value, (int, float)) or isinstance(value, bool) or value < 0:
-                raise ValueError(f"“{self.label}” needs a number, 0 or more.")
+                raise ValueError(_("“%(label)s” needs a number, 0 or more.") % {"label": self.label})
             return
         if operator in ("in", "not_in"):
             if not isinstance(value, list) or not value:
-                raise ValueError(f"“{operator}” needs a non-empty list of values.")
+                raise ValueError(_("“%(operator)s” needs a non-empty list of values.") % {"operator": operator})
             values = value
         else:
             values = [value]
         allowed = {choice.value for choice in self.choices()}
         unknown = [v for v in values if v not in allowed]
         if unknown:
-            raise ValueError(f"Unknown value(s) for “{self.label}”: {unknown}.")
+            raise ValueError(_("Unknown value(s) for “%(label)s”: %(unknown)s.") % {"label": self.label, "unknown": unknown})
 
 
     # --- the segment builder (mailing.manage) -------------------------------
@@ -95,9 +97,10 @@ class SegmentAttribute(ABC):
         """The rule as a readable phrase, e.g. "Child's gender is one of Girl, Prefer not to say"."""
         op = OPERATOR_LABELS.get(operator, operator)
         if self.value_type == "days":
-            return f"{self.label.replace(' in the last N days', '')} {op} {value} days"
+            # The label says "... N days" in every language; N becomes the value.
+            return re.sub(r"\bN\b", str(value), str(self.label))
         if self.value_type == "boolean":
-            return f"{self.label}: {'yes' if value else 'no'}"
+            return f"{self.label}: {_('yes') if value else _('no')}"
         if self.value_type == "number":
             return f"{self.label} {op} {value:g}{getattr(self, 'unit', '')}"
         labels = {str(c.value): c.label for c in self.choices()}
@@ -127,7 +130,7 @@ def number_q(field: str, operator: str, value: Any) -> Q:
     """The gte/lte Q on one numeric field, shared by number attributes."""
     if operator in ("gte", "lte"):
         return Q(**{f"{field}__{operator}": value})
-    raise ValueError(f"Unsupported operator: {operator}")
+    raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
 
 
 def choice_q(field: str, operator: str, value: Any) -> Q:
@@ -138,4 +141,4 @@ def choice_q(field: str, operator: str, value: Any) -> Q:
         return Q(**{f"{field}__in": value})
     if operator == "not_in":
         return ~Q(**{f"{field}__in": value})
-    raise ValueError(f"Unsupported operator: {operator}")
+    raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})

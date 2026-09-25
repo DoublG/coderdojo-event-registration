@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from accounts.organisation import require_organisation_admin
@@ -58,7 +59,7 @@ def promotion_create(request):
     form = PromotionForm(request.POST or None, request.FILES or None, initial=initial)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, "Promotion saved.")
+        messages.success(request, _("Promotion saved."))
         return redirect("manage_promotion_list")
     return render(request, "content/manage/promotion_form.html", {"form": form, "active": "promotions"})
 
@@ -70,7 +71,7 @@ def promotion_detail(request, promotion_id):
     form = PromotionForm(request.POST or None, request.FILES or None, instance=promotion)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, "Promotion saved.")
+        messages.success(request, _("Promotion saved."))
         return redirect("manage_promotion_list")
     return render(request, "content/manage/promotion_form.html", {
         "form": form, "promotion": promotion, "active": "promotions",
@@ -83,5 +84,5 @@ def promotion_delete(request, promotion_id):
     require_organisation_admin(request)
     promotion = get_object_or_404(Promotion, pk=promotion_id)
     promotion.delete()
-    messages.success(request, "Promotion removed.")
+    messages.success(request, _("Promotion removed."))
     return redirect("manage_promotion_list")

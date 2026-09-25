@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 
 from events.models import Event, Registration
 
@@ -9,7 +10,7 @@ class EventAttribute(SegmentAttribute):
     """The child has a registration (confirmed or waitlisted) for the event."""
 
     key = "event"
-    label = "Registered for event"
+    label = _("Registered for event")
     value_type = "choice"
     scope = NINJA
     registrations = Registration.objects.all()
@@ -27,4 +28,4 @@ class EventAttribute(SegmentAttribute):
             return matched
         if operator == "not_in":
             return ~matched
-        raise ValueError(f"Unsupported operator: {operator}")
+        raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})

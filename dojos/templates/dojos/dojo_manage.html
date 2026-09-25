@@ -1,7 +1,8 @@
 {% extends "dojos/_admin_base.html" %}
+{% load i18n %}
 {% load static %}
-{% block admin_page_title %}Settings{% endblock %}
-{% block admin_heading %}Dojo profile{% endblock %}
+{% block admin_page_title %}{% translate "Settings" %}{% endblock %}
+{% block admin_heading %}{% translate "Dojo profile" %}{% endblock %}
 
 {% block admin_extra_style %}
 <style>
@@ -19,39 +20,39 @@
   {% endcomment %}
   <div class="cd-card dojo-status-card">
     <div>
-      <p class="cd-form__label label">Dojo status</p>
+      <p class="cd-form__label label">{% translate "Dojo status" %}</p>
       <span class="cd-badge {% if dojo.status == 'active' %}cd-badge--success{% elif dojo.status == 'draft' %}cd-badge--outline{% else %}cd-badge--warning{% endif %} caption">{{ dojo.get_status_display }}</span>
     </div>
     {% if dojo_access.can_manage_lifecycle %}
       <form class="dojo-status-card__actions" method="post" action="{% url 'dojo_set_lifecycle' dojo_id=dojo.id %}">
         {% csrf_token %}
         {% if dojo.status == 'draft' %}
-          <button type="submit" name="action" value="launch" class="cd-btn cd-btn--primary label">Launch dojo</button>
+          <button type="submit" name="action" value="launch" class="cd-btn cd-btn--primary label">{% translate "Launch dojo" %}</button>
         {% elif dojo.status == 'active' %}
-          <button type="submit" name="action" value="go_dormant" class="cd-btn cd-btn--ghost label"{% if active_event_count %} disabled{% endif %}>Mark dormant</button>
+          <button type="submit" name="action" value="go_dormant" class="cd-btn cd-btn--ghost label"{% if active_event_count %} disabled{% endif %}>{% translate "Mark dormant" %}</button>
           <button type="submit" name="action" value="archive" class="cd-btn cd-btn--ghost label"{% if active_event_count %} disabled{% endif %}
-                  onclick="return confirm('Archive {{ dojo.name }}? It disappears from the public site until you reopen it.');">Archive</button>
+                  onclick="{% blocktranslate asvar confirm_msg with name=dojo.name %}Archive {{ name }}? It disappears from the public site until you reopen it.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">{% translate "Archive" %}</button>
         {% elif dojo.status == 'dormant' %}
-          <button type="submit" name="action" value="restart" class="cd-btn cd-btn--primary label">Restart dojo</button>
+          <button type="submit" name="action" value="restart" class="cd-btn cd-btn--primary label">{% translate "Restart dojo" %}</button>
           <button type="submit" name="action" value="archive" class="cd-btn cd-btn--ghost label"{% if active_event_count %} disabled{% endif %}
-                  onclick="return confirm('Archive {{ dojo.name }}? It disappears from the public site until you reopen it.');">Archive</button>
+                  onclick="{% blocktranslate asvar confirm_msg with name=dojo.name %}Archive {{ name }}? It disappears from the public site until you reopen it.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">{% translate "Archive" %}</button>
         {% else %}
-          <button type="submit" name="action" value="reopen" class="cd-btn cd-btn--secondary label">Reopen as draft</button>
+          <button type="submit" name="action" value="reopen" class="cd-btn cd-btn--secondary label">{% translate "Reopen as draft" %}</button>
         {% endif %}
       </form>
     {% endif %}
     <p class="dojo-status-card__help caption">
       {% if dojo.status == 'draft' %}
-        Hidden from the public site while you set it up. Launch it when your profile, team and first sessions are ready.
+        {% translate "Hidden from the public site while you set it up. Launch it when your profile, team and first sessions are ready." %}
       {% elif dojo.status == 'active' %}
-        Public: listed in the dojo finder, with its sessions open for sign-ups.
-        {% if active_event_count %}It has {{ active_event_count }} upcoming session{{ active_event_count|pluralize }} in draft or open, so it can't be made dormant or archived yet.{% endif %}
+        {% translate "Public: listed in the dojo finder, with its sessions open for sign-ups." %}
+        {% if active_event_count %}{% blocktranslate count counter=active_event_count %}It has {{ counter }} upcoming session in draft or open, so it can't be made dormant or archived yet.{% plural %}It has {{ counter }} upcoming sessions in draft or open, so it can't be made dormant or archived yet.{% endblocktranslate %}{% endif %}
       {% elif dojo.status == 'dormant' %}
-        Not running for now: hidden from the public site, but kept in ninjas' history. Restart it any time.
+        {% translate "Not running for now: hidden from the public site, but kept in ninjas' history. Restart it any time." %}
       {% else %}
-        Closed: hidden from the public site, kept in ninjas' history. Reopening brings it back as a draft.
+        {% translate "Closed: hidden from the public site, kept in ninjas' history. Reopening brings it back as a draft." %}
       {% endif %}
-      {% if not dojo_access.can_manage_lifecycle %}Only the dojo's champion can change its status.{% endif %}
+      {% if not dojo_access.can_manage_lifecycle %}{% translate "Only the dojo's champion can change its status." %}{% endif %}
     </p>
   </div>
 
@@ -62,12 +63,12 @@
       {% if saved or geocode_failed or form.non_field_errors %}
         <div class="cd-form__notes">
           {% if saved %}
-            <p class="cd-form__note cd-form__note--success">Saved — your dojo's page is up to date.</p>
+            <p class="cd-form__note cd-form__note--success">{% translate "Saved — your dojo's page is up to date." %}</p>
           {% endif %}
           {% if geocode_failed %}
             <p class="cd-form__note cd-form__note--warning">
-              We couldn't find that address on the map, so the "Visit us" map link and distance
-              search still use the old location. Everything else was saved.
+              {% blocktranslate trimmed %}We couldn't find that address on the map, so the "Visit us" map link and distance
+              search still use the old location. Everything else was saved.{% endblocktranslate %}
             </p>
           {% endif %}
           {% for error in form.non_field_errors %}
@@ -77,18 +78,18 @@
       {% endif %}
 
       <div class="cd-form__group">
-        <h3 class="cd-form__group-title heading-md">Basics</h3>
-        <p class="cd-form__group-desc body-sm">The name, icon, and one-line tagline shown at the top of your dojo's page.</p>
+        <h3 class="cd-form__group-title heading-md">{% translate "Basics" %}</h3>
+        <p class="cd-form__group-desc body-sm">{% translate "The name, icon, and one-line tagline shown at the top of your dojo's page." %}</p>
         <div class="cd-form__row">
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.name.id_for_label }}">Name<span class="cd-form__required" aria-hidden="true">*</span></label>
+            <label class="cd-form__label label" for="{{ form.name.id_for_label }}">{% translate "Name" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
             <ul class="cd-form__errors">{% for error in form.name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             {{ form.name }}
           </div>
         </div>
         <div class="cd-form__field">
-          <label class="cd-form__label label">Icon</label>
-          <p class="cd-form__help caption" style="margin-top:0;">Round icon shown at the top of the dojo page, next to its name.</p>
+          <label class="cd-form__label label">{% translate "Icon" %}</label>
+          <p class="cd-form__help caption" style="margin-top:0;">{% translate "Round icon shown at the top of the dojo page, next to its name." %}</p>
           {% if dojo.icon %}
             <img src="{{ dojo.icon.url }}" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;margin-bottom:var(--space-2);">
           {% endif %}
@@ -99,7 +100,7 @@
                 {% if radio.data.value %}
                   <img class="cd-template-picker__option-img" src="{% static 'dojos/template_icons/'|add:radio.data.value %}" alt="">
                 {% else %}
-                  <span class="cd-template-picker__option-none caption">No template</span>
+                  <span class="cd-template-picker__option-none caption">{% translate "No template" %}</span>
                 {% endif %}
                 <span class="caption">{{ radio.choice_label }}</span>
               </label>
@@ -108,33 +109,33 @@
           <ul class="cd-form__errors">{% for error in form.template_icon.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
         </div>
         <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.icon.id_for_label }}">…or upload your own</label>
+          <label class="cd-form__label label" for="{{ form.icon.id_for_label }}">{% translate "…or upload your own" %}</label>
           {{ form.icon }}
-          <p class="cd-form__help caption">Uploading a file here overrides the template chosen above.</p>
+          <p class="cd-form__help caption">{% translate "Uploading a file here overrides the template chosen above." %}</p>
           <ul class="cd-form__errors">{% for error in form.icon.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
         </div>
         <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.tagline.id_for_label }}">Tagline</label>
+          <label class="cd-form__label label" for="{{ form.tagline.id_for_label }}">{% translate "Tagline" %}</label>
           {{ form.tagline }}
-          <p class="cd-form__help caption">Shown right under the dojo's name. Supports basic Markdown.</p>
+          <p class="cd-form__help caption">{% translate "Shown right under the dojo's name. Supports basic Markdown." %}</p>
           <ul class="cd-form__errors">{% for error in form.tagline.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
         </div>
       </div>
 
       <div class="cd-form__group">
-        <h3 class="cd-form__group-title heading-md">About this dojo</h3>
+        <h3 class="cd-form__group-title heading-md">{% translate "About this dojo" %}</h3>
         <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.description.id_for_label }}">Description</label>
+          <label class="cd-form__label label" for="{{ form.description.id_for_label }}">{% translate "Description" %}</label>
           {{ form.description }}
-          <p class="cd-form__help caption">Shown further down the page, above the team. Supports basic Markdown.</p>
+          <p class="cd-form__help caption">{% translate "Shown further down the page, above the team. Supports basic Markdown." %}</p>
           <ul class="cd-form__errors">{% for error in form.description.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
         </div>
       </div>
 
       <div class="cd-form__group">
-        <h3 class="cd-form__group-title heading-md">Pathways</h3>
+        <h3 class="cd-form__group-title heading-md">{% translate "Pathways" %}</h3>
           <div class="cd-form__field">
-            <label class="cd-form__label label">Pathways your dojo provides</label>
+            <label class="cd-form__label label">{% translate "Pathways your dojo provides" %}</label>
             <ul class="cd-form__errors">{% for error in form.pathways.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             <div class="cd-form__checkbox-list">
               {% for checkbox in form.pathways %}
@@ -144,27 +145,27 @@
                 </label>
               {% endfor %}
             </div>
-            <p class="cd-form__help caption">Optional — shown on your dojo's page, and pre-selected for new sessions.</p>
+            <p class="cd-form__help caption">{% translate "Optional — shown on your dojo's page, and pre-selected for new sessions." %}</p>
           </div>
       </div>
 
       <div class="cd-form__group">
-        <h3 class="cd-form__group-title heading-md">Schedule &amp; ages</h3>
+        <h3 class="cd-form__group-title heading-md">{% translate "Schedule &amp; ages" %}</h3>
         <div class="cd-form__row">
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.schedule_description.id_for_label }}">Meets</label>
+            <label class="cd-form__label label" for="{{ form.schedule_description.id_for_label }}">{% translate "Meets" %}</label>
             <ul class="cd-form__errors">{% for error in form.schedule_description.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             {{ form.schedule_description }}
           </div>
         </div>
         <div class="cd-form__row">
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.min_age.id_for_label }}">Minimum age</label>
+            <label class="cd-form__label label" for="{{ form.min_age.id_for_label }}">{% translate "Minimum age" %}</label>
             <ul class="cd-form__errors">{% for error in form.min_age.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             {{ form.min_age }}
           </div>
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.max_age.id_for_label }}">Maximum age</label>
+            <label class="cd-form__label label" for="{{ form.max_age.id_for_label }}">{% translate "Maximum age" %}</label>
             <ul class="cd-form__errors">{% for error in form.max_age.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             {{ form.max_age }}
           </div>
@@ -172,45 +173,45 @@
       </div>
 
       <div class="cd-form__group">
-        <h3 class="cd-form__group-title heading-md">Contact &amp; location</h3>
+        <h3 class="cd-form__group-title heading-md">{% translate "Contact &amp; location" %}</h3>
         <div class="cd-form__row">
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.email.id_for_label }}">Email</label>
+            <label class="cd-form__label label" for="{{ form.email.id_for_label }}">{% translate "Email" %}</label>
             <ul class="cd-form__errors">{% for error in form.email.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             {{ form.email }}
           </div>
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.phone.id_for_label }}">Phone</label>
+            <label class="cd-form__label label" for="{{ form.phone.id_for_label }}">{% translate "Phone" %}</label>
             <ul class="cd-form__errors">{% for error in form.phone.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             {{ form.phone }}
           </div>
         </div>
         <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.municipality.id_for_label }}">Municipality</label>
+          <label class="cd-form__label label" for="{{ form.municipality.id_for_label }}">{% translate "Municipality" %}</label>
           <ul class="cd-form__errors">{% for error in form.municipality.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
           {{ form.municipality }}
         </div>
         <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.address.id_for_label }}">Address</label>
+          <label class="cd-form__label label" for="{{ form.address.id_for_label }}">{% translate "Address" %}</label>
           {{ form.address }}
-          <p class="cd-form__help caption">Used for the "Visit us" map link and for distance search — changing it updates the map location automatically.</p>
+          <p class="cd-form__help caption">{% blocktranslate %}Used for the "Visit us" map link and for distance search — changing it updates the map location automatically.{% endblocktranslate %}</p>
           <ul class="cd-form__errors">{% for error in form.address.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
         </div>
       </div>
 
       <div class="cd-form__group">
-        <h3 class="cd-form__group-title heading-md">Visit us notes</h3>
+        <h3 class="cd-form__group-title heading-md">{% translate "Visit us notes" %}</h3>
         <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.visit_notes.id_for_label }}">Extra info</label>
+          <label class="cd-form__label label" for="{{ form.visit_notes.id_for_label }}">{% translate "Extra info" %}</label>
           {{ form.visit_notes }}
-          <p class="cd-form__help caption">Parking, entrance, accessibility — anything extra for the Visit us section. Supports basic Markdown.</p>
+          <p class="cd-form__help caption">{% translate "Parking, entrance, accessibility — anything extra for the Visit us section. Supports basic Markdown." %}</p>
           <ul class="cd-form__errors">{% for error in form.visit_notes.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
         </div>
       </div>
 
       <div class="cd-form__actions">
-        {% if not dojo.is_organisation %}<a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_detail' dojo_id=dojo.id %}" target="_blank" rel="noopener">View public page</a>{% endif %}
-        <button type="submit" class="cd-btn cd-btn--primary label">Save changes</button>
+        {% if not dojo.is_organisation %}<a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_detail' dojo_id=dojo.id %}" target="_blank" rel="noopener">{% translate "View public page" %}</a>{% endif %}
+        <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save changes" %}</button>
       </div>
 
     </form>

@@ -1,19 +1,20 @@
 {% extends "core/_manage_base.html" %}
-{% block manage_page_title %}Campaigns{% endblock %}
-{% block manage_heading %}Campaigns{% endblock %}
-{% block manage_topbar_extra %}<a class="cd-btn cd-btn--primary label" href="{% url 'manage_campaign_create' %}">New campaign</a>{% endblock %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Campaigns" %}{% endblock %}
+{% block manage_heading %}{% translate "Campaigns" %}{% endblock %}
+{% block manage_topbar_extra %}<a class="cd-btn cd-btn--primary label" href="{% url 'manage_campaign_create' %}">{% translate "New campaign" %}</a>{% endblock %}
 
 {% block manage_content %}
   <div class="cd-table-wrap">
     <table class="cd-table cd-table--zebra">
       <thead>
         <tr>
-          <th class="label" scope="col">Name</th>
-          <th class="label" scope="col">Status</th>
-          <th class="label" scope="col">Segment</th>
-          <th class="label cd-table__num" scope="col">Audience</th>
-          <th class="label cd-table__num" scope="col">Sent</th>
-          <th class="label" scope="col">When</th>
+          <th class="label" scope="col">{% translate "Name" %}</th>
+          <th class="label" scope="col">{% translate "Status" %}</th>
+          <th class="label" scope="col">{% translate "Segment" %}</th>
+          <th class="label cd-table__num" scope="col">{% translate "Audience" %}</th>
+          <th class="label cd-table__num" scope="col">{% translate "Sent" %}</th>
+          <th class="label" scope="col">{% translate "When" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -27,7 +28,7 @@
             <td class="body-sm">{% if campaign.scheduled_at %}{{ campaign.scheduled_at|date:"d/m/Y H:i" }}{% elif campaign.launched_at %}{{ campaign.launched_at|date:"d/m/Y H:i" }}{% else %}—{% endif %}</td>
           </tr>
         {% empty %}
-          <tr><td class="body-sm" colspan="6">No campaigns yet. Create one to reach families, mentors or champions.</td></tr>
+          <tr><td class="body-sm" colspan="6">{% translate "No campaigns yet. Create one to reach families, mentors or champions." %}</td></tr>
         {% endfor %}
       </tbody>
     </table>

@@ -1,12 +1,13 @@
 {% extends "dojos/_admin_base.html" %}
-{% block admin_page_title %}Attendance — {{ event.name }}{% endblock %}
-{% block admin_heading %}Attendance{% endblock %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "Attendance" %} — {{ event.name }}{% endblock %}
+{% block admin_heading %}{% translate "Attendance" %}{% endblock %}
 
 {% block admin_topbar_extra %}
   {% if dojo_access.can_manage_events %}
-    <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">Back to event</a>
+    <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">{% translate "Back to event" %}</a>
   {% else %}
-    <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_list' dojo_id=dojo.id %}">Back to events</a>
+    <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_list' dojo_id=dojo.id %}">{% translate "Back to events" %}</a>
   {% endif %}
 {% endblock %}
 

@@ -25,6 +25,18 @@ class NotifyTests(TestCase):
         self.assertFalse(notification.read)
         self.assertEqual(Notification.objects.count(), 1)
 
+    def test_text_is_written_in_the_recipients_language(self):
+        """Stored as shown, so rendered in the recipient's own language, whoever
+        triggered it (notifications.services.notify, `params`)."""
+        from django.utils import translation
+        from django.utils.translation import gettext_lazy
+
+        self.owner.preferred_language = "nl-be"
+        self.owner.save(update_fields=["preferred_language"])
+        with translation.override("fr-be"):
+            notification = notify(self.owner, gettext_lazy("You've been added to the %(dojo)s team."), params={"dojo": "Ghent"})
+        self.assertEqual(notification.text, "Je bent toegevoegd aan het team van Ghent.")
+
     def test_publishes_to_the_recipients_group(self):
         with patch("notifications.services.get_channel_layer") as mock_get_layer:
             mock_layer = Mock()

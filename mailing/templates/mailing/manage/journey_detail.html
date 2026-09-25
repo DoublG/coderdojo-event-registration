@@ -1,6 +1,7 @@
 {% extends "core/_manage_base.html" %}
+{% load i18n %}
 {% block manage_page_title %}{{ journey.name }}{% endblock %}
-{% block manage_heading %}{{ journey.name }} {% if journey.is_active %}<span class="cd-badge cd-badge--success caption">Active</span>{% else %}<span class="cd-badge cd-badge--outline caption">Paused</span>{% endif %}{% endblock %}
+{% block manage_heading %}{{ journey.name }} {% if journey.is_active %}<span class="cd-badge cd-badge--success caption">{% translate "Active" %}</span>{% else %}<span class="cd-badge cd-badge--outline caption">{% translate "Paused" %}</span>{% endif %}{% endblock %}
 
 {% block manage_extra_style %}
 <style>
@@ -22,56 +23,56 @@
   <div>
     <form method="post" class="cd-card cd-form campaign-card" novalidate>
       {% csrf_token %}
-      <h2 class="heading-md">Journey</h2>
+      <h2 class="heading-md">{% translate "Journey" %}</h2>
       {% include "mailing/manage/_journey_fields.html" %}
-      <div class="cd-form__actions"><button type="submit" class="cd-btn cd-btn--primary label">Save</button></div>
+      <div class="cd-form__actions"><button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button></div>
     </form>
     <div class="cd-card campaign-card">
-      <h2 class="heading-md">Preview</h2>
+      <h2 class="heading-md">{% translate "Preview" %}</h2>
       {% for preview in previews %}
         <p class="label">{{ preview.language }}: {{ preview.subject }}</p>
         <pre class="campaign-preview body-sm">{{ preview.body }}</pre>
       {% empty %}
-        <p class="body-sm">No template “{{ journey.template_key }}” exists yet.</p>
+        <p class="body-sm">{% blocktranslate with key=journey.template_key %}No template “{{ key }}” exists yet.{% endblocktranslate %}</p>
       {% endfor %}
     </div>
   </div>
 
   <div>
     <div class="cd-card campaign-card">
-      <h2 class="heading-md">Results</h2>
+      <h2 class="heading-md">{% translate "Results" %}</h2>
       <div class="campaign-stats">
-        <div><strong>{{ stats.due }}</strong><span class="caption">get it on the next run</span></div>
-        <div><strong>{{ stats.recent }}</strong><span class="caption">last {{ stats.days }} days</span></div>
-        <div><strong>{{ stats.total }}</strong><span class="caption">in total</span></div>
-        <div><strong>{{ stats.sent }}</strong><span class="caption">sent</span></div>
-        <div><strong>{{ stats.held_back }}</strong><span class="caption">held back</span></div>
+        <div><strong>{{ stats.due }}</strong><span class="caption">{% translate "get it on the next run" %}</span></div>
+        <div><strong>{{ stats.recent }}</strong><span class="caption">{% blocktranslate with days=stats.days %}last {{ days }} days{% endblocktranslate %}</span></div>
+        <div><strong>{{ stats.total }}</strong><span class="caption">{% translate "in total" %}</span></div>
+        <div><strong>{{ stats.sent }}</strong><span class="caption">{% translate "sent" %}</span></div>
+        <div><strong>{{ stats.held_back }}</strong><span class="caption">{% translate "held back" %}</span></div>
       </div>
       {% if due_sample %}
-        <p class="caption" style="margin-top: var(--space-3);">Next run, for example:</p>
+        <p class="caption" style="margin-top: var(--space-3);">{% translate "Next run, for example:" %}</p>
         <ul class="body-sm">{% for account in due_sample %}<li>{{ account.get_full_name|default:account.get_username }} · {{ account.email }}</li>{% endfor %}</ul>
       {% endif %}
       {% if recent %}
-        <p class="caption">Latest:</p>
+        <p class="caption">{% translate "Latest:" %}</p>
         <ul class="body-sm">{% for delivery in recent %}<li>{{ delivery.created_at|date:"d/m/Y" }} · {{ delivery.user.email }} · {{ delivery.email.get_status_display|default:"—" }}</li>{% endfor %}</ul>
       {% endif %}
     </div>
 
     <div class="cd-card campaign-card">
-      <h2 class="heading-md">Actions</h2>
+      <h2 class="heading-md">{% translate "Actions" %}</h2>
       {% for problem in problems %}<p class="cd-form__note cd-form__note--error caption">{{ problem }}</p>{% endfor %}
       <div class="campaign-actions">
         <form method="post" action="{% url 'manage_journey_test' journey_id=journey.id %}">
-          {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">Send a test to me</button>
+          {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Send a test to me" %}</button>
         </form>
         {% if journey.is_active %}
           <form method="post" action="{% url 'manage_journey_pause' journey_id=journey.id %}">
-            {% csrf_token %}<button type="submit" class="cd-btn cd-btn--secondary label">Pause</button>
+            {% csrf_token %}<button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Pause" %}</button>
           </form>
         {% else %}
           <form method="post" action="{% url 'manage_journey_activate' journey_id=journey.id %}"
-                onsubmit="return confirm('Activate? The next run (18:00) sends it to the {{ stats.due }} people who match now.');">
-            {% csrf_token %}<button type="submit" class="cd-btn cd-btn--primary label"{% if problems %} disabled{% endif %}>Activate</button>
+                onsubmit="{% blocktranslate asvar confirm_msg with due=stats.due %}Activate? The next run (18:00) sends it to the {{ due }} people who match now.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
+            {% csrf_token %}<button type="submit" class="cd-btn cd-btn--primary label"{% if problems %} disabled{% endif %}>{% translate "Activate" %}</button>
           </form>
         {% endif %}
       </div>

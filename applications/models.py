@@ -47,8 +47,8 @@ class Application(models.Model):
     VOLUNTEER_MENTOR = "volunteer_mentor"
     OTHER = "other"
     MENTOR_ROLE_CHOICES = [
-        (VOLUNTEER_MENTOR, "Volunteer mentor"),
-        (OTHER, "Something else (board, events, comms)"),
+        (VOLUNTEER_MENTOR, _("Volunteer mentor")),
+        (OTHER, _("Something else (board, events, comms)")),
     ]
 
     account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="applications")
@@ -107,7 +107,7 @@ class BackgroundCheckHistory(models.Model):
 
     VALIDATED = "validated"
     REJECTED = "rejected"
-    DECISION_CHOICES = [(VALIDATED, "Validated"), (REJECTED, "Rejected")]
+    DECISION_CHOICES = [(VALIDATED, _("Validated")), (REJECTED, _("Rejected"))]
 
     account = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="background_check_history",

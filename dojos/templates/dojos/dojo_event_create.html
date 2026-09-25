@@ -1,6 +1,7 @@
 {% extends "dojos/_admin_base.html" %}
-{% block admin_page_title %}New event{% endblock %}
-{% block admin_heading %}New event{% endblock %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "New event" %}{% endblock %}
+{% block admin_heading %}{% translate "New event" %}{% endblock %}
 
 {% block admin_extra_style %}
 <style>
@@ -24,8 +25,8 @@
       {% include "dojos/partials/_event_form_fields.html" %}
 
       <div class="cd-form__actions">
-        <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_list' dojo_id=dojo.id %}">Cancel</a>
-        <button type="submit" class="cd-btn cd-btn--primary label">Create event</button>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_list' dojo_id=dojo.id %}">{% translate "Cancel" %}</a>
+        <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Create event" %}</button>
       </div>
 
     </form>

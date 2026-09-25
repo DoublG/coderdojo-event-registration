@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from dojos.models import DojoMembership
 from events.models import NinjaBelt, NinjaEngagement, NinjaEngagementChange
@@ -17,7 +18,7 @@ class StageChangedAttribute(SegmentAttribute):
     risk. Value: {"from": [...] (empty = any), "to": [...], "days": N}."""
 
     key = "stage_changed"
-    label = "How the child comes to sessions changed"
+    label = _("How the child comes to sessions changed")
     value_type = "stage_change"
     scope = NINJA
     operators = ["within_days"]
@@ -30,7 +31,7 @@ class StageChangedAttribute(SegmentAttribute):
         if (operator != "within_days" or not isinstance(value, dict) or not value.get("to")
                 or not set(value["to"]) <= stages or not set(value.get("from") or []) <= stages
                 or not isinstance(value.get("days"), int) or value["days"] <= 0):
-            raise ValueError(f"“{self.label}” needs the new stage(s) and a number of days.")
+            raise ValueError(_("“%(label)s” needs the new stage(s) and a number of days.") % {"label": self.label})
 
     def build_q(self, operator, value):
         changes = NinjaEngagementChange.objects.filter(
@@ -42,9 +43,12 @@ class StageChangedAttribute(SegmentAttribute):
 
     def describe(self, operator, value):
         labels = {c.value: c.label for c in self.choices()}
-        names = lambda stages: " or ".join(labels.get(s, s) for s in stages)  # noqa: E731
-        start = f"from {names(value['from'])} " if value.get("from") else ""
-        return f"Became {names(value.get('to', []))} {start}in the last {value.get('days')} days"
+        names = lambda stages: str(_(" or ")).join(str(labels.get(s, s)) for s in stages)  # noqa: E731
+        if value.get("from"):
+            return _("Became %(to)s from %(from)s in the last %(days)s days") % {
+                "to": names(value.get("to", [])), "from": names(value["from"]), "days": value.get("days"),
+            }
+        return _("Became %(to)s in the last %(days)s days") % {"to": names(value.get("to", [])), "days": value.get("days")}
 
     def value_from_form(self, operator, data):
         try:
@@ -59,7 +63,7 @@ class NoNewBeltAttribute(SegmentAttribute):
     children who might like a new pathway."""
 
     key = "no_new_belt_within_days"
-    label = "No new belt in the last N days"
+    label = _("No new belt in the last N days")
     value_type = "days"
     scope = NINJA
 
@@ -68,7 +72,7 @@ class NoNewBeltAttribute(SegmentAttribute):
 
     def build_q(self, operator, value):
         if operator != "within_days":
-            raise ValueError(f"Unsupported operator: {operator}")
+            raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         recent = NinjaBelt.objects.filter(awarded_on__gte=timezone.localdate() - timedelta(days=value))
         return ~Q(pk__in=recent.values("ninja_id"))
 
@@ -78,7 +82,7 @@ class NotOnATeamAttribute(SegmentAttribute):
     "Account's role: mentor", volunteers who've drifted away."""
 
     key = "not_on_team_within_days"
-    label = "Not on a session team in the last N days"
+    label = _("Not on a session team in the last N days")
     value_type = "days"
     scope = USER
 
@@ -87,7 +91,7 @@ class NotOnATeamAttribute(SegmentAttribute):
 
     def build_q(self, operator, value):
         if operator != "within_days":
-            raise ValueError(f"Unsupported operator: {operator}")
+            raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         since = timezone.now() - timedelta(days=value)
         recent = DojoMembership.objects.filter(events__start_time__gte=since, events__start_time__lte=timezone.now())
         return ~Q(pk__in=recent.values("user_id"))

@@ -1,6 +1,7 @@
 {% extends "dojos/_admin_base.html" %}
-{% block admin_page_title %}Team{% endblock %}
-{% block admin_heading %}Team{% endblock %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "Team" %}{% endblock %}
+{% block admin_heading %}{% translate "Team" %}{% endblock %}
 
 {% block admin_extra_style %}
 <style>
@@ -29,22 +30,22 @@ transferring the champion role (the champion only).
 
   {% if requests %}
     <section class="cd-card">
-      <h2 class="heading-md">Join requests</h2>
+      <h2 class="heading-md">{% translate "Join requests" %}</h2>
       {% for membership in requests %}
         <div class="team-row">
           <div class="team-row__person">
             {% include "dojos/partials/_mentor_avatar.html" with mentor=membership %}
             <div>
               <p class="body" style="margin: 0;">{{ membership.name }}</p>
-              <p class="caption team-row__meta">Asked {{ membership.created_at|date:"j M Y" }}{% if membership.user.email %} · {{ membership.user.email }}{% endif %}</p>
+              <p class="caption team-row__meta">{% blocktranslate with date=membership.created_at|date:"j M Y" %}Asked {{ date }}{% endblocktranslate %}{% if membership.user.email %} · {{ membership.user.email }}{% endif %}</p>
             </div>
           </div>
           {% if dojo_access.can_manage_team %}
             <form class="team-row__actions" method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}">
               {% csrf_token %}
               <input type="hidden" name="membership_id" value="{{ membership.id }}">
-              <button type="submit" name="action" value="accept" class="cd-btn cd-btn--secondary label">Accept</button>
-              <button type="submit" name="action" value="decline" class="cd-btn cd-btn--ghost label">Decline</button>
+              <button type="submit" name="action" value="accept" class="cd-btn cd-btn--secondary label">{% translate "Accept" %}</button>
+              <button type="submit" name="action" value="decline" class="cd-btn cd-btn--ghost label">{% translate "Decline" %}</button>
             </form>
           {% endif %}
         </div>
@@ -53,16 +54,16 @@ transferring the champion role (the champion only).
   {% endif %}
 
   <section class="cd-card">
-    <h2 class="heading-md">Current team</h2>
+    <h2 class="heading-md">{% translate "Current team" %}</h2>
     {% for membership in active_members %}
       <div class="team-row">
         <div class="team-row__person">
           {% include "dojos/partials/_mentor_avatar.html" with mentor=membership %}
           <div>
-            <p class="body" style="margin: 0;">{{ membership.name }}{% if membership.user_id == request.user.id %} (you){% endif %}</p>
+            <p class="body" style="margin: 0;">{{ membership.name }}{% if membership.user_id == request.user.id %} {% translate "(you)" %}{% endif %}</p>
             <p class="caption team-row__meta">
               {{ membership.get_role_display }}
-              {% if membership.joined_at %} · since {{ membership.joined_at|date:"M Y" }}{% endif %}
+              {% if membership.joined_at %} · {% blocktranslate with date=membership.joined_at|date:"M Y" %}since {{ date }}{% endblocktranslate %}{% endif %}
               {% if membership.promoted_by %} · promoted by {{ membership.promoted_by.name }}{% endif %}
             </p>
           </div>
@@ -70,99 +71,99 @@ transferring the champion role (the champion only).
         <div class="team-row__actions">
           {% if membership.user_id == request.user.id and membership.role != 'champion' %}
             <form method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}"
-                  onsubmit="return confirm('Leave the {{ dojo.name }} team? You lose access to this dashboard.');">
+                  onsubmit="{% blocktranslate asvar confirm_msg with name=dojo.name %}Leave the {{ name }} team? You lose access to this dashboard.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
               {% csrf_token %}
-              <button type="submit" name="action" value="leave" class="cd-btn cd-btn--ghost label">Leave team</button>
+              <button type="submit" name="action" value="leave" class="cd-btn cd-btn--ghost label">{% translate "Leave team" %}</button>
             </form>
           {% elif dojo_access.can_manage_team and membership.role != 'champion' %}
             <form method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}"
-                  onsubmit="return confirm('Remove {{ membership.name }} from the team?');">
+                  onsubmit="{% blocktranslate asvar confirm_msg with name=membership.name %}Remove {{ name }} from the team?{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
               {% csrf_token %}
               <input type="hidden" name="membership_id" value="{{ membership.id }}">
-              <button type="submit" name="action" value="remove" class="cd-btn cd-btn--ghost label">Remove</button>
+              <button type="submit" name="action" value="remove" class="cd-btn cd-btn--ghost label">{% translate "Remove" %}</button>
             </form>
           {% endif %}
         </div>
       </div>
     {% empty %}
-      <p class="body-sm">Nobody on the team yet.</p>
+      <p class="body-sm">{% translate "Nobody on the team yet." %}</p>
     {% endfor %}
   </section>
 
   {% if dojo_access.can_manage_team %}
     <section class="cd-card">
-      <h2 class="heading-md">Add a mentor</h2>
-      <p class="body-sm" style="color: var(--ink-muted);">Only approved mentors (with a valid background check) can be added. They can also ask to join from the dojo's public page.</p>
+      <h2 class="heading-md">{% translate "Add a mentor" %}</h2>
+      <p class="body-sm" style="color: var(--ink-muted);">{% translate "Only approved mentors (with a valid background check) can be added. They can also ask to join from the dojo's public page." %}</p>
       <form class="cd-form inline-form" method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="add_mentor">
         <div class="cd-form__field">
-          <label class="cd-form__label label" for="add-mentor-email">Their account's email</label>
-          <input class="cd-form__input body" type="email" id="add-mentor-email" name="email" required placeholder="mentor@example.com">
+          <label class="cd-form__label label" for="add-mentor-email">{% translate "Their account's email" %}</label>
+          <input class="cd-form__input body" type="email" id="add-mentor-email" name="email" required placeholder="{% translate "mentor@example.com" %}">
         </div>
-        <button type="submit" class="cd-btn cd-btn--primary label">Add to team</button>
+        <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Add to team" %}</button>
       </form>
     </section>
 
     <section class="cd-card">
-      <h2 class="heading-md">Promote a youth mentor</h2>
+      <h2 class="heading-md">{% translate "Promote a youth mentor" %}</h2>
       {% if youth_mentor_candidates %}
-        <p class="body-sm" style="color: var(--ink-muted);">A ninja with their own login who helps run sessions here.</p>
+        <p class="body-sm" style="color: var(--ink-muted);">{% translate "A ninja with their own login who helps run sessions here." %}</p>
         <form class="cd-form inline-form" method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}">
           {% csrf_token %}
           <input type="hidden" name="action" value="promote">
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="promote-ninja">Ninja</label>
+            <label class="cd-form__label label" for="promote-ninja">{% translate "Ninja" %}</label>
             <select class="cd-form__select body" id="promote-ninja" name="ninja_id">
               {% for ninja in youth_mentor_candidates %}
                 <option value="{{ ninja.id }}">{{ ninja.name }}</option>
               {% endfor %}
             </select>
           </div>
-          <button type="submit" class="cd-btn cd-btn--secondary label">Promote</button>
+          <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Promote" %}</button>
         </form>
       {% else %}
-        <p class="body-sm" style="color: var(--ink-muted);">No ninjas with their own login are linked to this dojo yet (through their home dojo or a session sign-up).</p>
+        <p class="body-sm" style="color: var(--ink-muted);">{% translate "No ninjas with their own login are linked to this dojo yet (through their home dojo or a session sign-up)." %}</p>
       {% endif %}
     </section>
   {% endif %}
 
   {% if dojo_access.is_champion %}
     <section class="cd-card">
-      <h2 class="heading-md">Hand over the champion role</h2>
+      <h2 class="heading-md">{% translate "Hand over the champion role" %}</h2>
       {% if transfer_candidates %}
-        <p class="body-sm" style="color: var(--ink-muted);">Make one of your mentors this dojo's champion. You stay on the team as a mentor.</p>
+        <p class="body-sm" style="color: var(--ink-muted);">{% translate "Make one of your mentors this dojo's champion. You stay on the team as a mentor." %}</p>
         <form class="cd-form inline-form" method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}"
-              onsubmit="return confirm('Hand over the champion role? You become a mentor.');">
+              onsubmit="{% translate "Hand over the champion role? You become a mentor." as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
           {% csrf_token %}
           <input type="hidden" name="action" value="transfer">
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="transfer-to">New champion</label>
+            <label class="cd-form__label label" for="transfer-to">{% translate "New champion" %}</label>
             <select class="cd-form__select body" id="transfer-to" name="membership_id">
               {% for membership in transfer_candidates %}
                 <option value="{{ membership.id }}">{{ membership.name }}</option>
               {% endfor %}
             </select>
           </div>
-          <button type="submit" class="cd-btn cd-btn--ghost label">Hand over</button>
+          <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Hand over" %}</button>
         </form>
       {% else %}
-        <p class="body-sm" style="color: var(--ink-muted);">You need at least one active mentor on the team to hand the champion role to.</p>
+        <p class="body-sm" style="color: var(--ink-muted);">{% translate "You need at least one active mentor on the team to hand the champion role to." %}</p>
       {% endif %}
     </section>
   {% endif %}
 
   {% if former_members %}
     <section class="cd-card">
-      <h2 class="heading-md">Former team members</h2>
-      <p class="body-sm" style="color: var(--ink-muted);">No longer on the team, but still shown on the sessions they helped run.</p>
+      <h2 class="heading-md">{% translate "Former team members" %}</h2>
+      <p class="body-sm" style="color: var(--ink-muted);">{% translate "No longer on the team, but still shown on the sessions they helped run." %}</p>
       {% for membership in former_members %}
         <div class="team-row">
           <div class="team-row__person">
             {% include "dojos/partials/_mentor_avatar.html" with mentor=membership %}
             <div>
               <p class="body" style="margin: 0;">{{ membership.name }}</p>
-              <p class="caption team-row__meta">{{ membership.get_role_display }}{% if membership.left_at %} · left {{ membership.left_at|date:"M Y" }}{% endif %}</p>
+              <p class="caption team-row__meta">{{ membership.get_role_display }}{% if membership.left_at %} · {% blocktranslate with date=membership.left_at|date:"M Y" %}left {{ date }}{% endblocktranslate %}{% endif %}</p>
             </div>
           </div>
         </div>

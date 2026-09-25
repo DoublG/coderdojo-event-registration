@@ -34,8 +34,6 @@ Why does the site ask for a criminal record extract?
 
 Can I change the site's language?
     Yes — the language switcher in the site menu offers English,
-    Nederlands and Français. The pages for families (finding a dojo,
-    sessions and signing up, your account and your children, mail
-    preferences) are translated; the pages for volunteers and dojo teams
-    follow. The texts dojos write themselves (descriptions, updates,
-    questions) are shown as the dojo wrote them.
+    Nederlands and Français, and the whole site follows it, including the
+    pages for volunteers and dojo teams. The texts dojos write themselves
+    (descriptions, updates, questions) are shown as the dojo wrote them.

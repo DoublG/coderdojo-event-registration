@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from accounts.organisation import require_organisation_admin
@@ -45,7 +46,7 @@ def campaign_create(request):
     form = CampaignForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         campaign = form.save()
-        messages.success(request, "Campaign saved as a draft.")
+        messages.success(request, _("Campaign saved as a draft."))
         return redirect("manage_campaign_detail", campaign_id=campaign.pk)
     return render(request, "mailing/manage/campaign_form.html", {"form": form, "active": "campaigns"})
 
@@ -75,7 +76,7 @@ def campaign_detail(request, campaign_id):
         form = CampaignForm(request.POST or None, instance=campaign)
         if request.method == "POST" and form.is_valid():
             form.save()
-            messages.success(request, "Campaign saved.")
+            messages.success(request, _("Campaign saved."))
             return redirect("manage_campaign_detail", campaign_id=campaign.pk)
     audience = campaigns.audience(campaign)
     return render(request, "mailing/manage/campaign_detail.html", {
@@ -166,7 +167,7 @@ def segment_create(request):
     form = SegmentForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         segment = form.save()
-        messages.success(request, "Segment created. Now add who's in it.")
+        messages.success(request, _("Segment created. Now add who's in it."))
         return redirect("manage_segment_detail", segment_id=segment.pk)
     return render(request, "mailing/manage/segment_form.html", {"form": form, "active": "segments"})
 
@@ -178,7 +179,7 @@ def segment_detail(request, segment_id):
     form = SegmentForm(request.POST or None, instance=segment)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, "Segment saved.")
+        messages.success(request, _("Segment saved."))
         return redirect("manage_segment_detail", segment_id=segment.pk)
     accounts = SegmentResolver().resolve(segment)
     return render(request, "mailing/manage/segment_detail.html", {
@@ -290,7 +291,7 @@ def segment_delete(request, segment_id):
     require_organisation_admin(request)
     segment = get_object_or_404(Segment, pk=segment_id)
     segment.delete()  # launched campaigns keep their frozen copy
-    messages.success(request, f"Segment “{segment.name}” deleted.")
+    messages.success(request, _("Segment “%(segment)s” deleted.") % {"segment": segment.name})
     return redirect("manage_segment_list")
 
 
@@ -330,8 +331,7 @@ def template_create(request):
             body="Hi {{ recipient_name }},\n\n...\n\nThe CoderDojo Belgium team\n\n--\n"
                  "You get this mail because of your mail preferences. Unsubscribe: {{ unsubscribe_url }}",
         )
-        messages.success(request, "Template created. Write the English version first: it's used for every "
-                                  "language that has no version of its own.")
+        messages.success(request, _("Template created. Write the English version first: it's used for every language that has no version of its own."))
         return redirect("manage_template_edit", key=form.cleaned_data["key"], language=FALLBACK_LANGUAGE)
     return render(request, "mailing/manage/template_new.html", {"form": form, "active": "templates"})
 
@@ -354,7 +354,7 @@ def template_edit(request, key, language):
     form = TemplateVersionForm(request.POST or None, instance=template, sample_context=sample)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, f"{languages[language]} version saved.")
+        messages.success(request, _("%(language)s version saved.") % {"language": languages[language]})
         return redirect("manage_template_edit", key=key, language=language)
     preview = None
     if template.pk and not form.errors:
@@ -381,18 +381,18 @@ def template_delete(request, key, language=None):
     in_use = Campaign.objects.filter(template_key=key, status__in=[Campaign.Status.DRAFT, Campaign.Status.QUEUED])
     if language:
         if language == FALLBACK_LANGUAGE:
-            messages.error(request, "The English version is the fallback for every language: it can't be deleted.")
+            messages.error(request, _("The English version is the fallback for every language: it can't be deleted."))
         else:
             versions.filter(language=language).delete()
-            messages.success(request, "That language version is deleted; English is used instead.")
+            messages.success(request, _("That language version is deleted; English is used instead."))
         return redirect("manage_template_edit", key=key, language=FALLBACK_LANGUAGE)
     if key in SYSTEM_TEMPLATE_KEYS:
-        messages.error(request, "The site sends this template itself: it can be edited, not deleted.")
+        messages.error(request, _("The site sends this template itself: it can be edited, not deleted."))
     elif in_use.exists():
-        messages.error(request, "A campaign that hasn't gone out yet uses this template.")
+        messages.error(request, _("A campaign that hasn't gone out yet uses this template."))
     else:
         versions.delete()
-        messages.success(request, f"Template “{key}” deleted.")
+        messages.success(request, _("Template “%(key)s” deleted.") % {"key": key})
         return redirect("manage_template_list")
     return redirect("manage_template_edit", key=key, language=FALLBACK_LANGUAGE)
 
@@ -413,7 +413,7 @@ def journey_create(request):
     form = JourneyForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         journey = form.save()
-        messages.success(request, "Journey saved. It's paused until you activate it.")
+        messages.success(request, _("Journey saved. It's paused until you activate it."))
         return redirect("manage_journey_detail", journey_id=journey.pk)
     return render(request, "mailing/manage/journey_form.html", {"form": form, "active": "journeys"})
 
@@ -425,7 +425,7 @@ def journey_detail(request, journey_id):
     form = JourneyForm(request.POST or None, instance=journey)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, "Journey saved. Changes apply from the next daily run.")
+        messages.success(request, _("Journey saved. Changes apply from the next daily run."))
         return redirect("manage_journey_detail", journey_id=journey.pk)
     return render(request, "mailing/manage/journey_detail.html", {
         "journey": journey, "form": form, "active": "journeys", "stats": journeys.stats(journey),

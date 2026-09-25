@@ -24,7 +24,7 @@ class MailPreferencesForm(forms.Form):
     )
     postal_code = forms.CharField(
         label=_("Postcode"), required=False, max_length=4,
-        widget=forms.TextInput(attrs={"class": "cd-form__input body", "inputmode": "numeric", "placeholder": "9000"}),
+        widget=forms.TextInput(attrs={"class": "cd-form__input body", "inputmode": "numeric", "placeholder": _("9000")}),
     )
 
     def __init__(self, *args, user, **kwargs):
@@ -78,7 +78,7 @@ class MailingFormMixin:
         self.fields["category"].choices = [(c.value, c.label) for c in MailCategory if CAN_OPT_OUT[c]]
         keys = EmailTemplate.objects.order_by("key").values_list("key", flat=True).distinct()
         self.fields["template_key"] = forms.ChoiceField(
-            label="Template", choices=[(k, k) for k in keys],
+            label=_("Template"), choices=[(k, k) for k in keys],
             widget=forms.Select(attrs={"class": "cd-form__select body"}),
         )
         self.fields["segment"].queryset = Segment.objects.filter(is_active=True).order_by("name")
@@ -94,7 +94,7 @@ class MailingFormMixin:
             name, sep, value = line.partition(":")
             name = name.strip()
             if not sep or not VARIABLE_RE.match(name):
-                raise ValidationError(f"Line {number}: write it as name: value (a name in lowercase letters and _).")
+                raise ValidationError(_("Line %(number)s: write it as name: value (a name in lowercase letters and _).") % {"number": number})
             variables[name] = value.strip()
         return variables
 
@@ -105,10 +105,10 @@ class MailingFormMixin:
 
 def _variables_field():
     return forms.CharField(
-        label="Template variables", required=False,
+        label=_("Template variables"), required=False,
         widget=forms.Textarea(attrs={"class": "cd-form__input body", "rows": 3,
-                                     "placeholder": "signup_url: https://coolestprojects.org"}),
-        help_text="One per line, as name: value. The template uses them as {{ name }}.",
+                                     "placeholder": _("signup_url: https://coolestprojects.org")}),
+        help_text=_("One per line, as name: value. The template uses them as {{ name }}."),
     )
 
 
@@ -122,7 +122,7 @@ class CampaignForm(MailingFormMixin, forms.ModelForm):
         model = Campaign
         fields = ["name", "category", "template_key", "segment", "scheduled_at"]
         widgets = {
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Coolest Projects 2027"}),
+            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Coolest Projects 2027")}),
             "category": forms.Select(attrs={"class": "cd-form__select body"}),
             "segment": forms.Select(attrs={"class": "cd-form__select body"}),
             "scheduled_at": forms.DateTimeInput(attrs={"class": "cd-form__input body", "type": "datetime-local"},
@@ -132,12 +132,13 @@ class CampaignForm(MailingFormMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["scheduled_at"].input_formats = ["%Y-%m-%dT%H:%M"]
-        self.fields["scheduled_at"].label = "Send at"
+        self.fields["scheduled_at"].label = _("Send at")
+        self.fields["scheduled_at"].help_text = _("Leave empty to send as soon as it's launched.")
 
     def clean_scheduled_at(self):
         when = self.cleaned_data["scheduled_at"]
         if when and when <= timezone.now():
-            raise ValidationError("Pick a time in the future, or leave it empty to send when launched.")
+            raise ValidationError(_("Pick a time in the future, or leave it empty to send when launched."))
         return when
 
 
@@ -146,11 +147,11 @@ class SegmentForm(forms.ModelForm):
         model = Segment
         fields = ["name", "description", "is_active"]
         widgets = {
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Families near Ghent"}),
+            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Families near Ghent")}),
             "description": forms.Textarea(attrs={"class": "cd-form__input body", "rows": 2,
-                                                 "placeholder": "Who this is, in a sentence."}),
+                                                 "placeholder": _("Who this is, in a sentence.")}),
         }
-        labels = {"is_active": "Active (offered when creating a campaign)"}
+        labels = {"is_active": _("Active (offered when creating a campaign)")}
 
 
 class TemplateVersionForm(forms.ModelForm):
@@ -187,13 +188,13 @@ class TemplateVersionForm(forms.ModelForm):
 
 class NewTemplateForm(forms.Form):
     key = forms.SlugField(
-        label="Name", max_length=100, help_text="Lowercase, with _ between words, e.g. campaign_summer_camp.",
-        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "campaign_summer_camp"}),
+        label=_("Name"), max_length=100, help_text=_("Lowercase, with _ between words, e.g. campaign_summer_camp."),
+        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("campaign_summer_camp")}),
     )
-    category = forms.ChoiceField(label="Kind of mail", widget=forms.Select(attrs={"class": "cd-form__select body"}))
+    category = forms.ChoiceField(label=_("Kind of mail"), widget=forms.Select(attrs={"class": "cd-form__select body"}))
     description = forms.CharField(
         required=False, max_length=255, widget=forms.TextInput(attrs={"class": "cd-form__input body"}),
-        help_text="When it's used and which variables it takes.",
+        help_text=_("When it's used and which variables it takes."),
     )
 
     def __init__(self, *args, **kwargs):
@@ -203,7 +204,7 @@ class NewTemplateForm(forms.Form):
     def clean_key(self):
         key = self.cleaned_data["key"].replace("-", "_")
         if EmailTemplate.objects.filter(key=key).exists():
-            raise ValidationError("A template with this name already exists.")
+            raise ValidationError(_("A template with this name already exists."))
         return key
 
 
@@ -215,8 +216,9 @@ class JourneyForm(MailingFormMixin, forms.ModelForm):
     class Meta:
         model = Journey
         fields = ["name", "category", "template_key", "segment", "cooldown_days"]
+        help_texts = {"cooldown_days": _("Someone who got it doesn't get it again for this many days.")}
         widgets = {
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "We miss you"}),
+            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("We miss you")}),
             "category": forms.Select(attrs={"class": "cd-form__select body"}),
             "segment": forms.Select(attrs={"class": "cd-form__select body"}),
             "cooldown_days": forms.NumberInput(attrs={"class": "cd-form__input body", "min": 1}),

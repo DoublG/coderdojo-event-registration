@@ -12,6 +12,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext as _
 
 from accounts.models import Ninja, User
 from applications.services import is_approved_champion
@@ -158,7 +159,7 @@ def dojo_join_request(request, dojo_id):
     if request.method == "POST":
         try:
             team.request_to_join(dojo, request.user)
-            messages.success(request, f"Your request to join {dojo.name} has been sent to its team.")
+            messages.success(request, _("Your request to join %(dojo)s has been sent to its team.") % {"dojo": dojo.name})
         except team.TeamError as error:
             messages.error(request, str(error))
     return redirect("dojo_detail", dojo_id=dojo.id)
@@ -249,7 +250,7 @@ def dojo_create(request):
     a draft, hidden from the public site, with them as its champion. They
     fill in the rest on the Settings page and launch it from there."""
     if not is_approved_champion(request.user):
-        messages.error(request, "Only approved champions with a valid background check can create a dojo.")
+        messages.error(request, _("Only approved champions with a valid background check can create a dojo."))
         return redirect("account_home")
 
     if request.method == "POST":
@@ -265,9 +266,9 @@ def dojo_create(request):
                     dojo=dojo, user=request.user, role=DojoMembership.CHAMPION,
                     status=DojoMembership.ACTIVE, joined_at=timezone.now(), requested_by=request.user,
                 )
-            messages.success(request, f"{dojo.name} has been created as a draft. Fill in its profile, then launch it.")
+            messages.success(request, _("%(dojo)s has been created as a draft. Fill in its profile, then launch it.") % {"dojo": dojo.name})
             if geocode_failed:
-                messages.error(request, "We couldn't find that address on the map; check it on this page.")
+                messages.error(request, _("We couldn't find that address on the map; check it on this page."))
             return redirect("dojo_manage", dojo_id=dojo.id)
     else:
         form = DojoCreateForm()
@@ -320,7 +321,7 @@ def dojo_set_lifecycle(request, dojo_id):
     if request.method == "POST":
         try:
             team.change_status(access.dojo, request.POST.get("action", ""))
-            messages.success(request, f"{access.dojo.name} is now {access.dojo.get_status_display().lower()}.")
+            messages.success(request, _("%(dojo)s is now %(lower)s.") % {"dojo": access.dojo.name, "lower": access.dojo.get_status_display().lower()})
         except team.TeamError as error:
             messages.error(request, str(error))
     return redirect("dojo_manage", dojo_id=access.dojo.id)
@@ -389,7 +390,7 @@ def dojo_updates(request, dojo_id):
             announcement.dojo = dojo
             announcement.date = timezone.localdate()
             announcement.save()
-            messages.success(request, "Update posted on the dojo's page.")
+            messages.success(request, _("Update posted on the dojo's page."))
             return redirect("dojo_updates", dojo_id=dojo.id)
     return render(request, "dojos/dojo_updates.html", {
         "form": form,
@@ -406,7 +407,7 @@ def dojo_update_delete(request, dojo_id, announcement_id):
     access = require_dojo_access(request, dojo_id, POST_UPDATES)
     if request.method == "POST":
         get_object_or_404(access.dojo.announcements, id=announcement_id).delete()
-        messages.success(request, "Update removed.")
+        messages.success(request, _("Update removed."))
     return redirect("dojo_updates", dojo_id=access.dojo.id)
 
 
@@ -450,13 +451,13 @@ def dojo_team_action(request, dojo_id):
     try:
         if action == "leave":
             team.leave(access.membership)
-            messages.success(request, f"You've left the {dojo.name} team.")
+            messages.success(request, _("You've left the %(dojo)s team.") % {"dojo": dojo.name})
             return redirect("account_home")
         if action == "transfer":
             if not access.is_champion or membership is None:
                 raise PermissionDenied
             team.transfer_champion(dojo, access.membership, membership)
-            messages.success(request, f"{membership.name} is now the champion of {dojo.name}.")
+            messages.success(request, _("%(membership)s is now the champion of %(dojo)s.") % {"membership": membership.name, "dojo": dojo.name})
             return redirect("dojo_team_manage", dojo_id=dojo.id)
 
         if not access.can_manage_team:
@@ -465,26 +466,26 @@ def dojo_team_action(request, dojo_id):
             raise Http404
         if action == "accept":
             team.accept_request(membership, by=request.user)
-            messages.success(request, f"{membership.name} is now on the team.")
+            messages.success(request, _("%(membership)s is now on the team.") % {"membership": membership.name})
         elif action == "decline":
             team.decline_request(membership, by=request.user)
-            messages.success(request, "Request declined.")
+            messages.success(request, _("Request declined."))
         elif action == "remove":
             team.remove_member(membership)
-            messages.success(request, f"{membership.name} has been removed from the team.")
+            messages.success(request, _("%(membership)s has been removed from the team.") % {"membership": membership.name})
         elif action == "add_mentor":
             email = request.POST.get("email", "").strip()
             user = User.objects.filter(email__iexact=email).first() if email else None
             if user is None:
-                raise team.TeamError("No account uses that email address.")
+                raise team.TeamError(_("No account uses that email address."))
             team.add_mentor(dojo, user, by=request.user)
-            messages.success(request, f"{user.team_name} has been added to the team.")
+            messages.success(request, _("%(name)s has been added to the team.") % {"name": user.team_name})
         elif action == "promote":
             ninja = get_object_or_404(_youth_mentor_candidates(dojo), id=request.POST.get("ninja_id"))
             team.promote_youth_mentor(dojo, ninja.account, by_membership=access.membership)
-            messages.success(request, f"{ninja.account.team_name} is now a youth mentor.")
+            messages.success(request, _("%(name)s is now a youth mentor.") % {"name": ninja.account.team_name})
         else:
-            messages.error(request, "Unknown action.")
+            messages.error(request, _("Unknown action."))
     except team.TeamError as error:
         messages.error(request, str(error))
     # The Members page posts its "Promote" here too, and comes back to itself.
@@ -705,7 +706,7 @@ def dojo_event_award_belt(request, dojo_id, event_id, registration_id):
         belt = Belt.objects.filter(id=request.POST.get("belt") or None).first()
         try:
             if belt is None:
-                raise BeltError("Pick a belt to award.")
+                raise BeltError(_("Pick a belt to award."))
             award_belt(registration.ninja, belt, access.membership, note=request.POST.get("note", ""))
         except BeltError as error:
             belt_error = str(error)

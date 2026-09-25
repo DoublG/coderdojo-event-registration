@@ -6,6 +6,12 @@
   {"name":"SearchTable"},{"name":"DojoFinder"},{"name":"AttendanceList"},{"name":"MagicLink"},{"name":"Notification"},{"name":"AdminNav"},
   {"name":"SponsorGrid"},{"name":"FAQAccordion"},{"name":"Footer"}
 ]} */
+// The page's texts come from Django's JavaScript catalog (jsi18n/, loaded
+// before this file); without it, gettext() just returns the English text.
+if (typeof window.gettext !== "function") {
+  window.gettext = function (text) { return text; };
+}
+
 (function () {
   "use strict";
 
@@ -196,11 +202,11 @@
       resendBtn.addEventListener("click", function () {
         var original = resendBtn.textContent;
         resendBtn.disabled = true;
-        resendBtn.textContent = "Sending…";
+        resendBtn.textContent = gettext("Sending…");
         setTimeout(function () {
           resendBtn.disabled = false;
           resendBtn.textContent = original;
-          if (statusEl) statusEl.textContent = "Link resent.";
+          if (statusEl) statusEl.textContent = gettext("Link resent.");
         }, 900);
       });
     }
@@ -365,11 +371,11 @@
       shell.setAttribute("data-pinned", pinned ? "true" : "false");
       if (pinBtn) {
         pinBtn.setAttribute("aria-pressed", pinned ? "true" : "false");
-        pinBtn.setAttribute("aria-label", pinned ? "Unpin sidebar" : "Pin sidebar open");
-        pinBtn.title = pinned ? "Unpin sidebar" : "Pin sidebar open";
+        pinBtn.setAttribute("aria-label", pinned ? gettext("Unpin sidebar") : gettext("Pin sidebar open"));
+        pinBtn.title = pinned ? gettext("Unpin sidebar") : gettext("Pin sidebar open");
       }
       toggle.disabled = pinned;
-      toggle.title = pinned ? "Unpin the sidebar to hide it" : "";
+      toggle.title = pinned ? gettext("Unpin the sidebar to hide it") : "";
       if (pinned) setCollapsed(false, persist); // pinning always shows it, and locks it there
       if (persist !== false) writeStored("pinned", pinned);
     }
@@ -506,12 +512,12 @@
 
     if (!navigator.geolocation) {
       button.disabled = true;
-      button.title = "Your browser doesn't support location lookup.";
+      button.title = gettext("Your browser doesn't support location lookup.");
       return;
     }
 
     button.addEventListener("click", function () {
-      buttonLabel.textContent = "Locating…";
+      buttonLabel.textContent = gettext("Locating…");
       button.disabled = true;
 
       navigator.geolocation.getCurrentPosition(
@@ -530,7 +536,7 @@
         function () {
           buttonLabel.textContent = defaultLabel;
           button.disabled = false;
-          alert("Couldn't get your location — check your browser's location permission for this site and try again.");
+          alert(gettext("Couldn't get your location — check your browser's location permission for this site and try again."));
         },
         { timeout: 10000 }
       );

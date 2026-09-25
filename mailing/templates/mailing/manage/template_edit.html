@@ -1,4 +1,5 @@
 {% extends "core/_manage_base.html" %}
+{% load i18n %}
 {% block manage_page_title %}{{ key }}{% endblock %}
 {% block manage_heading %}{{ key }}{% endblock %}
 
@@ -16,10 +17,10 @@
 {% endblock %}
 
 {% block manage_content %}
-  <p class="body-sm">{{ category }}{% if system %} · <span class="cd-badge cd-badge--outline caption">Sent by the site</span>{% endif %}</p>
-  <nav class="tpl-tabs" aria-label="Languages">
+  <p class="body-sm">{{ category }}{% if system %} · <span class="cd-badge cd-badge--outline caption">{% translate "Sent by the site" %}</span>{% endif %}</p>
+  <nav class="tpl-tabs" aria-label="{% translate "Languages" %}">
     {% for code, name, exists in tabs %}
-      <a class="cd-btn {% if code == language %}cd-btn--primary{% else %}cd-btn--ghost{% endif %} label" href="{% url 'manage_template_edit' key=key language=code %}">{{ name }}{% if not exists %} (not written yet){% endif %}</a>
+      <a class="cd-btn {% if code == language %}cd-btn--primary{% else %}cd-btn--ghost{% endif %} label" href="{% url 'manage_template_edit' key=key language=code %}">{{ name }}{% if not exists %} {% translate "(not written yet)" %}{% endif %}</a>
     {% endfor %}
   </nav>
 
@@ -27,53 +28,53 @@
     <form method="post" class="cd-card cd-form tpl-card" novalidate>
       {% csrf_token %}
       <h2 class="heading-md">{{ language_name }}</h2>
-      {% if is_new_version %}<p class="cd-form__note caption">There's no {{ language_name }} version yet: until there is, people who chose {{ language_name }} get the English one. This form starts from the English text.</p>{% endif %}
+      {% if is_new_version %}<p class="cd-form__note caption">{% blocktranslate %}There's no {{ language_name }} version yet: until there is, people who chose {{ language_name }} get the English one. This form starts from the English text.{% endblocktranslate %}</p>{% endif %}
       <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ form.subject.id_for_label }}">Subject</label>
+        <label class="cd-form__label label" for="{{ form.subject.id_for_label }}">{% translate "Subject" %}</label>
         <ul class="cd-form__errors">{% for error in form.subject.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
         {{ form.subject }}
       </div>
       <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ form.body.id_for_label }}">Text</label>
+        <label class="cd-form__label label" for="{{ form.body.id_for_label }}">{% translate "Text" %}</label>
         <ul class="cd-form__errors">{% for error in form.body.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
         {{ form.body }}
-        <p class="cd-form__help caption">Variables you can use: {% for name in sample_names %}<code>{% templatetag openvariable %} {{ name }} {% templatetag closevariable %}</code>{% if not forloop.last %}, {% endif %}{% endfor %}. Dates take a format, e.g. <code>{% templatetag openvariable %} start_time|date:"l j F" {% templatetag closevariable %}</code> (day and month names follow the language).</p>
+        <p class="cd-form__help caption">{% translate "Variables you can use:" %} {% for name in sample_names %}<code>{% templatetag openvariable %} {{ name }} {% templatetag closevariable %}</code>{% if not forloop.last %}, {% endif %}{% endfor %}. {% translate "Dates take a format, e.g." %} <code>{% templatetag openvariable %} start_time|date:"l j F" {% templatetag closevariable %}</code> {% translate "(day and month names follow the language)." %}</p>
       </div>
       <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ form.description.id_for_label }}">Description</label>
+        <label class="cd-form__label label" for="{{ form.description.id_for_label }}">{% translate "Description" %}</label>
         {{ form.description }}
       </div>
       <div class="cd-form__actions" style="justify-content: space-between;">
         <span>
           {% if not is_new_version and language != fallback %}
-            <button type="submit" form="delete-language" class="cd-btn cd-btn--ghost label">Delete this language</button>
+            <button type="submit" form="delete-language" class="cd-btn cd-btn--ghost label">{% translate "Delete this language" %}</button>
           {% endif %}
         </span>
-        <button type="submit" class="cd-btn cd-btn--primary label">Save</button>
+        <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button>
       </div>
     </form>
 
     <div>
       <div class="cd-card tpl-card">
-        <h2 class="heading-md">Preview</h2>
+        <h2 class="heading-md">{% translate "Preview" %}</h2>
         {% if preview %}
           <p class="label">{{ preview.0 }}</p>
           <pre class="tpl-preview body-sm">{{ preview.1 }}</pre>
-          <p class="caption">With example data. The mail's language decides how dates are written.</p>
+          <p class="caption">{% translate "With example data. The mail's language decides how dates are written." %}</p>
         {% else %}
-          <p class="body-sm">Save to see the preview.</p>
+          <p class="body-sm">{% translate "Save to see the preview." %}</p>
         {% endif %}
       </div>
       {% if not system %}
         <div class="cd-card tpl-card">
-          <h2 class="heading-md">Delete the template</h2>
-          <form method="post" action="{% url 'manage_template_delete' key=key %}" onsubmit="return confirm('Delete this template in every language?');">
-            {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">Delete template</button>
+          <h2 class="heading-md">{% translate "Delete the template" %}</h2>
+          <form method="post" action="{% url 'manage_template_delete' key=key %}" onsubmit="{% translate "Delete this template in every language?" as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
+            {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Delete template" %}</button>
           </form>
         </div>
       {% endif %}
     </div>
   </div>
   <form id="delete-language" method="post" action="{% url 'manage_template_delete_language' key=key language=language %}"
-        onsubmit="return confirm('Delete the {{ language_name }} version? English is used instead.');">{% csrf_token %}</form>
+        onsubmit="{% blocktranslate asvar confirm_msg with language_name=language_name %}Delete the {{ language_name }} version? English is used instead.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">{% csrf_token %}</form>
 {% endblock %}

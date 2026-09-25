@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from accounts.models import Ninja
 
 from ..base import NINJA, SegmentAttribute, SegmentChoice, choice_q
@@ -5,7 +7,7 @@ from ..base import NINJA, SegmentAttribute, SegmentChoice, choice_q
 
 class NinjaGenderAttribute(SegmentAttribute):
     key = "ninja_gender"
-    label = "Child's gender"
+    label = _("Child's gender")
     value_type = "choice"
     scope = NINJA
 

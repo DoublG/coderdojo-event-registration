@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Case, Q, When
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 
 class FAQQuerySet(models.QuerySet):
@@ -167,10 +168,10 @@ class Promotion(models.Model):
     UPCOMING_FIRST = "upcoming_first"
     DOJO_FINDER_BANNER = "dojo_finder_banner"
     PLACEMENT_CHOICES = [
-        (HOMEPAGE_HERO, "Homepage: large card under the introduction"),
-        (EVENT_LIST_TOP, "Events page: pinned above the list"),
-        (UPCOMING_FIRST, "Homepage: first in Upcoming sessions"),
-        (DOJO_FINDER_BANNER, "Dojo finder: banner above the results"),
+        (HOMEPAGE_HERO, _("Homepage: large card under the introduction")),
+        (EVENT_LIST_TOP, _("Events page: pinned above the list")),
+        (UPCOMING_FIRST, _("Homepage: first in Upcoming sessions")),
+        (DOJO_FINDER_BANNER, _("Dojo finder: banner above the results")),
     ]
 
     event = models.ForeignKey("events.Event", on_delete=models.CASCADE, related_name="promotions")

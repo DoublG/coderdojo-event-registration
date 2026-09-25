@@ -1,6 +1,7 @@
 {% extends "dojos/_admin_base.html" %}
-{% block admin_page_title %}Members{% endblock %}
-{% block admin_heading %}Members{% endblock %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "Members" %}{% endblock %}
+{% block admin_heading %}{% translate "Members" %}{% endblock %}
 
 {% block admin_extra_style %}
 <style>
@@ -23,21 +24,21 @@ session's attendance list instead. "Promote" posts to dojo_team_action
 {% endcomment %}
 <div class="members-page">
   <p class="body-sm muted">
-    Children who have {{ dojo.name }} as their home dojo: set at their first sign-up here, and changeable by their parents.
-    Children visiting from another dojo are marked "Visiting" on each session's attendance list.
+{% blocktranslate trimmed with name=dojo.name %}    Children who have {{ name }} as their home dojo: set at their first sign-up here, and changeable by their parents.
+    Children visiting from another dojo are marked "Visiting" on each session's attendance list.{% endblocktranslate %}
   </p>
 
   <div class="cd-table-wrap">
     <table class="cd-table cd-table--zebra">
       <thead>
         <tr>
-          <th class="label" scope="col">Ninja</th>
-          <th class="label" scope="col">Belt</th>
-          <th class="label" scope="col">Comes</th>
-          <th class="label" scope="col">Sessions</th>
-          <th class="label" scope="col">Last visit</th>
-          <th class="label" scope="col">Member since</th>
-          <th class="label" scope="col">Youth mentor</th>
+          <th class="label" scope="col">{% translate "Ninja" %}</th>
+          <th class="label" scope="col">{% translate "Belt" %}</th>
+          <th class="label" scope="col">{% translate "Comes" %}</th>
+          <th class="label" scope="col">{% translate "Sessions" %}</th>
+          <th class="label" scope="col">{% translate "Last visit" %}</th>
+          <th class="label" scope="col">{% translate "Member since" %}</th>
+          <th class="label" scope="col">{% translate "Youth mentor" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -49,7 +50,7 @@ session's attendance list instead. "Promote" posts to dojo_team_action
                 {% include "accounts/partials/_child_avatar.html" with child=ninja %}
                 <div>
                   <p>{{ ninja.name }}</p>
-                  <p class="caption muted">{% if ninja.age %}Age {{ ninja.age }}{% endif %}{% if row.has_login %}{% if ninja.age %} · {% endif %}Own login{% endif %}</p>
+                  <p class="caption muted">{% if ninja.age %}{% blocktranslate with age=ninja.age %}Age {{ age }}{% endblocktranslate %}{% endif %}{% if row.has_login %}{% if ninja.age %} · {% endif %}{% translate "Own login" %}{% endif %}</p>
                 </div>
               </div>
             </td>
@@ -57,7 +58,7 @@ session's attendance list instead. "Promote" posts to dojo_team_action
             <td class="body-sm">
               {% if engagement %}
                 <span class="cd-badge caption {% if engagement.stage == 'regular' %}cd-badge--success{% elif engagement.stage == 'at_risk' %}cd-badge--warning{% elif engagement.stage == 'new' %}cd-badge--accent{% else %}cd-badge--outline{% endif %}"
-                      title="Came to {{ engagement.attended_180d }} of the {{ engagement.offered_180d }} sessions meant for them in the last 180 days{% if engagement.missed_in_a_row %}; missed the last {{ engagement.missed_in_a_row }}{% endif %}.">{{ engagement.get_stage_display }}</span>
+                      title="{% blocktranslate with came=engagement.attended_180d offered=engagement.offered_180d %}Came to {{ came }} of the {{ offered }} sessions meant for them in the last 180 days{% endblocktranslate %}{% if engagement.missed_in_a_row %}{% blocktranslate with missed=engagement.missed_in_a_row %}; missed the last {{ missed }}{% endblocktranslate %}{% endif %}.">{{ engagement.get_stage_display }}</span>
               {% else %}—{% endif %}
             </td>
             <td class="body-sm">{{ engagement.attended_total|default:"0" }}</td>
@@ -65,24 +66,24 @@ session's attendance list instead. "Promote" posts to dojo_team_action
             <td class="body-sm">{{ ninja.member_since|date:"M Y"|default:"—" }}</td>
             <td class="body-sm">
               {% if row.is_youth_mentor %}
-                <span class="cd-badge cd-badge--accent caption">Youth mentor</span>
+                <span class="cd-badge cd-badge--accent caption">{% translate "Youth mentor" %}</span>
               {% elif row.can_promote %}
                 <form method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}"
-                      onsubmit="return confirm('Make {{ ninja.name }} a youth mentor at {{ dojo.name }}? Their family gets a mail about it.');">
+                      onsubmit="{% blocktranslate asvar confirm_msg with ninja=ninja.name dojo=dojo.name %}Make {{ ninja }} a youth mentor at {{ dojo }}? Their family gets a mail about it.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="promote">
                   <input type="hidden" name="ninja_id" value="{{ ninja.id }}">
                   <input type="hidden" name="next" value="{{ request.path }}">
-                  <button type="submit" class="cd-btn cd-btn--ghost label">Promote</button>
+                  <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Promote" %}</button>
                 </form>
               {% elif not row.has_login %}
-                <span class="caption muted" title="A youth mentor needs their own login; their parent can create one on the child's page.">Needs own login</span>
+                <span class="caption muted" title="{% translate "A youth mentor needs their own login; their parent can create one on the child's page." %}">{% translate "Needs own login" %}</span>
               {% else %}—{% endif %}
             </td>
           </tr>
           {% endwith %}
         {% empty %}
-          <tr><td class="body-sm" colspan="7">No children have {{ dojo.name }} as their home dojo yet.</td></tr>
+          <tr><td class="body-sm" colspan="7">{% blocktranslate with name=dojo.name %}No children have {{ name }} as their home dojo yet.{% endblocktranslate %}</td></tr>
         {% endfor %}
       </tbody>
     </table>

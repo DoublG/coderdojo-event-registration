@@ -1,17 +1,18 @@
 {% extends "core/_manage_base.html" %}
-{% block manage_page_title %}Mail templates{% endblock %}
-{% block manage_heading %}Mail templates{% endblock %}
-{% block manage_topbar_extra %}<a class="cd-btn cd-btn--primary label" href="{% url 'manage_template_create' %}">New template</a>{% endblock %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Mail templates" %}{% endblock %}
+{% block manage_heading %}{% translate "Mail templates" %}{% endblock %}
+{% block manage_topbar_extra %}<a class="cd-btn cd-btn--primary label" href="{% url 'manage_template_create' %}">{% translate "New template" %}</a>{% endblock %}
 
 {% block manage_content %}
   <div class="cd-table-wrap">
     <table class="cd-table cd-table--zebra">
       <thead>
         <tr>
-          <th class="label" scope="col">Template</th>
-          <th class="label" scope="col">Kind of mail</th>
-          <th class="label" scope="col">Languages</th>
-          <th class="label" scope="col">Used by</th>
+          <th class="label" scope="col">{% translate "Template" %}</th>
+          <th class="label" scope="col">{% translate "Kind of mail" %}</th>
+          <th class="label" scope="col">{% translate "Languages" %}</th>
+          <th class="label" scope="col">{% translate "Used by" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -20,10 +21,10 @@
             <td class="body-sm"><a href="{% url 'manage_template_edit' key=row.key language='en-us' %}">{{ row.key }}</a>{% if row.description %}<br><span class="caption">{{ row.description }}</span>{% endif %}</td>
             <td class="body-sm">{{ row.category }}</td>
             <td class="body-sm">{{ row.languages|join:", " }}</td>
-            <td class="body-sm">{% if row.system %}<span class="cd-badge cd-badge--outline caption">Sent by the site</span>{% endif %}{% for name in row.campaigns %}{% if forloop.first %} {% endif %}{{ name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+            <td class="body-sm">{% if row.system %}<span class="cd-badge cd-badge--outline caption">{% translate "Sent by the site" %}</span>{% endif %}{% for name in row.campaigns %}{% if forloop.first %} {% endif %}{{ name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
           </tr>
         {% empty %}
-          <tr><td class="body-sm" colspan="4">No templates yet.</td></tr>
+          <tr><td class="body-sm" colspan="4">{% translate "No templates yet." %}</td></tr>
         {% endfor %}
       </tbody>
     </table>

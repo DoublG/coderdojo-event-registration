@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, render
+from django.utils.translation import gettext as _
 
 from accounts.models import User
 
@@ -19,7 +20,7 @@ def _apply(request, kind, form_class, template):
     error = None
     form = form_class(account=request.user)
     if request.user.applications.filter(kind=kind, status__in=[Application.PENDING, Application.APPROVED]).exists():
-        error = "You've already applied for this — see your account page for its status."
+        error = _("You've already applied for this — see your account page for its status.")
     elif request.method == "POST":
         form = form_class(request.POST, account=request.user)
         if form.is_valid():

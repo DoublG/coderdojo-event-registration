@@ -27,9 +27,9 @@ class Event(models.Model):
     OPEN = "open"
     CLOSED = "closed"
     STATUS_CHOICES = [
-        (DRAFT, "Draft"),
-        (OPEN, "Open"),
-        (CLOSED, "Closed"),
+        (DRAFT, _("Draft")),
+        (OPEN, _("Open")),
+        (CLOSED, _("Closed")),
     ]
 
     name = models.CharField(max_length=200)
@@ -198,7 +198,7 @@ class Badge(models.Model):
 
     ONE_OFF = "one_off"
     MILESTONE = "milestone"
-    KIND_CHOICES = [(ONE_OFF, "One-off"), (MILESTONE, "Milestone")]
+    KIND_CHOICES = [(ONE_OFF, _("One-off")), (MILESTONE, _("Milestone"))]
 
     name = models.CharField(max_length=200)
     kind = models.CharField(max_length=10, choices=KIND_CHOICES, default=ONE_OFF)
@@ -225,7 +225,7 @@ class Badge(models.Model):
         if self.kind == self.MILESTONE and not self.threshold:
             raise ValidationError({"threshold": "A milestone badge needs a threshold."})
         if self.kind == self.ONE_OFF and (self.threshold or self.grants_belt_id):
-            raise ValidationError("Only milestone badges have a threshold or grant a belt.")
+            raise ValidationError(_("Only milestone badges have a threshold or grant a belt."))
 
 
 class NinjaBadgeManager(models.Manager):
@@ -322,13 +322,13 @@ class NinjaEngagement(models.Model):
     NEVER_ATTENDED = "never_attended"
     AGED_OUT = "aged_out"
     STAGE_CHOICES = [
-        (NEW, "New"),
-        (REGULAR, "Regular"),
-        (OCCASIONAL, "Occasional"),
-        (AT_RISK, "At risk"),
-        (LAPSED, "Lapsed"),
-        (NEVER_ATTENDED, "Never came"),
-        (AGED_OUT, "Aged out"),
+        (NEW, _("New")),
+        (REGULAR, _("Regular")),
+        (OCCASIONAL, _("Occasional")),
+        (AT_RISK, _("At risk")),
+        (LAPSED, _("Lapsed")),
+        (NEVER_ATTENDED, _("Never came")),
+        (AGED_OUT, _("Aged out")),
     ]
 
     ninja = models.ForeignKey("accounts.Ninja", on_delete=models.CASCADE, related_name="engagement")

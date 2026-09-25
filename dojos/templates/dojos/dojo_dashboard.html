@@ -1,10 +1,11 @@
 {% extends "dojos/_admin_base.html" %}
-{% block admin_page_title %}Attendance{% endblock %}
-{% block admin_heading %}Attendance{% endblock %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "Attendance" %}{% endblock %}
+{% block admin_heading %}{% translate "Attendance" %}{% endblock %}
 
 {% block admin_topbar_extra %}
   {% if event and dojo_access.can_manage_events %}
-    <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">Open session</a>
+    <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">{% translate "Open session" %}</a>
   {% endif %}
 {% endblock %}
 
@@ -12,20 +13,23 @@
   {% if dojo.status != 'active' %}
     <div class="cd-card" style="margin-bottom: var(--space-5); padding: var(--space-4);">
       <p class="body" style="margin: 0;">
-        {{ dojo.name }} is <strong>{{ dojo.get_status_display|lower }}</strong>, so it and its sessions are hidden from the public site.
-        {% if dojo_access.can_manage_lifecycle %}Change that under <a href="{% url 'dojo_manage' dojo_id=dojo.id %}">Settings</a>.{% endif %}
+        {% blocktranslate with name=dojo.name status=dojo.get_status_display|lower %}{{ name }} is <strong>{{ status }}</strong>, so it and its sessions are hidden from the public site.{% endblocktranslate %}
+        {% if dojo_access.can_manage_lifecycle %}{% url 'dojo_manage' dojo_id=dojo.id as settings_url %}{% blocktranslate %}Change that under <a href="{{ settings_url }}">Settings</a>.{% endblocktranslate %}{% endif %}
       </p>
     </div>
   {% elif dormancy_nudge %}
     <div class="cd-card" style="margin-bottom: var(--space-5); padding: var(--space-4);">
       <p class="body" style="margin: 0;">
-        No sessions have been planned for over six months. Plan your next session{% if dojo_access.can_manage_events %} under <a href="{% url 'dojo_event_create' dojo_id=dojo.id %}">New event</a>{% endif %}, or mark the dojo dormant{% if dojo_access.can_manage_lifecycle %} under <a href="{% url 'dojo_manage' dojo_id=dojo.id %}">Settings</a>{% endif %}.
+        {% translate "No sessions have been planned for over six months." %}
+        {% url 'dojo_event_create' dojo_id=dojo.id as new_event_url %}{% url 'dojo_manage' dojo_id=dojo.id as settings_url %}
+        {% if dojo_access.can_manage_events %}{% blocktranslate %}Plan your next session under <a href="{{ new_event_url }}">New event</a>.{% endblocktranslate %}{% else %}{% translate "Plan your next session." %}{% endif %}
+        {% if dojo_access.can_manage_lifecycle %}{% blocktranslate %}Or mark the dojo dormant under <a href="{{ settings_url }}">Settings</a>.{% endblocktranslate %}{% else %}{% translate "Or have the champion mark the dojo dormant." %}{% endif %}
       </p>
     </div>
   {% endif %}
   {% if event %}
     {% include "dojos/partials/_attendance.html" %}
   {% else %}
-    <p class="body">No sessions yet{% if dojo_access.can_manage_events %} — <a href="{% url 'dojo_event_create' dojo_id=dojo.id %}">create one</a> to start taking attendance{% endif %}.</p>
+    <p class="body">{% if dojo_access.can_manage_events %}{% url 'dojo_event_create' dojo_id=dojo.id as new_event_url %}{% blocktranslate %}No sessions yet — <a href="{{ new_event_url }}">create one</a> to start taking attendance.{% endblocktranslate %}{% else %}{% translate "No sessions yet." %}{% endif %}</p>
   {% endif %}
 {% endblock %}

@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
 One ninja's Present/Absent toggle. Clicking the already-pressed button
 posts "none", clearing the mark back to "not yet marked" (Registration.attended
 is tri-state). htmx swaps just this row; without JS it's a plain form post.
@@ -10,27 +10,27 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
       {% with engagement=engagement_by_ninja|get_item:ninja.id %}{% if engagement %}
         {# How this child comes to this dojo (events.engagement, rebuilt nightly). #}
         <span class="cd-badge caption {% if engagement.stage == 'regular' %}cd-badge--success{% elif engagement.stage == 'at_risk' %}cd-badge--warning{% elif engagement.stage == 'new' %}cd-badge--accent{% else %}cd-badge--outline{% endif %}"
-              title="Came to {{ engagement.attended_180d }} of the {{ engagement.offered_180d }} sessions meant for them in the last 180 days{% if engagement.missed_in_a_row %}; missed the last {{ engagement.missed_in_a_row }}{% endif %}.">{{ engagement.get_stage_display }}</span>
+              title="{% blocktranslate with came=engagement.attended_180d offered=engagement.offered_180d %}Came to {{ came }} of the {{ offered }} sessions meant for them in the last 180 days{% endblocktranslate %}{% if engagement.missed_in_a_row %}{% blocktranslate with missed=engagement.missed_in_a_row %}; missed the last {{ missed }}{% endblocktranslate %}{% endif %}.">{{ engagement.get_stage_display }}</span>
       {% endif %}{% endwith %}
       {% if ninja.home_dojo_id and ninja.home_dojo_id != event.dojo_id %}
-        <span class="cd-badge cd-badge--outline caption" title="Home dojo: {{ ninja.home_dojo.name }}">Visiting</span>
+        <span class="cd-badge cd-badge--outline caption" title="{% blocktranslate with name=ninja.home_dojo.name %}Home dojo: {{ name }}{% endblocktranslate %}">{% translate "Visiting" %}</span>
       {% endif %}
     </span>
     {% with age=ninja.age pathways=registration.pathways.all current_belt=ninja.current_belt %}
       {% if age is not None or pathways or current_belt %}
-        <span class="cd-attendance__meta caption">{% if age is not None %}Age {{ age }}{% endif %}{% if age is not None and pathways %} · {% endif %}{% for pathway in pathways %}{{ pathway.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if current_belt %}{% if age is not None or pathways %} · {% endif %}{{ current_belt.name }}{% endif %}</span>
+        <span class="cd-attendance__meta caption">{% if age is not None %}{% blocktranslate %}Age {{ age }}{% endblocktranslate %}{% endif %}{% if age is not None and pathways %} · {% endif %}{% for pathway in pathways %}{{ pathway.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if current_belt %}{% if age is not None or pathways %} · {% endif %}{{ current_belt.name }}{% endif %}</span>
       {% endif %}
       {% with top_belt=all_belts|last %}
       {% if dojo_access.can_award_belts and top_belt and top_belt.level > current_belt.level|default:0 %}
         {# A ninja's proficiency level: only belts above their current one can be awarded (events.awards.award_belt). #}
         <details class="cd-attendance__belt caption"{% if belt_error %} open{% endif %}>
-          <summary>Award belt</summary>
+          <summary>{% translate "Award belt" %}</summary>
           <form method="post" action="{% url 'dojo_event_award_belt' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
                 hx-post="{% url 'dojo_event_award_belt' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
                 hx-target="#attendance-row-{{ registration.id }}" hx-swap="outerHTML">
             {% csrf_token %}
             {% if belt_error %}<p class="caption" role="alert" style="color: var(--danger, #b3261e); margin: var(--space-2) 0;">{{ belt_error }}</p>{% endif %}
-            <label class="label" for="belt-{{ registration.id }}" style="display: block; margin-top: var(--space-2);">Belt</label>
+            <label class="label" for="belt-{{ registration.id }}" style="display: block; margin-top: var(--space-2);">{% translate "Belt" %}</label>
             <select class="cd-form__input body" name="belt" id="belt-{{ registration.id }}" required>
               {% for belt in all_belts %}
                 {% if not current_belt or belt.level > current_belt.level %}
@@ -38,9 +38,9 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
                 {% endif %}
               {% endfor %}
             </select>
-            <label class="label" for="belt-note-{{ registration.id }}" style="display: block; margin-top: var(--space-2);">Note (optional)</label>
-            <input class="cd-form__input body" type="text" name="note" id="belt-note-{{ registration.id }}" maxlength="300" placeholder="What {{ ninja.name }} showed">
-            <button type="submit" class="cd-btn cd-btn--ghost label" style="margin-top: var(--space-2);">Award belt</button>
+            <label class="label" for="belt-note-{{ registration.id }}" style="display: block; margin-top: var(--space-2);">{% translate "Note (optional)" %}</label>
+            <input class="cd-form__input body" type="text" name="note" id="belt-note-{{ registration.id }}" maxlength="300" placeholder="{% blocktranslate with name=ninja.name %}What {{ name }} showed{% endblocktranslate %}">
+            <button type="submit" class="cd-btn cd-btn--ghost label" style="margin-top: var(--space-2);">{% translate "Award belt" %}</button>
           </form>
         </details>
       {% endif %}
@@ -49,7 +49,7 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
     {% if dojo_access.can_take_attendance and all_pathways %}
       {# What this ninja works on: pre-filled from the session's pathways at signup, narrowed here. #}
       <details class="cd-attendance__pathways caption">
-        <summary>Pathways</summary>
+        <summary>{% translate "Pathways" %}</summary>
         <form method="post" action="{% url 'dojo_event_registration_pathways' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
               hx-post="{% url 'dojo_event_registration_pathways' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
               hx-target="#attendance-row-{{ registration.id }}" hx-swap="outerHTML">
@@ -57,10 +57,10 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
           {% for pathway in all_pathways %}
             <label style="display: block;">
               <input type="checkbox" name="pathway" value="{{ pathway.id }}"{% if pathway in registration.pathways.all %} checked{% endif %}>
-              {{ pathway.name }}{% if pathway.id in event_pathway_ids %} <span style="color: var(--ink-muted);">(this session)</span>{% endif %}
+              {{ pathway.name }}{% if pathway.id in event_pathway_ids %} <span style="color: var(--ink-muted);">{% translate "(this session)" %}</span>{% endif %}
             </label>
           {% endfor %}
-          <button type="submit" class="cd-btn cd-btn--ghost label" style="margin-top: var(--space-2);">Save pathways</button>
+          <button type="submit" class="cd-btn cd-btn--ghost label" style="margin-top: var(--space-2);">{% translate "Save pathways" %}</button>
         </form>
       </details>
     {% endif %}
@@ -70,22 +70,22 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
         hx-post="{% url 'dojo_event_attendance_mark' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
         hx-target="#attendance-row-{{ registration.id }}" hx-swap="outerHTML">
     {% csrf_token %}
-    <div class="cd-attendance__toggle" role="group" aria-label="Attendance for {{ ninja.name }}">
+    <div class="cd-attendance__toggle" role="group" aria-label="{% blocktranslate with name=ninja.name %}Attendance for {{ name }}{% endblocktranslate %}">
       <button type="submit" name="attended" value="{% if registration.attended %}none{% else %}present{% endif %}"
               class="cd-attendance__btn cd-attendance__btn--present label" aria-pressed="{% if registration.attended %}true{% else %}false{% endif %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
-        Present
+        {% translate "Present" %}
       </button>
       <button type="submit" name="attended" value="{% if registration.attended is False %}none{% else %}absent{% endif %}"
               class="cd-attendance__btn cd-attendance__btn--absent label" aria-pressed="{% if registration.attended is False %}true{% else %}false{% endif %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
-        Absent
+        {% translate "Absent" %}
       </button>
     </div>
   </form>
   {% else %}
     <span class="cd-badge {% if registration.attended %}cd-badge--success{% elif registration.attended is False %}cd-badge--warning{% else %}cd-badge--outline{% endif %} caption">
-      {% if registration.attended %}Present{% elif registration.attended is False %}Absent{% else %}Not marked{% endif %}
+      {% if registration.attended %}{% translate "Present" %}{% elif registration.attended is False %}{% translate "Absent" %}{% else %}{% translate "Not marked" %}{% endif %}
     </span>
   {% endif %}
 </div>

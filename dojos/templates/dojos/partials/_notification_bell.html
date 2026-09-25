@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
   The dojo admin sidebar's notification bell — real data (dojos.views.
   _notification_context), rendered from this one partial by three different
   callers that must all stay in sync: the initial page load
@@ -14,7 +14,7 @@
   case).
 {% endcomment %}
 <div class="cd-notif" id="notif-admin-page" hx-swap-oob="true" hx-on::oob-after-swap="CoderDojo.initNotifications(this)">
-  <button type="button" class="cd-notif__bell" data-cd-notif-toggle aria-haspopup="true" aria-label="Notifications">
+  <button type="button" class="cd-notif__bell" data-cd-notif-toggle aria-haspopup="true" aria-label="{% translate "Notifications" %}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
       <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
@@ -22,14 +22,14 @@
     <span class="cd-notif__count" data-cd-notif-count {% if not unread_count %}hidden{% endif %}>{{ unread_count }}</span>
   </button>
 
-  <div class="cd-notif__panel" data-cd-notif-panel hidden role="menu" aria-label="Notifications">
+  <div class="cd-notif__panel" data-cd-notif-panel hidden role="menu" aria-label="{% translate "Notifications" %}">
     <div class="cd-notif__header">
-      <h3 class="cd-notif__title heading-sm">Notifications</h3>
+      <h3 class="cd-notif__title heading-sm">{% translate "Notifications" %}</h3>
       <form method="post" action="{% url 'mark_all_notifications_read' dojo_id=dojo.id %}"
             hx-post="{% url 'mark_all_notifications_read' dojo_id=dojo.id %}" hx-swap="none">
         {% csrf_token %}
         <button type="submit" class="cd-notif__mark-all label" data-cd-notif-mark-all {% if not unread_count %}disabled{% endif %}>
-          Mark all as read
+          {% translate "Mark all as read" %}
         </button>
       </form>
     </div>
@@ -42,14 +42,14 @@
               <span class="cd-notif__dot" aria-hidden="true"></span>
               <span class="cd-notif__body">
                 <p class="cd-notif__text body-sm">{{ notification.text }}</p>
-                <p class="cd-notif__time caption">{{ notification.created_at|timesince }} ago</p>
+                <p class="cd-notif__time caption">{% blocktranslate with since=notification.created_at|timesince %}{{ since }} ago{% endblocktranslate %}</p>
               </span>
             </a>
           </li>
         {% endfor %}
       </ul>
     {% else %}
-      <p class="cd-notif__empty">You're all caught up.</p>
+      <p class="cd-notif__empty">{% translate "You're all caught up." %}</p>
     {% endif %}
   </div>
 </div>

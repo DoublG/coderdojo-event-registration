@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from dojos.models import Dojo
 
@@ -7,7 +8,7 @@ from .models import Application
 
 class BackgroundCheckUploadForm(forms.Form):
     document = forms.FileField(
-        label="Uittreksel uit het strafregister (model 2)",
+        label=_("Uittreksel uit het strafregister (model 2)"),
         widget=forms.ClearableFileInput(attrs={"class": "cd-form__input body"}),
     )
 
@@ -19,7 +20,7 @@ class _ApplicationForm(forms.ModelForm):
 
     phone = forms.CharField(
         required=False, max_length=30,
-        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "+32 4xx xx xx xx"}),
+        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("+32 4xx xx xx xx")}),
     )
 
     def __init__(self, *args, account, **kwargs):
@@ -37,15 +38,15 @@ class ChampionApplicationForm(_ApplicationForm):
         model = Application
         fields = ["area", "preferred_schedule", "proposed_venue", "message", "consent", "background_check_consent"]
         widgets = {
-            "area": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Leuven"}),
-            "preferred_schedule": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "e.g. Saturday mornings"}),
+            "area": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Leuven")}),
+            "preferred_schedule": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("e.g. Saturday mornings")}),
             "proposed_venue": forms.TextInput(attrs={
                 "class": "cd-form__input body",
-                "placeholder": "e.g. Leuven Public Library, a school, a community centre",
+                "placeholder": _("e.g. Leuven Public Library, a school, a community centre"),
             }),
             "message": forms.Textarea(attrs={
                 "class": "cd-form__input body", "rows": 4,
-                "placeholder": "Any relevant experience, a connection at the venue, why this area needs a dojo — whatever's useful for us to know.",
+                "placeholder": _("Any relevant experience, a connection at the venue, why this area needs a dojo — whatever's useful for us to know."),
             }),
             "consent": forms.CheckboxInput(),
             "background_check_consent": forms.CheckboxInput(),
@@ -65,7 +66,7 @@ class MentorApplicationForm(_ApplicationForm):
             "mentor_role": forms.Select(attrs={"class": "cd-form__select body"}),
             "message": forms.Textarea(attrs={
                 "class": "cd-form__input body", "rows": 4,
-                "placeholder": "e.g. Python, Scratch, web, robotics, event-day support — no experience necessary.",
+                "placeholder": _("e.g. Python, Scratch, web, robotics, event-day support — no experience necessary."),
             }),
             "background_check_consent": forms.CheckboxInput(),
         }
@@ -73,6 +74,6 @@ class MentorApplicationForm(_ApplicationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["dojo"].queryset = Dojo.objects.public().order_by("name")
-        self.fields["dojo"].empty_label = "Not sure yet — any dojo"
+        self.fields["dojo"].empty_label = _("Not sure yet — any dojo")
         self.fields["mentor_role"].required = True
         self.fields["mentor_role"].choices = Application.MENTOR_ROLE_CHOICES

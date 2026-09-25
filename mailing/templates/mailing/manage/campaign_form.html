@@ -1,14 +1,15 @@
 {% extends "core/_manage_base.html" %}
-{% block manage_page_title %}New campaign{% endblock %}
-{% block manage_heading %}New campaign{% endblock %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "New campaign" %}{% endblock %}
+{% block manage_heading %}{% translate "New campaign" %}{% endblock %}
 
 {% block manage_content %}
   <form method="post" class="cd-card cd-form" style="padding: var(--space-5);" novalidate>
     {% csrf_token %}
     {% include "mailing/manage/_campaign_fields.html" %}
     <div class="cd-form__actions">
-      <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_campaign_list' %}">Cancel</a>
-      <button type="submit" class="cd-btn cd-btn--primary label">Save draft</button>
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_campaign_list' %}">{% translate "Cancel" %}</a>
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save draft" %}</button>
     </div>
   </form>
 {% endblock %}
