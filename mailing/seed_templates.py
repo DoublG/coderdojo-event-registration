@@ -800,3 +800,15 @@ CAMPAIGNS = [
         },
     },
 ]
+
+# The templates the site itself sends (everything but the campaign
+# examples): they can be edited, never deleted, and their English version
+# (the fallback for every language) always stays.
+SYSTEM_TEMPLATE_KEYS = {entry["key"] for entry in TEMPLATES if entry["category"] != MailCategory.NEWSLETTER}
+
+# Example data for previewing a template nobody wrote a sample for yet.
+GENERIC_SAMPLE_CONTEXT = {
+    "recipient_name": "Ellen",
+    "site_url": "https://coolregistration.localhost",
+    "unsubscribe_url": "https://coolregistration.localhost/mail/unsubscribe/example/",
+}

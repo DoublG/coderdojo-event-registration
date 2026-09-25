@@ -137,3 +137,57 @@ class SegmentForm(forms.ModelForm):
                                                  "placeholder": "Who this is, in a sentence."}),
         }
         labels = {"is_active": "Active (offered when creating a campaign)"}
+
+
+class TemplateVersionForm(forms.ModelForm):
+    """One language of an email template. The subject and body must be valid
+    Django template syntax and render with example data, so a broken
+    template never reaches anyone."""
+
+    class Meta:
+        model = EmailTemplate
+        fields = ["subject", "body", "description"]
+        widgets = {
+            "subject": forms.TextInput(attrs={"class": "cd-form__input body"}),
+            "body": forms.Textarea(attrs={"class": "cd-form__input body", "rows": 18, "spellcheck": "true"}),
+            "description": forms.TextInput(attrs={"class": "cd-form__input body"}),
+        }
+
+    def __init__(self, *args, sample_context=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.sample_context = sample_context or {}
+
+    def clean(self):
+        from django.template import Context, Template, TemplateSyntaxError
+
+        cleaned = super().clean()
+        for field in ("subject", "body"):
+            try:
+                Template(cleaned.get(field, "")).render(Context(self.sample_context, autoescape=False))
+            except TemplateSyntaxError as error:
+                self.add_error(field, f"This doesn't work as a template: {error}")
+            except Exception as error:  # a filter failing on the example data
+                self.add_error(field, f"This fails with the example data: {error}")
+        return cleaned
+
+
+class NewTemplateForm(forms.Form):
+    key = forms.SlugField(
+        label="Name", max_length=100, help_text="Lowercase, with _ between words, e.g. campaign_summer_camp.",
+        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "campaign_summer_camp"}),
+    )
+    category = forms.ChoiceField(label="Kind of mail", widget=forms.Select(attrs={"class": "cd-form__select body"}))
+    description = forms.CharField(
+        required=False, max_length=255, widget=forms.TextInput(attrs={"class": "cd-form__input body"}),
+        help_text="When it's used and which variables it takes.",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["category"].choices = [(c.value, c.label) for c in MailCategory if CAN_OPT_OUT[c]]
+
+    def clean_key(self):
+        key = self.cleaned_data["key"].replace("-", "_")
+        if EmailTemplate.objects.filter(key=key).exists():
+            raise ValidationError("A template with this name already exists.")
+        return key

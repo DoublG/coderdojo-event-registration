@@ -7,15 +7,18 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from accounts.organisation import require_organisation_admin
 
 from . import campaigns
-from .forms import CampaignForm, SegmentForm
+from .forms import CampaignForm, NewTemplateForm, SegmentForm, TemplateVersionForm
 from .models import Campaign, EmailTemplate, Segment, SegmentGroup, SegmentRule
+from .rendering import FALLBACK_LANGUAGE
 from .rendering import render as render_template
+from .seed_templates import GENERIC_SAMPLE_CONTEXT, SAMPLE_CONTEXT, SYSTEM_TEMPLATE_KEYS
 from .segmentation.base import OPERATOR_LABELS
 from .segmentation.registry import get_attribute, get_attributes
 from .segmentation.resolver import SegmentResolver
@@ -289,3 +292,106 @@ def segment_delete(request, segment_id):
     segment.delete()  # launched campaigns keep their frozen copy
     messages.success(request, f"Segment “{segment.name}” deleted.")
     return redirect("manage_segment_list")
+
+
+# --- mail templates -------------------------------------------------------------------
+
+
+def _sample_context(key):
+    return {**GENERIC_SAMPLE_CONTEXT, **SAMPLE_CONTEXT.get(key, {})}
+
+
+@login_required
+def template_list(request):
+    require_organisation_admin(request)
+    languages = dict(settings.LANGUAGES)
+    rows = {}
+    for template in EmailTemplate.objects.order_by("key", "language"):
+        row = rows.setdefault(template.key, {"key": template.key, "category": template.get_category_display(),
+                                             "description": template.description, "languages": []})
+        row["languages"].append(languages.get(template.language, template.language))
+    used_by = {}
+    for campaign in Campaign.objects.exclude(status=Campaign.Status.CANCELLED).only("name", "template_key"):
+        used_by.setdefault(campaign.template_key, []).append(campaign.name)
+    for key, row in rows.items():
+        row["system"] = key in SYSTEM_TEMPLATE_KEYS
+        row["campaigns"] = used_by.get(key, [])
+    return render(request, "mailing/manage/template_list.html", {"rows": rows.values(), "active": "templates"})
+
+
+@login_required
+def template_create(request):
+    require_organisation_admin(request)
+    form = NewTemplateForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        EmailTemplate.objects.create(
+            key=form.cleaned_data["key"], language=FALLBACK_LANGUAGE, category=form.cleaned_data["category"],
+            description=form.cleaned_data["description"], subject="{{ recipient_name }}, ...",
+            body="Hi {{ recipient_name }},\n\n...\n\nThe CoderDojo Belgium team\n\n--\n"
+                 "You get this mail because of your mail preferences. Unsubscribe: {{ unsubscribe_url }}",
+        )
+        messages.success(request, "Template created. Write the English version first: it's used for every "
+                                  "language that has no version of its own.")
+        return redirect("manage_template_edit", key=form.cleaned_data["key"], language=FALLBACK_LANGUAGE)
+    return render(request, "mailing/manage/template_new.html", {"form": form, "active": "templates"})
+
+
+@login_required
+def template_edit(request, key, language):
+    require_organisation_admin(request)
+    languages = dict(settings.LANGUAGES)
+    if language not in languages:
+        raise Http404
+    versions = {t.language: t for t in EmailTemplate.objects.filter(key=key)}
+    if not versions:
+        raise Http404
+    english = versions.get(FALLBACK_LANGUAGE) or next(iter(versions.values()))
+    template = versions.get(language) or EmailTemplate(
+        key=key, language=language, category=english.category, description=english.description,
+        subject=english.subject, body=english.body,
+    )
+    sample = _sample_context(key)
+    form = TemplateVersionForm(request.POST or None, instance=template, sample_context=sample)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, f"{languages[language]} version saved.")
+        return redirect("manage_template_edit", key=key, language=language)
+    preview = None
+    if template.pk and not form.errors:
+        preview = render_template(key, language, sample)
+    return render(request, "mailing/manage/template_edit.html", {
+        "form": form, "key": key, "language": language, "language_name": languages[language],
+        "tabs": [(code, name, code in versions) for code, name in settings.LANGUAGES],
+        "is_new_version": template.pk is None, "preview": preview, "category": english.get_category_display(),
+        "system": key in SYSTEM_TEMPLATE_KEYS, "fallback": FALLBACK_LANGUAGE,
+        "sample_names": sorted(sample), "active": "templates",
+    })
+
+
+@login_required
+@require_POST
+def template_delete(request, key, language=None):
+    """Delete one language version, or (language empty) a whole campaign
+    template. The site's own templates, and the English fallback of any
+    template, stay; so does a template a draft campaign still uses."""
+    require_organisation_admin(request)
+    versions = EmailTemplate.objects.filter(key=key)
+    if not versions.exists():
+        raise Http404
+    in_use = Campaign.objects.filter(template_key=key, status__in=[Campaign.Status.DRAFT, Campaign.Status.QUEUED])
+    if language:
+        if language == FALLBACK_LANGUAGE:
+            messages.error(request, "The English version is the fallback for every language: it can't be deleted.")
+        else:
+            versions.filter(language=language).delete()
+            messages.success(request, "That language version is deleted; English is used instead.")
+        return redirect("manage_template_edit", key=key, language=FALLBACK_LANGUAGE)
+    if key in SYSTEM_TEMPLATE_KEYS:
+        messages.error(request, "The site sends this template itself: it can be edited, not deleted.")
+    elif in_use.exists():
+        messages.error(request, "A campaign that hasn't gone out yet uses this template.")
+    else:
+        versions.delete()
+        messages.success(request, f"Template “{key}” deleted.")
+        return redirect("manage_template_list")
+    return redirect("manage_template_edit", key=key, language=FALLBACK_LANGUAGE)

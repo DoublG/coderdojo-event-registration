@@ -1456,3 +1456,76 @@ class ProfileAttributeTests(TestCase):
         self.assertIsNotNone(logged.signed_up_at)
         self.assertEqual(self._one("ninja", "cancellations", "gte", 1), {"tenfam"})
         self.assertEqual(self._one("ninja", "cancellations", "lte", 0), {"fifteenfam"})
+
+
+class TemplateDashboardTests(TestCase):
+    def setUp(self):
+        from accounts.models import OrganisationRole
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.admin = User.objects.create(username="orgadmin", email="ann@example.com")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.client.force_login(self.admin)
+
+    def _edit(self, key, language="en-us"):
+        return reverse("manage_template_edit", kwargs={"key": key, "language": language})
+
+    def test_list_shows_what_uses_each_template(self):
+        Campaign.objects.create(name="Spring Girlz", template_key="campaign_girlz")
+        response = self.client.get(reverse("manage_template_list"))
+        self.assertContains(response, "Sent by the site")
+        self.assertContains(response, "Spring Girlz")
+        self.client.force_login(User.objects.create(username="parent", email="p@example.com"))
+        self.assertEqual(self.client.get(reverse("manage_template_list")).status_code, 404)
+
+    def test_edit_a_language_with_preview(self):
+        response = self.client.get(self._edit("session_reminder", "nl-be"))
+        self.assertContains(response, "Herinnering: Scratch for beginners op zaterdag")
+        response = self.client.post(self._edit("session_reminder", "nl-be"), {
+            "subject": "Tot {{ start_time|date:'l' }}!", "body": "Hallo {{ recipient_name }}", "description": "d",
+        })
+        self.assertRedirects(response, self._edit("session_reminder", "nl-be"))
+        self.assertEqual(EmailTemplate.objects.get(key="session_reminder", language="nl-be").subject,
+                         "Tot {{ start_time|date:'l' }}!")
+
+    def test_a_broken_template_is_refused(self):
+        response = self.client.post(self._edit("session_reminder"), {"subject": "Hi", "body": "{% if %}", "description": ""})
+        self.assertContains(response, "doesn&#x27;t work as a template")
+        self.assertNotEqual(EmailTemplate.objects.get(key="session_reminder", language="en-us").body, "{% if %}")
+
+    def test_write_a_missing_language_starting_from_english(self):
+        response = self.client.get(self._edit("campaign_girlz", "de"))
+        self.assertContains(response, "no Deutsch version yet")
+        self.assertEqual(response.context["form"]["subject"].value(),
+                         EmailTemplate.objects.get(key="campaign_girlz", language="en-us").subject)
+        self.client.post(self._edit("campaign_girlz", "de"), {"subject": "CoderDojo Girlz", "body": "Hallo!", "description": ""})
+        self.assertTrue(EmailTemplate.objects.filter(key="campaign_girlz", language="de").exists())
+
+    def test_create_a_campaign_template(self):
+        response = self.client.post(reverse("manage_template_create"),
+                                    {"key": "campaign_summer", "category": "newsletter", "description": ""})
+        self.assertRedirects(response, self._edit("campaign_summer"))
+        self.assertEqual(EmailTemplate.objects.get(key="campaign_summer").language, "en-us")
+        response = self.client.post(reverse("manage_template_create"),
+                                    {"key": "campaign_summer", "category": "newsletter", "description": ""})
+        self.assertContains(response, "already exists")
+
+    def test_what_can_and_can_not_be_deleted(self):
+        delete_key = lambda key: reverse("manage_template_delete", kwargs={"key": key})  # noqa: E731
+        delete_language = lambda key, lang: reverse(  # noqa: E731
+            "manage_template_delete_language", kwargs={"key": key, "language": lang})
+
+        self.client.post(delete_language("campaign_girlz", "en-us"))
+        self.assertTrue(EmailTemplate.objects.filter(key="campaign_girlz", language="en-us").exists())
+        self.client.post(delete_language("campaign_girlz", "fr-be"))
+        self.assertFalse(EmailTemplate.objects.filter(key="campaign_girlz", language="fr-be").exists())
+
+        self.client.post(delete_key("password_reset"))
+        self.assertTrue(EmailTemplate.objects.filter(key="password_reset").exists())
+
+        Campaign.objects.create(name="Draft", template_key="campaign_new_dojo")
+        self.client.post(delete_key("campaign_new_dojo"))
+        self.assertTrue(EmailTemplate.objects.filter(key="campaign_new_dojo").exists())
+
+        self.client.post(delete_key("campaign_girlz"))
+        self.assertFalse(EmailTemplate.objects.filter(key="campaign_girlz").exists())
