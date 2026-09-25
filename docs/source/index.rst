@@ -20,6 +20,7 @@ the people building it.
    families/finding-a-dojo
    families/signing-up-for-a-session
    families/managing-your-account
+   families/mail-preferences
 
 .. toctree::
    :maxdepth: 2

@@ -1,0 +1,156 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 09:04+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/families/mail-preferences.rst:2
+msgid "Mail preferences"
+msgstr "E-mailvoorkeuren"
+
+#: ../../source/families/mail-preferences.rst:4
+msgid ""
+"We send a few kinds of mail. Some are always sent, because they're about "
+"your account or a session you booked. The others you can switch on or off"
+" yourself."
+msgstr ""
+"We sturen een paar soorten e-mails. Sommige worden altijd verstuurd, "
+"omdat ze over uw account of een geboekte sessie gaan. De andere kunt u "
+"zelf aan- of uitzetten."
+
+#: ../../source/families/mail-preferences.rst:9
+msgid "What we use to choose relevant mails"
+msgstr "Wat we gebruiken om relevante e-mails te kiezen"
+
+#: ../../source/families/mail-preferences.rst:11
+msgid ""
+"We use what we know about your family to send you mails that are relevant"
+" to you: which sessions your children come to, their age and gender, your"
+" postcode and your language. That's how you hear about sessions at your "
+"dojo, a new dojo near you, or events like Coolest Projects and CoderDojo "
+"Girlz."
+msgstr ""
+"We gebruiken wat we over uw gezin weten om u e-mails te sturen die voor u"
+" relevant zijn: naar welke sessies uw kinderen komen, hun leeftijd en "
+"gender, uw postcode en uw taal. Zo hoort u over sessies bij uw dojo, een "
+"nieuwe dojo bij u in de buurt, of evenementen zoals Coolest Projects en "
+"CoderDojo Girlz."
+
+#: ../../source/families/mail-preferences.rst:18
+msgid "Choosing which mails you get"
+msgstr "Kiezen welke e-mails u krijgt"
+
+#: ../../source/families/mail-preferences.rst:20
+msgid ""
+"On your account page, open **Mail preferences**. You'll see one switch "
+"per kind of mail:"
+msgstr ""
+"Open op uw accountpagina **E-mailvoorkeuren**. U ziet één schakelaar per "
+"soort e-mail:"
+
+#: ../../source/families/mail-preferences.rst:23
+msgid ""
+"**Reminders**: a reminder before a session you signed up for. On unless "
+"you switch it off."
+msgstr ""
+"**Herinneringen**: een herinnering vóór een sessie waarvoor u bent "
+"ingeschreven. Aan, tenzij u ze uitzet."
+
+#: ../../source/families/mail-preferences.rst:25
+msgid ""
+"**News from your dojo**: new sessions and news from the dojos your family"
+" goes to. On unless you switch it off."
+msgstr ""
+"**Nieuws van uw dojo**: nieuwe sessies en nieuws van de dojo's waar uw "
+"gezin naartoe gaat. Aan, tenzij u het uitzet."
+
+#: ../../source/families/mail-preferences.rst:27
+msgid ""
+"**Volunteering**: news for champions and mentors, and calls for "
+"volunteers. On unless you switch it off."
+msgstr ""
+"**Vrijwilligerswerk**: nieuws voor champions en mentoren, en oproepen "
+"voor vrijwilligers. Aan, tenzij u het uitzet."
+
+#: ../../source/families/mail-preferences.rst:29
+msgid ""
+"**Newsletter and campaigns**: the CoderDojo Belgium newsletter and events"
+" like Coolest Projects and CoderDojo Girlz. **Off until you switch it "
+"on** (or tick the box when you create your account)."
+msgstr ""
+"**Nieuwsbrief en campagnes**: de nieuwsbrief van CoderDojo Belgium en "
+"evenementen zoals Coolest Projects en CoderDojo Girlz. **Uit tot u ze "
+"aanzet** (of het vakje aanvinkt wanneer u uw account aanmaakt)."
+
+#: ../../source/families/mail-preferences.rst:33
+msgid ""
+"Mails about your account (such as a password reset) and about your "
+"bookings (confirmations, a place coming free on the waiting list) are "
+"always sent."
+msgstr ""
+"E-mails over uw account (zoals een nieuw wachtwoord) en over uw boekingen"
+" (bevestigingen, een vrijgekomen plaats op de wachtlijst) worden altijd "
+"verstuurd."
+
+#: ../../source/families/mail-preferences.rst:36
+msgid ""
+"On the same page you can pick the **language** your mails are in, and set"
+" or change your **postcode**. The postcode is optional; it's used to tell"
+" you about dojos and sessions near you, and the dojo finder starts from "
+"it when you're signed in."
+msgstr ""
+"Op dezelfde pagina kiest u de **taal** van uw e-mails, en stelt u uw "
+"**postcode** in of past u die aan. De postcode is optioneel; we gebruiken"
+" hem om u te laten weten welke dojo's en sessies er bij u in de buurt "
+"zijn, en de dojozoeker start ervan wanneer u bent aangemeld."
+
+#: ../../source/families/mail-preferences.rst:42
+msgid "Unsubscribing from a mail"
+msgstr "Uitschrijven voor een e-mail"
+
+#: ../../source/families/mail-preferences.rst:44
+msgid ""
+"Every mail you can switch off has an unsubscribe link at the bottom. It "
+"works without signing in: open it and confirm, or tick **Unsubscribe from"
+" all optional mails** to switch everything optional off at once. Many "
+"mail apps also show their own **Unsubscribe** button for our mails, which"
+" does the same thing."
+msgstr ""
+"Elke e-mail die u kunt uitzetten heeft onderaan een link om uit te "
+"schrijven. Die werkt zonder aan te melden: open hem en bevestig, of vink "
+"**Uitschrijven voor alle optionele e-mails** aan om alles wat optioneel "
+"is in één keer uit te zetten. Veel e-mailapps tonen voor onze e-mails ook"
+" een eigen knop **Uitschrijven**, die hetzelfde doet."
+
+#: ../../source/families/mail-preferences.rst:51
+msgid "Children with their own login"
+msgstr "Kinderen met een eigen login"
+
+#: ../../source/families/mail-preferences.rst:53
+msgid ""
+"A child with their own login and email address gets mail about their own "
+"bookings and their dojo, and can choose on their own Mail preferences "
+"page. They never get the newsletter or campaigns; those go to parents "
+"only."
+msgstr ""
+"Een kind met een eigen login en e-mailadres krijgt e-mails over de eigen "
+"boekingen en de eigen dojo, en kiest zelf op de eigen pagina "
+"E-mailvoorkeuren. Het krijgt nooit de nieuwsbrief of campagnes; die gaan "
+"alleen naar ouders."
+

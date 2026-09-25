@@ -22,6 +22,10 @@ To create an account:
    is optional ("Prefer not to say" is the default) and never shown
    publicly; it lets us tell you about girls' sessions. Use
    **Add another child** if you have more than one.
+#. If you'd like the CoderDojo Belgium newsletter and news about events
+   like Coolest Projects and CoderDojo Girlz, tick the newsletter box. It's
+   unticked unless you choose it; you can change it later (see
+   :doc:`mail-preferences`).
 #. Submit the form.
 
 Unlike applying to volunteer or start a dojo, there's no review step —

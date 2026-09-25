@@ -179,54 +179,149 @@ class EmailTemplate(models.Model):
     def __str__(self):
         return f"{self.key} [{self.language}]"
 
-class EmailType(models.TextChoices):
-    TRANSACTIONAL = "transactional"
-    REGISTRATION_REMINDER = "registration_reminder"
-    WAITLIST = "waitlist"
-    NEWSLETTER = "newsletter"
+class EmailMessageManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("user")
+
 
 class EmailMessage(models.Model):
-    class Type(models.TextChoices):
-        TRANSACTIONAL = "transactional"
-        REGISTRATION_REMINDER = "registration_reminder"
-        WAITLIST = "waitlist"
-        NEWSLETTER = "newsletter"
+    """One mail to one recipient, and the queue it waits in: every mail is
+    a row first (mailing.services.send), and the Celery dispatcher claims
+    `pending` rows and sends them (DATA_MODEL.md §11, "Sending pipeline").
+    Subject and body are rendered when the row is created, so the row is
+    also the record of exactly what was sent."""
 
-    type = models.CharField(max_length=50, choices=Type.choices)
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        SENDING = "sending", "Sending"
+        SENT = "sent", "Sent"
+        FAILED = "failed", "Failed"
+        BOUNCED = "bounced", "Bounced"
+        SUPPRESSED = "suppressed", "Not sent (no consent, no address or blocked)"
 
-    recipient = models.EmailField()
+    category = models.CharField(max_length=20, choices=MailCategory.choices)
+    template_key = models.CharField(max_length=100, blank=True)
     user = models.ForeignKey(
         "accounts.User",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
     )
-
+    recipient = models.EmailField(blank=True, help_text="The address used, as it was at the time.")
+    language = models.CharField(max_length=10, blank=True)
     subject = models.CharField(max_length=255)
+    body = models.TextField()
+    campaign = models.ForeignKey(Campaign, null=True, blank=True, on_delete=models.SET_NULL)
 
-    status = models.CharField(
-        max_length=20,
-        choices=[
-            ("pending", "Pending"),
-            ("sending", "Sending"),
-            ("sent", "Sent"),
-            ("failed", "Failed"),
-            ("bounced", "Bounced"),
-        ],
-        default="pending",
-    )
-
-    provider_id = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True,
-    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    status_reason = models.CharField(max_length=255, blank=True, help_text="Why it was suppressed or failed.")
+    priority = models.PositiveSmallIntegerField(default=5, help_text="Lower is sent first.")
+    send_after = models.DateTimeField(null=True, blank=True, help_text="Not sent before this time.")
+    claimed_at = models.DateTimeField(null=True, blank=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    # Makes a send() idempotent: a second send() with the same key is a no-op
+    # (e.g. "reminder:event42:ninja7"). Null for mail that can repeat.
+    idempotency_key = models.CharField(max_length=200, null=True, blank=True, unique=True)
+    message_id = models.CharField(max_length=255, blank=True, db_index=True, help_text="Our Message-ID header.")
 
     created_at = models.DateTimeField(auto_now_add=True)
     sent_at = models.DateTimeField(null=True, blank=True)
     bounced_at = models.DateTimeField(null=True, blank=True)
 
-    campaign = models.ForeignKey(Campaign,null=True,blank=True, on_delete=models.SET_NULL,)
+    objects = EmailMessageManager()
+
+    class Meta:
+        indexes = [models.Index(fields=["status", "priority", "created_at"], name="mailing_queue_idx")]
+
+    def __str__(self):
+        return f"{self.recipient or self.user} — {self.subject}"
+
+
+class MailPreferenceManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("user")
+
+
+class MailPreference(models.Model):
+    """An account's choice for one mail category. No row means the
+    category's default (mailing.categories.DEFAULT_SUBSCRIBED). Changed only
+    through mailing.preferences.set_preference, which also logs a
+    ConsentEvent."""
+
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="mail_preferences")
+    category = models.CharField(max_length=20, choices=MailCategory.choices)
+    subscribed = models.BooleanField()
+    changed_at = models.DateTimeField(auto_now=True)
+
+    objects = MailPreferenceManager()
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["user", "category"], name="unique_mail_preference")]
+
+    def __str__(self):
+        return f"{self.user}: {self.category} {'on' if self.subscribed else 'off'}"
+
+
+class ConsentEventManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("user")
+
+
+class ConsentEvent(models.Model):
+    """Append-only log of every preference change, as proof of consent:
+    who, what, when, how and under which wording. Nothing reads it to
+    decide who gets mail; MailPreference is the current state."""
+
+    SIGNUP = "signup"
+    PREFERENCES = "preferences"
+    UNSUBSCRIBE_LINK = "unsubscribe_link"
+    ADMIN = "admin"
+    BOUNCE = "bounce"
+    SOURCE_CHOICES = [
+        (SIGNUP, "Sign-up form"),
+        (PREFERENCES, "Mail preferences page"),
+        (UNSUBSCRIBE_LINK, "Unsubscribe link"),
+        (ADMIN, "Admin"),
+        (BOUNCE, "Bounce or complaint"),
+    ]
+
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="consent_events")
+    category = models.CharField(max_length=20, choices=MailCategory.choices)
+    subscribed = models.BooleanField()
+    source = models.CharField(max_length=20, choices=SOURCE_CHOICES)
+    wording_version = models.CharField(max_length=20, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = ConsentEventManager()
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user}: {self.category} {'on' if self.subscribed else 'off'} ({self.source})"
+
+
+class EmailSuppression(models.Model):
+    """An address nothing is sent to any more, whatever the preferences:
+    a hard bounce, a spam complaint, or blocked by hand."""
+
+    HARD_BOUNCE = "hard_bounce"
+    COMPLAINT = "complaint"
+    MANUAL = "manual"
+    REASON_CHOICES = [(HARD_BOUNCE, "Hard bounce"), (COMPLAINT, "Spam complaint"), (MANUAL, "Blocked by hand")]
+
+    email = models.EmailField(unique=True, help_text="Stored lower-case.")
+    reason = models.CharField(max_length=20, choices=REASON_CHOICES)
+    note = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.email} ({self.get_reason_display()})"
+
+    def save(self, *args, **kwargs):
+        self.email = self.email.strip().lower()
+        super().save(*args, **kwargs)
+
 
 class ProcessedImapMessage(models.Model):
     mailbox = models.CharField(max_length=255)
@@ -239,4 +334,7 @@ class ProcessedImapMessage(models.Model):
                 name="unique_processed_mail",
             )
         ]
+
+    def __str__(self):
+        return f"{self.mailbox} #{self.uid}"
 

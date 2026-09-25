@@ -40,3 +40,45 @@ DEFAULT_SUBSCRIBED = {
     MailCategory.VOLUNTEER: True,
     MailCategory.NEWSLETTER: False,
 }
+
+# A ninja's own login (with an email) only gets mail about its own
+# bookings and its dojo; campaigns and the newsletter go to adults only
+# (DATA_MODEL.md §11, decisions).
+ALLOWED_FOR_NINJA_ACCOUNTS = {
+    MailCategory.SERVICE,
+    MailCategory.REGISTRATION,
+    MailCategory.REMINDER,
+    MailCategory.DOJO_NEWS,
+}
+
+# Lower goes first: the dispatcher claims pending mail in this order, so a
+# password reset never waits behind a campaign.
+PRIORITY = {
+    MailCategory.SERVICE: 0,
+    MailCategory.REGISTRATION: 1,
+    MailCategory.REMINDER: 5,
+    MailCategory.DOJO_NEWS: 5,
+    MailCategory.VOLUNTEER: 5,
+    MailCategory.NEWSLETTER: 9,
+}
+
+# Which version of the privacy explanation (DATA_MODEL.md §11, "Sending
+# pipeline" step 5) a consent was given under; recorded on ConsentEvent.
+PRIVACY_WORDING_VERSION = "2026-09-25"
+
+
+def categories_for(user):
+    """The categories `user` can receive at all."""
+    if user.is_ninja:
+        return [c for c in MailCategory if c in ALLOWED_FOR_NINJA_ACCOUNTS]
+    return list(MailCategory)
+
+# One line per category for the Mail preferences page.
+DESCRIPTIONS = {
+    MailCategory.SERVICE: "Password resets, background-check requests and other mail about your account.",
+    MailCategory.REGISTRATION: "Confirmations and changes for the sessions you signed up for.",
+    MailCategory.REMINDER: "A reminder before a session you signed up for, and before your background check expires.",
+    MailCategory.DOJO_NEWS: "New sessions and news from the dojos your family goes to.",
+    MailCategory.VOLUNTEER: "News for champions and mentors, and calls for volunteers.",
+    MailCategory.NEWSLETTER: "The CoderDojo Belgium newsletter and events like Coolest Projects and CoderDojo Girlz.",
+}

@@ -77,6 +77,12 @@
             <label class="body-sm" for="{{ form.consent.id_for_label }}">I am the parent or legal guardian of the children listed below.</label>
           </div>
           <ul class="cd-form__errors">{% for error in form.consent.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+          <div class="cd-form__checkbox-row">
+            {{ form.newsletter }}
+            <label class="body-sm" for="{{ form.newsletter.id_for_label }}">Send me the CoderDojo Belgium newsletter and news about events like Coolest Projects and CoderDojo Girlz.</label>
+          </div>
+          {% include "mailing/partials/_privacy_explanation.html" with short=True %}
+          <p class="caption">You can change this, and which other mails you get, on your account's Mail preferences page.</p>
         </div>
 
         {% include "accounts/partials/_child_rows_fieldset.html" %}

@@ -27,6 +27,7 @@ urlpatterns = [
     path("", include("dojos.urls")),
     path("", include("events.urls")),
     path("", include("pathways.urls")),
+    path("", include("mailing.urls")),
 ]
 
 if settings.DEBUG:

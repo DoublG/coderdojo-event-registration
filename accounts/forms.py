@@ -80,6 +80,8 @@ class RegisterGuardianForm(forms.Form):
         widget=forms.Select(attrs={"class": "cd-form__input body"}),
     )
     consent = forms.BooleanField(required=True, widget=forms.CheckboxInput())
+    # The newsletter needs an explicit opt-in (mailing.categories): unticked.
+    newsletter = forms.BooleanField(required=False, widget=forms.CheckboxInput())
 
     def clean_email(self):
         email = self.cleaned_data["email"]

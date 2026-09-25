@@ -1,0 +1,67 @@
+{% extends "core/base.html" %}
+{% block title %}Mail preferences · CoderDojo Belgium{% endblock %}
+{% block root_class %}mail-prefs-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .mail-prefs-root { background: var(--surface-sunken); }
+  .mail-prefs-root .shell { max-width: 720px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+  .mail-prefs-root .mail-privacy { color: var(--ink-muted); margin: 0 0 var(--space-5); }
+  .mail-prefs-root .mail-category { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-3) 0; border-top: 1px solid var(--border); }
+  .mail-prefs-root .mail-category input { margin-top: 4px; }
+  .mail-prefs-root .mail-category p { margin: 0; }
+  .mail-prefs-root .mail-category .caption { color: var(--ink-muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="shell">
+    <div class="cd-card" style="padding: var(--space-6);">
+      <h1 class="heading-lg" style="margin-top: 0;">Mail preferences</h1>
+      {% include "mailing/partials/_privacy_explanation.html" %}
+
+      {% for message in messages %}
+        <p class="cd-form__note cd-form__note--success caption">{{ message }}</p>
+      {% endfor %}
+
+      <form method="post" class="cd-form" novalidate>
+        {% csrf_token %}
+        <div class="cd-form__group">
+          <h2 class="cd-form__group-title heading-md">Which mails you get</h2>
+          {% for field in form.category_fields %}
+            <label class="mail-category" for="{{ field.id_for_label }}">
+              {{ field }}
+              <span><p class="body">{{ field.label }}</p><p class="caption" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p></span>
+            </label>
+          {% endfor %}
+          {% for label, description in form.always_on %}
+            <div class="mail-category">
+              <input type="checkbox" checked disabled aria-label="{{ label }} (always on)">
+              <span><p class="body">{{ label }} <span class="cd-badge cd-badge--outline caption">Always on</span></p><p class="caption">{{ description }}</p></span>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="cd-form__row">
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="{{ form.preferred_language.id_for_label }}">{{ form.preferred_language.label }}</label>
+            {{ form.preferred_language }}
+          </div>
+          {% if form.postal_code %}
+            <div class="cd-form__field">
+              <label class="cd-form__label label" for="{{ form.postal_code.id_for_label }}">{{ form.postal_code.label }}</label>
+              {{ form.postal_code }}
+              <p class="cd-form__help caption">So we can tell you about dojos and sessions near you.</p>
+              <ul class="cd-form__errors">{% for error in form.postal_code.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="cd-form__actions">
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">Back to your account</a>
+          <button type="submit" class="cd-btn cd-btn--primary label">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -31,6 +31,7 @@ update its diagram in the same change.
 9. [Geo reference data](#9-geo-reference-data)
 10. [Redesign: rationale and plan](#10-redesign-rationale-and-plan)
 11. [Mailing and segmentation (work in progress)](#11-mailing-and-segmentation-work-in-progress)
+12. [Organisation events and promotion (later)](#12-organisation-events-and-promotion-later)
 
 ---
 
@@ -1685,7 +1686,9 @@ erDiagram
         string recipient
         string language
         string template_key
-        json context
+        string subject "rendered when queued"
+        text body "rendered when queued: the record of what was sent"
+        string status_reason "why suppressed or failed"
         string idempotency_key UK "e.g. reminder:event42:user7"
         string message_id "our Message-ID, matches bounces"
         string status "pending | sending | sent | failed | bounced | suppressed"
@@ -1786,7 +1789,10 @@ retries and scheduled sends are all just rows.
    category's allowed audience, the preference (or the category default),
    the suppression list and the account type. If the check fails, it
    records the row as `suppressed`, so reports can show who was skipped
-   and why. Otherwise it inserts a `pending` row and returns. A duplicate
+   and why. Otherwise it inserts a `pending` row and returns. It renders
+   the template in the recipient's language right away, so the row holds
+   the exact subject and body that go out (no context to serialise, and a
+   later template edit doesn't change a queued mail). A duplicate
    `idempotency_key` is a no-op, so the reminder job can run twice safely.
    The row stores the category's `priority`: `service` and `registration`
    go before `reminder`/`dojo_news`, which go before campaign mail. A
@@ -1832,8 +1838,7 @@ retries and scheduled sends are all just rows.
    - **Lost workers:** `acks_late=True` plus
      `task_reject_on_worker_lost=True`, so the broker redelivers a batch
      whose worker died mid-way.
-   - For each row it renders the template in the recipient's language,
-     sets our own `Message-ID` (stored as `message_id`, for bounce
+   - For each row it sets our own `Message-ID` (stored as `message_id`, for bounce
      matching), and, for anything other than `service`/`registration`,
      adds `List-Unsubscribe` and `List-Unsubscribe-Post` headers (RFC 8058
      one-click unsubscribe, which Gmail/Yahoo require for bulk senders)
@@ -2122,8 +2127,17 @@ Each phase ships with tests (the repo rule) and updates this section and
 - phase 2: done. `Ninja.gender` on the family forms (sign-up rows, add and
   edit a child) and `Event.audience` with its "Girls' session" label on the
   public pages. Seeders mark some upcoming sessions as CoderDojo Girlz
-- phase 3: `mailing.categories`, `User.preferred_language` and templates
-  per language
+- phase 3: done in the code, not in production yet.
+  - Consent: `MailPreference`, `ConsentEvent`, `EmailSuppression`.
+  - The `send()` gateway and the queue tasks (dispatcher, batches with
+    Celery rate limit and retries, the stuck-mail check), verified end to
+    end against Mailpit.
+  - The Mail preferences page with the approved explanation, one-click
+    unsubscribe (tested through nginx), and the newsletter opt-in on
+    sign-up.
+
+  Still open: the production systemd units and `deploy.sh`, then moving
+  `applications.services` mail to `send()`.
 - phase 7: scopes, a subquery per rule, rule validation, the admin
   audience preview, and the Tier 1 attributes listed above
 - phase 8: three seeded draft campaigns (`seed_mailing`)
@@ -2250,3 +2264,99 @@ the side. Nothing sends mail yet.
   any more ("Everyone active" is now built from the activity attributes),
   but it's kept for now. Likely replacement: the Tier 1 `account_role`
   attribute (guardian / mentor / champion / organisation).
+
+---
+
+## 12. Organisation events and promotion (later)
+
+**Not built yet.** This is the agreed direction for events the
+organisation runs itself, such as CoderDojo Girlz and Coolest Projects.
+They need two things today's model doesn't give them: an organiser that
+isn't a dojo, and promotion (featured, reordered, or shown in a different
+spot on a page).
+
+### Who organises an event
+
+Every `Event` has a `dojo`, and a lot hangs off that link:
+- the admin area, its access checks and capabilities (`/dojos/<id>/…`,
+  `dojos.access`)
+- the event team (`Event.team` → `DojoMembership`)
+- attendance, belt awards and manager notifications
+- `Event.visible()`, which requires an active dojo
+
+Two ways to let the organisation plan events:
+
+| | A. An organisation dojo (recommended) | B. Events without a dojo |
+|---|---|---|
+| Model | `Dojo.kind = dojo \| organisation`. One (or a few) organisation rows, e.g. "CoderDojo Belgium" or "CoderDojo Girlz". | `Event.dojo` nullable, plus an `Event.organiser` field. |
+| Hidden from discovery | `Dojo.objects.public()` excludes `kind=organisation`, which covers the dojo finder, dojo pages, the event filter, the application form and the segmentation dojo pickers in one place. | Nothing to hide, but every `event.dojo` use (about 25 code paths) needs a no-dojo branch. |
+| Admin, attendance, belts | Work unchanged: the organisation dojo has its own admin area, team and attendance screens. | Need a second admin surface for dojo-less events. |
+| Who runs the events | Memberships of the organisation dojo, so the same background-check rule applies. That matters: event staff work with children. | A new access rule, e.g. the `admin` organisation role, which today needs no background check. |
+| Location | Per event (`Event.location` / `venue_name` already exist). The organisation dojo has no location, so the finder skips it anyway. | Same. |
+| Cost | Small: one field, one filter, a few "not an organisation dojo" checks (dormancy nudge, lifecycle, dojo stats). | Large and spread out. |
+
+**Recommendation: A.** It's explicit (a `kind`, not "a dojo we happen to
+hide"), reuses the whole event machinery, and keeps the background-check
+rule for everyone who works at an event. Details to settle when building
+it:
+- An organisation dojo has no lifecycle nudges (dormancy) and never shows
+  in the dojo finder or the "near dojo" segment picker. Its events show
+  "Organised by CoderDojo Belgium" instead of a link to a dojo page.
+- Its team is managed like any dojo's (champion plus mentors). Organisation
+  `admin` role holders get no automatic membership: access to the
+  organisation's events stays tied to a valid background check.
+- **External registration.** Some events (e.g. Coolest Projects) take
+  registrations elsewhere. `Event.external_registration_url` makes the
+  event page link out instead of showing the sign-up form. Such an event
+  has no registrations or attendance on this site, and then counts for
+  nothing in the engagement statistics.
+
+### Promotion
+
+Promotion is a separate, time-boxed thing, not a property of the event, so
+it can be switched on and off, ordered, and pointed at different parts of
+the site without editing the event. A `content.Promotion` model sits next
+to `Announcement`:
+
+```mermaid
+erDiagram
+    EVENT ||--o{ PROMOTION : "promoted by"
+    PROMOTION {
+        bigint event_id FK
+        string placement "homepage_hero | event_list_top | upcoming_first | dojo_finder_banner"
+        int rank "lower shows first within a placement"
+        datetime starts_at
+        datetime ends_at
+        string title "optional, overrides the event name"
+        image image "optional, overrides the event banner"
+        string text "optional short pitch"
+    }
+```
+
+- **Placements** are a fixed list; each template shows the active
+  promotions for its placement, ordered by `rank`:
+  - `homepage_hero`: a large card at the top of the homepage
+  - `event_list_top`: pinned above the date-ordered event list
+  - `upcoming_first`: first in the upcoming-sessions carousel, before the
+    date order
+  - `dojo_finder_banner`: a banner above the dojo finder results
+- **Reordering** means editing `rank` (the admin list can edit it
+  directly). A promotion ends automatically at `ends_at`, or by default
+  when its event starts.
+- **Who manages it:** the organisation `admin` role, like the rest of the
+  site content. Promotion could later extend to dojo events (a champion
+  promoting their own session on their dojo page), with the same model.
+- **Mail and promotion stay separate but line up:** a campaign
+  (section 11) can link to a promoted event, and segments like "families
+  with girls near dojo X" target the same audience the promotion is for.
+
+### Build order (when this is picked up)
+
+1. `Dojo.kind` plus the `public()` filter, the organiser line on event
+   pages, and a seeded organisation dojo holding the CoderDojo Girlz and
+   Coolest Projects events.
+2. `Event.external_registration_url`.
+3. `content.Promotion` with the four placements and its admin.
+4. Docs (en/fr/nl) for families: where featured events appear, and that
+   some events register externally.
+

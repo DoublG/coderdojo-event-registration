@@ -93,6 +93,14 @@
       </form>
     </details>
 
+    <div class="cd-card add-child" style="margin-top: var(--space-5); text-align: left;">
+      <h2 class="heading-md section-title">Mail preferences</h2>
+      <p class="body-sm">Choose which mails you get, the language they're in, and your postcode.</p>
+      <div class="cd-form__actions" style="justify-content: flex-start;">
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'mail_preferences' %}">Mail preferences</a>
+      </div>
+    </div>
+
     {% comment %}
     Volunteering: this account's applications (applications.Application),
     its background check (on the account — needed to be a champion or

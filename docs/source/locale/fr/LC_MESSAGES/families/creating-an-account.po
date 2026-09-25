@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 08:49+0000\n"
+"POT-Creation-Date: 2026-09-25 09:04+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -87,10 +87,23 @@ msgstr ""
 " plusieurs."
 
 #: ../../source/families/creating-an-account.rst:25
+msgid ""
+"If you'd like the CoderDojo Belgium newsletter and news about events like"
+" Coolest Projects and CoderDojo Girlz, tick the newsletter box. It's "
+"unticked unless you choose it; you can change it later (see :doc:`mail-"
+"preferences`)."
+msgstr ""
+"Si vous souhaitez recevoir la newsletter de CoderDojo Belgium et les "
+"nouvelles d'événements comme Coolest Projects et CoderDojo Girlz, cochez "
+"la case de la newsletter. Elle n'est pas cochée sauf si vous le "
+"choisissez ; vous pourrez la modifier plus tard (voir :doc:`mail-"
+"preferences`)."
+
+#: ../../source/families/creating-an-account.rst:29
 msgid "Submit the form."
 msgstr "Envoyez le formulaire."
 
-#: ../../source/families/creating-an-account.rst:27
+#: ../../source/families/creating-an-account.rst:31
 msgid ""
 "Unlike applying to volunteer or start a dojo, there's no review step — "
 "your account is created immediately and you're taken straight to your "
@@ -101,7 +114,7 @@ msgstr ""
 "et vous êtes directement dirigé·e, connecté·e, vers la page de votre "
 "famille."
 
-#: ../../source/families/creating-an-account.rst:33
+#: ../../source/families/creating-an-account.rst:37
 msgid ""
 "Only a parent or legal guardian should create the family account and add "
 "children to it — you'll be asked to confirm this when registering. The "
@@ -112,7 +125,7 @@ msgstr ""
 "l'inscription. L'adresse e-mail utilisée pour l'inscription ne doit pas "
 "déjà être associée à un autre compte."
 
-#: ../../source/families/creating-an-account.rst:37
+#: ../../source/families/creating-an-account.rst:41
 msgid ""
 "Once your account exists, see :doc:`../families/finding-a-dojo` to find a"
 " session, or go straight to :doc:`../families/managing-your-account` to "

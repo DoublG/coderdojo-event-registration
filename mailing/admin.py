@@ -1,7 +1,18 @@
 from django.contrib import admin
 from django.utils.html import format_html_join
 
-from .models import Campaign, EmailMessage, EmailTemplate, Segment, SegmentGroup, SegmentRule
+from .models import (
+    Campaign,
+    ConsentEvent,
+    EmailMessage,
+    EmailSuppression,
+    EmailTemplate,
+    MailPreference,
+    Segment,
+    SegmentGroup,
+    SegmentRule,
+)
+from .preferences import subscribed_q
 from .rendering import render
 from .seed_templates import SAMPLE_CONTEXT
 from .segmentation.resolver import SegmentResolver
@@ -9,10 +20,14 @@ from .segmentation.resolver import SegmentResolver
 AUDIENCE_SAMPLE_SIZE = 10
 
 
-def _audience(segment):
+def _audience(segment, category=None):
+    """Count and sample of a segment's accounts; with a mail `category`,
+    only those who want that kind of mail (what a campaign would reach)."""
     if segment is None or segment.pk is None:
         return "—"
     recipients = SegmentResolver().resolve(segment)
+    if category:
+        recipients = recipients.filter(subscribed_q(category))
     sample = recipients.order_by("id")[:AUDIENCE_SAMPLE_SIZE]
     return format_html_join(
         "", "{}<br>", [(f"{recipients.count()} recipient(s)",)] + [(f"· {user.email}",) for user in sample]
@@ -73,19 +88,64 @@ class CampaignAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("segment")
 
-    @admin.display(description="Audience (active adults with an email)")
+    @admin.display(description="Audience (active adults with an email who want this kind of mail)")
     def audience(self, obj):
-        return _audience(obj.segment)
+        return _audience(obj.segment, obj.category)
 
 
 @admin.register(EmailMessage)
 class EmailMessageAdmin(admin.ModelAdmin):
-    list_display = ["recipient", "type", "subject", "status", "created_at", "sent_at"]
-    list_filter = ["status", "type"]
-    search_fields = ["recipient", "subject"]
+    """The mail queue and its history. Read-only: rows are created by
+    mailing.services.send() and changed by the Celery tasks."""
+
+    list_display = ["recipient", "category", "subject", "status", "attempts", "created_at", "sent_at"]
+    list_filter = ["status", "category", "campaign"]
+    search_fields = ["recipient", "subject", "message_id"]
+    date_hierarchy = "created_at"
 
     def has_add_permission(self, request):
         return False
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
+@admin.register(MailPreference)
+class MailPreferenceAdmin(admin.ModelAdmin):
+    """Read-only: preferences change through the account's own Mail
+    preferences page or an unsubscribe link, which also log consent."""
+
+    list_display = ["user", "category", "subscribed", "changed_at"]
+    list_filter = ["category", "subscribed"]
+    search_fields = ["user__email", "user__username"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(ConsentEvent)
+class ConsentEventAdmin(admin.ModelAdmin):
+    """The append-only consent log."""
+
+    list_display = ["created_at", "user", "category", "subscribed", "source", "wording_version"]
+    list_filter = ["category", "source", "subscribed"]
+    search_fields = ["user__email", "user__username"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(EmailSuppression)
+class EmailSuppressionAdmin(admin.ModelAdmin):
+    list_display = ["email", "reason", "note", "created_at"]
+    list_filter = ["reason"]
+    search_fields = ["email"]

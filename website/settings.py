@@ -68,10 +68,10 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-# Account-approval invite emails (see applications.admin). Inside the
-# .devcontainer workspace, EMAIL_HOST is set and mail goes to a Mailtrap
-# sandbox inbox (see .devcontainer/docker-compose.yml); outside it (plain
-# host-based `runserver`), EMAIL_HOST is unset and mail prints to the console.
+# Outgoing mail. Inside the .devcontainer workspace, EMAIL_HOST is set and
+# mail goes to the Mailpit catcher (see .devcontainer/docker-compose.yml);
+# outside it (plain host-based `runserver`), EMAIL_HOST is unset and mail
+# prints to the console.
 EMAIL_HOST = env('EMAIL_HOST')
 if EMAIL_HOST:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -85,6 +85,21 @@ else:
 DEFAULT_FROM_EMAIL = env(
     'DEFAULT_FROM_EMAIL', default='CoderDojo Belgium <no-reply@coderdojobelgium.example>'
 )
+# A stuck SMTP connection fails (and the batch is retried) instead of
+# blocking the mailing worker.
+EMAIL_TIMEOUT = env.int('EMAIL_TIMEOUT', default=30)
+
+# The site's own address, for links in mails (which are rendered in a
+# worker, with no request to build absolute URLs from).
+SITE_URL = env('SITE_URL', default='https://coolregistration.localhost').rstrip('/')
+
+# The mail engine (mailing app, DATA_MODEL.md §11 "Sending pipeline").
+MAILING_CLAIM_LIMIT = env.int('MAILING_CLAIM_LIMIT', default=200)  # rows the dispatcher claims per run
+MAILING_BATCH_SIZE = env.int('MAILING_BATCH_SIZE', default=20)  # rows per send_email_batch subtask
+# Celery rate limit for send_email_batch (per worker; there is one mailing
+# worker). Throughput is at most this many batches times MAILING_BATCH_SIZE.
+MAILING_BATCH_RATE_LIMIT = env('MAILING_BATCH_RATE_LIMIT', default='6/m')
+MAILING_CLAIM_TIMEOUT_MINUTES = env.int('MAILING_CLAIM_TIMEOUT_MINUTES', default=60)
 
 # Celery (website/celery.py). Two workers, see DATA_MODEL.md §11
 # "Production: two Celery workers under systemd": a `periodic` worker with
@@ -129,6 +144,11 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 10.0,
         # A worker that was down doesn't come back to a pile of stale runs.
         "options": {"expires": 10},
+    },
+    "requeue-stuck-emails": {
+        "task": "mailing.tasks.requeue_stuck_emails",
+        "schedule": 15 * 60.0,
+        "options": {"expires": 15 * 60},
     },
 }
 CELERY_TASK_ROUTES = {entry["task"]: {"queue": PERIODIC_QUEUE} for entry in CELERY_BEAT_SCHEDULE.values()}

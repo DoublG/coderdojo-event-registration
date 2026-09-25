@@ -461,6 +461,25 @@ class RegisterGuardianViewTests(TestCase):
         alex = Ninja.objects.of_guardian(guardian).get(name="Alex")
         self.assertEqual(alex.allergies_notes, "Peanut allergy")
 
+    def test_newsletter_is_opt_in_and_logged(self):
+        from mailing.categories import MailCategory
+        from mailing.models import ConsentEvent
+        from mailing.preferences import is_subscribed
+
+        self.client.post(reverse("register_guardian"), self._valid_post_data())
+        without = User.objects.get(email="jane@example.com")
+        self.assertFalse(is_subscribed(without, MailCategory.NEWSLETTER))
+        self.assertFalse(ConsentEvent.objects.exists())
+
+        self.client.logout()
+        self.client.post(reverse("register_guardian"), self._valid_post_data(email="joe@example.com", newsletter="on"))
+        with_newsletter = User.objects.get(email="joe@example.com")
+        self.assertTrue(is_subscribed(with_newsletter, MailCategory.NEWSLETTER))
+        self.assertEqual(ConsentEvent.objects.get().source, ConsentEvent.SIGNUP)
+
+    def test_form_shows_the_privacy_explanation(self):
+        self.assertContains(self.client.get(reverse("register_guardian")), "We use what we know about your family")
+
     def test_child_gender_is_saved_per_row(self):
         data = self._valid_post_data(child_1_gender=Ninja.GIRL, child_2_name="Alex", child_2_dob=_dob(9))
         self.client.post(reverse("register_guardian"), data)

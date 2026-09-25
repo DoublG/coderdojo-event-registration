@@ -18,6 +18,9 @@ from django.utils.text import slugify
 from core.image_library import library_filename, use_library_image
 from dojos.access import accessible_dojos
 from events.models import Registration
+from mailing.categories import MailCategory
+from mailing.models import ConsentEvent
+from mailing.preferences import set_preference
 from dojos.team import notify_managers
 
 from .forms import (
@@ -256,6 +259,8 @@ def register_guardian(request):
             parent.set_password(form.cleaned_data["password"])
             parent.save()
             _create_ninjas(parent, child_rows)
+            if form.cleaned_data["newsletter"]:
+                set_preference(parent, MailCategory.NEWSLETTER, True, ConsentEvent.SIGNUP)
 
             auth_login(request, parent, backend="accounts.backends.EmailOrUsernameBackend")
             return redirect("account_home")
