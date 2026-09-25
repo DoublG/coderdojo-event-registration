@@ -1951,3 +1951,81 @@ class DojoUpdatesTests(TestCase):
     def test_public_page_hides_the_section_without_updates(self):
         response = self.client.get(reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}))
         self.assertNotContains(response, "From this dojo")
+
+
+class OrganisationDojoTests(TestCase):
+    """An organisation dojo (Dojo.kind, DATA_MODEL.md §12) runs events like
+    any dojo but is never listed itself."""
+
+    def setUp(self):
+        self.champion = make_champion(username="org-champion")
+        self.org = make_dojo("CoderDojo Belgium", champion=self.champion, kind=Dojo.ORGANISATION)
+        self.dojo = make_dojo("Ghent", location=Point(3.72, 51.05, srid=4326))
+
+    def test_public_excludes_organisation_dojos(self):
+        self.assertEqual(list(Dojo.objects.public()), [self.dojo])
+        self.assertFalse(self.org.is_public)
+        self.assertTrue(self.org.is_organisation)
+
+    def test_no_public_dojo_pages(self):
+        for name in ("dojo_detail", "dojo_team"):
+            self.assertEqual(self.client.get(reverse(name, kwargs={"dojo_id": self.org.id})).status_code, 404)
+
+    def test_its_events_are_public(self):
+        event = Event.objects.create(
+            name="Coolest Projects", dojo=self.org, status=Event.OPEN, places=0,
+            start_time=timezone.now() + timedelta(days=30), end_time=timezone.now() + timedelta(days=30, hours=6),
+        )
+        self.assertIn(event, Event.objects.visible())
+
+    def test_its_team_still_has_the_admin_area(self):
+        self.client.force_login(self.champion)
+        response = self.client.get(reverse("dojo_manage", kwargs={"dojo_id": self.org.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "View public page")
+
+    def test_never_nudged_to_go_dormant(self):
+        Event.objects.create(
+            name="Long ago", dojo=self.org, status=Event.CLOSED, places=10,
+            start_time=timezone.now() - timedelta(days=400), end_time=timezone.now() - timedelta(days=400, hours=-2),
+        )
+        self.assertFalse(team.needs_dormancy_nudge(self.org))
+
+    def test_mentors_cannot_ask_to_join(self):
+        mentor = make_mentor(username="m")
+        with self.assertRaises(team.TeamError):
+            team.request_to_join(self.org, mentor)
+
+
+class OrganisationEventFormTests(TempMediaMixin, TestCase):
+    """Only an organisation dojo's events can register on another website."""
+
+    def setUp(self):
+        super().setUp()
+        self.champion = make_champion(username="org-champion")
+        self.org = make_dojo("CoderDojo Belgium", champion=self.champion, kind=Dojo.ORGANISATION)
+        self.client.force_login(self.champion)
+
+    def _post(self, dojo, **overrides):
+        data = {"name": "Coolest Projects", "event_date": "01/01/2030", "start_time": "10:00", "end_time": "17:00",
+                "places": "", "template_image": "", **overrides}
+        return self.client.post(reverse("dojo_event_create", kwargs={"dojo_id": dojo.id}), data)
+
+    def test_external_registration_without_places(self):
+        response = self._post(self.org, external_registration_url="https://coolestprojects.be/")
+        self.assertRedirects(response, reverse("dojo_event_list", kwargs={"dojo_id": self.org.id}))
+        event = Event.objects.get(dojo=self.org)
+        self.assertEqual(event.external_registration_url, "https://coolestprojects.be/")
+        self.assertEqual(event.places, 0)
+
+    def test_places_still_needed_without_an_external_link(self):
+        response = self._post(self.org)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Event.objects.exists())
+
+    def test_a_normal_dojo_has_no_external_registration(self):
+        dojo = make_dojo("Ghent", champion=self.champion)
+        response = self.client.get(reverse("dojo_event_create", kwargs={"dojo_id": dojo.id}))
+        self.assertNotContains(response, "external_registration_url")
+        self._post(dojo, places="20", external_registration_url="https://example.org/")
+        self.assertEqual(Event.objects.get(dojo=dojo).external_registration_url, "")

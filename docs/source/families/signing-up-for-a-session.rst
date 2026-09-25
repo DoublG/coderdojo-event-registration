@@ -26,6 +26,28 @@ the dojo has stopped taking new sign-ups for it (this normally happens
 once attendance for that session has already been checked) — get in
 touch with the dojo team directly if you still need a spot.
 
+Featured events
+----------------
+
+Some events are **featured**: CoderDojo Belgium highlights them for a while
+at the top of the homepage, first in **Upcoming sessions**, above the
+**Events** list or above the dojo finder's results. A featured event is
+signed up for like any other; the highlight disappears once the event
+starts.
+
+Events organised by CoderDojo Belgium
+--------------------------------------
+
+Besides the sessions dojos run, CoderDojo Belgium organises a few events
+itself, such as CoderDojo Girlz and Coolest Projects. Their page says
+**Organised by CoderDojo Belgium** instead of naming a dojo.
+
+Some of these events take registrations on their own website. Their page
+then has a **Register on …** button that opens that website, instead of
+the sign-up form, and the **Events** list shows the same label. You
+register there, not on your family account, so the event doesn't appear
+on your account page and you get no booking mails from us about it.
+
 Girls' sessions
 ----------------
 

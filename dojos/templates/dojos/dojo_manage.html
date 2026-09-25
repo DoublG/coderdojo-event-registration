@@ -209,7 +209,7 @@
       </div>
 
       <div class="cd-form__actions">
-        <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_detail' dojo_id=dojo.id %}" target="_blank" rel="noopener">View public page</a>
+        {% if not dojo.is_organisation %}<a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_detail' dojo_id=dojo.id %}" target="_blank" rel="noopener">View public page</a>{% endif %}
         <button type="submit" class="cd-btn cd-btn--primary label">Save changes</button>
       </div>
 

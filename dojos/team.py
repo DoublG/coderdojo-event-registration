@@ -224,7 +224,7 @@ def needs_dormancy_nudge(dojo):
     nothing coming up — shown as a banner on its dashboard until someone
     plans a session or marks it dormant (DATA_MODEL.md §10, decision 5).
     A dojo that has never held an event isn't nudged."""
-    if dojo.status != Dojo.ACTIVE:
+    if dojo.status != Dojo.ACTIVE or dojo.is_organisation:
         return False
     now = timezone.now()
     if dojo.event_set.filter(start_time__gte=now).exists():

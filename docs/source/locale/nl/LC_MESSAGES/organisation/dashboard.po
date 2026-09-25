@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 13:17+0000\n"
+"POT-Creation-Date: 2026-09-25 16:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -27,18 +27,19 @@ msgstr "Het organisatiedashboard"
 #: ../../source/organisation/dashboard.rst:4
 msgid ""
 "The organisation dashboard is where CoderDojo Belgium's own team runs "
-"mail to families and volunteers. It's open to accounts with the "
-"organisation's **admin** role: they find it under **Organisation** in the"
-" account menu."
+"mail to families and volunteers, and chooses which events the public site"
+" features. It's open to accounts with the organisation's **admin** role: "
+"they find it under **Organisation** in the account menu."
 msgstr ""
 "Via het organisatiedashboard beheert het eigen team van CoderDojo Belgium"
-" de e-mails naar gezinnen en vrijwilligers. Het is open voor accounts met"
-" de rol **beheerder** van de organisatie: zij vinden het onder "
+" de e-mails naar gezinnen en vrijwilligers, en kiest het welke "
+"evenementen de openbare site in de kijker zet. Het is open voor accounts "
+"met de rol **beheerder** van de organisatie: zij vinden het onder "
 "**Organisatie** in het accountmenu."
 
 #: ../../source/organisation/dashboard.rst:8
-msgid "The sidebar has four sections:"
-msgstr "De zijbalk heeft vier onderdelen:"
+msgid "The sidebar has five sections:"
+msgstr "De zijbalk heeft vijf onderdelen:"
 
 #: ../../source/organisation/dashboard.rst:10
 msgid ""
@@ -72,7 +73,15 @@ msgstr ""
 "**E-mailsjablonen**: de tekst van elke e-mail die de site verstuurt, in "
 "elke taal (zie :doc:`mail-templates`)."
 
-#: ../../source/organisation/dashboard.rst:19
+#: ../../source/organisation/dashboard.rst:18
+msgid ""
+"**Promotions**: which events are featured where on the public site (see "
+":doc:`promotions`)."
+msgstr ""
+"**Promoties**: welke evenementen waar op de openbare site in de kijker "
+"staan (zie :doc:`promotions`)."
+
+#: ../../source/organisation/dashboard.rst:21
 msgid ""
 "People only get mail they want. Every account chooses which kinds of mail"
 " it gets on its **Mail preferences** page; the newsletter and campaigns "
@@ -85,7 +94,7 @@ msgstr ""
 "ingeschreven, en de eigen logins van kinderen krijgen nooit campagnes. "
 "Adressen waarvoor e-mails terugkwamen worden automatisch overgeslagen."
 
-#: ../../source/organisation/dashboard.rst:24
+#: ../../source/organisation/dashboard.rst:26
 msgid ""
 "The technical side of the site (the full mail log, bounces, blocked "
 "addresses) stays in the site's technical admin, for fixing things when "

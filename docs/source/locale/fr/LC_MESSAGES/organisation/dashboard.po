@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 13:17+0000\n"
+"POT-Creation-Date: 2026-09-25 16:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -27,19 +27,19 @@ msgstr "Le tableau de bord de l'organisation"
 #: ../../source/organisation/dashboard.rst:4
 msgid ""
 "The organisation dashboard is where CoderDojo Belgium's own team runs "
-"mail to families and volunteers. It's open to accounts with the "
-"organisation's **admin** role: they find it under **Organisation** in the"
-" account menu."
+"mail to families and volunteers, and chooses which events the public site"
+" features. It's open to accounts with the organisation's **admin** role: "
+"they find it under **Organisation** in the account menu."
 msgstr ""
 "Le tableau de bord de l'organisation permet à l'équipe de CoderDojo "
-"Belgium de gérer les e-mails envoyés aux familles et aux bénévoles. Il "
-"est ouvert aux comptes qui ont le rôle **administrateur** de "
-"l'organisation : ils le trouvent sous **Organisation** dans le menu du "
-"compte."
+"Belgium de gérer les e-mails envoyés aux familles et aux bénévoles, et de"
+" choisir les événements que le site public met en avant. Il est ouvert "
+"aux comptes qui ont le rôle **administrateur** de l'organisation : ils le"
+" trouvent sous **Organisation** dans le menu du compte."
 
 #: ../../source/organisation/dashboard.rst:8
-msgid "The sidebar has four sections:"
-msgstr "La barre latérale comporte quatre rubriques :"
+msgid "The sidebar has five sections:"
+msgstr "La barre latérale comporte cinq rubriques :"
 
 #: ../../source/organisation/dashboard.rst:10
 msgid ""
@@ -73,7 +73,15 @@ msgstr ""
 "**Modèles d'e-mail** : le texte de chaque e-mail que le site envoie, dans"
 " chaque langue (voir :doc:`mail-templates`)."
 
-#: ../../source/organisation/dashboard.rst:19
+#: ../../source/organisation/dashboard.rst:18
+msgid ""
+"**Promotions**: which events are featured where on the public site (see "
+":doc:`promotions`)."
+msgstr ""
+"**Promotions** : quels événements sont mis en avant, et où, sur le site "
+"public (voir :doc:`promotions`)."
+
+#: ../../source/organisation/dashboard.rst:21
 msgid ""
 "People only get mail they want. Every account chooses which kinds of mail"
 " it gets on its **Mail preferences** page; the newsletter and campaigns "
@@ -87,7 +95,7 @@ msgstr ""
 "campagnes. Les adresses dont les e-mails sont revenus sont ignorées "
 "automatiquement."
 
-#: ../../source/organisation/dashboard.rst:24
+#: ../../source/organisation/dashboard.rst:26
 msgid ""
 "The technical side of the site (the full mail log, bounces, blocked "
 "addresses) stays in the site's technical admin, for fixing things when "

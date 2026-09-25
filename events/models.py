@@ -61,6 +61,12 @@ class Event(models.Model):
         max_length=10, choices=AUDIENCE_CHOICES, default=EVERYONE,
         help_text="Who the session is aimed at, shown as a label. It never restricts who can sign up.",
     )
+    external_registration_url = models.URLField(
+        blank=True, default="",
+        help_text="Registrations happen on another website (e.g. Coolest Projects): the event page links "
+                  "there instead of showing the sign-up form, so the event has no registrations or "
+                  "attendance on this site.",
+    )
     team = models.ManyToManyField(
         "dojos.DojoMembership", blank=True, related_name="events",
         help_text="Who ran (or will run) this session: members of the dojo's team.",
@@ -103,6 +109,18 @@ class Event(models.Model):
     @property
     def registration_open(self):
         return self.status == self.OPEN
+
+    @property
+    def registers_externally(self):
+        return bool(self.external_registration_url)
+
+    @property
+    def external_registration_host(self):
+        """The external sign-up site's name, for "Register on …" links."""
+        from urllib.parse import urlsplit
+
+        host = urlsplit(self.external_registration_url).hostname or ""
+        return host.removeprefix("www.")
 
 
 class Registration(models.Model):

@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.urls import reverse
 
-from content.models import FAQ, OrganisationTeamMember, Testimonial
+from content.models import FAQ, OrganisationTeamMember, Promotion, Testimonial
 from dojos.forms import DojoSearchForm
 from dojos.search import attach_next_events, dojos_by_distance, resolve_search_origin
 from dojos.views import WIDGET_RESULTS_LIMIT
@@ -61,4 +61,8 @@ def home(request):
         "geocode_failed": dojo_widget_geocode_failed,
         "events": events_page.object_list,
         "events_next_page_url": events_next_page_url,
+        # Featured events (content.Promotion, DATA_MODEL.md §12). Not cached:
+        # a promotion starts and ends on its own schedule.
+        "hero_promotions": Promotion.objects.showing(Promotion.HOMEPAGE_HERO),
+        "finder_promotions": Promotion.objects.showing(Promotion.DOJO_FINDER_BANNER),
     })

@@ -458,3 +458,46 @@ class EngagementTests(TestCase):
         count = NinjaEngagement.objects.count()
         rebuild()
         self.assertEqual(NinjaEngagement.objects.count(), count)
+
+
+class OrganisationAndExternalEventTests(TestCase):
+    """The organisation's own events (DATA_MODEL.md §12): "Organised by"
+    instead of a dojo link, and registration on another website."""
+
+    def setUp(self):
+        cache.clear()
+        self.org = make_dojo("CoderDojo Belgium", kind=Dojo.ORGANISATION)
+        self.event = _future_event(self.org, name="Coolest Projects", places=0,
+                                   external_registration_url="https://www.coolestprojects.be/register")
+
+    def test_detail_page_links_out_instead_of_signing_up(self):
+        response = self.client.get(reverse("event_detail", kwargs={"event_id": self.event.id}))
+        self.assertContains(response, "Organised by CoderDojo Belgium")
+        self.assertNotContains(response, reverse("dojo_detail", kwargs={"dojo_id": self.org.id}))
+        self.assertContains(response, 'href="https://www.coolestprojects.be/register"')
+        self.assertContains(response, "Register on coolestprojects.be")
+        self.assertNotContains(response, "Sign up now")
+
+    def test_a_dojo_event_still_links_to_its_dojo(self):
+        dojo = make_dojo("Ghent")
+        event = _future_event(dojo)
+        response = self.client.get(reverse("event_detail", kwargs={"event_id": event.id}))
+        self.assertContains(response, "Hosted by")
+        self.assertContains(response, reverse("dojo_detail", kwargs={"dojo_id": dojo.id}))
+
+    def test_signup_redirects_to_the_event_page(self):
+        parent = User.objects.create(username="parent")
+        self.client.force_login(parent)
+        response = self.client.get(reverse("event_signup", kwargs={"event_id": self.event.id}))
+        self.assertRedirects(response, reverse("event_detail", kwargs={"event_id": self.event.id}))
+
+    def test_listed_even_without_places(self):
+        from .search import upcoming_available_events
+
+        self.assertIn(self.event, upcoming_available_events())
+        response = self.client.get(reverse("event_list"))
+        self.assertContains(response, "Register on coolestprojects.be")
+
+    def test_event_filter_does_not_offer_the_organisation(self):
+        response = self.client.get(reverse("event_list"))
+        self.assertNotIn(self.org, response.context["dojo_choices"])

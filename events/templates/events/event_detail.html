@@ -60,7 +60,7 @@
         {{ event.start_time|date:"D j M" }} · {{ event.start_time|time:"H:i" }}–{{ event.end_time|time:"H:i" }}
         {% if event.venue_name %} · {{ event.venue_name }}{% endif %}
       </p>
-      <p class="body">Hosted by <a href="{% url 'dojo_detail' dojo_id=event.dojo.id %}">{{ event.dojo.name }}</a></p>
+      <p class="body">{% include "events/partials/_organiser.html" %}</p>
     </div>
 
     <div class="event-layout">
@@ -120,16 +120,21 @@
             <span class="cd-ticket-panel__value body">{{ event.min_age|default:"7" }}–{{ event.max_age|default:"18" }}</span>
           </div>
           <hr class="cd-ticket-panel__divider">
-          {% if all_registered %}
-            <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>Already signed up</button>
-          {% elif not event.registration_open %}
-            <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>Registrations closed</button>
+          {% if event.registers_externally %}
+            <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{{ event.external_registration_url }}" target="_blank" rel="noopener">Register on {{ event.external_registration_host }}</a>
+            <p class="cd-ticket-panel__note body-sm">Registration for this event happens on its own website, not on CoderDojo Belgium.</p>
           {% else %}
-            <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{% url 'event_signup' event_id=event.id %}">Sign up now</a>
+            {% if all_registered %}
+              <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>Already signed up</button>
+            {% elif not event.registration_open %}
+              <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>Registrations closed</button>
+            {% else %}
+              <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{% url 'event_signup' event_id=event.id %}">Sign up now</a>
+            {% endif %}
+            <p class="cd-ticket-panel__note body-sm">
+              {% if all_registered %}Every child on your account is already signed up{% elif not event.registration_open %}This session isn't accepting new registrations{% elif event.places_left > 0 %}{{ event.places_left }} of {{ event.places }} spots left{% else %}Full — join the waitlist{% endif %}
+            </p>
           {% endif %}
-          <p class="cd-ticket-panel__note body-sm">
-            {% if all_registered %}Every child on your account is already signed up{% elif not event.registration_open %}This session isn't accepting new registrations{% elif event.places_left > 0 %}{{ event.places_left }} of {{ event.places }} spots left{% else %}Full — join the waitlist{% endif %}
-          </p>
         </div>
       </aside>
     </div>

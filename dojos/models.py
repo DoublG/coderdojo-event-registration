@@ -11,8 +11,10 @@ class DojoQuerySet(models.QuerySet):
     def public(self):
         """What the public site may show: `active` dojos only. Draft,
         dormant and archived dojos stay reachable for their own team (the
-        admin area) and in ninjas' own history, never in public listings."""
-        return self.filter(status=Dojo.ACTIVE)
+        admin area) and in ninjas' own history, never in public listings.
+        Organisation dojos (Dojo.kind) are never listed either: only their
+        events are public (DATA_MODEL.md §12)."""
+        return self.filter(status=Dojo.ACTIVE, kind=Dojo.DOJO)
 
 class DojoManager(models.Manager.from_queryset(DojoQuerySet)):
     def get_queryset(self):
@@ -40,6 +42,18 @@ class Dojo(models.Model):
     ARCHIVED = "archived"
     STATUS_CHOICES = [(DRAFT, "Draft"), (ACTIVE, "Active"), (DORMANT, "Dormant"), (ARCHIVED, "Archived")]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=DRAFT)
+    # An organisation dojo (DATA_MODEL.md §12) runs the organisation's own
+    # events (CoderDojo Girlz, Coolest Projects). It has a team and an admin
+    # area like any dojo, and must be `active` for its events to show, but
+    # it's never listed itself: no dojo finder, dojo page or dojo pickers.
+    DOJO = "dojo"
+    ORGANISATION = "organisation"
+    KIND_CHOICES = [(DOJO, "Dojo"), (ORGANISATION, "Organisation")]
+    kind = models.CharField(
+        max_length=12, choices=KIND_CHOICES, default=DOJO,
+        help_text="Organisation: runs the organisation's own events. Never shown in the dojo finder or "
+                  "as a dojo page; its events say “Organised by” instead of linking to it.",
+    )
     created_by = models.ForeignKey(
         "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
         help_text="The approved champion who created this dojo.",
@@ -81,7 +95,11 @@ class Dojo(models.Model):
 
     @property
     def is_public(self):
-        return self.status == self.ACTIVE
+        return self.status == self.ACTIVE and self.kind == self.DOJO
+
+    @property
+    def is_organisation(self):
+        return self.kind == self.ORGANISATION
 
     @property
     def champion_membership(self):

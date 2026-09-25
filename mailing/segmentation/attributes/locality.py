@@ -74,7 +74,7 @@ class NearDojoAttribute(SegmentAttribute):
     scope = USER
 
     def choices(self):
-        return [SegmentChoice(dojo.pk, dojo.name) for dojo in Dojo.objects.exclude(location=None).order_by("name")]
+        return [SegmentChoice(dojo.pk, dojo.name) for dojo in Dojo.objects.filter(kind=Dojo.DOJO).exclude(location=None).order_by("name")]
 
     def validate(self, operator, value):
         if operator not in self.operators:

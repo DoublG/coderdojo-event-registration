@@ -1,5 +1,7 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Case, Q, When
+from django.utils import timezone
 
 
 class FAQQuerySet(models.QuerySet):
@@ -122,3 +124,104 @@ class OrganisationTeamMember(models.Model):
     @property
     def focus_area_list(self):
         return [area.strip() for area in self.focus_areas.split(",") if area.strip()]
+
+
+def _clear_upcoming_cache():
+    from django.core.cache import cache
+
+    from events.search import CACHE_KEY
+
+    cache.delete(CACHE_KEY)
+
+
+class PromotionQuerySet(models.QuerySet):
+    def showing(self, placement, now=None):
+        """What a placement shows right now, `rank` first: started, not yet
+        ended (at `ends_at`, or when the event starts if that's empty), and
+        only for an event the public site shows (Event.objects.visible())
+        that hasn't finished."""
+        from events.models import Event
+
+        now = now or timezone.now()
+        return (
+            self.filter(placement=placement, starts_at__lte=now, event__end_time__gt=now)
+            .filter(Q(ends_at__gt=now) | Q(ends_at=None, event__start_time__gt=now))
+            .filter(event__in=Event.objects.visible())
+            .order_by("rank", "starts_at", "id")
+        )
+
+
+class PromotionManager(models.Manager.from_queryset(PromotionQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().select_related("event__dojo__municipality")
+
+
+class Promotion(models.Model):
+    """An event featured somewhere on the public site, for a while
+    (DATA_MODEL.md §12). Separate from the event, so it can be switched on
+    and off, ordered and pointed at different places without editing the
+    event. Managed by the organisation's admin role (/manage/promotions/)."""
+
+    HOMEPAGE_HERO = "homepage_hero"
+    EVENT_LIST_TOP = "event_list_top"
+    UPCOMING_FIRST = "upcoming_first"
+    DOJO_FINDER_BANNER = "dojo_finder_banner"
+    PLACEMENT_CHOICES = [
+        (HOMEPAGE_HERO, "Homepage: large card under the introduction"),
+        (EVENT_LIST_TOP, "Events page: pinned above the list"),
+        (UPCOMING_FIRST, "Homepage: first in Upcoming sessions"),
+        (DOJO_FINDER_BANNER, "Dojo finder: banner above the results"),
+    ]
+
+    event = models.ForeignKey("events.Event", on_delete=models.CASCADE, related_name="promotions")
+    placement = models.CharField(max_length=20, choices=PLACEMENT_CHOICES)
+    rank = models.PositiveSmallIntegerField(default=0, help_text="Lower shows first within a placement.")
+    starts_at = models.DateTimeField(default=timezone.now)
+    ends_at = models.DateTimeField(
+        null=True, blank=True, help_text="Empty: the promotion ends when the event starts.",
+    )
+    title = models.CharField(max_length=200, blank=True, default="", help_text="Optional: replaces the event's name.")
+    image = models.ImageField(
+        upload_to="promotions/", null=True, blank=True, help_text="Optional: replaces the event's banner.",
+    )
+    text = models.CharField(max_length=300, blank=True, default="", help_text="Optional short pitch.")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = PromotionManager()
+
+    class Meta:
+        ordering = ["placement", "rank", "starts_at"]
+
+    def __str__(self):
+        return f"{self.display_title} ({self.get_placement_display()})"
+
+    # The upcoming-sessions carousel caches its list, `upcoming_first` order
+    # included (events.search): a change shows at once, not a minute later.
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        _clear_upcoming_cache()
+
+    def delete(self, *args, **kwargs):
+        result = super().delete(*args, **kwargs)
+        _clear_upcoming_cache()
+        return result
+
+    def clean(self):
+        if self.ends_at and self.starts_at and self.ends_at <= self.starts_at:
+            raise ValidationError({"ends_at": "The end must be after the start."})
+
+    @property
+    def display_title(self):
+        return self.title or self.event.name
+
+    @property
+    def display_image(self):
+        return self.image or self.event.image
+
+    @property
+    def effective_end(self):
+        return self.ends_at or self.event.start_time
+
+    def is_showing(self, now=None):
+        now = now or timezone.now()
+        return self.starts_at <= now < self.effective_end and now < self.event.end_time

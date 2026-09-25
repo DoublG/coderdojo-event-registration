@@ -38,11 +38,19 @@ Expects `form` (an events.forms.EventForm) in context, and optionally
   </div>
   <p class="cd-form__help caption">A session always runs within a single day.</p>
   <div class="cd-form__field">
-    <label class="cd-form__label label" for="{{ form.places.id_for_label }}">Places<span class="cd-form__required" aria-hidden="true">*</span></label>
+    <label class="cd-form__label label" for="{{ form.places.id_for_label }}">Places{% if form.places.field.required %}<span class="cd-form__required" aria-hidden="true">*</span>{% endif %}</label>
     <ul class="cd-form__errors">{% for error in form.places.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
     {{ form.places }}
     <p class="cd-form__help caption">How many children can register before new sign-ups go on the waiting list.</p>
   </div>
+  {% if form.external_registration_url %}
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="{{ form.external_registration_url.id_for_label }}">Registration on another website</label>
+      <ul class="cd-form__errors">{% for error in form.external_registration_url.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+      {{ form.external_registration_url }}
+      <p class="cd-form__help caption">Optional. When set, the event page links there instead of showing the sign-up form, and Places isn't needed.</p>
+    </div>
+  {% endif %}
 </div>
 
 <div class="cd-form__group">

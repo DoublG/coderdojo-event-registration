@@ -18,8 +18,8 @@ class DojoMembershipInline(admin.TabularInline):
 
 @admin.register(Dojo)
 class DojoAdmin(BelgiumGISModelAdmin):
-    list_display = ["name", "status", "municipality"]
-    list_filter = ["status"]
+    list_display = ["name", "kind", "status", "municipality"]
+    list_filter = ["kind", "status"]
     search_fields = ["name"]
     inlines = [DojoMembershipInline]
 

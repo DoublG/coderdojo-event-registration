@@ -29,6 +29,7 @@ urlpatterns = [
     path("", include("events.urls")),
     path("", include("pathways.urls")),
     path("", include("mailing.urls")),
+    path("", include("content.urls")),
     path("api/", api.urls),
 ]
 

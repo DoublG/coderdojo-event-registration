@@ -15,7 +15,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 from accounts.models import Ninja, User
 from applications.services import is_approved_champion
-from content.models import FAQ, OrganisationTeamMember
+from content.models import FAQ, OrganisationTeamMember, Promotion
 from events.awards import BeltError, award_belt, sync_milestones
 from events.forms import EventForm
 from events.models import Belt, Event, NinjaEngagement, Registration
@@ -94,6 +94,7 @@ def dojo_list(request):
         "geocode_failed": geocode_failed,
         "total_count": paginator.count,
         "next_page_url": next_page_url,
+        "promotions": Promotion.objects.showing(Promotion.DOJO_FINDER_BANNER),
     }
     # Infinite scroll (htmx "revealed" trigger, see _dojo_result.html):
     # subsequent pages return just the new <li> fragment, not the full page.

@@ -100,12 +100,15 @@ class EventForm(forms.ModelForm):
     class Meta:
         model = Event
         fields = [
-            "name", "places", "venue_name", "image",
+            "name", "places", "external_registration_url", "venue_name", "image",
             "description", "min_age", "max_age", "audience", "team", "pathways",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Coding Saturday"}),
             "places": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": "20"}),
+            "external_registration_url": forms.URLInput(attrs={
+                "class": "cd-form__input body", "placeholder": "https://www.coolestprojects.org/…",
+            }),
             "venue_name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": 'e.g. "Ghent Public Library"'}),
             "image": forms.ClearableFileInput(attrs={"class": "cd-form__input body"}),
             "description": forms.Textarea(attrs={
@@ -123,6 +126,13 @@ class EventForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Not sent (an older form, a script): keep the model default.
         self.fields["audience"].required = False
+        # Only the organisation's own events (an organisation dojo, DATA_MODEL.md
+        # §12) may take registrations on another website; for those, places
+        # are optional.
+        if dojo.is_organisation:
+            self.fields["places"].required = False
+        else:
+            del self.fields["external_registration_url"]
         # Who runs this session: anyone active on the dojo's team (champion,
         # mentors and youth mentors), shown as "Name (Role)".
         self.fields["team"].queryset = dojo.memberships.active().select_related("user").order_by("user__first_name")
@@ -147,6 +157,11 @@ class EventForm(forms.ModelForm):
         end_time = cleaned_data.get("end_time")
         if start_time and end_time and end_time <= start_time:
             self.add_error("end_time", "End time must be after the start time.")
+        if "places" not in self.errors and cleaned_data.get("places") is None:
+            if cleaned_data.get("external_registration_url"):
+                cleaned_data["places"] = 0
+            else:
+                self.add_error("places", "This field is required.")
         return cleaned_data
 
     def save(self, commit=True):

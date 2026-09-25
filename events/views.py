@@ -4,12 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Max, Q
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import Ninja
-from content.models import FAQ
+from content.models import FAQ, Promotion
 from dojos.models import Dojo
 from mailing.automated import booking_mail
 
@@ -25,7 +25,7 @@ def event_list(request):
     now = timezone.now()
 
     base_events = Event.objects.visible().filter(start_time__gte=now)
-    dojo_choices = Dojo.objects.filter(event__in=base_events).distinct().order_by("name")
+    dojo_choices = Dojo.objects.public().filter(event__in=base_events).distinct().order_by("name")
 
     events = base_events.select_related("dojo")
     if form.is_valid():
@@ -69,6 +69,9 @@ def event_list(request):
         "dojo_choices": dojo_choices,
         "total_count": paginator.count,
         "next_page_url": next_page_url,
+        # Pinned above the date-ordered list (content.Promotion), on the
+        # unfiltered list only: a search shows just what was asked for.
+        "promotions": [] if form.has_changed() else Promotion.objects.showing(Promotion.EVENT_LIST_TOP),
     }
     # Infinite scroll (htmx "revealed" trigger, see _event_results_page.html):
     # subsequent pages return just the new date-group fragment, not the full page.
@@ -118,6 +121,9 @@ def event_detail(request, event_id):
 @login_required
 def event_signup(request, event_id):
     event = get_object_or_404(Event.objects.visible(), id=event_id)
+    if event.registers_externally:
+        # Registrations happen elsewhere; its page links there.
+        return redirect("event_detail", event_id=event.id)
     # Any adult account can sign up its own ninjas (a ninja's own login can't).
     guardian = request.user if not request.user.is_ninja else None
     results = None

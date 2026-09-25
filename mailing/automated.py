@@ -21,6 +21,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import Guardianship, Ninja, User
+from dojos.models import Dojo
 from events.models import Event, Registration
 
 from .categories import MailCategory
@@ -109,11 +110,14 @@ def announce_new_sessions(now=None):
     """Tell the families of each dojo about its sessions that opened since
     the last run: one mail per family and dojo, listing them. A family
     belongs to a dojo when a child has it as home dojo or came to one of its
-    sessions in the last MAILING_DOJO_NEWS_ACTIVE_DAYS days."""
+    sessions in the last MAILING_DOJO_NEWS_ACTIVE_DAYS days. The
+    organisation's own events (an organisation dojo, DATA_MODEL.md §12)
+    aren't a dojo's news: they reach people through campaigns."""
     now = now or timezone.now()
     new = (
         Event.objects.visible()
         .filter(status=Event.OPEN, announced_at__isnull=True, published_at__isnull=False, start_time__gt=now)
+        .exclude(dojo__kind=Dojo.ORGANISATION)
         .order_by("start_time")
     )
     by_dojo = {}

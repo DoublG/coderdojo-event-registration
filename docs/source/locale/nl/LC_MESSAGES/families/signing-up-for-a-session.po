@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 09:23+0000\n"
+"POT-Creation-Date: 2026-09-25 16:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -58,11 +58,11 @@ msgstr ""
 " dat al voor die sessie is ingeschreven, wordt overgeslagen en als "
 "dusdanig gemarkeerd in plaats van dubbel geboekt."
 
-#: ../../source/families/signing-up-for-a-session.rst:16
+#: ../../source/families/signing-up-for-a-session.rst:19
 msgid "Mails about your booking"
 msgstr "E-mails over uw boeking"
 
-#: ../../source/families/signing-up-for-a-session.rst:18
+#: ../../source/families/signing-up-for-a-session.rst:21
 msgid ""
 "After you sign up, you (and any other parent on the account, plus a child"
 " with their own login and email) get a confirmation mail, or a waiting-"
@@ -76,7 +76,7 @@ msgstr ""
 " krijgt u een herinnering; herinneringen kunt u uitzetten op uw pagina "
 "**E-mailvoorkeuren** (zie :doc:`mail-preferences`)."
 
-#: ../../source/families/signing-up-for-a-session.rst:24
+#: ../../source/families/signing-up-for-a-session.rst:27
 msgid ""
 "If a session shows **Registrations closed** instead of a sign-up option, "
 "the dojo has stopped taking new sign-ups for it (this normally happens "
@@ -89,11 +89,59 @@ msgstr ""
 "gecontroleerd is) — neem rechtstreeks contact op met het dojoteam als u "
 "toch nog een plaats nodig hebt."
 
-#: ../../source/families/signing-up-for-a-session.rst:30
+#: ../../source/families/signing-up-for-a-session.rst:33
+msgid "Featured events"
+msgstr "Evenementen in de kijker"
+
+#: ../../source/families/signing-up-for-a-session.rst:35
+msgid ""
+"Some events are **featured**: CoderDojo Belgium highlights them for a "
+"while at the top of the homepage, first in **Upcoming sessions**, above "
+"the **Events** list or above the dojo finder's results. A featured event "
+"is signed up for like any other; the highlight disappears once the event "
+"starts."
+msgstr ""
+"Sommige evenementen staan **in de kijker**: CoderDojo Belgium zet ze een "
+"tijdje in de verf bovenaan de startpagina, vooraan bij **Aankomende "
+"sessies**, boven de lijst **Evenementen** of boven de resultaten van de "
+"dojozoeker. U schrijft zich in voor een evenement in de kijker zoals voor"
+" elk ander; het verdwijnt uit de kijker zodra het evenement begint."
+
+#: ../../source/families/signing-up-for-a-session.rst:42
+msgid "Events organised by CoderDojo Belgium"
+msgstr "Evenementen georganiseerd door CoderDojo Belgium"
+
+#: ../../source/families/signing-up-for-a-session.rst:44
+msgid ""
+"Besides the sessions dojos run, CoderDojo Belgium organises a few events "
+"itself, such as CoderDojo Girlz and Coolest Projects. Their page says "
+"**Organised by CoderDojo Belgium** instead of naming a dojo."
+msgstr ""
+"Naast de sessies van de dojo's organiseert CoderDojo Belgium zelf enkele "
+"evenementen, zoals CoderDojo Girlz en Coolest Projects. Op hun pagina "
+"staat **Georganiseerd door CoderDojo Belgium** in plaats van de naam van "
+"een dojo."
+
+#: ../../source/families/signing-up-for-a-session.rst:48
+msgid ""
+"Some of these events take registrations on their own website. Their page "
+"then has a **Register on …** button that opens that website, instead of "
+"the sign-up form, and the **Events** list shows the same label. You "
+"register there, not on your family account, so the event doesn't appear "
+"on your account page and you get no booking mails from us about it."
+msgstr ""
+"Voor sommige van deze evenementen schrijft u zich in op hun eigen "
+"website. Hun pagina heeft dan een knop **Inschrijven op …** die die "
+"website opent, in plaats van het inschrijvingsformulier, en de lijst "
+"**Evenementen** toont hetzelfde label. U schrijft zich daar in, niet via "
+"uw gezinsaccount, dus het evenement verschijnt niet op uw accountpagina "
+"en u krijgt er van ons geen e-mails over uw inschrijving voor."
+
+#: ../../source/families/signing-up-for-a-session.rst:55
 msgid "Girls' sessions"
 msgstr "Meisjessessies"
 
-#: ../../source/families/signing-up-for-a-session.rst:32
+#: ../../source/families/signing-up-for-a-session.rst:57
 msgid ""
 "Some sessions are labelled **Girls' session**. They're aimed at girls, "
 "but the label never stops anyone from signing up."
@@ -101,11 +149,11 @@ msgstr ""
 "Sommige sessies hebben het label **Meisjessessie**. Ze zijn bedoeld voor "
 "meisjes, maar het label houdt nooit iemand tegen om zich in te schrijven."
 
-#: ../../source/families/signing-up-for-a-session.rst:36
+#: ../../source/families/signing-up-for-a-session.rst:61
 msgid "Waiting lists"
 msgstr "Wachtlijsten"
 
-#: ../../source/families/signing-up-for-a-session.rst:38
+#: ../../source/families/signing-up-for-a-session.rst:63
 msgid ""
 "Sessions have a limited number of places. If a session is full when you "
 "sign up, your child is placed on the **waiting list** instead of being "
@@ -122,11 +170,11 @@ msgstr ""
 "automatisch bevestigd, en krijgt u daarover een e-mail. Hiervoor hoeft u "
 "zelf niets te doen."
 
-#: ../../source/families/signing-up-for-a-session.rst:46
+#: ../../source/families/signing-up-for-a-session.rst:71
 msgid "Cancelling"
 msgstr "Annuleren"
 
-#: ../../source/families/signing-up-for-a-session.rst:48
+#: ../../source/families/signing-up-for-a-session.rst:73
 msgid ""
 "If your plans change, cancel from your family account page (see :doc"
 ":`managing-your-account`) rather than just not turning up — that's also "

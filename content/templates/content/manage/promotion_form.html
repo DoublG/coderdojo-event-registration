@@ -1,0 +1,71 @@
+{% extends "core/_manage_base.html" %}
+{% block manage_page_title %}{% if promotion %}Promotion{% else %}New promotion{% endif %}{% endblock %}
+{% block manage_heading %}{% if promotion %}{{ promotion.display_title }}{% else %}New promotion{% endif %}{% endblock %}
+{% block manage_topbar_extra %}{% if promotion %}<a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=promotion.event_id %}" target="_blank" rel="noopener">View event</a>{% endif %}{% endblock %}
+
+{% block manage_content %}
+  <form method="post" enctype="multipart/form-data" class="cd-card cd-form" style="padding: var(--space-5);" novalidate>
+    {% csrf_token %}
+    <ul class="cd-form__errors">{% for error in form.non_field_errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    <div class="cd-form__row">
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="{{ form.event.id_for_label }}">Event<span class="cd-form__required" aria-hidden="true">*</span></label>
+        <ul class="cd-form__errors">{% for error in form.event.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        {{ form.event }}
+        <p class="cd-form__help caption">A draft event can be picked: the promotion shows once the event is published.</p>
+      </div>
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="{{ form.placement.id_for_label }}">Where<span class="cd-form__required" aria-hidden="true">*</span></label>
+        <ul class="cd-form__errors">{% for error in form.placement.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        {{ form.placement }}
+      </div>
+    </div>
+    <div class="cd-form__row">
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="{{ form.starts_at.id_for_label }}">{{ form.starts_at.label }}<span class="cd-form__required" aria-hidden="true">*</span></label>
+        <ul class="cd-form__errors">{% for error in form.starts_at.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        {{ form.starts_at }}
+      </div>
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="{{ form.ends_at.id_for_label }}">{{ form.ends_at.label }}</label>
+        <ul class="cd-form__errors">{% for error in form.ends_at.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        {{ form.ends_at }}
+        <p class="cd-form__help caption">{{ form.ends_at.help_text }}</p>
+      </div>
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="{{ form.rank.id_for_label }}">Rank</label>
+        <ul class="cd-form__errors">{% for error in form.rank.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        {{ form.rank }}
+        <p class="cd-form__help caption">{{ form.rank.help_text }}</p>
+      </div>
+    </div>
+    <div class="cd-form__row">
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="{{ form.title.id_for_label }}">Title</label>
+        <ul class="cd-form__errors">{% for error in form.title.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        {{ form.title }}
+      </div>
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="{{ form.text.id_for_label }}">Short pitch</label>
+        <ul class="cd-form__errors">{% for error in form.text.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        {{ form.text }}
+      </div>
+    </div>
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="{{ form.image.id_for_label }}">Image</label>
+      <ul class="cd-form__errors">{% for error in form.image.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+      {{ form.image }}
+      <p class="cd-form__help caption">{{ form.image.help_text }}</p>
+    </div>
+    <div class="cd-form__actions">
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_promotion_list' %}">Cancel</a>
+      <button type="submit" class="cd-btn cd-btn--primary label">Save</button>
+    </div>
+  </form>
+
+  {% if promotion %}
+    <form method="post" action="{% url 'manage_promotion_delete' promotion_id=promotion.id %}" style="margin-top: var(--space-5);" onsubmit="return confirm('Remove this promotion?');">
+      {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">Remove promotion</button>
+    </form>
+  {% endif %}
+{% endblock %}

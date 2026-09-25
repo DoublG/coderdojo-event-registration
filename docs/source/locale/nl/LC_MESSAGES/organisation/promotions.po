@@ -1,0 +1,179 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 16:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/promotions.rst:2
+msgid "Promotions and the organisation's own events"
+msgstr "Promoties en de eigen evenementen van de organisatie"
+
+#: ../../source/organisation/promotions.rst:5
+msgid "The organisation's own events"
+msgstr "De eigen evenementen van de organisatie"
+
+#: ../../source/organisation/promotions.rst:7
+msgid ""
+"CoderDojo Belgium's own events (CoderDojo Girlz, Coolest Projects, ...) "
+"are run from the **CoderDojo Belgium** dojo. It works like any dojo: its "
+"team (a champion and mentors, each with a valid background check) creates"
+" the events, publishes them and takes attendance from its dojo dashboard."
+" The difference is that it isn't a place families visit: it never shows "
+"in the dojo finder and has no public dojo page, and its events say "
+"**Organised by CoderDojo Belgium**. Families don't get the \"new sessions"
+" at your dojo\" mail for these events; tell them with a campaign (see "
+":doc:`campaigns`)."
+msgstr ""
+"De eigen evenementen van CoderDojo Belgium (CoderDojo Girlz, Coolest "
+"Projects, ...) worden georganiseerd vanuit de dojo **CoderDojo Belgium**."
+" Die werkt zoals elke dojo: het team (een champion en mentors, elk met "
+"een geldige achtergrondcontrole) maakt de evenementen aan, publiceert ze "
+"en houdt de aanwezigheden bij vanuit het dashboard van de dojo. Het "
+"verschil is dat het geen plek is die gezinnen bezoeken: de dojo "
+"verschijnt nooit in de dojozoeker, heeft geen openbare dojopagina en bij "
+"zijn evenementen staat **Georganiseerd door CoderDojo Belgium**. Gezinnen"
+" krijgen voor deze evenementen niet de e-mail over nieuwe sessies bij hun"
+" dojo; laat het hen weten met een campagne (zie :doc:`campaigns`)."
+
+#: ../../source/organisation/promotions.rst:16
+msgid ""
+"An event of this dojo can take registrations on another website: fill in "
+"**Registration on another website** when you create or edit it, and leave"
+" **Places** empty. Its page then links to that website instead of showing"
+" the sign-up form. Such an event has no registrations or attendance on "
+"this site, so it doesn't count in the children's attendance figures."
+msgstr ""
+"Voor een evenement van deze dojo kan de inschrijving op een andere "
+"website gebeuren: vul **Inschrijving op een andere website** in wanneer u"
+" het aanmaakt of bewerkt, en laat **Plaatsen** leeg. De pagina van het "
+"evenement linkt dan naar die website in plaats van het "
+"inschrijvingsformulier te tonen. Zo'n evenement heeft op deze site geen "
+"inschrijvingen of aanwezigheden, dus het telt niet mee in de "
+"aanwezigheidscijfers van de kinderen."
+
+#: ../../source/organisation/promotions.rst:23
+msgid "Promotions"
+msgstr "Promoties"
+
+#: ../../source/organisation/promotions.rst:25
+msgid ""
+"A promotion features one event in one place on the public site, for a "
+"while. Open **Promotions** in the organisation dashboard to see them, "
+"grouped by place, and choose **New promotion** to add one."
+msgstr ""
+"Een promotie zet één evenement een tijdje in de kijker op één plek van de"
+" openbare site. Open **Promoties** in het organisatiedashboard om ze te "
+"zien, gegroepeerd per plek, en kies **Nieuwe promotie** om er een toe te "
+"voegen."
+
+#: ../../source/organisation/promotions.rst:29
+msgid "There are four places:"
+msgstr "Er zijn vier plekken:"
+
+#: ../../source/organisation/promotions.rst:31
+msgid ""
+"**Homepage: large card under the introduction**, the first thing visitors"
+" see."
+msgstr ""
+"**Startpagina: grote kaart onder de inleiding**, het eerste wat bezoekers"
+" zien."
+
+#: ../../source/organisation/promotions.rst:33
+msgid ""
+"**Homepage: first in Upcoming sessions**, before the sessions in date "
+"order, with a **Featured** label."
+msgstr ""
+"**Startpagina: eerst bij Aankomende sessies**, vóór de sessies in "
+"volgorde van datum, met het label **In de kijker**."
+
+#: ../../source/organisation/promotions.rst:35
+msgid "**Events page: pinned above the list**, shown when nobody has searched."
+msgstr ""
+"**Evenementenpagina: vastgezet boven de lijst**, getoond wanneer niemand "
+"iets heeft gezocht."
+
+#: ../../source/organisation/promotions.rst:36
+msgid ""
+"**Dojo finder: banner above the results**, on the dojo finder page and "
+"the homepage's dojo finder."
+msgstr ""
+"**Dojozoeker: banner boven de resultaten**, op de pagina van de "
+"dojozoeker en in de dojozoeker op de startpagina."
+
+#: ../../source/organisation/promotions.rst:39
+msgid "For each promotion you choose:"
+msgstr "Voor elke promotie kiest u:"
+
+#: ../../source/organisation/promotions.rst:41
+msgid ""
+"**Event**: any upcoming event, of any dojo. A draft event can be picked; "
+"the promotion only shows once the event is published."
+msgstr ""
+"**Evenement**: elk aankomend evenement, van eender welke dojo. U kunt een"
+" evenement in ontwerp kiezen; de promotie verschijnt pas zodra het "
+"evenement gepubliceerd is."
+
+#: ../../source/organisation/promotions.rst:43
+msgid ""
+"**Show from** and **Show until**: when it shows. Leave **Show until** "
+"empty to stop when the event starts. A promotion never shows after its "
+"event has ended."
+msgstr ""
+"**Tonen vanaf** en **Tonen tot**: wanneer ze verschijnt. Laat **Tonen "
+"tot** leeg om te stoppen wanneer het evenement begint. Een promotie "
+"verschijnt nooit meer nadat haar evenement afgelopen is."
+
+#: ../../source/organisation/promotions.rst:46
+msgid ""
+"**Rank**: the order within a place, lowest first. To reorder, change the "
+"ranks."
+msgstr ""
+"**Rang**: de volgorde binnen een plek, laagste eerst. Om de volgorde te "
+"wijzigen, past u de rangen aan."
+
+#: ../../source/organisation/promotions.rst:48
+msgid ""
+"**Title**, **Short pitch** and **Image** (all optional): replace the "
+"event's name and banner, and add a line of text."
+msgstr ""
+"**Titel**, **Korte pitch** en **Afbeelding** (allemaal optioneel): "
+"vervangen de naam en de banner van het evenement, en voegen een regel "
+"tekst toe."
+
+#: ../../source/organisation/promotions.rst:51
+msgid ""
+"The list shows each promotion's status: **Showing**, **Scheduled** (it "
+"starts later), **Event not public** (the event is still a draft, or its "
+"dojo isn't active) or **Ended**. Open a promotion to change it or to "
+"remove it."
+msgstr ""
+"De lijst toont de status van elke promotie: **Zichtbaar**, **Gepland** "
+"(ze begint later), **Evenement niet openbaar** (het evenement is nog in "
+"ontwerp, of de dojo is niet actief) of **Afgelopen**. Open een promotie "
+"om ze te wijzigen of te verwijderen."
+
+#: ../../source/organisation/promotions.rst:56
+msgid ""
+"A promotion only changes where an event is shown, never who can sign up. "
+"To reach people by mail as well, send a campaign that links to the event."
+msgstr ""
+"Een promotie verandert alleen waar een evenement getoond wordt, nooit wie"
+" zich kan inschrijven. Om mensen ook per e-mail te bereiken, verstuurt u "
+"een campagne die naar het evenement linkt."
+

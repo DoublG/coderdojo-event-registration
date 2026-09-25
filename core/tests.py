@@ -96,7 +96,7 @@ class StrNeverQueriesTests(TestCase):
 
         from accounts.models import Guardianship, Ninja, OrganisationRole, User
         from applications.models import Application, BackgroundCheckHistory
-        from content.models import Announcement
+        from content.models import Announcement, Promotion
         from dojos.testing import add_member, make_dojo
         from events.models import (
             Badge, Belt, Event, NinjaBadge, NinjaBelt, NinjaEngagement, NinjaEngagementChange, RegistrationCancellation,
@@ -136,6 +136,9 @@ class StrNeverQueriesTests(TestCase):
             (EmailMessage.objects.create(user=user, category="service", subject="Hi", body=""), "jan — Hi"),
             (MailPreference.objects.create(user=user, category="newsletter", subscribed=True), "jan: newsletter on"),
             (ConsentEvent.objects.create(user=user, category="newsletter", subscribed=True, source="signup"), "jan: newsletter on"),
+            (Promotion.objects.create(event=Event.objects.create(
+                name="Coolest", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()),
+                placement=Promotion.HOMEPAGE_HERO), "Coolest (Homepage"),
         ]
         for row, expected in rows:
             model = type(row)

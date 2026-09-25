@@ -1,0 +1,5 @@
+{% comment %}
+Who runs an event (expects `event`): an organisation dojo's events
+(Dojo.kind, DATA_MODEL.md §12) say "Organised by …", since that dojo has
+no public page; any other event links to its dojo.
+{% endcomment %}{% if event.dojo.is_organisation %}Organised by {{ event.dojo.name }}{% else %}Hosted by <a href="{% url 'dojo_detail' dojo_id=event.dojo.id %}">{{ event.dojo.name }}</a>{% endif %}

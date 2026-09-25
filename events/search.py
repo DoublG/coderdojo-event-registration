@@ -17,7 +17,10 @@ CACHE_LIMIT = 200  # bound the cached list's size regardless of how far out even
 
 
 def upcoming_available_events():
-    """Upcoming events that still have open spots, soonest first.
+    """Upcoming events that still have open spots (or take registrations on
+    another website), soonest first — except the ones promoted with the
+    `upcoming_first` placement (content.Promotion), which come first, in
+    rank order, marked `is_promoted`.
 
     "Available" is computed in the database (confirmed registrations vs.
     places) rather than via Event.places_left, since that property runs a
@@ -31,13 +34,22 @@ def upcoming_available_events():
     if cached is not None:
         return cached
 
+    from content.models import Promotion
+
     now = timezone.now()
     events = list(
-        Event.objects.filter(start_time__gte=now, status=Event.OPEN)
+        Event.objects.visible().filter(start_time__gte=now, status=Event.OPEN)
         .annotate(confirmed_count=Count("registration", filter=Q(registration__waiting_list=False)))
-        .filter(places__gt=F("confirmed_count"))
+        .filter(Q(places__gt=F("confirmed_count")) | ~Q(external_registration_url=""))
         .select_related("dojo")
         .order_by("start_time")[:CACHE_LIMIT]
     )
+    promoted = {}
+    for promotion in Promotion.objects.showing(Promotion.UPCOMING_FIRST, now=now):
+        promoted.setdefault(promotion.event_id, len(promoted))
+    for event in events:
+        event.is_promoted = event.id in promoted
+    # A stable sort: promoted events first (by rank), the rest keep date order.
+    events.sort(key=lambda event: promoted.get(event.id, len(promoted)))
     cache.set(CACHE_KEY, events, CACHE_TIMEOUT)
     return events

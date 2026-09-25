@@ -1627,3 +1627,26 @@ class Tier3Tests(TestCase):
         self.assertEqual(self.client.get(reverse("manage_journey_list")).status_code, 200)
         self.client.force_login(self.family)
         self.assertEqual(self.client.get(reverse("manage_journey_list")).status_code, 404)
+
+
+class OrganisationEventsInDigestTests(TestCase):
+    def test_the_new_sessions_digest_skips_the_organisations_own_events(self):
+        from .automated import announce_new_sessions
+
+        org = make_dojo("CoderDojo Belgium", kind=Dojo.ORGANISATION)
+        parent = User.objects.create(username="p", email="p@example.com")
+        Guardianship.objects.create(guardian=parent, ninja=Ninja.objects.create(name="Kid", home_dojo=org))
+        start = timezone.now() + timedelta(days=10)
+        Event.objects.create(name="Girlz", dojo=org, status=Event.OPEN, places=10,
+                             start_time=start, end_time=start + timedelta(hours=2))
+        self.assertEqual(announce_new_sessions(), 0)
+        self.assertFalse(EmailMessage.objects.filter(template_key="new_sessions_at_dojo").exists())
+
+    def test_near_dojo_does_not_offer_organisation_dojos(self):
+        from django.contrib.gis.geos import Point
+
+        from .segmentation.registry import get_attribute
+
+        make_dojo("CoderDojo Belgium", kind=Dojo.ORGANISATION, location=Point(4.35, 50.85, srid=4326))
+        ghent = make_dojo("Ghent", location=Point(3.72, 51.05, srid=4326))
+        self.assertEqual([c.value for c in get_attribute("near_dojo").choices()], [ghent.pk])

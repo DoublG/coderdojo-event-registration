@@ -1,0 +1,42 @@
+{% extends "core/_manage_base.html" %}
+{% block manage_page_title %}Promotions{% endblock %}
+{% block manage_heading %}Promotions{% endblock %}
+{% block manage_topbar_extra %}<a class="cd-btn cd-btn--primary label" href="{% url 'manage_promotion_create' %}">New promotion</a>{% endblock %}
+
+{% block manage_content %}
+  <p class="body-sm">A promotion features an event in one place on the public site for a while. Within a place, the lowest rank shows first. Without an end, a promotion stops when its event starts.</p>
+  {% for group in groups %}
+    <h2 class="heading-md" style="margin: var(--space-6) 0 var(--space-3);">{{ group.label }}</h2>
+    <div class="cd-table-wrap">
+      <table class="cd-table cd-table--zebra">
+        <thead>
+          <tr>
+            <th class="label cd-table__num" scope="col">Rank</th>
+            <th class="label" scope="col">Promotion</th>
+            <th class="label" scope="col">Event</th>
+            <th class="label" scope="col">Shown</th>
+            <th class="label" scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for promotion, state in group.rows %}
+            <tr>
+              <td class="body-sm cd-table__num">{{ promotion.rank }}</td>
+              <td class="body-sm"><a href="{% url 'manage_promotion_detail' promotion_id=promotion.id %}">{{ promotion.display_title }}</a></td>
+              <td class="body-sm">{{ promotion.event.dojo.name }}, {{ promotion.event.start_time|date:"d/m/Y H:i" }}</td>
+              <td class="body-sm">{{ promotion.starts_at|date:"d/m/Y H:i" }} – {{ promotion.effective_end|date:"d/m/Y H:i" }}</td>
+              <td class="body-sm">
+                {% if state == "showing" %}<span class="cd-badge cd-badge--success caption">Showing</span>
+                {% elif state == "scheduled" %}<span class="cd-badge cd-badge--outline caption">Scheduled</span>
+                {% elif state == "hidden" %}<span class="cd-badge cd-badge--warning caption">Event not public</span>
+                {% else %}<span class="cd-badge cd-badge--outline caption">Ended</span>{% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td class="body-sm" colspan="5">Nothing promoted here.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endfor %}
+{% endblock %}

@@ -50,6 +50,8 @@
         </div>
       </form>
 
+      {% include "content/partials/_promotion_banner.html" %}
+
       {% if geocode_failed %}
         <p class="cd-dojo-finder__meta caption">Couldn't find "{{ search_label }}" — showing every dojo instead.</p>
       {% else %}

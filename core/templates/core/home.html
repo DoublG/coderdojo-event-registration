@@ -59,6 +59,7 @@
         <a class="cd-btn cd-btn--ghost label" href="{% url 'event_list' %}">Browse events</a>
       </div>
     </section>
+    {% include "content/partials/_promotion_hero.html" with promotions=hero_promotions %}
   </div>
 
   <div class="shell section">
@@ -88,6 +89,7 @@
       <h2 class="heading-lg">Find a dojo near you</h2>
       <p class="body">Every session is free and run by local volunteers.</p>
     </div>
+    {% include "content/partials/_promotion_banner.html" with promotions=finder_promotions %}
     <div class="center">
       {% include "dojos/partials/_dojo_finder_widget.html" %}
     </div>

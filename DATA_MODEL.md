@@ -200,6 +200,7 @@ erDiagram
         bigint id PK
         string name
         string status "draft, active, dormant, archived"
+        string kind "dojo | organisation (never listed, section 12)"
         bigint created_by_id FK "nullable"
         string address
         point location "geocoded from address"
@@ -286,6 +287,7 @@ erDiagram
         int min_age
         int max_age
         string audience "everyone | girls (a label, never a restriction)"
+        string external_registration_url "organisation events: sign-up elsewhere"
         datetime published_at "first opened (the new-sessions mail)"
         datetime announced_at "families told"
     }
@@ -559,6 +561,7 @@ erDiagram
     PATHWAY |o--o{ FAQ : "scoped to"
     DOJO |o--o{ TESTIMONIAL : "scoped to (blank = site-wide)"
     DOJO ||--o{ ANNOUNCEMENT : "posts"
+    EVENT ||--o{ PROMOTION : "featured by (section 12)"
     USER |o--o{ ORGANISATION_TEAM_MEMBER : "account (optional)"
 
     PATHWAY {
@@ -596,6 +599,13 @@ erDiagram
         bigint dojo_id FK
         date date
         string text
+    }
+    PROMOTION {
+        bigint event_id FK
+        string placement
+        int rank
+        datetime starts_at
+        datetime ends_at "nullable: until the event starts"
     }
 ```
 
@@ -2439,13 +2449,43 @@ the side.
 
 ---
 
-## 12. Organisation events and promotion (later)
+## 12. Organisation events and promotion
 
-**Not built yet.** This is the agreed direction for events the
-organisation runs itself, such as CoderDojo Girlz and Coolest Projects.
-They need two things today's model doesn't give them: an organiser that
-isn't a dojo, and promotion (featured, reordered, or shown in a different
-spot on a page).
+**Built** (option A below, all four build steps). Events the organisation
+runs itself, such as CoderDojo Girlz and Coolest Projects, needed two
+things the model didn't give them: an organiser that isn't a dojo, and
+promotion (featured, reordered, or shown in a different spot on a page).
+
+What was built, and the details settled while building it:
+- `Dojo.kind` (`dojo` | `organisation`). `Dojo.objects.public()` and
+  `Dojo.is_public` exclude organisation dojos, which covers the dojo
+  finder, dojo and team pages, join requests, the event filter and the
+  application form. An organisation dojo must still be `active` for its
+  events to be public (`Event.objects.visible()` is unchanged). There's no
+  UI to create one: it's set in the Django admin (or `seed_organisation`).
+- Organisation dojos are skipped by the dormancy nudge, the `near_dojo`
+  segment picker and the daily "new sessions at your dojo" mail
+  (organisation events reach families through campaigns instead). The
+  lifecycle actions stay available to their champion.
+- Event pages say "Organised by …" (`events/partials/_organiser.html`)
+  instead of linking to the dojo; the dojo admin hides "View public page".
+- `Event.external_registration_url`: only an organisation dojo's event
+  form offers it (`EventForm`), and then `places` is optional (saved as
+  0). The event page links out ("Register on <host>"), `event_signup`
+  redirects to the event page, and the upcoming-sessions carousel lists it
+  whatever its places.
+- `content.Promotion` as below. `Promotion.objects.showing(placement)` is
+  the one rule for what's live: started, not ended (`ends_at`, or the
+  event's start when empty), the event not finished, and the event in
+  `Event.objects.visible()`. Saving or deleting a promotion clears the
+  carousel's cache (`events.search`).
+- Managed on the organisation dashboard (`/manage/promotions/`,
+  `content/manage.py`, organisation `admin` role) with a full Django admin
+  page as well. Any upcoming event can be picked, drafts included (it
+  shows once published).
+- `manage.py seed_organisation` (rerun-safe) seeds "CoderDojo Belgium" with
+  an approved champion, a CoderDojo Girlz session, Coolest Projects
+  (registers externally) and one promotion per placement.
 
 ### Who organises an event
 
@@ -2522,7 +2562,7 @@ erDiagram
   (section 11) can link to a promoted event, and segments like "families
   with girls near dojo X" target the same audience the promotion is for.
 
-### Build order (when this is picked up)
+### Build order (all done)
 
 1. `Dojo.kind` plus the `public()` filter, the organiser line on event
    pages, and a seeded organisation dojo holding the CoderDojo Girlz and

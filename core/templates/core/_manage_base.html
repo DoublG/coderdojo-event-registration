@@ -80,6 +80,18 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
         </ul>
       </div>
 
+      <div class="cd-admin-nav__group">
+        <p class="cd-admin-nav__group-label caption">Public site</p>
+        <ul class="cd-admin-nav__list">
+          <li>
+            <a href="{% url 'manage_promotion_list' %}" class="cd-admin-nav__link label{% if active == 'promotions' %} cd-admin-nav__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6"/><path d="M18 6a8 8 0 0 1 0 12"/></svg>
+              Promotions
+            </a>
+          </li>
+        </ul>
+      </div>
+
       <div class="cd-admin-nav__footer">
         <div class="cd-admin-nav__avatar" aria-hidden="true">{{ request.user.first_name|first }}{{ request.user.last_name|first }}</div>
         <div class="cd-admin-nav__footer-info">

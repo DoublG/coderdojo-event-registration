@@ -21,6 +21,7 @@ see events.views.upcoming_sessions_widget.
   </div>
   <div class="cd-event__body">
     <h3 class="cd-event__title heading-md">{{ event.name }}</h3>
+    {% if event.is_promoted %}<span class="cd-badge cd-badge--warning caption">Featured</span>{% endif %}
     {% include "events/partials/_audience_badge.html" %}
     <p class="cd-event__meta body-sm">{{ event.start_time|date:"H:i" }} · {{ event.venue_name|default:event.dojo.name }}</p>
   </div>

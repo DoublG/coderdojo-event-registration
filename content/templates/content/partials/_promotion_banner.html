@@ -1,0 +1,25 @@
+{% comment %}
+A slim banner per active promotion, rank first: the event_list_top and
+dojo_finder_banner placements (content.Promotion). Expects `promotions`
+(Promotion.objects.showing(...)).
+{% endcomment %}
+{% if promotions %}
+  <div class="cd-promo-list">
+    {% for promotion in promotions %}
+      {% with event=promotion.event %}
+        <article class="cd-promo cd-promo--banner">
+          {% if promotion.display_image %}
+            <img class="cd-promo__image" src="{{ promotion.display_image.url }}" alt="" loading="lazy">
+          {% endif %}
+          <div class="cd-promo__body">
+            <p class="cd-promo__eyebrow caption">Featured · {{ event.start_time|date:"D j M" }} · {{ event.start_time|time:"H:i" }}</p>
+            <h2 class="cd-promo__title heading-md">{{ promotion.display_title }}</h2>
+            {% if promotion.text %}<p class="cd-promo__text body-sm">{{ promotion.text }}</p>{% endif %}
+            <p class="cd-promo__meta caption">{% include "events/partials/_organiser.html" %}</p>
+          </div>
+          <a class="cd-btn cd-btn--secondary label cd-promo__link" href="{% url 'event_detail' event_id=event.id %}">View event</a>
+        </article>
+      {% endwith %}
+    {% endfor %}
+  </div>
+{% endif %}
