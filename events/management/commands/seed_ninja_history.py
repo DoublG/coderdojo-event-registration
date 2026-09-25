@@ -169,10 +169,13 @@ class Command(BaseCommand):
         girls_event = None
         if all_past_events:
             girls_dojo = all_past_events[0].dojo
+            # Found again by dojo and time, not by name: seed_content_languages
+            # rewrites the name in the dojo's main language.
             girls_event, was_created = Event.objects.get_or_create(
-                dojo=girls_dojo, name="CoderDojo for Girls",
+                dojo=girls_dojo,
                 start_time=timezone.make_aware(datetime(2023, 2, 11, 10, 0)),
                 defaults={
+                    "name": "CoderDojo for Girls",
                     "end_time": timezone.make_aware(datetime(2023, 2, 11, 13, 0)),
                     "places": 30, "location": girls_dojo.location, "status": Event.CLOSED,
                     "audience": Event.GIRLS,
@@ -185,9 +188,10 @@ class Command(BaseCommand):
 
             projects_dojo = all_past_events[-1].dojo
             coolest_event, was_created = Event.objects.get_or_create(
-                dojo=projects_dojo, name="Coolest Projects 2026",
+                dojo=projects_dojo,
                 start_time=timezone.make_aware(datetime(2026, 6, 6, 10, 0)),
                 defaults={
+                    "name": "Coolest Projects 2026",
                     "end_time": timezone.make_aware(datetime(2026, 6, 6, 17, 0)),
                     "places": 200, "location": projects_dojo.location, "status": Event.CLOSED,
                     "description": "CoderDojo's yearly showcase — ninjas demo the projects they've been building all year.",

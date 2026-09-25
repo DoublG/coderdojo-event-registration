@@ -55,17 +55,19 @@ class Command(BaseCommand):
 
         for dojo in Dojo.objects.all()[:2]:
             for i, faq in enumerate(DOJO_FAQS):
+                # By position, not by question: seed_content_languages rewrites
+                # a dojo's FAQs in its main language.
                 _, was_created = FAQ.objects.get_or_create(
-                    dojo=dojo, event=None, pathway=None, question=faq["question"],
-                    defaults={"answer": faq["answer"], "order": i},
+                    dojo=dojo, event=None, pathway=None, order=i,
+                    defaults={"question": faq["question"], "answer": faq["answer"]},
                 )
                 created += 1 if was_created else 0
 
         for event in Event.objects.all()[:2]:
             for i, faq in enumerate(EVENT_FAQS):
                 _, was_created = FAQ.objects.get_or_create(
-                    dojo=None, event=event, pathway=None, question=faq["question"],
-                    defaults={"answer": faq["answer"], "order": i},
+                    dojo=None, event=event, pathway=None, order=i,
+                    defaults={"question": faq["question"], "answer": faq["answer"]},
                 )
                 created += 1 if was_created else 0
 

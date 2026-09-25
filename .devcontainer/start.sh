@@ -50,6 +50,12 @@ else
     echo "Demo data already present (events exist) - skipping demo seed."
 fi
 
+# The seeded site in several languages (DATA_MODEL.md §19): dojo languages by
+# region, and the Dutch and French versions of the seeded texts. Rerun-safe
+# (only touches rows still on their English seed text), so it runs on every
+# start and also fills in a database seeded before it existed.
+python manage.py seed_content_languages
+
 # Example email templates (en/nl/fr) and two draft campaigns. No dates, only
 # creates what's missing, so it's safe to run on every start.
 python manage.py seed_mailing

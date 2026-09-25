@@ -59,7 +59,7 @@ class Command(BaseCommand):
         rng = random.Random("seed-organisation")
         dojo, dojo_created = Dojo.objects.get_or_create(
             name=ORGANISATION_NAME, kind=Dojo.ORGANISATION,
-            defaults={"status": Dojo.ACTIVE, "email": "info@coderdojo-demo.example", "languages": ["nl-be", "fr-be", "en-us"],
+            defaults={"status": Dojo.ACTIVE, "email": "info@coderdojo-demo.example", "languages": ["en-us", "nl-be", "fr-be"],
                       "tagline": "The organisation behind CoderDojo in Belgium."},
         )
 

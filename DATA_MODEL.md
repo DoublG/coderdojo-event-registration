@@ -2723,5 +2723,11 @@ sees the **main language**, with an "Only in ..." note.
   language; the raw `translations` JSON stays editable too, and the
   per-language fields are applied after it), promotions also on the
   Promotions dashboard page. An untranslated FAQ answer shows its note
-  ("Only in English"); names and titles don't. The seeded demo content is
-  English only.
+  ("Only in English"); names and titles don't.
+- **Seed data** (`manage.py seed_content_languages`, run by `start.sh` after
+  the seeders): dojo languages by region (Wallonia French or French and
+  English; Brussels and within 15 km of it all three; Flanders mostly Dutch,
+  some Dutch and English, a few Dutch and French), each dojo's seeded texts
+  in its main language with versions in its others, and the organisation's
+  content in all three (`core/seed_translations.py`). The organisation dojo
+  is English-main, like the rest of the organisation's content.

@@ -1,8 +1,10 @@
 from datetime import date
 
+from django.contrib.gis.geos import MultiPolygon, Polygon
 from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from content.models import Testimonial
 from core import image_library
@@ -314,3 +316,62 @@ class OrganisationContentLanguagesTests(TestCase):
         response = self.client.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="nl-be")
         self.assertContains(response, "Yes, always.")
         self.assertContains(response, "Alleen in het English")
+
+
+
+class SeedContentLanguagesTests(TestCase):
+    """manage.py seed_content_languages: realistic languages per region and
+    the seeded texts in them; rerun-safe."""
+
+    def test_languages_by_region(self):
+        from core.management.commands.seed_content_languages import seeded_languages
+        from geo.models import AdministrativeBoundary
+
+        def province(name):
+            return AdministrativeBoundary.objects.create(
+                name=name, kind=AdministrativeBoundary.PROVINCE,
+                boundary=MultiPolygon(Polygon(((4, 50), (5, 50), (5, 51), (4, 50)))),
+            )
+
+        walloon, flemish = province("Province de Namur"), province("Provincie Limburg")
+        for i in range(12):
+            wallonia = seeded_languages(make_dojo(f"W{i}", province=walloon), km_from_brussels=60)
+            self.assertEqual(wallonia[0], "fr-be")
+            self.assertIn(wallonia, (["fr-be"], ["fr-be", "en-us"]))
+            flanders = seeded_languages(make_dojo(f"F{i}", province=flemish), km_from_brussels=80)
+            self.assertIn(flanders, (["nl-be"], ["nl-be", "en-us"], ["nl-be", "fr-be"]))
+        near = seeded_languages(make_dojo("Near", province=flemish), km_from_brussels=8)
+        self.assertEqual(near, ["nl-be", "fr-be", "en-us"])
+
+    def test_texts_in_the_dojo_languages_and_rerun_safe(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from content.models import FAQ
+        from events.management.commands.seed_events import description_for
+        from events.models import Event
+
+        dojo = make_dojo("Namur", languages=["fr-be", "en-us"], tagline="Seeing a kid's face light up when their code finally runs — that's the whole job.")
+        faq = FAQ.objects.create(dojo=dojo, question="Is there parking nearby?", answer="Yes, free parking is available right outside the venue.")
+        global_faq = FAQ.objects.create(question="Is it really free?", answer="Yes — every Dojo session is free, run entirely by volunteers.")
+        event = Event.objects.create(dojo=dojo, name="Coding Saturday", description=description_for("Coding Saturday"),
+                                     start_time=timezone.now(), end_time=timezone.now(), places=5)
+        pathway = Pathway.objects.create(name="Web Development", subtitle="x")
+
+        call_command("seed_content_languages", stdout=StringIO())
+        for obj in (dojo, faq, global_faq, event, pathway):
+            obj.refresh_from_db()
+        self.assertTrue(dojo.tagline.startswith("Voir le visage"))
+        self.assertTrue(dojo.translation_for("en-us", "tagline").startswith("Seeing a kid"))
+        self.assertEqual(faq.question, "Y a-t-il un parking à proximité ?")
+        self.assertEqual(faq.translation_for("nl-be", "question"), "")
+        self.assertEqual(global_faq.question, "Is it really free?")
+        self.assertEqual(global_faq.translation_for("nl-be", "question"), "Is het echt gratis?")
+        self.assertEqual(event.name, "Samedi code")
+        self.assertIn("**Samedi code**", event.description)
+        self.assertEqual(pathway.translation_for("fr-be", "name"), "Développement web")
+
+        out = StringIO()
+        call_command("seed_content_languages", stdout=out)
+        self.assertNotRegex(out.getvalue(), r"=[1-9]")
