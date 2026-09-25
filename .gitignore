@@ -52,7 +52,7 @@ coverage.xml
 *.pot
 # ...except the site's own compiled catalogs: the server may have no gettext
 # to compile them (manage.py compilemessages after editing a .po).
-!locale/*/LC_MESSAGES/django.mo
+!locale/*/LC_MESSAGES/*.mo
 
 # Django stuff:
 *.log
