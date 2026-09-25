@@ -1,0 +1,97 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 13:17+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/dashboard.rst:2
+msgid "The organisation dashboard"
+msgstr "Het organisatiedashboard"
+
+#: ../../source/organisation/dashboard.rst:4
+msgid ""
+"The organisation dashboard is where CoderDojo Belgium's own team runs "
+"mail to families and volunteers. It's open to accounts with the "
+"organisation's **admin** role: they find it under **Organisation** in the"
+" account menu."
+msgstr ""
+"Via het organisatiedashboard beheert het eigen team van CoderDojo Belgium"
+" de e-mails naar gezinnen en vrijwilligers. Het is open voor accounts met"
+" de rol **beheerder** van de organisatie: zij vinden het onder "
+"**Organisatie** in het accountmenu."
+
+#: ../../source/organisation/dashboard.rst:8
+msgid "The sidebar has four sections:"
+msgstr "De zijbalk heeft vier onderdelen:"
+
+#: ../../source/organisation/dashboard.rst:10
+msgid ""
+"**Campaigns**: one mailing to a group of people, now or at a set time "
+"(see :doc:`campaigns`)."
+msgstr ""
+"**Campagnes**: één mailing naar een groep mensen, nu of op een gekozen "
+"moment (zie :doc:`campaigns`)."
+
+#: ../../source/organisation/dashboard.rst:12
+msgid ""
+"**Journeys**: mailings that run by themselves every day, for example to "
+"families whose child has stopped coming (see :doc:`journeys`)."
+msgstr ""
+"**Trajecten**: mailings die elke dag vanzelf lopen, bijvoorbeeld naar "
+"gezinnen van wie het kind niet meer komt (zie :doc:`journeys`)."
+
+#: ../../source/organisation/dashboard.rst:14
+msgid ""
+"**Segments**: who a campaign or journey is for, described with rules "
+"instead of a list (see :doc:`segments`)."
+msgstr ""
+"**Segmenten**: voor wie een campagne of traject bedoeld is, beschreven "
+"met regels in plaats van een lijst (zie :doc:`segments`)."
+
+#: ../../source/organisation/dashboard.rst:16
+msgid ""
+"**Mail templates**: the text of every mail the site sends, in each "
+"language (see :doc:`mail-templates`)."
+msgstr ""
+"**E-mailsjablonen**: de tekst van elke e-mail die de site verstuurt, in "
+"elke taal (zie :doc:`mail-templates`)."
+
+#: ../../source/organisation/dashboard.rst:19
+msgid ""
+"People only get mail they want. Every account chooses which kinds of mail"
+" it gets on its **Mail preferences** page; the newsletter and campaigns "
+"only go to people who opted in, and children's own logins never get "
+"campaigns. Addresses that bounced are skipped automatically."
+msgstr ""
+"Mensen krijgen alleen e-mails die ze willen. Elk account kiest op de "
+"pagina **E-mailvoorkeuren** welke soorten e-mails het krijgt; de "
+"nieuwsbrief en campagnes gaan alleen naar wie zich ervoor heeft "
+"ingeschreven, en de eigen logins van kinderen krijgen nooit campagnes. "
+"Adressen waarvoor e-mails terugkwamen worden automatisch overgeslagen."
+
+#: ../../source/organisation/dashboard.rst:24
+msgid ""
+"The technical side of the site (the full mail log, bounces, blocked "
+"addresses) stays in the site's technical admin, for fixing things when "
+"something goes wrong."
+msgstr ""
+"De technische kant van de site (het volledige e-maillogboek, teruggekomen"
+" e-mails, geblokkeerde adressen) blijft in het technische beheer van de "
+"site, om dingen te herstellen als er iets misloopt."
+

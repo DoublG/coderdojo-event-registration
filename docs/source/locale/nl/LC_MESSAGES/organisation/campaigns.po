@@ -1,0 +1,120 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 13:17+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/campaigns.rst:2
+msgid "Campaigns"
+msgstr "Campagnes"
+
+#: ../../source/organisation/campaigns.rst:4
+msgid ""
+"A campaign sends one mail to everyone in a segment who wants that kind of"
+" mail: the newsletter, news from their dojo, or volunteering news."
+msgstr ""
+"Een campagne stuurt één e-mail naar iedereen in een segment die dat soort"
+" e-mail wil: de nieuwsbrief, nieuws van hun dojo of nieuws voor "
+"vrijwilligers."
+
+#: ../../source/organisation/campaigns.rst:8
+msgid "Preparing a campaign"
+msgstr "Een campagne voorbereiden"
+
+#: ../../source/organisation/campaigns.rst:10
+msgid "Under **Campaigns**, choose **New campaign** and fill in:"
+msgstr "Kies onder **Campagnes** voor **Nieuwe campagne** en vul in:"
+
+#: ../../source/organisation/campaigns.rst:12
+msgid "**Name**: for you; people don't see it."
+msgstr "**Naam**: voor uzelf; mensen zien hem niet."
+
+#: ../../source/organisation/campaigns.rst:13
+msgid "**Kind of mail**: decides who may get it, based on their mail preferences."
+msgstr ""
+"**Soort e-mail**: bepaalt wie hem mag krijgen, volgens hun "
+"e-mailvoorkeuren."
+
+#: ../../source/organisation/campaigns.rst:14
+msgid "**Segment**: who it's for (see :doc:`segments`)."
+msgstr "**Segment**: voor wie hij bedoeld is (zie :doc:`segments`)."
+
+#: ../../source/organisation/campaigns.rst:15
+msgid ""
+"**Template**: the text (see :doc:`mail-templates`). Every person gets it "
+"in their own language."
+msgstr ""
+"**Sjabloon**: de tekst (zie :doc:`mail-templates`). Iedereen krijgt hem "
+"in zijn eigen taal."
+
+#: ../../source/organisation/campaigns.rst:17
+msgid ""
+"**Template variables**: values the template uses, one per line, like "
+"``signup_url: https://...``."
+msgstr ""
+"**Sjabloonvariabelen**: waarden die het sjabloon gebruikt, één per regel,"
+" zoals ``signup_url: https://...``."
+
+#: ../../source/organisation/campaigns.rst:19
+msgid "**Send at**: leave empty to send when you launch it, or pick a time."
+msgstr ""
+"**Versturen op**: laat leeg om te versturen wanneer u hem lanceert, of "
+"kies een moment."
+
+#: ../../source/organisation/campaigns.rst:21
+msgid ""
+"The campaign's page shows the mail in every language as it will look, and"
+" how many people it will reach, with examples. **Send a test to me** "
+"sends it to your own address first."
+msgstr ""
+"De pagina van de campagne toont de e-mail in elke taal zoals hij eruit "
+"zal zien, en hoeveel mensen hij zal bereiken, met voorbeelden. **Stuur "
+"een test naar mij** stuurt hem eerst naar uw eigen adres."
+
+#: ../../source/organisation/campaigns.rst:26
+msgid "Launching"
+msgstr "Lanceren"
+
+#: ../../source/organisation/campaigns.rst:28
+msgid ""
+"**Launch** checks the campaign and sends it (or waits until its time). "
+"From that moment the list of people is fixed: changing the segment "
+"afterwards doesn't change who this campaign goes to. The mail goes out "
+"gradually, so a large campaign can take a while. Someone who unsubscribes"
+" in the meantime doesn't get it any more."
+msgstr ""
+"**Lanceren** controleert de campagne en verstuurt hem (of wacht tot het "
+"gekozen moment). Vanaf dan ligt de lijst met mensen vast: het segment "
+"achteraf wijzigen verandert niet naar wie deze campagne gaat. De e-mails "
+"vertrekken geleidelijk, dus een grote campagne kan even duren. Wie zich "
+"intussen uitschrijft, krijgt hem niet meer."
+
+#: ../../source/organisation/campaigns.rst:34
+msgid ""
+"While it's going out, **Cancel campaign** stops the mail that hasn't been"
+" sent yet. Once everything is out, the campaign shows as **Sent**, with "
+"its results: how many were sent, held back (unsubscribed, blocked "
+"addresses), bounced or failed, and how many people unsubscribed since."
+msgstr ""
+"Zolang hij verstuurd wordt, stopt **Campagne annuleren** de e-mails die "
+"nog niet vertrokken zijn. Zodra alles verstuurd is, staat de campagne op "
+"**Verstuurd**, met de resultaten: hoeveel e-mails verstuurd, "
+"tegengehouden (uitgeschreven, geblokkeerde adressen), teruggekomen of "
+"mislukt zijn, en hoeveel mensen zich sindsdien uitschreven."
+

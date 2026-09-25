@@ -1,0 +1,82 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 13:17+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/journeys.rst:2
+msgid "Journeys"
+msgstr "Parcours"
+
+#: ../../source/organisation/journeys.rst:4
+msgid ""
+"A journey is a campaign that runs by itself. Every day at 18:00 it sends "
+"its mail to everyone who matches its segment that day and hasn't had it "
+"recently. It's how you send \"we miss you\" the week a child stops "
+"coming, or \"welcome back\" when they return."
+msgstr ""
+"Un parcours est une campagne qui tourne toute seule. Chaque jour à 18:00,"
+" il envoie son e-mail à toutes les personnes qui correspondent à son "
+"segment ce jour-là et ne l'ont pas reçu récemment. C'est ainsi qu'on "
+"envoie « tu nous manques » la semaine où un enfant cesse de venir, ou « "
+"bon retour » quand il revient."
+
+#: ../../source/organisation/journeys.rst:10
+msgid "Setting one up"
+msgstr "Mettre un parcours en place"
+
+#: ../../source/organisation/journeys.rst:12
+msgid ""
+"Under **Journeys**, choose **New journey**. It has the same fields as a "
+"campaign, plus **Not again for (days)**: someone who got it doesn't get "
+"it again for that many days."
+msgstr ""
+"Sous **Parcours**, choisissez **Nouveau parcours**. Il a les mêmes champs"
+" qu'une campagne, plus **Pas de nouvel envoi pendant (jours)** : une "
+"personne qui l'a reçu ne le reçoit plus pendant ce nombre de jours."
+
+#: ../../source/organisation/journeys.rst:16
+msgid ""
+"Most journeys use a segment with a rule about a change, for example \"How"
+" the child comes to sessions changed: became **At risk** in the last 7 "
+"days\"."
+msgstr ""
+"La plupart des parcours utilisent un segment avec une règle sur un "
+"changement, par exemple « La façon dont l'enfant fréquente les séances a "
+"changé : devenu **À risque** au cours des 7 derniers jours »."
+
+#: ../../source/organisation/journeys.rst:19
+msgid ""
+"A new journey is paused. Its page shows the mail, a test button, and who "
+"would get it on the next run. **Activate** starts it: at the next run, "
+"everyone who matches at that moment gets it, so check that list first. "
+"**Pause** stops it again at any time."
+msgstr ""
+"Un nouveau parcours est en pause. Sa page montre l'e-mail, un bouton de "
+"test, et qui le recevrait au prochain passage. **Activer** le démarre : "
+"au prochain passage, toutes les personnes qui correspondent à ce "
+"moment-là le reçoivent, vérifiez donc cette liste d'abord. **Mettre en "
+"pause** l'arrête à tout moment."
+
+#: ../../source/organisation/journeys.rst:24
+msgid "The results show how many people got it in the last 30 days and in total."
+msgstr ""
+"Les résultats indiquent combien de personnes l'ont reçu au cours des 30 "
+"derniers jours et au total."
+

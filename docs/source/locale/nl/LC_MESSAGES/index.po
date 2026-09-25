@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 14:44+0000\n"
+"POT-Creation-Date: 2026-09-25 13:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -24,15 +24,19 @@ msgstr ""
 msgid "For families"
 msgstr "Voor gezinnen"
 
-#: ../../source/index.rst:24
+#: ../../source/index.rst:25
 msgid "Volunteering & new dojos"
 msgstr "Vrijwilligerswerk en nieuwe dojo's"
 
-#: ../../source/index.rst:32
+#: ../../source/index.rst:33
 msgid "For dojo teams"
 msgstr "Voor dojoteams"
 
-#: ../../source/index.rst:39
+#: ../../source/index.rst:40
+msgid "For the organisation"
+msgstr "Voor de organisatie"
+
+#: ../../source/index.rst:50
 msgid "More"
 msgstr "Meer"
 
@@ -57,12 +61,13 @@ msgstr ""
 #: ../../source/index.rst:10
 msgid ""
 "This help centre covers the website itself — creating an account, finding"
-" and booking a session, applying to volunteer or start a dojo, and "
-"running a session as a mentor. It's written for the people using the "
-"site, not for the people building it."
+" and booking a session, applying to volunteer or start a dojo, running a "
+"session as a mentor, and running the organisation's mail. It's written "
+"for the people using the site, not for the people building it."
 msgstr ""
 "Dit helpcentrum gaat over de website zelf: een account aanmaken, een "
 "sessie zoeken en boeken, solliciteren om vrijwilliger te worden of een "
-"dojo te starten, en een sessie begeleiden als mentor. Het is geschreven "
-"voor wie de site gebruikt, niet voor wie ze bouwt."
+"dojo te starten, een sessie begeleiden als mentor, en de e-mails van de "
+"organisatie beheren. Het is geschreven voor wie de site gebruikt, niet "
+"voor wie ze bouwt."
 

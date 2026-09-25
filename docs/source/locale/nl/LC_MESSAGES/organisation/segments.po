@@ -1,0 +1,125 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 13:17+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/segments.rst:2
+msgid "Segments: who gets a mail"
+msgstr "Segmenten: wie een e-mail krijgt"
+
+#: ../../source/organisation/segments.rst:4
+msgid ""
+"A segment describes a group of people with rules, for example \"parents "
+"of a girl aged 9 to 14 who lives within 25 km of Ghent\". It's worked out"
+" again every time it's used, so it's always up to date."
+msgstr ""
+"Een segment beschrijft een groep mensen met regels, bijvoorbeeld „ouders "
+"van een meisje van 9 tot 14 jaar dat binnen 25 km van Gent woont”. Het "
+"wordt telkens opnieuw berekend wanneer het gebruikt wordt, dus het is "
+"altijd actueel."
+
+#: ../../source/organisation/segments.rst:9
+msgid "Building a segment"
+msgstr "Een segment opbouwen"
+
+#: ../../source/organisation/segments.rst:11
+msgid ""
+"Under **Segments**, choose **New segment** and give it a name. Then add "
+"groups of rules:"
+msgstr ""
+"Kies onder **Segmenten** voor **Nieuw segment** en geef het een naam. "
+"Voeg daarna groepen regels toe:"
+
+#: ../../source/organisation/segments.rst:14
+msgid ""
+"A group about **Accounts** tests the account itself: its role (parent, "
+"mentor, champion), its language, where the family lives (province, or a "
+"distance from a dojo), when it was created."
+msgstr ""
+"Een groep over **Accounts** test het account zelf: de rol (ouder, mentor,"
+" champion), de taal, waar het gezin woont (provincie, of een afstand tot "
+"een dojo), wanneer het aangemaakt werd."
+
+#: ../../source/organisation/segments.rst:17
+msgid ""
+"A group about **Parents of a child who…** tests the children. All rules "
+"in such a group are about *the same child*: \"a girl\" and \"aged 9 to "
+"14\" means one child who is both. The mail goes to that child's parents."
+msgstr ""
+"Een groep over **Ouders van een kind dat…** test de kinderen. Alle regels"
+" in zo'n groep gaan over *hetzelfde kind*: „een meisje” en „9 tot 14 "
+"jaar” betekent één kind dat beide is. De e-mail gaat naar de ouders van "
+"dat kind."
+
+#: ../../source/organisation/segments.rst:21
+msgid ""
+"Each group matches when **all** or **any** of its rules match, as you "
+"choose. Groups at the top level must all match. Groups can hold nested "
+"groups, e.g. accounts that are mentors, or parents of a child who came to"
+" a session recently."
+msgstr ""
+"Een groep klopt wanneer **alle** of **een van** haar regels kloppen, naar"
+" keuze. De groepen op het hoogste niveau moeten allemaal kloppen. Groepen"
+" kunnen andere groepen bevatten, bv. accounts die mentor zijn, of ouders "
+"van een kind dat onlangs naar een sessie kwam."
+
+#: ../../source/organisation/segments.rst:26
+msgid ""
+"To add a rule, pick what it's about; the fields that fit appear next to "
+"it (a list to tick, a number of days, a dojo and a distance). Each rule "
+"is then shown as a sentence. The right-hand side shows how many accounts "
+"match, with some examples."
+msgstr ""
+"Om een regel toe te voegen, kiest u waarover hij gaat; de passende velden"
+" verschijnen ernaast (een lijst om aan te vinken, een aantal dagen, een "
+"dojo en een afstand). Elke regel wordt daarna als een zin getoond. Rechts"
+" ziet u hoeveel accounts overeenkomen, met enkele voorbeelden."
+
+#: ../../source/organisation/segments.rst:32
+msgid "How a child comes to sessions"
+msgstr "Hoe een kind naar sessies komt"
+
+#: ../../source/organisation/segments.rst:34
+msgid ""
+"Several rules use the figures the site works out every night from the "
+"attendance dojos mark: whether a child is **new**, **regular**, "
+"**occasional**, **at risk** (missed the last three sessions meant for "
+"them), **lapsed** (not in the last six months), **never came** or **aged "
+"out**, how many sessions they came to, how many they missed in a row, and"
+" when this changed. Only sessions meant for the child count: their age "
+"range, and girls' sessions only for girls."
+msgstr ""
+"Verschillende regels gebruiken de cijfers die de site elke nacht berekent"
+" uit de aanwezigheden die dojo's aanduiden: of een kind **nieuw**, "
+"**vaste bezoeker**, **af en toe**, **risico** (miste de laatste drie "
+"sessies die voor het kind bedoeld waren), **afgehaakt** (niet in de "
+"laatste zes maanden), **nooit gekomen** of **te oud** is, naar hoeveel "
+"sessies het kwam, hoeveel het er na elkaar miste, en wanneer dat "
+"veranderde. Alleen sessies die voor het kind bedoeld zijn tellen mee: de "
+"leeftijdscategorie, en meisjessessies alleen voor meisjes."
+
+#: ../../source/organisation/segments.rst:42
+msgid ""
+"A segment only says who *could* get a mail. A campaign or journey sends "
+"it only to those who want that kind of mail."
+msgstr ""
+"Een segment zegt alleen wie een e-mail *zou kunnen* krijgen. Een campagne"
+" of traject verstuurt hem alleen naar wie dat soort e-mail wil."
+

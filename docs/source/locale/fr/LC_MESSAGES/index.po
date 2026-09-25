@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 14:44+0000\n"
+"POT-Creation-Date: 2026-09-25 13:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -24,15 +24,19 @@ msgstr ""
 msgid "For families"
 msgstr "Pour les familles"
 
-#: ../../source/index.rst:24
+#: ../../source/index.rst:25
 msgid "Volunteering & new dojos"
 msgstr "Bénévolat et nouveaux dojos"
 
-#: ../../source/index.rst:32
+#: ../../source/index.rst:33
 msgid "For dojo teams"
 msgstr "Pour les équipes de dojo"
 
-#: ../../source/index.rst:39
+#: ../../source/index.rst:40
+msgid "For the organisation"
+msgstr "Pour l'organisation"
+
+#: ../../source/index.rst:50
 msgid "More"
 msgstr "Plus"
 
@@ -58,12 +62,13 @@ msgstr ""
 #: ../../source/index.rst:10
 msgid ""
 "This help centre covers the website itself — creating an account, finding"
-" and booking a session, applying to volunteer or start a dojo, and "
-"running a session as a mentor. It's written for the people using the "
-"site, not for the people building it."
+" and booking a session, applying to volunteer or start a dojo, running a "
+"session as a mentor, and running the organisation's mail. It's written "
+"for the people using the site, not for the people building it."
 msgstr ""
 "Ce centre d'aide porte sur le site lui-même : créer un compte, trouver et"
-" réserver une séance, poser sa candidature pour devenir bénévole ou "
-"lancer un dojo, et animer une séance en tant que mentor. Il s'adresse aux"
-" personnes qui utilisent le site, pas à celles qui le développent."
+" réserver une séance, postuler comme bénévole ou pour lancer un dojo, "
+"animer une séance comme mentor, et gérer les e-mails de l'organisation. "
+"Il est écrit pour les personnes qui utilisent le site, pas pour celles "
+"qui le construisent."
 

@@ -8,9 +8,9 @@ volunteers and new dojos get set up, and where dojo teams run their
 sessions day-to-day.
 
 This help centre covers the website itself — creating an account, finding
-and booking a session, applying to volunteer or start a dojo, and running a
-session as a mentor. It's written for the people using the site, not for
-the people building it.
+and booking a session, applying to volunteer or start a dojo, running a session
+as a mentor, and running the organisation's mail. It's written for
+the people using the site, not for the people building it.
 
 .. toctree::
    :maxdepth: 2
@@ -36,6 +36,16 @@ the people building it.
 
    dojo-team/logging-in
    dojo-team/running-a-session
+
+.. toctree::
+   :maxdepth: 2
+   :caption: For the organisation
+
+   organisation/dashboard
+   organisation/campaigns
+   organisation/journeys
+   organisation/segments
+   organisation/mail-templates
 
 .. toctree::
    :maxdepth: 1

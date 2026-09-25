@@ -1,0 +1,95 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 13:17+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/mail-templates.rst:2
+msgid "Mail templates"
+msgstr "Modèles d'e-mail"
+
+#: ../../source/organisation/mail-templates.rst:4
+msgid ""
+"Every mail the site sends has a template: its subject and text, in each "
+"language. Under **Mail templates** you see them all, the languages each "
+"one exists in, and what uses it: the site itself (booking confirmations, "
+"reminders, password resets, and so on) or campaigns and journeys."
+msgstr ""
+"Chaque e-mail envoyé par le site a un modèle : son objet et son texte, "
+"dans chaque langue. Sous **Modèles d'e-mail**, vous les voyez tous, les "
+"langues dans lesquelles chacun existe, et ce qui l'utilise : le site lui-"
+"même (confirmations d'inscription, rappels, réinitialisations de mot de "
+"passe, etc.) ou des campagnes et parcours."
+
+#: ../../source/organisation/mail-templates.rst:10
+msgid "Editing"
+msgstr "Modifier"
+
+#: ../../source/organisation/mail-templates.rst:12
+msgid ""
+"Open a template and pick a language tab. Change the subject and text and "
+"**Save**. The preview on the right shows the mail with example data."
+msgstr ""
+"Ouvrez un modèle et choisissez un onglet de langue. Modifiez l'objet et "
+"le texte, puis **Enregistrer**. L'aperçu à droite montre l'e-mail avec "
+"des données d'exemple."
+
+#: ../../source/organisation/mail-templates.rst:15
+msgid ""
+"Parts between ``{{`` and ``}}`` are filled in for each person, for "
+"example ``{{ recipient_name }}``; the page lists the ones this template "
+"can use. Dates take a format, like ``{{ start_time|date:\"l j F\" }}``, "
+"and day and month names follow the mail's language. A template that "
+"doesn't work is refused with an explanation, so a broken mail never goes "
+"out."
+msgstr ""
+"Les parties entre ``{{`` et ``}}`` sont complétées pour chaque personne, "
+"par exemple ``{{ recipient_name }}`` ; la page liste celles que ce modèle"
+" peut utiliser. Les dates prennent un format, comme ``{{ "
+"start_time|date:\"l j F\" }}``, et les noms des jours et des mois suivent"
+" la langue de l'e-mail. Un modèle qui ne fonctionne pas est refusé avec "
+"une explication : un e-mail cassé ne part donc jamais."
+
+#: ../../source/organisation/mail-templates.rst:21
+msgid ""
+"A language that has no version of its own uses the English one. Opening "
+"that language's tab starts from the English text, ready to translate."
+msgstr ""
+"Une langue sans version propre utilise la version anglaise. Ouvrir "
+"l'onglet de cette langue part du texte anglais, prêt à être traduit."
+
+#: ../../source/organisation/mail-templates.rst:25
+msgid "New templates and deleting"
+msgstr "Nouveaux modèles et suppression"
+
+#: ../../source/organisation/mail-templates.rst:27
+msgid ""
+"**New template** creates one for campaigns and journeys; write the "
+"English version first. You can delete a language version (English then "
+"takes its place) or a whole campaign template. The site's own templates "
+"and the English version of any template can't be deleted, and neither can"
+" a template a campaign that hasn't gone out yet still uses."
+msgstr ""
+"**Nouveau modèle** en crée un pour les campagnes et les parcours ; "
+"écrivez d'abord la version anglaise. Vous pouvez supprimer une version "
+"linguistique (l'anglaise prend alors sa place) ou un modèle de campagne "
+"entier. Les modèles propres au site et la version anglaise d'un modèle ne"
+" peuvent pas être supprimés, pas plus qu'un modèle qu'utilise encore une "
+"campagne pas encore envoyée."
+

@@ -1,0 +1,95 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 13:17+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Claude <noreply@anthropic.com>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/mail-templates.rst:2
+msgid "Mail templates"
+msgstr "E-mailsjablonen"
+
+#: ../../source/organisation/mail-templates.rst:4
+msgid ""
+"Every mail the site sends has a template: its subject and text, in each "
+"language. Under **Mail templates** you see them all, the languages each "
+"one exists in, and what uses it: the site itself (booking confirmations, "
+"reminders, password resets, and so on) or campaigns and journeys."
+msgstr ""
+"Elke e-mail die de site verstuurt, heeft een sjabloon: het onderwerp en "
+"de tekst, in elke taal. Onder **E-mailsjablonen** ziet u ze allemaal, in "
+"welke talen elk bestaat, en wat het gebruikt: de site zelf "
+"(inschrijvingsbevestigingen, herinneringen, nieuwe wachtwoorden "
+"enzovoort) of campagnes en trajecten."
+
+#: ../../source/organisation/mail-templates.rst:10
+msgid "Editing"
+msgstr "Bewerken"
+
+#: ../../source/organisation/mail-templates.rst:12
+msgid ""
+"Open a template and pick a language tab. Change the subject and text and "
+"**Save**. The preview on the right shows the mail with example data."
+msgstr ""
+"Open een sjabloon en kies een taaltabblad. Pas het onderwerp en de tekst "
+"aan en klik op **Opslaan**. De voorbeeldweergave rechts toont de e-mail "
+"met voorbeeldgegevens."
+
+#: ../../source/organisation/mail-templates.rst:15
+msgid ""
+"Parts between ``{{`` and ``}}`` are filled in for each person, for "
+"example ``{{ recipient_name }}``; the page lists the ones this template "
+"can use. Dates take a format, like ``{{ start_time|date:\"l j F\" }}``, "
+"and day and month names follow the mail's language. A template that "
+"doesn't work is refused with an explanation, so a broken mail never goes "
+"out."
+msgstr ""
+"Delen tussen ``{{`` en ``}}`` worden voor elke persoon ingevuld, "
+"bijvoorbeeld ``{{ recipient_name }}``; de pagina toont welke dit sjabloon"
+" kan gebruiken. Datums krijgen een formaat, zoals ``{{ "
+"start_time|date:\"l j F\" }}``, en de namen van dagen en maanden volgen "
+"de taal van de e-mail. Een sjabloon dat niet werkt, wordt met uitleg "
+"geweigerd, zodat er nooit een kapotte e-mail vertrekt."
+
+#: ../../source/organisation/mail-templates.rst:21
+msgid ""
+"A language that has no version of its own uses the English one. Opening "
+"that language's tab starts from the English text, ready to translate."
+msgstr ""
+"Een taal zonder eigen versie gebruikt de Engelse. Het tabblad van die "
+"taal openen begint van de Engelse tekst, klaar om te vertalen."
+
+#: ../../source/organisation/mail-templates.rst:25
+msgid "New templates and deleting"
+msgstr "Nieuwe sjablonen en verwijderen"
+
+#: ../../source/organisation/mail-templates.rst:27
+msgid ""
+"**New template** creates one for campaigns and journeys; write the "
+"English version first. You can delete a language version (English then "
+"takes its place) or a whole campaign template. The site's own templates "
+"and the English version of any template can't be deleted, and neither can"
+" a template a campaign that hasn't gone out yet still uses."
+msgstr ""
+"**Nieuw sjabloon** maakt er een voor campagnes en trajecten; schrijf "
+"eerst de Engelse versie. U kunt een taalversie verwijderen (dan neemt de "
+"Engelse haar plaats in) of een volledig campagnesjabloon. De eigen "
+"sjablonen van de site en de Engelse versie van een sjabloon kunnen niet "
+"verwijderd worden, net als een sjabloon dat een nog niet verstuurde "
+"campagne gebruikt."
+

@@ -30,7 +30,7 @@ update its diagram in the same change.
 8. [Notifications](#8-notifications)
 9. [Geo reference data](#9-geo-reference-data)
 10. [Redesign: rationale and plan](#10-redesign-rationale-and-plan)
-11. [Mailing and segmentation (work in progress)](#11-mailing-and-segmentation-work-in-progress)
+11. [Mailing, segmentation and campaigns](#11-mailing-segmentation-and-campaigns)
 12. [Organisation events and promotion (later)](#12-organisation-events-and-promotion-later)
 
 ---
@@ -286,6 +286,8 @@ erDiagram
         int min_age
         int max_age
         string audience "everyone | girls (a label, never a restriction)"
+        datetime published_at "first opened (the new-sessions mail)"
+        datetime announced_at "families told"
     }
     REGISTRATION {
         bigint id PK
@@ -294,6 +296,7 @@ erDiagram
         bool waiting_list
         int position "first-come queue"
         bool attended "null = not marked"
+        datetime created_at "signed up"
     }
 ```
 
@@ -330,6 +333,54 @@ stateDiagram-v2
     draft : draft<br/>hidden from the public site
     open : open<br/>public, sign-ups accepted
     closed : closed<br/>public, no new sign-ups
+```
+
+### Engagement and cancellations
+
+Cancelling a place deletes its `Registration` (so places and the waiting
+list stay simple) after appending a `RegistrationCancellation`. Every night
+`events.engagement.rebuild()` recomputes `NinjaEngagement`: per child and
+dojo they came to in the last year, plus an overall row measured at their
+main dojo. It only counts sessions meant for the child (age range; a girls'
+session only for girls), and records each overall stage change in
+`NinjaEngagementChange`. Segments, journeys and the dojo team's attendance
+list read it (section 11).
+
+```mermaid
+erDiagram
+    NINJA ||--o{ REGISTRATION_CANCELLATION : "cancelled places"
+    EVENT ||--o{ REGISTRATION_CANCELLATION : "cancellations"
+    NINJA ||--o{ NINJA_ENGAGEMENT : "nightly figures"
+    DOJO |o--o{ NINJA_ENGAGEMENT : "per dojo; empty = overall"
+    NINJA ||--o{ NINJA_ENGAGEMENT_CHANGE : "stage changes"
+
+    REGISTRATION_CANCELLATION {
+        bool was_waitlisted
+        datetime signed_up_at
+        datetime cancelled_at
+        bigint cancelled_by FK
+    }
+    NINJA_ENGAGEMENT {
+        bigint dojo_id FK "nullable: overall"
+        bigint main_dojo_id FK
+        string stage "new | regular | occasional | at_risk | lapsed | never_attended | aged_out"
+        date first_attended
+        date last_attended
+        int attended_total
+        int attended_180d
+        int offered_180d
+        float attendance_rate
+        int missed_in_a_row
+        int no_shows_90d
+        bool has_upcoming
+        bool from_marked_attendance
+        date computed_on
+    }
+    NINJA_ENGAGEMENT_CHANGE {
+        string from_stage
+        string to_stage
+        date changed_on
+    }
 ```
 
 ---
@@ -1502,103 +1553,168 @@ at every step:
 
 ---
 
-## 11. Mailing and segmentation (work in progress)
+## 11. Mailing, segmentation and campaigns
 
-The `mailing` app is the first step toward bulk and marketing mail. Segments,
-templates and draft campaigns work, and `seed_mailing` seeds examples, but
-nothing sends mail yet. See `CLAUDE.md`, "Mailing and segmentation", for how
-it works and the list of known gaps. The diagram shows the models as they
-are today. The account side is `User.preferred_language` and
-`User.postal_code`, plus `Ninja.gender` (section 2).
+Every mail the site sends goes through the `mailing` app: one gateway,
+`mailing.services.send()`, queues it as an `EmailMessage` row, and two
+Celery workers send it (see `CLAUDE.md`, "Background jobs" and "Mailing,
+segmentation and the organisation dashboard"). Preferences and consent are
+per account and kind of mail. The organisation runs campaigns, journeys,
+segments and mail templates from its dashboard (`/manage/`). The account
+side is `User.preferred_language` and `User.postal_code`, plus
+`Ninja.gender` (section 2); the engagement figures segments use are in
+section 4. This section first shows the models as built, then keeps the
+plan they were built from, with its decisions.
+
+### Consent, the queue and bounces
+
+```mermaid
+erDiagram
+    USER ||--o{ MAIL_PREFERENCE : "choice per category"
+    USER ||--o{ CONSENT_EVENT : "append-only log"
+    USER |o--o{ EMAIL_MESSAGE : "recipient account"
+    EMAIL_MESSAGE |o--o{ BOUNCE_RECORD : "matched bounce"
+
+    MAIL_PREFERENCE {
+        bigint user_id FK "unique with category"
+        string category "no row = the category default"
+        bool subscribed
+    }
+    CONSENT_EVENT {
+        bigint user_id FK
+        string category
+        bool subscribed
+        string source "signup | preferences | unsubscribe_link | admin | bounce"
+        string wording_version "PRIVACY_WORDING_VERSION"
+    }
+    EMAIL_SUPPRESSION {
+        string email UK "lower-case"
+        string reason "hard_bounce | soft_bounces | complaint | manual"
+    }
+    EMAIL_MESSAGE {
+        string category
+        string template_key
+        string recipient "the address used"
+        string language
+        string subject "rendered when queued"
+        text body "rendered when queued"
+        string status "pending | sending | sent | failed | bounced | suppressed"
+        string status_reason
+        int priority "service first, campaigns last"
+        datetime send_after "nullable"
+        datetime claimed_at
+        int attempts
+        string idempotency_key UK "nullable"
+        string message_id "our Message-ID"
+        bool is_test "a campaign test to its author"
+        bigint campaign_id FK "nullable"
+    }
+    BOUNCE_RECORD {
+        string email
+        string kind "hard | soft | complaint"
+        string status_code "e.g. 5.1.1"
+        bigint message_id FK "nullable"
+    }
+    PROCESSED_IMAP_MESSAGE {
+        string mailbox "unique with uid: IMAP name:uidvalidity, or pop3:host"
+        string uid
+    }
+    EMAIL_TEMPLATE {
+        string key "unique with language"
+        string language "en-us is the fallback"
+        string category
+        string subject "Django template syntax"
+        text body "plain text"
+    }
+```
+
+### Campaigns, journeys and segments
 
 ```mermaid
 erDiagram
     SEGMENT ||--o{ SEGMENT_GROUP : "groups"
-    SEGMENT_GROUP |o--o{ SEGMENT_GROUP : "parent / children (nesting)"
+    SEGMENT_GROUP |o--o{ SEGMENT_GROUP : "parent / children"
     SEGMENT_GROUP ||--o{ SEGMENT_RULE : "rules"
     SEGMENT |o--o{ CAMPAIGN : "segment (SET_NULL)"
-    CAMPAIGN |o--o{ EMAIL_MESSAGE : "campaign (SET_NULL)"
-    USER |o--o{ EMAIL_MESSAGE : "user (SET_NULL)"
+    SEGMENT |o--o{ JOURNEY : "segment (SET_NULL)"
+    CAMPAIGN |o--o{ EMAIL_MESSAGE : "its mail"
+    JOURNEY ||--o{ JOURNEY_DELIVERY : "who got it when"
+    JOURNEY_DELIVERY |o--|| EMAIL_MESSAGE : "the mail"
 
     SEGMENT {
-        bigint id PK
         string name
-        bool is_active
+        bool is_active "offered for campaigns"
     }
     SEGMENT_GROUP {
-        bigint id PK
-        bigint segment_id FK
-        bigint parent_id FK "nullable, root groups are ANDed"
+        bigint parent_id FK "nullable: root groups are ANDed"
         string operator "and | or"
         string scope "user | ninja (rules describe the same child)"
     }
     SEGMENT_RULE {
-        bigint id PK
         bigint group_id FK
-        string attribute "registry key, e.g. ninja_gender"
-        string operator "equals | in | not_in | is | within"
+        string attribute "registry key"
+        string operator "equals | in | not_in | is | within | within_days | gte | lte"
         json value
     }
     CAMPAIGN {
-        bigint id PK
-        bigint segment_id FK "nullable"
-        json segment_snapshot "nullable, frozen at launch"
-        string category "usually newsletter"
-        string template_key "EmailTemplate.key"
-        json context "extra template variables"
+        string name
+        string category "one people can opt out of"
+        string template_key
+        json context "template variables"
         string status "draft | queued | sending | completed | cancelled"
         datetime scheduled_at "nullable"
+        json segment_snapshot "frozen at launch; the audience is resolved from it"
+        datetime launched_at
+        bigint launched_by FK
+        datetime queued_at "every recipient's mail queued"
     }
-    EMAIL_MESSAGE {
-        bigint id PK
-        string type "transactional | registration_reminder | waitlist | newsletter"
-        string recipient "address actually used"
-        bigint user_id FK "nullable"
-        bigint campaign_id FK "nullable"
-        string status "pending | sending | sent | failed | bounced"
-        string provider_id "to match bounces"
-        datetime sent_at
-        datetime bounced_at
-    }
-    EMAIL_TEMPLATE {
-        bigint id PK
-        string key "unique with language"
-        string language "en-us | nl-be | fr-be | de"
+    JOURNEY {
+        string name
         string category
-        string subject "Django template syntax"
-        text body "plain text, Django template syntax"
+        string template_key
+        json context
+        int cooldown_days
+        bool is_active
     }
-    PROCESSED_IMAP_MESSAGE {
-        bigint id PK
-        string mailbox "unique with uid"
-        string uid
+    JOURNEY_DELIVERY {
+        bigint journey_id FK
+        bigint user_id FK
+        bigint email_id FK "nullable"
+        datetime created_at
     }
 ```
 
+### How mail goes out
+
 ```mermaid
 sequenceDiagram
-    participant Beat as celery beat (DatabaseScheduler)
-    participant R as Redis (broker, db 0)
-    participant W as celery worker
+    participant App as The site (a view, a job, a campaign)
     participant DB as MySQL
+    participant P as periodic worker (beat embedded)
+    participant R as Redis (broker, db 2)
+    participant M as mailing worker
     participant SMTP as SMTP (Mailpit in dev)
-    participant IMAP as Bounce mailbox
+    participant BOX as Bounce mailbox (IMAP; Mailpit POP3 in dev)
 
-    Beat-)R: send_pending_emails (every 10 s)
-    R-)W: task
-    W->>DB: EmailMessage pending → sending
-    W->>SMTP: send
-    W->>DB: sent (+ provider_id) / failed
-    Beat-)R: process_bounces (every 60 s)
-    R-)W: task
-    W->>IMAP: fetch new messages
-    W->>DB: skip if in ProcessedImapMessage, else mark EmailMessage bounced
-    Note over W,DB: intended flow. Both tasks are still stubs
+    App->>DB: send(): render, check consent, INSERT EmailMessage (pending or suppressed)
+    P->>DB: send_pending_emails, every 10 s: claim by priority (skip_locked), mark sending
+    P-)R: group of send_email_batch subtasks
+    R-)M: send_email_batch (rate_limit, autoretry with backoff)
+    M->>DB: re-check consent and blocks per row
+    M->>SMTP: send (envelope sender = bounce address)
+    M->>DB: sent / failed, row by row
+    P->>BOX: process_bounces, every 5 min
+    P->>DB: BounceRecord; bounced + EmailSuppression, or consent switched off
 ```
 
 ### Plan: mail preferences, sending, and engagement segments
 
-This plan builds on the current state shown above. It covers four things:
+> **Built.** Every phase below is done (see "Progress" under the
+> implementation plan). The plan stays as the record of why things are the
+> way they are; where the build differs from it, the progress notes and the
+> diagrams above describe what was built.
+
+This plan covers four things:
 mail categories that people can opt in to and out of, one sending pipeline
 that always enforces those choices, a segmentation engine built on
 engagement data (who comes regularly, who is dropping off), and recording
