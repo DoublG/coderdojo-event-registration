@@ -2115,7 +2115,10 @@ Each phase ships with tests (the repo rule) and updates this section and
 (en/fr/nl).
 
 **Progress (2026-09-25).** Parts of several phases are in place:
-- phase 1: the segment models and migration, admin registrations
+- phase 1: done. Segment models and migration, admin registrations,
+  correct task names, a broker db of its own, the two queues and workers
+  (also in `start.sh`), and the scaffolding (`test_mail`, the hourly test
+  task, the old reminders draft) removed
 - phase 2: `Ninja.gender` in the model, the admin and the seeders
 - phase 3: `mailing.categories`, `User.preferred_language` and templates
   per language

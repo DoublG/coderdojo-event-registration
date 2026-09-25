@@ -175,26 +175,32 @@ Per-project convention: reach for htmx for anything that needs server-driven par
 
 `send_mail(..., from_email=settings.DEFAULT_FROM_EMAIL, ...)` is called directly (synchronously, in the request) from `applications.services` and `accounts.provisioning`; nothing goes through `mailing` or Celery yet. `EMAIL_BACKEND` is env-driven in `website/settings.py`: console backend by default (host dev), SMTP once `EMAIL_HOST` is set. The devcontainer points it at **Mailpit** (`mailpit` service in `.devcontainer/docker-compose.yml`, SMTP on `mailpit:1025`, no auth/TLS), which catches every outgoing mail. Read them at `https://coolregistration.localhost/mails/` (nginx proxies `/mails/` to Mailpit's UI; `MP_WEBROOT=/mails` has to match that prefix), or directly on the host at `http://localhost:8025/mails/`. Mail is kept on the `mailpit-data` volume (max 5000 messages).
 
-### Background jobs: Celery worker + beat
+### Background jobs: two Celery workers, beat embedded
 
 Celery (`website/celery.py`, loaded from `website/__init__.py` so `@shared_task` binds to it) runs background and scheduled work. Configuration is the `CELERY_*` block in `website/settings.py` (`config_from_object(..., namespace="CELERY")`):
 
-- **Broker:** Redis, `redis://REDIS_HOST:REDIS_PORT/0`. That is **the same db 0 as `CACHES`** (Channels uses db 1). A `cache.clear()` also flushes the queued tasks, so give the broker its own db before anything calls it.
-- **Results:** `django_celery_results` (`CELERY_RESULT_BACKEND = "django-db"`), stored as `TaskResult` rows and visible in the Django admin. `CELERY_TASK_TRACK_STARTED` is on and `CELERY_TASK_TIME_LIMIT` is 30 minutes. `CELERY_CACHE_BACKEND` has no effect with the DB result backend.
+- **Two workers, two queues** (kept lean, same in dev and production; design in `DATA_MODEL.md` §11, "Production: two Celery workers under systemd"):
+  - The `periodic` worker (`-Q periodic -B`) runs beat embedded, plus every task beat triggers. `CELERY_TASK_ROUTES` is built from `CELERY_BEAT_SCHEDULE`, so a scheduled task is routed to `periodic` automatically.
+  - The mailing worker (`-Q celery`) runs everything else on the default queue. A new task needs no routing.
+  - Both run with concurrency 1. Keep periodic jobs short: a slow one holds up the 10-second mail dispatcher, so a heavy job only enqueues its real work on the default queue. Never add `-B` to the second worker, or every job fires twice.
+- **Broker:** Redis db `CELERY_BROKER_DB` (default 2). The cache is db 0 and Channels db 1, so a `cache.clear()` can't drop queued tasks.
+- **Delivery:** `acks_late` plus `reject_on_worker_lost` (and a prefetch of 1), so a task whose worker dies halfway is handed out again. Write tasks to be safe to run twice.
+- **Results:** `CELERY_TASK_IGNORE_RESULT = True`. Tasks report through the rows they change (e.g. `EmailMessage.status`), not through results. The `django-db` result backend stays configured for any task that opts in with `ignore_result=False`. `CELERY_TASK_TIME_LIMIT` is 30 minutes.
 - **Time zone:** `CELERY_TIMEZONE = "Europe/Brussels"`, so crontab schedules are in Belgian local time. Django itself stays on `TIME_ZONE = "UTC"`.
-- **Schedule (beat):** `django_celery_beat` with its `DatabaseScheduler`, so the live schedule is the `PeriodicTask` table, which you can edit in the Django admin (*Periodic tasks*). At startup, beat copies two code-defined sources into that table: `CELERY_BEAT_SCHEDULE` in settings, and `add_periodic_task` calls in `website/celery.py`'s `on_after_configure` hook. Beat only *sends* a task by name at the scheduled time; a worker has to have that name registered. A misspelled name only shows up in the worker log, as "Received unregistered task". Run exactly one beat, or every job fires once per beat.
-- **Tasks:** `autodiscover_tasks()` picks up each installed app's `tasks.py`, so for now that's `mailing/tasks.py`. The `test` (hourly, prints `hello`) and `debug_task` tasks in `website/celery.py` are scaffolding.
+- **Schedule:** `CELERY_BEAT_SCHEDULE` in settings is the only place jobs are defined (no `add_periodic_task` calls). Beat uses `django_celery_beat`'s `DatabaseScheduler`, which copies that dict into the `PeriodicTask` table at startup; you can edit it in the Django admin (*Periodic tasks*). It never deletes an entry the code stopped defining: remove stale ones with a data migration, as `mailing/migrations/0005_…` does. Beat only *sends* a task by name; a misspelled name shows up in the worker log as "Received unregistered task".
+- **Tasks:** `autodiscover_tasks()` picks up each installed app's `tasks.py`; for now that's `mailing/tasks.py`.
 
-**Dev processes:** `.devcontainer/start.sh` starts the worker and beat as background processes before `runserver`. The worker logs to `/workspace/background_job.log` and beat to `/workspace/background_job_beats.log`; both files are gitignored. Nothing supervises or autoreloads them, unlike `runserver`: **after changing a task or the schedule, restart them**, or the worker keeps running the old code (a stale worker is exactly how you get "unregistered task" errors). From a workspace shell:
+**Dev processes:** `.devcontainer/start.sh` starts both workers in the background before `runserver`, logging to `/workspace/celery-periodic.log` and `/workspace/celery-mailing.log` (gitignored). Nothing supervises or autoreloads them, unlike `runserver`: **after changing a task or the schedule, restart them**, or they keep running the old code (a stale worker is exactly how you get "unregistered task" errors). From a workspace shell (run the `pkill` on its own: `pkill -f` also matches a shell whose command line contains the pattern):
 
 ```sh
-pkill -f "celery -A website"
-celery -A website worker -l INFO > background_job.log 2>&1 &
-celery -A website beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler > background_job_beats.log 2>&1 &
-celery -A website inspect registered      # what the running worker actually knows
+pkill -f "[c]elery -A website worker"
+celery -A website worker -n periodic@%h -Q periodic -c 1 -B --scheduler django_celery_beat.schedulers:DatabaseScheduler -l INFO > celery-periodic.log 2>&1 &
+celery -A website worker -n mailing@%h -Q celery -c 1 -l INFO > celery-mailing.log 2>&1 &
+celery -A website inspect active_queues   # which worker listens to which queue
+celery -A website inspect registered      # what the running workers actually know
 ```
 
-**Production:** not wired up yet. `celery`, `django_celery_results` and `django-celery-beat` are in `requirements.txt`, but `scripts/deploy.sh` only reloads gunicorn. Decided, kept lean: Level27's Redis is the broker, and there are two systemd services that `deploy.sh` installs and restarts. A `periodic` worker runs beat embedded (`-B`) plus the beat-triggered jobs, and a mailing worker runs everything else on the default queue. Each has concurrency 1, and `start.sh` will mirror this. Design in `DATA_MODEL.md` §11, "Production: two Celery workers under systemd". Until that exists, nothing user-facing may depend on a task running. This is the main blocker for mailing: the plan makes Celery the only thing that sends mail.
+**Production:** not wired up yet. `celery`, `django_celery_results` and `django-celery-beat` are in `requirements.txt`, but `scripts/deploy.sh` only reloads gunicorn. Decided: Level27's Redis is the broker, and the same two workers run as systemd services that `deploy.sh` installs and restarts. They share the machine's memory with gunicorn, so they recycle their child processes and run at lower priority. Until that exists, nothing user-facing may depend on a task running. This is the main blocker for mailing: Celery is the only thing that sends mail.
 
 **Tests:** no `CELERY_TASK_ALWAYS_EAGER` override exists. Test a task by calling the function directly (`send_pending_emails()`), not `.delay()`, which would need a broker.
 
@@ -212,10 +218,8 @@ celery -A website inspect registered      # what the running worker actually kno
 - **Bounces** (planned): `mailing.bounce.BounceProcessor` (connect → fetch new → parse → handle) is meant to poll the IMAP bounce mailbox from the `process_bounces` beat task. It marks the matching `EmailMessage` `bounced`, and records each handled IMAP message in `ProcessedImapMessage` (unique `mailbox`+`uid`) so a message is never processed twice.
 
 **Known gaps as of 2026-09-25:**
-- Nothing sends yet: `send_pending_emails`, `process_bounces` and `BounceProcessor` are empty stubs, there's no `send()` gateway, and `EmailMessage` still has its own `type` enum instead of a `MailCategory`. `CELERY_BEAT_SCHEDULE` names `mailer.tasks.*`, but the app is `mailing`, so beat will send tasks no worker has registered.
+- Nothing sends yet: `send_pending_emails`, `process_bounces` and `BounceProcessor` are empty stubs, there's no `send()` gateway, and `EmailMessage` still has its own `type` enum instead of a `MailCategory`.
 - No consent, unsubscribe or suppression model yet. The newsletter category needs an explicit opt-in before any campaign goes out. When the Mail preferences card is built, it carries the privacy explanation above its toggles (approved wording in `DATA_MODEL.md` §11, "Sending pipeline" step 5).
-- `segmentation/services/reminders.py` is an unfinished draft (it imports a non-existent `users` app and filters on fields that don't exist). It isn't registered or imported anywhere.
-- The `test_mail` command is an empty stub. Its filename matches `test*.py`, so the test runner imports it: keep it importable.
 
 ### Sensitive vs. public media
 

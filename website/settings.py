@@ -86,27 +86,52 @@ DEFAULT_FROM_EMAIL = env(
     'DEFAULT_FROM_EMAIL', default='CoderDojo Belgium <no-reply@coderdojobelgium.example>'
 )
 
-# Celery Configuration Options
+# Celery (website/celery.py). Two workers, see DATA_MODEL.md §11
+# "Production: two Celery workers under systemd": a `periodic` worker with
+# beat embedded runs the jobs beat triggers, and a mailing worker runs
+# everything else on the default queue.
 CELERY_TIMEZONE = "Europe/Brussels"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
 CELERY_RESULT_BACKEND = 'django-db'
-CELERY_CACHE_BACKEND = 'default'
+# Tasks report through the rows they change (EmailMessage.status, ...), not
+# through results: without this the 10-second dispatcher alone would write
+# thousands of TaskResult rows a day.
+CELERY_TASK_IGNORE_RESULT = True
 
-CELERY_BROKER_URL = f"redis://{ env('REDIS_HOST', default='127.0.0.1') }:{ env('REDIS_PORT', default='6379') }/0"
+# Redis db 0 is the cache and db 1 the Channels layer: the broker gets its
+# own, so a cache.clear() can never drop queued tasks.
+CELERY_BROKER_URL = "redis://{host}:{port}/{db}".format(
+    host=env('REDIS_HOST', default='127.0.0.1'),
+    port=env('REDIS_PORT', default='6379'),
+    db=env('CELERY_BROKER_DB', default='2'),
+)
 
+# A task is acknowledged only once it's done, so the broker hands out a
+# task again if its worker dies halfway. The mail tasks are written to be
+# safe to run twice (rows already `sent` are skipped).
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+
+# Every task beat triggers runs on the `periodic` queue; anything not listed
+# here stays on the default queue (the mailing worker).
+PERIODIC_QUEUE = "periodic"
 CELERY_BEAT_SCHEDULE = {
-    "process-mail-bounces-every-minute": {
-        "task": "mailer.tasks.process_bounces",
-        "schedule": 60.0,
+    "process-mail-bounces": {
+        "task": "mailing.tasks.process_bounces",
+        "schedule": 5 * 60.0,
+        "options": {"expires": 5 * 60},
     },
-
-    "send-pending-emails-every-10-seconds": {
-        "task": "mailer.tasks.send_pending_emails",
+    "send-pending-emails": {
+        "task": "mailing.tasks.send_pending_emails",
         "schedule": 10.0,
+        # A worker that was down doesn't come back to a pile of stale runs.
+        "options": {"expires": 10},
     },
 }
+CELERY_TASK_ROUTES = {entry["task"]: {"queue": PERIODIC_QUEUE} for entry in CELERY_BEAT_SCHEDULE.values()}
 
 # Application definition
 
