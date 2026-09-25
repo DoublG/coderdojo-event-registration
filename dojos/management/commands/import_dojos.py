@@ -7,6 +7,7 @@ from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.core.management.base import BaseCommand
 
+from dojos.languages import region_languages
 from dojos.models import Dojo
 from geo.geocoding import USER_AGENT, geocode
 from geo.models import Municipality
@@ -131,7 +132,7 @@ class Command(BaseCommand):
                 updated += 1 if existing is not None else 0
                 continue
 
-            _, was_created = Dojo.objects.update_or_create(
+            dojo, was_created = Dojo.objects.update_or_create(
                 name=name,
                 defaults={
                     "municipality": municipality,
@@ -139,6 +140,10 @@ class Command(BaseCommand):
                     "location": location,
                 },
             )
+            if was_created:
+                # A starting language from its region; the team can change it.
+                dojo.languages = region_languages(dojo)
+                dojo.save(update_fields=["languages"])
             created += 1 if was_created else 0
             updated += 1 if not was_created else 0
 

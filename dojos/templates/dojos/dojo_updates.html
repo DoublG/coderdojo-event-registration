@@ -35,6 +35,7 @@ POST_UPDATES; anyone with admin access can read the list.
           <ul class="cd-form__errors">{% for error in form.text.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
           {{ form.text }}
         </div>
+        {% include "dojos/partials/_translation_fields.html" %}
         <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Post update" %}</button>
       </form>
     </section>

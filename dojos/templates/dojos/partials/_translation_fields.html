@@ -1,0 +1,20 @@
+{% load i18n %}{% comment %}
+A form's texts in the dojo's other languages (core.content_languages): one
+collapsible section per language, from `form.translation_groups`. The main
+fields above are the main language; a text left empty here shows the
+main-language version to visitors who read this language, with an "Only in"
+note. A language added on the Settings page gets its section once saved.
+{% endcomment %}
+{% for group in form.translation_groups %}
+  <details class="cd-form__group translation-group" lang="{{ group.code }}"{% for field in group.fields %}{% if field.value %} open{% endif %}{% endfor %}>
+    <summary class="cd-form__group-title heading-md">{% blocktranslate with language=group.name %}In {{ language }}{% endblocktranslate %}</summary>
+    <p class="cd-form__help caption">{% translate "Optional. Leave a text empty and visitors who read this language see the main-language version." %}</p>
+    {% for field in group.fields %}
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        <ul class="cd-form__errors">{% for error in field.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+      </div>
+    {% endfor %}
+  </details>
+{% endfor %}

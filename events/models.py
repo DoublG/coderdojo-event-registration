@@ -4,6 +4,8 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from core.content_languages import TranslatableModel
+
 MARKDOWN_HELP_TEXT = "Supports basic Markdown — # headings, **bold**, *italic*, links, lists."
 
 
@@ -22,7 +24,7 @@ class EventManager(models.Manager.from_queryset(EventQuerySet)):
         return super().get_queryset().select_related("dojo__municipality")
 
 
-class Event(models.Model):
+class Event(TranslatableModel):
     DRAFT = "draft"
     OPEN = "open"
     CLOSED = "closed"
@@ -31,6 +33,8 @@ class Event(models.Model):
         (OPEN, _("Open")),
         (CLOSED, _("Closed")),
     ]
+
+    TRANSLATABLE_FIELDS = ("name", "description")
 
     name = models.CharField(max_length=200)
     dojo = models.ForeignKey("dojos.Dojo", on_delete=models.CASCADE)
@@ -97,6 +101,10 @@ class Event(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.dojo})"
+
+    def content_languages(self):
+        """A session is given in, and written in, its dojo's languages."""
+        return self.dojo.content_languages()
 
     @property
     def places_left(self):

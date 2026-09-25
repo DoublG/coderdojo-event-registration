@@ -2679,3 +2679,39 @@ erDiagram
     NINJA }o--o| DOJO : "home_dojo (first sign-up, then the guardian)"
 ```
 
+## 19. A dojo's languages, and its texts in them (built)
+
+**Built.** Decisions: a dojo decides the languages it supports; **one setting
+means both** the languages its sessions are given in and the languages its
+texts are written in; a visitor whose language the dojo doesn't write in
+sees the **main language**, with an "Only in ..." note.
+
+- **`Dojo.languages`**: an ordered list of `LANGUAGES` codes, the first is the
+  **main language** (Settings page: **Languages** + **Main language**; the
+  main one is always included and first). A new dojo starts in its
+  champion's language; existing and seeded dojos start from their region
+  (`dojos/languages.py`: Walloon provinces French, Flemish Dutch, Brussels
+  both, otherwise Dutch; the data migration `dojos/0004` did the same).
+  The organisation dojo has all three.
+- **Translatable texts** (`core/content_languages.py`, `TranslatableModel`):
+  `Dojo` (tagline, description, schedule_description, visit_notes), `Event`
+  (name, description; in its dojo's languages) and `content.Announcement`
+  (text). The normal columns hold the main language; the others live in a
+  `translations` JSON field (`{"fr-be": {"description": "..."}}`).
+  `obj.localized(field, language=None)` returns the page's (or given)
+  language when written, else the main-language text as a `LocalizedText`
+  with `is_fallback`. Templates: `{% load content_i18n %}`,
+  `{{ dojo|localized:"description" }}`, `{% only_in text %}`,
+  `{{ codes|language_names }}`.
+- **Editing:** each form gets an optional section per other language (**In
+  <language>**, `dojos/partials/_translation_fields.html`) from
+  `add_translation_fields` / `save_translation_fields`; a newly added
+  language gets its section once saved. Removing a language keeps its
+  texts (they come back if it's added again).
+- **Families:** the dojo page says "Sessions in ...", a session page has a
+  **Language** row, and the dojo finder and events list filter on language
+  (`languages__contains`). Mails use the session's name in the recipient's
+  mail language (`mailing.automated`).
+- **Not per-dojo yet:** the organisation's catalogue content (pathways, FAQs,
+  badges, belts, testimonials, team bios, promotion texts) is still shown as
+  written.

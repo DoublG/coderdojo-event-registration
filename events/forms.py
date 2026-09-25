@@ -1,9 +1,16 @@
 from datetime import datetime
 
 from django import forms
+from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from core.content_languages import (
+    add_translation_fields,
+    bound_translation_groups,
+    optional_copy,
+    save_translation_fields,
+)
 from core.image_library import library_filename, use_library_image
 from dojos.models import Dojo
 from pathways.models import Pathway
@@ -39,6 +46,12 @@ class EventSearchForm(forms.Form):
         required=False,
         choices=[(DATE_ANY, _("Any date")), (DATE_WEEK, _("This week")), (DATE_MONTH, _("This month"))],
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-date"}),
+    )
+    # Only dojos (or sessions) given in this language (Dojo.languages).
+    language = forms.ChoiceField(
+        required=False,
+        choices=[("", _("Any language"))] + list(settings.LANGUAGES),
+        widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-language"}),
     )
     age = forms.ChoiceField(
         required=False,
@@ -148,6 +161,11 @@ class EventForm(forms.ModelForm):
             self.fields["event_date"].initial = self.instance.start_time.date()
             self.fields["start_time"].initial = self.instance.start_time.time()
             self.fields["end_time"].initial = self.instance.end_time.time()
+        # The session's name and description in the dojo's other languages.
+        labels = {"name": _("Name"), "description": _("Description")}
+        self.translation_groups = bound_translation_groups(self, add_translation_fields(
+            self, self.instance, lambda field: optional_copy(self.fields[field], labels[field]),
+        ))
 
     def clean_audience(self):
         return self.cleaned_data.get("audience") or Event.EVERYONE
@@ -157,12 +175,12 @@ class EventForm(forms.ModelForm):
         start_time = cleaned_data.get("start_time")
         end_time = cleaned_data.get("end_time")
         if start_time and end_time and end_time <= start_time:
-            self.add_error("end_time", "End time must be after the start time.")
+            self.add_error("end_time", _("End time must be after the start time."))
         if "places" not in self.errors and cleaned_data.get("places") is None:
             if cleaned_data.get("external_registration_url"):
                 cleaned_data["places"] = 0
             else:
-                self.add_error("places", "This field is required.")
+                self.add_error("places", _("This field is required."))
         return cleaned_data
 
     def save(self, commit=True):
@@ -174,6 +192,7 @@ class EventForm(forms.ModelForm):
         template_image = self.cleaned_data.get("template_image")
         if template_image and not self.files.get("image"):
             use_library_image(event, "image", "events", template_image)
+        save_translation_fields(self, event)
 
         if commit:
             event.save()

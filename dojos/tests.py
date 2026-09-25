@@ -2147,3 +2147,91 @@ class TeamAttendanceTests(TestCase):
         Registration.objects.create(event=self.event, ninja=visitor, position=1, waiting_list=False)
         response = self.client.get(self._url("dojo_event_attendance"))
         self.assertContains(response, "Visiting")
+
+
+
+class DojoLanguagesTests(TempMediaMixin, TestCase):
+    """A dojo's languages (core.content_languages, DATA_MODEL.md §19): the
+    languages its sessions are given in and its texts are written in."""
+
+    def setUp(self):
+        super().setUp()
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Brussels", champion=self.owner, address="Rue Haute 1, Brussels",
+                              description="Een gezellige codeerclub.")
+        self.client.force_login(self.owner)
+
+    def _post(self, **extra):
+        data = {"name": "CoderDojo Brussels", "tagline": "", "description": "Een gezellige codeerclub.",
+                "schedule_description": "", "min_age": "", "max_age": "", "email": "", "phone": "",
+                "municipality": "", "address": "Rue Haute 1, Brussels", "visit_notes": ""}
+        data.update(extra)
+        return self.client.post(reverse("dojo_manage", kwargs={"dojo_id": self.dojo.id}), data)
+
+    def test_settings_save_languages_main_first(self):
+        self._post(languages=["nl-be", "fr-be"], main_language="fr-be")
+        self.dojo.refresh_from_db()
+        self.assertEqual(self.dojo.languages, ["fr-be", "nl-be"])
+
+    def test_main_language_is_always_included(self):
+        self._post(languages=["en-us"], main_language="nl-be")
+        self.dojo.refresh_from_db()
+        self.assertEqual(self.dojo.languages, ["nl-be", "en-us"])
+
+    def test_a_post_without_languages_keeps_them(self):
+        self.dojo.languages = ["fr-be"]
+        self.dojo.save()
+        self._post()
+        self.dojo.refresh_from_db()
+        self.assertEqual(self.dojo.languages, ["fr-be"])
+
+    def test_other_language_texts_are_edited_and_shown(self):
+        self.dojo.languages = ["nl-be", "fr-be"]
+        self.dojo.save()
+        page = self.client.get(reverse("dojo_manage", kwargs={"dojo_id": self.dojo.id}))
+        self.assertEqual([g["code"] for g in page.context["form"].translation_groups], ["fr-be"])
+
+        self._post(languages=["nl-be", "fr-be"], main_language="nl-be", **{"tr__fr-be__description": "Un club de code sympa."})
+        self.dojo.refresh_from_db()
+        self.assertEqual(self.dojo.translation_for("fr-be", "description"), "Un club de code sympa.")
+
+        self.client.logout()
+        french = self.client.get(reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}), HTTP_ACCEPT_LANGUAGE="fr-be")
+        self.assertContains(french, "Un club de code sympa.")
+        self.assertContains(french, "Sessions en")
+        english = self.client.get(reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}), HTTP_ACCEPT_LANGUAGE="en-us")
+        self.assertContains(english, "Een gezellige codeerclub.")
+        self.assertContains(english, "Only in Nederlands")
+
+    def test_finder_filters_on_language(self):
+        french_dojo = make_dojo("Liège", languages=["fr-be"])
+        self.dojo.languages = ["nl-be"]
+        self.dojo.save()
+        response = self.client.get(reverse("dojo_list"), {"language": "fr-be"})
+        names = [d.name for d in response.context["dojos"]]
+        self.assertIn(french_dojo.name, names)
+        self.assertNotIn(self.dojo.name, names)
+
+    def test_new_dojo_starts_in_the_champions_language(self):
+        self.owner.preferred_language = "fr-be"
+        self.owner.save()
+        self.client.post(reverse("dojo_create"), {"name": "CoderDojo Namur", "address": "", "email": ""})
+        self.assertEqual(Dojo.objects.get(name="CoderDojo Namur").languages, ["fr-be"])
+
+    def test_update_in_other_languages(self):
+        self.dojo.languages = ["nl-be", "fr-be"]
+        self.dojo.save()
+        self.client.post(reverse("dojo_updates", kwargs={"dojo_id": self.dojo.id}),
+                         {"text": "Nieuwe zaal.", "tr__fr-be__text": "Nouvelle salle."})
+        announcement = self.dojo.announcements.get()
+        self.assertEqual((announcement.text, announcement.translation_for("fr-be", "text")), ("Nieuwe zaal.", "Nouvelle salle."))
+
+    def test_region_languages(self):
+        from geo.models import AdministrativeBoundary
+
+        from .languages import region_languages
+
+        liege = AdministrativeBoundary.objects.create(name="Province de Liège", kind=AdministrativeBoundary.PROVINCE,
+                                                      boundary=MultiPolygon(Polygon(((5, 50), (6, 50), (6, 51), (5, 50)))))
+        self.assertEqual(region_languages(make_dojo("Liège", province=liege)), ["fr-be"])
+        self.assertEqual(region_languages(make_dojo("Nowhere")), ["nl-be"])

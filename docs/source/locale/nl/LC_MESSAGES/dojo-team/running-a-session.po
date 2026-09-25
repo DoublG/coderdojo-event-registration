@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 16:49+0000\n"
+"POT-Creation-Date: 2026-09-25 19:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -457,10 +457,49 @@ msgstr ""
 "zetten."
 
 #: ../../source/dojo-team/running-a-session.rst:178
+msgid "Your dojo's languages"
+msgstr "De talen van je dojo"
+
+#: ../../source/dojo-team/running-a-session.rst:180
+msgid ""
+"On the **Settings** page, **Languages** says which languages your "
+"sessions are given in and your dojo's texts are written in; pick a **Main"
+" language** among them. Families see them on your dojo's page (\"Sessions"
+" in ...\"), on each session's page, and can search the dojo finder and "
+"the events list by language. A new dojo starts in its champion's "
+"language."
+msgstr ""
+"Op de pagina **Instellingen** geef je bij **Talen** aan in welke talen je"
+" sessies gegeven worden en de teksten van je dojo geschreven zijn; kies "
+"daaruit een **Hoofdtaal**. Gezinnen zien ze op de pagina van je dojo "
+"(\"Sessies in het ...\") en op de pagina van elke sessie, en kunnen in de"
+" dojozoeker en de lijst met evenementen op taal zoeken. Een nieuwe dojo "
+"begint in de taal van zijn champion."
+
+#: ../../source/dojo-team/running-a-session.rst:186
+msgid ""
+"The texts on the Settings page (tagline, description, when you meet, "
+"visit notes) are in the main language. Every other language gets its own "
+"section at the bottom of the page, **In <language>**, once you've saved "
+"it. The same goes for a session's name and description on its page, and "
+"for an update on the **Updates** page. All of these are optional: a text "
+"you leave empty shows the main-language version to visitors who read that"
+" language, with a small \"Only in ...\" note."
+msgstr ""
+"De teksten op de pagina Instellingen (slogan, beschrijving, wanneer "
+"jullie samenkomen, opmerkingen bij Bezoek ons) staan in de hoofdtaal. "
+"Elke andere taal krijgt onderaan de pagina een eigen deel, **In het "
+"<taal>**, zodra je hebt opgeslagen. Hetzelfde geldt voor de naam en "
+"beschrijving van een sessie op de pagina ervan, en voor een bericht op de"
+" pagina **Nieuws**. Dat is allemaal optioneel: een tekst die je leeg "
+"laat, toont bezoekers die die taal lezen de versie in de hoofdtaal, met "
+"een kleine vermelding \"Alleen in het ...\"."
+
+#: ../../source/dojo-team/running-a-session.rst:195
 msgid "Posting updates"
 msgstr "Nieuwtjes plaatsen"
 
-#: ../../source/dojo-team/running-a-session.rst:180
+#: ../../source/dojo-team/running-a-session.rst:197
 msgid ""
 "The **Updates** page in your dashboard's sidebar is where your dojo posts"
 " short, dated notes, shown under **From this dojo** on its public page: a"
@@ -478,7 +517,7 @@ msgstr ""
 "weg. Zowel de champion als de mentoren kunnen nieuwtjes plaatsen en "
 "verwijderen."
 
-#: ../../source/dojo-team/running-a-session.rst:187
+#: ../../source/dojo-team/running-a-session.rst:204
 msgid ""
 "Keep updates to news: something that's always true (parking, what to "
 "bring) belongs in the dojo's FAQ, and session dates are already on the "
@@ -488,11 +527,11 @@ msgstr ""
 " hoort in de FAQ van de dojo, en de data van sessies staan al in de lijst"
 " met evenementen."
 
-#: ../../source/dojo-team/running-a-session.rst:192
+#: ../../source/dojo-team/running-a-session.rst:209
 msgid "Team pages"
 msgstr "Teampagina's"
 
-#: ../../source/dojo-team/running-a-session.rst:194
+#: ../../source/dojo-team/running-a-session.rst:211
 msgid ""
 "A dojo's public team page (visible to anyone, not just the dojo team) "
 "shows its champion first, followed by its mentors and youth mentors. "

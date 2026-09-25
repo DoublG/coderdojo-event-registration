@@ -1,7 +1,15 @@
 from django import forms
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 from content.models import Announcement
+from core.content_languages import (
+    add_translation_fields,
+    bound_translation_groups,
+    clean_languages,
+    optional_copy,
+    save_translation_fields,
+)
 from core.image_library import library_filename, use_library_image
 
 from .models import Dojo
@@ -32,6 +40,21 @@ class DojoProfileForm(forms.ModelForm):
         choices=[(NO_TEMPLATE_ICON, _("No template — I'll upload my own below"))] + TEMPLATE_ICONS,
         widget=forms.RadioSelect,
     )
+
+    # The dojo's languages (Dojo.languages): the ones its sessions are given
+    # in and its texts are written in; the main one comes first.
+    languages = forms.MultipleChoiceField(
+        label=_("Languages"), choices=settings.LANGUAGES, widget=forms.CheckboxSelectMultiple, required=False,
+    )
+    main_language = forms.ChoiceField(
+        label=_("Main language"), choices=settings.LANGUAGES, required=False,
+        widget=forms.Select(attrs={"class": "cd-form__select body"}),
+    )
+
+    TRANSLATION_LABELS = {
+        "tagline": _("Tagline"), "description": _("Description"),
+        "schedule_description": _("Meets"), "visit_notes": _("Extra info"),
+    }
 
     class Meta:
         model = Dojo
@@ -70,9 +93,32 @@ class DojoProfileForm(forms.ModelForm):
         self.fields["municipality"].queryset = self.fields["municipality"].queryset.order_by("name")
         self.fields["municipality"].empty_label = _("Not set")
         self.fields["template_icon"].initial = library_filename(self.instance.icon, "dojos") or NO_TEMPLATE_ICON
+        languages = self.instance.content_languages()
+        self.fields["languages"].initial = languages
+        self.fields["main_language"].initial = languages[0]
+        # A field per text in each of the dojo's other (saved) languages.
+        self.translation_groups = bound_translation_groups(self, add_translation_fields(
+            self, self.instance, lambda field: optional_copy(self.fields[field], self.TRANSLATION_LABELS[field]),
+        ))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # A post without these fields (an older form, a script) keeps the
+        # dojo's languages as they are.
+        main = cleaned_data.get("main_language")
+        chosen = cleaned_data.get("languages") or []
+        if not main:
+            cleaned_data["languages"] = None
+        else:
+            # The main language is always one of them, and always first.
+            cleaned_data["languages"] = clean_languages([main] + [code for code, _name in settings.LANGUAGES if code in chosen])
+        return cleaned_data
 
     def save(self, commit=True):
         dojo = super().save(commit=False)
+        save_translation_fields(self, dojo)
+        if self.cleaned_data.get("languages"):
+            dojo.languages = self.cleaned_data["languages"]
         template_icon = self.cleaned_data.get("template_icon")
         if template_icon and not self.files.get("icon"):
             use_library_image(dojo, "icon", "dojos", template_icon)
@@ -95,6 +141,12 @@ class DojoSearchForm(forms.Form):
     # text geocoding entirely once present.
     lat = forms.FloatField(required=False, widget=forms.HiddenInput())
     lon = forms.FloatField(required=False, widget=forms.HiddenInput())
+    # Only dojos (or sessions) given in this language (Dojo.languages).
+    language = forms.ChoiceField(
+        required=False,
+        choices=[("", _("Any language"))] + list(settings.LANGUAGES),
+        widget=forms.Select(attrs={"class": "cd-form__select body", "id": "dojo-language", "aria-label": _("Language")}),
+    )
 
 
 class DojoCreateForm(forms.ModelForm):
@@ -116,6 +168,21 @@ class DojoCreateForm(forms.ModelForm):
 class AnnouncementForm(forms.ModelForm):
     """One "From this dojo" update (dojos.views.dojo_updates). Dated the
     day it's posted; the team writes only the text."""
+
+    def __init__(self, *args, dojo, **kwargs):
+        kwargs.setdefault("instance", Announcement(dojo=dojo))
+        super().__init__(*args, **kwargs)
+        # The same update in the dojo's other languages (optional).
+        self.translation_groups = bound_translation_groups(self, add_translation_fields(
+            self, self.instance, lambda field: optional_copy(self.fields[field], _("Update")),
+        ))
+
+    def save(self, commit=True):
+        announcement = super().save(commit=False)
+        save_translation_fields(self, announcement)
+        if commit:
+            announcement.save()
+        return announcement
 
     class Meta:
         model = Announcement

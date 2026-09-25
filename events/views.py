@@ -47,6 +47,10 @@ def event_list(request):
         elif date_bucket == "month":
             events = events.filter(start_time__lt=now + timedelta(days=30))
 
+        language = form.cleaned_data.get("language")
+        if language:
+            events = events.filter(dojo__languages__contains=[language])
+
         age_bucket = form.cleaned_data.get("age")
         if age_bucket in AGE_RANGES:
             lo, hi = AGE_RANGES[age_bucket]

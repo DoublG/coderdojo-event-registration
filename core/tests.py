@@ -8,6 +8,7 @@ from content.models import Testimonial
 from core import image_library
 from core.testing import TempMediaMixin
 from dojos.models import Dojo
+from dojos.testing import make_dojo
 from pathways.models import Pathway
 
 
@@ -237,3 +238,26 @@ class TranslationTests(TestCase):
             self.assertIn("Ninja's zijn 7 tot 17 jaar oud", ninja_birth_date_error(date(2000, 1, 1)))
         with translation.override("fr-be"):
             self.assertEqual(str(MailCategory.REMINDER.label), "Rappels")
+
+
+
+class ContentLanguagesTests(TestCase):
+    """core.content_languages: the text in the asked language when the dojo
+    wrote one, else the main language, flagged as a fallback."""
+
+    def test_localized_and_fallback(self):
+        from core.content_languages import normalize
+
+        dojo = make_dojo("Brussels", languages=["nl-be", "fr-be"], description="Nederlands")
+        dojo.set_translation("fr-be", "description", "Français")
+        self.assertEqual((dojo.localized("description", "fr-be"), dojo.localized("description", "fr-be").is_fallback), ("Français", False))
+        self.assertEqual((dojo.localized("description", "nl"), dojo.localized("description", "nl").is_fallback), ("Nederlands", False))
+        english = dojo.localized("description", "en-us")
+        self.assertEqual((english, english.is_fallback, english.language), ("Nederlands", True, "nl-be"))
+        self.assertEqual(normalize("FR_be"), "fr-be")
+
+    def test_clearing_a_translation_removes_it(self):
+        dojo = make_dojo("Brussels", languages=["nl-be", "fr-be"])
+        dojo.set_translation("fr-be", "tagline", "Salut")
+        dojo.set_translation("fr-be", "tagline", "")
+        self.assertEqual(dojo.translations, {})

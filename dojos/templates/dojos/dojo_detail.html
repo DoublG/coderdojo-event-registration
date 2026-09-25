@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load content_i18n %}
 {% load i18n %}
 {% load markdown_extras %}
 {% block title %}{{ dojo.name }} · CoderDojo Belgium{% endblock %}
@@ -92,14 +93,15 @@
           <h1 class="display-xl dojo-hero__name">{{ dojo.name }}</h1>
         </div>
       </div>
-      {% if dojo.tagline %}
-        <div class="body-lg markdown-content dojo-hero__tagline">{{ dojo.tagline|markdownify }}</div>
-      {% endif %}
+      {% with tagline=dojo|localized:"tagline" %}{% if tagline %}
+        <div class="body-lg markdown-content dojo-hero__tagline"{% if tagline.is_fallback %} lang="{{ tagline.language }}"{% endif %}>{{ tagline|markdownify }}</div>
+      {% endif %}{% endwith %}
       <p class="body dojo-hero__facts">
         {% translate "Free" %}
-        {% if dojo.schedule_description %} · {{ dojo.schedule_description }}{% endif %}
+        {% with meets=dojo|localized:"schedule_description" %}{% if meets %} · {{ meets }}{% endif %}{% endwith %}
         {% if dojo.min_age or dojo.max_age %} · {% blocktranslate with min=dojo.min_age|default:"7" max=dojo.max_age|default:"18" %}Ages {{ min }}–{{ max }}{% endblocktranslate %}{% endif %}
          · {% translate "No experience needed" %}
+         · {% blocktranslate with languages=dojo.content_languages|language_names %}Sessions in {{ languages }}{% endblocktranslate %}
       </p>
       <div style="display:flex; gap: var(--space-4); flex-wrap: wrap;">
         {% if next_event %}
@@ -117,7 +119,7 @@
           </div>
           <div>
             <p class="label next-session-full__label">{% translate "Next session" %} · {% if next_event.places_left > 0 %}{% translate "Open" %}{% else %}{% translate "Waitlist" %}{% endif %}</p>
-            <h3 class="heading-sm next-session-full__title">{{ next_event.name }}</h3>
+            <h3 class="heading-sm next-session-full__title">{{ next_event|localized:"name" }}</h3>
             {% include "events/partials/_audience_badge.html" with event=next_event %}
             <p class="body-sm next-session-full__meta">
               {{ next_event.start_time|date:"D j M" }} · {{ next_event.start_time|time:"H:i" }}
@@ -132,12 +134,12 @@
       </div>
     {% endif %}
 
-    {% if dojo.description %}
+    {% with description=dojo|localized:"description" %}{% if description %}
       <section class="section col">
-        <h2 class="heading-lg section-title">{% translate "About this dojo" %}</h2>
-        <div class="body markdown-content">{{ dojo.description|markdownify }}</div>
+        <h2 class="heading-lg section-title">{% translate "About this dojo" %} {% only_in description %}</h2>
+        <div class="body markdown-content"{% if description.is_fallback %} lang="{{ description.language }}"{% endif %}>{{ description|markdownify }}</div>
       </section>
-    {% endif %}
+    {% endif %}{% endwith %}
 
     {% with pathways=dojo.pathways.all %}
       {% if pathways %}
@@ -207,7 +209,7 @@
         {% for announcement in announcements %}
           <div class="announcement">
             <p class="caption date">{{ announcement.date|date:"j F Y" }}</p>
-            <p class="body-text body">{{ announcement.text|linebreaksbr }}</p>
+            {% with text=announcement|localized:"text" %}<p class="body-text body"{% if text.is_fallback %} lang="{{ text.language }}"{% endif %}>{{ text|linebreaksbr }} {% only_in text %}</p>{% endwith %}
           </div>
         {% endfor %}
       </section>
@@ -219,7 +221,7 @@
         <div class="cd-card" style="padding: var(--space-6);">
           <div class="detail-row">
             <span class="label detail-label">{% translate "Meets" %}</span>
-            <span class="body detail-value">{% if dojo.schedule_description %}{{ dojo.schedule_description }}{% else %}{% translate "To be confirmed" %}{% endif %}</span>
+            <span class="body detail-value">{% with meets=dojo|localized:"schedule_description" %}{% if meets %}{{ meets }}{% else %}{% translate "To be confirmed" %}{% endif %}{% endwith %}</span>
           </div>
           <div class="detail-row">
             <span class="label detail-label">{% translate "Ages" %}</span>
@@ -245,11 +247,12 @@
           {% endif %}
         </div>
       </div>
-      {% if dojo.visit_notes %}
-        <div class="cd-card markdown-content" style="padding: var(--space-6); margin-top: var(--space-4);">
-          {{ dojo.visit_notes|markdownify }}
+      {% with notes=dojo|localized:"visit_notes" %}{% if notes %}
+        <div class="cd-card markdown-content" style="padding: var(--space-6); margin-top: var(--space-4);"{% if notes.is_fallback %} lang="{{ notes.language }}"{% endif %}>
+          {% only_in notes %}
+          {{ notes|markdownify }}
         </div>
-      {% endif %}
+      {% endif %}{% endwith %}
       {% if dojo.address %}
         <a class="map-box body-sm" target="_blank" rel="noopener"
            href="https://www.google.com/maps/search/?api=1&query={% if dojo.location %}{{ dojo.location.y }},{{ dojo.location.x }}{% else %}{{ dojo.address|urlencode }}{% endif %}">

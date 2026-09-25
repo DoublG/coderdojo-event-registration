@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load content_i18n %}
 {% load i18n %}
 {% block title %}{{ child.name }} · CoderDojo Belgium{% endblock %}
 {% block root_class %}child-page-root{% endblock %}
@@ -77,11 +78,11 @@
           </thead>
           <tbody>
             {% for registration in upcoming %}
-              {% blocktranslate asvar remove_msg with child=child.name event=registration.event.name %}Remove {{ child }} from {{ event }}?{% endblocktranslate %}
+              {% blocktranslate asvar remove_msg with child=child.name event=registration.event|localized:"name" %}Remove {{ child }} from {{ event }}?{% endblocktranslate %}
               <tr>
                 <td class="body-sm">{{ registration.event.start_time|date:"j M Y, H:i" }}</td>
                 <td class="body-sm">
-                  {{ registration.event.name }}
+                  {{ registration.event|localized:"name" }}
                   {% if registration.waiting_list %}<span class="cd-badge cd-badge--warning caption">{% translate "Waiting list" %}</span>{% endif %}
                 </td>
                 <td class="body-sm">{{ registration.event.dojo.name }}</td>
@@ -177,7 +178,7 @@
             {% for registration in history %}
               <tr>
                 <td class="body-sm">{{ registration.event.start_time|date:"j M Y" }}</td>
-                <td class="body-sm">{{ registration.event.name }}</td>
+                <td class="body-sm">{{ registration.event|localized:"name" }}</td>
                 <td class="body-sm">{{ registration.event.dojo.name }}</td>
                 <td class="body-sm">{% for pathway in registration.pathways.all %}{{ pathway.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
                 <td class="body-sm">{% for mentor in registration.event.team.all %}{{ mentor.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>

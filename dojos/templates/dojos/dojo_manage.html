@@ -78,6 +78,25 @@
       {% endif %}
 
       <div class="cd-form__group">
+        <h3 class="cd-form__group-title heading-md">{% translate "Languages" %}</h3>
+        <p class="cd-form__group-desc body-sm">{% translate "The languages your sessions are given in and your dojo's texts are written in. Families see them on your dojo's page and can search on them. The main language is the one every text is written in first." %}</p>
+        <div class="cd-form__row">
+          <div class="cd-form__field">
+            <span class="cd-form__label label">{% translate "Languages" %}</span>
+            {% for checkbox in form.languages %}
+              <label class="cd-form__checkbox-row" for="{{ checkbox.id_for_label }}">{{ checkbox.tag }}<span class="body-sm">{{ checkbox.choice_label }}</span></label>
+            {% endfor %}
+            <ul class="cd-form__errors">{% for error in form.languages.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+          </div>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="{{ form.main_language.id_for_label }}">{% translate "Main language" %}</label>
+            {{ form.main_language }}
+            <p class="cd-form__help caption">{% translate "The fields below are in this language. Other languages get their own section at the bottom once saved." %}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="cd-form__group">
         <h3 class="cd-form__group-title heading-md">{% translate "Basics" %}</h3>
         <p class="cd-form__group-desc body-sm">{% translate "The name, icon, and one-line tagline shown at the top of your dojo's page." %}</p>
         <div class="cd-form__row">
@@ -208,6 +227,8 @@
           <ul class="cd-form__errors">{% for error in form.visit_notes.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
         </div>
       </div>
+
+      {% include "dojos/partials/_translation_fields.html" %}
 
       <div class="cd-form__actions">
         {% if not dojo.is_organisation %}<a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_detail' dojo_id=dojo.id %}" target="_blank" rel="noopener">{% translate "View public page" %}</a>{% endif %}

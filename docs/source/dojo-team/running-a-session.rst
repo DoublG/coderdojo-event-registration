@@ -174,6 +174,23 @@ sessions in draft or open for sign-ups; any pending join requests are
 declined. If no sessions have been planned for over six months, the
 dashboard reminds you to plan one or mark the dojo dormant.
 
+Your dojo's languages
+-----------------------
+
+On the **Settings** page, **Languages** says which languages your sessions
+are given in and your dojo's texts are written in; pick a **Main
+language** among them. Families see them on your dojo's page ("Sessions
+in ..."), on each session's page, and can search the dojo finder and the
+events list by language. A new dojo starts in its champion's language.
+
+The texts on the Settings page (tagline, description, when you meet,
+visit notes) are in the main language. Every other language gets its own
+section at the bottom of the page, **In <language>**, once you've saved
+it. The same goes for a session's name and description on its page, and
+for an update on the **Updates** page. All of these are optional: a text
+you leave empty shows the main-language version to visitors who read
+that language, with a small "Only in ..." note.
+
 Posting updates
 -----------------
 

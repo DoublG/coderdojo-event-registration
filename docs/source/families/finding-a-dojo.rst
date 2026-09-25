@@ -22,6 +22,10 @@ For every dojo rather than just the nearest handful, go to **Dojos**. It's
 the same search (postcode/city or your location), but with all matching
 dojos, paged as you scroll, and no limit on how many results you see.
 
+To only see dojos that give their sessions in a certain language, pick it
+in the language menu next to the search. The **Events** list has the same
+filter.
+
 If a location doesn't match anything, the search falls back to showing
 dojos unsorted rather than an empty page — try a nearby town or the
 postcode instead of a street address.
@@ -31,7 +35,10 @@ A dojo's page
 
 Click through to a dojo to see:
 
-- Its address, schedule (e.g. "every 2nd Saturday"), and age range.
+- Its address, schedule (e.g. "every 2nd Saturday"), age range and the
+  languages its sessions are given in. Its texts are shown in your
+  language when the dojo wrote them in it; otherwise you see them in the
+  dojo's main language, marked "Only in ...".
 - A description of the dojo and any visit notes (parking, entrance,
   accessibility).
 - Its next upcoming session, if one is scheduled.

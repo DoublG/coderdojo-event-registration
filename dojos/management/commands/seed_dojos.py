@@ -3,6 +3,7 @@ from pathlib import Path
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
+from dojos.languages import region_languages
 from dojos.models import Dojo
 from geo.models import AdministrativeBoundary, Municipality
 
@@ -40,6 +41,9 @@ class Command(BaseCommand):
         # The fixture predates Dojo.status; these are real, running dojos —
         # except the last few, which exercise the lifecycle (DATA_MODEL.md §3).
         Dojo.objects.update(status=Dojo.ACTIVE)
+        for dojo in Dojo.objects.select_related("province", "municipality"):
+            dojo.languages = region_languages(dojo)
+            dojo.save(update_fields=["languages"])
         lifecycle_examples = list(Dojo.objects.order_by("-id")[:len(LIFECYCLE_EXAMPLES)])
         for dojo, status in zip(lifecycle_examples, LIFECYCLE_EXAMPLES, strict=False):
             dojo.status = status

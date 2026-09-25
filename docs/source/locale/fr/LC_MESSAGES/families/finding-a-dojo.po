@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 08:25+0000\n"
+"POT-Creation-Date: 2026-09-25 19:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -75,6 +75,16 @@ msgstr ""
 
 #: ../../source/families/finding-a-dojo.rst:25
 msgid ""
+"To only see dojos that give their sessions in a certain language, pick it"
+" in the language menu next to the search. The **Events** list has the "
+"same filter."
+msgstr ""
+"Pour ne voir que les dojos qui donnent leurs sessions dans une langue "
+"donnée, choisissez-la dans le menu à côté de la recherche. La liste "
+"**Événements** propose le même filtre."
+
+#: ../../source/families/finding-a-dojo.rst:29
+msgid ""
 "If a location doesn't match anything, the search falls back to showing "
 "dojos unsorted rather than an empty page — try a nearby town or the "
 "postcode instead of a street address."
@@ -83,21 +93,27 @@ msgstr ""
 " les dojos non triés plutôt qu'une page vide : essayez une ville voisine "
 "ou le code postal plutôt qu'une adresse précise."
 
-#: ../../source/families/finding-a-dojo.rst:30
+#: ../../source/families/finding-a-dojo.rst:34
 msgid "A dojo's page"
 msgstr "La page d'un dojo"
 
-#: ../../source/families/finding-a-dojo.rst:32
+#: ../../source/families/finding-a-dojo.rst:36
 msgid "Click through to a dojo to see:"
 msgstr "Cliquez sur un dojo pour voir :"
 
-#: ../../source/families/finding-a-dojo.rst:34
-msgid "Its address, schedule (e.g. \"every 2nd Saturday\"), and age range."
+#: ../../source/families/finding-a-dojo.rst:38
+msgid ""
+"Its address, schedule (e.g. \"every 2nd Saturday\"), age range and the "
+"languages its sessions are given in. Its texts are shown in your language"
+" when the dojo wrote them in it; otherwise you see them in the dojo's "
+"main language, marked \"Only in ...\"."
 msgstr ""
-"Son adresse, ses horaires (par ex. « chaque 2e samedi ») et la tranche "
-"d'âge concernée."
+"Son adresse, ses horaires (p. ex. « un samedi sur deux »), les âges et "
+"les langues de ses sessions. Ses textes s'affichent dans votre langue si "
+"le dojo les a écrits dans celle-ci ; sinon, vous les voyez dans la langue"
+" principale du dojo, avec la mention « Uniquement en ... »."
 
-#: ../../source/families/finding-a-dojo.rst:35
+#: ../../source/families/finding-a-dojo.rst:42
 msgid ""
 "A description of the dojo and any visit notes (parking, entrance, "
 "accessibility)."
@@ -105,11 +121,11 @@ msgstr ""
 "Une description du dojo et d'éventuelles informations pratiques (parking,"
 " entrée, accessibilité)."
 
-#: ../../source/families/finding-a-dojo.rst:37
+#: ../../source/families/finding-a-dojo.rst:44
 msgid "Its next upcoming session, if one is scheduled."
 msgstr "Sa prochaine séance à venir, si elle est programmée."
 
-#: ../../source/families/finding-a-dojo.rst:38
+#: ../../source/families/finding-a-dojo.rst:45
 msgid ""
 "Its team — the champion (who runs the dojo) is always shown first, "
 "followed by its mentors and youth mentors."
@@ -117,17 +133,23 @@ msgstr ""
 "Son équipe — le champion (qui dirige le dojo) apparaît toujours en "
 "premier, suivi de ses mentors et jeunes mentors."
 
-#: ../../source/families/finding-a-dojo.rst:40
+#: ../../source/families/finding-a-dojo.rst:47
 msgid "Any FAQs specific to that dojo, alongside the site-wide ones."
 msgstr ""
 "Les questions fréquentes propres à ce dojo, en plus de celles valables "
 "pour tout le site."
 
-#: ../../source/families/finding-a-dojo.rst:42
+#: ../../source/families/finding-a-dojo.rst:49
 msgid ""
 "From there, click through to a session to see full details and sign your "
 "children up — see :doc:`signing-up-for-a-session`."
 msgstr ""
 "De là, cliquez sur une séance pour voir tous les détails et inscrire vos "
 "enfants — voir :doc:`signing-up-for-a-session`."
+
+#~ msgid "Its address, schedule (e.g. \"every 2nd Saturday\"), and age range."
+#~ msgstr ""
+#~ "Son adresse, ses horaires (par ex. "
+#~ "« chaque 2e samedi ») et la "
+#~ "tranche d'âge concernée."
 

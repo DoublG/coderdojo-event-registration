@@ -1,4 +1,4 @@
-{% load i18n %}{% comment %}
+{% load content_i18n %}{% load i18n %}{% comment %}
 The guardian account page's "Your children" section. Expects `guardian`
 and `children` (list of {child, registrations} dicts, one row per
 *upcoming* registration — a child can be signed up for more than one
@@ -30,7 +30,7 @@ a full page reload).
         <a class="body-sm child-card__link" href="{% url 'ninja_detail' ninja_id=entry.child.id %}">{% blocktranslate with name=entry.child.name %}View {{ name }}'s belts, badges &amp; history →{% endblocktranslate %}</a>
       </div>
       {% for registration in entry.registrations %}
-        {% blocktranslate asvar remove_msg with child=entry.child.name event=registration.event.name %}Remove {{ child }} from {{ event }}?{% endblocktranslate %}
+        {% blocktranslate asvar remove_msg with child=entry.child.name event=registration.event|localized:"name" %}Remove {{ child }} from {{ event }}?{% endblocktranslate %}
         <div class="next-row">
           <div class="date-box">
             <span class="caption dow">{{ registration.event.start_time|date:"D"|upper }}</span>
@@ -38,7 +38,7 @@ a full page reload).
           </div>
           <div class="info">
             <h3 class="heading-sm">
-              {{ registration.event.name }}
+              {{ registration.event|localized:"name" }}
               {% if registration.waiting_list %}
                 <span class="cd-badge cd-badge--warning caption">{% translate "Waiting list" %}</span>
               {% endif %}

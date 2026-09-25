@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Case, When
 from django.utils.translation import gettext_lazy as _
 
+from core.content_languages import LANGUAGE_CODES, TranslatableModel, clean_languages, language_name
 from geo.models import AdministrativeBoundary, Municipality
 
 MARKDOWN_HELP_TEXT = "Supports basic Markdown — # headings, **bold**, *italic*, links, lists."
@@ -22,7 +23,11 @@ class DojoManager(models.Manager.from_queryset(DojoQuerySet)):
         return super().get_queryset().select_related("municipality")
 
 
-class Dojo(models.Model):
+def default_dojo_languages():
+    return ["nl-be"]
+
+
+class Dojo(TranslatableModel):
     name = models.CharField(max_length=200)
     municipality = models.ForeignKey(Municipality, on_delete=models.CASCADE, null=True, blank=True)
     province = models.ForeignKey(
@@ -89,10 +94,25 @@ class Dojo(models.Model):
                   f"accessibility, whatever this chapter needs to add. {MARKDOWN_HELP_TEXT}",
     )
 
+    # The languages the dojo gives its sessions in and writes its texts in,
+    # in order: the first is its main language (core.content_languages).
+    languages = models.JSONField(
+        default=default_dojo_languages,
+        help_text='Language codes from LANGUAGES, main language first, e.g. ["nl-be", "fr-be"].',
+    )
+    TRANSLATABLE_FIELDS = ("tagline", "description", "schedule_description", "visit_notes")
+
     objects = DojoManager()
 
     def __str__(self):
         return f"{self.name} ({self.municipality})"
+
+    def content_languages(self):
+        return clean_languages(self.languages) or [LANGUAGE_CODES[0]]
+
+    @property
+    def language_names(self):
+        return [language_name(code) for code in self.content_languages()]
 
     @property
     def is_public(self):

@@ -505,3 +505,34 @@ class OrganisationAndExternalEventTests(TestCase):
     def test_event_filter_does_not_offer_the_organisation(self):
         response = self.client.get(reverse("event_list"))
         self.assertNotIn(self.org, response.context["dojo_choices"])
+
+
+
+class EventLanguageTests(TestCase):
+    """Sessions are given in their dojo's languages; their name and
+    description can have a version per language."""
+
+    def setUp(self):
+        self.dojo = make_dojo("Brussels", languages=["nl-be", "fr-be"])
+        self.event = _future_event(self.dojo, name="Codeerzaterdag", description="Leer programmeren.")
+        self.event.set_translation("fr-be", "name", "Samedi code")
+        self.event.save()
+
+    def test_detail_uses_the_visitors_language(self):
+        url = reverse("event_detail", kwargs={"event_id": self.event.id})
+        self.assertContains(self.client.get(url, HTTP_ACCEPT_LANGUAGE="fr-be"), "Samedi code")
+        dutch = self.client.get(url, HTTP_ACCEPT_LANGUAGE="nl-be")
+        self.assertContains(dutch, "Codeerzaterdag")
+        self.assertContains(dutch, "Nederlands (België), Français (Belgique)")
+
+    def test_description_falls_back_to_the_main_language_with_a_note(self):
+        response = self.client.get(reverse("event_detail", kwargs={"event_id": self.event.id}), HTTP_ACCEPT_LANGUAGE="fr-be")
+        self.assertContains(response, "Leer programmeren.")
+        self.assertContains(response, "Uniquement en Nederlands (België)")
+
+    def test_events_list_filters_on_language(self):
+        other = _future_event(make_dojo("Ghent", languages=["nl-be"]), name="Gent")
+        response = self.client.get(reverse("event_list"), {"language": "fr-be"})
+        events = list(response.context["events"])
+        self.assertIn(self.event, events)
+        self.assertNotIn(other, events)

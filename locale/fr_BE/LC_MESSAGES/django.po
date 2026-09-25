@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 18:44+0000\n"
+"POT-Creation-Date: 2026-09-25 19:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_BE\n"
@@ -42,8 +42,8 @@ msgstr "%(name)s n'a pas de compte."
 
 #: accounts/forms.py:51 accounts/templates/accounts/login.html:40
 #: accounts/templates/accounts/password_reset.html:32
-#: accounts/templates/accounts/register_guardian.html:45 dojos/forms.py:108
-#: dojos/templates/dojos/dojo_detail.html:236 dojos/templates/dojos/dojo_manage.html:180
+#: accounts/templates/accounts/register_guardian.html:45 dojos/forms.py:160
+#: dojos/templates/dojos/dojo_detail.html:238 dojos/templates/dojos/dojo_manage.html:199
 msgid "Email"
 msgstr "E-mail"
 
@@ -117,63 +117,63 @@ msgstr "Enregistrer le mot de passe"
 msgid "Log out instead"
 msgstr "Me déconnecter plutôt"
 
-#: accounts/templates/accounts/child_detail.html:67 core/templates/core/home.html:102
+#: accounts/templates/accounts/child_detail.html:68 core/templates/core/home.html:102
 msgid "Upcoming sessions"
 msgstr "Prochaines sessions"
 
-#: accounts/templates/accounts/child_detail.html:72 accounts/templates/accounts/child_detail.html:124
-#: accounts/templates/accounts/child_detail.html:169 dojos/templates/dojos/dojo_event_list.html:23
+#: accounts/templates/accounts/child_detail.html:73 accounts/templates/accounts/child_detail.html:125
+#: accounts/templates/accounts/child_detail.html:170 dojos/templates/dojos/dojo_event_list.html:23
 #: dojos/templates/dojos/partials/_event_form_fields.html:24
-#: events/templates/events/event_detail.html:112 events/templates/events/event_list.html:70
+#: events/templates/events/event_detail.html:113 events/templates/events/event_list.html:70
 msgid "Date"
 msgstr "Date"
 
-#: accounts/templates/accounts/child_detail.html:73 accounts/templates/accounts/child_detail.html:170
+#: accounts/templates/accounts/child_detail.html:74 accounts/templates/accounts/child_detail.html:171
 msgid "Session"
 msgstr "Session"
 
-#: accounts/templates/accounts/child_detail.html:74 accounts/templates/accounts/child_detail.html:171
-#: dojos/models.py:52 dojos/templates/dojos/_admin_base.html:130
+#: accounts/templates/accounts/child_detail.html:75 accounts/templates/accounts/child_detail.html:172
+#: dojos/models.py:57 dojos/templates/dojos/_admin_base.html:130
 #: events/templates/events/event_list.html:62 mailing/templates/mailing/manage/_rule_fields.html:47
 #: mailing/templates/mailing/manage/_rule_fields.html:57
 msgid "Dojo"
 msgstr "Dojo"
 
-#: accounts/templates/accounts/child_detail.html:75
+#: accounts/templates/accounts/child_detail.html:76
 #: mailing/templates/mailing/manage/campaign_detail.html:78
 #: mailing/templates/mailing/manage/journey_detail.html:62
 msgid "Actions"
 msgstr "Actions"
 
-#: accounts/templates/accounts/child_detail.html:80
+#: accounts/templates/accounts/child_detail.html:81
 #: accounts/templates/accounts/partials/_children_list.html:33
 #, python-format
 msgid "Remove %(child)s from %(event)s?"
 msgstr "Désinscrire %(child)s de %(event)s ?"
 
-#: accounts/templates/accounts/child_detail.html:85
+#: accounts/templates/accounts/child_detail.html:86
 #: accounts/templates/accounts/partials/_children_list.html:43
-#: events/templates/events/event_signup.html:84 events/templates/events/event_signup.html:182
+#: events/templates/events/event_signup.html:85 events/templates/events/event_signup.html:183
 msgid "Waiting list"
 msgstr "Liste d'attente"
 
-#: accounts/templates/accounts/child_detail.html:90 dojos/templates/dojos/partials/_dojo_result.html:40
+#: accounts/templates/accounts/child_detail.html:91 dojos/templates/dojos/partials/_dojo_result.html:40
 msgid "View"
 msgstr "Voir"
 
-#: accounts/templates/accounts/child_detail.html:94
+#: accounts/templates/accounts/child_detail.html:95
 #: accounts/templates/accounts/partials/_children_list.html:56
 msgid "Leave waiting list"
 msgstr "Quitter la liste d'attente"
 
-#: accounts/templates/accounts/child_detail.html:94 accounts/templates/accounts/guardian_detail.html:91
+#: accounts/templates/accounts/child_detail.html:95 accounts/templates/accounts/guardian_detail.html:91
 #: accounts/templates/accounts/partials/_child_header_edit.html:49
 #: accounts/templates/accounts/partials/_children_list.html:56
 #: accounts/templates/accounts/register_guardian.html:92
 #: applications/templates/applications/register_dojo.html:119
 #: applications/templates/applications/register_helper.html:106
 #: content/templates/content/manage/promotion_form.html:62 dojos/templates/dojos/dojo_create.html:37
-#: dojos/templates/dojos/dojo_event_create.html:28 events/templates/events/event_signup.html:169
+#: dojos/templates/dojos/dojo_event_create.html:28 events/templates/events/event_signup.html:170
 #: mailing/templates/mailing/manage/campaign_form.html:11
 #: mailing/templates/mailing/manage/journey_form.html:11
 #: mailing/templates/mailing/manage/segment_form.html:11
@@ -181,52 +181,52 @@ msgstr "Quitter la liste d'attente"
 msgid "Cancel"
 msgstr "Annuler"
 
-#: accounts/templates/accounts/child_detail.html:101
+#: accounts/templates/accounts/child_detail.html:102
 msgid "No upcoming sessions."
 msgstr "Aucune session à venir."
 
-#: accounts/templates/accounts/child_detail.html:101
+#: accounts/templates/accounts/child_detail.html:102
 msgid "Find a session"
 msgstr "Trouver une session"
 
-#: accounts/templates/accounts/child_detail.html:111 accounts/templates/accounts/child_detail.html:123
+#: accounts/templates/accounts/child_detail.html:112 accounts/templates/accounts/child_detail.html:124
 #: dojos/templates/dojos/dojo_members.html:36 dojos/templates/dojos/partials/_attendance_row.html:33
 msgid "Belt"
 msgstr "Ceinture"
 
-#: accounts/templates/accounts/child_detail.html:125
+#: accounts/templates/accounts/child_detail.html:126
 msgid "Awarded by"
 msgstr "Décernée par"
 
-#: accounts/templates/accounts/child_detail.html:126
+#: accounts/templates/accounts/child_detail.html:127
 msgid "Note"
 msgstr "Remarque"
 
-#: accounts/templates/accounts/child_detail.html:147
+#: accounts/templates/accounts/child_detail.html:148
 msgid "Badges"
 msgstr "Badges"
 
-#: accounts/templates/accounts/child_detail.html:149
+#: accounts/templates/accounts/child_detail.html:150
 msgid "Previous badges"
 msgstr "Badges précédents"
 
-#: accounts/templates/accounts/child_detail.html:152
+#: accounts/templates/accounts/child_detail.html:153
 msgid "Next badges"
 msgstr "Badges suivants"
 
-#: accounts/templates/accounts/child_detail.html:164
+#: accounts/templates/accounts/child_detail.html:165
 msgid "Event history"
 msgstr "Sessions passées"
 
-#: accounts/templates/accounts/child_detail.html:172
+#: accounts/templates/accounts/child_detail.html:173
 msgid "Worked on"
 msgstr "A travaillé sur"
 
-#: accounts/templates/accounts/child_detail.html:173
+#: accounts/templates/accounts/child_detail.html:174
 msgid "Mentors"
 msgstr "Mentors"
 
-#: accounts/templates/accounts/child_detail.html:187
+#: accounts/templates/accounts/child_detail.html:188
 msgid "No past sessions yet."
 msgstr "Aucune session passée pour l'instant."
 
@@ -409,7 +409,7 @@ msgstr "Cliquer pour modifier"
 #: accounts/templates/accounts/partials/_child_header_display.html:20
 #: accounts/templates/accounts/partials/_children_list.html:22
 #: dojos/templates/dojos/dojo_members.html:53 dojos/templates/dojos/partials/_attendance_row.html:21
-#: events/templates/events/event_signup.html:139 events/templates/events/event_signup.html:153
+#: events/templates/events/event_signup.html:140 events/templates/events/event_signup.html:154
 #, python-format
 msgid "Age %(age)s"
 msgstr "%(age)s ans"
@@ -419,7 +419,7 @@ msgstr "%(age)s ans"
 msgid "Member since %(date)s"
 msgstr "Membre depuis %(date)s"
 
-#: accounts/templates/accounts/partials/_child_header_display.html:25 dojos/models.py:166
+#: accounts/templates/accounts/partials/_child_header_display.html:25 dojos/models.py:186
 #: dojos/templates/dojos/dojo_members.html:41 dojos/templates/dojos/dojo_members.html:69
 msgid "Youth mentor"
 msgstr "Jeune mentor"
@@ -429,9 +429,9 @@ msgstr "Jeune mentor"
 msgid "at %(dojo)s"
 msgstr "à %(dojo)s"
 
-#: accounts/templates/accounts/partials/_child_header_edit.html:17 dojos/forms.py:108
-#: dojos/templates/dojos/dojo_event_list.html:24 dojos/templates/dojos/dojo_manage.html:86
-#: dojos/templates/dojos/partials/_event_form_fields.html:18 mailing/forms.py:191
+#: accounts/templates/accounts/partials/_child_header_edit.html:17 dojos/forms.py:160
+#: dojos/templates/dojos/dojo_event_list.html:24 dojos/templates/dojos/dojo_manage.html:105
+#: dojos/templates/dojos/partials/_event_form_fields.html:18 events/forms.py:165 mailing/forms.py:191
 #: mailing/templates/mailing/manage/_campaign_fields.html:5
 #: mailing/templates/mailing/manage/_journey_fields.html:5
 #: mailing/templates/mailing/manage/_segment_fields.html:2
@@ -480,7 +480,7 @@ msgstr "Enfant %(n)s"
 
 #: accounts/templates/accounts/partials/_child_rows_fieldset.html:21
 #: accounts/templates/accounts/partials/_child_rows_script.html:23
-#: dojos/templates/dojos/dojo_team_manage.html:83 dojos/templates/dojos/dojo_updates.html:56
+#: dojos/templates/dojos/dojo_team_manage.html:83 dojos/templates/dojos/dojo_updates.html:57
 #: mailing/templates/mailing/manage/_segment_group.html:28
 msgid "Remove"
 msgstr "Retirer"
@@ -778,7 +778,7 @@ msgstr "Nom complet"
 #: accounts/templates/accounts/register_guardian.html:52
 #: applications/templates/applications/register_dojo.html:59
 #: applications/templates/applications/register_helper.html:58
-#: dojos/templates/dojos/dojo_detail.html:242 dojos/templates/dojos/dojo_manage.html:185
+#: dojos/templates/dojos/dojo_detail.html:244 dojos/templates/dojos/dojo_manage.html:204
 msgid "Phone"
 msgstr "Téléphone"
 
@@ -872,7 +872,7 @@ msgstr ""
 msgid "Uittreksel uit het strafregister (model 2)"
 msgstr "Extrait de casier judiciaire (modèle 2)"
 
-#: applications/forms.py:23 dojos/forms.py:59
+#: applications/forms.py:23 dojos/forms.py:82
 msgid "+32 4xx xx xx xx"
 msgstr "+32 4xx xx xx xx"
 
@@ -904,7 +904,7 @@ msgstr "p. ex. Python, Scratch, web, robotique, aide lors d'événements. Aucune
 msgid "Not sure yet — any dojo"
 msgstr "Pas encore sûr, n'importe quel dojo"
 
-#: applications/models.py:40 dojos/models.py:166
+#: applications/models.py:40 dojos/models.py:186
 msgid "Mentor"
 msgstr "Mentor"
 
@@ -1278,20 +1278,20 @@ msgstr "Promotion enregistrée."
 msgid "Promotion removed."
 msgstr "Promotion supprimée."
 
-#: content/models.py:171
+#: content/models.py:178
 msgid "Homepage: large card under the introduction"
 msgstr "Accueil : grande carte sous l'introduction"
 
-#: content/models.py:172
+#: content/models.py:179
 msgid "Events page: pinned above the list"
 msgstr "Page des événements : épinglé au-dessus de la liste"
 
 # | msgid "Not registered for an upcoming session."
-#: content/models.py:173
+#: content/models.py:180
 msgid "Homepage: first in Upcoming sessions"
 msgstr "Accueil : premier dans Prochaines sessions"
 
-#: content/models.py:174
+#: content/models.py:181
 msgid "Dojo finder: banner above the results"
 msgstr "Recherche de dojo : bannière au-dessus des résultats"
 
@@ -1406,7 +1406,7 @@ msgid "Organisation dashboard"
 msgstr "Tableau de bord de l'organisation"
 
 #: core/templates/core/_manage_base.html:42 core/templates/core/menu.html:48
-#: core/templates/core/menu.html:50 dojos/models.py:52
+#: core/templates/core/menu.html:50 dojos/models.py:57
 msgid "Organisation"
 msgstr "Organisation"
 
@@ -1491,8 +1491,8 @@ msgstr ""
 "nous vous aidons pour le reste."
 
 #: core/templates/core/home.html:59 core/templates/core/home.html:189
-#: dojos/templates/dojos/dojo_detail.html:106 dojos/templates/dojos/dojo_detail.html:130
-#: events/templates/events/event_detail.html:133
+#: dojos/templates/dojos/dojo_detail.html:108 dojos/templates/dojos/dojo_detail.html:132
+#: events/templates/events/event_detail.html:138
 msgid "Sign up now"
 msgstr "Inscrivez-vous maintenant"
 
@@ -1513,7 +1513,7 @@ msgid "Next pathways"
 msgstr "Parcours suivants"
 
 #: core/templates/core/home.html:90 dojos/templates/dojos/dojo_list.html:31
-#: events/templates/events/event_list.html:99 pathways/templates/pathways/pathway_detail.html:132
+#: events/templates/events/event_list.html:103 pathways/templates/pathways/pathway_detail.html:132
 msgid "Find a dojo near you"
 msgstr "Trouvez un dojo près de chez vous"
 
@@ -1549,7 +1549,7 @@ msgstr "Notre équipe et les bénévoles qui font tourner chaque dojo."
 msgid "No team members listed yet."
 msgstr "Aucun membre de l'équipe pour l'instant."
 
-#: core/templates/core/home.html:156 dojos/templates/dojos/dojo_detail.html:189
+#: core/templates/core/home.html:156 dojos/templates/dojos/dojo_detail.html:191
 msgid "Frequently asked questions"
 msgstr "Questions fréquentes"
 
@@ -1580,7 +1580,8 @@ msgstr "Événements"
 msgid "Dojos"
 msgstr "Dojos"
 
-#: core/templates/core/menu.html:18
+#: core/templates/core/menu.html:18 dojos/forms.py:148 events/templates/events/event_detail.html:125
+#: events/templates/events/event_list.html:78
 msgid "Language"
 msgstr "Langue"
 
@@ -1604,8 +1605,8 @@ msgstr "Aider dans un autre dojo"
 msgid "Log out"
 msgstr "Se déconnecter"
 
-#: core/templates/core/menu.html:71 events/templates/events/event_signup.html:3
-#: events/templates/events/event_signup.html:170
+#: core/templates/core/menu.html:71 events/templates/events/event_signup.html:4
+#: events/templates/events/event_signup.html:171
 msgid "Sign up"
 msgstr "S'inscrire"
 
@@ -1613,129 +1614,182 @@ msgstr "S'inscrire"
 msgid "Switch to light mode"
 msgstr "Mode clair"
 
-#: dojos/forms.py:32 events/forms.py:97
+# | msgid "Language"
+# | msgid "Mail language"
+#: core/templatetags/content_i18n.py:28
+#, python-format
+msgid "Only in %(language)s"
+msgstr "Uniquement en %(language)s"
+
+#: dojos/forms.py:40 events/forms.py:110
 msgid "No template — I'll upload my own below"
 msgstr "Pas de modèle, j'envoie le mien ci-dessous"
 
-#: dojos/forms.py:45
+# | msgid "Language"
+#: dojos/forms.py:47 dojos/templates/dojos/dojo_manage.html:82
+#: dojos/templates/dojos/dojo_manage.html:86 mailing/templates/mailing/manage/template_edit.html:21
+#: mailing/templates/mailing/manage/template_list.html:14
+msgid "Languages"
+msgstr "Langues"
+
+# | msgid "Language"
+# | msgid "Mail language"
+#: dojos/forms.py:50 dojos/templates/dojos/dojo_manage.html:93
+msgid "Main language"
+msgstr "Langue principale"
+
+#: dojos/forms.py:55 dojos/templates/dojos/dojo_manage.html:138
+msgid "Tagline"
+msgstr "Slogan"
+
+# | msgid "Questions"
+#: dojos/forms.py:55 dojos/templates/dojos/dojo_manage.html:148
+#: dojos/templates/dojos/partials/_event_form_fields.html:103 events/forms.py:165
+#: mailing/templates/mailing/manage/_segment_fields.html:7
+#: mailing/templates/mailing/manage/segment_list.html:13
+#: mailing/templates/mailing/manage/template_edit.html:44
+msgid "Description"
+msgstr "Description"
+
+#: dojos/forms.py:56 dojos/templates/dojos/dojo_detail.html:223
+#: dojos/templates/dojos/dojo_manage.html:176
+msgid "Meets"
+msgstr "Quand"
+
+#: dojos/forms.py:56 dojos/templates/dojos/dojo_manage.html:225
+msgid "Extra info"
+msgstr "Infos supplémentaires"
+
+#: dojos/forms.py:68
 msgid "CoderDojo Ghent"
 msgstr "CoderDojo Gand"
 
-#: dojos/forms.py:49
+#: dojos/forms.py:72
 msgid "A short line shown right under the dojo's name."
 msgstr "Une phrase courte, juste sous le nom du dojo."
 
-#: dojos/forms.py:53
+#: dojos/forms.py:76
 msgid "Shown further down the page, above the team — what makes this dojo worth joining."
 msgstr "Plus bas sur la page, au-dessus de l'équipe : ce qui rend ce dojo intéressant."
 
-#: dojos/forms.py:55
+#: dojos/forms.py:78
 msgid "e.g. Every 2nd Saturday"
 msgstr "p. ex. un samedi sur deux"
 
-#: dojos/forms.py:56 events/forms.py:119
+#: dojos/forms.py:79 events/forms.py:132
 msgid "7"
 msgstr "7"
 
-#: dojos/forms.py:57 events/forms.py:120
+#: dojos/forms.py:80 events/forms.py:133
 msgid "18"
 msgstr "18"
 
-#: dojos/forms.py:58
+#: dojos/forms.py:81
 msgid "hello@example.org"
 msgstr "bonjour@exemple.be"
 
 # | msgid "Enter your postcode or city"
-#: dojos/forms.py:61
+#: dojos/forms.py:84
 msgid "Street, number, postcode, city"
 msgstr "Rue, numéro, code postal, commune"
 
-#: dojos/forms.py:64
+#: dojos/forms.py:87
 msgid "Parking, entrance, accessibility — anything extra for the Visit us section."
 msgstr "Parking, entrée, accessibilité : tout ce qui complète la section Nous rendre visite."
 
-#: dojos/forms.py:71 mailing/segmentation/attributes/locality.py:62
+#: dojos/forms.py:94 mailing/segmentation/attributes/locality.py:62
 msgid "Not set"
 msgstr "Non défini"
 
-#: dojos/forms.py:90
+#: dojos/forms.py:136
 msgid "Enter your postcode or city"
 msgstr "Indiquez votre code postal ou commune"
 
-#: dojos/forms.py:108 dojos/templates/dojos/dojo_detail.html:231
-#: dojos/templates/dojos/dojo_manage.html:196
+# | msgid "Language"
+# | msgid "Mail language"
+#: dojos/forms.py:147 events/forms.py:53
+msgid "Any language"
+msgstr "Toutes les langues"
+
+#: dojos/forms.py:160 dojos/templates/dojos/dojo_detail.html:233
+#: dojos/templates/dojos/dojo_manage.html:215
 msgid "Address"
 msgstr "Adresse"
 
-#: dojos/forms.py:110
+#: dojos/forms.py:162
 msgid "e.g. CoderDojo Leuven"
 msgstr "p. ex. CoderDojo Louvain"
 
 # | msgid "Enter your postcode or city"
-#: dojos/forms.py:111
+#: dojos/forms.py:163
 msgid "Street and number, postcode, city"
 msgstr "Rue et numéro, code postal, commune"
 
-#: dojos/forms.py:112
+#: dojos/forms.py:164
 msgid "hello@yourdojo.example"
 msgstr "bonjour@votredojo.exemple"
 
-#: dojos/forms.py:126
+# | msgid "Updates"
+#: dojos/forms.py:177
+msgid "Update"
+msgstr "Nouvelle"
+
+#: dojos/forms.py:193
 msgid "e.g. We've moved to the bigger room from October, same time, same entrance."
 msgstr "p. ex. À partir d'octobre, nous passons dans la grande salle, même heure, même entrée."
 
 # | msgid "New template"
-#: dojos/forms.py:129
+#: dojos/forms.py:196
 msgid "New update"
 msgstr "Nouvelle nouvelle"
 
-#: dojos/forms.py:134
+#: dojos/forms.py:201
 msgid "Keep it short: 500 characters at most."
 msgstr "Restez bref : 500 caractères maximum."
 
-#: dojos/models.py:44 dojos/templates/dojos/dojo_event_detail.html:35
-#: dojos/templates/dojos/dojo_event_list.html:37 events/models.py:30
+#: dojos/models.py:49 dojos/templates/dojos/dojo_event_detail.html:35
+#: dojos/templates/dojos/dojo_event_list.html:37 events/models.py:32
 #: mailing/templates/mailing/manage/_status_badge.html:1
 #: mailing/templates/mailing/manage/campaign_detail.html:27
 msgid "Draft"
 msgstr "Brouillon"
 
 # | msgid "Actions"
-#: dojos/models.py:44 dojos/models.py:172 mailing/templates/mailing/manage/journey_detail.html:4
+#: dojos/models.py:49 dojos/models.py:192 mailing/templates/mailing/manage/journey_detail.html:4
 #: mailing/templates/mailing/manage/journey_list.html:25
 msgid "Active"
 msgstr "Actif"
 
-#: dojos/models.py:44 dojos/models.py:172
+#: dojos/models.py:49 dojos/models.py:192
 msgid "Dormant"
 msgstr "En pause"
 
-#: dojos/models.py:44
+#: dojos/models.py:49
 msgid "Archived"
 msgstr "Archivé"
 
-#: dojos/models.py:166
+#: dojos/models.py:186
 msgid "Champion"
 msgstr "Champion"
 
 # | msgid "requested"
-#: dojos/models.py:172
+#: dojos/models.py:192
 msgid "Requested"
 msgstr "Demandé"
 
-#: dojos/models.py:205
+#: dojos/models.py:225
 msgid "Only a ninja account can be a youth mentor."
 msgstr "Seul un compte ninja peut être jeune mentor."
 
-#: dojos/models.py:207
+#: dojos/models.py:227
 msgid "A ninja account can only be a youth mentor."
 msgstr "Un compte ninja ne peut être que jeune mentor."
 
-#: dojos/models.py:213
+#: dojos/models.py:233
 msgid "This dojo already has an active champion."
 msgstr "Ce dojo a déjà un champion actif."
 
-#: dojos/models.py:217
+#: dojos/models.py:237
 msgid "A youth mentor must be promoted by a champion or mentor of the same dojo."
 msgstr "Un jeune mentor doit être promu par un champion ou un mentor du même dojo."
 
@@ -1832,7 +1886,7 @@ msgstr ""
 msgid "You're now the champion of %(dojo)s."
 msgstr "Vous êtes maintenant le champion de %(dojo)s."
 
-#: dojos/team.py:213 dojos/views.py:488
+#: dojos/team.py:213 dojos/views.py:493
 msgid "Unknown action."
 msgstr "Action inconnue."
 
@@ -1966,98 +2020,99 @@ msgstr ""
 msgid "No sessions yet."
 msgstr "Pas encore de sessions."
 
-#: dojos/templates/dojos/dojo_detail.html:99
+#: dojos/templates/dojos/dojo_detail.html:100
 msgid "Free"
 msgstr "Gratuit"
 
-#: dojos/templates/dojos/dojo_detail.html:101 events/templates/events/event_signup.html:61
+#: dojos/templates/dojos/dojo_detail.html:102 events/templates/events/event_signup.html:62
 #: events/templates/events/partials/_event_row.html:36
 #: pathways/templates/pathways/pathway_detail.html:49
 #, python-format
 msgid "Ages %(min)s–%(max)s"
 msgstr "De %(min)s à %(max)s ans"
 
-#: dojos/templates/dojos/dojo_detail.html:102 pathways/templates/pathways/pathway_detail.html:52
+#: dojos/templates/dojos/dojo_detail.html:103 pathways/templates/pathways/pathway_detail.html:52
 msgid "No experience needed"
 msgstr "Aucune expérience requise"
 
-#: dojos/templates/dojos/dojo_detail.html:108
+#: dojos/templates/dojos/dojo_detail.html:104
+#, python-format
+msgid "Sessions in %(languages)s"
+msgstr "Sessions en %(languages)s"
+
+#: dojos/templates/dojos/dojo_detail.html:110
 msgid "View this dojo's sessions"
 msgstr "Voir les sessions de ce dojo"
 
-#: dojos/templates/dojos/dojo_detail.html:119
+#: dojos/templates/dojos/dojo_detail.html:121
 msgid "Next session"
 msgstr "Prochaine session"
 
-#: dojos/templates/dojos/dojo_detail.html:119 dojos/templates/dojos/dojo_event_detail.html:37
+#: dojos/templates/dojos/dojo_detail.html:121 dojos/templates/dojos/dojo_event_detail.html:37
 #: dojos/templates/dojos/dojo_event_list.html:39 dojos/templates/dojos/partials/_dojo_result.html:33
-#: events/models.py:31 events/templates/events/event_signup.html:59
+#: events/models.py:33 events/templates/events/event_signup.html:60
 #: events/templates/events/partials/_event_row.html:34
 msgid "Open"
 msgstr "Ouvert"
 
-#: dojos/templates/dojos/dojo_detail.html:119 dojos/templates/dojos/partials/_dojo_result.html:31
+#: dojos/templates/dojos/dojo_detail.html:121 dojos/templates/dojos/partials/_dojo_result.html:31
 msgid "Waitlist"
 msgstr "Liste d'attente"
 
-#: dojos/templates/dojos/dojo_detail.html:124
+#: dojos/templates/dojos/dojo_detail.html:126
 #, python-format
 msgid "%(counter)s spot left"
 msgid_plural "%(counter)s spots left"
 msgstr[0] "%(counter)s place restante"
 msgstr[1] "%(counter)s places restantes"
 
-#: dojos/templates/dojos/dojo_detail.html:129
+#: dojos/templates/dojos/dojo_detail.html:131
 msgid "View session details →"
 msgstr "Voir la session →"
 
-#: dojos/templates/dojos/dojo_detail.html:137 dojos/templates/dojos/dojo_manage.html:127
+#: dojos/templates/dojos/dojo_detail.html:139 dojos/templates/dojos/dojo_manage.html:146
 msgid "About this dojo"
 msgstr "À propos de ce dojo"
 
-#: dojos/templates/dojos/dojo_detail.html:145 dojos/templates/dojos/dojo_manage.html:137
+#: dojos/templates/dojos/dojo_detail.html:147 dojos/templates/dojos/dojo_manage.html:156
 #: dojos/templates/dojos/partials/_attendance_row.html:52
 #: dojos/templates/dojos/partials/_event_form_fields.html:111
 msgid "Pathways"
 msgstr "Parcours"
 
-#: dojos/templates/dojos/dojo_detail.html:156
+#: dojos/templates/dojos/dojo_detail.html:158
 msgid "Run by"
 msgstr "Animé par"
 
-#: dojos/templates/dojos/dojo_detail.html:169
+#: dojos/templates/dojos/dojo_detail.html:171
 msgid "No mentors listed yet."
 msgstr "Aucun mentor pour l'instant."
 
-#: dojos/templates/dojos/dojo_detail.html:179
+#: dojos/templates/dojos/dojo_detail.html:181
 msgid "You're an approved mentor — want to help out here?"
 msgstr "Vous êtes un mentor approuvé. Vous voulez aider ici ?"
 
-#: dojos/templates/dojos/dojo_detail.html:180
+#: dojos/templates/dojos/dojo_detail.html:182
 msgid "Ask to join the team"
 msgstr "Demander à rejoindre l'équipe"
 
-#: dojos/templates/dojos/dojo_detail.html:183
+#: dojos/templates/dojos/dojo_detail.html:185
 msgid "Your request to join this team is waiting for an answer."
 msgstr "Votre demande pour rejoindre cette équipe attend une réponse."
 
-#: dojos/templates/dojos/dojo_detail.html:206
+#: dojos/templates/dojos/dojo_detail.html:208
 msgid "From this dojo"
 msgstr "Nouvelles de ce dojo"
 
-#: dojos/templates/dojos/dojo_detail.html:217
+#: dojos/templates/dojos/dojo_detail.html:219
 msgid "Visit us"
 msgstr "Nous rendre visite"
 
-#: dojos/templates/dojos/dojo_detail.html:221 dojos/templates/dojos/dojo_manage.html:157
-msgid "Meets"
-msgstr "Quand"
-
-#: dojos/templates/dojos/dojo_detail.html:222 dojos/templates/dojos/dojo_detail.html:232
+#: dojos/templates/dojos/dojo_detail.html:224 dojos/templates/dojos/dojo_detail.html:234
 msgid "To be confirmed"
 msgstr "À confirmer"
 
-#: dojos/templates/dojos/dojo_detail.html:225 events/templates/events/event_detail.html:120
+#: dojos/templates/dojos/dojo_detail.html:227 events/templates/events/event_detail.html:121
 msgid "Ages"
 msgstr "Âges"
 
@@ -2081,7 +2136,7 @@ msgid "Take attendance"
 msgstr "Noter les présences"
 
 #: dojos/templates/dojos/dojo_event_detail.html:39 dojos/templates/dojos/dojo_event_list.html:41
-#: events/models.py:32
+#: events/models.py:34
 msgid "Closed"
 msgstr "Clôturé"
 
@@ -2104,7 +2159,7 @@ msgstr "Clôturer les inscriptions"
 msgid "Back to draft"
 msgstr "Remettre en brouillon"
 
-#: dojos/templates/dojos/dojo_event_detail.html:59 dojos/templates/dojos/dojo_manage.html:214
+#: dojos/templates/dojos/dojo_event_detail.html:59 dojos/templates/dojos/dojo_manage.html:235
 msgid "View public page"
 msgstr "Voir la page publique"
 
@@ -2133,7 +2188,7 @@ msgstr ""
 msgid "Saved."
 msgstr "Enregistré."
 
-#: dojos/templates/dojos/dojo_event_detail.html:93 dojos/templates/dojos/dojo_manage.html:215
+#: dojos/templates/dojos/dojo_event_detail.html:93 dojos/templates/dojos/dojo_manage.html:236
 msgid "Save changes"
 msgstr "Enregistrer les modifications"
 
@@ -2167,7 +2222,7 @@ msgstr ""
 " 7 à 18 ans. Indiquez un code postal ou une commune pour voir ce qui existe près de chez vous."
 
 #: dojos/templates/dojos/dojo_list.html:40 dojos/templates/dojos/partials/_dojo_finder_widget.html:16
-#: events/templates/events/event_list.html:80
+#: events/templates/events/event_list.html:84
 msgid "Search"
 msgstr "Rechercher"
 
@@ -2175,23 +2230,23 @@ msgstr "Rechercher"
 msgid "Use my location"
 msgstr "Utiliser ma position"
 
-#: dojos/templates/dojos/dojo_list.html:57
+#: dojos/templates/dojos/dojo_list.html:58
 #, python-format
 msgid "Couldn't find \"%(search_label)s\" — showing every dojo instead."
 msgstr "« %(search_label)s » introuvable : voici tous les dojos."
 
-#: dojos/templates/dojos/dojo_list.html:59
+#: dojos/templates/dojos/dojo_list.html:60
 #, python-format
 msgid "Showing %(counter)s dojo near %(search_label)s, nearest first"
 msgid_plural "Showing %(counter)s dojos near %(search_label)s, nearest first"
 msgstr[0] "%(counter)s dojo près de %(search_label)s, le plus proche d'abord"
 msgstr[1] "%(counter)s dojos près de %(search_label)s, les plus proches d'abord"
 
-#: dojos/templates/dojos/dojo_list.html:69
+#: dojos/templates/dojos/dojo_list.html:70
 msgid "Already know when you'd like to come?"
 msgstr "Vous savez déjà quand vous voulez venir ?"
 
-#: dojos/templates/dojos/dojo_list.html:70 pathways/templates/pathways/pathway_detail.html:133
+#: dojos/templates/dojos/dojo_list.html:71 pathways/templates/pathways/pathway_detail.html:133
 msgid "Browse upcoming events"
 msgstr "Voir les prochains événements"
 
@@ -2285,87 +2340,92 @@ msgstr ""
 "Nous n'avons pas trouvé cette adresse sur la carte : le lien de carte « Nous rendre visite » et "
 "la recherche par distance utilisent encore l'ancien emplacement. Tout le reste est enregistré."
 
-#: dojos/templates/dojos/dojo_manage.html:82 dojos/templates/dojos/partials/_event_form_fields.html:9
+#: dojos/templates/dojos/dojo_manage.html:83
+msgid ""
+"The languages your sessions are given in and your dojo's texts are written in. Families see them "
+"on your dojo's page and can search on them. The main language is the one every text is written in"
+" first."
+msgstr ""
+"Les langues dans lesquelles vos sessions sont données et les textes de votre dojo sont écrits. "
+"Les familles les voient sur la page de votre dojo et peuvent chercher par langue. La langue "
+"principale est celle dans laquelle chaque texte est d'abord écrit."
+
+#: dojos/templates/dojos/dojo_manage.html:95
+msgid ""
+"The fields below are in this language. Other languages get their own section at the bottom once "
+"saved."
+msgstr ""
+"Les champs ci-dessous sont dans cette langue. Les autres langues ont leur propre section en bas, "
+"une fois enregistré."
+
+#: dojos/templates/dojos/dojo_manage.html:101 dojos/templates/dojos/partials/_event_form_fields.html:9
 msgid "Basics"
 msgstr "Essentiel"
 
-#: dojos/templates/dojos/dojo_manage.html:83
+#: dojos/templates/dojos/dojo_manage.html:102
 msgid "The name, icon, and one-line tagline shown at the top of your dojo's page."
 msgstr "Le nom, l'icône et le slogan affichés en haut de la page de votre dojo."
 
-#: dojos/templates/dojos/dojo_manage.html:92
+#: dojos/templates/dojos/dojo_manage.html:111
 msgid "Icon"
 msgstr "Icône"
 
-#: dojos/templates/dojos/dojo_manage.html:93
+#: dojos/templates/dojos/dojo_manage.html:112
 msgid "Round icon shown at the top of the dojo page, next to its name."
 msgstr "Icône ronde en haut de la page du dojo, à côté de son nom."
 
-#: dojos/templates/dojos/dojo_manage.html:104 dojos/templates/dojos/partials/_event_form_fields.html:84
+#: dojos/templates/dojos/dojo_manage.html:123 dojos/templates/dojos/partials/_event_form_fields.html:84
 msgid "No template"
 msgstr "Pas de modèle"
 
 # | msgid "upload your document"
-#: dojos/templates/dojos/dojo_manage.html:113 dojos/templates/dojos/partials/_event_form_fields.html:93
+#: dojos/templates/dojos/dojo_manage.html:132 dojos/templates/dojos/partials/_event_form_fields.html:93
 msgid "…or upload your own"
 msgstr "…ou envoyez la vôtre"
 
-#: dojos/templates/dojos/dojo_manage.html:115 dojos/templates/dojos/partials/_event_form_fields.html:95
+#: dojos/templates/dojos/dojo_manage.html:134 dojos/templates/dojos/partials/_event_form_fields.html:95
 msgid "Uploading a file here overrides the template chosen above."
 msgstr "Un fichier envoyé ici remplace le modèle choisi ci-dessus."
 
-#: dojos/templates/dojos/dojo_manage.html:119
-msgid "Tagline"
-msgstr "Slogan"
-
-#: dojos/templates/dojos/dojo_manage.html:121
+#: dojos/templates/dojos/dojo_manage.html:140
 msgid "Shown right under the dojo's name. Supports basic Markdown."
 msgstr "Juste sous le nom du dojo. Markdown simple accepté."
 
-# | msgid "Questions"
-#: dojos/templates/dojos/dojo_manage.html:129
-#: dojos/templates/dojos/partials/_event_form_fields.html:103
-#: mailing/templates/mailing/manage/_segment_fields.html:7
-#: mailing/templates/mailing/manage/segment_list.html:13
-#: mailing/templates/mailing/manage/template_edit.html:44
-msgid "Description"
-msgstr "Description"
-
-#: dojos/templates/dojos/dojo_manage.html:131
+#: dojos/templates/dojos/dojo_manage.html:150
 msgid "Shown further down the page, above the team. Supports basic Markdown."
 msgstr "Plus bas sur la page, au-dessus de l'équipe. Markdown simple accepté."
 
-#: dojos/templates/dojos/dojo_manage.html:139
+#: dojos/templates/dojos/dojo_manage.html:158
 msgid "Pathways your dojo provides"
 msgstr "Parcours proposés par votre dojo"
 
-#: dojos/templates/dojos/dojo_manage.html:149
+#: dojos/templates/dojos/dojo_manage.html:168
 msgid "Optional — shown on your dojo's page, and pre-selected for new sessions."
 msgstr "Facultatif : affichés sur la page de votre dojo et présélectionnés pour les nouvelles sessions."
 
-#: dojos/templates/dojos/dojo_manage.html:154
+#: dojos/templates/dojos/dojo_manage.html:173
 msgid "Schedule &amp; ages"
 msgstr "Horaires et âges"
 
-#: dojos/templates/dojos/dojo_manage.html:164
+#: dojos/templates/dojos/dojo_manage.html:183
 #: dojos/templates/dojos/partials/_event_form_fields.html:131
 msgid "Minimum age"
 msgstr "Âge minimum"
 
-#: dojos/templates/dojos/dojo_manage.html:169
+#: dojos/templates/dojos/dojo_manage.html:188
 #: dojos/templates/dojos/partials/_event_form_fields.html:136
 msgid "Maximum age"
 msgstr "Âge maximum"
 
-#: dojos/templates/dojos/dojo_manage.html:177
+#: dojos/templates/dojos/dojo_manage.html:196
 msgid "Contact &amp; location"
 msgstr "Contact et lieu"
 
-#: dojos/templates/dojos/dojo_manage.html:191
+#: dojos/templates/dojos/dojo_manage.html:210
 msgid "Municipality"
 msgstr "Commune"
 
-#: dojos/templates/dojos/dojo_manage.html:198
+#: dojos/templates/dojos/dojo_manage.html:217
 msgid ""
 "Used for the \"Visit us\" map link and for distance search — changing it updates the map location"
 " automatically."
@@ -2374,15 +2434,11 @@ msgstr ""
 "met à jour l'emplacement sur la carte automatiquement."
 
 # | msgid "Visit us"
-#: dojos/templates/dojos/dojo_manage.html:204
+#: dojos/templates/dojos/dojo_manage.html:223
 msgid "Visit us notes"
 msgstr "Remarques pour Nous rendre visite"
 
-#: dojos/templates/dojos/dojo_manage.html:206
-msgid "Extra info"
-msgstr "Infos supplémentaires"
-
-#: dojos/templates/dojos/dojo_manage.html:208
+#: dojos/templates/dojos/dojo_manage.html:227
 msgid ""
 "Parking, entrance, accessibility — anything extra for the Visit us section. Supports basic "
 "Markdown."
@@ -2646,30 +2702,30 @@ msgstr ""
 "la liste des événements."
 
 # | msgid "Password updated"
-#: dojos/templates/dojos/dojo_updates.html:38
+#: dojos/templates/dojos/dojo_updates.html:39
 msgid "Post update"
 msgstr "Publier"
 
 # | msgid "Password updated"
-#: dojos/templates/dojos/dojo_updates.html:44
+#: dojos/templates/dojos/dojo_updates.html:45
 msgid "Posted updates"
 msgstr "Nouvelles publiées"
 
-#: dojos/templates/dojos/dojo_updates.html:45
+#: dojos/templates/dojos/dojo_updates.html:46
 #, python-format
 msgid "The dojo's page shows the %(public_limit)s newest."
 msgstr "La page du dojo affiche les %(public_limit)s plus récentes."
 
-#: dojos/templates/dojos/dojo_updates.html:49
+#: dojos/templates/dojos/dojo_updates.html:50
 msgid "no longer shown"
 msgstr "plus affichée"
 
-#: dojos/templates/dojos/dojo_updates.html:54
+#: dojos/templates/dojos/dojo_updates.html:55
 msgid "Remove this update from the dojo's page?"
 msgstr "Retirer cette nouvelle de la page du dojo ?"
 
 # | msgid "No past sessions yet."
-#: dojos/templates/dojos/dojo_updates.html:61
+#: dojos/templates/dojos/dojo_updates.html:62
 msgid "No updates yet."
 msgstr "Pas encore de nouvelles."
 
@@ -2853,7 +2909,7 @@ msgstr ""
 "formulaire d'inscription, et Places n'est pas nécessaire."
 
 #: dojos/templates/dojos/partials/_event_form_fields.html:57
-#: events/templates/events/event_detail.html:116 events/templates/events/event_list.html:66
+#: events/templates/events/event_detail.html:117 events/templates/events/event_list.html:66
 msgid "Location"
 msgstr "Lieu"
 
@@ -2883,7 +2939,7 @@ msgid "Choose a template"
 msgstr "Choisir un modèle"
 
 #: dojos/templates/dojos/partials/_event_form_fields.html:101
-#: events/templates/events/event_detail.html:72
+#: events/templates/events/event_detail.html:73
 msgid "About this session"
 msgstr "À propos de cette session"
 
@@ -2892,7 +2948,7 @@ msgid "Supports basic Markdown."
 msgstr "Markdown simple accepté."
 
 #: dojos/templates/dojos/partials/_event_form_fields.html:113
-#: events/templates/events/event_detail.html:80
+#: events/templates/events/event_detail.html:81
 msgid "Pathways this session covers"
 msgstr "Parcours abordés pendant cette session"
 
@@ -2947,6 +3003,19 @@ msgstr "il y a %(since)s"
 msgid "You're all caught up."
 msgstr "Vous êtes à jour."
 
+# | msgid "Language"
+# | msgid "Languages"
+#: dojos/templates/dojos/partials/_translation_fields.html:10
+#, python-format
+msgid "In %(language)s"
+msgstr "En %(language)s"
+
+#: dojos/templates/dojos/partials/_translation_fields.html:11
+msgid "Optional. Leave a text empty and visitors who read this language see the main-language version."
+msgstr ""
+"Facultatif. Si vous laissez un texte vide, les visiteurs qui lisent cette langue voient la "
+"version dans la langue principale."
+
 #: dojos/templates/dojos/team_member_detail.html:67
 msgid "Focus areas"
 msgstr "Domaines de prédilection"
@@ -2957,79 +3026,79 @@ msgid "Get in touch with %(name)s"
 msgstr "Contacter %(name)s"
 
 # | msgid "Your request to join this team is waiting for an answer."
-#: dojos/views.py:162
+#: dojos/views.py:165
 #, python-format
 msgid "Your request to join %(dojo)s has been sent to its team."
 msgstr "Votre demande pour rejoindre %(dojo)s a été envoyée à son équipe."
 
-#: dojos/views.py:253
+#: dojos/views.py:256
 msgid "Only approved champions with a valid background check can create a dojo."
 msgstr "Seuls les champions approuvés avec un extrait de casier judiciaire valable peuvent créer un dojo."
 
-#: dojos/views.py:269
+#: dojos/views.py:274
 #, python-format
 msgid "%(dojo)s has been created as a draft. Fill in its profile, then launch it."
 msgstr "%(dojo)s a été créé en brouillon. Complétez son profil, puis lancez-le."
 
-#: dojos/views.py:271
+#: dojos/views.py:276
 msgid "We couldn't find that address on the map; check it on this page."
 msgstr "Nous n'avons pas trouvé cette adresse sur la carte ; vérifiez-la sur cette page."
 
-#: dojos/views.py:324
+#: dojos/views.py:329
 #, python-format
 msgid "%(dojo)s is now %(lower)s."
 msgstr "%(dojo)s est maintenant %(lower)s."
 
-#: dojos/views.py:393
+#: dojos/views.py:398
 msgid "Update posted on the dojo's page."
 msgstr "Nouvelle publiée sur la page du dojo."
 
-#: dojos/views.py:410
+#: dojos/views.py:415
 msgid "Update removed."
 msgstr "Nouvelle retirée."
 
 # | msgid "Youth mentor at %(dojo)s"
-#: dojos/views.py:454
+#: dojos/views.py:459
 #, python-format
 msgid "You've left the %(dojo)s team."
 msgstr "Vous avez quitté l'équipe de %(dojo)s."
 
-#: dojos/views.py:460
+#: dojos/views.py:465
 #, python-format
 msgid "%(membership)s is now the champion of %(dojo)s."
 msgstr "%(membership)s est maintenant le champion de %(dojo)s."
 
-#: dojos/views.py:469
+#: dojos/views.py:474
 #, python-format
 msgid "%(membership)s is now on the team."
 msgstr "%(membership)s fait maintenant partie de l'équipe."
 
 # | msgid "Request a new link"
-#: dojos/views.py:472
+#: dojos/views.py:477
 msgid "Request declined."
 msgstr "Demande refusée."
 
-#: dojos/views.py:475
+#: dojos/views.py:480
 #, python-format
 msgid "%(membership)s has been removed from the team."
 msgstr "%(membership)s a été retiré de l'équipe."
 
 # | msgid "Enter a valid email address."
-#: dojos/views.py:480
+#: dojos/views.py:485
 msgid "No account uses that email address."
 msgstr "Aucun compte n'utilise cette adresse e-mail."
 
-#: dojos/views.py:482
+#: dojos/views.py:487
 #, python-format
 msgid "%(name)s has been added to the team."
 msgstr "%(name)s a été ajouté à l'équipe."
 
-#: dojos/views.py:486
+#: dojos/views.py:491
 #, python-format
 msgid "%(name)s is now a youth mentor."
 msgstr "%(name)s est maintenant jeune mentor."
 
-#: dojos/views.py:709
+#: dojos/views.py:714
 msgid "Pick a belt to award."
 msgstr "Choisissez une ceinture à décerner."
 
@@ -3047,149 +3116,158 @@ msgstr "%(ninja)s n'est encore venu à aucune session de %(dojo)s."
 msgid "%(ninja)s already has the %(current)s (or higher)."
 msgstr "%(ninja)s a déjà la %(current)s (ou plus)."
 
-#: events/forms.py:30
+#: events/forms.py:37
 msgid "All dojos"
 msgstr "Tous les dojos"
 
-#: events/forms.py:36
+#: events/forms.py:43
 msgid "Postcode or city"
 msgstr "Code postal ou commune"
 
-#: events/forms.py:40
+#: events/forms.py:47
 msgid "Any date"
 msgstr "Toutes les dates"
 
-#: events/forms.py:40
+#: events/forms.py:47
 msgid "This week"
 msgstr "Cette semaine"
 
-#: events/forms.py:40
+#: events/forms.py:47
 msgid "This month"
 msgstr "Ce mois-ci"
 
-#: events/forms.py:45
+#: events/forms.py:58
 msgid "All ages"
 msgstr "Tous les âges"
 
-#: events/forms.py:75
+#: events/forms.py:88
 msgid "dd/mm/yyyy"
 msgstr "jj/mm/aaaa"
 
-#: events/forms.py:80 events/forms.py:87
+#: events/forms.py:93 events/forms.py:100
 msgid "HH:MM"
 msgstr "HH:MM"
 
 # | msgid "Free coding club · Saturdays"
-#: events/forms.py:108
+#: events/forms.py:121
 msgid "Coding Saturday"
 msgstr "Samedi code"
 
-#: events/forms.py:109
+#: events/forms.py:122
 msgid "20"
 msgstr "20"
 
-#: events/forms.py:111
+#: events/forms.py:124
 msgid "https://www.coolestprojects.org/…"
 msgstr "https://www.coolestprojects.org/…"
 
-#: events/forms.py:113
+#: events/forms.py:126
 msgid "e.g. \"Ghent Public Library\""
 msgstr "p. ex. « Bibliothèque de Gand »"
 
-#: events/forms.py:117
+#: events/forms.py:130
 msgid "What this session is about, what to bring — shown on the session's public page."
 msgstr "De quoi parle cette session, quoi apporter : affiché sur la page publique de la session."
 
-#: events/models.py:60
+#: events/forms.py:178
+msgid "End time must be after the start time."
+msgstr "L'heure de fin doit être après l'heure de début."
+
+# | msgid "First name is required."
+#: events/forms.py:183
+msgid "This field is required."
+msgstr "Ce champ est obligatoire."
+
+#: events/models.py:64
 msgid "Everyone"
 msgstr "Tout le monde"
 
-#: events/models.py:60 events/templates/events/partials/_audience_badge.html:4
+#: events/models.py:64 events/templates/events/partials/_audience_badge.html:4
 msgid "Girls' session"
 msgstr "Session pour filles"
 
-#: events/models.py:201
+#: events/models.py:209
 msgid "One-off"
 msgstr "Ponctuel"
 
-#: events/models.py:201
+#: events/models.py:209
 msgid "Milestone"
 msgstr "Palier"
 
-#: events/models.py:228
+#: events/models.py:236
 msgid "Only milestone badges have a threshold or grant a belt."
 msgstr "Seuls les badges de palier ont un seuil ou décernent une ceinture."
 
-#: events/models.py:300
+#: events/models.py:308
 #, python-format
 msgid "%(who)s, as %(role)s of %(dojo)s"
 msgstr "%(who)s, en tant que %(role)s de %(dojo)s"
 
-#: events/models.py:325
+#: events/models.py:333
 msgid "New"
 msgstr "Nouveau"
 
-#: events/models.py:326
+#: events/models.py:334
 msgid "Regular"
 msgstr "Régulier"
 
-#: events/models.py:327
+#: events/models.py:335
 msgid "Occasional"
 msgstr "Occasionnel"
 
-#: events/models.py:328
+#: events/models.py:336
 msgid "At risk"
 msgstr "Risque de décrocher"
 
-#: events/models.py:329
+#: events/models.py:337
 msgid "Lapsed"
 msgstr "Décroché"
 
-#: events/models.py:330
+#: events/models.py:338
 msgid "Never came"
 msgstr "Jamais venu"
 
 # | msgid "Log out"
-#: events/models.py:331
+#: events/models.py:339
 msgid "Aged out"
 msgstr "Trop âgé"
 
-#: events/templates/events/event_detail.html:92 pathways/templates/pathways/pathway_detail.html:112
+#: events/templates/events/event_detail.html:93 pathways/templates/pathways/pathway_detail.html:112
 msgid "Questions"
 msgstr "Questions"
 
-#: events/templates/events/event_detail.html:125 events/templates/events/partials/_event_row.html:28
+#: events/templates/events/event_detail.html:130 events/templates/events/partials/_event_row.html:28
 #, python-format
 msgid "Register on %(host)s"
 msgstr "S'inscrire sur %(host)s"
 
-#: events/templates/events/event_detail.html:126
+#: events/templates/events/event_detail.html:131
 msgid "Registration for this event happens on its own website, not on CoderDojo Belgium."
 msgstr "L'inscription à cet événement se fait sur son propre site, pas sur CoderDojo Belgium."
 
-#: events/templates/events/event_detail.html:129
+#: events/templates/events/event_detail.html:134
 msgid "Already signed up"
 msgstr "Déjà inscrit"
 
-#: events/templates/events/event_detail.html:131 events/templates/events/event_signup.html:55
+#: events/templates/events/event_detail.html:136 events/templates/events/event_signup.html:56
 #: events/templates/events/partials/_event_row.html:30
 msgid "Registrations closed"
 msgstr "Inscriptions clôturées"
 
-#: events/templates/events/event_detail.html:136
+#: events/templates/events/event_detail.html:141
 msgid "Every child on your account is already signed up"
 msgstr "Tous les enfants de votre compte sont déjà inscrits"
 
-#: events/templates/events/event_detail.html:136
+#: events/templates/events/event_detail.html:141
 msgid "This session isn't accepting new registrations"
 msgstr "Cette session n'accepte plus de nouvelles inscriptions"
 
-#: events/templates/events/event_detail.html:136
+#: events/templates/events/event_detail.html:141
 #, python-format
 msgid "%(left)s of %(total)s spots left"
 msgstr "%(left)s places libres sur %(total)s"
 
-#: events/templates/events/event_detail.html:136
+#: events/templates/events/event_detail.html:141
 msgid "Full — join the waitlist"
 msgstr "Complet : inscrivez-vous sur la liste d'attente"
 
@@ -3205,48 +3283,48 @@ msgstr "Toutes les sessions gratuites des CoderDojos de Belgique. Filtrez par do
 msgid "Age"
 msgstr "Âge"
 
-#: events/templates/events/event_list.html:88
+#: events/templates/events/event_list.html:92
 msgid "Filtered by:"
 msgstr "Filtré par :"
 
-#: events/templates/events/event_list.html:89
+#: events/templates/events/event_list.html:93
 msgid "Clear dojo filter"
 msgstr "Retirer le filtre dojo"
 
-#: events/templates/events/event_list.html:98
+#: events/templates/events/event_list.html:102
 msgid "Would rather browse by place than by date?"
 msgstr "Vous préférez chercher par lieu plutôt que par date ?"
 
-#: events/templates/events/event_signup.html:48
+#: events/templates/events/event_signup.html:49
 #, python-format
 msgid "Sign up for %(name)s"
 msgstr "S'inscrire à %(name)s"
 
-#: events/templates/events/event_signup.html:57 events/templates/events/partials/_event_row.html:32
+#: events/templates/events/event_signup.html:58 events/templates/events/partials/_event_row.html:32
 msgid "Full"
 msgstr "Complet"
 
-#: events/templates/events/event_signup.html:69 events/views.py:143
+#: events/templates/events/event_signup.html:70 events/views.py:147
 msgid "Registrations for this session are closed."
 msgstr "Les inscriptions à cette session sont clôturées."
 
-#: events/templates/events/event_signup.html:72 events/templates/events/event_signup.html:96
+#: events/templates/events/event_signup.html:73 events/templates/events/event_signup.html:97
 msgid "Back to session"
 msgstr "Retour à la session"
 
-#: events/templates/events/event_signup.html:77
+#: events/templates/events/event_signup.html:78
 msgid "You're all set"
 msgstr "C'est fait"
 
-#: events/templates/events/event_signup.html:86
+#: events/templates/events/event_signup.html:87
 msgid "Confirmed"
 msgstr "Confirmé"
 
-#: events/templates/events/event_signup.html:93
+#: events/templates/events/event_signup.html:94
 msgid "We'll email you if anyone on the waiting list gets a spot."
 msgstr "Nous vous enverrons un e-mail si une personne de la liste d'attente obtient une place."
 
-#: events/templates/events/event_signup.html:115
+#: events/templates/events/event_signup.html:116
 msgid ""
 "This session is full. Signing up below adds your child(ren) to the waiting list — we'll email you"
 " the moment a spot opens."
@@ -3254,42 +3332,42 @@ msgstr ""
 "Cette session est complète. En vous inscrivant ci-dessous, vos enfants sont placés sur la liste "
 "d'attente ; nous vous écrirons dès qu'une place se libère."
 
-#: events/templates/events/event_signup.html:121
+#: events/templates/events/event_signup.html:122
 msgid "Who's joining?"
 msgstr "Qui participe ?"
 
-#: events/templates/events/event_signup.html:123
+#: events/templates/events/event_signup.html:124
 msgid "Every child on your account is already signed up for this session — see below."
 msgstr "Tous les enfants de votre compte sont déjà inscrits à cette session, voir ci-dessous."
 
-#: events/templates/events/event_signup.html:126
+#: events/templates/events/event_signup.html:127
 msgid "Tick each child you'd like to add to the waiting list for this session."
 msgstr "Cochez chaque enfant à placer sur la liste d'attente de cette session."
 
-#: events/templates/events/event_signup.html:126
+#: events/templates/events/event_signup.html:127
 msgid "Tick each child you'd like to sign up for this session."
 msgstr "Cochez chaque enfant à inscrire à cette session."
 
-#: events/templates/events/event_signup.html:127
+#: events/templates/events/event_signup.html:128
 #, python-format
 msgid "Only %(counter)s spot left — anyone beyond that goes on the waiting list."
 msgid_plural "Only %(counter)s spots left — anyone beyond that goes on the waiting list."
 msgstr[0] "Plus que %(counter)s place : les suivants iront sur la liste d'attente."
 msgstr[1] "Plus que %(counter)s places : les suivants iront sur la liste d'attente."
 
-#: events/templates/events/event_signup.html:142
+#: events/templates/events/event_signup.html:143
 msgid "Already on waiting list"
 msgstr "Déjà sur la liste d'attente"
 
-#: events/templates/events/event_signup.html:144
+#: events/templates/events/event_signup.html:145
 msgid "Already confirmed"
 msgstr "Déjà confirmé"
 
-#: events/templates/events/event_signup.html:160
+#: events/templates/events/event_signup.html:161
 msgid "No children on your account yet — register one below to sign them up."
 msgstr "Aucun enfant sur votre compte pour l'instant. Ajoutez-en un ci-dessous pour l'inscrire."
 
-#: events/templates/events/event_signup.html:163
+#: events/templates/events/event_signup.html:164
 #, python-format
 msgid ""
 "Signing up on someone else's behalf? <a href=\"%(register_url)s\">Register another child</a> "
@@ -3298,20 +3376,20 @@ msgstr ""
 "Vous inscrivez quelqu'un d'autre ? <a href=\"%(register_url)s\">Enregistrez d'abord un autre "
 "enfant</a>."
 
-#: events/templates/events/event_signup.html:170
+#: events/templates/events/event_signup.html:171
 msgid "Join the waiting list"
 msgstr "S'inscrire sur la liste d'attente"
 
-#: events/templates/events/event_signup.html:182
+#: events/templates/events/event_signup.html:183
 msgid "Spot available"
 msgstr "Place disponible"
 
-#: events/templates/events/event_signup.html:182
+#: events/templates/events/event_signup.html:183
 #, python-brace-format
 msgid "All {waiting} selected will join the waiting list."
 msgstr "Les {waiting} enfants sélectionnés iront sur la liste d'attente."
 
-#: events/templates/events/event_signup.html:182
+#: events/templates/events/event_signup.html:183
 #, python-brace-format
 msgid "{confirmed} will get a spot · {waiting} will join the waiting list."
 msgstr "{confirmed} auront une place · {waiting} iront sur la liste d'attente."
@@ -3340,11 +3418,11 @@ msgstr "Voir %(name)s"
 msgid "No upcoming sessions with open spots right now — check back soon."
 msgstr "Aucune session à venir avec des places libres pour l'instant. Revenez bientôt."
 
-#: events/views.py:159
+#: events/views.py:163
 msgid "Please select at least one child."
 msgstr "Choisissez au moins un enfant."
 
-#: events/views.py:161
+#: events/views.py:165
 msgid "The child(ren) you selected are already signed up for this session."
 msgstr "Les enfants choisis sont déjà inscrits à cette session."
 
@@ -4460,12 +4538,6 @@ msgstr ""
 #: mailing/templates/mailing/manage/template_list.html:24
 msgid "Sent by the site"
 msgstr "Envoyé par le site"
-
-# | msgid "Language"
-#: mailing/templates/mailing/manage/template_edit.html:21
-#: mailing/templates/mailing/manage/template_list.html:14
-msgid "Languages"
-msgstr "Langues"
 
 #: mailing/templates/mailing/manage/template_edit.html:23
 msgid "(not written yet)"

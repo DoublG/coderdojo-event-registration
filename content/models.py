@@ -4,6 +4,8 @@ from django.db.models import Case, Q, When
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from core.content_languages import TranslatableModel
+
 
 class FAQQuerySet(models.QuerySet):
     def global_faqs(self):
@@ -74,12 +76,17 @@ class AnnouncementManager(models.Manager):
         return super().get_queryset().select_related("dojo__municipality")
 
 
-class Announcement(models.Model):
+class Announcement(TranslatableModel):
+    TRANSLATABLE_FIELDS = ("text",)
+
     dojo = models.ForeignKey("dojos.Dojo", on_delete=models.CASCADE, related_name="announcements")
     date = models.DateField()
     text = models.TextField()
 
     objects = AnnouncementManager()
+
+    def content_languages(self):
+        return self.dojo.content_languages()
 
     class Meta:
         ordering = ["-date", "-id"]
@@ -213,7 +220,7 @@ class Promotion(models.Model):
 
     @property
     def display_title(self):
-        return self.title or self.event.name
+        return self.title or self.event.localized("name")
 
     @property
     def display_image(self):

@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load content_i18n %}
 {% load i18n %}
 {% block title %}{% translate "Sign up" %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}signup-root{% endblock %}
@@ -45,7 +46,7 @@
   <div class="shell">
 
       <div class="signup-header">
-        <h1 class="display-lg">{% blocktranslate with name=event.name %}Sign up for {{ name }}{% endblocktranslate %}</h1>
+        <h1 class="display-lg">{% blocktranslate with name=event|localized:"name" %}Sign up for {{ name }}{% endblocktranslate %}</h1>
         <p class="body meta">
           {{ event.start_time|date:"D j M" }} · {{ event.start_time|time:"H:i" }}–{{ event.end_time|time:"H:i" }}
           {% if event.venue_name %} · {{ event.venue_name }}{% endif %}

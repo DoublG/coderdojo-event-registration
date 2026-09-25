@@ -41,11 +41,17 @@ def family_of(ninja):
     return User.objects.filter(pk__in=ids, is_active=True).exclude(email="").order_by("id")
 
 
-def _session_context(registration):
+def _mail_language(user):
+    return user.preferred_language or settings.LANGUAGE_CODE
+
+
+def _session_context(registration, user=None):
+    """The session's details; its name in `user`'s mail language when the
+    dojo wrote one (core.content_languages)."""
     event = registration.event
     return {
         "ninja_name": registration.ninja.name.split()[0],
-        "event_name": event.name,
+        "event_name": event.localized("name", _mail_language(user)) if user else event.name,
         "dojo_name": event.dojo.name,
         "start_time": timezone.localtime(event.start_time),
         "end_time": timezone.localtime(event.end_time),
@@ -65,10 +71,13 @@ def _queue(user, category, template_key, context, key):
 
 
 def _send_to_family(ninja, category, template_key, context, key_prefix):
+    """`context` is a dict, or a function of the recipient (for texts in
+    their own language)."""
     sent = 0
     for user in family_of(ninja):
         try:
-            sent += _queue(user, category, template_key, context, f"{key_prefix}:{user.pk}")
+            user_context = context(user) if callable(context) else context
+            sent += _queue(user, category, template_key, user_context, f"{key_prefix}:{user.pk}")
         except TemplateMissing:
             logger.exception("mail template %s is missing: nothing sent", template_key)
             return sent
@@ -78,14 +87,15 @@ def _send_to_family(ninja, category, template_key, context, key_prefix):
 def booking_mail(registration):
     """Right after a sign-up: a confirmation, or the waiting-list notice."""
     template = "registration_waitlisted" if registration.waiting_list else "registration_confirmed"
-    return _send_to_family(registration.ninja, MailCategory.REGISTRATION, template, _session_context(registration),
+    return _send_to_family(registration.ninja, MailCategory.REGISTRATION, template,
+                           lambda user: _session_context(registration, user),
                            f"booking:{registration.pk}")
 
 
 def waitlist_promoted_mail(registration):
     """A place came free and this waitlisted ninja moved up."""
     return _send_to_family(registration.ninja, MailCategory.REGISTRATION, "waitlist_promoted",
-                           _session_context(registration), f"promoted:{registration.pk}")
+                           lambda user: _session_context(registration, user), f"promoted:{registration.pk}")
 
 
 def youth_mentor_promoted_mail(membership):
@@ -118,7 +128,7 @@ def send_session_reminders(today=None):
         .select_related("event__dojo", "ninja")
     )
     return sum(
-        _send_to_family(r.ninja, MailCategory.REMINDER, "session_reminder", _session_context(r),
+        _send_to_family(r.ninja, MailCategory.REMINDER, "session_reminder", lambda user, r=r: _session_context(r, user),
                         f"reminder:{r.event_id}:{r.ninja_id}")
         for r in registrations
     )
@@ -155,19 +165,21 @@ def announce_new_sessions(now=None):
             | Q(pk__in=ninjas.exclude(account=None).values("account_id")),
             is_active=True,
         ).exclude(email="").order_by("id")
-        context = {
-            "dojo_name": dojo.name,
-            "dojo_url": settings.SITE_URL + reverse("dojo_detail", kwargs={"dojo_id": dojo.pk}),
-            "events": [
-                {"name": e.name, "start_time": timezone.localtime(e.start_time),
-                 "url": settings.SITE_URL + reverse("event_detail", kwargs={"event_id": e.pk})}
-                for e in events
-            ],
-        }
+        def context_for(user, dojo=dojo, events=events):
+            return {
+                "dojo_name": dojo.name,
+                "dojo_url": settings.SITE_URL + reverse("dojo_detail", kwargs={"dojo_id": dojo.pk}),
+                "events": [
+                    {"name": e.localized("name", _mail_language(user)), "start_time": timezone.localtime(e.start_time),
+                     "url": settings.SITE_URL + reverse("event_detail", kwargs={"event_id": e.pk})}
+                    for e in events
+                ],
+            }
+
         key = "dojo_news:" + "-".join(str(e.pk) for e in events)
         for user in users:
             try:
-                sent += _queue(user, MailCategory.DOJO_NEWS, "new_sessions_at_dojo", context, f"{key}:{user.pk}")
+                sent += _queue(user, MailCategory.DOJO_NEWS, "new_sessions_at_dojo", context_for(user), f"{key}:{user.pk}")
             except TemplateMissing:
                 logger.exception("mail template new_sessions_at_dojo is missing: nothing sent")
                 return sent

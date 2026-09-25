@@ -12,11 +12,13 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 
 from accounts.models import Ninja, User
 from applications.services import is_approved_champion
 from content.models import FAQ, OrganisationTeamMember, Promotion
+from core.content_languages import normalize
 from events.awards import BeltError, award_belt, sync_milestones
 from events.forms import EventForm
 from events.models import Belt, Event, NinjaEngagement, Registration, TeamAttendance
@@ -76,7 +78,8 @@ def _notification_context(user, dojo):
 def dojo_list(request):
     form = DojoSearchForm(request.GET)
     origin, search_label, geocode_failed = resolve_search_origin(form, request.user)
-    dojos_qs = dojos_by_distance(origin)
+    language = form.cleaned_data.get("language") if form.is_valid() else None
+    dojos_qs = dojos_by_distance(origin, language=language)
 
     paginator = Paginator(dojos_qs, RESULTS_PER_PAGE)
     page = paginator.get_page(request.GET.get("page"))
@@ -259,6 +262,8 @@ def dojo_create(request):
             with transaction.atomic():
                 dojo = form.save(commit=False)
                 dojo.status = Dojo.DRAFT
+                # Starts in the champion's own language; changed on the Settings page.
+                dojo.languages = [normalize(request.user.preferred_language or get_language()) or "nl-be"]
                 dojo.created_by = request.user
                 geocode_failed = bool(dojo.address) and not _geocode_address(dojo)
                 dojo.save()
@@ -380,11 +385,11 @@ def dojo_updates(request, dojo_id):
     form to post a new one, dated today."""
     access = require_dojo_access(request, dojo_id)
     dojo = access.dojo
-    form = AnnouncementForm()
+    form = AnnouncementForm(dojo=dojo)
     if request.method == "POST":
         if not access.can_post_updates:
             raise PermissionDenied
-        form = AnnouncementForm(request.POST)
+        form = AnnouncementForm(request.POST, dojo=dojo)
         if form.is_valid():
             announcement = form.save(commit=False)
             announcement.dojo = dojo

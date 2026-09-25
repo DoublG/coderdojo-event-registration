@@ -1,4 +1,4 @@
-{% load i18n %}{% comment %}
+{% load content_i18n %}{% load i18n %}{% comment %}
 Renders one row in the events list, grouped by day. Expects an `event`
 Event instance in context. Group a flat, start_time-ordered queryset by day
 with Django's built-in `regroup` tag:
@@ -18,7 +18,7 @@ with Django's built-in `regroup` tag:
     <span class="dom">{{ event.start_time|date:"j" }}</span>
   </div>
   <div class="info">
-    <h3 class="heading-md">{{ event.name }} - {{ event.dojo.name }}</h3>
+    <h3 class="heading-md">{{ event|localized:"name" }} - {{ event.dojo.name }}</h3>
     <p class="body-sm meta">
       {{ event.start_time|time:"H:i" }}{% if event.end_time %}–{{ event.end_time|time:"H:i" }}{% endif %}
       · {{ event.venue_name|default:event.dojo.address|default:event.dojo.name }}
