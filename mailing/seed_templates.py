@@ -521,6 +521,63 @@ Si vous n'avez rien demandé, vous pouvez ignorer cet e-mail : votre mot de pass
         },
     },
     {
+        "key": "ninja_account_created",
+        "category": MailCategory.SERVICE,
+        "description": "A guardian gave their child their own login (or switched it back on). Sent to the "
+                       "child's address. Variables: guardian_name, username, set_password_url.",
+        "subject": {
+            "en-us": "Your own CoderDojo login",
+            "nl-be": "Je eigen CoderDojo-login",
+            "fr-be": "Ton propre compte CoderDojo",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{{ guardian_name }} made you your own CoderDojo login. With it you can see your belt,
+your badges and the sessions you've been to, and sign yourself up for sessions.
+
+Choose your password here:
+
+{{ set_password_url }}
+
+After that, log in with this email address (or your username, {{ username }}).
+
+Didn't expect this mail? Then you can ignore it.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{{ guardian_name }} heeft een eigen CoderDojo-login voor je gemaakt. Daarmee zie je je
+gordel, je badges en de sessies waar je naartoe ging, en kan je je zelf inschrijven
+voor sessies.
+
+Kies hier je wachtwoord:
+
+{{ set_password_url }}
+
+Daarna log je in met dit e-mailadres (of je gebruikersnaam, {{ username }}).
+
+Had je deze e-mail niet verwacht? Dan kan je hem negeren.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{{ guardian_name }} t'a créé ton propre compte CoderDojo. Tu peux y voir ta ceinture,
+tes badges et les sessions auxquelles tu as participé, et t'inscrire toi-même à des
+sessions.
+
+Choisis ton mot de passe ici :
+
+{{ set_password_url }}
+
+Ensuite, connecte-toi avec cette adresse e-mail (ou ton nom d'utilisateur, {{ username }}).
+
+Tu ne t'attendais pas à cet e-mail ? Tu peux l'ignorer.
+""",
+        },
+    },
+    {
         "key": "campaign_coolest_projects",
         "category": MailCategory.NEWSLETTER,
         "description": "Campaign: invite every active family and volunteer to Coolest Projects. "
@@ -745,6 +802,10 @@ SAMPLE_CONTEXT = {
                              "account_url": "https://coolregistration.localhost/account/"},
     "application_rejected": {**_common},
     "password_reset": {**_common, "reset_url": "https://coolregistration.localhost/password-reset/confirm/MQ/abc-123/"},
+    "ninja_account_created": {
+        **_common, "recipient_name": "Emma", "guardian_name": "Ellen Peeters", "username": "emma",
+        "set_password_url": "https://coolregistration.localhost/password-reset/confirm/MQ/abc-123/",
+    },
     "campaign_coolest_projects": {**_common, "signup_url": "https://coolestprojects.org"},
     "campaign_girlz": {**_common, "signup_url": "https://coolregistration.localhost/events/"},
     "campaign_new_dojo": {**_common, "dojo_name": "CoderDojo Aalter", "dojo_path": "/dojos/1/"},

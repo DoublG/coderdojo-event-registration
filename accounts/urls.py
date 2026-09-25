@@ -21,6 +21,9 @@ urlpatterns = [
     path("account/ninja/<int:ninja_id>/", views.ninja_detail, name="ninja_detail"),
     path("account/ninja/<int:ninja_id>/edit/", views.edit_ninja, name="edit_ninja"),
     path("account/ninja/<int:ninja_id>/badges/", views.ninja_badges, name="ninja_badges"),
+    path("account/ninja/<int:ninja_id>/login/", views.ninja_login_create, name="ninja_login_create"),
+    path("account/ninja/<int:ninja_id>/login/resend/", views.ninja_login_resend, name="ninja_login_resend"),
+    path("account/ninja/<int:ninja_id>/login/remove/", views.ninja_login_remove, name="ninja_login_remove"),
     path(
         "account/registration/<int:registration_id>/cancel/",
         views.cancel_registration,

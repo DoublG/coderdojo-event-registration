@@ -1,12 +1,14 @@
 import re
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import authenticate, update_session_auth_hash
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -17,13 +19,14 @@ from django.utils.text import slugify
 
 from core.image_library import library_filename, use_library_image
 from dojos.access import accessible_dojos
+from dojos.team import notify_managers
 from events.models import Registration, RegistrationCancellation
 from mailing.automated import waitlist_promoted_mail
 from mailing.categories import MailCategory
 from mailing.models import ConsentEvent
 from mailing.preferences import set_preference
-from dojos.team import notify_managers
 
+from . import child_accounts
 from .forms import (
     ForcedPasswordChangeForm,
     LoginForm,
@@ -34,7 +37,6 @@ from .forms import (
 from .models import Guardianship, Ninja, User, ninja_birth_date_error
 from .provisioning import unique_username
 from .template_avatars import TEMPLATE_KID_AVATARS
-
 
 # Small on purpose — small enough that most children's award shelf
 # actually spans more than one page, so the lazy-load carousel (same
@@ -279,7 +281,7 @@ def register_guardian(request):
 def _children_context(parent):
     now = timezone.now()
     children = []
-    for child in Ninja.objects.of_guardian(parent).prefetch_related("belts__belt"):
+    for child in Ninja.objects.of_guardian(parent).select_related("account").prefetch_related("belts__belt"):
         # All upcoming registrations, not just the nearest one — a child
         # can be signed up for more than one session at a time. Not
         # filtering on waiting_list either — a waitlisted registration is
@@ -352,6 +354,11 @@ def ninja_detail(request, ninja_id):
         .prefetch_related("event__team__user", "pathways")
         .order_by("-event__start_time")
     )
+    upcoming = (
+        child.registration_set.filter(event__start_time__gte=now)
+        .select_related("event", "event__dojo")
+        .order_by("event__start_time")
+    )
     belt_history = list(child.belts.select_related(
         "belt", "awarded_by", "awarded_as_membership__user", "awarded_as_membership__dojo",
     ))
@@ -368,7 +375,7 @@ def ninja_detail(request, ninja_id):
         )
 
     return render(request, "accounts/child_detail.html", {
-        "child": child, "history": history,
+        "child": child, "history": history, "upcoming": upcoming,
         "can_edit": child.guardianships.filter(guardian=request.user).exists(),
         "badges": badges_page.object_list, "badges_next_page_url": badges_next_page_url,
         # Current belt = the highest in the history (newest first).
@@ -425,6 +432,64 @@ def edit_ninja(request, ninja_id):
     })
 
 
+def _login_card(request, child, error=None, notice=None):
+    """The child page's "Own login" card, after an htmx action on it; a
+    plain POST goes back to the page with the message flashed instead."""
+    if request.headers.get("HX-Request"):
+        return render(request, "accounts/partials/_ninja_login_card.html", {
+            "child": child, "login_error": error, "login_notice": notice,
+            "posted_email": request.POST.get("email", "") if error else "",
+        })
+    if error:
+        messages.error(request, error)
+    elif notice:
+        messages.success(request, notice)
+    return redirect("ninja_detail", ninja_id=child.id)
+
+
+@login_required
+def ninja_login_create(request, ninja_id):
+    """Give the child their own login (or switch a disabled one back on):
+    guardians only, see accounts.child_accounts."""
+    child = _get_own_ninja(request, ninja_id)
+    if request.method != "POST":
+        return redirect("ninja_detail", ninja_id=child.id)
+    try:
+        account = child_accounts.give_login(request.user, child, request.POST.get("email"))
+    except child_accounts.ChildAccountError as error:
+        return _login_card(request, child, error=str(error))
+    return _login_card(request, child, notice=f"Login created: we've mailed {account.email} a link to choose a password.")
+
+
+@login_required
+def ninja_login_resend(request, ninja_id):
+    child = _get_own_ninja(request, ninja_id)
+    if request.method != "POST":
+        return redirect("ninja_detail", ninja_id=child.id)
+    try:
+        child_accounts.resend_login_mail(request.user, child)
+    except child_accounts.ChildAccountError as error:
+        return _login_card(request, child, error=str(error))
+    return _login_card(request, child, notice=f"We've mailed {child.account.email} a new link to choose a password.")
+
+
+@login_required
+def ninja_login_remove(request, ninja_id):
+    child = _get_own_ninja(request, ninja_id)
+    if request.method != "POST":
+        return redirect("ninja_detail", ninja_id=child.id)
+    try:
+        outcome = child_accounts.remove_login(child)
+    except child_accounts.ChildAccountError as error:
+        return _login_card(request, child, error=str(error))
+    if outcome == child_accounts.DISABLED:
+        notice = (f"{child.name}'s login is switched off. It was on a dojo team, so it's kept for that "
+                  "team's history; their team places have ended.")
+    else:
+        notice = f"{child.name}'s login is removed."
+    return _login_card(request, child, notice=notice)
+
+
 @login_required
 def ninja_badges(request, ninja_id):
     """Lazy-loaded batches for the child detail page's Badges carousel —
@@ -448,7 +513,9 @@ def ninja_badges(request, ninja_id):
 @login_required
 def cancel_registration(request, registration_id):
     registration = get_object_or_404(
-        Registration, id=registration_id, ninja__guardianships__guardian=request.user,
+        Registration.objects.filter(Q(ninja__guardianships__guardian=request.user) | Q(ninja__account=request.user))
+        .distinct(),
+        id=registration_id,
     )
 
     if request.method == "POST":

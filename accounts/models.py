@@ -152,6 +152,13 @@ class NinjaQuerySet(models.QuerySet):
         """The ninjas `user` is a parent/guardian of (via Guardianship)."""
         return self.filter(guardianships__guardian=user).distinct()
 
+    def signable_by(self, user):
+        """The ninjas `user` can sign up for sessions: an adult account's
+        children, or a ninja's own login itself (DATA_MODEL.md §17)."""
+        if user.is_ninja:
+            return self.filter(account=user)
+        return self.of_guardian(user)
+
 
 class Ninja(models.Model):
     """A child aged 7–17 who visits a dojo (DATA_MODEL.md nomenclature).

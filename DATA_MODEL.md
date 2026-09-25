@@ -742,7 +742,8 @@ Watch out for two collisions with today's code:
 
 - **`NINJA_ACCOUNT`**: a ninja's own login. **No background check.** A
   ninja can be promoted to **Youth mentor** at a dojo by that dojo's
-  champion or one of its mentors.
+  champion or one of its mentors. Created and removed by the child's
+  guardian (§17).
 - **Account** (the normal, adult account; what `User` is today, minus the
   role subclasses). Every account *can* go through the background-check
   process (`BackgroundCheckMixin`'s lifecycle, tracked on the account
@@ -2595,6 +2596,44 @@ For event creation control API endpoints need to be developed, allow a dojo to p
 
 **Not built yet.** enable the classification of grdp categories and anonymisation and removal and archiving capabilities like e.g. https://django-gdpr-assist.readthedocs.io/en/latest/ 
 
-## 17 enable the creation of child accounts (later)
+## 17. Child accounts, managed by the guardian (built)
 
-**Not built yet.** enable the guardian account to manage the accounts for childs. Add a create button on the manage screen, email address is required than and allow the sending of the initial account creation mail. Allow the parent to remove the account again. **Decide `deletion`** if a child account has the helper role the account needs to be disabled not deleted and the role assigments must end. Recreating an account is then a password reset and reenablement of the user account. User accounts need to be able to be disabled. With the creation of a child account the Child gains the capability to register for sessions on his own. Guardian account can still review **Decide `changing`** does the editing capabilty still remain or is it switched to read-only if a child account is present.
+**Built.** A guardian gives a ninja their own login from the child's page
+(the **Own login** card, `accounts/partials/_ninja_login_card.html`) and can
+take it away again. All of it lives in `accounts/child_accounts.py`
+(`give_login`, `resend_login_mail`, `remove_login`; `ChildAccountError`
+carries the message for the guardian); the views
+(`ninja_login_create` / `_resend` / `_remove`) only call it, guardians only
+(`_get_own_ninja`, 404 for anyone else, including the child's own login).
+
+- **Creating:** the child's own email is required and must not be used by
+  another account. It creates a `User` of type `ninja` (username from
+  `unique_username`, the guardian's mail language) with **no usable
+  password**, links it as `Ninja.account`, and queues the
+  `ninja_account_created` service mail with a set-password link (Django's
+  password-reset confirm page, built on `SITE_URL`). No temporary password
+  is ever mailed. "Send the password mail again" is there as long as no
+  password has been chosen (the normal "Forgot password" skips accounts
+  without a usable password).
+- **Deletion — decided:** removing a login **deletes** the account, unless
+  it ever had a dojo membership (a youth mentor): then it's **disabled**
+  (`is_active=False`, password made unusable) and every membership that
+  isn't dormant yet goes dormant through `dojos.team.leave`, because
+  `Event.team` points at memberships and a delete would cascade them away.
+  A disabled login can't log in (`ModelBackend.user_can_authenticate`) and
+  gets no mail (`suppressed_reason`). "Switch login back on" is `give_login`
+  on that same account: re-enabled with the (possibly new) email and a fresh
+  set-password mail. The ninja itself (registrations, belts, badges) is
+  never touched.
+- **Changing — decided:** the guardian **keeps editing** the child's details
+  when the child has a login; the child's own login stays view-only for its
+  profile.
+- **Signing up:** a ninja's own login signs itself up for sessions
+  (`Ninja.objects.signable_by(user)`: an adult's children, or the ninja
+  itself), sees its upcoming sessions on its own page and can cancel its own
+  places (`cancel_registration`). Booking mail still goes to the whole
+  family (`mailing.automated.family_of`).
+
+The original request, kept for reference:
+
+> enable the guardian account to manage the accounts for childs. Add a create button on the manage screen, email address is required than and allow the sending of the initial account creation mail. Allow the parent to remove the account again. **Decide `deletion`** if a child account has the helper role the account needs to be disabled not deleted and the role assigments must end. Recreating an account is then a password reset and reenablement of the user account. User accounts need to be able to be disabled. With the creation of a child account the Child gains the capability to register for sessions on his own. Guardian account can still review **Decide `changing`** does the editing capabilty still remain or is it switched to read-only if a child account is present.

@@ -12,6 +12,9 @@ You'll need to be logged in to your family account to sign up (see
    already signed up for that session is skipped and flagged as such
    rather than double-booked.
 
+A child with their own login (see :doc:`managing-your-account`) can also
+sign themselves up the same way; they only see themselves in the list.
+
 Mails about your booking
 ------------------------
 

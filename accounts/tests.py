@@ -927,3 +927,163 @@ class NinjaAgeRuleTests(TestCase):
         self.assertContains(response, "Ninjas are 7 to 17 years old")
         grown_up.refresh_from_db()
         self.assertEqual(grown_up.date_of_birth, original)
+
+
+class NinjaLoginTests(TestCase):
+    """A guardian gives a child their own login, mails the password link
+    again and removes it (accounts.child_accounts, DATA_MODEL.md §17)."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.guardian = User.objects.create(
+            username="ellen", email="ellen@example.com", first_name="Ellen", preferred_language="nl-be",
+        )
+        self.child = make_ninja(self.guardian, "Emma", date_of_birth=_dob(12))
+        self.other_guardian = User.objects.create(username="other", email="other@example.com")
+        self.client.force_login(self.guardian)
+
+    def _url(self, name):
+        return reverse(name, kwargs={"ninja_id": self.child.id})
+
+    def _create(self, email="emma@example.com", **headers):
+        return self.client.post(self._url("ninja_login_create"), {"email": email}, **headers)
+
+    def test_create_makes_a_ninja_login_and_mails_the_child(self):
+        from urllib.parse import urlsplit
+
+        from mailing.models import EmailMessage
+
+        response = self._create(HTTP_HX_REQUEST="true")
+
+        self.assertTemplateUsed(response, "accounts/partials/_ninja_login_card.html")
+        self.child.refresh_from_db()
+        account = self.child.account
+        self.assertEqual((account.account_type, account.email, account.first_name), (User.NINJA, "emma@example.com", "Emma"))
+        self.assertEqual(account.preferred_language, "nl-be")
+        self.assertFalse(account.has_usable_password())
+        queued = EmailMessage.objects.get(template_key="ninja_account_created")
+        self.assertEqual((queued.user, queued.recipient, queued.status), (account, "emma@example.com", "pending"))
+
+        # The link in the mail sets a password the child can log in with.
+        link = next(line.strip() for line in queued.body.splitlines() if "/password-reset/confirm/" in line)
+        self.client.logout()
+        form = self.client.get(urlsplit(link).path, follow=True)
+        self.client.post(form.redirect_chain[-1][0], {"new_password1": PASSWORD, "new_password2": PASSWORD})
+        response = self.client.post(reverse("login"), {"email": "emma@example.com", "password": PASSWORD})
+        self.assertRedirects(response, reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
+
+    def test_email_is_required_and_unique(self):
+        self.assertIn("email address is needed", self._create(email="", HTTP_HX_REQUEST="true").context["login_error"])
+        self.assertEqual(
+            self._create(email="ELLEN@example.com", HTTP_HX_REQUEST="true").context["login_error"],
+            "An account already exists with this email.",
+        )
+        self.child.refresh_from_db()
+        self.assertIsNone(self.child.account)
+
+    def test_only_the_childs_guardians_manage_the_login(self):
+        self.client.force_login(self.other_guardian)
+        self.assertEqual(self._create().status_code, 404)
+        self.assertEqual(self.client.post(self._url("ninja_login_remove")).status_code, 404)
+        self.child.refresh_from_db()
+        self.assertIsNone(self.child.account)
+
+    def test_the_child_cannot_manage_its_own_login(self):
+        self._create()
+        self.child.refresh_from_db()
+        self.client.force_login(self.child.account)
+        self.assertEqual(self.client.post(self._url("ninja_login_remove")).status_code, 404)
+        self.assertTrue(User.objects.filter(pk=self.child.account_id).exists())
+
+    def test_card_only_shown_to_guardians(self):
+        page = self.client.get(self._url("ninja_detail"))
+        self.assertTemplateUsed(page, "accounts/partials/_ninja_login_card.html")
+        self._create()
+        self.child.refresh_from_db()
+        self.client.force_login(self.child.account)
+        page = self.client.get(self._url("ninja_detail"))
+        self.assertTemplateNotUsed(page, "accounts/partials/_ninja_login_card.html")
+
+    def test_resend_queues_another_mail(self):
+        from mailing.models import EmailMessage
+
+        self._create()
+        self.client.post(self._url("ninja_login_resend"))
+        self.assertEqual(EmailMessage.objects.filter(template_key="ninja_account_created").count(), 2)
+
+    def test_remove_deletes_a_login_that_was_never_on_a_team(self):
+        self._create()
+        self.child.refresh_from_db()
+        account_id = self.child.account_id
+
+        response = self.client.post(self._url("ninja_login_remove"))
+
+        self.assertRedirects(response, self._url("ninja_detail"))
+        self.assertFalse(User.objects.filter(pk=account_id).exists())
+        self.child.refresh_from_db()
+        self.assertIsNone(self.child.account)
+        self.assertTrue(Ninja.objects.filter(pk=self.child.pk).exists())
+
+    def test_remove_disables_a_youth_mentor_and_ends_their_team_places(self):
+        self._create()
+        self.child.refresh_from_db()
+        account = self.child.account
+        dojo = make_dojo("Ghent", champion=make_champion(username="champ"))
+        membership = add_member(dojo, account, role=DojoMembership.YOUTH_MENTOR)
+
+        self.client.post(self._url("ninja_login_remove"))
+
+        account.refresh_from_db()
+        membership.refresh_from_db()
+        self.assertFalse(account.is_active)
+        self.assertEqual(membership.status, DojoMembership.DORMANT)
+        self.child.refresh_from_db()
+        self.assertEqual(self.child.account, account)
+
+        # Switching it back on reuses the same account with a fresh password.
+        self._create(email="emma.new@example.com")
+        account.refresh_from_db()
+        self.assertTrue(account.is_active)
+        self.assertEqual(account.email, "emma.new@example.com")
+        self.assertFalse(account.has_usable_password())
+        self.assertEqual(User.objects.filter(account_type=User.NINJA).count(), 1)
+
+    def test_disabled_login_cannot_log_in(self):
+        self._create()
+        self.child.refresh_from_db()
+        account = self.child.account
+        account.set_password(PASSWORD)
+        account.save()
+        add_member(make_dojo("Ghent", champion=make_champion(username="champ")), account, role=DojoMembership.YOUTH_MENTOR)
+        self.client.post(self._url("ninja_login_remove"))
+
+        self.client.logout()
+        response = self.client.post(reverse("login"), {"email": "emma@example.com", "password": PASSWORD})
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context["error"])
+
+    def test_guardian_keeps_editing_a_child_with_a_login(self):
+        self._create()
+        response = self.client.post(self._url("edit_ninja"), {"name": "Emma P.", "date_of_birth": self.child.date_of_birth})
+        self.assertEqual(response.status_code, 200)
+        self.child.refresh_from_db()
+        self.assertEqual(self.child.name, "Emma P.")
+
+    def test_child_sees_and_cancels_its_own_upcoming_session(self):
+        self._create()
+        self.child.refresh_from_db()
+        event = Event.objects.create(
+            dojo=make_dojo("Ghent"), name="Scratch", status=Event.OPEN, places=5,
+            start_time=timezone.now() + timedelta(days=3), end_time=timezone.now() + timedelta(days=3, hours=2),
+        )
+        registration = Registration.objects.create(event=event, ninja=self.child, position=1, waiting_list=False)
+        self.client.force_login(self.child.account)
+
+        page = self.client.get(self._url("ninja_detail"))
+        self.assertEqual(list(page.context["upcoming"]), [registration])
+        self.client.post(reverse("cancel_registration", kwargs={"registration_id": registration.id}))
+        self.assertFalse(Registration.objects.filter(pk=registration.pk).exists())

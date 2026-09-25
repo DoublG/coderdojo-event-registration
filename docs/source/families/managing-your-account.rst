@@ -33,9 +33,28 @@ From here you can:
   attendance wristbands, which update as the dojo takes attendance), and
   their session history.
 
-If your child has their own login, they see their own page (their belt,
-badges and session history) when they log in, but can't change their details or
-sign up for sessions themselves; that stays with you.
+Giving your child their own login
+-----------------------------------
+
+A child can have their own login. Open the child's page from your family page
+and use the **Own login** card:
+
+- **Create login** — enter your child's own email address (it can't be one
+  that's already used by another account). Your child gets an email with a
+  link to choose their password, then logs in with that email address.
+  If the mail got lost, use **Send the password mail again**.
+- **Remove login** — your child can't log in any more. Their sessions,
+  belt and badges stay on your family page. If your child has helped run
+  sessions as a youth mentor, the login is switched off rather than
+  removed, so that the dojo's team history stays complete, and their place
+  on those dojo teams ends. You can switch it back on later with
+  **Switch login back on**: your child gets a new mail to choose a new
+  password.
+
+With their own login, your child sees their own page (their belt, badges,
+upcoming sessions and session history) and can sign themselves up for
+sessions or cancel their own places. Their details stay yours to manage:
+they can't change them, you still can.
 
 Already a champion or mentor?
 -------------------------------

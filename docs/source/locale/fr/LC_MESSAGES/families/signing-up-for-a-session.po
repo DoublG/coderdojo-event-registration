@@ -58,6 +58,15 @@ msgstr ""
 "enfant déjà inscrit à cette séance est ignoré et signalé comme tel plutôt"
 " que d'être inscrit deux fois."
 
+#: ../../source/families/signing-up-for-a-session.rst:15
+msgid ""
+"A child with their own login (see :doc:`managing-your-account`) can also "
+"sign themselves up the same way; they only see themselves in the list."
+msgstr ""
+"Un enfant qui a son propre compte (voir :doc:`managing-your-account`) "
+"peut aussi s'inscrire lui-même de la même façon ; il ne voit que lui-même"
+" dans la liste."
+
 #: ../../source/families/signing-up-for-a-session.rst:19
 msgid "Mails about your booking"
 msgstr "E-mails concernant votre réservation"

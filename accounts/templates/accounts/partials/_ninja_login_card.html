@@ -1,0 +1,63 @@
+{% comment %}
+The child page's "Own login" card, for the child's guardians only (see
+accounts.child_accounts, DATA_MODEL.md §17): give the child a login with
+their own email, mail the set-password link again, or remove the login.
+Each form posts over htmx and swaps this card; without htmx the view
+redirects back to the page, with the outcome as a message. Expects
+`child`, and optionally `login_error`, `login_notice` and `posted_email`.
+{% endcomment %}
+<section class="section cd-card login-card" id="ninja-login-card" aria-labelledby="login-heading">
+  <h2 class="heading-md section-title" id="login-heading">Own login</h2>
+
+  {% if login_error %}<p class="cd-form__note cd-form__note--error caption" role="alert">{{ login_error }}</p>{% endif %}
+  {% if login_notice %}<p class="cd-form__note cd-form__note--success caption" role="status">{{ login_notice }}</p>{% endif %}
+  {% for message in messages %}
+    <p class="cd-form__note {% if message.level_tag == 'error' %}cd-form__note--error{% else %}cd-form__note--success{% endif %} caption" role="status">{{ message }}</p>
+  {% endfor %}
+
+  {% with account=child.account %}
+    {% if account and account.is_active %}
+      <p class="body-sm">
+        {{ child.name }} logs in with <strong>{{ account.email }}</strong> (username <strong>{{ account.username }}</strong>).
+        {% if not account.has_usable_password %}They haven't chosen a password yet.{% endif %}
+        With their login they see this page and can sign themselves up for sessions; you keep managing their details.
+      </p>
+      <div class="cd-form__actions" style="justify-content: flex-start;">
+        {% if not account.has_usable_password %}
+          <form method="post" action="{% url 'ninja_login_resend' ninja_id=child.id %}"
+                hx-post="{% url 'ninja_login_resend' ninja_id=child.id %}" hx-target="#ninja-login-card" hx-swap="outerHTML">
+            {% csrf_token %}
+            <button type="submit" class="cd-btn cd-btn--ghost label">Send the password mail again</button>
+          </form>
+        {% endif %}
+        <form method="post" action="{% url 'ninja_login_remove' ninja_id=child.id %}"
+              hx-post="{% url 'ninja_login_remove' ninja_id=child.id %}" hx-target="#ninja-login-card" hx-swap="outerHTML"
+              hx-confirm="Remove {{ child.name }}'s login? They can't log in any more; their sessions, belts and badges stay.">
+          {% csrf_token %}
+          <button type="submit" class="cd-btn cd-btn--danger label">Remove login</button>
+        </form>
+      </div>
+    {% else %}
+      <p class="body-sm">
+        {% if account %}
+          {{ child.name }}'s login is switched off. Switch it back on with their email address: they get a mail to choose a new password.
+        {% else %}
+          Give {{ child.name }} their own login, so they can see their belt, badges and sessions and sign themselves up for sessions.
+          You keep managing their details, and can remove the login at any time. They get a mail to choose a password.
+        {% endif %}
+      </p>
+      <form class="cd-form" method="post" action="{% url 'ninja_login_create' ninja_id=child.id %}"
+            hx-post="{% url 'ninja_login_create' ninja_id=child.id %}" hx-target="#ninja-login-card" hx-swap="outerHTML">
+        {% csrf_token %}
+        <div class="cd-form__field">
+          <label class="cd-form__label label" for="ninja-login-email">{{ child.name }}'s email address</label>
+          <input class="cd-form__input body" type="email" id="ninja-login-email" name="email" required
+                 value="{% if posted_email %}{{ posted_email }}{% elif account %}{{ account.email }}{% endif %}" autocomplete="off">
+        </div>
+        <div class="cd-form__actions" style="justify-content: flex-start;">
+          <button type="submit" class="cd-btn cd-btn--primary label">{% if account %}Switch login back on{% else %}Create login{% endif %}</button>
+        </div>
+      </form>
+    {% endif %}
+  {% endwith %}
+</section>

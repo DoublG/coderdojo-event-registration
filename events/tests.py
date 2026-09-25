@@ -166,20 +166,24 @@ class EventSignupViewTests(TestCase):
         self.assertEqual(response.context["error"], "Please select at least one child.")
         self.assertFalse(Registration.objects.filter(event=event).exists())
 
-    def test_ninja_login_cannot_sign_anyone_up(self):
+    def test_ninja_login_signs_up_only_itself(self):
+        """A child with their own login (DATA_MODEL.md §17) signs themselves
+        up; another ninja's id in the post is ignored."""
         ninja_login = User.objects.create(username="kid", account_type=User.NINJA)
         self.child.account = ninja_login
         self.child.save(update_fields=["account"])
+        sibling = Ninja.objects.create(name="Sibling")
+        Guardianship.objects.create(guardian=self.guardian, ninja=sibling)
         event = _future_event(self.dojo, places=10)
         self.client.force_login(ninja_login)
 
         response = self.client.post(
             reverse("event_signup", kwargs={"event_id": event.id}),
-            {"child": [str(self.child.id)], "child_order": str(self.child.id)},
+            {"child": [str(self.child.id), str(sibling.id)], "child_order": f"{self.child.id},{sibling.id}"},
         )
 
-        self.assertEqual(response.context["children"], [])
-        self.assertFalse(Registration.objects.filter(event=event).exists())
+        self.assertEqual([entry["child"] for entry in response.context["children"]], [self.child])
+        self.assertEqual(list(Registration.objects.filter(event=event).values_list("ninja", flat=True)), [self.child.id])
 
     def test_signup_waitlists_when_full(self):
         event = _future_event(self.dojo, places=0)

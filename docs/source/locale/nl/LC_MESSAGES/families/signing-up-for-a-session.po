@@ -58,6 +58,15 @@ msgstr ""
 " dat al voor die sessie is ingeschreven, wordt overgeslagen en als "
 "dusdanig gemarkeerd in plaats van dubbel geboekt."
 
+#: ../../source/families/signing-up-for-a-session.rst:15
+msgid ""
+"A child with their own login (see :doc:`managing-your-account`) can also "
+"sign themselves up the same way; they only see themselves in the list."
+msgstr ""
+"Een kind met een eigen login (zie :doc:`managing-your-account`) kan zich "
+"op dezelfde manier ook zelf inschrijven; het ziet enkel zichzelf in de "
+"lijst."
+
 #: ../../source/families/signing-up-for-a-session.rst:19
 msgid "Mails about your booking"
 msgstr "E-mails over uw boeking"

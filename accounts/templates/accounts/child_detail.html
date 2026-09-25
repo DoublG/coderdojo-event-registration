@@ -46,6 +46,10 @@
   }
   .child-page-root .cd-award-grid::-webkit-scrollbar { display: none; }
   .child-page-root .cd-award-grid .cd-award { flex: 0 0 200px; scroll-snap-align: start; }
+  .child-page-root .login-card { padding: var(--space-5); }
+  .child-page-root .login-card .cd-form__note { margin: 0 0 var(--space-3); }
+  .child-page-root .login-card .cd-form__actions { gap: var(--space-3); flex-wrap: wrap; }
+  .child-page-root .upcoming-actions { display: flex; gap: var(--space-2); justify-content: flex-end; flex-wrap: wrap; }
 </style>
 {% endblock %}
 
@@ -53,6 +57,52 @@
   <div class="shell">
 
     {% include "accounts/partials/_child_header_display.html" %}
+
+    {% if can_edit %}
+      {% include "accounts/partials/_ninja_login_card.html" %}
+    {% endif %}
+
+    <section class="section" aria-labelledby="upcoming-heading">
+      <h2 class="heading-lg section-title" id="upcoming-heading">Upcoming sessions</h2>
+      <div class="cd-table-wrap">
+        <table class="cd-table cd-table--zebra">
+          <thead>
+            <tr>
+              <th class="label" scope="col">Date</th>
+              <th class="label" scope="col">Session</th>
+              <th class="label" scope="col">Dojo</th>
+              <th class="label" scope="col" aria-label="Actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for registration in upcoming %}
+              <tr>
+                <td class="body-sm">{{ registration.event.start_time|date:"j M Y, H:i" }}</td>
+                <td class="body-sm">
+                  {{ registration.event.name }}
+                  {% if registration.waiting_list %}<span class="cd-badge cd-badge--warning caption">Waiting list</span>{% endif %}
+                </td>
+                <td class="body-sm">{{ registration.event.dojo.name }}</td>
+                <td class="body-sm">
+                  <div class="upcoming-actions">
+                    <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=registration.event.id %}">View</a>
+                    <form method="post" action="{% url 'cancel_registration' registration_id=registration.id %}"
+                          onsubmit="return confirm('Remove {{ child.name }} from {{ registration.event.name }}?');">
+                      {% csrf_token %}
+                      <button type="submit" class="cd-btn cd-btn--danger label">{% if registration.waiting_list %}Leave waiting list{% else %}Cancel{% endif %}</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td class="body-sm" colspan="4">No upcoming sessions. <a href="{% url 'event_list' %}">Find a session</a>.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
 
     {% if current_belt %}
       <section class="section" aria-labelledby="belt-heading">

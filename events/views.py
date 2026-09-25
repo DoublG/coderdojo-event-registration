@@ -108,7 +108,7 @@ def event_detail(request, event_id):
 
     all_registered = False
     if request.user.is_authenticated:
-        children = list(Ninja.objects.of_guardian(request.user))
+        children = list(Ninja.objects.signable_by(request.user))
         if children:
             registered_count = Registration.objects.filter(event=event, ninja__in=children).count()
             all_registered = registered_count == len(children)
@@ -124,8 +124,9 @@ def event_signup(request, event_id):
     if event.registers_externally:
         # Registrations happen elsewhere; its page links there.
         return redirect("event_detail", event_id=event.id)
-    # Any adult account can sign up its own ninjas (a ninja's own login can't).
-    guardian = request.user if not request.user.is_ninja else None
+    # An adult account signs up its own ninjas; a ninja's own login signs up
+    # itself (Ninja.objects.signable_by).
+    guardian = request.user
     results = None
     error = None
 
@@ -133,7 +134,7 @@ def event_signup(request, event_id):
     if guardian:
         existing_registrations = {
             r.ninja_id: r
-            for r in Registration.objects.filter(event=event, ninja__in=Ninja.objects.of_guardian(guardian))
+            for r in Registration.objects.filter(event=event, ninja__in=Ninja.objects.signable_by(guardian))
         }
 
     if request.method == "POST" and guardian and not event.registration_open:
@@ -148,7 +149,7 @@ def event_signup(request, event_id):
         if set(ordered_ids) != set(submitted_ids):
             ordered_ids = submitted_ids
 
-        children_by_id = {str(c.id): c for c in Ninja.objects.of_guardian(guardian).filter(id__in=submitted_ids)}
+        children_by_id = {str(c.id): c for c in Ninja.objects.signable_by(guardian).filter(id__in=submitted_ids)}
         selected = [children_by_id[cid] for cid in dict.fromkeys(ordered_ids) if cid in children_by_id]
         new_children = [c for c in selected if c.id not in existing_registrations]
 
@@ -181,12 +182,12 @@ def event_signup(request, event_id):
             # on this form (e.g. via the browser back button).
             existing_registrations = {
                 r.ninja_id: r
-                for r in Registration.objects.filter(event=event, ninja__in=Ninja.objects.of_guardian(guardian))
+                for r in Registration.objects.filter(event=event, ninja__in=Ninja.objects.signable_by(guardian))
             }
 
     children = [
         {"child": child, "registration": existing_registrations.get(child.id)}
-        for child in Ninja.objects.of_guardian(guardian)
+        for child in Ninja.objects.signable_by(guardian)
     ] if guardian else []
     all_registered = bool(children) and all(entry["registration"] for entry in children)
 
