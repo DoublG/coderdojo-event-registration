@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}CoderDojo Belgium · Free coding club for kids and teens{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "CoderDojo Belgium · Free coding club for kids and teens" %}{% endblock %}
 {% block root_class %}home-root{% endblock %}
 
 {% block extra_style %}
@@ -51,12 +52,12 @@
 
   <div class="shell">
     <section class="cd-hero">
-      <p class="cd-hero__eyebrow label">Free coding club · Saturdays</p>
-      <h1 class="cd-hero__title display-2xl">Build something awesome with code.</h1>
-      <p class="cd-hero__subtitle body-lg">Free, for ages 7–18. No experience needed — bring a laptop and an idea, we'll help with the rest.</p>
+      <p class="cd-hero__eyebrow label">{% translate "Free coding club · Saturdays" %}</p>
+      <h1 class="cd-hero__title display-2xl">{% translate "Build something awesome with code." %}</h1>
+      <p class="cd-hero__subtitle body-lg">{% translate "Free, for ages 7–18. No experience needed — bring a laptop and an idea, we'll help with the rest." %}</p>
       <div class="cd-hero__actions">
-        <a class="cd-btn cd-btn--primary label" href="{% url 'register' %}">Sign up now</a>
-        <a class="cd-btn cd-btn--ghost label" href="{% url 'event_list' %}">Browse events</a>
+        <a class="cd-btn cd-btn--primary label" href="{% url 'register' %}">{% translate "Sign up now" %}</a>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'event_list' %}">{% translate "Browse events" %}</a>
       </div>
     </section>
     {% include "content/partials/_promotion_hero.html" with promotions=hero_promotions %}
@@ -65,14 +66,14 @@
   <div class="shell section">
     <div class="section-head carousel-section-head">
       <div>
-        <h2 class="heading-lg">What you'll learn</h2>
-        <p class="body">Pick a path — or try a bit of everything before you commit to one.</p>
+        <h2 class="heading-lg">{% translate "What you'll learn" %}</h2>
+        <p class="body">{% translate "Pick a path — or try a bit of everything before you commit to one." %}</p>
       </div>
       <div class="carousel__controls">
-        <button type="button" class="carousel__nav" id="pathway-carousel-prev" aria-label="Previous pathways">
+        <button type="button" class="carousel__nav" id="pathway-carousel-prev" aria-label="{% translate "Previous pathways" %}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
-        <button type="button" class="carousel__nav" id="pathway-carousel-next" aria-label="Next pathways">
+        <button type="button" class="carousel__nav" id="pathway-carousel-next" aria-label="{% translate "Next pathways" %}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
         </button>
       </div>
@@ -86,8 +87,8 @@
 
   <div class="shell section" style="background: var(--surface-sunken); border-radius: var(--radius-lg); padding: var(--space-6);">
     <div class="section-head">
-      <h2 class="heading-lg">Find a dojo near you</h2>
-      <p class="body">Every session is free and run by local volunteers.</p>
+      <h2 class="heading-lg">{% translate "Find a dojo near you" %}</h2>
+      <p class="body">{% translate "Every session is free and run by local volunteers." %}</p>
     </div>
     {% include "content/partials/_promotion_banner.html" with promotions=finder_promotions %}
     <div class="center">
@@ -98,14 +99,14 @@
   <div class="shell section">
     <div class="section-head carousel-section-head">
       <div>
-        <h2 class="heading-lg">Upcoming sessions</h2>
-        <p class="body">Free sessions with open spots, soonest first.</p>
+        <h2 class="heading-lg">{% translate "Upcoming sessions" %}</h2>
+        <p class="body">{% translate "Free sessions with open spots, soonest first." %}</p>
       </div>
       <div class="carousel__controls">
-        <button type="button" class="carousel__nav" id="sessions-carousel-prev" aria-label="Previous sessions">
+        <button type="button" class="carousel__nav" id="sessions-carousel-prev" aria-label="{% translate "Previous sessions" %}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
-        <button type="button" class="carousel__nav" id="sessions-carousel-next" aria-label="Next sessions">
+        <button type="button" class="carousel__nav" id="sessions-carousel-next" aria-label="{% translate "Next sessions" %}">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
         </button>
       </div>
@@ -113,13 +114,13 @@
     <div class="carousel__track" id="upcoming-sessions-track">
       {% include "events/partials/_upcoming_sessions_page.html" with events=events next_page_url=events_next_page_url %}
     </div>
-    <p style="margin: var(--space-4) 0 0;"><a class="body-sm" href="{% url 'event_list' %}" style="color: var(--secondary);">See every upcoming event →</a></p>
+    <p style="margin: var(--space-4) 0 0;"><a class="body-sm" href="{% url 'event_list' %}" style="color: var(--secondary);">{% translate "See every upcoming event →" %}</a></p>
   </div>
 
   <div class="shell section">
     <div class="section-head">
-      <h2 class="heading-lg">Meet the team</h2>
-      <p class="body">Our team and volunteers who keep every dojo running.</p>
+      <h2 class="heading-lg">{% translate "Meet the team" %}</h2>
+      <p class="body">{% translate "Our team and volunteers who keep every dojo running." %}</p>
     </div>
     <div class="row">
       {% for mentor in team %}
@@ -133,7 +134,7 @@
           </div>
         </a>
       {% empty %}
-        <p class="body-sm" style="color: var(--ink-muted);">No team members listed yet.</p>
+        <p class="body-sm" style="color: var(--ink-muted);">{% translate "No team members listed yet." %}</p>
       {% endfor %}
     </div>
   </div>
@@ -152,7 +153,7 @@
   {% if faqs %}
     <div class="shell section">
       <div class="section-head">
-        <h2 class="heading-lg">Frequently asked questions</h2>
+        <h2 class="heading-lg">{% translate "Frequently asked questions" %}</h2>
       </div>
       <div class="cd-faq" id="faq-home-page">
         {% for faq in faqs %}
@@ -170,7 +171,7 @@
 
   <div class="shell section">
     <div class="section-head">
-      <h2 class="heading-lg">Made possible by</h2>
+      <h2 class="heading-lg">{% translate "Made possible by" %}</h2>
     </div>
     <div class="cd-sponsor-grid">
       <div class="cd-sponsor-logo label">Acme Robotics</div>
@@ -183,9 +184,9 @@
   <div class="shell section">
     <div class="cta-wrap">
       <section class="cd-cta">
-        <h2 class="cd-cta__title display-lg">Ready to build your first project?</h2>
-        <p class="cd-cta__subtitle body-lg">Free, for ages 7–18. No experience needed — spots are limited, so sign up before Saturday.</p>
-        <a class="cd-btn cd-btn--primary label" href="{% url 'register' %}">Sign up now</a>
+        <h2 class="cd-cta__title display-lg">{% translate "Ready to build your first project?" %}</h2>
+        <p class="cd-cta__subtitle body-lg">{% translate "Free, for ages 7–18. No experience needed — spots are limited, so sign up before Saturday." %}</p>
+        <a class="cd-btn cd-btn--primary label" href="{% url 'register' %}">{% translate "Sign up now" %}</a>
       </section>
     </div>
   </div>

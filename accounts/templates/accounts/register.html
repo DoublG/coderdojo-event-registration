@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}Get involved · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Get involved" %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}register-choice-root{% endblock %}
 
 {% block extra_style %}
@@ -23,30 +24,30 @@
   <div class="shell">
 
     <div class="choice-header">
-      <h1 class="display-xl">How would you like to get involved?</h1>
-      <p class="body-lg">Pick the option that fits — each one asks for exactly what we need, nothing more.</p>
+      <h1 class="display-xl">{% translate "How would you like to get involved?" %}</h1>
+      <p class="body-lg">{% translate "Pick the option that fits — each one asks for exactly what we need, nothing more." %}</p>
     </div>
 
     <div class="row">
       <div class="cd-card choice-card">
-        <p class="label eyebrow">For parents &amp; guardians</p>
-        <h3 class="heading-md">Register your family</h3>
-        <p class="body-sm">Create an account and add your children so they can join sessions at any dojo.</p>
-        <a class="label" href="{% url 'register_guardian' %}">Get started →</a>
+        <p class="label eyebrow">{% translate "For parents &amp; guardians" %}</p>
+        <h3 class="heading-md">{% translate "Register your family" %}</h3>
+        <p class="body-sm">{% translate "Create an account and add your children so they can join sessions at any dojo." %}</p>
+        <a class="label" href="{% url 'register_guardian' %}">{% translate "Get started →" %}</a>
       </div>
 
       <div class="cd-card choice-card">
-        <p class="label eyebrow">For organisers</p>
-        <h3 class="heading-md">Start a new dojo</h3>
-        <p class="body-sm">Bring CoderDojo to your city — tell us about your venue and we'll help you get set up.</p>
-        <a class="label" href="{% url 'register_dojo' %}">Apply to start a dojo →</a>
+        <p class="label eyebrow">{% translate "For organisers" %}</p>
+        <h3 class="heading-md">{% translate "Start a new dojo" %}</h3>
+        <p class="body-sm">{% translate "Bring CoderDojo to your city — tell us about your venue and we'll help you get set up." %}</p>
+        <a class="label" href="{% url 'register_dojo' %}">{% translate "Apply to start a dojo →" %}</a>
       </div>
 
       <div class="cd-card choice-card">
-        <p class="label eyebrow">For volunteers</p>
-        <h3 class="heading-md">Become a mentor or volunteer</h3>
-        <p class="body-sm">Help out at an existing dojo — no teaching experience required, just a Saturday morning.</p>
-        <a class="label" href="{% url 'register_helper' %}">Apply to volunteer →</a>
+        <p class="label eyebrow">{% translate "For volunteers" %}</p>
+        <h3 class="heading-md">{% translate "Become a mentor or volunteer" %}</h3>
+        <p class="body-sm">{% translate "Help out at an existing dojo — no teaching experience required, just a Saturday morning." %}</p>
+        <a class="label" href="{% url 'register_helper' %}">{% translate "Apply to volunteer →" %}</a>
       </div>
     </div>
 

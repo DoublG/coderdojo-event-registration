@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
 The guardian account page's "Your children" section. Expects `guardian`
 and `children` (list of {child, registrations} dicts, one row per
 *upcoming* registration — a child can be signed up for more than one
@@ -8,7 +8,7 @@ as an htmx swap target after adding a child, so the list updates without
 a full page reload).
 {% endcomment %}
 <section id="children-list">
-  <h2 class="heading-lg section-title">Your children</h2>
+  <h2 class="heading-lg section-title">{% translate "Your children" %}</h2>
   {% if add_error %}<p class="caption" role="alert" style="color: var(--danger, #b3261e);">{{ add_error }}</p>{% endif %}
 
   {% for entry in children %}
@@ -19,17 +19,18 @@ a full page reload).
           <div>
             <p class="heading-sm child-card__name">{{ entry.child.name }}</p>
             <p class="body-sm child-card__meta">
-              {% if entry.child.age %}Age {{ entry.child.age }}{% endif %}
+              {% if entry.child.age %}{% blocktranslate with age=entry.child.age %}Age {{ age }}{% endblocktranslate %}{% endif %}
               {% if entry.child.home_dojo %} · {{ entry.child.home_dojo.name }}{% endif %}
               {% with current_belt=entry.child.current_belt %}{% if current_belt %} · {{ current_belt.name }}{% endif %}{% endwith %}
-              {% if entry.child.account and entry.child.account.is_active %} · Has own login{% endif %}
-              {% for membership in entry.child.youth_mentor_memberships %} · Youth mentor at {{ membership.dojo.name }}{% endfor %}
+              {% if entry.child.account and entry.child.account.is_active %} · {% translate "Has own login" %}{% endif %}
+              {% for membership in entry.child.youth_mentor_memberships %} · {% blocktranslate with dojo=membership.dojo.name %}Youth mentor at {{ dojo }}{% endblocktranslate %}{% endfor %}
             </p>
           </div>
         </div>
-        <a class="body-sm child-card__link" href="{% url 'ninja_detail' ninja_id=entry.child.id %}">View {{ entry.child.name }}'s belts, badges &amp; history →</a>
+        <a class="body-sm child-card__link" href="{% url 'ninja_detail' ninja_id=entry.child.id %}">{% blocktranslate with name=entry.child.name %}View {{ name }}'s belts, badges &amp; history →{% endblocktranslate %}</a>
       </div>
       {% for registration in entry.registrations %}
+        {% blocktranslate asvar remove_msg with child=entry.child.name event=registration.event.name %}Remove {{ child }} from {{ event }}?{% endblocktranslate %}
         <div class="next-row">
           <div class="date-box">
             <span class="caption dow">{{ registration.event.start_time|date:"D"|upper }}</span>
@@ -39,7 +40,7 @@ a full page reload).
             <h3 class="heading-sm">
               {{ registration.event.name }}
               {% if registration.waiting_list %}
-                <span class="cd-badge cd-badge--warning caption">Waiting list</span>
+                <span class="cd-badge cd-badge--warning caption">{% translate "Waiting list" %}</span>
               {% endif %}
             </h3>
             <p class="body-sm meta">
@@ -48,22 +49,22 @@ a full page reload).
             </p>
           </div>
           <div class="action">
-            <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=registration.event.id %}">View event</a>
+            <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=registration.event.id %}">{% translate "View event" %}</a>
             <form method="post" action="{% url 'cancel_registration' registration_id=registration.id %}"
-                  onsubmit="return confirm('Remove {{ entry.child.name }} from {{ registration.event.name }}?');">
+                  onsubmit="return confirm('{{ remove_msg|escapejs }}');">
               {% csrf_token %}
-              <button type="submit" class="cd-btn cd-btn--danger label">{% if registration.waiting_list %}Leave waiting list{% else %}Cancel{% endif %}</button>
+              <button type="submit" class="cd-btn cd-btn--danger label">{% if registration.waiting_list %}{% translate "Leave waiting list" %}{% else %}{% translate "Cancel" %}{% endif %}</button>
             </form>
           </div>
         </div>
       {% empty %}
         <div class="empty-row">
-          <p class="body-sm">Not registered for an upcoming session.</p>
-          <a class="cd-btn cd-btn--secondary label" href="{% url 'event_list' %}">Browse events</a>
+          <p class="body-sm">{% translate "Not registered for an upcoming session." %}</p>
+          <a class="cd-btn cd-btn--secondary label" href="{% url 'event_list' %}">{% translate "Browse events" %}</a>
         </div>
       {% endfor %}
     </div>
   {% empty %}
-    <p class="body" style="color: var(--ink-muted);">No children registered yet.</p>
+    <p class="body" style="color: var(--ink-muted);">{% translate "No children registered yet." %}</p>
   {% endfor %}
 </section>

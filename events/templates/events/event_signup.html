@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}Sign up · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Sign up" %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}signup-root{% endblock %}
 
 {% block extra_style %}
@@ -44,20 +45,20 @@
   <div class="shell">
 
       <div class="signup-header">
-        <h1 class="display-lg">Sign up for {{ event.name }}</h1>
+        <h1 class="display-lg">{% blocktranslate with name=event.name %}Sign up for {{ name }}{% endblocktranslate %}</h1>
         <p class="body meta">
           {{ event.start_time|date:"D j M" }} · {{ event.start_time|time:"H:i" }}–{{ event.end_time|time:"H:i" }}
           {% if event.venue_name %} · {{ event.venue_name }}{% endif %}
         </p>
         <div class="badges">
           {% if closed %}
-            <span class="cd-badge cd-badge--outline caption">Registrations closed</span>
+            <span class="cd-badge cd-badge--outline caption">{% translate "Registrations closed" %}</span>
           {% elif full %}
-            <span class="cd-badge cd-badge--danger caption">Full</span>
+            <span class="cd-badge cd-badge--danger caption">{% translate "Full" %}</span>
           {% else %}
-            <span class="cd-badge cd-badge--success caption">Open</span>
+            <span class="cd-badge cd-badge--success caption">{% translate "Open" %}</span>
           {% endif %}
-          <span class="cd-badge cd-badge--accent caption">Ages {{ event.min_age|default:"7" }}–{{ event.max_age|default:"18" }}</span>
+          <span class="cd-badge cd-badge--accent caption">{% blocktranslate with min=event.min_age|default:"7" max=event.max_age|default:"18" %}Ages {{ min }}–{{ max }}{% endblocktranslate %}</span>
         </div>
       </div>
 
@@ -65,34 +66,34 @@
         {% if closed and not results %}
 
           <div class="cd-form__notes">
-            <p class="cd-form__note cd-form__note--warning caption">Registrations for this session are closed.</p>
+            <p class="cd-form__note cd-form__note--warning caption">{% translate "Registrations for this session are closed." %}</p>
           </div>
           <div class="cd-form__actions">
-            <a class="cd-btn cd-btn--primary label" href="{% url 'event_detail' event_id=event.id %}">Back to session</a>
+            <a class="cd-btn cd-btn--primary label" href="{% url 'event_detail' event_id=event.id %}">{% translate "Back to session" %}</a>
           </div>
 
         {% elif results %}
 
-          <h3 class="cd-form__group-title heading-md">You're all set</h3>
+          <h3 class="cd-form__group-title heading-md">{% translate "You're all set" %}</h3>
           <div class="confirmation-card">
             <ul class="confirmation-list">
               {% for result in results %}
                 <li>
                   <span class="body">{{ result.child.name }}</span>
                   {% if result.waiting_list %}
-                    <span class="cd-badge cd-badge--warning caption">Waiting list</span>
+                    <span class="cd-badge cd-badge--warning caption">{% translate "Waiting list" %}</span>
                   {% else %}
-                    <span class="cd-badge cd-badge--success caption">Confirmed</span>
+                    <span class="cd-badge cd-badge--success caption">{% translate "Confirmed" %}</span>
                   {% endif %}
                 </li>
               {% endfor %}
             </ul>
           </div>
           {% if any_waitlisted %}
-            <p class="cd-form__help caption signup-summary">We'll email you if anyone on the waiting list gets a spot.</p>
+            <p class="cd-form__help caption signup-summary">{% translate "We'll email you if anyone on the waiting list gets a spot." %}</p>
           {% endif %}
           <div class="cd-form__actions">
-            <a class="cd-btn cd-btn--primary label" href="{% url 'event_detail' event_id=event.id %}">Back to session</a>
+            <a class="cd-btn cd-btn--primary label" href="{% url 'event_detail' event_id=event.id %}">{% translate "Back to session" %}</a>
           </div>
 
         {% else %}
@@ -111,19 +112,19 @@
             <div class="cd-form__notes">
               <p class="cd-form__note cd-form__note--warning caption">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-                This session is full. Signing up below adds your child(ren) to the waiting list — we'll email you the moment a spot opens.
+                {% translate "This session is full. Signing up below adds your child(ren) to the waiting list — we'll email you the moment a spot opens." %}
               </p>
             </div>
           {% endif %}
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">Who's joining?</h3>
+            <h3 class="cd-form__group-title heading-md">{% translate "Who's joining?" %}</h3>
             {% if all_registered %}
-              <p class="cd-form__group-desc body-sm">Every child on your account is already signed up for this session — see below.</p>
+              <p class="cd-form__group-desc body-sm">{% translate "Every child on your account is already signed up for this session — see below." %}</p>
             {% else %}
               <p class="cd-form__group-desc body-sm">
-                Tick each child you'd like to {% if full %}add to the waiting list for{% else %}sign up for{% endif %} this session.
-                {% if not full %}Only {{ event.places_left }} spot{{ event.places_left|pluralize }} left — anyone beyond that goes on the waiting list.{% endif %}
+                {% if full %}{% translate "Tick each child you'd like to add to the waiting list for this session." %}{% else %}{% translate "Tick each child you'd like to sign up for this session." %}{% endif %}
+                {% if not full %}{% blocktranslate count counter=event.places_left %}Only {{ counter }} spot left — anyone beyond that goes on the waiting list.{% plural %}Only {{ counter }} spots left — anyone beyond that goes on the waiting list.{% endblocktranslate %}{% endif %}
               </p>
             {% endif %}
 
@@ -135,12 +136,12 @@
                     {% include "accounts/partials/_child_avatar.html" with child=child %}
                     <label>
                       <span class="body">{{ child.name }}</span>
-                      <span class="body-sm">{% if child.age %}Age {{ child.age }}{% endif %}{% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}</span>
+                      <span class="body-sm">{% if child.age %}{% blocktranslate with age=child.age %}Age {{ age }}{% endblocktranslate %}{% endif %}{% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}</span>
                     </label>
                     {% if entry.registration.waiting_list %}
-                      <span class="cd-badge cd-badge--warning caption">Already on waiting list</span>
+                      <span class="cd-badge cd-badge--warning caption">{% translate "Already on waiting list" %}</span>
                     {% else %}
-                      <span class="cd-badge cd-badge--success caption">Already confirmed</span>
+                      <span class="cd-badge cd-badge--success caption">{% translate "Already confirmed" %}</span>
                     {% endif %}
                   </div>
                 {% else %}
@@ -149,24 +150,24 @@
                     {% include "accounts/partials/_child_avatar.html" with child=child %}
                     <label for="es-child-{{ child.id }}">
                       <span class="body">{{ child.name }}</span>
-                      <span class="body-sm">{% if child.age %}Age {{ child.age }}{% endif %}{% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}</span>
+                      <span class="body-sm">{% if child.age %}{% blocktranslate with age=child.age %}Age {{ age }}{% endblocktranslate %}{% endif %}{% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}</span>
                     </label>
                     <span class="child-select-row__status cd-badge caption" data-status style="display:none;"></span>
                   </div>
                 {% endif %}
               {% endwith %}
             {% empty %}
-              <p class="cd-form__help caption">No children on your account yet — register one below to sign them up.</p>
+              <p class="cd-form__help caption">{% translate "No children on your account yet — register one below to sign them up." %}</p>
             {% endfor %}
 
-            {% if not request.user.is_ninja %}<p class="cd-form__help caption" style="margin-top: var(--space-3);">Signing up on someone else's behalf? <a href="{% url 'register_guardian' %}">Register another child</a> first.</p>{% endif %}
+            {% if not request.user.is_ninja %}<p class="cd-form__help caption" style="margin-top: var(--space-3);">{% url 'register_guardian' as register_url %}{% blocktranslate %}Signing up on someone else's behalf? <a href="{{ register_url }}">Register another child</a> first.{% endblocktranslate %}</p>{% endif %}
           </div>
 
           <p class="cd-form__help caption signup-summary" id="signup-summary" hidden></p>
 
           <div class="cd-form__actions">
-            <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=event.id %}">Cancel</a>
-            <button type="submit" class="cd-btn cd-btn--primary label" id="event-signup-submit">{% if full %}Join the waiting list{% else %}Sign up{% endif %}</button>
+            <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=event.id %}">{% translate "Cancel" %}</a>
+            <button type="submit" class="cd-btn cd-btn--primary label" id="event-signup-submit">{% if full %}{% translate "Join the waiting list" %}{% else %}{% translate "Sign up" %}{% endif %}</button>
           </div>
 
         </form>
@@ -178,6 +179,7 @@
 {% endblock %}
 
 {% block extra_script %}
+{% translate "Spot available" as js_spot %}{% translate "Waiting list" as js_waiting %}{% translate "All {waiting} selected will join the waiting list." as js_all_waiting %}{% translate "{confirmed} will get a spot · {waiting} will join the waiting list." as js_some_waiting %}
 <script>
   (function () {
     var form = document.getElementById("event-signup-form");
@@ -218,11 +220,11 @@
         var getsSpot = placesLeft > 0 && (i + 1) <= placesLeft;
         status.style.display = "inline-flex";
         if (getsSpot) {
-          status.textContent = "Spot available";
+          status.textContent = "{{ js_spot|escapejs }}";
           status.className = "child-select-row__status cd-badge cd-badge--success caption";
         } else {
           waitlistedCount += 1;
-          status.textContent = "Waiting list";
+          status.textContent = "{{ js_waiting|escapejs }}";
           status.className = "child-select-row__status cd-badge cd-badge--warning caption";
         }
       });
@@ -240,8 +242,8 @@
         var confirmedCount = checkedCount - waitlistedCount;
         summary.hidden = false;
         summary.textContent = confirmedCount === 0
-          ? "All " + waitlistedCount + " selected will join the waiting list."
-          : confirmedCount + " will get a spot · " + waitlistedCount + " will join the waiting list.";
+          ? "{{ js_all_waiting|escapejs }}".replace("{waiting}", waitlistedCount)
+          : "{{ js_some_waiting|escapejs }}".replace("{confirmed}", confirmedCount).replace("{waiting}", waitlistedCount);
       }
     }
 

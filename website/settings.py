@@ -377,16 +377,15 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'en-us'
 
 # Offered in the menu's language switcher (django.views.i18n.set_language,
-# see website/urls.py). No page content is translated into these yet — this
-# wires the real, working switching mechanism (session-stored locale,
-# LocaleMiddleware) as a first step; actual .po translation catalogs for
-# nl-be/fr-be/de are a separate follow-up.
+# see website/urls.py) and as the mail language. The site's texts are
+# translated in locale/<nl_BE|fr_BE>/LC_MESSAGES/django.po (see CLAUDE.md,
+# "i18n"); German was dropped until German texts can be checked.
 LANGUAGES = [
     ('en-us', 'English'),
     ('nl-be', 'Nederlands (België)'),
     ('fr-be', 'Français (Belgique)'),
-    ('de', 'Deutsch'),
 ]
+LOCALE_PATHS = [BASE_DIR / "locale"]
 
 TIME_ZONE = 'UTC'
 

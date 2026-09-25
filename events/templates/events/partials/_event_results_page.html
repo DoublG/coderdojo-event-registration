@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
 Renders one page's worth of events, grouped by day (no outer wrapper —
 the caller owns the surrounding shell). Used both for the initial
 full-page render and for htmx's infinite-scroll fragment requests (see
@@ -27,5 +27,5 @@ Expects `events` (this page's slice, ordered by start_time) and
     {% endfor %}
   </div>
 {% empty %}
-  <p class="body" style="color: var(--ink-muted);">No upcoming events scheduled right now — check back soon.</p>
+  <p class="body" style="color: var(--ink-muted);">{% translate "No upcoming events scheduled right now — check back soon." %}</p>
 {% endfor %}

@@ -7,6 +7,7 @@ from django.db.models import Max, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from accounts.home_dojo import assign_on_signup
 from accounts.models import Ninja
@@ -139,7 +140,7 @@ def event_signup(request, event_id):
         }
 
     if request.method == "POST" and guardian and not event.registration_open:
-        error = "Registrations for this session are closed."
+        error = _("Registrations for this session are closed.")
     elif request.method == "POST" and guardian:
         submitted_ids = request.POST.getlist("child")
         # The order children were *checked* in (tracked client-side, since
@@ -155,9 +156,9 @@ def event_signup(request, event_id):
         new_children = [c for c in selected if c.id not in existing_registrations]
 
         if not selected:
-            error = "Please select at least one child."
+            error = _("Please select at least one child.")
         elif not new_children:
-            error = "The child(ren) you selected are already signed up for this session."
+            error = _("The child(ren) you selected are already signed up for this session.")
         else:
             with transaction.atomic():
                 next_position = Registration.objects.filter(event=event).aggregate(Max("position"))["position__max"] or 0

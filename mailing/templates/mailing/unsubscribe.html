@@ -1,19 +1,20 @@
 {% extends "core/base.html" %}
-{% block title %}Unsubscribe · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Unsubscribe" %} · CoderDojo Belgium{% endblock %}
 
 {% block content %}
   <div style="max-width: 560px; margin: 0 auto; padding: var(--space-7) var(--space-4);">
     <div class="cd-card" style="padding: var(--space-6);">
-      <h1 class="heading-lg" style="margin-top: 0;">Unsubscribe</h1>
-      <p class="body">Stop getting <strong>{{ category.label|lower }}</strong> mails from CoderDojo Belgium?</p>
+      <h1 class="heading-lg" style="margin-top: 0;">{% translate "Unsubscribe" %}</h1>
+      <p class="body">{% blocktranslate with label=category.label|lower %}Stop getting <strong>{{ label }}</strong> mails from CoderDojo Belgium?{% endblocktranslate %}</p>
       <form method="post" action="{% url 'mail_unsubscribe' token=token %}">
         <div class="cd-form__checkbox-row">
           <input type="checkbox" id="unsub-all" name="scope" value="all">
-          <label class="body-sm" for="unsub-all">Unsubscribe from all optional mails</label>
+          <label class="body-sm" for="unsub-all">{% translate "Unsubscribe from all optional mails" %}</label>
         </div>
-        <p class="caption" style="color: var(--ink-muted);">Mails about your account and your bookings are always sent.</p>
+        <p class="caption" style="color: var(--ink-muted);">{% translate "Mails about your account and your bookings are always sent." %}</p>
         <div class="cd-form__actions" style="justify-content: flex-start;">
-          <button type="submit" class="cd-btn cd-btn--primary label">Unsubscribe</button>
+          <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Unsubscribe" %}</button>
         </div>
       </form>
     </div>

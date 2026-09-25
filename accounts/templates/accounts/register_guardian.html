@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}Register · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Register" %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}register-root{% endblock %}
 {% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
 
@@ -17,8 +18,8 @@
 
 {% block content %}
   <div class="page">
-    <h1 class="display-lg page-title">Register for a dojo</h1>
-    <p class="body-lg page-subtitle">Create an account to register your children</p>
+    <h1 class="display-lg page-title">{% translate "Register for a dojo" %}</h1>
+    <p class="body-lg page-subtitle">{% translate "Create an account to register your children" %}</p>
 
     <div class="form-card">
       <form class="cd-form" id="registration-form-page" method="post" novalidate>
@@ -33,63 +34,63 @@
         {% endif %}
 
         <div class="cd-form__group">
-          <h3 class="cd-form__group-title heading-md">Your details (parent/guardian)</h3>
+          <h3 class="cd-form__group-title heading-md">{% translate "Your details (parent/guardian)" %}</h3>
           <div class="cd-form__row">
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.name.id_for_label }}">Full name<span class="cd-form__required" aria-hidden="true">*</span></label>
+              <label class="cd-form__label label" for="{{ form.name.id_for_label }}">{% translate "Full name" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
               <ul class="cd-form__errors">{% for error in form.name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
               {{ form.name }}
             </div>
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.email.id_for_label }}">Email<span class="cd-form__required" aria-hidden="true">*</span></label>
+              <label class="cd-form__label label" for="{{ form.email.id_for_label }}">{% translate "Email" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
               <ul class="cd-form__errors">{% for error in form.email.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
               {{ form.email }}
             </div>
           </div>
           <div class="cd-form__row">
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.phone.id_for_label }}">Phone</label>
+              <label class="cd-form__label label" for="{{ form.phone.id_for_label }}">{% translate "Phone" %}</label>
               {{ form.phone }}
-              <p class="cd-form__help caption">Only used if we need to reach you during a session.</p>
+              <p class="cd-form__help caption">{% translate "Only used if we need to reach you during a session." %}</p>
               <ul class="cd-form__errors">{% for error in form.phone.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.password.id_for_label }}">Password<span class="cd-form__required" aria-hidden="true">*</span></label>
+              <label class="cd-form__label label" for="{{ form.password.id_for_label }}">{% translate "Password" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
               {{ form.password }}
               <ul class="cd-form__errors">{% for error in form.password.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
           </div>
           <div class="cd-form__row">
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.postal_code.id_for_label }}">Postcode</label>
+              <label class="cd-form__label label" for="{{ form.postal_code.id_for_label }}">{% translate "Postcode" %}</label>
               {{ form.postal_code }}
-              <p class="cd-form__help caption">So we can tell you about dojos and sessions near you.</p>
+              <p class="cd-form__help caption">{% translate "So we can tell you about dojos and sessions near you." %}</p>
               <ul class="cd-form__errors">{% for error in form.postal_code.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
             <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.preferred_language.id_for_label }}">Language for emails<span class="cd-form__required" aria-hidden="true">*</span></label>
+              <label class="cd-form__label label" for="{{ form.preferred_language.id_for_label }}">{% translate "Language for emails" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
               {{ form.preferred_language }}
               <ul class="cd-form__errors">{% for error in form.preferred_language.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
           </div>
           <div class="cd-form__checkbox-row">
             {{ form.consent }}
-            <label class="body-sm" for="{{ form.consent.id_for_label }}">I am the parent or legal guardian of the children listed below.</label>
+            <label class="body-sm" for="{{ form.consent.id_for_label }}">{% translate "I am the parent or legal guardian of the children listed below." %}</label>
           </div>
           <ul class="cd-form__errors">{% for error in form.consent.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
           <div class="cd-form__checkbox-row">
             {{ form.newsletter }}
-            <label class="body-sm" for="{{ form.newsletter.id_for_label }}">Send me the CoderDojo Belgium newsletter and news about events like Coolest Projects and CoderDojo Girlz.</label>
+            <label class="body-sm" for="{{ form.newsletter.id_for_label }}">{% translate "Send me the CoderDojo Belgium newsletter and news about events like Coolest Projects and CoderDojo Girlz." %}</label>
           </div>
           {% include "mailing/partials/_privacy_explanation.html" with short=True %}
-          <p class="caption">You can change this, and which other mails you get, on your account's Mail preferences page.</p>
+          <p class="caption">{% translate "You can change this, and which other mails you get, on your account's Mail preferences page." %}</p>
         </div>
 
         {% include "accounts/partials/_child_rows_fieldset.html" %}
 
         <div class="cd-form__actions">
-          <a class="cd-btn cd-btn--ghost label" href="{% url 'register' %}">Cancel</a>
-          <button type="submit" class="cd-btn cd-btn--primary label">Create account</button>
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'register' %}">{% translate "Cancel" %}</a>
+          <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Create account" %}</button>
         </div>
 
       </form>

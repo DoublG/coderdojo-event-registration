@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}Upcoming events · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Upcoming events" %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}event-root{% endblock %}
 
 {% block extra_style %}
@@ -51,32 +52,32 @@
   <div class="shell">
 
     <div class="event-header">
-      <h1 class="display-xl">Upcoming events</h1>
-      <p class="body-lg">Every free session run by a CoderDojo across Belgium — filter by dojo, location, date or age.</p>
+      <h1 class="display-xl">{% translate "Upcoming events" %}</h1>
+      <p class="body-lg">{% translate "Every free session run by a CoderDojo across Belgium — filter by dojo, location, date or age." %}</p>
     </div>
 
     <form method="get" class="cd-card filter-card">
       <div class="filter-row">
         <div class="filter-field">
-          <label class="label" for="ep-dojo">Dojo</label>
+          <label class="label" for="ep-dojo">{% translate "Dojo" %}</label>
           {{ form.dojo }}
         </div>
         <div class="filter-field">
-          <label class="label" for="ep-location">Location</label>
+          <label class="label" for="ep-location">{% translate "Location" %}</label>
           {{ form.location }}
         </div>
         <div class="filter-field">
-          <label class="label" for="ep-date">Date</label>
+          <label class="label" for="ep-date">{% translate "Date" %}</label>
           {{ form.date }}
         </div>
         <div class="filter-field">
-          <label class="label" for="ep-age">Age</label>
+          <label class="label" for="ep-age">{% translate "Age" %}</label>
           {{ form.age }}
         </div>
         <div class="filter-field" style="flex: 0 0 auto;">
           <button type="submit" class="cd-btn cd-btn--secondary label">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-            Search
+            {% translate "Search" %}
           </button>
         </div>
       </div>
@@ -84,8 +85,8 @@
 
     {% if form.cleaned_data.dojo %}
       <div class="filter-chip">
-        <span class="body-sm">Filtered by: <strong>{{ form.cleaned_data.dojo.name }}</strong></span>
-        <a href="{% querystring dojo=None %}" aria-label="Clear dojo filter">×</a>
+        <span class="body-sm">{% translate "Filtered by:" %} <strong>{{ form.cleaned_data.dojo.name }}</strong></span>
+        <a href="{% querystring dojo=None %}" aria-label="{% translate "Clear dojo filter" %}">×</a>
       </div>
     {% endif %}
 
@@ -94,8 +95,8 @@
     {% include "events/partials/_event_results_page.html" %}
 
     <div class="cd-card find-cta">
-      <p class="body">Would rather browse by place than by date?</p>
-      <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_list' %}">Find a dojo near you</a>
+      <p class="body">{% translate "Would rather browse by place than by date?" %}</p>
+      <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_list' %}">{% translate "Find a dojo near you" %}</a>
     </div>
 
   </div>

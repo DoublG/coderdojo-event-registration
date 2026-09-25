@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core import signing
 from django.http import Http404
 from django.shortcuts import redirect, render
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 
 from accounts.models import User
@@ -30,7 +31,7 @@ def mail_preferences(request):
             user.postal_code = form.cleaned_data["postal_code"]
             fields.append("postal_code")
         user.save(update_fields=fields)
-        messages.success(request, "Your mail preferences are saved.")
+        messages.success(request, _("Your mail preferences are saved."))
         return redirect("mail_preferences")
     return render(request, "mailing/mail_preferences.html", {"form": form})
 

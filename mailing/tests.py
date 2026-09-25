@@ -330,7 +330,7 @@ class RenderingTests(TestCase):
         self.assertEqual(render("hello", "nl-be", {"name": "An"}), ("Dag An", "Hallo An\n"))
 
     def test_falls_back_to_english(self):
-        self.assertEqual(render("hello", "de", {"name": "An"})[0], "Hi An")
+        self.assertEqual(render("hello", "fr-be", {"name": "An"})[0], "Hi An")
 
     def test_plain_text_is_not_html_escaped(self):
         self.assertEqual(render("hello", "en-us", {"name": "A&B"})[1], "Hello A&B & <you>\n")
@@ -1494,12 +1494,13 @@ class TemplateDashboardTests(TestCase):
         self.assertNotEqual(EmailTemplate.objects.get(key="session_reminder", language="en-us").body, "{% if %}")
 
     def test_write_a_missing_language_starting_from_english(self):
-        response = self.client.get(self._edit("campaign_girlz", "de"))
-        self.assertContains(response, "no Deutsch version yet")
+        EmailTemplate.objects.filter(key="campaign_girlz", language="fr-be").delete()
+        response = self.client.get(self._edit("campaign_girlz", "fr-be"))
+        self.assertContains(response, "no Français (Belgique) version yet")
         self.assertEqual(response.context["form"]["subject"].value(),
                          EmailTemplate.objects.get(key="campaign_girlz", language="en-us").subject)
-        self.client.post(self._edit("campaign_girlz", "de"), {"subject": "CoderDojo Girlz", "body": "Hallo!", "description": ""})
-        self.assertTrue(EmailTemplate.objects.filter(key="campaign_girlz", language="de").exists())
+        self.client.post(self._edit("campaign_girlz", "fr-be"), {"subject": "CoderDojo Girlz", "body": "Salut !", "description": ""})
+        self.assertTrue(EmailTemplate.objects.filter(key="campaign_girlz", language="fr-be").exists())
 
     def test_create_a_campaign_template(self):
         response = self.client.post(reverse("manage_template_create"),

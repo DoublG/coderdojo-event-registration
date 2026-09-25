@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
 A batch of cards for the home page's "Upcoming sessions" carousel — either
 the initial 10 (rendered inline by core.views.home) or a lazy-loaded next
 10 (returned by events.views.upcoming_sessions_widget over htmx).
@@ -6,5 +6,5 @@ the initial 10 (rendered inline by core.views.home) or a lazy-loaded next
 {% for event in events %}
   {% include "events/partials/_upcoming_session_card.html" with is_last=forloop.last %}
 {% empty %}
-  <p class="body" style="color: var(--ink-muted);">No upcoming sessions with open spots right now — check back soon.</p>
+  <p class="body" style="color: var(--ink-muted);">{% translate "No upcoming sessions with open spots right now — check back soon." %}</p>
 {% endfor %}

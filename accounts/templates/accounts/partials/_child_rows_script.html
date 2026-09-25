@@ -1,4 +1,4 @@
-<script>
+{% load i18n %}<script>
   // Wires up "Add another child" / "Remove" — the rows themselves may
   // start out server-rendered (re-showing a family's data after a
   // validation error), this just handles adding/removing beyond that.
@@ -16,32 +16,46 @@
       return option.outerHTML;
     }).join("");
 
+    // The row's texts in the page's language (the server-rendered rows use
+    // the same translated strings, see _child_rows_fieldset.html).
+    var T = {
+      child: "{% translate 'Child {n}' as t %}{{ t|escapejs }}",
+      remove: "{% translate 'Remove' as t %}{{ t|escapejs }}",
+      firstName: "{% translate 'First name' as t %}{{ t|escapejs }}",
+      sam: "{% translate 'Sam' as t %}{{ t|escapejs }}",
+      dob: "{% translate 'Date of birth' as t %}{{ t|escapejs }}",
+      notes: "{% translate 'Allergies or notes' as t %}{{ t|escapejs }}",
+      none: "{% translate 'None' as t %}{{ t|escapejs }}",
+      gender: "{% translate 'Gender' as t %}{{ t|escapejs }}",
+      genderHelp: "{% translate "Optional, never shown publicly. Lets us tell you about girls' sessions." as t %}{{ t|escapejs }}"
+    };
+
     function subgroupHtml(n) {
       return (
         '<div class="cd-form__subgroup" data-child="' + n + '">' +
           '<div class="cd-form__subgroup-header">' +
-            '<h4 class="cd-form__subgroup-title heading-sm">Child ' + n + '</h4>' +
-            '<button type="button" class="cd-form__remove body-sm">Remove</button>' +
+            '<h4 class="cd-form__subgroup-title heading-sm">' + T.child.replace("{n}", n) + '</h4>' +
+            '<button type="button" class="cd-form__remove body-sm">' + T.remove + '</button>' +
           '</div>' +
           '<div class="cd-form__row">' +
             '<div class="cd-form__field">' +
-              '<label class="cd-form__label label" for="rp-c' + n + '-name">First name<span class="cd-form__required" aria-hidden="true">*</span></label>' +
-              '<input class="cd-form__input body" id="rp-c' + n + '-name" name="child_' + n + '_name" type="text" placeholder="Sam" required>' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-name">' + T.firstName + '<span class="cd-form__required" aria-hidden="true">*</span></label>' +
+              '<input class="cd-form__input body" id="rp-c' + n + '-name" name="child_' + n + '_name" type="text" placeholder="' + T.sam + '" required>' +
             '</div>' +
             '<div class="cd-form__field">' +
-              '<label class="cd-form__label label" for="rp-c' + n + '-dob">Date of birth<span class="cd-form__required" aria-hidden="true">*</span></label>' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-dob">' + T.dob + '<span class="cd-form__required" aria-hidden="true">*</span></label>' +
               '<input class="cd-form__input body" id="rp-c' + n + '-dob" name="child_' + n + '_dob" type="date" required>' +
             '</div>' +
           '</div>' +
           '<div class="cd-form__row">' +
             '<div class="cd-form__field">' +
-              '<label class="cd-form__label label" for="rp-c' + n + '-notes">Allergies or notes</label>' +
-              '<input class="cd-form__input body" id="rp-c' + n + '-notes" name="child_' + n + '_notes" type="text" placeholder="None">' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-notes">' + T.notes + '</label>' +
+              '<input class="cd-form__input body" id="rp-c' + n + '-notes" name="child_' + n + '_notes" type="text" placeholder="' + T.none + '">' +
             '</div>' +
             '<div class="cd-form__field">' +
-              '<label class="cd-form__label label" for="rp-c' + n + '-gender">Gender</label>' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-gender">' + T.gender + '</label>' +
               '<select class="cd-form__select body" id="rp-c' + n + '-gender" name="child_' + n + '_gender">' + genderOptions + '</select>' +
-              '<p class="cd-form__help caption">Optional, never shown publicly. Lets us tell you about girls\' sessions.</p>' +
+              '<p class="cd-form__help caption">' + T.genderHelp + '</p>' +
             '</div>' +
           '</div>' +
         '</div>'
@@ -57,7 +71,7 @@
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "cd-form__remove body-sm";
-          btn.textContent = "Remove";
+          btn.textContent = T.remove;
           btn.addEventListener("click", onRemove);
           header.appendChild(btn);
         } else if (subgroups.length === 1 && removeBtn) {

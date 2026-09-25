@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
 Renders one dojo-finder search result. Expects a `dojo` Dojo instance in
 context; optionally annotated by the view with:
   - distance_km: float, distance from the searched postcode/location
@@ -22,20 +22,20 @@ Usage:
   {% endif %}
   <div class="cd-dojo-finder__info">
     <h3 class="cd-dojo-finder__name heading-sm">{{ dojo.name }}</h3>
-    <p class="cd-dojo-finder__address body-sm">{{ dojo.address|default:"Address to be confirmed" }}</p>
+    <p class="cd-dojo-finder__address body-sm">{% if dojo.address %}{{ dojo.address }}{% else %}{% translate "Address to be confirmed" %}{% endif %}</p>
     <p class="cd-dojo-finder__next caption">
       {% if dojo.next_event %}
-        Next session: {{ dojo.next_event.start_time|date:"D j M, H:i" }}
+        {% blocktranslate with when=dojo.next_event.start_time|date:"D j M, H:i" %}Next session: {{ when }}{% endblocktranslate %}
         {% include "events/partials/_audience_badge.html" with event=dojo.next_event %}
         {% if dojo.next_event.places_left <= 0 %}
-          <span class="cd-badge cd-badge--warning caption">Waitlist</span>
+          <span class="cd-badge cd-badge--warning caption">{% translate "Waitlist" %}</span>
         {% else %}
-          <span class="cd-badge cd-badge--success caption">Open</span>
+          <span class="cd-badge cd-badge--success caption">{% translate "Open" %}</span>
         {% endif %}
       {% else %}
-        No upcoming sessions
+        {% translate "No upcoming sessions" %}
       {% endif %}
     </p>
   </div>
-  <a href="{% url 'dojo_detail' dojo_id=dojo.id %}" class="cd-btn cd-btn--ghost label">View</a>
+  <a href="{% url 'dojo_detail' dojo_id=dojo.id %}" class="cd-btn cd-btn--ghost label">{% translate "View" %}</a>
 </li>

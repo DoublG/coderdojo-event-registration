@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from content.models import Announcement
 from core.image_library import library_filename, use_library_image
@@ -86,7 +87,7 @@ class DojoSearchForm(forms.Form):
         max_length=200,
         widget=forms.TextInput(attrs={
             "class": "cd-dojo-finder__input body",
-            "placeholder": "Enter your postcode or city",
+            "placeholder": _("Enter your postcode or city"),
         }),
     )
     # Set by the "Use my location" button via the browser Geolocation API

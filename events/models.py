@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 MARKDOWN_HELP_TEXT = "Supports basic Markdown — # headings, **bold**, *italic*, links, lists."
 
@@ -56,7 +57,7 @@ class Event(models.Model):
     max_age = models.PositiveSmallIntegerField(null=True, blank=True)
     EVERYONE = "everyone"
     GIRLS = "girls"
-    AUDIENCE_CHOICES = [(EVERYONE, "Everyone"), (GIRLS, "Girls' session")]
+    AUDIENCE_CHOICES = [(EVERYONE, _("Everyone")), (GIRLS, _("Girls' session"))]
     audience = models.CharField(
         max_length=10, choices=AUDIENCE_CHOICES, default=EVERYONE,
         help_text="Who the session is aimed at, shown as a label. It never restricts who can sign up.",
@@ -295,8 +296,8 @@ class NinjaBelt(models.Model):
         who = membership.name if membership else (self.awarded_by.get_full_name() if self.awarded_by else "")
         if not membership:
             return who
-        role = dict(membership.ROLE_CHOICES).get(self.awarded_as_role or membership.role, "").lower()
-        return f"{who}, as {role} of {membership.dojo.name}"
+        role = str(dict(membership.ROLE_CHOICES).get(self.awarded_as_role or membership.role, "")).lower()
+        return _("%(who)s, as %(role)s of %(dojo)s") % {"who": who, "role": role, "dojo": membership.dojo.name}
 
 
 class NinjaEngagementManager(models.Manager):

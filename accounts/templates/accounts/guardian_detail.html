@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}My account · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "My account" %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}guardian-root{% endblock %}
 
 {% block extra_style %}
@@ -47,16 +48,16 @@
   <div class="shell">
 
     <div class="account-header col">
-      <h1 class="display-lg">Welcome back{% if guardian.first_name %}, {{ guardian.first_name }}{% endif %}</h1>
-      <p class="body-lg">Here's what's coming up for your children.</p>
+      <h1 class="display-lg">{% if guardian.first_name %}{% blocktranslate with name=guardian.first_name %}Welcome back, {{ name }}{% endblocktranslate %}{% else %}{% translate "Welcome back" %}{% endif %}</h1>
+      <p class="body-lg">{% translate "Here's what's coming up for your children." %}</p>
     </div>
 
     {% include "accounts/partials/_children_list.html" %}
 
     <details class="cd-card add-child">
       <summary>
-        <p class="body">Registering another child?</p>
-        <span class="cd-btn cd-btn--primary label">Register another child</span>
+        <p class="body">{% translate "Registering another child?" %}</p>
+        <span class="cd-btn cd-btn--primary label">{% translate "Register another child" %}</span>
       </summary>
       <form class="cd-form" method="post" action="{% url 'add_ninja' %}"
             hx-post="{% url 'add_ninja' %}" hx-target="#children-list" hx-swap="outerHTML"
@@ -64,7 +65,7 @@
         {% csrf_token %}
         <div class="cd-form__row">
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="ac-icon">Avatar</label>
+            <label class="cd-form__label label" for="ac-icon">{% translate "Avatar" %}</label>
             <select class="cd-form__select body" id="ac-icon" name="icon">
               {% for value, label in icon_choices %}
                 <option value="{{ value }}">{{ label }}</option>
@@ -72,32 +73,32 @@
             </select>
           </div>
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="ac-name">Child's name</label>
+            <label class="cd-form__label label" for="ac-name">{% translate "Child's name" %}</label>
             <input class="cd-form__input body" type="text" id="ac-name" name="name" required>
           </div>
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="ac-dob">Date of birth (optional)</label>
+            <label class="cd-form__label label" for="ac-dob">{% translate "Date of birth (optional)" %}</label>
             <input class="cd-form__input body" type="date" id="ac-dob" name="date_of_birth">
           </div>
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="ac-gender">Gender (optional)</label>
+            <label class="cd-form__label label" for="ac-gender">{% translate "Gender (optional)" %}</label>
             <select class="cd-form__select body" id="ac-gender" name="gender">
               {% for value, label in gender_choices %}<option value="{{ value }}"{% if value == "unspecified" %} selected{% endif %}>{{ label }}</option>{% endfor %}
             </select>
           </div>
         </div>
         <div class="cd-form__actions">
-          <button type="button" class="cd-btn cd-btn--ghost label" onclick="this.closest('details').open=false;">Cancel</button>
-          <button type="submit" class="cd-btn cd-btn--primary label">Add child</button>
+          <button type="button" class="cd-btn cd-btn--ghost label" onclick="this.closest('details').open=false;">{% translate "Cancel" %}</button>
+          <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Add child" %}</button>
         </div>
       </form>
     </details>
 
     <div class="cd-card add-child" style="margin-top: var(--space-5); text-align: left;">
-      <h2 class="heading-md section-title">Mail preferences</h2>
-      <p class="body-sm">Choose which mails you get, the language they're in, and your postcode.</p>
+      <h2 class="heading-md section-title">{% translate "Mail preferences" %}</h2>
+      <p class="body-sm">{% translate "Choose which mails you get, the language they're in, and your postcode." %}</p>
       <div class="cd-form__actions" style="justify-content: flex-start;">
-        <a class="cd-btn cd-btn--ghost label" href="{% url 'mail_preferences' %}">Mail preferences</a>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'mail_preferences' %}">{% translate "Mail preferences" %}</a>
       </div>
     </div>
 
@@ -107,43 +108,43 @@
     mentor, never to use the site as a parent) and the next step it can take.
     {% endcomment %}
     <div class="cd-card add-child volunteering" style="margin-top: var(--space-5); text-align: left;">
-      <h2 class="heading-md section-title">Volunteering</h2>
+      <h2 class="heading-md section-title">{% translate "Volunteering" %}</h2>
 
       {% for application in applications %}
         <p class="body-sm" style="margin: 0 0 var(--space-2);">
-          {{ application.get_kind_display }} application ·
+          {% blocktranslate with kind=application.get_kind_display %}{{ kind }} application{% endblocktranslate %} ·
           <span class="cd-badge {% if application.status == 'approved' %}cd-badge--success{% elif application.status == 'rejected' %}cd-badge--warning{% else %}cd-badge--outline{% endif %} caption">{{ application.get_status_display }}</span>
-          <span class="caption" style="color: var(--ink-muted);">sent {{ application.submitted_at|date:"j M Y" }}</span>
+          <span class="caption" style="color: var(--ink-muted);">{% blocktranslate with date=application.submitted_at|date:"j M Y" %}sent {{ date }}{% endblocktranslate %}</span>
         </p>
       {% endfor %}
 
       {% if applications or guardian.background_check_status != 'not_requested' %}
         <p class="body-sm" style="margin: var(--space-3) 0;">
-          Background check:
+          {% translate "Background check:" %}
           {% if guardian.background_check_valid %}
-            <strong>valid</strong> until {{ guardian.background_check_expires_at|date:"d/m/Y" }}.
+            {% blocktranslate with date=guardian.background_check_expires_at|date:"d/m/Y" %}<strong>valid</strong> until {{ date }}.{% endblocktranslate %}
           {% elif guardian.background_check_status == 'submitted' %}
-            <strong>uploaded</strong>, waiting for review.
+            {% translate "<strong>uploaded</strong>, waiting for review." %}
           {% elif guardian.background_check_can_upload %}
-            <strong>{% if guardian.background_check_status == 'validated' %}expired{% elif guardian.background_check_status == 'rejected' %}needs a new document{% else %}requested{% endif %}</strong>
-            — <a href="{% url 'renew_background_check' %}">upload your document</a>.
-            {% if guardian.background_check_status == 'validated' %}Until then you can't open your dojo dashboards.{% endif %}
+            <strong>{% if guardian.background_check_status == 'validated' %}{% translate "expired" %}{% elif guardian.background_check_status == 'rejected' %}{% translate "needs a new document" %}{% else %}{% translate "requested" %}{% endif %}</strong>
+            — <a href="{% url 'renew_background_check' %}">{% translate "upload your document" %}</a>.
+            {% if guardian.background_check_status == 'validated' %}{% translate "Until then you can't open your dojo dashboards." %}{% endif %}
           {% else %}
-            not requested yet — we'll email you once your application has been looked at.
+            {% translate "not requested yet — we'll email you once your application has been looked at." %}
           {% endif %}
         </p>
       {% endif %}
 
       <div class="cd-form__actions" style="justify-content: flex-start;">
         {% if user_is_approved_champion %}
-          <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_create' %}">Create a dojo</a>
+          <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_create' %}">{% translate "Create a dojo" %}</a>
         {% elif not has_champion_application %}
-          <a class="cd-btn cd-btn--ghost label" href="{% url 'register_dojo' %}">Apply to start a dojo</a>
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'register_dojo' %}">{% translate "Apply to start a dojo" %}</a>
         {% endif %}
         {% if user_is_approved_mentor %}
-          <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_list' %}">Find a dojo to help at</a>
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_list' %}">{% translate "Find a dojo to help at" %}</a>
         {% elif not has_mentor_application %}
-          <a class="cd-btn cd-btn--ghost label" href="{% url 'register_helper' %}">Apply to volunteer</a>
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'register_helper' %}">{% translate "Apply to volunteer" %}</a>
         {% endif %}
       </div>
     </div>

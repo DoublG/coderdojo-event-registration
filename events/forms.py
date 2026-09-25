@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django import forms
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from core.image_library import library_filename, use_library_image
 from dojos.models import Dojo
@@ -26,22 +27,22 @@ class EventSearchForm(forms.Form):
     dojo = forms.ModelChoiceField(
         queryset=Dojo.objects.public().order_by("name"),
         required=False,
-        empty_label="All dojos",
+        empty_label=_("All dojos"),
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-dojo"}),
     )
     location = forms.CharField(
         required=False,
         max_length=200,
-        widget=forms.TextInput(attrs={"class": "cd-form__input body", "id": "ep-location", "placeholder": "Postcode or city"}),
+        widget=forms.TextInput(attrs={"class": "cd-form__input body", "id": "ep-location", "placeholder": _("Postcode or city")}),
     )
     date = forms.ChoiceField(
         required=False,
-        choices=[(DATE_ANY, "Any date"), (DATE_WEEK, "This week"), (DATE_MONTH, "This month")],
+        choices=[(DATE_ANY, _("Any date")), (DATE_WEEK, _("This week")), (DATE_MONTH, _("This month"))],
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-date"}),
     )
     age = forms.ChoiceField(
         required=False,
-        choices=[(AGE_ANY, "All ages")] + [(key, key.replace("-", "–")) for key in AGE_RANGES],
+        choices=[(AGE_ANY, _("All ages"))] + [(key, key.replace("-", "–")) for key in AGE_RANGES],
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-age"}),
     )
 

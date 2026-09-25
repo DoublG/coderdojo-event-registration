@@ -7,15 +7,16 @@ DEFAULT_SUBSCRIBED already record the agreed rules for when they are.
 """
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class MailCategory(models.TextChoices):
-    SERVICE = "service", "Account and security"
-    REGISTRATION = "registration", "Session bookings"
-    REMINDER = "reminder", "Reminders"
-    DOJO_NEWS = "dojo_news", "News from your dojo"
-    VOLUNTEER = "volunteer", "Volunteering"
-    NEWSLETTER = "newsletter", "Newsletter and campaigns"
+    SERVICE = "service", _("Account and security")
+    REGISTRATION = "registration", _("Session bookings")
+    REMINDER = "reminder", _("Reminders")
+    DOJO_NEWS = "dojo_news", _("News from your dojo")
+    VOLUNTEER = "volunteer", _("Volunteering")
+    NEWSLETTER = "newsletter", _("Newsletter and campaigns")
 
 
 # service/registration mail is about the account or a booking the recipient
@@ -75,10 +76,10 @@ def categories_for(user):
 
 # One line per category for the Mail preferences page.
 DESCRIPTIONS = {
-    MailCategory.SERVICE: "Password resets, background-check requests and other mail about your account.",
-    MailCategory.REGISTRATION: "Confirmations and changes for the sessions you signed up for.",
-    MailCategory.REMINDER: "A reminder two days before a session you signed up for.",
-    MailCategory.DOJO_NEWS: "New sessions and news from the dojos your family goes to.",
-    MailCategory.VOLUNTEER: "News for champions and mentors, and calls for volunteers.",
-    MailCategory.NEWSLETTER: "The CoderDojo Belgium newsletter and events like Coolest Projects and CoderDojo Girlz.",
+    MailCategory.SERVICE: _("Password resets, background-check requests and other mail about your account."),
+    MailCategory.REGISTRATION: _("Confirmations and changes for the sessions you signed up for."),
+    MailCategory.REMINDER: _("A reminder two days before a session you signed up for."),
+    MailCategory.DOJO_NEWS: _("New sessions and news from the dojos your family goes to."),
+    MailCategory.VOLUNTEER: _("News for champions and mentors, and calls for volunteers."),
+    MailCategory.NEWSLETTER: _("The CoderDojo Belgium newsletter and events like Coolest Projects and CoderDojo Girlz."),
 }

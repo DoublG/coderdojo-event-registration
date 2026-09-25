@@ -16,6 +16,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import slugify
+from django.utils.translation import gettext as _
 
 from core.image_library import library_filename, use_library_image
 from dojos.access import accessible_dojos
@@ -103,7 +104,7 @@ def login(request):
                 auth_login(request, user)
                 return redirect(_post_login_redirect(request, user))
             else:
-                error = "That email/password combination doesn't match an account."
+                error = _("That email/password combination doesn't match an account.")
     else:
         form = LoginForm()
 
@@ -193,10 +194,10 @@ def _parse_child_rows(post_data):
 
         errors = {}
         if not name:
-            errors["name"] = "First name is required."
+            errors["name"] = _("First name is required.")
         date_of_birth = parse_date(dob_raw) if dob_raw else None
         if not date_of_birth:
-            errors["dob"] = "Date of birth is required."
+            errors["dob"] = _("Date of birth is required.")
         elif dob_error := ninja_birth_date_error(date_of_birth):
             errors["dob"] = dob_error
 
@@ -246,10 +247,10 @@ def register_guardian(request):
         child_rows = _parse_child_rows(request.POST)
         children_valid = bool(child_rows) and not any(row["errors"] for row in child_rows)
         if not child_rows:
-            children_error = "Add at least one child."
+            children_error = _("Add at least one child.")
 
         if form.is_valid() and children_valid:
-            first_name, _, last_name = form.cleaned_data["name"].partition(" ")
+            first_name, _sep, last_name = form.cleaned_data["name"].partition(" ")
             parent = User(
                 username=unique_username(slugify(form.cleaned_data["name"])),
                 email=form.cleaned_data["email"],
@@ -468,7 +469,9 @@ def ninja_login_create(request, ninja_id):
         account = child_accounts.give_login(request.user, child, request.POST.get("email"))
     except child_accounts.ChildAccountError as error:
         return _login_card(request, child, error=str(error))
-    return _login_card(request, child, notice=f"Login created: we've mailed {account.email} a link to choose a password.")
+    return _login_card(request, child, notice=_("Login created: we've mailed %(email)s a link to choose a password.") % {
+        "email": account.email,
+    })
 
 
 @login_required
@@ -480,7 +483,9 @@ def ninja_login_resend(request, ninja_id):
         child_accounts.resend_login_mail(request.user, child)
     except child_accounts.ChildAccountError as error:
         return _login_card(request, child, error=str(error))
-    return _login_card(request, child, notice=f"We've mailed {child.account.email} a new link to choose a password.")
+    return _login_card(request, child, notice=_("We've mailed %(email)s a new link to choose a password.") % {
+        "email": child.account.email,
+    })
 
 
 @login_required
@@ -493,10 +498,10 @@ def ninja_login_remove(request, ninja_id):
     except child_accounts.ChildAccountError as error:
         return _login_card(request, child, error=str(error))
     if outcome == child_accounts.DISABLED:
-        notice = (f"{child.name}'s login is switched off. It was on a dojo team, so it's kept for that "
-                  "team's history; their team places have ended.")
+        notice = _("%(name)s's login is switched off. It was on a dojo team, so it's kept for that "
+                   "team's history; their team places have ended.") % {"name": child.name}
     else:
-        notice = f"{child.name}'s login is removed."
+        notice = _("%(name)s's login is removed.") % {"name": child.name}
     return _login_card(request, child, notice=notice)
 
 

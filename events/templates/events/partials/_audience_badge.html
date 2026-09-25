@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
 The "Girls' session" label (Event.audience). Informational only: it never
 restricts who can sign up. Expects `event`.
-{% endcomment %}{% if event.is_girls_session %}<span class="cd-badge cd-badge--accent caption">Girls' session</span>{% endif %}
+{% endcomment %}{% if event.is_girls_session %}<span class="cd-badge cd-badge--accent caption">{% translate "Girls' session" %}</span>{% endif %}

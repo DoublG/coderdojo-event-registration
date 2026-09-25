@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}Log in · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Log in" %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}login-page-root{% endblock %}
 
 {% block extra_style %}
@@ -21,8 +22,8 @@
     <div class="cd-card cd-login" style="padding: var(--space-6); width: 100%; max-width: 400px;">
 
       <div class="cd-login__header">
-        <h2 class="cd-login__title heading-lg">Welcome back</h2>
-        <p class="cd-login__subtitle body-sm">Log in to see your dojo's schedule and manage your account.</p>
+        <h2 class="cd-login__title heading-lg">{% translate "Welcome back" %}</h2>
+        <p class="cd-login__subtitle body-sm">{% translate "Log in to see your dojo's schedule and manage your account." %}</p>
       </div>
 
       <form class="cd-login__fields" method="post" novalidate>
@@ -36,26 +37,26 @@
         {% endif %}
 
         <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.email.id_for_label }}">Email</label>
+          <label class="cd-form__label label" for="{{ form.email.id_for_label }}">{% translate "Email" %}</label>
           {{ form.email }}
         </div>
         <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.password.id_for_label }}">Password</label>
+          <label class="cd-form__label label" for="{{ form.password.id_for_label }}">{% translate "Password" %}</label>
           {{ form.password }}
         </div>
 
         <div class="cd-login__row">
           <div class="cd-form__checkbox-row">
             <input type="checkbox" id="lp-login-remember">
-            <label class="body-sm" for="lp-login-remember">Remember me</label>
+            <label class="body-sm" for="lp-login-remember">{% translate "Remember me" %}</label>
           </div>
-          <a href="{% url 'password_reset' %}" class="cd-login__forgot body-sm">Forgot password?</a>
+          <a href="{% url 'password_reset' %}" class="cd-login__forgot body-sm">{% translate "Forgot password?" %}</a>
         </div>
 
-        <button type="submit" class="cd-btn cd-btn--primary cd-btn--block label">Log in</button>
+        <button type="submit" class="cd-btn cd-btn--primary cd-btn--block label">{% translate "Log in" %}</button>
       </form>
 
-      <p class="cd-login__footer body-sm">New to CoderDojo? <a href="{% url 'register' %}">Create an account</a></p>
+      <p class="cd-login__footer body-sm">{% translate "New to CoderDojo?" %} <a href="{% url 'register' %}">{% translate "Create an account" %}</a></p>
 
     </div>
   </div>

@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
 Renders one row in the events list, grouped by day. Expects an `event`
 Event instance in context. Group a flat, start_time-ordered queryset by day
 with Django's built-in `regroup` tag:
@@ -25,17 +25,17 @@ with Django's built-in `regroup` tag:
     </p>
     <div class="badges">
       {% if event.registers_externally %}
-        <span class="cd-badge cd-badge--outline caption">Register on {{ event.external_registration_host }}</span>
+        <span class="cd-badge cd-badge--outline caption">{% blocktranslate with host=event.external_registration_host %}Register on {{ host }}{% endblocktranslate %}</span>
       {% elif not event.registration_open %}
-        <span class="cd-badge cd-badge--outline caption">Registrations closed</span>
+        <span class="cd-badge cd-badge--outline caption">{% translate "Registrations closed" %}</span>
       {% elif event.places_left <= 0 %}
-        <span class="cd-badge cd-badge--danger caption">Full</span>
+        <span class="cd-badge cd-badge--danger caption">{% translate "Full" %}</span>
       {% else %}
-        <span class="cd-badge cd-badge--success caption">Open</span>
+        <span class="cd-badge cd-badge--success caption">{% translate "Open" %}</span>
       {% endif %}
-      <span class="cd-badge cd-badge--accent caption">Ages {{ event.min_age|default:"7" }}–{{ event.max_age|default:"18" }}</span>
+      <span class="cd-badge cd-badge--accent caption">{% blocktranslate with min=event.min_age|default:"7" max=event.max_age|default:"18" %}Ages {{ min }}–{{ max }}{% endblocktranslate %}</span>
       {% include "events/partials/_audience_badge.html" %}
     </div>
   </div>
-  <div class="action"><a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=event.id %}">View event</a></div>
+  <div class="action"><a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=event.id %}">{% translate "View event" %}</a></div>
 </div>

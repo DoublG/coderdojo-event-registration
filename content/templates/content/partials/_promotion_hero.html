@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
 The homepage_hero placement (content.Promotion): a large card per active
 promotion, rank first. Expects `promotions` (Promotion.objects.showing(...)).
 {% endcomment %}
@@ -9,12 +9,12 @@ promotion, rank first. Expects `promotions` (Promotion.objects.showing(...)).
         <img class="cd-promo__image" src="{{ promotion.display_image.url }}" alt="">
       {% endif %}
       <div class="cd-promo__body">
-        <p class="cd-promo__eyebrow label">Featured · {{ event.start_time|date:"D j M" }}</p>
+        <p class="cd-promo__eyebrow label">{% translate "Featured" %} · {{ event.start_time|date:"D j M" }}</p>
         <h2 class="cd-promo__title display-lg">{{ promotion.display_title }}</h2>
         {% if promotion.text %}<p class="cd-promo__text body-lg">{{ promotion.text }}</p>{% endif %}
         <p class="cd-promo__meta body-sm">{% include "events/partials/_organiser.html" %}{% if event.venue_name %} · {{ event.venue_name }}{% endif %}</p>
         <div class="cd-promo__actions">
-          <a class="cd-btn cd-btn--primary label" href="{% url 'event_detail' event_id=event.id %}">Find out more</a>
+          <a class="cd-btn cd-btn--primary label" href="{% url 'event_detail' event_id=event.id %}">{% translate "Find out more" %}</a>
         </div>
       </div>
     </article>

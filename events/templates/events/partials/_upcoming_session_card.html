@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
 One card in the home page's "Upcoming sessions" carousel. When this is the
 last card of a lazy-loaded batch and there's another page, it carries the
 htmx trigger that fetches the next 10 as the carousel is scrolled into it —
@@ -21,9 +21,9 @@ see events.views.upcoming_sessions_widget.
   </div>
   <div class="cd-event__body">
     <h3 class="cd-event__title heading-md">{{ event.name }}</h3>
-    {% if event.is_promoted %}<span class="cd-badge cd-badge--warning caption">Featured</span>{% endif %}
+    {% if event.is_promoted %}<span class="cd-badge cd-badge--warning caption">{% translate "Featured" %}</span>{% endif %}
     {% include "events/partials/_audience_badge.html" %}
     <p class="cd-event__meta body-sm">{{ event.start_time|date:"H:i" }} · {{ event.venue_name|default:event.dojo.name }}</p>
   </div>
-  <a href="{% url 'event_detail' event.id %}" style="position:absolute; inset:0;" aria-label="View {{ event.name }}"></a>
+  <a href="{% url 'event_detail' event.id %}" style="position:absolute; inset:0;" aria-label="{% blocktranslate with name=event.name %}View {{ name }}{% endblocktranslate %}"></a>
 </article>

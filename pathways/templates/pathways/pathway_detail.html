@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}{{ pathway.name }} pathway · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% blocktranslate with name=pathway.name %}{{ name }} pathway{% endblocktranslate %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}pathwaydetail-root{% endblock %}
 
 {% block extra_style %}
@@ -45,13 +46,13 @@
       {% if pathway.subtitle %}<p class="body-lg subtitle">{{ pathway.subtitle }}</p>{% endif %}
       <div class="tags">
         {% if pathway.min_age or pathway.max_age %}
-          <span class="cd-badge cd-badge--accent caption">Ages {{ pathway.min_age|default:"7" }}–{{ pathway.max_age|default:"18" }}</span>
+          <span class="cd-badge cd-badge--accent caption">{% blocktranslate with min=pathway.min_age|default:"7" max=pathway.max_age|default:"18" %}Ages {{ min }}–{{ max }}{% endblocktranslate %}</span>
         {% endif %}
         {% if pathway.no_experience_needed %}
-          <span class="cd-badge cd-badge--outline caption">No experience needed</span>
+          <span class="cd-badge cd-badge--outline caption">{% translate "No experience needed" %}</span>
         {% endif %}
         {% if pathway.runs_in_browser %}
-          <span class="cd-badge cd-badge--outline caption">Runs in the browser</span>
+          <span class="cd-badge cd-badge--outline caption">{% translate "Runs in the browser" %}</span>
         {% endif %}
       </div>
     </div>
@@ -59,8 +60,8 @@
     {% with projects=pathway.projects.all %}
       {% if projects %}
         <section class="section">
-          <h2 class="heading-lg">What you'll build</h2>
-          <p class="section-desc body">A few of the projects kids on this pathway have walked out with.</p>
+          <h2 class="heading-lg">{% translate "What you'll build" %}</h2>
+          <p class="section-desc body">{% translate "A few of the projects kids on this pathway have walked out with." %}</p>
           <div class="row">
             {% for project in projects %}
               <article class="cd-card build-card">
@@ -76,8 +77,8 @@
     {% with steps=pathway.steps.all %}
       {% if steps %}
         <section class="section" style="background: var(--surface-sunken); border-radius: var(--radius-lg); padding: var(--space-6);">
-          <h2 class="heading-lg">How a session works</h2>
-          <p class="section-desc body">Every dojo runs this a little differently, but it usually looks like this.</p>
+          <h2 class="heading-lg">{% translate "How a session works" %}</h2>
+          <p class="section-desc body">{% translate "Every dojo runs this a little differently, but it usually looks like this." %}</p>
           <div class="row">
             {% for step in steps %}
               <article class="cd-card step-card">
@@ -94,8 +95,8 @@
     {% with skills=pathway.skills.all %}
       {% if skills %}
         <section class="section">
-          <h2 class="heading-lg">Skills you'll pick up</h2>
-          <p class="section-desc body">The building blocks every later pathway builds on.</p>
+          <h2 class="heading-lg">{% translate "Skills you'll pick up" %}</h2>
+          <p class="section-desc body">{% translate "The building blocks every later pathway builds on." %}</p>
           <div class="skills">
             {% for skill in skills %}
               <span class="cd-badge cd-badge--outline caption">{{ skill.name }}</span>
@@ -108,7 +109,7 @@
     {% with faqs=pathway.faqs.all %}
       {% if faqs %}
         <section class="section">
-          <h2 class="heading-lg">Questions</h2>
+          <h2 class="heading-lg">{% translate "Questions" %}</h2>
           <div class="cd-faq" id="faq-pathway-detail-page">
             {% for faq in faqs %}
               <div class="cd-faq__item" data-open="false">
@@ -126,24 +127,24 @@
 
     <section class="section">
       <div class="cd-card find-cta">
-        <p class="body">Ready to try it in person?</p>
+        <p class="body">{% translate "Ready to try it in person?" %}</p>
         <div class="actions">
-          <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_list' %}">Find a dojo near you</a>
-          <a class="cd-btn cd-btn--ghost label" href="{% url 'event_list' %}">Browse upcoming events</a>
+          <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_list' %}">{% translate "Find a dojo near you" %}</a>
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'event_list' %}">{% translate "Browse upcoming events" %}</a>
         </div>
       </div>
     </section>
 
     {% if other_pathways %}
       <section class="section other-pathways">
-        <h2 class="heading-lg">Other pathways</h2>
-        <p class="section-desc body">Not sure this is the right one? Kids move between pathways freely.</p>
+        <h2 class="heading-lg">{% translate "Other pathways" %}</h2>
+        <p class="section-desc body">{% translate "Not sure this is the right one? Kids move between pathways freely." %}</p>
         <div class="row">
           {% for other in other_pathways %}
             <article class="cd-card other-pathway-card">
               <h3 class="heading-md">{{ other.name }}</h3>
               <p class="body-sm">{{ other.subtitle }}</p>
-              <a class="label" href="{% url 'pathway_detail' pathway_id=other.id %}">Explore {{ other.name }} →</a>
+              <a class="label" href="{% url 'pathway_detail' pathway_id=other.id %}">{% blocktranslate with name=other.name %}Explore {{ name }} →{% endblocktranslate %}</a>
             </article>
           {% endfor %}
         </div>

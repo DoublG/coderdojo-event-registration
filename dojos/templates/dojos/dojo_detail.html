@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 {% load markdown_extras %}
 {% block title %}{{ dojo.name }} · CoderDojo Belgium{% endblock %}
 {% block root_class %}dojo-page-root{% endblock %}
@@ -95,16 +96,16 @@
         <div class="body-lg markdown-content dojo-hero__tagline">{{ dojo.tagline|markdownify }}</div>
       {% endif %}
       <p class="body dojo-hero__facts">
-        Free
+        {% translate "Free" %}
         {% if dojo.schedule_description %} · {{ dojo.schedule_description }}{% endif %}
-        {% if dojo.min_age or dojo.max_age %} · Ages {{ dojo.min_age|default:"7" }}–{{ dojo.max_age|default:"18" }}{% endif %}
-         · No experience needed
+        {% if dojo.min_age or dojo.max_age %} · {% blocktranslate with min=dojo.min_age|default:"7" max=dojo.max_age|default:"18" %}Ages {{ min }}–{{ max }}{% endblocktranslate %}{% endif %}
+         · {% translate "No experience needed" %}
       </p>
       <div style="display:flex; gap: var(--space-4); flex-wrap: wrap;">
         {% if next_event %}
-          <a class="cd-btn cd-btn--primary label" href="{% url 'event_signup' event_id=next_event.id %}">Sign up now</a>
+          <a class="cd-btn cd-btn--primary label" href="{% url 'event_signup' event_id=next_event.id %}">{% translate "Sign up now" %}</a>
         {% endif %}
-        <a class="cd-btn cd-btn--ghost label" href="{% url 'event_list' %}{% querystring dojo=dojo.id %}">View this dojo's sessions</a>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'event_list' %}{% querystring dojo=dojo.id %}">{% translate "View this dojo's sessions" %}</a>
       </div>
     </div>
 
@@ -115,25 +116,25 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           </div>
           <div>
-            <p class="label next-session-full__label">Next session · {% if next_event.places_left > 0 %}Open{% else %}Waitlist{% endif %}</p>
+            <p class="label next-session-full__label">{% translate "Next session" %} · {% if next_event.places_left > 0 %}{% translate "Open" %}{% else %}{% translate "Waitlist" %}{% endif %}</p>
             <h3 class="heading-sm next-session-full__title">{{ next_event.name }}</h3>
             {% include "events/partials/_audience_badge.html" with event=next_event %}
             <p class="body-sm next-session-full__meta">
               {{ next_event.start_time|date:"D j M" }} · {{ next_event.start_time|time:"H:i" }}
-              {% if next_event.places_left > 0 %} · {{ next_event.places_left }} spot{{ next_event.places_left|pluralize }} left{% endif %}
+              {% if next_event.places_left > 0 %} · {% blocktranslate count counter=next_event.places_left %}{{ counter }} spot left{% plural %}{{ counter }} spots left{% endblocktranslate %}{% endif %}
             </p>
           </div>
         </div>
         <div class="next-session-full__actions">
-          <a class="body-sm" href="{% url 'event_detail' event_id=next_event.id %}">View session details →</a>
-          <a class="cd-btn cd-btn--primary label" href="{% url 'event_signup' event_id=next_event.id %}">Sign up now</a>
+          <a class="body-sm" href="{% url 'event_detail' event_id=next_event.id %}">{% translate "View session details →" %}</a>
+          <a class="cd-btn cd-btn--primary label" href="{% url 'event_signup' event_id=next_event.id %}">{% translate "Sign up now" %}</a>
         </div>
       </div>
     {% endif %}
 
     {% if dojo.description %}
       <section class="section col">
-        <h2 class="heading-lg section-title">About this dojo</h2>
+        <h2 class="heading-lg section-title">{% translate "About this dojo" %}</h2>
         <div class="body markdown-content">{{ dojo.description|markdownify }}</div>
       </section>
     {% endif %}
@@ -141,7 +142,7 @@
     {% with pathways=dojo.pathways.all %}
       {% if pathways %}
         <section class="section">
-          <h2 class="heading-lg section-title">Pathways</h2>
+          <h2 class="heading-lg section-title">{% translate "Pathways" %}</h2>
           <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
             {% for pathway in pathways %}
               <a class="cd-badge cd-badge--outline caption" href="{% url 'pathway_detail' pathway_id=pathway.id %}">{{ pathway.name }}</a>
@@ -152,7 +153,7 @@
     {% endwith %}
 
     <section class="section">
-      <h2 class="heading-lg section-title">Run by</h2>
+      <h2 class="heading-lg section-title">{% translate "Run by" %}</h2>
       <div class="row">
         {% for mentor in mentors %}
           <a class="mentor-link" href="{% url 'dojo_team' dojo.id %}">
@@ -165,7 +166,7 @@
             </div>
           </a>
         {% empty %}
-          <p class="body-sm" style="color: var(--ink-muted);">No mentors listed yet.</p>
+          <p class="body-sm" style="color: var(--ink-muted);">{% translate "No mentors listed yet." %}</p>
         {% endfor %}
       </div>
 
@@ -175,17 +176,17 @@
       {% if join_state == "can_request" %}
         <form class="join-team" method="post" action="{% url 'dojo_join_request' dojo_id=dojo.id %}" style="margin-top: var(--space-4);">
           {% csrf_token %}
-          <p class="body-sm" style="color: var(--ink-muted); margin: 0 0 var(--space-2);">You're an approved mentor — want to help out here?</p>
-          <button type="submit" class="cd-btn cd-btn--secondary label">Ask to join the team</button>
+          <p class="body-sm" style="color: var(--ink-muted); margin: 0 0 var(--space-2);">{% translate "You're an approved mentor — want to help out here?" %}</p>
+          <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Ask to join the team" %}</button>
         </form>
       {% elif join_state == "requested" %}
-        <p class="body-sm" style="color: var(--ink-muted); margin-top: var(--space-4);">Your request to join this team is waiting for an answer.</p>
+        <p class="body-sm" style="color: var(--ink-muted); margin-top: var(--space-4);">{% translate "Your request to join this team is waiting for an answer." %}</p>
       {% endif %}
     </section>
 
     {% if faqs %}
       <section class="section col">
-        <h2 class="heading-lg section-title">Frequently asked questions</h2>
+        <h2 class="heading-lg section-title">{% translate "Frequently asked questions" %}</h2>
         <div class="cd-faq" id="faq-dojo-page">
           {% for faq in faqs %}
             <div class="cd-faq__item" data-open="false">
@@ -202,7 +203,7 @@
 
     {% if announcements %}
       <section class="section col">
-        <h2 class="heading-lg section-title">From this dojo</h2>
+        <h2 class="heading-lg section-title">{% translate "From this dojo" %}</h2>
         {% for announcement in announcements %}
           <div class="announcement">
             <p class="caption date">{{ announcement.date|date:"j F Y" }}</p>
@@ -213,32 +214,32 @@
     {% endif %}
 
     <section class="section">
-      <h2 class="heading-lg section-title">Visit us</h2>
+      <h2 class="heading-lg section-title">{% translate "Visit us" %}</h2>
       <div class="row">
         <div class="cd-card" style="padding: var(--space-6);">
           <div class="detail-row">
-            <span class="label detail-label">Meets</span>
-            <span class="body detail-value">{{ dojo.schedule_description|default:"To be confirmed" }}</span>
+            <span class="label detail-label">{% translate "Meets" %}</span>
+            <span class="body detail-value">{% if dojo.schedule_description %}{{ dojo.schedule_description }}{% else %}{% translate "To be confirmed" %}{% endif %}</span>
           </div>
           <div class="detail-row">
-            <span class="label detail-label">Ages</span>
+            <span class="label detail-label">{% translate "Ages" %}</span>
             <span class="body detail-value">{{ dojo.min_age|default:"7" }}–{{ dojo.max_age|default:"18" }}</span>
           </div>
         </div>
         <div class="cd-card" style="padding: var(--space-6);">
           <div class="detail-row">
-            <span class="label detail-label">Address</span>
-            <span class="body detail-value">{{ dojo.address|default:"To be confirmed" }}</span>
+            <span class="label detail-label">{% translate "Address" %}</span>
+            <span class="body detail-value">{% if dojo.address %}{{ dojo.address }}{% else %}{% translate "To be confirmed" %}{% endif %}</span>
           </div>
           {% if dojo.email %}
             <div class="detail-row">
-              <span class="label detail-label">Email</span>
+              <span class="label detail-label">{% translate "Email" %}</span>
               <span class="body detail-value"><a href="mailto:{{ dojo.email }}">{{ dojo.email }}</a></span>
             </div>
           {% endif %}
           {% if dojo.phone %}
             <div class="detail-row">
-              <span class="label detail-label">Phone</span>
+              <span class="label detail-label">{% translate "Phone" %}</span>
               <span class="body detail-value">{{ dojo.phone }}</span>
             </div>
           {% endif %}

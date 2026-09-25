@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from applications.storage import get_private_storage
 
@@ -143,7 +144,9 @@ def ninja_birth_date_error(date_of_birth):
     if date_of_birth is None:
         return None
     if not NINJA_MIN_AGE <= age_on(date_of_birth, date.today()) <= NINJA_MAX_AGE:
-        return f"Ninjas are {NINJA_MIN_AGE} to {NINJA_MAX_AGE} years old — check the date of birth."
+        return _("Ninjas are %(min)s to %(max)s years old — check the date of birth.") % {
+            "min": NINJA_MIN_AGE, "max": NINJA_MAX_AGE,
+        }
     return None
 
 
@@ -170,7 +173,7 @@ class Ninja(models.Model):
     BOY = "boy"
     OTHER = "other"
     UNSPECIFIED = "unspecified"
-    GENDER_CHOICES = [(GIRL, "Girl"), (BOY, "Boy"), (OTHER, "Other"), (UNSPECIFIED, "Prefer not to say")]
+    GENDER_CHOICES = [(GIRL, _("Girl")), (BOY, _("Boy")), (OTHER, _("Other")), (UNSPECIFIED, _("Prefer not to say"))]
 
     name = models.CharField(max_length=200)
     gender = models.CharField(

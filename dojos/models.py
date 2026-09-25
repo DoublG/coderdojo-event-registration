@@ -1,6 +1,7 @@
 from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
 from django.db.models import Case, When
+from django.utils.translation import gettext_lazy as _
 
 from geo.models import AdministrativeBoundary, Municipality
 
@@ -162,7 +163,7 @@ class DojoMembership(models.Model):
     CHAMPION = "champion"
     MENTOR = "mentor"
     YOUTH_MENTOR = "youth_mentor"
-    ROLE_CHOICES = [(CHAMPION, "Champion"), (MENTOR, "Mentor"), (YOUTH_MENTOR, "Youth mentor")]
+    ROLE_CHOICES = [(CHAMPION, _("Champion")), (MENTOR, _("Mentor")), (YOUTH_MENTOR, _("Youth mentor"))]
     MANAGER_ROLES = (CHAMPION, MENTOR)
 
     REQUESTED = "requested"

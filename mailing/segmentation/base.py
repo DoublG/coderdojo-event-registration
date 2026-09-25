@@ -102,7 +102,7 @@ class SegmentAttribute(ABC):
             return f"{self.label} {op} {value:g}{getattr(self, 'unit', '')}"
         labels = {str(c.value): c.label for c in self.choices()}
         values = value if isinstance(value, list) else [value]
-        return f"{self.label} {op} {', '.join(labels.get(str(v), str(v)) for v in values)}"
+        return f"{self.label} {op} {', '.join(str(labels.get(str(v), v)) for v in values)}"
 
     def value_from_form(self, operator: str, data) -> Any:
         """The rule's JSON value from the builder's form fields (`data` is a

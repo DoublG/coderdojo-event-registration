@@ -1,10 +1,10 @@
-{% load static %}<!doctype html>
+{% load static i18n %}<!doctype html>
 {% comment %}
   Theme is read straight from the "theme" cookie the nav's toggle sets (see
   menu.html), so the very first render already has the right theme — no
   client-side flash-of-wrong-theme to guard against.
 {% endcomment %}
-<html lang="en" {% block html_theme_attr %}data-theme="{% if request.COOKIES.theme == 'dark' %}dark{% else %}light{% endif %}"{% endblock %}>
+{% get_current_language as LANGUAGE_CODE %}<html lang="{{ LANGUAGE_CODE }}" {% block html_theme_attr %}data-theme="{% if request.COOKIES.theme == 'dark' %}dark{% else %}light{% endif %}"{% endblock %}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -34,9 +34,9 @@
     <footer class="cd-footer" style="margin-top: var(--space-8);">
       <p class="body-sm" style="margin:0;">CoderDojo · Ghent Public Library · hello@example.org</p>
       <ul class="cd-footer__links body-sm">
-        <li><a href="#">Code of conduct</a></li>
-        <li><a href="{% url 'register' %}">Volunteer with us</a></li>
-        <li><a href="#">Contact</a></li>
+        <li><a href="#">{% translate "Code of conduct" %}</a></li>
+        <li><a href="{% url 'register' %}">{% translate "Volunteer with us" %}</a></li>
+        <li><a href="#">{% translate "Contact" %}</a></li>
       </ul>
     </footer>
   </div>

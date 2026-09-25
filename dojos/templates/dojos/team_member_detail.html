@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 {% block title %}{{ mentor.name }} · CoderDojo Belgium{% endblock %}
 {% block root_class %}team-details-root{% endblock %}
 
@@ -49,21 +50,21 @@
         <p class="body role-line">{{ mentor.position }}</p>
         <p class="body-sm facts-line">
           CoderDojo Belgium
-          {% if mentor.joined_date %} · On the team since {{ mentor.joined_date|date:"Y" }}{% endif %}
+          {% if mentor.joined_date %} · {% blocktranslate with year=mentor.joined_date|date:"Y" %}On the team since {{ year }}{% endblocktranslate %}{% endif %}
         </p>
       </div>
     </div>
 
     {% if mentor.bio %}
       <div class="col about">
-        <h2 class="heading-md">About {{ mentor.name }}</h2>
+        <h2 class="heading-md">{% blocktranslate with name=mentor.name %}About {{ name }}{% endblocktranslate %}</h2>
         <p class="body">{{ mentor.bio }}</p>
       </div>
     {% endif %}
 
     {% if focus_areas %}
       <div class="col focus-areas">
-        <h2 class="heading-md">Focus areas</h2>
+        <h2 class="heading-md">{% translate "Focus areas" %}</h2>
         <div class="tags">
           {% for area in focus_areas %}
             <span class="cd-badge cd-badge--outline caption">{{ area }}</span>
@@ -75,7 +76,7 @@
     {% if mentor.email %}
       <div class="col contact-card">
         <div>
-          <p class="body-sm">Get in touch with {{ mentor.name }}</p>
+          <p class="body-sm">{% blocktranslate with name=mentor.name %}Get in touch with {{ name }}{% endblocktranslate %}</p>
           <a class="body" href="mailto:{{ mentor.email }}">{{ mentor.email }}</a>
         </div>
       </div>

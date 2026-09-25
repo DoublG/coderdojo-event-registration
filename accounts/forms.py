@@ -4,6 +4,7 @@ from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, Set
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from geo.models import Municipality
 
@@ -47,7 +48,7 @@ class StyledSetPasswordForm(StyledFormMixin, SetPasswordForm):
 
 class LoginForm(forms.Form):
     email = forms.CharField(
-        label="Email",
+        label=_("Email"),
         widget=forms.TextInput(attrs={
             "class": "cd-form__input body",
             "placeholder": "you@example.com",
@@ -97,13 +98,13 @@ class RegisterGuardianForm(forms.Form):
     def clean_email(self):
         email = self.cleaned_data["email"]
         if User.objects.filter(email__iexact=email).exists():
-            raise ValidationError("An account already exists with this email.")
+            raise ValidationError(_("An account already exists with this email."))
         return email
 
     def clean_postal_code(self):
         postal_code = self.cleaned_data["postal_code"].strip()
         if postal_code and not Municipality.objects.filter(postal_code=postal_code).exists():
-            raise ValidationError("That isn't a Belgian postcode we know.")
+            raise ValidationError(_("That isn't a Belgian postcode we know."))
         return postal_code
 
     def clean_password(self):

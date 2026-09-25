@@ -1,15 +1,16 @@
 {% extends "core/base.html" %}
-{% block title %}Unsubscribed · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Unsubscribed" %} · CoderDojo Belgium{% endblock %}
 
 {% block content %}
   <div style="max-width: 560px; margin: 0 auto; padding: var(--space-7) var(--space-4);">
     <div class="cd-card" style="padding: var(--space-6);">
-      <h1 class="heading-lg" style="margin-top: 0;">You're unsubscribed</h1>
+      <h1 class="heading-lg" style="margin-top: 0;">{% translate "You're unsubscribed" %}</h1>
       <p class="body">
-        {% if everything %}You won't get any optional mails from us any more.{% else %}You won't get <strong>{{ category.label|lower }}</strong> mails any more.{% endif %}
-        Mails about your account and your bookings are still sent.
+        {% if everything %}{% translate "You won't get any optional mails from us any more." %}{% else %}{% blocktranslate with label=category.label|lower %}You won't get <strong>{{ label }}</strong> mails any more.{% endblocktranslate %}{% endif %}
+        {% translate "Mails about your account and your bookings are still sent." %}
       </p>
-      <p class="body-sm">You can change this any time on your <a href="{% url 'mail_preferences' %}">Mail preferences</a> page.</p>
+      <p class="body-sm">{% url 'mail_preferences' as prefs_url %}{% blocktranslate %}You can change this any time on your <a href="{{ prefs_url }}">Mail preferences</a> page.{% endblocktranslate %}</p>
     </div>
   </div>
 {% endblock %}

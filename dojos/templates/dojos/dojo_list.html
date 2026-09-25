@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}Find a dojo · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Find a dojo" %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}finder-root{% endblock %}
 
 {% block extra_style %}
@@ -27,8 +28,8 @@
   <div class="shell">
 
     <div class="finder-header">
-      <h1 class="display-xl">Find a dojo near you</h1>
-      <p class="body-lg">Every CoderDojo in Belgium is free, run by local volunteers, and open to kids aged 7–18 — enter a postcode or city to see what's nearby.</p>
+      <h1 class="display-xl">{% translate "Find a dojo near you" %}</h1>
+      <p class="body-lg">{% translate "Every CoderDojo in Belgium is free, run by local volunteers, and open to kids aged 7–18 — enter a postcode or city to see what's nearby." %}</p>
     </div>
 
     <div class="cd-dojo-finder">
@@ -36,7 +37,7 @@
       <form method="get" class="cd-card filter-card" id="dojo-search-form">
         <div class="cd-dojo-finder__bar">
           <div class="cd-dojo-finder__field">
-            <button type="submit" class="cd-dojo-finder__icon" aria-label="Search">
+            <button type="submit" class="cd-dojo-finder__icon" aria-label="{% translate "Search" %}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
             </button>
             {{ form.location }}
@@ -45,7 +46,7 @@
           {{ form.lon }}
           <button type="button" class="cd-btn cd-btn--secondary label" data-cd-use-my-location>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-            <span>Use my location</span>
+            <span>{% translate "Use my location" %}</span>
           </button>
         </div>
       </form>
@@ -53,9 +54,9 @@
       {% include "content/partials/_promotion_banner.html" %}
 
       {% if geocode_failed %}
-        <p class="cd-dojo-finder__meta caption">Couldn't find "{{ search_label }}" — showing every dojo instead.</p>
+        <p class="cd-dojo-finder__meta caption">{% blocktranslate %}Couldn't find "{{ search_label }}" — showing every dojo instead.{% endblocktranslate %}</p>
       {% else %}
-        <p class="cd-dojo-finder__meta caption">Showing {{ total_count }} dojo{{ total_count|pluralize }} near {{ search_label }}, nearest first</p>
+        <p class="cd-dojo-finder__meta caption">{% blocktranslate count counter=total_count %}Showing {{ counter }} dojo near {{ search_label }}, nearest first{% plural %}Showing {{ counter }} dojos near {{ search_label }}, nearest first{% endblocktranslate %}</p>
       {% endif %}
 
       <ul class="cd-dojo-finder__list">
@@ -65,8 +66,8 @@
     </div>
 
     <div class="cd-card find-cta">
-      <p class="body">Already know when you'd like to come?</p>
-      <a class="cd-btn cd-btn--primary label" href="{% url 'event_list' %}">Browse upcoming events</a>
+      <p class="body">{% translate "Already know when you'd like to come?" %}</p>
+      <a class="cd-btn cd-btn--primary label" href="{% url 'event_list' %}">{% translate "Browse upcoming events" %}</a>
     </div>
 
   </div>

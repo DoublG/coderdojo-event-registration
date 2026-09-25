@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
 Renders one pathway teaser card (used on the homepage's "What you'll
 learn" section). Expects a `pathway` Pathway instance in context.
 Usage:
@@ -14,5 +14,5 @@ Usage:
   {% endif %}
   <h3 class="cd-pathway__title heading-md">{{ pathway.name }}</h3>
   <p class="cd-pathway__desc body-sm">{{ pathway.subtitle|truncatewords:12 }}</p>
-  <a class="cd-pathway__link label" href="{% url 'pathway_detail' pathway_id=pathway.id %}">Explore {{ pathway.name }} →</a>
+  <a class="cd-pathway__link label" href="{% url 'pathway_detail' pathway_id=pathway.id %}">{% blocktranslate with name=pathway.name %}Explore {{ name }} →{% endblocktranslate %}</a>
 </article>

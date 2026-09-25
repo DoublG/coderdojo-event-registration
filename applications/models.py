@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from accounts.models import User
 
@@ -36,12 +37,12 @@ class Application(models.Model):
 
     MENTOR = "mentor"
     CHAMPION = "champion"
-    KIND_CHOICES = [(MENTOR, "Mentor"), (CHAMPION, "Champion (start a dojo)")]
+    KIND_CHOICES = [(MENTOR, _("Mentor")), (CHAMPION, _("Champion (start a dojo)"))]
 
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
-    STATUS_CHOICES = [(PENDING, "Pending"), (APPROVED, "Approved"), (REJECTED, "Rejected")]
+    STATUS_CHOICES = [(PENDING, _("Pending")), (APPROVED, _("Approved")), (REJECTED, _("Rejected"))]
 
     VOLUNTEER_MENTOR = "volunteer_mentor"
     OTHER = "other"

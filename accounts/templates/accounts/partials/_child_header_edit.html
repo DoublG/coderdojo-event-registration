@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
 The child detail page's header, swapped in over htmx when the name is
 clicked (see _child_header_display.html). Submitting saves the name,
 avatar and birthday and swaps back to the display header; Cancel just
@@ -14,30 +14,30 @@ Expects `child`, `icon_choices`, `current_icon`, `gender_choices` and
   <div class="child-header__fields">
     <div class="cd-form__row">
       <div class="cd-form__field">
-        <label class="cd-form__label label" for="ec-name">Name</label>
+        <label class="cd-form__label label" for="ec-name">{% translate "Name" %}</label>
         <input class="cd-form__input body" type="text" id="ec-name" name="name" value="{{ child.name }}" autofocus required>
       </div>
       <div class="cd-form__field">
-        <label class="cd-form__label label" for="ec-dob">Date of birth</label>
+        <label class="cd-form__label label" for="ec-dob">{% translate "Date of birth" %}</label>
         <input class="cd-form__input body" type="date" id="ec-dob" name="date_of_birth" value="{{ child.date_of_birth|date:'Y-m-d' }}">
         {% if dob_error %}<ul class="cd-form__errors"><li class="caption" role="alert">{{ dob_error }}</li></ul>{% endif %}
       </div>
       <div class="cd-form__field">
-        <label class="cd-form__label label" for="ec-gender">Gender (optional)</label>
+        <label class="cd-form__label label" for="ec-gender">{% translate "Gender (optional)" %}</label>
         <select class="cd-form__select body" id="ec-gender" name="gender">
           {% for value, label in gender_choices %}<option value="{{ value }}"{% if value == child.gender %} selected{% endif %}>{{ label }}</option>{% endfor %}
         </select>
       </div>
       <div class="cd-form__field">
-        <label class="cd-form__label label" for="ec-home-dojo">Home dojo</label>
+        <label class="cd-form__label label" for="ec-home-dojo">{% translate "Home dojo" %}</label>
         <select class="cd-form__select body" id="ec-home-dojo" name="home_dojo">
-          <option value="">None yet</option>
+          <option value="">{% translate "None yet" %}</option>
           {% if child.home_dojo and child.home_dojo not in home_dojo_choices %}<option value="{{ child.home_dojo_id }}" selected>{{ child.home_dojo.name }}</option>{% endif %}
           {% for dojo in home_dojo_choices %}<option value="{{ dojo.id }}"{% if dojo.id == child.home_dojo_id %} selected{% endif %}>{{ dojo.name }}</option>{% endfor %}
         </select>
       </div>
       <div class="cd-form__field">
-        <label class="cd-form__label label" for="ec-icon">Avatar</label>
+        <label class="cd-form__label label" for="ec-icon">{% translate "Avatar" %}</label>
         <select class="cd-form__select body" id="ec-icon" name="icon">
           {% for value, label in icon_choices %}
             <option value="{{ value }}" {% if value == current_icon %}selected{% endif %}>{{ label }}</option>
@@ -46,8 +46,8 @@ Expects `child`, `icon_choices`, `current_icon`, `gender_choices` and
       </div>
     </div>
     <div class="cd-form__actions">
-      <button type="button" class="cd-btn cd-btn--ghost label" onclick="window.location.reload();">Cancel</button>
-      <button type="submit" class="cd-btn cd-btn--primary label">Save</button>
+      <button type="button" class="cd-btn cd-btn--ghost label" onclick="window.location.reload();">{% translate "Cancel" %}</button>
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button>
     </div>
   </div>
 </form>

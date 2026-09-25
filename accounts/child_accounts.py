@@ -23,6 +23,7 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.utils.text import slugify
+from django.utils.translation import gettext as _
 
 from .models import User
 from .provisioning import unique_username
@@ -42,16 +43,16 @@ def has_active_login(ninja):
 def _clean_email(email, account=None):
     email = (email or "").strip()
     if not email:
-        raise ChildAccountError("Your child's own email address is needed for a login.")
+        raise ChildAccountError(_("Your child's own email address is needed for a login."))
     try:
         validate_email(email)
     except ValidationError:
-        raise ChildAccountError("Enter a valid email address.") from None
+        raise ChildAccountError(_("Enter a valid email address.")) from None
     taken = User.objects.filter(email__iexact=email)
     if account is not None:
         taken = taken.exclude(pk=account.pk)
     if taken.exists():
-        raise ChildAccountError("An account already exists with this email.")
+        raise ChildAccountError(_("An account already exists with this email."))
     return email
 
 
@@ -82,7 +83,7 @@ def give_login(guardian, ninja, email):
     the child a link to choose a password."""
     account = ninja.account
     if account is not None and account.is_active:
-        raise ChildAccountError(f"{ninja.name} already has a login.")
+        raise ChildAccountError(_("%(name)s already has a login.") % {"name": ninja.name})
     email = _clean_email(email, account)
     if account is None:
         account = User(
@@ -108,7 +109,7 @@ def resend_login_mail(guardian, ninja):
     """Mail the set-password link again (a new one, the old one keeps
     working until a password is set)."""
     if not has_active_login(ninja):
-        raise ChildAccountError(f"{ninja.name} doesn't have a login.")
+        raise ChildAccountError(_("%(name)s doesn't have a login.") % {"name": ninja.name})
     return send_login_mail(guardian, ninja.account)
 
 
@@ -122,7 +123,7 @@ def remove_login(ninja):
 
     account = ninja.account
     if account is None or not account.is_active:
-        raise ChildAccountError(f"{ninja.name} doesn't have a login.")
+        raise ChildAccountError(_("%(name)s doesn't have a login.") % {"name": ninja.name})
     memberships = list(account.dojo_memberships.all())
     if not memberships:
         account.delete()

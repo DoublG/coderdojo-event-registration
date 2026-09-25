@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 {% load markdown_extras %}
 {% block title %}{{ event.name }} · CoderDojo Belgium{% endblock %}
 {% block root_class %}eventdetail-root{% endblock %}
@@ -68,7 +69,7 @@
 
         {% if event.description %}
           <section>
-            <h2 class="heading-lg section-title">About this session</h2>
+            <h2 class="heading-lg section-title">{% translate "About this session" %}</h2>
             <div class="body markdown-content">{{ event.description|markdownify }}</div>
           </section>
         {% endif %}
@@ -76,7 +77,7 @@
         {% with pathways=event.pathways.all %}
           {% if pathways %}
             <section>
-              <h2 class="heading-lg section-title">Pathways this session covers</h2>
+              <h2 class="heading-lg section-title">{% translate "Pathways this session covers" %}</h2>
               <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
                 {% for pathway in pathways %}
                   <a class="cd-badge cd-badge--outline caption" href="{% url 'pathway_detail' pathway_id=pathway.id %}">{{ pathway.name }}</a>
@@ -88,7 +89,7 @@
 
         {% if faqs %}
           <section>
-            <h2 class="heading-lg section-title">Questions</h2>
+            <h2 class="heading-lg section-title">{% translate "Questions" %}</h2>
             <div class="cd-faq" id="faq-event-detail-page">
               {% for faq in faqs %}
                 <div class="cd-faq__item" data-open="false">
@@ -108,31 +109,31 @@
       <aside class="event-side">
         <div class="cd-card cd-ticket-panel">
           <div class="cd-ticket-panel__row">
-            <span class="cd-ticket-panel__label label">Date</span>
+            <span class="cd-ticket-panel__label label">{% translate "Date" %}</span>
             <span class="cd-ticket-panel__value body">{{ event.start_time|date:"D, j M" }} · {{ event.start_time|time:"H:i" }}–{{ event.end_time|time:"H:i" }}</span>
           </div>
           <div class="cd-ticket-panel__row">
-            <span class="cd-ticket-panel__label label">Location</span>
+            <span class="cd-ticket-panel__label label">{% translate "Location" %}</span>
             <span class="cd-ticket-panel__value body">{{ event.venue_name|default:event.dojo.address|default:event.dojo.name }}</span>
           </div>
           <div class="cd-ticket-panel__row">
-            <span class="cd-ticket-panel__label label">Ages</span>
+            <span class="cd-ticket-panel__label label">{% translate "Ages" %}</span>
             <span class="cd-ticket-panel__value body">{{ event.min_age|default:"7" }}–{{ event.max_age|default:"18" }}</span>
           </div>
           <hr class="cd-ticket-panel__divider">
           {% if event.registers_externally %}
-            <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{{ event.external_registration_url }}" target="_blank" rel="noopener">Register on {{ event.external_registration_host }}</a>
-            <p class="cd-ticket-panel__note body-sm">Registration for this event happens on its own website, not on CoderDojo Belgium.</p>
+            <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{{ event.external_registration_url }}" target="_blank" rel="noopener">{% blocktranslate with host=event.external_registration_host %}Register on {{ host }}{% endblocktranslate %}</a>
+            <p class="cd-ticket-panel__note body-sm">{% translate "Registration for this event happens on its own website, not on CoderDojo Belgium." %}</p>
           {% else %}
             {% if all_registered %}
-              <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>Already signed up</button>
+              <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>{% translate "Already signed up" %}</button>
             {% elif not event.registration_open %}
-              <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>Registrations closed</button>
+              <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>{% translate "Registrations closed" %}</button>
             {% else %}
-              <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{% url 'event_signup' event_id=event.id %}">Sign up now</a>
+              <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{% url 'event_signup' event_id=event.id %}">{% translate "Sign up now" %}</a>
             {% endif %}
             <p class="cd-ticket-panel__note body-sm">
-              {% if all_registered %}Every child on your account is already signed up{% elif not event.registration_open %}This session isn't accepting new registrations{% elif event.places_left > 0 %}{{ event.places_left }} of {{ event.places }} spots left{% else %}Full — join the waitlist{% endif %}
+              {% if all_registered %}{% translate "Every child on your account is already signed up" %}{% elif not event.registration_open %}{% translate "This session isn't accepting new registrations" %}{% elif event.places_left > 0 %}{% blocktranslate with left=event.places_left total=event.places %}{{ left }} of {{ total }} spots left{% endblocktranslate %}{% else %}{% translate "Full — join the waitlist" %}{% endif %}
             </p>
           {% endif %}
         </div>

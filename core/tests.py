@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
@@ -99,11 +101,24 @@ class StrNeverQueriesTests(TestCase):
         from content.models import Announcement, Promotion
         from dojos.testing import add_member, make_dojo
         from events.models import (
-            Badge, Belt, Event, NinjaBadge, NinjaBelt, NinjaEngagement, NinjaEngagementChange, RegistrationCancellation,
+            Badge,
+            Belt,
+            Event,
+            NinjaBadge,
+            NinjaBelt,
+            NinjaEngagement,
+            NinjaEngagementChange,
+            RegistrationCancellation,
             TeamAttendance,
         )
         from mailing.models import (
-            ConsentEvent, EmailMessage, Journey, JourneyDelivery, MailPreference, Segment, SegmentGroup,
+            ConsentEvent,
+            EmailMessage,
+            Journey,
+            JourneyDelivery,
+            MailPreference,
+            Segment,
+            SegmentGroup,
         )
         from notifications.models import Notification
         from pathways.models import PathwayProject, PathwayStep
@@ -181,3 +196,31 @@ class AdminStaysFullyUsableTests(TestCase):
                 if not getattr(model_admin, f"has_{permission}_permission")(request):
                     missing.append(f"{label}: {permission}")
         self.assertEqual(missing, [], "the admin must stay fully usable for fixing things by hand")
+
+
+class TranslationTests(TestCase):
+    """The site's texts come in Dutch and French (locale/, CLAUDE.md "i18n"):
+    the pages families see follow the visitor's language."""
+
+    def test_switcher_offers_english_dutch_and_french(self):
+        response = self.client.get(reverse("home"))
+        self.assertEqual([code for code, _name in response.context["AVAILABLE_LANGUAGES"]], ["en-us", "nl-be", "fr-be"])
+
+    def test_pages_follow_the_browser_language(self):
+        for language, heading in [("nl-be", "Bouw iets geweldigs met code."), ("fr-be", "Créez quelque chose de génial avec du code."),
+                                  ("en-us", "Build something awesome with code.")]:
+            response = self.client.get(reverse("home"), HTTP_ACCEPT_LANGUAGE=language)
+            self.assertContains(response, heading)
+            self.assertContains(response, f'<html lang="{language}"')
+
+    def test_python_texts_are_translated_too(self):
+        from django.utils import translation
+
+        from accounts.models import ninja_birth_date_error
+        from mailing.categories import MailCategory
+
+        with translation.override("nl-be"):
+            self.assertEqual(str(MailCategory.REMINDER.label), "Herinneringen")
+            self.assertIn("Ninja's zijn 7 tot 17 jaar oud", ninja_birth_date_error(date(2000, 1, 1)))
+        with translation.override("fr-be"):
+            self.assertEqual(str(MailCategory.REMINDER.label), "Rappels")

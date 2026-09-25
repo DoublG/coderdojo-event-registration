@@ -1,0 +1,1651 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 18:02+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: nl_BE\n"
+"Language-Team: nl_BE <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: accounts/child_accounts.py:46
+msgid "Your child's own email address is needed for a login."
+msgstr "Voor een login is het eigen e-mailadres van je kind nodig."
+
+#: accounts/child_accounts.py:50
+msgid "Enter a valid email address."
+msgstr "Vul een geldig e-mailadres in."
+
+#: accounts/child_accounts.py:55 accounts/forms.py:101
+msgid "An account already exists with this email."
+msgstr "Er bestaat al een account met dit e-mailadres."
+
+#: accounts/child_accounts.py:86
+#, python-format
+msgid "%(name)s already has a login."
+msgstr "%(name)s heeft al een login."
+
+#: accounts/child_accounts.py:112 accounts/child_accounts.py:126
+#, python-format
+msgid "%(name)s doesn't have a login."
+msgstr "%(name)s heeft geen login."
+
+#: accounts/forms.py:51 accounts/templates/accounts/login.html:40
+#: accounts/templates/accounts/password_reset.html:32
+#: accounts/templates/accounts/register_guardian.html:45 dojos/templates/dojos/dojo_detail.html:236
+msgid "Email"
+msgstr "E-mail"
+
+#: accounts/forms.py:107 mailing/forms.py:51
+msgid "That isn't a Belgian postcode we know."
+msgstr "Dat is geen Belgische postcode die we kennen."
+
+#: accounts/models.py:147
+#, python-format
+msgid "Ninjas are %(min)s to %(max)s years old — check the date of birth."
+msgstr "Ninja's zijn %(min)s tot %(max)s jaar oud. Kijk de geboortedatum na."
+
+#: accounts/models.py:176
+msgid "Girl"
+msgstr "Meisje"
+
+#: accounts/models.py:176
+msgid "Boy"
+msgstr "Jongen"
+
+#: accounts/models.py:176
+msgid "Other"
+msgstr "Anders"
+
+#: accounts/models.py:176
+msgid "Prefer not to say"
+msgstr "Zeg ik liever niet"
+
+#: accounts/templates/accounts/change_password.html:3
+msgid "Change password"
+msgstr "Wachtwoord wijzigen"
+
+#: accounts/templates/accounts/change_password.html:25
+#: accounts/templates/accounts/password_reset_confirm.html:3
+#: accounts/templates/accounts/password_reset_confirm.html:26
+msgid "Set a new password"
+msgstr "Kies een nieuw wachtwoord"
+
+#: accounts/templates/accounts/change_password.html:27
+msgid "Your account was set up with a temporary password — choose your own before continuing."
+msgstr "Je account heeft een tijdelijk wachtwoord. Kies je eigen wachtwoord voor je verdergaat."
+
+#: accounts/templates/accounts/change_password.html:29
+msgid "Enter your current password and a new one."
+msgstr "Vul je huidige wachtwoord en een nieuw wachtwoord in."
+
+#: accounts/templates/accounts/change_password.html:45
+msgid "Temporary password"
+msgstr "Tijdelijk wachtwoord"
+
+#: accounts/templates/accounts/change_password.html:45
+msgid "Current password"
+msgstr "Huidig wachtwoord"
+
+#: accounts/templates/accounts/change_password.html:52
+#: accounts/templates/accounts/password_reset_confirm.html:41
+msgid "New password"
+msgstr "Nieuw wachtwoord"
+
+#: accounts/templates/accounts/change_password.html:59
+#: accounts/templates/accounts/password_reset_confirm.html:48
+msgid "Confirm new password"
+msgstr "Bevestig het nieuwe wachtwoord"
+
+#: accounts/templates/accounts/change_password.html:66
+#: accounts/templates/accounts/password_reset_confirm.html:55
+msgid "Save password"
+msgstr "Wachtwoord opslaan"
+
+#: accounts/templates/accounts/change_password.html:70
+msgid "Log out instead"
+msgstr "Liever afmelden"
+
+#: accounts/templates/accounts/child_detail.html:67 core/templates/core/home.html:102
+msgid "Upcoming sessions"
+msgstr "Komende sessies"
+
+#: accounts/templates/accounts/child_detail.html:72 accounts/templates/accounts/child_detail.html:124
+#: accounts/templates/accounts/child_detail.html:169 events/templates/events/event_detail.html:112
+#: events/templates/events/event_list.html:70
+msgid "Date"
+msgstr "Datum"
+
+#: accounts/templates/accounts/child_detail.html:73 accounts/templates/accounts/child_detail.html:170
+msgid "Session"
+msgstr "Sessie"
+
+#: accounts/templates/accounts/child_detail.html:74 accounts/templates/accounts/child_detail.html:171
+#: events/templates/events/event_list.html:62
+msgid "Dojo"
+msgstr "Dojo"
+
+#: accounts/templates/accounts/child_detail.html:75
+msgid "Actions"
+msgstr "Acties"
+
+#: accounts/templates/accounts/child_detail.html:80
+#: accounts/templates/accounts/partials/_children_list.html:33
+#, python-format
+msgid "Remove %(child)s from %(event)s?"
+msgstr "%(child)s uitschrijven voor %(event)s?"
+
+#: accounts/templates/accounts/child_detail.html:85
+#: accounts/templates/accounts/partials/_children_list.html:43
+#: events/templates/events/event_signup.html:84 events/templates/events/event_signup.html:182
+msgid "Waiting list"
+msgstr "Wachtlijst"
+
+#: accounts/templates/accounts/child_detail.html:90 dojos/templates/dojos/partials/_dojo_result.html:40
+msgid "View"
+msgstr "Bekijken"
+
+#: accounts/templates/accounts/child_detail.html:94
+#: accounts/templates/accounts/partials/_children_list.html:56
+msgid "Leave waiting list"
+msgstr "Van de wachtlijst halen"
+
+#: accounts/templates/accounts/child_detail.html:94 accounts/templates/accounts/guardian_detail.html:91
+#: accounts/templates/accounts/partials/_child_header_edit.html:49
+#: accounts/templates/accounts/partials/_children_list.html:56
+#: accounts/templates/accounts/register_guardian.html:92 events/templates/events/event_signup.html:169
+msgid "Cancel"
+msgstr "Annuleren"
+
+#: accounts/templates/accounts/child_detail.html:101
+msgid "No upcoming sessions."
+msgstr "Geen komende sessies."
+
+#: accounts/templates/accounts/child_detail.html:101
+msgid "Find a session"
+msgstr "Zoek een sessie"
+
+#: accounts/templates/accounts/child_detail.html:111 accounts/templates/accounts/child_detail.html:123
+msgid "Belt"
+msgstr "Gordel"
+
+#: accounts/templates/accounts/child_detail.html:125
+msgid "Awarded by"
+msgstr "Toegekend door"
+
+#: accounts/templates/accounts/child_detail.html:126
+msgid "Note"
+msgstr "Opmerking"
+
+#: accounts/templates/accounts/child_detail.html:147
+msgid "Badges"
+msgstr "Badges"
+
+#: accounts/templates/accounts/child_detail.html:149
+msgid "Previous badges"
+msgstr "Vorige badges"
+
+#: accounts/templates/accounts/child_detail.html:152
+msgid "Next badges"
+msgstr "Volgende badges"
+
+#: accounts/templates/accounts/child_detail.html:164
+msgid "Event history"
+msgstr "Eerdere sessies"
+
+#: accounts/templates/accounts/child_detail.html:172
+msgid "Worked on"
+msgstr "Werkte aan"
+
+#: accounts/templates/accounts/child_detail.html:173
+msgid "Mentors"
+msgstr "Mentors"
+
+#: accounts/templates/accounts/child_detail.html:187
+msgid "No past sessions yet."
+msgstr "Nog geen eerdere sessies."
+
+#: accounts/templates/accounts/guardian_detail.html:3
+msgid "My account"
+msgstr "Mijn account"
+
+#: accounts/templates/accounts/guardian_detail.html:51
+#, python-format
+msgid "Welcome back, %(name)s"
+msgstr "Welkom terug, %(name)s"
+
+#: accounts/templates/accounts/guardian_detail.html:51 accounts/templates/accounts/login.html:25
+msgid "Welcome back"
+msgstr "Welkom terug"
+
+#: accounts/templates/accounts/guardian_detail.html:52
+msgid "Here's what's coming up for your children."
+msgstr "Dit staat er op het programma voor je kinderen."
+
+#: accounts/templates/accounts/guardian_detail.html:59
+msgid "Registering another child?"
+msgstr "Nog een kind registreren?"
+
+#: accounts/templates/accounts/guardian_detail.html:60
+msgid "Register another child"
+msgstr "Nog een kind registreren"
+
+#: accounts/templates/accounts/guardian_detail.html:68
+#: accounts/templates/accounts/partials/_child_header_edit.html:40
+msgid "Avatar"
+msgstr "Avatar"
+
+#: accounts/templates/accounts/guardian_detail.html:76
+msgid "Child's name"
+msgstr "Naam van het kind"
+
+#: accounts/templates/accounts/guardian_detail.html:80
+msgid "Date of birth (optional)"
+msgstr "Geboortedatum (optioneel)"
+
+#: accounts/templates/accounts/guardian_detail.html:84
+#: accounts/templates/accounts/partials/_child_header_edit.html:26
+msgid "Gender (optional)"
+msgstr "Gender (optioneel)"
+
+#: accounts/templates/accounts/guardian_detail.html:92
+msgid "Add child"
+msgstr "Kind toevoegen"
+
+#: accounts/templates/accounts/guardian_detail.html:98
+#: accounts/templates/accounts/guardian_detail.html:101
+#: mailing/templates/mailing/mail_preferences.html:3 mailing/templates/mailing/mail_preferences.html:21
+msgid "Mail preferences"
+msgstr "E-mailvoorkeuren"
+
+#: accounts/templates/accounts/guardian_detail.html:99
+msgid "Choose which mails you get, the language they're in, and your postcode."
+msgstr "Kies welke e-mails je krijgt, in welke taal, en je postcode."
+
+#: accounts/templates/accounts/guardian_detail.html:112 mailing/categories.py:18
+msgid "Volunteering"
+msgstr "Vrijwilligerswerk"
+
+#: accounts/templates/accounts/guardian_detail.html:116
+#, python-format
+msgid "%(kind)s application"
+msgstr "Aanvraag als %(kind)s"
+
+#: accounts/templates/accounts/guardian_detail.html:118
+#, python-format
+msgid "sent %(date)s"
+msgstr "verstuurd op %(date)s"
+
+#: accounts/templates/accounts/guardian_detail.html:124
+msgid "Background check:"
+msgstr "Uittreksel uit het strafregister:"
+
+#: accounts/templates/accounts/guardian_detail.html:126
+#, python-format
+msgid "<strong>valid</strong> until %(date)s."
+msgstr "<strong>geldig</strong> tot %(date)s."
+
+#: accounts/templates/accounts/guardian_detail.html:128
+msgid "<strong>uploaded</strong>, waiting for review."
+msgstr "<strong>opgeladen</strong>, wacht op nazicht."
+
+#: accounts/templates/accounts/guardian_detail.html:130
+msgid "expired"
+msgstr "verlopen"
+
+#: accounts/templates/accounts/guardian_detail.html:130
+msgid "needs a new document"
+msgstr "nieuw document nodig"
+
+#: accounts/templates/accounts/guardian_detail.html:130
+msgid "requested"
+msgstr "gevraagd"
+
+#: accounts/templates/accounts/guardian_detail.html:131
+msgid "upload your document"
+msgstr "laad je document op"
+
+#: accounts/templates/accounts/guardian_detail.html:132
+msgid "Until then you can't open your dojo dashboards."
+msgstr "Tot dan kun je je dojodashboards niet openen."
+
+#: accounts/templates/accounts/guardian_detail.html:134
+msgid "not requested yet — we'll email you once your application has been looked at."
+msgstr "nog niet gevraagd. We mailen je zodra je aanvraag bekeken is."
+
+#: accounts/templates/accounts/guardian_detail.html:141 core/templates/core/menu.html:53
+msgid "Create a dojo"
+msgstr "Een dojo aanmaken"
+
+#: accounts/templates/accounts/guardian_detail.html:143 core/templates/core/menu.html:55
+msgid "Apply to start a dojo"
+msgstr "Een dojo starten"
+
+#: accounts/templates/accounts/guardian_detail.html:146
+msgid "Find a dojo to help at"
+msgstr "Zoek een dojo om te helpen"
+
+#: accounts/templates/accounts/guardian_detail.html:148 core/templates/core/menu.html:61
+msgid "Apply to volunteer"
+msgstr "Word vrijwilliger"
+
+#: accounts/templates/accounts/login.html:3 accounts/templates/accounts/login.html:56
+#: accounts/templates/accounts/password_reset_complete.html:27 core/templates/core/menu.html:70
+msgid "Log in"
+msgstr "Aanmelden"
+
+#: accounts/templates/accounts/login.html:26
+msgid "Log in to see your dojo's schedule and manage your account."
+msgstr "Meld je aan om de planning van je dojo te zien en je account te beheren."
+
+#: accounts/templates/accounts/login.html:44 accounts/templates/accounts/register_guardian.html:58
+msgid "Password"
+msgstr "Wachtwoord"
+
+#: accounts/templates/accounts/login.html:51
+msgid "Remember me"
+msgstr "Onthoud mij"
+
+#: accounts/templates/accounts/login.html:53
+msgid "Forgot password?"
+msgstr "Wachtwoord vergeten?"
+
+#: accounts/templates/accounts/login.html:59
+msgid "New to CoderDojo?"
+msgstr "Nieuw bij CoderDojo?"
+
+#: accounts/templates/accounts/login.html:59
+msgid "Create an account"
+msgstr "Maak een account aan"
+
+#: accounts/templates/accounts/partials/_badge_card.html:26
+#, python-format
+msgid "Earned %(date)s"
+msgstr "Behaald op %(date)s"
+
+#: accounts/templates/accounts/partials/_badge_card.html:30
+#, python-format
+msgid "%(name)s, locked, %(current)s of %(total)s"
+msgstr "%(name)s, vergrendeld, %(current)s van %(total)s"
+
+#: accounts/templates/accounts/partials/_badge_card.html:52
+#, python-format
+msgid "%(current)s of %(total)s sessions"
+msgstr "%(current)s van %(total)s sessies"
+
+#: accounts/templates/accounts/partials/_badge_card.html:52
+msgid "Locked"
+msgstr "Vergrendeld"
+
+#: accounts/templates/accounts/partials/_child_header_display.html:14
+msgid "Click to edit"
+msgstr "Klik om te bewerken"
+
+#: accounts/templates/accounts/partials/_child_header_display.html:20
+#: accounts/templates/accounts/partials/_children_list.html:22
+#: events/templates/events/event_signup.html:139 events/templates/events/event_signup.html:153
+#, python-format
+msgid "Age %(age)s"
+msgstr "%(age)s jaar"
+
+#: accounts/templates/accounts/partials/_child_header_display.html:22
+#, python-format
+msgid "Member since %(date)s"
+msgstr "Lid sinds %(date)s"
+
+#: accounts/templates/accounts/partials/_child_header_display.html:25 dojos/models.py:166
+msgid "Youth mentor"
+msgstr "Youth mentor"
+
+#: accounts/templates/accounts/partials/_child_header_display.html:25
+#, python-format
+msgid "at %(dojo)s"
+msgstr "bij %(dojo)s"
+
+#: accounts/templates/accounts/partials/_child_header_edit.html:17
+msgid "Name"
+msgstr "Naam"
+
+#: accounts/templates/accounts/partials/_child_header_edit.html:21
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:30
+#: accounts/templates/accounts/partials/_child_rows_script.html:26
+msgid "Date of birth"
+msgstr "Geboortedatum"
+
+#: accounts/templates/accounts/partials/_child_header_edit.html:32
+msgid "Home dojo"
+msgstr "Thuisdojo"
+
+#: accounts/templates/accounts/partials/_child_header_edit.html:34
+msgid "None yet"
+msgstr "Nog geen"
+
+#: accounts/templates/accounts/partials/_child_header_edit.html:50
+#: mailing/templates/mailing/mail_preferences.html:63
+msgid "Save"
+msgstr "Opslaan"
+
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:9
+msgid "Children"
+msgstr "Kinderen"
+
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:10
+msgid "Add each child who'll attend the dojo."
+msgstr "Voeg elk kind toe dat naar de dojo komt."
+
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:20
+#, python-format
+msgid "Child %(n)s"
+msgstr "Kind %(n)s"
+
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:21
+#: accounts/templates/accounts/partials/_child_rows_script.html:23
+msgid "Remove"
+msgstr "Verwijderen"
+
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:25
+#: accounts/templates/accounts/partials/_child_rows_script.html:24
+msgid "First name"
+msgstr "Voornaam"
+
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:27
+#: accounts/templates/accounts/partials/_child_rows_script.html:25
+msgid "Sam"
+msgstr "Sam"
+
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:37
+#: accounts/templates/accounts/partials/_child_rows_script.html:27
+msgid "Allergies or notes"
+msgstr "Allergieën of opmerkingen"
+
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:38
+#: accounts/templates/accounts/partials/_child_rows_script.html:28
+msgid "None"
+msgstr "Geen"
+
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:41
+#: accounts/templates/accounts/partials/_child_rows_script.html:29
+msgid "Gender"
+msgstr "Gender"
+
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:45
+#: accounts/templates/accounts/partials/_child_rows_script.html:30
+msgid "Optional, never shown publicly. Lets us tell you about girls' sessions."
+msgstr "Optioneel, nooit openbaar. Zo kunnen we je laten weten wanneer er meisjessessies zijn."
+
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:54
+msgid "Add another child"
+msgstr "Nog een kind toevoegen"
+
+#: accounts/templates/accounts/partials/_child_rows_script.html:22
+#, python-brace-format
+msgid "Child {n}"
+msgstr "Kind {n}"
+
+#: accounts/templates/accounts/partials/_children_list.html:11
+msgid "Your children"
+msgstr "Je kinderen"
+
+#: accounts/templates/accounts/partials/_children_list.html:25
+msgid "Has own login"
+msgstr "Heeft een eigen login"
+
+#: accounts/templates/accounts/partials/_children_list.html:26
+#, python-format
+msgid "Youth mentor at %(dojo)s"
+msgstr "Youth mentor bij %(dojo)s"
+
+#: accounts/templates/accounts/partials/_children_list.html:30
+#, python-format
+msgid "View %(name)s's belts, badges &amp; history →"
+msgstr "Bekijk de gordels, badges en sessies van %(name)s →"
+
+#: accounts/templates/accounts/partials/_children_list.html:52
+#: content/templates/content/partials/_promotion_banner.html:20
+#: events/templates/events/partials/_event_row.html:40
+msgid "View event"
+msgstr "Bekijk het evenement"
+
+#: accounts/templates/accounts/partials/_children_list.html:62
+msgid "Not registered for an upcoming session."
+msgstr "Niet ingeschreven voor een komende sessie."
+
+#: accounts/templates/accounts/partials/_children_list.html:63 core/templates/core/home.html:60
+msgid "Browse events"
+msgstr "Bekijk de evenementen"
+
+#: accounts/templates/accounts/partials/_children_list.html:68
+msgid "No children registered yet."
+msgstr "Nog geen kinderen geregistreerd."
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:10
+msgid "Own login"
+msgstr "Eigen login"
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:21
+#, python-format
+msgid "%(name)s logs in with <strong>%(email)s</strong> (username <strong>%(username)s</strong>)."
+msgstr ""
+"%(name)s meldt zich aan met <strong>%(email)s</strong> (gebruikersnaam "
+"<strong>%(username)s</strong>)."
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:22
+msgid "They haven't chosen a password yet."
+msgstr "Er is nog geen wachtwoord gekozen."
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:23
+msgid ""
+"With their login they see this page and can sign themselves up for sessions; you keep managing "
+"their details."
+msgstr ""
+"Met die login ziet je kind deze pagina en kan het zich zelf inschrijven voor sessies. Jij blijft "
+"de gegevens beheren."
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:30
+msgid "Send the password mail again"
+msgstr "Stuur de wachtwoordmail opnieuw"
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:35
+#, python-format
+msgid "Remove %(name)s's login? They can't log in any more; their sessions, belts and badges stay."
+msgstr ""
+"De login van %(name)s verwijderen? Je kind kan dan niet meer aanmelden; sessies, gordels en "
+"badges blijven bewaard."
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:37
+msgid "Remove login"
+msgstr "Login verwijderen"
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:43
+#, python-format
+msgid ""
+"%(name)s's login is switched off. Switch it back on with their email address: they get a mail to "
+"choose a new password."
+msgstr ""
+"De login van %(name)s is uitgeschakeld. Schakel hem opnieuw in met het e-mailadres van je kind: "
+"het krijgt dan een e-mail om een nieuw wachtwoord te kiezen."
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:45
+#, python-format
+msgid ""
+"Give %(name)s their own login, so they can see their belt, badges and sessions and sign "
+"themselves up for sessions. You keep managing their details, and can remove the login at any "
+"time. They get a mail to choose a password."
+msgstr ""
+"Geef %(name)s een eigen login, zodat je kind zijn gordel, badges en sessies kan zien en zich zelf"
+" kan inschrijven voor sessies. Jij blijft de gegevens beheren en kunt de login altijd "
+"verwijderen. Je kind krijgt een e-mail om een wachtwoord te kiezen."
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:53
+#, python-format
+msgid "%(name)s's email address"
+msgstr "E-mailadres van %(name)s"
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:58
+msgid "Switch login back on"
+msgstr "Login opnieuw inschakelen"
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:58
+msgid "Create login"
+msgstr "Login aanmaken"
+
+#: accounts/templates/accounts/password_reset.html:3
+#: accounts/templates/accounts/password_reset_done.html:3
+msgid "Reset password"
+msgstr "Wachtwoord opnieuw instellen"
+
+#: accounts/templates/accounts/password_reset.html:25
+msgid "Reset your password"
+msgstr "Stel je wachtwoord opnieuw in"
+
+#: accounts/templates/accounts/password_reset.html:26
+msgid "Enter the email on your account and we'll send you a link to set a new password."
+msgstr "Vul het e-mailadres van je account in en we sturen je een link om een nieuw wachtwoord te kiezen."
+
+#: accounts/templates/accounts/password_reset.html:38
+msgid "Send reset link"
+msgstr "Stuur de link"
+
+#: accounts/templates/accounts/password_reset.html:41
+#: accounts/templates/accounts/password_reset_done.html:27
+msgid "Back to log in"
+msgstr "Terug naar aanmelden"
+
+#: accounts/templates/accounts/password_reset_complete.html:3
+#: accounts/templates/accounts/password_reset_complete.html:24
+msgid "Password updated"
+msgstr "Wachtwoord gewijzigd"
+
+#: accounts/templates/accounts/password_reset_complete.html:25
+msgid "Your password has been changed. You can now log in with it."
+msgstr "Je wachtwoord is gewijzigd. Je kunt er nu mee aanmelden."
+
+#: accounts/templates/accounts/password_reset_confirm.html:59
+msgid "Link expired"
+msgstr "Link verlopen"
+
+#: accounts/templates/accounts/password_reset_confirm.html:60
+msgid "This password reset link is invalid or has already been used."
+msgstr "Deze link om je wachtwoord opnieuw in te stellen is ongeldig of werd al gebruikt."
+
+#: accounts/templates/accounts/password_reset_confirm.html:62
+msgid "Request a new link"
+msgstr "Vraag een nieuwe link aan"
+
+#: accounts/templates/accounts/password_reset_done.html:24
+msgid "Check your email"
+msgstr "Kijk je mailbox na"
+
+#: accounts/templates/accounts/password_reset_done.html:25
+msgid ""
+"If that email matches an account, we've sent a link to reset your password. It'll expire soon, so"
+" use it right away."
+msgstr ""
+"Als dat e-mailadres bij een account hoort, hebben we je een link gestuurd om je wachtwoord "
+"opnieuw in te stellen. De link verloopt snel, dus gebruik hem meteen."
+
+#: accounts/templates/accounts/register.html:3
+msgid "Get involved"
+msgstr "Doe mee"
+
+#: accounts/templates/accounts/register.html:27
+msgid "How would you like to get involved?"
+msgstr "Hoe wil je meedoen?"
+
+#: accounts/templates/accounts/register.html:28
+msgid "Pick the option that fits — each one asks for exactly what we need, nothing more."
+msgstr "Kies wat bij je past. We vragen telkens alleen wat we nodig hebben, niets meer."
+
+#: accounts/templates/accounts/register.html:33
+msgid "For parents &amp; guardians"
+msgstr "Voor ouders en voogden"
+
+#: accounts/templates/accounts/register.html:34
+msgid "Register your family"
+msgstr "Registreer je gezin"
+
+#: accounts/templates/accounts/register.html:35
+msgid "Create an account and add your children so they can join sessions at any dojo."
+msgstr "Maak een account aan en voeg je kinderen toe, zodat ze naar sessies in elke dojo kunnen."
+
+#: accounts/templates/accounts/register.html:36
+msgid "Get started →"
+msgstr "Aan de slag →"
+
+#: accounts/templates/accounts/register.html:40
+msgid "For organisers"
+msgstr "Voor organisatoren"
+
+#: accounts/templates/accounts/register.html:41
+msgid "Start a new dojo"
+msgstr "Start een nieuwe dojo"
+
+#: accounts/templates/accounts/register.html:42
+msgid "Bring CoderDojo to your city — tell us about your venue and we'll help you get set up."
+msgstr "Breng CoderDojo naar je stad. Vertel ons over je locatie en we helpen je op weg."
+
+#: accounts/templates/accounts/register.html:43
+msgid "Apply to start a dojo →"
+msgstr "Een dojo starten →"
+
+#: accounts/templates/accounts/register.html:47
+msgid "For volunteers"
+msgstr "Voor vrijwilligers"
+
+#: accounts/templates/accounts/register.html:48
+msgid "Become a mentor or volunteer"
+msgstr "Word mentor of vrijwilliger"
+
+#: accounts/templates/accounts/register.html:49
+msgid "Help out at an existing dojo — no teaching experience required, just a Saturday morning."
+msgstr ""
+"Help in een bestaande dojo. Je hoeft geen lesgeefervaring te hebben, alleen een "
+"zaterdagvoormiddag."
+
+#: accounts/templates/accounts/register.html:50
+msgid "Apply to volunteer →"
+msgstr "Word vrijwilliger →"
+
+#: accounts/templates/accounts/register_guardian.html:3
+msgid "Register"
+msgstr "Registreren"
+
+#: accounts/templates/accounts/register_guardian.html:21
+msgid "Register for a dojo"
+msgstr "Registreer je voor een dojo"
+
+#: accounts/templates/accounts/register_guardian.html:22
+msgid "Create an account to register your children"
+msgstr "Maak een account aan om je kinderen in te schrijven"
+
+#: accounts/templates/accounts/register_guardian.html:37
+msgid "Your details (parent/guardian)"
+msgstr "Jouw gegevens (ouder/voogd)"
+
+#: accounts/templates/accounts/register_guardian.html:40
+msgid "Full name"
+msgstr "Volledige naam"
+
+#: accounts/templates/accounts/register_guardian.html:52 dojos/templates/dojos/dojo_detail.html:242
+msgid "Phone"
+msgstr "Telefoon"
+
+#: accounts/templates/accounts/register_guardian.html:54
+msgid "Only used if we need to reach you during a session."
+msgstr "Alleen gebruikt als we je tijdens een sessie moeten bereiken."
+
+#: accounts/templates/accounts/register_guardian.html:65 mailing/forms.py:26
+msgid "Postcode"
+msgstr "Postcode"
+
+#: accounts/templates/accounts/register_guardian.html:67
+#: mailing/templates/mailing/mail_preferences.html:55
+msgid "So we can tell you about dojos and sessions near you."
+msgstr "Zo kunnen we je laten weten welke dojo's en sessies er in je buurt zijn."
+
+#: accounts/templates/accounts/register_guardian.html:71 mailing/forms.py:22
+msgid "Language for emails"
+msgstr "Taal van de e-mails"
+
+#: accounts/templates/accounts/register_guardian.html:78
+msgid "I am the parent or legal guardian of the children listed below."
+msgstr "Ik ben de ouder of wettelijke voogd van de kinderen hieronder."
+
+#: accounts/templates/accounts/register_guardian.html:83
+msgid ""
+"Send me the CoderDojo Belgium newsletter and news about events like Coolest Projects and "
+"CoderDojo Girlz."
+msgstr ""
+"Stuur me de nieuwsbrief van CoderDojo Belgium en nieuws over evenementen zoals Coolest Projects "
+"en CoderDojo Girlz."
+
+#: accounts/templates/accounts/register_guardian.html:86
+msgid "You can change this, and which other mails you get, on your account's Mail preferences page."
+msgstr ""
+"Je kunt dit, en welke andere e-mails je krijgt, aanpassen op de pagina E-mailvoorkeuren van je "
+"account."
+
+#: accounts/templates/accounts/register_guardian.html:93
+msgid "Create account"
+msgstr "Account aanmaken"
+
+#: accounts/views.py:107
+msgid "That email/password combination doesn't match an account."
+msgstr "Die combinatie van e-mail en wachtwoord hoort bij geen enkele account."
+
+#: accounts/views.py:197
+msgid "First name is required."
+msgstr "Voornaam is verplicht."
+
+#: accounts/views.py:200
+msgid "Date of birth is required."
+msgstr "Geboortedatum is verplicht."
+
+#: accounts/views.py:250
+msgid "Add at least one child."
+msgstr "Voeg minstens één kind toe."
+
+#: accounts/views.py:472
+#, python-format
+msgid "Login created: we've mailed %(email)s a link to choose a password."
+msgstr "Login aangemaakt: we hebben %(email)s een link gestuurd om een wachtwoord te kiezen."
+
+#: accounts/views.py:486
+#, python-format
+msgid "We've mailed %(email)s a new link to choose a password."
+msgstr "We hebben %(email)s een nieuwe link gestuurd om een wachtwoord te kiezen."
+
+#: accounts/views.py:501
+#, python-format
+msgid ""
+"%(name)s's login is switched off. It was on a dojo team, so it's kept for that team's history; "
+"their team places have ended."
+msgstr ""
+"De login van %(name)s is uitgeschakeld. Hij stond in een dojoteam en blijft dus bewaard voor de "
+"geschiedenis van dat team; de plaatsen in de teams zijn beëindigd."
+
+#: accounts/views.py:504
+#, python-format
+msgid "%(name)s's login is removed."
+msgstr "De login van %(name)s is verwijderd."
+
+#: applications/models.py:40 dojos/models.py:166
+msgid "Mentor"
+msgstr "Mentor"
+
+# | msgid "Apply to start a dojo"
+#: applications/models.py:40
+msgid "Champion (start a dojo)"
+msgstr "Champion (een dojo starten)"
+
+#: applications/models.py:45
+msgid "Pending"
+msgstr "In behandeling"
+
+#: applications/models.py:45
+msgid "Approved"
+msgstr "Goedgekeurd"
+
+#: applications/models.py:45
+msgid "Rejected"
+msgstr "Afgewezen"
+
+#: content/templates/content/partials/_promotion_banner.html:15
+#: content/templates/content/partials/_promotion_hero.html:12
+#: events/templates/events/partials/_upcoming_session_card.html:24
+msgid "Featured"
+msgstr "In de kijker"
+
+#: content/templates/content/partials/_promotion_hero.html:17
+msgid "Find out more"
+msgstr "Meer weten"
+
+#: core/templates/core/base.html:37
+msgid "Code of conduct"
+msgstr "Gedragscode"
+
+#: core/templates/core/base.html:38
+msgid "Volunteer with us"
+msgstr "Word vrijwilliger"
+
+#: core/templates/core/base.html:39
+msgid "Contact"
+msgstr "Contact"
+
+#: core/templates/core/home.html:3
+msgid "CoderDojo Belgium · Free coding club for kids and teens"
+msgstr "CoderDojo Belgium · Gratis codeerclub voor kinderen en tieners"
+
+#: core/templates/core/home.html:55
+msgid "Free coding club · Saturdays"
+msgstr "Gratis codeerclub · op zaterdag"
+
+#: core/templates/core/home.html:56
+msgid "Build something awesome with code."
+msgstr "Bouw iets geweldigs met code."
+
+#: core/templates/core/home.html:57
+msgid "Free, for ages 7–18. No experience needed — bring a laptop and an idea, we'll help with the rest."
+msgstr ""
+"Gratis, van 7 tot 18 jaar. Geen ervaring nodig: breng een laptop en een idee mee, wij helpen met "
+"de rest."
+
+#: core/templates/core/home.html:59 core/templates/core/home.html:189
+#: dojos/templates/dojos/dojo_detail.html:106 dojos/templates/dojos/dojo_detail.html:130
+#: events/templates/events/event_detail.html:133
+msgid "Sign up now"
+msgstr "Schrijf je nu in"
+
+#: core/templates/core/home.html:69
+msgid "What you'll learn"
+msgstr "Wat je leert"
+
+#: core/templates/core/home.html:70
+msgid "Pick a path — or try a bit of everything before you commit to one."
+msgstr "Kies een leertraject, of probeer eerst van alles een beetje."
+
+#: core/templates/core/home.html:73
+msgid "Previous pathways"
+msgstr "Vorige leertrajecten"
+
+#: core/templates/core/home.html:76
+msgid "Next pathways"
+msgstr "Volgende leertrajecten"
+
+#: core/templates/core/home.html:90 dojos/templates/dojos/dojo_list.html:31
+#: events/templates/events/event_list.html:99 pathways/templates/pathways/pathway_detail.html:132
+msgid "Find a dojo near you"
+msgstr "Vind een dojo in je buurt"
+
+#: core/templates/core/home.html:91
+msgid "Every session is free and run by local volunteers."
+msgstr "Elke sessie is gratis en wordt begeleid door vrijwilligers uit de buurt."
+
+#: core/templates/core/home.html:103
+msgid "Free sessions with open spots, soonest first."
+msgstr "Gratis sessies met vrije plaatsen, de eerstvolgende eerst."
+
+#: core/templates/core/home.html:106
+msgid "Previous sessions"
+msgstr "Vorige sessies"
+
+#: core/templates/core/home.html:109
+msgid "Next sessions"
+msgstr "Volgende sessies"
+
+#: core/templates/core/home.html:117
+msgid "See every upcoming event →"
+msgstr "Bekijk alle komende evenementen →"
+
+#: core/templates/core/home.html:122
+msgid "Meet the team"
+msgstr "Maak kennis met het team"
+
+#: core/templates/core/home.html:123
+msgid "Our team and volunteers who keep every dojo running."
+msgstr "Ons team en de vrijwilligers die elke dojo draaiende houden."
+
+#: core/templates/core/home.html:137
+msgid "No team members listed yet."
+msgstr "Nog geen teamleden."
+
+#: core/templates/core/home.html:156 dojos/templates/dojos/dojo_detail.html:189
+msgid "Frequently asked questions"
+msgstr "Veelgestelde vragen"
+
+#: core/templates/core/home.html:174
+msgid "Made possible by"
+msgstr "Mogelijk gemaakt door"
+
+#: core/templates/core/home.html:187
+msgid "Ready to build your first project?"
+msgstr "Klaar voor je eerste project?"
+
+#: core/templates/core/home.html:188
+msgid "Free, for ages 7–18. No experience needed — spots are limited, so sign up before Saturday."
+msgstr ""
+"Gratis, van 7 tot 18 jaar. Geen ervaring nodig. Er zijn maar een beperkt aantal plaatsen, dus "
+"schrijf je in voor zaterdag."
+
+#: core/templates/core/menu.html:8
+msgid "Home"
+msgstr "Home"
+
+#: core/templates/core/menu.html:9
+msgid "Events"
+msgstr "Evenementen"
+
+#: core/templates/core/menu.html:10
+msgid "Dojos"
+msgstr "Dojo's"
+
+#: core/templates/core/menu.html:18
+msgid "Language"
+msgstr "Taal"
+
+#: core/templates/core/menu.html:27 core/templates/core/menu.html:76
+msgid "Switch to dark mode"
+msgstr "Donkere modus"
+
+#: core/templates/core/menu.html:41
+msgid "My Account"
+msgstr "Mijn account"
+
+#: core/templates/core/menu.html:44
+msgid "Manage"
+msgstr "Beheren"
+
+#: core/templates/core/menu.html:48 core/templates/core/menu.html:50
+msgid "Organisation"
+msgstr "Organisatie"
+
+#: core/templates/core/menu.html:59
+msgid "Help at another dojo"
+msgstr "Help bij een andere dojo"
+
+#: core/templates/core/menu.html:65
+msgid "Log out"
+msgstr "Afmelden"
+
+#: core/templates/core/menu.html:71 events/templates/events/event_signup.html:3
+#: events/templates/events/event_signup.html:170
+msgid "Sign up"
+msgstr "Inschrijven"
+
+#: core/templates/core/menu.html:76
+msgid "Switch to light mode"
+msgstr "Lichte modus"
+
+#: dojos/forms.py:90
+msgid "Enter your postcode or city"
+msgstr "Vul je postcode of gemeente in"
+
+#: dojos/models.py:166
+msgid "Champion"
+msgstr "Champion"
+
+#: dojos/templates/dojos/dojo_detail.html:99
+msgid "Free"
+msgstr "Gratis"
+
+#: dojos/templates/dojos/dojo_detail.html:101 events/templates/events/event_signup.html:61
+#: events/templates/events/partials/_event_row.html:36
+#: pathways/templates/pathways/pathway_detail.html:49
+#, python-format
+msgid "Ages %(min)s–%(max)s"
+msgstr "%(min)s tot %(max)s jaar"
+
+#: dojos/templates/dojos/dojo_detail.html:102 pathways/templates/pathways/pathway_detail.html:52
+msgid "No experience needed"
+msgstr "Geen ervaring nodig"
+
+#: dojos/templates/dojos/dojo_detail.html:108
+msgid "View this dojo's sessions"
+msgstr "Bekijk de sessies van deze dojo"
+
+#: dojos/templates/dojos/dojo_detail.html:119
+msgid "Next session"
+msgstr "Volgende sessie"
+
+#: dojos/templates/dojos/dojo_detail.html:119 dojos/templates/dojos/partials/_dojo_result.html:33
+#: events/templates/events/event_signup.html:59 events/templates/events/partials/_event_row.html:34
+msgid "Open"
+msgstr "Open"
+
+#: dojos/templates/dojos/dojo_detail.html:119 dojos/templates/dojos/partials/_dojo_result.html:31
+msgid "Waitlist"
+msgstr "Wachtlijst"
+
+#: dojos/templates/dojos/dojo_detail.html:124
+#, python-format
+msgid "%(counter)s spot left"
+msgid_plural "%(counter)s spots left"
+msgstr[0] "nog %(counter)s plaats"
+msgstr[1] "nog %(counter)s plaatsen"
+
+#: dojos/templates/dojos/dojo_detail.html:129
+msgid "View session details →"
+msgstr "Bekijk de sessie →"
+
+#: dojos/templates/dojos/dojo_detail.html:137
+msgid "About this dojo"
+msgstr "Over deze dojo"
+
+#: dojos/templates/dojos/dojo_detail.html:145
+msgid "Pathways"
+msgstr "Leertrajecten"
+
+#: dojos/templates/dojos/dojo_detail.html:156
+msgid "Run by"
+msgstr "Begeleid door"
+
+#: dojos/templates/dojos/dojo_detail.html:169
+msgid "No mentors listed yet."
+msgstr "Nog geen mentors."
+
+#: dojos/templates/dojos/dojo_detail.html:179
+msgid "You're an approved mentor — want to help out here?"
+msgstr "Je bent een goedgekeurde mentor. Wil je hier helpen?"
+
+#: dojos/templates/dojos/dojo_detail.html:180
+msgid "Ask to join the team"
+msgstr "Vraag om bij het team te komen"
+
+#: dojos/templates/dojos/dojo_detail.html:183
+msgid "Your request to join this team is waiting for an answer."
+msgstr "Je vraag om bij dit team te komen wacht op een antwoord."
+
+#: dojos/templates/dojos/dojo_detail.html:206
+msgid "From this dojo"
+msgstr "Nieuws van deze dojo"
+
+#: dojos/templates/dojos/dojo_detail.html:217
+msgid "Visit us"
+msgstr "Bezoek ons"
+
+#: dojos/templates/dojos/dojo_detail.html:221
+msgid "Meets"
+msgstr "Wanneer"
+
+#: dojos/templates/dojos/dojo_detail.html:222 dojos/templates/dojos/dojo_detail.html:232
+msgid "To be confirmed"
+msgstr "Nog te bevestigen"
+
+#: dojos/templates/dojos/dojo_detail.html:225 events/templates/events/event_detail.html:120
+msgid "Ages"
+msgstr "Leeftijd"
+
+#: dojos/templates/dojos/dojo_detail.html:231
+msgid "Address"
+msgstr "Adres"
+
+#: dojos/templates/dojos/dojo_list.html:3
+msgid "Find a dojo"
+msgstr "Vind een dojo"
+
+#: dojos/templates/dojos/dojo_list.html:32
+msgid ""
+"Every CoderDojo in Belgium is free, run by local volunteers, and open to kids aged 7–18 — enter a"
+" postcode or city to see what's nearby."
+msgstr ""
+"Elke CoderDojo in België is gratis, wordt begeleid door vrijwilligers uit de buurt en staat open "
+"voor kinderen van 7 tot 18 jaar. Vul een postcode of gemeente in om te zien wat er in de buurt "
+"is."
+
+#: dojos/templates/dojos/dojo_list.html:40 dojos/templates/dojos/partials/_dojo_finder_widget.html:16
+#: events/templates/events/event_list.html:80
+msgid "Search"
+msgstr "Zoeken"
+
+#: dojos/templates/dojos/dojo_list.html:49 dojos/templates/dojos/partials/_dojo_finder_widget.html:25
+msgid "Use my location"
+msgstr "Gebruik mijn locatie"
+
+#: dojos/templates/dojos/dojo_list.html:57
+#, python-format
+msgid "Couldn't find \"%(search_label)s\" — showing every dojo instead."
+msgstr "\"%(search_label)s\" niet gevonden: we tonen alle dojo's."
+
+#: dojos/templates/dojos/dojo_list.html:59
+#, python-format
+msgid "Showing %(counter)s dojo near %(search_label)s, nearest first"
+msgid_plural "Showing %(counter)s dojos near %(search_label)s, nearest first"
+msgstr[0] "%(counter)s dojo in de buurt van %(search_label)s, dichtstbijzijnde eerst"
+msgstr[1] "%(counter)s dojo's in de buurt van %(search_label)s, dichtstbijzijnde eerst"
+
+#: dojos/templates/dojos/dojo_list.html:69
+msgid "Already know when you'd like to come?"
+msgstr "Weet je al wanneer je wilt komen?"
+
+#: dojos/templates/dojos/dojo_list.html:70 pathways/templates/pathways/pathway_detail.html:133
+msgid "Browse upcoming events"
+msgstr "Bekijk de komende evenementen"
+
+#: dojos/templates/dojos/dojo_team.html:3 dojos/templates/dojos/dojo_team.html:71
+#, python-format
+msgid "%(name)s team"
+msgstr "Team van %(name)s"
+
+#: dojos/templates/dojos/dojo_team.html:56 dojos/templates/dojos/team_member_detail.html:53
+#, python-format
+msgid "On the team since %(year)s"
+msgstr "In het team sinds %(year)s"
+
+#: dojos/templates/dojos/dojo_team.html:57
+#, python-format
+msgid "%(n)s+ sessions run"
+msgstr "%(n)s+ sessies begeleid"
+
+#: dojos/templates/dojos/dojo_team.html:64 dojos/templates/dojos/team_member_detail.html:60
+#, python-format
+msgid "About %(name)s"
+msgstr "Over %(name)s"
+
+#: dojos/templates/dojos/dojo_team.html:78
+msgid "Meet the rest of the team"
+msgstr "Maak kennis met de rest van het team"
+
+#: dojos/templates/dojos/dojo_team.html:79
+msgid ""
+"Every dojo is run by its champion, with mentors and youth mentors. A small ring around each "
+"avatar marks which — the words next to it always say the same thing out loud, so the ring is "
+"never the only clue."
+msgstr ""
+"Elke dojo wordt geleid door zijn champion, samen met mentors en youth mentors. Een ringetje rond "
+"elke avatar toont wie wat is. De tekst ernaast zegt altijd hetzelfde, dus de ring is nooit de "
+"enige aanwijzing."
+
+#: dojos/templates/dojos/dojo_team.html:90
+msgid "No other mentors listed yet."
+msgstr "Nog geen andere mentors."
+
+#: dojos/templates/dojos/partials/_dojo_finder_widget_results.html:11
+#, python-format
+msgid "Couldn't find \"%(search_label)s\" — showing dojos near Ghent instead."
+msgstr "\"%(search_label)s\" niet gevonden: we tonen dojo's in de buurt van Gent."
+
+#: dojos/templates/dojos/partials/_dojo_finder_widget_results.html:13
+#, python-format
+msgid "Showing the closest dojo to %(search_label)s"
+msgid_plural "Showing the %(counter)s closest dojos to %(search_label)s"
+msgstr[0] "De dichtstbijzijnde dojo bij %(search_label)s"
+msgstr[1] "De %(counter)s dichtstbijzijnde dojo's bij %(search_label)s"
+
+#: dojos/templates/dojos/partials/_dojo_finder_widget_results.html:20
+msgid "No dojos found."
+msgstr "Geen dojo's gevonden."
+
+#: dojos/templates/dojos/partials/_dojo_result.html:25
+msgid "Address to be confirmed"
+msgstr "Adres nog te bevestigen"
+
+#: dojos/templates/dojos/partials/_dojo_result.html:28
+#, python-format
+msgid "Next session: %(when)s"
+msgstr "Volgende sessie: %(when)s"
+
+#: dojos/templates/dojos/partials/_dojo_result.html:36
+msgid "No upcoming sessions"
+msgstr "Geen komende sessies"
+
+#: dojos/templates/dojos/team_member_detail.html:67
+msgid "Focus areas"
+msgstr "Specialiteiten"
+
+#: dojos/templates/dojos/team_member_detail.html:79
+#, python-format
+msgid "Get in touch with %(name)s"
+msgstr "Neem contact op met %(name)s"
+
+#: events/forms.py:30
+msgid "All dojos"
+msgstr "Alle dojo's"
+
+#: events/forms.py:36
+msgid "Postcode or city"
+msgstr "Postcode of gemeente"
+
+#: events/forms.py:40
+msgid "Any date"
+msgstr "Elke datum"
+
+#: events/forms.py:40
+msgid "This week"
+msgstr "Deze week"
+
+#: events/forms.py:40
+msgid "This month"
+msgstr "Deze maand"
+
+#: events/forms.py:45
+msgid "All ages"
+msgstr "Alle leeftijden"
+
+#: events/models.py:60
+msgid "Everyone"
+msgstr "Iedereen"
+
+#: events/models.py:60 events/templates/events/partials/_audience_badge.html:4
+msgid "Girls' session"
+msgstr "Meisjessessie"
+
+#: events/models.py:300
+#, python-format
+msgid "%(who)s, as %(role)s of %(dojo)s"
+msgstr "%(who)s, als %(role)s van %(dojo)s"
+
+#: events/templates/events/event_detail.html:72
+msgid "About this session"
+msgstr "Over deze sessie"
+
+#: events/templates/events/event_detail.html:80
+msgid "Pathways this session covers"
+msgstr "Leertrajecten in deze sessie"
+
+#: events/templates/events/event_detail.html:92 pathways/templates/pathways/pathway_detail.html:112
+msgid "Questions"
+msgstr "Vragen"
+
+#: events/templates/events/event_detail.html:116 events/templates/events/event_list.html:66
+msgid "Location"
+msgstr "Locatie"
+
+#: events/templates/events/event_detail.html:125 events/templates/events/partials/_event_row.html:28
+#, python-format
+msgid "Register on %(host)s"
+msgstr "Inschrijven op %(host)s"
+
+#: events/templates/events/event_detail.html:126
+msgid "Registration for this event happens on its own website, not on CoderDojo Belgium."
+msgstr "Inschrijven voor dit evenement gebeurt op de eigen website ervan, niet op CoderDojo Belgium."
+
+#: events/templates/events/event_detail.html:129
+msgid "Already signed up"
+msgstr "Al ingeschreven"
+
+#: events/templates/events/event_detail.html:131 events/templates/events/event_signup.html:55
+#: events/templates/events/partials/_event_row.html:30
+msgid "Registrations closed"
+msgstr "Inschrijvingen gesloten"
+
+#: events/templates/events/event_detail.html:136
+msgid "Every child on your account is already signed up"
+msgstr "Al je kinderen zijn al ingeschreven"
+
+#: events/templates/events/event_detail.html:136
+msgid "This session isn't accepting new registrations"
+msgstr "Deze sessie aanvaardt geen nieuwe inschrijvingen"
+
+#: events/templates/events/event_detail.html:136
+#, python-format
+msgid "%(left)s of %(total)s spots left"
+msgstr "nog %(left)s van de %(total)s plaatsen vrij"
+
+#: events/templates/events/event_detail.html:136
+msgid "Full — join the waitlist"
+msgstr "Volzet: zet je op de wachtlijst"
+
+#: events/templates/events/event_list.html:3 events/templates/events/event_list.html:55
+msgid "Upcoming events"
+msgstr "Komende evenementen"
+
+#: events/templates/events/event_list.html:56
+msgid "Every free session run by a CoderDojo across Belgium — filter by dojo, location, date or age."
+msgstr "Alle gratis sessies van de CoderDojo's in heel België. Filter op dojo, locatie, datum of leeftijd."
+
+#: events/templates/events/event_list.html:74
+msgid "Age"
+msgstr "Leeftijd"
+
+#: events/templates/events/event_list.html:88
+msgid "Filtered by:"
+msgstr "Gefilterd op:"
+
+#: events/templates/events/event_list.html:89
+msgid "Clear dojo filter"
+msgstr "Dojofilter wissen"
+
+#: events/templates/events/event_list.html:98
+msgid "Would rather browse by place than by date?"
+msgstr "Zoek je liever op plaats dan op datum?"
+
+#: events/templates/events/event_signup.html:48
+#, python-format
+msgid "Sign up for %(name)s"
+msgstr "Inschrijven voor %(name)s"
+
+#: events/templates/events/event_signup.html:57 events/templates/events/partials/_event_row.html:32
+msgid "Full"
+msgstr "Volzet"
+
+#: events/templates/events/event_signup.html:69 events/views.py:143
+msgid "Registrations for this session are closed."
+msgstr "De inschrijvingen voor deze sessie zijn gesloten."
+
+#: events/templates/events/event_signup.html:72 events/templates/events/event_signup.html:96
+msgid "Back to session"
+msgstr "Terug naar de sessie"
+
+#: events/templates/events/event_signup.html:77
+msgid "You're all set"
+msgstr "Alles in orde"
+
+#: events/templates/events/event_signup.html:86
+msgid "Confirmed"
+msgstr "Bevestigd"
+
+#: events/templates/events/event_signup.html:93
+msgid "We'll email you if anyone on the waiting list gets a spot."
+msgstr "We mailen je als iemand van de wachtlijst een plaats krijgt."
+
+#: events/templates/events/event_signup.html:115
+msgid ""
+"This session is full. Signing up below adds your child(ren) to the waiting list — we'll email you"
+" the moment a spot opens."
+msgstr ""
+"Deze sessie is volzet. Als je hieronder inschrijft, komen je kinderen op de wachtlijst. We mailen"
+" je zodra er een plaats vrijkomt."
+
+#: events/templates/events/event_signup.html:121
+msgid "Who's joining?"
+msgstr "Wie komt er?"
+
+#: events/templates/events/event_signup.html:123
+msgid "Every child on your account is already signed up for this session — see below."
+msgstr "Al je kinderen zijn al ingeschreven voor deze sessie, zie hieronder."
+
+#: events/templates/events/event_signup.html:126
+msgid "Tick each child you'd like to add to the waiting list for this session."
+msgstr "Vink elk kind aan dat je op de wachtlijst voor deze sessie wilt zetten."
+
+#: events/templates/events/event_signup.html:126
+msgid "Tick each child you'd like to sign up for this session."
+msgstr "Vink elk kind aan dat je voor deze sessie wilt inschrijven."
+
+#: events/templates/events/event_signup.html:127
+#, python-format
+msgid "Only %(counter)s spot left — anyone beyond that goes on the waiting list."
+msgid_plural "Only %(counter)s spots left — anyone beyond that goes on the waiting list."
+msgstr[0] "Nog maar %(counter)s plaats vrij: wie daarna komt, gaat op de wachtlijst."
+msgstr[1] "Nog maar %(counter)s plaatsen vrij: wie daarna komt, gaat op de wachtlijst."
+
+#: events/templates/events/event_signup.html:142
+msgid "Already on waiting list"
+msgstr "Al op de wachtlijst"
+
+#: events/templates/events/event_signup.html:144
+msgid "Already confirmed"
+msgstr "Al bevestigd"
+
+#: events/templates/events/event_signup.html:160
+msgid "No children on your account yet — register one below to sign them up."
+msgstr "Nog geen kinderen op je account. Voeg er hieronder een toe om het in te schrijven."
+
+#: events/templates/events/event_signup.html:163
+#, python-format
+msgid ""
+"Signing up on someone else's behalf? <a href=\"%(register_url)s\">Register another child</a> "
+"first."
+msgstr "Schrijf je iemand anders in? <a href=\"%(register_url)s\">Registreer dan eerst een ander kind</a>."
+
+#: events/templates/events/event_signup.html:170
+msgid "Join the waiting list"
+msgstr "Op de wachtlijst zetten"
+
+#: events/templates/events/event_signup.html:182
+msgid "Spot available"
+msgstr "Plaats vrij"
+
+#: events/templates/events/event_signup.html:182
+#, python-brace-format
+msgid "All {waiting} selected will join the waiting list."
+msgstr "Alle {waiting} geselecteerde kinderen komen op de wachtlijst."
+
+#: events/templates/events/event_signup.html:182
+#, python-brace-format
+msgid "{confirmed} will get a spot · {waiting} will join the waiting list."
+msgstr "{confirmed} krijgen een plaats · {waiting} komen op de wachtlijst."
+
+#: events/templates/events/partials/_event_results_page.html:30
+msgid "No upcoming events scheduled right now — check back soon."
+msgstr "Er zijn momenteel geen komende evenementen gepland. Kom binnenkort nog eens kijken."
+
+#: events/templates/events/partials/_organiser.html:5
+#, python-format
+msgid "Organised by %(name)s"
+msgstr "Georganiseerd door %(name)s"
+
+#: events/templates/events/partials/_organiser.html:5
+#, python-format
+msgid "Hosted by <a href=\"%(dojo_url)s\">%(name)s</a>"
+msgstr "Bij <a href=\"%(dojo_url)s\">%(name)s</a>"
+
+# | msgid "About %(name)s"
+#: events/templates/events/partials/_upcoming_session_card.html:28
+#, python-format
+msgid "View %(name)s"
+msgstr "Bekijk %(name)s"
+
+#: events/templates/events/partials/_upcoming_sessions_page.html:9
+msgid "No upcoming sessions with open spots right now — check back soon."
+msgstr "Er zijn momenteel geen komende sessies met vrije plaatsen. Kom binnenkort nog eens kijken."
+
+#: events/views.py:159
+msgid "Please select at least one child."
+msgstr "Kies minstens één kind."
+
+#: events/views.py:161
+msgid "The child(ren) you selected are already signed up for this session."
+msgstr "De gekozen kinderen zijn al ingeschreven voor deze sessie."
+
+#: mailing/categories.py:14
+msgid "Account and security"
+msgstr "Account en beveiliging"
+
+#: mailing/categories.py:15
+msgid "Session bookings"
+msgstr "Inschrijvingen voor sessies"
+
+#: mailing/categories.py:16
+msgid "Reminders"
+msgstr "Herinneringen"
+
+#: mailing/categories.py:17
+msgid "News from your dojo"
+msgstr "Nieuws van je dojo"
+
+#: mailing/categories.py:19
+msgid "Newsletter and campaigns"
+msgstr "Nieuwsbrief en campagnes"
+
+#: mailing/categories.py:79
+msgid "Password resets, background-check requests and other mail about your account."
+msgstr ""
+"Wachtwoordherstel, vragen om een uittreksel uit het strafregister en andere e-mails over je "
+"account."
+
+#: mailing/categories.py:80
+msgid "Confirmations and changes for the sessions you signed up for."
+msgstr "Bevestigingen en wijzigingen voor de sessies waarvoor je inschreef."
+
+#: mailing/categories.py:81
+msgid "A reminder two days before a session you signed up for."
+msgstr "Een herinnering twee dagen voor een sessie waarvoor je inschreef."
+
+#: mailing/categories.py:82
+msgid "New sessions and news from the dojos your family goes to."
+msgstr "Nieuwe sessies en nieuws van de dojo's waar je gezin naartoe gaat."
+
+#: mailing/categories.py:83
+msgid "News for champions and mentors, and calls for volunteers."
+msgstr "Nieuws voor champions en mentors, en oproepen voor vrijwilligers."
+
+#: mailing/categories.py:84
+msgid "The CoderDojo Belgium newsletter and events like Coolest Projects and CoderDojo Girlz."
+msgstr "De nieuwsbrief van CoderDojo Belgium en evenementen zoals Coolest Projects en CoderDojo Girlz."
+
+#: mailing/templates/mailing/mail_preferences.html:31
+msgid "Which mails you get"
+msgstr "Welke e-mails je krijgt"
+
+#: mailing/templates/mailing/mail_preferences.html:40
+#, python-format
+msgid "%(label)s (always on)"
+msgstr "%(label)s (altijd aan)"
+
+#: mailing/templates/mailing/mail_preferences.html:41
+msgid "Always on"
+msgstr "Altijd aan"
+
+#: mailing/templates/mailing/mail_preferences.html:62
+msgid "Back to your account"
+msgstr "Terug naar je account"
+
+#: mailing/templates/mailing/partials/_privacy_explanation.html:8
+msgid ""
+"We use what we know about your family to send you mails that are relevant to you: which sessions "
+"your children come to, their age and gender, your postcode and your language. That's how you hear"
+" about sessions at your dojo, a new dojo near you, or events like Coolest Projects and CoderDojo "
+"Girlz."
+msgstr ""
+"We gebruiken wat we over je gezin weten om je e-mails te sturen die voor jou relevant zijn: naar "
+"welke sessies je kinderen komen, hun leeftijd en gender, je postcode en je taal. Zo hoor je over "
+"sessies in je dojo, een nieuwe dojo in je buurt, of evenementen zoals Coolest Projects en "
+"CoderDojo Girlz."
+
+#: mailing/templates/mailing/partials/_privacy_explanation.html:11
+msgid "Below you choose which mails you get. Mails about your account and your bookings are always sent."
+msgstr ""
+"Hieronder kies je welke e-mails je krijgt. E-mails over je account en je inschrijvingen krijg je "
+"altijd."
+
+#: mailing/templates/mailing/unsubscribe.html:3 mailing/templates/mailing/unsubscribe.html:8
+#: mailing/templates/mailing/unsubscribe.html:17
+msgid "Unsubscribe"
+msgstr "Uitschrijven"
+
+#: mailing/templates/mailing/unsubscribe.html:9
+#, python-format
+msgid "Stop getting <strong>%(label)s</strong> mails from CoderDojo Belgium?"
+msgstr "Wil je geen e-mails meer over <strong>%(label)s</strong> van CoderDojo Belgium?"
+
+#: mailing/templates/mailing/unsubscribe.html:13
+msgid "Unsubscribe from all optional mails"
+msgstr "Uitschrijven voor alle optionele e-mails"
+
+#: mailing/templates/mailing/unsubscribe.html:15
+msgid "Mails about your account and your bookings are always sent."
+msgstr "E-mails over je account en je inschrijvingen krijg je altijd."
+
+#: mailing/templates/mailing/unsubscribed.html:3
+msgid "Unsubscribed"
+msgstr "Uitgeschreven"
+
+#: mailing/templates/mailing/unsubscribed.html:8
+msgid "You're unsubscribed"
+msgstr "Je bent uitgeschreven"
+
+#: mailing/templates/mailing/unsubscribed.html:10
+msgid "You won't get any optional mails from us any more."
+msgstr "Je krijgt geen optionele e-mails meer van ons."
+
+#: mailing/templates/mailing/unsubscribed.html:10
+#, python-format
+msgid "You won't get <strong>%(label)s</strong> mails any more."
+msgstr "Je krijgt geen e-mails over <strong>%(label)s</strong> meer."
+
+#: mailing/templates/mailing/unsubscribed.html:11
+msgid "Mails about your account and your bookings are still sent."
+msgstr "E-mails over je account en je inschrijvingen krijg je nog wel."
+
+#: mailing/templates/mailing/unsubscribed.html:13
+#, python-format
+msgid "You can change this any time on your <a href=\"%(prefs_url)s\">Mail preferences</a> page."
+msgstr "Je kunt dit altijd aanpassen op je pagina <a href=\"%(prefs_url)s\">E-mailvoorkeuren</a>."
+
+#: mailing/views.py:34
+msgid "Your mail preferences are saved."
+msgstr "Je e-mailvoorkeuren zijn opgeslagen."
+
+#: pathways/templates/pathways/partials/_pathway_card.html:17
+#: pathways/templates/pathways/pathway_detail.html:147
+#, python-format
+msgid "Explore %(name)s →"
+msgstr "Ontdek %(name)s →"
+
+#: pathways/templates/pathways/pathway_detail.html:3
+#, python-format
+msgid "%(name)s pathway"
+msgstr "Leertraject %(name)s"
+
+#: pathways/templates/pathways/pathway_detail.html:55
+msgid "Runs in the browser"
+msgstr "Werkt in de browser"
+
+#: pathways/templates/pathways/pathway_detail.html:63
+msgid "What you'll build"
+msgstr "Wat je gaat maken"
+
+#: pathways/templates/pathways/pathway_detail.html:64
+msgid "A few of the projects kids on this pathway have walked out with."
+msgstr "Enkele projecten die kinderen in dit leertraject al gemaakt hebben."
+
+#: pathways/templates/pathways/pathway_detail.html:80
+msgid "How a session works"
+msgstr "Hoe een sessie verloopt"
+
+#: pathways/templates/pathways/pathway_detail.html:81
+msgid "Every dojo runs this a little differently, but it usually looks like this."
+msgstr "Elke dojo pakt het een beetje anders aan, maar meestal ziet het er zo uit."
+
+#: pathways/templates/pathways/pathway_detail.html:98
+msgid "Skills you'll pick up"
+msgstr "Wat je leert"
+
+#: pathways/templates/pathways/pathway_detail.html:99
+msgid "The building blocks every later pathway builds on."
+msgstr "De bouwstenen waarop elk volgend leertraject verder bouwt."
+
+#: pathways/templates/pathways/pathway_detail.html:130
+msgid "Ready to try it in person?"
+msgstr "Zin om het zelf te proberen?"
+
+#: pathways/templates/pathways/pathway_detail.html:140
+msgid "Other pathways"
+msgstr "Andere leertrajecten"
+
+#: pathways/templates/pathways/pathway_detail.html:141
+msgid "Not sure this is the right one? Kids move between pathways freely."
+msgstr "Twijfel je of dit het juiste is? Kinderen kunnen vrij wisselen tussen leertrajecten."
+

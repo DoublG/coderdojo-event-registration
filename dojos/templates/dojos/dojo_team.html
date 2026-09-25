@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}{{ dojo.name }} team · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% blocktranslate with name=dojo.name %}{{ name }} team{% endblocktranslate %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}mentor-detail-root{% endblock %}
 {% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
 
@@ -52,30 +53,30 @@
             <p class="body role-line">{{ featured.get_role_display }}{% if featured.title %}, {{ featured.title }}{% endif %}</p>
             <p class="body-sm facts-line">
               {{ dojo.name }}
-              {% if featured.joined_at %} · On the team since {{ featured.joined_at|date:"Y" }}{% endif %}
-              {% if featured.sessions_run %} · {{ featured.sessions_run }}+ sessions run{% endif %}
+              {% if featured.joined_at %} · {% blocktranslate with year=featured.joined_at|date:"Y" %}On the team since {{ year }}{% endblocktranslate %}{% endif %}
+              {% if featured.sessions_run %} · {% blocktranslate with n=featured.sessions_run %}{{ n }}+ sessions run{% endblocktranslate %}{% endif %}
             </p>
           </div>
         </div>
 
         {% if featured.bio %}
           <div class="col about">
-            <h2 class="heading-md">About {{ featured.name }}</h2>
+            <h2 class="heading-md">{% blocktranslate with name=featured.name %}About {{ name }}{% endblocktranslate %}</h2>
             <p class="body">{{ featured.bio }}</p>
           </div>
         {% endif %}
       {% else %}
         <div class="mentor-header">
           <div>
-            <h1 class="display-lg">{{ dojo.name }} team</h1>
+            <h1 class="display-lg">{% blocktranslate with name=dojo.name %}{{ name }} team{% endblocktranslate %}</h1>
           </div>
         </div>
       {% endif %}
     {% endwith %}
 
     <div class="team-section">
-      <h2 class="heading-lg">Meet the rest of the team</h2>
-      <p class="body team-desc">Every dojo is run by its champion, with mentors and youth mentors. A small ring around each avatar marks which — the words next to it always say the same thing out loud, so the ring is never the only clue.</p>
+      <h2 class="heading-lg">{% translate "Meet the rest of the team" %}</h2>
+      <p class="body team-desc">{% translate "Every dojo is run by its champion, with mentors and youth mentors. A small ring around each avatar marks which — the words next to it always say the same thing out loud, so the ring is never the only clue." %}</p>
       <div class="team-grid">
         {% for mentor in mentors|slice:"1:" %}
           <div class="cd-mentor">
@@ -86,7 +87,7 @@
             </div>
           </div>
         {% empty %}
-          <p class="body-sm" style="color: var(--ink-muted);">No other mentors listed yet.</p>
+          <p class="body-sm" style="color: var(--ink-muted);">{% translate "No other mentors listed yet." %}</p>
         {% endfor %}
       </div>
     </div>

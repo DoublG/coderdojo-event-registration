@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
-{% block title %}Mail preferences · CoderDojo Belgium{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Mail preferences" %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}mail-prefs-root{% endblock %}
 
 {% block extra_style %}
@@ -17,7 +18,7 @@
 {% block content %}
   <div class="shell">
     <div class="cd-card" style="padding: var(--space-6);">
-      <h1 class="heading-lg" style="margin-top: 0;">Mail preferences</h1>
+      <h1 class="heading-lg" style="margin-top: 0;">{% translate "Mail preferences" %}</h1>
       {% include "mailing/partials/_privacy_explanation.html" %}
 
       {% for message in messages %}
@@ -27,7 +28,7 @@
       <form method="post" class="cd-form" novalidate>
         {% csrf_token %}
         <div class="cd-form__group">
-          <h2 class="cd-form__group-title heading-md">Which mails you get</h2>
+          <h2 class="cd-form__group-title heading-md">{% translate "Which mails you get" %}</h2>
           {% for field in form.category_fields %}
             <label class="mail-category" for="{{ field.id_for_label }}">
               {{ field }}
@@ -36,8 +37,8 @@
           {% endfor %}
           {% for label, description in form.always_on %}
             <div class="mail-category">
-              <input type="checkbox" checked disabled aria-label="{{ label }} (always on)">
-              <span><p class="body">{{ label }} <span class="cd-badge cd-badge--outline caption">Always on</span></p><p class="caption">{{ description }}</p></span>
+              <input type="checkbox" checked disabled aria-label="{% blocktranslate %}{{ label }} (always on){% endblocktranslate %}">
+              <span><p class="body">{{ label }} <span class="cd-badge cd-badge--outline caption">{% translate "Always on" %}</span></p><p class="caption">{{ description }}</p></span>
             </div>
           {% endfor %}
         </div>
@@ -51,15 +52,15 @@
             <div class="cd-form__field">
               <label class="cd-form__label label" for="{{ form.postal_code.id_for_label }}">{{ form.postal_code.label }}</label>
               {{ form.postal_code }}
-              <p class="cd-form__help caption">So we can tell you about dojos and sessions near you.</p>
+              <p class="cd-form__help caption">{% translate "So we can tell you about dojos and sessions near you." %}</p>
               <ul class="cd-form__errors">{% for error in form.postal_code.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             </div>
           {% endif %}
         </div>
 
         <div class="cd-form__actions">
-          <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">Back to your account</a>
-          <button type="submit" class="cd-btn cd-btn--primary label">Save</button>
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">{% translate "Back to your account" %}</a>
+          <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button>
         </div>
       </form>
     </div>

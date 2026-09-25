@@ -1,4 +1,4 @@
-{% comment %}
+{% load i18n %}{% comment %}
 The child detail page's header, in its normal (read-only) state. Clicking
 the name swaps this whole block for _child_header_edit.html over htmx —
 same click-to-edit approach used nowhere else in the app yet, but the
@@ -11,18 +11,18 @@ the ninja views their own page — then the name isn't clickable).
   {% include "accounts/partials/_child_avatar.html" with child=child %}
   <div>
     <h1 class="display-lg child-header__name"
-        {% if can_edit %}title="Click to edit"
+        {% if can_edit %}title="{% translate "Click to edit" %}"
         hx-get="{% url 'edit_ninja' ninja_id=child.id %}"
         hx-target="#child-header" hx-swap="outerHTML"{% endif %}>
       {{ child.name }}
     </h1>
     <p class="body">
-      {% if child.age %}Age {{ child.age }}{% endif %}
+      {% if child.age %}{% blocktranslate with age=child.age %}Age {{ age }}{% endblocktranslate %}{% endif %}
       {% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}
-      {% if child.member_since %} · Member since {{ child.member_since|date:"F Y" }}{% endif %}
+      {% if child.member_since %} · {% blocktranslate with date=child.member_since|date:"F Y" %}Member since {{ date }}{% endblocktranslate %}{% endif %}
     </p>
     {% for membership in child.youth_mentor_memberships %}
-      <p class="body-sm"><span class="cd-badge cd-badge--accent caption">Youth mentor</span> at {{ membership.dojo.name }}</p>
+      <p class="body-sm"><span class="cd-badge cd-badge--accent caption">{% translate "Youth mentor" %}</span> {% blocktranslate with dojo=membership.dojo.name %}at {{ dojo }}{% endblocktranslate %}</p>
     {% endfor %}
   </div>
 </div>
