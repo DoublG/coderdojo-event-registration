@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from django.contrib.gis.geos import Point
 from django.core import mail
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -1172,3 +1172,62 @@ class HomeDojoTests(TestCase):
         add_member(self.ghent, login, role=DojoMembership.YOUTH_MENTOR)
         response = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
         self.assertContains(response, "Youth mentor")
+
+
+
+class SeedCredentialsTests(TestCase):
+    """seed_credentials.csv: merged by username (a rerun never drops logins)
+    and described from the data, so a tester knows what each login can do."""
+
+    def setUp(self):
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+
+        self.dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.dir.cleanup)
+        patcher = patch("accounts.seed_credentials.CREDENTIALS_FILE", Path(self.dir.name) / "seed_credentials.csv")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_rerun_merges_instead_of_replacing(self):
+        from .seed_credentials import read_credentials, write_credentials
+
+        User.objects.create(username="m1", email="m1@coderdojo-demo.example")
+        User.objects.create(username="m2", email="m2@coderdojo-demo.example")
+        write_credentials("mentor", [("m1", "m1@coderdojo-demo.example", "pw1")])
+        write_credentials("mentor", [("m2", "m2@coderdojo-demo.example", "pw2")])
+        self.assertEqual({r["username"] for r in read_credentials()}, {"m1", "m2"})
+
+    def test_descriptions_say_what_the_login_can_do(self):
+        from .seed_credentials import describe_account
+
+        parent = User.objects.create(username="p", email="p@coderdojo-demo.example")
+        kid_login = User.objects.create(username="k", account_type=User.NINJA)
+        make_ninja(parent, "Emma", date_of_birth=_dob(12), account=kid_login)
+        make_ninja(parent, "Lucas", date_of_birth=_dob(9))
+        dojo = make_dojo("Ghent", champion=make_champion(username="champ"), languages=["nl-be", "en-us"])
+        add_member(dojo, kid_login, role=DojoMembership.YOUTH_MENTOR)
+
+        self.assertIn("Parent of 2 children: Emma (12) [own login], Lucas (9)", describe_account(parent))
+        kid = describe_account(kid_login)
+        self.assertIn("Child login of Emma (12)", kid)
+        self.assertIn("Youth mentor at Ghent (NL/EN)", kid)
+        self.assertIn("Champion of 1 dojo: Ghent (NL/EN)", describe_account(User.objects.get(username="champ")))
+
+    @override_settings(DEBUG=True)
+    def test_command_gives_missing_seeded_logins_a_password(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from .seed_credentials import read_credentials
+
+        seeded = User.objects.create(username="lost", email="lost@coderdojo-demo.example")
+        User.objects.create(username="real", email="someone@gmail.com")
+        call_command("describe_seed_accounts", stdout=StringIO())
+        rows = {r["username"]: r for r in read_credentials()}
+        self.assertEqual(set(rows), {"lost"})
+        seeded.refresh_from_db()
+        self.assertTrue(seeded.check_password(rows["lost"]["password"]))
+        self.assertIn("Plain adult account", rows["lost"]["description"])

@@ -64,6 +64,12 @@ python manage.py seed_mailing
 # attendance badges and engagement segments work right after a start.
 python manage.py rebuild_engagement
 
+# seed_credentials.csv: a description per login (what a tester can do with it:
+# champion of which dojos, parent of which children, a child login that's a
+# youth mentor, ...), worked out from the data. Also gives seeded logins missing
+# from the file a new password (DEBUG only).
+python manage.py describe_seed_accounts
+
 # Background jobs: the same two Celery workers as production (DATA_MODEL.md
 # §11, "Production: two Celery workers under systemd"). `periodic` runs beat
 # embedded (-B, the only beat) plus the jobs beat triggers; `mailing` runs
