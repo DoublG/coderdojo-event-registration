@@ -18,6 +18,8 @@ OPERATOR_LABELS = {
     "is": "is",
     "within": "within",
     "within_days": "in the last",
+    "gte": "at least",
+    "lte": "at most",
 }
 
 OPERATORS = {
@@ -25,6 +27,7 @@ OPERATORS = {
     "boolean": ["is"],
     "distance": ["within"],
     "days": ["within_days"],
+    "number": ["gte", "lte"],
 }
 
 
@@ -70,6 +73,10 @@ class SegmentAttribute(ABC):
             if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
                 raise ValueError(f"“{self.label}” needs a whole number of days, e.g. 365.")
             return
+        if self.value_type == "number":
+            if not isinstance(value, (int, float)) or isinstance(value, bool) or value < 0:
+                raise ValueError(f"“{self.label}” needs a number, 0 or more.")
+            return
         if operator in ("in", "not_in"):
             if not isinstance(value, list) or not value:
                 raise ValueError(f"“{operator}” needs a non-empty list of values.")
@@ -91,6 +98,8 @@ class SegmentAttribute(ABC):
             return f"{self.label.replace(' in the last N days', '')} {op} {value} days"
         if self.value_type == "boolean":
             return f"{self.label}: {'yes' if value else 'no'}"
+        if self.value_type == "number":
+            return f"{self.label} {op} {value:g}{getattr(self, 'unit', '')}"
         labels = {str(c.value): c.label for c in self.choices()}
         values = value if isinstance(value, list) else [value]
         return f"{self.label} {op} {', '.join(labels.get(str(v), str(v)) for v in values)}"
@@ -105,12 +114,20 @@ class SegmentAttribute(ABC):
             return by_text.get(data.get("value", ""), data.get("value", ""))
         if self.value_type == "boolean":
             return data.get("value") == "true"
-        if self.value_type == "days":
+        if self.value_type in ("days", "number"):
             try:
-                return int(data.get("value", ""))
+                number = float(data.get("value", ""))
             except ValueError:
                 return None
+            return int(number) if number.is_integer() else number
         return data.get("value")
+
+
+def number_q(field: str, operator: str, value: Any) -> Q:
+    """The gte/lte Q on one numeric field, shared by number attributes."""
+    if operator in ("gte", "lte"):
+        return Q(**{f"{field}__{operator}": value})
+    raise ValueError(f"Unsupported operator: {operator}")
 
 
 def choice_q(field: str, operator: str, value: Any) -> Q:

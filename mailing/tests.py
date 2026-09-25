@@ -1325,3 +1325,78 @@ class SegmentBuilderTests(TestCase):
         for url in [self.url, reverse("manage_segment_add_group", kwargs={"segment_id": self.segment.pk}),
                     reverse("manage_segment_add_rule", kwargs={"segment_id": self.segment.pk, "group_id": group.pk})]:
             self.assertEqual(self.client.post(url, {"scope": "user"}).status_code, 404)
+
+
+class EngagementAttributeTests(TestCase):
+    """Segments on the nightly engagement snapshot (events.engagement)."""
+
+    def setUp(self):
+        from events.engagement import rebuild
+
+        self.ghent, self.antwerp = make_dojo("Ghent"), make_dojo("Antwerp", status=Dojo.DORMANT)
+        self.regular = _family("regularfam", Ninja.GIRL)
+        self.lapsed = _family("lapsedfam", Ninja.BOY)
+        regular_kid = Ninja.objects.of_guardian(self.regular).get()
+        lapsed_kid = Ninja.objects.of_guardian(self.lapsed).get()
+        Ninja.objects.filter(pk=lapsed_kid.pk).update(home_dojo=self.antwerp)
+        for days in (150, 120, 90, 60, 30):
+            Registration.objects.create(event=self._session(days, self.ghent), ninja=regular_kid,
+                                        waiting_list=False, position=1, attended=True)
+        for days in (330, 300, 270):
+            Registration.objects.create(event=self._session(days, self.antwerp), ninja=lapsed_kid,
+                                        waiting_list=False, position=1, attended=True)
+        upcoming = self._session(-7, self.ghent, status=Event.OPEN)
+        Registration.objects.create(event=upcoming, ninja=regular_kid, waiting_list=False, position=1)
+        rebuild()
+
+    def _session(self, days_ago, dojo, status=Event.CLOSED):
+        start = timezone.now() - timedelta(days=days_ago)
+        return Event.objects.create(name=f"S{days_ago}", dojo=dojo, status=status, places=20,
+                                    start_time=start, end_time=start + timedelta(hours=2))
+
+    def _one(self, attribute, operator, value):
+        return _resolve(_segment(("ninja", "and", [(attribute, operator, value)])))
+
+    def test_each_engagement_attribute(self):
+        self.assertEqual(self._one("engagement_stage", "in", ["regular"]), {"regularfam"})
+        self.assertEqual(self._one("engagement_stage", "in", ["lapsed"]), {"lapsedfam"})
+        self.assertEqual(self._one("engagement_stage_at_dojo", "in", {"dojo": self.ghent.pk, "stages": ["regular"]}),
+                         {"regularfam"})
+        self.assertEqual(self._one("attendance_rate", "gte", 50), {"regularfam"})
+        self.assertEqual(self._one("sessions_attended", "gte", 3), {"regularfam"})
+        self.assertEqual(self._one("days_since_last_visit", "gte", 200), {"lapsedfam"})
+        self.assertEqual(self._one("days_since_last_visit", "lte", 45), {"regularfam"})
+        self.assertEqual(self._one("has_upcoming_registration", "is", True), {"regularfam"})
+        self.assertEqual(self._one("main_dojo_status", "in", ["dormant"]), {"lapsedfam"})
+
+    def test_rules_read_as_sentences_and_validate(self):
+        from .segmentation.registry import get_attribute
+
+        self.assertEqual(get_attribute("attendance_rate").describe("gte", 50),
+                         "Share of their sessions they came to (last 180 days, %) at least 50%")
+        self.assertEqual(get_attribute("engagement_stage_at_dojo").describe("in", {"dojo": self.ghent.pk, "stages": ["at_risk"]}),
+                         "At Ghent: At risk")
+        with self.assertRaises(ValueError):
+            get_attribute("missed_in_a_row").validate("gte", -1)
+        with self.assertRaises(ValueError):
+            get_attribute("engagement_stage_at_dojo").validate("in", {"dojo": self.ghent.pk, "stages": []})
+
+    def test_builder_widgets_and_parsing(self):
+        from accounts.models import OrganisationRole
+
+        admin = User.objects.create(username="orgadmin", email="ann@example.com")
+        OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
+        self.client.force_login(admin)
+        segment = Segment.objects.create(name="Engaged")
+        group = SegmentGroup.objects.create(segment=segment, scope="ninja")
+        fields = reverse("manage_segment_rule_fields", kwargs={"segment_id": segment.pk, "group_id": group.pk})
+        self.assertContains(self.client.get(fields, {"attribute": "missed_in_a_row"}), 'step="any"')
+        self.assertContains(self.client.get(fields, {"attribute": "engagement_stage_at_dojo"}), 'name="dojo"')
+        add = reverse("manage_segment_add_rule", kwargs={"segment_id": segment.pk, "group_id": group.pk})
+        self.client.post(add, {"attribute": "missed_in_a_row", "operator": "gte", "value": "3"})
+        self.client.post(add, {"attribute": "engagement_stage_at_dojo", "operator": "in", "dojo": str(self.ghent.pk),
+                               "value": ["at_risk", "lapsed"]})
+        self.assertEqual(dict(SegmentRule.objects.values_list("attribute", "value")), {
+            "missed_in_a_row": 3,
+            "engagement_stage_at_dojo": {"dojo": self.ghent.pk, "stages": ["at_risk", "lapsed"]},
+        })

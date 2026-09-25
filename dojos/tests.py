@@ -739,6 +739,20 @@ class DojoEventAttendanceViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("login"), response.url)
 
+    def test_rows_show_how_each_child_comes_to_this_dojo(self):
+        from events.models import NinjaEngagement
+
+        NinjaEngagement.objects.create(ninja=self.zoe.ninja, dojo=self.dojo, stage=NinjaEngagement.AT_RISK,
+                                       attended_180d=2, offered_180d=6, missed_in_a_row=3,
+                                       computed_on=timezone.localdate())
+        self.client.force_login(self.owner)
+        response = self.client.get(self._page_url())
+        self.assertContains(response, "At risk")
+        self.assertContains(response, "Came to 2 of the 6 sessions meant for them in the last 180 days; missed the last 3.")
+        # Still there after marking the row (the row is re-rendered on its own).
+        response = self.client.post(self._mark_url(self.zoe), {"attended": "present"}, HTTP_HX_REQUEST="true")
+        self.assertContains(response, "At risk")
+
     def test_another_owner_gets_404_everywhere(self):
         other_owner = make_champion(username="owner2")
         self.client.force_login(other_owner)

@@ -18,7 +18,7 @@ from applications.services import is_approved_champion
 from content.models import FAQ, OrganisationTeamMember
 from events.awards import BeltError, award_belt, sync_milestones
 from events.forms import EventForm
-from events.models import Belt, Event, Registration
+from events.models import Belt, Event, NinjaEngagement, Registration
 from geo.geocoding import find_province, geocode
 from notifications.models import Notification
 from pathways.models import Pathway
@@ -184,6 +184,12 @@ def _attendance_context(event):
         "all_pathways": sorted(Pathway.objects.all(), key=lambda p: (p.id not in event_pathway_ids, p.name)),
         # For each row's "Award belt" picker (only belts above the ninja's current one are offered).
         "all_belts": list(Belt.objects.all()),
+        # How each ninja comes to this dojo (last night's events.engagement snapshot).
+        "engagement_by_ninja": {
+            row.ninja_id: row
+            for row in NinjaEngagement.objects.filter(dojo_id=event.dojo_id,
+                                                      ninja_id__in=[r.ninja_id for r in registrations])
+        },
     }
 
 

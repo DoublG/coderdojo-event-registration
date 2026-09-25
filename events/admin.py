@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from geo.widgets import BelgiumGISModelAdmin
 
-from .models import Badge, Belt, Event, NinjaBadge, NinjaBelt, Registration
+from .models import Badge, Belt, Event, NinjaBadge, NinjaBelt, NinjaEngagement, Registration
 
 
 @admin.register(Event)
@@ -38,3 +38,13 @@ class NinjaBeltAdmin(admin.ModelAdmin):
 
     list_display = ["ninja", "belt", "awarded_on", "awarded_by_label"]
     list_filter = ["belt"]
+
+
+@admin.register(NinjaEngagement)
+class NinjaEngagementAdmin(admin.ModelAdmin):
+    """The nightly engagement snapshot (events.engagement). Rebuilt every
+    night, so an edit here only lasts until the next rebuild."""
+
+    list_display = ["ninja", "dojo", "stage", "attended_180d", "offered_180d", "missed_in_a_row", "last_attended"]
+    list_filter = ["stage", "computed_on"]
+    search_fields = ["ninja__name"]

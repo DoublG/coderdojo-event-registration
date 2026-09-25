@@ -29,6 +29,18 @@ match SegmentAttribute.value_from_form.
     <select class="cd-form__select body" name="value" aria-label="Value"><option value="true">Yes</option><option value="false">No</option></select>
   {% elif attribute.value_type == "days" %}
     <input class="cd-form__input body" type="number" name="value" min="1" value="365" style="max-width: 8rem;" aria-label="Days"> <span class="body-sm">days</span>
+  {% elif attribute.value_type == "number" %}
+    <input class="cd-form__input body" type="number" name="value" min="0" step="any" value="3" style="max-width: 8rem;" aria-label="Number">{% if attribute.unit %} <span class="body-sm">{{ attribute.unit }}</span>{% endif %}
+  {% elif attribute.value_type == "dojo_stage" %}
+    <span class="body-sm">at</span>
+    <select class="cd-form__select body" name="dojo" aria-label="Dojo">
+      {% for choice in attribute.dojo_choices %}<option value="{{ choice.value }}">{{ choice.label }}</option>{% endfor %}
+    </select>
+    <div class="cd-form__checkbox-list">
+      {% for choice in choices %}
+        <label class="cd-form__checkbox-row body-sm"><input type="checkbox" name="value" value="{{ choice.value }}"> {{ choice.label }}</label>
+      {% endfor %}
+    </div>
   {% elif attribute.value_type == "distance" %}
     <input class="cd-form__input body" type="number" name="km" min="1" step="1" value="20" style="max-width: 6rem;" aria-label="Kilometres"> <span class="body-sm">km of</span>
     <select class="cd-form__select body" name="dojo" aria-label="Dojo">

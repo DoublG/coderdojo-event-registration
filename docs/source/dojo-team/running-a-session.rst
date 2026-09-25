@@ -74,6 +74,14 @@ history.
 Marking a child present also keeps their attendance badges (the
 wristbands) up to date.
 
+Next to each child's name, a label shows how they come to your dojo:
+**New**, **Regular**, **Occasional**, **At risk** (missed the last three
+sessions meant for them), **Lapsed** (not in the last six months),
+**Never came** or **Aged out**. Hover over it for the numbers behind it.
+It's worked out every night from the attendance you mark, and only
+counts sessions meant for that child (their age range; a girls' session
+only for girls), so marking attendance keeps it accurate.
+
 Awarding belts
 ---------------
 

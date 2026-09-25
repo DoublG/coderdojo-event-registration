@@ -2168,7 +2168,12 @@ Each phase ships with tests (the repo rule) and updates this section and
   the digest (existing sessions were marked announced by the migration).
   `load_mail_templates` runs on every deploy.
 
-- phase 7: the segment builder is in the organisation dashboard.
+- phase 6: done. `events.NinjaEngagement`, rebuilt nightly
+  (`events/engagement.py`, 03:00), with stages as specified above and the
+  stage shown on the dojo team's attendance rows. The `registration
+  created_at` and cancellation log from the plan aren't built yet.
+- phase 7: the segment builder is in the organisation dashboard, and the
+  Tier 2 attributes are built on the snapshot.
 - phase 8: done, in the organisation dashboard (`/manage/`), not the
   Django admin.
   - campaigns: create, preview, test, launch or schedule, cancel, results

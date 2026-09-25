@@ -1,5 +1,16 @@
 from .attributes.account import AccountTypeAttribute, HasChildrenAttribute
 from .attributes.activity import ActiveTeamMemberAttribute, AttendedWithinDaysAttribute
+from .attributes.engagement import (
+    AttendanceRateAttribute,
+    DaysSinceLastVisitAttribute,
+    EngagementStageAttribute,
+    HasUpcomingAttribute,
+    MainDojoStatusAttribute,
+    MissedInARowAttribute,
+    NoShowsAttribute,
+    SessionsAttendedAttribute,
+    StageAtDojoAttribute,
+)
 from .attributes.event import EventAttribute
 from .attributes.locality import LanguageAttribute, NearDojoAttribute, ProvinceAttribute
 from .attributes.ninja import NinjaGenderAttribute
@@ -16,6 +27,15 @@ SEGMENT_ATTRIBUTES = {
         NearDojoAttribute,
         NinjaGenderAttribute,
         AttendedWithinDaysAttribute,
+        EngagementStageAttribute,
+        StageAtDojoAttribute,
+        AttendanceRateAttribute,
+        SessionsAttendedAttribute,
+        MissedInARowAttribute,
+        DaysSinceLastVisitAttribute,
+        NoShowsAttribute,
+        HasUpcomingAttribute,
+        MainDojoStatusAttribute,
         EventAttribute,
         AttendedEventAttribute,
     ]

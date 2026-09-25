@@ -53,6 +53,10 @@ fi
 # creates what's missing, so it's safe to run on every start.
 python manage.py seed_mailing
 
+# The engagement snapshot is rebuilt nightly by Celery beat; build it now so
+# attendance badges and engagement segments work right after a start.
+python manage.py rebuild_engagement
+
 # Background jobs: the same two Celery workers as production (DATA_MODEL.md
 # §11, "Production: two Celery workers under systemd"). `periodic` runs beat
 # embedded (-B, the only beat) plus the jobs beat triggers; `mailing` runs

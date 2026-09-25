@@ -189,6 +189,12 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=9, minute=0),
         "options": {"queue": "celery", "expires": 6 * 3600},
     },
+    # Before the day's mail jobs, so segments and the dashboards see fresh figures.
+    "rebuild-engagement": {
+        "task": "events.tasks.rebuild_engagement",
+        "schedule": crontab(hour=3, minute=0),
+        "options": {"queue": "celery", "expires": 6 * 3600},
+    },
     "new-sessions-digest": {
         "task": "mailing.tasks.announce_new_sessions",
         "schedule": crontab(hour=17, minute=0),

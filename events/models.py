@@ -254,3 +254,64 @@ class NinjaBelt(models.Model):
             return who
         role = dict(membership.ROLE_CHOICES).get(self.awarded_as_role or membership.role, "").lower()
         return f"{who}, as {role} of {membership.dojo.name}"
+
+
+class NinjaEngagementManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("ninja", "dojo")
+
+
+class NinjaEngagement(models.Model):
+    """How a ninja comes to sessions, rebuilt every night by
+    events.engagement.rebuild (DATA_MODEL.md §11, "Engagement snapshot").
+    One row per ninja and dojo they came to in the last year, plus one
+    overall row (dojo empty) measured at their main dojo. Only sessions
+    meant for the ninja count as offered (age range; a girls' session only
+    for girls). Never edited by hand in normal use: the next rebuild
+    replaces it."""
+
+    NEW = "new"
+    REGULAR = "regular"
+    OCCASIONAL = "occasional"
+    AT_RISK = "at_risk"
+    LAPSED = "lapsed"
+    NEVER_ATTENDED = "never_attended"
+    AGED_OUT = "aged_out"
+    STAGE_CHOICES = [
+        (NEW, "New"),
+        (REGULAR, "Regular"),
+        (OCCASIONAL, "Occasional"),
+        (AT_RISK, "At risk"),
+        (LAPSED, "Lapsed"),
+        (NEVER_ATTENDED, "Never came"),
+        (AGED_OUT, "Aged out"),
+    ]
+
+    ninja = models.ForeignKey("accounts.Ninja", on_delete=models.CASCADE, related_name="engagement")
+    dojo = models.ForeignKey(
+        "dojos.Dojo", on_delete=models.CASCADE, null=True, blank=True, related_name="+",
+        help_text="Empty: the ninja overall, measured at their main dojo.",
+    )
+    main_dojo = models.ForeignKey("dojos.Dojo", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    stage = models.CharField(max_length=20, choices=STAGE_CHOICES)
+    first_attended = models.DateField(null=True, blank=True)
+    last_attended = models.DateField(null=True, blank=True)
+    attended_total = models.PositiveIntegerField(default=0)
+    attended_180d = models.PositiveIntegerField(default=0)
+    offered_180d = models.PositiveIntegerField(default=0, help_text="Sessions meant for the ninja, held in the window.")
+    attendance_rate = models.FloatField(default=0)
+    missed_in_a_row = models.PositiveIntegerField(default=0)
+    no_shows_90d = models.PositiveIntegerField(default=0)
+    has_upcoming = models.BooleanField(default=False)
+    from_marked_attendance = models.BooleanField(
+        default=True, help_text="False when some counted visits are confirmed places at sessions nobody marked.",
+    )
+    computed_on = models.DateField()
+
+    objects = NinjaEngagementManager()
+
+    class Meta:
+        indexes = [models.Index(fields=["dojo", "stage"], name="events_engagement_stage_idx")]
+
+    def __str__(self):
+        return f"{self.ninja} @ {self.dojo or 'overall'}: {self.get_stage_display()}"

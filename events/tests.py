@@ -9,6 +9,7 @@ from accounts.models import Guardianship, Ninja, User
 from dojos.models import Dojo
 from dojos.testing import make_dojo
 
+from .engagement import is_aimed_at
 from .models import Event, Registration
 
 
@@ -365,3 +366,95 @@ class StrNeverQueriesTests(TestCase):
             self.assertEqual(str(event), "Session (Ghent (9000 Gent))")
             self.assertEqual(str(event.dojo), "Ghent (9000 Gent)")
 
+
+
+class EngagementTests(TestCase):
+    """events.engagement: stages measured against the sessions meant for
+    each child (DATA_MODEL.md §11, "Engagement snapshot")."""
+
+    def setUp(self):
+        self.dojo = make_dojo("Ghent")
+        self.ninja = Ninja.objects.create(name="Emma", gender=Ninja.GIRL, date_of_birth=timezone.localdate() - timedelta(days=11 * 365))
+
+    def _session(self, days_ago, dojo=None, **fields):
+        start = timezone.now() - timedelta(days=days_ago)
+        return Event.objects.create(name=f"S{days_ago}", dojo=dojo or self.dojo, status=Event.CLOSED, places=20,
+                                    start_time=start, end_time=start + timedelta(hours=2), **fields)
+
+    def _came(self, event, ninja=None, attended=True):
+        Registration.objects.create(event=event, ninja=ninja or self.ninja, waiting_list=False, position=1, attended=attended)
+
+    def _overall(self, ninja=None):
+        from .engagement import rebuild
+        from .models import NinjaEngagement
+
+        rebuild()
+        return NinjaEngagement.objects.get(ninja=ninja or self.ninja, dojo=None)
+
+    def test_regular_at_a_monthly_dojo(self):
+        for days in (150, 120, 90, 60, 30):
+            session = self._session(days)
+            self._came(session)
+        row = self._overall()
+        self.assertEqual((row.stage, row.attended_180d, row.offered_180d), ("regular", 5, 5))
+        self.assertEqual(row.main_dojo, self.dojo)
+
+    def test_at_risk_after_three_missed_sessions(self):
+        for days in (170, 150, 130, 110):
+            self._came(self._session(days))
+        for days in (60, 40, 20):
+            self._session(days)
+        row = self._overall()
+        self.assertEqual((row.stage, row.missed_in_a_row), ("at_risk", 3))
+
+    def test_lapsed_never_new_and_aged_out(self):
+        lapsed = Ninja.objects.create(name="Old visitor")
+        for days in (300, 280, 260):
+            self._came(self._session(days), ninja=lapsed)
+        never = Ninja.objects.create(name="Never")
+        new = Ninja.objects.create(name="New")
+        self._came(self._session(20), ninja=new)
+        adult = Ninja.objects.create(name="Adult", date_of_birth=timezone.localdate() - timedelta(days=19 * 365))
+        self._came(self._session(25), ninja=adult)
+        stages = {n.name: self._overall(n).stage for n in (lapsed, never, new, adult)}
+        self.assertEqual(stages, {"Old visitor": "lapsed", "Never": "never_attended", "New": "new", "Adult": "aged_out"})
+
+    def test_a_session_nobody_marked_counts_a_confirmed_place(self):
+        unmarked = self._session(30)
+        Registration.objects.create(event=unmarked, ninja=self.ninja, waiting_list=False, position=1)
+        row = self._overall()
+        self.assertEqual(row.attended_180d, 1)
+        self.assertFalse(row.from_marked_attendance)
+
+    def test_a_boy_does_not_miss_a_girls_session_or_one_for_older_children(self):
+        boy = Ninja.objects.create(name="Liam", gender=Ninja.BOY, date_of_birth=timezone.localdate() - timedelta(days=8 * 365))
+        for days in (170, 150, 130):
+            self._came(self._session(days), ninja=boy)
+        self._session(60, audience=Event.GIRLS)
+        self._session(40, min_age=12)
+        self._session(20, audience=Event.GIRLS)
+        row = self._overall(boy)
+        self.assertEqual((row.missed_in_a_row, row.offered_180d), (0, 3))
+        self.assertFalse(is_aimed_at(boy, Event(audience=Event.GIRLS, start_time=timezone.now())))
+
+    def test_overall_counts_a_visit_at_another_dojo(self):
+        elsewhere = make_dojo("Antwerp")
+        self.ninja.home_dojo = self.dojo
+        self.ninja.save()
+        for days in (60, 40):
+            self._session(days)
+        self._came(self._session(20, dojo=elsewhere))
+        row = self._overall()
+        self.assertEqual((row.attended_180d, row.missed_in_a_row), (1, 0))
+        self.assertEqual(row.stage, "new")
+
+    def test_upcoming_booking_and_rebuild_replaces_rows(self):
+        from .engagement import rebuild
+        from .models import NinjaEngagement
+
+        future = _future_event(self.dojo)
+        Registration.objects.create(event=future, ninja=self.ninja, waiting_list=False, position=1)
+        self.assertTrue(self._overall().has_upcoming)
+        count = NinjaEngagement.objects.count()
+        rebuild()
+        self.assertEqual(NinjaEngagement.objects.count(), count)

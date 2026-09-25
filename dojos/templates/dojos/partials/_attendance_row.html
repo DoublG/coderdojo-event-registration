@@ -3,10 +3,16 @@ One ninja's Present/Absent toggle. Clicking the already-pressed button
 posts "none", clearing the mark back to "not yet marked" (Registration.attended
 is tri-state). htmx swaps just this row; without JS it's a plain form post.
 {% endcomment %}
-{% with ninja=registration.ninja %}
+{% load lookup %}{% with ninja=registration.ninja %}
 <div class="cd-attendance__row" id="attendance-row-{{ registration.id }}">
   <div class="cd-attendance__person">
-    <span class="cd-attendance__name body">{{ ninja.name }}</span>
+    <span class="cd-attendance__name body">{{ ninja.name }}
+      {% with engagement=engagement_by_ninja|get_item:ninja.id %}{% if engagement %}
+        {# How this child comes to this dojo (events.engagement, rebuilt nightly). #}
+        <span class="cd-badge caption {% if engagement.stage == 'regular' %}cd-badge--success{% elif engagement.stage == 'at_risk' %}cd-badge--warning{% elif engagement.stage == 'new' %}cd-badge--accent{% else %}cd-badge--outline{% endif %}"
+              title="Came to {{ engagement.attended_180d }} of the {{ engagement.offered_180d }} sessions meant for them in the last 180 days{% if engagement.missed_in_a_row %}; missed the last {{ engagement.missed_in_a_row }}{% endif %}.">{{ engagement.get_stage_display }}</span>
+      {% endif %}{% endwith %}
+    </span>
     {% with age=ninja.age pathways=registration.pathways.all current_belt=ninja.current_belt %}
       {% if age is not None or pathways or current_belt %}
         <span class="cd-attendance__meta caption">{% if age is not None %}Age {{ age }}{% endif %}{% if age is not None and pathways %} · {% endif %}{% for pathway in pathways %}{{ pathway.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if current_belt %}{% if age is not None or pathways %} · {% endif %}{{ current_belt.name }}{% endif %}</span>
