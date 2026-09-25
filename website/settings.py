@@ -228,7 +228,8 @@ INSTALLED_APPS = [
     'notifications',
     'django_celery_results',
     'mailing',
-    'django_celery_beat'
+    'django_celery_beat',
+    'ninja'
 ]
 
 MIDDLEWARE = [

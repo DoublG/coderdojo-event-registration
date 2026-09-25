@@ -1,6 +1,7 @@
 {% extends "core/_manage_base.html" %}
 {% block manage_page_title %}Segments{% endblock %}
 {% block manage_heading %}Segments{% endblock %}
+{% block manage_topbar_extra %}<a class="cd-btn cd-btn--primary label" href="{% url 'manage_segment_create' %}">New segment</a>{% endblock %}
 
 {% block manage_content %}
   <div class="cd-table-wrap">
@@ -15,7 +16,7 @@
       <tbody>
         {% for segment, count in rows %}
           <tr>
-            <td class="body-sm">{{ segment.name }}{% if not segment.is_active %} <span class="cd-badge cd-badge--outline caption">Inactive</span>{% endif %}</td>
+            <td class="body-sm"><a href="{% url 'manage_segment_detail' segment_id=segment.id %}">{{ segment.name }}</a>{% if not segment.is_active %} <span class="cd-badge cd-badge--outline caption">Inactive</span>{% endif %}</td>
             <td class="body-sm">{{ segment.description }}</td>
             <td class="body-sm cd-table__num">{{ count }}</td>
           </tr>

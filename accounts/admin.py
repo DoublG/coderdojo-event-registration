@@ -34,6 +34,14 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = BaseUserAdmin.fieldsets + (
         ("CoderDojo", {"fields": ("account_type", "phone", "preferred_language", "postal_code", "must_change_password")}),
         ("Team-page profile", {"fields": ("display_name", "title", "bio", "photo", "show_on_team_pages")}),
+        # For fixing a check by hand (reviews happen in the Background checks
+        # list, applications.admin). The document itself isn't here: it's in
+        # private storage and only read through download_background_check.
+        ("Background check (fix by hand)", {
+            "classes": ["collapse"],
+            "fields": ("background_check_status", "background_check_requested_at", "background_check_submitted_at",
+                       "background_check_reviewed_at", "background_check_expires_at", "background_check_token"),
+        }),
     )
     search_fields = ["username", "email", "first_name", "last_name"]
     inlines = [GuardianshipInline, OrganisationRoleInline]

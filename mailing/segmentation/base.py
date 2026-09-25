@@ -11,6 +11,15 @@ NINJA = "ninja"
 
 # The operators each value type supports. A rule's operator is validated
 # against its attribute's type when the rule is saved (SegmentRule.clean).
+OPERATOR_LABELS = {
+    "equals": "is",
+    "in": "is one of",
+    "not_in": "is none of",
+    "is": "is",
+    "within": "within",
+    "within_days": "in the last",
+}
+
 OPERATORS = {
     "choice": ["equals", "in", "not_in"],
     "boolean": ["is"],
@@ -71,6 +80,37 @@ class SegmentAttribute(ABC):
         unknown = [v for v in values if v not in allowed]
         if unknown:
             raise ValueError(f"Unknown value(s) for “{self.label}”: {unknown}.")
+
+
+    # --- the segment builder (mailing.manage) -------------------------------
+
+    def describe(self, operator: str, value: Any) -> str:
+        """The rule as a readable phrase, e.g. "Child's gender is one of Girl, Prefer not to say"."""
+        op = OPERATOR_LABELS.get(operator, operator)
+        if self.value_type == "days":
+            return f"{self.label.replace(' in the last N days', '')} {op} {value} days"
+        if self.value_type == "boolean":
+            return f"{self.label}: {'yes' if value else 'no'}"
+        labels = {str(c.value): c.label for c in self.choices()}
+        values = value if isinstance(value, list) else [value]
+        return f"{self.label} {op} {', '.join(labels.get(str(v), str(v)) for v in values)}"
+
+    def value_from_form(self, operator: str, data) -> Any:
+        """The rule's JSON value from the builder's form fields (`data` is a
+        QueryDict): choices come back as their real (typed) values."""
+        by_text = {str(c.value): c.value for c in self.choices()}
+        if self.value_type == "choice":
+            if operator in ("in", "not_in"):
+                return [by_text.get(v, v) for v in data.getlist("value")]
+            return by_text.get(data.get("value", ""), data.get("value", ""))
+        if self.value_type == "boolean":
+            return data.get("value") == "true"
+        if self.value_type == "days":
+            try:
+                return int(data.get("value", ""))
+            except ValueError:
+                return None
+        return data.get("value")
 
 
 def choice_q(field: str, operator: str, value: Any) -> Q:

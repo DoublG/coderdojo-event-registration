@@ -130,3 +130,34 @@ class StrNeverQueriesTests(TestCase):
                 loaded = model.objects.get(pk=row.pk)
                 with self.assertNumQueries(0):
                     self.assertIn(expected, str(loaded))
+
+
+class AdminStaysFullyUsableTests(TestCase):
+    """The Django admin is the emergency tool: whatever breaks must be
+    fixable there, so nobody ever needs direct database access (CLAUDE.md).
+    Every registered model lets a superuser add, change and delete, apart
+    from the exceptions below, each with its reason."""
+
+    # (app_label.ModelName, permission) -> why it's not needed.
+    EXCEPTIONS = {
+        ("applications.BackgroundCheck", "add"): "a review list over existing accounts; the accounts themselves "
+                                                 "(check fields included) are fully editable in the User admin",
+    }
+
+    def test_superuser_can_add_change_and_delete_everything(self):
+        from django.contrib import admin
+        from django.test import RequestFactory
+
+        from accounts.models import User
+
+        request = RequestFactory().get("/admin/")
+        request.user = User.objects.create(username="root", is_staff=True, is_superuser=True)
+        missing = []
+        for model, model_admin in admin.site._registry.items():
+            label = f"{model._meta.app_label}.{model.__name__}"
+            for permission in ("add", "change", "delete"):
+                if (label, permission) in self.EXCEPTIONS:
+                    continue
+                if not getattr(model_admin, f"has_{permission}_permission")(request):
+                    missing.append(f"{label}: {permission}")
+        self.assertEqual(missing, [], "the admin must stay fully usable for fixing things by hand")

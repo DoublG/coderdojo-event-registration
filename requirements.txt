@@ -50,4 +50,27 @@ zope.interface==8.6
 # background jobs
 celery==5.6.3
 django_celery_results==2.6.0
-django-celery-beat==2.9.0
+# django-celery-beat 2.9.0 (the latest release) caps Django<6.1; upstream main
+# allows <6.2 since celery/django-celery-beat#1042 but hasn't released it yet.
+# Pinned to that commit as a tarball (no git needed on the server). Swap back
+# to a plain `django-celery-beat==X.Y.Z` once a release supports Django 6.1.
+django-celery-beat @ https://github.com/celery/django-celery-beat/archive/dde53dcbe2bdd80c9e818fb6119523f5f39ab8e4.tar.gz
+
+# Pulled in by the background-job packages (pinned for reproducible installs):
+amqp==5.4.0
+billiard==4.3.0
+click==8.5.0
+click-didyoumean==0.3.1
+click-plugins==1.1.1.2
+click-repl==0.4.0
+cron_descriptor==2.1.0
+django-timezone-field==7.2.2
+kombu==5.6.2
+prompt_toolkit==3.0.53
+python-crontab==3.4.0
+python-dateutil==2.9.0.post0
+six==1.17.0
+tzdata==2026.4
+tzlocal==5.4.4
+vine==5.1.0
+wcwidth==0.9.1

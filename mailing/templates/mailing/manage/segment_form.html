@@ -1,0 +1,14 @@
+{% extends "core/_manage_base.html" %}
+{% block manage_page_title %}New segment{% endblock %}
+{% block manage_heading %}New segment{% endblock %}
+
+{% block manage_content %}
+  <form method="post" class="cd-card cd-form" style="padding: var(--space-5); max-width: 640px;" novalidate>
+    {% csrf_token %}
+    {% include "mailing/manage/_segment_fields.html" %}
+    <div class="cd-form__actions">
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_segment_list' %}">Cancel</a>
+      <button type="submit" class="cd-btn cd-btn--primary label">Create</button>
+    </div>
+  </form>
+{% endblock %}

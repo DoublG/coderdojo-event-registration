@@ -84,6 +84,16 @@ class NearDojoAttribute(SegmentAttribute):
         if value.get("dojo") not in {choice.value for choice in self.choices()}:
             raise ValueError("Pick a dojo that has a location.")
 
+    def describe(self, operator, value):
+        names = {c.value: c.label for c in self.choices()}
+        return f"Lives within {value.get('km')} km of {names.get(value.get('dojo'), 'a dojo')}"
+
+    def value_from_form(self, operator, data):
+        try:
+            return {"dojo": int(data.get("dojo", "")), "km": float(data.get("km", ""))}
+        except ValueError:
+            return None
+
     def build_q(self, operator, value):
         if operator != "within":
             raise ValueError(f"Unsupported operator: {operator}")

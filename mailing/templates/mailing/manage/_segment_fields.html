@@ -1,0 +1,13 @@
+<div class="cd-form__field">
+  <label class="cd-form__label label" for="{{ form.name.id_for_label }}">Name<span class="cd-form__required" aria-hidden="true">*</span></label>
+  <ul class="cd-form__errors">{% for error in form.name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+  {{ form.name }}
+</div>
+<div class="cd-form__field">
+  <label class="cd-form__label label" for="{{ form.description.id_for_label }}">Description</label>
+  {{ form.description }}
+</div>
+<div class="cd-form__checkbox-row">
+  {{ form.is_active }}
+  <label class="body-sm" for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+</div>

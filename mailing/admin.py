@@ -96,68 +96,44 @@ class CampaignAdmin(admin.ModelAdmin):
 
 @admin.register(EmailMessage)
 class EmailMessageAdmin(admin.ModelAdmin):
-    """The mail queue and its history. Read-only: rows are created by
-    mailing.services.send() and changed by the Celery tasks."""
+    """The mail queue and its history. Rows are created by
+    mailing.services.send() and changed by the Celery tasks; edit one here
+    only to fix something by hand (e.g. put a stuck row back to pending)."""
 
     list_display = ["recipient", "category", "subject", "status", "attempts", "created_at", "sent_at"]
     list_filter = ["status", "category", "campaign"]
     search_fields = ["recipient", "subject", "message_id"]
     date_hierarchy = "created_at"
 
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
 
 @admin.register(MailPreference)
 class MailPreferenceAdmin(admin.ModelAdmin):
-    """Read-only: preferences change through the account's own Mail
-    preferences page or an unsubscribe link, which also log consent."""
+    """Preferences change through the account's own Mail preferences page or
+    an unsubscribe link, which also log a ConsentEvent. An edit here does
+    NOT log one: only for fixing something by hand (and note why)."""
 
     list_display = ["user", "category", "subscribed", "changed_at"]
     list_filter = ["category", "subscribed"]
     search_fields = ["user__email", "user__username"]
 
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
 
 @admin.register(ConsentEvent)
 class ConsentEventAdmin(admin.ModelAdmin):
-    """The append-only consent log."""
+    """The consent log, append-only in normal use (mailing.preferences).
+    Editable here only for emergencies, e.g. erasing a person's data."""
 
     list_display = ["created_at", "user", "category", "subscribed", "source", "wording_version"]
     list_filter = ["category", "source", "subscribed"]
     search_fields = ["user__email", "user__username"]
 
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
 
 @admin.register(BounceRecord)
 class BounceRecordAdmin(admin.ModelAdmin):
-    """What came back from the bounce mailbox (append-only)."""
+    """What came back from the bounce mailbox (append-only in normal use)."""
 
     list_display = ["created_at", "email", "kind", "status_code", "diagnostic"]
     list_filter = ["kind"]
     search_fields = ["email", "diagnostic"]
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
 
 
 @admin.register(EmailSuppression)

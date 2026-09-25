@@ -9,10 +9,11 @@ permissions below; holding any role makes the account staff.
   families (accounts, ninjas, registrations) and no background checks.
 - ADMIN: everything the board has, plus editing dojos and events, the site
   content (FAQs, testimonials, announcements), the pathway, badge and
-  belt catalogues, and mail campaigns: templates, segments and campaigns,
-  plus viewing sent mail (DATA_MODEL.md §11: only this role runs
-  campaigns; the board gets no mailing access, since segments and sent mail
-  show families' personal data).
+  belt catalogues, the mail templates, campaigns and segments (run day to
+  day from the organisation dashboard, /manage/, which only this role
+  opens: is_organisation_admin), plus viewing sent mail (DATA_MODEL.md §11:
+  the board gets no mailing access, since segments and sent mail show
+  families' personal data).
 
 Neither role can award belts (only a dojo's active champion/mentors can,
 events.awards) or review background checks (a separate, explicitly granted
@@ -59,6 +60,8 @@ ADMIN_PERMISSIONS = {
     "pathways.pathwayproject": _EDIT,
     "pathways.skill": _EDIT,
     "mailing.emailtemplate": _EDIT,
+    # Day to day these are run from the organisation dashboard (/manage/);
+    # the admin keeps full access for fixing things by hand.
     "mailing.segment": _EDIT,
     "mailing.segmentgroup": _EDIT,
     "mailing.segmentrule": _EDIT,

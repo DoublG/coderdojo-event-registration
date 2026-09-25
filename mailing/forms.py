@@ -125,3 +125,15 @@ class CampaignForm(forms.ModelForm):
     def save(self, commit=True):
         self.instance.context = self.cleaned_data["variables"]
         return super().save(commit)
+
+
+class SegmentForm(forms.ModelForm):
+    class Meta:
+        model = Segment
+        fields = ["name", "description", "is_active"]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Families near Ghent"}),
+            "description": forms.Textarea(attrs={"class": "cd-form__input body", "rows": 2,
+                                                 "placeholder": "Who this is, in a sentence."}),
+        }
+        labels = {"is_active": "Active (offered when creating a campaign)"}

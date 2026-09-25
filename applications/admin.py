@@ -103,6 +103,16 @@ def reject_checks(modeladmin, request, queryset):
          "Rejected (documents deleted)")
 
 
+@admin.register(BackgroundCheckHistory)
+class BackgroundCheckHistoryAdmin(admin.ModelAdmin):
+    """The decision log, append-only in normal use (applications.services).
+    Editable here only for fixing something by hand."""
+
+    list_display = ["account", "decision", "reviewed_by", "reviewed_at", "expires_at"]
+    list_filter = ["decision"]
+    search_fields = ["account__username", "account__email"]
+
+
 @admin.register(BackgroundCheck)
 class BackgroundCheckAdmin(admin.ModelAdmin):
     """Reviewers' list of accounts with a background check in progress or on

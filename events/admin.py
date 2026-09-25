@@ -32,15 +32,9 @@ class NinjaBadgeAdmin(admin.ModelAdmin):
 
 @admin.register(NinjaBelt)
 class NinjaBeltAdmin(admin.ModelAdmin):
-    """Append-only history: rows can be looked at (and removed by someone
-    with delete rights, to undo a mistake), never edited. Belts are awarded
-    from the dojo's attendance list, where the rules are enforced."""
+    """Append-only history in normal use: belts are awarded from the dojo's
+    attendance list (events.awards), where the rules are enforced. Editable
+    here only to fix a mistake by hand, which bypasses those rules."""
 
     list_display = ["ninja", "belt", "awarded_on", "awarded_by_label"]
     list_filter = ["belt"]
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False

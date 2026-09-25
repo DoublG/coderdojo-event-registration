@@ -2168,6 +2168,13 @@ Each phase ships with tests (the repo rule) and updates this section and
   the digest (existing sessions were marked announced by the migration).
   `load_mail_templates` runs on every deploy.
 
+- phase 7: the segment builder is in the organisation dashboard.
+- phase 8: done, in the organisation dashboard (`/manage/`), not the
+  Django admin.
+  - campaigns: create, preview, test, launch or schedule, cancel, results
+  - the segment is frozen at launch and the audience resolved from it
+  - consent and blocks are re-checked right before each mail goes out
+
 `User.postal_code`, with the dojo finder starting from it, came in on
 the side.
 
@@ -2273,6 +2280,11 @@ the side.
     membership at an active dojo that held a session in the last N days,
     plus parents of a child who came to a session in the last N days, with
     the same N for both (365 for now).
+12. **Day-to-day work happens in the management dashboards; the Django
+    admin stays fully usable** for technical interventions and emergencies,
+    so nobody ever needs direct database access. Campaigns and segments are
+    run from the organisation dashboard (`/manage/`) and keep their full
+    admin pages.
 
 #### Still open
 
@@ -2387,3 +2399,29 @@ erDiagram
 4. Docs (en/fr/nl) for families: where featured events appear, and that
    some events register externally.
 
+## 13. API based management (later)
+
+**Not built yet.** create API endpoints for registration management
+for special events the registration could be handled by dedicated event websites, they will have to communicate the active registrations for statistices (register, delete, waiting list).  **Decide `external user`** we need to create a possibility to create shadow users or replicate the user base or link them to our internal user model. We also need to add source fields to the User model to make a distiction beween technical and real users. 
+
+For attendance control API endpoints need to be supplied for future app development. e.g Scan application for attendance
+
+For event creation control API endpoints need to be developed, allow a dojo to programmatically create events, close them.
+
+**Decide `external access`** Are we going to allow to create oauth2.0 client based technical users so a Dojo is allowed to plug in their own technologies plug into the role concept.
+
+## 14. Audit log (later)
+
+**Not built yet.** decide if we want to keep a complete audit log with change history by using https://github.com/jazzband/django-auditlog or https://django-reversion.readthedocs.io/en/latest/ or https://django-simple-history.readthedocs.io/en/stable/
+
+## 15. 2FA login for management accounts (later)
+
+**Not built yet.** enable higher security logins than only username and password enable allowed login methods based on the security level of the user, are we also going to allow social login capabilities e.g Facebook, Google, ...
+
+## 16 GDPR based management (later)
+
+**Not built yet.** enable the classification of grdp categories and anonymisation and removal and archiving capabilities like e.g. https://django-gdpr-assist.readthedocs.io/en/latest/ 
+
+## 17 enable the creation of child accounts (later)
+
+**Not built yet.** enable the guardian account to manage the accounts for childs. Add a create button on the manage screen, email address is required than and allow the sending of the initial account creation mail. Allow the parent to remove the account again. **Decide `deletion`** if a child account has the helper role the account needs to be disabled not deleted and the role assigments must end. Recreating an account is then a password reset and reenablement of the user account. User accounts need to be able to be disabled. With the creation of a child account the Child gains the capability to register for sessions on his own. Guardian account can still review **Decide `changing`** does the editing capabilty still remain or is it switched to read-only if a child account is present.

@@ -17,6 +17,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path
 from django.urls import include, path
+from .api import api
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,6 +29,7 @@ urlpatterns = [
     path("", include("events.urls")),
     path("", include("pathways.urls")),
     path("", include("mailing.urls")),
+    path("api/", api.urls),
 ]
 
 if settings.DEBUG:

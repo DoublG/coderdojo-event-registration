@@ -1,0 +1,65 @@
+{% comment %}
+One group of a segment (recursive: its child groups include this again).
+Expects `node` ({group, rules, children}), `segment`, `user_attributes`,
+`ninja_attributes`, `scopes`, `operators`.
+{% endcomment %}
+<div class="segment-group">
+  <div class="segment-group__head">
+    <strong class="label">{% if node.group.scope == "ninja" %}Parents of a child who…{% else %}Accounts that…{% endif %}</strong>
+    <form method="post" action="{% url 'manage_segment_update_group' segment_id=segment.id group_id=node.group.id %}" class="segment-inline">
+      {% csrf_token %}
+      <label class="caption">match
+        <select class="cd-form__select body" name="operator" onchange="this.form.submit()">
+          {% for value, label in operators %}<option value="{{ value }}"{% if value == node.group.operator %} selected{% endif %}>{% if value == "and" %}all of these{% else %}any of these{% endif %}</option>{% endfor %}
+        </select>
+      </label>
+    </form>
+    <form method="post" action="{% url 'manage_segment_delete_group' segment_id=segment.id group_id=node.group.id %}" class="segment-inline"
+          onsubmit="return confirm('Remove this group and everything in it?');">
+      {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">Remove group</button>
+    </form>
+  </div>
+
+  <ul class="segment-rules">
+    {% for item in node.rules %}
+      <li class="body-sm">
+        {{ item.text }}
+        <form method="post" action="{% url 'manage_segment_delete_rule' segment_id=segment.id rule_id=item.rule.id %}" class="segment-inline">
+          {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label" aria-label="Remove rule">Remove</button>
+        </form>
+      </li>
+    {% empty %}
+      {% if not node.children %}<li class="caption">No rules yet: this group doesn't narrow anything down.</li>{% endif %}
+    {% endfor %}
+  </ul>
+
+  <form method="post" action="{% url 'manage_segment_add_rule' segment_id=segment.id group_id=node.group.id %}" class="segment-add-rule">
+    {% csrf_token %}
+    <select class="cd-form__select body" name="attribute" aria-label="Add a rule about"
+            hx-get="{% url 'manage_segment_rule_fields' segment_id=segment.id group_id=node.group.id %}"
+            hx-target="#rule-fields-{{ node.group.id }}" hx-trigger="change">
+      <option value="">Add a rule about…</option>
+      {% if node.group.scope == "ninja" %}{% for attribute in ninja_attributes %}<option value="{{ attribute.key }}">{{ attribute.label }}</option>{% endfor %}
+      {% else %}{% for attribute in user_attributes %}<option value="{{ attribute.key }}">{{ attribute.label }}</option>{% endfor %}{% endif %}
+    </select>
+    <span id="rule-fields-{{ node.group.id }}" class="segment-rule-fields"></span>
+  </form>
+
+  {% for child in node.children %}
+    {% include "mailing/manage/_segment_group.html" with node=child %}
+  {% endfor %}
+
+  <form method="post" action="{% url 'manage_segment_add_group' segment_id=segment.id %}" class="segment-inline segment-add-group">
+    {% csrf_token %}
+    <input type="hidden" name="parent" value="{{ node.group.id }}">
+    {% if node.group.scope == "ninja" %}
+      <input type="hidden" name="scope" value="ninja">
+      <button type="submit" class="cd-btn cd-btn--ghost label">+ Nested group about the same child</button>
+    {% else %}
+      <select class="cd-form__select body" name="scope" aria-label="Nested group about">
+        {% for value, label in scopes %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="cd-btn cd-btn--ghost label">+ Nested group</button>
+    {% endif %}
+  </form>
+</div>

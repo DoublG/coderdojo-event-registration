@@ -1,0 +1,39 @@
+{% comment %}
+htmx partial (mailing.manage.segment_rule_fields): the operator and value
+fields for the attribute picked in a group's "Add a rule" form. Field names
+match SegmentAttribute.value_from_form.
+{% endcomment %}
+{% if attribute %}
+  {% if operators|length > 1 %}
+    <select class="cd-form__select body" name="operator" aria-label="How">
+      {% for value, label in operators %}{% if not attribute.value_type == "choice" or value != "equals" %}<option value="{{ value }}">{{ label }}</option>{% endif %}{% endfor %}
+    </select>
+  {% else %}
+    <input type="hidden" name="operator" value="{{ operators.0.0 }}"><span class="body-sm">{{ operators.0.1 }}</span>
+  {% endif %}
+
+  {% if attribute.value_type == "choice" %}
+    {% if choices|length > 12 %}
+      <select class="cd-form__select body segment-multi" name="value" multiple size="8" aria-label="Values">
+        {% for choice in choices %}<option value="{{ choice.value }}">{{ choice.label }}</option>{% endfor %}
+      </select>
+      <p class="caption">Ctrl/Cmd-click to pick several.</p>
+    {% else %}
+      <div class="cd-form__checkbox-list">
+        {% for choice in choices %}
+          <label class="cd-form__checkbox-row body-sm"><input type="checkbox" name="value" value="{{ choice.value }}"> {{ choice.label }}</label>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% elif attribute.value_type == "boolean" %}
+    <select class="cd-form__select body" name="value" aria-label="Value"><option value="true">Yes</option><option value="false">No</option></select>
+  {% elif attribute.value_type == "days" %}
+    <input class="cd-form__input body" type="number" name="value" min="1" value="365" style="max-width: 8rem;" aria-label="Days"> <span class="body-sm">days</span>
+  {% elif attribute.value_type == "distance" %}
+    <input class="cd-form__input body" type="number" name="km" min="1" step="1" value="20" style="max-width: 6rem;" aria-label="Kilometres"> <span class="body-sm">km of</span>
+    <select class="cd-form__select body" name="dojo" aria-label="Dojo">
+      {% for choice in choices %}<option value="{{ choice.value }}">{{ choice.label }}</option>{% endfor %}
+    </select>
+  {% endif %}
+  <button type="submit" class="cd-btn cd-btn--secondary label">Add rule</button>
+{% endif %}

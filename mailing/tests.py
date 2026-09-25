@@ -1232,3 +1232,96 @@ class CampaignDashboardTests(TestCase):
         self.assertEqual(EmailMessage.objects.get(pk=row.pk).status, Status.SUPPRESSED)
         self.assertEqual(connection.return_value.sent, [])
         self.assertEqual(campaigns.stats(campaign)["unsubscribed"], 1)
+
+
+class SegmentBuilderTests(TestCase):
+    def setUp(self):
+        from accounts.models import OrganisationRole
+
+        self.admin = User.objects.create(username="orgadmin", email="ann@example.com")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.client.force_login(self.admin)
+        _family("girlfam", Ninja.GIRL)
+        _family("boyfam", Ninja.BOY)
+        _family("unlisted", Ninja.UNSPECIFIED)
+        self.client.post(reverse("manage_segment_create"), {"name": "Girlz", "description": "", "is_active": "on"})
+        self.segment = Segment.objects.get(name="Girlz")
+        self.url = reverse("manage_segment_detail", kwargs={"segment_id": self.segment.pk})
+
+    def _add_group(self, scope, parent=None):
+        self.client.post(reverse("manage_segment_add_group", kwargs={"segment_id": self.segment.pk}),
+                         {"scope": scope, **({"parent": parent.pk} if parent else {})})
+        return SegmentGroup.objects.filter(segment=self.segment).latest("id")
+
+    def _add_rule(self, group, data):
+        return self.client.post(
+            reverse("manage_segment_add_rule", kwargs={"segment_id": self.segment.pk, "group_id": group.pk}),
+            data, follow=True,
+        )
+
+    def test_build_a_segment_and_see_its_audience(self):
+        group = self._add_group("ninja")
+        response = self._add_rule(group, {"attribute": "ninja_gender", "operator": "in", "value": ["girl", "unspecified"]})
+        self.assertContains(response, "Child&#x27;s gender is one of Girl, Prefer not to say")
+        rule = SegmentRule.objects.get()
+        self.assertEqual(rule.value, ["girl", "unspecified"])
+        response = self.client.get(self.url)
+        self.assertEqual(response.context["count"], 2)
+        self.assertContains(response, "girlfam@example.com")
+        self.assertNotContains(response, "boyfam@example.com")
+
+    def test_typed_values_for_days_and_distance(self):
+        dojo = make_dojo("Ghent", location=Point(3.72, 51.05, srid=4326))
+        ninja_group, user_group = self._add_group("ninja"), self._add_group("user")
+        self._add_rule(ninja_group, {"attribute": "attended_within_days", "operator": "within_days", "value": "180"})
+        self._add_rule(user_group, {"attribute": "near_dojo", "operator": "within", "dojo": str(dojo.pk), "km": "25"})
+        values = dict(SegmentRule.objects.values_list("attribute", "value"))
+        self.assertEqual(values, {"attended_within_days": 180, "near_dojo": {"dojo": dojo.pk, "km": 25.0}})
+        self.assertContains(self.client.get(self.url), "Lives within 25.0 km of Ghent")
+
+    def test_a_rule_that_can_not_work_is_refused_with_a_message(self):
+        group = self._add_group("ninja")
+        response = self._add_rule(group, {"attribute": "ninja_gender", "operator": "in"})  # nothing ticked
+        self.assertContains(response, "non-empty list")
+        response = self._add_rule(group, {"attribute": "account_type", "operator": "in", "value": ["adult"]})
+        self.assertContains(response, "can&#x27;t be used in a group about")
+        self.assertFalse(SegmentRule.objects.exists())
+
+    def test_nested_groups_follow_the_scope_rules(self):
+        user_group = self._add_group("user")
+        child = self._add_group("ninja", parent=user_group)
+        self.assertEqual(child.parent, user_group)
+        response = self.client.post(reverse("manage_segment_add_group", kwargs={"segment_id": self.segment.pk}),
+                                    {"scope": "user", "parent": child.pk}, follow=True)
+        self.assertContains(response, "must also be about the child")
+        self.assertEqual(SegmentGroup.objects.filter(parent=child).count(), 0)
+
+    def test_rule_fields_fit_the_attribute(self):
+        group = self._add_group("ninja")
+        fields_url = reverse("manage_segment_rule_fields", kwargs={"segment_id": self.segment.pk, "group_id": group.pk})
+        gender = self.client.get(fields_url, {"attribute": "ninja_gender"})
+        self.assertContains(gender, 'type="checkbox" name="value" value="girl"')
+        self.assertNotContains(gender, 'value="equals"')
+        days = self.client.get(fields_url, {"attribute": "attended_within_days"})
+        self.assertContains(days, 'type="number" name="value"')
+
+    def test_change_operator_remove_rule_group_and_segment(self):
+        group = self._add_group("ninja")
+        self._add_rule(group, {"attribute": "ninja_gender", "operator": "in", "value": ["girl"]})
+        self.client.post(reverse("manage_segment_update_group", kwargs={"segment_id": self.segment.pk, "group_id": group.pk}),
+                         {"operator": "or"})
+        self.assertEqual(SegmentGroup.objects.get(pk=group.pk).operator, "or")
+        rule = SegmentRule.objects.get()
+        self.client.post(reverse("manage_segment_delete_rule", kwargs={"segment_id": self.segment.pk, "rule_id": rule.pk}))
+        self.assertFalse(SegmentRule.objects.exists())
+        self.client.post(reverse("manage_segment_delete_group", kwargs={"segment_id": self.segment.pk, "group_id": group.pk}))
+        self.assertFalse(SegmentGroup.objects.exists())
+        self.client.post(reverse("manage_segment_delete", kwargs={"segment_id": self.segment.pk}))
+        self.assertFalse(Segment.objects.exists())
+
+    def test_builder_endpoints_are_404_without_the_admin_role(self):
+        group = self._add_group("ninja")
+        self.client.force_login(User.objects.get(username="girlfam"))
+        for url in [self.url, reverse("manage_segment_add_group", kwargs={"segment_id": self.segment.pk}),
+                    reverse("manage_segment_add_rule", kwargs={"segment_id": self.segment.pk, "group_id": group.pk})]:
+            self.assertEqual(self.client.post(url, {"scope": "user"}).status_code, 404)
