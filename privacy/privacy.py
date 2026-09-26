@@ -15,6 +15,7 @@ from django_celery_beat.models import (
     SolarSchedule,
 )
 from django_celery_results.models import ChordCounter, GroupResult, TaskResult
+from oauth2_provider.models import AccessToken, Application, DeviceGrant, Grant, IDToken, RefreshToken
 
 from privacy.models import ErasureRecord, RetentionNotice
 from privacy.registry import Category, LegalBasis, Subject, keep, personal, register, register_not_personal
@@ -135,3 +136,8 @@ register(
     fields={("account", "inactive_since", "days_before", "created_at"): personal(Category.IDENTITY)},
     not_personal=["id"],
 )
+
+# The API (DATA_MODEL.md §13) only has the client credentials grant: every
+# client and token belongs to a dojo API client's technical account.
+for model in (Application, AccessToken, RefreshToken, Grant, IDToken, DeviceGrant):
+    register_not_personal(model, "API clients and their tokens, all of technical accounts (client credentials only)")

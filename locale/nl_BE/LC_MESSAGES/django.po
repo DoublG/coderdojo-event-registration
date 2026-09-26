@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-26 12:27+0000\n"
+"POT-Creation-Date: 2026-09-26 17:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -54,24 +54,24 @@ msgstr "E-mail"
 msgid "That isn't a Belgian postcode we know."
 msgstr "Dat is geen Belgische postcode die we kennen."
 
-#: accounts/models.py:147
+#: accounts/models.py:154
 #, python-format
 msgid "Ninjas are %(min)s to %(max)s years old — check the date of birth."
 msgstr "Ninja's zijn %(min)s tot %(max)s jaar oud. Kijk de geboortedatum na."
 
-#: accounts/models.py:176
+#: accounts/models.py:183
 msgid "Girl"
 msgstr "Meisje"
 
-#: accounts/models.py:176
+#: accounts/models.py:183
 msgid "Boy"
 msgstr "Jongen"
 
-#: accounts/models.py:176
+#: accounts/models.py:183
 msgid "Other"
 msgstr "Anders"
 
-#: accounts/models.py:176
+#: accounts/models.py:183
 msgid "Prefer not to say"
 msgstr "Zeg ik liever niet"
 
@@ -508,9 +508,9 @@ msgid ""
 "their belts) to choose which news about sessions and events like CoderDojo "
 "Girlz and Coolest Projects I get."
 msgstr ""
-"Gebruik de gegevens van mijn kinderen (hun leeftijd, gender, de sessies "
-"waar ze naartoe komen en hun gordels) om te kiezen welk nieuws over sessies "
-"en evenementen zoals CoderDojo Girlz en Coolest Projects ik krijg."
+"Gebruik de gegevens van mijn kinderen (hun leeftijd, gender, de sessies waar "
+"ze naartoe komen en hun gordels) om te kiezen welk nieuws over sessies en "
+"evenementen zoals CoderDojo Girlz en Coolest Projects ik krijg."
 
 #: accounts/templates/accounts/partials/_child_header_display.html:14
 msgid "Click to edit"
@@ -550,8 +550,10 @@ msgid "at %(dojo)s"
 msgstr "bij %(dojo)s"
 
 #: accounts/templates/accounts/partials/_child_header_edit.html:17
-#: content/forms.py:82 content/templates/content/manage/sponsor_list.html:16
-#: dojos/forms.py:161 dojos/templates/dojos/dojo_event_list.html:24
+#: api/templates/api/dojo_api_clients.html:51
+#: api/templates/api/dojo_api_clients.html:77 content/forms.py:82
+#: content/templates/content/manage/sponsor_list.html:16 dojos/forms.py:161
+#: dojos/templates/dojos/dojo_event_list.html:24
 #: dojos/templates/dojos/dojo_manage.html:105
 #: dojos/templates/dojos/partials/_event_form_fields.html:18
 #: events/forms.py:167 events/forms.py:221 events/forms.py:248
@@ -1024,6 +1026,147 @@ msgid "A spot opened up in %(event)s — a waitlisted family is now confirmed."
 msgstr ""
 "Er kwam een plaats vrij in %(event)s: een gezin van de wachtlijst is nu "
 "bevestigd."
+
+#: api/services.py:25
+msgid "Give the client a name."
+msgstr "Geef de client een naam."
+
+#: api/services.py:29
+msgid "Choose what the client may do."
+msgstr "Kies wat de client mag doen."
+
+#: api/templates/api/dojo_api_clients.html:3
+#: api/templates/api/dojo_api_clients.html:4
+#: api/templates/api/dojo_api_clients.html:113
+#: dojos/templates/dojos/_admin_base.html:142
+msgid "API"
+msgstr "API"
+
+#: api/templates/api/dojo_api_clients.html:31
+msgid ""
+"An API client is an app or website that works for this dojo, for now an app "
+"at the door that marks who came. It logs in with its own client ID and "
+"secret (OAuth 2.0 client credentials) and can only do what you allow here, "
+"for this dojo only. Only you, as the champion, see this page."
+msgstr ""
+"Een API-client is een app of website die voor deze dojo werkt, voorlopig een "
+"app aan de deur die aanduidt wie er kwam. Hij logt in met een eigen client-"
+"ID en geheim (OAuth 2.0 client credentials) en kan alleen doen wat je hier "
+"toelaat, en enkel voor deze dojo. Alleen jij, als champion, ziet deze pagina."
+
+#: api/templates/api/dojo_api_clients.html:35
+#, python-format
+msgid "Login details for %(name)s"
+msgstr "Inloggegevens voor %(name)s"
+
+#: api/templates/api/dojo_api_clients.html:36
+msgid ""
+"Copy the secret now: it's shown only this once. If it gets lost, renew it "
+"below."
+msgstr ""
+"Kopieer het geheim nu: het wordt maar één keer getoond. Ben je het kwijt, "
+"maak dan hieronder een nieuw aan."
+
+#: api/templates/api/dojo_api_clients.html:38
+#: api/templates/api/dojo_api_clients.html:78
+msgid "Client ID"
+msgstr "Client-ID"
+
+#: api/templates/api/dojo_api_clients.html:39
+msgid "Client secret"
+msgstr "Clientgeheim"
+
+#: api/templates/api/dojo_api_clients.html:45
+msgid "Add a client"
+msgstr "Een client toevoegen"
+
+#: api/templates/api/dojo_api_clients.html:52
+msgid "Scan app at the door"
+msgstr "Scan-app aan de deur"
+
+#: api/templates/api/dojo_api_clients.html:56
+msgid "What it may do"
+msgstr "Wat hij mag doen"
+
+#: api/templates/api/dojo_api_clients.html:60
+msgid "See the sessions and who has a place"
+msgstr "De sessies zien en wie een plaats heeft"
+
+#: api/templates/api/dojo_api_clients.html:60
+msgid "Mark who came"
+msgstr "Aanduiden wie er kwam"
+
+#: api/templates/api/dojo_api_clients.html:65
+msgid "Add client"
+msgstr "Client toevoegen"
+
+#: api/templates/api/dojo_api_clients.html:71
+msgid "Your clients"
+msgstr "Je clients"
+
+#: api/templates/api/dojo_api_clients.html:79
+msgid "May"
+msgstr "Mag"
+
+#: api/templates/api/dojo_api_clients.html:80
+msgid "Last used"
+msgstr "Laatst gebruikt"
+
+#: api/templates/api/dojo_api_clients.html:87
+#, python-format
+msgid "added %(date)s"
+msgstr "toegevoegd op %(date)s"
+
+#: api/templates/api/dojo_api_clients.html:93
+#, python-format
+msgid "Give %(name)s a new secret? The old one stops working at once."
+msgstr "%(name)s een nieuw geheim geven? Het oude werkt meteen niet meer."
+
+#: api/templates/api/dojo_api_clients.html:94
+msgid "New secret"
+msgstr "Nieuw geheim"
+
+#: api/templates/api/dojo_api_clients.html:95
+#, python-format
+msgid "Delete %(name)s? It stops working at once and leaves this list."
+msgstr ""
+"%(name)s verwijderen? Hij werkt meteen niet meer en verdwijnt uit deze "
+"lijst."
+
+#: api/templates/api/dojo_api_clients.html:96
+#: mailing/templates/mailing/manage/segment_detail.html:58
+msgid "Delete"
+msgstr "Verwijderen"
+
+# | msgid "No mentors listed yet."
+#: api/templates/api/dojo_api_clients.html:105
+msgid "No clients yet."
+msgstr "Nog geen clients."
+
+#: api/templates/api/dojo_api_clients.html:110
+msgid "For the app's developer"
+msgstr "Voor wie de app bouwt"
+
+#: api/templates/api/dojo_api_clients.html:112
+msgid "Token"
+msgstr "Token"
+
+#: api/templates/api/dojo_api_clients.html:114
+msgid "Reference"
+msgstr "Referentie"
+
+#: api/templates/api/dojo_api_clients.html:116
+msgid ""
+"A token lasts an hour; the app asks for a new one with the same client ID "
+"and secret."
+msgstr ""
+"Een token is een uur geldig; de app vraagt een nieuw aan met hetzelfde "
+"client-ID en geheim."
+
+#: api/views.py:77
+#, python-format
+msgid "%(name)s is deleted: it can't use the API any more."
+msgstr "%(name)s is verwijderd: hij kan de API niet meer gebruiken."
 
 #: applications/forms.py:11
 msgid "Uittreksel uit het strafregister (model 2)"
@@ -1797,12 +1940,12 @@ msgstr "Organisatiebeheerder"
 
 # | msgid "Sign up"
 #: core/templates/core/_manage_base.html:133
-#: dojos/templates/dojos/_admin_base.html:148
+#: dojos/templates/dojos/_admin_base.html:156
 msgid "Sign out"
 msgstr "Afmelden"
 
 #: core/templates/core/_manage_base.html:142
-#: dojos/templates/dojos/_admin_base.html:157
+#: dojos/templates/dojos/_admin_base.html:165
 msgid "Menu"
 msgstr "Menu"
 
@@ -2530,7 +2673,7 @@ msgstr ""
 msgid "You're now the champion of %(dojo)s."
 msgstr "Je bent nu de champion van %(dojo)s."
 
-#: dojos/team.py:226 dojos/views.py:505
+#: dojos/team.py:226 dojos/views.py:500
 msgid "Unknown action."
 msgstr "Onbekende actie."
 
@@ -3793,14 +3936,14 @@ msgstr "Neem contact op met %(name)s"
 msgid "Your request to join %(dojo)s has been sent to its team."
 msgstr "Je aanvraag om bij %(dojo)s te komen is naar het team gestuurd."
 
-#: dojos/views.py:268
+#: dojos/views.py:263
 msgid ""
 "Only approved champions with a valid background check can create a dojo."
 msgstr ""
 "Alleen goedgekeurde champions met een geldig uittreksel uit het "
 "strafregister kunnen een dojo aanmaken."
 
-#: dojos/views.py:286
+#: dojos/views.py:281
 #, python-format
 msgid ""
 "%(dojo)s has been created as a draft. Fill in its profile, then launch it."
@@ -3808,69 +3951,69 @@ msgstr ""
 "%(dojo)s is aangemaakt als ontwerp. Vul het profiel in en lanceer de dojo "
 "daarna."
 
-#: dojos/views.py:288
+#: dojos/views.py:283
 msgid "We couldn't find that address on the map; check it on this page."
 msgstr "We vonden dat adres niet op de kaart; kijk het na op deze pagina."
 
-#: dojos/views.py:341
+#: dojos/views.py:336
 #, python-format
 msgid "%(dojo)s is now %(lower)s."
 msgstr "%(dojo)s is nu %(lower)s."
 
-#: dojos/views.py:410
+#: dojos/views.py:405
 msgid "Update posted on the dojo's page."
 msgstr "Bericht gepost op de pagina van de dojo."
 
-#: dojos/views.py:427
+#: dojos/views.py:422
 msgid "Update removed."
 msgstr "Bericht verwijderd."
 
 # | msgid "Youth mentor at %(dojo)s"
-#: dojos/views.py:471
+#: dojos/views.py:466
 #, python-format
 msgid "You've left the %(dojo)s team."
 msgstr "Je hebt het team van %(dojo)s verlaten."
 
-#: dojos/views.py:477
+#: dojos/views.py:472
 #, python-format
 msgid "%(membership)s is now the champion of %(dojo)s."
 msgstr "%(membership)s is nu de champion van %(dojo)s."
 
-#: dojos/views.py:486
+#: dojos/views.py:481
 #, python-format
 msgid "%(membership)s is now on the team."
 msgstr "%(membership)s zit nu in het team."
 
 # | msgid "Request a new link"
-#: dojos/views.py:489
+#: dojos/views.py:484
 msgid "Request declined."
 msgstr "Aanvraag geweigerd."
 
-#: dojos/views.py:492
+#: dojos/views.py:487
 #, python-format
 msgid "%(membership)s has been removed from the team."
 msgstr "%(membership)s is uit het team verwijderd."
 
 # | msgid "Enter a valid email address."
-#: dojos/views.py:497
+#: dojos/views.py:492
 msgid "No account uses that email address."
 msgstr "Geen enkel account gebruikt dat e-mailadres."
 
-#: dojos/views.py:499
+#: dojos/views.py:494
 #, python-format
 msgid "%(name)s has been added to the team."
 msgstr "%(name)s is aan het team toegevoegd."
 
-#: dojos/views.py:503
+#: dojos/views.py:498
 #, python-format
 msgid "%(name)s is now a youth mentor."
 msgstr "%(name)s is nu youth mentor."
 
-#: dojos/views.py:726
+#: dojos/views.py:716
 msgid "Pick a belt to award."
 msgstr "Kies een gordel om toe te kennen."
 
-#: dojos/views.py:763
+#: dojos/views.py:753
 msgid "Pick a badge to award."
 msgstr "Kies een badge om toe te kennen."
 
@@ -5473,10 +5616,6 @@ msgstr ""
 msgid "Nobody matches yet."
 msgstr "Nog niemand voldoet."
 
-#: mailing/templates/mailing/manage/segment_detail.html:58
-msgid "Delete"
-msgstr "Verwijderen"
-
 #: mailing/templates/mailing/manage/segment_detail.html:59
 msgid "Used by draft campaigns:"
 msgstr "Gebruikt door ontwerpcampagnes:"
@@ -5625,8 +5764,8 @@ msgid ""
 "about sessions at your dojo, a new dojo near you, or events like Coolest "
 "Projects and CoderDojo Girlz."
 msgstr ""
-"We gebruiken wat we over je gezin weten om je e-mails te sturen die voor "
-"jou relevant zijn: je postcode en je taal en, voor de kinderen waarvoor je "
+"We gebruiken wat we over je gezin weten om je e-mails te sturen die voor jou "
+"relevant zijn: je postcode en je taal en, voor de kinderen waarvoor je "
 "akkoord gaat, naar welke sessies ze komen, hun leeftijd en gender. Zo hoor "
 "je over sessies in je dojo, een nieuwe dojo in je buurt, of evenementen "
 "zoals Coolest Projects en CoderDojo Girlz."
@@ -5754,7 +5893,7 @@ msgstr ""
 "Twijfel je of dit het juiste is? Kinderen kunnen vrij wisselen tussen "
 "leertrajecten."
 
-#: privacy/deletion.py:52
+#: privacy/deletion.py:53
 msgid ""
 "A child's own login is removed by their parent, or goes with the family's "
 "account."
@@ -5762,11 +5901,19 @@ msgstr ""
 "De eigen login van een kind wordt verwijderd door de ouder, of verdwijnt "
 "samen met het account van het gezin."
 
-#: privacy/deletion.py:59
+#: privacy/deletion.py:57
+msgid ""
+"This is an API client's technical account: the dojo's champion revokes the "
+"client."
+msgstr ""
+"Dit is het technische account van een API-client: de champion van de dojo "
+"trekt de client in."
+
+#: privacy/deletion.py:64
 msgid "This account has already been deleted."
 msgstr "Dit account is al verwijderd."
 
-#: privacy/deletion.py:63
+#: privacy/deletion.py:68
 #, python-format
 msgid ""
 "This account is the champion of %(dojos)s. A dojo can't be without its "
@@ -5777,13 +5924,13 @@ msgstr ""
 "rol moet eerst naar een van de mentors van de dojo (op de Team-pagina van de "
 "dojo)."
 
-#: privacy/deletion.py:69
+#: privacy/deletion.py:74
 msgid "This account has an organisation role. It has to be taken away first."
 msgstr ""
 "Dit account heeft een rol in de organisatie. Die moet eerst weggenomen "
 "worden."
 
-#: privacy/deletion.py:71
+#: privacy/deletion.py:76
 msgid ""
 "This is a technical administrator's account (superuser); it can't be deleted "
 "here."
@@ -5791,7 +5938,7 @@ msgstr ""
 "Dit is het account van een technisch beheerder (superuser); het kan hier "
 "niet verwijderd worden."
 
-#: privacy/retention.py:250
+#: privacy/retention.py:251
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
@@ -5803,7 +5950,7 @@ msgstr ""
 "zolang die persoon champion is. Vraag om de rol door te geven aan een "
 "mentor, of neem contact op met de organisatie."
 
-#: privacy/retention.py:256
+#: privacy/retention.py:257
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
@@ -6080,6 +6227,20 @@ msgstr "Typ de gebruikersnaam van het account om te bevestigen."
 #: privacy/views.py:121
 msgid "The account has been deleted."
 msgstr "Het account is verwijderd."
+
+#~ msgid "This client has been revoked."
+#~ msgstr "Deze client is ingetrokken."
+
+#~ msgid "This client has been revoked already."
+#~ msgstr "Deze client is al ingetrokken."
+
+# | msgid "sent %(date)s"
+#, python-format
+#~ msgid "Revoked %(date)s"
+#~ msgstr "Ingetrokken op %(date)s"
+
+#~ msgid "Revoke"
+#~ msgstr "Intrekken"
 
 #~ msgid ""
 #~ "I'm the parent or legal guardian of the children I add, and I agree that "

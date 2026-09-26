@@ -251,7 +251,9 @@ INSTALLED_APPS = [
     'mailing',
     'django_celery_beat',
     'ninja',
+    'oauth2_provider',
     'privacy',
+    'api',
     'auditlog',
 ]
 
@@ -472,6 +474,24 @@ AUDITLOG_DISABLE_REMOTE_ADDR = True  # no IP addresses: every entry has its acco
 AUDITLOG_STORE_JSON_CHANGES = False
 AUDITLOG_MASK_CALLABLE = "core.audit.mask"  # the default keeps half the value
 AUDITLOG_USE_FK_STRING_REPRESENTATION = False  # links as ids, not names: less personal data in the log
+
+# The API (api/, DATA_MODEL.md §13): OAuth 2.0 client credentials only, for
+# the API clients a dojo's champion makes (api.models.DojoApiClient). A
+# client may only ask for the scopes it was given (api.scopes); tokens last
+# an hour; client secrets are stored hashed (django-oauth-toolkit's default).
+OAUTH2_PROVIDER = {
+    "SCOPES": {
+        "attendance:read": "See the dojo's sessions and who has a place",
+        "attendance:write": "Mark who came to the dojo's sessions",
+    },
+    "SCOPES_BACKEND_CLASS": "api.scopes.ClientScopes",
+    "ACCESS_TOKEN_EXPIRE_SECONDS": 3600,
+}
+# The toolkit's own models, named so migrations can point at them (they're
+# "swappable"; we don't swap them).
+OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
+# Requests per client (ninja's throttling, on the cache).
+API_RATE_LIMIT = "600/m"
 
 # Retention (privacy.retention, DATA_MODEL.md §16 phase 4). An account is
 # deleted (a champion's or mentor's cleaned) this long after its last login,

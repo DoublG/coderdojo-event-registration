@@ -188,6 +188,17 @@ class AdminStaysFullyUsableTests(TestCase):
         ("auditlog.LogEntry", "add"): "the audit log is read-only",
         ("auditlog.LogEntry", "change"): "the audit log is read-only",
         ("auditlog.LogEntry", "delete"): "the audit log is read-only",
+        # django-oauth-toolkit's own admin (the API, DATA_MODEL.md §13), for
+        # security: a token typed in by hand would be a secret in the clear,
+        # and deleting a token row can leave a refresh token that mints new
+        # ones. Tokens are ended with the admin's "Revoke" action (or by
+        # revoking the client); the applications are fully editable.
+        ("oauth2_provider.AccessToken", "add"): "tokens are only issued by the OAuth flow",
+        ("oauth2_provider.AccessToken", "delete"): "ended with the Revoke action, never a raw delete",
+        ("oauth2_provider.RefreshToken", "add"): "tokens are only issued by the OAuth flow",
+        ("oauth2_provider.RefreshToken", "delete"): "ended with the Revoke action, never a raw delete",
+        ("oauth2_provider.Grant", "add"): "authorization codes are only issued by the OAuth flow (grant not enabled)",
+        ("oauth2_provider.IDToken", "add"): "ID tokens are only issued by the OAuth flow (not enabled)",
     }
 
     def test_superuser_can_add_change_and_delete_everything(self):
@@ -436,6 +447,11 @@ class AuditLogCoverageTests(TestCase):
         "mailing.ProcessedImapMessage": "bounce-mailbox bookkeeping",
         "notifications.Notification": "written by the site; marking read is no change worth recording",
         "privacy.ErasureRecord": "itself the log of erasures, without personal data",
+        "oauth2_provider.AccessToken": "API tokens, made every hour by the clients themselves",
+        "oauth2_provider.RefreshToken": "API tokens (the client credentials grant gets none)",
+        "oauth2_provider.Grant": "authorization codes (that grant isn't enabled)",
+        "oauth2_provider.IDToken": "OpenID Connect tokens (not enabled)",
+        "oauth2_provider.DeviceGrant": "device codes (that grant isn't enabled)",
         "privacy.RetentionNotice": "written by the retention job; itself a log of reminders",
     }
 

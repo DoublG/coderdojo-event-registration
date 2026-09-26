@@ -36,6 +36,7 @@ the people using the site, not for the people building it.
 
    dojo-team/logging-in
    dojo-team/running-a-session
+   dojo-team/api-clients
 
 .. toctree::
    :maxdepth: 2

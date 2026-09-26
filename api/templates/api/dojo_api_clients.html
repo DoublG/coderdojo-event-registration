@@ -1,0 +1,120 @@
+{% extends "dojos/_admin_base.html" %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "API" %}{% endblock %}
+{% block admin_heading %}{% translate "API" %}{% endblock %}
+
+{% block admin_extra_style %}
+<style>
+  .api-manage { max-width: 900px; display: flex; flex-direction: column; gap: var(--space-5); }
+  .api-manage .cd-card { padding: var(--space-5); }
+  .api-manage h2 { color: var(--ink); margin: 0 0 var(--space-3); }
+  .api-manage .muted { color: var(--ink-muted); }
+  .api-manage code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; word-break: break-all; }
+  .api-manage .secret { background: var(--surface-sunken); border: 1px solid var(--border); border-radius: var(--radius-md, 8px); padding: var(--space-3); margin: var(--space-2) 0; }
+  .api-manage dl { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-2) var(--space-4); margin: 0; }
+  .api-manage dt { font-weight: 700; }
+  .api-manage dd { margin: 0; }
+  .api-manage .scopes { display: flex; flex-direction: column; gap: var(--space-2); }
+  .api-manage .scopes .cd-form__label { margin: 0; }
+  .api-manage .scope-row { display: flex; gap: var(--space-2); align-items: center; margin: 0; }
+  .api-manage .actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .api-manage code.scope { white-space: nowrap; word-break: normal; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+{% comment %}
+The dojo's API clients (api.views, api.services, DATA_MODEL.md §13): only
+the champion (MANAGE_API). A new client's secret, or a renewed one, is
+shown here once and only its hash is kept.
+{% endcomment %}
+<div class="api-manage">
+  <p class="body-sm muted">{% translate "An API client is an app or website that works for this dojo, for now an app at the door that marks who came. It logs in with its own client ID and secret (OAuth 2.0 client credentials) and can only do what you allow here, for this dojo only. Only you, as the champion, see this page." %}</p>
+
+  {% if new_secret %}
+    <section class="cd-card" role="status">
+      <h2 class="heading-md">{% blocktranslate with name=new_client.name %}Login details for {{ name }}{% endblocktranslate %}</h2>
+      <p class="cd-form__note cd-form__note--error caption">{% translate "Copy the secret now: it's shown only this once. If it gets lost, renew it below." %}</p>
+      <dl class="body-sm">
+        <dt>{% translate "Client ID" %}</dt><dd><code>{{ new_client_id }}</code></dd>
+        <dt>{% translate "Client secret" %}</dt><dd><div class="secret"><code>{{ new_secret }}</code></div></dd>
+      </dl>
+    </section>
+  {% endif %}
+
+  <section class="cd-card">
+    <h2 class="heading-md">{% translate "Add a client" %}</h2>
+    {% if error %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endif %}
+    <form class="cd-form" method="post" action="{% url 'dojo_api_clients' dojo_id=dojo.id %}">
+      {% csrf_token %}
+      <div class="cd-form__row">
+        <div class="cd-form__field">
+          <label class="cd-form__label label" for="api-name">{% translate "Name" %}</label>
+          <input class="cd-form__input body" type="text" id="api-name" name="name" maxlength="100" value="{{ name|default:'' }}" placeholder="{% translate 'Scan app at the door' %}" required>
+        </div>
+      </div>
+      <div class="scopes" role="group" aria-labelledby="api-scopes-label">
+        <p class="cd-form__label label" id="api-scopes-label">{% translate "What it may do" %}</p>
+        {% for value, label in scope_choices %}
+          <label class="scope-row body-sm" for="api-scope-{{ forloop.counter }}">
+            <input type="checkbox" id="api-scope-{{ forloop.counter }}" name="scope" value="{{ value }}" checked>
+            <span>{% if value == "attendance:read" %}{% translate "See the sessions and who has a place" %}{% else %}{% translate "Mark who came" %}{% endif %} <code class="muted">{{ value }}</code></span>
+          </label>
+        {% endfor %}
+      </div>
+      <div class="cd-form__actions" style="justify-content: flex-start;">
+        <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Add client" %}</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="cd-card">
+    <h2 class="heading-md">{% translate "Your clients" %}</h2>
+    {% if clients %}
+      <div class="cd-table-wrap">
+        <table class="cd-table cd-table--zebra">
+          <thead>
+            <tr>
+              <th class="label" scope="col">{% translate "Name" %}</th>
+              <th class="label" scope="col">{% translate "Client ID" %}</th>
+              <th class="label" scope="col">{% translate "May" %}</th>
+              <th class="label" scope="col">{% translate "Last used" %}</th>
+              <th class="label" scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for client in clients %}
+              <tr>
+                <td class="body-sm">{{ client.name }}<br><span class="caption muted">{% blocktranslate with date=client.created_at|date:"d/m/Y" %}added {{ date }}{% endblocktranslate %}</span></td>
+                <td class="body-sm"><code>{{ client.application.client_id }}</code></td>
+                <td class="body-sm">{% for scope in client.scopes %}<code class="scope">{{ scope }}</code>{% if not forloop.last %}<br>{% endif %}{% endfor %}</td>
+                <td class="body-sm">{% if client.last_used %}{{ client.last_used|date:"d/m/Y H:i" }}{% else %}—{% endif %}</td>
+                <td class="body-sm">
+                  <div class="actions">
+                    {% blocktranslate asvar renew_msg with name=client.name %}Give {{ name }} a new secret? The old one stops working at once.{% endblocktranslate %}
+                    <form method="post" action="{% url 'dojo_api_client_renew' dojo_id=dojo.id client_id=client.id %}" onsubmit="return confirm('{{ renew_msg|escapejs }}');">{% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "New secret" %}</button></form>
+                    {% blocktranslate asvar delete_msg with name=client.name %}Delete {{ name }}? It stops working at once and leaves this list.{% endblocktranslate %}
+                    <form method="post" action="{% url 'dojo_api_client_delete' dojo_id=dojo.id client_id=client.id %}" onsubmit="return confirm('{{ delete_msg|escapejs }}');">{% csrf_token %}<button type="submit" class="cd-btn cd-btn--danger label">{% translate "Delete" %}</button></form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="body-sm muted">{% translate "No clients yet." %}</p>
+    {% endif %}
+  </section>
+
+  <section class="cd-card">
+    <h2 class="heading-md">{% translate "For the app's developer" %}</h2>
+    <dl class="body-sm">
+      <dt>{% translate "Token" %}</dt><dd><code>POST {{ token_url }}</code> · <code>grant_type=client_credentials</code></dd>
+      <dt>{% translate "API" %}</dt><dd><code>{{ api_url }}</code></dd>
+      <dt>{% translate "Reference" %}</dt><dd><a href="{{ docs_url }}">{{ docs_url }}</a></dd>
+    </dl>
+    <p class="caption muted">{% translate "A token lasts an hour; the app asks for a new one with the same client ID and secret." %}</p>
+  </section>
+</div>
+{% endblock %}

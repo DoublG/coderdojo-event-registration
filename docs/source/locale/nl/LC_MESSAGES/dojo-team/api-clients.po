@@ -1,0 +1,154 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-26 17:29+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/dojo-team/api-clients.rst:2
+msgid "Apps that work for your dojo (API)"
+msgstr "Apps die voor je dojo werken (API)"
+
+#: ../../source/dojo-team/api-clients.rst:4
+msgid ""
+"An app or website can work for your dojo through the site's API: for now,"
+" an app at the door that marks which children and team members came, so "
+"you don't have to tick them off on the attendance list. Only the dojo's "
+"**champion** can let an app in."
+msgstr ""
+"Een app of website kan via de API van de site voor je dojo werken: "
+"voorlopig een app aan de deur die aanduidt welke kinderen en teamleden er"
+" kwamen, zodat je ze niet op de aanwezigheidslijst hoeft af te vinken. "
+"Alleen de **champion** van de dojo kan een app toegang geven."
+
+#: ../../source/dojo-team/api-clients.rst:10
+msgid "Adding a client"
+msgstr "Een client toevoegen"
+
+#: ../../source/dojo-team/api-clients.rst:12
+msgid ""
+"In the sidebar, under **Dojo**, open **API** (only the champion sees it)."
+" Under **Add a client**, give it a name you'll recognise (for example "
+"\"Scan app at the door\") and choose what it may do:"
+msgstr ""
+"Open in de zijbalk, onder **Dojo**, de pagina **API** (alleen de champion"
+" ziet ze). Geef onder **Een client toevoegen** een naam die je herkent "
+"(bijvoorbeeld \"Scan-app aan de deur\") en kies wat hij mag doen:"
+
+#: ../../source/dojo-team/api-clients.rst:16
+msgid ""
+"**See the sessions and who has a place**: your dojo's sessions, and for "
+"each one the children with a confirmed place and the session's team."
+msgstr ""
+"**De sessies zien en wie een plaats heeft**: de sessies van je dojo, en "
+"per sessie de kinderen met een bevestigde plaats en het team van de "
+"sessie."
+
+#: ../../source/dojo-team/api-clients.rst:18
+msgid ""
+"**Mark who came**: mark a child or team member present, absent or not "
+"marked yet, or everyone present at once."
+msgstr ""
+"**Aanduiden wie er kwam**: een kind of teamlid aanwezig, afwezig of nog "
+"niet aangeduid zetten, of iedereen tegelijk aanwezig."
+
+#: ../../source/dojo-team/api-clients.rst:21
+msgid ""
+"After **Add client**, the page shows the client's **client ID** and "
+"**client secret**. Give both to whoever sets up the app. **The secret is "
+"shown only this once**: we only keep a scrambled copy, so we can't show "
+"it again. If it gets lost, make a new one (below)."
+msgstr ""
+"Na **Client toevoegen** toont de pagina het **client-ID** en het "
+"**clientgeheim**. Geef ze allebei aan wie de app instelt. **Het geheim "
+"wordt maar één keer getoond**: we bewaren alleen een versleutelde versie,"
+" dus we kunnen het niet opnieuw tonen. Ben je het kwijt, maak dan een "
+"nieuw aan (zie hieronder)."
+
+#: ../../source/dojo-team/api-clients.rst:27
+msgid "What an app can and can't do"
+msgstr "Wat een app wel en niet kan"
+
+#: ../../source/dojo-team/api-clients.rst:29
+msgid ""
+"A client only ever works for your dojo, and only does what you allowed. "
+"It never sees children's allergies or notes, their family, or anything "
+"else from their account. What it marks is recorded under the client's own"
+" name, not yours."
+msgstr ""
+"Een client werkt alleen voor je dojo en doet alleen wat je toeliet. Hij "
+"ziet nooit de allergieën of opmerkingen van kinderen, hun gezin of iets "
+"anders van hun account. Wat hij aanduidt, wordt bewaard onder de naam van"
+" de client, niet onder de jouwe."
+
+#: ../../source/dojo-team/api-clients.rst:35
+msgid "New secret and deleting"
+msgstr "Nieuw geheim en verwijderen"
+
+#: ../../source/dojo-team/api-clients.rst:37
+msgid "In **Your clients**:"
+msgstr "In **Je clients**:"
+
+#: ../../source/dojo-team/api-clients.rst:39
+msgid ""
+"**New secret** gives the client a new secret; the old one stops working "
+"at once. Use it when the secret may have leaked, or got lost."
+msgstr ""
+"**Nieuw geheim** geeft de client een nieuw geheim; het oude werkt meteen "
+"niet meer. Gebruik het als het geheim misschien uitgelekt of kwijt is."
+
+#: ../../source/dojo-team/api-clients.rst:41
+msgid ""
+"**Delete** stops the client at once and removes it from the list. What it"
+" marked stays."
+msgstr ""
+"**Verwijderen** zet de client meteen stop en haalt hem uit de lijst. Wat "
+"hij aanduidde, blijft."
+
+#: ../../source/dojo-team/api-clients.rst:44
+msgid "The list also shows when each client was last used."
+msgstr "De lijst toont ook wanneer elke client het laatst gebruikt werd."
+
+#: ../../source/dojo-team/api-clients.rst:47
+msgid "For the app's developer"
+msgstr "Voor wie de app bouwt"
+
+#: ../../source/dojo-team/api-clients.rst:49
+msgid ""
+"The bottom of the **API** page has the addresses the app needs. The app "
+"asks for a token with its client ID and secret (OAuth 2.0, client "
+"credentials), which lasts an hour, and sends it with every request. The "
+"**Reference** link is the full, technical description of the API."
+msgstr ""
+"Onderaan de pagina **API** staan de adressen die de app nodig heeft. De "
+"app vraagt met zijn client-ID en geheim een token aan (OAuth 2.0, client "
+"credentials), dat een uur geldig is, en stuurt het mee met elke vraag. De"
+" link **Referentie** is de volledige, technische beschrijving van de API."
+
+#~ msgid ""
+#~ "A client only ever works for your"
+#~ " dojo, and only does what you "
+#~ "allowed. It never sees children's "
+#~ "allergies or notes, their family, or "
+#~ "anything else from their account. "
+#~ "Everything it marks is recorded under"
+#~ " its own name, so the attendance "
+#~ "list and the history show which "
+#~ "app marked what."
+#~ msgstr ""
+

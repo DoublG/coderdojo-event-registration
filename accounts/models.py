@@ -70,7 +70,10 @@ class User(AbstractUser):
     # every link to "an account" stay a single foreign key.
     ADULT = "adult"
     NINJA = "ninja"
-    ACCOUNT_TYPE_CHOICES = [(ADULT, "Adult"), (NINJA, "Ninja")]
+    # An API client's technical account (api.models.DojoApiClient): never
+    # logs in, never a person; it's who marked what through the API.
+    SERVICE = "service"
+    ACCOUNT_TYPE_CHOICES = [(ADULT, "Adult"), (NINJA, "Ninja"), (SERVICE, "API client (technical)")]
     account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default=ADULT)
     phone = models.CharField(max_length=30, blank=True, default="")
     preferred_language = models.CharField(
@@ -100,6 +103,10 @@ class User(AbstractUser):
     @property
     def is_ninja(self):
         return self.account_type == self.NINJA
+
+    @property
+    def is_service(self):
+        return self.account_type == self.SERVICE
 
     @property
     def team_name(self):

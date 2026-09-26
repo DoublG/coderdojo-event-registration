@@ -19,9 +19,10 @@ from accounts.models import Ninja, User
 from applications.services import is_approved_champion
 from content.models import FAQ, OrganisationTeamMember, Promotion
 from core.content_languages import normalize
-from events.awards import BadgeError, BeltError, award_badge, award_belt, sync_milestones
+from events import attendance
+from events.awards import BadgeError, BeltError, award_badge, award_belt
 from events.forms import EventForm
-from events.models import Badge, Belt, Event, NinjaEngagement, Registration, TeamAttendance
+from events.models import Badge, Belt, Event, NinjaEngagement, Registration
 from geo.geocoding import find_province, geocode
 from notifications.models import Notification
 from pathways.models import Pathway
@@ -33,7 +34,6 @@ from .access import (
     EDIT_SETTINGS,
     MANAGE_EVENTS,
     MANAGE_LIFECYCLE,
-    MANAGE_TEAM,
     POST_UPDATES,
     TAKE_ATTENDANCE,
     accessible_dojos,
@@ -215,12 +215,7 @@ def _awardable_badges(registrations):
 
 
 def _team_attendance_rows(event):
-    """One {membership, attended} per person on the session's team
-    (`Event.team`), champion first; `attended` from TeamAttendance, None
-    when not marked yet."""
-    marks = dict(TeamAttendance.objects.filter(event=event).values_list("membership_id", "attended"))
-    memberships = event.team.select_related("user", "dojo").order_by("role", "user__first_name")
-    return [{"membership": m, "attended": marks.get(m.id)} for m in memberships]
+    return attendance.team_rows(event)
 
 
 @login_required
@@ -640,11 +635,9 @@ def dojo_event_attendance_mark(request, dojo_id, event_id, registration_id):
     )
 
     if request.method == "POST" and request.POST.get("attended") in ATTENDANCE_VALUES:
-        registration.attended = ATTENDANCE_VALUES[request.POST["attended"]]
-        registration.save(update_fields=["attended"])
         # Milestone badges count sessions attended; one that grants a belt
         # awards it as whoever marked the attendance.
-        sync_milestones(registration.ninja, access.membership)
+        attendance.mark_child(registration, ATTENDANCE_VALUES[request.POST["attended"]], awarded_as=access.membership)
 
     if request.headers.get("HX-Request"):
         context = {"dojo": dojo, "dojo_access": access, **_attendance_context(event), "registration": registration}
@@ -665,10 +658,7 @@ def dojo_event_team_attendance_mark(request, dojo_id, event_id, membership_id):
     membership = get_object_or_404(event.team.select_related("user"), id=membership_id)
 
     if request.method == "POST" and request.POST.get("attended") in ATTENDANCE_VALUES:
-        TeamAttendance.objects.update_or_create(
-            event=event, membership=membership,
-            defaults={"attended": ATTENDANCE_VALUES[request.POST["attended"]], "marked_by": request.user},
-        )
+        attendance.mark_team_member(event, membership, ATTENDANCE_VALUES[request.POST["attended"]], request.user)
 
     if request.headers.get("HX-Request"):
         context = {"dojo": dojo, "dojo_access": access, **_attendance_context(event)}
@@ -788,17 +778,7 @@ def dojo_event_attendance_mark_all(request, dojo_id, event_id):
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
 
     if request.method == "POST":
-        confirmed = event.registration_set.filter(waiting_list=False)
-        # One save per row, not QuerySet.update(): the audit log only sees saves.
-        for registration in confirmed.exclude(attended=True):
-            registration.attended = True
-            registration.save(update_fields=["attended"])
-        for ninja in Ninja.objects.filter(registration__in=confirmed):
-            sync_milestones(ninja, access.membership)
-        for membership in event.team.all():
-            TeamAttendance.objects.update_or_create(
-                event=event, membership=membership, defaults={"attended": True, "marked_by": request.user},
-            )
+        attendance.mark_all_present(event, request.user, awarded_as=access.membership)
 
     if request.headers.get("HX-Request"):
         return render(request, "dojos/partials/_attendance.html", {"dojo": dojo, "dojo_access": access, **_attendance_context(event)})

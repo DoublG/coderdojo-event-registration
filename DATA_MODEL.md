@@ -2585,16 +2585,116 @@ erDiagram
 4. Docs (en/fr/nl) for families: where featured events appear, and that
    some events register externally.
 
-## 13. API based management (later)
+## 13. API based management (in progress)
 
-**Not built yet.** create API endpoints for registration management
-for special events the registration could be handled by dedicated event websites, they will have to communicate the active registrations for statistices (register, delete, waiting list).  **Decide `external user`** we need to create a possibility to create shadow users or replicate the user base or link them to our internal user model. We also need to add source fields to the User model to make a distiction beween technical and real users. 
+**Built: dojo API clients (OAuth 2.0 client credentials) and the attendance
+API** (phases 1 and 4 below, without the check-in codes and organisation
+clients); the rest is the plan. Three needs, from the original notes:
 
-For attendance control API endpoints need to be supplied for future app development. e.g Scan application for attendance
+- **External registrations:** some events (CoderDojo Girlz, Coolest
+  Projects: organisation events with `Event.external_registration_url`,
+  §12) take their sign-ups on their own website. That site reports its
+  registrations (registered, cancelled, waiting list) here, for the
+  statistics.
+- **Attendance:** an app (e.g. scanning children in at the door) marks who
+  came, instead of the attendance list.
+- **Event management:** a dojo creates its sessions, opens and closes them
+  from its own tools.
 
-For event creation control API endpoints need to be developed, allow a dojo to programmatically create events, close them.
+django-ninja stays the framework (`/api/v1/`, OpenAPI reference at
+`/api/v1/docs`); django-oauth-toolkit 3.4.1 is the OAuth 2.0 server.
 
-**Decide `external access`** Are we going to allow to create oauth2.0 client based technical users so a Dojo is allowed to plug in their own technologies plug into the role concept.
+### Decisions
+
+1. **OAuth 2.0 client credentials (decided, built).** Safer than static
+   API keys: the client secret only goes to the token endpoint, every
+   other request carries a token that lasts an hour, a leaked token soon
+   stops working, and it's the standard every language has libraries for.
+   A client is a django-oauth-toolkit `Application` (confidential, client
+   credentials grant only, secret stored hashed and shown once) linked to
+   an `api.DojoApiClient`: its dojo, name, scopes and technical account.
+   Later, a client may sign its token request with its own key
+   (`private_key_jwt`) instead of a shared secret; check the toolkit's
+   support first.
+2. **Only the champion makes clients (decided, built):** a new capability
+   `MANAGE_API`, champion only (not mentors): a client acts for the whole
+   dojo. The dojo admin area's **API** page (`/dojos/<id>/manage/api/`):
+   add (name + what it may do), new secret (the old one and its tokens
+   stop working), delete (client, application and tokens deleted at once;
+   its technical account switched off and kept for the history, so what
+   it marked keeps its name). There's no separate "revoke": deleting is
+   how a client is stopped (decided).
+3. **Scopes (built: attendance):** `attendance:read` (the dojo's sessions,
+   who has a confirmed place, the team) and `attendance:write` (mark who
+   came). A client only gets the scopes its champion gave it
+   (`api.scopes.ClientScopes`). Still to add with their phases:
+   `events:write` and `external_registrations:write`. **Never** health
+   notes, belts or badges, team or lifecycle changes: those stay with
+   people.
+4. **A technical account per client (decided, built):**
+   `User.account_type = "service"`, unusable password: what
+   `TeamAttendance.marked_by` and the audit log's actor point at. Never
+   counted as a person: retention and account deletion skip it, segments
+   only take adults.
+5. **External registrants: no shadow users (recommended, not built).** The
+   external site reports each registration with its own id and a status
+   (`registered`, `waitlisted`, `cancelled`), without personal data
+   (optionally age and gender for statistics, see open points), as
+   `events.ExternalRegistration`, upserted. Shadow `User`/`Ninja` rows would
+   put people who never signed up here in exports, retention and segments.
+
+### Phases
+
+1. **Foundations** — *built for dojo clients:* `api` app, `DojoApiClient`,
+   service accounts, the token endpoint (`/api/oauth/token/`, revoke at
+   `/api/oauth/revoke/`), `api.auth.OAuth2` (401 without a valid
+   token of an active client, 403 without the scope, 404 for another
+   dojo's rows; described in the OpenAPI spec as an OAuth 2.0 client
+   credentials scheme with each endpoint's scope), throttling per client
+   (`API_RATE_LIMIT`), the audit log's
+   actor, the champion's API page, privacy classification (the toolkit's
+   models are not personal: client credentials only), and **a test that no
+   API schema holds a field classified `special`, `criminal` or
+   `security`, or anything `export=False`**. *Still to do:* organisation
+   clients (for the organisation dojo's events, on the organisation
+   dashboard).
+2. **Shared services** — *built for attendance* (`events/attendance.py`,
+   used by the dojo views and the API). *Still to do:* signing up and
+   cancelling (`events/registrations.py`, out of `event_signup` and
+   `cancel_registration`) and event create/edit/status
+   (`events/services.py`) before phases 3 and 5.
+3. **Event management** (`events:write`): list, create, edit, open /
+   close / back to draft, like the dojo's event screens.
+4. **Attendance** — *built:* `GET /api/v1/events?when=upcoming|past`,
+   `GET /api/v1/events/{id}/attendance` (confirmed children and the team,
+   each `attended` true / false / null), `PUT
+   .../attendance/children/{registration_id}` and `PUT
+   .../attendance/team/{membership_id}` (`{"attended": ...}`), `POST
+   .../attendance/all-present`. Milestone badges follow as on the site; a
+   milestone that grants a belt only gives the badge (a client never
+   awards belts). *Still to do:* a **check-in code** per registration (a
+   signed token as a QR code in the booking mail) for a scan app that
+   doesn't need the list.
+5. **External registrations** (`external_registrations:write`,
+   organisation clients, events with `external_registration_url`).
+6. **Apps used by a person (later, if needed):** the authorization code
+   grant with PKCE, tokens tied to the person's own `User`, so every rule
+   of `dojos.access` applies as on the site.
+7. **Docs** — *built:* the help page for dojo teams
+   (`docs/source/dojo-team/api-clients.rst`, en/fr/nl), the API section in
+   `CLAUDE.md`; the OpenAPI page is the reference.
+
+### Open points
+
+- Should the external site be able to send age and gender (decision 5), or
+  only counts?
+- Client secrets never expire today (renew them by hand); tokens last an
+  hour. Should secrets expire, e.g. after a year?
+- django-oauth-toolkit 3.4.1 officially supports Django up to 6.0; it runs
+  our tests on 6.1. Watch its releases.
+- **Production:** the deploy is blocked until the server has MySQL client
+  headers and GDAL/GEOS (see "Deploying" in `CLAUDE.md`); the API needs
+  nothing more (same gunicorn, under `/api/`).
 
 ## 14. Audit log (built)
 

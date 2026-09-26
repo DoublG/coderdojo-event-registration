@@ -8,8 +8,9 @@ erased with the children only it is a guardian of.
 
 What stops it (`Preview.blockers`, each a message for the person asking):
 being the champion of an active dojo (the role has to move first), an
-organisation role, a superuser, and a ninja's own login (it goes with its
-family, and only the guardian takes it away). Views only call these;
+organisation role, a superuser, a ninja's own login (it goes with its
+family, and only the guardian takes it away) and an API client's technical
+account. Views only call these;
 `DeletionError` carries the message.
 """
 
@@ -50,6 +51,10 @@ def preview(user):
     if user.is_ninja:
         return Preview(
             user, blockers=[_("A child's own login is removed by their parent, or goes with the family's account.")]
+        )
+    if user.is_service:
+        return Preview(
+            user, blockers=[_("This is an API client's technical account: the dojo's champion revokes the client.")]
         )
     children = sole_children(user)
     shared = [child for child in Ninja.objects.of_guardian(user).order_by("name") if child not in children]

@@ -109,7 +109,8 @@ def champion_of_active_dojos(user):
 def candidates(today=None):
     """Accounts the rule applies to whose first reminder is due or past:
     not erased yet, no organisation role, not a superuser, never a ninja's
-    own login (it goes with the family)."""
+    own login (it goes with the family) or an API client's technical
+    account (it never logs in)."""
     today = today or timezone.localdate()
     # A day's margin for time zones: handle_account decides by the date.
     cutoff = today - timedelta(days=settings.ACCOUNT_RETENTION_DAYS - _first_reminder() - 1)
@@ -119,7 +120,7 @@ def candidates(today=None):
         .annotate(erased=Exists(erased))
         .filter(inactive_since__lt=cutoff, erased=False, is_superuser=False)
         .exclude(Exists(OrganisationRole.objects.filter(account=OuterRef("pk"))))
-        .exclude(account_type=User.NINJA)
+        .exclude(account_type__in=[User.NINJA, User.SERVICE])
         .order_by("pk")
     )
 

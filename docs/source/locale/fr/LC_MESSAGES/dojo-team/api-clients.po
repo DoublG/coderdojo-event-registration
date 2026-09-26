@@ -1,0 +1,162 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-26 17:29+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/dojo-team/api-clients.rst:2
+msgid "Apps that work for your dojo (API)"
+msgstr "Applications qui travaillent pour votre dojo (API)"
+
+#: ../../source/dojo-team/api-clients.rst:4
+msgid ""
+"An app or website can work for your dojo through the site's API: for now,"
+" an app at the door that marks which children and team members came, so "
+"you don't have to tick them off on the attendance list. Only the dojo's "
+"**champion** can let an app in."
+msgstr ""
+"Une application ou un site peut travailler pour votre dojo via l'API du "
+"site : pour l'instant, une application à l'entrée qui indique quels "
+"enfants et membres de l'équipe sont venus, pour que vous n'ayez pas à les"
+" cocher sur la liste de présence. Seul le **champion** du dojo peut "
+"donner accès à une application."
+
+#: ../../source/dojo-team/api-clients.rst:10
+msgid "Adding a client"
+msgstr "Ajouter un client"
+
+#: ../../source/dojo-team/api-clients.rst:12
+msgid ""
+"In the sidebar, under **Dojo**, open **API** (only the champion sees it)."
+" Under **Add a client**, give it a name you'll recognise (for example "
+"\"Scan app at the door\") and choose what it may do:"
+msgstr ""
+"Dans la barre latérale, sous **Dojo**, ouvrez **API** (seul le champion "
+"la voit). Sous **Ajouter un client**, donnez-lui un nom que vous "
+"reconnaîtrez (par exemple « Application de scan à l'entrée ») et "
+"choisissez ce qu'il peut faire :"
+
+#: ../../source/dojo-team/api-clients.rst:16
+msgid ""
+"**See the sessions and who has a place**: your dojo's sessions, and for "
+"each one the children with a confirmed place and the session's team."
+msgstr ""
+"**Voir les sessions et qui a une place** : les sessions de votre dojo et,"
+" pour chacune, les enfants ayant une place confirmée et l'équipe de la "
+"session."
+
+#: ../../source/dojo-team/api-clients.rst:18
+msgid ""
+"**Mark who came**: mark a child or team member present, absent or not "
+"marked yet, or everyone present at once."
+msgstr ""
+"**Indiquer qui est venu** : marquer un enfant ou un membre de l'équipe "
+"présent, absent ou pas encore indiqué, ou tout le monde présent d'un "
+"coup."
+
+#: ../../source/dojo-team/api-clients.rst:21
+msgid ""
+"After **Add client**, the page shows the client's **client ID** and "
+"**client secret**. Give both to whoever sets up the app. **The secret is "
+"shown only this once**: we only keep a scrambled copy, so we can't show "
+"it again. If it gets lost, make a new one (below)."
+msgstr ""
+"Après **Ajouter le client**, la page affiche l'**identifiant client** et "
+"le **secret client**. Donnez-les tous les deux à la personne qui "
+"configure l'application. **Le secret n'est affiché qu'une seule fois** : "
+"nous n'en gardons qu'une version brouillée, nous ne pouvons donc pas "
+"l'afficher à nouveau. S'il se perd, créez-en un nouveau (voir ci-"
+"dessous)."
+
+#: ../../source/dojo-team/api-clients.rst:27
+msgid "What an app can and can't do"
+msgstr "Ce qu'une application peut et ne peut pas faire"
+
+#: ../../source/dojo-team/api-clients.rst:29
+msgid ""
+"A client only ever works for your dojo, and only does what you allowed. "
+"It never sees children's allergies or notes, their family, or anything "
+"else from their account. What it marks is recorded under the client's own"
+" name, not yours."
+msgstr ""
+"Un client ne travaille que pour votre dojo et ne fait que ce que vous "
+"avez autorisé. Il ne voit jamais les allergies ou remarques des enfants, "
+"leur famille ni rien d'autre de leur compte. Ce qu'il indique est "
+"enregistré au nom du client, pas au vôtre."
+
+#: ../../source/dojo-team/api-clients.rst:35
+msgid "New secret and deleting"
+msgstr "Nouveau secret et suppression"
+
+#: ../../source/dojo-team/api-clients.rst:37
+msgid "In **Your clients**:"
+msgstr "Dans **Vos clients** :"
+
+#: ../../source/dojo-team/api-clients.rst:39
+msgid ""
+"**New secret** gives the client a new secret; the old one stops working "
+"at once. Use it when the secret may have leaked, or got lost."
+msgstr ""
+"**Nouveau secret** donne un nouveau secret au client ; l'ancien cesse de "
+"fonctionner immédiatement. Utilisez-le si le secret a pu fuiter ou s'est "
+"perdu."
+
+#: ../../source/dojo-team/api-clients.rst:41
+msgid ""
+"**Delete** stops the client at once and removes it from the list. What it"
+" marked stays."
+msgstr ""
+"**Supprimer** arrête le client immédiatement et le retire de la liste. Ce "
+"qu'il a indiqué reste."
+
+#: ../../source/dojo-team/api-clients.rst:44
+msgid "The list also shows when each client was last used."
+msgstr ""
+"La liste indique aussi quand chaque client a été utilisé pour la dernière"
+" fois."
+
+#: ../../source/dojo-team/api-clients.rst:47
+msgid "For the app's developer"
+msgstr "Pour le développeur de l'application"
+
+#: ../../source/dojo-team/api-clients.rst:49
+msgid ""
+"The bottom of the **API** page has the addresses the app needs. The app "
+"asks for a token with its client ID and secret (OAuth 2.0, client "
+"credentials), which lasts an hour, and sends it with every request. The "
+"**Reference** link is the full, technical description of the API."
+msgstr ""
+"Le bas de la page **API** donne les adresses dont l'application a besoin."
+" L'application demande un jeton avec son identifiant client et son secret"
+" (OAuth 2.0, client credentials), valable une heure, et l'envoie avec "
+"chaque requête. Le lien **Référence** est la description technique "
+"complète de l'API."
+
+#~ msgid ""
+#~ "A client only ever works for your"
+#~ " dojo, and only does what you "
+#~ "allowed. It never sees children's "
+#~ "allergies or notes, their family, or "
+#~ "anything else from their account. "
+#~ "Everything it marks is recorded under"
+#~ " its own name, so the attendance "
+#~ "list and the history show which "
+#~ "app marked what."
+#~ msgstr ""
+

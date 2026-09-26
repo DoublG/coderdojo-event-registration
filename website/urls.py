@@ -18,7 +18,9 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import include, path
 from django.views.i18n import JavaScriptCatalog
-from .api import api
+from oauth2_provider import views as oauth2_views
+
+from api.v1 import api as api_v1
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +28,7 @@ urlpatterns = [
     path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),  # the texts bundle.js's gettext() uses
     path("", include("core.urls")),
     path("", include("accounts.urls")),
+    path("", include("api.urls")),
     path("", include("applications.urls")),
     path("", include("dojos.urls")),
     path("", include("events.urls")),
@@ -33,7 +36,10 @@ urlpatterns = [
     path("", include("mailing.urls")),
     path("", include("content.urls")),
     path("", include("privacy.urls")),
-    path("api/", api.urls),
+    # The API (DATA_MODEL.md §13): OAuth 2.0 client credentials, then /api/v1/.
+    path("api/oauth/token/", oauth2_views.TokenView.as_view(), name="oauth2_token"),
+    path("api/oauth/revoke/", oauth2_views.RevokeTokenView.as_view(), name="oauth2_revoke"),
+    path("api/v1/", api_v1.urls),
 ]
 
 if settings.DEBUG:

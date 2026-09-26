@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-26 12:27+0000\n"
+"POT-Creation-Date: 2026-09-26 17:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -54,25 +54,25 @@ msgstr "E-mail"
 msgid "That isn't a Belgian postcode we know."
 msgstr "Ce code postal belge nous est inconnu."
 
-#: accounts/models.py:147
+#: accounts/models.py:154
 #, python-format
 msgid "Ninjas are %(min)s to %(max)s years old — check the date of birth."
 msgstr ""
 "Les ninjas ont entre %(min)s et %(max)s ans. Vérifiez la date de naissance."
 
-#: accounts/models.py:176
+#: accounts/models.py:183
 msgid "Girl"
 msgstr "Fille"
 
-#: accounts/models.py:176
+#: accounts/models.py:183
 msgid "Boy"
 msgstr "Garçon"
 
-#: accounts/models.py:176
+#: accounts/models.py:183
 msgid "Other"
 msgstr "Autre"
 
-#: accounts/models.py:176
+#: accounts/models.py:183
 msgid "Prefer not to say"
 msgstr "Je préfère ne pas le dire"
 
@@ -557,8 +557,10 @@ msgid "at %(dojo)s"
 msgstr "à %(dojo)s"
 
 #: accounts/templates/accounts/partials/_child_header_edit.html:17
-#: content/forms.py:82 content/templates/content/manage/sponsor_list.html:16
-#: dojos/forms.py:161 dojos/templates/dojos/dojo_event_list.html:24
+#: api/templates/api/dojo_api_clients.html:51
+#: api/templates/api/dojo_api_clients.html:77 content/forms.py:82
+#: content/templates/content/manage/sponsor_list.html:16 dojos/forms.py:161
+#: dojos/templates/dojos/dojo_event_list.html:24
 #: dojos/templates/dojos/dojo_manage.html:105
 #: dojos/templates/dojos/partials/_event_form_fields.html:18
 #: events/forms.py:167 events/forms.py:221 events/forms.py:248
@@ -1028,6 +1030,150 @@ msgid "A spot opened up in %(event)s — a waitlisted family is now confirmed."
 msgstr ""
 "Une place s'est libérée pour %(event)s : une famille de la liste d'attente "
 "est maintenant confirmée."
+
+#: api/services.py:25
+msgid "Give the client a name."
+msgstr "Donnez un nom au client."
+
+#: api/services.py:29
+msgid "Choose what the client may do."
+msgstr "Choisissez ce que le client peut faire."
+
+#: api/templates/api/dojo_api_clients.html:3
+#: api/templates/api/dojo_api_clients.html:4
+#: api/templates/api/dojo_api_clients.html:113
+#: dojos/templates/dojos/_admin_base.html:142
+msgid "API"
+msgstr "API"
+
+#: api/templates/api/dojo_api_clients.html:31
+msgid ""
+"An API client is an app or website that works for this dojo, for now an app "
+"at the door that marks who came. It logs in with its own client ID and "
+"secret (OAuth 2.0 client credentials) and can only do what you allow here, "
+"for this dojo only. Only you, as the champion, see this page."
+msgstr ""
+"Un client API est une application ou un site qui travaille pour ce dojo, "
+"pour l'instant une application à l'entrée qui indique qui est venu. Il se "
+"connecte avec son propre identifiant client et son secret (OAuth 2.0 client "
+"credentials) et ne peut faire que ce que vous autorisez ici, pour ce dojo "
+"uniquement. Vous seul, en tant que champion, voyez cette page."
+
+#: api/templates/api/dojo_api_clients.html:35
+#, python-format
+msgid "Login details for %(name)s"
+msgstr "Identifiants de %(name)s"
+
+#: api/templates/api/dojo_api_clients.html:36
+msgid ""
+"Copy the secret now: it's shown only this once. If it gets lost, renew it "
+"below."
+msgstr ""
+"Copiez le secret maintenant : il n'est affiché qu'une seule fois. S'il se "
+"perd, renouvelez-le ci-dessous."
+
+#: api/templates/api/dojo_api_clients.html:38
+#: api/templates/api/dojo_api_clients.html:78
+msgid "Client ID"
+msgstr "Identifiant client"
+
+#: api/templates/api/dojo_api_clients.html:39
+msgid "Client secret"
+msgstr "Secret client"
+
+#: api/templates/api/dojo_api_clients.html:45
+msgid "Add a client"
+msgstr "Ajouter un client"
+
+#: api/templates/api/dojo_api_clients.html:52
+msgid "Scan app at the door"
+msgstr "Application de scan à l'entrée"
+
+#: api/templates/api/dojo_api_clients.html:56
+msgid "What it may do"
+msgstr "Ce qu'il peut faire"
+
+#: api/templates/api/dojo_api_clients.html:60
+msgid "See the sessions and who has a place"
+msgstr "Voir les sessions et qui a une place"
+
+#: api/templates/api/dojo_api_clients.html:60
+msgid "Mark who came"
+msgstr "Indiquer qui est venu"
+
+#: api/templates/api/dojo_api_clients.html:65
+msgid "Add client"
+msgstr "Ajouter le client"
+
+#: api/templates/api/dojo_api_clients.html:71
+msgid "Your clients"
+msgstr "Vos clients"
+
+#: api/templates/api/dojo_api_clients.html:79
+msgid "May"
+msgstr "Peut"
+
+#: api/templates/api/dojo_api_clients.html:80
+msgid "Last used"
+msgstr "Dernière utilisation"
+
+#: api/templates/api/dojo_api_clients.html:87
+#, python-format
+msgid "added %(date)s"
+msgstr "ajouté le %(date)s"
+
+#: api/templates/api/dojo_api_clients.html:93
+#, python-format
+msgid "Give %(name)s a new secret? The old one stops working at once."
+msgstr ""
+"Donner un nouveau secret à %(name)s ? L'ancien cesse de fonctionner "
+"immédiatement."
+
+#: api/templates/api/dojo_api_clients.html:94
+msgid "New secret"
+msgstr "Nouveau secret"
+
+#: api/templates/api/dojo_api_clients.html:95
+#, python-format
+msgid "Delete %(name)s? It stops working at once and leaves this list."
+msgstr ""
+"Supprimer %(name)s ? Il cesse de fonctionner immédiatement et quitte cette "
+"liste."
+
+#: api/templates/api/dojo_api_clients.html:96
+#: mailing/templates/mailing/manage/segment_detail.html:58
+msgid "Delete"
+msgstr "Supprimer"
+
+# | msgid "No mentors listed yet."
+#: api/templates/api/dojo_api_clients.html:105
+msgid "No clients yet."
+msgstr "Pas encore de clients."
+
+#: api/templates/api/dojo_api_clients.html:110
+msgid "For the app's developer"
+msgstr "Pour le développeur de l'application"
+
+#: api/templates/api/dojo_api_clients.html:112
+msgid "Token"
+msgstr "Jeton"
+
+#: api/templates/api/dojo_api_clients.html:114
+msgid "Reference"
+msgstr "Référence"
+
+#: api/templates/api/dojo_api_clients.html:116
+msgid ""
+"A token lasts an hour; the app asks for a new one with the same client ID "
+"and secret."
+msgstr ""
+"Un jeton est valable une heure ; l'application en demande un nouveau avec le "
+"même identifiant client et secret."
+
+#: api/views.py:77
+#, python-format
+msgid "%(name)s is deleted: it can't use the API any more."
+msgstr "%(name)s est supprimé : il ne peut plus utiliser l'API."
 
 #: applications/forms.py:11
 msgid "Uittreksel uit het strafregister (model 2)"
@@ -1802,12 +1948,12 @@ msgstr "Administrateur de l'organisation"
 
 # | msgid "Sign up"
 #: core/templates/core/_manage_base.html:133
-#: dojos/templates/dojos/_admin_base.html:148
+#: dojos/templates/dojos/_admin_base.html:156
 msgid "Sign out"
 msgstr "Se déconnecter"
 
 #: core/templates/core/_manage_base.html:142
-#: dojos/templates/dojos/_admin_base.html:157
+#: dojos/templates/dojos/_admin_base.html:165
 msgid "Menu"
 msgstr "Menu"
 
@@ -2536,7 +2682,7 @@ msgstr ""
 msgid "You're now the champion of %(dojo)s."
 msgstr "Vous êtes maintenant le champion de %(dojo)s."
 
-#: dojos/team.py:226 dojos/views.py:505
+#: dojos/team.py:226 dojos/views.py:500
 msgid "Unknown action."
 msgstr "Action inconnue."
 
@@ -3800,85 +3946,85 @@ msgstr "Contacter %(name)s"
 msgid "Your request to join %(dojo)s has been sent to its team."
 msgstr "Votre demande pour rejoindre %(dojo)s a été envoyée à son équipe."
 
-#: dojos/views.py:268
+#: dojos/views.py:263
 msgid ""
 "Only approved champions with a valid background check can create a dojo."
 msgstr ""
 "Seuls les champions approuvés avec un extrait de casier judiciaire valable "
 "peuvent créer un dojo."
 
-#: dojos/views.py:286
+#: dojos/views.py:281
 #, python-format
 msgid ""
 "%(dojo)s has been created as a draft. Fill in its profile, then launch it."
 msgstr ""
 "%(dojo)s a été créé en brouillon. Complétez son profil, puis lancez-le."
 
-#: dojos/views.py:288
+#: dojos/views.py:283
 msgid "We couldn't find that address on the map; check it on this page."
 msgstr ""
 "Nous n'avons pas trouvé cette adresse sur la carte ; vérifiez-la sur cette "
 "page."
 
-#: dojos/views.py:341
+#: dojos/views.py:336
 #, python-format
 msgid "%(dojo)s is now %(lower)s."
 msgstr "%(dojo)s est maintenant %(lower)s."
 
-#: dojos/views.py:410
+#: dojos/views.py:405
 msgid "Update posted on the dojo's page."
 msgstr "Nouvelle publiée sur la page du dojo."
 
-#: dojos/views.py:427
+#: dojos/views.py:422
 msgid "Update removed."
 msgstr "Nouvelle retirée."
 
 # | msgid "Youth mentor at %(dojo)s"
-#: dojos/views.py:471
+#: dojos/views.py:466
 #, python-format
 msgid "You've left the %(dojo)s team."
 msgstr "Vous avez quitté l'équipe de %(dojo)s."
 
-#: dojos/views.py:477
+#: dojos/views.py:472
 #, python-format
 msgid "%(membership)s is now the champion of %(dojo)s."
 msgstr "%(membership)s est maintenant le champion de %(dojo)s."
 
-#: dojos/views.py:486
+#: dojos/views.py:481
 #, python-format
 msgid "%(membership)s is now on the team."
 msgstr "%(membership)s fait maintenant partie de l'équipe."
 
 # | msgid "Request a new link"
-#: dojos/views.py:489
+#: dojos/views.py:484
 msgid "Request declined."
 msgstr "Demande refusée."
 
-#: dojos/views.py:492
+#: dojos/views.py:487
 #, python-format
 msgid "%(membership)s has been removed from the team."
 msgstr "%(membership)s a été retiré de l'équipe."
 
 # | msgid "Enter a valid email address."
-#: dojos/views.py:497
+#: dojos/views.py:492
 msgid "No account uses that email address."
 msgstr "Aucun compte n'utilise cette adresse e-mail."
 
-#: dojos/views.py:499
+#: dojos/views.py:494
 #, python-format
 msgid "%(name)s has been added to the team."
 msgstr "%(name)s a été ajouté à l'équipe."
 
-#: dojos/views.py:503
+#: dojos/views.py:498
 #, python-format
 msgid "%(name)s is now a youth mentor."
 msgstr "%(name)s est maintenant jeune mentor."
 
-#: dojos/views.py:726
+#: dojos/views.py:716
 msgid "Pick a belt to award."
 msgstr "Choisissez une ceinture à décerner."
 
-#: dojos/views.py:763
+#: dojos/views.py:753
 msgid "Pick a badge to award."
 msgstr "Choisissez un badge à décerner."
 
@@ -5495,10 +5641,6 @@ msgstr ""
 msgid "Nobody matches yet."
 msgstr "Personne ne correspond pour l'instant."
 
-#: mailing/templates/mailing/manage/segment_detail.html:58
-msgid "Delete"
-msgstr "Supprimer"
-
 #: mailing/templates/mailing/manage/segment_detail.html:59
 msgid "Used by draft campaigns:"
 msgstr "Utilisé par des campagnes en brouillon :"
@@ -5647,11 +5789,11 @@ msgid ""
 "about sessions at your dojo, a new dojo near you, or events like Coolest "
 "Projects and CoderDojo Girlz."
 msgstr ""
-"Nous utilisons ce que nous savons de votre famille pour vous envoyer des "
-"e-mails pertinents : votre code postal et votre langue et, pour les enfants "
-"pour lesquels vous l'acceptez, les sessions auxquelles ils participent, "
-"leur âge et leur genre. C'est ainsi que vous entendez parler des sessions "
-"de votre dojo, d'un nouveau dojo près de chez vous ou d'événements comme "
+"Nous utilisons ce que nous savons de votre famille pour vous envoyer des e-"
+"mails pertinents : votre code postal et votre langue et, pour les enfants "
+"pour lesquels vous l'acceptez, les sessions auxquelles ils participent, leur "
+"âge et leur genre. C'est ainsi que vous entendez parler des sessions de "
+"votre dojo, d'un nouveau dojo près de chez vous ou d'événements comme "
 "Coolest Projects et CoderDojo Girlz."
 
 #: mailing/templates/mailing/partials/_privacy_explanation.html:11
@@ -5777,7 +5919,7 @@ msgstr "Autres parcours"
 msgid "Not sure this is the right one? Kids move between pathways freely."
 msgstr "Vous hésitez ? Les enfants peuvent changer de parcours librement."
 
-#: privacy/deletion.py:52
+#: privacy/deletion.py:53
 msgid ""
 "A child's own login is removed by their parent, or goes with the family's "
 "account."
@@ -5785,11 +5927,19 @@ msgstr ""
 "Le compte personnel d'un enfant est supprimé par son parent, ou disparaît "
 "avec le compte de la famille."
 
-#: privacy/deletion.py:59
+#: privacy/deletion.py:57
+msgid ""
+"This is an API client's technical account: the dojo's champion revokes the "
+"client."
+msgstr ""
+"C'est le compte technique d'un client API : le champion du dojo révoque le "
+"client."
+
+#: privacy/deletion.py:64
 msgid "This account has already been deleted."
 msgstr "Ce compte a déjà été supprimé."
 
-#: privacy/deletion.py:63
+#: privacy/deletion.py:68
 #, python-format
 msgid ""
 "This account is the champion of %(dojos)s. A dojo can't be without its "
@@ -5800,12 +5950,12 @@ msgstr ""
 "champion : le rôle doit d'abord passer à un des mentors du dojo (sur la page "
 "Équipe du dojo)."
 
-#: privacy/deletion.py:69
+#: privacy/deletion.py:74
 msgid "This account has an organisation role. It has to be taken away first."
 msgstr ""
 "Ce compte a un rôle dans l'organisation. Il faut d'abord le lui retirer."
 
-#: privacy/deletion.py:71
+#: privacy/deletion.py:76
 msgid ""
 "This is a technical administrator's account (superuser); it can't be deleted "
 "here."
@@ -5813,7 +5963,7 @@ msgstr ""
 "C'est le compte d'un administrateur technique (superuser) ; il ne peut pas "
 "être supprimé ici."
 
-#: privacy/retention.py:250
+#: privacy/retention.py:251
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
@@ -5825,7 +5975,7 @@ msgstr ""
 "qu'il reste champion. Demandez-lui de passer le rôle à un mentor, ou "
 "contactez l'organisation."
 
-#: privacy/retention.py:256
+#: privacy/retention.py:257
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
@@ -6102,6 +6252,20 @@ msgstr "Tapez le nom d'utilisateur du compte pour confirmer."
 #: privacy/views.py:121
 msgid "The account has been deleted."
 msgstr "Le compte a été supprimé."
+
+#~ msgid "This client has been revoked."
+#~ msgstr "Ce client a été révoqué."
+
+#~ msgid "This client has been revoked already."
+#~ msgstr "Ce client a déjà été révoqué."
+
+# | msgid "sent %(date)s"
+#, python-format
+#~ msgid "Revoked %(date)s"
+#~ msgstr "Révoqué le %(date)s"
+
+#~ msgid "Revoke"
+#~ msgstr "Révoquer"
 
 #~ msgid ""
 #~ "I'm the parent or legal guardian of the children I add, and I agree that "

@@ -62,6 +62,9 @@ RECORDED = {
     "pathways.PathwayStep": {},
     "pathways.PathwayProject": {},
     "pathways.Skill": {},
+    # The API (DATA_MODEL.md §13): who made, renewed or revoked a dojo's client.
+    "api.DojoApiClient": {},
+    "oauth2_provider.Application": {"mask_fields": ["client_secret"]},
 }
 
 

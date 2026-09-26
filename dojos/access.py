@@ -45,9 +45,12 @@ POST_UPDATES = "post_updates"  # post/delete the "From this dojo" updates (conte
 # See a child's allergies or notes (Ninja.allergies_notes, health data) on the
 # attendance list of a session they have a confirmed place at.
 VIEW_HEALTH_NOTES = "view_health_notes"
+# Make, revoke and renew the dojo's API clients (api.models.DojoApiClient):
+# they act for the whole dojo, so only its champion.
+MANAGE_API = "manage_api"
 ALL_CAPABILITIES = frozenset({
     TAKE_ATTENDANCE, MANAGE_EVENTS, EDIT_SETTINGS, MANAGE_TEAM, AWARD_BELTS, AWARD_BADGES, MANAGE_LIFECYCLE,
-    POST_UPDATES, VIEW_HEALTH_NOTES,
+    POST_UPDATES, VIEW_HEALTH_NOTES, MANAGE_API,
 })
 
 ROLE_CAPABILITIES = {
@@ -55,8 +58,9 @@ ROLE_CAPABILITIES = {
     # Mentors can do everything for day-to-day running and team management;
     # the dojo's lifecycle (launching it, making it dormant, archiving,
     # reopening) stays with its champion, and so do the children's health
-    # notes (the family forms tell parents only the champion sees them).
-    MENTOR: ALL_CAPABILITIES - {MANAGE_LIFECYCLE, VIEW_HEALTH_NOTES},
+    # notes (the family forms tell parents only the champion sees them) and
+    # the dojo's API clients.
+    MENTOR: ALL_CAPABILITIES - {MANAGE_LIFECYCLE, VIEW_HEALTH_NOTES, MANAGE_API},
 }
 
 
@@ -113,6 +117,10 @@ class DojoAccess:
     @property
     def can_view_health_notes(self):
         return self.can(VIEW_HEALTH_NOTES)
+
+    @property
+    def can_manage_api(self):
+        return self.can(MANAGE_API)
 
 
 def managing_membership(user, dojo):
