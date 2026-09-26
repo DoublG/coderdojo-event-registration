@@ -375,3 +375,25 @@ class SeedContentLanguagesTests(TestCase):
         out = StringIO()
         call_command("seed_content_languages", stdout=out)
         self.assertNotRegex(out.getvalue(), r"=[1-9]")
+
+
+
+class ContactAndCodeOfConductTests(TestCase):
+    """The footer's contact details (settings.ORGANISATION_CONTACT) and its
+    Contact and Code of conduct pages."""
+
+    def test_footer_shows_the_organisation_and_links_the_pages(self):
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, 'href="mailto:info@coderdojobelgium.be"')
+        self.assertContains(response, "Liersesteenweg 4, 2800 Mechelen")
+        self.assertContains(response, f'href="{reverse("contact")}"')
+        self.assertContains(response, f'href="{reverse("code_of_conduct")}"')
+
+    def test_contact_page(self):
+        response = self.client.get(reverse("contact"))
+        self.assertContains(response, "0523.889.476")
+        self.assertContains(response, "https://www.instagram.com/coderdojobelgium/")
+
+    def test_code_of_conduct_in_the_visitors_language(self):
+        self.assertContains(self.client.get(reverse("code_of_conduct")), "call 112")
+        self.assertContains(self.client.get(reverse("code_of_conduct"), HTTP_ACCEPT_LANGUAGE="nl-be"), "Gedragscode")

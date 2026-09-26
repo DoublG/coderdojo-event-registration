@@ -1,0 +1,64 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Contact" %} · CoderDojo Belgium{% endblock %}
+{% block root_class %}info-page-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .info-page-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .info-page-root .info-content { max-width: 820px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+  .info-page-root .info-content a { color: var(--secondary); }
+  .info-page-root h1 { color: var(--ink); margin: 0 0 var(--space-3); }
+  .info-page-root h2 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .info-page-root .lead { color: var(--ink-muted); margin: 0 0 var(--space-6); }
+  .info-page-root .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-4); }
+  .info-page-root .cd-card { padding: var(--space-5); }
+  .info-page-root .cd-card p { margin: 0 0 var(--space-2); }
+  .info-page-root .muted { color: var(--ink-muted); }
+  .info-page-root .socials { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% comment %}
+How to reach CoderDojo Belgium (settings.ORGANISATION_CONTACT, via
+core.context_processors.organisation_contact). Questions about one dojo go
+to that dojo: its page shows its email.
+{% endcomment %}
+<div class="shell info-content">
+  <h1 class="display-lg">{% translate "Contact" %}</h1>
+  <p class="body-lg lead">{% blocktranslate trimmed %}Questions about CoderDojo in Belgium, volunteering, starting a dojo or becoming a partner? We're happy to help.{% endblocktranslate %}</p>
+
+  <div class="contact-grid">
+    <section class="cd-card">
+      <h2 class="heading-md">{% translate "Email" %}</h2>
+      <p class="body"><a href="mailto:{{ organisation.email }}">{{ organisation.email }}</a></p>
+      <p class="body-sm muted">{% translate "For general questions about CoderDojo Belgium." %}</p>
+    </section>
+
+    <section class="cd-card">
+      <h2 class="heading-md">{% translate "A question about one dojo?" %}</h2>
+      <p class="body-sm">{% blocktranslate trimmed %}Sessions, places and practical questions are best asked to the dojo itself: every dojo's page shows how to reach its team.{% endblocktranslate %}</p>
+      <p class="body-sm"><a href="{% url 'dojo_list' %}">{% translate "Find a dojo →" %}</a></p>
+    </section>
+
+    <section class="cd-card">
+      <h2 class="heading-md">{% translate "Office" %}</h2>
+      <p class="body">{{ organisation.legal_name }}<br>{% for line in organisation.office %}{{ line }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</p>
+      <p class="body-sm muted">{% translate "Registered office:" %} {{ organisation.registered_office|join:", " }}<br>{% translate "Company number:" %} {{ organisation.company_number }}</p>
+    </section>
+
+    <section class="cd-card">
+      <h2 class="heading-md">{% translate "Follow us" %}</h2>
+      <p class="socials body">
+        <a href="{{ organisation.facebook }}" target="_blank" rel="noopener">Facebook</a>
+        <a href="{{ organisation.instagram }}" target="_blank" rel="noopener">Instagram</a>
+        <a href="{{ organisation.linkedin }}" target="_blank" rel="noopener">LinkedIn</a>
+      </p>
+      <p class="body-sm"><a href="{{ organisation.website }}" target="_blank" rel="noopener">coderdojobelgium.be</a></p>
+    </section>
+  </div>
+
+  <p class="body-sm muted" style="margin-top: var(--space-6);">{% url 'code_of_conduct' as coc_url %}{% blocktranslate trimmed %}Everyone at a dojo follows our <a href="{{ coc_url }}">code of conduct</a>. Worried about a child's safety? It tells you where to go.{% endblocktranslate %}</p>
+</div>
+{% endblock %}

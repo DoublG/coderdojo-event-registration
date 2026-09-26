@@ -11,6 +11,13 @@ services:
       # coolregistration.localhost verify like a browser that trusted the same CA.
       NODE_OPTIONS: "--use-system-ca"
 
+      # Commits made inside this container (by Claude Code) are Claude's,
+      # whatever the repo's own git config says (CLAUDE.md, "Workflow rules").
+      GIT_AUTHOR_NAME: Claude
+      GIT_AUTHOR_EMAIL: noreply@anthropic.com
+      GIT_COMMITTER_NAME: Claude
+      GIT_COMMITTER_EMAIL: noreply@anthropic.com
+
       # Database configuration - read by website/settings.py
       DB_HOST: db
       DB_PORT: 3306

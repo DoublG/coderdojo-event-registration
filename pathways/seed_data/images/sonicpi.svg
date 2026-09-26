@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#2A1E3F"/>
+  <path d="M40 150 Q60 90 80 150 T120 150 T160 150 Q175 60 190 150 T220 150 T250 150 Q265 110 280 150 T320 150 T360 150" fill="none" stroke="#E4468B" stroke-width="7" stroke-linecap="round"/>
+  <g fill="#F5C518">
+    <ellipse cx="118" cy="232" rx="17" ry="12"/><rect x="131" y="180" width="6" height="52"/>
+    <ellipse cx="268" cy="222" rx="17" ry="12"/><ellipse cx="318" cy="212" rx="17" ry="12"/>
+    <rect x="281" y="160" width="6" height="62"/><rect x="331" y="150" width="6" height="62"/>
+    <rect x="281" y="150" width="56" height="10"/>
+  </g>
+  <g fill="#8C7BC4" font-family="monospace" font-size="20"><text x="48" y="62">live_loop :beat do</text><text x="70" y="88">sample :bd_haus</text></g>
+</svg>

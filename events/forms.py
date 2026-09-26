@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 
 from django import forms
 from django.conf import settings
@@ -11,11 +12,11 @@ from core.content_languages import (
     optional_copy,
     save_translation_fields,
 )
-from core.image_library import library_filename, use_library_image
+from core.image_library import LIBRARY_DIRS, library_filename, use_library_image
 from dojos.models import Dojo
 from pathways.models import Pathway
 
-from .models import Event
+from .models import Badge, Event
 from .template_images import TEMPLATE_IMAGES
 
 DATE_ANY = ""
@@ -199,3 +200,74 @@ class EventForm(forms.ModelForm):
             event.save()
             self.save_m2m()
         return event
+
+
+class BadgeForm(forms.ModelForm):
+    """An award (events.Badge) on the organisation dashboard's Awards page
+    (events.manage). Only the organisation defines awards; dojo teams only
+    award them. The icon is one of the shipped award icons (linked from the
+    image library, see core.image_library) or an uploaded raster image; an
+    upload wins. SVG is deliberately not uploadable: it can carry script."""
+
+    library_icon = forms.ChoiceField(
+        required=False, label=_("Standard icon"),
+        widget=forms.Select(attrs={"class": "cd-form__select body"}),
+    )
+
+    class Meta:
+        model = Badge
+        fields = ["name", "kind", "description", "criteria", "threshold", "grants_belt", "library_icon", "icon"]
+        labels = {
+            "name": _("Name"), "kind": _("Kind"), "description": _("Description"), "criteria": _("How to earn it"),
+            "threshold": _("Sessions needed"), "grants_belt": _("Also grants belt"), "icon": _("Icon"),
+        }
+        help_texts = {
+            "kind": _("A one-off is earned by doing something once; a milestone is reached by attending a number of sessions."),
+            "criteria": _("One-off only."),
+            "threshold": _("Milestone only: how many sessions a ninja must attend."),
+            "grants_belt": _("Milestone only, optional: reaching it also awards this belt."),
+            "icon": _("Optional: upload your own icon instead (PNG, JPG or WebP, square works best)."),
+        }
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("e.g. Game Maker")}),
+            "kind": forms.Select(attrs={"class": "cd-form__select body"}),
+            "description": forms.TextInput(attrs={"class": "cd-form__input body"}),
+            "criteria": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("e.g. Build and share a playable game.")}),
+            "threshold": forms.NumberInput(attrs={"class": "cd-form__input body", "min": 1}),
+            "grants_belt": forms.Select(attrs={"class": "cd-form__select body"}),
+            "icon": forms.ClearableFileInput(attrs={"class": "cd-form__input body", "accept": "image/*"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        icons = sorted(path.name for path in LIBRARY_DIRS["awards"].iterdir() if path.is_file())
+        self.fields["library_icon"].choices = [("", _("None, or my own upload"))] + [
+            (name, Path(name).stem.replace("-", " ").capitalize()) for name in icons
+        ]
+        self.fields["library_icon"].initial = library_filename(self.instance.icon, "awards")
+        labels = {"name": _("Name"), "description": _("Description"), "criteria": _("How to earn it")}
+        self.translation_groups = bound_translation_groups(self, add_translation_fields(
+            self, self.instance, lambda field: optional_copy(self.fields[field], labels[field]),
+        ))
+
+    def main_fields(self):
+        """The award's own fields, without the per-language copies."""
+        return [self[name] for name in self.Meta.fields]
+
+    def clean(self):
+        cleaned = super().clean()
+        # A one-off never keeps a milestone's threshold or belt, so switching
+        # the kind can't trip Badge.clean() over leftover values.
+        if cleaned.get("kind") == Badge.ONE_OFF:
+            cleaned["threshold"] = cleaned["grants_belt"] = None
+        return cleaned
+
+    def save(self, commit=True):
+        badge = super().save(commit=False)
+        library_icon = self.cleaned_data.get("library_icon")
+        if library_icon and not self.files.get("icon"):
+            use_library_image(badge, "icon", "awards", library_icon)
+        save_translation_fields(self, badge)
+        if commit:
+            badge.save()
+        return badge

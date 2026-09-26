@@ -90,6 +90,24 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
               {% translate "Promotions" %}
             </a>
           </li>
+          <li>
+            <a href="{% url 'manage_sponsor_list' %}" class="cd-admin-nav__link label{% if active == 'sponsors' %} cd-admin-nav__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-9.3-9A5 5 0 0 1 12 6a5 5 0 0 1 9.3 6c-2.3 4.6-9.3 9-9.3 9z"/></svg>
+              {% translate "Sponsors" %}
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="cd-admin-nav__group">
+        <p class="cd-admin-nav__group-label caption">{% translate "Ninjas" %}</p>
+        <ul class="cd-admin-nav__list">
+          <li>
+            <a href="{% url 'manage_badge_list' %}" class="cd-admin-nav__link label{% if active == 'awards' %} cd-admin-nav__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg>
+              {% translate "Awards" %}
+            </a>
+          </li>
         </ul>
       </div>
 

@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from core.admin_translations import TranslationAdminMixin
 
-from .models import FAQ, Announcement, OrganisationTeamMember, Promotion, Testimonial
+from .models import FAQ, Announcement, OrganisationTeamMember, Promotion, Sponsor, Testimonial
 
 
 @admin.register(Announcement)
@@ -36,3 +36,14 @@ class ScopedContentAdmin(TranslationAdminMixin, admin.ModelAdmin):
     languages when scoped to a dojo (or its session), else the
     organisation's. Pick the dojo and save first; its other languages then
     get their own sections."""
+
+
+@admin.register(Sponsor)
+class SponsorAdmin(admin.ModelAdmin):
+    """The homepage's "Made possible by" sponsors; managed day to day on the
+    organisation dashboard's Sponsors page."""
+
+    list_display = ["name", "url", "order", "is_public"]
+    list_editable = ["order", "is_public"]
+    search_fields = ["name"]
+

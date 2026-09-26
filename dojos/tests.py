@@ -1871,6 +1871,80 @@ class AwardBeltViewTests(TestCase):
         self.assertIsNotNone(self.ninja.badges.get(badge=self.band).earned_date)
 
 
+class AwardBadgeViewTests(TestCase):
+    """Awarding a one-off badge from the attendance list (AWARD_BADGES): the
+    organisation defines badges, the dojo's champion and mentors award them."""
+
+    def setUp(self):
+        from events.models import Badge
+
+        self.maker = Badge.objects.create(name="Game Maker", criteria="Build a playable game.")
+        self.explorer = Badge.objects.create(name="Code Explorer")
+        self.band = Badge.objects.create(name="White Band", kind=Badge.MILESTONE, threshold=1)
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.mentor = make_mentor(username="m1")
+        add_member(self.dojo, self.mentor)
+        self.event = Event.objects.create(
+            name="Session", dojo=self.dojo, status=Event.OPEN,
+            start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10,
+        )
+        self.ninja = Ninja.objects.create(name="Mila")
+        self.registration = Registration.objects.create(event=self.event, ninja=self.ninja, waiting_list=False, position=1)
+        self.url = reverse("dojo_event_award_badge", kwargs={
+            "dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.registration.id,
+        })
+        self.page = reverse("dojo_event_attendance", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+
+    def test_champion_and_mentor_can_award(self):
+        for user, badge in ((self.owner, self.maker), (self.mentor, self.explorer)):
+            self.client.force_login(user)
+            self.assertContains(self.client.get(self.page), "Award badge")
+            response = self.client.post(self.url, {"badge": badge.id, "note": "Well done"}, HTTP_HX_REQUEST="true")
+            self.assertTemplateUsed(response, "dojos/partials/_attendance_row.html")
+            award = self.ninja.badges.get(badge=badge)
+            self.assertEqual((award.awarded_by, award.note), (user, "Well done"))
+            self.assertIsNotNone(award.earned_date)
+        # Both one-offs earned: nothing left to award, and milestones are never offered.
+        self.assertNotContains(self.client.get(self.page), "Award badge")
+
+    def test_only_one_offs_not_yet_earned_are_offered(self):
+        self.client.force_login(self.owner)
+        self.client.post(self.url, {"badge": self.maker.id}, HTTP_HX_REQUEST="true")
+        response = self.client.get(self.page)
+        self.assertContains(response, f'<option value="{self.explorer.id}"')
+        self.assertNotContains(response, f'<option value="{self.maker.id}"')
+        self.assertNotContains(response, f'<option value="{self.band.id}"')
+
+    def test_a_refused_award_shows_the_message_in_the_row(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(self.url, {"badge": self.band.id}, HTTP_HX_REQUEST="true")
+        self.assertEqual(response.context["badge_error"], "Milestones are awarded automatically when attendance is marked.")
+        self.assertFalse(self.ninja.badges.exists())
+
+    def test_needs_award_badges_and_the_right_event(self):
+        self.client.force_login(self.mentor)
+        with patch.dict(access.ROLE_CAPABILITIES, {access.MENTOR: frozenset({access.TAKE_ATTENDANCE})}):
+            self.assertEqual(self.client.post(self.url, {"badge": self.maker.id}).status_code, 403)
+            self.assertNotContains(self.client.get(self.page), "Award badge")
+
+        outsider = make_champion(username="outsider")
+        make_dojo("Antwerp", champion=outsider)
+        self.client.force_login(outsider)
+        self.assertEqual(self.client.post(self.url, {"badge": self.maker.id}).status_code, 404)
+
+        other_event = Event.objects.create(
+            name="Other", dojo=make_dojo("Leuven"), start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z", places=10,
+        )
+        wrong = reverse("dojo_event_award_badge", kwargs={
+            "dojo_id": self.dojo.id, "event_id": other_event.id, "registration_id": self.registration.id,
+        })
+        self.client.force_login(self.owner)
+        self.assertEqual(self.client.post(wrong, {"badge": self.maker.id}).status_code, 404)
+        self.assertFalse(self.ninja.badges.exists())
+
+
 class DojoUpdatesTests(TestCase):
     """The admin "Updates" page (dojo_updates / dojo_update_delete) and the
     public page's "From this dojo" list."""

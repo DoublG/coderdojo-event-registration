@@ -4,6 +4,9 @@ flow call these; nothing else creates NinjaBelt rows (seeders aside).
 - award_belt: a dojo's active champion or mentor awards a ninja the next
   belt(s) up. Belts are an append-only history, so a belt at or below the
   ninja's current level is refused, never overwritten.
+- award_badge: a dojo's active champion or mentor awards a ninja a one-off
+  badge (the organisation defines badges; dojo teams only award them).
+  Milestones are never awarded by hand.
 - sync_milestones: recomputes a ninja's milestone badges (sessions
   attended) after attendance changes. A reached milestone that grants a
   belt awards it, as the membership that marked the attendance.
@@ -20,18 +23,28 @@ class BeltError(Exception):
     """A belt can't be awarded; the message is shown to the user."""
 
 
-def _check_can_award(membership):
+class BadgeError(Exception):
+    """A badge can't be awarded; the message is shown to the user."""
+
+
+def _may_award(membership, capability):
     # Imported here: dojos.access imports dojos.models, which the events
     # models reference by string only — keep the import graph one-way.
-    from dojos.access import AWARD_BELTS, ROLE_CAPABILITIES
+    from dojos.access import ROLE_CAPABILITIES
     from dojos.models import DojoMembership
 
-    if (
-        membership is None
-        or membership.status != DojoMembership.ACTIVE
-        or AWARD_BELTS not in ROLE_CAPABILITIES.get(membership.role, ())
-        or not membership.user.background_check_valid
-    ):
+    return (
+        membership is not None
+        and membership.status == DojoMembership.ACTIVE
+        and capability in ROLE_CAPABILITIES.get(membership.role, ())
+        and membership.user.background_check_valid
+    )
+
+
+def _check_can_award(membership):
+    from dojos.access import AWARD_BELTS
+
+    if not _may_award(membership, AWARD_BELTS):
         raise BeltError(_("Only a dojo's active champion or mentors can award belts."))
 
 
@@ -51,6 +64,29 @@ def award_belt(ninja, belt, membership, note="", awarded_on=None):
         awarded_by=membership.user, awarded_as_membership=membership, awarded_as_role=membership.role,
         note=note.strip(),
     )
+
+
+def award_badge(ninja, badge, membership, note="", awarded_on=None):
+    """Award `ninja` the one-off `badge`, as `membership` (an active
+    champion/mentor membership). The ninja must have a registration at one
+    of that dojo's sessions and not have the badge yet."""
+    from dojos.access import AWARD_BADGES
+
+    if not _may_award(membership, AWARD_BADGES):
+        raise BadgeError(_("Only a dojo's active champion or mentors can award badges."))
+    if badge.kind != Badge.ONE_OFF:
+        raise BadgeError(_("Milestones are awarded automatically when attendance is marked."))
+    if not Registration.objects.filter(ninja=ninja, event__dojo_id=membership.dojo_id).exists():
+        raise BadgeError(_("%(ninja)s hasn't been to a session at %(dojo)s.") % {"ninja": ninja.name, "dojo": membership.dojo.name})
+    ninja_badge, created = NinjaBadge.objects.get_or_create(ninja=ninja, badge=badge)
+    if not created and ninja_badge.earned_date:
+        raise BadgeError(_("%(ninja)s already has the %(badge)s badge.") % {"ninja": ninja.name, "badge": badge.name})
+    ninja_badge.earned_date = awarded_on or timezone.localdate()
+    ninja_badge.awarded_by = membership.user
+    ninja_badge.awarded_as_membership = membership
+    ninja_badge.note = note.strip()
+    ninja_badge.save()
+    return ninja_badge
 
 
 @transaction.atomic

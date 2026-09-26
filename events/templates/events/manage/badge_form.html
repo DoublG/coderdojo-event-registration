@@ -1,0 +1,33 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% if badge %}{{ badge.name }}{% else %}{% translate "New award" %}{% endif %}{% endblock %}
+{% block manage_heading %}{% if badge %}{{ badge.name }}{% else %}{% translate "New award" %}{% endif %}{% endblock %}
+
+{% block manage_content %}
+  {% if badge %}
+    <p class="body-sm">{% blocktranslate count counter=badge.earned_count %}Earned by {{ counter }} ninja.{% plural %}Earned by {{ counter }} ninjas.{% endblocktranslate %}</p>
+  {% endif %}
+  <form class="cd-card cd-form" method="post" enctype="multipart/form-data" novalidate style="padding: var(--space-5); max-width: 640px;">
+    {% csrf_token %}
+    <ul class="cd-form__errors">{% for error in form.non_field_errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {% for field in form.main_fields %}
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="cd-form__required" aria-hidden="true">*</span>{% endif %}</label>
+        {{ field }}
+        {% if field.help_text %}<p class="cd-form__help caption">{{ field.help_text }}</p>{% endif %}
+        <ul class="cd-form__errors">{% for error in field.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+      </div>
+    {% endfor %}
+    {% include "dojos/partials/_translation_fields.html" %}
+    <div class="cd-form__actions">
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_badge_list' %}">{% translate "Cancel" %}</a>
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button>
+    </div>
+  </form>
+  {% if badge and not badge.ninja_count %}
+    <form method="post" action="{% url 'manage_badge_delete' badge_id=badge.id %}" style="margin-top: var(--space-4);"
+          onsubmit="{% blocktranslate asvar confirm_msg with name=badge.name %}Remove the {{ name }} award?{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
+      {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Remove award" %}</button>
+    </form>
+  {% endif %}
+{% endblock %}

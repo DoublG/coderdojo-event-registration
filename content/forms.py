@@ -10,7 +10,7 @@ from core.content_languages import (
 )
 from events.models import Event
 
-from .models import Promotion
+from .models import Promotion, Sponsor
 
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M"
 
@@ -71,3 +71,20 @@ class PromotionForm(forms.ModelForm):
 def _event_label(event):
     label = f"{event.name} — {event.dojo.name}, {timezone.localtime(event.start_time):%d/%m/%Y %H:%M}"
     return _("%(label)s (draft)") % {"label": label} if event.status == Event.DRAFT else label
+
+
+class SponsorForm(forms.ModelForm):
+    """One sponsor on the organisation dashboard's Sponsors page."""
+
+    class Meta:
+        model = Sponsor
+        fields = ["name", "url", "logo", "order", "is_public"]
+        labels = {"name": _("Name"), "url": _("Website"), "logo": _("Logo"), "order": _("Order"), "is_public": _("Shown on the homepage")}
+        help_texts = {"logo": _("Optional. Without a logo, the sponsor's name is shown."), "order": _("Lower comes first.")}
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("e.g. Telenet")}),
+            "url": forms.URLInput(attrs={"class": "cd-form__input body", "placeholder": "https://"}),
+            "logo": forms.ClearableFileInput(attrs={"class": "cd-form__input body", "accept": "image/*"}),
+            "order": forms.NumberInput(attrs={"class": "cd-form__input body", "min": 0}),
+        }
+

@@ -1,0 +1,32 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% if sponsor %}{{ sponsor.name }}{% else %}{% translate "New sponsor" %}{% endif %}{% endblock %}
+{% block manage_heading %}{% if sponsor %}{{ sponsor.name }}{% else %}{% translate "New sponsor" %}{% endif %}{% endblock %}
+
+{% block manage_content %}
+  <form class="cd-card cd-form" method="post" enctype="multipart/form-data" novalidate style="padding: var(--space-5); max-width: 640px;">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="cd-form__field">
+        {% if field.name == "is_public" %}
+          <label class="cd-form__checkbox-row" for="{{ field.id_for_label }}">{{ field }}<span class="body-sm">{{ field.label }}</span></label>
+        {% else %}
+          <label class="cd-form__label label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="cd-form__required" aria-hidden="true">*</span>{% endif %}</label>
+          {{ field }}
+          {% if field.help_text %}<p class="cd-form__help caption">{{ field.help_text }}</p>{% endif %}
+        {% endif %}
+        <ul class="cd-form__errors">{% for error in field.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+      </div>
+    {% endfor %}
+    <div class="cd-form__actions">
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_sponsor_list' %}">{% translate "Cancel" %}</a>
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button>
+    </div>
+  </form>
+  {% if sponsor %}
+    <form method="post" action="{% url 'manage_sponsor_delete' sponsor_id=sponsor.id %}" style="margin-top: var(--space-4);"
+          onsubmit="{% blocktranslate asvar confirm_msg with name=sponsor.name %}Remove {{ name }} from the sponsors?{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
+      {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Remove sponsor" %}</button>
+    </form>
+  {% endif %}
+{% endblock %}

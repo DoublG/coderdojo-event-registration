@@ -5,7 +5,7 @@ The organisation dashboard is where CoderDojo Belgium's own team runs mail to
 families and volunteers, and chooses which events the public site features. It's open to accounts with the organisation's
 **admin** role: they find it under **Organisation** in the account menu.
 
-The sidebar has five sections:
+The sidebar has these sections:
 
 - **Campaigns**: one mailing to a group of people, now or at a set time (see
   :doc:`campaigns`).
@@ -17,6 +17,10 @@ The sidebar has five sections:
   language (see :doc:`mail-templates`).
 - **Promotions**: which events are featured where on the public site (see
   :doc:`promotions`).
+- **Sponsors**: the sponsors and partners on the homepage (see
+  :doc:`sponsors`).
+- **Awards**: the badges ninjas can earn at their dojo (see
+  :doc:`awards`).
 
 People only get mail they want. Every account chooses which kinds of mail
 it gets on its **Mail preferences** page; the newsletter and campaigns only

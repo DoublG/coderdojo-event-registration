@@ -1,0 +1,97 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-26 05:39+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/awards.rst:2
+msgid "Awards"
+msgstr "Distinctions"
+
+#: ../../source/organisation/awards.rst:4
+msgid ""
+"Awards are the badges ninjas can earn. Only the organisation creates "
+"them, on the **Awards** page under **Ninjas** in the organisation "
+"dashboard. Dojo teams can't create awards: a dojo's champion and mentors "
+"award the one-off awards to the children at their sessions, from the "
+"attendance list."
+msgstr "Les distinctions sont les badges que les ninjas peuvent obtenir. Seule l'organisation les crée, sur la page **Distinctions** sous **Ninjas** dans le tableau de bord de l'organisation. Les équipes des dojos ne peuvent pas créer de distinctions : le champion et les mentors d'un dojo décernent les distinctions ponctuelles aux enfants lors de leurs sessions, depuis la liste de présence."
+
+#: ../../source/organisation/awards.rst:9
+msgid "There are two kinds:"
+msgstr "Il en existe deux types :"
+
+#: ../../source/organisation/awards.rst:11
+msgid ""
+"**One-off**: earned by doing something once, for example taking part in a"
+" CoderDojo Girlz session. Describe what earns it under **How to earn "
+"it**."
+msgstr ""
+"**Ponctuelle** : s'obtient en faisant quelque chose une fois, par exemple"
+" en participant à une session CoderDojo Girlz. Décrivez comment l'obtenir"
+" sous **Comment l'obtenir**."
+
+#: ../../source/organisation/awards.rst:13
+msgid ""
+"**Milestone**: reached automatically once a ninja has attended a number "
+"of sessions, such as the attendance wristbands. Fill in **Sessions "
+"needed**. A milestone can also award a belt when it's reached (**Also "
+"grants belt**)."
+msgstr ""
+"**Palier** : atteint automatiquement dès qu'un ninja a participé à un "
+"certain nombre de sessions, comme les bracelets de présence. Remplissez "
+"**Sessions nécessaires**. Un palier peut aussi décerner une ceinture "
+"lorsqu'il est atteint (**Décerne aussi la ceinture**)."
+
+#: ../../source/organisation/awards.rst:18
+msgid "For each award you also fill in:"
+msgstr "Pour chaque distinction, vous remplissez aussi :"
+
+#: ../../source/organisation/awards.rst:20
+msgid ""
+"**Name** and **Description**, with optional versions in the other "
+"languages. A text left empty in a language shows the English version."
+msgstr ""
+"**Nom** et **Description**, avec des versions facultatives dans les "
+"autres langues. Un texte laissé vide dans une langue affiche la version "
+"anglaise."
+
+#: ../../source/organisation/awards.rst:22
+msgid ""
+"**Icon**: pick one of the **standard icons**, or upload your own image "
+"(PNG, JPG or WebP; a square image works best). An uploaded image wins "
+"over a standard icon."
+msgstr ""
+"**Icône** : choisissez l'une des **icônes standard**, ou téléversez votre"
+" propre image (PNG, JPG ou WebP ; une image carrée convient le mieux). "
+"Une image téléversée l'emporte sur une icône standard."
+
+#: ../../source/organisation/awards.rst:26
+msgid ""
+"The list shows how many ninjas have earned each award. Open an award to "
+"change it. An award that no ninja has yet can be removed; one that ninjas"
+" already have (or are working towards) stays, so it never disappears from"
+" a child's page."
+msgstr ""
+"La liste indique combien de ninjas ont obtenu chaque distinction. Ouvrez "
+"une distinction pour la modifier. Une distinction qu'aucun ninja n'a "
+"encore peut être supprimée ; celle que des ninjas ont déjà (ou qu'ils "
+"sont en train d'obtenir) reste, pour ne jamais disparaître de la page "
+"d'un enfant."
+

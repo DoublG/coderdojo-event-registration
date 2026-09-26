@@ -1,0 +1,64 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n content_i18n %}
+{% block manage_page_title %}{% translate "Awards" %}{% endblock %}
+{% block manage_heading %}{% translate "Awards" %}{% endblock %}
+{% block manage_topbar_extra %}<a class="cd-btn cd-btn--primary label" href="{% url 'manage_badge_create' %}">{% translate "New award" %}</a>{% endblock %}
+
+{% block manage_content %}
+  {% comment %}events.Badge: the awards ninjas can earn (events/manage.py). Only the organisation defines them; dojo teams award them.{% endcomment %}
+  <p class="body-sm">{% translate "The awards ninjas can earn. Only the organisation creates them; dojo teams award them to the ninjas at their sessions. Milestones are awarded automatically when a ninja has attended enough sessions." %}</p>
+
+  <h2 class="heading-md">{% translate "One-off awards" %}</h2>
+  <div class="cd-table-wrap">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label" scope="col">{% translate "Icon" %}</th>
+          <th class="label" scope="col">{% translate "Name" %}</th>
+          <th class="label" scope="col">{% translate "How to earn it" %}</th>
+          <th class="label cd-table__num" scope="col">{% translate "Earned by" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for badge in one_offs %}
+          <tr>
+            <td class="body-sm">{% if badge.icon %}<img src="{{ badge.icon.url }}" alt="" style="height: 32px; width: 32px; object-fit: contain;">{% else %}—{% endif %}</td>
+            <td class="body-sm"><a href="{% url 'manage_badge_detail' badge_id=badge.id %}">{{ badge|localized:"name" }}</a></td>
+            <td class="body-sm">{{ badge|localized:"criteria"|default:"—" }}</td>
+            <td class="body-sm cd-table__num">{{ badge.earned_count }}</td>
+          </tr>
+        {% empty %}
+          <tr><td class="body-sm" colspan="4">{% translate "No one-off awards yet." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="heading-md" style="margin-top: var(--space-6);">{% translate "Milestones" %}</h2>
+  <div class="cd-table-wrap">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label" scope="col">{% translate "Icon" %}</th>
+          <th class="label" scope="col">{% translate "Name" %}</th>
+          <th class="label cd-table__num" scope="col">{% translate "Sessions needed" %}</th>
+          <th class="label" scope="col">{% translate "Also grants belt" %}</th>
+          <th class="label cd-table__num" scope="col">{% translate "Earned by" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for badge in milestones %}
+          <tr>
+            <td class="body-sm">{% if badge.icon %}<img src="{{ badge.icon.url }}" alt="" style="height: 32px; width: 32px; object-fit: contain;">{% else %}—{% endif %}</td>
+            <td class="body-sm"><a href="{% url 'manage_badge_detail' badge_id=badge.id %}">{{ badge|localized:"name" }}</a></td>
+            <td class="body-sm cd-table__num">{{ badge.threshold }}</td>
+            <td class="body-sm">{% if badge.grants_belt %}{{ badge.grants_belt|localized:"name" }}{% else %}—{% endif %}</td>
+            <td class="body-sm cd-table__num">{{ badge.earned_count }}</td>
+          </tr>
+        {% empty %}
+          <tr><td class="body-sm" colspan="5">{% translate "No milestones yet." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

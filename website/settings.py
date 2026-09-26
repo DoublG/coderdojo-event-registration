@@ -274,6 +274,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'accounts.context_processors.user_roles',
+                'core.context_processors.organisation_contact',
             ],
         },
     },
@@ -400,6 +401,21 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 # language first: the normal fields hold it, the others are translations
 # edited in the admin. A dojo picks its own (Dojo.languages).
 ORGANISATION_LANGUAGES = ["en-us", "nl-be", "fr-be"]
+
+# CoderDojo Belgium's own contact details (coderdojobelgium.be, September
+# 2026): the footer and the Contact page (core.context_processors).
+ORGANISATION_CONTACT = {
+    "name": "CoderDojo Belgium",
+    "legal_name": "CoderDojo Belgium vzw",
+    "email": "info@coderdojobelgium.be",
+    "office": ["Liersesteenweg 4", "2800 Mechelen"],
+    "registered_office": ["François Rigasquare 16", "1030 Schaarbeek"],
+    "company_number": "0523.889.476",
+    "website": "https://coderdojobelgium.be",
+    "facebook": "https://www.facebook.com/CoderDojoBelgiumvzw",
+    "instagram": "https://www.instagram.com/coderdojobelgium/",
+    "linkedin": "https://www.linkedin.com/company/coderdojo-belgium/",
+}
 
 TIME_ZONE = 'UTC'
 

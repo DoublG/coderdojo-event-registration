@@ -245,9 +245,12 @@ class NinjaBadgeManager(models.Manager):
 
 
 class NinjaBadge(models.Model):
-    """One ninja's progress on one badge. A one-off is earned or not; a
+    """One ninja's progress on one badge. A one-off is earned or not, and is
+    awarded by a dojo's active champion or mentor (events.awards.award_badge),
+    recorded like a belt: the account and the membership they acted in. A
     milestone tracks attended sessions toward its threshold (see
-    events.awards.sync_milestones) and is earned once it's reached."""
+    events.awards.sync_milestones) and is earned once it's reached; nobody
+    awards it, so its awarded_* fields stay empty."""
 
     ninja = models.ForeignKey("accounts.Ninja", on_delete=models.CASCADE, related_name="badges")
     badge = models.ForeignKey(Badge, on_delete=models.CASCADE, related_name="ninja_badges")
@@ -255,6 +258,15 @@ class NinjaBadge(models.Model):
     earned_date = models.DateField(null=True, blank=True, help_text="Blank if still in progress.")
     progress_current = models.PositiveIntegerField(null=True, blank=True, help_text="Milestone only.")
     progress_total = models.PositiveIntegerField(null=True, blank=True, help_text="Milestone only.")
+    awarded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="badges_awarded",
+        help_text="One-off only: who awarded it.",
+    )
+    awarded_as_membership = models.ForeignKey(
+        "dojos.DojoMembership", on_delete=models.SET_NULL, null=True, blank=True, related_name="badges_awarded",
+        help_text="One-off only: the dojo team membership they awarded it as.",
+    )
+    note = models.CharField(max_length=300, blank=True, default="", help_text="Optional: what the ninja did.")
 
     objects = NinjaBadgeManager()
 

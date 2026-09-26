@@ -1,0 +1,78 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-26 05:14+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/sponsors.rst:2
+msgid "Sponsors"
+msgstr "Sponsors"
+
+#: ../../source/organisation/sponsors.rst:4
+msgid ""
+"The homepage shows CoderDojo Belgium's sponsors and partners under **Made"
+" possible by**. You manage them on the **Sponsors** page, under **Public "
+"site** in the organisation dashboard."
+msgstr ""
+"La page d'accueil affiche les sponsors et partenaires de CoderDojo "
+"Belgium sous **Rendu possible grâce à**. Vous les gérez sur la page "
+"**Sponsors**, sous **Site public** dans le tableau de bord de "
+"l'organisation."
+
+#: ../../source/organisation/sponsors.rst:8
+msgid "For each sponsor you fill in:"
+msgstr "Pour chaque sponsor, vous indiquez :"
+
+#: ../../source/organisation/sponsors.rst:10
+msgid ""
+"**Name** and **Website**: each sponsor on the homepage links to its "
+"website."
+msgstr ""
+"**Nom** et **Site web** : chaque sponsor sur la page d'accueil renvoie "
+"vers son site."
+
+#: ../../source/organisation/sponsors.rst:12
+msgid ""
+"**Logo** (optional): shown instead of the name. Without a logo, the name "
+"is shown."
+msgstr ""
+"**Logo** (facultatif) : affiché à la place du nom. Sans logo, le nom est "
+"affiché."
+
+#: ../../source/organisation/sponsors.rst:14
+msgid "**Order**: lowest first."
+msgstr "**Ordre** : le plus bas en premier."
+
+#: ../../source/organisation/sponsors.rst:15
+msgid ""
+"**Shown on the homepage**: untick it to hide a sponsor without removing "
+"it, for example while a partnership is on hold."
+msgstr ""
+"**Affiché sur la page d'accueil** : décochez-le pour masquer un sponsor "
+"sans le retirer, par exemple quand un partenariat est en pause."
+
+#: ../../source/organisation/sponsors.rst:18
+msgid ""
+"Open a sponsor from the list to change it or to remove it. Without any "
+"sponsors shown, the homepage leaves out **Made possible by**."
+msgstr ""
+"Ouvrez un sponsor dans la liste pour le modifier ou le retirer. Sans "
+"sponsor affiché, la page d'accueil n'affiche pas **Rendu possible grâce "
+"à**."
+

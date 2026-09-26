@@ -243,3 +243,24 @@ class Promotion(OrganisationContent):
     def is_showing(self, now=None):
         now = now or timezone.now()
         return self.starts_at <= now < self.effective_end and now < self.event.end_time
+
+
+class Sponsor(models.Model):
+    """A sponsor or partner shown under "Made possible by" on the homepage,
+    in `order`, linking to its website. Shows its logo when one is
+    uploaded, else its name. Managed on the organisation dashboard
+    (/manage/sponsors/, content/manage.py)."""
+
+    name = models.CharField(max_length=200)
+    url = models.URLField("website", blank=True, default="")
+    logo = models.ImageField(upload_to="sponsors/", null=True, blank=True,
+                             help_text="Optional. Without a logo, the sponsor's name is shown.")
+    order = models.PositiveSmallIntegerField(default=0, help_text="Lower comes first.")
+    is_public = models.BooleanField("shown", default=True, help_text="Uncheck to hide it from the homepage.")
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return self.name
+

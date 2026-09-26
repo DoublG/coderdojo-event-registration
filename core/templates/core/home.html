@@ -169,17 +169,21 @@
     </div>
   {% endif %}
 
+  {% if sponsors %}
+  {# content.Sponsor, managed on the organisation dashboard (/manage/sponsors/). #}
   <div class="shell section">
     <div class="section-head">
       <h2 class="heading-lg">{% translate "Made possible by" %}</h2>
     </div>
     <div class="cd-sponsor-grid">
-      <div class="cd-sponsor-logo label">Acme Robotics</div>
-      <div class="cd-sponsor-logo label">Ghent Library</div>
-      <div class="cd-sponsor-logo label">Brightware</div>
-      <div class="cd-sponsor-logo label">Local Youth Fund</div>
+      {% for sponsor in sponsors %}
+        {% if sponsor.url %}<a class="cd-sponsor-logo label" href="{{ sponsor.url }}" target="_blank" rel="noopener">{% else %}<div class="cd-sponsor-logo label">{% endif %}
+          {% if sponsor.logo %}<img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}" loading="lazy">{% else %}{{ sponsor.name }}{% endif %}
+        {% if sponsor.url %}</a>{% else %}</div>{% endif %}
+      {% endfor %}
     </div>
   </div>
+  {% endif %}
 
   <div class="shell section">
     <div class="cta-wrap">

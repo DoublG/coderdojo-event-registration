@@ -1,0 +1,84 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Code of conduct" %} · CoderDojo Belgium{% endblock %}
+{% block root_class %}info-page-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .info-page-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
+  .info-page-root .info-content { max-width: 820px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+  .info-page-root .info-content a { color: var(--secondary); }
+  .info-page-root h1 { color: var(--ink); margin: 0 0 var(--space-3); }
+  .info-page-root h2 { color: var(--ink); margin: var(--space-6) 0 var(--space-2); }
+  .info-page-root .lead { color: var(--ink-muted); margin: 0 0 var(--space-4); }
+  .info-page-root ul { padding-left: var(--space-5); margin: 0; }
+  .info-page-root li { margin: 0 0 var(--space-2); }
+  .info-page-root .cd-card { padding: var(--space-5); margin-top: var(--space-6); }
+</style>
+{% endblock %}
+
+{% block content %}
+{% comment %}
+The code of conduct for everyone at a dojo, built on the principles
+CoderDojo Belgium states (free, open to everyone, outside school and
+non-commercial, a safe and warm place) and on this site's own rules (the
+background check for champions and mentors, an adult on site for
+under-12s). Worried about a child: the dojo team, the organisation, or the
+Belgian helplines.
+{% endcomment %}
+<div class="shell info-content">
+  <h1 class="display-lg">{% translate "Code of conduct" %}</h1>
+  <p class="body-lg lead">{% blocktranslate trimmed %}A dojo is a place where children and teenagers learn to code by doing, trying and making mistakes, together with volunteers. To keep it safe and fun for everyone, everybody at a dojo follows this code: ninjas, parents and guardians, mentors, champions and visitors.{% endblocktranslate %}</p>
+
+  <h2 class="heading-lg">{% translate "What CoderDojo stands for" %}</h2>
+  <ul class="body">
+    <li>{% translate "Free: no fees, a venue that's lent to us, and volunteers who give their time." %}</li>
+    <li>{% translate "Open to everyone, whatever their background, home situation, gender or disability." %}</li>
+    <li>{% translate "Outside school and non-commercial: nobody sells anything at a dojo." %}</li>
+    <li>{% translate "A warm, safe place where it's fine not to know something yet." %}</li>
+  </ul>
+
+  <h2 class="heading-lg">{% translate "Everyone" %}</h2>
+  <ul class="body">
+    <li>{% translate "Be kind and respectful. No bullying, harassment or discrimination, at the dojo or online." %}</li>
+    <li>{% translate "Help each other: asking a question and sharing what you know are both part of learning." %}</li>
+    <li>{% translate "Take care of the venue and the equipment, and follow the dojo team's safety instructions." %}</li>
+    <li>{% translate "Ask before taking a photo or video of someone; for a child, ask their parent or guardian." %}</li>
+  </ul>
+
+  <h2 class="heading-lg">{% translate "Ninjas" %}</h2>
+  <ul class="body">
+    <li>{% translate "Ask a mentor when you're stuck, and let others ask you." %}</li>
+    <li>{% translate "Only make and share things that are kind and appropriate, and never share your own or anyone else's personal details online." %}</li>
+    <li>{% translate "Look after laptops and kits you borrow, and give them back at the end." %}</li>
+    <li>{% translate "Tell a mentor, or your parents, if something online or at the dojo makes you feel uncomfortable." %}</li>
+  </ul>
+
+  <h2 class="heading-lg">{% translate "Parents and guardians" %}</h2>
+  <ul class="body">
+    <li>{% translate "Children under 12 need an adult on site for the whole session; older children can be dropped off and picked up on time." %}</li>
+    <li>{% translate "Tell the dojo about allergies or anything else the team should know, in your child's details on this site." %}</li>
+    <li>{% translate "Cancel a place you can't use, so a child on the waiting list can come instead." %}</li>
+  </ul>
+
+  <h2 class="heading-lg">{% translate "Mentors and champions" %}</h2>
+  <ul class="body">
+    <li>{% translate "Keep your background check (criminal record extract, model 2) valid; without it you can't help at a dojo." %}</li>
+    <li>{% translate "Stay in sight of others: don't be alone with a ninja out of view, and don't contact ninjas privately outside the dojo (messages, social media)." %}</li>
+    <li>{% translate "Use families' details only for the dojo, never for anything else." %}</li>
+    <li>{% translate "Make everyone feel welcome, first-timers most of all, and let ninjas find the answer themselves." %}</li>
+  </ul>
+
+  <section class="cd-card">
+    <h2 class="heading-md" style="margin-top: 0;">{% translate "Worried about something?" %}</h2>
+    <ul class="body">
+      <li>{% translate "At a session, talk to the dojo's champion or a mentor straight away." %}</li>
+      <li>{% blocktranslate trimmed with email=organisation.email %}You can always contact CoderDojo Belgium at <a href="mailto:{{ email }}">{{ email }}</a>; we treat every report confidentially.{% endblocktranslate %}</li>
+      <li>{% translate "If a child is in danger, call 112." %}</li>
+      <li>{% translate "Worried about violence against or abuse of a child? Call 1712 (in Dutch) or Écoute-Enfants on 103 (in French), free and anonymous." %}</li>
+    </ul>
+  </section>
+
+  <p class="body-sm" style="margin-top: var(--space-5); color: var(--ink-muted);">{% blocktranslate trimmed %}If someone doesn't follow this code, the dojo team can ask them to leave the session, and CoderDojo Belgium can end a volunteer's role or close an account.{% endblocktranslate %}</p>
+</div>
+{% endblock %}

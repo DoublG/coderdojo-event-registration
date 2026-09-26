@@ -146,13 +146,17 @@ PATHWAYS = [
             "This is where code meets a breadboard. Using a Raspberry Pi's GPIO pins, you'll wire up real "
             "components — LEDs, buttons, buzzers, sensors — and write Python to control them. It's slower and "
             "more hands-on than screen-only pathways (there's wiring to get right, not just code), which is "
-            "exactly what makes it satisfying: a program that makes a physical light blink on command."
+            "exactly what makes it satisfying: a program that makes a physical light blink on command.\n\n"
+            "The same pathway also covers microcontrollers: an Arduino runs one program the moment it gets "
+            "power, which makes it ideal for robots, lights and sensors, and an ESP32 adds Wi-Fi and "
+            "Bluetooth, so a project can send its measurements to a phone or a web page."
         ),
         "min_age": 10,
         "max_age": 18,
         "no_experience_needed": False,
         "runs_in_browser": False,
-        "skills": ["GPIO basics", "Circuits & breadboards", "Python for hardware", "Reading sensors", "Debugging hardware"],
+        "skills": ["GPIO basics", "Circuits & breadboards", "Python for hardware", "Reading sensors", "Debugging hardware",
+                   "Arduino programming", "Wi-Fi projects with ESP32"],
         "steps": [
             ("Wire the circuit", "Follow a diagram to connect components to the right GPIO pins — a mentor checks the wiring before anything gets powered on."),
             ("Write the code", "Python controls the circuit: turning pins on and off, or reading a sensor's value."),
@@ -162,11 +166,14 @@ PATHWAYS = [
             ("A traffic light sequence", "Wire three LEDs and time a proper red-amber-green-amber sequence in code."),
             ("A burglar alarm", "A motion sensor triggers a buzzer and a flashing light — with a keypad code to disarm it."),
             ("A mini weather station", "Read temperature and humidity from a sensor and log or display the results."),
+            ("A plant-watering alarm with Arduino", "A soil-moisture sensor on an Arduino beeps and lights up when the plant needs water."),
+            ("A Wi-Fi thermometer with an ESP32", "The ESP32 serves a small web page that shows the room's temperature on any phone on the same network."),
         ],
         "faqs": [
             ("Is prior coding experience required?", "Basic Python (variables, loops, functions) helps a lot — mentors usually suggest finishing a few Python sessions first."),
             ("What if we let out the magic smoke?", "It happens — mentors check wiring before power-on specifically to keep this rare, and the dojo keeps spare components on hand."),
             ("Do we need our own Raspberry Pi?", "No — the dojo's kit includes boards, breadboards, jumper wires and a starter set of components to borrow for the session."),
+            ("Raspberry Pi, Arduino or ESP32: what's the difference?", "A Raspberry Pi is a small computer with its own operating system; an Arduino is a microcontroller that runs one program as soon as it's powered; an ESP32 is a microcontroller with Wi-Fi and Bluetooth. Mentors help pick the right board for the project."),
         ],
     },
     {
@@ -200,16 +207,111 @@ PATHWAYS = [
             ("Can we keep what we print?", "Yes — printed projects go home with the ninja who designed them."),
         ],
     },
+    {
+        "name": "mBot",
+        "image": "mbot.svg",
+        "subtitle": "Build and program a small robot that drives, follows lines and avoids obstacles.",
+        "description": (
+            "mBot is a small educational robot on wheels, with sensors for light, distance and lines. You "
+            "program it with blocks in mBlock, which works just like Scratch, so a first drive around the "
+            "table happens in the first session. After that it's about making the robot smarter: following a "
+            "line, stopping before a wall, or racing through an obstacle course built by the other ninjas."
+        ),
+        "min_age": 8,
+        "max_age": 14,
+        "no_experience_needed": True,
+        "runs_in_browser": True,
+        "skills": ["Block coding", "Sensors", "Loops", "Conditionals", "Robotics basics"],
+        "steps": [
+            ("Meet the robot", "Find the motors, the lights and the sensors, and make the robot drive a square."),
+            ("Add a sensor", "Use the distance or line sensor so the robot reacts to what's around it."),
+            ("Take on a challenge", "An obstacle course or a line to follow: test, adjust and try again."),
+        ],
+        "projects": [
+            ("A line follower", "Make the robot follow a black line on the floor without losing it in the bends."),
+            ("An obstacle avoider", "The ultrasonic sensor spots a wall and the robot turns before it bumps into it."),
+            ("A remote-controlled racer", "Steer the robot with the keyboard or the remote and race against another team."),
+        ],
+        "faqs": [
+            ("Do we need our own mBot?", "No — the dojo lends out robots, batteries and cables during the session."),
+            ("Is it hard to program?", "No — mBlock uses the same kind of blocks as Scratch; ninjas who want to can switch to Python later."),
+            ("From what age can children join?", "From about eight years old, as soon as a child can follow a short Scratch project."),
+        ],
+    },
+    {
+        "name": "Sonic Pi",
+        "image": "sonicpi.svg",
+        "subtitle": "Make music with code: beats, melodies and live-coding.",
+        "description": (
+            "Sonic Pi turns code into music. A few lines play a beat, a loop keeps it going, and changing a "
+            "number while it plays changes the song right away: that's called live-coding, and DJs do it on "
+            "stage. Along the way ninjas learn loops, variables and randomness, and they end the session with a "
+            "track of their own."
+        ),
+        "min_age": 10,
+        "max_age": 18,
+        "no_experience_needed": True,
+        "runs_in_browser": False,
+        "skills": ["Loops", "Variables", "Randomness", "Timing & rhythm", "Live-coding"],
+        "steps": [
+            ("Play your first sound", "One line of code plays a note, a second one plays a drum sample."),
+            ("Loop a beat", "A live loop keeps the beat going while you add melodies and effects."),
+            ("Perform it live", "Change the code while the music plays and show your track to the group."),
+        ],
+        "projects": [
+            ("A drum beat", "Build a beat from samples and play with the tempo until it grooves."),
+            ("Your own melody", "Write a tune note by note, then let the code pick random notes from a scale."),
+            ("A live-coding set", "Combine loops and effects and change them live, like a DJ."),
+        ],
+        "faqs": [
+            ("Do you need to know music?", "No — ninjas learn about rhythm and notes along the way, and experimenting is the whole point."),
+            ("Does it make a lot of noise?", "Everyone works with headphones; bring your own if you have them."),
+            ("Can we use Sonic Pi at home?", "Yes — Sonic Pi is free for Windows, macOS, Linux and Raspberry Pi."),
+        ],
+    },
+    {
+        "name": "Unity",
+        "image": "unity.svg",
+        "subtitle": "Build your own 2D and 3D games with a real game engine.",
+        "description": (
+            "Unity is the game engine behind many well-known games. Ninjas build a world with objects, "
+            "physics and a camera, and bring it to life with scripts in C#. It's a big step up from Scratch, "
+            "so it suits older ninjas who already know a little coding, but the reward is a game that looks "
+            "and plays like a real one."
+        ),
+        "min_age": 12,
+        "max_age": 18,
+        "no_experience_needed": False,
+        "runs_in_browser": False,
+        "skills": ["Game design", "C# basics", "Physics & collisions", "3D scenes", "Debugging"],
+        "steps": [
+            ("Build the scene", "Place a floor, walls, a player and a camera, and let physics do its work."),
+            ("Write a script", "A short C# script makes the player move and jump, and counts the points."),
+            ("Test and share", "Play your own game, fix what's off, and let others try it."),
+        ],
+        "projects": [
+            ("A roll-a-ball game", "Roll a ball through a level and collect all the coins against the clock."),
+            ("A 2D platformer", "Jump across platforms, avoid enemies and reach the flag."),
+            ("A small 3D world", "Build a world with its own obstacles and walk through it in first person."),
+        ],
+        "faqs": [
+            ("What do you need to know first?", "Some experience with Scratch or Python helps a lot: Unity uses C#, a real programming language."),
+            ("Does Unity work on every laptop?", "Unity needs a fairly powerful laptop; the dojo checks which laptops are suitable."),
+            ("Is Unity free?", "Yes — Unity is free for personal use and learning."),
+        ],
+    },
 ]
 
 
 class Command(BaseCommand):
-    help = "Seed the six core learning pathways (Scratch, Python, Web, micro:bit, Raspberry Pi, 3D printing) with steps, projects, skills and FAQs."
+    help = ("Seed the learning pathways (Scratch, Python, Web, micro:bit, Raspberry Pi with Arduino and ESP32, 3D printing, "
+            "mBot, Sonic Pi, Unity) with steps, projects, skills and FAQs.")
 
     def handle(self, *args, **options):
         created, updated = 0, 0
 
         for entry in PATHWAYS:
+            before = Pathway.objects.filter(name=entry["name"]).values("subtitle", "description").first()
             pathway, was_created = Pathway.objects.update_or_create(
                 name=entry["name"],
                 defaults={
@@ -223,6 +325,12 @@ class Command(BaseCommand):
             )
             created += 1 if was_created else 0
             updated += 1 if not was_created else 0
+            if before:
+                for field in ("subtitle", "description"):
+                    if before[field] != entry[field]:
+                        pathway.set_translation("nl-be", field, "")
+                        pathway.set_translation("fr-be", field, "")
+                pathway.save(update_fields=["translations"])
 
             use_library_image(pathway, "image", "pathways", entry["image"], save=True)
 

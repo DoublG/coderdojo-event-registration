@@ -38,7 +38,12 @@ class BeltAdmin(TranslationAdminMixin, admin.ModelAdmin):
 
 @admin.register(NinjaBadge)
 class NinjaBadgeAdmin(admin.ModelAdmin):
-    list_display = ["ninja", "badge", "earned_date", "progress_current", "progress_total"]
+    """One-off badges are awarded from the dojo's attendance list and
+    milestones follow attendance (events.awards), where the rules are
+    enforced. Editable here only to fix a mistake by hand, which bypasses
+    those rules."""
+
+    list_display = ["ninja", "badge", "earned_date", "progress_current", "progress_total", "awarded_by"]
     list_filter = ["badge"]
 
 

@@ -395,9 +395,14 @@ with their rules in `events/awards.py`:
 - A **badge** is an award: either a **one-off** ("did the thing", e.g.
   attended a CoderDojo for Girls session) or a **milestone** reached by a
   number of sessions attended (the attendance wristbands). `NinjaBadge`
-  holds one ninja's progress on one badge. Milestones are recomputed
-  (`sync_milestones`) whenever the dojo team marks attendance; an earned
-  badge stays earned if a mark is later undone.
+  holds one ninja's progress on one badge. Only the organisation defines
+  badges (the organisation dashboard's *Awards* page). A one-off is awarded
+  from the attendance list by an **active champion or mentor** with a valid
+  check (`AWARD_BADGES`, `award_badge`), to a ninja who has been to one of
+  that dojo's sessions, once; the row records the account, the membership
+  and an optional note. Milestones are never awarded by hand: they're
+  recomputed (`sync_milestones`) whenever the dojo team marks attendance;
+  an earned badge stays earned if a mark is later undone.
 - A **belt** is a ninja's **proficiency level**: one overall track ordered
   by `Belt.level`, not linked to pathways. `NinjaBelt` is an append-only
   history (current belt = the highest level, `Ninja.current_belt`).
@@ -422,6 +427,8 @@ erDiagram
     BELT |o--o{ BADGE : "grants_belt (milestones, optional)"
     USER |o--o{ NINJA_BELT : "awarded_by"
     DOJO_MEMBERSHIP |o--o{ NINJA_BELT : "awarded_as_membership"
+    USER |o--o{ NINJA_BADGE : "awarded_by (one-off)"
+    DOJO_MEMBERSHIP |o--o{ NINJA_BADGE : "awarded_as_membership (one-off)"
 
     BADGE {
         bigint id PK
@@ -437,6 +444,9 @@ erDiagram
         date earned_date "null = in progress"
         int progress_current "milestone"
         int progress_total "milestone"
+        bigint awarded_by FK "one-off; nullable"
+        bigint awarded_as_membership FK "one-off; nullable"
+        string note "one-off"
     }
     BELT {
         bigint id PK

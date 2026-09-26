@@ -1,16 +1,20 @@
 from datetime import timedelta
+from io import BytesIO
 
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+from PIL import Image
 
-from accounts.models import Guardianship, Ninja, User
+from accounts.models import Guardianship, Ninja, OrganisationRole, User
+from core.testing import TempMediaMixin
 from dojos.models import Dojo
 from dojos.testing import make_dojo
 
 from .engagement import is_aimed_at
-from .models import Event, Registration
+from .models import Badge, Belt, Event, NinjaBadge, Registration
 
 
 def _future_event(dojo, **kwargs):
@@ -340,6 +344,37 @@ class BeltAndBadgeTests(TestCase):
         self.assertIsNotNone(self.ninja.badges.get(badge=first).earned_date)
         self.assertEqual(self.ninja.belts.count(), 1)
 
+    def test_a_mentor_awards_a_one_off_badge_once(self):
+        from .awards import BadgeError, award_badge
+
+        maker = self.Badge.objects.create(name="Game Maker")
+        award = award_badge(self.ninja, maker, self.mentor, note=" Built a platformer ")
+
+        self.assertIsNotNone(award.earned_date)
+        self.assertEqual((award.awarded_by, award.awarded_as_membership, award.note), (self.mentor.user, self.mentor, "Built a platformer"))
+        with self.assertRaises(BadgeError):
+            award_badge(self.ninja, maker, self.champion)
+        self.assertEqual(self.ninja.badges.count(), 1)
+
+    def test_badge_rules(self):
+        from dojos.models import DojoMembership
+        from dojos.testing import add_member, make_champion, make_mentor
+
+        from .awards import BadgeError, award_badge
+
+        maker = self.Badge.objects.create(name="Game Maker")
+        band = self.Badge.objects.create(name="Band", kind=self.Badge.MILESTONE, threshold=1)
+        dormant = add_member(self.dojo, make_mentor(username="gone"), status=DojoMembership.DORMANT)
+        other_dojo = make_dojo("Antwerp", champion=make_champion(username="other"))
+        for badge, membership in (
+            (band, self.mentor),  # milestones follow attendance, never by hand
+            (maker, dormant),  # not an active manager
+            (maker, other_dojo.champion_membership),  # the ninja never came there
+        ):
+            with self.assertRaises(BadgeError):
+                award_badge(self.ninja, badge, membership)
+        self.assertFalse(self.ninja.badges.exists())
+
     def test_milestone_needs_a_threshold(self):
         from django.core.exceptions import ValidationError
 
@@ -536,3 +571,92 @@ class EventLanguageTests(TestCase):
         events = list(response.context["events"])
         self.assertIn(self.event, events)
         self.assertNotIn(other, events)
+
+
+def _png():
+    buffer = BytesIO()
+    Image.new("RGB", (8, 8), "orange").save(buffer, "PNG")
+    return SimpleUploadedFile("game.png", buffer.getvalue(), content_type="image/png")
+
+
+class ManageAwardsTests(TempMediaMixin, TestCase):
+    """The organisation dashboard's Awards page (events.manage): only
+    organisation admins create and edit awards; dojo teams only award them."""
+
+    def setUp(self):
+        super().setUp()
+        self.admin = User.objects.create(username="admin")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+
+    def test_admin_uploads_a_new_one_off_award(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("manage_badge_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "events/manage/badge_list.html")
+        response = self.client.post(reverse("manage_badge_create"), {
+            "name": "Game Maker", "kind": Badge.ONE_OFF, "criteria": "Build and share a playable game.",
+            "tr__nl-be__name": "Spelmaker",
+            "icon": _png(),
+        })
+        self.assertRedirects(response, reverse("manage_badge_list"))
+        badge = Badge.objects.get(name="Game Maker")
+        self.assertEqual(badge.kind, Badge.ONE_OFF)
+        self.assertTrue(badge.icon.name.startswith("awards/"))
+        self.assertEqual(badge.translation_for("nl-be", "name"), "Spelmaker")
+
+    def test_a_standard_icon_is_linked_and_svg_uploads_are_refused(self):
+        self.client.force_login(self.admin)
+        self.client.post(reverse("manage_badge_create"), {"name": "Coolest", "kind": Badge.ONE_OFF, "library_icon": "coolest-projects.svg"})
+        self.assertEqual(Badge.objects.get(name="Coolest").icon.name, "library/awards/coolest-projects.svg")
+        svg = SimpleUploadedFile("x.svg", b'<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>', content_type="image/svg+xml")
+        response = self.client.post(reverse("manage_badge_create"), {"name": "Sneaky", "kind": Badge.ONE_OFF, "icon": svg})
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Badge.objects.filter(name="Sneaky").exists())
+
+    def test_milestone_needs_a_threshold_and_can_grant_a_belt(self):
+        belt = Belt.objects.create(name="Yellow belt", level=1)
+        self.client.force_login(self.admin)
+        response = self.client.post(reverse("manage_badge_create"), {"name": "Blue Band", "kind": Badge.MILESTONE})
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Badge.objects.exists())
+        self.client.post(reverse("manage_badge_create"), {
+            "name": "Blue Band", "kind": Badge.MILESTONE, "threshold": "20", "grants_belt": belt.id,
+        })
+        badge = Badge.objects.get(name="Blue Band")
+        self.assertEqual((badge.threshold, badge.grants_belt), (20, belt))
+
+    def test_switching_to_one_off_drops_the_milestone_fields(self):
+        belt = Belt.objects.create(name="Yellow belt", level=1)
+        badge = Badge.objects.create(name="Band", kind=Badge.MILESTONE, threshold=3, grants_belt=belt)
+        self.client.force_login(self.admin)
+        response = self.client.post(reverse("manage_badge_detail", kwargs={"badge_id": badge.id}), {
+            "name": "Band", "kind": Badge.ONE_OFF, "threshold": "3", "grants_belt": belt.id,
+        })
+        self.assertRedirects(response, reverse("manage_badge_list"))
+        badge.refresh_from_db()
+        self.assertEqual((badge.kind, badge.threshold, badge.grants_belt), (Badge.ONE_OFF, None, None))
+
+    def test_an_award_ninjas_have_is_not_removed(self):
+        kept = Badge.objects.create(name="Kept")
+        NinjaBadge.objects.create(ninja=Ninja.objects.create(name="Ada", date_of_birth="2015-01-01"),
+                                  badge=kept, earned_date=timezone.localdate())
+        unused = Badge.objects.create(name="Unused")
+        self.client.force_login(self.admin)
+        self.client.post(reverse("manage_badge_delete", kwargs={"badge_id": kept.id}))
+        self.client.post(reverse("manage_badge_delete", kwargs={"badge_id": unused.id}))
+        self.assertEqual(list(Badge.objects.values_list("name", flat=True)), ["Kept"])
+
+    def test_only_organisation_admins(self):
+        badge = Badge.objects.create(name="Game Maker")
+        board = User.objects.create(username="board")
+        OrganisationRole.objects.create(account=board, role=OrganisationRole.BOARD)
+        champion = User.objects.create(username="champion")
+        make_dojo("Leuven", champion=champion)
+        for user in (User.objects.create(username="parent"), board, champion):
+            self.client.force_login(user)
+            for url in (reverse("manage_badge_list"), reverse("manage_badge_create"),
+                        reverse("manage_badge_detail", kwargs={"badge_id": badge.id})):
+                self.assertEqual(self.client.get(url).status_code, 404)
+            self.client.post(reverse("manage_badge_create"), {"name": "Sneaky", "kind": Badge.ONE_OFF})
+            self.client.post(reverse("manage_badge_delete", kwargs={"badge_id": badge.id}))
+        self.assertEqual(list(Badge.objects.values_list("name", flat=True)), ["Game Maker"])

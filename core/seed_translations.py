@@ -236,17 +236,26 @@ T = {
     ("This is where code meets a breadboard. Using a Raspberry Pi's GPIO pins, you'll wire up real "
      "components — LEDs, buttons, buzzers, sensors — and write Python to control them. It's slower and "
      "more hands-on than screen-only pathways (there's wiring to get right, not just code), which is "
-     "exactly what makes it satisfying: a program that makes a physical light blink on command."): (
+     "exactly what makes it satisfying: a program that makes a physical light blink on command.\n\n"
+     "The same pathway also covers microcontrollers: an Arduino runs one program the moment it gets "
+     "power, which makes it ideal for robots, lights and sensors, and an ESP32 adds Wi-Fi and "
+     "Bluetooth, so a project can send its measurements to a phone or a web page."): (
         "Hier komen code en breadboard samen. Met de GPIO-pinnen van een Raspberry Pi sluit je echte "
         "onderdelen aan (leds, knoppen, zoemers, sensoren) en schrijf je Python om ze te besturen. Het gaat "
         "trager en is meer handwerk dan leertrajecten op het scherm (de bedrading moet ook kloppen, niet "
         "alleen de code), en net dat geeft zoveel voldoening: een programma dat op commando een echt lichtje "
-        "laat knipperen.",
+        "laat knipperen.\n\n"
+        "Hetzelfde leertraject gaat ook over microcontrollers: een Arduino voert één programma uit zodra hij "
+        "stroom krijgt, ideaal voor robots, lichtjes en sensoren, en een ESP32 heeft daarbovenop wifi en "
+        "Bluetooth, zodat een project zijn metingen naar een gsm of een webpagina kan sturen.",
         "Ici, le code rencontre la plaque d'essai. Grâce aux broches GPIO d'un Raspberry Pi, vous branchez de "
         "vrais composants (LED, boutons, buzzers, capteurs) et écrivez du Python pour les contrôler. C'est "
         "plus lent et plus manuel que les parcours sur écran (le câblage doit être juste, pas seulement le "
         "code), et c'est justement ce qui rend la chose si satisfaisante : un programme qui fait clignoter une "
-        "vraie lumière sur commande."),
+        "vraie lumière sur commande.\n\n"
+        "Le même parcours aborde aussi les microcontrôleurs : un Arduino exécute un programme dès qu'il est "
+        "alimenté, idéal pour des robots, des lumières et des capteurs, et un ESP32 ajoute le Wi-Fi et le "
+        "Bluetooth, pour qu'un projet envoie ses mesures vers un téléphone ou une page web."),
     "Wire the circuit": ("Bouw de schakeling", "Câbler le circuit"),
     "Follow a diagram to connect components to the right GPIO pins — a mentor checks the wiring before anything gets powered on.": (
         "Volg een schema om onderdelen op de juiste GPIO-pinnen aan te sluiten. Een mentor controleert de bedrading voor er stroom op komt.",
@@ -337,6 +346,178 @@ T = {
         "Ja, geprinte projecten gaan mee naar huis met de ninja die ze ontwierp.",
         "Oui : les projets imprimés repartent avec le ninja qui les a conçus."),
 
+    "A plant-watering alarm with Arduino": ("Een plantenalarm met Arduino", "Une alarme d'arrosage avec Arduino"),
+    "A soil-moisture sensor on an Arduino beeps and lights up when the plant needs water.": (
+        "Een vochtigheidssensor op een Arduino piept en licht op als de plant water nodig heeft.",
+        "Un capteur d'humidité du sol sur un Arduino bipe et s'allume quand la plante a besoin d'eau."),
+    "A Wi-Fi thermometer with an ESP32": ("Een wifi-thermometer met een ESP32", "Un thermomètre Wi-Fi avec un ESP32"),
+    "The ESP32 serves a small web page that shows the room's temperature on any phone on the same network.": (
+        "De ESP32 toont op een kleine webpagina de temperatuur in de kamer, op elke gsm in hetzelfde netwerk.",
+        "L'ESP32 affiche sur une petite page web la température de la pièce, sur tout téléphone du même réseau."),
+    "Raspberry Pi, Arduino or ESP32: what's the difference?": ("Raspberry Pi, Arduino of ESP32: wat is het verschil?", "Raspberry Pi, Arduino ou ESP32 : quelle différence ?"),
+    "A Raspberry Pi is a small computer with its own operating system; an Arduino is a microcontroller that runs one program as soon as it's powered; an ESP32 is a microcontroller with Wi-Fi and Bluetooth. Mentors help pick the right board for the project.": (
+        "Een Raspberry Pi is een kleine computer met een eigen besturingssysteem; een Arduino is een microcontroller die één programma uitvoert zodra hij stroom krijgt; een ESP32 is een microcontroller met wifi en Bluetooth. Mentors helpen het juiste bordje voor het project kiezen.",
+        "Un Raspberry Pi est un petit ordinateur avec son propre système d'exploitation ; un Arduino est un microcontrôleur qui exécute un programme dès qu'il est alimenté ; un ESP32 est un microcontrôleur avec Wi-Fi et Bluetooth. Les mentors aident à choisir la bonne carte pour le projet."),
+
+    "mBot": ("mBot", "mBot"),
+    "Build and program a small robot that drives, follows lines and avoids obstacles.": (
+        "Bouw en programmeer een kleine robot die rijdt, lijnen volgt en obstakels ontwijkt.",
+        "Construisez et programmez un petit robot qui roule, suit des lignes et évite les obstacles."),
+    ("mBot is a small educational robot on wheels, with sensors for light, distance and lines. You "
+     "program it with blocks in mBlock, which works just like Scratch, so a first drive around the "
+     "table happens in the first session. After that it's about making the robot smarter: following a "
+     "line, stopping before a wall, or racing through an obstacle course built by the other ninjas."): (
+        "mBot is een kleine leerrobot op wielen, met sensoren voor licht, afstand en lijnen. Je programmeert "
+        "hem met blokjes in mBlock, dat net zo werkt als Scratch, dus al in de eerste sessie rijdt hij een "
+        "rondje over de tafel. Daarna maak je de robot slimmer: een lijn volgen, stoppen voor een muur of "
+        "racen door een hindernissenparcours dat de andere ninja's bouwden.",
+        "mBot est un petit robot éducatif sur roues, avec des capteurs de lumière, de distance et de ligne. "
+        "On le programme avec des blocs dans mBlock, qui fonctionne comme Scratch : il fait donc un premier "
+        "tour de table dès la première session. Ensuite, on le rend plus malin : suivre une ligne, s'arrêter "
+        "avant un mur ou traverser un parcours d'obstacles construit par les autres ninjas."),
+    "Meet the robot": ("Maak kennis met de robot", "Faire connaissance avec le robot"),
+    "Find the motors, the lights and the sensors, and make the robot drive a square.": (
+        "Zoek de motoren, de lichtjes en de sensoren, en laat de robot een vierkant rijden.",
+        "Repérez les moteurs, les lumières et les capteurs, et faites rouler le robot en carré."),
+    "Add a sensor": ("Voeg een sensor toe", "Ajouter un capteur"),
+    "Use the distance or line sensor so the robot reacts to what's around it.": (
+        "Gebruik de afstands- of lijnsensor zodat de robot reageert op wat er rond hem gebeurt.",
+        "Utilisez le capteur de distance ou de ligne pour que le robot réagisse à ce qui l'entoure."),
+    "Take on a challenge": ("Ga een uitdaging aan", "Relever un défi"),
+    "An obstacle course or a line to follow: test, adjust and try again.": (
+        "Een hindernissenparcours of een lijn om te volgen: testen, bijsturen en opnieuw proberen.",
+        "Un parcours d'obstacles ou une ligne à suivre : tester, ajuster et réessayer."),
+    "A line follower": ("Een lijnvolger", "Un suiveur de ligne"),
+    "Make the robot follow a black line on the floor without losing it in the bends.": (
+        "Laat de robot een zwarte lijn op de grond volgen zonder hem in de bochten kwijt te raken.",
+        "Faites suivre au robot une ligne noire au sol sans la perdre dans les virages."),
+    "An obstacle avoider": ("Een obstakelontwijker", "Un robot qui évite les obstacles"),
+    "The ultrasonic sensor spots a wall and the robot turns before it bumps into it.": (
+        "De ultrasone sensor ziet een muur en de robot draait voor hij ertegen botst.",
+        "Le capteur à ultrasons repère un mur et le robot tourne avant de le heurter."),
+    "A remote-controlled racer": ("Een racer met afstandsbediening", "Un bolide télécommandé"),
+    "Steer the robot with the keyboard or the remote and race against another team.": (
+        "Stuur de robot met het toetsenbord of de afstandsbediening en race tegen een ander team.",
+        "Pilotez le robot au clavier ou à la télécommande et faites la course contre une autre équipe."),
+    "Do we need our own mBot?": ("Hebben we een eigen mBot nodig?", "Faut-il son propre mBot ?"),
+    "No — the dojo lends out robots, batteries and cables during the session.": (
+        "Nee, de dojo leent tijdens de sessie robots, batterijen en kabels uit.",
+        "Non : le dojo prête des robots, des piles et des câbles pendant la session."),
+    "Is it hard to program?": ("Is het moeilijk om te programmeren?", "Est-ce difficile à programmer ?"),
+    "No — mBlock uses the same kind of blocks as Scratch; ninjas who want to can switch to Python later.": (
+        "Nee, mBlock gebruikt dezelfde soort blokjes als Scratch; wie wil, kan later overstappen op Python.",
+        "Non : mBlock utilise le même type de blocs que Scratch ; ceux qui le souhaitent peuvent passer à Python plus tard."),
+    "From what age can children join?": ("Vanaf welke leeftijd kunnen kinderen meedoen?", "À partir de quel âge les enfants peuvent-ils participer ?"),
+    "From about eight years old, as soon as a child can follow a short Scratch project.": (
+        "Vanaf ongeveer acht jaar, zodra een kind een kort Scratch-project kan volgen.",
+        "Dès environ huit ans, dès qu'un enfant peut suivre un petit projet Scratch."),
+
+    "Sonic Pi": ("Sonic Pi", "Sonic Pi"),
+    "Make music with code: beats, melodies and live-coding.": (
+        "Maak muziek met code: beats, melodieën en live-coding.",
+        "Faites de la musique avec du code : rythmes, mélodies et live-coding."),
+    ("Sonic Pi turns code into music. A few lines play a beat, a loop keeps it going, and changing a "
+     "number while it plays changes the song right away: that's called live-coding, and DJs do it on "
+     "stage. Along the way ninjas learn loops, variables and randomness, and they end the session with a "
+     "track of their own."): (
+        "Sonic Pi maakt van code muziek. Een paar regels spelen een beat, een lus houdt hem gaande, en als "
+        "je een getal verandert terwijl de muziek speelt, verandert het nummer meteen: dat heet live-coding, "
+        "en dj's doen het op het podium. Ondertussen leren ninja's lussen, variabelen en toeval, en ze "
+        "sluiten de sessie af met een eigen nummer.",
+        "Sonic Pi transforme le code en musique. Quelques lignes jouent un rythme, une boucle le fait tourner, "
+        "et changer un nombre pendant que la musique joue modifie le morceau aussitôt : c'est le live-coding, "
+        "que des DJ pratiquent sur scène. En chemin, les ninjas apprennent les boucles, les variables et le "
+        "hasard, et terminent la session avec leur propre morceau."),
+    "Play your first sound": ("Speel je eerste geluid", "Jouer son premier son"),
+    "One line of code plays a note, a second one plays a drum sample.": (
+        "Eén regel code speelt een noot, een tweede speelt een drumsample.",
+        "Une ligne de code joue une note, une deuxième joue un échantillon de batterie."),
+    "Loop a beat": ("Laat een beat lussen", "Faire tourner un rythme"),
+    "A live loop keeps the beat going while you add melodies and effects.": (
+        "Een live loop houdt de beat gaande terwijl je melodieën en effecten toevoegt.",
+        "Une live loop maintient le rythme pendant que vous ajoutez mélodies et effets."),
+    "Perform it live": ("Speel het live", "Le jouer en direct"),
+    "Change the code while the music plays and show your track to the group.": (
+        "Verander de code terwijl de muziek speelt en laat je nummer aan de groep horen.",
+        "Modifiez le code pendant que la musique joue et faites écouter votre morceau au groupe."),
+    "A drum beat": ("Een drumbeat", "Un rythme de batterie"),
+    "Build a beat from samples and play with the tempo until it grooves.": (
+        "Bouw een beat met samples en speel met het tempo tot het groovet.",
+        "Construisez un rythme avec des échantillons et jouez avec le tempo jusqu'à ce que ça groove."),
+    "Your own melody": ("Je eigen melodie", "Votre propre mélodie"),
+    "Write a tune note by note, then let the code pick random notes from a scale.": (
+        "Schrijf een melodie noot per noot, en laat de code dan willekeurige noten uit een toonladder kiezen.",
+        "Écrivez un air note par note, puis laissez le code choisir des notes au hasard dans une gamme."),
+    "A live-coding set": ("Een live-coding-set", "Un set de live-coding"),
+    "Combine loops and effects and change them live, like a DJ.": (
+        "Combineer lussen en effecten en verander ze live, zoals een dj.",
+        "Combinez boucles et effets et modifiez-les en direct, comme un DJ."),
+    "Do you need to know music?": ("Moet je iets van muziek kennen?", "Faut-il connaître la musique ?"),
+    "No — ninjas learn about rhythm and notes along the way, and experimenting is the whole point.": (
+        "Nee, ninja's leren onderweg over ritme en noten, en experimenteren is net de bedoeling.",
+        "Non : les ninjas découvrent le rythme et les notes en chemin, et expérimenter est tout l'intérêt."),
+    "Does it make a lot of noise?": ("Maakt dat veel lawaai?", "Est-ce que ça fait beaucoup de bruit ?"),
+    "Everyone works with headphones; bring your own if you have them.": (
+        "Iedereen werkt met een koptelefoon; breng je eigen mee als je er een hebt.",
+        "Chacun travaille avec un casque ; apportez le vôtre si vous en avez un."),
+    "Can we use Sonic Pi at home?": ("Kunnen we Sonic Pi thuis gebruiken?", "Peut-on utiliser Sonic Pi à la maison ?"),
+    "Yes — Sonic Pi is free for Windows, macOS, Linux and Raspberry Pi.": (
+        "Ja, Sonic Pi is gratis voor Windows, macOS, Linux en Raspberry Pi.",
+        "Oui : Sonic Pi est gratuit pour Windows, macOS, Linux et Raspberry Pi."),
+
+    "Unity": ("Unity", "Unity"),
+    "Build your own 2D and 3D games with a real game engine.": (
+        "Bouw je eigen 2D- en 3D-games met een echte game-engine.",
+        "Créez vos propres jeux 2D et 3D avec un vrai moteur de jeu."),
+    ("Unity is the game engine behind many well-known games. Ninjas build a world with objects, "
+     "physics and a camera, and bring it to life with scripts in C#. It's a big step up from Scratch, "
+     "so it suits older ninjas who already know a little coding, but the reward is a game that looks "
+     "and plays like a real one."): (
+        "Unity is de game-engine achter veel bekende games. Ninja's bouwen een wereld met objecten, fysica en "
+        "een camera, en brengen die tot leven met scripts in C#. Het is een grote stap na Scratch, dus het "
+        "past bij oudere ninja's die al wat kunnen programmeren, maar het resultaat is een game die eruitziet "
+        "en speelt als een echte.",
+        "Unity est le moteur de jeu derrière de nombreux jeux connus. Les ninjas construisent un monde avec "
+        "des objets, de la physique et une caméra, et lui donnent vie avec des scripts en C#. C'est un grand "
+        "pas après Scratch, il convient donc aux ninjas plus âgés qui savent déjà un peu programmer, mais le "
+        "résultat est un jeu qui ressemble à un vrai et se joue comme tel."),
+    "Build the scene": ("Bouw de scène", "Construire la scène"),
+    "Place a floor, walls, a player and a camera, and let physics do its work.": (
+        "Plaats een vloer, muren, een speler en een camera, en laat de fysica haar werk doen.",
+        "Placez un sol, des murs, un joueur et une caméra, et laissez la physique faire son travail."),
+    "Write a script": ("Schrijf een script", "Écrire un script"),
+    "A short C# script makes the player move and jump, and counts the points.": (
+        "Een kort C#-script laat de speler bewegen en springen, en telt de punten.",
+        "Un court script C# fait bouger et sauter le joueur, et compte les points."),
+    "Test and share": ("Testen en delen", "Tester et partager"),
+    "Play your own game, fix what's off, and let others try it.": (
+        "Speel je eigen game, herstel wat niet klopt, en laat anderen hem proberen.",
+        "Jouez à votre jeu, corrigez ce qui cloche et faites-le essayer aux autres."),
+    "A roll-a-ball game": ("Een rolbalspel", "Un jeu de balle qui roule"),
+    "Roll a ball through a level and collect all the coins against the clock.": (
+        "Rol een bal door een level en verzamel alle munten tegen de klok.",
+        "Faites rouler une balle dans un niveau et ramassez toutes les pièces contre la montre."),
+    "A 2D platformer": ("Een 2D-platformspel", "Un jeu de plateforme 2D"),
+    "Jump across platforms, avoid enemies and reach the flag.": (
+        "Spring over platformen, ontwijk vijanden en bereik de vlag.",
+        "Sautez de plateforme en plateforme, évitez les ennemis et atteignez le drapeau."),
+    "A small 3D world": ("Een kleine 3D-wereld", "Un petit monde en 3D"),
+    "Build a world with its own obstacles and walk through it in first person.": (
+        "Bouw een wereld met eigen obstakels en wandel er in first person doorheen.",
+        "Construisez un monde avec ses propres obstacles et parcourez-le à la première personne."),
+    "What do you need to know first?": ("Wat moet je al kennen?", "Que faut-il savoir au départ ?"),
+    "Some experience with Scratch or Python helps a lot: Unity uses C#, a real programming language.": (
+        "Wat ervaring met Scratch of Python helpt veel: Unity gebruikt C#, een echte programmeertaal.",
+        "Un peu d'expérience avec Scratch ou Python aide beaucoup : Unity utilise C#, un vrai langage de programmation."),
+    "Does Unity work on every laptop?": ("Werkt Unity op elke laptop?", "Unity fonctionne-t-il sur tous les ordinateurs ?"),
+    "Unity needs a fairly powerful laptop; the dojo checks which laptops are suitable.": (
+        "Unity heeft een vrij krachtige laptop nodig; de dojo kijkt na welke laptops geschikt zijn.",
+        "Unity demande un ordinateur assez puissant ; le dojo vérifie quels ordinateurs conviennent."),
+    "Is Unity free?": ("Is Unity gratis?", "Unity est-il gratuit ?"),
+    "Yes — Unity is free for personal use and learning.": (
+        "Ja, Unity is gratis voor persoonlijk gebruik en om te leren.",
+        "Oui : Unity est gratuit pour un usage personnel et pour apprendre."),
+
     # --- skills --------------------------------------------------------------------
     "3D modelling basics": ("Basis 3D-modelleren", "Bases de la modélisation 3D"),
     "Block coding": ("Programmeren met blokjes", "Programmation par blocs"),
@@ -363,6 +544,17 @@ T = {
     "Sequencing": ("Volgorde", "Séquences"),
     "Slicing & printing basics": ("Basis slicen en printen", "Bases du tranchage et de l'impression"),
     "Variables": ("Variabelen", "Variables"),
+    "Arduino programming": ("Programmeren met Arduino", "Programmation Arduino"),
+    "Wi-Fi projects with ESP32": ("Wifi-projecten met ESP32", "Projets Wi-Fi avec ESP32"),
+    "Sensors": ("Sensoren", "Capteurs"),
+    "Robotics basics": ("Basis robotica", "Bases de la robotique"),
+    "Randomness": ("Toeval", "Hasard"),
+    "Timing & rhythm": ("Timing en ritme", "Tempo et rythme"),
+    "Live-coding": ("Live-coding", "Live-coding"),
+    "Game design": ("Gamedesign", "Conception de jeux"),
+    "C# basics": ("Basis C#", "Bases de C#"),
+    "Physics & collisions": ("Fysica en botsingen", "Physique et collisions"),
+    "3D scenes": ("3D-scènes", "Scènes 3D"),
 
     # --- global, dojo and session FAQs ---------------------------------------------------
     "Is it really free?": ("Is het echt gratis?", "C'est vraiment gratuit ?"),

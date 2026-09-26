@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 16:00+0000\n"
+"POT-Creation-Date: 2026-09-26 05:34+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -38,8 +38,8 @@ msgstr ""
 " trouvent sous **Organisation** dans le menu du compte."
 
 #: ../../source/organisation/dashboard.rst:8
-msgid "The sidebar has five sections:"
-msgstr "La barre latérale comporte cinq rubriques :"
+msgid "The sidebar has these sections:"
+msgstr "La barre latérale comporte ces sections :"
 
 #: ../../source/organisation/dashboard.rst:10
 msgid ""
@@ -81,7 +81,19 @@ msgstr ""
 "**Promotions** : quels événements sont mis en avant, et où, sur le site "
 "public (voir :doc:`promotions`)."
 
-#: ../../source/organisation/dashboard.rst:21
+#: ../../source/organisation/dashboard.rst:20
+msgid ""
+"**Sponsors**: the sponsors and partners on the homepage (see "
+":doc:`sponsors`)."
+msgstr ""
+"**Sponsors** : les sponsors et partenaires de la page d'accueil (voir "
+":doc:`sponsors`)."
+
+#: ../../source/organisation/dashboard.rst:22
+msgid "**Awards**: the badges ninjas can earn at their dojo (see :doc:`awards`)."
+msgstr "**Distinctions** : les badges que les ninjas peuvent obtenir dans leur dojo (voir :doc:`awards`)."
+
+#: ../../source/organisation/dashboard.rst:25
 msgid ""
 "People only get mail they want. Every account chooses which kinds of mail"
 " it gets on its **Mail preferences** page; the newsletter and campaigns "
@@ -95,7 +107,7 @@ msgstr ""
 "campagnes. Les adresses dont les e-mails sont revenus sont ignorées "
 "automatiquement."
 
-#: ../../source/organisation/dashboard.rst:26
+#: ../../source/organisation/dashboard.rst:30
 msgid ""
 "The technical side of the site (the full mail log, bounces, blocked "
 "addresses) stays in the site's technical admin, for fixing things when "

@@ -58,6 +58,13 @@
       </div>
     </div>
 
+    {% with description=pathway|localized:"description" %}{% if description %}
+      <section class="section pathway-about">
+        <h2 class="heading-lg">{% translate "About this pathway" %}</h2>
+        <div class="body"{% if description.is_fallback %} lang="{{ description.language }}"{% endif %}>{{ description|linebreaks }}</div>
+      </section>
+    {% endif %}{% endwith %}
+
     {% with projects=pathway.projects.all %}
       {% if projects %}
         <section class="section">
@@ -144,7 +151,7 @@
           {% for other in other_pathways %}
             <article class="cd-card other-pathway-card">
               <h3 class="heading-md">{{ other|localized:"name" }}</h3>
-              <p class="body-sm">{{ other.subtitle }}</p>
+              <p class="body-sm">{{ other|localized:"subtitle" }}</p>
               <a class="label" href="{% url 'pathway_detail' pathway_id=other.id %}">{% blocktranslate with name=other|localized:"name" %}Explore {{ name }} →{% endblocktranslate %}</a>
             </article>
           {% endfor %}

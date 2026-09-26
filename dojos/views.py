@@ -19,15 +19,16 @@ from accounts.models import Ninja, User
 from applications.services import is_approved_champion
 from content.models import FAQ, OrganisationTeamMember, Promotion
 from core.content_languages import normalize
-from events.awards import BeltError, award_belt, sync_milestones
+from events.awards import BadgeError, BeltError, award_badge, award_belt, sync_milestones
 from events.forms import EventForm
-from events.models import Belt, Event, NinjaEngagement, Registration, TeamAttendance
+from events.models import Badge, Belt, Event, NinjaEngagement, Registration, TeamAttendance
 from geo.geocoding import find_province, geocode
 from notifications.models import Notification
 from pathways.models import Pathway
 
 from . import team
 from .access import (
+    AWARD_BADGES,
     AWARD_BELTS,
     EDIT_SETTINGS,
     MANAGE_EVENTS,
@@ -176,7 +177,7 @@ def _attendance_context(event):
     registrations = list(
         event.registration_set.filter(waiting_list=False)
         .select_related("ninja", "ninja__home_dojo")
-        .prefetch_related("pathways", "ninja__belts__belt")
+        .prefetch_related("pathways", "ninja__belts__belt", "ninja__badges")
         .order_by("ninja__name")
     )
     event_pathway_ids = set(event.pathways.values_list("id", flat=True))
@@ -193,6 +194,8 @@ def _attendance_context(event):
         "all_pathways": sorted(Pathway.objects.all(), key=lambda p: (p.id not in event_pathway_ids, p.name)),
         # For each row's "Award belt" picker (only belts above the ninja's current one are offered).
         "all_belts": list(Belt.objects.all()),
+        # For each row's "Award badge" picker: the one-off badges the ninja hasn't earned yet.
+        "awardable_badges_by_ninja": _awardable_badges(registrations),
         # How each ninja comes to this dojo (last night's events.engagement snapshot).
         "engagement_by_ninja": {
             row.ninja_id: row
@@ -200,6 +203,15 @@ def _attendance_context(event):
                                                       ninja_id__in=[r.ninja_id for r in registrations])
         },
     }
+
+
+def _awardable_badges(registrations):
+    one_offs = list(Badge.objects.filter(kind=Badge.ONE_OFF).order_by("name"))
+    result = {}
+    for registration in registrations:
+        earned = {nb.badge_id for nb in registration.ninja.badges.all() if nb.earned_date}
+        result[registration.ninja_id] = [badge for badge in one_offs if badge.id not in earned]
+    return result
 
 
 def _team_attendance_rows(event):
@@ -721,6 +733,43 @@ def dojo_event_award_belt(request, dojo_id, event_id, registration_id):
     if request.headers.get("HX-Request"):
         context = {
             "dojo": dojo, "dojo_access": access, **_attendance_context(event), "belt_error": belt_error,
+            "registration": Registration.objects.select_related("ninja").prefetch_related("pathways").get(
+                pk=registration.pk,
+            ),
+        }
+        return render(request, "dojos/partials/_attendance_row.html", context)
+    return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
+
+
+@login_required
+def dojo_event_award_badge(request, dojo_id, event_id, registration_id):
+    """Award the ninja on this attendance row a one-off badge (POST `badge`,
+    optional `note`), as the viewer's champion/mentor membership. The
+    organisation defines the badges (events.manage); the rules are in
+    events.awards.award_badge, whose BadgeError is shown inside the row.
+    Same htmx/no-JS handling as dojo_event_award_belt."""
+    access = require_dojo_access(request, dojo_id, AWARD_BADGES)
+    dojo = access.dojo
+    event = get_object_or_404(Event, id=event_id, dojo=dojo)
+    registration = get_object_or_404(
+        Registration.objects.select_related("ninja"),
+        id=registration_id, event=event, waiting_list=False,
+    )
+    badge_error = None
+    if request.method == "POST":
+        badge = Badge.objects.filter(id=request.POST.get("badge") or None).first()
+        try:
+            if badge is None:
+                raise BadgeError(_("Pick a badge to award."))
+            award_badge(registration.ninja, badge, access.membership, note=request.POST.get("note", ""))
+        except BadgeError as error:
+            badge_error = str(error)
+            if not request.headers.get("HX-Request"):
+                messages.error(request, badge_error)
+
+    if request.headers.get("HX-Request"):
+        context = {
+            "dojo": dojo, "dojo_access": access, **_attendance_context(event), "badge_error": badge_error,
             "registration": Registration.objects.select_related("ninja").prefetch_related("pathways").get(
                 pk=registration.pk,
             ),

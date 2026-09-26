@@ -47,6 +47,8 @@ the people using the site, not for the people building it.
    organisation/segments
    organisation/mail-templates
    organisation/promotions
+   organisation/sponsors
+   organisation/awards
 
 .. toctree::
    :maxdepth: 1

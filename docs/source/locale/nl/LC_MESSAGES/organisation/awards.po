@@ -1,0 +1,96 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-26 05:39+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/awards.rst:2
+msgid "Awards"
+msgstr "Onderscheidingen"
+
+#: ../../source/organisation/awards.rst:4
+msgid ""
+"Awards are the badges ninjas can earn. Only the organisation creates "
+"them, on the **Awards** page under **Ninjas** in the organisation "
+"dashboard. Dojo teams can't create awards: a dojo's champion and mentors "
+"award the one-off awards to the children at their sessions, from the "
+"attendance list."
+msgstr "Onderscheidingen zijn de badges die ninja's kunnen verdienen. Alleen de organisatie maakt ze aan, op de pagina **Onderscheidingen** onder **Ninja's** in het organisatiedashboard. Dojoteams kunnen geen onderscheidingen aanmaken: de champion en mentors van een dojo kennen de eenmalige onderscheidingen toe aan de kinderen op hun sessies, vanuit de aanwezigheidslijst."
+
+#: ../../source/organisation/awards.rst:9
+msgid "There are two kinds:"
+msgstr "Er zijn twee soorten:"
+
+#: ../../source/organisation/awards.rst:11
+msgid ""
+"**One-off**: earned by doing something once, for example taking part in a"
+" CoderDojo Girlz session. Describe what earns it under **How to earn "
+"it**."
+msgstr ""
+"**Eenmalig**: verdien je door iets één keer te doen, bijvoorbeeld "
+"deelnemen aan een CoderDojo Girlz-sessie. Beschrijf onder **Hoe je ze "
+"verdient** wat ervoor nodig is."
+
+#: ../../source/organisation/awards.rst:13
+msgid ""
+"**Milestone**: reached automatically once a ninja has attended a number "
+"of sessions, such as the attendance wristbands. Fill in **Sessions "
+"needed**. A milestone can also award a belt when it's reached (**Also "
+"grants belt**)."
+msgstr ""
+"**Mijlpaal**: wordt automatisch bereikt zodra een ninja een aantal "
+"sessies heeft bijgewoond, zoals de aanwezigheidsbandjes. Vul **Nodige "
+"sessies** in. Een mijlpaal kan ook een gordel toekennen wanneer ze "
+"bereikt wordt (**Geeft ook gordel**)."
+
+#: ../../source/organisation/awards.rst:18
+msgid "For each award you also fill in:"
+msgstr "Voor elke onderscheiding vul je ook in:"
+
+#: ../../source/organisation/awards.rst:20
+msgid ""
+"**Name** and **Description**, with optional versions in the other "
+"languages. A text left empty in a language shows the English version."
+msgstr ""
+"**Naam** en **Beschrijving**, met optionele versies in de andere talen. "
+"Een tekst die je in een taal leeg laat, toont de Engelse versie."
+
+#: ../../source/organisation/awards.rst:22
+msgid ""
+"**Icon**: pick one of the **standard icons**, or upload your own image "
+"(PNG, JPG or WebP; a square image works best). An uploaded image wins "
+"over a standard icon."
+msgstr ""
+"**Icoon**: kies een van de **standaardiconen**, of upload je eigen "
+"afbeelding (PNG, JPG of WebP; een vierkante afbeelding werkt het best). "
+"Een geüploade afbeelding gaat voor op een standaardicoon."
+
+#: ../../source/organisation/awards.rst:26
+msgid ""
+"The list shows how many ninjas have earned each award. Open an award to "
+"change it. An award that no ninja has yet can be removed; one that ninjas"
+" already have (or are working towards) stays, so it never disappears from"
+" a child's page."
+msgstr ""
+"De lijst toont hoeveel ninja's elke onderscheiding behaald hebben. Open "
+"een onderscheiding om ze te wijzigen. Een onderscheiding die nog geen "
+"enkele ninja heeft, kun je verwijderen; een die ninja's al hebben (of "
+"waar ze naartoe werken) blijft, zodat ze nooit van de pagina van een kind"
+" verdwijnt."
+

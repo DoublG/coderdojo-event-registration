@@ -46,6 +46,29 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
       {% endif %}
       {% endwith %}
     {% endwith %}
+    {% with awardable=awardable_badges_by_ninja|get_item:ninja.id %}
+    {% if dojo_access.can_award_badges and awardable %}
+      {# One-off badges the ninja hasn't earned yet; the organisation defines them (events.awards.award_badge). #}
+      <details class="cd-attendance__belt caption"{% if badge_error %} open{% endif %}>
+        <summary>{% translate "Award badge" %}</summary>
+        <form method="post" action="{% url 'dojo_event_award_badge' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
+              hx-post="{% url 'dojo_event_award_badge' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
+              hx-target="#attendance-row-{{ registration.id }}" hx-swap="outerHTML">
+          {% csrf_token %}
+          {% if badge_error %}<p class="caption" role="alert" style="color: var(--danger, #b3261e); margin: var(--space-2) 0;">{{ badge_error }}</p>{% endif %}
+          <label class="label" for="badge-{{ registration.id }}" style="display: block; margin-top: var(--space-2);">{% translate "Badge" %}</label>
+          <select class="cd-form__input body" name="badge" id="badge-{{ registration.id }}" required>
+            {% for badge in awardable %}
+              <option value="{{ badge.id }}"{% if badge.criteria %} title="{{ badge|localized:'criteria' }}"{% endif %}>{{ badge|localized:"name" }}</option>
+            {% endfor %}
+          </select>
+          <label class="label" for="badge-note-{{ registration.id }}" style="display: block; margin-top: var(--space-2);">{% translate "Note (optional)" %}</label>
+          <input class="cd-form__input body" type="text" name="note" id="badge-note-{{ registration.id }}" maxlength="300" placeholder="{% blocktranslate with name=ninja.name %}What {{ name }} did{% endblocktranslate %}">
+          <button type="submit" class="cd-btn cd-btn--ghost label" style="margin-top: var(--space-2);">{% translate "Award badge" %}</button>
+        </form>
+      </details>
+    {% endif %}
+    {% endwith %}
     {% if dojo_access.can_take_attendance and all_pathways %}
       {# What this ninja works on: pre-filled from the session's pathways at signup, narrowed here. #}
       <details class="cd-attendance__pathways caption">

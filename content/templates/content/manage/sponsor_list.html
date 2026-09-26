@@ -1,0 +1,36 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Sponsors" %}{% endblock %}
+{% block manage_heading %}{% translate "Sponsors" %}{% endblock %}
+{% block manage_topbar_extra %}<a class="cd-btn cd-btn--primary label" href="{% url 'manage_sponsor_create' %}">{% translate "New sponsor" %}</a>{% endblock %}
+
+{% block manage_content %}
+  {% comment %}content.Sponsor: the homepage's "Made possible by", in order (content/manage.py).{% endcomment %}
+  <p class="body-sm">{% translate 'The sponsors and partners shown under "Made possible by" on the homepage, lowest order first. Each links to its website and shows its logo, or its name when it has no logo.' %}</p>
+  <div class="cd-table-wrap">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label cd-table__num" scope="col">{% translate "Order" %}</th>
+          <th class="label" scope="col">{% translate "Name" %}</th>
+          <th class="label" scope="col">{% translate "Logo" %}</th>
+          <th class="label" scope="col">{% translate "Website" %}</th>
+          <th class="label" scope="col">{% translate "Status" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sponsor in sponsors %}
+          <tr>
+            <td class="body-sm cd-table__num">{{ sponsor.order }}</td>
+            <td class="body-sm"><a href="{% url 'manage_sponsor_detail' sponsor_id=sponsor.id %}">{{ sponsor.name }}</a></td>
+            <td class="body-sm">{% if sponsor.logo %}<img src="{{ sponsor.logo.url }}" alt="" style="max-height: 28px; max-width: 100px;">{% else %}—{% endif %}</td>
+            <td class="body-sm">{% if sponsor.url %}<a href="{{ sponsor.url }}" target="_blank" rel="noopener">{{ sponsor.url|truncatechars:48 }}</a>{% else %}—{% endif %}</td>
+            <td class="body-sm">{% if sponsor.is_public %}<span class="cd-badge cd-badge--success caption">{% translate "Shown" %}</span>{% else %}<span class="cd-badge cd-badge--outline caption">{% translate "Hidden" %}</span>{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td class="body-sm" colspan="5">{% translate 'No sponsors yet. Without any, the homepage leaves out "Made possible by".' %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

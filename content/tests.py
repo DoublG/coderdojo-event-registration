@@ -12,7 +12,7 @@ from dojos.models import Dojo
 from dojos.testing import make_dojo
 from events.models import Event
 
-from .models import Announcement, Promotion
+from .models import Announcement, Promotion, Sponsor
 
 
 class SeedAnnouncementsTests(TestCase):
@@ -228,3 +228,54 @@ class SeedOrganisationTests(TestCase):
         self.assertTrue(org.event_set.exclude(external_registration_url="").exists())
         self.assertEqual(set(Promotion.objects.values_list("placement", flat=True)),
                          {value for value, _ in Promotion.PLACEMENT_CHOICES})
+
+
+
+class SponsorTests(TestCase):
+    """The homepage's "Made possible by" (content.Sponsor), managed on the
+    organisation dashboard's Sponsors page (organisation admins only)."""
+
+    def setUp(self):
+        self.admin = User.objects.create(username="admin")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+
+    def test_homepage_shows_public_sponsors_in_order_with_links(self):
+        Sponsor.objects.create(name="Telenet", url="https://www.telenet.be", order=2)
+        Sponsor.objects.create(name="KBC", url="https://www.kbc.be/", order=1)
+        Sponsor.objects.create(name="Hidden Co", is_public=False)
+        response = self.client.get(reverse("home"))
+        self.assertEqual([s.name for s in response.context["sponsors"]], ["KBC", "Telenet"])
+        self.assertContains(response, 'href="https://www.kbc.be/"')
+        self.assertNotContains(response, "Hidden Co")
+
+    def test_no_sponsors_no_section(self):
+        self.assertNotContains(self.client.get(reverse("home")), "cd-sponsor-grid")
+
+    def test_admin_adds_edits_and_removes_a_sponsor(self):
+        self.client.force_login(self.admin)
+        self.assertEqual(self.client.get(reverse("manage_sponsor_list")).status_code, 200)
+        response = self.client.post(reverse("manage_sponsor_create"),
+                                    {"name": "Flexmail", "url": "https://flexmail.be/", "order": "3", "is_public": "on"})
+        self.assertRedirects(response, reverse("manage_sponsor_list"))
+        sponsor = Sponsor.objects.get(name="Flexmail")
+        self.client.post(reverse("manage_sponsor_detail", kwargs={"sponsor_id": sponsor.id}),
+                         {"name": "Flexmail", "url": "https://flexmail.be/", "order": "1"})
+        sponsor.refresh_from_db()
+        self.assertEqual((sponsor.order, sponsor.is_public), (1, False))
+        self.client.post(reverse("manage_sponsor_delete", kwargs={"sponsor_id": sponsor.id}))
+        self.assertFalse(Sponsor.objects.exists())
+
+    def test_only_organisation_admins(self):
+        sponsor = Sponsor.objects.create(name="EVS")
+        board = User.objects.create(username="board")
+        OrganisationRole.objects.create(account=board, role=OrganisationRole.BOARD)
+        for user in (User.objects.create(username="parent"), board):
+            self.client.force_login(user)
+            for url in (reverse("manage_sponsor_list"), reverse("manage_sponsor_detail", kwargs={"sponsor_id": sponsor.id})):
+                self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_seed_is_rerun_safe(self):
+        call_command("seed_sponsors", stdout=StringIO())
+        call_command("seed_sponsors", stdout=StringIO())
+        self.assertEqual(Sponsor.objects.count(), 9)
+        self.assertTrue(Sponsor.objects.filter(name="Telenet", url="https://www.telenet.be").exists())

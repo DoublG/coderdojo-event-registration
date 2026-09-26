@@ -33,11 +33,11 @@
 
   <div class="shell">
     <footer class="cd-footer" style="margin-top: var(--space-8);">
-      <p class="body-sm" style="margin:0;">CoderDojo · Ghent Public Library · hello@example.org</p>
+      <p class="body-sm" style="margin:0;">{{ organisation.legal_name }} · {{ organisation.office|join:", " }} · <a href="mailto:{{ organisation.email }}">{{ organisation.email }}</a></p>
       <ul class="cd-footer__links body-sm">
-        <li><a href="#">{% translate "Code of conduct" %}</a></li>
+        <li><a href="{% url 'code_of_conduct' %}">{% translate "Code of conduct" %}</a></li>
         <li><a href="{% url 'register' %}">{% translate "Volunteer with us" %}</a></li>
-        <li><a href="#">{% translate "Contact" %}</a></li>
+        <li><a href="{% url 'contact' %}">{% translate "Contact" %}</a></li>
       </ul>
     </footer>
   </div>

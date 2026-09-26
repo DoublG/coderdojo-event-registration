@@ -235,7 +235,10 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   color: var(--ink-muted);
+  text-decoration: none;
 }
+a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
+.cd-sponsor-logo img { max-height: 40px; max-width: 140px; object-fit: contain; }
 
 /* ---------- FAQ accordion ---------- */
 .cd-faq { border-top: 1px solid var(--border); }
@@ -271,6 +274,8 @@
 .cd-footer__links { display: flex; gap: var(--space-5); flex-wrap: wrap; list-style: none; margin: 0; padding: 0; }
 .cd-footer__links a { color: var(--ink-muted); text-decoration: underline; }
 .cd-footer__links a:hover { color: var(--ink); }
+.cd-footer p a { color: inherit; }
+.cd-footer p a:hover { color: var(--ink); }
 
 /* ---------- EventCard (Eventbrite-style listing tile) ---------- */
 .cd-event {

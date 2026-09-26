@@ -103,6 +103,16 @@ showed. Belts are never taken away or changed afterwards: the family sees
 the full history on their child's page, including who awarded each belt
 and for which dojo.
 
+Awarding badges
+----------------
+
+Badges reward something a child did, such as building their first game.
+CoderDojo Belgium decides which badges exist; your team awards them. On the
+attendance list, **Award badge** lets you pick one of the badges the child
+doesn't have yet and add an optional note about what they did. The badge
+then shows on their child's page. The attendance wristbands aren't in this
+list: they follow the sessions a child attended by themselves.
+
 Your dashboard's **Attendance** page shows the same list for your next
 upcoming session (or your most recent one, if nothing's scheduled), so on
 the day itself you can start marking without looking the session up.
