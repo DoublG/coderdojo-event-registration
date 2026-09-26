@@ -122,9 +122,11 @@ class PromotionPlacementTests(TestCase):
         self.assertNotContains(self.client.get(reverse("event_list"), {"date": "week"}), "cd-promo")
 
     def test_dojo_finder_banner(self):
+        """On the dojo finder page only: the homepage's finder widget doesn't
+        repeat an event the homepage already features elsewhere."""
         self._promote(Promotion.DOJO_FINDER_BANNER)
         self.assertContains(self.client.get(reverse("dojo_list")), "cd-promo--banner")
-        self.assertContains(self.client.get(reverse("home")), "cd-promo--banner")
+        self.assertNotContains(self.client.get(reverse("home")), "cd-promo--banner")
 
     def test_upcoming_first_puts_the_event_first_in_the_carousel(self):
         from events.search import upcoming_available_events

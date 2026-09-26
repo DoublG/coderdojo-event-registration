@@ -2552,7 +2552,9 @@ erDiagram
   - `event_list_top`: pinned above the date-ordered event list
   - `upcoming_first`: first in the upcoming-sessions carousel, before the
     date order
-  - `dojo_finder_banner`: a banner above the dojo finder results
+  - `dojo_finder_banner`: a banner above the dojo finder results (the Dojos
+    page only; the homepage's finder widget doesn't repeat it, since the
+    homepage already features events in its hero and Upcoming sessions)
 - **Reordering** means editing `rank` (the admin list can edit it
   directly). A promotion ends automatically at `ends_at`, or by default
   when its event starts.

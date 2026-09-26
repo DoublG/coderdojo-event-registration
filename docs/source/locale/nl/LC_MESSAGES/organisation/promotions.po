@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 19:20+0000\n"
+"POT-Creation-Date: 2026-09-26 05:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: nl\n"
@@ -110,17 +110,19 @@ msgstr ""
 
 #: ../../source/organisation/promotions.rst:36
 msgid ""
-"**Dojo finder: banner above the results**, on the dojo finder page and "
-"the homepage's dojo finder."
+"**Dojo finder: banner above the results**, on the dojo finder page "
+"(**Dojos**). Not on the homepage's small dojo finder: the homepage "
+"already features events higher up."
 msgstr ""
 "**Dojozoeker: banner boven de resultaten**, op de pagina van de "
-"dojozoeker en in de dojozoeker op de startpagina."
+"dojozoeker (**Dojo's**). Niet in de kleine dojozoeker op de startpagina: "
+"die zet al hogerop evenementen in de kijker."
 
-#: ../../source/organisation/promotions.rst:39
+#: ../../source/organisation/promotions.rst:40
 msgid "For each promotion you choose:"
 msgstr "Voor elke promotie kiest u:"
 
-#: ../../source/organisation/promotions.rst:41
+#: ../../source/organisation/promotions.rst:42
 msgid ""
 "**Event**: any upcoming event, of any dojo. A draft event can be picked; "
 "the promotion only shows once the event is published."
@@ -129,7 +131,7 @@ msgstr ""
 " evenement in ontwerp kiezen; de promotie verschijnt pas zodra het "
 "evenement gepubliceerd is."
 
-#: ../../source/organisation/promotions.rst:43
+#: ../../source/organisation/promotions.rst:44
 msgid ""
 "**Show from** and **Show until**: when it shows. Leave **Show until** "
 "empty to stop when the event starts. A promotion never shows after its "
@@ -139,7 +141,7 @@ msgstr ""
 "tot** leeg om te stoppen wanneer het evenement begint. Een promotie "
 "verschijnt nooit meer nadat haar evenement afgelopen is."
 
-#: ../../source/organisation/promotions.rst:46
+#: ../../source/organisation/promotions.rst:47
 msgid ""
 "**Rank**: the order within a place, lowest first. To reorder, change the "
 "ranks."
@@ -147,7 +149,7 @@ msgstr ""
 "**Rang**: de volgorde binnen een plek, laagste eerst. Om de volgorde te "
 "wijzigen, past u de rangen aan."
 
-#: ../../source/organisation/promotions.rst:48
+#: ../../source/organisation/promotions.rst:49
 msgid ""
 "**Title**, **Short pitch** and **Image** (all optional): replace the "
 "event's name and banner, and add a line of text."
@@ -156,7 +158,7 @@ msgstr ""
 "vervangen de naam en de banner van het evenement, en voegen een regel "
 "tekst toe."
 
-#: ../../source/organisation/promotions.rst:50
+#: ../../source/organisation/promotions.rst:51
 msgid ""
 "**In Nederlands** and **In Français** (optional): the title and pitch in "
 "those languages. Visitors see the version in their own language, else the"
@@ -166,7 +168,7 @@ msgstr ""
 "pitch in die talen. Bezoekers zien de versie in hun eigen taal, anders de"
 " Engelse."
 
-#: ../../source/organisation/promotions.rst:54
+#: ../../source/organisation/promotions.rst:55
 msgid ""
 "The list shows each promotion's status: **Showing**, **Scheduled** (it "
 "starts later), **Event not public** (the event is still a draft, or its "
@@ -178,7 +180,7 @@ msgstr ""
 "ontwerp, of de dojo is niet actief) of **Afgelopen**. Open een promotie "
 "om ze te wijzigen of te verwijderen."
 
-#: ../../source/organisation/promotions.rst:59
+#: ../../source/organisation/promotions.rst:60
 msgid ""
 "A promotion only changes where an event is shown, never who can sign up. "
 "To reach people by mail as well, send a campaign that links to the event."

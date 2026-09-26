@@ -21,8 +21,12 @@ see events.views.upcoming_sessions_widget.
   </div>
   <div class="cd-event__body">
     <h3 class="cd-event__title heading-md">{{ event|localized:"name" }}</h3>
-    {% if event.is_promoted %}<span class="cd-badge cd-badge--warning caption">{% translate "Featured" %}</span>{% endif %}
-    {% include "events/partials/_audience_badge.html" %}
+    {% if event.is_promoted or event.is_girls_session %}
+      <div class="cd-event__badges">
+        {% if event.is_promoted %}<span class="cd-badge cd-badge--warning caption">{% translate "Featured" %}</span>{% endif %}
+        {% include "events/partials/_audience_badge.html" %}
+      </div>
+    {% endif %}
     <p class="cd-event__meta body-sm">{{ event.start_time|date:"H:i" }} · {{ event.venue_name|default:event.dojo.name }}</p>
   </div>
   <a href="{% url 'event_detail' event.id %}" style="position:absolute; inset:0;" aria-label="{% blocktranslate with name=event|localized:"name" %}View {{ name }}{% endblocktranslate %}"></a>

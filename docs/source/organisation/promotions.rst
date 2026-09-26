@@ -33,8 +33,9 @@ There are four places:
 - **Homepage: first in Upcoming sessions**, before the sessions in date
   order, with a **Featured** label.
 - **Events page: pinned above the list**, shown when nobody has searched.
-- **Dojo finder: banner above the results**, on the dojo finder page and
-  the homepage's dojo finder.
+- **Dojo finder: banner above the results**, on the dojo finder page
+  (**Dojos**). Not on the homepage's small dojo finder: the homepage
+  already features events higher up.
 
 For each promotion you choose:
 

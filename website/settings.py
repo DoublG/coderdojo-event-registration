@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 import environ
 from celery.schedules import crontab
@@ -331,6 +332,14 @@ CACHES = {
         },
     }
 }
+
+# `manage.py test` gets its own Redis database: tests fill the cache with
+# their own rows (the homepage's Upcoming sessions, the dojo finder's
+# default list) and clear it, which would otherwise show up in, or wipe,
+# the running dev server's cache. Still Redis, not LocMemCache, because
+# code under test uses Redis-only features (cache.lock in mailing.campaigns).
+if len(sys.argv) > 1 and sys.argv[1] == "test":
+    CACHES["default"]["LOCATION"] = CACHES["default"]["LOCATION"].rsplit("/", 1)[0] + "/3"
 
 # Channels' backing store for notifications/consumers.py — same Redis
 # instance as CACHES above (same REDIS_HOST/REDIS_PORT), but db 1 rather

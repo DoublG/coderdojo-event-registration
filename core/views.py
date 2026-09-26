@@ -64,5 +64,4 @@ def home(request):
         # Featured events (content.Promotion, DATA_MODEL.md §12). Not cached:
         # a promotion starts and ends on its own schedule.
         "hero_promotions": Promotion.objects.showing(Promotion.HOMEPAGE_HERO),
-        "finder_promotions": Promotion.objects.showing(Promotion.DOJO_FINDER_BANNER),
     })

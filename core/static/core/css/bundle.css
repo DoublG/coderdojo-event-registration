@@ -309,6 +309,7 @@
 }
 .cd-event__body { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
 .cd-event__title { color: var(--ink); margin: 0; }
+.cd-event__badges { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
 .cd-event__meta { color: var(--ink-muted); margin: 0; }
 .cd-event__price { color: var(--success); margin-top: var(--space-1); }
 
