@@ -110,7 +110,11 @@ register(
     legal_basis=LegalBasis.CONTRACT,
     retention="child",
     seen_by="The family; the organisation (Django admin)",
-    fields={("guardian", "ninja", "relation", "created_at"): personal(Category.CHILD)},
+    fields={
+        ("guardian", "ninja", "relation", "created_at"): personal(Category.CHILD),
+        # The proof of the guardian's consent to the child's data being kept.
+        ("consent_given_at", "consent_wording_version"): personal(Category.CHILD, legal_basis=LegalBasis.CONSENT),
+    },
     not_personal=["id"],
 )
 

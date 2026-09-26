@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-26 07:27+0000\n"
+"POT-Creation-Date: 2026-09-26 11:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -88,6 +88,21 @@ msgstr ""
 
 #: ../../source/families/creating-an-account.rst:26
 msgid ""
+"Tick the box to confirm that you're the children's parent or legal "
+"guardian and that you agree to how we keep their details: to sign them up"
+" for sessions and keep track of their sessions, belts and badges, with "
+"allergies and notes shown only to the champion. You can download or "
+"delete this data at any time from your account page."
+msgstr ""
+"Cochez la case pour confirmer que vous êtes le parent ou le tuteur légal "
+"des enfants et que vous acceptez la façon dont nous conservons leurs "
+"données : pour les inscrire aux sessions et suivre leurs sessions, "
+"ceintures et badges, les allergies et remarques n'étant montrées qu'au "
+"champion. Vous pouvez télécharger ou supprimer ces données à tout moment "
+"depuis votre page de compte."
+
+#: ../../source/families/creating-an-account.rst:31
+msgid ""
 "If you'd like the CoderDojo Belgium newsletter and news about events like"
 " Coolest Projects and CoderDojo Girlz, tick the newsletter box. It's "
 "unticked unless you choose it; you can change it later (see :doc:`mail-"
@@ -99,11 +114,11 @@ msgstr ""
 "choisissez ; vous pourrez la modifier plus tard (voir :doc:`mail-"
 "preferences`)."
 
-#: ../../source/families/creating-an-account.rst:30
+#: ../../source/families/creating-an-account.rst:35
 msgid "Submit the form."
 msgstr "Envoyez le formulaire."
 
-#: ../../source/families/creating-an-account.rst:32
+#: ../../source/families/creating-an-account.rst:37
 msgid ""
 "Unlike applying to volunteer or start a dojo, there's no review step — "
 "your account is created immediately and you're taken straight to your "
@@ -114,18 +129,19 @@ msgstr ""
 "et vous êtes directement dirigé·e, connecté·e, vers la page de votre "
 "famille."
 
-#: ../../source/families/creating-an-account.rst:38
+#: ../../source/families/creating-an-account.rst:43
 msgid ""
 "Only a parent or legal guardian should create the family account and add "
-"children to it — you'll be asked to confirm this when registering. The "
-"email you register with can't already be in use by another account."
+"children to it — you confirm this with the box above, and again whenever "
+"you add a child later. The email you register with can't already be in "
+"use by another account."
 msgstr ""
-"Seul un parent ou tuteur légal doit créer le compte famille et y ajouter "
-"des enfants : cela vous sera demandé de le confirmer lors de "
-"l'inscription. L'adresse e-mail utilisée pour l'inscription ne doit pas "
-"déjà être associée à un autre compte."
+"Seul un parent ou tuteur légal peut créer le compte familial et y ajouter "
+"des enfants — vous le confirmez avec la case ci-dessus, et à nouveau chaque "
+"fois que vous ajoutez un enfant plus tard. L'adresse e-mail utilisée pour "
+"l'inscription ne peut pas déjà être utilisée par un autre compte."
 
-#: ../../source/families/creating-an-account.rst:42
+#: ../../source/families/creating-an-account.rst:48
 msgid ""
 "Once your account exists, see :doc:`../families/finding-a-dojo` to find a"
 " session, or go straight to :doc:`../families/managing-your-account` to "

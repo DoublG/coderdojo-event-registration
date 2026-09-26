@@ -258,6 +258,15 @@ class Guardianship(models.Model):
     ninja = models.ForeignKey(Ninja, on_delete=models.CASCADE, related_name="guardianships")
     relation = models.CharField(max_length=20, choices=RELATION_CHOICES, default=PARENT)
     created_at = models.DateTimeField(auto_now_add=True)
+    # The guardian's consent to the child's data being kept (accounts.consent).
+    consent_given_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="When the guardian agreed to the child's data being kept; empty for links made before the "
+                  "consent was asked, or made in the admin.",
+    )
+    consent_wording_version = models.CharField(
+        max_length=20, blank=True, default="", help_text="The wording agreed to (accounts.consent)."
+    )
 
     objects = GuardianshipManager()
 

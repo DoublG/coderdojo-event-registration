@@ -36,7 +36,7 @@
     </section>
   {% endif %}
 
-  <p class="body-sm">{% translate "When someone asks for a copy of their data by mail or post, find their account here and download it. The file holds everything the site keeps about the account and the children it's a guardian of, as the family gets it with Download my data on their account page. Send it only to the account's own email address." %}</p>
+  <p class="body-sm">{% translate "When someone asks for a copy of their data, or to have it deleted, by mail or post, find their account here. The file holds everything the site keeps about the account and the children it's a guardian of, as the family gets it with Download my data on their account page. Send it only to the account's own email address." %}</p>
 
   <form method="get" class="cd-card cd-form" style="padding: var(--space-5);">
     <div class="cd-form__field">
@@ -67,7 +67,7 @@
               <td class="body-sm">{{ account.email|default:"—" }}</td>
               <td class="body-sm">{% if account.is_ninja %}{% translate "Ninja login" %}{% else %}{% translate "Adult" %}{% endif %}{% if not account.is_active %} <span class="cd-badge cd-badge--outline caption">{% translate "Inactive" %}</span>{% endif %}</td>
               <td class="body-sm cd-table__num">{{ account.children_count }}</td>
-              <td class="body-sm"><a class="cd-btn cd-btn--ghost label" href="{% url 'manage_privacy_export' user_id=account.id %}">{% translate "Download data" %}</a></td>
+              <td class="body-sm"><a class="cd-btn cd-btn--ghost label" href="{% url 'manage_privacy_export' user_id=account.id %}">{% translate "Download data" %}</a>{% if account.is_active and not account.is_ninja %} <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_privacy_delete' user_id=account.id %}">{% translate "Delete…" %}</a>{% endif %}</td>
             </tr>
           {% empty %}
             <tr><td class="body-sm" colspan="5">{% translate "No accounts match." %}</td></tr>

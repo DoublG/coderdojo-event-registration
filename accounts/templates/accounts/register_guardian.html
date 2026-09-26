@@ -75,7 +75,7 @@
           </div>
           <div class="cd-form__checkbox-row">
             {{ form.consent }}
-            <label class="body-sm" for="{{ form.consent.id_for_label }}">{% translate "I am the parent or legal guardian of the children listed below." %}</label>
+            <label class="body-sm" for="{{ form.consent.id_for_label }}">{% include "accounts/partials/_child_data_consent.html" %}</label>
           </div>
           <ul class="cd-form__errors">{% for error in form.consent.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
           <div class="cd-form__checkbox-row">

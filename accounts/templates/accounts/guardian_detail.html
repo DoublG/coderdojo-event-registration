@@ -94,6 +94,10 @@
             <p class="cd-form__help caption">{% translate "Only the champion (the person running the dojo) sees this, on the list of a session your child is signed up for." %}</p>
           </div>
         </div>
+        <div class="cd-form__checkbox-row">
+          <input type="checkbox" id="ac-consent" name="consent" required>
+          <label class="body-sm" for="ac-consent">{% include "accounts/partials/_child_data_consent.html" %}</label>
+        </div>
         <div class="cd-form__actions">
           <button type="button" class="cd-btn cd-btn--ghost label" onclick="this.closest('details').open=false;">{% translate "Cancel" %}</button>
           <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Add child" %}</button>
@@ -114,6 +118,7 @@
       <p class="body-sm">{% translate "Download a copy of everything we keep about you and your children, as a file you can open or take elsewhere." %}</p>
       <div class="cd-form__actions" style="justify-content: flex-start;">
         <a class="cd-btn cd-btn--ghost label" href="{% url 'download_my_data' %}">{% translate "Download my data" %}</a>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'delete_my_account' %}">{% translate "Delete my account" %}</a>
       </div>
     </div>
 

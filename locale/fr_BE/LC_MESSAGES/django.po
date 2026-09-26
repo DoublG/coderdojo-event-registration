@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-26 10:43+0000\n"
+"POT-Creation-Date: 2026-09-26 11:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -185,7 +185,7 @@ msgid "Leave waiting list"
 msgstr "Quitter la liste d'attente"
 
 #: accounts/templates/accounts/child_detail.html:95
-#: accounts/templates/accounts/guardian_detail.html:98
+#: accounts/templates/accounts/guardian_detail.html:102
 #: accounts/templates/accounts/partials/_child_header_edit.html:56
 #: accounts/templates/accounts/partials/_children_list.html:56
 #: accounts/templates/accounts/register_guardian.html:92
@@ -201,6 +201,8 @@ msgstr "Quitter la liste d'attente"
 #: mailing/templates/mailing/manage/journey_form.html:11
 #: mailing/templates/mailing/manage/segment_form.html:11
 #: mailing/templates/mailing/manage/template_new.html:18
+#: privacy/templates/privacy/delete_account.html:62
+#: privacy/templates/privacy/manage/delete.html:36
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -256,7 +258,7 @@ msgid "No past sessions yet."
 msgstr "Aucune session passée pour l'instant."
 
 #: accounts/templates/accounts/child_detail.html:199
-#: accounts/templates/accounts/guardian_detail.html:113
+#: accounts/templates/accounts/guardian_detail.html:117
 msgid "Your data"
 msgstr "Vos données"
 
@@ -269,7 +271,7 @@ msgstr ""
 "fichier que vous pouvez ouvrir ou emporter ailleurs."
 
 #: accounts/templates/accounts/child_detail.html:201
-#: accounts/templates/accounts/guardian_detail.html:116
+#: accounts/templates/accounts/guardian_detail.html:120
 msgid "Download my data"
 msgstr "Télécharger mes données"
 
@@ -340,23 +342,23 @@ msgstr ""
 "Seul le champion (la personne qui dirige le dojo) voit ceci, sur la liste "
 "d'une session à laquelle votre enfant est inscrit."
 
-#: accounts/templates/accounts/guardian_detail.html:99
+#: accounts/templates/accounts/guardian_detail.html:103
 msgid "Add child"
 msgstr "Ajouter l'enfant"
 
-#: accounts/templates/accounts/guardian_detail.html:105
-#: accounts/templates/accounts/guardian_detail.html:108
+#: accounts/templates/accounts/guardian_detail.html:109
+#: accounts/templates/accounts/guardian_detail.html:112
 #: mailing/templates/mailing/mail_preferences.html:3
 #: mailing/templates/mailing/mail_preferences.html:21
 msgid "Mail preferences"
 msgstr "Préférences e-mail"
 
-#: accounts/templates/accounts/guardian_detail.html:106
+#: accounts/templates/accounts/guardian_detail.html:110
 msgid "Choose which mails you get, the language they're in, and your postcode."
 msgstr ""
 "Choisissez les e-mails que vous recevez, leur langue et votre code postal."
 
-#: accounts/templates/accounts/guardian_detail.html:114
+#: accounts/templates/accounts/guardian_detail.html:118
 msgid ""
 "Download a copy of everything we keep about you and your children, as a file "
 "you can open or take elsewhere."
@@ -365,76 +367,83 @@ msgstr ""
 "celui de vos enfants, dans un fichier que vous pouvez ouvrir ou emporter "
 "ailleurs."
 
-#: accounts/templates/accounts/guardian_detail.html:127
+#: accounts/templates/accounts/guardian_detail.html:121
+#: privacy/templates/privacy/delete_account.html:3
+#: privacy/templates/privacy/delete_account.html:22
+#: privacy/templates/privacy/delete_account.html:63
+msgid "Delete my account"
+msgstr "Supprimer mon compte"
+
+#: accounts/templates/accounts/guardian_detail.html:132
 #: mailing/categories.py:18
 msgid "Volunteering"
 msgstr "Bénévolat"
 
-#: accounts/templates/accounts/guardian_detail.html:131
+#: accounts/templates/accounts/guardian_detail.html:136
 #, python-format
 msgid "%(kind)s application"
 msgstr "Candidature %(kind)s"
 
-#: accounts/templates/accounts/guardian_detail.html:133
+#: accounts/templates/accounts/guardian_detail.html:138
 #, python-format
 msgid "sent %(date)s"
 msgstr "envoyée le %(date)s"
 
-#: accounts/templates/accounts/guardian_detail.html:139
+#: accounts/templates/accounts/guardian_detail.html:144
 msgid "Background check:"
 msgstr "Extrait de casier judiciaire :"
 
-#: accounts/templates/accounts/guardian_detail.html:141
+#: accounts/templates/accounts/guardian_detail.html:146
 #, python-format
 msgid "<strong>valid</strong> until %(date)s."
 msgstr "<strong>valable</strong> jusqu'au %(date)s."
 
-#: accounts/templates/accounts/guardian_detail.html:143
+#: accounts/templates/accounts/guardian_detail.html:148
 msgid "<strong>uploaded</strong>, waiting for review."
 msgstr "<strong>envoyé</strong>, en attente de vérification."
 
-#: accounts/templates/accounts/guardian_detail.html:145
+#: accounts/templates/accounts/guardian_detail.html:150
 msgid "expired"
 msgstr "expiré"
 
-#: accounts/templates/accounts/guardian_detail.html:145
+#: accounts/templates/accounts/guardian_detail.html:150
 msgid "needs a new document"
 msgstr "nouveau document requis"
 
-#: accounts/templates/accounts/guardian_detail.html:145
+#: accounts/templates/accounts/guardian_detail.html:150
 msgid "requested"
 msgstr "demandé"
 
-#: accounts/templates/accounts/guardian_detail.html:146
+#: accounts/templates/accounts/guardian_detail.html:151
 msgid "upload your document"
 msgstr "envoyez votre document"
 
-#: accounts/templates/accounts/guardian_detail.html:147
+#: accounts/templates/accounts/guardian_detail.html:152
 msgid "Until then you can't open your dojo dashboards."
 msgstr "D'ici là, vous ne pouvez pas ouvrir vos tableaux de bord de dojo."
 
-#: accounts/templates/accounts/guardian_detail.html:149
+#: accounts/templates/accounts/guardian_detail.html:154
 msgid ""
 "not requested yet — we'll email you once your application has been looked at."
 msgstr ""
 "pas encore demandé. Nous vous écrirons dès que votre candidature aura été "
 "examinée."
 
-#: accounts/templates/accounts/guardian_detail.html:156
+#: accounts/templates/accounts/guardian_detail.html:161
 #: core/templates/core/menu.html:53
 msgid "Create a dojo"
 msgstr "Créer un dojo"
 
-#: accounts/templates/accounts/guardian_detail.html:158
+#: accounts/templates/accounts/guardian_detail.html:163
 #: core/templates/core/menu.html:55
 msgid "Apply to start a dojo"
 msgstr "Lancer un dojo"
 
-#: accounts/templates/accounts/guardian_detail.html:161
+#: accounts/templates/accounts/guardian_detail.html:166
 msgid "Find a dojo to help at"
 msgstr "Trouver un dojo où aider"
 
-#: accounts/templates/accounts/guardian_detail.html:163
+#: accounts/templates/accounts/guardian_detail.html:168
 #: core/templates/core/menu.html:61
 msgid "Apply to volunteer"
 msgstr "Devenir bénévole"
@@ -490,6 +499,22 @@ msgstr "%(current)s sessions sur %(total)s"
 #: accounts/templates/accounts/partials/_badge_card.html:52
 msgid "Locked"
 msgstr "Verrouillé"
+
+#: accounts/templates/accounts/partials/_child_data_consent.html:5
+msgid ""
+"I'm the parent or legal guardian of the children I add, and I agree that "
+"CoderDojo Belgium keeps their details (name, date of birth, gender, and "
+"allergies or notes if I fill them in) to sign them up for sessions and to "
+"keep track of their sessions, belts and badges. Allergies and notes are only "
+"shown to the champion of a dojo they come to. I can download or delete this "
+"data at any time from my account page."
+msgstr ""
+"Je suis le parent ou le tuteur légal des enfants que j'ajoute, et j'accepte "
+"que CoderDojo Belgium conserve leurs données (nom, date de naissance, "
+"genre, et allergies ou remarques si je les indique) pour les inscrire aux "
+"sessions et suivre leurs sessions, ceintures et badges. Les allergies et "
+"remarques ne sont montrées qu'au champion d'un dojo où ils vont. Je peux "
+"télécharger ou supprimer ces données à tout moment depuis ma page de compte."
 
 #: accounts/templates/accounts/partials/_child_header_display.html:14
 msgid "Click to edit"
@@ -926,10 +951,6 @@ msgstr "Pour vous informer des dojos et sessions près de chez vous."
 msgid "Language for emails"
 msgstr "Langue des e-mails"
 
-#: accounts/templates/accounts/register_guardian.html:78
-msgid "I am the parent or legal guardian of the children listed below."
-msgstr "Je suis le parent ou le tuteur légal des enfants ci-dessous."
-
 #: accounts/templates/accounts/register_guardian.html:83
 msgid ""
 "Send me the CoderDojo Belgium newsletter and news about events like Coolest "
@@ -950,36 +971,44 @@ msgstr ""
 msgid "Create account"
 msgstr "Créer le compte"
 
-#: accounts/views.py:108
+#: accounts/views.py:110
 msgid "That email/password combination doesn't match an account."
 msgstr "Cette combinaison e-mail et mot de passe ne correspond à aucun compte."
 
-#: accounts/views.py:198
+#: accounts/views.py:200
 msgid "First name is required."
 msgstr "Le prénom est obligatoire."
 
-#: accounts/views.py:201
+#: accounts/views.py:203
 msgid "Date of birth is required."
 msgstr "La date de naissance est obligatoire."
 
-#: accounts/views.py:251
+#: accounts/views.py:253
 msgid "Add at least one child."
 msgstr "Ajoutez au moins un enfant."
 
-#: accounts/views.py:476
+#: accounts/views.py:339
+msgid ""
+"Please confirm that you're the child's parent or guardian and agree to how "
+"we keep their data."
+msgstr ""
+"Confirmez que vous êtes le parent ou le tuteur de l'enfant et que vous "
+"acceptez la façon dont nous conservons ses données."
+
+#: accounts/views.py:483
 #, python-format
 msgid "Login created: we've mailed %(email)s a link to choose a password."
 msgstr ""
 "Compte créé : nous avons envoyé à %(email)s un lien pour choisir un mot de "
 "passe."
 
-#: accounts/views.py:490
+#: accounts/views.py:497
 #, python-format
 msgid "We've mailed %(email)s a new link to choose a password."
 msgstr ""
 "Nous avons envoyé à %(email)s un nouveau lien pour choisir un mot de passe."
 
-#: accounts/views.py:505
+#: accounts/views.py:512
 #, python-format
 msgid ""
 "%(name)s's login is switched off. It was on a dojo team, so it's kept for "
@@ -989,12 +1018,12 @@ msgstr ""
 "dojo, il est conservé pour l'historique de cette équipe ; ses places dans "
 "les équipes ont pris fin."
 
-#: accounts/views.py:508
+#: accounts/views.py:515
 #, python-format
 msgid "%(name)s's login is removed."
 msgstr "Le compte de %(name)s est supprimé."
 
-#: accounts/views.py:560
+#: accounts/views.py:567
 #, python-format
 msgid "A spot opened up in %(event)s — a waitlisted family is now confirmed."
 msgstr ""
@@ -5731,7 +5760,43 @@ msgstr "Autres parcours"
 msgid "Not sure this is the right one? Kids move between pathways freely."
 msgstr "Vous hésitez ? Les enfants peuvent changer de parcours librement."
 
-#: privacy/retention.py:260
+#: privacy/deletion.py:52
+msgid ""
+"A child's own login is removed by their parent, or goes with the family's "
+"account."
+msgstr ""
+"Le compte personnel d'un enfant est supprimé par son parent, ou disparaît "
+"avec le compte de la famille."
+
+#: privacy/deletion.py:59
+msgid "This account has already been deleted."
+msgstr "Ce compte a déjà été supprimé."
+
+#: privacy/deletion.py:63
+#, python-format
+msgid ""
+"This account is the champion of %(dojos)s. A dojo can't be without its "
+"champion: the role has to go to one of the dojo's mentors first (on the "
+"dojo's Team page)."
+msgstr ""
+"Ce compte est champion de %(dojos)s. Un dojo ne peut pas rester sans "
+"champion : le rôle doit d'abord passer à un des mentors du dojo (sur la "
+"page Équipe du dojo)."
+
+#: privacy/deletion.py:69
+msgid "This account has an organisation role. It has to be taken away first."
+msgstr ""
+"Ce compte a un rôle dans l'organisation. Il faut d'abord le lui retirer."
+
+#: privacy/deletion.py:71
+msgid ""
+"This is a technical administrator's account (superuser); it can't be deleted "
+"here."
+msgstr ""
+"C'est le compte d'un administrateur technique (superuser) ; il ne peut pas "
+"être supprimé ici."
+
+#: privacy/retention.py:250
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
@@ -5743,7 +5808,7 @@ msgstr ""
 "qu'il reste champion. Demandez-lui de passer le rôle à un mentor, ou "
 "contactez l'organisation."
 
-#: privacy/retention.py:266
+#: privacy/retention.py:256
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
@@ -5754,6 +5819,169 @@ msgstr ""
 "compte sera nettoyé le %(date)s, mais pas tant qu'il reste champion. "
 "Demandez-lui de passer le rôle à un mentor, ou contactez l'organisation."
 
+# | msgid "Your child's own email address is needed for a login."
+#: privacy/templates/privacy/account_deleted.html:3
+#: privacy/templates/privacy/account_deleted.html:8
+msgid "Your account has been deleted"
+msgstr "Votre compte a été supprimé"
+
+#: privacy/templates/privacy/account_deleted.html:9
+msgid ""
+"Thanks for coding with us. You're always welcome back: a new account takes a "
+"minute."
+msgstr ""
+"Merci d'avoir codé avec nous. Vous êtes toujours le bienvenu : un nouveau "
+"compte se crée en une minute."
+
+# | msgid "Shown on the homepage's Upcoming sessions card."
+#: privacy/templates/privacy/account_deleted.html:10
+msgid "To the homepage"
+msgstr "Vers la page d'accueil"
+
+#: privacy/templates/privacy/delete_account.html:29
+msgid "Back to my account"
+msgstr "Retour à mon compte"
+
+#: privacy/templates/privacy/delete_account.html:32
+msgid "This deletes your account right away. It can't be undone."
+msgstr ""
+"Votre compte sera supprimé immédiatement. Cette action est irréversible."
+
+#: privacy/templates/privacy/delete_account.html:34
+msgid "What's deleted"
+msgstr "Ce qui est supprimé"
+
+#: privacy/templates/privacy/delete_account.html:35
+msgid ""
+"Your login, your contact details, your mail preferences, your applications "
+"and your background-check details."
+msgstr ""
+"Votre connexion, vos coordonnées, vos préférences d'e-mail, vos "
+"candidatures et les données de votre extrait de casier judiciaire."
+
+#: privacy/templates/privacy/delete_account.html:35
+msgid "Your login, your contact details and your mail preferences."
+msgstr "Votre connexion, vos coordonnées et vos préférences d'e-mail."
+
+#: privacy/templates/privacy/delete_account.html:37
+msgid ""
+"These children are deleted with your account: their details, their own login "
+"if they have one, their belts and badges. The sessions they came to keep "
+"counting, without their name."
+msgstr ""
+"Ces enfants sont supprimés avec votre compte : leurs données, leur propre "
+"compte s'ils en ont un, leurs ceintures et badges. Les sessions auxquelles "
+"ils ont participé restent comptées, sans leur nom."
+
+#: privacy/templates/privacy/delete_account.html:42
+msgid "What stays"
+msgstr "Ce qui reste"
+
+#: privacy/templates/privacy/delete_account.html:44
+msgid ""
+"Your name on the sessions you helped run and on the belts and badges you "
+"awarded, and your profile on the dojos' team pages."
+msgstr ""
+"Votre nom sur les sessions que vous avez encadrées et sur les ceintures et "
+"badges que vous avez remis, ainsi que votre profil sur les pages d'équipe "
+"des dojos."
+
+#: privacy/templates/privacy/delete_account.html:44
+msgid ""
+"Your name on the sessions you helped run and on the belts and badges you "
+"awarded."
+msgstr ""
+"Votre nom sur les sessions que vous avez encadrées et sur les ceintures et "
+"badges que vous avez remis."
+
+#: privacy/templates/privacy/delete_account.html:47
+msgid "These children stay, with their other parent or guardian:"
+msgstr "Ces enfants restent, avec leur autre parent ou tuteur :"
+
+#: privacy/templates/privacy/delete_account.html:52
+#, python-format
+msgid "Want a copy first? <a href=\"%(download_url)s\">Download my data</a>."
+msgstr ""
+"Une copie d'abord ? <a href=\"%(download_url)s\">Télécharger mes "
+"données</a>."
+
+#: privacy/templates/privacy/delete_account.html:57
+msgid "Your password, to confirm"
+msgstr "Votre mot de passe, pour confirmer"
+
+#: privacy/templates/privacy/manage/delete.html:3
+#: privacy/templates/privacy/manage/delete.html:4
+msgid "Delete an account"
+msgstr "Supprimer un compte"
+
+#: privacy/templates/privacy/manage/delete.html:17
+msgid "Back"
+msgstr "Retour"
+
+#: privacy/templates/privacy/manage/delete.html:20
+msgid ""
+"Only for a request from the account holder, made by mail or post; families "
+"can also delete their account themselves from their account page. It happens "
+"right away and can't be undone."
+msgstr ""
+"Uniquement pour une demande du titulaire du compte, par e-mail ou par "
+"courrier ; les familles peuvent aussi supprimer leur compte elles-mêmes "
+"depuis leur page de compte. La suppression est immédiate et irréversible."
+
+#: privacy/templates/privacy/manage/delete.html:22
+msgid ""
+"A champion or mentor: the account is cleaned. Their name stays on past "
+"sessions and on belts and badges they awarded; the rest is deleted."
+msgstr ""
+"Un champion ou mentor : le compte est nettoyé. Son nom reste sur les "
+"sessions passées et sur les ceintures et badges remis ; le reste est "
+"supprimé."
+
+#: privacy/templates/privacy/manage/delete.html:22
+msgid "Their team-page profile stays, as they chose to show it."
+msgstr ""
+"Son profil sur les pages d'équipe reste, comme la personne a choisi de "
+"l'afficher."
+
+#: privacy/templates/privacy/manage/delete.html:22
+msgid ""
+"The account is erased: login, contact details, mail preferences and "
+"applications."
+msgstr ""
+"Le compte est effacé : connexion, coordonnées, préférences d'e-mail et "
+"candidatures."
+
+#: privacy/templates/privacy/manage/delete.html:23
+msgid "Children erased with it:"
+msgstr "Enfants effacés avec lui :"
+
+#: privacy/templates/privacy/manage/delete.html:23
+msgid "none"
+msgstr "aucun"
+
+#: privacy/templates/privacy/manage/delete.html:24
+msgid "Children who stay with their other guardian:"
+msgstr "Enfants qui restent avec leur autre parent ou tuteur :"
+
+#: privacy/templates/privacy/manage/delete.html:26
+#, python-format
+msgid ""
+"If they asked for a copy too, <a href=\"%(export_url)s\">download their "
+"data</a> first."
+msgstr ""
+"Si la personne a aussi demandé une copie, <a "
+"href=\"%(export_url)s\">téléchargez ses données</a> d'abord."
+
+#: privacy/templates/privacy/manage/delete.html:31
+#, python-format
+msgid "Type the username, %(username)s, to confirm"
+msgstr "Tapez le nom d'utilisateur, %(username)s, pour confirmer"
+
+# | msgid "Meet the team"
+#: privacy/templates/privacy/manage/delete.html:37
+msgid "Delete the account"
+msgstr "Supprimer le compte"
+
 #: privacy/templates/privacy/manage/privacy.html:12
 msgid ""
 "These champions haven't logged in for almost two years. Their account is "
@@ -5762,12 +5990,11 @@ msgid ""
 "has to go dormant. The dojo's mentors have been told on their dashboard. "
 "Once the role has moved, the champion leaves this list."
 msgstr ""
-"Ces champions ne se sont plus connectés depuis presque deux ans. Leur "
-"compte est nettoyé à la date indiquée, mais pas tant qu'ils sont champion "
-"d'un dojo actif : le rôle doit d'abord passer à un des mentors du dojo, ou "
-"le dojo doit passer en sommeil. Les mentors du dojo ont été prévenus sur "
-"leur tableau de bord. Dès que le rôle est passé, le champion quitte cette "
-"liste."
+"Ces champions ne se sont plus connectés depuis presque deux ans. Leur compte "
+"est nettoyé à la date indiquée, mais pas tant qu'ils sont champion d'un dojo "
+"actif : le rôle doit d'abord passer à un des mentors du dojo, ou le dojo "
+"doit passer en sommeil. Les mentors du dojo ont été prévenus sur leur "
+"tableau de bord. Dès que le rôle est passé, le champion quitte cette liste."
 
 #: privacy/templates/privacy/manage/privacy.html:19
 msgid "Last login"
@@ -5792,14 +6019,14 @@ msgstr "Ouvrir le dojo"
 
 #: privacy/templates/privacy/manage/privacy.html:40
 msgid ""
-"When someone asks for a copy of their data by mail or post, find their "
-"account here and download it. The file holds everything the site keeps about "
-"the account and the children it's a guardian of, as the family gets it with "
-"Download my data on their account page. Send it only to the account's own "
-"email address."
+"When someone asks for a copy of their data, or to have it deleted, by mail "
+"or post, find their account here. The file holds everything the site keeps "
+"about the account and the children it's a guardian of, as the family gets it "
+"with Download my data on their account page. Send it only to the account's "
+"own email address."
 msgstr ""
-"Lorsqu'une personne demande une copie de ses données par e-mail ou par "
-"courrier, recherchez son compte ici et téléchargez-les. Le fichier contient "
+"Lorsqu'une personne demande une copie de ses données, ou leur suppression, "
+"par e-mail ou par courrier, recherchez son compte ici. Le fichier contient "
 "tout ce que le site conserve sur le compte et les enfants dont il est le "
 "parent ou tuteur, tel que la famille l'obtient avec Télécharger mes données "
 "sur sa page de compte. Envoyez-le uniquement à l'adresse e-mail du compte."
@@ -5825,6 +6052,10 @@ msgstr "Adulte"
 msgid "Download data"
 msgstr "Télécharger les données"
 
+#: privacy/templates/privacy/manage/privacy.html:71
+msgid "Delete…"
+msgstr "Supprimer…"
+
 #: privacy/templates/privacy/manage/privacy.html:74
 msgid "No accounts match."
 msgstr "Aucun compte ne correspond."
@@ -5837,9 +6068,24 @@ msgstr ""
 "Seuls les %(search_limit)s premiers sont affichés ; affinez la recherche "
 "pour en trouver d'autres."
 
-#: privacy/views.py:39
+#: privacy/views.py:42
 msgid ""
 "You just downloaded your data. Please wait a minute before trying again."
 msgstr ""
 "Vous venez de télécharger vos données. Veuillez patienter une minute avant "
 "de réessayer."
+
+#: privacy/views.py:100
+msgid "That isn't your password."
+msgstr "Ce n'est pas votre mot de passe."
+
+#: privacy/views.py:118
+msgid "Type the account's username to confirm."
+msgstr "Tapez le nom d'utilisateur du compte pour confirmer."
+
+#: privacy/views.py:121
+msgid "The account has been deleted."
+msgstr "Le compte a été supprimé."
+
+#~ msgid "I am the parent or legal guardian of the children listed below."
+#~ msgstr "Je suis le parent ou le tuteur légal des enfants ci-dessous."

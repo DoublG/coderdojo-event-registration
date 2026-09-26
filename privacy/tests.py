@@ -90,6 +90,8 @@ class RegistryValidationTests(SimpleTestCase):
                 "accounts.Guardianship.ninja",
                 "accounts.Guardianship.relation",
                 "accounts.Guardianship.created_at",
+                "accounts.Guardianship.consent_given_at",
+                "accounts.Guardianship.consent_wording_version",
                 "accounts.Ninja",
             ],
         )
@@ -843,3 +845,118 @@ class RetentionTests(TestCase):
                 self.assertIn("2026", subject, (language, volunteer))
                 self.assertIn("https://x/login/", body, (language, volunteer))
                 self.assertNotIn("{%", body)
+
+
+class DeleteAccountTests(TestCase):
+    """privacy.deletion: the family's Delete my account and the
+    organisation's Delete… on the Privacy page."""
+
+    def setUp(self):
+        from accounts.models import OrganisationRole
+
+        self.parent = User.objects.create(username="an", email="an@example.com", first_name="An")
+        self.parent.set_password("secret-password-1")
+        self.parent.save()
+        self.child = Ninja.objects.create(name="Lotte")
+        Guardianship.objects.create(guardian=self.parent, ninja=self.child)
+        self.shared = Ninja.objects.create(name="Mats")
+        Guardianship.objects.create(guardian=self.parent, ninja=self.shared)
+        Guardianship.objects.create(guardian=User.objects.create(username="bart"), ninja=self.shared)
+        self.admin = User.objects.create(username="orgadmin")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+
+    def url(self, name, *args):
+        from django.urls import reverse
+
+        return reverse(name, args=args)
+
+    def erased(self, user):
+        from privacy.erasure import is_erased
+
+        return is_erased(user)
+
+    def test_the_account_page_links_to_it(self):
+        self.client.force_login(self.parent)
+        self.assertContains(self.client.get(self.url("account_home")), self.url("delete_my_account"))
+
+    def test_the_preview(self):
+        self.client.force_login(self.parent)
+        response = self.client.get(self.url("delete_my_account"))
+        self.assertTemplateUsed(response, "privacy/delete_account.html")
+        self.assertEqual(response.context["preview"].children, [self.child])
+        self.assertEqual(response.context["preview"].shared_children, [self.shared])
+        self.assertContains(response, 'name="password"')
+
+    def test_a_wrong_password_deletes_nothing(self):
+        self.client.force_login(self.parent)
+        response = self.client.post(self.url("delete_my_account"), {"password": "nope"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["error"])
+        self.assertFalse(self.erased(self.parent))
+
+    def test_the_family_deletes_its_account(self):
+        from privacy.models import ErasureRecord
+
+        self.client.force_login(self.parent)
+        response = self.client.post(self.url("delete_my_account"), {"password": "secret-password-1"})
+        self.assertTemplateUsed(response, "privacy/account_deleted.html")
+        self.assertNotIn("_auth_user_id", self.client.session)
+        record = ErasureRecord.objects.get(model="accounts.User", object_id=self.parent.pk)
+        self.assertEqual((record.reason, record.requested_by), (ErasureRecord.SELF, None))
+        self.assertEqual(Ninja.objects.get(pk=self.child.pk).name, f"Former ninja #{self.child.pk}")
+        self.assertEqual(Ninja.objects.get(pk=self.shared.pk).name, "Mats")
+        self.assertFalse(User.objects.get(pk=self.parent.pk).is_active)
+
+    def test_not_for_a_childs_own_login(self):
+        login = User.objects.create(username="lotte", account_type=User.NINJA)
+        self.client.force_login(login)
+        self.assertEqual(self.client.get(self.url("delete_my_account")).status_code, 404)
+
+    def test_a_champion_of_an_active_dojo_hands_over_first(self):
+        from dojos.testing import make_dojo
+
+        make_dojo("Ghent", champion=self.parent)
+        self.client.force_login(self.parent)
+        response = self.client.get(self.url("delete_my_account"))
+        self.assertContains(response, "champion of Ghent")
+        self.assertNotContains(response, 'name="password"')
+        self.client.post(self.url("delete_my_account"), {"password": "secret-password-1"})
+        self.assertFalse(self.erased(self.parent))
+
+    def test_a_mentor_is_cleaned(self):
+        from dojos.testing import add_member, make_dojo
+        from privacy.models import ErasureRecord
+
+        add_member(make_dojo("Ghent"), self.parent)
+        self.client.force_login(self.parent)
+        self.client.post(self.url("delete_my_account"), {"password": "secret-password-1"})
+        self.assertTrue(ErasureRecord.objects.get(model="accounts.User", object_id=self.parent.pk).keep_visible)
+
+    def test_the_organisation_page_is_for_the_admin_role_only(self):
+        self.client.force_login(self.parent)
+        self.assertEqual(self.client.get(self.url("manage_privacy_delete", self.parent.pk)).status_code, 404)
+
+    def test_the_organisation_deletes_on_request(self):
+        from privacy.models import ErasureRecord
+
+        self.client.force_login(self.admin)
+        response = self.client.get(self.url("manage_privacy"), {"q": "an@example"})
+        self.assertContains(response, self.url("manage_privacy_delete", self.parent.pk))
+        response = self.client.get(self.url("manage_privacy_delete", self.parent.pk))
+        self.assertTemplateUsed(response, "privacy/manage/delete.html")
+        self.assertContains(response, "Lotte")
+
+        response = self.client.post(self.url("manage_privacy_delete", self.parent.pk), {"confirm": "wrong"})
+        self.assertTrue(response.context["error"])
+        self.assertFalse(self.erased(self.parent))
+
+        response = self.client.post(self.url("manage_privacy_delete", self.parent.pk), {"confirm": "an"})
+        self.assertRedirects(response, self.url("manage_privacy"))
+        record = ErasureRecord.objects.get(model="accounts.User", object_id=self.parent.pk)
+        self.assertEqual((record.reason, record.requested_by), (ErasureRecord.REQUEST, self.admin))
+
+    def test_an_organisation_role_is_taken_away_first(self):
+        self.client.force_login(self.admin)
+        response = self.client.post(self.url("manage_privacy_delete", self.admin.pk), {"confirm": "orgadmin"})
+        self.assertContains(response, "organisation role")
+        self.assertFalse(self.erased(self.admin))

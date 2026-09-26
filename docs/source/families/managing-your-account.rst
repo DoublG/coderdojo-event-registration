@@ -21,7 +21,9 @@ From here you can:
 - **Add a child** — name, date of birth, an optional icon, an optional
   gender and optional allergies or notes. Ninjas are 7 to 17, so a date
   of birth outside that range isn't accepted. Gender is never shown
-  publicly; it lets us tell you about girls' sessions.
+  publicly; it lets us tell you about girls' sessions. As at sign-up, you
+  tick the box to confirm you're the child's parent or guardian and agree
+  to how we keep their details.
 - **Edit a child's details** — click their name/header to edit it inline.
   A child who has turned 18 stays on your account; only a newly entered
   date of birth is checked.
@@ -87,6 +89,24 @@ their file holds only their own data.
 
 You can download it once a minute. If you'd rather ask by email or post,
 contact us and we'll send it to your account's email address.
+
+Deleting your account
+-----------------------
+
+**Delete my account**, on the same **Your data** card, first shows what
+will happen: which of your children are deleted with your account (those
+only you are a parent or guardian of, with their own logins, belts and
+badges; the sessions they came to keep counting, without their name),
+and which stay with their other parent or guardian. Enter your password to
+confirm; your account is deleted right away, and that can't be undone.
+Download your data first if you'd like a copy.
+
+**Champions and mentors:** your name stays on the sessions you helped run
+and on the belts and badges you awarded, and so does your profile on the
+dojos' team pages if you chose to show it. As the champion of an active
+dojo, hand the role to one of its mentors first.
+
+You can also ask us by email or post; we'll delete it for you.
 
 Accounts you no longer use
 ----------------------------

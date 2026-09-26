@@ -2990,9 +2990,9 @@ the verified session belong to django-otp in both cases.
 
 **Phases 1 to 3 are built** (the classification, the register and a
 person's export), **phase 4 for the decided rules** (accounts, the audit
-log, login sessions) and **phase 5's erasure itself** (`privacy/erasure.py`,
-used by the retention job; the dashboard page and the family's request
-aren't built); the rest is the plan. Classify every piece of personal data
+log, login sessions) and **phase 5** (erasure, and deleting an account on
+request from the family's account page and the organisation's Privacy
+page); the rest is the plan. Classify every piece of personal data
 the site keeps (GDPR categories), and build on that: exporting a person's
 data, anonymising or removing it, and archiving or deleting it once it's no
 longer needed. Most of our data is about **children**, one field is
@@ -3026,6 +3026,16 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
   attendance list of a session the child has a confirmed place at
   (`dojos.access.VIEW_HEALTH_NOTES`, never granted to mentors). The family
   forms say so next to the field.
+- **The guardian's consent to the children's data (decided):** a required
+  checkbox on family sign-up and on Add a child, with one approved wording
+  (`accounts/partials/_child_data_consent.html`, versioned by
+  `accounts.consent.CHILD_DATA_WORDING_VERSION`): the child's details are
+  kept to sign them up and follow their sessions, belts and badges;
+  allergies and notes only for the champion; download or delete at any
+  time. Each `Guardianship` made on the site records when it was given
+  and to which wording (`consent_given_at`, `consent_wording_version`);
+  links from before, or made in the admin, have none. Change the wording
+  only together with the version.
 - **Criminal-record extracts** (GDPR art. 10): the uploaded document (deleted
   at the decision already), `User.background_check_*`,
   `applications.BackgroundCheckHistory`, `Application` (motivation text,
@@ -3276,10 +3286,26 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
 5. **Right to erasure** (art. 17): `privacy.erasure.erase_person(user,
    requested_by, reason)`, from the organisation dashboard (with a
    confirmation showing what will happen) and later on request from the
-   account page. *The erasure itself is built* (`privacy/erasure.py`,
+   account page. *Built* (`privacy/erasure.py`, `privacy/deletion.py`,
    `privacy.ErasureRecord`, `manage.py privacy_replay_erasures`), used by
-   the retention job; the dashboard page and the family's request aren't.
+   the retention job and by deleting an account on request.
    Implementation decisions:
+   - **Deleting an account on request** (`privacy.deletion`: `preview()`
+     then `delete_account()`) from two places. The family: **Delete my
+     account** on the account page's Your data card (`/account/delete/`),
+     confirmed with its password, deleted right away, then logged out
+     (`ErasureRecord.reason = self`). The organisation: **Delete…** per
+     account on the Privacy page (`/manage/privacy/<id>/delete/`), for a
+     request by mail or post, confirmed by typing the username (`request`,
+     with `requested_by`). Both show first which children go with the
+     account and which stay with another guardian, and what a champion or
+     mentor keeps (they're cleaned, `keep_visible`, as by retention).
+   - **What stops it:** the champion of an active dojo (the role moves
+     first), an organisation role, a superuser, a ninja's own login (it's
+     the guardian's to remove, or goes with the family), and an account
+     already erased.
+   - No confirmation mail: the erasure empties the address and the queued
+     mail with it.
    - **Rows are found by `subjects`** (the account, the children erased
      with it and their own logins, the account's email address), all of
      them before anything changes. A row of someone else's that only links

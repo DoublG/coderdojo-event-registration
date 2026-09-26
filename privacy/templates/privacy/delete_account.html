@@ -1,0 +1,68 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Delete my account" %} · CoderDojo Belgium{% endblock %}
+{% block root_class %}delete-account-root{% endblock %}
+{% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
+
+{% block extra_style %}
+<style>
+  .delete-account-root { background: var(--surface-sunken); }
+  .delete-account-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+  .delete-account-root .page-title { color: var(--ink); margin: 0 0 var(--space-4); }
+  .delete-account-root .form-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
+  .delete-account-root .form-card h2 { margin: var(--space-5) 0 var(--space-2); }
+  .delete-account-root .form-card ul.children { margin: var(--space-2) 0 0; padding-left: var(--space-5); }
+</style>
+{% endblock %}
+
+{% block content %}
+  {% comment %}The family deletes its own account (privacy/views.py delete_my_account, privacy.deletion).{% endcomment %}
+  <div class="page">
+    <h1 class="display-lg page-title">{% translate "Delete my account" %}</h1>
+    <div class="form-card">
+      {% if not preview.possible %}
+        <div class="cd-form__notes">
+          {% for blocker in preview.blockers %}<p class="cd-form__note cd-form__note--error caption">{{ blocker }}</p>{% endfor %}
+        </div>
+        <div class="cd-form__actions" style="justify-content: flex-start;">
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">{% translate "Back to my account" %}</a>
+        </div>
+      {% else %}
+        <p class="body">{% translate "This deletes your account right away. It can't be undone." %}</p>
+
+        <h2 class="heading-sm">{% translate "What's deleted" %}</h2>
+        <p class="body-sm">{% if preview.volunteer %}{% translate "Your login, your contact details, your mail preferences, your applications and your background-check details." %}{% else %}{% translate "Your login, your contact details and your mail preferences." %}{% endif %}</p>
+        {% if preview.children %}
+          <p class="body-sm">{% translate "These children are deleted with your account: their details, their own login if they have one, their belts and badges. The sessions they came to keep counting, without their name." %}</p>
+          <ul class="children body-sm">{% for child in preview.children %}<li>{{ child.name }}</li>{% endfor %}</ul>
+        {% endif %}
+
+        {% if preview.volunteer or preview.shared_children %}
+          <h2 class="heading-sm">{% translate "What stays" %}</h2>
+          {% if preview.volunteer %}
+            <p class="body-sm">{% if preview.keeps_profile %}{% translate "Your name on the sessions you helped run and on the belts and badges you awarded, and your profile on the dojos' team pages." %}{% else %}{% translate "Your name on the sessions you helped run and on the belts and badges you awarded." %}{% endif %}</p>
+          {% endif %}
+          {% if preview.shared_children %}
+            <p class="body-sm">{% translate "These children stay, with their other parent or guardian:" %}</p>
+            <ul class="children body-sm">{% for child in preview.shared_children %}<li>{{ child.name }}</li>{% endfor %}</ul>
+          {% endif %}
+        {% endif %}
+
+        <p class="body-sm" style="margin-top: var(--space-5);">{% url 'download_my_data' as download_url %}{% blocktranslate %}Want a copy first? <a href="{{ download_url }}">Download my data</a>.{% endblocktranslate %}</p>
+
+        <form class="cd-form" method="post" style="margin-top: var(--space-5);">
+          {% csrf_token %}
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="delete-password">{% translate "Your password, to confirm" %}</label>
+            <input class="cd-form__input body" type="password" id="delete-password" name="password" autocomplete="current-password" required>
+            {% if error %}<ul class="cd-form__errors"><li class="caption">{{ error }}</li></ul>{% endif %}
+          </div>
+          <div class="cd-form__actions">
+            <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">{% translate "Cancel" %}</a>
+            <button type="submit" class="cd-btn cd-btn--danger label">{% translate "Delete my account" %}</button>
+          </div>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

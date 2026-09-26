@@ -1,0 +1,41 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Delete an account" %}{% endblock %}
+{% block manage_heading %}{% translate "Delete an account" %}{% endblock %}
+
+{% block manage_content %}
+  {% comment %}Deleting an account on a request by mail or post (privacy/views.py manage_privacy_delete, privacy.deletion).{% endcomment %}
+  <div class="cd-card" style="padding: var(--space-5);">
+    <p class="body"><strong>{{ account.get_full_name|default:account.username }}</strong> · {{ account.username }}{% if account.email %} · {{ account.email }}{% endif %}</p>
+
+    {% if not preview.possible %}
+      <div class="cd-form__notes">
+        {% for blocker in preview.blockers %}<p class="cd-form__note cd-form__note--error caption">{{ blocker }}</p>{% endfor %}
+      </div>
+      <div class="cd-form__actions" style="justify-content: flex-start;">
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_privacy' %}">{% translate "Back" %}</a>
+      </div>
+    {% else %}
+      <p class="body-sm">{% translate "Only for a request from the account holder, made by mail or post; families can also delete their account themselves from their account page. It happens right away and can't be undone." %}</p>
+      <ul class="body-sm">
+        <li>{% if preview.volunteer %}{% translate "A champion or mentor: the account is cleaned. Their name stays on past sessions and on belts and badges they awarded; the rest is deleted." %}{% if preview.keeps_profile %} {% translate "Their team-page profile stays, as they chose to show it." %}{% endif %}{% else %}{% translate "The account is erased: login, contact details, mail preferences and applications." %}{% endif %}</li>
+        <li>{% translate "Children erased with it:" %} {% for child in preview.children %}{{ child.name }}{% if not forloop.last %}, {% endif %}{% empty %}{% translate "none" %}{% endfor %}</li>
+        {% if preview.shared_children %}<li>{% translate "Children who stay with their other guardian:" %} {% for child in preview.shared_children %}{{ child.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>{% endif %}
+      </ul>
+      <p class="body-sm">{% url 'manage_privacy_export' user_id=account.id as export_url %}{% blocktranslate %}If they asked for a copy too, <a href="{{ export_url }}">download their data</a> first.{% endblocktranslate %}</p>
+
+      <form class="cd-form" method="post">
+        {% csrf_token %}
+        <div class="cd-form__field">
+          <label class="cd-form__label label" for="delete-confirm">{% blocktranslate with username=account.username %}Type the username, {{ username }}, to confirm{% endblocktranslate %}</label>
+          <input class="cd-form__input body" type="text" id="delete-confirm" name="confirm" autocomplete="off" required>
+          {% if error %}<ul class="cd-form__errors"><li class="caption">{{ error }}</li></ul>{% endif %}
+        </div>
+        <div class="cd-form__actions">
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_privacy' %}">{% translate "Cancel" %}</a>
+          <button type="submit" class="cd-btn cd-btn--danger label">{% translate "Delete the account" %}</button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+{% endblock %}

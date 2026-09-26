@@ -1,0 +1,12 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Your account has been deleted" %} · CoderDojo Belgium{% endblock %}
+{% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
+
+{% block content %}
+  <div style="max-width: 640px; margin: 0 auto; padding: var(--space-8) var(--space-4); text-align: center;">
+    <h1 class="display-lg">{% translate "Your account has been deleted" %}</h1>
+    <p class="body-lg">{% translate "Thanks for coding with us. You're always welcome back: a new account takes a minute." %}</p>
+    <p><a class="cd-btn cd-btn--primary label" href="{% url 'home' %}">{% translate "To the homepage" %}</a></p>
+  </div>
+{% endblock %}

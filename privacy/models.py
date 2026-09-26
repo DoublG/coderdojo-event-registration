@@ -8,9 +8,16 @@ class ErasureRecord(models.Model):
     backup is restored, `manage.py privacy_replay_erasures` erases them again
     from these rows."""
 
+    # The account holder deleted their own account; REQUEST is the
+    # organisation acting on a request by mail or post.
+    SELF = "self"
     REQUEST = "request"
     RETENTION = "retention"
-    REASON_CHOICES = [(REQUEST, "On request"), (RETENTION, "Retention: two years without logging in")]
+    REASON_CHOICES = [
+        (SELF, "By the account holder"),
+        (REQUEST, "On request, by the organisation"),
+        (RETENTION, "Retention: two years without logging in"),
+    ]
 
     # "accounts.User" or "accounts.Ninja".
     model = models.CharField(max_length=100)
