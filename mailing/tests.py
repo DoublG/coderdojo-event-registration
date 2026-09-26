@@ -13,6 +13,7 @@ from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from accounts.consent import consent_fields
 from accounts.models import Guardianship, Ninja, User
 from dojos.models import Dojo, DojoMembership
 from dojos.testing import add_member, make_dojo
@@ -20,7 +21,7 @@ from events.models import Event, Registration
 from geo.models import AdministrativeBoundary, Municipality
 
 from . import campaigns, journeys
-from .categories import MailCategory
+from .categories import PRIVACY_WORDING_VERSION, MailCategory
 from .models import (
     BounceRecord,
     Campaign,
@@ -51,13 +52,15 @@ from .tasks import (
 from .testing import complaint_report, dsn_report
 
 
-def _family(username, *genders, **fields):
-    """An adult account with one child per gender given."""
+def _family(username, *genders, consent=True, **fields):
+    """An adult account with one child per gender given; by default the
+    parent agreed to the children's details choosing their mail
+    (accounts.consent), as child groups in segments need."""
     fields.setdefault("email", f"{username}@example.com")
     guardian = User.objects.create(username=username, **fields)
     for index, gender in enumerate(genders):
         ninja = Ninja.objects.create(name=f"{username}-kid-{index}", gender=gender)
-        Guardianship.objects.create(guardian=guardian, ninja=ninja)
+        Guardianship.objects.create(guardian=guardian, ninja=ninja, **consent_fields(consent))
     return guardian
 
 
@@ -92,6 +95,27 @@ class SegmentResolverTests(TestCase):
     def test_girlz_segment_selects_families_with_a_girl_or_an_unlisted_child(self):
         segment = _segment(("ninja", "and", [("ninja_gender", "in", [Ninja.GIRL, Ninja.UNSPECIFIED])]))
         self.assertEqual(_resolve(segment), {"girl", "unlisted", "mixed"})
+
+    def test_a_child_group_only_counts_children_with_the_parents_consent(self):
+        """accounts.consent: without it, a child's details never choose mail;
+        rules about the account still reach the parent."""
+        _family("no-consent", Ninja.GIRL, consent=False)
+        segment = _segment(("ninja", "and", [("ninja_gender", "in", [Ninja.GIRL])]))
+        self.assertEqual(_resolve(segment), {"girl", "mixed"})
+        segment = _segment(("user", "and", [("has_children", "is", True)]))
+        self.assertIn("no-consent", _resolve(segment))
+
+    def test_the_consent_is_per_guardian(self):
+        """Two parents of one child: only the one who agreed is reached."""
+        from accounts.consent import set_consent
+
+        kid = Ninja.objects.get(name="girl-kid-0")
+        co_parent = User.objects.create(username="co-parent", email="co@example.com")
+        Guardianship.objects.create(guardian=co_parent, ninja=kid)
+        segment = _segment(("ninja", "and", [("ninja_gender", "in", [Ninja.GIRL])]))
+        self.assertNotIn("co-parent", _resolve(segment))
+        set_consent(Guardianship.objects.get(guardian=co_parent), True)
+        self.assertIn("co-parent", _resolve(segment))
 
     def test_everyone_active_selects_every_active_adult_with_an_email(self):
         segment = _segment(("user", "and", [("account_type", "equals", User.ADULT)]))
@@ -432,7 +456,8 @@ class PreferenceTests(TestCase):
         self.assertFalse(set_preference(self.parent, MailCategory.NEWSLETTER, True, ConsentEvent.PREFERENCES))
         self.assertTrue(set_preference(self.parent, MailCategory.NEWSLETTER, False, ConsentEvent.UNSUBSCRIBE_LINK))
         log = list(ConsentEvent.objects.order_by("id").values_list("subscribed", "source", "wording_version"))
-        self.assertEqual(log, [(True, "signup", "2026-09-25"), (False, "unsubscribe_link", "2026-09-25")])
+        version = PRIVACY_WORDING_VERSION
+        self.assertEqual(log, [(True, "signup", version), (False, "unsubscribe_link", version)])
 
     def test_mail_that_cant_be_switched_off(self):
         self.assertFalse(set_preference(self.parent, MailCategory.SERVICE, False, ConsentEvent.PREFERENCES))
@@ -653,6 +678,26 @@ class MailPreferencesViewTests(TestCase):
         self.assertEqual((self.parent.preferred_language, self.parent.postal_code), ("fr-be", "9000"))
         self.assertEqual(set(ConsentEvent.objects.values_list("category", "source")),
                          {("newsletter", "preferences"), ("reminder", "preferences")})
+
+    def test_a_switch_per_child_gives_or_withdraws_the_consent(self):
+        from accounts.consent import CHILD_DATA_WORDING_VERSION
+
+        lotte = Ninja.objects.create(name="Lotte")
+        mats = Ninja.objects.create(name="Mats")
+        Guardianship.objects.create(guardian=self.parent, ninja=lotte, **consent_fields())
+        Guardianship.objects.create(guardian=self.parent, ninja=mats)
+        self.client.force_login(self.parent)
+        response = self.client.get(reverse("mail_preferences"))
+        self.assertContains(response, "Use my children's details")
+        self.assertTrue(response.context["form"][f"child_{lotte.id}"].initial)
+        self.assertFalse(response.context["form"][f"child_{mats.id}"].initial)
+
+        self.client.post(reverse("mail_preferences"), {"preferred_language": "nl-be", f"child_{mats.id}": "on"})
+        lotte_link = Guardianship.objects.get(ninja=lotte)
+        mats_link = Guardianship.objects.get(ninja=mats)
+        self.assertEqual((lotte_link.consent_given_at, lotte_link.consent_wording_version), (None, ""))
+        self.assertIsNotNone(mats_link.consent_given_at)
+        self.assertEqual(mats_link.consent_wording_version, CHILD_DATA_WORDING_VERSION)
 
     def test_ninja_account_sees_only_its_own_kinds_of_mail(self):
         teen = User.objects.create(username="teen", email="t@example.com", account_type=User.NINJA)

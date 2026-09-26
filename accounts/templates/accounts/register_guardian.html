@@ -75,9 +75,13 @@
           </div>
           <div class="cd-form__checkbox-row">
             {{ form.consent }}
-            <label class="body-sm" for="{{ form.consent.id_for_label }}">{% include "accounts/partials/_child_data_consent.html" %}</label>
+            <label class="body-sm" for="{{ form.consent.id_for_label }}">{% translate "I am the parent or legal guardian of the children listed below." %}</label>
           </div>
           <ul class="cd-form__errors">{% for error in form.consent.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+          <div class="cd-form__checkbox-row">
+            {{ form.child_data_mail }}
+            <label class="body-sm" for="{{ form.child_data_mail.id_for_label }}">{% include "accounts/partials/_child_data_consent.html" %} <span class="caption">{% translate "Optional; you can change it for each child on your Mail preferences page." %}</span></label>
+          </div>
           <div class="cd-form__checkbox-row">
             {{ form.newsletter }}
             <label class="body-sm" for="{{ form.newsletter.id_for_label }}">{% translate "Send me the CoderDojo Belgium newsletter and news about events like Coolest Projects and CoderDojo Girlz." %}</label>

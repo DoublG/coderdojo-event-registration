@@ -6,6 +6,7 @@ from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 
+from accounts.consent import set_consent
 from accounts.models import User
 
 from .categories import CAN_OPT_OUT, MailCategory, categories_for
@@ -18,13 +19,16 @@ from .services import read_unsubscribe_token
 @login_required
 def mail_preferences(request):
     """The account's Mail preferences page: a switch per kind of mail it can
-    turn off, the mail language, and (adults) the postcode. Above them, the
+    turn off, a switch per child for using their details to choose mails
+    (accounts.consent), the mail language, and (adults) the postcode. Above them, the
     approved explanation of what we use to pick relevant mails."""
     user = request.user
     form = MailPreferencesForm(request.POST or None, user=user)
     if request.method == "POST" and form.is_valid():
         for category, subscribed in form.chosen().items():
             set_preference(user, category, subscribed, ConsentEvent.PREFERENCES)
+        for guardianship, given in form.child_consents():
+            set_consent(guardianship, given)
         user.preferred_language = form.cleaned_data["preferred_language"]
         fields = ["preferred_language"]
         if "postal_code" in form.cleaned_data:

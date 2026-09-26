@@ -92,6 +92,9 @@ class RegisterGuardianForm(forms.Form):
         widget=forms.Select(attrs={"class": "cd-form__input body"}),
     )
     consent = forms.BooleanField(required=True, widget=forms.CheckboxInput())
+    # Optional: the children's details may choose which mails the family
+    # gets (accounts.consent). Never needed to sign a child up.
+    child_data_mail = forms.BooleanField(required=False, widget=forms.CheckboxInput())
     # The newsletter needs an explicit opt-in (mailing.categories): unticked.
     newsletter = forms.BooleanField(required=False, widget=forms.CheckboxInput())
 

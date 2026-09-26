@@ -44,6 +44,14 @@ GENDER_OTHER_SHARE = 0.03
 NUM_GUARDIANS = 40
 CHILD_LOGIN_PROBABILITY = 0.5
 
+# The guardian's consent to the children's data (accounts.consent), by the
+# number in the username, so both cases can be tested: every 4th family
+# signed up before the consent was asked (none recorded), and a few gave it
+# for their first child only (the others added in the admin). The rest
+# consented to every child.
+NO_CONSENT = {2}  # guardian-N with N % 4 in here
+FIRST_CHILD_ONLY = {3}  # guardian-N with N % 8 in here
+
 
 class Command(BaseCommand):
     help = (
@@ -143,6 +151,8 @@ class Command(BaseCommand):
             guardian.postal_code, guardian.preferred_language = _seed_locale(guardian, dojo)
             guardian.save(update_fields=["postal_code", "preferred_language"])
 
+        consented = _seed_consent()
+
         # A couple of ninjas with their own login help out at their home
         # dojo: youth mentors, promoted by that dojo's champion.
         promoted = 0
@@ -164,9 +174,37 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(
             f"Done. guardians={guardians_created} children={children_created} "
-            f"child_logins={child_logins_created}. Credentials for newly seeded accounts "
+            f"child_logins={child_logins_created} consents_recorded={consented}. Credentials for newly seeded accounts "
             f"written to {CREDENTIALS_FILE}"
         ))
+
+
+def _consent_for(guardianship, position):
+    """Whether this seeded family gave its consent for this child (its
+    `position` among the family's children, from 0)."""
+    number = int(guardianship.guardian.username.rsplit("-", 1)[1])
+    if number % 4 in NO_CONSENT:
+        return False
+    return position == 0 or number % 8 not in FIRST_CHILD_ONLY
+
+
+def _seed_consent():
+    """Record the consent where the seeded family gave it, dated when the
+    child was linked. Only fills in a missing one, so it's rerun-safe and
+    never takes away a consent given since on the site."""
+    from accounts.consent import CHILD_DATA_WORDING_VERSION
+
+    recorded = 0
+    guardians = User.objects.filter(username__regex=r"^guardian-[0-9]+$", guardianships__isnull=False).distinct()
+    for guardian in guardians:
+        links = Guardianship.objects.filter(guardian=guardian).order_by("ninja_id")
+        for position, guardianship in enumerate(links):
+            if guardianship.consent_given_at is None and _consent_for(guardianship, position):
+                guardianship.consent_given_at = guardianship.created_at
+                guardianship.consent_wording_version = CHILD_DATA_WORDING_VERSION
+                guardianship.save(update_fields=["consent_given_at", "consent_wording_version"])
+                recorded += 1
+    return recorded
 
 
 def _seed_gender(ninja):

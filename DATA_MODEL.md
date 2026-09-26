@@ -3026,16 +3026,26 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
   attendance list of a session the child has a confirmed place at
   (`dojos.access.VIEW_HEALTH_NOTES`, never granted to mentors). The family
   forms say so next to the field.
-- **The guardian's consent to the children's data (decided):** a required
-  checkbox on family sign-up and on Add a child, with one approved wording
+- **The guardian's consent, for mail only (decided):** whether a child's
+  details (age, gender, sessions, belts) may choose which mail the family
+  gets. It matters only to the organisation dashboard's segments (so
+  campaigns and journeys): a "Parents of a child who…" group only reaches
+  the guardians who consented for that child
+  (`mailing.segmentation.resolver`). Signing a child up, their sessions,
+  belts and badges, and the automated mail never depend on it. An optional
+  checkbox on family sign-up (next to the required "I am the parent or
+  legal guardian") and on Add a child, and a switch per child on the Mail
+  preferences page to give or withdraw it, with one approved wording
   (`accounts/partials/_child_data_consent.html`, versioned by
-  `accounts.consent.CHILD_DATA_WORDING_VERSION`): the child's details are
-  kept to sign them up and follow their sessions, belts and badges;
-  allergies and notes only for the champion; download or delete at any
-  time. Each `Guardianship` made on the site records when it was given
-  and to which wording (`consent_given_at`, `consent_wording_version`);
-  links from before, or made in the admin, have none. Change the wording
-  only together with the version.
+  `accounts.consent.CHILD_DATA_WORDING_VERSION`; every change through
+  `accounts.consent.set_consent`, so the audit log has its history). It's
+  per guardian and child, on the `Guardianship` (`consent_given_at`,
+  `consent_wording_version`); links from before, or made in the admin,
+  have none. The mail privacy explanation says so
+  (`PRIVACY_WORDING_VERSION` 2026-09-26). `seed_guardians` seeds both: most
+  families consented for every child, every 4th (`guardian-2`, `-6`, ...)
+  for none, a few (`guardian-N` with N % 8 = 3) for their first child
+  only; `seed_credentials.csv` marks those children `[no consent]`.
 - **Criminal-record extracts** (GDPR art. 10): the uploaded document (deleted
   at the decision already), `User.background_check_*`,
   `applications.BackgroundCheckHistory`, `Application` (motivation text,
@@ -3044,8 +3054,8 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
   `NinjaBadge`, `NinjaBelt` (notes by mentors), attendance.
 - **Profiling of children**: `NinjaEngagement`, `NinjaEngagementChange`, and
   the segment attributes built on them (engagement stage, gender, age, belt)
-  that choose who gets mail. Profiling children for mailings needs a
-  documented legitimate-interest assessment, or a limit (see open points).
+  that choose who gets mail: only for children whose guardian consented
+  (see above).
 - **Volunteers at work**: `DojoMembership`, `TeamAttendance` (the insurance
   record), `Event.team`.
 - **Mail**: `EmailMessage` (the full rendered subject and body, recipient
@@ -3389,8 +3399,8 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
   a session without the champion need it too (adding `VIEW_HEALTH_NOTES`
   to mentors in `dojos.access.ROLE_CAPABILITIES`, and changing the text
   on the family forms and in the docs).
-- **Profiling children for mail**: keep the child attributes in segments
-  for all categories, or only for mail the family opted in to?
+- ~~Profiling children for mail~~ Decided: a child's details only choose
+  mail with the guardian's consent, per child (see the inventory).
 - **Legal bases** in the classification (phase 1) need checking: which
   art. 6 basis and art. 9/10 condition apply to the health field (explicit
   consent?) and to background checks (Belgian rules on criminal-record

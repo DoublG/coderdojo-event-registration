@@ -1,4 +1,3 @@
-import re
 from datetime import timedelta
 from unittest.mock import patch
 
@@ -201,14 +200,13 @@ class AddChildViewTests(TempMediaMixin, TestCase):
         response = self.client.post(reverse("add_ninja"), {"consent": "on", "name": "Kid"})
         self.assertEqual(response.status_code, 302)
 
-    def test_the_consent_is_needed_and_recorded(self):
+    def test_the_consent_is_optional_and_recorded(self):
         from accounts.consent import CHILD_DATA_WORDING_VERSION
 
         self.client.force_login(self.guardian)
-        response = self.client.post(reverse("add_ninja"), {"name": "No Consent", "date_of_birth": _dob(10)})
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context["add_error"])
-        self.assertFalse(Ninja.objects.filter(name="No Consent").exists())
+        self.client.post(reverse("add_ninja"), {"name": "No Consent", "date_of_birth": _dob(10)})
+        guardianship = Guardianship.objects.get(ninja__name="No Consent")
+        self.assertIsNone(guardianship.consent_given_at)
 
         self.client.post(reverse("add_ninja"), {"consent": "on", "name": "Consented", "date_of_birth": _dob(10)})
         guardianship = Guardianship.objects.get(ninja__name="Consented")
@@ -218,8 +216,8 @@ class AddChildViewTests(TempMediaMixin, TestCase):
     def test_the_form_asks_for_the_consent(self):
         self.client.force_login(self.guardian)
         response = self.client.get(reverse("account_home"))
-        self.assertContains(response, 'name="consent" required')
-        self.assertContains(response, "I can download")
+        self.assertContains(response, 'name="consent">')
+        self.assertContains(response, "Use my children's details")
 
     def test_post_creates_participant(self):
         self.client.force_login(self.guardian)
@@ -489,11 +487,16 @@ class RegisterGuardianViewTests(TestCase):
     def test_sign_up_records_the_consent_for_the_children(self):
         from accounts.consent import CHILD_DATA_WORDING_VERSION
 
-        self.assertContains(self.client.get(reverse("register_guardian")), "I can download")
-        self.client.post(reverse("register_guardian"), self._valid_post_data())
+        self.assertContains(self.client.get(reverse("register_guardian")), "Use my children's details")
+        self.client.post(reverse("register_guardian"), self._valid_post_data(child_data_mail="on"))
         guardianship = Guardianship.objects.get(guardian__email="jane@example.com")
         self.assertIsNotNone(guardianship.consent_given_at)
         self.assertEqual(guardianship.consent_wording_version, CHILD_DATA_WORDING_VERSION)
+
+    def test_sign_up_without_the_consent_for_the_children(self):
+        response = self.client.post(reverse("register_guardian"), self._valid_post_data())
+        self.assertRedirects(response, reverse("account_home"))
+        self.assertIsNone(Guardianship.objects.get(guardian__email="jane@example.com").consent_given_at)
 
     def test_get_renders_one_empty_child_row(self):
         response = self.client.get(reverse("register_guardian"))
@@ -1238,7 +1241,9 @@ class SeedCredentialsTests(TestCase):
         dojo = make_dojo("Ghent", champion=make_champion(username="champ"), languages=["nl-be", "en-us"])
         add_member(dojo, kid_login, role=DojoMembership.YOUTH_MENTOR)
 
-        self.assertIn("Parent of 2 children: Emma (12) [own login], Lucas (9)", describe_account(parent))
+        # Emma's guardian consented (accounts.consent); Lucas was linked without.
+        Guardianship.objects.filter(guardian=parent, ninja__name="Emma").update(consent_given_at=timezone.now())
+        self.assertIn("Parent of 2 children: Emma (12) [own login], Lucas (9) [no consent]", describe_account(parent))
         kid = describe_account(kid_login)
         self.assertIn("Child login of Emma (12)", kid)
         self.assertIn("Youth mentor at Ghent (NL/EN)", kid)

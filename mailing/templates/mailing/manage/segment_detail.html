@@ -25,7 +25,7 @@
   <div>
     <div class="cd-card segment-card">
       <h2 class="heading-md">{% translate "Who's in it" %}</h2>
-      <p class="caption">{% blocktranslate %}Groups at the top level must all match. Inside a group, choose whether all or any of its rules must match. A "Parents of a child who…" group describes one child: all its rules are about the same child.{% endblocktranslate %}</p>
+      <p class="caption">{% blocktranslate %}Groups at the top level must all match. Inside a group, choose whether all or any of its rules must match. A "Parents of a child who…" group describes one child: all its rules are about the same child.{% endblocktranslate %} {% translate "It only counts children whose parent agreed to their details being used for mail." %}</p>
       {% for node in tree %}
         {% include "mailing/manage/_segment_group.html" %}
       {% empty %}

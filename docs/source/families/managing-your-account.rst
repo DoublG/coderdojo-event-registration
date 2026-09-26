@@ -21,9 +21,8 @@ From here you can:
 - **Add a child** — name, date of birth, an optional icon, an optional
   gender and optional allergies or notes. Ninjas are 7 to 17, so a date
   of birth outside that range isn't accepted. Gender is never shown
-  publicly; it lets us tell you about girls' sessions. As at sign-up, you
-  tick the box to confirm you're the child's parent or guardian and agree
-  to how we keep their details.
+  publicly. As at sign-up, an optional box lets us use the child's details
+  to choose which news you get (see :doc:`mail-preferences`).
 - **Edit a child's details** — click their name/header to edit it inline.
   A child who has turned 18 stays on your account; only a newly entered
   date of birth is checked.

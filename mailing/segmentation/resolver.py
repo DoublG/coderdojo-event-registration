@@ -47,7 +47,8 @@ class SegmentResolver:
     event A" AND "registered for event B") would otherwise have to match
     the same registration row. Rules in a ninja group are combined on the
     child, so they all describe the same child, and the group then selects
-    that child's guardians.
+    that child's guardians: only those who agreed to the child's details
+    being used for mail (accounts.consent).
 
     The result is always active adult accounts with an email address:
     campaigns never go to ninja accounts. A segment without any rule
@@ -73,8 +74,11 @@ class SegmentResolver:
     def _user_q(self, group):
         """A Q on User for any group (a ninja group is projected to guardians)."""
         if group["scope"] == NINJA:
+            # Only the guardians who agreed to this child's details choosing
+            # their mail (accounts.consent).
             ninjas = Ninja.objects.filter(self._ninja_q(group))
-            return Q(pk__in=Guardianship.objects.filter(ninja__in=ninjas).values("guardian_id"))
+            consented = Guardianship.objects.filter(ninja__in=ninjas, consent_given_at__isnull=False)
+            return Q(pk__in=consented.values("guardian_id"))
 
         parts = [self._rule_q(rule, User) for rule in group["rules"]]
         parts += [self._user_q(child) for child in group["children"]]

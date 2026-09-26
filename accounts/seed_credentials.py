@@ -168,7 +168,15 @@ def describe_account(user):
     else:
         children = list(Ninja.objects.of_guardian(user).select_related("account", "home_dojo"))
         if children:
-            described = [f"{c.name}{_age(c)}{' [own login]' if c.account_id and c.account.is_active else ''}" for c in children]
+            # accounts.consent: which children this guardian gave no consent for.
+            no_consent = set(
+                user.guardianships.filter(consent_given_at__isnull=True).values_list("ninja_id", flat=True)
+            )
+            described = [
+                f"{c.name}{_age(c)}{' [own login]' if c.account_id and c.account.is_active else ''}"
+                f"{' [no consent]' if c.id in no_consent else ''}"
+                for c in children
+            ]
             parts.append(f"Parent of {len(children)} child{'ren' if len(children) > 1 else ''}: {_names(described, 4)}")
         if not parts:
             parts.append("Plain adult account (no children, no roles)")

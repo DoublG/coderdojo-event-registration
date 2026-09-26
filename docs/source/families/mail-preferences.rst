@@ -9,10 +9,21 @@ What we use to choose relevant mails
 ------------------------------------
 
 We use what we know about your family to send you mails that are relevant
-to you: which sessions your children come to, their age and gender, your
-postcode and your language. That's how you hear about sessions at your
-dojo, a new dojo near you, or events like Coolest Projects and CoderDojo
-Girlz.
+to you: your postcode and your language and, for the children you agree
+to it for, which sessions they come to, their age and gender. That's how
+you hear about sessions at your dojo, a new dojo near you, or events like
+Coolest Projects and CoderDojo Girlz.
+
+Your children's details
+-----------------------
+
+Under **Your children's details** there's a switch per child: whether we
+may use that child's details (their age, gender, the sessions they come to
+and their belts) to choose which news about sessions and events you get.
+It's off unless you ticked it when you signed up or added the child, and
+you can change it at any time. It's only about mail: signing your child up
+for sessions, their belts and badges never depend on it. If both parents
+have an account, each chooses for themselves.
 
 Choosing which mails you get
 ----------------------------

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-26 11:38+0000\n"
+"POT-Creation-Date: 2026-09-26 12:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -26,7 +26,7 @@ msgstr "L'adresse e-mail de votre enfant est nécessaire pour un compte."
 msgid "Enter a valid email address."
 msgstr "Saisissez une adresse e-mail valide."
 
-#: accounts/child_accounts.py:55 accounts/forms.py:101
+#: accounts/child_accounts.py:55 accounts/forms.py:104
 msgid "An account already exists with this email."
 msgstr "Un compte existe déjà avec cette adresse e-mail."
 
@@ -50,7 +50,7 @@ msgstr "%(name)s n'a pas de compte."
 msgid "Email"
 msgstr "E-mail"
 
-#: accounts/forms.py:107 mailing/forms.py:51
+#: accounts/forms.py:110 mailing/forms.py:60
 msgid "That isn't a Belgian postcode we know."
 msgstr "Ce code postal belge nous est inconnu."
 
@@ -188,7 +188,7 @@ msgstr "Quitter la liste d'attente"
 #: accounts/templates/accounts/guardian_detail.html:102
 #: accounts/templates/accounts/partials/_child_header_edit.html:56
 #: accounts/templates/accounts/partials/_children_list.html:56
-#: accounts/templates/accounts/register_guardian.html:92
+#: accounts/templates/accounts/register_guardian.html:96
 #: applications/templates/applications/register_dojo.html:119
 #: applications/templates/applications/register_helper.html:106
 #: content/templates/content/manage/promotion_form.html:64
@@ -341,6 +341,14 @@ msgid ""
 msgstr ""
 "Seul le champion (la personne qui dirige le dojo) voit ceci, sur la liste "
 "d'une session à laquelle votre enfant est inscrit."
+
+#: accounts/templates/accounts/guardian_detail.html:99
+#: accounts/templates/accounts/register_guardian.html:83
+msgid ""
+"Optional; you can change it for each child on your Mail preferences page."
+msgstr ""
+"Facultatif ; vous pouvez le modifier pour chaque enfant sur votre page "
+"Préférences e-mail."
 
 #: accounts/templates/accounts/guardian_detail.html:103
 msgid "Add child"
@@ -500,21 +508,16 @@ msgstr "%(current)s sessions sur %(total)s"
 msgid "Locked"
 msgstr "Verrouillé"
 
-#: accounts/templates/accounts/partials/_child_data_consent.html:5
+#: accounts/templates/accounts/partials/_child_data_consent.html:7
 msgid ""
-"I'm the parent or legal guardian of the children I add, and I agree that "
-"CoderDojo Belgium keeps their details (name, date of birth, gender, and "
-"allergies or notes if I fill them in) to sign them up for sessions and to "
-"keep track of their sessions, belts and badges. Allergies and notes are only "
-"shown to the champion of a dojo they come to. I can download or delete this "
-"data at any time from my account page."
+"Use my children's details (their age, gender, the sessions they come to and "
+"their belts) to choose which news about sessions and events like CoderDojo "
+"Girlz and Coolest Projects I get."
 msgstr ""
-"Je suis le parent ou le tuteur légal des enfants que j'ajoute, et j'accepte "
-"que CoderDojo Belgium conserve leurs données (nom, date de naissance, "
-"genre, et allergies ou remarques si je les indique) pour les inscrire aux "
-"sessions et suivre leurs sessions, ceintures et badges. Les allergies et "
-"remarques ne sont montrées qu'au champion d'un dojo où ils vont. Je peux "
-"télécharger ou supprimer ces données à tout moment depuis ma page de compte."
+"Utiliser les données de mes enfants (leur âge, leur genre, les sessions "
+"auxquelles ils participent et leurs ceintures) pour choisir les nouvelles "
+"que je reçois sur les sessions et les événements comme CoderDojo Girlz et "
+"Coolest Projects."
 
 #: accounts/templates/accounts/partials/_child_header_display.html:14
 msgid "Click to edit"
@@ -560,7 +563,7 @@ msgstr "à %(dojo)s"
 #: dojos/templates/dojos/partials/_event_form_fields.html:18
 #: events/forms.py:167 events/forms.py:221 events/forms.py:248
 #: events/templates/events/manage/badge_list.html:18
-#: events/templates/events/manage/badge_list.html:44 mailing/forms.py:191
+#: events/templates/events/manage/badge_list.html:44 mailing/forms.py:207
 #: mailing/templates/mailing/manage/_campaign_fields.html:5
 #: mailing/templates/mailing/manage/_journey_fields.html:5
 #: mailing/templates/mailing/manage/_segment_fields.html:2
@@ -589,7 +592,7 @@ msgstr "Aucun pour l'instant"
 #: content/templates/content/manage/promotion_form.html:65
 #: content/templates/content/manage/sponsor_form.html:23
 #: events/templates/events/manage/badge_form.html:24
-#: mailing/templates/mailing/mail_preferences.html:63
+#: mailing/templates/mailing/mail_preferences.html:75
 #: mailing/templates/mailing/manage/campaign_detail.html:29
 #: mailing/templates/mailing/manage/journey_detail.html:28
 #: mailing/templates/mailing/manage/segment_detail.html:47
@@ -943,7 +946,7 @@ msgid "Postcode"
 msgstr "Code postal"
 
 #: accounts/templates/accounts/register_guardian.html:67
-#: mailing/templates/mailing/mail_preferences.html:55
+#: mailing/templates/mailing/mail_preferences.html:67
 msgid "So we can tell you about dojos and sessions near you."
 msgstr "Pour vous informer des dojos et sessions près de chez vous."
 
@@ -951,7 +954,11 @@ msgstr "Pour vous informer des dojos et sessions près de chez vous."
 msgid "Language for emails"
 msgstr "Langue des e-mails"
 
-#: accounts/templates/accounts/register_guardian.html:83
+#: accounts/templates/accounts/register_guardian.html:78
+msgid "I am the parent or legal guardian of the children listed below."
+msgstr "Je suis le parent ou le tuteur légal des enfants ci-dessous."
+
+#: accounts/templates/accounts/register_guardian.html:87
 msgid ""
 "Send me the CoderDojo Belgium newsletter and news about events like Coolest "
 "Projects and CoderDojo Girlz."
@@ -959,7 +966,7 @@ msgstr ""
 "Envoyez-moi la newsletter de CoderDojo Belgium et les nouvelles d'événements "
 "comme Coolest Projects et CoderDojo Girlz."
 
-#: accounts/templates/accounts/register_guardian.html:86
+#: accounts/templates/accounts/register_guardian.html:90
 msgid ""
 "You can change this, and which other mails you get, on your account's Mail "
 "preferences page."
@@ -967,7 +974,7 @@ msgstr ""
 "Vous pouvez modifier cela, ainsi que les autres e-mails que vous recevez, "
 "sur la page Préférences e-mail de votre compte."
 
-#: accounts/templates/accounts/register_guardian.html:93
+#: accounts/templates/accounts/register_guardian.html:97
 msgid "Create account"
 msgstr "Créer le compte"
 
@@ -986,14 +993,6 @@ msgstr "La date de naissance est obligatoire."
 #: accounts/views.py:253
 msgid "Add at least one child."
 msgstr "Ajoutez au moins un enfant."
-
-#: accounts/views.py:339
-msgid ""
-"Please confirm that you're the child's parent or guardian and agree to how "
-"we keep their data."
-msgstr ""
-"Confirmez que vous êtes le parent ou le tuteur de l'enfant et que vous "
-"acceptez la façon dont nous conservons ses données."
 
 #: accounts/views.py:483
 #, python-format
@@ -4459,14 +4458,14 @@ msgstr ""
 msgid "9000"
 msgstr "9000"
 
-#: mailing/forms.py:81
+#: mailing/forms.py:97
 #: mailing/templates/mailing/manage/_campaign_fields.html:23
 #: mailing/templates/mailing/manage/_journey_fields.html:23
 #: mailing/templates/mailing/manage/template_list.html:12
 msgid "Template"
 msgstr "Modèle"
 
-#: mailing/forms.py:97
+#: mailing/forms.py:113
 #, python-format
 msgid ""
 "Line %(number)s: write it as name: value (a name in lowercase letters and _)."
@@ -4475,82 +4474,82 @@ msgstr ""
 "minuscules et _)."
 
 # | msgid "Spot available"
-#: mailing/forms.py:108
+#: mailing/forms.py:124
 msgid "Template variables"
 msgstr "Variables du modèle"
 
-#: mailing/forms.py:110
+#: mailing/forms.py:126
 msgid "signup_url: https://coolestprojects.org"
 msgstr "signup_url: https://coolestprojects.org"
 
-#: mailing/forms.py:111
+#: mailing/forms.py:127
 msgid "One per line, as name: value. The template uses them as {{ name }}."
 msgstr ""
 "Une par ligne, sous la forme nom: valeur. Le modèle les utilise comme "
 "{{ name }}."
 
-#: mailing/forms.py:125
+#: mailing/forms.py:141
 msgid "Coolest Projects 2027"
 msgstr "Coolest Projects 2027"
 
 # | msgid "Aimed at"
-#: mailing/forms.py:135
+#: mailing/forms.py:151
 msgid "Send at"
 msgstr "Envoyer le"
 
 # | msgid "Leave empty to use the event's name"
-#: mailing/forms.py:136
+#: mailing/forms.py:152
 msgid "Leave empty to send as soon as it's launched."
 msgstr "Laisser vide pour envoyer dès le lancement."
 
-#: mailing/forms.py:141
+#: mailing/forms.py:157
 msgid "Pick a time in the future, or leave it empty to send when launched."
 msgstr ""
 "Choisissez un moment dans le futur, ou laissez vide pour envoyer au "
 "lancement."
 
-#: mailing/forms.py:150
+#: mailing/forms.py:166
 msgid "Families near Ghent"
 msgstr "Familles près de Gand"
 
-#: mailing/forms.py:152
+#: mailing/forms.py:168
 msgid "Who this is, in a sentence."
 msgstr "De qui il s'agit, en une phrase."
 
-#: mailing/forms.py:154
+#: mailing/forms.py:170
 msgid "Active (offered when creating a campaign)"
 msgstr "Actif (proposé lors de la création d'une campagne)"
 
-#: mailing/forms.py:191
+#: mailing/forms.py:207
 msgid "Lowercase, with _ between words, e.g. campaign_summer_camp."
 msgstr "En minuscules, avec _ entre les mots, p. ex. campaign_summer_camp."
 
-#: mailing/forms.py:192
+#: mailing/forms.py:208
 msgid "campaign_summer_camp"
 msgstr "campaign_summer_camp"
 
-#: mailing/forms.py:194
+#: mailing/forms.py:210
 #: mailing/templates/mailing/manage/_campaign_fields.html:10
 #: mailing/templates/mailing/manage/_journey_fields.html:10
 #: mailing/templates/mailing/manage/template_list.html:13
 msgid "Kind of mail"
 msgstr "Type d'e-mail"
 
-#: mailing/forms.py:197
+#: mailing/forms.py:213
 msgid "When it's used and which variables it takes."
 msgstr "Quand il est utilisé et quelles variables il reçoit."
 
-#: mailing/forms.py:207
+#: mailing/forms.py:223
 msgid "A template with this name already exists."
 msgstr "Un modèle avec ce nom existe déjà."
 
-#: mailing/forms.py:219
+#: mailing/forms.py:235
 msgid "Someone who got it doesn't get it again for this many days."
 msgstr ""
 "Une personne qui l'a reçu ne le reçoit plus pendant ce nombre de jours."
 
 # | msgid "Which mails you get"
-#: mailing/forms.py:221
+#: mailing/forms.py:237
 msgid "We miss you"
 msgstr "Vous nous manquez"
 
@@ -5037,7 +5036,15 @@ msgstr "%(label)s (toujours activé)"
 msgid "Always on"
 msgstr "Toujours activé"
 
-#: mailing/templates/mailing/mail_preferences.html:62
+#: mailing/templates/mailing/mail_preferences.html:48
+msgid "Your children's details"
+msgstr "Les données de vos enfants"
+
+#: mailing/templates/mailing/mail_preferences.html:49
+msgid "Per child; signing up for sessions never depends on it."
+msgstr "Par enfant ; l'inscription aux sessions n'en dépend jamais."
+
+#: mailing/templates/mailing/mail_preferences.html:74
 msgid "Back to your account"
 msgstr "Retour à votre compte"
 
@@ -5442,6 +5449,14 @@ msgstr ""
 "groupe « Parents d'un enfant qui… » décrit un seul enfant : toutes ses "
 "règles portent sur le même enfant."
 
+#: mailing/templates/mailing/manage/segment_detail.html:28
+msgid ""
+"It only counts children whose parent agreed to their details being used for "
+"mail."
+msgstr ""
+"Il ne compte que les enfants dont un parent a accepté que leurs données "
+"servent aux e-mails."
+
 #: mailing/templates/mailing/manage/segment_detail.html:32
 msgid "No groups yet. Start with one:"
 msgstr "Pas encore de groupes. Commencez par un :"
@@ -5627,15 +5642,17 @@ msgstr "Pas encore de modèles."
 #: mailing/templates/mailing/partials/_privacy_explanation.html:8
 msgid ""
 "We use what we know about your family to send you mails that are relevant to "
-"you: which sessions your children come to, their age and gender, your "
-"postcode and your language. That's how you hear about sessions at your dojo, "
-"a new dojo near you, or events like Coolest Projects and CoderDojo Girlz."
+"you: your postcode and your language and, for the children you agree to it "
+"for, which sessions they come to, their age and gender. That's how you hear "
+"about sessions at your dojo, a new dojo near you, or events like Coolest "
+"Projects and CoderDojo Girlz."
 msgstr ""
-"Nous utilisons ce que nous savons de votre famille pour vous envoyer des e-"
-"mails pertinents : les sessions auxquelles vos enfants participent, leur âge "
-"et leur genre, votre code postal et votre langue. C'est ainsi que vous "
-"entendez parler des sessions de votre dojo, d'un nouveau dojo près de chez "
-"vous ou d'événements comme Coolest Projects et CoderDojo Girlz."
+"Nous utilisons ce que nous savons de votre famille pour vous envoyer des "
+"e-mails pertinents : votre code postal et votre langue et, pour les enfants "
+"pour lesquels vous l'acceptez, les sessions auxquelles ils participent, "
+"leur âge et leur genre. C'est ainsi que vous entendez parler des sessions "
+"de votre dojo, d'un nouveau dojo près de chez vous ou d'événements comme "
+"Coolest Projects et CoderDojo Girlz."
 
 #: mailing/templates/mailing/partials/_privacy_explanation.html:11
 msgid ""
@@ -5698,7 +5715,7 @@ msgstr ""
 "Vous pouvez modifier cela à tout moment sur votre page <a "
 "href=\"%(prefs_url)s\">Préférences e-mail</a>."
 
-#: mailing/views.py:34
+#: mailing/views.py:38
 msgid "Your mail preferences are saved."
 msgstr "Vos préférences e-mail sont enregistrées."
 
@@ -5780,8 +5797,8 @@ msgid ""
 "dojo's Team page)."
 msgstr ""
 "Ce compte est champion de %(dojos)s. Un dojo ne peut pas rester sans "
-"champion : le rôle doit d'abord passer à un des mentors du dojo (sur la "
-"page Équipe du dojo)."
+"champion : le rôle doit d'abord passer à un des mentors du dojo (sur la page "
+"Équipe du dojo)."
 
 #: privacy/deletion.py:69
 msgid "This account has an organisation role. It has to be taken away first."
@@ -5856,8 +5873,8 @@ msgid ""
 "Your login, your contact details, your mail preferences, your applications "
 "and your background-check details."
 msgstr ""
-"Votre connexion, vos coordonnées, vos préférences d'e-mail, vos "
-"candidatures et les données de votre extrait de casier judiciaire."
+"Votre connexion, vos coordonnées, vos préférences d'e-mail, vos candidatures "
+"et les données de votre extrait de casier judiciaire."
 
 #: privacy/templates/privacy/delete_account.html:35
 msgid "Your login, your contact details and your mail preferences."
@@ -5902,8 +5919,7 @@ msgstr "Ces enfants restent, avec leur autre parent ou tuteur :"
 #, python-format
 msgid "Want a copy first? <a href=\"%(download_url)s\">Download my data</a>."
 msgstr ""
-"Une copie d'abord ? <a href=\"%(download_url)s\">Télécharger mes "
-"données</a>."
+"Une copie d'abord ? <a href=\"%(download_url)s\">Télécharger mes données</a>."
 
 #: privacy/templates/privacy/delete_account.html:57
 msgid "Your password, to confirm"
@@ -6087,5 +6103,25 @@ msgstr "Tapez le nom d'utilisateur du compte pour confirmer."
 msgid "The account has been deleted."
 msgstr "Le compte a été supprimé."
 
-#~ msgid "I am the parent or legal guardian of the children listed below."
-#~ msgstr "Je suis le parent ou le tuteur légal des enfants ci-dessous."
+#~ msgid ""
+#~ "I'm the parent or legal guardian of the children I add, and I agree that "
+#~ "CoderDojo Belgium keeps their details (name, date of birth, gender, and "
+#~ "allergies or notes if I fill them in) to sign them up for sessions and to "
+#~ "keep track of their sessions, belts and badges. Allergies and notes are "
+#~ "only shown to the champion of a dojo they come to. I can download or "
+#~ "delete this data at any time from my account page."
+#~ msgstr ""
+#~ "Je suis le parent ou le tuteur légal des enfants que j'ajoute, et "
+#~ "j'accepte que CoderDojo Belgium conserve leurs données (nom, date de "
+#~ "naissance, genre, et allergies ou remarques si je les indique) pour les "
+#~ "inscrire aux sessions et suivre leurs sessions, ceintures et badges. Les "
+#~ "allergies et remarques ne sont montrées qu'au champion d'un dojo où ils "
+#~ "vont. Je peux télécharger ou supprimer ces données à tout moment depuis "
+#~ "ma page de compte."
+
+#~ msgid ""
+#~ "Please confirm that you're the child's parent or guardian and agree to "
+#~ "how we keep their data."
+#~ msgstr ""
+#~ "Confirmez que vous êtes le parent ou le tuteur de l'enfant et que vous "
+#~ "acceptez la façon dont nous conservons ses données."

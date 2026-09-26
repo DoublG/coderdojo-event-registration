@@ -65,7 +65,7 @@ PRIORITY = {
 
 # Which version of the privacy explanation (DATA_MODEL.md §11, "Sending
 # pipeline" step 5) a consent was given under; recorded on ConsentEvent.
-PRIVACY_WORDING_VERSION = "2026-09-25"
+PRIVACY_WORDING_VERSION = "2026-09-26"
 
 
 def categories_for(user):

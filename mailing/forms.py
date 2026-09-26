@@ -44,6 +44,15 @@ class MailPreferencesForm(forms.Form):
                 )
         if user.is_ninja:
             del self.fields["postal_code"]
+        # Per child: may their details choose which mails we send (accounts.consent)?
+        self.guardianships = [] if user.is_ninja else list(
+            user.guardianships.select_related("ninja").order_by("ninja__name")
+        )
+        for guardianship in self.guardianships:
+            self.fields[f"child_{guardianship.ninja_id}"] = forms.BooleanField(
+                required=False, label=guardianship.ninja.name,
+                initial=guardianship.consent_given_at is not None,
+            )
 
     def clean_postal_code(self):
         postal_code = self.cleaned_data["postal_code"].strip()
@@ -53,6 +62,13 @@ class MailPreferencesForm(forms.Form):
 
     def category_fields(self):
         return [self[name] for name in self.fields if name.startswith("category_")]
+
+    def child_fields(self):
+        return [self[name] for name in self.fields if name.startswith("child_")]
+
+    def child_consents(self):
+        """(guardianship, given) for every child, from the cleaned data."""
+        return [(g, self.cleaned_data[f"child_{g.ninja_id}"]) for g in self.guardianships]
 
     def always_on(self):
         return [(category.label, DESCRIPTIONS[category]) for category in self.categories if not CAN_OPT_OUT[category]]

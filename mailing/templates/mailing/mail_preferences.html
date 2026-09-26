@@ -43,6 +43,18 @@
           {% endfor %}
         </div>
 
+        {% if form.child_fields %}
+          <div class="cd-form__group">
+            <h2 class="cd-form__group-title heading-md">{% translate "Your children's details" %}</h2>
+            <p class="caption">{% include "accounts/partials/_child_data_consent.html" %} {% translate "Per child; signing up for sessions never depends on it." %}</p>
+            {% for field in form.child_fields %}
+              <label class="mail-category" for="{{ field.id_for_label }}">
+                {{ field }}
+                <span><p class="body">{{ field.label }}</p></span>
+              </label>
+            {% endfor %}
+          </div>
+        {% endif %}
         <div class="cd-form__row">
           <div class="cd-form__field">
             <label class="cd-form__label label" for="{{ form.preferred_language.id_for_label }}">{{ form.preferred_language.label }}</label>

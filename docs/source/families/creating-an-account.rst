@@ -24,10 +24,10 @@ To create an account:
    publicly; it lets us tell you about girls' sessions. Use
    **Add another child** if you have more than one.
 #. Tick the box to confirm that you're the children's parent or legal
-   guardian and that you agree to how we keep their details: to sign them
-   up for sessions and keep track of their sessions, belts and badges,
-   with allergies and notes shown only to the champion. You can download
-   or delete this data at any time from your account page.
+   guardian. A second box is optional: whether we may use your children's
+   details (their age, gender, sessions and belts) to choose which news
+   about sessions and events you get. Signing them up never depends on it,
+   and you can change it per child later (see :doc:`mail-preferences`).
 #. If you'd like the CoderDojo Belgium newsletter and news about events
    like Coolest Projects and CoderDojo Girlz, tick the newsletter box. It's
    unticked unless you choose it; you can change it later (see
@@ -41,8 +41,7 @@ family's page, signed in.
 .. note::
 
    Only a parent or legal guardian should create the family account and
-   add children to it — you confirm this with the box above, and again
-   whenever you add a child later.
+   add children to it — you'll be asked to confirm this when registering.
    The email you register with can't already be in use by another account.
 
 Once your account exists, see :doc:`../families/finding-a-dojo` to find a

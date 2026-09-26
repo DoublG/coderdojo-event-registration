@@ -217,12 +217,12 @@ def _clean_gender(value):
     return value if value in dict(Ninja.GENDER_CHOICES) else Ninja.UNSPECIFIED
 
 
-def _create_ninjas(parent, child_rows):
+def _create_ninjas(parent, child_rows, consent=False):
     for row in child_rows:
         ninja = Ninja.objects.create(
             name=row["name"], date_of_birth=row["date_of_birth"], allergies_notes=row["notes"], gender=row["gender"],
         )
-        Guardianship.objects.create(guardian=parent, ninja=ninja, **consent_fields())
+        Guardianship.objects.create(guardian=parent, ninja=ninja, **consent_fields(consent))
 
 
 def _site_language(request):
@@ -267,7 +267,7 @@ def register_guardian(request):
             # A child never exists without a guardian: all or nothing.
             with transaction.atomic():
                 parent.save()
-                _create_ninjas(parent, child_rows)
+                _create_ninjas(parent, child_rows, consent=form.cleaned_data["child_data_mail"])
                 if form.cleaned_data["newsletter"]:
                     set_preference(parent, MailCategory.NEWSLETTER, True, ConsentEvent.SIGNUP)
 
@@ -335,15 +335,15 @@ def add_ninja(request):
         name = request.POST.get("name", "").strip()
         date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
         add_error = ninja_birth_date_error(date_of_birth)
-        if not add_error and not request.POST.get("consent"):
-            add_error = _("Please confirm that you're the child's parent or guardian and agree to how we keep their data.")
         if name and not add_error:
             ninja = Ninja(name=name, date_of_birth=date_of_birth, gender=_clean_gender(request.POST.get("gender")),
                           allergies_notes=request.POST.get("allergies_notes", "").strip())
             _set_icon(ninja, request.POST.get("icon", ""))
             with transaction.atomic():  # a child never exists without a guardian
                 ninja.save()
-                Guardianship.objects.create(guardian=guardian, ninja=ninja, **consent_fields())
+                Guardianship.objects.create(
+                    guardian=guardian, ninja=ninja, **consent_fields(bool(request.POST.get("consent")))
+                )
     children = _children_context(guardian)
     return render(request, "accounts/partials/_children_list.html", {
         "guardian": guardian, "children": children, "add_error": add_error,
