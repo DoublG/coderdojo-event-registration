@@ -5,6 +5,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from content.models import Announcement
+from core.audit import without_audit_log
 from dojos.models import Dojo
 
 # Short, dated notes a dojo's team posts on its public page ("From this
@@ -31,6 +32,7 @@ ANNOUNCEMENTS = [
 class Command(BaseCommand):
     help = "Seed a few random updates ('From this dojo') for dojos that have none yet."
 
+    @without_audit_log
     def handle(self, *args, **options):
         today = timezone.localdate()
         created = 0

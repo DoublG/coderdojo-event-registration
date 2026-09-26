@@ -8,6 +8,7 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
@@ -262,10 +263,12 @@ def register_guardian(request):
                 preferred_language=form.cleaned_data["preferred_language"] or _site_language(request),
             )
             parent.set_password(form.cleaned_data["password"])
-            parent.save()
-            _create_ninjas(parent, child_rows)
-            if form.cleaned_data["newsletter"]:
-                set_preference(parent, MailCategory.NEWSLETTER, True, ConsentEvent.SIGNUP)
+            # A child never exists without a guardian: all or nothing.
+            with transaction.atomic():
+                parent.save()
+                _create_ninjas(parent, child_rows)
+                if form.cleaned_data["newsletter"]:
+                    set_preference(parent, MailCategory.NEWSLETTER, True, ConsentEvent.SIGNUP)
 
             auth_login(request, parent, backend="accounts.backends.EmailOrUsernameBackend")
             return redirect("account_home")
@@ -332,10 +335,12 @@ def add_ninja(request):
         date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
         add_error = ninja_birth_date_error(date_of_birth)
         if name and not add_error:
-            ninja = Ninja(name=name, date_of_birth=date_of_birth, gender=_clean_gender(request.POST.get("gender")))
+            ninja = Ninja(name=name, date_of_birth=date_of_birth, gender=_clean_gender(request.POST.get("gender")),
+                          allergies_notes=request.POST.get("allergies_notes", "").strip())
             _set_icon(ninja, request.POST.get("icon", ""))
-            ninja.save()
-            Guardianship.objects.create(guardian=guardian, ninja=ninja)
+            with transaction.atomic():  # a child never exists without a guardian
+                ninja.save()
+                Guardianship.objects.create(guardian=guardian, ninja=ninja)
     children = _children_context(guardian)
     return render(request, "accounts/partials/_children_list.html", {
         "guardian": guardian, "children": children, "add_error": add_error,
@@ -425,6 +430,8 @@ def edit_ninja(request, ninja_id):
         child.date_of_birth = date_of_birth
         if "gender" in request.POST:
             child.gender = _clean_gender(request.POST["gender"])
+        if "allergies_notes" in request.POST:
+            child.allergies_notes = request.POST["allergies_notes"].strip()
         # Like gender: a form without the field keeps what's stored, and an
         # unknown id (not a public dojo) changes nothing.
         if "home_dojo" in request.POST:

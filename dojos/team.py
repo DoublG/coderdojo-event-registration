@@ -166,6 +166,19 @@ def remove_member(membership):
     _make_dormant(membership)
 
 
+def end_all_memberships(user):
+    """For erasing an account (privacy.erasure): every membership of `user`
+    ends, the champion's too. Pending requests go (as a declined one would),
+    the rest become dormant, kept for past sessions' teams. Only the
+    retention job and an erasure call this; a champion of an active dojo is
+    never erased by the job (privacy.retention)."""
+    for membership in DojoMembership.objects.filter(user=user):
+        if membership.status == DojoMembership.REQUESTED and not membership.joined_at:
+            membership.delete()
+        elif membership.status != DojoMembership.DORMANT:
+            _make_dormant(membership)
+
+
 def leave(membership):
     if membership.role == DojoMembership.CHAMPION:
         raise TeamError(_("As champion you can't leave; transfer the champion role to a mentor first."))

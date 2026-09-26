@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.translation import gettext as _
 
 from accounts.models import User
+from core.audit import log_access
 
 from . import services
 from .forms import BackgroundCheckUploadForm, ChampionApplicationForm, MentorApplicationForm
@@ -89,6 +90,7 @@ def download_background_check(request, user_id):
     account = get_object_or_404(User, pk=user_id)
     if not account.background_check_document:
         raise Http404
+    log_access(account)  # a criminal-record extract (GDPR art. 10): recorded in the audit log
     return FileResponse(
         account.background_check_document.open("rb"),
         as_attachment=True,

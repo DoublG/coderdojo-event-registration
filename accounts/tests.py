@@ -1231,3 +1231,56 @@ class SeedCredentialsTests(TestCase):
         seeded.refresh_from_db()
         self.assertTrue(seeded.check_password(rows["lost"]["password"]))
         self.assertIn("Plain adult account", rows["lost"]["description"])
+
+
+class ChildHealthNotesTests(TestCase):
+    """The family keeps a child's allergies or notes up to date on the
+    account pages (add a child, edit a child); only the dojo's champion sees
+    them (dojos.access.VIEW_HEALTH_NOTES)."""
+
+    def setUp(self):
+        from .models import Guardianship
+
+        self.parent = User.objects.create(username="parent", email="parent@example.com")
+        self.child = Ninja.objects.create(name="Emma", allergies_notes="Peanut allergy")
+        Guardianship.objects.create(guardian=self.parent, ninja=self.child)
+        self.client.force_login(self.parent)
+        self.edit_url = reverse("edit_ninja", kwargs={"ninja_id": self.child.id})
+
+    def test_add_a_child_with_notes(self):
+        self.client.post(reverse("add_ninja"), {"name": "Lou", "allergies_notes": "  Gluten-free  "},
+                         HTTP_HX_REQUEST="true")
+        self.assertEqual(Ninja.objects.get(name="Lou").allergies_notes, "Gluten-free")
+
+    def test_edit_form_shows_and_saves_the_notes(self):
+        response = self.client.get(self.edit_url, HTTP_HX_REQUEST="true")
+        self.assertContains(response, 'name="allergies_notes"')
+        self.assertContains(response, "Peanut allergy")
+        self.assertContains(response, "Only the champion")
+        response = self.client.post(self.edit_url, {"name": "Emma", "allergies_notes": "Asthma inhaler"},
+                                    HTTP_HX_REQUEST="true")
+        self.assertContains(response, "Asthma inhaler")
+        self.child.refresh_from_db()
+        self.assertEqual(self.child.allergies_notes, "Asthma inhaler")
+
+    def test_clearing_the_notes(self):
+        self.client.post(self.edit_url, {"name": "Emma", "allergies_notes": ""}, HTTP_HX_REQUEST="true")
+        self.child.refresh_from_db()
+        self.assertEqual(self.child.allergies_notes, "")
+
+    def test_a_form_without_the_field_keeps_them(self):
+        self.client.post(self.edit_url, {"name": "Emma"}, HTTP_HX_REQUEST="true")
+        self.child.refresh_from_db()
+        self.assertEqual(self.child.allergies_notes, "Peanut allergy")
+
+    def test_the_child_page_shows_them_to_the_family(self):
+        response = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
+        self.assertContains(response, "Peanut allergy")
+
+    def test_another_family_cannot_edit_them(self):
+        other = User.objects.create(username="other", email="other@example.com")
+        self.client.force_login(other)
+        response = self.client.post(self.edit_url, {"name": "Emma", "allergies_notes": "x"}, HTTP_HX_REQUEST="true")
+        self.assertEqual(response.status_code, 404)
+        self.child.refresh_from_db()
+        self.assertEqual(self.child.allergies_notes, "Peanut allergy")

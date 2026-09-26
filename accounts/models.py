@@ -197,7 +197,11 @@ class Ninja(models.Model):
         "dojos.Dojo", on_delete=models.SET_NULL, null=True, blank=True, related_name="home_ninjas"
     )
     member_since = models.DateField(null=True, blank=True)
-    allergies_notes = models.TextField(blank=True, default="", help_text="Allergies or other notes for mentors.")
+    allergies_notes = models.TextField(
+        blank=True, default="",
+        help_text="Allergies or other notes from the family (health data). Shown to the champion only, on the "
+                  "attendance list of a session the child has a confirmed place at.",
+    )
     photo = models.ImageField(upload_to="participants/", null=True, blank=True)
 
     objects = NinjaQuerySet.as_manager()

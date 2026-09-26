@@ -21,6 +21,7 @@ from django.db.models import F, FloatField
 from django.db.models.expressions import ExpressionWrapper
 
 from content.models import FAQ, Announcement, OrganisationTeamMember, Promotion, Testimonial
+from core.audit import without_audit_log
 from core.seed_translations import EN, FR, GIRLZ_PREFIX, NL, translate, translate_session_description
 from dojos.languages import region_languages
 from dojos.models import Dojo
@@ -75,6 +76,7 @@ def localize(obj, fields, translator=None):
 class Command(BaseCommand):
     help = "Give the seeded dojos languages by region and the seeded texts their Dutch and French versions (rerun-safe)."
 
+    @without_audit_log
     def handle(self, *args, **options):
         counts = {}
 

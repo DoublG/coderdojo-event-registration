@@ -2596,17 +2596,784 @@ For event creation control API endpoints need to be developed, allow a dojo to p
 
 **Decide `external access`** Are we going to allow to create oauth2.0 client based technical users so a Dojo is allowed to plug in their own technologies plug into the role concept.
 
-## 14. Audit log (later)
+## 14. Audit log (built)
 
-**Not built yet.** decide if we want to keep a complete audit log with change history by using https://github.com/jazzband/django-auditlog or https://django-reversion.readthedocs.io/en/latest/ or https://django-simple-history.readthedocs.io/en/stable/
+A record of who changed what, and who viewed the most sensitive data (a
+child's health notes, criminal-record extracts), kept in the database next
+to the data and shown in the Django admin. §16 phase 6 depends on it.
+
+**All phases are built;** phase 5's retention and erasure of entries came
+with §16 phases 4 and 5 (`privacy.retention`, `privacy.erasure`). What
+changed from the plan below while building it (the plan's text is kept as
+written, so this list wins where they differ):
+
+- **Checked on Django 6.1 and ASGI:** its 17 migrations, the whole test
+  suite, and a change through nginx + Daphne recorded with its account and
+  no address. Still to check at the first deploy: the same through
+  gunicorn + uvicorn on Level27.
+- **The recorded models are `core.audit.RECORDED`, not a setting.**
+  auditlog 3.4.1 diffs a new row over `_meta.get_fields()`, reverse
+  relations included, so every create listed junk like
+  `applications.Application.None`. `core.audit.register_models()` (from
+  `CoreConfig.ready`) registers each model with an explicit
+  `include_fields` of its own columns, which removes it. `auth.Group`
+  (the roles' permissions) was added to the list.
+- **`AUDITLOG_STORE_JSON_CHANGES = False`**: with JSON, file fields are
+  compared as objects, and an empty photo (`None` in memory, `''` in the
+  database) showed up as a change on every save. Changes are stored as
+  text.
+- **`AUDITLOG_MASK_CALLABLE = "core.audit.mask"`**: the default mask keeps
+  half the value ("\*\*\*nuts"); ours hides it all.
+- **`core.audit.AuditlogMiddleware`** (in `MIDDLEWARE`, replacing
+  auditlog's) drops the port too: `AUDITLOG_DISABLE_REMOTE_ADDR` doesn't
+  cover `X-Forwarded-Port`, and the test showed it stored.
+- **Health-note views are recorded by a template tag**, `{% audit_view
+  ninja %}` (`core/templatetags/audit.py`), inside the block of
+  `_attendance_row.html` that prints the notes. The row is rendered by
+  eight views, whole list or one row, so the tag records exactly what was
+  shown. The other views go through `core.audit.log_access(obj)`:
+  `download_background_check`, `manage_privacy_export` (replacing the
+  logger line of §16 phase 3), and the Django admin change page of
+  `User`, `Ninja` and `BackgroundCheck` (`LogAccessAdminMixin`, GET only).
+- **The per-row history** (`core.audit.AuditHistoryAdminMixin` on the
+  `User`, `Ninja`, `Dojo` and `Event` admins: an "Audit log" column)
+  also requires `auditlog.view_logentry`: auditlog's own view only checks
+  the view permission of the row's model, which the board has for dojos
+  and sessions. The column is hidden from anyone without it.
+- The admin's section is auditlog's own ("Audit log" → "Log entries"),
+  apart from Django's "Administration" → "Log entries"; no renaming.
+- The seeders are wrapped in `core.audit.without_audit_log` (16
+  `seed_*` commands and `describe_seed_accounts`).
+
+### Choosing a package
+
+| Package | Records changes | Records views | How it stores them |
+|---|---|---|---|
+| **[django-auditlog](https://github.com/jazzband/django-auditlog) 3.4.1** | yes, as a diff per save/delete, plus many-to-many changes | **yes**: a `LogEntry.Action.ACCESS` action, written when the `auditlog.signals.accessed` signal is sent for a registered model | one `auditlog_logentry` table |
+| django-simple-history 3.13.0 | yes, a full copy of the row per save | no | a history table per model: every personal field copied, so erasure has to scrub each one |
+| django-reversion | only what's saved inside a revision block | no | versions for restoring, not an audit trail |
+| django-easy-audit 1.3.9 | yes | only as URLs (every request, via middleware), not which records a page showed | its own tables |
+| Django itself | only the admin's add/change/delete (`admin.LogEntry`) | no | — |
+
+**Decision:** django-auditlog. One table, diffs instead of copies (less
+personal data to classify and erase), and the only one that records a view
+of a specific record. Its classifiers stop at Django 5.2 (it requires
+`Django>=4.2`, no upper limit), so phase 1 checks it on our 6.1.
+
+What we checked in its 3.4.1 source, and what the plan has to work around:
+
+- **Only `save()`/`delete()` and many-to-many changes are recorded**
+  (`post_save`/`pre_save`/`post_delete`/`m2m_changed`), never
+  `QuerySet.update()`, `bulk_create()` or raw SQL. Of our code that
+  changes data worth recording, only *Mark all present*
+  (`dojos/views.py`, `confirmed.update(attended=True)`) does that. The
+  mail queue, campaign status and the nightly engagement rebuild use
+  `update()`/`bulk_create()` too, but those models aren't recorded (below).
+- **Signals are per class:** a save through the *Background checks* admin
+  (the `applications.BackgroundCheck` proxy over `User`) sends `post_save`
+  with the proxy as sender, so the proxy is registered as well as `User`.
+- **Views are only recorded where the `accessed` signal is sent.** The
+  package sends it only from `auditlog.mixins.LogAccessMixin`, for
+  class-based `DetailView`s. Our views are functions, and it has nothing
+  for admin pages, so we send it ourselves (phase 3).
+- **The acting user** comes from `auditlog.middleware.AuditlogMiddleware`
+  (a contextvar, plus the address from `X-Forwarded-For`). The middleware
+  is sync-only, so under Daphne/uvicorn Django runs it through
+  `sync_to_async` with our sync views: checked in phase 1. Outside a
+  request (Celery, management commands) the actor is empty unless the
+  code wraps the work in `auditlog.context.set_actor(user)`.
+  `auditlog.context.disable_auditlog()` turns recording off for a block.
+- **Its admin is read-only** (`has_add_permission` and
+  `has_change_permission` return `False`, delete only as a cascade). That
+  goes against our rule that the admin always stays fully usable
+  (`core.tests.AdminStaysFullyUsableTests`); **decided: the audit log is
+  the exception** (phase 4).
+- **Retention:** `manage.py auditlogflush --before-date YYYY-MM-DD`
+  deletes older entries (or `--truncate` for everything).
+- **Settings we'd use:** `AUDITLOG_INCLUDE_TRACKING_MODELS` (which models,
+  with per-model `exclude_fields`/`mask_fields`/`m2m_fields`),
+  `AUDITLOG_EXCLUDE_TRACKING_FIELDS`, `AUDITLOG_MASK_TRACKING_FIELDS`,
+  `AUDITLOG_DISABLE_ON_RAW_SAVE`, `AUDITLOG_DISABLE_REMOTE_ADDR`,
+  `AUDITLOG_STORE_JSON_CHANGES`, `AUDITLOG_USE_FK_STRING_REPRESENTATION`.
+
+### Phases
+
+1. **Check it works here** (a spike, nothing kept if it fails):
+   `django-auditlog==3.4.1` in `requirements.txt` (the site imports it at
+   runtime; its one dependency, `python-dateutil`, is already pinned
+   there), `"auditlog"` in `INSTALLED_APPS`, `AuditlogMiddleware` right
+   after `AuthenticationMiddleware`, `migrate` (17 migrations of its own).
+   Then: the whole test suite, a save through `runserver` (Daphne, ASGI)
+   with the actor recorded, and the same through production's gunicorn +
+   uvicorn worker (`scripts/deploy.sh --check` first; the deploy
+   runs `migrate`).
+2. **Record changes.**
+   - Settings (one place, `website/settings.py`):
+     `AUDITLOG_STORE_JSON_CHANGES = True`, `AUDITLOG_DISABLE_ON_RAW_SAVE =
+     True` (fixtures), `AUDITLOG_USE_FK_STRING_REPRESENTATION = False`
+     (links recorded as ids, not names: less personal data in the log),
+     `AUDITLOG_MASK_TRACKING_FIELDS = ("password",
+     "background_check_token")`, `AUDITLOG_EXCLUDE_TRACKING_FIELDS =
+     ("last_login",)` (every login would be a change),
+     `AUDITLOG_DISABLE_REMOTE_ADDR = True` (decided: no IP addresses,
+     see open points). That setting doesn't cover `remote_port`, which
+     the middleware reads from `X-Forwarded-Port`: our nginx doesn't send
+     it, but Level27's proxy might, so a test checks that an entry made
+     through a request has both `remote_addr` and `remote_port` empty (if
+     not, a small subclass of `AuditlogMiddleware` drops the port).
+   - **Recorded** (`AUDITLOG_INCLUDE_TRACKING_MODELS`), with options:
+     accounts (`User` and the `BackgroundCheck` proxy with
+     `m2m_fields={"groups"}`, `Ninja` with `mask_fields=["allergies_notes"]`
+     so the log says it changed, never what it says, `Guardianship`,
+     `OrganisationRole`), `Dojo`, `DojoMembership`, `Event` (excluding
+     `published_at` and `announced_at`, set by the site itself;
+     `m2m_fields={"team"}`), `Registration`, `TeamAttendance`,
+     `NinjaBelt`, `NinjaBadge`, `Badge`, `Belt`, `Application`,
+     `BackgroundCheckHistory`, the mail consent and blocks
+     (`MailPreference`, `ConsentEvent`, `EmailSuppression`), the
+     organisation's dashboard content (`Campaign`, `Journey`, `Segment`,
+     `SegmentGroup`, `SegmentRule`, `EmailTemplate`, `Promotion`,
+     `Sponsor`, `OrganisationTeamMember`, `Testimonial`, `FAQ`,
+     `Announcement`), pathways.
+   - **Not recorded**, each for its reason: what the site writes itself
+     in bulk (`EmailMessage`, `BounceRecord`, `ProcessedImapMessage`,
+     `JourneyDelivery`, `NinjaEngagement`, `NinjaEngagementChange`,
+     `Notification`, `RegistrationCancellation` (itself a log)),
+     sessions, Celery's tables, geo reference data, Django's own
+     `admin.LogEntry`, and the audit log itself.
+   - **A test that every model has a decision**, like
+     `privacy.tests.EveryFieldIsClassifiedTests`: each installed model is
+     either recorded or in a `NOT_RECORDED` list with its reason, so a new
+     model can't be forgotten.
+   - *Mark all present* saves each registration (or writes its entries
+     with `LogEntry.objects.log_create`) instead of `QuerySet.update()`.
+   - Seeders and `start.sh`'s reseeding run inside `disable_auditlog()`
+     (seed data isn't history). Celery jobs that change recorded rows run
+     with an empty actor, which the admin shows as "system".
+3. **Record views of the sensitive data**, through one helper
+   (`core/audit.py`: `log_access(obj)` sends `accessed`, so the entry
+   carries the request's actor):
+   - the attendance list, for every child whose `allergies_notes` it shows
+     (`VIEW_HEALTH_NOTES`, champion only); one entry per child per page
+     view;
+   - `download_background_check` (a reviewer opening an extract);
+   - the organisation's data export (`privacy.views.manage_privacy_export`),
+     on the exported account; this closes the gap noted in §16 phase 3;
+   - the Django admin's change page of `Ninja`, `User` and
+     `BackgroundCheck` (a small `LogAccessAdminMixin` whose `change_view`
+     calls the helper on GET).
+   Every other page view stays unrecorded: this is about special-category
+   data, not traffic.
+4. **The admin.** The log is shown **only in the Django admin**
+   (`/admin/`, decided): no page on the organisation dashboard
+   (`/manage/`) or in a dojo's admin area, and nothing in the family
+   pages. It's a technical tool for investigating, like the mail log and
+   bounces (`CLAUDE.md`: the Django admin is for technical interventions).
+   - **Read-only, the one exception to "the admin always stays fully
+     usable"** (decided): auditlog's own `LogEntryAdmin` stays as it is
+     (no add, no change, no delete from its pages), because a log anyone
+     with admin access can edit proves nothing. It gets three entries in
+     `AdminStaysFullyUsableTests.EXCEPTIONS` (`auditlog.LogEntry` add,
+     change, delete) with that reason. Entries are only ever removed
+     through code: the retention job and erasure (phase 5), or
+     `manage.py auditlogflush` on the server as the emergency tool.
+   - A subclass of its admin (same permissions) only to name it "Audit
+     log", so it isn't confused with Django's own admin history ("Log
+     entries").
+   - `auditlog.mixins.AuditlogHistoryAdminMixin` on the `User`, `Ninja`,
+     `Dojo` and `Event` admins: an "Audit log" link per object.
+   - **Who sees it (decided): the organisation's admin role.** The
+     `auditlog.view_logentry` permission goes to the admin role's
+     permission group only (`accounts/organisation.py`), never the
+     board's; superusers see it anyway. A test checks that an admin-role
+     account can open the audit log in the Django admin and a board
+     account gets a 403.
+5. **Privacy and retention** (§16):
+   - Classify `auditlog.LogEntry` in `privacy/privacy.py`: `object_repr`,
+     `changes`, `changes_text`, `serialized_data`, `additional_data`,
+     `actor`, `actor_email`, `cid`; `remote_addr` and `remote_port` stay
+     empty (not personal as long as they do); a new
+     retention rule `audit_log`; not part of a person's export for now
+     (see open points: added there if it's ever needed).
+   - **Retention (decided): two years after the last login.** Entries
+     follow the account they belong to: those it made (`actor`) and those
+     about its own records (its `User` row, its children, memberships,
+     applications, ...) are removed when the account is erased (or, for a
+     champion or mentor, cleaned) two years after its last login (§16 phase 4, with reminder mails first). So an
+     active volunteer's entries stay as long as they keep logging in.
+     Entries with no account behind them (made by a Celery job or a
+     management command, about a dojo or a session) are removed two years
+     after they were written (`AUDIT_LOG_RETENTION_DAYS = 730`). Both run
+     in the nightly retention job (§16 phase 4), on the default queue,
+     deleting in batches, safe to run twice.
+   - Erasure (§16 phase 5) also clears `object_repr`, `changes`,
+     `changes_text` and `serialized_data` of the entries about the erased
+     person (their `content_type` + `object_id`), and `actor_email` where
+     they were the actor; the `actor` link stays, pointing at the
+     anonymised account.
+   - Update §16's inventory ("Outside our apps") and phase 6 (health-note
+     views are recorded).
+6. **Docs.** An "Audit log" section in `CLAUDE.md` (what's recorded, the
+   coverage test, the read-only admin as the one exception named in the
+   "admin always stays fully usable" workflow rule, `log_access` for new sensitive views, never
+   `QuerySet.update()` on a recorded model where the change should show
+   up), and this section rewritten as "built".
+   No end-user docs and no text on the family forms: families aren't
+   told about the log (decided, see open points).
+
+### Open points
+
+- ~~IP addresses~~ Decided: not recorded
+  (`AUDITLOG_DISABLE_REMOTE_ADDR = True`). Every entry is tied to a
+  logged-in account already, and addresses are in the infrastructure's
+  own logs (nginx, Level27) when an incident needs them.
+- ~~Retention period~~ Decided: two years after the account's last
+  login, the same rule as the account itself (phase 5, and §16 phase 4
+  for the reminder mails); two years after the entry when no account is
+  behind it.
+- ~~Editable in the admin?~~ Decided: read-only, the exception to the
+  admin rule (phase 4). It still isn't tamper-proof against someone with
+  database or shell access; that would need write-once storage outside
+  the database, out of scope here.
+- ~~Who sees the audit log~~ Decided: only in the Django admin, and only
+  for the organisation's admin role (and superusers), not the board
+  (phase 4).
+- ~~Telling families~~ Decided: the family forms and the help docs
+  don't mention the log. If it's ever needed (a request under art. 15,
+  or the board wants it), the person's data export (§16 phase 3) gets the
+  audit entries about their own and their children's records. That's
+  more than a `subjects` entry: `auditlog.LogEntry` points at a record
+  through `content_type` + `object_id` (a generic link), not a foreign
+  key, so `privacy.export` needs a small special case that looks up the
+  entries for each exported row. Whether the actor's name is shown there
+  follows the export's rule for links to someone else (`export=False`
+  today).
 
 ## 15. 2FA login for management accounts (later)
 
-**Not built yet.** enable higher security logins than only username and password enable allowed login methods based on the security level of the user, are we also going to allow social login capabilities e.g Facebook, Google, ...
+**Not built yet; this is the plan.** Allow stronger logins than a
+username and password, with the login methods allowed depending on the
+security level of the account. Still to decide: whether to allow social
+login too (Facebook, Google, ...); it's not part of this plan.
 
-## 16 GDPR based management (later)
+### The library, and its catch
 
-**Not built yet.** enable the classification of grdp categories and anonymisation and removal and archiving capabilities like e.g. https://django-gdpr-assist.readthedocs.io/en/latest/ 
+[django-two-factor-auth](https://django-two-factor-auth.readthedocs.io/en/stable/)
+(1.18.1, September 2025) is built on **django-otp**, which stores the
+devices, checks the codes and marks a session as verified. On top of that
+it gives: a login in steps (password, then a code), a setup page with a QR
+code, backup codes, pages to turn 2FA off and see your devices, a
+"remember this browser" cookie, a protected admin login, `@otp_required` /
+`OTPRequiredMixin` / `request.user.is_verified()`, and the `user_verified`
+signal.
+
+**Catch:** it officially supports only Django 4.2–5.2 and Python up to
+3.13. We run Django 6.1 and production runs Python 3.14. It installs
+(`Django>=4.2`, no upper bound), but nobody has tested it on our versions.
+It also always pulls in `django-phonenumber-field`, `qrcode` and
+`django-formtools`, even without SMS.
+
+**Decision:** try django-two-factor-auth first (phase 0). If it doesn't
+work on Django 6.1, fall back to **django-otp alone** plus about three
+small views of our own. Nothing is lost either way: the device tables and
+the verified session belong to django-otp in both cases.
+
+### Phases
+
+0. **Compatibility test** (half a day). Install `django-two-factor-auth`
+   in the devcontainer; `manage.py check`, `migrate`, then a full round
+   trip: log in, set up a TOTP device, log out, log in with a code, use the
+   admin. Check its login form works with `EmailOrUsernameBackend` (it
+   should, it calls `authenticate()`). If it fails, take the
+   django-otp-only route.
+1. **Installation.**
+   - `requirements.txt`: `django-two-factor-auth`, `django-otp`, `qrcode`,
+     `django-formtools`, `django-phonenumber-field`, pinned (pure Python,
+     fine on Level27).
+   - `INSTALLED_APPS`: `django_otp`, `django_otp.plugins.otp_totp`,
+     `django_otp.plugins.otp_static` (backup codes), `two_factor`. No phone
+     plugins (SMS via Twilio costs money and is the weakest method). No
+     `otp_email` for now: it calls `send_mail` directly, which breaks the
+     rule that every mail goes through `mailing.services.send`. WebAuthn
+     (passkeys) can come later.
+   - `MIDDLEWARE`: `django_otp.middleware.OTPMiddleware` right after
+     `AuthenticationMiddleware`, before `ForcePasswordChangeMiddleware`.
+   - Settings: `TWO_FACTOR_REMEMBER_COOKIE_AGE` (e.g. 30 days),
+     `TWO_FACTOR_REMEMBER_COOKIE_SECURE = True`,
+     `TWO_FACTOR_REMEMBER_COOKIE_DOMAIN = COOKIE_DOMAIN`,
+     `TWO_FACTOR_LOGIN_TIMEOUT` at its default,
+     `OTP_TOTP_ISSUER = "CoderDojo Belgium"` (the name authenticator apps
+     show).
+2. **One login page only** (the docs warn that any second login route can
+   skip 2FA).
+   - Replace `accounts.views.login` with a subclass of
+     `two_factor.views.LoginView`: same URL name `login` and path
+     `/login/` (so `LOGIN_URL` doesn't change), our template (`cd-*`), and
+     `_post_login_redirect` afterwards.
+   - Include only the setup, backup, profile and disable views from
+     `two_factor.urls`, never its login route (`account/login/`). Its
+     paths are under `/account/two_factor/…`, no clash with ours.
+   - Every other place that logs someone in: `register_guardian` calls
+     `auth_login` (fine: a new account has no device); password reset
+     keeps `post_reset_login = False`; setting a child's password must not
+     log the child in.
+   - Admin: keep `TWO_FACTOR_PATCH_ADMIN = True` and make `admin.site` an
+     `AdminSiteOTPRequired`, so `/admin/` really requires a code, not only
+     a patched login page.
+3. **Who must use it** (policy, see open points).
+   - Proposal: required for organisation roles and superusers (the Django
+     admin and `/manage/`) and for active champions and mentors (they see
+     other families' children's data); optional for parents; never for
+     ninja accounts.
+   - One rule in one place: `accounts.two_factor.requires_2fa(user)`,
+     built on `accounts.organisation` and `dojos.access`.
+   - `accounts.middleware.RequireTwoFactorMiddleware`, like
+     `ForcePasswordChangeMiddleware`: an account that must use 2FA without
+     a device goes to setup; one with a device but an unverified session
+     goes to the code step; same exempt paths (logout, static, media, the
+     2FA pages).
+   - The real lock is in the access helpers: `dojos.access.
+     managing_membership` and `require_organisation_admin` also check
+     `is_verified()`. The middleware only guides people.
+   - WebSockets: `OTPMiddleware` doesn't run in Channels, so
+     `NotificationConsumer.connect()` checks verification itself, from the
+     `otp_device_id` django-otp keeps in the session.
+   - A role change (made champion, mentor or given an organisation role)
+     sends the person to setup on their next page, with a notification
+     explaining why.
+4. **Pages.**
+   - Override the `two_factor/*` templates with our shell (`core/base.html`,
+     `cd-*`); texts in our own nl/fr catalogs (the package's translations
+     don't match our tone).
+   - Account page: a "Two-step login" card with the status, set up / turn
+     off, backup codes, "forget remembered browsers".
+   - A mail when 2FA is turned on or off or a backup code is used: a new
+     `service` template in `mailing/seed_templates.py` (en/nl/fr), sent
+     through `mailing.services.send` from the `user_verified` signal.
+5. **Getting back in, admin, seed data.**
+   - Lost phone: the person's backup codes; otherwise an organisation admin
+     deletes their TOTP device in the Django admin (django-otp registers
+     those models). `AdminStaysFullyUsableTests` covers them.
+   - Seeded champion, mentor and organisation accounts get a TOTP device
+     with a fixed test secret, written to `seed_credentials.csv` by
+     `describe_seed_accounts`, so testers can add it to an authenticator
+     app. (Not a `TWO_FACTOR_ENFORCE` switch that's off in dev: dev would
+     then differ from production.)
+   - TOTP secrets are stored unencrypted in the database. Acceptable, but
+     noted.
+6. **Tests.** Enforcement breaks every existing test that logs in as a
+   mentor or organisation account. Add `core.testing.login_verified(client,
+   user)` (a TOTP device, `force_login`, `otp_device_id` in the session)
+   and switch those tests to it. New tests: the login steps (password only,
+   password plus code, wrong code, remembered browser), setup and backup
+   codes, `requires_2fa` per role, the middleware redirects, `dojos.access`
+   / `/manage/` / the admin / the consumer refusing an unverified session,
+   and no ninja account ever being asked to set up 2FA.
+7. **Docs and deploy.** A "Two-step login" help page in `docs/` (en/fr/nl),
+   a short section in `CLAUDE.md` ("Account model"), this section rewritten
+   as "built" with its diagram. `deploy.sh` needs no change (`migrate`
+   creates the tables). Roll out in two steps: optional for everyone for
+   about two weeks, then required.
+
+### Open points
+
+- **Who must use it:** the proposal above (organisation roles, superusers,
+  active champions and mentors; optional for parents). Champions and
+  mentors required right away, or after a transition period?
+- **Methods:** TOTP (authenticator app) plus backup codes first. Passkeys
+  (WebAuthn) in the first version, or later?
+- **Social login** (Facebook, Google, ...): in or out, and if in, for which
+  account types (it would still need a second factor for management
+  accounts).
+
+## 16. GDPR: classifying personal data, export, erasure and retention (in progress)
+
+**Phases 1 to 3 are built** (the classification, the register and a
+person's export), **phase 4 for the decided rules** (accounts, the audit
+log, login sessions) and **phase 5's erasure itself** (`privacy/erasure.py`,
+used by the retention job; the dashboard page and the family's request
+aren't built); the rest is the plan. Classify every piece of personal data
+the site keeps (GDPR categories), and build on that: exporting a person's
+data, anonymising or removing it, and archiving or deleting it once it's no
+longer needed. Most of our data is about **children**, one field is
+**health data** and one flow handles **criminal-record extracts**, so this
+matters more here than on an average site.
+
+### Existing Django apps
+
+| Package | Latest | Verdict |
+|---|---|---|
+| [django-gdpr-assist](https://django-gdpr-assist.readthedocs.io/) | 1.4.2 (April 2022), Django 2.2–4.0 | **Not usable**: unmaintained, and far from Django 6.1. Its design is the right one, though: a `PrivacyMeta` per model (which fields are personal, how to anonymise them, what to export), search and export per person, anonymise instead of delete, and a log of erasures so they can be replayed after restoring a backup. We copy that design. |
+| django-GDPR (0.2.23, 2023) | Django ≤2.1 | Not usable. |
+| [django-gdpr-ready](https://github.com/GDPR-ready/django-gdpr-ready) | 4 commits | Experimental, not usable. |
+| [django-scrubber](https://github.com/regiohelden/django-scrubber) | 8.0.0 (September 2026), Django 5.2–6.1 | **Usable, for one job**: anonymising a whole copy of the database (`scrub_data`, refuses to run without `DEBUG`) and `scrub_validation`, which lists fields without a scrubber. It works per field across a table, not per person. Only needed if a production copy ever has to be used outside production (today dev uses seeded data only). |
+| [django-fernet-encrypted-fields](https://pypi.org/project/django-fernet-encrypted-fields/) | 0.4.0 (April 2026), Django ≥4.2 | Optional: encrypts one field in the database (for the health data below). An encrypted field can't be searched or filtered. |
+| django-auditlog 3.4.1 / django-simple-history 3.13.0 | maintained | Not GDPR tools, but §14's audit log (django-auditlog chosen, see §14). Its table keeps personal data (diffs, who viewed what), so it's classified and covered by retention and erasure too (§14 phase 5). |
+
+**Decision:** no package does the whole job on Django 6.1, so build a small
+`privacy` app on the gdpr-assist design, and use django-scrubber (later,
+only if needed) and possibly an encrypted field as single-purpose helpers.
+
+### What personal data we keep (inventory, September 2026)
+
+- **Accounts** (`accounts.User`): name, username, email, phone, postcode,
+  language, team-page profile (`display_name`, `title`, `bio`, `photo`,
+  `show_on_team_pages`), login data (password hash, `last_login`), roles.
+- **Children** (`accounts.Ninja`, `Guardianship`): name, date of birth,
+  gender, photo, home dojo, **`allergies_notes` (health data, GDPR art. 9,
+  a special category)**. The family enters and edits it (sign-up, add a
+  child, edit a child); the dojo's **champion only** sees it, on the
+  attendance list of a session the child has a confirmed place at
+  (`dojos.access.VIEW_HEALTH_NOTES`, never granted to mentors). The family
+  forms say so next to the field.
+- **Criminal-record extracts** (GDPR art. 10): the uploaded document (deleted
+  at the decision already), `User.background_check_*`,
+  `applications.BackgroundCheckHistory`, `Application` (motivation text,
+  consents).
+- **What children do**: `Registration`, `RegistrationCancellation`,
+  `NinjaBadge`, `NinjaBelt` (notes by mentors), attendance.
+- **Profiling of children**: `NinjaEngagement`, `NinjaEngagementChange`, and
+  the segment attributes built on them (engagement stage, gender, age, belt)
+  that choose who gets mail. Profiling children for mailings needs a
+  documented legitimate-interest assessment, or a limit (see open points).
+- **Volunteers at work**: `DojoMembership`, `TeamAttendance` (the insurance
+  record), `Event.team`.
+- **Mail**: `EmailMessage` (the full rendered subject and body, recipient
+  address), `MailPreference`, `ConsentEvent` (proof of consent),
+  `EmailSuppression`, `BounceRecord`, `JourneyDelivery`, `Notification`.
+- **Contact data of dojos and the organisation**: `Dojo.email`/`phone`
+  (often a person's), `OrganisationTeamMember`, `Testimonial.author`.
+- **Outside our apps**: sessions, `admin.LogEntry` (`object_repr` holds
+  names), `django_celery_results` (task arguments), Mailpit/SMTP logs,
+  backups on the server.
+
+### Phases
+
+1. **Classification: a `privacy` app with a registry.** *Built.*
+   `privacy/registry.py` (`register`, `register_not_personal`, and the
+   `personal`/`anonymise`/`keep` field specs); every app has its
+   `privacy.py`, Django's and third-party models (sessions, `LogEntry`,
+   celery results and beat, auth, content types) are in
+   `privacy/privacy.py`. Implementation decisions:
+   - `not_personal` isn't a category but a list per model (or
+     `register_not_personal(model, reason)` for a whole model), so the
+     categories only describe personal data.
+   - A model's `purpose`, `legal_basis`, `retention` and `seen_by` are the
+     default for its fields; a field overrides them where it differs (the
+     health field's `seen_by`, the team-page profile's consent). Fields
+     themselves have no default: every one needs its own decision.
+   - `on_erasure` on a link to the person: `delete` deletes the row (it's
+     about them), `keep` keeps it pointing at the anonymised account or
+     child (a past session's team, a belt awarded). The `User` and `Ninja`
+     rows themselves are anonymised ("Former member #id", "Former ninja
+     #id"), not deleted.
+   - Everything on a row about a person counts as personal, not just
+     names (a registration's `attended`, a mail's `status`); fields that
+     only stay for statistics are `keep` with that reason.
+   - Legal bases chosen for now (to confirm, see open points): background
+     checks legitimate interest, the health field consent, `ConsentEvent`
+     legal obligation (art. 7.1), children's data contract.
+   - Each app gets a `privacy.py` (autodiscovered, like `tasks.py`) that
+     declares, per model, each field's category and what happens to it.
+     Kept out of `models.py` so third-party models (sessions, `LogEntry`,
+     celery results, the audit log later) can be declared the same way.
+   - Categories: `identity` (name, email, phone, postcode, username),
+     `child` (anything about a ninja), `special` (art. 9: health),
+     `criminal` (art. 10: background checks), `profiling` (engagement,
+     segments), `public_profile` (shown on team pages by choice),
+     `contact_public` (a dojo's published contact details), `security`
+     (password hash, tokens), `not_personal`.
+   - Per field: `purpose`, `legal_basis` (contract, legitimate interest,
+     consent, legal obligation), `retention` (a rule name, see phase 4),
+     `on_erasure` (`delete`, `anonymise` with a replacement, or `keep` with
+     the reason) and `export` (yes/no).
+   - **A test that every field is classified**: every concrete field of
+     every model in our apps (and the listed third-party ones) must be in
+     the registry, so a new field without a decision fails the tests, the
+     same way `core.tests.StrNeverQueriesTests` and
+     `AdminStaysFullyUsableTests` guard their rules.
+2. **Register of processing activities** (GDPR art. 30): *Built*
+   (`privacy/register.py`, one row per personal field in CSV; per category
+   and model in Markdown, plus the retention rules and the models without
+   personal data).
+   `manage.py privacy_register` writes the register (per category: which
+   data, purpose, legal basis, retention, who can see it) as Markdown/CSV
+   from the registry, for the board and for a request from the Belgian data
+   protection authority (GBA/APD). The privacy notice on the site is
+   checked against it; changing its wording goes together with
+   `PRIVACY_WORDING_VERSION` (`mailing/preferences.py`), as today.
+3. **Right of access and portability** (art. 15/20): *Built*
+   (`privacy/export.py`, `privacy/views.py`). Implementation decisions:
+   - Each model says whose rows are whose with `subjects` in its
+     registration: a lookup to the account, to a child, or a field holding
+     the account's email address (`EmailSuppression`). Models without
+     (a dojo's contact details, `Event`, `Testimonial`) are listed with
+     their reason in `ExportCoverageTests`.
+   - A row is exported with all its fields except the id and `export=False`
+     ones, including its non-personal context (a registration's session);
+     links show the linked object's name. Links to someone else (the
+     reviewer of an application or a check, who marked attendance, who
+     requested or decided a join) are `export=False`: their data, not the
+     person's.
+   - A guardian's export includes the children's own logins and their
+     mail; a ninja login's includes only its own child record.
+   - The family's download is limited to once a minute per account (the
+     cache; fails open when Redis is down). The organisation's download
+     isn't rate-limited; the §14 audit log records it (an access entry on
+     the exported account, with the admin who downloaded it).
+   - `privacy.export.export_person(user)` → JSON of everything the registry
+     marks `export`: the account, the children the account is guardian of,
+     their registrations, belts, badges, mail preferences and consents,
+     applications and background-check decisions (never the document), the
+     mail sent to them.
+   - Family: "Download my data" on the account page (login required,
+     rate-limited). A ninja login gets only its own data.
+   - Organisation: the same export from a new organisation dashboard page
+     (`/manage/privacy/`), for requests that come in by mail or post.
+4. **Retention: deleting what's no longer needed.** *Built for the
+   decided rules* (`privacy/retention.py`, the nightly
+   `privacy.tasks.apply_retention` at 10:00 on the default queue, also
+   `manage.py apply_retention`): accounts two years after the last login
+   with their reminders, the audit log (§14) and expired login sessions.
+   The other rules wait for their periods (open points). Implementation
+   decisions:
+   - **Settings:** `ACCOUNT_RETENTION_DAYS = 730`,
+     `ACCOUNT_DELETION_REMINDER_DAYS = (30, 7)`,
+     `ACCOUNT_DELETION_NOTICE_DAYS = 30`, `AUDIT_LOG_RETENTION_DAYS = 730`.
+   - **Each reminder is a `privacy.RetentionNotice`** (account, the last
+     login it was about, days before), the record the job decides by; the
+     mail itself goes through `send()` with the idempotency key below. A
+     login starts a new period: the old notices are removed.
+   - **Never without a month's notice:** the date is the later of two
+     years after the last login and `ACCOUNT_DELETION_NOTICE_DAYS` after the
+     first reminder. That covers accounts already overdue when the rule
+     started and an organisation role that just ended (no separate "role
+     ended" date needed: no reminders go out while the role is held).
+   - **Held back:** the date-passed notice of a champion of an active dojo
+     is a `RetentionNotice` with `days_before = 0` (no mail, the mentors'
+     second notification); the account is cleaned the first night after
+     the role has moved (or the dojo stopped being active).
+   - **A child's own login is on the family's counter (decided,
+     replacing "a ninja's own login" in the plan below):** a guardian's
+     date counts the latest login of any of its children's own logins
+     (`with_inactive_since`), so a family stays while a child uses their
+     login. The login has no date, reminder or removal of its own: the
+     guardian's reminders are the notice (the mail says the children's own
+     logins go with them), and it's erased with its child when the family
+     is. The job never handles a ninja login itself.
+   - **A child always has a guardian (decided):** family sign-up and Add a
+     child create the child and its guardianship in one transaction. A
+     child without one can only come from a manual fix in the Django admin
+     (adding a child there, deleting a guardianship or a guardian's
+     account); the automatic jobs leave such a child and its login alone,
+     and it stays until it's handled in the admin.
+   - The organisation's list is
+     `champions_needing_attention()` (the Privacy page and the sidebar
+     count, `{% retention_attention_count %}`).
+   - Every account is handled in its own transaction; one that fails
+     (e.g. a missing template) is logged and retried the next night, and
+     never erased without its reminder.
+
+   The plan:
+   - Rules in one module (`privacy/retention.py`), with periods in settings.
+     Proposals to decide (see open points): a child's data N years after
+     their last session or after turning 18; `EmailMessage` bodies after 12
+     months (keep the row, status and category for statistics); bounces and
+     processed-mailbox rows after 12 months; closed sessions' registrations
+     anonymised after N years (counts stay for statistics);
+     background-check history as long as the legal rules say; `TeamAttendance`
+     as long as the insurance needs it.
+   - **Accounts (decided): erased two years after the last login**
+     (`ACCOUNT_RETENTION_DAYS = 730`; `User.last_login`, or `date_joined`
+     for an account that never logged in), with reminder mails first:
+     - **Reminders** 30 and 7 days before the date
+       (`ACCOUNT_DELETION_REMINDER_DAYS = (30, 7)`): the service mail
+       `account_deletion_reminder` (en/nl/fr in
+       `mailing/seed_templates.py`, one of `SYSTEM_TEMPLATE_KEYS`),
+       through `send()`, with the date, a login link, and what goes with
+       the account: the children who have no other guardian, and their
+       history. `service` mail can't be switched off, so a family that
+       opted out of everything still gets it; a blocked address
+       (`EmailSuppression`) is recorded as suppressed and the deletion
+       goes ahead. Idempotency key
+       `account-deletion:<user>:<days>:<last login date>`, so a
+       reminder goes once per period of inactivity and again after a
+       later one.
+     - **Logging in is what counts.** Any login moves the date two years
+       on; nothing else does (Django only updates `last_login` at login,
+       and a session lasts at most `SESSION_COOKIE_AGE`).
+     - **The deletion itself is the erasure of phase 5**
+       (`erase_person(user, requested_by=None, reason="retention")`, with
+       its `ErasureRecord`), so phase 5 comes first: the account is
+       anonymised where other rows point at it, children with no other
+       guardian are erased with it, a child with another guardian stays.
+     - **A ninja's own login** that hasn't been used for two years is
+       removed like the guardian would (`child_accounts.remove_login`);
+       the reminders go to the child's login and to its guardians, and
+       the child's record follows the child rule, not this one.
+     - **Champions and mentors are cleaned, not erased (decided):** an
+       account that was ever on a dojo team as champion or mentor (any
+       membership that got past `requested`) keeps only what the site
+       shows of it, and everything else is deleted. Their name is on past
+       sessions' teams, on belts they awarded and, by choice, on the team
+       pages, and those stay right.
+       - **Kept:** the name as shown (`User.team_name`, frozen into
+         `display_name` so the first and last name can go), and the
+         team-page profile (`title`, `bio`, `photo`) only if
+         `show_on_team_pages` was on (otherwise it wasn't visible and is
+         deleted too); the memberships (made `dormant`, with their role
+         and dates), `Event.team`, `TeamAttendance`, the belts and badges
+         they awarded.
+       - **Deleted:** everything else, as in an erasure: login (unusable
+         password, inactive, username `former-<id>`), email, phone,
+         postcode, language, applications, the background-check fields
+         on the account (the decisions in `BackgroundCheckHistory`
+         follow their own rule), mail preferences (the consent log
+         follows its own), notifications, and the family side:
+         guardianships, and the children with no other guardian.
+       - In the classification this is erasure with one difference: the
+         `public_profile` fields are kept when they were shown, and the
+         visible name is kept. So it's a mode of phase 5's
+         `erase_person(..., keep_visible=True)`, not a second list of
+         fields; a new visible field is covered by giving it the
+         `public_profile` category.
+       - **Still the champion of an active dojo (decided):** the dojo
+         can't be left without one, so cleaning waits until the role is
+         handed over, and two sides are told, from the first reminder on
+         (30 days before the date), so they can act before it:
+         - **The organisation's administrators, in their dashboard:** a
+           "Needs attention" list on the Privacy page (`/manage/privacy/`:
+           the dojo, the champion, their last login, the date) and a
+           count on the sidebar's Privacy link, so it shows on every
+           `/manage/` page. The organisation dashboard has no notification
+           bell, so the list is the notice; it disappears once the role
+           has moved. From there the admin can open the dojo in the Django
+           admin, to hand the role over or set the dojo dormant.
+         - **The dojo's other mentors, through notifications:** the
+           dashboard bell (`dojos.team.notify_managers(..., exclude=<the
+           champion>)`: one per active mentor), once at the first reminder and
+           again when the date has passed, linking to the Team page. A
+           mentor can't take the role themselves (`transfer_champion` is
+           champion-only), so the text asks them to contact the champion
+           or the organisation.
+         - A dojo with no other active mentor only has the organisation
+           side.
+       - Their reminder mails say what stays (their name on past sessions
+         and, if they chose it, their team profile) and what goes.
+     - **Organisation roles are excluded (decided):** an account holding
+       an `OrganisationRole` (board or admin) is never deleted or cleaned
+       automatically and gets no reminder mails, for as long as it holds
+       the role. Superusers are treated the same (the site's technical
+       administrators). Once the role ends, the rule applies again from
+       the last login; if that's already more than two years ago, the
+       first reminder gives the usual 30 days (the date is never earlier
+       than 30 days after the role ended).
+   - A nightly beat job (`privacy.tasks.apply_retention`) that only
+     enqueues the work on the default queue, like every heavy job (see
+     "Background jobs" in `CLAUDE.md`), safe to run twice. It sends the
+     reminders that are due, erases the accounts whose date has passed,
+     and applies the other rules (including the audit log's, §14).
+5. **Right to erasure** (art. 17): `privacy.erasure.erase_person(user,
+   requested_by, reason)`, from the organisation dashboard (with a
+   confirmation showing what will happen) and later on request from the
+   account page. *The erasure itself is built* (`privacy/erasure.py`,
+   `privacy.ErasureRecord`, `manage.py privacy_replay_erasures`), used by
+   the retention job; the dashboard page and the family's request aren't.
+   Implementation decisions:
+   - **Rows are found by `subjects`** (the account, the children erased
+     with it and their own logins, the account's email address), all of
+     them before anything changes. A row of someone else's that only links
+     to the person (a cancellation they made) gets that link's rule alone:
+     a nullable link is emptied, a `keep` one stays.
+   - **"Emptied"** is null where allowed, else False, the field's default
+     or an empty text; a file is deleted, a standard library image only
+     unlinked. A `personal` required link to the person deletes the row.
+     `anonymise` takes a literal ("{pk}" is the row's id) or a
+     `privacy.registry.Computed` (the unusable password).
+   - **`keep_visible`** keeps the `public_profile` fields where the model's
+     `visible_when` flag is on (`User.show_on_team_pages`,
+     `OrganisationTeamMember.is_public`); the visible name is frozen into
+     `display_name` first. Memberships end through
+     `dojos.team.end_all_memberships` (dormant; a pending first request goes).
+   - **The audit log:** the erasure runs with the log disabled (its diff
+     would hold what was erased). Entries about the erased rows are
+     cleared on request and removed by the retention job, as are the
+     entries the account made (on request only `actor_email` is cleared).
+     Django's admin history (`admin.LogEntry`) about those rows loses its
+     `object_repr` and `change_message`.
+   - `erase_child(ninja)` erases one child and their own login whatever
+     guardians they have, for a request about a single child.
+   - Not yet: a child's upcoming places are kept (anonymised) rather than
+     cancelled, so an erasure on request should come after cancelling them.
+
+   The plan:
+   - **Anonymise rather than delete** where other rows point at the person:
+     a `User` on a past `Event.team` or a `NinjaBelt.awarded_by` becomes
+     "Former volunteer #id" (inactive, personal fields blanked, as
+     `child_accounts.remove_login` already disables a login instead of
+     deleting it). Children with no other guardian are erased with the
+     family; their registrations are anonymised, so a session's numbers
+     stay right.
+   - **`keep_visible=True`** (used for champions and mentors by the
+     retention rule, phase 4): the same, except that the visible name is
+     frozen into `display_name` and kept, and the `public_profile` fields
+     stay when `show_on_team_pages` was on.
+   - `keep` fields stay, with their reason: proof of consent
+     (`ConsentEvent`), a suppressed address (`EmailSuppression`, otherwise
+     we would mail it again), background-check decisions for as long as
+     the legal rules say.
+   - Every erasure writes an `ErasureRecord` (model, row id, when, why,
+     requested by; no personal data), so an erasure can be **replayed after
+     restoring a backup** (`manage.py privacy_replay_erasures`).
+   - Goes through the classification only, so a new field is covered
+     automatically.
+6. **Restricting who sees what.**
+   - The health field: done (champion only, attendance list of a session
+     the child has a confirmed place at, see the inventory above); every
+     time it's shown, and every change (masked), is in the §14 audit log.
+     Still to consider: an encrypted field.
+   - Profiling segments: limit attributes about children (gender, age,
+     engagement) to categories the family opted in to, or document the
+     legitimate-interest assessment (open point).
+   - The admin keeps full access (`CLAUDE.md`: never read-only); each
+     `ModelAdmin` of a `special`/`criminal` model says so in its docstring,
+     and the §14 audit log records who viewed (`LogAccessAdminMixin`) or
+     changed it (built).
+7. **Copies of the database** (only when needed): django-scrubber, with its
+   scrubbers generated from the registry (one source of truth) and
+   `scrub_validation` in the test run.
+8. **Docs.** A privacy page in `docs/` (en/fr/nl: what we keep, how to get
+   a copy, how to have it removed), a "Privacy" section in `CLAUDE.md` (a new
+   field needs a classification), and this section rewritten as "built".
+
+### Open points
+
+- ~~A child whose own login is in use~~ Decided: a child's own logins
+  count toward their guardians' two years, and the login goes with the
+  family (phase 4).
+- **Retention periods** for each rule in phase 4: needs legal input
+  (Belgian law, the insurer for `TeamAttendance`, the rules for
+  criminal-record extracts). Decided so far: accounts two years after the
+  last login, with reminder mails (phase 4), and the audit log with them
+  (§14).
+- **Who handles requests** in the organisation (a privacy contact or DPO),
+  and within how many days (the GDPR's one month).
+- **Health data**: decided: the champion sees `allergies_notes` on the
+  attendance list (see the inventory). Still open: whether mentors running
+  a session without the champion need it too (adding `VIEW_HEALTH_NOTES`
+  to mentors in `dojos.access.ROLE_CAPABILITIES`, and changing the text
+  on the family forms and in the docs).
+- **Profiling children for mail**: keep the child attributes in segments
+  for all categories, or only for mail the family opted in to?
+- **Legal bases** in the classification (phase 1) need checking: which
+  art. 6 basis and art. 9/10 condition apply to the health field (explicit
+  consent?) and to background checks (Belgian rules on criminal-record
+  extracts for work with minors).
+- **Children's own requests**: Belgium's age of digital consent is 13; can a
+  ninja login ask for its own export or erasure, or only the guardian?
+- **Archiving** (the original question): whether anything moves to an
+  archive instead of being deleted (e.g. yearly statistics), and in what
+  form (aggregated numbers only).
 
 ## 17. Child accounts, managed by the guardian (built)
 

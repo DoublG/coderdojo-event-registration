@@ -73,6 +73,8 @@ ADMIN_PERMISSIONS = {
     "mailing.consentevent": _VIEW,
     "mailing.emailsuppression": _EDIT,
     "mailing.bouncerecord": _VIEW,
+    # The audit log (DATA_MODEL.md §14): the admin role only, never the board.
+    "auditlog.logentry": _VIEW,
 }
 ROLE_PERMISSIONS = {OrganisationRole.BOARD: BOARD_PERMISSIONS, OrganisationRole.ADMIN: ADMIN_PERMISSIONS}
 

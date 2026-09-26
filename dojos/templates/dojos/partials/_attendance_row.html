@@ -1,4 +1,4 @@
-{% load content_i18n %}{% load i18n %}{% comment %}
+{% load content_i18n %}{% load i18n %}{% load audit %}{% comment %}
 One ninja's Present/Absent toggle. Clicking the already-pressed button
 posts "none", clearing the mark back to "not yet marked" (Registration.attended
 is tri-state). htmx swaps just this row; without JS it's a plain form post.
@@ -19,6 +19,10 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
     {% with age=ninja.age pathways=registration.pathways.all current_belt=ninja.current_belt %}
       {% if age is not None or pathways or current_belt %}
         <span class="cd-attendance__meta caption">{% if age is not None %}{% blocktranslate %}Age {{ age }}{% endblocktranslate %}{% endif %}{% if age is not None and pathways %} · {% endif %}{% for pathway in pathways %}{{ pathway|localized:"name" }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if current_belt %}{% if age is not None or pathways %} · {% endif %}{{ current_belt|localized:"name" }}{% endif %}</span>
+      {% endif %}
+      {% if dojo_access.can_view_health_notes and ninja.allergies_notes %}
+        {# The family's allergies or notes (health data): champion only, dojos.access.VIEW_HEALTH_NOTES; every time it's shown goes in the audit log. #}{% audit_view ninja %}
+        <span class="cd-attendance__health caption" style="display: block; margin-top: var(--space-1);"><span class="cd-badge cd-badge--warning caption">{% translate "Allergies or notes" %}</span> {{ ninja.allergies_notes|linebreaksbr }}</span>
       {% endif %}
       {% with top_belt=all_belts|last %}
       {% if dojo_access.can_award_belts and top_belt and top_belt.level > current_belt.level|default:0 %}

@@ -7,6 +7,7 @@ from django.utils import timezone
 from accounts.models import Guardianship, Ninja, User
 from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
 from accounts.template_avatars import TEMPLATE_KID_AVATARS
+from core.audit import without_audit_log
 from core.image_library import use_library_image
 from dojos.models import Dojo, DojoMembership
 
@@ -52,6 +53,7 @@ class Command(BaseCommand):
         "parent opting them in."
     )
 
+    @without_audit_log
     def handle(self, *args, **options):
         rng = random.Random(7)
         guardians_created = children_created = child_logins_created = 0

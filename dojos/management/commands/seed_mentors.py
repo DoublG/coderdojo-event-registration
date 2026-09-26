@@ -6,11 +6,12 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from accounts.models import OrganisationRole, User
+from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
+from accounts.template_avatars import TEMPLATE_AVATARS, TEMPLATE_KID_AVATARS
 from applications.models import Application
 from applications.seeding import approve_for_seeding
-from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
 from content.models import OrganisationTeamMember
-from accounts.template_avatars import TEMPLATE_AVATARS, TEMPLATE_KID_AVATARS
+from core.audit import without_audit_log
 from core.image_library import use_library_image
 from dojos.models import Dojo, DojoMembership
 from dojos.template_icons import TEMPLATE_ICONS
@@ -136,6 +137,7 @@ class Command(BaseCommand):
         "team member here and there, to exercise the Team page."
     )
 
+    @without_audit_log
     def handle(self, *args, **options):
         rng = random.Random(7)
         created = 0

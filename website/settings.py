@@ -207,6 +207,14 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=17, minute=0),
         "options": {"queue": "celery", "expires": 6 * 3600},
     },
+    # Reminder mails and deletions for accounts unused for two years, the
+    # audit log and expired sessions (privacy.retention). Daytime, since it
+    # mails families.
+    "retention": {
+        "task": "privacy.tasks.apply_retention",
+        "schedule": crontab(hour=10, minute=0),
+        "options": {"queue": "celery", "expires": 6 * 3600},
+    },
 }
 CELERY_TASK_ROUTES = {
     entry["task"]: {"queue": PERIODIC_QUEUE}
@@ -242,7 +250,9 @@ INSTALLED_APPS = [
     'django_celery_results',
     'mailing',
     'django_celery_beat',
-    'ninja'
+    'ninja',
+    'privacy',
+    'auditlog',
 ]
 
 MIDDLEWARE = [
@@ -254,6 +264,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Records who made each audit-log entry (DATA_MODEL.md §14); needs request.user.
+    'core.audit.AuditlogMiddleware',
     'accounts.middleware.ForcePasswordChangeMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -445,3 +457,28 @@ MEDIA_ROOT = BASE_DIR / "media"
 # permission-gated view in applications.views. See applications.storage.
 PRIVATE_MEDIA_ROOT = BASE_DIR / "private_media"
 
+
+# Audit log (django-auditlog, DATA_MODEL.md §14): who changed what, and who
+# viewed a child's health notes or a criminal-record extract (core.audit).
+# The recorded models are core.audit.RECORDED (registered from
+# CoreConfig.ready); every other model is listed with its reason in
+# core.tests.AuditLogCoverageTests. Shown only in the Django admin,
+# read-only, to the organisation's admin role.
+AUDITLOG_INCLUDE_ALL_MODELS = False
+AUDITLOG_DISABLE_ON_RAW_SAVE = True  # fixtures aren't history
+AUDITLOG_DISABLE_REMOTE_ADDR = True  # no IP addresses: every entry has its account, nginx logs the rest
+# Changes as text: with JSON, auditlog 3.4.1 compares file fields as
+# objects and records an empty photo as a change on every save.
+AUDITLOG_STORE_JSON_CHANGES = False
+AUDITLOG_MASK_CALLABLE = "core.audit.mask"  # the default keeps half the value
+AUDITLOG_USE_FK_STRING_REPRESENTATION = False  # links as ids, not names: less personal data in the log
+
+# Retention (privacy.retention, DATA_MODEL.md §16 phase 4). An account is
+# deleted (a champion's or mentor's cleaned) this long after its last login,
+# with reminder mails this many days before, and never sooner than
+# ACCOUNT_DELETION_NOTICE_DAYS after the first reminder. Audit log entries
+# with no account behind them go this long after they were written.
+ACCOUNT_RETENTION_DAYS = 730
+ACCOUNT_DELETION_REMINDER_DAYS = (30, 7)
+ACCOUNT_DELETION_NOTICE_DAYS = 30
+AUDIT_LOG_RETENTION_DAYS = 730

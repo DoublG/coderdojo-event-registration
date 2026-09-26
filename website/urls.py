@@ -32,6 +32,7 @@ urlpatterns = [
     path("", include("pathways.urls")),
     path("", include("mailing.urls")),
     path("", include("content.urls")),
+    path("", include("privacy.urls")),
     path("api/", api.urls),
 ]
 

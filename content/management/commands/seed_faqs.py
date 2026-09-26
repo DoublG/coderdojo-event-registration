@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from content.models import FAQ
+from core.audit import without_audit_log
 from dojos.models import Dojo
 from events.models import Event
 
@@ -43,6 +44,7 @@ EVENT_FAQS = [
 class Command(BaseCommand):
     help = "Seed the site-wide FAQs shown on the homepage, plus a couple of dojo- and event-specific examples."
 
+    @without_audit_log
     def handle(self, *args, **options):
         created = 0
 

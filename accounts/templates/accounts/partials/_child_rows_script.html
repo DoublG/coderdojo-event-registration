@@ -26,6 +26,7 @@
       dob: "{% translate 'Date of birth' as t %}{{ t|escapejs }}",
       notes: "{% translate 'Allergies or notes' as t %}{{ t|escapejs }}",
       none: "{% translate 'None' as t %}{{ t|escapejs }}",
+      notesHelp: "{% translate "Only the champion (the person running the dojo) sees this, on the list of a session your child is signed up for." as t %}{{ t|escapejs }}",
       gender: "{% translate 'Gender' as t %}{{ t|escapejs }}",
       genderHelp: "{% translate "Optional, never shown publicly. Lets us tell you about girls' sessions." as t %}{{ t|escapejs }}"
     };
@@ -51,6 +52,7 @@
             '<div class="cd-form__field">' +
               '<label class="cd-form__label label" for="rp-c' + n + '-notes">' + T.notes + '</label>' +
               '<input class="cd-form__input body" id="rp-c' + n + '-notes" name="child_' + n + '_notes" type="text" placeholder="' + T.none + '">' +
+              '<p class="cd-form__help caption">' + T.notesHelp + '</p>' +
             '</div>' +
             '<div class="cd-form__field">' +
               '<label class="cd-form__label label" for="rp-c' + n + '-gender">' + T.gender + '</label>' +

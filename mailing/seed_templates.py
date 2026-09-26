@@ -578,6 +578,99 @@ Tu ne t'attendais pas à cet e-mail ? Tu peux l'ignorer.
         },
     },
     {
+        "key": "account_deletion_reminder",
+        "category": MailCategory.SERVICE,
+        "description": "An unused account will be deleted (privacy.retention). Variables: deletion_date, login_url, "
+                       "children, volunteer, keeps_profile, champion_of.",
+        "subject": {
+            "en-us": "Your CoderDojo account will be deleted on {{ deletion_date|date:'j F Y' }}",
+            "nl-be": "Je CoderDojo-account wordt op {{ deletion_date|date:'j F Y' }} verwijderd",
+            "fr-be": "Votre compte CoderDojo sera supprimé le {{ deletion_date|date:'j F Y' }}",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+Nobody has logged in to your CoderDojo account for almost two years{% if children %}, and
+your children haven't used their own logins either{% endif %}. We don't keep data we no
+longer need, so on {{ deletion_date|date:"j F Y" }} your account will be
+{% if volunteer %}cleaned up.
+
+What stays: your name on the sessions you helped run and on the belts and badges you
+awarded{% if keeps_profile %}, and your profile on the dojos' team pages{% endif %}. Everything else goes: your
+login, your contact details, your applications and background-check details and your
+mail preferences.{% else %}deleted: your login, your contact details and your mail preferences.{% endif %}
+{% if children %}
+These children go with your account (their details, their own login if they have one,
+their belts and badges; the sessions they came to are kept without their name):
+{% for child in children %}- {{ child }}
+{% endfor %}{% endif %}{% if champion_of %}
+You're still the champion of {{ champion_of|join:", " }}. A dojo can't be without its
+champion, so your account stays until you hand that role to a mentor (on the dojo's
+Team page) or the organisation does.
+{% endif %}
+Want to keep your account? Just log in before that date{% if children %} (or let one of your
+children log in with their own login){% endif %}:
+
+{{ login_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Er is al bijna twee jaar niet meer ingelogd op je CoderDojo-account{% if children %}, en ook je
+kinderen gebruikten hun eigen login niet{% endif %}. We bewaren geen gegevens die we niet meer
+nodig hebben, dus op {{ deletion_date|date:"j F Y" }} wordt je account
+{% if volunteer %}opgeschoond.
+
+Wat blijft: je naam bij de sessies die je mee begeleidde en bij de gordels en badges die
+je uitreikte{% if keeps_profile %}, en je profiel op de teampagina's van de dojo's{% endif %}. Al de rest
+verdwijnt: je login, je contactgegevens, je aanvragen en de gegevens van je
+uittreksel uit het strafregister, en je mailvoorkeuren.{% else %}verwijderd: je login, je contactgegevens en je mailvoorkeuren.{% endif %}
+{% if children %}
+Deze kinderen verdwijnen mee met je account (hun gegevens, hun eigen login als ze er
+een hebben, hun gordels en badges; de sessies waar ze naartoe kwamen blijven bewaard
+zonder hun naam):
+{% for child in children %}- {{ child }}
+{% endfor %}{% endif %}{% if champion_of %}
+Je bent nog champion van {{ champion_of|join:", " }}. Een dojo kan niet zonder
+champion, dus je account blijft tot je die rol doorgeeft aan een mentor (op de
+Team-pagina van de dojo) of de organisatie dat doet.
+{% endif %}
+Wil je je account houden? Log dan gewoon in voor die datum{% if children %} (of laat een van je
+kinderen inloggen met de eigen login){% endif %}:
+
+{{ login_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Personne ne s'est connecté à votre compte CoderDojo depuis presque deux ans{% if children %}, et
+vos enfants n'ont pas non plus utilisé leur propre compte{% endif %}. Nous ne gardons pas les
+données dont nous n'avons plus besoin : le {{ deletion_date|date:"j F Y" }}, votre compte sera
+{% if volunteer %}nettoyé.
+
+Ce qui reste : votre nom sur les sessions que vous avez encadrées et sur les ceintures
+et badges que vous avez remis{% if keeps_profile %}, ainsi que votre profil sur les pages d'équipe des
+dojos{% endif %}. Tout le reste disparaît : votre connexion, vos coordonnées, vos candidatures
+et les données de votre extrait de casier judiciaire, et vos préférences d'e-mail.{% else %}supprimé : votre connexion, vos coordonnées et vos préférences d'e-mail.{% endif %}
+{% if children %}
+Ces enfants disparaissent avec votre compte (leurs données, leur propre compte s'ils en
+ont un, leurs ceintures et badges ; les sessions auxquelles ils ont participé sont
+gardées sans leur nom) :
+{% for child in children %}- {{ child }}
+{% endfor %}{% endif %}{% if champion_of %}
+Vous êtes toujours champion de {{ champion_of|join:", " }}. Un dojo ne peut pas rester
+sans champion : votre compte reste donc jusqu'à ce que vous passiez ce rôle à un
+mentor (sur la page Équipe du dojo) ou que l'organisation le fasse.
+{% endif %}
+Vous voulez garder votre compte ? Connectez-vous simplement avant cette date{% if children %} (ou
+laissez un de vos enfants se connecter avec son propre compte){% endif %} :
+
+{{ login_url }}
+""",
+        },
+    },
+    {
         "key": "youth_mentor_promoted",
         "category": MailCategory.SERVICE,
         "description": "A dojo's team made a child a youth mentor; sent to the family (guardians, plus the "
@@ -869,6 +962,11 @@ SAMPLE_CONTEXT = {
     "ninja_account_created": {
         **_common, "recipient_name": "Emma", "guardian_name": "Ellen Peeters", "username": "emma",
         "set_password_url": "https://coolregistration.localhost/password-reset/confirm/MQ/abc-123/",
+    },
+    "account_deletion_reminder": {
+        **_common, "deletion_date": datetime(2026, 10, 26), "login_url": "https://coolregistration.localhost/login/",
+        "children": ["Emma", "Lucas"], "volunteer": False, "keeps_profile": False,
+        "champion_of": [],
     },
     "campaign_coolest_projects": {**_common, "signup_url": "https://coolestprojects.org"},
     "campaign_girlz": {**_common, "signup_url": "https://coolregistration.localhost/events/"},

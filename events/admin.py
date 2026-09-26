@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from core.admin_translations import TranslationAdminMixin
+from core.audit import AuditHistoryAdminMixin
 from geo.widgets import BelgiumGISModelAdmin
 
 from .models import (
@@ -18,7 +19,7 @@ from .models import (
 
 
 @admin.register(Event)
-class EventAdmin(TranslationAdminMixin, BelgiumGISModelAdmin):
+class EventAdmin(TranslationAdminMixin, AuditHistoryAdminMixin, BelgiumGISModelAdmin):
     list_display = ["name", "dojo", "start_time", "status", "audience"]
     list_filter = ["status", "audience"]
     search_fields = ["name", "dojo__name"]

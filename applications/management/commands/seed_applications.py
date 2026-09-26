@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from accounts.models import User
 from applications.models import Application, BackgroundCheckHistory
+from core.audit import without_audit_log
 from dojos.models import Dojo
 
 # (background check status on the account, application status) for a few
@@ -26,6 +27,7 @@ class Command(BaseCommand):
         "something to work through. Needs seed_guardians to have run first."
     )
 
+    @without_audit_log
     def handle(self, *args, **options):
         rng = random.Random(11)
         parents = list(

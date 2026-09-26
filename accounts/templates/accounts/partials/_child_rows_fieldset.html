@@ -36,6 +36,7 @@
           <div class="cd-form__field">
             <label class="cd-form__label label" for="rp-c{{ row.index }}-notes">{% translate "Allergies or notes" %}</label>
             <input class="cd-form__input body" id="rp-c{{ row.index }}-notes" name="child_{{ row.index }}_notes" type="text" placeholder="{% translate "None" %}" value="{{ row.notes }}">
+            <p class="cd-form__help caption">{% translate "Only the champion (the person running the dojo) sees this, on the list of a session your child is signed up for." %}</p>
           </div>
           <div class="cd-form__field">
             <label class="cd-form__label label" for="rp-c{{ row.index }}-gender">{% translate "Gender" %}</label>

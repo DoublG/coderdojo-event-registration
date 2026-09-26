@@ -87,6 +87,13 @@
             </select>
           </div>
         </div>
+        <div class="cd-form__row">
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="ac-notes">{% translate "Allergies or notes (optional)" %}</label>
+            <textarea class="cd-form__textarea body" id="ac-notes" name="allergies_notes" rows="2" placeholder="{% translate "None" %}"></textarea>
+            <p class="cd-form__help caption">{% translate "Only the champion (the person running the dojo) sees this, on the list of a session your child is signed up for." %}</p>
+          </div>
+        </div>
         <div class="cd-form__actions">
           <button type="button" class="cd-btn cd-btn--ghost label" onclick="this.closest('details').open=false;">{% translate "Cancel" %}</button>
           <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Add child" %}</button>
@@ -99,6 +106,14 @@
       <p class="body-sm">{% translate "Choose which mails you get, the language they're in, and your postcode." %}</p>
       <div class="cd-form__actions" style="justify-content: flex-start;">
         <a class="cd-btn cd-btn--ghost label" href="{% url 'mail_preferences' %}">{% translate "Mail preferences" %}</a>
+      </div>
+    </div>
+
+    <div class="cd-card add-child" style="margin-top: var(--space-5); text-align: left;">
+      <h2 class="heading-md section-title">{% translate "Your data" %}</h2>
+      <p class="body-sm">{% translate "Download a copy of everything we keep about you and your children, as a file you can open or take elsewhere." %}</p>
+      <div class="cd-form__actions" style="justify-content: flex-start;">
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'download_my_data' %}">{% translate "Download my data" %}</a>
       </div>
     </div>
 

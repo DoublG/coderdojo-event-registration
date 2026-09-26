@@ -6,6 +6,7 @@ from datetime import date, datetime, time, timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
+from core.audit import without_audit_log
 from core.image_library import use_library_image
 from dojos.models import Dojo
 from events.models import Event
@@ -113,6 +114,7 @@ class Command(BaseCommand):
         "workshop, some get a weekly Wednesday or Friday session instead."
     )
 
+    @without_audit_log
     def handle(self, *args, **options):
         rng = random.Random(42)
         today = timezone.localdate()

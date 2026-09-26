@@ -1,0 +1,82 @@
+"""Getting a copy of your data (DATA_MODEL.md §16 phase 3, `privacy.export`):
+the family's "Download my data" and the organisation dashboard's Privacy
+page (/manage/privacy/, shell core/_manage_base.html), for requests that
+come in by mail or post."""
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
+from django.db.models import Count, Q
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
+
+from accounts.models import User
+from accounts.organisation import require_organisation_admin
+from core.audit import log_access
+
+from .export import export_filename, export_json
+from .retention import champions_needing_attention
+
+# One download per account per minute: an export runs a query per model.
+EXPORT_INTERVAL_SECONDS = 60
+SEARCH_LIMIT = 25
+
+
+def _download(user):
+    response = HttpResponse(export_json(user), content_type="application/json; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="{export_filename(user)}"'
+    return response
+
+
+@login_required
+def download_my_data(request):
+    """The account's own data and its children's, as a JSON file. A ninja's
+    own login gets only its own."""
+    # cache.add is False when the key exists; None when the cache is down
+    # (IGNORE_EXCEPTIONS), and then the download goes ahead.
+    if cache.add(f"privacy:export:{request.user.pk}", 1, EXPORT_INTERVAL_SECONDS) is False:
+        messages.error(request, _("You just downloaded your data. Please wait a minute before trying again."))
+        return redirect("account_home")
+    return _download(request.user)
+
+
+@login_required
+def manage_privacy(request):
+    """Find an account to answer a request for a copy of someone's data,
+    and the champions the retention job is waiting on."""
+    require_organisation_admin(request)
+    query = request.GET.get("q", "").strip()
+    accounts = []
+    if query:
+        accounts = (
+            User.objects.filter(
+                Q(email__icontains=query)
+                | Q(username__icontains=query)
+                | Q(first_name__icontains=query)
+                | Q(last_name__icontains=query)
+                | Q(guardianships__ninja__name__icontains=query)
+            )
+            .annotate(children_count=Count("guardianships", distinct=True))
+            .distinct()
+            .order_by("last_name", "first_name", "username")[:SEARCH_LIMIT]
+        )
+    return render(
+        request,
+        "privacy/manage/privacy.html",
+        {
+            "query": query,
+            "accounts": accounts,
+            "search_limit": SEARCH_LIMIT,
+            "attention": champions_needing_attention(),
+            "active": "privacy",
+        },
+    )
+
+
+@login_required
+def manage_privacy_export(request, user_id):
+    require_organisation_admin(request)
+    user = get_object_or_404(User, pk=user_id)
+    log_access(user)  # who handed out whose data: recorded in the audit log
+    return _download(user)

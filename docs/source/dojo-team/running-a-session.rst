@@ -77,6 +77,12 @@ wristbands) up to date.
 A child whose home dojo is another dojo is marked **Visiting**; hover over
 it to see which dojo.
 
+If the family entered **allergies or notes** for their child, the
+dojo's champion sees them on that child's row. They're health data, so
+only the champion sees them, and only for children with a confirmed
+place at that session; mentors don't. The family keeps them up to date
+on their account page.
+
 Under the children, **Session team** lists everyone you picked as the
 session's team (champion, mentors and youth mentors). Mark them
 **Present** or **Absent** the same way: the list of who was actually

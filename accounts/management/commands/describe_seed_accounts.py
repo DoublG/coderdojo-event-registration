@@ -11,6 +11,7 @@ from accounts.seed_credentials import (
     generate_password,
     read_credentials,
 )
+from core.audit import without_audit_log
 
 
 def _role_for(user):
@@ -35,6 +36,7 @@ class Command(BaseCommand):
         "get a new password and a row, so every seeded login can be tested."
     )
 
+    @without_audit_log
     def handle(self, *args, **options):
         rows = read_credentials()
         restored = 0

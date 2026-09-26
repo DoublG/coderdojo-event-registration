@@ -42,17 +42,21 @@ AWARD_BELTS = "award_belts"  # award a ninja a belt (redesign phase 5)
 AWARD_BADGES = "award_badges"  # award a ninja a one-off badge (the organisation defines them)
 MANAGE_LIFECYCLE = "manage_lifecycle"  # launch / dormant / archive / reopen the dojo
 POST_UPDATES = "post_updates"  # post/delete the "From this dojo" updates (content.Announcement)
+# See a child's allergies or notes (Ninja.allergies_notes, health data) on the
+# attendance list of a session they have a confirmed place at.
+VIEW_HEALTH_NOTES = "view_health_notes"
 ALL_CAPABILITIES = frozenset({
     TAKE_ATTENDANCE, MANAGE_EVENTS, EDIT_SETTINGS, MANAGE_TEAM, AWARD_BELTS, AWARD_BADGES, MANAGE_LIFECYCLE,
-    POST_UPDATES,
+    POST_UPDATES, VIEW_HEALTH_NOTES,
 })
 
 ROLE_CAPABILITIES = {
     CHAMPION: ALL_CAPABILITIES,
     # Mentors can do everything for day-to-day running and team management;
     # the dojo's lifecycle (launching it, making it dormant, archiving,
-    # reopening) stays with its champion.
-    MENTOR: ALL_CAPABILITIES - {MANAGE_LIFECYCLE},
+    # reopening) stays with its champion, and so do the children's health
+    # notes (the family forms tell parents only the champion sees them).
+    MENTOR: ALL_CAPABILITIES - {MANAGE_LIFECYCLE, VIEW_HEALTH_NOTES},
 }
 
 
@@ -105,6 +109,10 @@ class DojoAccess:
     @property
     def can_post_updates(self):
         return self.can(POST_UPDATES)
+
+    @property
+    def can_view_health_notes(self):
+        return self.can(VIEW_HEALTH_NOTES)
 
 
 def managing_membership(user, dojo):

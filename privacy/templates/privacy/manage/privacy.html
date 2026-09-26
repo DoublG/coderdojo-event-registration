@@ -1,0 +1,80 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Privacy" %}{% endblock %}
+{% block manage_heading %}{% translate "Privacy" %}{% endblock %}
+
+{% block manage_content %}
+  {% comment %}Requests for a copy of someone's data (privacy/views.py, privacy.export), and the champions the retention job can't clean yet (privacy.retention).{% endcomment %}
+  {% if attention %}
+    <section class="cd-card" style="padding: var(--space-5); margin-bottom: var(--space-6);" aria-labelledby="attention-heading">
+      <h2 class="h4" id="attention-heading" style="margin-top: 0;">{% translate "Needs attention" %}</h2>
+      <p class="body-sm">{% blocktranslate %}These champions haven't logged in for almost two years. Their account is cleaned on the date shown, but not while they're the champion of an active dojo: the role has to move to one of the dojo's mentors first, or the dojo has to go dormant. The dojo's mentors have been told on their dashboard. Once the role has moved, the champion leaves this list.{% endblocktranslate %}</p>
+      <div class="cd-table-wrap">
+        <table class="cd-table cd-table--zebra">
+          <thead>
+            <tr>
+              <th class="label" scope="col">{% translate "Dojo" %}</th>
+              <th class="label" scope="col">{% translate "Champion" %}</th>
+              <th class="label" scope="col">{% translate "Last login" %}</th>
+              <th class="label" scope="col">{% translate "To be cleaned on" %}</th>
+              <th class="label" scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in attention %}
+              <tr>
+                <td class="body-sm">{{ row.dojo.name }}</td>
+                <td class="body-sm">{{ row.champion.get_full_name|default:row.champion.username }}{% if row.champion.email %}<br><span class="caption">{{ row.champion.email }}</span>{% endif %}</td>
+                <td class="body-sm">{% if row.last_login %}{{ row.last_login|date:"d/m/Y" }}{% else %}{% translate "Never" %}{% endif %}</td>
+                <td class="body-sm">{{ row.date|date:"d/m/Y" }}{% if row.passed %} <span class="cd-badge cd-badge--outline caption">{% translate "Overdue" %}</span>{% endif %}</td>
+                <td class="body-sm"><a class="cd-btn cd-btn--ghost label" href="{% url 'admin:dojos_dojo_change' row.dojo.id %}">{% translate "Open the dojo" %}</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  <p class="body-sm">{% translate "When someone asks for a copy of their data by mail or post, find their account here and download it. The file holds everything the site keeps about the account and the children it's a guardian of, as the family gets it with Download my data on their account page. Send it only to the account's own email address." %}</p>
+
+  <form method="get" class="cd-card cd-form" style="padding: var(--space-5);">
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="privacy-q">{% translate "Name, email address or username" %}</label>
+      <input class="cd-form__input body" type="search" id="privacy-q" name="q" value="{{ query }}" autofocus>
+    </div>
+    <div class="cd-form__actions">
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Search" %}</button>
+    </div>
+  </form>
+
+  {% if query %}
+    <div class="cd-table-wrap" style="margin-top: var(--space-5);">
+      <table class="cd-table cd-table--zebra">
+        <thead>
+          <tr>
+            <th class="label" scope="col">{% translate "Name" %}</th>
+            <th class="label" scope="col">{% translate "Email" %}</th>
+            <th class="label" scope="col">{% translate "Account" %}</th>
+            <th class="label cd-table__num" scope="col">{% translate "Children" %}</th>
+            <th class="label" scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for account in accounts %}
+            <tr>
+              <td class="body-sm">{{ account.get_full_name|default:account.username }}</td>
+              <td class="body-sm">{{ account.email|default:"—" }}</td>
+              <td class="body-sm">{% if account.is_ninja %}{% translate "Ninja login" %}{% else %}{% translate "Adult" %}{% endif %}{% if not account.is_active %} <span class="cd-badge cd-badge--outline caption">{% translate "Inactive" %}</span>{% endif %}</td>
+              <td class="body-sm cd-table__num">{{ account.children_count }}</td>
+              <td class="body-sm"><a class="cd-btn cd-btn--ghost label" href="{% url 'manage_privacy_export' user_id=account.id %}">{% translate "Download data" %}</a></td>
+            </tr>
+          {% empty %}
+            <tr><td class="body-sm" colspan="5">{% translate "No accounts match." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if accounts|length == search_limit %}<p class="caption">{% blocktranslate %}Showing the first {{ search_limit }}; search more precisely to find others.{% endblocktranslate %}</p>{% endif %}
+  {% endif %}
+{% endblock %}

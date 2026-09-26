@@ -182,6 +182,12 @@ class AdminStaysFullyUsableTests(TestCase):
     EXCEPTIONS = {
         ("applications.BackgroundCheck", "add"): "a review list over existing accounts; the accounts themselves "
                                                  "(check fields included) are fully editable in the User admin",
+        # The one exception to the rule (DATA_MODEL.md §14): a log anyone can
+        # edit proves nothing. Entries are only removed by code (retention,
+        # erasure) or manage.py auditlogflush.
+        ("auditlog.LogEntry", "add"): "the audit log is read-only",
+        ("auditlog.LogEntry", "change"): "the audit log is read-only",
+        ("auditlog.LogEntry", "delete"): "the audit log is read-only",
     }
 
     def test_superuser_can_add_change_and_delete_everything(self):
@@ -397,3 +403,266 @@ class ContactAndCodeOfConductTests(TestCase):
     def test_code_of_conduct_in_the_visitors_language(self):
         self.assertContains(self.client.get(reverse("code_of_conduct")), "call 112")
         self.assertContains(self.client.get(reverse("code_of_conduct"), HTTP_ACCEPT_LANGUAGE="nl-be"), "Gedragscode")
+
+
+class AuditLogCoverageTests(TestCase):
+    """Every model is either recorded in the audit log
+    (AUDITLOG_INCLUDE_TRACKING_MODELS, DATA_MODEL.md §14) or listed here with
+    the reason it isn't, so a new model can't be forgotten."""
+
+    NOT_RECORDED = {
+        "admin.LogEntry": "Django's own admin history, itself a log",
+        "auditlog.LogEntry": "the audit log itself",
+        "auth.Permission": "Django's permission list, from migrations",
+        "contenttypes.ContentType": "Django's list of models, from migrations",
+        "sessions.Session": "logins, changed on every request",
+        "django_celery_beat.ClockedSchedule": "the background jobs' schedule, a technical setting",
+        "django_celery_beat.CrontabSchedule": "the background jobs' schedule, a technical setting",
+        "django_celery_beat.IntervalSchedule": "the background jobs' schedule, a technical setting",
+        "django_celery_beat.SolarSchedule": "the background jobs' schedule, a technical setting",
+        "django_celery_beat.PeriodicTask": "the background jobs' schedule; beat updates it on every run",
+        "django_celery_beat.PeriodicTasks": "beat's change marker",
+        "django_celery_results.ChordCounter": "task bookkeeping",
+        "django_celery_results.GroupResult": "task results",
+        "django_celery_results.TaskResult": "task results",
+        "events.NinjaEngagement": "rebuilt by the site every night",
+        "events.NinjaEngagementChange": "written by the nightly rebuild; itself a history",
+        "events.RegistrationCancellation": "itself a log of cancellations",
+        "geo.AdministrativeBoundary": "reference data, from seed files",
+        "geo.Municipality": "reference data, from seed files",
+        "mailing.BounceRecord": "written by the bounce processing; itself a log",
+        "mailing.EmailMessage": "the mail queue, updated by the workers on every send",
+        "mailing.JourneyDelivery": "written by the journeys job; itself a log",
+        "mailing.ProcessedImapMessage": "bounce-mailbox bookkeeping",
+        "notifications.Notification": "written by the site; marking read is no change worth recording",
+        "privacy.ErasureRecord": "itself the log of erasures, without personal data",
+        "privacy.RetentionNotice": "written by the retention job; itself a log of reminders",
+    }
+
+    def test_every_model_is_recorded_or_has_a_reason(self):
+        from auditlog.registry import auditlog
+        from django.apps import apps
+
+        undecided = sorted(
+            model._meta.label
+            for model in apps.get_models()
+            if not model._meta.auto_created
+            and not auditlog.contains(model)
+            and model._meta.label not in self.NOT_RECORDED
+        )
+        self.assertEqual(undecided, [], "add it to AUDITLOG_INCLUDE_TRACKING_MODELS, or to NOT_RECORDED with a reason")
+        both = sorted(label for label in self.NOT_RECORDED if auditlog.contains(apps.get_model(label)))
+        self.assertEqual(both, [], "recorded, so remove it from NOT_RECORDED")
+
+
+class AuditLogTests(TestCase):
+    """What the audit log records (DATA_MODEL.md §14)."""
+
+    def setUp(self):
+        from accounts.models import Guardianship, Ninja, User
+
+        self.parent = User.objects.create(username="an", email="an@example.com")
+        self.child = Ninja.objects.create(name="Lotte", allergies_notes="Peanuts")
+        Guardianship.objects.create(guardian=self.parent, ninja=self.child)
+
+    def entries(self, obj):
+        from auditlog.models import LogEntry
+
+        return LogEntry.objects.get_for_object(obj).order_by("pk")
+
+    def test_a_change_records_who_made_it_and_no_address(self):
+        from auditlog.context import set_actor
+
+        with set_actor(self.parent):
+            self.child.name = "Lotte P."
+            self.child.save()
+        entry = self.entries(self.child).last()
+        self.assertEqual(entry.actor, self.parent)
+        self.assertEqual(entry.changes_dict["name"], ["Lotte", "Lotte P."])
+        self.assertIsNone(entry.remote_addr)
+
+    def test_a_request_records_the_account_but_no_address_or_port(self):
+        from auditlog.models import LogEntry
+
+        from mailing.models import MailPreference
+
+        self.client.force_login(self.parent)
+        self.client.post(
+            reverse("mail_preferences"),
+            {"category_newsletter": "on", "postal_code": "", "preferred_language": "en-us"},
+            HTTP_X_FORWARDED_FOR="203.0.113.7",
+            HTTP_X_FORWARDED_PORT="443",
+        )
+        preference = MailPreference.objects.get(user=self.parent, category="newsletter")
+        entry = LogEntry.objects.get_for_object(preference).get()
+        self.assertEqual(entry.actor, self.parent)
+        self.assertIsNone(entry.remote_addr)
+        self.assertIsNone(entry.remote_port)
+
+    def test_health_notes_are_masked(self):
+        self.child.allergies_notes = "Peanuts and milk"
+        self.child.save()
+        entry = self.entries(self.child).last()
+        self.assertIn("allergies_notes", entry.changes_dict)
+        self.assertNotIn("milk", str(entry.changes))
+        self.assertNotIn("Peanuts", str(entry.changes))
+
+    def test_passwords_are_masked_and_logins_not_recorded(self):
+        from django.utils import timezone
+
+        before = self.entries(self.parent).count()
+        self.parent.last_login = timezone.now()
+        self.parent.save()
+        self.assertEqual(self.entries(self.parent).count(), before)
+        self.parent.set_password("a new secret")
+        self.parent.save()
+        self.assertNotIn(self.parent.password, str(self.entries(self.parent).last().changes))
+
+    def test_mark_all_present_is_recorded(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from dojos.testing import make_champion, make_dojo
+        from events.models import Event, Registration
+
+        champion = make_champion(username="champ")
+        dojo = make_dojo("Ghent", champion=champion)
+        start = timezone.now()
+        event = Event.objects.create(name="Coding", dojo=dojo, places=5, start_time=start,
+                                     end_time=start + timedelta(hours=2), status=Event.OPEN)
+        registration = Registration.objects.create(event=event, ninja=self.child, waiting_list=False, position=1)
+        self.client.force_login(champion)
+        self.client.post(reverse("dojo_event_attendance_mark_all", args=[dojo.id, event.id]))
+        registration.refresh_from_db()
+        self.assertTrue(registration.attended)
+        entry = self.entries(registration).last()
+        self.assertEqual((entry.actor, entry.changes_dict["attended"]), (champion, ["None", "True"]))
+
+    def test_seeding_is_not_recorded(self):
+        from auditlog.models import LogEntry
+
+        from core.audit import without_audit_log
+
+        @without_audit_log
+        def seed():
+            from accounts.models import Ninja
+
+            Ninja.objects.create(name="Seeded")
+
+        before = LogEntry.objects.count()
+        seed()
+        self.assertEqual(LogEntry.objects.count(), before)
+
+
+class AuditLogAccessTests(TestCase):
+    """Views of special-category data are recorded (DATA_MODEL.md §14 phase 3)."""
+
+    def setUp(self):
+        from datetime import timedelta
+
+        from accounts.models import Guardianship, Ninja, User
+        from dojos.testing import add_member, make_champion, make_mentor
+        from events.models import Event, Registration
+
+        self.champion = make_champion(username="champ")
+        self.dojo = make_dojo("Ghent", champion=self.champion)
+        self.mentor = make_mentor(username="mentor")
+        add_member(self.dojo, self.mentor)
+        parent = User.objects.create(username="an")
+        self.with_notes = Ninja.objects.create(name="Lotte", allergies_notes="Peanuts")
+        self.without_notes = Ninja.objects.create(name="Mats")
+        start = timezone.now() + timedelta(days=1)
+        self.event = Event.objects.create(name="Coding", dojo=self.dojo, places=5, start_time=start,
+                                          end_time=start + timedelta(hours=2), status=Event.OPEN)
+        for position, ninja in enumerate([self.with_notes, self.without_notes]):
+            Guardianship.objects.create(guardian=parent, ninja=ninja)
+            Registration.objects.create(event=self.event, ninja=ninja, waiting_list=False, position=position)
+
+    def views(self, obj):
+        from auditlog.models import LogEntry
+
+        return list(LogEntry.objects.get_for_object(obj).filter(action=LogEntry.Action.ACCESS))
+
+    def test_the_champion_seeing_health_notes_is_recorded(self):
+        self.client.force_login(self.champion)
+        url = reverse("dojo_event_attendance", args=[self.dojo.id, self.event.id])
+        self.assertContains(self.client.get(url), "Peanuts")
+        [entry] = self.views(self.with_notes)
+        self.assertEqual(entry.actor, self.champion)
+        self.assertEqual(self.views(self.without_notes), [])
+        # The dashboard shows the same list, so it's recorded again.
+        self.client.get(reverse("dojo_dashboard", args=[self.dojo.id]))
+        self.assertEqual(len(self.views(self.with_notes)), 2)
+
+    def test_a_mentor_sees_no_notes_so_nothing_is_recorded(self):
+        self.client.force_login(self.mentor)
+        url = reverse("dojo_event_attendance", args=[self.dojo.id, self.event.id])
+        self.assertNotContains(self.client.get(url), "Peanuts")
+        self.assertEqual(self.views(self.with_notes), [])
+
+    def test_opening_a_child_in_the_django_admin_is_recorded(self):
+        from accounts.models import User
+
+        root = User.objects.create(username="root", is_staff=True, is_superuser=True)
+        self.client.force_login(root)
+        url = reverse("admin:accounts_ninja_change", args=[self.with_notes.id])
+        self.assertEqual(self.client.get(url).status_code, 200)
+        [entry] = self.views(self.with_notes)
+        self.assertEqual(entry.actor, root)
+
+    def test_the_organisation_export_is_recorded(self):
+        from accounts.models import OrganisationRole, User
+
+        admin = User.objects.create(username="orgadmin")
+        OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
+        parent = User.objects.get(username="an")
+        self.client.force_login(admin)
+        self.client.get(reverse("manage_privacy_export", args=[parent.id]))
+        [entry] = self.views(parent)
+        self.assertEqual(entry.actor, admin)
+
+
+class AuditLogAdminTests(TestCase):
+    """The audit log is shown only in the Django admin, read-only, to the
+    organisation's admin role (DATA_MODEL.md §14 phase 4)."""
+
+    def setUp(self):
+        from accounts.models import OrganisationRole, User
+
+        self.admin = User.objects.create(username="orgadmin")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.board = User.objects.create(username="board")
+        OrganisationRole.objects.create(account=self.board, role=OrganisationRole.BOARD)
+        self.dojo = make_dojo("Ghent")
+
+    def test_the_admin_role_sees_the_audit_log(self):
+        self.client.force_login(self.admin)
+        self.assertEqual(self.client.get(reverse("admin:auditlog_logentry_changelist")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("admin:dojos_dojo_auditlog", args=[self.dojo.id])).status_code, 200)
+        self.assertContains(self.client.get(reverse("admin:dojos_dojo_changelist")),
+                            reverse("admin:dojos_dojo_auditlog", args=[self.dojo.id]))
+
+    def test_the_board_does_not(self):
+        self.client.force_login(self.board)
+        self.assertEqual(self.client.get(reverse("admin:auditlog_logentry_changelist")).status_code, 403)
+        # The board may view dojos, but not their audit history.
+        self.assertEqual(self.client.get(reverse("admin:dojos_dojo_auditlog", args=[self.dojo.id])).status_code, 403)
+        response = self.client.get(reverse("admin:dojos_dojo_changelist"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, reverse("admin:dojos_dojo_auditlog", args=[self.dojo.id]))
+
+    def test_nobody_can_edit_it_from_the_admin(self):
+        from auditlog.models import LogEntry
+        from django.contrib import admin
+        from django.test import RequestFactory
+
+        from accounts.models import User
+
+        request = RequestFactory().get("/admin/")
+        request.user = User.objects.create(username="root", is_staff=True, is_superuser=True)
+        model_admin = admin.site._registry[LogEntry]
+        self.assertTrue(model_admin.has_view_permission(request))
+        self.assertFalse(model_admin.has_add_permission(request))
+        self.assertFalse(model_admin.has_change_permission(request))
+        self.assertFalse(model_admin.has_delete_permission(request))

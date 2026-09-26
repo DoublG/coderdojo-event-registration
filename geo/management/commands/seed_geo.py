@@ -3,6 +3,7 @@ from pathlib import Path
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
+from core.audit import without_audit_log
 from geo.models import AdministrativeBoundary, Municipality
 
 SEED_DATA_DIR = Path(__file__).resolve().parent.parent.parent / "seed_data"
@@ -19,6 +20,7 @@ class Command(BaseCommand):
         "import_boundaries + `manage.py dumpdata` to refresh the dump itself."
     )
 
+    @without_audit_log
     def handle(self, *args, **options):
         if Municipality.objects.exists() or AdministrativeBoundary.objects.exists():
             self.stdout.write("Municipality/AdministrativeBoundary data already present, skipping.")

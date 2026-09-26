@@ -22,6 +22,7 @@ from pathlib import Path
 from django.conf import settings
 
 CREDENTIALS_FILE = Path(settings.BASE_DIR) / "seed_credentials.csv"
+_REAL_CREDENTIALS_FILE = CREDENTIALS_FILE
 FIELDNAMES = ["role", "username", "email", "password", "description"]
 
 # Seeded accounts use these domains (seeded child logins have no email).
@@ -52,6 +53,16 @@ def read_credentials():
 
 
 def _write(rows):
+    # A test that runs a seeder would otherwise overwrite the developer's real
+    # file with the test database's passwords and descriptions. The test
+    # environment is the only one with a mail outbox.
+    from django.core import mail
+
+    if hasattr(mail, "outbox") and CREDENTIALS_FILE == _REAL_CREDENTIALS_FILE:
+        raise RuntimeError(
+            "A test is writing the real seed_credentials.csv: patch "
+            "accounts.seed_credentials.CREDENTIALS_FILE to a temporary file."
+        )
     with open(CREDENTIALS_FILE, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=FIELDNAMES, extrasaction="ignore")
         writer.writeheader()

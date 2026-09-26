@@ -393,6 +393,16 @@ class DownloadBackgroundCheckTests(_CleanupDocumentsMixin, TestCase):
         self.client.force_login(User.objects.create(username="staff", is_staff=True))
         self.assertEqual(self.client.get(self.url).status_code, 403)
 
+    def test_a_download_is_recorded_in_the_audit_log(self):
+        from auditlog.models import LogEntry
+
+        reviewer = User.objects.create(username="reviewer")
+        reviewer.user_permissions.add(Permission.objects.get(codename="can_review_background_checks"))
+        self.client.force_login(reviewer)
+        self.client.get(self.url)
+        entry = LogEntry.objects.get_for_object(self.user).get(action=LogEntry.Action.ACCESS)
+        self.assertEqual(entry.actor, reviewer)
+
     def test_reviewer_downloads_the_document_until_it_is_decided(self):
         reviewer = User.objects.create(username="reviewer")
         reviewer.user_permissions.add(Permission.objects.get(codename="can_review_background_checks"))

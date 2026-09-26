@@ -1,4 +1,4 @@
-{% load i18n %}{% load static %}<!doctype html>
+{% load i18n %}{% load static %}{% load retention %}<!doctype html>
 {% comment %}
 The organisation's management dashboard (/manage/…): the same app-like
 shell as a dojo's admin area (dojos/_admin_base.html), with the
@@ -106,6 +106,19 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
             <a href="{% url 'manage_badge_list' %}" class="cd-admin-nav__link label{% if active == 'awards' %} cd-admin-nav__link--active{% endif %}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg>
               {% translate "Awards" %}
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="cd-admin-nav__group">
+        <p class="cd-admin-nav__group-label caption">{% translate "Accounts" %}</p>
+        <ul class="cd-admin-nav__list">
+          <li>
+            <a href="{% url 'manage_privacy' %}" class="cd-admin-nav__link label{% if active == 'privacy' %} cd-admin-nav__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>
+              {% translate "Privacy" %}
+              {% retention_attention_count as attention_count %}{% if attention_count %}<span class="cd-admin-nav__count caption" title="{% translate 'Needs attention' %}">{{ attention_count }}</span>{% endif %}
             </a>
           </li>
         </ul>

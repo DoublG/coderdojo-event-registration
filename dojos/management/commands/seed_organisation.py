@@ -10,6 +10,7 @@ from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write
 from applications.models import Application
 from applications.seeding import approve_for_seeding
 from content.models import Promotion
+from core.audit import without_audit_log
 from core.image_library import use_library_image
 from dojos.models import Dojo, DojoMembership
 from events.models import Event
@@ -55,6 +56,7 @@ class Command(BaseCommand):
     )
 
     @transaction.atomic
+    @without_audit_log
     def handle(self, *args, **options):
         rng = random.Random("seed-organisation")
         dojo, dojo_created = Dojo.objects.get_or_create(

@@ -2309,3 +2309,65 @@ class DojoLanguagesTests(TempMediaMixin, TestCase):
                                                       boundary=MultiPolygon(Polygon(((5, 50), (6, 50), (6, 51), (5, 50)))))
         self.assertEqual(region_languages(make_dojo("Liège", province=liege)), ["fr-be"])
         self.assertEqual(region_languages(make_dojo("Nowhere")), ["nl-be"])
+
+
+class HealthNotesOnAttendanceTests(TestCase):
+    """A child's allergies or notes (Ninja.allergies_notes, health data) are
+    shown to the dojo's champion only, on the attendance list of a session
+    the child has a confirmed place at (dojos.access.VIEW_HEALTH_NOTES)."""
+
+    def setUp(self):
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.mentor = make_mentor(username="mentor1")
+        add_member(self.dojo, self.mentor)
+        self.event = Event.objects.create(
+            name="Session", dojo=self.dojo, status=Event.OPEN,
+            start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=10,
+        )
+        self.zoe = Registration.objects.create(
+            event=self.event, ninja=Ninja.objects.create(name="Zoe", allergies_notes="Peanut allergy"),
+            waiting_list=False, position=1,
+        )
+        Registration.objects.create(
+            event=self.event, ninja=Ninja.objects.create(name="Wait", allergies_notes="Lactose intolerant"),
+            waiting_list=True, position=2,
+        )
+        self.url = reverse("dojo_event_attendance", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+
+    def test_only_the_champion_has_the_capability(self):
+        self.assertIn(access.VIEW_HEALTH_NOTES, access.ROLE_CAPABILITIES[access.CHAMPION])
+        self.assertNotIn(access.VIEW_HEALTH_NOTES, access.ROLE_CAPABILITIES[access.MENTOR])
+
+    def test_champion_sees_the_notes_of_children_with_a_place(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url)
+        self.assertContains(response, "Peanut allergy")
+        # The waiting list isn't on the attendance list, so neither are its notes.
+        self.assertNotContains(response, "Lactose intolerant")
+
+    def test_champion_still_sees_them_after_marking_the_row(self):
+        self.client.force_login(self.owner)
+        url = reverse("dojo_event_attendance_mark", kwargs={
+            "dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.zoe.id,
+        })
+        response = self.client.post(url, {"attended": "present"}, HTTP_HX_REQUEST="true")
+        self.assertContains(response, "Peanut allergy")
+
+    def test_champion_sees_them_on_the_dashboard(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": self.dojo.id}))
+        self.assertContains(response, "Peanut allergy")
+
+    def test_mentor_does_not_see_them(self):
+        self.client.force_login(self.mentor)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Zoe")
+        self.assertNotContains(response, "Peanut allergy")
+
+    def test_nothing_shown_without_notes(self):
+        self.zoe.ninja.allergies_notes = ""
+        self.zoe.ninja.save()
+        self.client.force_login(self.owner)
+        self.assertNotContains(self.client.get(self.url), "cd-attendance__health")

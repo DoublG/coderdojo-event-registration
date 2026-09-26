@@ -5,6 +5,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from accounts.models import Ninja
+from core.audit import without_audit_log
 from core.image_library import use_library_image
 from dojos.models import Dojo
 from pathways.models import Pathway
@@ -76,6 +77,7 @@ class Command(BaseCommand):
         "sections have something to show."
     )
 
+    @without_audit_log
     def handle(self, *args, **options):
         today = timezone.localdate()
 

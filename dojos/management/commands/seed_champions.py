@@ -1,14 +1,14 @@
 import random
 
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from django.utils.text import slugify
 
-from django.utils import timezone
-
 from accounts.models import User
+from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
 from applications.models import Application
 from applications.seeding import approve_for_seeding
-from accounts.seed_credentials import CREDENTIALS_FILE, generate_password, write_credentials
+from core.audit import without_audit_log
 from dojos.models import Dojo, DojoMembership
 
 FIRST_NAMES = [
@@ -29,6 +29,7 @@ class Command(BaseCommand):
         "owner-<id>-<slug> login if there is one."
     )
 
+    @without_audit_log
     def handle(self, *args, **options):
         rng = random.Random(1)
         created = reused = 0

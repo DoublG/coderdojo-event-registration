@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
+from core.audit import AuditHistoryAdminMixin, LogAccessAdminMixin
+
 from .models import Guardianship, Ninja, OrganisationRole, User
 
 
@@ -28,7 +30,7 @@ class OrganisationRoleAdmin(admin.ModelAdmin):
 
 
 @admin.register(User)
-class UserAdmin(BaseUserAdmin):
+class UserAdmin(LogAccessAdminMixin, AuditHistoryAdminMixin, BaseUserAdmin):
     list_display = ["username", "email", "first_name", "last_name", "account_type", "is_staff"]
     list_filter = ["account_type", "is_staff", "is_active", "preferred_language"]
     fieldsets = BaseUserAdmin.fieldsets + (
@@ -54,7 +56,13 @@ class NinjaGuardianshipInline(admin.TabularInline):
 
 
 @admin.register(Ninja)
-class NinjaAdmin(admin.ModelAdmin):
+class NinjaAdmin(LogAccessAdminMixin, AuditHistoryAdminMixin, admin.ModelAdmin):
+    """On the site a child always has a guardian (family sign-up, Add a
+    child). A child saved here without one, or left without one by deleting
+    a guardianship or a guardian's account, is a manual fix: the automatic
+    jobs leave it and its own login alone (the retention job,
+    privacy.retention), so it stays until it's handled here."""
+
     list_display = ["name", "date_of_birth", "gender", "home_dojo", "current_belt", "account"]
     list_filter = ["gender"]
     search_fields = ["name"]

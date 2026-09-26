@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from content.models import Sponsor
+from core.audit import without_audit_log
 
 # CoderDojo Belgium's sponsors and partners, as listed on coderdojobelgium.be
 # (September 2026), in alphabetical order. No logos: upload them on the
@@ -21,6 +22,7 @@ SPONSORS = [
 class Command(BaseCommand):
     help = "Seed the homepage's sponsors (\"Made possible by\"). Rerun-safe: only creates the ones that are missing."
 
+    @without_audit_log
     def handle(self, *args, **options):
         created = 0
         for order, (name, url) in enumerate(SPONSORS, start=1):

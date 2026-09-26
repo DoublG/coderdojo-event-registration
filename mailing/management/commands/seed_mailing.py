@@ -5,6 +5,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.urls import reverse
 
+from core.audit import without_audit_log
 from dojos.models import Dojo
 from mailing.models import Campaign, Segment, SegmentGroup, SegmentRule
 from mailing.seed_templates import CAMPAIGNS, NEW_DOJO
@@ -20,6 +21,7 @@ class Command(BaseCommand):
     )
 
     @transaction.atomic
+    @without_audit_log
     def handle(self, *args, **options):
         call_command("load_mail_templates", stdout=self.stdout)
 

@@ -20,7 +20,7 @@ ignore = [
 [tool.ruff.lint.isort]
 known-first-party = [
     "accounts", "applications", "content", "core", "dojos",
-    "events", "geo", "notifications", "pathways", "website",
+    "events", "geo", "notifications", "pathways", "privacy", "website",
 ]
 
 [tool.ruff.format]

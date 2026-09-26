@@ -3,6 +3,7 @@ from pathlib import Path
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
+from core.audit import without_audit_log
 from dojos.languages import region_languages
 from dojos.models import Dojo
 from geo.models import AdministrativeBoundary, Municipality
@@ -26,6 +27,7 @@ class Command(BaseCommand):
         "real import_municipalities/import_boundaries) to have run first."
     )
 
+    @without_audit_log
     def handle(self, *args, **options):
         if Dojo.objects.exists():
             self.stdout.write("Dojo data already present, skipping.")

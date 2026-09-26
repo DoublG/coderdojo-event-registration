@@ -218,6 +218,19 @@ class PromotionDashboardTests(TestCase):
 
 
 class SeedOrganisationTests(TestCase):
+    def setUp(self):
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+
+        # The seeder writes the organisation champion's login; keep it out of
+        # the developer's real seed_credentials.csv.
+        self.dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.dir.cleanup)
+        patcher = patch("accounts.seed_credentials.CREDENTIALS_FILE", Path(self.dir.name) / "seed_credentials.csv")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_seeds_the_organisation_and_is_rerun_safe(self):
         call_command("seed_organisation", stdout=StringIO())
         call_command("seed_organisation", stdout=StringIO())

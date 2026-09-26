@@ -1,7 +1,7 @@
 {% load i18n %}{% comment %}
 The child detail page's header, swapped in over htmx when the name is
 clicked (see _child_header_display.html). Submitting saves the name,
-avatar and birthday and swaps back to the display header; Cancel just
+avatar, birthday and the other details and swaps back to the display header; Cancel just
 reloads, since nothing's been saved yet.
 Expects `child`, `icon_choices`, `current_icon`, `gender_choices` and
 `home_dojo_choices` (public dojos, accounts.home_dojo) in context.
@@ -43,6 +43,13 @@ Expects `child`, `icon_choices`, `current_icon`, `gender_choices` and
             <option value="{{ value }}" {% if value == current_icon %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
+      </div>
+    </div>
+    <div class="cd-form__row">
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="ec-notes">{% translate "Allergies or notes (optional)" %}</label>
+        <textarea class="cd-form__textarea body" id="ec-notes" name="allergies_notes" rows="2" placeholder="{% translate "None" %}">{{ child.allergies_notes }}</textarea>
+        <p class="cd-form__help caption">{% translate "Only the champion (the person running the dojo) sees this, on the list of a session your child is signed up for." %}</p>
       </div>
     </div>
     <div class="cd-form__actions">

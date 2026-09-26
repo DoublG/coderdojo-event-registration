@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from accounts.models import User
+from core.audit import LogAccessAdminMixin
 
 from . import services
 from .models import Application, BackgroundCheck, BackgroundCheckHistory
@@ -114,7 +115,7 @@ class BackgroundCheckHistoryAdmin(admin.ModelAdmin):
 
 
 @admin.register(BackgroundCheck)
-class BackgroundCheckAdmin(admin.ModelAdmin):
+class BackgroundCheckAdmin(LogAccessAdminMixin, admin.ModelAdmin):
     """Reviewers' list of accounts with a background check in progress or on
     record. The document is on private storage with no public URL: the only
     way to see it — even from here — is the permission-gated download link."""

@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from content.models import Testimonial
+from core.audit import without_audit_log
 
 # Site-wide quotes (Testimonial.dojo=None) — the homepage picks one of
 # these at random on every load (see core.views.home).
@@ -46,6 +47,7 @@ TESTIMONIALS = [
 class Command(BaseCommand):
     help = "Seed a handful of site-wide testimonials the homepage picks from at random."
 
+    @without_audit_log
     def handle(self, *args, **options):
         created = 0
         for t in TESTIMONIALS:

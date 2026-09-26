@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from content.models import FAQ
+from core.audit import without_audit_log
 from core.image_library import use_library_image
 from pathways.models import Pathway, PathwayProject, PathwayStep, Skill
 
@@ -307,6 +308,7 @@ class Command(BaseCommand):
     help = ("Seed the learning pathways (Scratch, Python, Web, micro:bit, Raspberry Pi with Arduino and ESP32, 3D printing, "
             "mBot, Sonic Pi, Unity) with steps, projects, skills and FAQs.")
 
+    @without_audit_log
     def handle(self, *args, **options):
         created, updated = 0, 0
 

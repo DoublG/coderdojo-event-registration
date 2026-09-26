@@ -789,7 +789,10 @@ def dojo_event_attendance_mark_all(request, dojo_id, event_id):
 
     if request.method == "POST":
         confirmed = event.registration_set.filter(waiting_list=False)
-        confirmed.update(attended=True)
+        # One save per row, not QuerySet.update(): the audit log only sees saves.
+        for registration in confirmed.exclude(attended=True):
+            registration.attended = True
+            registration.save(update_fields=["attended"])
         for ninja in Ninja.objects.filter(registration__in=confirmed):
             sync_milestones(ninja, access.membership)
         for membership in event.team.all():

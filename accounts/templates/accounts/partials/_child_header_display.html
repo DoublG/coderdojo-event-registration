@@ -21,6 +21,9 @@ the ninja views their own page — then the name isn't clickable).
       {% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}
       {% if child.member_since %} · {% blocktranslate with date=child.member_since|date:"F Y" %}Member since {{ date }}{% endblocktranslate %}{% endif %}
     </p>
+    {% if child.allergies_notes %}
+      <p class="body-sm"><span class="cd-badge cd-badge--warning caption">{% translate "Allergies or notes" %}</span> {{ child.allergies_notes|linebreaksbr }}</p>
+    {% endif %}
     {% for membership in child.youth_mentor_memberships %}
       <p class="body-sm"><span class="cd-badge cd-badge--accent caption">{% translate "Youth mentor" %}</span> {% blocktranslate with dojo=membership.dojo.name %}at {{ dojo }}{% endblocktranslate %}</p>
     {% endfor %}
