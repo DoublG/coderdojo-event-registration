@@ -25,12 +25,12 @@ class BelgiumOSMWidget(OSMWidget):
         extend = False
         css = {
             "all": (
-                "https://cdn.jsdelivr.net/npm/ol@v10.9.0/ol.css",
+                "geo/vendor/ol-10.9.0/ol.css",
                 "gis/css/ol3.css",
             )
         }
         js = (
-            "https://cdn.jsdelivr.net/npm/ol@v10.9.0/dist/ol.js",
+            "geo/vendor/ol-10.9.0/ol.js",
             "geo/js/belgium_map_widget.js",
         )
 

@@ -1,6 +1,9 @@
+import re
 from datetime import date
 
+from django.conf import settings
 from django.contrib.gis.geos import MultiPolygon, Polygon
+from django.contrib.staticfiles import finders
 from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
@@ -977,3 +980,48 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             if (value := getattr(field, attr)) and not isinstance(value, Promise)
         ]
         self.assertEqual(untranslated, [])
+
+
+class VendoredHtmxTests(TestCase):
+    """htmx comes from our own static files (core/static/core/vendor/htmx/),
+    never from a CDN: one connection less per page, and visitors' IP
+    addresses don't go to a third party. Covers the three page shells."""
+
+    SCRIPT_SRC = re.compile(r'<script[^>]*\ssrc="([^"]+)"')
+
+    def script_sources(self, response):
+        self.assertEqual(response.status_code, 200)
+        return self.SCRIPT_SRC.findall(response.content.decode())
+
+    def assert_scripts_are_ours(self, response, *expected):
+        sources = self.script_sources(response)
+        for src in sources:
+            self.assertTrue(src.startswith("/"), f"{src} is loaded from another site")
+            if src.startswith(settings.STATIC_URL):
+                path = src.removeprefix(settings.STATIC_URL)
+                self.assertIsNotNone(finders.find(path), f"{src} doesn't exist")
+        for name in expected:
+            self.assertTrue(any(src.endswith(name) for src in sources), f"{name} isn't loaded")
+
+    def test_the_public_site(self):
+        cache.clear()
+        self.assert_scripts_are_ours(self.client.get(reverse("home")), "htmx-2.0.4.min.js")
+
+    def test_the_dojo_admin_area(self):
+        from dojos.testing import make_champion
+
+        champion = make_champion(username="champ")
+        dojo = make_dojo("Ghent", champion=champion)
+        self.client.force_login(champion)
+        response = self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": dojo.id}))
+        self.assert_scripts_are_ours(response, "htmx-2.0.4.min.js", "htmx-ext-ws-2.0.1.js")
+
+    def test_the_organisation_dashboard(self):
+        from accounts.models import OrganisationRole, User
+
+        admin = User.objects.create(username="orgadmin")
+        OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
+        self.client.force_login(admin)
+        response = self.client.get(reverse("manage_home"), follow=True)
+        self.assertTemplateUsed(response, "core/_manage_base.html")
+        self.assert_scripts_are_ours(response, "htmx-2.0.4.min.js")
