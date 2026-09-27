@@ -1,4 +1,4 @@
-{% load i18n %}{% load static %}{% load retention %}<!doctype html>
+{% load i18n %}{% load static %}{% load retention %}{% load js_catalog %}<!doctype html>
 {% comment %}
 The organisation's management dashboard (/manage/…): the same app-like
 shell as a dojo's admin area (dojos/_admin_base.html), with the
@@ -30,7 +30,7 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
 </head>
 <body>
 <script src="{% static 'core/vendor/htmx/htmx-2.0.4.min.js' %}"></script>
-<script src="{% url 'javascript-catalog' %}"></script>
+<script src="{% javascript_catalog_url %}"></script>
 <script src="{% static 'core/js/bundle.js' %}"></script>
 
 <div class="cd-root admin-page-root" style="padding: 0;">

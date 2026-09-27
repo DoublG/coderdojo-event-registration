@@ -1,4 +1,4 @@
-{% load i18n %}{% load static %}<!doctype html>
+{% load i18n %}{% load static %}{% load js_catalog %}<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -16,7 +16,7 @@
 <body>
 <script src="{% static 'core/vendor/htmx/htmx-2.0.4.min.js' %}"></script>
 <script src="{% static 'core/vendor/htmx/htmx-ext-ws-2.0.1.js' %}"></script>
-<script src="{% url 'javascript-catalog' %}"></script>
+<script src="{% javascript_catalog_url %}"></script>
 <script src="{% static 'core/js/bundle.js' %}"></script>
 <!-- Never swapped by anything (not the bell's own oob updates, not mark-all-read) — this is
      purely what holds the WebSocket open for the life of the page; see

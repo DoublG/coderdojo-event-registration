@@ -1,4 +1,4 @@
-{% load static i18n %}<!doctype html>
+{% load static i18n %}{% load js_catalog %}<!doctype html>
 {% comment %}
   Theme is read straight from the "theme" cookie the nav's toggle sets (see
   menu.html), so the very first render already has the right theme — no
@@ -21,7 +21,7 @@
 </head>
 <body>
 <script src="{% static 'core/vendor/htmx/htmx-2.0.4.min.js' %}"></script>
-<script src="{% url 'javascript-catalog' %}"></script>
+<script src="{% javascript_catalog_url %}"></script>
 <script src="{% static 'core/js/bundle.js' %}"></script>
 
 <div class="cd-root {% block root_class %}{% endblock %}" style="padding: 0;">

@@ -1025,3 +1025,48 @@ class VendoredHtmxTests(TestCase):
         response = self.client.get(reverse("manage_home"), follow=True)
         self.assertTemplateUsed(response, "core/_manage_base.html")
         self.assert_scripts_are_ours(response, "htmx-2.0.4.min.js")
+
+
+class JavaScriptCatalogTests(TestCase):
+    """The pages load bundle.js's texts from /jsi18n/<language>/<version>/,
+    which browsers cache for a year (core.jsi18n)."""
+
+    def test_the_page_links_the_catalog_for_its_language(self):
+        from core.jsi18n import catalog_version
+
+        cache.clear()
+        response = self.client.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="nl-be")
+        self.assertContains(response, f'<script src="/jsi18n/nl-be/{catalog_version()}/"></script>', html=True)
+
+    def test_the_language_comes_from_the_url_not_the_browser(self):
+        url = reverse("javascript-catalog-versioned", kwargs={"language": "nl-be", "version": "any"})
+        response = self.client.get(url, HTTP_ACCEPT_LANGUAGE="fr-be")
+        self.assertContains(response, "Zijbalk vastzetten")
+        self.assertIn("immutable", response["Cache-Control"])
+        self.assertIn("max-age=31536000", response["Cache-Control"])
+
+    def test_an_unknown_language_is_not_found(self):
+        url = reverse("javascript-catalog-versioned", kwargs={"language": "de-de", "version": "any"})
+        self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_new_translations_get_a_new_version(self):
+        """A compilemessages changes the URL, also on a running runserver."""
+        import tempfile
+        from pathlib import Path
+        from unittest import mock
+
+        from django.utils.autoreload import file_changed
+
+        from core import jsi18n
+
+        with tempfile.TemporaryDirectory() as folder:
+            mo = Path(folder) / "djangojs.mo"
+            mo.write_bytes(b"old")
+            with mock.patch.object(jsi18n, "_catalog_files", return_value=[mo]):
+                jsi18n.catalog_version.cache_clear()
+                before = jsi18n.catalog_version()
+                mo.write_bytes(b"new")
+                self.assertEqual(jsi18n.catalog_version(), before)
+                file_changed.send(sender=None, file_path=mo)
+                self.assertNotEqual(jsi18n.catalog_version(), before)
+        jsi18n.catalog_version.cache_clear()

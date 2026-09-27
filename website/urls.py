@@ -21,6 +21,7 @@ from django.views.i18n import JavaScriptCatalog
 from oauth2_provider import views as oauth2_views
 
 from api.v1 import api as api_v1
+from core import jsi18n
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -28,6 +29,8 @@ urlpatterns = [
         "i18n/", include("django.conf.urls.i18n")
     ),  # provides the set_language view used by the menu's language switcher
     path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),  # the texts bundle.js's gettext() uses
+    # The same catalog at a URL browsers cache for a year; what the pages load.
+    path("jsi18n/<str:language>/<str:version>/", jsi18n.javascript_catalog, name="javascript-catalog-versioned"),
     path("", include("core.urls")),
     path("", include("accounts.urls")),
     path("", include("api.urls")),
