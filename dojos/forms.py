@@ -1,5 +1,6 @@
 from django import forms
 from django.conf import settings
+from django.utils.functional import lazy
 from django.utils.translation import gettext_lazy as _
 
 from content.models import Announcement
@@ -11,6 +12,7 @@ from core.content_languages import (
     save_translation_fields,
 )
 from core.image_library import library_filename, use_library_image
+from events.models import Badge, Belt
 
 from .models import Dojo
 from .template_icons import TEMPLATE_ICONS
@@ -240,3 +242,68 @@ class TransferChampionForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields["membership_id"].queryset = candidates
         self.fields["membership_id"].label_from_instance = lambda membership: membership.name
+
+
+class TitledSelect(forms.Select):
+    """A select whose options can carry a tooltip (`titles`: value → text)."""
+
+    def __init__(self, *args, titles=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.titles = titles or {}
+
+    def create_option(self, name, value, *args, **kwargs):
+        option = super().create_option(name, value, *args, **kwargs)
+        if title := self.titles.get(str(value)):
+            option["attrs"]["title"] = title
+        return option
+
+
+class AwardForm(forms.Form):
+    """An attendance row's "Award belt" / "Award badge" form. The select
+    offers what the ninja can still get, but any belt or badge is accepted
+    here: events.awards decides, and the view puts its error on the field
+    (a page left open can offer one that's no longer allowed)."""
+
+    field = None  # "belt" or "badge"
+    note_placeholder = None
+    note = forms.CharField(label=_("Note (optional)"), required=False, max_length=300)
+
+    def __init__(self, *args, registration, offered, **kwargs):
+        kwargs.setdefault("auto_id", f"{self.field}-{registration.pk}-%s")
+        super().__init__(*args, **kwargs)
+        self.order_fields([self.field, "note"])
+        field = self.fields[self.field]
+        field.queryset = field.queryset.model.objects.all()
+        field.label_from_instance = lambda award: award.localized("name")
+        self.offer(offered)
+        name, placeholder = registration.ninja.name, self.note_placeholder
+        self.fields["note"].widget.attrs["placeholder"] = lazy(lambda: placeholder % {"name": name}, str)()
+
+    def offer(self, offered):
+        """What the select shows (the queryset still accepts any)."""
+        self.offered = list(offered)
+        self.fields[self.field].widget.choices = [(award.pk, award.localized("name")) for award in self.offered]
+
+
+class AwardBeltForm(AwardForm):
+    field = "belt"
+    note_placeholder = _("What %(name)s showed")
+    belt = forms.ModelChoiceField(
+        label=_("Belt"), queryset=Belt.objects.none(), empty_label=None,
+        error_messages={"required": _("Pick a belt to award."), "invalid_choice": _("Pick a belt to award.")},
+    )
+
+
+class AwardBadgeForm(AwardForm):
+    field = "badge"
+    note_placeholder = _("What %(name)s did")
+    badge = forms.ModelChoiceField(
+        label=_("Badge"), queryset=Badge.objects.none(), empty_label=None, widget=TitledSelect,
+        error_messages={"required": _("Pick a badge to award."), "invalid_choice": _("Pick a badge to award.")},
+    )
+
+    def offer(self, offered):
+        super().offer(offered)
+        self.fields["badge"].widget.titles = {
+            str(badge.pk): badge.localized("criteria") for badge in self.offered if badge.criteria
+        }

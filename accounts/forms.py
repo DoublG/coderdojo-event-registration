@@ -337,7 +337,13 @@ class EditChildForm(ChildForm):
         ).order_by("name")
         self.fields["home_dojo"].label_from_instance = lambda dojo: dojo.name
         self.fields["home_dojo"].initial = child.home_dojo_id
-        self.fields["icon"].initial = library_filename(child.photo, "ninjas")
+        # A photo that isn't one of the standard avatars (an upload, or none
+        # yet) is kept unless another avatar is picked.
+        current = library_filename(child.photo, "ninjas")
+        if not current:
+            keep = _("Keep the current photo") if child.photo else _("No avatar")
+            self.fields["icon"].choices = [("", keep), *TEMPLATE_KID_AVATARS]
+        self.fields["icon"].initial = current or ""
         if self.is_bound:
             data = self.data.copy()
             for name in self.KEPT_WHEN_MISSING:

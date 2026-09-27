@@ -1886,7 +1886,8 @@ class AwardBeltViewTests(TestCase):
         self.client.post(self.url, {"belt": self.yellow.id}, HTTP_HX_REQUEST="true")
         response = self.client.post(self.url, {"belt": self.white.id}, HTTP_HX_REQUEST="true")
 
-        self.assertEqual(response.context["belt_error"], "Mila already has the Yellow belt (or higher).")
+        self.assertEqual(response.context["belt_forms"][self.ninja.id].errors["belt"], ["Mila already has the Yellow belt (or higher)."])
+        self.assertContains(response, "Mila already has the Yellow belt (or higher).")
         self.assertEqual(self.ninja.belts.count(), 1)
 
     def test_needs_award_belts_and_the_right_event(self):
@@ -1969,8 +1970,20 @@ class AwardBadgeViewTests(TestCase):
     def test_a_refused_award_shows_the_message_in_the_row(self):
         self.client.force_login(self.owner)
         response = self.client.post(self.url, {"badge": self.band.id}, HTTP_HX_REQUEST="true")
-        self.assertEqual(response.context["badge_error"], "Milestones are awarded automatically when attendance is marked.")
+        self.assertEqual(response.context["badge_forms"][self.ninja.id].errors["badge"],
+                         ["Milestones are awarded automatically when attendance is marked."])
+        self.assertContains(response, "Milestones are awarded automatically when attendance is marked.")
         self.assertFalse(self.ninja.badges.exists())
+
+    def test_no_badge_picked_is_refused(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(self.url, {"badge": ""}, HTTP_HX_REQUEST="true")
+        self.assertEqual(response.context["badge_forms"][self.ninja.id].errors["badge"], ["Pick a badge to award."])
+        self.assertFalse(self.ninja.badges.exists())
+
+    def test_the_criteria_are_the_options_tooltip(self):
+        self.client.force_login(self.owner)
+        self.assertContains(self.client.get(self.page), 'title="Build a playable game."')
 
     def test_needs_award_badges_and_the_right_event(self):
         self.client.force_login(self.mentor)

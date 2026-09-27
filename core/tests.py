@@ -822,6 +822,8 @@ class SiteFormTextsAreTranslatedTests(TestCase):
         from dojos.forms import (
             AddMentorForm,
             AnnouncementForm,
+            AwardBadgeForm,
+            AwardBeltForm,
             DojoCreateForm,
             DojoProfileForm,
             PromoteYouthMentorForm,
@@ -829,7 +831,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
         )
         from dojos.testing import make_dojo
         from events.forms import BadgeForm, EventForm
-        from events.models import Event
+        from events.models import Event, Registration
         from mailing.forms import CampaignForm, JourneyForm, NewTemplateForm, SegmentForm, TemplateVersionForm
         from privacy.forms import ConfirmUsernameForm
 
@@ -847,6 +849,8 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             PromoteYouthMentorForm(candidates=Ninja.objects.none()),
             TransferChampionForm(candidates=bruges.memberships.all()), ApiClientForm(),
             AddChildForm(guardian=User(last_name="Peeters")), EditChildForm(instance=Ninja(name="Emma")), SignUpChildForm(),
+            AwardBeltForm(registration=Registration(pk=1, ninja=Ninja(name="Emma")), offered=[]),
+            AwardBadgeForm(registration=Registration(pk=1, ninja=Ninja(name="Emma")), offered=[]),
         ]
 
     def test_labels_and_help_texts_are_translated(self):

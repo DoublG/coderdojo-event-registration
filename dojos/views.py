@@ -43,6 +43,8 @@ from .access import (
 from .forms import (
     AddMentorForm,
     AnnouncementForm,
+    AwardBadgeForm,
+    AwardBeltForm,
     DojoCreateForm,
     DojoProfileForm,
     DojoSearchForm,
@@ -200,16 +202,33 @@ def _attendance_context(event):
         # For each row's pathway picker: every pathway, the session's own first.
         "event_pathway_ids": event_pathway_ids,
         "all_pathways": sorted(Pathway.objects.all(), key=lambda p: (p.id not in event_pathway_ids, p.name)),
-        # For each row's "Award belt" picker (only belts above the ninja's current one are offered).
-        "all_belts": list(Belt.objects.all()),
-        # For each row's "Award badge" picker: the one-off badges the ninja hasn't earned yet.
-        "awardable_badges_by_ninja": _awardable_badges(registrations),
+        # Each row's "Award belt" and "Award badge" forms, for a ninja with
+        # something left to award: belts above their current one, one-off
+        # badges they haven't earned yet.
+        "belt_forms": _award_forms(AwardBeltForm, registrations, _awardable_belts(registrations)),
+        "badge_forms": _award_forms(AwardBadgeForm, registrations, _awardable_badges(registrations)),
         # How each ninja comes to this dojo (last night's events.engagement snapshot).
         "engagement_by_ninja": {
             row.ninja_id: row
             for row in NinjaEngagement.objects.filter(dojo_id=event.dojo_id,
                                                       ninja_id__in=[r.ninja_id for r in registrations])
         },
+    }
+
+
+def _awardable_belts(registrations):
+    belts = list(Belt.objects.all())
+    result = {}
+    for registration in registrations:
+        current = registration.ninja.current_belt
+        result[registration.ninja_id] = [belt for belt in belts if not current or belt.level > current.level]
+    return result
+
+
+def _award_forms(form_class, registrations, offers):
+    return {
+        registration.ninja_id: form_class(registration=registration, offered=offers[registration.ninja_id])
+        for registration in registrations if offers[registration.ninja_id]
     }
 
 
@@ -712,78 +731,60 @@ def dojo_event_registration_pathways(request, dojo_id, event_id, registration_id
     return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
 
 
-@login_required
-def dojo_event_award_belt(request, dojo_id, event_id, registration_id):
-    """Award the ninja on this attendance row a belt (POST `belt`, optional
-    `note`), as the viewer's champion/mentor membership. The rules (a belt
-    above their current one; see events.awards.award_belt) raise BeltError,
-    shown inside the row. Same htmx/no-JS handling as
-    dojo_event_attendance_mark."""
-    access = require_dojo_access(request, dojo_id, AWARD_BELTS)
+def _award_view(request, access, event_id, registration_id, form_class, forms_key, award, error_class):
+    """The "Award belt" / "Award badge" forms on an attendance row: the rules
+    (events.awards) raise `error_class`, shown under the field in the
+    re-rendered row. Same htmx/no-JS handling as dojo_event_attendance_mark."""
     dojo = access.dojo
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
     registration = get_object_or_404(
         Registration.objects.select_related("ninja"),
         id=registration_id, event=event, waiting_list=False,
     )
-    belt_error = None
+    form = None
     if request.method == "POST":
-        belt = Belt.objects.filter(id=request.POST.get("belt") or None).first()
-        try:
-            if belt is None:
-                raise BeltError(_("Pick a belt to award."))
-            award_belt(registration.ninja, belt, access.membership, note=request.POST.get("note", ""))
-        except BeltError as error:
-            belt_error = str(error)
-            if not request.headers.get("HX-Request"):
-                messages.error(request, belt_error)
+        form = form_class(request.POST, registration=registration, offered=[])
+        if form.is_valid():
+            try:
+                award(registration.ninja, form.cleaned_data[form.field], access.membership, note=form.cleaned_data["note"])
+            except error_class as error:
+                form.add_error(form.field, str(error))
+        if form.errors and not request.headers.get("HX-Request"):
+            messages.error(request, " ".join(error for errors in form.errors.values() for error in errors))
 
     if request.headers.get("HX-Request"):
         context = {
-            "dojo": dojo, "dojo_access": access, **_attendance_context(event), "belt_error": belt_error,
+            "dojo": dojo, "dojo_access": access, **_attendance_context(event),
             "registration": Registration.objects.select_related("ninja").prefetch_related("pathways").get(
                 pk=registration.pk,
             ),
         }
+        if form is not None and form.errors:
+            # The posted form, with its error, offering what the row offers
+            # now (maybe nothing: the error still shows, until the next load).
+            fresh = context[forms_key].get(registration.ninja_id)
+            form.offer(fresh.offered if fresh else [])
+            context[forms_key][registration.ninja_id] = form
         return render(request, "dojos/partials/_attendance_row.html", context)
     return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
+
+
+@login_required
+def dojo_event_award_belt(request, dojo_id, event_id, registration_id):
+    """Award the ninja on this attendance row a belt (AwardBeltForm), as the
+    viewer's champion/mentor membership: only a belt above their current one
+    (events.awards.award_belt)."""
+    access = require_dojo_access(request, dojo_id, AWARD_BELTS)
+    return _award_view(request, access, event_id, registration_id, AwardBeltForm, "belt_forms", award_belt, BeltError)
 
 
 @login_required
 def dojo_event_award_badge(request, dojo_id, event_id, registration_id):
-    """Award the ninja on this attendance row a one-off badge (POST `badge`,
-    optional `note`), as the viewer's champion/mentor membership. The
-    organisation defines the badges (events.manage); the rules are in
-    events.awards.award_badge, whose BadgeError is shown inside the row.
-    Same htmx/no-JS handling as dojo_event_award_belt."""
+    """Award the ninja on this attendance row a one-off badge (AwardBadgeForm),
+    as the viewer's champion/mentor membership. The organisation defines the
+    badges (events.manage); the rules are in events.awards.award_badge."""
     access = require_dojo_access(request, dojo_id, AWARD_BADGES)
-    dojo = access.dojo
-    event = get_object_or_404(Event, id=event_id, dojo=dojo)
-    registration = get_object_or_404(
-        Registration.objects.select_related("ninja"),
-        id=registration_id, event=event, waiting_list=False,
-    )
-    badge_error = None
-    if request.method == "POST":
-        badge = Badge.objects.filter(id=request.POST.get("badge") or None).first()
-        try:
-            if badge is None:
-                raise BadgeError(_("Pick a badge to award."))
-            award_badge(registration.ninja, badge, access.membership, note=request.POST.get("note", ""))
-        except BadgeError as error:
-            badge_error = str(error)
-            if not request.headers.get("HX-Request"):
-                messages.error(request, badge_error)
-
-    if request.headers.get("HX-Request"):
-        context = {
-            "dojo": dojo, "dojo_access": access, **_attendance_context(event), "badge_error": badge_error,
-            "registration": Registration.objects.select_related("ninja").prefetch_related("pathways").get(
-                pk=registration.pk,
-            ),
-        }
-        return render(request, "dojos/partials/_attendance_row.html", context)
-    return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
+    return _award_view(request, access, event_id, registration_id, AwardBadgeForm, "badge_forms", award_badge, BadgeError)
 
 
 @login_required

@@ -355,6 +355,24 @@ class EditChildViewTests(TestCase):
         self.child.refresh_from_db()
         self.assertEqual(self.child.gender, Ninja.GIRL)
 
+    def test_an_uploaded_photo_is_kept_unless_an_avatar_is_picked(self):
+        Ninja.objects.filter(pk=self.child.pk).update(photo="participants/own-photo.jpg")
+        self.client.force_login(self.guardian)
+        url = reverse("edit_ninja", kwargs={"ninja_id": self.child.id})
+        self.assertContains(self.client.get(url), '<option value="" selected>Keep the current photo</option>', html=True)
+
+        self.client.post(url, {"name": "Kid One", "icon": ""})
+        self.child.refresh_from_db()
+        self.assertEqual(self.child.photo.name, "participants/own-photo.jpg")
+
+    def test_a_child_without_a_photo_keeps_none_unless_an_avatar_is_picked(self):
+        self.client.force_login(self.guardian)
+        url = reverse("edit_ninja", kwargs={"ninja_id": self.child.id})
+        self.assertContains(self.client.get(url), '<option value="" selected>No avatar</option>', html=True)
+        self.client.post(url, {"name": "Kid One", "icon": ""})
+        self.child.refresh_from_db()
+        self.assertFalse(self.child.photo)
+
     def test_edit_form_preselects_the_gender(self):
         Ninja.objects.filter(pk=self.child.pk).update(gender=Ninja.OTHER)
         self.client.force_login(self.guardian)
