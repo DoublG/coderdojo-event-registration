@@ -802,10 +802,16 @@ class SiteFormTextsAreTranslatedTests(TestCase):
     as_field_group here."""
 
     def forms(self):
-        from accounts.forms import ForcedPasswordChangeForm, LoginForm, StyledPasswordResetForm, StyledSetPasswordForm
+        from accounts.forms import (
+            ForcedPasswordChangeForm,
+            LoginForm,
+            RegisterGuardianForm,
+            StyledPasswordResetForm,
+            StyledSetPasswordForm,
+        )
         from accounts.models import User
         from accounts.two_step_forms import AppSetupForm, ConfirmPasswordForm
-        from applications.forms import BackgroundCheckUploadForm
+        from applications.forms import BackgroundCheckUploadForm, ChampionApplicationForm, MentorApplicationForm
         from content.forms import PromotionForm, SponsorForm
         from dojos.forms import AnnouncementForm, DojoCreateForm
         from dojos.testing import make_dojo
@@ -818,6 +824,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             NewTemplateForm(), TemplateVersionForm(), BackgroundCheckUploadForm(),
             AppSetupForm(key="00" * 20, user=user), ConfirmPasswordForm(user),
             LoginForm(), StyledPasswordResetForm(), StyledSetPasswordForm(user), ForcedPasswordChangeForm(user),
+            ChampionApplicationForm(account=user), MentorApplicationForm(account=user), RegisterGuardianForm(),
         ]
 
     def test_labels_and_help_texts_are_translated(self):

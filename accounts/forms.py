@@ -105,37 +105,32 @@ class RegisterGuardianForm(forms.Form):
     since they're a dynamic, JS-managed set of rows rather than a fixed
     set of fields a Form/formset maps cleanly onto."""
 
-    name = forms.CharField(
-        max_length=150,
-        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "Jane Doe"}),
-    )
-    email = forms.EmailField(
-        widget=forms.EmailInput(attrs={"class": "cd-form__input body", "placeholder": "jane.doe@example.com"}),
-    )
+    # The input classes come from core.forms.SiteBoundField.
+    name = forms.CharField(label=_("Full name"), max_length=150, widget=forms.TextInput(attrs={"placeholder": "Jane Doe"}))
+    email = forms.EmailField(label=_("Email"), widget=forms.EmailInput(attrs={"placeholder": "jane.doe@example.com"}))
     phone = forms.CharField(
-        required=False,
-        max_length=30,
-        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "+32 4xx xx xx xx"}),
+        label=_("Phone"), required=False, max_length=30,
+        help_text=_("Only used if we need to reach you during a session."),
+        widget=forms.TextInput(attrs={"placeholder": "+32 4xx xx xx xx"}),
     )
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"class": "cd-form__input body"}),
-    )
+    password = forms.CharField(label=_("Password"), widget=forms.PasswordInput())
     postal_code = forms.CharField(
-        required=False,
-        max_length=4,
-        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": "9000", "inputmode": "numeric"}),
+        label=_("Postcode"), required=False, max_length=4,
+        help_text=_("So we can tell you about dojos and sessions near you."),
+        widget=forms.TextInput(attrs={"placeholder": "9000", "inputmode": "numeric"}),
     )
-    preferred_language = forms.ChoiceField(
-        required=False,
-        choices=settings.LANGUAGES,
-        widget=forms.Select(attrs={"class": "cd-form__input body"}),
+    preferred_language = forms.ChoiceField(label=_("Language for emails"), required=False, choices=settings.LANGUAGES)
+    consent = forms.BooleanField(
+        label=_("I am the parent or legal guardian of the children listed below."), required=True,
     )
-    consent = forms.BooleanField(required=True, widget=forms.CheckboxInput())
     # Optional: the children's details may choose which mails the family
     # gets (accounts.consent). Never needed to sign a child up.
     child_data_mail = forms.BooleanField(required=False, widget=forms.CheckboxInput())
     # The newsletter needs an explicit opt-in (mailing.categories): unticked.
-    newsletter = forms.BooleanField(required=False, widget=forms.CheckboxInput())
+    newsletter = forms.BooleanField(
+        label=_("Send me the CoderDojo Belgium newsletter and news about events like Coolest Projects and CoderDojo Girlz."),
+        required=False,
+    )
 
     def clean_email(self):
         email = self.cleaned_data["email"]

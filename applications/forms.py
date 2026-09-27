@@ -16,8 +16,8 @@ class _ApplicationForm(forms.ModelForm):
     number is asked for here, and saved onto the account."""
 
     phone = forms.CharField(
-        required=False, max_length=30,
-        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("+32 4xx xx xx xx")}),
+        label=_("Phone"), required=False, max_length=30,
+        widget=forms.TextInput(attrs={"placeholder": _("+32 4xx xx xx xx")}),
     )
 
     def __init__(self, *args, account, **kwargs):
@@ -34,15 +34,26 @@ class ChampionApplicationForm(_ApplicationForm):
     class Meta:
         model = Application
         fields = ["area", "preferred_schedule", "proposed_venue", "message", "consent", "background_check_consent"]
+        labels = {
+            "area": _("City or area"), "preferred_schedule": _("Preferred day & time"),
+            "proposed_venue": _("Proposed venue"), "message": _("What made you want to start a dojo?"),
+            "consent": _("I understand CoderDojo sessions are always free and run by volunteers."),
+            "background_check_consent": _("I understand a Belgian criminal record extract (model 2, Artikel 596.2) will be required."),
+        }
+        # The model's help texts are notes for the admin (English only): not shown here.
+        help_texts = {
+            "proposed_venue": _("Not confirmed yet? That's fine — we can help you find one."),
+            "area": "", "preferred_schedule": "", "message": "", "consent": "", "background_check_consent": "",
+        }
+        # The input classes come from core.forms.SiteBoundField.
         widgets = {
-            "area": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Leuven")}),
-            "preferred_schedule": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("e.g. Saturday mornings")}),
+            "area": forms.TextInput(attrs={"placeholder": _("Leuven")}),
+            "preferred_schedule": forms.TextInput(attrs={"placeholder": _("e.g. Saturday mornings")}),
             "proposed_venue": forms.TextInput(attrs={
-                "class": "cd-form__input body",
                 "placeholder": _("e.g. Leuven Public Library, a school, a community centre"),
             }),
             "message": forms.Textarea(attrs={
-                "class": "cd-form__input body", "rows": 4,
+                "rows": 4,
                 "placeholder": _("Any relevant experience, a connection at the venue, why this area needs a dojo — whatever's useful for us to know."),
             }),
             "consent": forms.CheckboxInput(),
@@ -58,11 +69,16 @@ class MentorApplicationForm(_ApplicationForm):
     class Meta:
         model = Application
         fields = ["dojo", "mentor_role", "message", "background_check_consent"]
+        labels = {
+            "dojo": _("Which dojo?"), "mentor_role": _("Role"), "message": _("What would you like to help with?"),
+            "background_check_consent": _("I understand a Belgian criminal record extract (model 2, Artikel 596.2) will be required."),
+        }
+        # The model's help texts are notes for the admin (English only): not shown here.
+        help_texts = {"dojo": "", "message": "", "background_check_consent": ""}
+        # The input classes come from core.forms.SiteBoundField.
         widgets = {
-            "dojo": forms.Select(attrs={"class": "cd-form__select body"}),
-            "mentor_role": forms.Select(attrs={"class": "cd-form__select body"}),
             "message": forms.Textarea(attrs={
-                "class": "cd-form__input body", "rows": 4,
+                "rows": 4,
                 "placeholder": _("e.g. Python, Scratch, web, robotics, event-day support — no experience necessary."),
             }),
             "background_check_consent": forms.CheckboxInput(),
