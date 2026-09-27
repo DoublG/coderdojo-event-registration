@@ -51,15 +51,18 @@ python manage.py test accounts.tests.SomeTestCase.test_something   # one test
 # If the debug toolbar's E001 check refuses to run tests, add --debug-mode
 # (keeps DEBUG=True for the run) rather than working around it in settings.
 python manage.py test --debug-mode
+# No --parallel: cloning the test database needs mysqldump, which the workspace
+# image doesn't have. A run that was interrupted leaves test_<DB_NAME> behind;
+# --noinput drops it without asking.
 
 # Django shell / admin superuser
 python manage.py shell
 python manage.py createsuperuser
 
-# Translations (LANGUAGES in settings.py: en-us, nl-be, fr-be, de — switching
-# mechanism is wired up per-request/session, but no .po catalogs exist yet)
-python manage.py makemessages -l nl_BE
-python manage.py compilemessages
+# Translations (en-us, nl-be, fr-be; the full makemessages command with its
+# --ignore flags and the workflow are under "i18n" below)
+python manage.py makemessages -l nl_BE -l fr_BE --ignore=".venv/*" --ignore="docs/*" --ignore="staticfiles/*" --ignore="media/*"
+python manage.py compilemessages -l nl_BE -l fr_BE --ignore=".venv/*"
 ```
 
 Claude Code's login/settings/session history in the `workspace` container live on the `claude-config` named volume (mounted at `/root/.claude`, with `CLAUDE_CONFIG_DIR` pointing there so `.claude.json` is inside it too) — a rebuild keeps them; only `docker compose ... down -v` wipes them (along with the DB volume).

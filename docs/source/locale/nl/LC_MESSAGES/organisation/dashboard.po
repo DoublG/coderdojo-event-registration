@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-26 05:34+0000\n"
+"POT-Creation-Date: 2026-09-27 10:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -27,21 +27,22 @@ msgstr "Het organisatiedashboard"
 #: ../../source/organisation/dashboard.rst:4
 msgid ""
 "The organisation dashboard is where CoderDojo Belgium's own team runs "
-"mail to families and volunteers, and chooses which events the public site"
-" features. It's open to accounts with the organisation's **admin** role: "
-"they find it under **Organisation** in the account menu."
+"mail to families and volunteers, chooses which events the public site "
+"features, and handles privacy requests. It's open to accounts with the "
+"organisation's **admin** role: they find it under **Organisation** in the"
+" account menu."
 msgstr ""
 "Via het organisatiedashboard beheert het eigen team van CoderDojo Belgium"
-" de e-mails naar gezinnen en vrijwilligers, en kiest het welke "
-"evenementen de openbare site in de kijker zet. Het is open voor accounts "
-"met de rol **beheerder** van de organisatie: zij vinden het onder "
-"**Organisatie** in het accountmenu."
+" de e-mails naar gezinnen en vrijwilligers, kiest het welke evenementen "
+"de openbare site in de kijker zet en behandelt het privacyverzoeken. Het "
+"is open voor accounts met de rol **beheerder** van de organisatie: zij "
+"vinden het onder **Organisatie** in het accountmenu."
 
-#: ../../source/organisation/dashboard.rst:8
+#: ../../source/organisation/dashboard.rst:9
 msgid "The sidebar has these sections:"
 msgstr "De zijbalk heeft deze onderdelen:"
 
-#: ../../source/organisation/dashboard.rst:10
+#: ../../source/organisation/dashboard.rst:11
 msgid ""
 "**Campaigns**: one mailing to a group of people, now or at a set time "
 "(see :doc:`campaigns`)."
@@ -49,7 +50,7 @@ msgstr ""
 "**Campagnes**: één mailing naar een groep mensen, nu of op een gekozen "
 "moment (zie :doc:`campaigns`)."
 
-#: ../../source/organisation/dashboard.rst:12
+#: ../../source/organisation/dashboard.rst:13
 msgid ""
 "**Journeys**: mailings that run by themselves every day, for example to "
 "families whose child has stopped coming (see :doc:`journeys`)."
@@ -57,7 +58,7 @@ msgstr ""
 "**Trajecten**: mailings die elke dag vanzelf lopen, bijvoorbeeld naar "
 "gezinnen van wie het kind niet meer komt (zie :doc:`journeys`)."
 
-#: ../../source/organisation/dashboard.rst:14
+#: ../../source/organisation/dashboard.rst:15
 msgid ""
 "**Segments**: who a campaign or journey is for, described with rules "
 "instead of a list (see :doc:`segments`)."
@@ -65,7 +66,7 @@ msgstr ""
 "**Segmenten**: voor wie een campagne of traject bedoeld is, beschreven "
 "met regels in plaats van een lijst (zie :doc:`segments`)."
 
-#: ../../source/organisation/dashboard.rst:16
+#: ../../source/organisation/dashboard.rst:17
 msgid ""
 "**Mail templates**: the text of every mail the site sends, in each "
 "language (see :doc:`mail-templates`)."
@@ -73,7 +74,7 @@ msgstr ""
 "**E-mailsjablonen**: de tekst van elke e-mail die de site verstuurt, in "
 "elke taal (zie :doc:`mail-templates`)."
 
-#: ../../source/organisation/dashboard.rst:18
+#: ../../source/organisation/dashboard.rst:19
 msgid ""
 "**Promotions**: which events are featured where on the public site (see "
 ":doc:`promotions`)."
@@ -81,7 +82,7 @@ msgstr ""
 "**Promoties**: welke evenementen waar op de openbare site in de kijker "
 "staan (zie :doc:`promotions`)."
 
-#: ../../source/organisation/dashboard.rst:20
+#: ../../source/organisation/dashboard.rst:21
 msgid ""
 "**Sponsors**: the sponsors and partners on the homepage (see "
 ":doc:`sponsors`)."
@@ -89,11 +90,30 @@ msgstr ""
 "**Sponsors**: de sponsors en partners op de startpagina (zie "
 ":doc:`sponsors`)."
 
-#: ../../source/organisation/dashboard.rst:22
+#: ../../source/organisation/dashboard.rst:23
 msgid "**Awards**: the badges ninjas can earn at their dojo (see :doc:`awards`)."
-msgstr "**Onderscheidingen**: de badges die ninja's in hun dojo kunnen verdienen (zie :doc:`awards`)."
+msgstr ""
+"**Onderscheidingen**: de badges die ninja's in hun dojo kunnen verdienen "
+"(zie :doc:`awards`)."
 
 #: ../../source/organisation/dashboard.rst:25
+msgid ""
+"**Privacy**: a copy of someone's data, or deleting their account, when "
+"they ask by mail or post (see :doc:`privacy`)."
+msgstr ""
+"**Privacy**: een kopie van iemands gegevens, of het verwijderen van zijn "
+"of haar account, als die persoon erom vraagt per e-mail of per post (zie "
+":doc:`privacy`)."
+
+#: ../../source/organisation/dashboard.rst:27
+msgid ""
+"**Sign-in security**: which roles must use two-step login (see :doc"
+":`sign-in-security`)."
+msgstr ""
+"**Aanmeldbeveiliging**: welke rollen tweestapsaanmelding moeten gebruiken"
+" (zie :doc:`sign-in-security`)."
+
+#: ../../source/organisation/dashboard.rst:30
 msgid ""
 "People only get mail they want. Every account chooses which kinds of mail"
 " it gets on its **Mail preferences** page; the newsletter and campaigns "
@@ -106,7 +126,7 @@ msgstr ""
 "ingeschreven, en de eigen logins van kinderen krijgen nooit campagnes. "
 "Adressen waarvoor e-mails terugkwamen worden automatisch overgeslagen."
 
-#: ../../source/organisation/dashboard.rst:30
+#: ../../source/organisation/dashboard.rst:35
 msgid ""
 "The technical side of the site (the full mail log, bounces, blocked "
 "addresses) stays in the site's technical admin, for fixing things when "

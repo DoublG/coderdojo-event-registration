@@ -1,0 +1,126 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-27 10:50+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/privacy.rst:2
+msgid "Privacy requests"
+msgstr "Demandes liées à la vie privée"
+
+#: ../../source/organisation/privacy.rst:4
+msgid ""
+"Families download their own data and delete their own account from their "
+"family page (see :doc:`../families/managing-your-account`). When someone "
+"asks by mail or post instead, you handle it on the **Privacy** page, "
+"under **Accounts** in the organisation dashboard."
+msgstr ""
+"Les familles téléchargent leurs propres données et suppriment leur propre"
+" compte depuis leur page famille (voir :doc:`../families/managing-your-"
+"account`). Quand quelqu'un le demande plutôt par e-mail ou par courrier, "
+"vous vous en occupez sur la page **Vie privée**, sous **Comptes** dans le"
+" tableau de bord de l'organisation."
+
+#: ../../source/organisation/privacy.rst:10
+msgid "Finding the account"
+msgstr "Trouver le compte"
+
+#: ../../source/organisation/privacy.rst:12
+msgid ""
+"Search by name, email address or username; a child's name finds the "
+"child's parents too. Each account in the list shows whether it's an adult"
+" or a child's own login, and how many children it's a guardian of."
+msgstr ""
+"Cherchez par nom, adresse e-mail ou nom d'utilisateur ; le nom d'un "
+"enfant trouve aussi ses parents. Chaque compte de la liste indique s'il "
+"s'agit d'un adulte ou de la connexion propre d'un enfant, et de combien "
+"d'enfants il est le parent ou tuteur."
+
+#: ../../source/organisation/privacy.rst:17
+msgid "A copy of someone's data"
+msgstr "Une copie des données de quelqu'un"
+
+#: ../../source/organisation/privacy.rst:19
+msgid ""
+"**Download data** gives you the same file the family gets with **Download"
+" my data**: everything the site keeps about the account and the children "
+"it's a guardian of. Send it only to the account's own email address. "
+"Every download is recorded."
+msgstr ""
+"**Télécharger les données** vous donne le même fichier que la famille "
+"obtient avec **Télécharger mes données** : tout ce que le site conserve "
+"sur le compte et les enfants dont il est le parent ou tuteur. Envoyez-le "
+"uniquement à l'adresse e-mail du compte lui-même. Chaque téléchargement "
+"est enregistré."
+
+#: ../../source/organisation/privacy.rst:25
+msgid "Deleting an account"
+msgstr "Supprimer un compte"
+
+#: ../../source/organisation/privacy.rst:27
+msgid ""
+"**Delete…** first shows what will happen: whether the account is erased "
+"or, for a champion or mentor, cleaned (their name stays on past sessions "
+"and on the belts and badges they awarded), which children are erased with"
+" it, and which stay with their other guardian. Type the account's "
+"username to confirm. It happens right away and can't be undone, so "
+"download the data first if they asked for a copy too."
+msgstr ""
+"**Supprimer…** montre d'abord ce qui va se passer : si le compte est "
+"effacé ou, pour un champion ou un mentor, nettoyé (son nom reste sur les "
+"sessions passées et sur les ceintures et badges qu'il a remis), quels "
+"enfants sont effacés avec lui et lesquels restent chez leur autre parent "
+"ou tuteur. Tapez le nom d'utilisateur du compte pour confirmer. La "
+"suppression est immédiate et définitive : téléchargez donc d'abord les "
+"données si la personne a aussi demandé une copie."
+
+#: ../../source/organisation/privacy.rst:34
+msgid ""
+"Some accounts can't be deleted here: the champion of an active dojo (the "
+"role has to move to one of the dojo's mentors first), an account with an "
+"organisation role (take the role away first) and a child's own login "
+"(it's removed by their parent, or goes with the family's account)."
+msgstr ""
+"Certains comptes ne peuvent pas être supprimés ici : le champion d'un "
+"dojo actif (le rôle doit d'abord passer à l'un des mentors du dojo), un "
+"compte qui a un rôle dans l'organisation (retirez d'abord ce rôle) et la "
+"connexion propre d'un enfant (c'est son parent qui la supprime, ou elle "
+"part avec le compte de la famille)."
+
+#: ../../source/organisation/privacy.rst:40
+msgid "Needs attention"
+msgstr "À traiter"
+
+#: ../../source/organisation/privacy.rst:42
+msgid ""
+"Accounts that haven't logged in for two years are deleted automatically. "
+"A champion of an active dojo is held back until the role moves: they're "
+"listed under **Needs attention**, with the date their account is due to "
+"be cleaned. The dojo's mentors are told on their dashboard. Once the role"
+" has moved to a mentor, or the dojo has gone dormant, the champion leaves"
+" the list. The number next to **Privacy** in the sidebar counts them."
+msgstr ""
+"Les comptes qui ne se sont pas connectés depuis deux ans sont supprimés "
+"automatiquement. Le champion d'un dojo actif est retenu jusqu'à ce que le"
+" rôle change de mains : il figure sous **À traiter**, avec la date à "
+"laquelle son compte doit être nettoyé. Les mentors du dojo en sont "
+"informés sur leur tableau de bord. Dès que le rôle est passé à un mentor,"
+" ou que le dojo est mis en sommeil, le champion quitte la liste. Le "
+"nombre à côté de **Vie privée** dans la barre latérale les compte."
+

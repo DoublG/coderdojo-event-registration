@@ -2,7 +2,8 @@ The organisation dashboard
 ==========================
 
 The organisation dashboard is where CoderDojo Belgium's own team runs mail to
-families and volunteers, and chooses which events the public site features. It's open to accounts with the organisation's
+families and volunteers, chooses which events the public site features, and
+handles privacy requests. It's open to accounts with the organisation's
 **admin** role: they find it under **Organisation** in the account menu.
 
 The sidebar has these sections:
@@ -21,6 +22,10 @@ The sidebar has these sections:
   :doc:`sponsors`).
 - **Awards**: the badges ninjas can earn at their dojo (see
   :doc:`awards`).
+- **Privacy**: a copy of someone's data, or deleting their account, when
+  they ask by mail or post (see :doc:`privacy`).
+- **Sign-in security**: which roles must use two-step login (see
+  :doc:`sign-in-security`).
 
 People only get mail they want. Every account chooses which kinds of mail
 it gets on its **Mail preferences** page; the newsletter and campaigns only

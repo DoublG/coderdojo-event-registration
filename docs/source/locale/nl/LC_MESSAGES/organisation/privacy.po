@@ -1,0 +1,126 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-27 10:50+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/privacy.rst:2
+msgid "Privacy requests"
+msgstr "Privacyverzoeken"
+
+#: ../../source/organisation/privacy.rst:4
+msgid ""
+"Families download their own data and delete their own account from their "
+"family page (see :doc:`../families/managing-your-account`). When someone "
+"asks by mail or post instead, you handle it on the **Privacy** page, "
+"under **Accounts** in the organisation dashboard."
+msgstr ""
+"Gezinnen downloaden hun eigen gegevens en verwijderen hun eigen account "
+"via hun gezinspagina (zie :doc:`../families/managing-your-account`). "
+"Vraagt iemand het in plaats daarvan per e-mail of per post, dan regel je "
+"het op de pagina **Privacy**, onder **Accounts** in het "
+"organisatiedashboard."
+
+#: ../../source/organisation/privacy.rst:10
+msgid "Finding the account"
+msgstr "Het account vinden"
+
+#: ../../source/organisation/privacy.rst:12
+msgid ""
+"Search by name, email address or username; a child's name finds the "
+"child's parents too. Each account in the list shows whether it's an adult"
+" or a child's own login, and how many children it's a guardian of."
+msgstr ""
+"Zoek op naam, e-mailadres of gebruikersnaam; met de naam van een kind "
+"vind je ook de ouders van dat kind. Elk account in de lijst toont of het "
+"een volwassene is of de eigen login van een kind, en van hoeveel kinderen"
+" het de ouder of voogd is."
+
+#: ../../source/organisation/privacy.rst:17
+msgid "A copy of someone's data"
+msgstr "Een kopie van iemands gegevens"
+
+#: ../../source/organisation/privacy.rst:19
+msgid ""
+"**Download data** gives you the same file the family gets with **Download"
+" my data**: everything the site keeps about the account and the children "
+"it's a guardian of. Send it only to the account's own email address. "
+"Every download is recorded."
+msgstr ""
+"**Gegevens downloaden** geeft je hetzelfde bestand dat het gezin krijgt "
+"met **Mijn gegevens downloaden**: alles wat de site bijhoudt over het "
+"account en de kinderen van wie het de ouder of voogd is. Stuur het alleen"
+" naar het eigen e-mailadres van het account. Elke download wordt "
+"vastgelegd."
+
+#: ../../source/organisation/privacy.rst:25
+msgid "Deleting an account"
+msgstr "Een account verwijderen"
+
+#: ../../source/organisation/privacy.rst:27
+msgid ""
+"**Delete…** first shows what will happen: whether the account is erased "
+"or, for a champion or mentor, cleaned (their name stays on past sessions "
+"and on the belts and badges they awarded), which children are erased with"
+" it, and which stay with their other guardian. Type the account's "
+"username to confirm. It happens right away and can't be undone, so "
+"download the data first if they asked for a copy too."
+msgstr ""
+"**Verwijderen…** toont eerst wat er zal gebeuren: of het account gewist "
+"wordt of, bij een champion of mentor, opgeschoond (de naam blijft staan "
+"bij voorbije sessies en bij de gordels en badges die die persoon "
+"uitreikte), welke kinderen mee gewist worden en welke bij hun andere "
+"ouder of voogd blijven. Typ de gebruikersnaam van het account om te "
+"bevestigen. Het gebeurt meteen en kan niet ongedaan gemaakt worden, dus "
+"download eerst de gegevens als de persoon ook om een kopie vroeg."
+
+#: ../../source/organisation/privacy.rst:34
+msgid ""
+"Some accounts can't be deleted here: the champion of an active dojo (the "
+"role has to move to one of the dojo's mentors first), an account with an "
+"organisation role (take the role away first) and a child's own login "
+"(it's removed by their parent, or goes with the family's account)."
+msgstr ""
+"Sommige accounts kun je hier niet verwijderen: de champion van een "
+"actieve dojo (de rol moet eerst naar een van de mentors van de dojo "
+"gaan), een account met een rol in de organisatie (neem de rol eerst af) "
+"en de eigen login van een kind (die verwijdert de ouder, of hij verdwijnt"
+" samen met het account van het gezin)."
+
+#: ../../source/organisation/privacy.rst:40
+msgid "Needs attention"
+msgstr "Vraagt aandacht"
+
+#: ../../source/organisation/privacy.rst:42
+msgid ""
+"Accounts that haven't logged in for two years are deleted automatically. "
+"A champion of an active dojo is held back until the role moves: they're "
+"listed under **Needs attention**, with the date their account is due to "
+"be cleaned. The dojo's mentors are told on their dashboard. Once the role"
+" has moved to a mentor, or the dojo has gone dormant, the champion leaves"
+" the list. The number next to **Privacy** in the sidebar counts them."
+msgstr ""
+"Accounts die al twee jaar niet aangemeld zijn, worden automatisch "
+"verwijderd. Een champion van een actieve dojo wordt tegengehouden tot de "
+"rol overgaat: die staat onder **Vraagt aandacht**, met de datum waarop "
+"het account opgeschoond moet worden. De mentors van de dojo krijgen een "
+"melding op hun dashboard. Zodra de rol naar een mentor is gegaan, of de "
+"dojo slapend is gezet, verdwijnt de champion uit de lijst. Het getal "
+"naast **Privacy** in de zijbalk telt hen."
+
