@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-hidden="true">
+  <defs><clipPath id="robot-08-goggles"><circle cx="48" cy="48" r="48"/></clipPath></defs>
+  <circle cx="48" cy="48" r="48" fill="#e4f7df"/>
+  <g clip-path="url(#robot-08-goggles)" shape-rendering="crispEdges">
+    <rect x="42" y="9" width="6" height="3" fill="#ed1c24"/>
+    <rect x="48" y="9" width="6" height="3" fill="#d11523"/>
+    <rect x="45" y="12" width="3" height="12" fill="#fbbc1d"/>
+    <rect x="48" y="12" width="3" height="12" fill="#e5a015"/>
+    <rect x="24" y="24" width="24" height="30" fill="#66db4c"/>
+    <rect x="48" y="24" width="24" height="30" fill="#52c136"/>
+    <rect x="21" y="27" width="3" height="24" fill="#66db4c"/>
+    <rect x="72" y="27" width="3" height="24" fill="#52c136"/>
+    <rect x="27" y="27" width="18" height="18" fill="#ffffff"/>
+    <rect x="51" y="27" width="18" height="18" fill="#ffffff"/>
+    <rect x="30" y="30" width="12" height="12" fill="#efefef"/>
+    <rect x="33" y="33" width="6" height="6" fill="#201600"/>
+    <rect x="36" y="33" width="3" height="3" fill="#00ada8"/>
+    <rect x="54" y="30" width="12" height="12" fill="#efefef"/>
+    <rect x="57" y="33" width="6" height="6" fill="#201600"/>
+    <rect x="60" y="33" width="3" height="3" fill="#00ada8"/>
+    <rect x="39" y="48" width="18" height="3" fill="#201600"/>
+    <rect x="45" y="54" width="3" height="6" fill="#ed1c24"/>
+    <rect x="48" y="54" width="3" height="6" fill="#d11523"/>
+    <rect x="15" y="63" width="9" height="6" fill="#fbbc1d"/>
+    <rect x="72" y="63" width="9" height="6" fill="#e5a015"/>
+    <rect x="21" y="60" width="27" height="36" fill="#66db4c"/>
+    <rect x="48" y="60" width="27" height="36" fill="#52c136"/>
+    <rect x="54" y="69" width="3" height="3" fill="#d11523"/>
+    <rect x="60" y="69" width="3" height="3" fill="#d11523"/>
+    <rect x="54" y="72" width="9" height="3" fill="#d11523"/>
+    <rect x="57" y="75" width="3" height="3" fill="#d11523"/>
+    <rect x="21" y="87" width="27" height="3" fill="#fbbc1d"/>
+    <rect x="48" y="87" width="27" height="3" fill="#e5a015"/>
+  </g>
+</svg>

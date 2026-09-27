@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-hidden="true">
+  <defs><clipPath id="robot-10-ghost"><circle cx="48" cy="48" r="48"/></clipPath></defs>
+  <circle cx="48" cy="48" r="48" fill="#dfeaff"/>
+  <g clip-path="url(#robot-10-ghost)" shape-rendering="crispEdges">
+    <rect x="45" y="9" width="3" height="9" fill="#fbbc1d"/>
+    <rect x="48" y="9" width="3" height="9" fill="#e5a015"/>
+    <rect x="36" y="18" width="12" height="3" fill="#006aff"/>
+    <rect x="48" y="18" width="12" height="3" fill="#0963ce"/>
+    <rect x="30" y="21" width="18" height="3" fill="#006aff"/>
+    <rect x="48" y="21" width="18" height="3" fill="#0963ce"/>
+    <rect x="27" y="24" width="21" height="3" fill="#006aff"/>
+    <rect x="48" y="24" width="21" height="3" fill="#0963ce"/>
+    <rect x="24" y="27" width="24" height="45" fill="#006aff"/>
+    <rect x="48" y="27" width="24" height="45" fill="#0963ce"/>
+    <rect x="30" y="33" width="12" height="3" fill="#66db4c"/>
+    <rect x="54" y="33" width="12" height="3" fill="#52c136"/>
+    <rect x="30" y="36" width="12" height="12" fill="#efefef"/>
+    <rect x="33" y="39" width="6" height="6" fill="#201600"/>
+    <rect x="36" y="39" width="3" height="3" fill="#00ada8"/>
+    <rect x="54" y="36" width="12" height="12" fill="#efefef"/>
+    <rect x="57" y="39" width="6" height="6" fill="#201600"/>
+    <rect x="60" y="39" width="3" height="3" fill="#00ada8"/>
+    <rect x="36" y="54" width="24" height="3" fill="#201600"/>
+    <rect x="24" y="66" width="3" height="6" fill="#ffffff"/>
+    <rect x="30" y="66" width="3" height="6" fill="#ffffff"/>
+    <rect x="36" y="66" width="3" height="6" fill="#ffffff"/>
+    <rect x="42" y="66" width="3" height="6" fill="#ffffff"/>
+    <rect x="51" y="66" width="3" height="6" fill="#ffffff"/>
+    <rect x="57" y="66" width="3" height="6" fill="#ffffff"/>
+    <rect x="63" y="66" width="3" height="6" fill="#ffffff"/>
+    <rect x="69" y="66" width="3" height="6" fill="#ffffff"/>
+    <rect x="21" y="72" width="27" height="6" fill="#fbbc1d"/>
+    <rect x="48" y="72" width="27" height="6" fill="#e5a015"/>
+    <rect x="27" y="78" width="6" height="18" fill="#66db4c"/>
+    <rect x="39" y="78" width="6" height="18" fill="#66db4c"/>
+    <rect x="51" y="78" width="6" height="18" fill="#52c136"/>
+    <rect x="63" y="78" width="6" height="18" fill="#52c136"/>
+  </g>
+</svg>

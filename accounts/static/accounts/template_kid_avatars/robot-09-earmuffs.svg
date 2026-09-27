@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-hidden="true">
+  <defs><clipPath id="robot-09-earmuffs"><circle cx="48" cy="48" r="48"/></clipPath></defs>
+  <circle cx="48" cy="48" r="48" fill="#fde4e4"/>
+  <g clip-path="url(#robot-09-earmuffs)" shape-rendering="crispEdges">
+    <rect x="36" y="15" width="12" height="3" fill="#ed1c24"/>
+    <rect x="48" y="15" width="12" height="3" fill="#d11523"/>
+    <rect x="27" y="18" width="21" height="39" fill="#ed1c24"/>
+    <rect x="48" y="18" width="21" height="39" fill="#d11523"/>
+    <rect x="18" y="27" width="9" height="18" fill="#201600"/>
+    <rect x="69" y="27" width="9" height="18" fill="#201600"/>
+    <rect x="15" y="30" width="3" height="12" fill="#5396c9"/>
+    <rect x="78" y="30" width="3" height="12" fill="#2678ab"/>
+    <rect x="33" y="27" width="12" height="12" fill="#efefef"/>
+    <rect x="36" y="30" width="6" height="6" fill="#201600"/>
+    <rect x="39" y="30" width="3" height="3" fill="#00ada8"/>
+    <rect x="51" y="27" width="12" height="12" fill="#efefef"/>
+    <rect x="54" y="30" width="6" height="6" fill="#201600"/>
+    <rect x="57" y="30" width="3" height="3" fill="#00ada8"/>
+    <rect x="33" y="39" width="12" height="3" fill="#00ada8"/>
+    <rect x="51" y="39" width="12" height="3" fill="#00ada8"/>
+    <rect x="42" y="48" width="12" height="3" fill="#201600"/>
+    <rect x="24" y="57" width="24" height="9" fill="#fbbc1d"/>
+    <rect x="48" y="57" width="24" height="9" fill="#e5a015"/>
+    <rect x="21" y="66" width="27" height="30" fill="#00ada8"/>
+    <rect x="48" y="66" width="27" height="30" fill="#048e87"/>
+    <rect x="42" y="69" width="12" height="24" fill="#ffffff"/>
+    <rect x="39" y="72" width="18" height="18" fill="#ffffff"/>
+    <rect x="45" y="75" width="3" height="12" fill="#fbbc1d"/>
+    <rect x="48" y="75" width="3" height="12" fill="#e5a015"/>
+    <rect x="42" y="78" width="6" height="6" fill="#fbbc1d"/>
+    <rect x="48" y="78" width="6" height="6" fill="#e5a015"/>
+  </g>
+</svg>

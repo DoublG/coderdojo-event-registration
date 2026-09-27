@@ -31,4 +31,13 @@ TEMPLATE_KID_AVATARS = [
     ("robot-01-cyclops.svg", "Cyclops Robot"),
     ("robot-02-square.svg", "Square Robot"),
     ("robot-03-headphones.svg", "Headphones Robot"),
+    # Pixel robots after the ones on coderdojobelgium.be.
+    ("robot-04-antennae.svg", "Blue Antenna Robot"),
+    ("robot-05-forks.svg", "Teal Fork Robot"),
+    ("robot-06-box.svg", "Yellow Box Robot"),
+    ("robot-07-dome.svg", "Red Dome Robot"),
+    ("robot-08-goggles.svg", "Green Goggle Robot"),
+    ("robot-09-earmuffs.svg", "Red Earmuff Robot"),
+    ("robot-10-ghost.svg", "Blue Ghost Robot"),
+    ("robot-11-lights.svg", "Teal Lights Robot"),
 ]
