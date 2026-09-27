@@ -18,7 +18,9 @@
   .home-root .row > * { flex: 1 1 220px; }
   .home-root .center { display: flex; justify-content: center; }
   .home-root .finder-box { background: var(--surface-sunken); border-radius: var(--radius-lg); padding: var(--space-6); }
-  .home-root .finder-box .cd-dojo-finder { max-width: none; }  /* the box's full width, like the dojo finder page */
+  /* The finder and its heading centred in the box, at a width a list reads well at. */
+  .home-root .finder-box .section-head { margin-left: auto; margin-right: auto; text-align: center; }
+  .home-root .finder-box .cd-dojo-finder { max-width: 640px; margin: 0 auto; }
   @media (max-width: 640px) { .home-root .finder-box { padding: var(--space-5) var(--space-4); } }
   .home-root .cta-wrap { background: var(--surface-raised); border-radius: var(--radius-lg); }
   @media (max-width: 640px) {
