@@ -1010,11 +1010,11 @@ class NinjaLoginTests(TestCase):
         self.assertRedirects(response, reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
 
     def test_email_is_required_and_unique(self):
-        self.assertIn("email address is needed", self._create(email="", HTTP_HX_REQUEST="true").context["login_error"])
-        self.assertEqual(
-            self._create(email="ELLEN@example.com", HTTP_HX_REQUEST="true").context["login_error"],
-            "An account already exists with this email.",
-        )
+        def email_errors(email):
+            return self._create(email=email, HTTP_HX_REQUEST="true").context["login_form"].errors["email"]
+
+        self.assertIn("email address is needed", email_errors("")[0])
+        self.assertEqual(email_errors("ELLEN@example.com"), ["An account already exists with this email."])
         self.child.refresh_from_db()
         self.assertIsNone(self.child.account)
 

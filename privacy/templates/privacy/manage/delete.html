@@ -26,11 +26,7 @@
 
       <form class="cd-form" method="post">
         {% csrf_token %}
-        <div class="cd-form__field">
-          <label class="cd-form__label label" for="delete-confirm">{% blocktranslate with username=account.username %}Type the username, {{ username }}, to confirm{% endblocktranslate %}</label>
-          <input class="cd-form__input body" type="text" id="delete-confirm" name="confirm" autocomplete="off" required>
-          {% if error %}<ul class="cd-form__errors"><li class="caption">{{ error }}</li></ul>{% endif %}
-        </div>
+        {{ form.confirm.as_field_group }}
         <div class="cd-form__actions">
           <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_privacy' %}">{% translate "Cancel" %}</a>
           <button type="submit" class="cd-btn cd-btn--danger label">{% translate "Delete the account" %}</button>

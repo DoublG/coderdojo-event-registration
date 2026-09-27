@@ -40,7 +40,15 @@ from .access import (
     is_approved_mentor,
     require_dojo_access,
 )
-from .forms import AnnouncementForm, DojoCreateForm, DojoProfileForm, DojoSearchForm
+from .forms import (
+    AddMentorForm,
+    AnnouncementForm,
+    DojoCreateForm,
+    DojoProfileForm,
+    DojoSearchForm,
+    PromoteYouthMentorForm,
+    TransferChampionForm,
+)
 from .models import Dojo, DojoMembership
 from .search import attach_next_events, dojos_by_distance, resolve_search_origin
 
@@ -430,14 +438,19 @@ def dojo_team_manage(request, dojo_id):
     access = require_dojo_access(request, dojo_id)
     dojo = access.dojo
     memberships = dojo.memberships.select_related("user", "promoted_by__user")
+    transfer_candidates = memberships.filter(
+        status=DojoMembership.ACTIVE, role=DojoMembership.MENTOR,
+    ).order_by("user__first_name")
+    youth_mentor_candidates = _youth_mentor_candidates(dojo) if access.can_manage_team else Ninja.objects.none()
     return render(request, "dojos/dojo_team_manage.html", {
         "active_members": memberships.filter(status=DojoMembership.ACTIVE).order_by("role", "user__first_name"),
         "requests": memberships.filter(status=DojoMembership.REQUESTED).order_by("created_at"),
         "former_members": memberships.filter(status=DojoMembership.DORMANT).order_by("-left_at"),
-        "transfer_candidates": memberships.filter(
-            status=DojoMembership.ACTIVE, role=DojoMembership.MENTOR,
-        ).order_by("user__first_name"),
-        "youth_mentor_candidates": _youth_mentor_candidates(dojo) if access.can_manage_team else [],
+        "transfer_candidates": transfer_candidates,
+        "youth_mentor_candidates": youth_mentor_candidates,
+        "add_mentor_form": AddMentorForm(),
+        "promote_form": PromoteYouthMentorForm(candidates=youth_mentor_candidates),
+        "transfer_form": TransferChampionForm(candidates=transfer_candidates),
         "active": "team",
         **_admin_context(request, access),
     })
@@ -486,14 +499,19 @@ def dojo_team_action(request, dojo_id):
             team.remove_member(membership)
             messages.success(request, _("%(membership)s has been removed from the team.") % {"membership": membership.name})
         elif action == "add_mentor":
-            email = request.POST.get("email", "").strip()
-            user = User.objects.filter(email__iexact=email).first() if email else None
+            form = AddMentorForm(request.POST)
+            user = None
+            if form.is_valid():
+                user = User.objects.filter(email__iexact=form.cleaned_data["email"]).first()
             if user is None:
                 raise team.TeamError(_("No account uses that email address."))
             team.add_mentor(dojo, user, by=request.user)
             messages.success(request, _("%(name)s has been added to the team.") % {"name": user.team_name})
         elif action == "promote":
-            ninja = get_object_or_404(_youth_mentor_candidates(dojo), id=request.POST.get("ninja_id"))
+            form = PromoteYouthMentorForm(request.POST, candidates=_youth_mentor_candidates(dojo))
+            if not form.is_valid():
+                raise Http404
+            ninja = form.cleaned_data["ninja_id"]
             team.promote_youth_mentor(dojo, ninja.account, by_membership=access.membership)
             messages.success(request, _("%(name)s is now a youth mentor.") % {"name": ninja.account.team_name})
         else:

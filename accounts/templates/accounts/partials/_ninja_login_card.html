@@ -4,7 +4,8 @@ accounts.child_accounts, DATA_MODEL.md §17): give the child a login with
 their own email, mail the set-password link again, or remove the login.
 Each form posts over htmx and swaps this card; without htmx the view
 redirects back to the page, with the outcome as a message. Expects
-`child`, and optionally `login_error`, `login_notice` and `posted_email`.
+`child` and `login_form` (accounts.forms.ChildLoginForm), and optionally
+`login_error` and `login_notice`.
 {% endcomment %}
 <section class="section cd-card login-card" id="ninja-login-card" aria-labelledby="login-heading">
   <h2 class="heading-md section-title" id="login-heading">{% translate "Own login" %}</h2>
@@ -49,11 +50,7 @@ redirects back to the page, with the outcome as a message. Expects
       <form class="cd-form" method="post" action="{% url 'ninja_login_create' ninja_id=child.id %}"
             hx-post="{% url 'ninja_login_create' ninja_id=child.id %}" hx-target="#ninja-login-card" hx-swap="outerHTML">
         {% csrf_token %}
-        <div class="cd-form__field">
-          <label class="cd-form__label label" for="ninja-login-email">{% blocktranslate with name=child.name %}{{ name }}'s email address{% endblocktranslate %}</label>
-          <input class="cd-form__input body" type="email" id="ninja-login-email" name="email" required
-                 value="{% if posted_email %}{{ posted_email }}{% elif account %}{{ account.email }}{% endif %}" autocomplete="off">
-        </div>
+        {{ login_form.email.as_field_group }}
         <div class="cd-form__actions" style="justify-content: flex-start;">
           <button type="submit" class="cd-btn cd-btn--primary label">{% if account %}{% translate "Switch login back on" %}{% else %}{% translate "Create login" %}{% endif %}</button>
         </div>

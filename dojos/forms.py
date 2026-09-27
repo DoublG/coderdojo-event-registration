@@ -211,3 +211,32 @@ class AnnouncementForm(forms.ModelForm):
         if len(text) > 500:
             raise forms.ValidationError(_("Keep it short: 500 characters at most."))
         return text
+
+
+# --- the Team page (dojos.views.dojo_team_manage / dojo_team_action) ---------
+# The field names are what dojo_team_action reads (the Members page posts
+# `ninja_id` too); the team rules themselves stay in dojos.team.
+
+
+class AddMentorForm(forms.Form):
+    email = forms.EmailField(
+        label=_("Their account's email"), widget=forms.EmailInput(attrs={"placeholder": _("mentor@example.com")}),
+    )
+
+
+class PromoteYouthMentorForm(forms.Form):
+    ninja_id = forms.ModelChoiceField(label=_("Ninja"), queryset=None, empty_label=None)
+
+    def __init__(self, *args, candidates, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["ninja_id"].queryset = candidates
+        self.fields["ninja_id"].label_from_instance = lambda ninja: ninja.full_name
+
+
+class TransferChampionForm(forms.Form):
+    membership_id = forms.ModelChoiceField(label=_("New champion"), queryset=None, empty_label=None)
+
+    def __init__(self, *args, candidates, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["membership_id"].queryset = candidates
+        self.fields["membership_id"].label_from_instance = lambda membership: membership.name

@@ -106,23 +106,3 @@ class PasskeySetupForm(WebauthnDeviceValidationForm):
             raise forms.ValidationError(_("That passkey couldn't be checked. Please try again.")) from exc
         except KeyError as exc:  # the challenge is gone from the session
             raise forms.ValidationError(_("That took too long. Please try again.")) from exc
-
-
-class ConfirmPasswordForm(forms.Form):
-    """Asks for the account's password before a change that weakens the login."""
-
-    password = forms.CharField(
-        label=_("Your password"),
-        strip=False,
-        widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}),
-    )
-
-    def __init__(self, user, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.user = user
-
-    def clean_password(self):
-        password = self.cleaned_data["password"]
-        if not self.user.check_password(password):
-            raise forms.ValidationError(_("That password isn't right."))
-        return password

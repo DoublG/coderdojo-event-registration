@@ -52,11 +52,7 @@
 
         <form class="cd-form" method="post" style="margin-top: var(--space-5);">
           {% csrf_token %}
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="delete-password">{% translate "Your password, to confirm" %}</label>
-            <input class="cd-form__input body" type="password" id="delete-password" name="password" autocomplete="current-password" required>
-            {% if error %}<ul class="cd-form__errors"><li class="caption">{{ error }}</li></ul>{% endif %}
-          </div>
+          {{ form.password.as_field_group }}
           <div class="cd-form__actions">
             <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">{% translate "Cancel" %}</a>
             <button type="submit" class="cd-btn cd-btn--danger label">{% translate "Delete my account" %}</button>

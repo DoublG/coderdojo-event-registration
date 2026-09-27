@@ -97,10 +97,7 @@ transferring the champion role (the champion only).
       <form class="cd-form inline-form" method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="add_mentor">
-        <div class="cd-form__field">
-          <label class="cd-form__label label" for="add-mentor-email">{% translate "Their account's email" %}</label>
-          <input class="cd-form__input body" type="email" id="add-mentor-email" name="email" required placeholder="{% translate "mentor@example.com" %}">
-        </div>
+        {{ add_mentor_form.email.as_field_group }}
         <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Add to team" %}</button>
       </form>
     </section>
@@ -112,14 +109,7 @@ transferring the champion role (the champion only).
         <form class="cd-form inline-form" method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}">
           {% csrf_token %}
           <input type="hidden" name="action" value="promote">
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="promote-ninja">{% translate "Ninja" %}</label>
-            <select class="cd-form__select body" id="promote-ninja" name="ninja_id">
-              {% for ninja in youth_mentor_candidates %}
-                <option value="{{ ninja.id }}">{{ ninja.full_name }}</option>
-              {% endfor %}
-            </select>
-          </div>
+          {{ promote_form.ninja_id.as_field_group }}
           <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Promote" %}</button>
         </form>
       {% else %}
@@ -137,14 +127,7 @@ transferring the champion role (the champion only).
               onsubmit="{% translate "Hand over the champion role? You become a mentor." as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
           {% csrf_token %}
           <input type="hidden" name="action" value="transfer">
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="transfer-to">{% translate "New champion" %}</label>
-            <select class="cd-form__select body" id="transfer-to" name="membership_id">
-              {% for membership in transfer_candidates %}
-                <option value="{{ membership.id }}">{{ membership.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
+          {{ transfer_form.membership_id.as_field_group }}
           <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Hand over" %}</button>
         </form>
       {% else %}

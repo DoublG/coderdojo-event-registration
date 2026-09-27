@@ -1,5 +1,6 @@
 from django import forms
 from django.conf import settings
+from django.contrib.auth import password_validation
 from django.contrib.auth.forms import (
     AuthenticationForm,
     PasswordChangeForm,
@@ -7,7 +8,6 @@ from django.contrib.auth.forms import (
     SetPasswordForm,
     UsernameField,
 )
-from django.contrib.auth import password_validation
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.urls import reverse
@@ -201,3 +201,43 @@ class SignInPolicyForm(forms.Form):
             row.save()
             changed.append(role)
         return changed
+
+
+class ConfirmPasswordForm(forms.Form):
+    """Asks for the account's password before a change that can't be taken
+    back or weakens the login (turning off two-step login, deleting the
+    account)."""
+
+    password = forms.CharField(
+        label=_("Your password"),
+        strip=False,
+        widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}),
+    )
+
+    def __init__(self, user, *args, label=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        if label:
+            self.fields["password"].label = label
+
+    def clean_password(self):
+        password = self.cleaned_data["password"]
+        if not self.user.check_password(password):
+            raise forms.ValidationError(_("That password isn't right."))
+        return password
+
+
+class ChildLoginForm(forms.Form):
+    """The child page's "Own login" card: the child's own email address
+    (accounts.views.ninja_login_create). The rules about which address may be
+    used live in accounts.child_accounts.give_login; the view adds its
+    ChildAccountError to the field."""
+
+    # Not required here: an empty address gets the service's own message.
+    email = forms.EmailField(required=False, widget=forms.EmailInput(attrs={"autocomplete": "off", "required": True}))
+
+    def __init__(self, child, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["email"].label = lazy(lambda: _("%(name)s's email address") % {"name": child.name}, str)()
+        if child.account is not None:
+            self.fields["email"].initial = child.account.email

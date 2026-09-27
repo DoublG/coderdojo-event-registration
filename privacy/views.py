@@ -13,12 +13,14 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
+from accounts.forms import ConfirmPasswordForm
 from accounts.models import User
 from accounts.organisation import require_organisation_admin
 from core.audit import log_access
 
 from .deletion import delete_account, preview
 from .export import export_filename, export_json
+from .forms import ConfirmUsernameForm
 from .retention import champions_needing_attention
 
 # One download per account per minute: an export runs a query per model.
@@ -95,15 +97,12 @@ def delete_my_account(request):
     if user.is_ninja:
         raise Http404
     result = preview(user)
-    error = None
-    if request.method == "POST" and result.possible:
-        if not user.check_password(request.POST.get("password", "")):
-            error = _("That isn't your password.")
-        else:
-            delete_account(user)
-            logout(request)
-            return render(request, "privacy/account_deleted.html")
-    return render(request, "privacy/delete_account.html", {"preview": result, "error": error})
+    form = ConfirmPasswordForm(user, request.POST or None, label=_("Your password, to confirm"))
+    if request.method == "POST" and result.possible and form.is_valid():
+        delete_account(user)
+        logout(request)
+        return render(request, "privacy/account_deleted.html")
+    return render(request, "privacy/delete_account.html", {"preview": result, "form": form})
 
 
 @login_required
@@ -113,16 +112,13 @@ def manage_privacy_delete(request, user_id):
     require_organisation_admin(request)
     account = get_object_or_404(User, pk=user_id)
     result = preview(account)
-    error = None
-    if request.method == "POST" and result.possible:
-        if request.POST.get("confirm", "").strip() != account.get_username():
-            error = _("Type the account's username to confirm.")
-        else:
-            delete_account(account, requested_by=request.user)
-            messages.success(request, _("The account has been deleted."))
-            return redirect("manage_privacy")
+    form = ConfirmUsernameForm(account, request.POST or None)
+    if request.method == "POST" and result.possible and form.is_valid():
+        delete_account(account, requested_by=request.user)
+        messages.success(request, _("The account has been deleted."))
+        return redirect("manage_privacy")
     return render(
         request,
         "privacy/manage/delete.html",
-        {"account": account, "preview": result, "error": error, "active": "privacy"},
+        {"account": account, "preview": result, "form": form, "active": "privacy"},
     )

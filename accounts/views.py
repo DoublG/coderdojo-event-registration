@@ -35,6 +35,7 @@ from mailing.preferences import set_preference
 from . import child_accounts, home_dojo, two_step
 from .consent import consent_fields
 from .forms import (
+    ChildLoginForm,
     ForcedPasswordChangeForm,
     LoginForm,
     RegisterGuardianForm,
@@ -428,6 +429,7 @@ def ninja_detail(request, ninja_id):
         "badges": badges_page.object_list, "badges_next_page_url": badges_next_page_url,
         # Current belt = the highest in the history (newest first).
         "belt_history": belt_history, "current_belt": child.current_belt,
+        "login_form": ChildLoginForm(child),
     })
 
 
@@ -496,14 +498,17 @@ def edit_ninja(request, ninja_id):
     return render(request, "accounts/partials/_child_header_edit.html", _edit_context(child))
 
 
-def _login_card(request, child, error=None, notice=None):
+def _login_card(request, child, error=None, notice=None, login_form=None):
     """The child page's "Own login" card, after an htmx action on it; a
-    plain POST goes back to the page with the message flashed instead."""
+    plain POST goes back to the page with the message flashed instead.
+    `login_form` is the submitted ChildLoginForm, with its errors."""
     if request.headers.get("HX-Request"):
         return render(request, "accounts/partials/_ninja_login_card.html", {
             "child": child, "login_error": error, "login_notice": notice,
-            "posted_email": request.POST.get("email", "") if error else "",
+            "login_form": login_form if login_form is not None and login_form.errors else ChildLoginForm(child),
         })
+    if login_form is not None and login_form.errors:
+        error = " ".join(login_form.errors["email"])
     if error:
         messages.error(request, error)
     elif notice:
@@ -518,13 +523,17 @@ def ninja_login_create(request, ninja_id):
     child = _get_own_ninja(request, ninja_id)
     if request.method != "POST":
         return redirect("ninja_detail", ninja_id=child.id)
-    try:
-        account = child_accounts.give_login(request.user, child, request.POST.get("email"))
-    except child_accounts.ChildAccountError as error:
-        return _login_card(request, child, error=str(error))
-    return _login_card(request, child, notice=_("Login created: we've mailed %(email)s a link to choose a password.") % {
-        "email": account.email,
-    })
+    form = ChildLoginForm(child, request.POST)
+    if form.is_valid():
+        try:
+            account = child_accounts.give_login(request.user, child, form.cleaned_data["email"])
+        except child_accounts.ChildAccountError as error:
+            form.add_error("email", str(error))
+        else:
+            return _login_card(request, child, notice=_("Login created: we've mailed %(email)s a link to choose a password.") % {
+                "email": account.email,
+            })
+    return _login_card(request, child, login_form=form)
 
 
 @login_required

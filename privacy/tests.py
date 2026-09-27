@@ -891,7 +891,7 @@ class DeleteAccountTests(TestCase):
         self.client.force_login(self.parent)
         response = self.client.post(self.url("delete_my_account"), {"password": "nope"})
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context["error"])
+        self.assertTrue(response.context["form"].errors)
         self.assertFalse(self.erased(self.parent))
 
     def test_the_family_deletes_its_account(self):
@@ -947,7 +947,7 @@ class DeleteAccountTests(TestCase):
         self.assertContains(response, "Lotte")
 
         response = self.client.post(self.url("manage_privacy_delete", self.parent.pk), {"confirm": "wrong"})
-        self.assertTrue(response.context["error"])
+        self.assertTrue(response.context["form"].errors)
         self.assertFalse(self.erased(self.parent))
 
         response = self.client.post(self.url("manage_privacy_delete", self.parent.pk), {"confirm": "an"})

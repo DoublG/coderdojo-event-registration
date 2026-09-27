@@ -803,22 +803,31 @@ class SiteFormTextsAreTranslatedTests(TestCase):
 
     def forms(self):
         from accounts.forms import (
+            ChildLoginForm,
+            ConfirmPasswordForm,
             ForcedPasswordChangeForm,
             LoginForm,
             RegisterGuardianForm,
             StyledPasswordResetForm,
             StyledSetPasswordForm,
         )
-        from accounts.models import User
-        from accounts.two_step_forms import AppSetupForm, ConfirmPasswordForm
+        from accounts.models import Ninja, User
+        from accounts.two_step_forms import AppSetupForm
         from applications.forms import BackgroundCheckUploadForm, ChampionApplicationForm, MentorApplicationForm
         from content.forms import PromotionForm, SponsorForm
-        from dojos.forms import AnnouncementForm, DojoCreateForm, DojoProfileForm
+        from dojos.forms import (
+            AddMentorForm,
+            AnnouncementForm,
+            DojoCreateForm,
+            DojoProfileForm,
+            PromoteYouthMentorForm,
+            TransferChampionForm,
+        )
         from dojos.testing import make_dojo
         from events.forms import BadgeForm, EventForm
-        from mailing.forms import CampaignForm, JourneyForm, NewTemplateForm, SegmentForm, TemplateVersionForm
-
         from events.models import Event
+        from mailing.forms import CampaignForm, JourneyForm, NewTemplateForm, SegmentForm, TemplateVersionForm
+        from privacy.forms import ConfirmUsernameForm
 
         user = User.objects.create(username="u")
         bruges = make_dojo("Bruges")
@@ -829,7 +838,10 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             LoginForm(), StyledPasswordResetForm(), StyledSetPasswordForm(user), ForcedPasswordChangeForm(user),
             ChampionApplicationForm(account=user), MentorApplicationForm(account=user), RegisterGuardianForm(),
             DojoProfileForm(instance=make_dojo("Antwerp")), EventForm(dojo=bruges, instance=Event(dojo=bruges)),
-            CampaignForm(), JourneyForm(), SegmentForm(),
+            CampaignForm(), JourneyForm(), SegmentForm(), ConfirmUsernameForm(user),
+            ChildLoginForm(Ninja(name="Emma")), AddMentorForm(),
+            PromoteYouthMentorForm(candidates=Ninja.objects.none()),
+            TransferChampionForm(candidates=bruges.memberships.all()),
         ]
 
     def test_labels_and_help_texts_are_translated(self):

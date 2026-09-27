@@ -27,8 +27,9 @@ from two_factor.utils import get_otpauth_url
 from two_factor.views.core import REMEMBER_COOKIE_PREFIX
 
 from . import sign_in, two_step
+from .forms import ConfirmPasswordForm
 from .models import User
-from .two_step_forms import AppSetupForm, ConfirmPasswordForm, PasskeySetupForm
+from .two_step_forms import AppSetupForm, PasskeySetupForm
 
 APP_KEY_SESSION = "two_step_app_key"
 NEW_CODES_SESSION = "two_step_new_backup_codes"
