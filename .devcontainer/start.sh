@@ -18,6 +18,25 @@ cd /workspace
 # (staticfiles.W004). The app's own files are in each app's static/ folder.
 mkdir -p static
 
+# DEBUG=false (docker-compose.yml) runs the site like production, to check its
+# speed. The same test for "on" as django-environ's (website/settings.py).
+case "${DEBUG:-}" in
+    [Tt][Rr][Uu][Ee]|[Oo][Nn]|[Oo][Kk]|[Yy]|[Yy][Ee][Ss]|1) debug=1 ;;
+    *) debug=0 ;;
+esac
+
+# nginx serves /static/ from staticfiles/ when a file is there, else asks
+# Django (nginx.conf). With DEBUG off Django serves no static files, so they're
+# collected there; with DEBUG on it's emptied, or nginx would keep serving an
+# old copy of a file you're editing. The folder itself stays: nginx's bind
+# mount is pinned to it.
+mkdir -p staticfiles
+if [ "$debug" = 1 ]; then
+    find staticfiles -mindepth 1 -delete
+else
+    python manage.py collectstatic --noinput --clear --verbosity 0
+fi
+
 python manage.py migrate
 
 # Seed municipalities/boundaries/dojos from the bundled JSON dumps
@@ -91,5 +110,12 @@ celery -A website worker -n periodic@%h -Q periodic -c 1 -B \
     --scheduler django_celery_beat.schedulers:DatabaseScheduler -l INFO > celery-periodic.log 2>&1 &
 celery -A website worker -n mailing@%h -Q celery -c 1 -l INFO > celery-mailing.log 2>&1 &
 
-# start server
-python manage.py runserver 0.0.0.0:8000
+# start server: runserver while developing (reloads on every change, serves the
+# static files); with DEBUG off the command production runs (gunicorn with
+# uvicorn workers, main.py), so what you measure is how the site behaves there.
+# More workers: WEB_CONCURRENCY=<n> (gunicorn reads it itself; default 1).
+if [ "$debug" = 1 ]; then
+    python manage.py runserver 0.0.0.0:8000
+else
+    gunicorn -k uvicorn.workers.UvicornWorker main:app -b 0.0.0.0:8000 --access-logfile -
+fi

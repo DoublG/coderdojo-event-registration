@@ -494,6 +494,12 @@ STATIC_URL = "/static/"
 
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
+# Where collectstatic gathers the static files for a web server to serve. Only
+# set in the devcontainer (STATIC_ROOT env var), where start.sh collects them
+# for nginx when DEBUG is off; production doesn't set it (scripts/deploy.sh
+# skips collectstatic then).
+STATIC_ROOT = env("STATIC_ROOT", default=None)
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 

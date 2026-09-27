@@ -37,7 +37,12 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
 
-      DEBUG: true
+      # On by default. `DEBUG=false` in the environment that runs docker compose
+      # (or in .devcontainer/.env) runs the site like production to check its
+      # speed: start.sh then collects the static files for nginx and serves the
+      # site with gunicorn instead of runserver (CLAUDE.md, "Commands").
+      DEBUG: ${DEBUG:-true}
+      STATIC_ROOT: /workspace/staticfiles
 
       # Test mailcient
       EMAIL_HOST: mailpit
@@ -123,6 +128,11 @@ services:
       # Sphinx end-user docs (docs/build/html) - rebuild with `make html`
       # (from inside docs/) after changing anything under docs/source/.
       - ../docs/build/html:/usr/share/nginx/html/docs:ro
+      # /static/ (collectstatic's output, only filled when DEBUG is off) and
+      # the public /media/ files, served by nginx itself (nginx.conf).
+      # Never private_media/.
+      - ../staticfiles:/srv/static:ro
+      - ../media:/srv/media:ro
 
   phpmyadmin:
     container_name: ${PROJECT_NAME:-coolregistration-dev}-phpmyadmin

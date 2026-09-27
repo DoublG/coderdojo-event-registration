@@ -20,6 +20,10 @@ mysqlclient==2.3.0
 pillow==12.3.0
 redis==8.1.0
 requests==2.34.2
+# Production serves the site with uvicorn workers (main.py), which Level27
+# provides; uvicorn only accepts WebSocket connections (the notification bell)
+# when websockets (or wsproto) is installed, and answers them 404 otherwise.
+websockets==17.1
 
 # Pulled in by the above (pinned for reproducible installs):
 asgiref==3.12.1

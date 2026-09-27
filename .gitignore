@@ -134,3 +134,5 @@ docs/source/locale/*/LC_MESSAGES/**/*.mo
 
 # Auto-generated login credentials for seeded demo accounts - never commit
 seed_credentials.csv
+# collectstatic output (STATIC_ROOT, devcontainer with DEBUG off)
+/staticfiles/

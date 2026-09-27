@@ -6,6 +6,12 @@
 # Lint/format (config in pyproject.toml)
 ruff==0.16.8
 
+# The server production runs (Level27 provides its own there): start.sh uses
+# it when DEBUG is off, to measure the site the way it's served in production.
+gunicorn==26.2.0
+uvicorn==0.54.0
+h11==0.16.0
+
 # Data loading: the import_* management commands (import_boundaries,
 # import_municipalities, import_dojos) and their dependencies. Imported
 # inside those commands only, never by the running site.
