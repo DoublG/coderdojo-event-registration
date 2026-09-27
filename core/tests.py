@@ -810,6 +810,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             ForcedPasswordChangeForm,
             LoginForm,
             RegisterGuardianForm,
+            SignUpChildForm,
             StyledPasswordResetForm,
             StyledSetPasswordForm,
         )
@@ -845,7 +846,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             ChildLoginForm(Ninja(name="Emma")), AddMentorForm(),
             PromoteYouthMentorForm(candidates=Ninja.objects.none()),
             TransferChampionForm(candidates=bruges.memberships.all()), ApiClientForm(),
-            AddChildForm(guardian=User(last_name="Peeters")), EditChildForm(instance=Ninja(name="Emma")),
+            AddChildForm(guardian=User(last_name="Peeters")), EditChildForm(instance=Ninja(name="Emma")), SignUpChildForm(),
         ]
 
     def test_labels_and_help_texts_are_translated(self):

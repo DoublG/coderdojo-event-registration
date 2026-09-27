@@ -1,5 +1,3 @@
-import re
-
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
@@ -14,7 +12,6 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.utils.dateparse import parse_date
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
@@ -37,6 +34,7 @@ from .consent import consent_fields
 from .forms import (
     AddChildForm,
     ChildLoginForm,
+    ChildRowsFormSet,
     EditChildForm,
     ForcedPasswordChangeForm,
     LoginForm,
@@ -44,7 +42,7 @@ from .forms import (
     StyledPasswordResetForm,
     StyledSetPasswordForm,
 )
-from .models import Guardianship, Ninja, User, ninja_birth_date_error
+from .models import Guardianship, Ninja, User
 from .provisioning import unique_username
 from .template_avatars import TEMPLATE_KID_AVATARS
 from .two_step_forms import BackupCodeForm, CodeTokenForm, PasskeyTokenForm
@@ -54,8 +52,6 @@ from .two_step_forms import BackupCodeForm, CodeTokenForm, PasskeyTokenForm
 # pattern as the homepage's "Upcoming sessions", see
 # events.views.upcoming_sessions_widget) has something to demonstrate.
 BADGES_PAGE_SIZE = 4
-
-CHILD_NAME_FIELD_RE = re.compile(r"^child_(\d+)_name$")
 
 
 def _get_own_ninja(request, ninja_id, allow_self=False):
@@ -205,55 +201,9 @@ def register(request):
     return render(request, "accounts/register.html")
 
 
-def _parse_child_rows(post_data):
-    """Parses the family-registration form's dynamically-numbered child
-    fields (child_<n>_name/family_name/dob/notes/gender) into a list of row dicts, one
-    per index actually present in the POST data. Not a Form/formset: the
-    page's "Add another child"/"Remove" buttons (see the template's
-    extra_script block) can leave gaps in the numbering (e.g. child_1,
-    child_3 after removing child_2), which doesn't map onto Django's
-    prefix-fieldname convention — same raw-POST-parsing approach as
-    add_child/edit_child above."""
-    indices = sorted({int(m.group(1)) for key in post_data if (m := CHILD_NAME_FIELD_RE.match(key))})
-
-    rows = []
-    for n in indices:
-        name = post_data.get(f"child_{n}_name", "").strip()
-        family_name = post_data.get(f"child_{n}_family_name", "").strip()
-        dob_raw = post_data.get(f"child_{n}_dob", "")
-        notes = post_data.get(f"child_{n}_notes", "").strip()
-        gender = _clean_gender(post_data.get(f"child_{n}_gender"))
-
-        errors = {}
-        if not name:
-            errors["name"] = _("First name is required.")
-        if not family_name:
-            errors["family_name"] = _("Family name is required.")
-        date_of_birth = parse_date(dob_raw) if dob_raw else None
-        if not date_of_birth:
-            errors["dob"] = _("Date of birth is required.")
-        elif dob_error := ninja_birth_date_error(date_of_birth):
-            errors["dob"] = dob_error
-
-        rows.append({
-            "index": n, "name": name, "family_name": family_name, "dob": dob_raw, "date_of_birth": date_of_birth,
-            "notes": notes, "gender": gender, "errors": errors,
-        })
-    return rows
-
-
-def _clean_gender(value):
-    """A posted gender, or "Prefer not to say" for anything else (including
-    a form that didn't send one). Optional everywhere, never an error."""
-    return value if value in dict(Ninja.GENDER_CHOICES) else Ninja.UNSPECIFIED
-
-
-def _create_ninjas(parent, child_rows, consent=False):
-    for row in child_rows:
-        ninja = Ninja.objects.create(
-            name=row["name"], family_name=row["family_name"], date_of_birth=row["date_of_birth"], allergies_notes=row["notes"], gender=row["gender"],
-        )
-        Guardianship.objects.create(guardian=parent, ninja=ninja, **consent_fields(consent))
+def _create_ninjas(parent, children, consent=False):
+    for child_form in children.forms:
+        Guardianship.objects.create(guardian=parent, ninja=child_form.save(), **consent_fields(consent))
 
 
 def _site_language(request):
@@ -273,17 +223,10 @@ def register_guardian(request):
     if request.user.is_authenticated:
         return redirect("account_home")
 
-    child_rows = None
-    children_error = None
-
     if request.method == "POST":
         form = RegisterGuardianForm(request.POST)
-        child_rows = _parse_child_rows(request.POST)
-        children_valid = bool(child_rows) and not any(row["errors"] for row in child_rows)
-        if not child_rows:
-            children_error = _("Add at least one child.")
-
-        if form.is_valid() and children_valid:
+        children = ChildRowsFormSet(request.POST)
+        if all([form.is_valid(), children.is_valid()]):
             first_name, _sep, last_name = form.cleaned_data["name"].partition(" ")
             parent = User(
                 username=unique_username(slugify(form.cleaned_data["name"])),
@@ -298,7 +241,7 @@ def register_guardian(request):
             # A child never exists without a guardian: all or nothing.
             with transaction.atomic():
                 parent.save()
-                _create_ninjas(parent, child_rows, consent=form.cleaned_data["child_data_mail"])
+                _create_ninjas(parent, children, consent=form.cleaned_data["child_data_mail"])
                 if form.cleaned_data["newsletter"]:
                     set_preference(parent, MailCategory.NEWSLETTER, True, ConsentEvent.SIGNUP)
 
@@ -306,13 +249,9 @@ def register_guardian(request):
             return redirect("account_home")
     else:
         form = RegisterGuardianForm(initial={"preferred_language": _site_language(request)})
+        children = ChildRowsFormSet()
 
-    return render(request, "accounts/register_guardian.html", {
-        "form": form,
-        "child_rows": child_rows or [{"index": 1, "name": "", "family_name": "", "dob": "", "notes": "", "gender": Ninja.UNSPECIFIED, "errors": {}}],
-        "children_error": children_error,
-        "gender_choices": Ninja.GENDER_CHOICES,
-    })
+    return render(request, "accounts/register_guardian.html", {"form": form, "children": children})
 
 
 def _children_context(parent):

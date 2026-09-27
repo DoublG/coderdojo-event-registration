@@ -26,6 +26,10 @@ def _dob(age):
     return (timezone.localdate() - timedelta(days=int(age * 365.25) + 180)).isoformat()
 
 
+# The management form of family sign-up's child rows (accounts.forms.ChildRowsFormSet).
+CHILD_ROWS = {"child-TOTAL_FORMS": "3", "child-INITIAL_FORMS": "0"}
+
+
 def make_ninja(guardian, name, **fields):
     """A ninja linked to `guardian` through a Guardianship."""
     ninja = Ninja.objects.create(name=name, **fields)
@@ -477,9 +481,10 @@ class RegisterGuardianViewTests(TestCase):
             "phone": "",
             "password": self.valid_password,
             "consent": "on",
-            "child_1_name": "Sam", "child_1_family_name": "Peeters",
-            "child_1_dob": _dob(10),
-            "child_1_notes": "",
+            **CHILD_ROWS,
+            "child-0-name": "Sam", "child-0-family_name": "Peeters",
+            "child-0-date_of_birth": _dob(10),
+            "child-0-allergies_notes": "",
         }
         data.update(overrides)
         return data
@@ -501,7 +506,7 @@ class RegisterGuardianViewTests(TestCase):
     def test_get_renders_one_empty_child_row(self):
         response = self.client.get(reverse("register_guardian"))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context["child_rows"]), 1)
+        self.assertEqual(len(response.context["children"].forms), 1)
 
     def test_valid_post_creates_account_logs_in_and_redirects(self):
         response = self.client.post(reverse("register_guardian"), self._valid_post_data())
@@ -518,7 +523,8 @@ class RegisterGuardianViewTests(TestCase):
         """Simulates a family who added a 2nd/3rd child then removed the
         middle one client-side, leaving gaps in the field numbering."""
         data = self._valid_post_data(
-            child_3_name="Alex", child_3_family_name="Doe", child_3_dob=_dob(12), child_3_notes="Peanut allergy",
+            **{"child-2-name": "Alex", "child-2-family_name": "Doe", "child-2-date_of_birth": _dob(12),
+               "child-2-allergies_notes": "Peanut allergy"},
         )
         self.client.post(reverse("register_guardian"), data)
 
@@ -547,7 +553,9 @@ class RegisterGuardianViewTests(TestCase):
         self.assertContains(self.client.get(reverse("register_guardian")), "We use what we know about your family")
 
     def test_child_gender_is_saved_per_row(self):
-        data = self._valid_post_data(child_1_gender=Ninja.GIRL, child_2_name="Alex", child_2_family_name="Doe", child_2_dob=_dob(9))
+        data = self._valid_post_data(**{
+            "child-0-gender": Ninja.GIRL, "child-1-name": "Alex", "child-1-family_name": "Doe", "child-1-date_of_birth": _dob(9),
+        })
         self.client.post(reverse("register_guardian"), data)
 
         guardian = User.objects.get(email="jane@example.com")
@@ -556,8 +564,8 @@ class RegisterGuardianViewTests(TestCase):
 
     def test_form_offers_the_gender_choices(self):
         response = self.client.get(reverse("register_guardian"))
-        self.assertContains(response, 'name="child_1_gender"')
-        self.assertContains(response, 'id="rp-gender-choices"')
+        self.assertContains(response, 'name="child-0-gender"')
+        self.assertContains(response, '<option value="unspecified" selected>')
 
     def test_postcode_and_mail_language_are_saved(self):
         Municipality.objects.create(postal_code="9000", name="Gent", center=Point(3.7174, 51.0543, srid=4326))
@@ -603,26 +611,25 @@ class RegisterGuardianViewTests(TestCase):
 
     def test_child_missing_required_fields_is_rejected(self):
         response = self.client.post(
-            reverse("register_guardian"), self._valid_post_data(child_1_name="", child_1_dob="")
+            reverse("register_guardian"), self._valid_post_data(**{"child-0-name": "", "child-0-date_of_birth": ""})
         )
 
         self.assertEqual(response.status_code, 200)
-        row = response.context["child_rows"][0]
-        self.assertIn("name", row["errors"])
-        self.assertIn("dob", row["errors"])
+        row = response.context["children"].forms[0]
+        self.assertIn("name", row.errors)
+        self.assertIn("date_of_birth", row.errors)
         self.assertFalse(User.objects.filter(email="jane@example.com").exists())
         self.assertFalse(Ninja.objects.exists())
 
     def test_no_children_is_rejected(self):
         data = self._valid_post_data()
-        del data["child_1_name"]
-        del data["child_1_dob"]
-        del data["child_1_notes"]
+        for key in ["child-0-name", "child-0-family_name", "child-0-date_of_birth", "child-0-allergies_notes"]:
+            del data[key]
 
         response = self.client.post(reverse("register_guardian"), data)
 
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context["children_error"])
+        self.assertEqual(response.context["children"].non_form_errors(), ["Add at least one child."])
         self.assertFalse(User.objects.filter(email="jane@example.com").exists())
 
 
@@ -941,7 +948,7 @@ class NinjaAgeRuleTests(TestCase):
         response = self.client.post(reverse("register_guardian"), {
             "name": "Jane Doe", "email": "jane@example.com", "phone": "",
             "password": PASSWORD, "password_confirm": PASSWORD,
-            "child_1_name": "Old", "child_1_family_name": "Peeters", "child_1_dob": _dob(19), "child_1_notes": "",
+            **CHILD_ROWS, "child-0-name": "Old", "child-0-family_name": "Peeters", "child-0-date_of_birth": _dob(19),
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Ninjas are 7 to 17 years old")
@@ -1936,12 +1943,12 @@ class ChildFamilyNameTests(TestCase):
         self.client.logout()
         data = {
             "name": "Jane Doe", "email": "jane@example.com", "phone": "", "password": "a-brand-new-password-99",
-            "consent": "on", "child_1_name": "Sam", "child_1_family_name": "", "child_1_dob": _dob(10),
+            "consent": "on", **CHILD_ROWS, "child-0-name": "Sam", "child-0-family_name": "", "child-0-date_of_birth": _dob(10),
         }
         response = self.client.post(reverse("register_guardian"), data)
         self.assertContains(response, "Family name is required.")
         self.assertFalse(Ninja.objects.exists())
-        data["child_1_family_name"] = "Doe"
+        data["child-0-family_name"] = "Doe"
         self.client.post(reverse("register_guardian"), data)
         self.assertEqual(Ninja.objects.get().full_name, "Sam Doe")
 

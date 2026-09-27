@@ -1,0 +1,21 @@
+{% load i18n %}{% comment %}
+  One child's row on family sign-up (accounts.forms.SignUpChildForm as
+  `form`, numbered `n`). Also the <template> _child_rows_script.html clones
+  for "Add another child"; it adds the Remove buttons and the numbers.
+{% endcomment %}
+<div class="cd-form__subgroup" data-child>
+  <div class="cd-form__subgroup-header">
+    <h4 class="cd-form__subgroup-title heading-sm">{% blocktranslate %}Child {{ n }}{% endblocktranslate %}</h4>
+  </div>
+  <div class="cd-form__row">
+    {{ form.name.as_field_group }}
+    {{ form.family_name.as_field_group }}
+  </div>
+  <div class="cd-form__row">
+    {{ form.date_of_birth.as_field_group }}
+    {{ form.gender.as_field_group }}
+  </div>
+  <div class="cd-form__row">
+    {{ form.allergies_notes.as_field_group }}
+  </div>
+</div>

@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.conf import settings
 from django.contrib.auth import password_validation
@@ -11,7 +13,7 @@ from django.contrib.auth.forms import (
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.urls import reverse
-from django.utils.functional import lazy
+from django.utils.functional import cached_property, lazy
 from django.utils.safestring import SafeString
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
@@ -102,10 +104,8 @@ class LoginForm(AuthenticationForm):
 
 
 class RegisterGuardianForm(forms.Form):
-    """The parent/guardian half of the family-registration page — the
-    children are handled separately (see accounts.views._parse_child_rows)
-    since they're a dynamic, JS-managed set of rows rather than a fixed
-    set of fields a Form/formset maps cleanly onto."""
+    """The parent/guardian half of the family-registration page; the
+    children are ChildRowsFormSet, next to it."""
 
     # The input classes come from core.forms.SiteBoundField.
     name = forms.CharField(label=_("Full name"), max_length=150, widget=forms.TextInput(attrs={"placeholder": "Jane Doe"}))
@@ -248,7 +248,7 @@ class ChildLoginForm(forms.Form):
 class LenientChoiceField(forms.ChoiceField):
     """A choice that's never an error: anything unknown (or missing) becomes
     `fallback`. For optional pickers where a stale or tampered value should
-    just fall back, like the child's gender (_clean_gender) or avatar."""
+    just fall back, like the child's gender or avatar."""
 
     def __init__(self, *args, fallback="", **kwargs):
         self.fallback = fallback
@@ -344,3 +344,51 @@ class EditChildForm(ChildForm):
                 if name not in data:
                     data[name] = self.get_initial_for_field(self.fields[name], name) or ""
             self.data = data
+
+
+class SignUpChildForm(ChildForm):
+    """One child's row on family sign-up (ChildRowsFormSet)."""
+
+    icon = None
+
+    class Meta(ChildForm.Meta):
+        labels = {**ChildForm.Meta.labels, "date_of_birth": _("Date of birth"), "allergies_notes": _("Allergies or notes")}
+        help_texts = {**ChildForm.Meta.help_texts}
+        error_messages = {**ChildForm.Meta.error_messages, "date_of_birth": {"required": _("Date of birth is required.")}}
+        widgets = {
+            **ChildForm.Meta.widgets,
+            "name": forms.TextInput(attrs={"placeholder": _("Sam")}),
+            "family_name": forms.TextInput(attrs={"placeholder": _("Peeters")}),
+            "allergies_notes": forms.TextInput(attrs={"placeholder": _("None")}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["family_name"].required = True
+        self.fields["date_of_birth"].required = True
+        self.fields["gender"].label = _("Gender")
+        self.fields["gender"].help_text = _("Optional, never shown publicly. Lets us tell you about girls' sessions.")
+        self.fields["gender"].initial = Ninja.UNSPECIFIED
+
+
+class ChildRowsFormSet(forms.formset_factory(SignUpChildForm, extra=0)):
+    """The children on family sign-up: rows numbered child-<n>-..., added
+    and removed on the page (_child_rows_script.html clones `empty_form`).
+    Removing a row leaves a gap in the numbering, so the rows are the
+    numbers the post actually has, each one filled in, and at least one."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("prefix", "child")
+        super().__init__(*args, **kwargs)
+
+    @cached_property
+    def forms(self):
+        if not self.is_bound:
+            return [self._construct_form(0)]
+        row = re.compile(rf"^{re.escape(self.prefix)}-(\d+)-name$")
+        numbers = sorted({int(match[1]) for key in self.data if (match := row.match(key))})
+        return [self._construct_form(n, empty_permitted=False) for n in numbers]
+
+    def clean(self):
+        if not self.forms:
+            raise ValidationError(_("Add at least one child."))

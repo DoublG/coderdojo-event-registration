@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 09:52+0000\n"
+"POT-Creation-Date: 2026-09-27 09:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -40,23 +40,23 @@ msgstr "%(name)s a déjà un compte."
 msgid "%(name)s doesn't have a login."
 msgstr "%(name)s n'a pas de compte."
 
-#: accounts/forms.py:38
+#: accounts/forms.py:40
 msgid "New password"
 msgstr "Nouveau mot de passe"
 
-#: accounts/forms.py:40
+#: accounts/forms.py:42
 msgid "Confirm new password"
 msgstr "Confirmez le nouveau mot de passe"
 
-#: accounts/forms.py:52
+#: accounts/forms.py:54
 msgid "Temporary password"
 msgstr "Mot de passe temporaire"
 
-#: accounts/forms.py:52
+#: accounts/forms.py:54
 msgid "Current password"
 msgstr "Mot de passe actuel"
 
-#: accounts/forms.py:59 accounts/forms.py:85 accounts/forms.py:112
+#: accounts/forms.py:61 accounts/forms.py:87 accounts/forms.py:112
 #: accounts/templates/accounts/manage/security.html:71
 #: core/templates/core/contact.html:34 dojos/forms.py:69 dojos/forms.py:171
 #: dojos/templates/dojos/dojo_detail.html:238
@@ -64,11 +64,11 @@ msgstr "Mot de passe actuel"
 msgid "Email"
 msgstr "E-mail"
 
-#: accounts/forms.py:94 accounts/forms.py:118
+#: accounts/forms.py:96 accounts/forms.py:118
 msgid "Password"
 msgstr "Mot de passe"
 
-#: accounts/forms.py:99 accounts/forms.py:100
+#: accounts/forms.py:101 accounts/forms.py:102
 msgid "That email/password combination doesn't match an account."
 msgstr "Cette combinaison e-mail et mot de passe ne correspond à aucun compte."
 
@@ -140,14 +140,10 @@ msgid "Avatar"
 msgstr "Avatar"
 
 #: accounts/forms.py:277
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:25
-#: accounts/templates/accounts/partials/_child_rows_script.html:27
 msgid "First name"
 msgstr "Prénom"
 
 #: accounts/forms.py:278
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:30
-#: accounts/templates/accounts/partials/_child_rows_script.html:29
 msgid "Family name"
 msgstr "Nom de famille"
 
@@ -156,8 +152,6 @@ msgid "Allergies or notes (optional)"
 msgstr "Allergies ou remarques (facultatif)"
 
 #: accounts/forms.py:282
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:53
-#: accounts/templates/accounts/partials/_child_rows_script.html:34
 msgid ""
 "Only the champion (the person running the dojo) sees this, on the list of a "
 "session your child is signed up for."
@@ -165,17 +159,15 @@ msgstr ""
 "Seul le champion (la personne qui dirige le dojo) voit ceci, sur la liste "
 "d'une session à laquelle votre enfant est inscrit."
 
-#: accounts/forms.py:285 accounts/views.py:229
+#: accounts/forms.py:285
 msgid "First name is required."
 msgstr "Le prénom est obligatoire."
 
-#: accounts/forms.py:286 accounts/views.py:231
+#: accounts/forms.py:286
 msgid "Family name is required."
 msgstr "Le nom de famille est obligatoire."
 
-#: accounts/forms.py:290
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:52
-#: accounts/templates/accounts/partials/_child_rows_script.html:33
+#: accounts/forms.py:290 accounts/forms.py:362
 msgid "None"
 msgstr "Aucune"
 
@@ -191,11 +183,41 @@ msgstr "Dojo d'attache"
 msgid "None yet"
 msgstr "Aucun pour l'instant"
 
-#: accounts/forms.py:333
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:37
-#: accounts/templates/accounts/partials/_child_rows_script.html:31
+#: accounts/forms.py:333 accounts/forms.py:355
 msgid "Date of birth"
 msgstr "Date de naissance"
+
+#: accounts/forms.py:355
+#: accounts/templates/accounts/partials/_child_header_display.html:25
+#: dojos/templates/dojos/partials/_attendance_row.html:25
+msgid "Allergies or notes"
+msgstr "Allergies ou remarques"
+
+#: accounts/forms.py:357
+msgid "Date of birth is required."
+msgstr "La date de naissance est obligatoire."
+
+#: accounts/forms.py:360
+msgid "Sam"
+msgstr "Sam"
+
+#: accounts/forms.py:361
+msgid "Peeters"
+msgstr "Dupont"
+
+#: accounts/forms.py:369
+msgid "Gender"
+msgstr "Genre"
+
+#: accounts/forms.py:370
+msgid "Optional, never shown publicly. Lets us tell you about girls' sessions."
+msgstr ""
+"Facultatif, jamais affiché publiquement. Nous permet de vous informer des "
+"sessions pour filles."
+
+#: accounts/forms.py:394
+msgid "Add at least one child."
+msgstr "Ajoutez au moins un enfant."
 
 #: accounts/manage.py:41
 msgid "Sign-in policy saved."
@@ -954,13 +976,6 @@ msgstr "%(age)s ans"
 msgid "Member since %(date)s"
 msgstr "Membre depuis %(date)s"
 
-#: accounts/templates/accounts/partials/_child_header_display.html:25
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:51
-#: accounts/templates/accounts/partials/_child_rows_script.html:32
-#: dojos/templates/dojos/partials/_attendance_row.html:25
-msgid "Allergies or notes"
-msgstr "Allergies ou remarques"
-
 #: accounts/templates/accounts/partials/_child_header_display.html:28
 #: dojos/models.py:186 dojos/templates/dojos/dojo_members.html:42
 #: dojos/templates/dojos/dojo_members.html:70
@@ -972,22 +987,30 @@ msgstr "Jeune mentor"
 msgid "at %(dojo)s"
 msgstr "à %(dojo)s"
 
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:9
-#: privacy/templates/privacy/manage/privacy.html:60
-msgid "Children"
-msgstr "Enfants"
-
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:10
-msgid "Add each child who'll attend the dojo."
-msgstr "Ajoutez chaque enfant qui viendra au dojo."
-
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:20
+#: accounts/templates/accounts/partials/_child_row.html:8
 #, python-format
 msgid "Child %(n)s"
 msgstr "Enfant %(n)s"
 
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:21
-#: accounts/templates/accounts/partials/_child_rows_script.html:26
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:7
+#: privacy/templates/privacy/manage/privacy.html:60
+msgid "Children"
+msgstr "Enfants"
+
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:8
+msgid "Add each child who'll attend the dojo."
+msgstr "Ajoutez chaque enfant qui viendra au dojo."
+
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:26
+msgid "Add another child"
+msgstr "Ajouter un autre enfant"
+
+#: accounts/templates/accounts/partials/_child_rows_script.html:14
+#, python-brace-format
+msgid "Child {n}"
+msgstr "Enfant {n}"
+
+#: accounts/templates/accounts/partials/_child_rows_script.html:15
 #: accounts/templates/accounts/security.html:39
 #: accounts/templates/accounts/security.html:54
 #: accounts/templates/accounts/security_confirm.html:25
@@ -996,37 +1019,6 @@ msgstr "Enfant %(n)s"
 #: mailing/templates/mailing/manage/_segment_group.html:28
 msgid "Remove"
 msgstr "Retirer"
-
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:27
-#: accounts/templates/accounts/partials/_child_rows_script.html:28
-msgid "Sam"
-msgstr "Sam"
-
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:32
-#: accounts/templates/accounts/partials/_child_rows_script.html:30
-msgid "Peeters"
-msgstr "Dupont"
-
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:42
-#: accounts/templates/accounts/partials/_child_rows_script.html:35
-msgid "Gender"
-msgstr "Genre"
-
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:46
-#: accounts/templates/accounts/partials/_child_rows_script.html:36
-msgid "Optional, never shown publicly. Lets us tell you about girls' sessions."
-msgstr ""
-"Facultatif, jamais affiché publiquement. Nous permet de vous informer des "
-"sessions pour filles."
-
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:62
-msgid "Add another child"
-msgstr "Ajouter un autre enfant"
-
-#: accounts/templates/accounts/partials/_child_rows_script.html:25
-#, python-brace-format
-msgid "Child {n}"
-msgstr "Enfant {n}"
 
 #: accounts/templates/accounts/partials/_children_list.html:11
 msgid "Your children"
@@ -1703,32 +1695,24 @@ msgstr "Votre navigateur n'a pas créé de clé d'accès. Veuillez réessayer."
 msgid "That took too long. Please try again."
 msgstr "Cela a pris trop de temps. Veuillez réessayer."
 
-#: accounts/views.py:122 accounts/views.py:127
+#: accounts/views.py:118 accounts/views.py:123
 msgid "That took too long. Please log in again."
 msgstr "Cela a pris trop de temps. Reconnectez-vous."
 
-#: accounts/views.py:234
-msgid "Date of birth is required."
-msgstr "La date de naissance est obligatoire."
-
-#: accounts/views.py:284
-msgid "Add at least one child."
-msgstr "Ajoutez au moins un enfant."
-
-#: accounts/views.py:478
+#: accounts/views.py:417
 #, python-format
 msgid "Login created: we've mailed %(email)s a link to choose a password."
 msgstr ""
 "Compte créé : nous avons envoyé à %(email)s un lien pour choisir un mot de "
 "passe."
 
-#: accounts/views.py:493
+#: accounts/views.py:432
 #, python-format
 msgid "We've mailed %(email)s a new link to choose a password."
 msgstr ""
 "Nous avons envoyé à %(email)s un nouveau lien pour choisir un mot de passe."
 
-#: accounts/views.py:508
+#: accounts/views.py:447
 #, python-format
 msgid ""
 "%(name)s's login is switched off. It was on a dojo team, so it's kept for "
@@ -1738,12 +1722,12 @@ msgstr ""
 "dojo, il est conservé pour l'historique de cette équipe ; ses places dans "
 "les équipes ont pris fin."
 
-#: accounts/views.py:511
+#: accounts/views.py:450
 #, python-format
 msgid "%(name)s's login is removed."
 msgstr "Le compte de %(name)s est supprimé."
 
-#: accounts/views.py:563
+#: accounts/views.py:502
 #, python-format
 msgid "A spot opened up in %(event)s — a waitlisted family is now confirmed."
 msgstr ""
