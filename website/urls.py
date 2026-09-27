@@ -15,7 +15,6 @@ Including another URLconf
 """
 from django.conf import settings
 from django.contrib import admin
-from django.urls import path
 from django.urls import include, path
 from django.views.i18n import JavaScriptCatalog
 from oauth2_provider import views as oauth2_views

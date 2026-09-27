@@ -2,7 +2,6 @@ from unittest.mock import AsyncMock, Mock, patch
 
 from django.test import TestCase
 
-from dojos.models import Dojo
 from dojos.testing import make_champion, make_dojo
 
 from .models import Notification

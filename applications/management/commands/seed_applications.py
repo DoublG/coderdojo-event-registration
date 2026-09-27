@@ -37,7 +37,7 @@ class Command(BaseCommand):
         created = 0
         now = timezone.now()
 
-        for parent, (check_status, application_status) in zip(parents, STAGES):
+        for parent, (check_status, application_status) in zip(parents, STAGES, strict=False):
             if parent.applications.exists():
                 continue
             Application.objects.create(

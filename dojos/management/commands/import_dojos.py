@@ -33,7 +33,7 @@ def scrape_dojos(html):
     ids, raw_values = parts[1::2], parts[2::2]
 
     dojos = []
-    for marker_id, raw_value in zip(ids, raw_values):
+    for marker_id, raw_value in zip(ids, raw_values, strict=True):
         obj_match = re.match(r'\{"content":"(?:[^"\\]|\\.)*"\}', raw_value)
         if not obj_match:
             continue

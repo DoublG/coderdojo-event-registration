@@ -26,11 +26,11 @@ class Command(BaseCommand):
 
         Municipality.objects.all().delete()
 
-        for l in frame.itertuples():
-            p = l.geometry
+        for row in frame.itertuples():
+            p = row.geometry
             municipality = Municipality(
-                postal_code=int(l.postcode),
-                name=l.namefre if pd.notna(l.namefre) else l.namedut,
+                postal_code=int(row.postcode),
+                name=row.namefre if pd.notna(row.namefre) else row.namedut,
                 center=Point(
                     p.x,
                     p.y,
