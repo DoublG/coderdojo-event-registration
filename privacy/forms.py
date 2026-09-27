@@ -14,7 +14,8 @@ class ConfirmUsernameForm(forms.Form):
         self.account = account
         # Lazy, like every label: rendered in the language of the request that shows it.
         self.fields["confirm"].label = lazy(
-            lambda: _("Type the username, %(username)s, to confirm") % {"username": account.get_username()}, str,
+            lambda: _("Type the username, %(username)s, to confirm") % {"username": account.get_username()},
+            str,
         )()
 
     def clean_confirm(self):

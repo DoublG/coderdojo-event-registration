@@ -77,7 +77,9 @@ class PostcodeSearchOriginTests(TestCase):
         make_dojo("Ghent", location=Point(3.7174, 51.0543, srid=4326))
         make_dojo("Hasselt", location=Point(5.3378, 50.9307, srid=4326))
         Municipality.objects.create(postal_code="3500", name="Hasselt", center=Point(5.3378, 50.9307, srid=4326))
-        Municipality.objects.create(postal_code="3500", name="Sint-Lambrechts-Herk", center=Point(5.29, 50.94, srid=4326))
+        Municipality.objects.create(
+            postal_code="3500", name="Sint-Lambrechts-Herk", center=Point(5.29, 50.94, srid=4326)
+        )
         cls.limburger = User.objects.create(username="limburg", postal_code="3500")
 
     def setUp(self):
@@ -147,8 +149,11 @@ class DojoTeamViewTests(TestCase):
         dojo = make_dojo("Ghent", champion=owner)
         # "Aaron" sorts before "Zoe" — the champion still comes first.
         add_member(dojo, make_mentor(username="m1", first_name="Aaron"))
-        add_member(dojo, User.objects.create(username="kid", first_name="Kid", account_type=User.NINJA),
-                   DojoMembership.YOUTH_MENTOR)
+        add_member(
+            dojo,
+            User.objects.create(username="kid", first_name="Kid", account_type=User.NINJA),
+            DojoMembership.YOUTH_MENTOR,
+        )
 
         response = self.client.get(reverse("dojo_team", kwargs={"dojo_id": dojo.id}))
 
@@ -200,8 +205,12 @@ class PublicDojoVisibilityTests(TestCase):
     def test_events_of_non_active_dojos_are_hidden(self):
         dojo = make_dojo("Sleeping", status=Dojo.DORMANT)
         event = Event.objects.create(
-            name="Session", dojo=dojo, status=Event.OPEN,
-            start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10,
+            name="Session",
+            dojo=dojo,
+            status=Event.OPEN,
+            start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z",
+            places=10,
         )
         self.assertFalse(Event.objects.visible().filter(id=event.id).exists())
         self.assertEqual(self.client.get(reverse("event_detail", kwargs={"event_id": event.id})).status_code, 404)
@@ -216,27 +225,39 @@ class DojoMembershipRulesTests(TestCase):
         self.dojo = make_dojo("Ghent", champion=self.owner)
 
     def test_only_one_active_champion(self):
-        other = DojoMembership(dojo=self.dojo, user=make_champion(username="owner2"),
-                               role=DojoMembership.CHAMPION, status=DojoMembership.ACTIVE)
+        other = DojoMembership(
+            dojo=self.dojo,
+            user=make_champion(username="owner2"),
+            role=DojoMembership.CHAMPION,
+            status=DojoMembership.ACTIVE,
+        )
         with self.assertRaises(ValidationError):
             other.clean()
 
     def test_youth_mentor_must_be_a_ninja_account(self):
-        adult = DojoMembership(dojo=self.dojo, user=User.objects.create(username="adult"),
-                               role=DojoMembership.YOUTH_MENTOR)
+        adult = DojoMembership(
+            dojo=self.dojo, user=User.objects.create(username="adult"), role=DojoMembership.YOUTH_MENTOR
+        )
         with self.assertRaises(ValidationError):
             adult.clean()
 
     def test_ninja_account_can_only_be_youth_mentor(self):
-        kid = DojoMembership(dojo=self.dojo, user=User.objects.create(username="kid", account_type=User.NINJA),
-                             role=DojoMembership.MENTOR)
+        kid = DojoMembership(
+            dojo=self.dojo,
+            user=User.objects.create(username="kid", account_type=User.NINJA),
+            role=DojoMembership.MENTOR,
+        )
         with self.assertRaises(ValidationError):
             kid.clean()
 
     def test_youth_mentor_promoted_by_another_dojos_team_is_invalid(self):
         elsewhere = make_dojo("Antwerp", champion=make_champion(username="owner2"))
-        kid = DojoMembership(dojo=self.dojo, user=User.objects.create(username="kid", account_type=User.NINJA),
-                             role=DojoMembership.YOUTH_MENTOR, promoted_by=elsewhere.champion_membership)
+        kid = DojoMembership(
+            dojo=self.dojo,
+            user=User.objects.create(username="kid", account_type=User.NINJA),
+            role=DojoMembership.YOUTH_MENTOR,
+            promoted_by=elsewhere.champion_membership,
+        )
         with self.assertRaises(ValidationError):
             kid.clean()
 
@@ -247,7 +268,11 @@ class DojoMembershipRulesTests(TestCase):
     def test_former_member_stays_on_past_event_teams(self):
         mentor = add_member(self.dojo, make_mentor(username="m1"))
         event = Event.objects.create(
-            name="Past", dojo=self.dojo, start_time="2020-01-01T10:00:00Z", end_time="2020-01-01T12:00:00Z", places=10,
+            name="Past",
+            dojo=self.dojo,
+            start_time="2020-01-01T10:00:00Z",
+            end_time="2020-01-01T12:00:00Z",
+            places=10,
         )
         event.team.add(mentor)
 
@@ -257,6 +282,7 @@ class DojoMembershipRulesTests(TestCase):
         self.assertEqual(mentor.status, DojoMembership.DORMANT)
         self.assertEqual(list(event.team.all()), [mentor])
         self.assertEqual(mentor.sessions_run, 1)
+
 
 class DojoDashboardViewTests(TestCase):
     def test_dojo_with_no_sessions_still_renders(self):
@@ -273,12 +299,19 @@ class DojoDashboardViewTests(TestCase):
         owner = make_champion(username="owner1")
         dojo = make_dojo("Ghent", champion=owner)
         event = Event.objects.create(
-            name="Session", dojo=dojo, status=Event.OPEN,
-            start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10
+            name="Session",
+            dojo=dojo,
+            status=Event.OPEN,
+            start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z",
+            places=10,
         )
         registration = Registration.objects.create(
-            event=event, ninja=Ninja.objects.create(name="Mila"), waiting_list=False,
-            position=1, attended=True,
+            event=event,
+            ninja=Ninja.objects.create(name="Mila"),
+            waiting_list=False,
+            position=1,
+            attended=True,
         )
         self.client.force_login(owner)
 
@@ -367,7 +400,8 @@ class DojoManageViewTests(TempMediaMixin, TestCase):
     def test_address_change_geocodes_and_updates_province(self, mock_geocode):
         mock_geocode.return_value = (51.2194, 4.4025)  # Antwerp
         province = AdministrativeBoundary.objects.create(
-            kind=AdministrativeBoundary.PROVINCE, name="Antwerp",
+            kind=AdministrativeBoundary.PROVINCE,
+            name="Antwerp",
             boundary=MultiPolygon(Polygon(((4, 51), (4, 52), (5, 52), (5, 51), (4, 51)))),
         )
         self.client.force_login(self.owner)
@@ -439,7 +473,10 @@ class DojoManageViewTests(TempMediaMixin, TestCase):
 
         other.refresh_from_db()
         self.assertEqual(other.icon.name, "library/dojos/icon-02-robot.svg")
-        self.assertEqual(list((self.media_root / "library" / "dojos").iterdir()), [self.media_root / "library/dojos/icon-02-robot.svg"])
+        self.assertEqual(
+            list((self.media_root / "library" / "dojos").iterdir()),
+            [self.media_root / "library/dojos/icon-02-robot.svg"],
+        )
         self.assertFalse((self.media_root / "dojos").exists())
         response = self.client.get(reverse("dojo_manage", kwargs={"dojo_id": other.id}))
         self.assertEqual(response.context["form"]["template_icon"].value(), "icon-02-robot.svg")
@@ -484,8 +521,12 @@ class DojoEventListViewTests(TestCase):
         every status — draft included — since this is where they'd publish
         one from."""
         draft = Event.objects.create(
-            name="Draft session", dojo=self.dojo, status=Event.DRAFT,
-            start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=10
+            name="Draft session",
+            dojo=self.dojo,
+            status=Event.DRAFT,
+            start_time="2030-01-01T10:00:00Z",
+            end_time="2030-01-01T12:00:00Z",
+            places=10,
         )
         self.client.force_login(self.owner)
 
@@ -576,7 +617,8 @@ class DojoEventCreateViewTests(TempMediaMixin, TestCase):
         response = self.client.get(reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}))
 
         self.assertEqual(
-            set(response.context["form"].fields["team"].queryset), {own_mentor, self.dojo.champion_membership},
+            set(response.context["form"].fields["team"].queryset),
+            {own_mentor, self.dojo.champion_membership},
         )
 
     def test_several_team_members_can_be_assigned(self):
@@ -610,7 +652,9 @@ class DojoEventDetailViewTests(TestCase):
         self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
         self.event = Event.objects.create(
-            name="Session", dojo=self.dojo, status=Event.OPEN,
+            name="Session",
+            dojo=self.dojo,
+            status=Event.OPEN,
             start_time=timezone.make_aware(datetime(2030, 1, 1, 10, 0)),
             end_time=timezone.make_aware(datetime(2030, 1, 1, 12, 0)),
             places=10,
@@ -652,8 +696,11 @@ class DojoEventDetailViewTests(TestCase):
         in the URL, or an owner could edit any event by swapping ids."""
         other_dojo = make_dojo("Antwerp")
         other_event = Event.objects.create(
-            name="Elsewhere", dojo=other_dojo,
-            start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=10
+            name="Elsewhere",
+            dojo=other_dojo,
+            start_time="2030-01-01T10:00:00Z",
+            end_time="2030-01-01T12:00:00Z",
+            places=10,
         )
         self.client.force_login(self.owner)
         response = self.client.get(self._url(other_event))
@@ -731,8 +778,12 @@ class DojoEventAttendanceViewTests(TestCase):
         self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
         self.event = Event.objects.create(
-            name="Session", dojo=self.dojo, status=Event.OPEN,
-            start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=10
+            name="Session",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time="2030-01-01T10:00:00Z",
+            end_time="2030-01-01T12:00:00Z",
+            places=10,
         )
         self.zoe = Registration.objects.create(
             event=self.event, ninja=Ninja.objects.create(name="Zoe"), waiting_list=False, position=1
@@ -748,9 +799,14 @@ class DojoEventAttendanceViewTests(TestCase):
         return reverse("dojo_event_attendance", kwargs={"dojo_id": self.dojo.id, "event_id": (event or self.event).id})
 
     def _mark_url(self, registration):
-        return reverse("dojo_event_attendance_mark", kwargs={
-            "dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": registration.id,
-        })
+        return reverse(
+            "dojo_event_attendance_mark",
+            kwargs={
+                "dojo_id": self.dojo.id,
+                "event_id": self.event.id,
+                "registration_id": registration.id,
+            },
+        )
 
     def _mark_all_url(self):
         return reverse("dojo_event_attendance_mark_all", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
@@ -763,13 +819,21 @@ class DojoEventAttendanceViewTests(TestCase):
     def test_rows_show_how_each_child_comes_to_this_dojo(self):
         from events.models import NinjaEngagement
 
-        NinjaEngagement.objects.create(ninja=self.zoe.ninja, dojo=self.dojo, stage=NinjaEngagement.AT_RISK,
-                                       attended_180d=2, offered_180d=6, missed_in_a_row=3,
-                                       computed_on=timezone.localdate())
+        NinjaEngagement.objects.create(
+            ninja=self.zoe.ninja,
+            dojo=self.dojo,
+            stage=NinjaEngagement.AT_RISK,
+            attended_180d=2,
+            offered_180d=6,
+            missed_in_a_row=3,
+            computed_on=timezone.localdate(),
+        )
         self.client.force_login(self.owner)
         response = self.client.get(self._page_url())
         self.assertContains(response, "At risk")
-        self.assertContains(response, "Came to 2 of the 6 sessions meant for them in the last 180 days; missed the last 3.")
+        self.assertContains(
+            response, "Came to 2 of the 6 sessions meant for them in the last 180 days; missed the last 3."
+        )
         # Still there after marking the row (the row is re-rendered on its own).
         response = self.client.post(self._mark_url(self.zoe), {"attended": "present"}, HTTP_HX_REQUEST="true")
         self.assertContains(response, "At risk")
@@ -785,8 +849,11 @@ class DojoEventAttendanceViewTests(TestCase):
 
     def test_event_of_another_dojo_gets_404(self):
         other_event = Event.objects.create(
-            name="Elsewhere", dojo=make_dojo("Antwerp"),
-            start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=10
+            name="Elsewhere",
+            dojo=make_dojo("Antwerp"),
+            start_time="2030-01-01T10:00:00Z",
+            end_time="2030-01-01T12:00:00Z",
+            places=10,
         )
         self.client.force_login(self.owner)
         self.assertEqual(self.client.get(self._page_url(other_event)).status_code, 404)
@@ -795,8 +862,11 @@ class DojoEventAttendanceViewTests(TestCase):
         """The registration id must belong to the event in the URL, or an
         owner could mark attendance on another dojo's session."""
         other_event = Event.objects.create(
-            name="Elsewhere", dojo=make_dojo("Antwerp"),
-            start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=10
+            name="Elsewhere",
+            dojo=make_dojo("Antwerp"),
+            start_time="2030-01-01T10:00:00Z",
+            end_time="2030-01-01T12:00:00Z",
+            places=10,
         )
         other_registration = Registration.objects.create(
             event=other_event, ninja=Ninja.objects.create(name="Other"), waiting_list=False, position=1
@@ -893,8 +963,12 @@ class DojoEventSetStatusViewTests(TestCase):
         self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
         self.event = Event.objects.create(
-            name="Session", dojo=self.dojo, status=Event.DRAFT,
-            start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=10
+            name="Session",
+            dojo=self.dojo,
+            status=Event.DRAFT,
+            start_time="2030-01-01T10:00:00Z",
+            end_time="2030-01-01T12:00:00Z",
+            places=10,
         )
 
     def _url(self, event=None):
@@ -1056,8 +1130,12 @@ class HelperDojoAccessTests(TestCase):
         self.helper = make_mentor(username="helper1", first_name="Hanna", last_name="Helper")
         add_member(self.dojo, self.helper)
         self.event = Event.objects.create(
-            name="Session", dojo=self.dojo, status=Event.DRAFT,
-            start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10
+            name="Session",
+            dojo=self.dojo,
+            status=Event.DRAFT,
+            start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z",
+            places=10,
         )
         self.registration = Registration.objects.create(
             event=self.event, ninja=Ninja.objects.create(name="Mila"), waiting_list=False, position=1
@@ -1086,9 +1164,14 @@ class HelperDojoAccessTests(TestCase):
     def test_helper_can_change_status_and_mark_attendance(self):
         self.client.force_login(self.helper)
 
-        self.client.post(reverse("dojo_event_set_status", kwargs=self._kw(event_id=self.event.id)), {"status": Event.OPEN})
         self.client.post(
-            reverse("dojo_event_attendance_mark", kwargs=self._kw(event_id=self.event.id, registration_id=self.registration.id)),
+            reverse("dojo_event_set_status", kwargs=self._kw(event_id=self.event.id)), {"status": Event.OPEN}
+        )
+        self.client.post(
+            reverse(
+                "dojo_event_attendance_mark",
+                kwargs=self._kw(event_id=self.event.id, registration_id=self.registration.id),
+            ),
             {"attended": "present"},
         )
 
@@ -1166,7 +1249,8 @@ class HelperDojoAccessTests(TestCase):
     def test_mentor_cannot_manage_the_dojo_lifecycle(self):
         self.client.force_login(self.helper)
         response = self.client.post(
-            reverse("dojo_set_lifecycle", kwargs=self._kw()), {"action": "archive"},
+            reverse("dojo_set_lifecycle", kwargs=self._kw()),
+            {"action": "archive"},
         )
         self.assertEqual(response.status_code, 403)
         self.dojo.refresh_from_db()
@@ -1203,17 +1287,24 @@ class HelperDojoAccessTests(TestCase):
                 with self.subTest(page=name):
                     self.assertEqual(self.client.get(urls[name]).status_code, 403)
             self.assertEqual(
-                self.client.post(reverse("dojo_event_set_status", kwargs=event_kw), {"status": Event.OPEN}).status_code,
+                self.client.post(
+                    reverse("dojo_event_set_status", kwargs=event_kw), {"status": Event.OPEN}
+                ).status_code,
                 403,
             )
             self.assertEqual(
                 self.client.post(
-                    reverse("dojo_event_attendance_mark", kwargs=self._kw(event_id=self.event.id, registration_id=self.registration.id)),
+                    reverse(
+                        "dojo_event_attendance_mark",
+                        kwargs=self._kw(event_id=self.event.id, registration_id=self.registration.id),
+                    ),
                     {"attended": "present"},
                 ).status_code,
                 403,
             )
-            self.assertEqual(self.client.post(reverse("dojo_event_attendance_mark_all", kwargs=event_kw)).status_code, 403)
+            self.assertEqual(
+                self.client.post(reverse("dojo_event_attendance_mark_all", kwargs=event_kw)).status_code, 403
+            )
 
             dashboard = self.client.get(urls["dashboard"])
             events = self.client.get(urls["events"])
@@ -1446,7 +1537,6 @@ class NotificationConsumerTests(TransactionTestCase):
 
         await communicator.disconnect()
 
-
     async def test_the_sign_in_policy_applies_to_the_socket(self):
         """accounts.sign_in: a champion whose role needs two-step login gets
         the socket only from a session that passed it."""
@@ -1456,7 +1546,8 @@ class NotificationConsumerTests(TransactionTestCase):
         from accounts.models import SignInRequirement
 
         await sync_to_async(SignInRequirement.objects.create)(
-            role=SignInRequirement.CHAMPION, level=SignInRequirement.TWO_STEP,
+            role=SignInRequirement.CHAMPION,
+            level=SignInRequirement.TWO_STEP,
         )
         device = await sync_to_async(TOTPDevice.objects.create)(user=self.owner, name="default")
 
@@ -1482,7 +1573,9 @@ class TeamMemberDetailViewTests(TestCase):
 
     def test_listed_member_renders_with_position(self):
         member = OrganisationTeamMember.objects.create(
-            name="Board Person", position="Member of the board", focus_areas="Finance, Grants",
+            name="Board Person",
+            position="Member of the board",
+            focus_areas="Finance, Grants",
         )
         response = self.client.get(reverse("team_member_detail", kwargs={"member_id": member.id}))
         self.assertEqual(response.status_code, 200)
@@ -1670,8 +1763,12 @@ class DojoLifecycleTests(TestCase):
     def test_dormant_and_archive_blocked_by_active_events(self):
         self._act("launch")
         Event.objects.create(
-            name="Upcoming", dojo=self.dojo, status=Event.OPEN,
-            start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10,
+            name="Upcoming",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z",
+            places=10,
         )
         self.assertEqual(self._act("go_dormant"), Dojo.ACTIVE)
         self.assertEqual(self._act("archive"), Dojo.ACTIVE)
@@ -1679,12 +1776,20 @@ class DojoLifecycleTests(TestCase):
     def test_closed_or_past_events_do_not_block(self):
         self._act("launch")
         Event.objects.create(
-            name="Closed", dojo=self.dojo, status=Event.CLOSED,
-            start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10,
+            name="Closed",
+            dojo=self.dojo,
+            status=Event.CLOSED,
+            start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z",
+            places=10,
         )
         Event.objects.create(
-            name="Past", dojo=self.dojo, status=Event.OPEN,
-            start_time="2020-01-01T10:00:00Z", end_time="2020-01-01T12:00:00Z", places=10,
+            name="Past",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time="2020-01-01T10:00:00Z",
+            end_time="2020-01-01T12:00:00Z",
+            places=10,
         )
         self.assertEqual(self._act("go_dormant"), Dojo.DORMANT)
 
@@ -1716,7 +1821,11 @@ class DormancyNudgeTests(TestCase):
     def _event(self, days_from_now):
         start = timezone.now() + timedelta(days=days_from_now)
         return Event.objects.create(
-            name="Session", dojo=self.dojo, start_time=start, end_time=start + timedelta(hours=2), places=10,
+            name="Session",
+            dojo=self.dojo,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+            places=10,
         )
 
     def test_nudged_after_half_a_year_without_events(self):
@@ -1760,8 +1869,13 @@ class PathwayScopeTests(TestCase):
 
     def _event(self, **fields):
         return Event.objects.create(
-            name="Session", dojo=self.dojo, status=Event.OPEN,
-            start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10, **fields,
+            name="Session",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z",
+            places=10,
+            **fields,
         )
 
     def test_new_event_preselects_the_dojos_pathways(self):
@@ -1771,7 +1885,9 @@ class PathwayScopeTests(TestCase):
     def test_existing_event_keeps_its_own_pathways(self):
         event = self._event()
         event.pathways.set([self.web])
-        response = self.client.get(reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": event.id}))
+        response = self.client.get(
+            reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": event.id})
+        )
         self.assertEqual(list(response.context["form"]["pathways"].value()), [self.web.id])
 
     def test_settings_save_the_dojos_pathways(self):
@@ -1800,12 +1916,20 @@ class PathwayScopeTests(TestCase):
     def test_team_narrows_what_a_ninja_works_on(self):
         event = self._event()
         registration = Registration.objects.create(
-            event=event, ninja=Ninja.objects.create(name="Mila"), waiting_list=False, position=1,
+            event=event,
+            ninja=Ninja.objects.create(name="Mila"),
+            waiting_list=False,
+            position=1,
         )
         registration.pathways.set([self.scratch, self.python])
-        url = reverse("dojo_event_registration_pathways", kwargs={
-            "dojo_id": self.dojo.id, "event_id": event.id, "registration_id": registration.id,
-        })
+        url = reverse(
+            "dojo_event_registration_pathways",
+            kwargs={
+                "dojo_id": self.dojo.id,
+                "event_id": event.id,
+                "registration_id": registration.id,
+            },
+        )
 
         # Any pathway may be picked — the event's are only the default.
         response = self.client.post(url, {"pathway": [self.web.id]}, HTTP_HX_REQUEST="true")
@@ -1816,24 +1940,40 @@ class PathwayScopeTests(TestCase):
     def test_pathway_editing_needs_take_attendance_and_the_right_event(self):
         event = self._event()
         registration = Registration.objects.create(
-            event=event, ninja=Ninja.objects.create(name="Mila"), waiting_list=False, position=1,
+            event=event,
+            ninja=Ninja.objects.create(name="Mila"),
+            waiting_list=False,
+            position=1,
         )
         mentor = make_mentor(username="m1")
         add_member(self.dojo, mentor)
-        url = reverse("dojo_event_registration_pathways", kwargs={
-            "dojo_id": self.dojo.id, "event_id": event.id, "registration_id": registration.id,
-        })
+        url = reverse(
+            "dojo_event_registration_pathways",
+            kwargs={
+                "dojo_id": self.dojo.id,
+                "event_id": event.id,
+                "registration_id": registration.id,
+            },
+        )
         self.client.force_login(mentor)
         with patch.dict(access.ROLE_CAPABILITIES, {access.MENTOR: frozenset()}):
             self.assertEqual(self.client.post(url, {"pathway": [self.web.id]}).status_code, 403)
 
         other_event = Event.objects.create(
-            name="Other", dojo=make_dojo("Antwerp"), start_time="2099-01-01T10:00:00Z",
-            end_time="2099-01-01T12:00:00Z", places=10,
+            name="Other",
+            dojo=make_dojo("Antwerp"),
+            start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z",
+            places=10,
         )
-        wrong = reverse("dojo_event_registration_pathways", kwargs={
-            "dojo_id": self.dojo.id, "event_id": other_event.id, "registration_id": registration.id,
-        })
+        wrong = reverse(
+            "dojo_event_registration_pathways",
+            kwargs={
+                "dojo_id": self.dojo.id,
+                "event_id": other_event.id,
+                "registration_id": registration.id,
+            },
+        )
         self.client.force_login(self.owner)
         self.assertEqual(self.client.post(wrong, {"pathway": [self.web.id]}).status_code, 404)
         self.assertFalse(registration.pathways.exists())
@@ -1842,7 +1982,9 @@ class PathwayScopeTests(TestCase):
         event = self._event()
         event.pathways.set([self.web])
         self.client.logout()
-        self.assertContains(self.client.get(reverse("event_detail", kwargs={"event_id": event.id})), "Pathways this session covers")
+        self.assertContains(
+            self.client.get(reverse("event_detail", kwargs={"event_id": event.id})), "Pathways this session covers"
+        )
         dojo_page = self.client.get(reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}))
         self.assertContains(dojo_page, "Scratch")
         self.assertContains(dojo_page, "Python")
@@ -1861,14 +2003,25 @@ class AwardBeltViewTests(TestCase):
         self.owner = make_champion(username="owner1")
         self.dojo = make_dojo("Ghent", champion=self.owner)
         self.event = Event.objects.create(
-            name="Session", dojo=self.dojo, status=Event.OPEN,
-            start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10,
+            name="Session",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z",
+            places=10,
         )
         self.ninja = Ninja.objects.create(name="Mila")
-        self.registration = Registration.objects.create(event=self.event, ninja=self.ninja, waiting_list=False, position=1)
-        self.url = reverse("dojo_event_award_belt", kwargs={
-            "dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.registration.id,
-        })
+        self.registration = Registration.objects.create(
+            event=self.event, ninja=self.ninja, waiting_list=False, position=1
+        )
+        self.url = reverse(
+            "dojo_event_award_belt",
+            kwargs={
+                "dojo_id": self.dojo.id,
+                "event_id": self.event.id,
+                "registration_id": self.registration.id,
+            },
+        )
         self.client.force_login(self.owner)
 
     def test_awards_the_belt_and_rerenders_the_row(self):
@@ -1886,7 +2039,10 @@ class AwardBeltViewTests(TestCase):
         self.client.post(self.url, {"belt": self.yellow.id}, HTTP_HX_REQUEST="true")
         response = self.client.post(self.url, {"belt": self.white.id}, HTTP_HX_REQUEST="true")
 
-        self.assertEqual(response.context["belt_forms"][self.ninja.id].errors["belt"], ["Mila already has the Yellow belt (or higher)."])
+        self.assertEqual(
+            response.context["belt_forms"][self.ninja.id].errors["belt"],
+            ["Mila already has the Yellow belt (or higher)."],
+        )
         self.assertContains(response, "Mila already has the Yellow belt (or higher).")
         self.assertEqual(self.ninja.belts.count(), 1)
 
@@ -1896,29 +2052,46 @@ class AwardBeltViewTests(TestCase):
         self.client.force_login(mentor)
         with patch.dict(access.ROLE_CAPABILITIES, {access.MENTOR: frozenset({access.TAKE_ATTENDANCE})}):
             self.assertEqual(self.client.post(self.url, {"belt": self.white.id}).status_code, 403)
-            page = self.client.get(reverse("dojo_event_attendance", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id}))
+            page = self.client.get(
+                reverse("dojo_event_attendance", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+            )
             self.assertNotContains(page, "Award belt")
 
         other_event = Event.objects.create(
-            name="Other", dojo=make_dojo("Antwerp"), start_time="2099-01-01T10:00:00Z",
-            end_time="2099-01-01T12:00:00Z", places=10,
+            name="Other",
+            dojo=make_dojo("Antwerp"),
+            start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z",
+            places=10,
         )
-        wrong = reverse("dojo_event_award_belt", kwargs={
-            "dojo_id": self.dojo.id, "event_id": other_event.id, "registration_id": self.registration.id,
-        })
+        wrong = reverse(
+            "dojo_event_award_belt",
+            kwargs={
+                "dojo_id": self.dojo.id,
+                "event_id": other_event.id,
+                "registration_id": self.registration.id,
+            },
+        )
         self.client.force_login(self.owner)
         self.assertEqual(self.client.post(wrong, {"belt": self.white.id}).status_code, 404)
         self.assertFalse(self.ninja.belts.exists())
 
     def test_marking_present_updates_milestone_badges(self):
-        mark = reverse("dojo_event_attendance_mark", kwargs={
-            "dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.registration.id,
-        })
+        mark = reverse(
+            "dojo_event_attendance_mark",
+            kwargs={
+                "dojo_id": self.dojo.id,
+                "event_id": self.event.id,
+                "registration_id": self.registration.id,
+            },
+        )
         self.client.post(mark, {"attended": "present"})
         self.assertIsNotNone(self.ninja.badges.get(badge=self.band).earned_date)
 
     def test_mark_all_present_updates_milestone_badges(self):
-        self.client.post(reverse("dojo_event_attendance_mark_all", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id}))
+        self.client.post(
+            reverse("dojo_event_attendance_mark_all", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+        )
         self.assertIsNotNone(self.ninja.badges.get(badge=self.band).earned_date)
 
 
@@ -1937,14 +2110,25 @@ class AwardBadgeViewTests(TestCase):
         self.mentor = make_mentor(username="m1")
         add_member(self.dojo, self.mentor)
         self.event = Event.objects.create(
-            name="Session", dojo=self.dojo, status=Event.OPEN,
-            start_time="2099-01-01T10:00:00Z", end_time="2099-01-01T12:00:00Z", places=10,
+            name="Session",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z",
+            places=10,
         )
         self.ninja = Ninja.objects.create(name="Mila")
-        self.registration = Registration.objects.create(event=self.event, ninja=self.ninja, waiting_list=False, position=1)
-        self.url = reverse("dojo_event_award_badge", kwargs={
-            "dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.registration.id,
-        })
+        self.registration = Registration.objects.create(
+            event=self.event, ninja=self.ninja, waiting_list=False, position=1
+        )
+        self.url = reverse(
+            "dojo_event_award_badge",
+            kwargs={
+                "dojo_id": self.dojo.id,
+                "event_id": self.event.id,
+                "registration_id": self.registration.id,
+            },
+        )
         self.page = reverse("dojo_event_attendance", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
 
     def test_champion_and_mentor_can_award(self):
@@ -1970,8 +2154,10 @@ class AwardBadgeViewTests(TestCase):
     def test_a_refused_award_shows_the_message_in_the_row(self):
         self.client.force_login(self.owner)
         response = self.client.post(self.url, {"badge": self.band.id}, HTTP_HX_REQUEST="true")
-        self.assertEqual(response.context["badge_forms"][self.ninja.id].errors["badge"],
-                         ["Milestones are awarded automatically when attendance is marked."])
+        self.assertEqual(
+            response.context["badge_forms"][self.ninja.id].errors["badge"],
+            ["Milestones are awarded automatically when attendance is marked."],
+        )
         self.assertContains(response, "Milestones are awarded automatically when attendance is marked.")
         self.assertFalse(self.ninja.badges.exists())
 
@@ -1997,12 +2183,20 @@ class AwardBadgeViewTests(TestCase):
         self.assertEqual(self.client.post(self.url, {"badge": self.maker.id}).status_code, 404)
 
         other_event = Event.objects.create(
-            name="Other", dojo=make_dojo("Leuven"), start_time="2099-01-01T10:00:00Z",
-            end_time="2099-01-01T12:00:00Z", places=10,
+            name="Other",
+            dojo=make_dojo("Leuven"),
+            start_time="2099-01-01T10:00:00Z",
+            end_time="2099-01-01T12:00:00Z",
+            places=10,
         )
-        wrong = reverse("dojo_event_award_badge", kwargs={
-            "dojo_id": self.dojo.id, "event_id": other_event.id, "registration_id": self.registration.id,
-        })
+        wrong = reverse(
+            "dojo_event_award_badge",
+            kwargs={
+                "dojo_id": self.dojo.id,
+                "event_id": other_event.id,
+                "registration_id": self.registration.id,
+            },
+        )
         self.client.force_login(self.owner)
         self.assertEqual(self.client.post(wrong, {"badge": self.maker.id}).status_code, 404)
         self.assertFalse(self.ninja.badges.exists())
@@ -2110,8 +2304,12 @@ class OrganisationDojoTests(TestCase):
 
     def test_its_events_are_public(self):
         event = Event.objects.create(
-            name="Coolest Projects", dojo=self.org, status=Event.OPEN, places=0,
-            start_time=timezone.now() + timedelta(days=30), end_time=timezone.now() + timedelta(days=30, hours=6),
+            name="Coolest Projects",
+            dojo=self.org,
+            status=Event.OPEN,
+            places=0,
+            start_time=timezone.now() + timedelta(days=30),
+            end_time=timezone.now() + timedelta(days=30, hours=6),
         )
         self.assertIn(event, Event.objects.visible())
 
@@ -2123,8 +2321,12 @@ class OrganisationDojoTests(TestCase):
 
     def test_never_nudged_to_go_dormant(self):
         Event.objects.create(
-            name="Long ago", dojo=self.org, status=Event.CLOSED, places=10,
-            start_time=timezone.now() - timedelta(days=400), end_time=timezone.now() - timedelta(days=400, hours=-2),
+            name="Long ago",
+            dojo=self.org,
+            status=Event.CLOSED,
+            places=10,
+            start_time=timezone.now() - timedelta(days=400),
+            end_time=timezone.now() - timedelta(days=400, hours=-2),
         )
         self.assertFalse(team.needs_dormancy_nudge(self.org))
 
@@ -2144,8 +2346,15 @@ class OrganisationEventFormTests(TempMediaMixin, TestCase):
         self.client.force_login(self.champion)
 
     def _post(self, dojo, **overrides):
-        data = {"name": "Coolest Projects", "event_date": "01/01/2030", "start_time": "10:00", "end_time": "17:00",
-                "places": "", "template_image": "", **overrides}
+        data = {
+            "name": "Coolest Projects",
+            "event_date": "01/01/2030",
+            "start_time": "10:00",
+            "end_time": "17:00",
+            "places": "",
+            "template_image": "",
+            **overrides,
+        }
         return self.client.post(reverse("dojo_event_create", kwargs={"dojo_id": dojo.id}), data)
 
     def test_external_registration_without_places(self):
@@ -2208,12 +2417,19 @@ class MembersPageTests(TestCase):
         from mailing.models import EmailMessage
 
         self.client.force_login(self.owner)
-        response = self.client.post(reverse("dojo_team_action", kwargs={"dojo_id": self.dojo.id}), {
-            "action": "promote", "ninja_id": self.kid.id, "next": self.url,
-        })
+        response = self.client.post(
+            reverse("dojo_team_action", kwargs={"dojo_id": self.dojo.id}),
+            {
+                "action": "promote",
+                "ninja_id": self.kid.id,
+                "next": self.url,
+            },
+        )
 
         self.assertRedirects(response, self.url)
-        self.assertTrue(self.dojo.memberships.active().filter(user=self.kid_login, role=DojoMembership.YOUTH_MENTOR).exists())
+        self.assertTrue(
+            self.dojo.memberships.active().filter(user=self.kid_login, role=DojoMembership.YOUTH_MENTOR).exists()
+        )
         mails = EmailMessage.objects.filter(template_key="youth_mentor_promoted")
         self.assertEqual(set(mails.values_list("recipient", flat=True)), {"parent@example.com", "kid@example.com"})
         self.assertIn("Emma", mails.first().subject)
@@ -2241,8 +2457,12 @@ class TeamAttendanceTests(TestCase):
         self.not_on_session = add_member(self.dojo, make_mentor(username="m2"))
         now = timezone.now()
         self.event = Event.objects.create(
-            name="Scratch", dojo=self.dojo, status=Event.OPEN, places=5,
-            start_time=now + timedelta(days=1), end_time=now + timedelta(days=1, hours=2),
+            name="Scratch",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            places=5,
+            start_time=now + timedelta(days=1),
+            end_time=now + timedelta(days=1, hours=2),
         )
         self.event.team.set([self.dojo.champion_membership, self.mentor])
         self.client.force_login(self.owner)
@@ -2286,7 +2506,6 @@ class TeamAttendanceTests(TestCase):
         self.assertContains(response, "Visiting")
 
 
-
 class DojoLanguagesTests(TempMediaMixin, TestCase):
     """A dojo's languages (core.content_languages, DATA_MODEL.md §19): the
     languages its sessions are given in and its texts are written in."""
@@ -2294,14 +2513,25 @@ class DojoLanguagesTests(TempMediaMixin, TestCase):
     def setUp(self):
         super().setUp()
         self.owner = make_champion(username="owner1")
-        self.dojo = make_dojo("Brussels", champion=self.owner, address="Rue Haute 1, Brussels",
-                              description="Een gezellige codeerclub.")
+        self.dojo = make_dojo(
+            "Brussels", champion=self.owner, address="Rue Haute 1, Brussels", description="Een gezellige codeerclub."
+        )
         self.client.force_login(self.owner)
 
     def _post(self, **extra):
-        data = {"name": "CoderDojo Brussels", "tagline": "", "description": "Een gezellige codeerclub.",
-                "schedule_description": "", "min_age": "", "max_age": "", "email": "", "phone": "",
-                "municipality": "", "address": "Rue Haute 1, Brussels", "visit_notes": ""}
+        data = {
+            "name": "CoderDojo Brussels",
+            "tagline": "",
+            "description": "Een gezellige codeerclub.",
+            "schedule_description": "",
+            "min_age": "",
+            "max_age": "",
+            "email": "",
+            "phone": "",
+            "municipality": "",
+            "address": "Rue Haute 1, Brussels",
+            "visit_notes": "",
+        }
         data.update(extra)
         return self.client.post(reverse("dojo_manage", kwargs={"dojo_id": self.dojo.id}), data)
 
@@ -2328,15 +2558,21 @@ class DojoLanguagesTests(TempMediaMixin, TestCase):
         page = self.client.get(reverse("dojo_manage", kwargs={"dojo_id": self.dojo.id}))
         self.assertEqual([g["code"] for g in page.context["form"].translation_groups], ["fr-be"])
 
-        self._post(languages=["nl-be", "fr-be"], main_language="nl-be", **{"tr__fr-be__description": "Un club de code sympa."})
+        self._post(
+            languages=["nl-be", "fr-be"], main_language="nl-be", **{"tr__fr-be__description": "Un club de code sympa."}
+        )
         self.dojo.refresh_from_db()
         self.assertEqual(self.dojo.translation_for("fr-be", "description"), "Un club de code sympa.")
 
         self.client.logout()
-        french = self.client.get(reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}), HTTP_ACCEPT_LANGUAGE="fr-be")
+        french = self.client.get(
+            reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}), HTTP_ACCEPT_LANGUAGE="fr-be"
+        )
         self.assertContains(french, "Un club de code sympa.")
         self.assertContains(french, "Sessions en")
-        english = self.client.get(reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}), HTTP_ACCEPT_LANGUAGE="en-us")
+        english = self.client.get(
+            reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}), HTTP_ACCEPT_LANGUAGE="en-us"
+        )
         self.assertContains(english, "Een gezellige codeerclub.")
         self.assertContains(english, "Only in Nederlands")
 
@@ -2358,18 +2594,25 @@ class DojoLanguagesTests(TempMediaMixin, TestCase):
     def test_update_in_other_languages(self):
         self.dojo.languages = ["nl-be", "fr-be"]
         self.dojo.save()
-        self.client.post(reverse("dojo_updates", kwargs={"dojo_id": self.dojo.id}),
-                         {"text": "Nieuwe zaal.", "tr__fr-be__text": "Nouvelle salle."})
+        self.client.post(
+            reverse("dojo_updates", kwargs={"dojo_id": self.dojo.id}),
+            {"text": "Nieuwe zaal.", "tr__fr-be__text": "Nouvelle salle."},
+        )
         announcement = self.dojo.announcements.get()
-        self.assertEqual((announcement.text, announcement.translation_for("fr-be", "text")), ("Nieuwe zaal.", "Nouvelle salle."))
+        self.assertEqual(
+            (announcement.text, announcement.translation_for("fr-be", "text")), ("Nieuwe zaal.", "Nouvelle salle.")
+        )
 
     def test_region_languages(self):
         from geo.models import AdministrativeBoundary
 
         from .languages import region_languages
 
-        liege = AdministrativeBoundary.objects.create(name="Province de Liège", kind=AdministrativeBoundary.PROVINCE,
-                                                      boundary=MultiPolygon(Polygon(((5, 50), (6, 50), (6, 51), (5, 50)))))
+        liege = AdministrativeBoundary.objects.create(
+            name="Province de Liège",
+            kind=AdministrativeBoundary.PROVINCE,
+            boundary=MultiPolygon(Polygon(((5, 50), (6, 50), (6, 51), (5, 50)))),
+        )
         self.assertEqual(region_languages(make_dojo("Liège", province=liege)), ["fr-be"])
         self.assertEqual(region_languages(make_dojo("Nowhere")), ["nl-be"])
 
@@ -2385,16 +2628,24 @@ class HealthNotesOnAttendanceTests(TestCase):
         self.mentor = make_mentor(username="mentor1")
         add_member(self.dojo, self.mentor)
         self.event = Event.objects.create(
-            name="Session", dojo=self.dojo, status=Event.OPEN,
-            start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=10,
+            name="Session",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time="2030-01-01T10:00:00Z",
+            end_time="2030-01-01T12:00:00Z",
+            places=10,
         )
         self.zoe = Registration.objects.create(
-            event=self.event, ninja=Ninja.objects.create(name="Zoe", allergies_notes="Peanut allergy"),
-            waiting_list=False, position=1,
+            event=self.event,
+            ninja=Ninja.objects.create(name="Zoe", allergies_notes="Peanut allergy"),
+            waiting_list=False,
+            position=1,
         )
         Registration.objects.create(
-            event=self.event, ninja=Ninja.objects.create(name="Wait", allergies_notes="Lactose intolerant"),
-            waiting_list=True, position=2,
+            event=self.event,
+            ninja=Ninja.objects.create(name="Wait", allergies_notes="Lactose intolerant"),
+            waiting_list=True,
+            position=2,
         )
         self.url = reverse("dojo_event_attendance", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
 
@@ -2411,9 +2662,14 @@ class HealthNotesOnAttendanceTests(TestCase):
 
     def test_champion_still_sees_them_after_marking_the_row(self):
         self.client.force_login(self.owner)
-        url = reverse("dojo_event_attendance_mark", kwargs={
-            "dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.zoe.id,
-        })
+        url = reverse(
+            "dojo_event_attendance_mark",
+            kwargs={
+                "dojo_id": self.dojo.id,
+                "event_id": self.event.id,
+                "registration_id": self.zoe.id,
+            },
+        )
         response = self.client.post(url, {"attended": "present"}, HTTP_HX_REQUEST="true")
         self.assertContains(response, "Peanut allergy")
 

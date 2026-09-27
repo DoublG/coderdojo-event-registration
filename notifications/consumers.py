@@ -49,7 +49,9 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         user = self.scope["user"]
         self.dojo_id = self.scope["url_route"]["kwargs"]["dojo_id"]
 
-        if not user.is_authenticated or not await _has_dojo_access(user, self.scope.get("session") or {}, self.dojo_id):
+        if not user.is_authenticated or not await _has_dojo_access(
+            user, self.scope.get("session") or {}, self.dojo_id
+        ):
             await self.close()
             return
 
@@ -68,6 +70,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         same-named consumer method."""
         context = await database_sync_to_async(_notification_context)(self.scope["user"], self.dojo_id)
         html = await database_sync_to_async(render_to_string)(
-            "dojos/partials/_notification_bell.html", context,
+            "dojos/partials/_notification_bell.html",
+            context,
         )
         await self.send(text_data=html)

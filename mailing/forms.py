@@ -22,10 +22,13 @@ class MailPreferencesForm(forms.Form):
     off are listed by the template, not as fields."""
 
     preferred_language = forms.ChoiceField(
-        label=_("Language for emails"), choices=settings.LANGUAGES,
+        label=_("Language for emails"),
+        choices=settings.LANGUAGES,
     )
     postal_code = forms.CharField(
-        label=_("Postcode"), required=False, max_length=4,
+        label=_("Postcode"),
+        required=False,
+        max_length=4,
         help_text=_("So we can tell you about dojos and sessions near you."),
         widget=forms.TextInput(attrs={"inputmode": "numeric", "placeholder": _("9000")}),
     )
@@ -33,27 +36,34 @@ class MailPreferencesForm(forms.Form):
     def __init__(self, *args, user, **kwargs):
         self.user = user
         current = preferences_for(user)
-        kwargs.setdefault("initial", {}).update({
-            "preferred_language": user.preferred_language or settings.LANGUAGES[0][0],
-            "postal_code": user.postal_code,
-            **{f"category_{category}": subscribed for category, subscribed in current.items()},
-        })
+        kwargs.setdefault("initial", {}).update(
+            {
+                "preferred_language": user.preferred_language or settings.LANGUAGES[0][0],
+                "postal_code": user.postal_code,
+                **{f"category_{category}": subscribed for category, subscribed in current.items()},
+            }
+        )
         super().__init__(*args, **kwargs)
         self.categories = categories_for(user)
         for category in self.categories:
             if CAN_OPT_OUT[category]:
                 self.fields[f"category_{category}"] = forms.BooleanField(
-                    required=False, label=category.label, help_text=DESCRIPTIONS[category],
+                    required=False,
+                    label=category.label,
+                    help_text=DESCRIPTIONS[category],
                 )
         if user.is_ninja:
             del self.fields["postal_code"]
         # Per child: may their details choose which mails we send (accounts.consent)?
-        self.guardianships = [] if user.is_ninja else list(
-            user.guardianships.select_related("ninja").order_by("ninja__name", "ninja__family_name")
+        self.guardianships = (
+            []
+            if user.is_ninja
+            else list(user.guardianships.select_related("ninja").order_by("ninja__name", "ninja__family_name"))
         )
         for guardianship in self.guardianships:
             self.fields[f"child_{guardianship.ninja_id}"] = forms.BooleanField(
-                required=False, label=guardianship.ninja.full_name,
+                required=False,
+                label=guardianship.ninja.full_name,
                 initial=guardianship.consent_given_at is not None,
             )
 
@@ -78,8 +88,11 @@ class MailPreferencesForm(forms.Form):
 
     def chosen(self):
         """{category: subscribed} from the submitted checkboxes."""
-        return {name.removeprefix("category_"): value for name, value in self.cleaned_data.items()
-                if name.startswith("category_")}
+        return {
+            name.removeprefix("category_"): value
+            for name, value in self.cleaned_data.items()
+            if name.startswith("category_")
+        }
 
 
 # --- the organisation dashboard (mailing.manage) --------------------------------
@@ -115,7 +128,10 @@ class MailingFormMixin:
             name, sep, value = line.partition(":")
             name = name.strip()
             if not sep or not VARIABLE_RE.match(name):
-                raise ValidationError(_("Line %(number)s: write it as name: value (a name in lowercase letters and _).") % {"number": number})
+                raise ValidationError(
+                    _("Line %(number)s: write it as name: value (a name in lowercase letters and _).")
+                    % {"number": number}
+                )
             variables[name] = value.strip()
         return variables
 
@@ -126,7 +142,8 @@ class MailingFormMixin:
 
 def _variables_field():
     return forms.CharField(
-        label=_("Template variables"), required=False,
+        label=_("Template variables"),
+        required=False,
         widget=forms.Textarea(attrs={"rows": 3, "placeholder": _("signup_url: https://coolestprojects.org")}),
         help_text=_("One per line, as name: value. The template uses them as {{ name }}."),
     )
@@ -134,7 +151,9 @@ def _variables_field():
 
 def _segments_help():
     """The Segment field's help, with a link to the Segments page."""
-    return mark_safe(_('<a href="%(url)s">Segments</a> describe who gets it.') % {"url": reverse("manage_segment_list")})
+    return mark_safe(
+        _('<a href="%(url)s">Segments</a> describe who gets it.') % {"url": reverse("manage_segment_list")}
+    )
 
 
 class CampaignForm(MailingFormMixin, forms.ModelForm):
@@ -175,7 +194,11 @@ class SegmentForm(forms.ModelForm):
             "name": forms.TextInput(attrs={"placeholder": _("Families near Ghent")}),
             "description": forms.Textarea(attrs={"rows": 2, "placeholder": _("Who this is, in a sentence.")}),
         }
-        labels = {"name": _("Name"), "description": _("Description"), "is_active": _("Active (offered when creating a campaign)")}
+        labels = {
+            "name": _("Name"),
+            "description": _("Description"),
+            "is_active": _("Active (offered when creating a campaign)"),
+        }
         # The model's help texts are English notes for the admin.
         help_texts = {"name": "", "description": "", "is_active": ""}
 
@@ -216,12 +239,16 @@ class TemplateVersionForm(forms.ModelForm):
 
 class NewTemplateForm(forms.Form):
     key = forms.SlugField(
-        label=_("Name"), max_length=100, help_text=_("Lowercase, with _ between words, e.g. campaign_summer_camp."),
+        label=_("Name"),
+        max_length=100,
+        help_text=_("Lowercase, with _ between words, e.g. campaign_summer_camp."),
         widget=forms.TextInput(attrs={"placeholder": _("campaign_summer_camp")}),
     )
     category = forms.ChoiceField(label=_("Kind of mail"))
     description = forms.CharField(
-        label=_("Description"), required=False, max_length=255,
+        label=_("Description"),
+        required=False,
+        max_length=255,
         help_text=_("When it's used and which variables it takes."),
     )
 
@@ -258,4 +285,3 @@ class JourneyForm(MailingFormMixin, forms.ModelForm):
             'Tip: a rule like "How the child comes to sessions changed: became At risk in the last 7 days" '
             "makes it a triggered mail."
         )
-

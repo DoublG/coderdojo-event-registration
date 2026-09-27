@@ -131,20 +131,32 @@ class SegmentResolverTests(TestCase):
         self.assertEqual(_resolve(segment), set())
 
     def test_rules_in_a_ninja_group_describe_the_same_child(self):
-        """"A girl registered for the event" must not match a family whose
+        """ "A girl registered for the event" must not match a family whose
         boy is registered and whose girl isn't."""
         event = Event.objects.create(
-            name="Girlz", dojo=make_dojo(), status=Event.OPEN, places=10,
-            start_time=timezone.now() + timedelta(days=3), end_time=timezone.now() + timedelta(days=3, hours=2),
+            name="Girlz",
+            dojo=make_dojo(),
+            status=Event.OPEN,
+            places=10,
+            start_time=timezone.now() + timedelta(days=3),
+            end_time=timezone.now() + timedelta(days=3, hours=2),
         )
         mixed_boy = Ninja.objects.get(name="mixed-kid-0")
         Registration.objects.create(event=event, ninja=mixed_boy, waiting_list=False, position=1)
-        Registration.objects.create(event=event, ninja=Ninja.objects.get(name="girl-kid-0"), waiting_list=False, position=2)
+        Registration.objects.create(
+            event=event, ninja=Ninja.objects.get(name="girl-kid-0"), waiting_list=False, position=2
+        )
 
-        segment = _segment(("ninja", "and", [
-            ("ninja_gender", "equals", Ninja.GIRL),
-            ("event", "equals", event.pk),
-        ]))
+        segment = _segment(
+            (
+                "ninja",
+                "and",
+                [
+                    ("ninja_gender", "equals", Ninja.GIRL),
+                    ("event", "equals", event.pk),
+                ],
+            )
+        )
         self.assertEqual(_resolve(segment), {"girl"})
 
     def test_two_rules_on_the_same_relation_are_independent_subqueries(self):
@@ -153,8 +165,9 @@ class SegmentResolverTests(TestCase):
         dojo = make_dojo()
         start = timezone.now() + timedelta(days=3)
         a, b = (
-            Event.objects.create(name=n, dojo=dojo, status=Event.OPEN, places=5, start_time=start,
-                                 end_time=start + timedelta(hours=2))
+            Event.objects.create(
+                name=n, dojo=dojo, status=Event.OPEN, places=5, start_time=start, end_time=start + timedelta(hours=2)
+            )
             for n in "AB"
         )
         kid = Ninja.objects.get(name="girl-kid-0")
@@ -179,21 +192,33 @@ class SegmentResolverTests(TestCase):
         self.assertEqual(_resolve(segment), {"volunteer"})
 
     def test_or_group(self):
-        segment = _segment(("ninja", "or", [
-            ("ninja_gender", "equals", Ninja.BOY),
-            ("ninja_gender", "equals", Ninja.OTHER),
-        ]))
+        segment = _segment(
+            (
+                "ninja",
+                "or",
+                [
+                    ("ninja_gender", "equals", Ninja.BOY),
+                    ("ninja_gender", "equals", Ninja.OTHER),
+                ],
+            )
+        )
         self.assertEqual(_resolve(segment), {"boy", "other", "mixed"})
 
 
 def _session(dojo, days_ago, status=Event.CLOSED):
     start = timezone.now() - timedelta(days=days_ago)
-    return Event.objects.create(name=f"Session {days_ago}", dojo=dojo, status=status, places=20,
-                                start_time=start, end_time=start + timedelta(hours=2))
+    return Event.objects.create(
+        name=f"Session {days_ago}",
+        dojo=dojo,
+        status=status,
+        places=20,
+        start_time=start,
+        end_time=start + timedelta(hours=2),
+    )
 
 
 class ActivityAttributeTests(TestCase):
-    """"Everyone active": volunteers whose dojo held a session in the last N
+    """ "Everyone active": volunteers whose dojo held a session in the last N
     days, and families whose child came to one, with the same N."""
 
     def _team_members(self, days):
@@ -231,8 +256,10 @@ class ActivityAttributeTests(TestCase):
     def test_families_whose_child_came_recently(self):
         dojo = make_dojo()
         recent, old = _session(dojo, days_ago=20), _session(dojo, days_ago=400)
-        kids = {name: Ninja.objects.of_guardian(_family(name, Ninja.GIRL)).get()
-                for name in ["came", "absent", "long-ago", "waitlisted"]}
+        kids = {
+            name: Ninja.objects.of_guardian(_family(name, Ninja.GIRL)).get()
+            for name in ["came", "absent", "long-ago", "waitlisted"]
+        }
         Registration.objects.create(event=recent, ninja=kids["came"], waiting_list=False, position=1, attended=True)
         Registration.objects.create(event=recent, ninja=kids["absent"], waiting_list=False, position=2, attended=False)
         Registration.objects.create(event=recent, ninja=kids["waitlisted"], waiting_list=True, position=3)
@@ -256,7 +283,9 @@ class ActivityAttributeTests(TestCase):
         group = SegmentGroup.objects.create(segment=Segment.objects.create(name="x"), scope="user")
         for value in [0, -5, "365", 1.5, True]:
             with self.subTest(value=value), self.assertRaises(ValidationError):
-                SegmentRule(group=group, attribute="active_team_member", operator="within_days", value=value).full_clean()
+                SegmentRule(
+                    group=group, attribute="active_team_member", operator="within_days", value=value
+                ).full_clean()
 
 
 class LocalityAttributeTests(TestCase):
@@ -264,7 +293,9 @@ class LocalityAttributeTests(TestCase):
     def setUpTestData(cls):
         square = MultiPolygon(Polygon(((3.0, 50.5), (4.5, 50.5), (4.5, 51.5), (3.0, 51.5), (3.0, 50.5))), srid=4326)
         cls.east_flanders = AdministrativeBoundary.objects.create(
-            kind=AdministrativeBoundary.PROVINCE, name="Provincie Oost-Vlaanderen", boundary=square,
+            kind=AdministrativeBoundary.PROVINCE,
+            name="Provincie Oost-Vlaanderen",
+            boundary=square,
         )
         Municipality.objects.create(postal_code="9000", name="Gent", center=Point(3.7174, 51.0543, srid=4326))
         Municipality.objects.create(postal_code="1000", name="Bruxelles", center=Point(4.3517, 50.8503, srid=4326))
@@ -345,10 +376,12 @@ class SegmentRuleValidationTests(TestCase):
 
 class RenderingTests(TestCase):
     def setUp(self):
-        EmailTemplate.objects.create(key="hello", language="en-us", category="service",
-                                     subject="Hi {{ name }}", body="Hello {{ name }} & <you>")
-        EmailTemplate.objects.create(key="hello", language="nl-be", category="service",
-                                     subject="Dag {{ name }}", body="Hallo {{ name }}")
+        EmailTemplate.objects.create(
+            key="hello", language="en-us", category="service", subject="Hi {{ name }}", body="Hello {{ name }} & <you>"
+        )
+        EmailTemplate.objects.create(
+            key="hello", language="nl-be", category="service", subject="Dag {{ name }}", body="Hallo {{ name }}"
+        )
 
     def test_renders_in_the_requested_language(self):
         self.assertEqual(render("hello", "nl-be", {"name": "An"}), ("Dag An", "Hallo An\n"))
@@ -407,8 +440,13 @@ class SeedMailingTests(TestCase):
         session = _session(dojo, days_ago=30)
         girl_family = _family("girl", Ninja.GIRL)
         _family("boy", Ninja.BOY)
-        Registration.objects.create(event=session, ninja=Ninja.objects.of_guardian(girl_family).get(),
-                                    waiting_list=False, position=1, attended=True)
+        Registration.objects.create(
+            event=session,
+            ninja=Ninja.objects.of_guardian(girl_family).get(),
+            waiting_list=False,
+            position=1,
+            attended=True,
+        )
         champion = User.objects.create(username="champion", email="c@example.com")
         add_member(dojo, champion, DojoMembership.CHAMPION)
 
@@ -426,11 +464,20 @@ Status = EmailMessage.Status
 
 def _templates():
     for language, greeting in [("en-us", "Hello"), ("nl-be", "Hallo")]:
-        EmailTemplate.objects.create(key="note", language=language, category=MailCategory.REMINDER,
-                                     subject=f"{greeting} {{{{ recipient_name }}}}",
-                                     body=f"{greeting}! {{{{ extra }}}} {{{{ unsubscribe_url }}}}")
-    EmailTemplate.objects.create(key="account", language="en-us", category=MailCategory.SERVICE,
-                                 subject="Your account", body="Account mail. {{ unsubscribe_url }}")
+        EmailTemplate.objects.create(
+            key="note",
+            language=language,
+            category=MailCategory.REMINDER,
+            subject=f"{greeting} {{{{ recipient_name }}}}",
+            body=f"{greeting}! {{{{ extra }}}} {{{{ unsubscribe_url }}}}",
+        )
+    EmailTemplate.objects.create(
+        key="account",
+        language="en-us",
+        category=MailCategory.SERVICE,
+        subject="Your account",
+        body="Account mail. {{ unsubscribe_url }}",
+    )
 
 
 class PreferenceTests(TestCase):
@@ -445,8 +492,10 @@ class PreferenceTests(TestCase):
         self.assertTrue(is_subscribed(self.parent, MailCategory.SERVICE))
 
     def test_ninja_accounts_only_get_their_own_kinds_of_mail(self):
-        self.assertEqual(set(preferences_for(self.teen)),
-                         {MailCategory.SERVICE, MailCategory.REGISTRATION, MailCategory.REMINDER, MailCategory.DOJO_NEWS})
+        self.assertEqual(
+            set(preferences_for(self.teen)),
+            {MailCategory.SERVICE, MailCategory.REGISTRATION, MailCategory.REMINDER, MailCategory.DOJO_NEWS},
+        )
         self.assertFalse(is_subscribed(self.teen, MailCategory.NEWSLETTER))
         self.assertFalse(set_preference(self.teen, MailCategory.NEWSLETTER, True, ConsentEvent.PREFERENCES))
         self.assertFalse(is_subscribed(self.teen, MailCategory.NEWSLETTER))
@@ -470,8 +519,11 @@ class PreferenceTests(TestCase):
         set_preference(other, MailCategory.REMINDER, False, ConsentEvent.PREFERENCES)
         for category in [MailCategory.NEWSLETTER, MailCategory.REMINDER, MailCategory.SERVICE]:
             with self.subTest(category=category):
-                in_db = set(User.objects.filter(pk__in=[self.parent.pk, other.pk]).filter(subscribed_q(category))
-                            .values_list("username", flat=True))
+                in_db = set(
+                    User.objects.filter(pk__in=[self.parent.pk, other.pk])
+                    .filter(subscribed_q(category))
+                    .values_list("username", flat=True)
+                )
                 in_python = {u.username for u in (self.parent, other) if is_subscribed(u, category)}
                 self.assertEqual(in_db, in_python)
 
@@ -479,12 +531,16 @@ class PreferenceTests(TestCase):
 class SendGatewayTests(TestCase):
     def setUp(self):
         _templates()
-        self.user = User.objects.create(username="ellen", first_name="Ellen", email="ellen@example.com",
-                                        preferred_language="nl-be")
+        self.user = User.objects.create(
+            username="ellen", first_name="Ellen", email="ellen@example.com", preferred_language="nl-be"
+        )
 
     def test_queues_a_rendered_mail_in_the_recipients_language(self):
         row = send(self.user, MailCategory.REMINDER, "note", {"extra": "Tot zaterdag"})
-        self.assertEqual((row.status, row.recipient, row.language, row.subject), (Status.PENDING, "ellen@example.com", "nl-be", "Hallo Ellen"))
+        self.assertEqual(
+            (row.status, row.recipient, row.language, row.subject),
+            (Status.PENDING, "ellen@example.com", "nl-be", "Hallo Ellen"),
+        )
         self.assertIn("Tot zaterdag", row.body)
         self.assertIn("/mail/unsubscribe/", row.body)
         self.assertEqual(row.priority, 5)
@@ -498,7 +554,9 @@ class SendGatewayTests(TestCase):
     def test_suppressed_with_a_reason(self):
         cases = {
             "unsubscribed": lambda: set_preference(self.user, MailCategory.REMINDER, False, ConsentEvent.PREFERENCES),
-            "blocked": lambda: EmailSuppression.objects.create(email="Ellen@Example.com ", reason=EmailSuppression.HARD_BOUNCE),
+            "blocked": lambda: EmailSuppression.objects.create(
+                email="Ellen@Example.com ", reason=EmailSuppression.HARD_BOUNCE
+            ),
             "no address": lambda: User.objects.filter(pk=self.user.pk).update(email=""),
             "inactive": lambda: User.objects.filter(pk=self.user.pk).update(is_active=False),
         }
@@ -577,7 +635,9 @@ class QueueTests(TestCase):
         self.assertEqual([len(sig.args[0]) for sig in signatures], [2, 1])
 
     def _claimed(self, *rows):
-        EmailMessage.objects.filter(pk__in=[r.pk for r in rows]).update(status=Status.SENDING, claimed_at=timezone.now())
+        EmailMessage.objects.filter(pk__in=[r.pk for r in rows]).update(
+            status=Status.SENDING, claimed_at=timezone.now()
+        )
 
     def test_batch_sends_with_message_id_and_unsubscribe_headers(self):
         reminder, account = self._queue(self.users[0]), self._queue(self.users[1], MailCategory.SERVICE)
@@ -622,8 +682,10 @@ class QueueTests(TestCase):
         with patch("mailing.tasks.mail.get_connection", return_value=_FakeConnection({"u1@example.com": down})):
             with self.assertRaises(TransientSendError):
                 send_email_batch([r.pk for r in rows])
-        self.assertEqual(dict(EmailMessage.objects.values_list("recipient", "status")),
-                         {"u0@example.com": Status.SENT, "u1@example.com": Status.SENDING})
+        self.assertEqual(
+            dict(EmailMessage.objects.values_list("recipient", "status")),
+            {"u0@example.com": Status.SENT, "u1@example.com": Status.SENDING},
+        )
 
         connection = _FakeConnection()
         with patch("mailing.tasks.mail.get_connection", return_value=connection):
@@ -635,16 +697,23 @@ class QueueTests(TestCase):
         self._claimed(*rows)
         EmailMessage.objects.filter(pk=rows[0].pk).update(status=Status.SENT)
         SendBatchTask().on_failure(RuntimeError("smtp down"), "task-id", ([r.pk for r in rows],), {}, None)
-        self.assertEqual(dict(EmailMessage.objects.values_list("recipient", "status")),
-                         {"u0@example.com": Status.SENT, "u1@example.com": Status.FAILED})
+        self.assertEqual(
+            dict(EmailMessage.objects.values_list("recipient", "status")),
+            {"u0@example.com": Status.SENT, "u1@example.com": Status.FAILED},
+        )
 
     @override_settings(MAILING_CLAIM_TIMEOUT_MINUTES=60)
     def test_requeue_stuck_rows(self):
         stuck, fresh = self._queue(self.users[0]), self._queue(self.users[1])
-        EmailMessage.objects.filter(pk=stuck.pk).update(status=Status.SENDING, claimed_at=timezone.now() - timedelta(hours=2))
+        EmailMessage.objects.filter(pk=stuck.pk).update(
+            status=Status.SENDING, claimed_at=timezone.now() - timedelta(hours=2)
+        )
         EmailMessage.objects.filter(pk=fresh.pk).update(status=Status.SENDING, claimed_at=timezone.now())
         self.assertEqual(requeue_stuck_emails(), 1)
-        self.assertEqual(dict(EmailMessage.objects.values_list("pk", "status")), {stuck.pk: Status.PENDING, fresh.pk: Status.SENDING})
+        self.assertEqual(
+            dict(EmailMessage.objects.values_list("pk", "status")),
+            {stuck.pk: Status.PENDING, fresh.pk: Status.SENDING},
+        )
 
 
 class MailPreferencesViewTests(TestCase):
@@ -667,17 +736,25 @@ class MailPreferencesViewTests(TestCase):
 
     def test_saving_changes_preferences_language_and_postcode(self):
         self.client.force_login(self.parent)
-        response = self.client.post(reverse("mail_preferences"), {
-            "category_newsletter": "on", "category_dojo_news": "on", "category_volunteer": "on",
-            "preferred_language": "fr-be", "postal_code": "9000",
-        })
+        response = self.client.post(
+            reverse("mail_preferences"),
+            {
+                "category_newsletter": "on",
+                "category_dojo_news": "on",
+                "category_volunteer": "on",
+                "preferred_language": "fr-be",
+                "postal_code": "9000",
+            },
+        )
         self.assertRedirects(response, reverse("mail_preferences"))
         self.assertTrue(is_subscribed(self.parent, MailCategory.NEWSLETTER))
         self.assertFalse(is_subscribed(self.parent, MailCategory.REMINDER))
         self.parent.refresh_from_db()
         self.assertEqual((self.parent.preferred_language, self.parent.postal_code), ("fr-be", "9000"))
-        self.assertEqual(set(ConsentEvent.objects.values_list("category", "source")),
-                         {("newsletter", "preferences"), ("reminder", "preferences")})
+        self.assertEqual(
+            set(ConsentEvent.objects.values_list("category", "source")),
+            {("newsletter", "preferences"), ("reminder", "preferences")},
+        )
 
     def test_a_switch_per_child_gives_or_withdraws_the_consent(self):
         from accounts.consent import CHILD_DATA_WORDING_VERSION
@@ -728,8 +805,10 @@ class UnsubscribeViewTests(TestCase):
 
     def test_unsubscribe_from_everything_optional(self):
         self.client.post(self.url, {"scope": "all"})
-        self.assertEqual({c for c, on in preferences_for(self.user).items() if on},
-                         {MailCategory.SERVICE, MailCategory.REGISTRATION})
+        self.assertEqual(
+            {c for c, on in preferences_for(self.user).items() if on},
+            {MailCategory.SERVICE, MailCategory.REGISTRATION},
+        )
 
     def test_bad_token_or_category_is_404(self):
         self.assertEqual(self.client.get(reverse("mail_unsubscribe", kwargs={"token": "nope"})).status_code, 404)
@@ -777,7 +856,8 @@ class BounceTests(TestCase):
         self.user = User.objects.create(username="u0", email="u0@example.com")
         self.row = send(self.user, MailCategory.REMINDER, "note")
         EmailMessage.objects.filter(pk=self.row.pk).update(
-            status=Status.SENT, message_id="<123.456.789@coolregistration.localhost>")
+            status=Status.SENT, message_id="<123.456.789@coolregistration.localhost>"
+        )
         self.row.refresh_from_db()
 
     def _process(self, *raw_messages, start=1):
@@ -792,7 +872,9 @@ class BounceTests(TestCase):
         self.assertEqual(self.row.status, Status.BOUNCED)
         self.assertEqual(EmailSuppression.objects.get().reason, EmailSuppression.HARD_BOUNCE)
         record = BounceRecord.objects.get()
-        self.assertEqual((record.kind, record.status_code, record.message_id), (BounceRecord.HARD, "5.1.1", self.row.pk))
+        self.assertEqual(
+            (record.kind, record.status_code, record.message_id), (BounceRecord.HARD, "5.1.1", self.row.pk)
+        )
         # The next mail to that address isn't sent.
         self.assertEqual(send(self.user, MailCategory.REMINDER, "note").status, Status.SUPPRESSED)
 
@@ -818,8 +900,10 @@ class BounceTests(TestCase):
     def test_complaint_switches_off_optional_mail_but_does_not_block(self):
         set_preference(self.user, MailCategory.NEWSLETTER, True, ConsentEvent.SIGNUP)
         self._process(_complaint(message_id=self.row.message_id))
-        self.assertEqual({c for c, on in preferences_for(self.user).items() if on},
-                         {MailCategory.SERVICE, MailCategory.REGISTRATION})
+        self.assertEqual(
+            {c for c, on in preferences_for(self.user).items() if on},
+            {MailCategory.SERVICE, MailCategory.REGISTRATION},
+        )
         self.assertEqual(ConsentEvent.objects.latest("id").source, ConsentEvent.BOUNCE)
         self.assertFalse(EmailSuppression.objects.exists())
 
@@ -851,7 +935,9 @@ I'm away until Monday.
         self.assertFalse(BounceRecord.objects.exists())
         self.assertEqual(ProcessedImapMessage.objects.count(), 2)
 
-    @override_settings(MAILING_BOUNCE_ADDRESS="bounces+{id}@example.org", DEFAULT_FROM_EMAIL="CoderDojo <noreply@example.org>")
+    @override_settings(
+        MAILING_BOUNCE_ADDRESS="bounces+{id}@example.org", DEFAULT_FROM_EMAIL="CoderDojo <noreply@example.org>"
+    )
     def test_mail_goes_out_with_the_bounce_address_as_envelope_sender(self):
         from .tasks import _build
 
@@ -874,8 +960,12 @@ I'm away until Monday.
         self.assertEqual(process_bounces(), 0)
 
 
-@override_settings(MAILING_BOUNCE_IMAP_HOST="imap.example.org", MAILING_BOUNCE_IMAP_MAILBOX="Bounces",
-                   MAILING_BOUNCE_IMAP_SSL=True, MAILING_BOUNCE_PROTOCOL="imap")
+@override_settings(
+    MAILING_BOUNCE_IMAP_HOST="imap.example.org",
+    MAILING_BOUNCE_IMAP_MAILBOX="Bounces",
+    MAILING_BOUNCE_IMAP_SSL=True,
+    MAILING_BOUNCE_PROTOCOL="imap",
+)
 class ImapMailboxTests(TestCase):
     """ImapMailbox against a mocked imaplib connection (no IMAP server in
     the devcontainer)."""
@@ -939,21 +1029,32 @@ class AutomatedMailTests(TestCase):
     def setUp(self):
         call_command("load_mail_templates", stdout=StringIO())
         self.dojo = make_dojo("Ghent")
-        self.parent = User.objects.create(username="parent", first_name="Ellen", email="p@example.com",
-                                          preferred_language="nl-be")
+        self.parent = User.objects.create(
+            username="parent", first_name="Ellen", email="p@example.com", preferred_language="nl-be"
+        )
         self.co_parent = User.objects.create(username="co", email="co@example.com")
         self.teen_login = User.objects.create(username="teen", email="t@example.com", account_type=User.NINJA)
-        self.kid = Ninja.objects.create(name="Emma", family_name="Peeters", account=self.teen_login, home_dojo=self.dojo)
+        self.kid = Ninja.objects.create(
+            name="Emma", family_name="Peeters", account=self.teen_login, home_dojo=self.dojo
+        )
         for guardian in (self.parent, self.co_parent):
             Guardianship.objects.create(guardian=guardian, ninja=self.kid)
 
     def _event(self, days_ahead=2, status=Event.OPEN, places=10, dojo=None, name="Scratch"):
         start = timezone.now().replace(hour=14, minute=0, second=0, microsecond=0) + timedelta(days=days_ahead)
-        return Event.objects.create(name=name, dojo=dojo or self.dojo, status=status, places=places,
-                                    start_time=start, end_time=start + timedelta(hours=2))
+        return Event.objects.create(
+            name=name,
+            dojo=dojo or self.dojo,
+            status=status,
+            places=places,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+        )
 
     def _mails(self, **filters):
-        return list(EmailMessage.objects.filter(**filters).order_by("id").values_list("recipient", "template_key", "status"))
+        return list(
+            EmailMessage.objects.filter(**filters).order_by("id").values_list("recipient", "template_key", "status")
+        )
 
     def test_family_is_guardians_and_own_login_with_email(self):
         from .automated import family_of
@@ -964,21 +1065,28 @@ class AutomatedMailTests(TestCase):
     def test_signup_confirms_to_the_whole_family(self):
         event = self._event(days_ahead=10)
         self.client.force_login(self.parent)
-        self.client.post(reverse("event_signup", kwargs={"event_id": event.id}),
-                         {"child": [str(self.kid.id)], "child_order": str(self.kid.id)})
-        self.assertEqual(self._mails(), [
-            ("p@example.com", "registration_confirmed", Status.PENDING),
-            ("co@example.com", "registration_confirmed", Status.PENDING),
-            ("t@example.com", "registration_confirmed", Status.PENDING),
-        ])
+        self.client.post(
+            reverse("event_signup", kwargs={"event_id": event.id}),
+            {"child": [str(self.kid.id)], "child_order": str(self.kid.id)},
+        )
+        self.assertEqual(
+            self._mails(),
+            [
+                ("p@example.com", "registration_confirmed", Status.PENDING),
+                ("co@example.com", "registration_confirmed", Status.PENDING),
+                ("t@example.com", "registration_confirmed", Status.PENDING),
+            ],
+        )
         dutch = EmailMessage.objects.get(recipient="p@example.com")
         self.assertEqual(dutch.subject, "Emma is ingeschreven voor Scratch")
 
     def test_signup_for_a_full_session_sends_the_waiting_list_notice(self):
         event = self._event(days_ahead=10, places=0)
         self.client.force_login(self.parent)
-        self.client.post(reverse("event_signup", kwargs={"event_id": event.id}),
-                         {"child": [str(self.kid.id)], "child_order": str(self.kid.id)})
+        self.client.post(
+            reverse("event_signup", kwargs={"event_id": event.id}),
+            {"child": [str(self.kid.id)], "child_order": str(self.kid.id)},
+        )
         self.assertEqual({key for _r, key, _s in self._mails()}, {"registration_waitlisted"})
 
     def test_moving_up_from_the_waiting_list_mails_the_family(self):
@@ -992,17 +1100,24 @@ class AutomatedMailTests(TestCase):
         self.client.force_login(other_parent)
         self.client.post(reverse("cancel_registration", kwargs={"registration_id": confirmed.id}))
 
-        self.assertEqual({(r, k) for r, k, _s in self._mails()},
-                         {("p@example.com", "waitlist_promoted"), ("co@example.com", "waitlist_promoted"),
-                          ("t@example.com", "waitlist_promoted")})
+        self.assertEqual(
+            {(r, k) for r, k, _s in self._mails()},
+            {
+                ("p@example.com", "waitlist_promoted"),
+                ("co@example.com", "waitlist_promoted"),
+                ("t@example.com", "waitlist_promoted"),
+            },
+        )
 
     def test_a_missing_template_never_breaks_a_signup(self):
         EmailTemplate.objects.all().delete()
         event = self._event(days_ahead=10)
         self.client.force_login(self.parent)
         with self.assertLogs("mailing.automated", level="ERROR"):
-            self.client.post(reverse("event_signup", kwargs={"event_id": event.id}),
-                             {"child": [str(self.kid.id)], "child_order": str(self.kid.id)})
+            self.client.post(
+                reverse("event_signup", kwargs={"event_id": event.id}),
+                {"child": [str(self.kid.id)], "child_order": str(self.kid.id)},
+            )
         self.assertTrue(Registration.objects.filter(event=event, ninja=self.kid).exists())
         self.assertEqual(EmailMessage.objects.count(), 0)
 
@@ -1019,11 +1134,14 @@ class AutomatedMailTests(TestCase):
 
         self.assertEqual(send_session_reminders(), 2)  # parent + co-parent; the teen opted out
         self.assertEqual(send_session_reminders(), 0)  # idempotent
-        self.assertEqual(self._mails(template_key="session_reminder"), [
-            ("p@example.com", "session_reminder", Status.PENDING),
-            ("co@example.com", "session_reminder", Status.PENDING),
-            ("t@example.com", "session_reminder", Status.SUPPRESSED),
-        ])
+        self.assertEqual(
+            self._mails(template_key="session_reminder"),
+            [
+                ("p@example.com", "session_reminder", Status.PENDING),
+                ("co@example.com", "session_reminder", Status.PENDING),
+                ("t@example.com", "session_reminder", Status.SUPPRESSED),
+            ],
+        )
 
     def test_new_sessions_digest_per_family_and_dojo(self):
         from .automated import announce_new_sessions
@@ -1042,8 +1160,10 @@ class AutomatedMailTests(TestCase):
         announce_new_sessions()
 
         ghent = EmailMessage.objects.filter(template_key="new_sessions_at_dojo", body__contains="Ghent")
-        self.assertEqual(set(ghent.values_list("recipient", flat=True)),
-                         {"p@example.com", "co@example.com", "t@example.com", "v@example.com"})
+        self.assertEqual(
+            set(ghent.values_list("recipient", flat=True)),
+            {"p@example.com", "co@example.com", "t@example.com", "v@example.com"},
+        )
         body = ghent.get(recipient="co@example.com").body
         self.assertIn("A,", body)
         self.assertIn("B,", body)
@@ -1092,8 +1212,12 @@ class EveryMailGoesThroughTheEngineTests(TestCase):
         offenders = []
         for path in root.rglob("*.py"):
             relative = path.relative_to(root).as_posix()
-            if (relative in self.ALLOWED or "/migrations/" in relative or relative.endswith("tests.py")
-                    or relative.startswith((".", "docs/", "static/", "media/"))):
+            if (
+                relative in self.ALLOWED
+                or "/migrations/" in relative
+                or relative.endswith("tests.py")
+                or relative.startswith((".", "docs/", "static/", "media/"))
+            ):
                 continue
             for number, line in enumerate(path.read_text(errors="ignore").splitlines(), 1):
                 if self.DIRECT_SEND.search(line) and not line.lstrip().startswith("#"):
@@ -1121,10 +1245,15 @@ class CampaignDashboardTests(TestCase):
         self.client.force_login(self.admin)
 
     def _campaign(self, **fields):
-        return Campaign.objects.create(**{
-            "name": "Girlz", "segment": self.segment, "template_key": "campaign_girlz",
-            "context": {"signup_url": "https://example.org"}, **fields,
-        })
+        return Campaign.objects.create(
+            **{
+                "name": "Girlz",
+                "segment": self.segment,
+                "template_key": "campaign_girlz",
+                "context": {"signup_url": "https://example.org"},
+                **fields,
+            }
+        )
 
     # access
 
@@ -1159,10 +1288,17 @@ class CampaignDashboardTests(TestCase):
     # the draft
 
     def test_create_a_draft_with_template_variables(self):
-        response = self.client.post(reverse("manage_campaign_create"), {
-            "name": "Girlz spring", "category": "newsletter", "template_key": "campaign_girlz",
-            "segment": self.segment.pk, "variables": "signup_url: https://example.org/girlz\n\n", "scheduled_at": "",
-        })
+        response = self.client.post(
+            reverse("manage_campaign_create"),
+            {
+                "name": "Girlz spring",
+                "category": "newsletter",
+                "template_key": "campaign_girlz",
+                "segment": self.segment.pk,
+                "variables": "signup_url: https://example.org/girlz\n\n",
+                "scheduled_at": "",
+            },
+        )
         campaign = Campaign.objects.get(name="Girlz spring")
         self.assertRedirects(response, reverse("manage_campaign_detail", kwargs={"campaign_id": campaign.pk}))
         self.assertEqual(campaign.context, {"signup_url": "https://example.org/girlz"})
@@ -1174,9 +1310,16 @@ class CampaignDashboardTests(TestCase):
         form = CampaignForm()
         self.assertNotIn("service", dict(form.fields["category"].choices))
         self.assertNotIn("registration", dict(form.fields["category"].choices))
-        bad = CampaignForm({"name": "x", "category": "newsletter", "template_key": "campaign_girlz",
-                            "segment": self.segment.pk, "variables": "Bad Name: x",
-                            "scheduled_at": "2001-01-01T10:00"})
+        bad = CampaignForm(
+            {
+                "name": "x",
+                "category": "newsletter",
+                "template_key": "campaign_girlz",
+                "segment": self.segment.pk,
+                "variables": "Bad Name: x",
+                "scheduled_at": "2001-01-01T10:00",
+            }
+        )
         self.assertFalse(bad.is_valid())
         self.assertIn("variables", bad.errors)
         self.assertIn("scheduled_at", bad.errors)
@@ -1213,7 +1356,9 @@ class CampaignDashboardTests(TestCase):
         ]:
             with self.subTest(problem):
                 campaign = self._campaign(**fields)
-                response = self.client.post(reverse("manage_campaign_launch", kwargs={"campaign_id": campaign.pk}), follow=True)
+                response = self.client.post(
+                    reverse("manage_campaign_launch", kwargs={"campaign_id": campaign.pk}), follow=True
+                )
                 self.assertContains(response, problem)
                 self.assertEqual(Campaign.objects.get(pk=campaign.pk).status, Campaign.Status.DRAFT)
 
@@ -1243,7 +1388,9 @@ class CampaignDashboardTests(TestCase):
         campaigns.launch_due()
         self.assertEqual(Campaign.objects.get(pk=campaign.pk).status, Campaign.Status.COMPLETED)
         # A launched campaign can't be edited any more.
-        response = self.client.post(reverse("manage_campaign_detail", kwargs={"campaign_id": campaign.pk}), {"name": "Changed"})
+        response = self.client.post(
+            reverse("manage_campaign_detail", kwargs={"campaign_id": campaign.pk}), {"name": "Changed"}
+        )
         self.assertIsNone(response.context["form"])
         self.assertEqual(Campaign.objects.get(pk=campaign.pk).name, "Girlz")
 
@@ -1294,19 +1441,24 @@ class SegmentBuilderTests(TestCase):
         self.url = reverse("manage_segment_detail", kwargs={"segment_id": self.segment.pk})
 
     def _add_group(self, scope, parent=None):
-        self.client.post(reverse("manage_segment_add_group", kwargs={"segment_id": self.segment.pk}),
-                         {"scope": scope, **({"parent": parent.pk} if parent else {})})
+        self.client.post(
+            reverse("manage_segment_add_group", kwargs={"segment_id": self.segment.pk}),
+            {"scope": scope, **({"parent": parent.pk} if parent else {})},
+        )
         return SegmentGroup.objects.filter(segment=self.segment).latest("id")
 
     def _add_rule(self, group, data):
         return self.client.post(
             reverse("manage_segment_add_rule", kwargs={"segment_id": self.segment.pk, "group_id": group.pk}),
-            data, follow=True,
+            data,
+            follow=True,
         )
 
     def test_build_a_segment_and_see_its_audience(self):
         group = self._add_group("ninja")
-        response = self._add_rule(group, {"attribute": "ninja_gender", "operator": "in", "value": ["girl", "unspecified"]})
+        response = self._add_rule(
+            group, {"attribute": "ninja_gender", "operator": "in", "value": ["girl", "unspecified"]}
+        )
         self.assertContains(response, "Child&#x27;s gender is one of Girl, Prefer not to say")
         rule = SegmentRule.objects.get()
         self.assertEqual(rule.value, ["girl", "unspecified"])
@@ -1336,14 +1488,19 @@ class SegmentBuilderTests(TestCase):
         user_group = self._add_group("user")
         child = self._add_group("ninja", parent=user_group)
         self.assertEqual(child.parent, user_group)
-        response = self.client.post(reverse("manage_segment_add_group", kwargs={"segment_id": self.segment.pk}),
-                                    {"scope": "user", "parent": child.pk}, follow=True)
+        response = self.client.post(
+            reverse("manage_segment_add_group", kwargs={"segment_id": self.segment.pk}),
+            {"scope": "user", "parent": child.pk},
+            follow=True,
+        )
         self.assertContains(response, "must also be about the child")
         self.assertEqual(SegmentGroup.objects.filter(parent=child).count(), 0)
 
     def test_rule_fields_fit_the_attribute(self):
         group = self._add_group("ninja")
-        fields_url = reverse("manage_segment_rule_fields", kwargs={"segment_id": self.segment.pk, "group_id": group.pk})
+        fields_url = reverse(
+            "manage_segment_rule_fields", kwargs={"segment_id": self.segment.pk, "group_id": group.pk}
+        )
         gender = self.client.get(fields_url, {"attribute": "ninja_gender"})
         self.assertContains(gender, 'type="checkbox" name="value" value="girl"')
         self.assertNotContains(gender, 'value="equals"')
@@ -1353,13 +1510,19 @@ class SegmentBuilderTests(TestCase):
     def test_change_operator_remove_rule_group_and_segment(self):
         group = self._add_group("ninja")
         self._add_rule(group, {"attribute": "ninja_gender", "operator": "in", "value": ["girl"]})
-        self.client.post(reverse("manage_segment_update_group", kwargs={"segment_id": self.segment.pk, "group_id": group.pk}),
-                         {"operator": "or"})
+        self.client.post(
+            reverse("manage_segment_update_group", kwargs={"segment_id": self.segment.pk, "group_id": group.pk}),
+            {"operator": "or"},
+        )
         self.assertEqual(SegmentGroup.objects.get(pk=group.pk).operator, "or")
         rule = SegmentRule.objects.get()
-        self.client.post(reverse("manage_segment_delete_rule", kwargs={"segment_id": self.segment.pk, "rule_id": rule.pk}))
+        self.client.post(
+            reverse("manage_segment_delete_rule", kwargs={"segment_id": self.segment.pk, "rule_id": rule.pk})
+        )
         self.assertFalse(SegmentRule.objects.exists())
-        self.client.post(reverse("manage_segment_delete_group", kwargs={"segment_id": self.segment.pk, "group_id": group.pk}))
+        self.client.post(
+            reverse("manage_segment_delete_group", kwargs={"segment_id": self.segment.pk, "group_id": group.pk})
+        )
         self.assertFalse(SegmentGroup.objects.exists())
         self.client.post(reverse("manage_segment_delete", kwargs={"segment_id": self.segment.pk}))
         self.assertFalse(Segment.objects.exists())
@@ -1367,8 +1530,11 @@ class SegmentBuilderTests(TestCase):
     def test_builder_endpoints_are_404_without_the_admin_role(self):
         group = self._add_group("ninja")
         self.client.force_login(User.objects.get(username="girlfam"))
-        for url in [self.url, reverse("manage_segment_add_group", kwargs={"segment_id": self.segment.pk}),
-                    reverse("manage_segment_add_rule", kwargs={"segment_id": self.segment.pk, "group_id": group.pk})]:
+        for url in [
+            self.url,
+            reverse("manage_segment_add_group", kwargs={"segment_id": self.segment.pk}),
+            reverse("manage_segment_add_rule", kwargs={"segment_id": self.segment.pk, "group_id": group.pk}),
+        ]:
             self.assertEqual(self.client.post(url, {"scope": "user"}).status_code, 404)
 
 
@@ -1385,19 +1551,31 @@ class EngagementAttributeTests(TestCase):
         lapsed_kid = Ninja.objects.of_guardian(self.lapsed).get()
         Ninja.objects.filter(pk=lapsed_kid.pk).update(home_dojo=self.antwerp)
         for days in (150, 120, 90, 60, 30):
-            Registration.objects.create(event=self._session(days, self.ghent), ninja=regular_kid,
-                                        waiting_list=False, position=1, attended=True)
+            Registration.objects.create(
+                event=self._session(days, self.ghent), ninja=regular_kid, waiting_list=False, position=1, attended=True
+            )
         for days in (330, 300, 270):
-            Registration.objects.create(event=self._session(days, self.antwerp), ninja=lapsed_kid,
-                                        waiting_list=False, position=1, attended=True)
+            Registration.objects.create(
+                event=self._session(days, self.antwerp),
+                ninja=lapsed_kid,
+                waiting_list=False,
+                position=1,
+                attended=True,
+            )
         upcoming = self._session(-7, self.ghent, status=Event.OPEN)
         Registration.objects.create(event=upcoming, ninja=regular_kid, waiting_list=False, position=1)
         rebuild()
 
     def _session(self, days_ago, dojo, status=Event.CLOSED):
         start = timezone.now() - timedelta(days=days_ago)
-        return Event.objects.create(name=f"S{days_ago}", dojo=dojo, status=status, places=20,
-                                    start_time=start, end_time=start + timedelta(hours=2))
+        return Event.objects.create(
+            name=f"S{days_ago}",
+            dojo=dojo,
+            status=status,
+            places=20,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+        )
 
     def _one(self, attribute, operator, value):
         return _resolve(_segment(("ninja", "and", [(attribute, operator, value)])))
@@ -1405,8 +1583,9 @@ class EngagementAttributeTests(TestCase):
     def test_each_engagement_attribute(self):
         self.assertEqual(self._one("engagement_stage", "in", ["regular"]), {"regularfam"})
         self.assertEqual(self._one("engagement_stage", "in", ["lapsed"]), {"lapsedfam"})
-        self.assertEqual(self._one("engagement_stage_at_dojo", "in", {"dojo": self.ghent.pk, "stages": ["regular"]}),
-                         {"regularfam"})
+        self.assertEqual(
+            self._one("engagement_stage_at_dojo", "in", {"dojo": self.ghent.pk, "stages": ["regular"]}), {"regularfam"}
+        )
         self.assertEqual(self._one("attendance_rate", "gte", 50), {"regularfam"})
         self.assertEqual(self._one("sessions_attended", "gte", 3), {"regularfam"})
         self.assertEqual(self._one("days_since_last_visit", "gte", 200), {"lapsedfam"})
@@ -1417,10 +1596,14 @@ class EngagementAttributeTests(TestCase):
     def test_rules_read_as_sentences_and_validate(self):
         from .segmentation.registry import get_attribute
 
-        self.assertEqual(get_attribute("attendance_rate").describe("gte", 50),
-                         "Share of their sessions they came to (last 180 days, %) at least 50%")
-        self.assertEqual(get_attribute("engagement_stage_at_dojo").describe("in", {"dojo": self.ghent.pk, "stages": ["at_risk"]}),
-                         "At Ghent: At risk")
+        self.assertEqual(
+            get_attribute("attendance_rate").describe("gte", 50),
+            "Share of their sessions they came to (last 180 days, %) at least 50%",
+        )
+        self.assertEqual(
+            get_attribute("engagement_stage_at_dojo").describe("in", {"dojo": self.ghent.pk, "stages": ["at_risk"]}),
+            "At Ghent: At risk",
+        )
         with self.assertRaises(ValueError):
             get_attribute("missed_in_a_row").validate("gte", -1)
         with self.assertRaises(ValueError):
@@ -1439,12 +1622,22 @@ class EngagementAttributeTests(TestCase):
         self.assertContains(self.client.get(fields, {"attribute": "engagement_stage_at_dojo"}), 'name="dojo"')
         add = reverse("manage_segment_add_rule", kwargs={"segment_id": segment.pk, "group_id": group.pk})
         self.client.post(add, {"attribute": "missed_in_a_row", "operator": "gte", "value": "3"})
-        self.client.post(add, {"attribute": "engagement_stage_at_dojo", "operator": "in", "dojo": str(self.ghent.pk),
-                               "value": ["at_risk", "lapsed"]})
-        self.assertEqual(dict(SegmentRule.objects.values_list("attribute", "value")), {
-            "missed_in_a_row": 3,
-            "engagement_stage_at_dojo": {"dojo": self.ghent.pk, "stages": ["at_risk", "lapsed"]},
-        })
+        self.client.post(
+            add,
+            {
+                "attribute": "engagement_stage_at_dojo",
+                "operator": "in",
+                "dojo": str(self.ghent.pk),
+                "value": ["at_risk", "lapsed"],
+            },
+        )
+        self.assertEqual(
+            dict(SegmentRule.objects.values_list("attribute", "value")),
+            {
+                "missed_in_a_row": 3,
+                "engagement_stage_at_dojo": {"dojo": self.ghent.pk, "stages": ["at_risk", "lapsed"]},
+            },
+        )
 
 
 class ProfileAttributeTests(TestCase):
@@ -1458,8 +1651,11 @@ class ProfileAttributeTests(TestCase):
         self.ten = _family("tenfam", Ninja.GIRL)
         self.fifteen = _family("fifteenfam", Ninja.BOY)
         Ninja.objects.filter(guardianships__guardian=self.ten).update(
-            date_of_birth=today.replace(year=today.year - 10), home_dojo=self.dojo)
-        Ninja.objects.filter(guardianships__guardian=self.fifteen).update(date_of_birth=today.replace(year=today.year - 15))
+            date_of_birth=today.replace(year=today.year - 10), home_dojo=self.dojo
+        )
+        Ninja.objects.filter(guardianships__guardian=self.fifteen).update(
+            date_of_birth=today.replace(year=today.year - 15)
+        )
         yellow = Belt.objects.create(level=2, name="Yellow")
         NinjaBelt.objects.create(ninja=Ninja.objects.of_guardian(self.fifteen).get(), belt=yellow, awarded_on=today)
         self.champion = User.objects.create(username="champ", email="c@example.com")
@@ -1485,8 +1681,14 @@ class ProfileAttributeTests(TestCase):
 
     def test_waiting_list_and_cancellations(self):
         start = timezone.now() + timedelta(days=5)
-        event = Event.objects.create(name="Full", dojo=self.dojo, status=Event.OPEN, places=0,
-                                     start_time=start, end_time=start + timedelta(hours=2))
+        event = Event.objects.create(
+            name="Full",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            places=0,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+        )
         ten_kid = Ninja.objects.of_guardian(self.ten).get()
         registration = Registration.objects.create(event=event, ninja=ten_kid, waiting_list=True, position=1)
         self.assertEqual(self._one("ninja", "waitlisted_for_event", "in", [event.pk]), {"tenfam"})
@@ -1496,8 +1698,9 @@ class ProfileAttributeTests(TestCase):
         from events.models import RegistrationCancellation
 
         logged = RegistrationCancellation.objects.get()
-        self.assertEqual((logged.ninja, logged.event, logged.was_waitlisted, logged.cancelled_by),
-                         (ten_kid, event, True, self.ten))
+        self.assertEqual(
+            (logged.ninja, logged.event, logged.was_waitlisted, logged.cancelled_by), (ten_kid, event, True, self.ten)
+        )
         self.assertIsNotNone(logged.signed_up_at)
         self.assertEqual(self._one("ninja", "cancellations", "gte", 1), {"tenfam"})
         self.assertEqual(self._one("ninja", "cancellations", "lte", 0), {"fifteenfam"})
@@ -1526,15 +1729,24 @@ class TemplateDashboardTests(TestCase):
     def test_edit_a_language_with_preview(self):
         response = self.client.get(self._edit("session_reminder", "nl-be"))
         self.assertContains(response, "Herinnering: Scratch for beginners op zaterdag")
-        response = self.client.post(self._edit("session_reminder", "nl-be"), {
-            "subject": "Tot {{ start_time|date:'l' }}!", "body": "Hallo {{ recipient_name }}", "description": "d",
-        })
+        response = self.client.post(
+            self._edit("session_reminder", "nl-be"),
+            {
+                "subject": "Tot {{ start_time|date:'l' }}!",
+                "body": "Hallo {{ recipient_name }}",
+                "description": "d",
+            },
+        )
         self.assertRedirects(response, self._edit("session_reminder", "nl-be"))
-        self.assertEqual(EmailTemplate.objects.get(key="session_reminder", language="nl-be").subject,
-                         "Tot {{ start_time|date:'l' }}!")
+        self.assertEqual(
+            EmailTemplate.objects.get(key="session_reminder", language="nl-be").subject,
+            "Tot {{ start_time|date:'l' }}!",
+        )
 
     def test_a_broken_template_is_refused(self):
-        response = self.client.post(self._edit("session_reminder"), {"subject": "Hi", "body": "{% if %}", "description": ""})
+        response = self.client.post(
+            self._edit("session_reminder"), {"subject": "Hi", "body": "{% if %}", "description": ""}
+        )
         self.assertContains(response, "doesn&#x27;t work as a template")
         self.assertNotEqual(EmailTemplate.objects.get(key="session_reminder", language="en-us").body, "{% if %}")
 
@@ -1542,24 +1754,31 @@ class TemplateDashboardTests(TestCase):
         EmailTemplate.objects.filter(key="campaign_girlz", language="fr-be").delete()
         response = self.client.get(self._edit("campaign_girlz", "fr-be"))
         self.assertContains(response, "no Français (Belgique) version yet")
-        self.assertEqual(response.context["form"]["subject"].value(),
-                         EmailTemplate.objects.get(key="campaign_girlz", language="en-us").subject)
-        self.client.post(self._edit("campaign_girlz", "fr-be"), {"subject": "CoderDojo Girlz", "body": "Salut !", "description": ""})
+        self.assertEqual(
+            response.context["form"]["subject"].value(),
+            EmailTemplate.objects.get(key="campaign_girlz", language="en-us").subject,
+        )
+        self.client.post(
+            self._edit("campaign_girlz", "fr-be"), {"subject": "CoderDojo Girlz", "body": "Salut !", "description": ""}
+        )
         self.assertTrue(EmailTemplate.objects.filter(key="campaign_girlz", language="fr-be").exists())
 
     def test_create_a_campaign_template(self):
-        response = self.client.post(reverse("manage_template_create"),
-                                    {"key": "campaign_summer", "category": "newsletter", "description": ""})
+        response = self.client.post(
+            reverse("manage_template_create"), {"key": "campaign_summer", "category": "newsletter", "description": ""}
+        )
         self.assertRedirects(response, self._edit("campaign_summer"))
         self.assertEqual(EmailTemplate.objects.get(key="campaign_summer").language, "en-us")
-        response = self.client.post(reverse("manage_template_create"),
-                                    {"key": "campaign_summer", "category": "newsletter", "description": ""})
+        response = self.client.post(
+            reverse("manage_template_create"), {"key": "campaign_summer", "category": "newsletter", "description": ""}
+        )
         self.assertContains(response, "already exists")
 
     def test_what_can_and_can_not_be_deleted(self):
         delete_key = lambda key: reverse("manage_template_delete", kwargs={"key": key})  # noqa: E731
         delete_language = lambda key, lang: reverse(  # noqa: E731
-            "manage_template_delete_language", kwargs={"key": key, "language": lang})
+            "manage_template_delete_language", kwargs={"key": key, "language": lang}
+        )
 
         self.client.post(delete_language("campaign_girlz", "en-us"))
         self.assertTrue(EmailTemplate.objects.filter(key="campaign_girlz", language="en-us").exists())
@@ -1590,16 +1809,23 @@ class Tier3Tests(TestCase):
 
     def _session(self, days_ago):
         start = timezone.now() - timedelta(days=days_ago)
-        return Event.objects.create(name=f"S{days_ago}", dojo=self.dojo, status=Event.CLOSED, places=20,
-                                    start_time=start, end_time=start + timedelta(hours=2))
+        return Event.objects.create(
+            name=f"S{days_ago}",
+            dojo=self.dojo,
+            status=Event.CLOSED,
+            places=20,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+        )
 
     def test_rebuild_records_stage_changes_once_a_day(self):
         from events.engagement import rebuild
         from events.models import NinjaEngagementChange
 
         for days in (170, 150, 130, 110):
-            Registration.objects.create(event=self._session(days), ninja=self.kid, waiting_list=False, position=1,
-                                        attended=True)
+            Registration.objects.create(
+                event=self._session(days), ninja=self.kid, waiting_list=False, position=1, attended=True
+            )
         rebuild()
         self.assertFalse(NinjaEngagementChange.objects.exists())  # the first build records nothing
         for days in (60, 40, 20):
@@ -1608,31 +1834,58 @@ class Tier3Tests(TestCase):
         rebuild()
         change = NinjaEngagementChange.objects.get(ninja=self.kid)
         self.assertEqual(change.to_stage, "at_risk")
-        self.assertEqual(_resolve(_segment(("ninja", "and", [
-            ("stage_changed", "within_days", {"from": [], "to": ["at_risk"], "days": 7})]))), {"fam"})
-        self.assertEqual(_resolve(_segment(("ninja", "and", [
-            ("stage_changed", "within_days", {"from": ["lapsed"], "to": ["at_risk"], "days": 7})]))), set())
+        self.assertEqual(
+            _resolve(
+                _segment(
+                    ("ninja", "and", [("stage_changed", "within_days", {"from": [], "to": ["at_risk"], "days": 7})])
+                )
+            ),
+            {"fam"},
+        )
+        self.assertEqual(
+            _resolve(
+                _segment(
+                    (
+                        "ninja",
+                        "and",
+                        [("stage_changed", "within_days", {"from": ["lapsed"], "to": ["at_risk"], "days": 7})],
+                    )
+                )
+            ),
+            set(),
+        )
 
     def test_no_new_belt_and_not_on_a_team(self):
         from events.models import Belt, NinjaBelt
 
-        NinjaBelt.objects.create(ninja=Ninja.objects.of_guardian(self.other).get(),
-                                 belt=Belt.objects.create(level=1, name="White"), awarded_on=timezone.localdate())
-        self.assertEqual(_resolve(_segment(("ninja", "and", [("no_new_belt_within_days", "within_days", 365)]))), {"fam"})
+        NinjaBelt.objects.create(
+            ninja=Ninja.objects.of_guardian(self.other).get(),
+            belt=Belt.objects.create(level=1, name="White"),
+            awarded_on=timezone.localdate(),
+        )
+        self.assertEqual(
+            _resolve(_segment(("ninja", "and", [("no_new_belt_within_days", "within_days", 365)]))), {"fam"}
+        )
 
-        busy, idle = User.objects.create(username="busy", email="bu@example.com"), User.objects.create(username="idle", email="i@example.com")
+        busy, idle = (
+            User.objects.create(username="busy", email="bu@example.com"),
+            User.objects.create(username="idle", email="i@example.com"),
+        )
         busy_membership = add_member(self.dojo, busy)
         add_member(self.dojo, idle)
         self._session(10).team.add(busy_membership)
-        segment = _segment(("user", "and", [("account_role", "in", ["mentor"]), ("not_on_team_within_days", "within_days", 90)]))
+        segment = _segment(
+            ("user", "and", [("account_role", "in", ["mentor"]), ("not_on_team_within_days", "within_days", 90)])
+        )
         self.assertEqual(_resolve(segment), {"idle"})
 
     def test_journey_sends_once_per_cooldown_to_those_who_want_it(self):
         from .models import Journey, JourneyDelivery
 
         segment = _segment(("ninja", "and", [("ninja_gender", "in", [Ninja.GIRL, Ninja.BOY])]))
-        journey = Journey.objects.create(name="Hello", segment=segment, category="dojo_news",
-                                         template_key="campaign_girlz", cooldown_days=30)
+        journey = Journey.objects.create(
+            name="Hello", segment=segment, category="dojo_news", template_key="campaign_girlz", cooldown_days=30
+        )
         set_preference(self.other, MailCategory.DOJO_NEWS, False, ConsentEvent.PREFERENCES)
         with self.assertRaises(campaigns.CampaignError):  # no English template
             Journey.objects.filter(pk=journey.pk).update(template_key="nope")
@@ -1659,10 +1912,17 @@ class Tier3Tests(TestCase):
         OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
         self.client.force_login(admin)
         segment = _segment(("ninja", "and", [("ninja_gender", "in", [Ninja.GIRL])]))
-        response = self.client.post(reverse("manage_journey_create"), {
-            "name": "We miss you", "category": "dojo_news", "template_key": "campaign_girlz",
-            "segment": segment.pk, "variables": "signup_url: https://example.org", "cooldown_days": "365",
-        })
+        response = self.client.post(
+            reverse("manage_journey_create"),
+            {
+                "name": "We miss you",
+                "category": "dojo_news",
+                "template_key": "campaign_girlz",
+                "segment": segment.pk,
+                "variables": "signup_url: https://example.org",
+                "cooldown_days": "365",
+            },
+        )
         journey = Journey.objects.get()
         self.assertRedirects(response, reverse("manage_journey_detail", kwargs={"journey_id": journey.pk}))
         self.assertFalse(journey.is_active)
@@ -1683,8 +1943,9 @@ class OrganisationEventsInDigestTests(TestCase):
         parent = User.objects.create(username="p", email="p@example.com")
         Guardianship.objects.create(guardian=parent, ninja=Ninja.objects.create(name="Kid", home_dojo=org))
         start = timezone.now() + timedelta(days=10)
-        Event.objects.create(name="Girlz", dojo=org, status=Event.OPEN, places=10,
-                             start_time=start, end_time=start + timedelta(hours=2))
+        Event.objects.create(
+            name="Girlz", dojo=org, status=Event.OPEN, places=10, start_time=start, end_time=start + timedelta(hours=2)
+        )
         self.assertEqual(announce_new_sessions(), 0)
         self.assertFalse(EmailMessage.objects.filter(template_key="new_sessions_at_dojo").exists())
 

@@ -79,13 +79,19 @@ def campaign_detail(request, campaign_id):
             messages.success(request, _("Campaign saved."))
             return redirect("manage_campaign_detail", campaign_id=campaign.pk)
     audience = campaigns.audience(campaign)
-    return render(request, "mailing/manage/campaign_detail.html", {
-        "campaign": campaign, "form": form, "active": "campaigns",
-        "stats": campaigns.stats(campaign),
-        "audience_sample": audience.order_by("pk")[:AUDIENCE_SAMPLE],
-        "problems": campaigns.launch_problems(campaign) if campaign.is_editable else [],
-        "previews": _previews(campaign, request.user),
-    })
+    return render(
+        request,
+        "mailing/manage/campaign_detail.html",
+        {
+            "campaign": campaign,
+            "form": form,
+            "active": "campaigns",
+            "stats": campaigns.stats(campaign),
+            "audience_sample": audience.order_by("pk")[:AUDIENCE_SAMPLE],
+            "problems": campaigns.launch_problems(campaign) if campaign.is_editable else [],
+            "previews": _previews(campaign, request.user),
+        },
+    )
 
 
 def _campaign_action(request, campaign_id, action, success):
@@ -104,7 +110,9 @@ def _campaign_action(request, campaign_id, action, success):
 @require_POST
 def campaign_test(request, campaign_id):
     return _campaign_action(
-        request, campaign_id, lambda c: campaigns.send_test(c, request.user),
+        request,
+        campaign_id,
+        lambda c: campaigns.send_test(c, request.user),
         lambda c: f"A test is on its way to {request.user.email}.",
     )
 
@@ -116,6 +124,7 @@ def campaign_launch(request, campaign_id):
         if campaign.scheduled_at:
             return f"Launched: it goes out on {campaign.scheduled_at:%d/%m/%Y at %H:%M}."
         return "Launched: the mail is being queued and goes out within minutes."
+
     return _campaign_action(request, campaign_id, lambda c: campaigns.launch(c, request.user), success)
 
 
@@ -182,13 +191,23 @@ def segment_detail(request, segment_id):
         messages.success(request, _("Segment saved."))
         return redirect("manage_segment_detail", segment_id=segment.pk)
     accounts = SegmentResolver().resolve(segment)
-    return render(request, "mailing/manage/segment_detail.html", {
-        "segment": segment, "form": form, "tree": _tree(segment), "active": "segments",
-        "count": accounts.count(), "sample": accounts.order_by("pk")[:AUDIENCE_SAMPLE],
-        "user_attributes": _attributes_for("user"), "ninja_attributes": _attributes_for("ninja"),
-        "scopes": SegmentGroup.Scope.choices, "operators": SegmentGroup.Operator.choices,
-        "draft_campaigns": segment.campaign_set.filter(status=Campaign.Status.DRAFT),
-    })
+    return render(
+        request,
+        "mailing/manage/segment_detail.html",
+        {
+            "segment": segment,
+            "form": form,
+            "tree": _tree(segment),
+            "active": "segments",
+            "count": accounts.count(),
+            "sample": accounts.order_by("pk")[:AUDIENCE_SAMPLE],
+            "user_attributes": _attributes_for("user"),
+            "ninja_attributes": _attributes_for("ninja"),
+            "scopes": SegmentGroup.Scope.choices,
+            "operators": SegmentGroup.Operator.choices,
+            "draft_campaigns": segment.campaign_set.filter(status=Campaign.Status.DRAFT),
+        },
+    )
 
 
 def _back(segment, message=None, request=None, error=False):
@@ -198,8 +217,11 @@ def _back(segment, message=None, request=None, error=False):
 
 
 def _validation_text(error):
-    return " ".join(m for messages_ in error.message_dict.values() for m in messages_) \
-        if hasattr(error, "message_dict") else " ".join(error.messages)
+    return (
+        " ".join(m for messages_ in error.message_dict.values() for m in messages_)
+        if hasattr(error, "message_dict")
+        else " ".join(error.messages)
+    )
 
 
 @login_required
@@ -207,9 +229,17 @@ def _validation_text(error):
 def segment_add_group(request, segment_id):
     require_organisation_admin(request)
     segment = get_object_or_404(Segment, pk=segment_id)
-    parent = get_object_or_404(SegmentGroup, pk=request.POST["parent"], segment=segment) if request.POST.get("parent") else None
-    group = SegmentGroup(segment=segment, parent=parent, scope=request.POST.get("scope", "user"),
-                         operator=request.POST.get("operator", SegmentGroup.Operator.AND))
+    parent = (
+        get_object_or_404(SegmentGroup, pk=request.POST["parent"], segment=segment)
+        if request.POST.get("parent")
+        else None
+    )
+    group = SegmentGroup(
+        segment=segment,
+        parent=parent,
+        scope=request.POST.get("scope", "user"),
+        operator=request.POST.get("operator", SegmentGroup.Operator.AND),
+    )
     try:
         group.full_clean()
     except ValidationError as error:
@@ -248,11 +278,16 @@ def segment_rule_fields(request, segment_id, group_id):
         attribute = get_attribute(request.GET.get("attribute", ""))
     except ValueError:
         attribute = None
-    return render(request, "mailing/manage/_rule_fields.html", {
-        "group": group, "attribute": attribute,
-        "operators": [(op, OPERATOR_LABELS.get(op, op)) for op in attribute.operators] if attribute else [],
-        "choices": attribute.choices() if attribute else [],
-    })
+    return render(
+        request,
+        "mailing/manage/_rule_fields.html",
+        {
+            "group": group,
+            "attribute": attribute,
+            "operators": [(op, OPERATOR_LABELS.get(op, op)) for op in attribute.operators] if attribute else [],
+            "choices": attribute.choices() if attribute else [],
+        },
+    )
 
 
 @login_required
@@ -265,8 +300,12 @@ def segment_add_rule(request, segment_id, group_id):
     except ValueError:
         return _back(group.segment, "Pick what the rule is about.", request, error=True)
     operator = request.POST.get("operator", attribute.operators[0])
-    rule = SegmentRule(group=group, attribute=attribute.key, operator=operator,
-                       value=attribute.value_from_form(operator, request.POST))
+    rule = SegmentRule(
+        group=group,
+        attribute=attribute.key,
+        operator=operator,
+        value=attribute.value_from_form(operator, request.POST),
+    )
     try:
         rule.full_clean()
     except ValidationError as error:
@@ -308,8 +347,15 @@ def template_list(request):
     languages = dict(settings.LANGUAGES)
     rows = {}
     for template in EmailTemplate.objects.order_by("key", "language"):
-        row = rows.setdefault(template.key, {"key": template.key, "category": template.get_category_display(),
-                                             "description": template.description, "languages": []})
+        row = rows.setdefault(
+            template.key,
+            {
+                "key": template.key,
+                "category": template.get_category_display(),
+                "description": template.description,
+                "languages": [],
+            },
+        )
         row["languages"].append(languages.get(template.language, template.language))
     used_by = {}
     for campaign in Campaign.objects.exclude(status=Campaign.Status.CANCELLED).only("name", "template_key"):
@@ -326,12 +372,20 @@ def template_create(request):
     form = NewTemplateForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         EmailTemplate.objects.create(
-            key=form.cleaned_data["key"], language=FALLBACK_LANGUAGE, category=form.cleaned_data["category"],
-            description=form.cleaned_data["description"], subject="{{ recipient_name }}, ...",
+            key=form.cleaned_data["key"],
+            language=FALLBACK_LANGUAGE,
+            category=form.cleaned_data["category"],
+            description=form.cleaned_data["description"],
+            subject="{{ recipient_name }}, ...",
             body="Hi {{ recipient_name }},\n\n...\n\nThe CoderDojo Belgium team\n\n--\n"
-                 "You get this mail because of your mail preferences. Unsubscribe: {{ unsubscribe_url }}",
+            "You get this mail because of your mail preferences. Unsubscribe: {{ unsubscribe_url }}",
         )
-        messages.success(request, _("Template created. Write the English version first: it's used for every language that has no version of its own."))
+        messages.success(
+            request,
+            _(
+                "Template created. Write the English version first: it's used for every language that has no version of its own."
+            ),
+        )
         return redirect("manage_template_edit", key=form.cleaned_data["key"], language=FALLBACK_LANGUAGE)
     return render(request, "mailing/manage/template_new.html", {"form": form, "active": "templates"})
 
@@ -347,8 +401,12 @@ def template_edit(request, key, language):
         raise Http404
     english = versions.get(FALLBACK_LANGUAGE) or next(iter(versions.values()))
     template = versions.get(language) or EmailTemplate(
-        key=key, language=language, category=english.category, description=english.description,
-        subject=english.subject, body=english.body,
+        key=key,
+        language=language,
+        category=english.category,
+        description=english.description,
+        subject=english.subject,
+        body=english.body,
     )
     sample = _sample_context(key)
     form = TemplateVersionForm(request.POST or None, instance=template, sample_context=sample)
@@ -359,13 +417,24 @@ def template_edit(request, key, language):
     preview = None
     if template.pk and not form.errors:
         preview = render_template(key, language, sample)
-    return render(request, "mailing/manage/template_edit.html", {
-        "form": form, "key": key, "language": language, "language_name": languages[language],
-        "tabs": [(code, name, code in versions) for code, name in settings.LANGUAGES],
-        "is_new_version": template.pk is None, "preview": preview, "category": english.get_category_display(),
-        "system": key in SYSTEM_TEMPLATE_KEYS, "fallback": FALLBACK_LANGUAGE,
-        "sample_names": sorted(sample), "active": "templates",
-    })
+    return render(
+        request,
+        "mailing/manage/template_edit.html",
+        {
+            "form": form,
+            "key": key,
+            "language": language,
+            "language_name": languages[language],
+            "tabs": [(code, name, code in versions) for code, name in settings.LANGUAGES],
+            "is_new_version": template.pk is None,
+            "preview": preview,
+            "category": english.get_category_display(),
+            "system": key in SYSTEM_TEMPLATE_KEYS,
+            "fallback": FALLBACK_LANGUAGE,
+            "sample_names": sorted(sample),
+            "active": "templates",
+        },
+    )
 
 
 @login_required
@@ -427,13 +496,20 @@ def journey_detail(request, journey_id):
         form.save()
         messages.success(request, _("Journey saved. Changes apply from the next daily run."))
         return redirect("manage_journey_detail", journey_id=journey.pk)
-    return render(request, "mailing/manage/journey_detail.html", {
-        "journey": journey, "form": form, "active": "journeys", "stats": journeys.stats(journey),
-        "due_sample": journeys.due(journey).order_by("pk")[:AUDIENCE_SAMPLE] if journey.segment_id else [],
-        "problems": journeys.problems(journey),
-        "previews": _previews(journey, request.user),
-        "recent": journey.deliveries.select_related("email").order_by("-created_at")[:AUDIENCE_SAMPLE],
-    })
+    return render(
+        request,
+        "mailing/manage/journey_detail.html",
+        {
+            "journey": journey,
+            "form": form,
+            "active": "journeys",
+            "stats": journeys.stats(journey),
+            "due_sample": journeys.due(journey).order_by("pk")[:AUDIENCE_SAMPLE] if journey.segment_id else [],
+            "problems": journeys.problems(journey),
+            "previews": _previews(journey, request.user),
+            "recent": journey.deliveries.select_related("email").order_by("-created_at")[:AUDIENCE_SAMPLE],
+        },
+    )
 
 
 def _journey_action(request, journey_id, action, success):
@@ -451,8 +527,9 @@ def _journey_action(request, journey_id, action, success):
 @login_required
 @require_POST
 def journey_activate(request, journey_id):
-    return _journey_action(request, journey_id, journeys.activate,
-                           "Active: it runs every day at 18:00 for everyone newly matching.")
+    return _journey_action(
+        request, journey_id, journeys.activate, "Active: it runs every day at 18:00 for everyone newly matching."
+    )
 
 
 @login_required
@@ -464,5 +541,9 @@ def journey_pause(request, journey_id):
 @login_required
 @require_POST
 def journey_test(request, journey_id):
-    return _journey_action(request, journey_id, lambda j: journeys.send_test(j, request.user),
-                           f"A test is on its way to {request.user.email}.")
+    return _journey_action(
+        request,
+        journey_id,
+        lambda j: journeys.send_test(j, request.user),
+        f"A test is on its way to {request.user.email}.",
+    )

@@ -102,10 +102,14 @@ def upcoming_sessions_widget(request):
     if page.has_next():
         next_page_url = f"{reverse('upcoming_sessions_widget')}?page={page.next_page_number()}"
 
-    return render(request, "events/partials/_upcoming_sessions_page.html", {
-        "events": page.object_list,
-        "next_page_url": next_page_url,
-    })
+    return render(
+        request,
+        "events/partials/_upcoming_sessions_page.html",
+        {
+            "events": page.object_list,
+            "next_page_url": next_page_url,
+        },
+    )
 
 
 def event_detail(request, event_id):
@@ -119,9 +123,15 @@ def event_detail(request, event_id):
             registered_count = Registration.objects.filter(event=event, ninja__in=children).count()
             all_registered = registered_count == len(children)
 
-    return render(request, "events/event_detail.html", {
-        "event": event, "faqs": faqs, "all_registered": all_registered,
-    })
+    return render(
+        request,
+        "events/event_detail.html",
+        {
+            "event": event,
+            "faqs": faqs,
+            "all_registered": all_registered,
+        },
+    )
 
 
 @login_required
@@ -165,14 +175,19 @@ def event_signup(request, event_id):
             error = _("The child(ren) you selected are already signed up for this session.")
         else:
             with transaction.atomic():
-                next_position = Registration.objects.filter(event=event).aggregate(Max("position"))["position__max"] or 0
+                next_position = (
+                    Registration.objects.filter(event=event).aggregate(Max("position"))["position__max"] or 0
+                )
                 confirmed_count = Registration.objects.filter(event=event, waiting_list=False).count()
                 results = []
                 for child in new_children:
                     next_position += 1
                     waiting_list = confirmed_count >= event.places
                     registration = Registration.objects.create(
-                        event=event, ninja=child, waiting_list=waiting_list, position=next_position,
+                        event=event,
+                        ninja=child,
+                        waiting_list=waiting_list,
+                        position=next_position,
                     )
                     # What the ninja works on starts as everything the session
                     # covers; the dojo team narrows it on the attendance list.
@@ -193,16 +208,29 @@ def event_signup(request, event_id):
                 for r in Registration.objects.filter(event=event, ninja__in=Ninja.objects.signable_by(guardian))
             }
 
-    children = [
-        {"child": child, "registration": existing_registrations.get(child.id)}
-        for child in Ninja.objects.signable_by(guardian)
-    ] if guardian else []
+    children = (
+        [
+            {"child": child, "registration": existing_registrations.get(child.id)}
+            for child in Ninja.objects.signable_by(guardian)
+        ]
+        if guardian
+        else []
+    )
     all_registered = bool(children) and all(entry["registration"] for entry in children)
 
     any_waitlisted = bool(results) and any(r["waiting_list"] for r in results)
-    return render(request, "events/event_signup.html", {
-        "event": event, "full": event.places_left <= 0, "closed": not event.registration_open,
-        "guardian": guardian, "children": children,
-        "all_registered": all_registered,
-        "results": results, "any_waitlisted": any_waitlisted, "error": error,
-    })
+    return render(
+        request,
+        "events/event_signup.html",
+        {
+            "event": event,
+            "full": event.places_left <= 0,
+            "closed": not event.registration_open,
+            "guardian": guardian,
+            "children": children,
+            "all_registered": all_registered,
+            "results": results,
+            "any_waitlisted": any_waitlisted,
+            "error": error,
+        },
+    )

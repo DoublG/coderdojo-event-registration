@@ -18,6 +18,7 @@ class DojoQuerySet(models.QuerySet):
         events are public (DATA_MODEL.md §12)."""
         return self.filter(status=Dojo.ACTIVE, kind=Dojo.DOJO)
 
+
 class DojoManager(models.Manager.from_queryset(DojoQuerySet)):
     def get_queryset(self):
         return super().get_queryset().select_related("municipality")
@@ -56,29 +57,41 @@ class Dojo(TranslatableModel):
     ORGANISATION = "organisation"
     KIND_CHOICES = [(DOJO, _("Dojo")), (ORGANISATION, _("Organisation"))]
     kind = models.CharField(
-        max_length=12, choices=KIND_CHOICES, default=DOJO,
+        max_length=12,
+        choices=KIND_CHOICES,
+        default=DOJO,
         help_text="Organisation: runs the organisation's own events. Never shown in the dojo finder or "
-                  "as a dojo page; its events say “Organised by” instead of linking to it.",
+        "as a dojo page; its events say “Organised by” instead of linking to it.",
     )
     created_by = models.ForeignKey(
-        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
         help_text="The approved champion who created this dojo.",
     )
     pathways = models.ManyToManyField(
-        "pathways.Pathway", blank=True, related_name="dojos",
+        "pathways.Pathway",
+        blank=True,
+        related_name="dojos",
         help_text="The pathways this dojo provides (optional). New events pre-select these.",
     )
     icon = models.ImageField(
-        upload_to="dojos/", null=True, blank=True,
+        upload_to="dojos/",
+        null=True,
+        blank=True,
         help_text="Round icon shown at the top of the dojo page, next to its name.",
     )
 
     tagline = models.TextField(
-        blank=True, default="",
+        blank=True,
+        default="",
         help_text=f"Shown at the top of the dojo page, between the title and the buttons. {MARKDOWN_HELP_TEXT}",
     )
     description = models.TextField(
-        blank=True, default="",
+        blank=True,
+        default="",
         help_text=f"Shown further down the dojo page, above the team. {MARKDOWN_HELP_TEXT}",
     )
     schedule_description = models.CharField(
@@ -89,9 +102,10 @@ class Dojo(TranslatableModel):
     email = models.EmailField(blank=True, default="")
     phone = models.CharField(max_length=30, blank=True, default="")
     visit_notes = models.TextField(
-        blank=True, default="",
+        blank=True,
+        default="",
         help_text=f"Optional extra info for the Visit us section — parking, entrance, "
-                  f"accessibility, whatever this chapter needs to add. {MARKDOWN_HELP_TEXT}",
+        f"accessibility, whatever this chapter needs to add. {MARKDOWN_HELP_TEXT}",
     )
 
     # The languages the dojo gives its sessions in and writes its texts in,
@@ -157,7 +171,8 @@ class DojoMembershipQuerySet(models.QuerySet):
                     When(role=DojoMembership.MENTOR, then=1),
                     default=2,
                 ),
-                "user__first_name", "user__username",
+                "user__first_name",
+                "user__username",
             )
         )
 
@@ -196,15 +211,27 @@ class DojoMembership(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=ACTIVE)
     requested_by = models.ForeignKey(
-        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
         help_text="Who asked (the mentor themselves) or added them (a champion/mentor).",
     )
     decided_by = models.ForeignKey(
-        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
         help_text="The champion/mentor who accepted or declined a join request.",
     )
     promoted_by = models.ForeignKey(
-        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
         help_text="Youth mentors only: the champion/mentor membership that promoted them.",
     )
     joined_at = models.DateTimeField(null=True, blank=True, help_text="When this membership (last) became active.")
@@ -227,7 +254,9 @@ class DojoMembership(models.Model):
             raise ValidationError(_("A ninja account can only be a youth mentor."))
         if self.role == self.CHAMPION and self.status == self.ACTIVE:
             others = DojoMembership.objects.filter(
-                dojo_id=self.dojo_id, role=self.CHAMPION, status=self.ACTIVE,
+                dojo_id=self.dojo_id,
+                role=self.CHAMPION,
+                status=self.ACTIVE,
             ).exclude(pk=self.pk)
             if others.exists():
                 raise ValidationError(_("This dojo already has an active champion."))

@@ -29,23 +29,38 @@ def _run(modeladmin, request, queryset, action, done_label):
 # to anyone who can merely view the list (e.g. the board's read-only
 # organisation role, accounts.organisation).
 
+
 @admin.action(description="Request a background check from the applicant", permissions=["change"])
 def request_check_for_applicants(modeladmin, request, queryset):
-    _run(modeladmin, request, queryset,
-         lambda application: services.request_background_check(application.account, request),
-         "Background check requested")
+    _run(
+        modeladmin,
+        request,
+        queryset,
+        lambda application: services.request_background_check(application.account, request),
+        "Background check requested",
+    )
 
 
 @admin.action(description="Approve (needs a valid background check)", permissions=["change"])
 def approve_applications(modeladmin, request, queryset):
-    _run(modeladmin, request, queryset,
-         lambda application: services.approve_application(application, request.user), "Approved")
+    _run(
+        modeladmin,
+        request,
+        queryset,
+        lambda application: services.approve_application(application, request.user),
+        "Approved",
+    )
 
 
 @admin.action(description="Reject", permissions=["change"])
 def reject_applications(modeladmin, request, queryset):
-    _run(modeladmin, request, queryset,
-         lambda application: services.reject_application(application, request.user), "Rejected")
+    _run(
+        modeladmin,
+        request,
+        queryset,
+        lambda application: services.reject_application(application, request.user),
+        "Rejected",
+    )
 
 
 @admin.register(Application)
@@ -66,6 +81,7 @@ class ApplicationAdmin(admin.ModelAdmin):
 
 # --- background checks (on the account) ----------------------------------------------
 
+
 class BackgroundCheckHistoryInline(admin.TabularInline):
     """The append-only audit log: who decided, when. Read-only."""
 
@@ -82,8 +98,13 @@ class BackgroundCheckHistoryInline(admin.TabularInline):
 
 @admin.action(description="Request a (new) background check document", permissions=["change"])
 def request_checks(modeladmin, request, queryset):
-    _run(modeladmin, request, queryset, lambda user: services.request_background_check(user, request),
-         "Background check requested")
+    _run(
+        modeladmin,
+        request,
+        queryset,
+        lambda user: services.request_background_check(user, request),
+        "Background check requested",
+    )
 
 
 @admin.action(description="Validate the uploaded document (deletes it)")
@@ -91,8 +112,13 @@ def validate_checks(modeladmin, request, queryset):
     if not request.user.has_perm(REVIEW_PERMISSION):
         modeladmin.message_user(request, "You don't have permission to review background checks.", level="error")
         return
-    _run(modeladmin, request, queryset, lambda user: services.validate_background_check(user, request.user),
-         "Validated (documents deleted)")
+    _run(
+        modeladmin,
+        request,
+        queryset,
+        lambda user: services.validate_background_check(user, request.user),
+        "Validated (documents deleted)",
+    )
 
 
 @admin.action(description="Reject the uploaded document (deletes it)")
@@ -100,8 +126,13 @@ def reject_checks(modeladmin, request, queryset):
     if not request.user.has_perm(REVIEW_PERMISSION):
         modeladmin.message_user(request, "You don't have permission to review background checks.", level="error")
         return
-    _run(modeladmin, request, queryset, lambda user: services.reject_background_check(user, request.user),
-         "Rejected (documents deleted)")
+    _run(
+        modeladmin,
+        request,
+        queryset,
+        lambda user: services.reject_background_check(user, request.user),
+        "Rejected (documents deleted)",
+    )
 
 
 @admin.register(BackgroundCheckHistory)
@@ -120,12 +151,23 @@ class BackgroundCheckAdmin(LogAccessAdminMixin, admin.ModelAdmin):
     record. The document is on private storage with no public URL: the only
     way to see it — even from here — is the permission-gated download link."""
 
-    list_display = ["username", "email", "background_check_status", "background_check_submitted_at", "background_check_expires_at"]
+    list_display = [
+        "username",
+        "email",
+        "background_check_status",
+        "background_check_submitted_at",
+        "background_check_expires_at",
+    ]
     list_filter = ["background_check_status"]
     search_fields = ["username", "email", "first_name", "last_name"]
     fields = [
-        "username", "email", "background_check_status", "background_check_requested_at",
-        "background_check_submitted_at", "background_check_reviewed_at", "background_check_expires_at",
+        "username",
+        "email",
+        "background_check_status",
+        "background_check_requested_at",
+        "background_check_submitted_at",
+        "background_check_reviewed_at",
+        "background_check_expires_at",
         "document_link",
     ]
     readonly_fields = fields

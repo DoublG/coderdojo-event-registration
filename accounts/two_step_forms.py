@@ -81,7 +81,9 @@ class PasskeyTokenForm(_StyledTokenMixin, WebauthnAuthenticationTokenForm):
 class AppSetupForm(TOTPDeviceForm):
     """Adding an authenticator app: the first code it shows proves it's set up."""
 
-    error_messages = {"invalid_token": _("That code isn't right. Check the app shows CoderDojo Belgium, then try the newest code.")}
+    error_messages = {
+        "invalid_token": _("That code isn't right. Check the app shows CoderDojo Belgium, then try the newest code.")
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -23,7 +23,10 @@ TEXTAREA_CLASS = "cd-form__textarea body"
 
 # Laid out by field.html itself (checkbox rows, option lists), never boxed.
 UNSTYLED_WIDGETS = (
-    forms.CheckboxInput, forms.RadioSelect, forms.CheckboxSelectMultiple, forms.HiddenInput,
+    forms.CheckboxInput,
+    forms.RadioSelect,
+    forms.CheckboxSelectMultiple,
+    forms.HiddenInput,
     forms.MultipleHiddenInput,
 )
 

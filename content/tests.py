@@ -33,10 +33,17 @@ class SeedAnnouncementsTests(TestCase):
 
 def _event(dojo, days=14, **fields):
     start = timezone.now() + timedelta(days=days)
-    return Event.objects.create(**{
-        "name": "Coolest Projects", "dojo": dojo, "status": Event.OPEN, "places": 10,
-        "start_time": start, "end_time": start + timedelta(hours=6), **fields,
-    })
+    return Event.objects.create(
+        **{
+            "name": "Coolest Projects",
+            "dojo": dojo,
+            "status": Event.OPEN,
+            "places": 10,
+            "start_time": start,
+            "end_time": start + timedelta(hours=6),
+            **fields,
+        }
+    )
 
 
 class PromotionShowingTests(TestCase):
@@ -49,43 +56,65 @@ class PromotionShowingTests(TestCase):
         return list(Promotion.objects.showing(placement, now=now or self.now))
 
     def test_shows_from_start_until_the_event_starts(self):
-        promotion = Promotion.objects.create(event=self.event, placement=Promotion.HOMEPAGE_HERO,
-                                             starts_at=self.now - timedelta(days=1))
+        promotion = Promotion.objects.create(
+            event=self.event, placement=Promotion.HOMEPAGE_HERO, starts_at=self.now - timedelta(days=1)
+        )
         self.assertEqual(self._showing(), [promotion])
         self.assertEqual(self._showing(Promotion.EVENT_LIST_TOP), [])
         self.assertEqual(self._showing(now=self.now - timedelta(days=2)), [])  # not started yet
         self.assertEqual(self._showing(now=self.event.start_time + timedelta(minutes=1)), [])  # event started
 
     def test_an_explicit_end_wins(self):
-        Promotion.objects.create(event=self.event, placement=Promotion.HOMEPAGE_HERO,
-                                 starts_at=self.now - timedelta(days=2), ends_at=self.now - timedelta(days=1))
+        Promotion.objects.create(
+            event=self.event,
+            placement=Promotion.HOMEPAGE_HERO,
+            starts_at=self.now - timedelta(days=2),
+            ends_at=self.now - timedelta(days=1),
+        )
         self.assertEqual(self._showing(), [])
 
     def test_never_after_the_event_has_ended(self):
-        Promotion.objects.create(event=self.event, placement=Promotion.HOMEPAGE_HERO,
-                                 starts_at=self.now - timedelta(days=1), ends_at=self.now + timedelta(days=60))
+        Promotion.objects.create(
+            event=self.event,
+            placement=Promotion.HOMEPAGE_HERO,
+            starts_at=self.now - timedelta(days=1),
+            ends_at=self.now + timedelta(days=60),
+        )
         self.assertEqual(self._showing(now=self.event.end_time + timedelta(minutes=1)), [])
 
     def test_only_for_events_the_public_site_shows(self):
-        Promotion.objects.create(event=_event(self.org, status=Event.DRAFT), placement=Promotion.HOMEPAGE_HERO,
-                                 starts_at=self.now - timedelta(days=1))
+        Promotion.objects.create(
+            event=_event(self.org, status=Event.DRAFT),
+            placement=Promotion.HOMEPAGE_HERO,
+            starts_at=self.now - timedelta(days=1),
+        )
         dormant = make_dojo("Sleepy", status=Dojo.DORMANT)
-        Promotion.objects.create(event=_event(dormant), placement=Promotion.HOMEPAGE_HERO,
-                                 starts_at=self.now - timedelta(days=1))
+        Promotion.objects.create(
+            event=_event(dormant), placement=Promotion.HOMEPAGE_HERO, starts_at=self.now - timedelta(days=1)
+        )
         self.assertEqual(self._showing(), [])
 
     def test_ordered_by_rank(self):
-        second = Promotion.objects.create(event=self.event, placement=Promotion.HOMEPAGE_HERO, rank=2,
-                                          starts_at=self.now - timedelta(days=1))
-        first = Promotion.objects.create(event=_event(self.org, name="Girlz"), placement=Promotion.HOMEPAGE_HERO,
-                                         rank=1, starts_at=self.now - timedelta(days=1))
+        second = Promotion.objects.create(
+            event=self.event, placement=Promotion.HOMEPAGE_HERO, rank=2, starts_at=self.now - timedelta(days=1)
+        )
+        first = Promotion.objects.create(
+            event=_event(self.org, name="Girlz"),
+            placement=Promotion.HOMEPAGE_HERO,
+            rank=1,
+            starts_at=self.now - timedelta(days=1),
+        )
         self.assertEqual(self._showing(), [first, second])
 
     def test_end_must_follow_start(self):
         from django.core.exceptions import ValidationError
 
-        promotion = Promotion(event=self.event, placement=Promotion.HOMEPAGE_HERO,
-                              starts_at=self.now, ends_at=self.now - timedelta(hours=1))
+        promotion = Promotion(
+            event=self.event,
+            placement=Promotion.HOMEPAGE_HERO,
+            starts_at=self.now,
+            ends_at=self.now - timedelta(hours=1),
+        )
         with self.assertRaises(ValidationError):
             promotion.full_clean()
 
@@ -101,8 +130,9 @@ class PromotionPlacementTests(TestCase):
         self.featured = _event(self.org, days=40, name="Coolest Projects")
 
     def _promote(self, placement, **fields):
-        return Promotion.objects.create(event=self.featured, placement=placement,
-                                        starts_at=timezone.now() - timedelta(hours=1), **fields)
+        return Promotion.objects.create(
+            event=self.featured, placement=placement, starts_at=timezone.now() - timedelta(hours=1), **fields
+        )
 
     def test_homepage_hero(self):
         self._promote(Promotion.HOMEPAGE_HERO, title="Show what you made", text="Sign up your project!")
@@ -150,8 +180,11 @@ class PromotionDashboardTests(TestCase):
 
     def test_only_the_organisation_admin_role_gets_in(self):
         promotion = Promotion.objects.create(event=self.event, placement=Promotion.HOMEPAGE_HERO)
-        urls = [reverse("manage_promotion_list"), reverse("manage_promotion_create"),
-                reverse("manage_promotion_detail", kwargs={"promotion_id": promotion.id})]
+        urls = [
+            reverse("manage_promotion_list"),
+            reverse("manage_promotion_create"),
+            reverse("manage_promotion_detail", kwargs={"promotion_id": promotion.id}),
+        ]
         self.client.logout()
         for url in urls:
             self.assertEqual(self.client.get(url).status_code, 302)  # to login
@@ -167,8 +200,9 @@ class PromotionDashboardTests(TestCase):
 
     def test_list_shows_each_placement_and_state(self):
         Promotion.objects.create(event=self.event, placement=Promotion.HOMEPAGE_HERO, title="Live one")
-        Promotion.objects.create(event=_event(self.org, status=Event.DRAFT, name="Not yet"),
-                                 placement=Promotion.EVENT_LIST_TOP)
+        Promotion.objects.create(
+            event=_event(self.org, status=Event.DRAFT, name="Not yet"), placement=Promotion.EVENT_LIST_TOP
+        )
         response = self.client.get(reverse("manage_promotion_list"))
         self.assertTemplateUsed(response, "content/manage/promotion_list.html")
         self.assertContains(response, "Live one")
@@ -177,14 +211,24 @@ class PromotionDashboardTests(TestCase):
         self.assertContains(response, "Nothing promoted here.")  # the two empty placements
 
     def test_create(self):
-        response = self.client.post(reverse("manage_promotion_create"), {
-            "event": self.event.id, "placement": Promotion.UPCOMING_FIRST, "rank": "3",
-            "starts_at": "2026-01-01T09:00", "ends_at": "", "title": "", "text": "Come along",
-        })
+        response = self.client.post(
+            reverse("manage_promotion_create"),
+            {
+                "event": self.event.id,
+                "placement": Promotion.UPCOMING_FIRST,
+                "rank": "3",
+                "starts_at": "2026-01-01T09:00",
+                "ends_at": "",
+                "title": "",
+                "text": "Come along",
+            },
+        )
         self.assertRedirects(response, reverse("manage_promotion_list"))
         promotion = Promotion.objects.get()
-        self.assertEqual((promotion.event, promotion.placement, promotion.rank, promotion.text),
-                         (self.event, Promotion.UPCOMING_FIRST, 3, "Come along"))
+        self.assertEqual(
+            (promotion.event, promotion.placement, promotion.rank, promotion.text),
+            (self.event, Promotion.UPCOMING_FIRST, 3, "Come along"),
+        )
         self.assertIsNone(promotion.ends_at)
 
     def test_create_prefills_the_event(self):
@@ -200,8 +244,15 @@ class PromotionDashboardTests(TestCase):
     def test_edit_and_invalid_window(self):
         promotion = Promotion.objects.create(event=self.event, placement=Promotion.HOMEPAGE_HERO)
         url = reverse("manage_promotion_detail", kwargs={"promotion_id": promotion.id})
-        data = {"event": self.event.id, "placement": Promotion.HOMEPAGE_HERO, "rank": "0",
-                "starts_at": "2026-01-02T09:00", "ends_at": "2026-01-01T09:00", "title": "", "text": ""}
+        data = {
+            "event": self.event.id,
+            "placement": Promotion.HOMEPAGE_HERO,
+            "rank": "0",
+            "starts_at": "2026-01-02T09:00",
+            "ends_at": "2026-01-01T09:00",
+            "title": "",
+            "text": "",
+        }
         self.assertEqual(self.client.post(url, data).status_code, 200)
         data["ends_at"] = "2026-02-01T09:00"
         data["rank"] = "5"
@@ -239,9 +290,10 @@ class SeedOrganisationTests(TestCase):
         self.assertIsNotNone(org.champion)
         self.assertEqual(org.event_set.count(), 2)
         self.assertTrue(org.event_set.exclude(external_registration_url="").exists())
-        self.assertEqual(set(Promotion.objects.values_list("placement", flat=True)),
-                         {value for value, _ in Promotion.PLACEMENT_CHOICES})
-
+        self.assertEqual(
+            set(Promotion.objects.values_list("placement", flat=True)),
+            {value for value, _ in Promotion.PLACEMENT_CHOICES},
+        )
 
 
 class SponsorTests(TestCase):
@@ -267,12 +319,16 @@ class SponsorTests(TestCase):
     def test_admin_adds_edits_and_removes_a_sponsor(self):
         self.client.force_login(self.admin)
         self.assertEqual(self.client.get(reverse("manage_sponsor_list")).status_code, 200)
-        response = self.client.post(reverse("manage_sponsor_create"),
-                                    {"name": "Flexmail", "url": "https://flexmail.be/", "order": "3", "is_public": "on"})
+        response = self.client.post(
+            reverse("manage_sponsor_create"),
+            {"name": "Flexmail", "url": "https://flexmail.be/", "order": "3", "is_public": "on"},
+        )
         self.assertRedirects(response, reverse("manage_sponsor_list"))
         sponsor = Sponsor.objects.get(name="Flexmail")
-        self.client.post(reverse("manage_sponsor_detail", kwargs={"sponsor_id": sponsor.id}),
-                         {"name": "Flexmail", "url": "https://flexmail.be/", "order": "1"})
+        self.client.post(
+            reverse("manage_sponsor_detail", kwargs={"sponsor_id": sponsor.id}),
+            {"name": "Flexmail", "url": "https://flexmail.be/", "order": "1"},
+        )
         sponsor.refresh_from_db()
         self.assertEqual((sponsor.order, sponsor.is_public), (1, False))
         self.client.post(reverse("manage_sponsor_delete", kwargs={"sponsor_id": sponsor.id}))
@@ -284,7 +340,10 @@ class SponsorTests(TestCase):
         OrganisationRole.objects.create(account=board, role=OrganisationRole.BOARD)
         for user in (User.objects.create(username="parent"), board):
             self.client.force_login(user)
-            for url in (reverse("manage_sponsor_list"), reverse("manage_sponsor_detail", kwargs={"sponsor_id": sponsor.id})):
+            for url in (
+                reverse("manage_sponsor_list"),
+                reverse("manage_sponsor_detail", kwargs={"sponsor_id": sponsor.id}),
+            ):
                 self.assertEqual(self.client.get(url).status_code, 404)
 
     def test_seed_is_rerun_safe(self):

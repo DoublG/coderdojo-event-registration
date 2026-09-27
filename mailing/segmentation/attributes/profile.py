@@ -67,7 +67,9 @@ class CurrentBeltAttribute(SegmentAttribute):
     scope = NINJA
 
     def choices(self):
-        return [SegmentChoice(NO_BELT, _("No belt yet"))] + [SegmentChoice(b.level, b.localized("name")) for b in Belt.objects.order_by("level")]
+        return [SegmentChoice(NO_BELT, _("No belt yet"))] + [
+            SegmentChoice(b.level, b.localized("name")) for b in Belt.objects.order_by("level")
+        ]
 
     def build_q(self, operator, value):
         levels = [value] if operator == "equals" else list(value)
@@ -129,8 +131,9 @@ class CancellationsAttribute(SegmentAttribute):
 
     def build_q(self, operator, value):
         since = timezone.now() - timedelta(days=90)
-        counts = (RegistrationCancellation.objects.filter(cancelled_at__gte=since)
-                  .values("ninja_id").annotate(n=Count("id")))
+        counts = (
+            RegistrationCancellation.objects.filter(cancelled_at__gte=since).values("ninja_id").annotate(n=Count("id"))
+        )
         if operator == "gte":
             return Q(pk__in=counts.filter(n__gte=value).values("ninja_id")) if value > 0 else Q()
         if operator == "lte":
@@ -185,5 +188,3 @@ class JoinedAttribute(SegmentAttribute):
         if operator != "within_days":
             raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         return Q(date_joined__gte=timezone.now() - timedelta(days=value))
-
-

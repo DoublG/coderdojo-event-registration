@@ -31,7 +31,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         rng = random.Random(11)
         parents = list(
-            User.objects.filter(username__startswith="guardian-", account_type=User.ADULT).order_by("id")[:len(STAGES)]
+            User.objects.filter(username__startswith="guardian-", account_type=User.ADULT).order_by("id")[
+                : len(STAGES)
+            ]
         )
         dojos = list(Dojo.objects.public().order_by("id")[:10])
         created = 0
@@ -41,8 +43,11 @@ class Command(BaseCommand):
             if parent.applications.exists():
                 continue
             Application.objects.create(
-                account=parent, kind=Application.MENTOR, status=application_status,
-                dojo=rng.choice(dojos) if dojos else None, mentor_role=Application.VOLUNTEER_MENTOR,
+                account=parent,
+                kind=Application.MENTOR,
+                status=application_status,
+                dojo=rng.choice(dojos) if dojos else None,
+                mentor_role=Application.VOLUNTEER_MENTOR,
                 message="I'd love to help out with Scratch sessions on Saturdays.",
                 background_check_consent=True,
                 decided_at=now if application_status != Application.PENDING else None,
@@ -55,8 +60,11 @@ class Command(BaseCommand):
             if check_status == User.CHECK_REJECTED:
                 parent.background_check_reviewed_at = now - timedelta(days=1)
                 BackgroundCheckHistory.objects.create(
-                    account=parent, decision=BackgroundCheckHistory.REJECTED, reviewed_at=parent.background_check_reviewed_at,
-                    requested_at=parent.background_check_requested_at, submitted_at=parent.background_check_submitted_at,
+                    account=parent,
+                    decision=BackgroundCheckHistory.REJECTED,
+                    reviewed_at=parent.background_check_reviewed_at,
+                    requested_at=parent.background_check_requested_at,
+                    submitted_at=parent.background_check_submitted_at,
                     note="Seed data: wrong document (model 1 instead of model 2).",
                 )
             parent.save()

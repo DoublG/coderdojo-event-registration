@@ -116,13 +116,20 @@ class OrganisationTeamMember(OrganisationContent):
     bio = models.TextField(blank=True, default="")
     photo = models.ImageField(upload_to="team/", null=True, blank=True)
     focus_areas = models.CharField(
-        max_length=300, blank=True, default="", help_text='Comma-separated, e.g. "Partnerships, Events"',
+        max_length=300,
+        blank=True,
+        default="",
+        help_text='Comma-separated, e.g. "Partnerships, Events"',
     )
     joined_date = models.DateField(null=True, blank=True)
     order = models.PositiveSmallIntegerField(default=0, help_text="Lower comes first.")
     is_public = models.BooleanField(default=True)
     account = models.ForeignKey(
-        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
         help_text="Optional: the person's own account, if they have one.",
     )
 
@@ -196,11 +203,16 @@ class Promotion(OrganisationContent):
     rank = models.PositiveSmallIntegerField(default=0, help_text="Lower shows first within a placement.")
     starts_at = models.DateTimeField(default=timezone.now)
     ends_at = models.DateTimeField(
-        null=True, blank=True, help_text="Empty: the promotion ends when the event starts.",
+        null=True,
+        blank=True,
+        help_text="Empty: the promotion ends when the event starts.",
     )
     title = models.CharField(max_length=200, blank=True, default="", help_text="Optional: replaces the event's name.")
     image = models.ImageField(
-        upload_to="promotions/", null=True, blank=True, help_text="Optional: replaces the event's banner.",
+        upload_to="promotions/",
+        null=True,
+        blank=True,
+        help_text="Optional: replaces the event's banner.",
     )
     text = models.CharField(max_length=300, blank=True, default="", help_text="Optional short pitch.")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -253,8 +265,12 @@ class Sponsor(models.Model):
 
     name = models.CharField(max_length=200)
     url = models.URLField("website", blank=True, default="")
-    logo = models.ImageField(upload_to="sponsors/", null=True, blank=True,
-                             help_text="Optional. Without a logo, the sponsor's name is shown.")
+    logo = models.ImageField(
+        upload_to="sponsors/",
+        null=True,
+        blank=True,
+        help_text="Optional. Without a logo, the sponsor's name is shown.",
+    )
     order = models.PositiveSmallIntegerField(default=0, help_text="Lower comes first.")
     is_public = models.BooleanField("shown", default=True, help_text="Uncheck to hide it from the homepage.")
 
@@ -263,4 +279,3 @@ class Sponsor(models.Model):
 
     def __str__(self):
         return self.name
-

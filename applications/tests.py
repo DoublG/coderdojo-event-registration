@@ -67,6 +67,7 @@ class _CleanupDocumentsMixin:
 
 # --- applying ------------------------------------------------------------------------
 
+
 class ApplyViewTests(TestCase):
     def setUp(self):
         self.parent = User.objects.create(username="jane", first_name="Jane", email="jane@example.com")
@@ -86,15 +87,25 @@ class ApplyViewTests(TestCase):
     def test_champion_application_is_saved_on_the_account(self):
         self.client.force_login(self.parent)
 
-        response = self.client.post(reverse("register_dojo"), {
-            "phone": "0470000000", "area": "Leuven", "preferred_schedule": "Saturdays",
-            "proposed_venue": "", "message": "Let's do this", "consent": "on", "background_check_consent": "on",
-        })
+        response = self.client.post(
+            reverse("register_dojo"),
+            {
+                "phone": "0470000000",
+                "area": "Leuven",
+                "preferred_schedule": "Saturdays",
+                "proposed_venue": "",
+                "message": "Let's do this",
+                "consent": "on",
+                "background_check_consent": "on",
+            },
+        )
 
         self.assertTrue(response.context["submitted"])
         application = Application.objects.get()
-        self.assertEqual((application.account, application.kind, application.status),
-                         (self.parent, Application.CHAMPION, Application.PENDING))
+        self.assertEqual(
+            (application.account, application.kind, application.status),
+            (self.parent, Application.CHAMPION, Application.PENDING),
+        )
         self.assertEqual(application.area, "Leuven")
         self.parent.refresh_from_db()
         self.assertEqual(self.parent.phone, "0470000000")
@@ -120,10 +131,15 @@ class ApplyViewTests(TestCase):
         self.client.force_login(self.parent)
 
         with patch("dojos.team.notify") as mock_notify:
-            self.client.post(reverse("register_helper"), {
-                "dojo": dojo.id, "mentor_role": Application.VOLUNTEER_MENTOR,
-                "message": "", "background_check_consent": "on",
-            })
+            self.client.post(
+                reverse("register_helper"),
+                {
+                    "dojo": dojo.id,
+                    "mentor_role": Application.VOLUNTEER_MENTOR,
+                    "message": "",
+                    "background_check_consent": "on",
+                },
+            )
 
         self.assertEqual({c.args[0].pk for c in mock_notify.call_args_list}, {champion.pk})
         self.assertEqual(Application.objects.get(account=self.parent).dojo, dojo)
@@ -137,6 +153,7 @@ class ApplyViewTests(TestCase):
 
 
 # --- the background check -------------------------------------------------------------
+
 
 class BackgroundCheckFlowTests(_CleanupDocumentsMixin, TestCase):
     def setUp(self):
@@ -152,8 +169,9 @@ class BackgroundCheckFlowTests(_CleanupDocumentsMixin, TestCase):
         self.assertIsNotNone(self.user.background_check_token)
         queued = EmailMessage.objects.get(template_key="background_check_requested")
         self.assertEqual((queued.recipient, queued.category, queued.status), ("tom@example.com", "service", "pending"))
-        self.assertIn(reverse("upload_background_check", kwargs={"token": self.user.background_check_token}),
-                      queued.body)
+        self.assertIn(
+            reverse("upload_background_check", kwargs={"token": self.user.background_check_token}), queued.body
+        )
 
     def test_request_refused_while_valid_or_awaiting_review(self):
         valid = make_mentor(username="valid")
@@ -198,8 +216,10 @@ class BackgroundCheckFlowTests(_CleanupDocumentsMixin, TestCase):
         self.assertFalse(user.background_check_document)
         self.assertFalse(storage.exists(path))
         history = BackgroundCheckHistory.objects.get(account=user)
-        self.assertEqual((history.decision, history.reviewed_by, history.note),
-                         (BackgroundCheckHistory.VALIDATED, self.reviewer, "All good"))
+        self.assertEqual(
+            (history.decision, history.reviewed_by, history.note),
+            (BackgroundCheckHistory.VALIDATED, self.reviewer, "All good"),
+        )
         self.assertEqual(history.expires_at, user.background_check_expires_at)
 
     def test_reject_deletes_document_writes_history_and_allows_a_new_upload(self):
@@ -239,6 +259,7 @@ class BackgroundCheckFlowTests(_CleanupDocumentsMixin, TestCase):
 
 
 # --- approving -------------------------------------------------------------------------
+
 
 class ApprovalTests(TestCase):
     def setUp(self):
@@ -326,6 +347,7 @@ class ApprovalTests(TestCase):
 
 
 # --- admin actions -----------------------------------------------------------------------
+
 
 class AdminActionTests(_CleanupDocumentsMixin, TestCase):
     def setUp(self):
@@ -419,6 +441,7 @@ class DownloadBackgroundCheckTests(_CleanupDocumentsMixin, TestCase):
 
 # --- creating a dojo -----------------------------------------------------------------------
 
+
 @patch("dojos.views.geocode", return_value=(51.05, 3.72))
 @patch("dojos.views.find_province", return_value=None)
 class DojoCreateTests(TestCase):
@@ -426,9 +449,14 @@ class DojoCreateTests(TestCase):
         champion = make_champion(username="c1")
         self.client.force_login(champion)
 
-        response = self.client.post(reverse("dojo_create"), {
-            "name": "CoderDojo Leuven", "address": "Ladeuzeplein 21, Leuven", "email": "hi@leuven.example",
-        })
+        response = self.client.post(
+            reverse("dojo_create"),
+            {
+                "name": "CoderDojo Leuven",
+                "address": "Ladeuzeplein 21, Leuven",
+                "email": "hi@leuven.example",
+            },
+        )
 
         dojo = Dojo.objects.get(name="CoderDojo Leuven")
         self.assertRedirects(response, reverse("dojo_manage", kwargs={"dojo_id": dojo.id}))

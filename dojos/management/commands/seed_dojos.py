@@ -46,12 +46,14 @@ class Command(BaseCommand):
         for dojo in Dojo.objects.select_related("province", "municipality"):
             dojo.languages = region_languages(dojo)
             dojo.save(update_fields=["languages"])
-        lifecycle_examples = list(Dojo.objects.order_by("-id")[:len(LIFECYCLE_EXAMPLES)])
+        lifecycle_examples = list(Dojo.objects.order_by("-id")[: len(LIFECYCLE_EXAMPLES)])
         for dojo, status in zip(lifecycle_examples, LIFECYCLE_EXAMPLES, strict=False):
             dojo.status = status
             dojo.save(update_fields=["status"])
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Done. dojos={Dojo.objects.count()} "
-            f"(non-active: {', '.join(f'{d.name}={d.status}' for d in lifecycle_examples)})"
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Done. dojos={Dojo.objects.count()} "
+                f"(non-active: {', '.join(f'{d.name}={d.status}' for d in lifecycle_examples)})"
+            )
+        )

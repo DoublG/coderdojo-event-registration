@@ -74,6 +74,7 @@ def categories_for(user):
         return [c for c in MailCategory if c in ALLOWED_FOR_NINJA_ACCOUNTS]
     return list(MailCategory)
 
+
 # One line per category for the Mail preferences page.
 DESCRIPTIONS = {
     MailCategory.SERVICE: _("Password resets, background-check requests and other mail about your account."),
@@ -81,5 +82,7 @@ DESCRIPTIONS = {
     MailCategory.REMINDER: _("A reminder two days before a session you signed up for."),
     MailCategory.DOJO_NEWS: _("New sessions and news from the dojos your family goes to."),
     MailCategory.VOLUNTEER: _("News for champions and mentors, and calls for volunteers."),
-    MailCategory.NEWSLETTER: _("The CoderDojo Belgium newsletter and events like Coolest Projects and CoderDojo Girlz."),
+    MailCategory.NEWSLETTER: _(
+        "The CoderDojo Belgium newsletter and events like Coolest Projects and CoderDojo Girlz."
+    ),
 }

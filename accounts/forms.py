@@ -60,8 +60,9 @@ class StyledPasswordResetForm(PasswordResetForm):
         super().__init__(*args, **kwargs)
         self.fields["email"].label = _("Email")
 
-    def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email,
-                  html_email_template_name=None):
+    def send_mail(
+        self, subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name=None
+    ):
         """Every mail goes through the mail engine (mailing.services.send):
         queued as account (`service`) mail, in the account's language, with
         the reset link built from the request's own domain."""
@@ -69,8 +70,12 @@ class StyledPasswordResetForm(PasswordResetForm):
         from mailing.services import send_or_log
 
         path = reverse("password_reset_confirm", kwargs={"uidb64": context["uid"], "token": context["token"]})
-        send_or_log(context["user"], MailCategory.SERVICE, "password_reset",
-             {"reset_url": f"{context['protocol']}://{context['domain']}{path}"})
+        send_or_log(
+            context["user"],
+            MailCategory.SERVICE,
+            "password_reset",
+            {"reset_url": f"{context['protocol']}://{context['domain']}{path}"},
+        )
 
 
 class StyledSetPasswordForm(NewPasswordLabelsMixin, SetPasswordForm):
@@ -85,12 +90,14 @@ class LoginForm(AuthenticationForm):
 
     username = UsernameField(
         label=_("Email"),
-        widget=forms.TextInput(attrs={
-            "class": "cd-form__input body",
-            "placeholder": "you@example.com",
-            "autofocus": True,
-            "autocomplete": "username",
-        }),
+        widget=forms.TextInput(
+            attrs={
+                "class": "cd-form__input body",
+                "placeholder": "you@example.com",
+                "autofocus": True,
+                "autocomplete": "username",
+            }
+        ),
     )
     password = forms.CharField(
         label=_("Password"),
@@ -108,29 +115,38 @@ class RegisterGuardianForm(forms.Form):
     children are ChildRowsFormSet, next to it."""
 
     # The input classes come from core.forms.SiteBoundField.
-    name = forms.CharField(label=_("Full name"), max_length=150, widget=forms.TextInput(attrs={"placeholder": "Jane Doe"}))
+    name = forms.CharField(
+        label=_("Full name"), max_length=150, widget=forms.TextInput(attrs={"placeholder": "Jane Doe"})
+    )
     email = forms.EmailField(label=_("Email"), widget=forms.EmailInput(attrs={"placeholder": "jane.doe@example.com"}))
     phone = forms.CharField(
-        label=_("Phone"), required=False, max_length=30,
+        label=_("Phone"),
+        required=False,
+        max_length=30,
         help_text=_("Only used if we need to reach you during a session."),
         widget=forms.TextInput(attrs={"placeholder": "+32 4xx xx xx xx"}),
     )
     password = forms.CharField(label=_("Password"), widget=forms.PasswordInput())
     postal_code = forms.CharField(
-        label=_("Postcode"), required=False, max_length=4,
+        label=_("Postcode"),
+        required=False,
+        max_length=4,
         help_text=_("So we can tell you about dojos and sessions near you."),
         widget=forms.TextInput(attrs={"placeholder": "9000", "inputmode": "numeric"}),
     )
     preferred_language = forms.ChoiceField(label=_("Language for emails"), required=False, choices=settings.LANGUAGES)
     consent = forms.BooleanField(
-        label=_("I am the parent or legal guardian of the children listed below."), required=True,
+        label=_("I am the parent or legal guardian of the children listed below."),
+        required=True,
     )
     # Optional: the children's details may choose which mails the family
     # gets (accounts.consent). Never needed to sign a child up.
     child_data_mail = forms.BooleanField(required=False, widget=forms.CheckboxInput())
     # The newsletter needs an explicit opt-in (mailing.categories): unticked.
     newsletter = forms.BooleanField(
-        label=_("Send me the CoderDojo Belgium newsletter and news about events like Coolest Projects and CoderDojo Girlz."),
+        label=_(
+            "Send me the CoderDojo Belgium newsletter and news about events like Coolest Projects and CoderDojo Girlz."
+        ),
         required=False,
     )
 
@@ -166,16 +182,21 @@ class SignInPolicyForm(forms.Form):
         for role, label in SignInRequirement.ROLE_CHOICES:
             current = requirements.get(role)
             self.fields[f"level_{role}"] = forms.ChoiceField(
-                label=label, choices=SignInRequirement.LEVEL_CHOICES,
+                label=label,
+                choices=SignInRequirement.LEVEL_CHOICES,
                 initial=current.level if current else SignInRequirement.PASSWORD,
                 widget=forms.Select(attrs={"class": "cd-form__input body"}),
             )
             self.fields[f"from_{role}"] = forms.DateField(
-                label=_("Required from"), required=False,
+                label=_("Required from"),
+                required=False,
                 initial=current.required_from if current else None,
                 widget=forms.DateInput(
-                    attrs={"class": "cd-form__input body", "type": "date",
-                           "aria-label": format_lazy("{}: {}", label, _("Required from"))},
+                    attrs={
+                        "class": "cd-form__input body",
+                        "type": "date",
+                        "aria-label": format_lazy("{}: {}", label, _("Required from")),
+                    },
                     format="%Y-%m-%d",
                 ),
             )
@@ -279,7 +300,9 @@ class ChildForm(forms.ModelForm):
             "allergies_notes": _("Allergies or notes (optional)"),
         }
         help_texts = {
-            "allergies_notes": _("Only the champion (the person running the dojo) sees this, on the list of a session your child is signed up for."),
+            "allergies_notes": _(
+                "Only the champion (the person running the dojo) sees this, on the list of a session your child is signed up for."
+            ),
         }
         error_messages = {
             "name": {"required": _("First name is required.")},
@@ -358,9 +381,16 @@ class SignUpChildForm(ChildForm):
     icon = None
 
     class Meta(ChildForm.Meta):
-        labels = {**ChildForm.Meta.labels, "date_of_birth": _("Date of birth"), "allergies_notes": _("Allergies or notes")}
+        labels = {
+            **ChildForm.Meta.labels,
+            "date_of_birth": _("Date of birth"),
+            "allergies_notes": _("Allergies or notes"),
+        }
         help_texts = {**ChildForm.Meta.help_texts}
-        error_messages = {**ChildForm.Meta.error_messages, "date_of_birth": {"required": _("Date of birth is required.")}}
+        error_messages = {
+            **ChildForm.Meta.error_messages,
+            "date_of_birth": {"required": _("Date of birth is required.")},
+        }
         widgets = {
             **ChildForm.Meta.widgets,
             "name": forms.TextInput(attrs={"placeholder": _("Sam")}),

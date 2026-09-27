@@ -48,10 +48,20 @@ VIEW_HEALTH_NOTES = "view_health_notes"
 # Make, revoke and renew the dojo's API clients (api.models.DojoApiClient):
 # they act for the whole dojo, so only its champion.
 MANAGE_API = "manage_api"
-ALL_CAPABILITIES = frozenset({
-    TAKE_ATTENDANCE, MANAGE_EVENTS, EDIT_SETTINGS, MANAGE_TEAM, AWARD_BELTS, AWARD_BADGES, MANAGE_LIFECYCLE,
-    POST_UPDATES, VIEW_HEALTH_NOTES, MANAGE_API,
-})
+ALL_CAPABILITIES = frozenset(
+    {
+        TAKE_ATTENDANCE,
+        MANAGE_EVENTS,
+        EDIT_SETTINGS,
+        MANAGE_TEAM,
+        AWARD_BELTS,
+        AWARD_BADGES,
+        MANAGE_LIFECYCLE,
+        POST_UPDATES,
+        VIEW_HEALTH_NOTES,
+        MANAGE_API,
+    }
+)
 
 ROLE_CAPABILITIES = {
     CHAMPION: ALL_CAPABILITIES,

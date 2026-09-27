@@ -29,7 +29,9 @@ class Command(BaseCommand):
         call_command("loaddata", str(MUNICIPALITIES_FIXTURE))
         call_command("loaddata", str(BOUNDARIES_FIXTURE))
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Done. municipalities={Municipality.objects.count()} "
-            f"boundaries={AdministrativeBoundary.objects.count()}"
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Done. municipalities={Municipality.objects.count()} "
+                f"boundaries={AdministrativeBoundary.objects.count()}"
+            )
+        )

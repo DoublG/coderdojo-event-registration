@@ -105,12 +105,20 @@ class GirlsSessionLabelTests(TestCase):
     def setUpTestData(cls):
         cls.dojo = make_dojo("Ghent")
         cls.girls = _future_event(cls.dojo, name="Girlz", audience=Event.GIRLS)
-        cls.everyone = _future_event(cls.dojo, name="Everyone", start_time=timezone.now() + timedelta(days=8),
-                                     end_time=timezone.now() + timedelta(days=8, hours=2))
+        cls.everyone = _future_event(
+            cls.dojo,
+            name="Everyone",
+            start_time=timezone.now() + timedelta(days=8),
+            end_time=timezone.now() + timedelta(days=8, hours=2),
+        )
 
     def test_label_on_event_detail_only_for_girls_sessions(self):
-        self.assertContains(self.client.get(reverse("event_detail", kwargs={"event_id": self.girls.id})), "Girls' session")
-        self.assertNotContains(self.client.get(reverse("event_detail", kwargs={"event_id": self.everyone.id})), "Girls' session")
+        self.assertContains(
+            self.client.get(reverse("event_detail", kwargs={"event_id": self.girls.id})), "Girls' session"
+        )
+        self.assertNotContains(
+            self.client.get(reverse("event_detail", kwargs={"event_id": self.everyone.id})), "Girls' session"
+        )
 
     def test_label_on_event_list(self):
         self.assertContains(self.client.get(reverse("event_list")), "Girls' session", count=1)
@@ -121,8 +129,10 @@ class GirlsSessionLabelTests(TestCase):
         Guardianship.objects.create(guardian=guardian, ninja=boy)
         self.client.force_login(guardian)
 
-        self.client.post(reverse("event_signup", kwargs={"event_id": self.girls.id}),
-                         {"child": [str(boy.id)], "child_order": str(boy.id)})
+        self.client.post(
+            reverse("event_signup", kwargs={"event_id": self.girls.id}),
+            {"child": [str(boy.id)], "child_order": str(boy.id)},
+        )
 
         self.assertTrue(Registration.objects.filter(event=self.girls, ninja=boy, waiting_list=False).exists())
 
@@ -187,7 +197,9 @@ class EventSignupViewTests(TestCase):
         )
 
         self.assertEqual([entry["child"] for entry in response.context["children"]], [self.child])
-        self.assertEqual(list(Registration.objects.filter(event=event).values_list("ninja", flat=True)), [self.child.id])
+        self.assertEqual(
+            list(Registration.objects.filter(event=event).values_list("ninja", flat=True)), [self.child.id]
+        )
 
     def test_signup_waitlists_when_full(self):
         event = _future_event(self.dojo, places=0)
@@ -260,7 +272,9 @@ class BeltAndBadgeTests(TestCase):
         self.mentor = add_member(self.dojo, make_mentor(username="mentor"))
         self.ninja = Ninja.objects.create(name="Mila")
         self.event = _future_event(self.dojo)
-        self.registration = Registration.objects.create(event=self.event, ninja=self.ninja, waiting_list=False, position=1)
+        self.registration = Registration.objects.create(
+            event=self.event, ninja=self.ninja, waiting_list=False, position=1
+        )
 
     def test_award_records_who_and_in_which_role(self):
         from .awards import award_belt
@@ -320,7 +334,9 @@ class BeltAndBadgeTests(TestCase):
     def test_milestones_follow_attendance_and_can_grant_a_belt(self):
         from .awards import sync_milestones
 
-        first = self.Badge.objects.create(name="White Band", kind=self.Badge.MILESTONE, threshold=1, grants_belt=self.white)
+        first = self.Badge.objects.create(
+            name="White Band", kind=self.Badge.MILESTONE, threshold=1, grants_belt=self.white
+        )
         second = self.Badge.objects.create(name="Green Band", kind=self.Badge.MILESTONE, threshold=2)
 
         sync_milestones(self.ninja, self.mentor)
@@ -351,7 +367,10 @@ class BeltAndBadgeTests(TestCase):
         award = award_badge(self.ninja, maker, self.mentor, note=" Built a platformer ")
 
         self.assertIsNotNone(award.earned_date)
-        self.assertEqual((award.awarded_by, award.awarded_as_membership, award.note), (self.mentor.user, self.mentor, "Built a platformer"))
+        self.assertEqual(
+            (award.awarded_by, award.awarded_as_membership, award.note),
+            (self.mentor.user, self.mentor, "Built a platformer"),
+        )
         with self.assertRaises(BadgeError):
             award_badge(self.ninja, maker, self.champion)
         self.assertEqual(self.ninja.badges.count(), 1)
@@ -393,10 +412,16 @@ class StrNeverQueriesTests(TestCase):
 
         from geo.models import Municipality
 
-        self.municipality = Municipality.objects.create(postal_code="9000", name="Gent", center=Point(3.72, 51.05, srid=4326))
+        self.municipality = Municipality.objects.create(
+            postal_code="9000", name="Gent", center=Point(3.72, 51.05, srid=4326)
+        )
         self.dojo = make_dojo("Ghent", municipality=self.municipality)
         self.event = Event.objects.create(
-            name="Session", dojo=self.dojo, start_time=timezone.now(), end_time=timezone.now() + timedelta(hours=2), places=5,
+            name="Session",
+            dojo=self.dojo,
+            start_time=timezone.now(),
+            end_time=timezone.now() + timedelta(hours=2),
+            places=5,
         )
 
     def test_default_manager_preloads_dojo_and_municipality(self):
@@ -406,22 +431,32 @@ class StrNeverQueriesTests(TestCase):
             self.assertEqual(str(event.dojo), "Ghent (9000 Gent)")
 
 
-
 class EngagementTests(TestCase):
     """events.engagement: stages measured against the sessions meant for
     each child (DATA_MODEL.md §11, "Engagement snapshot")."""
 
     def setUp(self):
         self.dojo = make_dojo("Ghent")
-        self.ninja = Ninja.objects.create(name="Emma", gender=Ninja.GIRL, date_of_birth=timezone.localdate() - timedelta(days=11 * 365))
+        self.ninja = Ninja.objects.create(
+            name="Emma", gender=Ninja.GIRL, date_of_birth=timezone.localdate() - timedelta(days=11 * 365)
+        )
 
     def _session(self, days_ago, dojo=None, **fields):
         start = timezone.now() - timedelta(days=days_ago)
-        return Event.objects.create(name=f"S{days_ago}", dojo=dojo or self.dojo, status=Event.CLOSED, places=20,
-                                    start_time=start, end_time=start + timedelta(hours=2), **fields)
+        return Event.objects.create(
+            name=f"S{days_ago}",
+            dojo=dojo or self.dojo,
+            status=Event.CLOSED,
+            places=20,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+            **fields,
+        )
 
     def _came(self, event, ninja=None, attended=True):
-        Registration.objects.create(event=event, ninja=ninja or self.ninja, waiting_list=False, position=1, attended=attended)
+        Registration.objects.create(
+            event=event, ninja=ninja or self.ninja, waiting_list=False, position=1, attended=attended
+        )
 
     def _overall(self, ninja=None):
         from .engagement import rebuild
@@ -456,7 +491,9 @@ class EngagementTests(TestCase):
         adult = Ninja.objects.create(name="Adult", date_of_birth=timezone.localdate() - timedelta(days=19 * 365))
         self._came(self._session(25), ninja=adult)
         stages = {n.name: self._overall(n).stage for n in (lapsed, never, new, adult)}
-        self.assertEqual(stages, {"Old visitor": "lapsed", "Never": "never_attended", "New": "new", "Adult": "aged_out"})
+        self.assertEqual(
+            stages, {"Old visitor": "lapsed", "Never": "never_attended", "New": "new", "Adult": "aged_out"}
+        )
 
     def test_a_session_nobody_marked_counts_a_confirmed_place(self):
         unmarked = self._session(30)
@@ -466,7 +503,9 @@ class EngagementTests(TestCase):
         self.assertFalse(row.from_marked_attendance)
 
     def test_a_boy_does_not_miss_a_girls_session_or_one_for_older_children(self):
-        boy = Ninja.objects.create(name="Liam", gender=Ninja.BOY, date_of_birth=timezone.localdate() - timedelta(days=8 * 365))
+        boy = Ninja.objects.create(
+            name="Liam", gender=Ninja.BOY, date_of_birth=timezone.localdate() - timedelta(days=8 * 365)
+        )
         for days in (170, 150, 130):
             self._came(self._session(days), ninja=boy)
         self._session(60, audience=Event.GIRLS)
@@ -506,8 +545,12 @@ class OrganisationAndExternalEventTests(TestCase):
     def setUp(self):
         cache.clear()
         self.org = make_dojo("CoderDojo Belgium", kind=Dojo.ORGANISATION)
-        self.event = _future_event(self.org, name="Coolest Projects", places=0,
-                                   external_registration_url="https://www.coolestprojects.be/register")
+        self.event = _future_event(
+            self.org,
+            name="Coolest Projects",
+            places=0,
+            external_registration_url="https://www.coolestprojects.be/register",
+        )
 
     def test_detail_page_links_out_instead_of_signing_up(self):
         response = self.client.get(reverse("event_detail", kwargs={"event_id": self.event.id}))
@@ -542,7 +585,6 @@ class OrganisationAndExternalEventTests(TestCase):
         self.assertNotIn(self.org, response.context["dojo_choices"])
 
 
-
 class EventLanguageTests(TestCase):
     """Sessions are given in their dojo's languages; their name and
     description can have a version per language."""
@@ -561,7 +603,9 @@ class EventLanguageTests(TestCase):
         self.assertContains(dutch, "Nederlands (België), Français (Belgique)")
 
     def test_description_falls_back_to_the_main_language_with_a_note(self):
-        response = self.client.get(reverse("event_detail", kwargs={"event_id": self.event.id}), HTTP_ACCEPT_LANGUAGE="fr-be")
+        response = self.client.get(
+            reverse("event_detail", kwargs={"event_id": self.event.id}), HTTP_ACCEPT_LANGUAGE="fr-be"
+        )
         self.assertContains(response, "Leer programmeren.")
         self.assertContains(response, "Uniquement en Nederlands (België)")
 
@@ -593,11 +637,16 @@ class ManageAwardsTests(TempMediaMixin, TestCase):
         response = self.client.get(reverse("manage_badge_list"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "events/manage/badge_list.html")
-        response = self.client.post(reverse("manage_badge_create"), {
-            "name": "Game Maker", "kind": Badge.ONE_OFF, "criteria": "Build and share a playable game.",
-            "tr__nl-be__name": "Spelmaker",
-            "icon": _png(),
-        })
+        response = self.client.post(
+            reverse("manage_badge_create"),
+            {
+                "name": "Game Maker",
+                "kind": Badge.ONE_OFF,
+                "criteria": "Build and share a playable game.",
+                "tr__nl-be__name": "Spelmaker",
+                "icon": _png(),
+            },
+        )
         self.assertRedirects(response, reverse("manage_badge_list"))
         badge = Badge.objects.get(name="Game Maker")
         self.assertEqual(badge.kind, Badge.ONE_OFF)
@@ -606,10 +655,19 @@ class ManageAwardsTests(TempMediaMixin, TestCase):
 
     def test_a_standard_icon_is_linked_and_svg_uploads_are_refused(self):
         self.client.force_login(self.admin)
-        self.client.post(reverse("manage_badge_create"), {"name": "Coolest", "kind": Badge.ONE_OFF, "library_icon": "coolest-projects.svg"})
+        self.client.post(
+            reverse("manage_badge_create"),
+            {"name": "Coolest", "kind": Badge.ONE_OFF, "library_icon": "coolest-projects.svg"},
+        )
         self.assertEqual(Badge.objects.get(name="Coolest").icon.name, "library/awards/coolest-projects.svg")
-        svg = SimpleUploadedFile("x.svg", b'<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>', content_type="image/svg+xml")
-        response = self.client.post(reverse("manage_badge_create"), {"name": "Sneaky", "kind": Badge.ONE_OFF, "icon": svg})
+        svg = SimpleUploadedFile(
+            "x.svg",
+            b'<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
+            content_type="image/svg+xml",
+        )
+        response = self.client.post(
+            reverse("manage_badge_create"), {"name": "Sneaky", "kind": Badge.ONE_OFF, "icon": svg}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Badge.objects.filter(name="Sneaky").exists())
 
@@ -619,9 +677,15 @@ class ManageAwardsTests(TempMediaMixin, TestCase):
         response = self.client.post(reverse("manage_badge_create"), {"name": "Blue Band", "kind": Badge.MILESTONE})
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Badge.objects.exists())
-        self.client.post(reverse("manage_badge_create"), {
-            "name": "Blue Band", "kind": Badge.MILESTONE, "threshold": "20", "grants_belt": belt.id,
-        })
+        self.client.post(
+            reverse("manage_badge_create"),
+            {
+                "name": "Blue Band",
+                "kind": Badge.MILESTONE,
+                "threshold": "20",
+                "grants_belt": belt.id,
+            },
+        )
         badge = Badge.objects.get(name="Blue Band")
         self.assertEqual((badge.threshold, badge.grants_belt), (20, belt))
 
@@ -629,17 +693,26 @@ class ManageAwardsTests(TempMediaMixin, TestCase):
         belt = Belt.objects.create(name="Yellow belt", level=1)
         badge = Badge.objects.create(name="Band", kind=Badge.MILESTONE, threshold=3, grants_belt=belt)
         self.client.force_login(self.admin)
-        response = self.client.post(reverse("manage_badge_detail", kwargs={"badge_id": badge.id}), {
-            "name": "Band", "kind": Badge.ONE_OFF, "threshold": "3", "grants_belt": belt.id,
-        })
+        response = self.client.post(
+            reverse("manage_badge_detail", kwargs={"badge_id": badge.id}),
+            {
+                "name": "Band",
+                "kind": Badge.ONE_OFF,
+                "threshold": "3",
+                "grants_belt": belt.id,
+            },
+        )
         self.assertRedirects(response, reverse("manage_badge_list"))
         badge.refresh_from_db()
         self.assertEqual((badge.kind, badge.threshold, badge.grants_belt), (Badge.ONE_OFF, None, None))
 
     def test_an_award_ninjas_have_is_not_removed(self):
         kept = Badge.objects.create(name="Kept")
-        NinjaBadge.objects.create(ninja=Ninja.objects.create(name="Ada", date_of_birth="2015-01-01"),
-                                  badge=kept, earned_date=timezone.localdate())
+        NinjaBadge.objects.create(
+            ninja=Ninja.objects.create(name="Ada", date_of_birth="2015-01-01"),
+            badge=kept,
+            earned_date=timezone.localdate(),
+        )
         unused = Badge.objects.create(name="Unused")
         self.client.force_login(self.admin)
         self.client.post(reverse("manage_badge_delete", kwargs={"badge_id": kept.id}))
@@ -654,8 +727,11 @@ class ManageAwardsTests(TempMediaMixin, TestCase):
         make_dojo("Leuven", champion=champion)
         for user in (User.objects.create(username="parent"), board, champion):
             self.client.force_login(user)
-            for url in (reverse("manage_badge_list"), reverse("manage_badge_create"),
-                        reverse("manage_badge_detail", kwargs={"badge_id": badge.id})):
+            for url in (
+                reverse("manage_badge_list"),
+                reverse("manage_badge_create"),
+                reverse("manage_badge_detail", kwargs={"badge_id": badge.id}),
+            ):
                 self.assertEqual(self.client.get(url).status_code, 404)
             self.client.post(reverse("manage_badge_create"), {"name": "Sneaky", "kind": Badge.ONE_OFF})
             self.client.post(reverse("manage_badge_delete", kwargs={"badge_id": badge.id}))

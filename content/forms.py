@@ -29,8 +29,12 @@ class PromotionForm(forms.ModelForm):
         model = Promotion
         fields = ["event", "placement", "rank", "starts_at", "ends_at", "title", "text", "image"]
         labels = {
-            "event": _("Event"), "placement": _("Where"), "rank": _("Rank"), "title": _("Title"),
-            "text": _("Short pitch"), "image": _("Image"),
+            "event": _("Event"),
+            "placement": _("Where"),
+            "rank": _("Rank"),
+            "title": _("Title"),
+            "text": _("Short pitch"),
+            "image": _("Image"),
         }
         # Every help text here, translated: a model's own help_text is English-only (for the admin).
         help_texts = {
@@ -58,9 +62,14 @@ class PromotionForm(forms.ModelForm):
         self.fields["image"].help_text = _("Optional: replaces the event's banner.")
         # The title and pitch in the organisation's other languages.
         labels = {"title": _("Title"), "text": _("Short pitch")}
-        self.translation_groups = bound_translation_groups(self, add_translation_fields(
-            self, self.instance, lambda field: optional_copy(self.fields[field], labels[field]),
-        ))
+        self.translation_groups = bound_translation_groups(
+            self,
+            add_translation_fields(
+                self,
+                self.instance,
+                lambda field: optional_copy(self.fields[field], labels[field]),
+            ),
+        )
         upcoming = Event.objects.filter(end_time__gt=timezone.now())
         if self.instance.event_id:
             upcoming = upcoming | Event.objects.filter(pk=self.instance.event_id)
@@ -87,9 +96,16 @@ class SponsorForm(forms.ModelForm):
     class Meta:
         model = Sponsor
         fields = ["name", "url", "logo", "order", "is_public"]
-        labels = {"name": _("Name"), "url": _("Website"), "logo": _("Logo"), "order": _("Order"), "is_public": _("Shown on the homepage")}
+        labels = {
+            "name": _("Name"),
+            "url": _("Website"),
+            "logo": _("Logo"),
+            "order": _("Order"),
+            "is_public": _("Shown on the homepage"),
+        }
         help_texts = {
-            "logo": _("Optional. Without a logo, the sponsor's name is shown."), "order": _("Lower comes first."),
+            "logo": _("Optional. Without a logo, the sponsor's name is shown."),
+            "order": _("Lower comes first."),
             "is_public": _("Uncheck to hide it from the homepage."),
         }
         # The input classes come from core.forms.SiteBoundField.
@@ -99,4 +115,3 @@ class SponsorForm(forms.ModelForm):
             "logo": forms.ClearableFileInput(attrs={"accept": "image/*"}),
             "order": forms.NumberInput(attrs={"min": 0}),
         }
-

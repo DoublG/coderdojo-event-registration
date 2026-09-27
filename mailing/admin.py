@@ -160,4 +160,3 @@ class JourneyDeliveryAdmin(admin.ModelAdmin):
     list_display = ["created_at", "journey", "user", "email"]
     list_filter = ["journey"]
     search_fields = ["user__email"]
-

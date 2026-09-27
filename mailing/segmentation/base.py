@@ -70,7 +70,10 @@ class SegmentAttribute(ABC):
     def validate(self, operator: str, value: Any) -> None:
         """Raise ValueError with a readable message for a rule that can't work."""
         if operator not in self.operators:
-            raise ValueError(_("“%(label)s” supports %(join)s, not “%(operator)s”.") % {"label": self.label, "join": ', '.join(self.operators), "operator": operator})
+            raise ValueError(
+                _("“%(label)s” supports %(join)s, not “%(operator)s”.")
+                % {"label": self.label, "join": ", ".join(self.operators), "operator": operator}
+            )
         if self.value_type == "days":
             if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
                 raise ValueError(_("“%(label)s” needs a whole number of days, e.g. 365.") % {"label": self.label})
@@ -88,8 +91,9 @@ class SegmentAttribute(ABC):
         allowed = {choice.value for choice in self.choices()}
         unknown = [v for v in values if v not in allowed]
         if unknown:
-            raise ValueError(_("Unknown value(s) for “%(label)s”: %(unknown)s.") % {"label": self.label, "unknown": unknown})
-
+            raise ValueError(
+                _("Unknown value(s) for “%(label)s”: %(unknown)s.") % {"label": self.label, "unknown": unknown}
+            )
 
     # --- the segment builder (mailing.manage) -------------------------------
 

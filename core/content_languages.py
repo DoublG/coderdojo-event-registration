@@ -64,9 +64,10 @@ class TranslatableModel(models.Model):
     TRANSLATABLE_FIELDS = ()
 
     translations = models.JSONField(
-        default=dict, blank=True,
+        default=dict,
+        blank=True,
         help_text='The texts in the dojo\'s other languages: {"fr-be": {"field": "text"}}. The normal fields '
-                  "hold the main language. Edited on the dojo's dashboard pages.",
+        "hold the main language. Edited on the dojo's dashboard pages.",
     )
 
     class Meta:
@@ -151,7 +152,9 @@ def optional_copy(form_field, label):
 
     widget = copy.deepcopy(form_field.widget)
     widget.attrs.pop("placeholder", None)
-    return forms.CharField(required=False, label=label, widget=widget, max_length=getattr(form_field, "max_length", None))
+    return forms.CharField(
+        required=False, label=label, widget=widget, max_length=getattr(form_field, "max_length", None)
+    )
 
 
 def bound_translation_groups(form, groups):

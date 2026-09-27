@@ -28,14 +28,21 @@ class StageChangedAttribute(SegmentAttribute):
 
     def validate(self, operator, value):
         stages = {c.value for c in self.choices()}
-        if (operator != "within_days" or not isinstance(value, dict) or not value.get("to")
-                or not set(value["to"]) <= stages or not set(value.get("from") or []) <= stages
-                or not isinstance(value.get("days"), int) or value["days"] <= 0):
+        if (
+            operator != "within_days"
+            or not isinstance(value, dict)
+            or not value.get("to")
+            or not set(value["to"]) <= stages
+            or not set(value.get("from") or []) <= stages
+            or not isinstance(value.get("days"), int)
+            or value["days"] <= 0
+        ):
             raise ValueError(_("“%(label)s” needs the new stage(s) and a number of days.") % {"label": self.label})
 
     def build_q(self, operator, value):
         changes = NinjaEngagementChange.objects.filter(
-            to_stage__in=value["to"], changed_on__gte=timezone.localdate() - timedelta(days=value["days"]),
+            to_stage__in=value["to"],
+            changed_on__gte=timezone.localdate() - timedelta(days=value["days"]),
         )
         if value.get("from"):
             changes = changes.filter(from_stage__in=value["from"])
@@ -46,9 +53,14 @@ class StageChangedAttribute(SegmentAttribute):
         names = lambda stages: str(_(" or ")).join(str(labels.get(s, s)) for s in stages)  # noqa: E731
         if value.get("from"):
             return _("Became %(to)s from %(from)s in the last %(days)s days") % {
-                "to": names(value.get("to", [])), "from": names(value["from"]), "days": value.get("days"),
+                "to": names(value.get("to", [])),
+                "from": names(value["from"]),
+                "days": value.get("days"),
             }
-        return _("Became %(to)s in the last %(days)s days") % {"to": names(value.get("to", [])), "days": value.get("days")}
+        return _("Became %(to)s in the last %(days)s days") % {
+            "to": names(value.get("to", [])),
+            "days": value.get("days"),
+        }
 
     def value_from_form(self, operator, data):
         try:

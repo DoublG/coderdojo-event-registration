@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
@@ -22,9 +23,11 @@ from oauth2_provider import views as oauth2_views
 from api.v1 import api as api_v1
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('i18n/', include('django.conf.urls.i18n')),  # provides the set_language view used by the menu's language switcher
-    path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),  # the texts bundle.js's gettext() uses
+    path("admin/", admin.site.urls),
+    path(
+        "i18n/", include("django.conf.urls.i18n")
+    ),  # provides the set_language view used by the menu's language switcher
+    path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),  # the texts bundle.js's gettext() uses
     path("", include("core.urls")),
     path("", include("accounts.urls")),
     path("", include("api.urls")),
@@ -45,6 +48,10 @@ if settings.DEBUG:
     import debug_toolbar
     from django.conf.urls.static import static
 
-    urlpatterns = [
-        path('__debug__/', include(debug_toolbar.urls)),
-    ] + urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns = (
+        [
+            path("__debug__/", include(debug_toolbar.urls)),
+        ]
+        + urlpatterns
+        + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    )

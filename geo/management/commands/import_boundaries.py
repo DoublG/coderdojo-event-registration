@@ -18,9 +18,7 @@ SIMPLIFY_TOLERANCE_DEGREES = 0.002
 def load_geometry(shapely_geometry):
     import shapely
 
-    simplified = shapely.force_2d(shapely_geometry).simplify(
-        SIMPLIFY_TOLERANCE_DEGREES, preserve_topology=True
-    )
+    simplified = shapely.force_2d(shapely_geometry).simplify(SIMPLIFY_TOLERANCE_DEGREES, preserve_topology=True)
     geometry = GEOSGeometry(simplified.wkt, srid=4326)
     if geometry.geom_type == "Polygon":
         geometry = MultiPolygon(geometry, srid=4326)
@@ -80,7 +78,9 @@ class Command(BaseCommand):
                 boundary=load_geometry(row.boundary),
             )
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Imported {AdministrativeBoundary.objects.filter(kind=AdministrativeBoundary.COUNTRY).count()} country "
-            f"and {AdministrativeBoundary.objects.filter(kind=AdministrativeBoundary.PROVINCE).count()} province boundaries."
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Imported {AdministrativeBoundary.objects.filter(kind=AdministrativeBoundary.COUNTRY).count()} country "
+                f"and {AdministrativeBoundary.objects.filter(kind=AdministrativeBoundary.PROVINCE).count()} province boundaries."
+            )
+        )

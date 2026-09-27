@@ -127,11 +127,15 @@ def dojo_finder_widget(request):
     origin, search_label, geocode_failed = resolve_search_origin(form, request.user)
     dojos = attach_next_events(list(dojos_by_distance(origin)[:WIDGET_RESULTS_LIMIT]))
 
-    return render(request, "dojos/partials/_dojo_finder_widget_results.html", {
-        "dojos": dojos,
-        "search_label": search_label,
-        "geocode_failed": geocode_failed,
-    })
+    return render(
+        request,
+        "dojos/partials/_dojo_finder_widget_results.html",
+        {
+            "dojos": dojos,
+            "search_label": search_label,
+            "geocode_failed": geocode_failed,
+        },
+    )
 
 
 def _join_state(user, dojo):
@@ -152,12 +156,18 @@ def dojo_detail(request, dojo_id):
     dojo = get_object_or_404(Dojo.objects.public(), id=dojo_id)
     next_event = dojo.event_set.visible().filter(start_time__gte=timezone.now()).order_by("start_time").first()
     faqs = FAQ.objects.for_dojo(dojo)
-    return render(request, "dojos/dojo_detail.html", {
-        "dojo": dojo, "next_event": next_event, "faqs": faqs,
-        "announcements": dojo.announcements.all()[:PUBLIC_UPDATES_LIMIT],
-        "mentors": dojo.memberships.for_team_page(),
-        "join_state": _join_state(request.user, dojo),
-    })
+    return render(
+        request,
+        "dojos/dojo_detail.html",
+        {
+            "dojo": dojo,
+            "next_event": next_event,
+            "faqs": faqs,
+            "announcements": dojo.announcements.all()[:PUBLIC_UPDATES_LIMIT],
+            "mentors": dojo.memberships.for_team_page(),
+            "join_state": _join_state(request.user, dojo),
+        },
+    )
 
 
 def dojo_team(request, dojo_id):
@@ -173,7 +183,9 @@ def dojo_join_request(request, dojo_id):
     if request.method == "POST":
         try:
             team.request_to_join(dojo, request.user)
-            messages.success(request, _("Your request to join %(dojo)s has been sent to its team.") % {"dojo": dojo.name})
+            messages.success(
+                request, _("Your request to join %(dojo)s has been sent to its team.") % {"dojo": dojo.name}
+            )
         except team.TeamError as error:
             messages.error(request, str(error))
     return redirect("dojo_detail", dojo_id=dojo.id)
@@ -210,8 +222,9 @@ def _attendance_context(event):
         # How each ninja comes to this dojo (last night's events.engagement snapshot).
         "engagement_by_ninja": {
             row.ninja_id: row
-            for row in NinjaEngagement.objects.filter(dojo_id=event.dojo_id,
-                                                      ninja_id__in=[r.ninja_id for r in registrations])
+            for row in NinjaEngagement.objects.filter(
+                dojo_id=event.dojo_id, ninja_id__in=[r.ninja_id for r in registrations]
+            )
         },
     }
 
@@ -228,7 +241,8 @@ def _awardable_belts(registrations):
 def _award_forms(form_class, registrations, offers):
     return {
         registration.ninja_id: form_class(registration=registration, offered=offers[registration.ninja_id])
-        for registration in registrations if offers[registration.ninja_id]
+        for registration in registrations
+        if offers[registration.ninja_id]
     }
 
 
@@ -256,13 +270,17 @@ def dojo_dashboard(request, dojo_id):
     if session is None:
         session = dojo.event_set.order_by("-start_time").first()
 
-    return render(request, "dojos/dojo_dashboard.html", {
-        "session": session,
-        "dormancy_nudge": team.needs_dormancy_nudge(dojo),
-        **(_attendance_context(session) if session is not None else {}),
-        "active": "attendance",
-        **_admin_context(request, access),
-    })
+    return render(
+        request,
+        "dojos/dojo_dashboard.html",
+        {
+            "session": session,
+            "dormancy_nudge": team.needs_dormancy_nudge(dojo),
+            **(_attendance_context(session) if session is not None else {}),
+            "active": "attendance",
+            **_admin_context(request, access),
+        },
+    )
 
 
 def _geocode_address(dojo):
@@ -302,10 +320,17 @@ def dojo_create(request):
                 geocode_failed = bool(dojo.address) and not _geocode_address(dojo)
                 dojo.save()
                 DojoMembership.objects.create(
-                    dojo=dojo, user=request.user, role=DojoMembership.CHAMPION,
-                    status=DojoMembership.ACTIVE, joined_at=timezone.now(), requested_by=request.user,
+                    dojo=dojo,
+                    user=request.user,
+                    role=DojoMembership.CHAMPION,
+                    status=DojoMembership.ACTIVE,
+                    joined_at=timezone.now(),
+                    requested_by=request.user,
                 )
-            messages.success(request, _("%(dojo)s has been created as a draft. Fill in its profile, then launch it.") % {"dojo": dojo.name})
+            messages.success(
+                request,
+                _("%(dojo)s has been created as a draft. Fill in its profile, then launch it.") % {"dojo": dojo.name},
+            )
             if geocode_failed:
                 messages.error(request, _("We couldn't find that address on the map; check it on this page."))
             return redirect("dojo_manage", dojo_id=dojo.id)
@@ -344,11 +369,18 @@ def dojo_manage(request, dojo_id):
     else:
         form = DojoProfileForm(instance=dojo)
 
-    return render(request, "dojos/dojo_manage.html", {
-        "form": form, "saved": saved, "geocode_failed": geocode_failed, "active": "settings",
-        "active_event_count": team.active_events(dojo).count(),
-        **_admin_context(request, access),
-    })
+    return render(
+        request,
+        "dojos/dojo_manage.html",
+        {
+            "form": form,
+            "saved": saved,
+            "geocode_failed": geocode_failed,
+            "active": "settings",
+            "active_event_count": team.active_events(dojo).count(),
+            **_admin_context(request, access),
+        },
+    )
 
 
 @login_required
@@ -360,7 +392,11 @@ def dojo_set_lifecycle(request, dojo_id):
     if request.method == "POST":
         try:
             team.change_status(access.dojo, request.POST.get("action", ""))
-            messages.success(request, _("%(dojo)s is now %(lower)s.") % {"dojo": access.dojo.name, "lower": access.dojo.get_status_display().lower()})
+            messages.success(
+                request,
+                _("%(dojo)s is now %(lower)s.")
+                % {"dojo": access.dojo.name, "lower": access.dojo.get_status_display().lower()},
+            )
         except team.TeamError as error:
             messages.error(request, str(error))
     return redirect("dojo_manage", dojo_id=access.dojo.id)
@@ -372,7 +408,8 @@ def _youth_mentor_candidates(dojo):
     up for one of its sessions, and who aren't already on the team."""
     on_team = dojo.memberships.active().values("user_id")
     ninjas = (
-        Ninja.objects.exclude(account=None).filter(account__is_active=True)
+        Ninja.objects.exclude(account=None)
+        .filter(account__is_active=True)
         .filter(Q(home_dojo=dojo) | Q(registration__event__dojo=dojo))
         .exclude(account_id__in=on_team)
         .select_related("account")
@@ -396,20 +433,31 @@ def dojo_members(request, dojo_id):
         Ninja.objects.filter(home_dojo=dojo).select_related("account").prefetch_related("belts__belt").order_by("name")
     )
     engagement = {row.ninja_id: row for row in NinjaEngagement.objects.filter(dojo=dojo, ninja__in=ninjas)}
-    youth_mentor_ids = set(dojo.memberships.active().filter(role=DojoMembership.YOUTH_MENTOR).values_list("user_id", flat=True))
-    candidate_ids = set(_youth_mentor_candidates(dojo).values_list("id", flat=True)) if access.can_manage_team else set()
-    rows = [{
-        "ninja": ninja,
-        "engagement": engagement.get(ninja.id),
-        "has_login": bool(ninja.account_id and ninja.account.is_active),
-        "is_youth_mentor": ninja.account_id in youth_mentor_ids,
-        "can_promote": ninja.id in candidate_ids,
-    } for ninja in ninjas]
-    return render(request, "dojos/dojo_members.html", {
-        "rows": rows,
-        "active": "members",
-        **_admin_context(request, access),
-    })
+    youth_mentor_ids = set(
+        dojo.memberships.active().filter(role=DojoMembership.YOUTH_MENTOR).values_list("user_id", flat=True)
+    )
+    candidate_ids = (
+        set(_youth_mentor_candidates(dojo).values_list("id", flat=True)) if access.can_manage_team else set()
+    )
+    rows = [
+        {
+            "ninja": ninja,
+            "engagement": engagement.get(ninja.id),
+            "has_login": bool(ninja.account_id and ninja.account.is_active),
+            "is_youth_mentor": ninja.account_id in youth_mentor_ids,
+            "can_promote": ninja.id in candidate_ids,
+        }
+        for ninja in ninjas
+    ]
+    return render(
+        request,
+        "dojos/dojo_members.html",
+        {
+            "rows": rows,
+            "active": "members",
+            **_admin_context(request, access),
+        },
+    )
 
 
 @login_required
@@ -431,13 +479,17 @@ def dojo_updates(request, dojo_id):
             announcement.save()
             messages.success(request, _("Update posted on the dojo's page."))
             return redirect("dojo_updates", dojo_id=dojo.id)
-    return render(request, "dojos/dojo_updates.html", {
-        "form": form,
-        "announcements": dojo.announcements.all(),
-        "public_limit": PUBLIC_UPDATES_LIMIT,
-        "active": "updates",
-        **_admin_context(request, access),
-    })
+    return render(
+        request,
+        "dojos/dojo_updates.html",
+        {
+            "form": form,
+            "announcements": dojo.announcements.all(),
+            "public_limit": PUBLIC_UPDATES_LIMIT,
+            "active": "updates",
+            **_admin_context(request, access),
+        },
+    )
 
 
 @login_required
@@ -458,21 +510,26 @@ def dojo_team_manage(request, dojo_id):
     dojo = access.dojo
     memberships = dojo.memberships.select_related("user", "promoted_by__user")
     transfer_candidates = memberships.filter(
-        status=DojoMembership.ACTIVE, role=DojoMembership.MENTOR,
+        status=DojoMembership.ACTIVE,
+        role=DojoMembership.MENTOR,
     ).order_by("user__first_name")
     youth_mentor_candidates = _youth_mentor_candidates(dojo) if access.can_manage_team else Ninja.objects.none()
-    return render(request, "dojos/dojo_team_manage.html", {
-        "active_members": memberships.filter(status=DojoMembership.ACTIVE).order_by("role", "user__first_name"),
-        "requests": memberships.filter(status=DojoMembership.REQUESTED).order_by("created_at"),
-        "former_members": memberships.filter(status=DojoMembership.DORMANT).order_by("-left_at"),
-        "transfer_candidates": transfer_candidates,
-        "youth_mentor_candidates": youth_mentor_candidates,
-        "add_mentor_form": AddMentorForm(),
-        "promote_form": PromoteYouthMentorForm(candidates=youth_mentor_candidates),
-        "transfer_form": TransferChampionForm(candidates=transfer_candidates),
-        "active": "team",
-        **_admin_context(request, access),
-    })
+    return render(
+        request,
+        "dojos/dojo_team_manage.html",
+        {
+            "active_members": memberships.filter(status=DojoMembership.ACTIVE).order_by("role", "user__first_name"),
+            "requests": memberships.filter(status=DojoMembership.REQUESTED).order_by("created_at"),
+            "former_members": memberships.filter(status=DojoMembership.DORMANT).order_by("-left_at"),
+            "transfer_candidates": transfer_candidates,
+            "youth_mentor_candidates": youth_mentor_candidates,
+            "add_mentor_form": AddMentorForm(),
+            "promote_form": PromoteYouthMentorForm(candidates=youth_mentor_candidates),
+            "transfer_form": TransferChampionForm(candidates=transfer_candidates),
+            "active": "team",
+            **_admin_context(request, access),
+        },
+    )
 
 
 @login_required
@@ -501,7 +558,11 @@ def dojo_team_action(request, dojo_id):
             if not access.is_champion or membership is None:
                 raise PermissionDenied
             team.transfer_champion(dojo, access.membership, membership)
-            messages.success(request, _("%(membership)s is now the champion of %(dojo)s.") % {"membership": membership.name, "dojo": dojo.name})
+            messages.success(
+                request,
+                _("%(membership)s is now the champion of %(dojo)s.")
+                % {"membership": membership.name, "dojo": dojo.name},
+            )
             return redirect("dojo_team_manage", dojo_id=dojo.id)
 
         if not access.can_manage_team:
@@ -516,7 +577,9 @@ def dojo_team_action(request, dojo_id):
             messages.success(request, _("Request declined."))
         elif action == "remove":
             team.remove_member(membership)
-            messages.success(request, _("%(membership)s has been removed from the team.") % {"membership": membership.name})
+            messages.success(
+                request, _("%(membership)s has been removed from the team.") % {"membership": membership.name}
+            )
         elif action == "add_mentor":
             form = AddMentorForm(request.POST)
             user = None
@@ -549,10 +612,15 @@ def dojo_event_list(request, dojo_id):
     access = require_dojo_access(request, dojo_id)
     dojo = access.dojo
     events = dojo.event_set.order_by("-start_time")
-    return render(request, "dojos/dojo_event_list.html", {
-        "events": events, "active": "events",
-        **_admin_context(request, access),
-    })
+    return render(
+        request,
+        "dojos/dojo_event_list.html",
+        {
+            "events": events,
+            "active": "events",
+            **_admin_context(request, access),
+        },
+    )
 
 
 @login_required
@@ -572,10 +640,15 @@ def dojo_event_create(request, dojo_id):
     else:
         form = EventForm(instance=Event(dojo=dojo), dojo=dojo)
 
-    return render(request, "dojos/dojo_event_create.html", {
-        "form": form, "active": "events",
-        **_admin_context(request, access),
-    })
+    return render(
+        request,
+        "dojos/dojo_event_create.html",
+        {
+            "form": form,
+            "active": "events",
+            **_admin_context(request, access),
+        },
+    )
 
 
 @login_required
@@ -601,10 +674,17 @@ def dojo_event_detail(request, dojo_id, event_id):
     else:
         form = EventForm(instance=event, dojo=dojo)
 
-    return render(request, "dojos/dojo_event_detail.html", {
-        "event": event, "form": form, "saved": saved, "active": "events",
-        **_admin_context(request, access),
-    })
+    return render(
+        request,
+        "dojos/dojo_event_detail.html",
+        {
+            "event": event,
+            "form": form,
+            "saved": saved,
+            "active": "events",
+            **_admin_context(request, access),
+        },
+    )
 
 
 @login_required
@@ -649,11 +729,15 @@ def dojo_event_attendance(request, dojo_id, event_id):
     access = require_dojo_access(request, dojo_id, TAKE_ATTENDANCE)
     dojo = access.dojo
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
-    return render(request, "dojos/dojo_event_attendance.html", {
-        **_attendance_context(event),
-        "active": "events",
-        **_admin_context(request, access),
-    })
+    return render(
+        request,
+        "dojos/dojo_event_attendance.html",
+        {
+            **_attendance_context(event),
+            "active": "events",
+            **_admin_context(request, access),
+        },
+    )
 
 
 @login_required
@@ -668,7 +752,9 @@ def dojo_event_attendance_mark(request, dojo_id, event_id, registration_id):
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
     registration = get_object_or_404(
         Registration.objects.select_related("ninja").prefetch_related("pathways"),
-        id=registration_id, event=event, waiting_list=False,
+        id=registration_id,
+        event=event,
+        waiting_list=False,
     )
 
     if request.method == "POST" and request.POST.get("attended") in ATTENDANCE_VALUES:
@@ -679,7 +765,9 @@ def dojo_event_attendance_mark(request, dojo_id, event_id, registration_id):
     if request.headers.get("HX-Request"):
         context = {"dojo": dojo, "dojo_access": access, **_attendance_context(event), "registration": registration}
         row = render_to_string("dojos/partials/_attendance_row.html", context, request=request)
-        summary = render_to_string("dojos/partials/_attendance_summary.html", {**context, "oob": True}, request=request)
+        summary = render_to_string(
+            "dojos/partials/_attendance_summary.html", {**context, "oob": True}, request=request
+        )
         return HttpResponse(row + summary)
     return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
 
@@ -701,7 +789,9 @@ def dojo_event_team_attendance_mark(request, dojo_id, event_id, membership_id):
         context = {"dojo": dojo, "dojo_access": access, **_attendance_context(event)}
         row = next(r for r in context["team_rows"] if r["membership"].id == membership.id)
         html = render_to_string("dojos/partials/_attendance_team_row.html", {**context, "row": row}, request=request)
-        summary = render_to_string("dojos/partials/_attendance_summary.html", {**context, "oob": True}, request=request)
+        summary = render_to_string(
+            "dojos/partials/_attendance_summary.html", {**context, "oob": True}, request=request
+        )
         return HttpResponse(html + summary)
     return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
 
@@ -717,14 +807,18 @@ def dojo_event_registration_pathways(request, dojo_id, event_id, registration_id
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
     registration = get_object_or_404(
         Registration.objects.select_related("ninja"),
-        id=registration_id, event=event, waiting_list=False,
+        id=registration_id,
+        event=event,
+        waiting_list=False,
     )
     if request.method == "POST":
         registration.pathways.set(Pathway.objects.filter(id__in=request.POST.getlist("pathway")))
 
     if request.headers.get("HX-Request"):
         context = {
-            "dojo": dojo, "dojo_access": access, **_attendance_context(event),
+            "dojo": dojo,
+            "dojo_access": access,
+            **_attendance_context(event),
             "registration": Registration.objects.prefetch_related("pathways").get(pk=registration.pk),
         }
         return render(request, "dojos/partials/_attendance_row.html", context)
@@ -739,14 +833,21 @@ def _award_view(request, access, event_id, registration_id, form_class, forms_ke
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
     registration = get_object_or_404(
         Registration.objects.select_related("ninja"),
-        id=registration_id, event=event, waiting_list=False,
+        id=registration_id,
+        event=event,
+        waiting_list=False,
     )
     form = None
     if request.method == "POST":
         form = form_class(request.POST, registration=registration, offered=[])
         if form.is_valid():
             try:
-                award(registration.ninja, form.cleaned_data[form.field], access.membership, note=form.cleaned_data["note"])
+                award(
+                    registration.ninja,
+                    form.cleaned_data[form.field],
+                    access.membership,
+                    note=form.cleaned_data["note"],
+                )
             except error_class as error:
                 form.add_error(form.field, str(error))
         if form.errors and not request.headers.get("HX-Request"):
@@ -754,8 +855,12 @@ def _award_view(request, access, event_id, registration_id, form_class, forms_ke
 
     if request.headers.get("HX-Request"):
         context = {
-            "dojo": dojo, "dojo_access": access, **_attendance_context(event),
-            "registration": Registration.objects.select_related("ninja").prefetch_related("pathways").get(
+            "dojo": dojo,
+            "dojo_access": access,
+            **_attendance_context(event),
+            "registration": Registration.objects.select_related("ninja")
+            .prefetch_related("pathways")
+            .get(
                 pk=registration.pk,
             ),
         }
@@ -784,7 +889,9 @@ def dojo_event_award_badge(request, dojo_id, event_id, registration_id):
     as the viewer's champion/mentor membership. The organisation defines the
     badges (events.manage); the rules are in events.awards.award_badge."""
     access = require_dojo_access(request, dojo_id, AWARD_BADGES)
-    return _award_view(request, access, event_id, registration_id, AwardBadgeForm, "badge_forms", award_badge, BadgeError)
+    return _award_view(
+        request, access, event_id, registration_id, AwardBadgeForm, "badge_forms", award_badge, BadgeError
+    )
 
 
 @login_required
@@ -800,7 +907,11 @@ def dojo_event_attendance_mark_all(request, dojo_id, event_id):
         attendance.mark_all_present(event, request.user, awarded_as=access.membership)
 
     if request.headers.get("HX-Request"):
-        return render(request, "dojos/partials/_attendance.html", {"dojo": dojo, "dojo_access": access, **_attendance_context(event)})
+        return render(
+            request,
+            "dojos/partials/_attendance.html",
+            {"dojo": dojo, "dojo_access": access, **_attendance_context(event)},
+        )
     return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
 
 
@@ -834,9 +945,14 @@ def mark_all_notifications_read(request, dojo_id):
     dojo = access.dojo
     if request.method == "POST":
         Notification.objects.filter(recipient=request.user, dojo=dojo, read=False).update(read=True)
-    return render(request, "dojos/partials/_notification_bell.html", {
-        "dojo": dojo, **_notification_context(request.user, dojo),
-    })
+    return render(
+        request,
+        "dojos/partials/_notification_bell.html",
+        {
+            "dojo": dojo,
+            **_notification_context(request.user, dojo),
+        },
+    )
 
 
 def team_member_detail(request, member_id):
@@ -844,6 +960,11 @@ def team_member_detail(request, member_id):
     (content.OrganisationTeamMember — display only, e.g. "Member of the
     board"). A dojo's own team is shown on dojo_team.html instead."""
     member = get_object_or_404(OrganisationTeamMember, id=member_id, is_public=True)
-    return render(request, "dojos/team_member_detail.html", {
-        "mentor": member, "focus_areas": member.focus_area_list,
-    })
+    return render(
+        request,
+        "dojos/team_member_detail.html",
+        {
+            "mentor": member,
+            "focus_areas": member.focus_area_list,
+        },
+    )

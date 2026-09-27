@@ -21,7 +21,6 @@ class PathwayDetailViewTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
-
 class SeededPathwaysTests(TestCase):
     """seed_pathways: the nine pathways, with the Raspberry Pi pathway also
     covering Arduino and ESP32, shown in the visitor's language."""
@@ -59,5 +58,7 @@ class SeededPathwaysTests(TestCase):
         call_command("seed_pathways", stdout=StringIO())
         call_command("seed_content_languages", stdout=StringIO())
         unity = Pathway.objects.get(name="Unity")
-        self.assertEqual(unity.translation_for("fr-be", "subtitle"), "Créez vos propres jeux 2D et 3D avec un vrai moteur de jeu.")
+        self.assertEqual(
+            unity.translation_for("fr-be", "subtitle"), "Créez vos propres jeux 2D et 3D avec un vrai moteur de jeu."
+        )
         self.assertEqual(Pathway.objects.count(), 9)

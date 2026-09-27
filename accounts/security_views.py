@@ -68,16 +68,20 @@ def security(request):
     user = request.user
     enforced, upcoming = sign_in.requirements_for(user)
     methods = two_step.methods(user)
-    return render(request, "accounts/security.html", {
-        "app": next((device for device in methods if two_step.kind_of(device) == two_step.APP), None),
-        "passkeys": [device for device in methods if two_step.kind_of(device) == two_step.PASSKEY],
-        "is_on": bool(methods),
-        "backup_codes_left": two_step.backup_codes_left(user),
-        "enforced": enforced if enforced.level != sign_in.PASSWORD else None,
-        "upcoming": upcoming,
-        "status": sign_in.request_status(request),
-        "remembered": any(key.startswith(REMEMBER_COOKIE_PREFIX) for key in request.COOKIES),
-    })
+    return render(
+        request,
+        "accounts/security.html",
+        {
+            "app": next((device for device in methods if two_step.kind_of(device) == two_step.APP), None),
+            "passkeys": [device for device in methods if two_step.kind_of(device) == two_step.PASSKEY],
+            "is_on": bool(methods),
+            "backup_codes_left": two_step.backup_codes_left(user),
+            "enforced": enforced if enforced.level != sign_in.PASSWORD else None,
+            "upcoming": upcoming,
+            "status": sign_in.request_status(request),
+            "remembered": any(key.startswith(REMEMBER_COOKIE_PREFIX) for key in request.COOKIES),
+        },
+    )
 
 
 def _qr_svg(url):
@@ -114,14 +118,20 @@ def security_app(request):
         return _after_first_method(request, was_on)
     secret = b32encode(unhexlify(key)).decode("ascii")
     otpauth_url = get_otpauth_url(
-        accountname=request.user.email or request.user.get_username(), secret=secret, issuer=settings.TWO_FACTOR_ISSUER,
+        accountname=request.user.email or request.user.get_username(),
+        secret=secret,
+        issuer=settings.TWO_FACTOR_ISSUER,
     )
-    return render(request, "accounts/security_app.html", {
-        "form": form,
-        "qr_svg": _qr_svg(otpauth_url),
-        "secret": " ".join(secret[i:i + 4] for i in range(0, len(secret), 4)),
-        "otpauth_url": otpauth_url,
-    })
+    return render(
+        request,
+        "accounts/security_app.html",
+        {
+            "form": form,
+            "qr_svg": _qr_svg(otpauth_url),
+            "secret": " ".join(secret[i : i + 4] for i in range(0, len(secret), 4)),
+            "otpauth_url": otpauth_url,
+        },
+    )
 
 
 @never_cache
@@ -148,10 +158,14 @@ def security_passkey(request):
             error = " ".join(form.errors.get("token", [])) or _("That passkey couldn't be checked. Please try again.")
     # A new, unbound form puts fresh options (and challenge) in the session.
     PasskeySetupForm(device=None, request=request)
-    return render(request, "accounts/security_passkey.html", {
-        "error": error,
-        "passkey_options": request.session.get("webauthn_creation_options"),
-    })
+    return render(
+        request,
+        "accounts/security_passkey.html",
+        {
+            "error": error,
+            "passkey_options": request.session.get("webauthn_creation_options"),
+        },
+    )
 
 
 @never_cache
@@ -166,10 +180,14 @@ def security_backup_codes(request):
     if request.method == "POST":
         request.session[NEW_CODES_SESSION] = two_step.make_backup_codes(request.user)
         return redirect("account_security_backup_codes")
-    return render(request, "accounts/security_backup_codes.html", {
-        "codes": request.session.pop(NEW_CODES_SESSION, None),
-        "codes_left": two_step.backup_codes_left(request.user),
-    })
+    return render(
+        request,
+        "accounts/security_backup_codes.html",
+        {
+            "codes": request.session.pop(NEW_CODES_SESSION, None),
+            "codes_left": two_step.backup_codes_left(request.user),
+        },
+    )
 
 
 DEVICE_MODELS = {two_step.APP: TOTPDevice, two_step.PASSKEY: WebauthnDevice}
@@ -197,10 +215,18 @@ def security_remove(request, kind, device_id):
         else:
             messages.success(request, _("Two-step login is off.") if last else _("That sign-in method is removed."))
         return redirect("account_security")
-    return render(request, "accounts/security_confirm.html", {
-        "form": form, "blocked": blocked, "kind": kind, "device": device, "last": last,
-        "action": reverse("account_security_remove", kwargs={"kind": kind, "device_id": device.pk}),
-    })
+    return render(
+        request,
+        "accounts/security_confirm.html",
+        {
+            "form": form,
+            "blocked": blocked,
+            "kind": kind,
+            "device": device,
+            "last": last,
+            "action": reverse("account_security_remove", kwargs={"kind": kind, "device_id": device.pk}),
+        },
+    )
 
 
 @never_cache
@@ -222,10 +248,17 @@ def security_turn_off(request):
         else:
             messages.success(request, _("Two-step login is off."))
         return redirect("account_security")
-    return render(request, "accounts/security_confirm.html", {
-        "form": form, "blocked": blocked, "kind": None, "last": True,
-        "action": reverse("account_security_turn_off"),
-    })
+    return render(
+        request,
+        "accounts/security_confirm.html",
+        {
+            "form": form,
+            "blocked": blocked,
+            "kind": None,
+            "last": True,
+            "action": reverse("account_security_turn_off"),
+        },
+    )
 
 
 @login_required

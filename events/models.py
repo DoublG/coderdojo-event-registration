@@ -39,10 +39,12 @@ class Event(TranslatableModel):
     name = models.CharField(max_length=200)
     dojo = models.ForeignKey("dojos.Dojo", on_delete=models.CASCADE)
     status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES, default=DRAFT,
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default=DRAFT,
         help_text="Draft: hidden from the public site while it's being put together. "
-                  "Open: visible, registrations open. Closed: visible, registrations closed — "
-                  "set manually, normally once attendance for the session has been checked."
+        "Open: visible, registrations open. Closed: visible, registrations closed — "
+        "set manually, normally once attendance for the session has been checked.",
     )
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
@@ -52,7 +54,9 @@ class Event(TranslatableModel):
     location = models.PointField(srid=4326, null=True, blank=True, spatial_index=False)
     venue_name = models.CharField(max_length=200, blank=True, default="", help_text='e.g. "Ghent Public Library"')
     image = models.ImageField(
-        upload_to="events/", null=True, blank=True,
+        upload_to="events/",
+        null=True,
+        blank=True,
         help_text="Banner shown on the homepage's Upcoming sessions card.",
     )
 
@@ -63,23 +67,30 @@ class Event(TranslatableModel):
     GIRLS = "girls"
     AUDIENCE_CHOICES = [(EVERYONE, _("Everyone")), (GIRLS, _("Girls' session"))]
     audience = models.CharField(
-        max_length=10, choices=AUDIENCE_CHOICES, default=EVERYONE,
+        max_length=10,
+        choices=AUDIENCE_CHOICES,
+        default=EVERYONE,
         help_text="Who the session is aimed at, shown as a label. It never restricts who can sign up.",
     )
     external_registration_url = models.URLField(
-        blank=True, default="",
+        blank=True,
+        default="",
         help_text="Registrations happen on another website (e.g. Coolest Projects): the event page links "
-                  "there instead of showing the sign-up form, so the event has no registrations or "
-                  "attendance on this site.",
+        "there instead of showing the sign-up form, so the event has no registrations or "
+        "attendance on this site.",
     )
     team = models.ManyToManyField(
-        "dojos.DojoMembership", blank=True, related_name="events",
+        "dojos.DojoMembership",
+        blank=True,
+        related_name="events",
         help_text="Who ran (or will run) this session: members of the dojo's team.",
     )
     pathways = models.ManyToManyField(
-        "pathways.Pathway", blank=True, related_name="events",
+        "pathways.Pathway",
+        blank=True,
+        related_name="events",
         help_text="The pathways this session covers (optional; shown on its public page). "
-                  "Pre-filled from the dojo's; registrations pre-select these.",
+        "Pre-filled from the dojo's; registrations pre-select these.",
     )
 
     ninjas = models.ManyToManyField("accounts.Ninja", through="Registration")
@@ -142,9 +153,11 @@ class Registration(models.Model):
     attended = models.BooleanField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now, editable=False, help_text="When the ninja was signed up.")
     pathways = models.ManyToManyField(
-        "pathways.Pathway", blank=True, related_name="registrations",
+        "pathways.Pathway",
+        blank=True,
+        related_name="registrations",
         help_text="What this ninja works on at this session — usually a subset of the event's "
-                  "pathways, which it's pre-filled from.",
+        "pathways, which it's pre-filled from.",
     )
 
     class Meta:
@@ -170,8 +183,9 @@ class RegistrationCancellation(models.Model):
     was_waitlisted = models.BooleanField()
     signed_up_at = models.DateTimeField(null=True, blank=True)
     cancelled_at = models.DateTimeField(default=timezone.now)
-    cancelled_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
-                                     related_name="+")
+    cancelled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
 
     objects = RegistrationCancellationManager()
 
@@ -189,8 +203,12 @@ class Belt(OrganisationContent):
 
     name = models.CharField(max_length=100, help_text='e.g. "Yellow belt".')
     level = models.PositiveSmallIntegerField(unique=True, help_text="Order on the track: 1 is the first belt.")
-    colour = models.CharField(max_length=7, blank=True, default="", help_text='Hex colour for the belt swatch, e.g. "#f5c518".')
-    requirements = models.TextField(blank=True, default="", help_text="What a ninja must be able to do to get this belt.")
+    colour = models.CharField(
+        max_length=7, blank=True, default="", help_text='Hex colour for the belt swatch, e.g. "#f5c518".'
+    )
+    requirements = models.TextField(
+        blank=True, default="", help_text="What a ninja must be able to do to get this belt."
+    )
     icon = models.ImageField(upload_to="belts/", null=True, blank=True)
 
     class Meta:
@@ -215,13 +233,22 @@ class Badge(OrganisationContent):
     kind = models.CharField(max_length=10, choices=KIND_CHOICES, default=ONE_OFF)
     description = models.CharField(max_length=300, blank=True, default="")
     criteria = models.CharField(
-        max_length=200, blank=True, default="", help_text='One-off: what earns it, e.g. "Attend a CoderDojo for Girls session."',
+        max_length=200,
+        blank=True,
+        default="",
+        help_text='One-off: what earns it, e.g. "Attend a CoderDojo for Girls session."',
     )
     threshold = models.PositiveIntegerField(
-        null=True, blank=True, help_text="Milestone: how many sessions a ninja must attend to reach it.",
+        null=True,
+        blank=True,
+        help_text="Milestone: how many sessions a ninja must attend to reach it.",
     )
     grants_belt = models.ForeignKey(
-        Belt, on_delete=models.SET_NULL, null=True, blank=True, related_name="granted_by_badges",
+        Belt,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="granted_by_badges",
         help_text="Milestone (optional): reaching it also grants this belt.",
     )
     icon = models.ImageField(upload_to="awards/", null=True, blank=True)
@@ -259,11 +286,19 @@ class NinjaBadge(models.Model):
     progress_current = models.PositiveIntegerField(null=True, blank=True, help_text="Milestone only.")
     progress_total = models.PositiveIntegerField(null=True, blank=True, help_text="Milestone only.")
     awarded_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="badges_awarded",
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="badges_awarded",
         help_text="One-off only: who awarded it.",
     )
     awarded_as_membership = models.ForeignKey(
-        "dojos.DojoMembership", on_delete=models.SET_NULL, null=True, blank=True, related_name="badges_awarded",
+        "dojos.DojoMembership",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="badges_awarded",
         help_text="One-off only: the dojo team membership they awarded it as.",
     )
     note = models.CharField(max_length=300, blank=True, default="", help_text="Optional: what the ninja did.")
@@ -296,12 +331,20 @@ class NinjaBelt(models.Model):
     belt = models.ForeignKey(Belt, on_delete=models.PROTECT, related_name="ninja_belts")
     awarded_on = models.DateField()
     awarded_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="belts_awarded",
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="belts_awarded",
     )
     awarded_as_membership = models.ForeignKey(
-        "dojos.DojoMembership", on_delete=models.SET_NULL, null=True, related_name="belts_awarded",
+        "dojos.DojoMembership",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="belts_awarded",
     )
-    awarded_as_role = models.CharField(max_length=20, blank=True, default="", help_text="The membership's role when awarding.")
+    awarded_as_role = models.CharField(
+        max_length=20, blank=True, default="", help_text="The membership's role when awarding."
+    )
     note = models.CharField(max_length=300, blank=True, default="", help_text="Optional: what the ninja showed.")
 
     objects = NinjaBeltManager()
@@ -356,7 +399,11 @@ class NinjaEngagement(models.Model):
 
     ninja = models.ForeignKey("accounts.Ninja", on_delete=models.CASCADE, related_name="engagement")
     dojo = models.ForeignKey(
-        "dojos.Dojo", on_delete=models.CASCADE, null=True, blank=True, related_name="+",
+        "dojos.Dojo",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="+",
         help_text="Empty: the ninja overall, measured at their main dojo.",
     )
     main_dojo = models.ForeignKey("dojos.Dojo", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
@@ -365,13 +412,16 @@ class NinjaEngagement(models.Model):
     last_attended = models.DateField(null=True, blank=True)
     attended_total = models.PositiveIntegerField(default=0)
     attended_180d = models.PositiveIntegerField(default=0)
-    offered_180d = models.PositiveIntegerField(default=0, help_text="Sessions meant for the ninja, held in the window.")
+    offered_180d = models.PositiveIntegerField(
+        default=0, help_text="Sessions meant for the ninja, held in the window."
+    )
     attendance_rate = models.FloatField(default=0)
     missed_in_a_row = models.PositiveIntegerField(default=0)
     no_shows_90d = models.PositiveIntegerField(default=0)
     has_upcoming = models.BooleanField(default=False)
     from_marked_attendance = models.BooleanField(
-        default=True, help_text="False when some counted visits are confirmed places at sessions nobody marked.",
+        default=True,
+        help_text="False when some counted visits are confirmed places at sessions nobody marked.",
     )
     computed_on = models.DateField()
 
@@ -424,7 +474,11 @@ class TeamAttendance(models.Model):
     attended = models.BooleanField(null=True, blank=True)
     marked_at = models.DateTimeField(auto_now=True)
     marked_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
     )
 
     objects = TeamAttendanceManager()

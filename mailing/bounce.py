@@ -65,7 +65,8 @@ class ImapMailbox:
     def __enter__(self):
         imap_class = imaplib.IMAP4_SSL if settings.MAILING_BOUNCE_IMAP_SSL else imaplib.IMAP4
         self.imap = imap_class(
-            settings.MAILING_BOUNCE_IMAP_HOST, settings.MAILING_BOUNCE_IMAP_PORT,
+            settings.MAILING_BOUNCE_IMAP_HOST,
+            settings.MAILING_BOUNCE_IMAP_PORT,
             timeout=settings.MAILING_BOUNCE_IMAP_TIMEOUT,
         )
         self.imap.login(settings.MAILING_BOUNCE_IMAP_USER, settings.MAILING_BOUNCE_IMAP_PASSWORD)
@@ -106,8 +107,11 @@ class Pop3Mailbox:
 
     def __enter__(self):
         pop_class = poplib.POP3_SSL if settings.MAILING_BOUNCE_IMAP_SSL else poplib.POP3
-        self.pop = pop_class(settings.MAILING_BOUNCE_IMAP_HOST, settings.MAILING_BOUNCE_IMAP_PORT,
-                             timeout=settings.MAILING_BOUNCE_IMAP_TIMEOUT)
+        self.pop = pop_class(
+            settings.MAILING_BOUNCE_IMAP_HOST,
+            settings.MAILING_BOUNCE_IMAP_PORT,
+            timeout=settings.MAILING_BOUNCE_IMAP_TIMEOUT,
+        )
         self.pop.user(settings.MAILING_BOUNCE_IMAP_USER)
         self.pop.pass_(settings.MAILING_BOUNCE_IMAP_PASSWORD)
         self.key = f"pop3:{settings.MAILING_BOUNCE_IMAP_HOST}"
@@ -125,8 +129,11 @@ class Pop3Mailbox:
         return False
 
     def unprocessed_uids(self):
-        seen = set(ProcessedImapMessage.objects.filter(mailbox=self.key, uid__in=list(self.numbers))
-                   .values_list("uid", flat=True))
+        seen = set(
+            ProcessedImapMessage.objects.filter(mailbox=self.key, uid__in=list(self.numbers)).values_list(
+                "uid", flat=True
+            )
+        )
         return [uid for uid in self.numbers if uid not in seen]
 
     def fetch(self, uid):
@@ -138,7 +145,6 @@ MAILBOX_CLASSES = {"imap": ImapMailbox, "pop3": Pop3Mailbox}
 
 
 class BounceProcessor:
-
     def __init__(self, mailbox_class=None):
         self.mailbox_class = mailbox_class or MAILBOX_CLASSES[settings.MAILING_BOUNCE_PROTOCOL]
 
@@ -160,7 +166,7 @@ class BounceProcessor:
         return self.mailbox_class()
 
     def get_new_messages(self, mailbox):
-        for uid in mailbox.unprocessed_uids()[:settings.MAILING_BOUNCE_BATCH]:
+        for uid in mailbox.unprocessed_uids()[: settings.MAILING_BOUNCE_BATCH]:
             yield uid, mailbox.fetch(uid)
 
     # --- parsing -------------------------------------------------------------
@@ -169,7 +175,11 @@ class BounceProcessor:
         if self._is_auto_reply(message):
             return None
         ours = self._match_our_message(message)
-        report_type = (message.get_param("report-type") or "").lower() if message.get_content_type() == "multipart/report" else ""
+        report_type = (
+            (message.get_param("report-type") or "").lower()
+            if message.get_content_type() == "multipart/report"
+            else ""
+        )
         if report_type == "feedback-report":
             return self._parse_complaint(message, ours)
         if report_type == "delivery-status":
@@ -178,7 +188,9 @@ class BounceProcessor:
 
     def _is_auto_reply(self, message):
         auto = (message.get("Auto-Submitted") or "").lower()
-        return auto.startswith("auto-replied") or bool(message.get("X-Autoreply")) or bool(message.get("X-Autorespond"))
+        return (
+            auto.startswith("auto-replied") or bool(message.get("X-Autoreply")) or bool(message.get("X-Autorespond"))
+        )
 
     def _parse_dsn(self, message, ours):
         for part in message.walk():
@@ -199,14 +211,19 @@ class BounceProcessor:
         if isinstance(payload, list):  # the email package splits the report into blocks
             return payload
         text = payload if isinstance(payload, str) else ""
-        return [email.message_from_string(block + "\n", policy=email.policy.default) for block in re.split(r"\n\s*\n", text)]
+        return [
+            email.message_from_string(block + "\n", policy=email.policy.default)
+            for block in re.split(r"\n\s*\n", text)
+        ]
 
     def _parse_complaint(self, message, ours):
         recipient = ""
         for part in message.walk():
             if part.get_content_type() == "message/feedback-report":
                 blocks = self._status_blocks(part)
-                recipient = self._address(next((b.get("Original-Rcpt-To") for b in blocks if b.get("Original-Rcpt-To")), ""))
+                recipient = self._address(
+                    next((b.get("Original-Rcpt-To") for b in blocks if b.get("Original-Rcpt-To")), "")
+                )
         return self._bounce(BounceRecord.COMPLAINT, recipient, "", "", ours)
 
     def _parse_plain(self, message, ours):
@@ -224,7 +241,9 @@ class BounceProcessor:
         address = (recipient or (ours.recipient if ours else "")).strip().lower()
         if not address:
             return None
-        return Bounce(kind=kind, email=address, status_code=status[:20], diagnostic=str(diagnostic)[:255], message=ours)
+        return Bounce(
+            kind=kind, email=address, status_code=status[:20], diagnostic=str(diagnostic)[:255], message=ours
+        )
 
     def _match_our_message(self, message):
         """Our EmailMessage this bounce is about: by the VERP address it was
@@ -234,7 +253,9 @@ class BounceProcessor:
             verp = re.compile(prefix + r"(\d+)" + suffix, re.IGNORECASE)
             for header in ("Delivered-To", "X-Original-To", "Envelope-To", "To"):
                 for value in message.get_all(header) or []:
-                    if (m := verp.search(str(value))) and (row := EmailMessage.objects.filter(pk=int(m.group(1))).first()):
+                    if (m := verp.search(str(value))) and (
+                        row := EmailMessage.objects.filter(pk=int(m.group(1))).first()
+                    ):
                         return row
         domain = re.escape(urlparse(settings.SITE_URL).hostname or "localhost")
         ids = re.findall(r"<[^<>\s]+@" + domain + ">", self._text(message, include_headers=True))
@@ -260,22 +281,31 @@ class BounceProcessor:
 
     def handle(self, bounce):
         BounceRecord.objects.create(
-            email=bounce.email, kind=bounce.kind, status_code=bounce.status_code,
-            diagnostic=bounce.diagnostic, message=bounce.message,
+            email=bounce.email,
+            kind=bounce.kind,
+            status_code=bounce.status_code,
+            diagnostic=bounce.diagnostic,
+            message=bounce.message,
         )
         if bounce.kind == BounceRecord.HARD:
             if bounce.message is not None:
                 EmailMessage.objects.filter(pk=bounce.message.pk).update(
-                    status=EmailMessage.Status.BOUNCED, bounced_at=timezone.now(),
+                    status=EmailMessage.Status.BOUNCED,
+                    bounced_at=timezone.now(),
                     status_reason=f"Bounced {bounce.status_code} {bounce.diagnostic}".strip()[:255],
                 )
             self._suppress(bounce.email, EmailSuppression.HARD_BOUNCE, f"{bounce.status_code} {bounce.diagnostic}")
         elif bounce.kind == BounceRecord.SOFT:
             since = timezone.now() - timedelta(days=settings.MAILING_SOFT_BOUNCE_WINDOW_DAYS)
-            soft = BounceRecord.objects.filter(email=bounce.email, kind=BounceRecord.SOFT, created_at__gte=since).count()
+            soft = BounceRecord.objects.filter(
+                email=bounce.email, kind=BounceRecord.SOFT, created_at__gte=since
+            ).count()
             if soft >= settings.MAILING_SOFT_BOUNCE_LIMIT:
-                self._suppress(bounce.email, EmailSuppression.SOFT_BOUNCES,
-                               f"{soft} soft bounces in {settings.MAILING_SOFT_BOUNCE_WINDOW_DAYS} days")
+                self._suppress(
+                    bounce.email,
+                    EmailSuppression.SOFT_BOUNCES,
+                    f"{soft} soft bounces in {settings.MAILING_SOFT_BOUNCE_WINDOW_DAYS} days",
+                )
         elif bounce.kind == BounceRecord.COMPLAINT:
             user = bounce.message.user if bounce.message and bounce.message.user_id else None
             if user is None:

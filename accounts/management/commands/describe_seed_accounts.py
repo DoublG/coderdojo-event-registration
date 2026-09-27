@@ -44,15 +44,21 @@ class Command(BaseCommand):
             seeded = Q(account_type=User.NINJA, email="")
             for domain in SEED_EMAIL_DOMAINS:
                 seeded |= Q(email__iendswith=domain)
-            missing = User.objects.filter(seeded).exclude(username__in=[row["username"] for row in rows]).order_by("id")
+            missing = (
+                User.objects.filter(seeded).exclude(username__in=[row["username"] for row in rows]).order_by("id")
+            )
             for user in missing:
                 password = generate_password()
                 user.set_password(password)
                 user.save(update_fields=["password"])
-                rows.append({"role": _role_for(user), "username": user.username, "email": user.email, "password": password})
+                rows.append(
+                    {"role": _role_for(user), "username": user.username, "email": user.email, "password": password}
+                )
                 restored += 1
         _write(describe_rows(rows))
-        self.stdout.write(self.style.SUCCESS(
-            f"Done. {len(rows)} logins described in {CREDENTIALS_FILE.name}"
-            + (f", {restored} missing seeded logins given a new password." if restored else ".")
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Done. {len(rows)} logins described in {CREDENTIALS_FILE.name}"
+                + (f", {restored} missing seeded logins given a new password." if restored else ".")
+            )
+        )

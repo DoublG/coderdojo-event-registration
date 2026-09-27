@@ -87,15 +87,24 @@ def _send_to_family(ninja, category, template_key, context, key_prefix):
 def booking_mail(registration):
     """Right after a sign-up: a confirmation, or the waiting-list notice."""
     template = "registration_waitlisted" if registration.waiting_list else "registration_confirmed"
-    return _send_to_family(registration.ninja, MailCategory.REGISTRATION, template,
-                           lambda user: _session_context(registration, user),
-                           f"booking:{registration.pk}")
+    return _send_to_family(
+        registration.ninja,
+        MailCategory.REGISTRATION,
+        template,
+        lambda user: _session_context(registration, user),
+        f"booking:{registration.pk}",
+    )
 
 
 def waitlist_promoted_mail(registration):
     """A place came free and this waitlisted ninja moved up."""
-    return _send_to_family(registration.ninja, MailCategory.REGISTRATION, "waitlist_promoted",
-                           lambda user: _session_context(registration, user), f"promoted:{registration.pk}")
+    return _send_to_family(
+        registration.ninja,
+        MailCategory.REGISTRATION,
+        "waitlist_promoted",
+        lambda user: _session_context(registration, user),
+        f"promoted:{registration.pk}",
+    )
 
 
 def youth_mentor_promoted_mail(membership):
@@ -112,8 +121,9 @@ def youth_mentor_promoted_mail(membership):
         "ninja_url": settings.SITE_URL + reverse("ninja_detail", kwargs={"ninja_id": ninja.pk}),
     }
     stamp = membership.joined_at.isoformat() if membership.joined_at else ""
-    return _send_to_family(ninja, MailCategory.SERVICE, "youth_mentor_promoted", context,
-                           f"youth_mentor:{membership.pk}:{stamp}")
+    return _send_to_family(
+        ninja, MailCategory.SERVICE, "youth_mentor_promoted", context, f"youth_mentor:{membership.pk}:{stamp}"
+    )
 
 
 def send_session_reminders(today=None):
@@ -128,8 +138,13 @@ def send_session_reminders(today=None):
         .select_related("event__dojo", "ninja")
     )
     return sum(
-        _send_to_family(r.ninja, MailCategory.REMINDER, "session_reminder", lambda user, r=r: _session_context(r, user),
-                        f"reminder:{r.event_id}:{r.ninja_id}")
+        _send_to_family(
+            r.ninja,
+            MailCategory.REMINDER,
+            "session_reminder",
+            lambda user, r=r: _session_context(r, user),
+            f"reminder:{r.event_id}:{r.ninja_id}",
+        )
         for r in registrations
     )
 
@@ -157,21 +172,32 @@ def announce_new_sessions(now=None):
     for dojo, events in by_dojo.items():
         ninjas = Ninja.objects.filter(
             Q(home_dojo=dojo)
-            | Q(pk__in=Registration.objects.filter(event__dojo=dojo, attended=True, event__start_time__gte=since)
-                .values("ninja_id"))
+            | Q(
+                pk__in=Registration.objects.filter(
+                    event__dojo=dojo, attended=True, event__start_time__gte=since
+                ).values("ninja_id")
+            )
         )
-        users = User.objects.filter(
-            Q(pk__in=Guardianship.objects.filter(ninja__in=ninjas).values("guardian_id"))
-            | Q(pk__in=ninjas.exclude(account=None).values("account_id")),
-            is_active=True,
-        ).exclude(email="").order_by("id")
+        users = (
+            User.objects.filter(
+                Q(pk__in=Guardianship.objects.filter(ninja__in=ninjas).values("guardian_id"))
+                | Q(pk__in=ninjas.exclude(account=None).values("account_id")),
+                is_active=True,
+            )
+            .exclude(email="")
+            .order_by("id")
+        )
+
         def context_for(user, dojo=dojo, events=events):
             return {
                 "dojo_name": dojo.name,
                 "dojo_url": settings.SITE_URL + reverse("dojo_detail", kwargs={"dojo_id": dojo.pk}),
                 "events": [
-                    {"name": e.localized("name", _mail_language(user)), "start_time": timezone.localtime(e.start_time),
-                     "url": settings.SITE_URL + reverse("event_detail", kwargs={"event_id": e.pk})}
+                    {
+                        "name": e.localized("name", _mail_language(user)),
+                        "start_time": timezone.localtime(e.start_time),
+                        "url": settings.SITE_URL + reverse("event_detail", kwargs={"event_id": e.pk}),
+                    }
                     for e in events
                 ],
             }
@@ -179,7 +205,9 @@ def announce_new_sessions(now=None):
         key = "dojo_news:" + "-".join(str(e.pk) for e in events)
         for user in users:
             try:
-                sent += _queue(user, MailCategory.DOJO_NEWS, "new_sessions_at_dojo", context_for(user), f"{key}:{user.pk}")
+                sent += _queue(
+                    user, MailCategory.DOJO_NEWS, "new_sessions_at_dojo", context_for(user), f"{key}:{user.pk}"
+                )
             except TemplateMissing:
                 logger.exception("mail template new_sessions_at_dojo is missing: nothing sent")
                 return sent

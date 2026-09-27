@@ -208,11 +208,16 @@ class AddChildViewTests(TempMediaMixin, TestCase):
         from accounts.consent import CHILD_DATA_WORDING_VERSION
 
         self.client.force_login(self.guardian)
-        self.client.post(reverse("add_ninja"), {"family_name": "Peeters", "name": "No Consent", "date_of_birth": _dob(10)})
+        self.client.post(
+            reverse("add_ninja"), {"family_name": "Peeters", "name": "No Consent", "date_of_birth": _dob(10)}
+        )
         guardianship = Guardianship.objects.get(ninja__name="No Consent")
         self.assertIsNone(guardianship.consent_given_at)
 
-        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "Consented", "date_of_birth": _dob(10)})
+        self.client.post(
+            reverse("add_ninja"),
+            {"consent": "on", "family_name": "Peeters", "name": "Consented", "date_of_birth": _dob(10)},
+        )
         guardianship = Guardianship.objects.get(ninja__name="Consented")
         self.assertIsNotNone(guardianship.consent_given_at)
         self.assertEqual(guardianship.consent_wording_version, CHILD_DATA_WORDING_VERSION)
@@ -234,15 +239,42 @@ class AddChildViewTests(TempMediaMixin, TestCase):
 
     def test_picked_icon_links_the_standard_avatar(self):
         self.client.force_login(self.guardian)
-        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "A", "date_of_birth": _dob(10), "icon": "alien-01-green.svg"})
-        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "B", "date_of_birth": _dob(10), "icon": "alien-01-green.svg"})
+        self.client.post(
+            reverse("add_ninja"),
+            {
+                "consent": "on",
+                "family_name": "Peeters",
+                "name": "A",
+                "date_of_birth": _dob(10),
+                "icon": "alien-01-green.svg",
+            },
+        )
+        self.client.post(
+            reverse("add_ninja"),
+            {
+                "consent": "on",
+                "family_name": "Peeters",
+                "name": "B",
+                "date_of_birth": _dob(10),
+                "icon": "alien-01-green.svg",
+            },
+        )
         photos = set(Ninja.objects.of_guardian(self.guardian).values_list("photo", flat=True))
         self.assertEqual(photos, {"library/ninjas/alien-01-green.svg"})
         self.assertFalse((self.media_root / "participants").exists())
 
     def test_unknown_icon_is_ignored(self):
         self.client.force_login(self.guardian)
-        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "A", "date_of_birth": _dob(10), "icon": "../../settings.py"})
+        self.client.post(
+            reverse("add_ninja"),
+            {
+                "consent": "on",
+                "family_name": "Peeters",
+                "name": "A",
+                "date_of_birth": _dob(10),
+                "icon": "../../settings.py",
+            },
+        )
         self.assertFalse(Ninja.objects.get(name="A").photo)
 
     def test_any_adult_account_can_add_children(self):
@@ -267,9 +299,13 @@ class AddChildViewTests(TempMediaMixin, TestCase):
 
     def test_gender_is_saved_and_optional(self):
         self.client.force_login(self.guardian)
-        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "A", "gender": Ninja.GIRL})
+        self.client.post(
+            reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "A", "gender": Ninja.GIRL}
+        )
         self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "B"})
-        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "C", "gender": "dragon"})
+        self.client.post(
+            reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "C", "gender": "dragon"}
+        )
         genders = dict(Ninja.objects.of_guardian(self.guardian).values_list("name", "gender"))
         self.assertEqual(genders, {"A": Ninja.GIRL, "B": Ninja.UNSPECIFIED, "C": Ninja.UNSPECIFIED})
 
@@ -284,16 +320,12 @@ class ChildDetailViewTests(TestCase):
 
     def test_own_child_renders(self):
         self.client.force_login(self.guardian)
-        response = self.client.get(
-            reverse("ninja_detail", kwargs={"ninja_id": self.child.id})
-        )
+        response = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
         self.assertEqual(response.status_code, 200)
 
     def test_another_familys_child_is_404(self):
         self.client.force_login(self.guardian)
-        response = self.client.get(
-            reverse("ninja_detail", kwargs={"ninja_id": self.other_child.id})
-        )
+        response = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.other_child.id}))
         self.assertEqual(response.status_code, 404)
 
     def test_second_guardian_can_see_the_ninja_too(self):
@@ -327,9 +359,7 @@ class EditChildViewTests(TestCase):
 
     def test_get_returns_edit_form_partial(self):
         self.client.force_login(self.guardian)
-        response = self.client.get(
-            reverse("edit_ninja", kwargs={"ninja_id": self.child.id})
-        )
+        response = self.client.get(reverse("edit_ninja", kwargs={"ninja_id": self.child.id}))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "accounts/partials/_child_header_edit.html")
 
@@ -359,7 +389,9 @@ class EditChildViewTests(TestCase):
         Ninja.objects.filter(pk=self.child.pk).update(photo="participants/own-photo.jpg")
         self.client.force_login(self.guardian)
         url = reverse("edit_ninja", kwargs={"ninja_id": self.child.id})
-        self.assertContains(self.client.get(url), '<option value="" selected>Keep the current photo</option>', html=True)
+        self.assertContains(
+            self.client.get(url), '<option value="" selected>Keep the current photo</option>', html=True
+        )
 
         self.client.post(url, {"name": "Kid One", "icon": ""})
         self.child.refresh_from_db()
@@ -424,11 +456,7 @@ class CancelRegistrationViewTests(TestCase):
 
     def test_cancelling_a_confirmed_spot_promotes_next_in_line(self):
         self.client.force_login(self.guardian)
-        response = self.client.post(
-            reverse(
-                "cancel_registration", kwargs={"registration_id": self.confirmed.id}
-            )
-        )
+        response = self.client.post(reverse("cancel_registration", kwargs={"registration_id": self.confirmed.id}))
         self.assertRedirects(response, reverse("account_home"))
         self.assertFalse(Registration.objects.filter(id=self.confirmed.id).exists())
         self.waitlisted.refresh_from_db()
@@ -437,11 +465,7 @@ class CancelRegistrationViewTests(TestCase):
     def test_cannot_cancel_another_familys_registration(self):
         other_guardian = User.objects.create(username="g2", email="g2@example.com")
         self.client.force_login(other_guardian)
-        response = self.client.post(
-            reverse(
-                "cancel_registration", kwargs={"registration_id": self.confirmed.id}
-            )
-        )
+        response = self.client.post(reverse("cancel_registration", kwargs={"registration_id": self.confirmed.id}))
         self.assertEqual(response.status_code, 404)
         self.assertTrue(Registration.objects.filter(id=self.confirmed.id).exists())
 
@@ -457,17 +481,18 @@ class CancelRegistrationViewTests(TestCase):
         add_member(dojo, mentor)
         add_member(dojo, youth, DojoMembership.YOUTH_MENTOR)
         event = Event.objects.create(
-            name="Antwerp Session", dojo=dojo,
-            start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=1,
+            name="Antwerp Session",
+            dojo=dojo,
+            start_time="2030-01-01T10:00:00Z",
+            end_time="2030-01-01T12:00:00Z",
+            places=1,
         )
         confirmed = Registration.objects.create(event=event, ninja=self.child, waiting_list=False, position=1)
         Registration.objects.create(event=event, ninja=self.waitlisted_child, waiting_list=True, position=2)
         self.client.force_login(self.guardian)
 
         with patch("dojos.team.notify") as mock_notify:
-            self.client.post(
-                reverse("cancel_registration", kwargs={"registration_id": confirmed.id})
-            )
+            self.client.post(reverse("cancel_registration", kwargs={"registration_id": confirmed.id}))
 
         recipient_ids = {call.args[0].pk for call in mock_notify.call_args_list}
         self.assertEqual(recipient_ids, {owner.pk, mentor.pk})
@@ -483,7 +508,8 @@ class CancelRegistrationViewTests(TestCase):
         with patch("dojos.team.notify") as mock_notify:
             self.client.post(
                 reverse(
-                    "cancel_registration", kwargs={"registration_id": self.confirmed.id},
+                    "cancel_registration",
+                    kwargs={"registration_id": self.confirmed.id},
                 )
             )
         mock_notify.assert_not_called()
@@ -500,7 +526,8 @@ class RegisterGuardianViewTests(TestCase):
             "password": self.valid_password,
             "consent": "on",
             **CHILD_ROWS,
-            "child-0-name": "Sam", "child-0-family_name": "Peeters",
+            "child-0-name": "Sam",
+            "child-0-family_name": "Peeters",
             "child-0-date_of_birth": _dob(10),
             "child-0-allergies_notes": "",
         }
@@ -541,8 +568,12 @@ class RegisterGuardianViewTests(TestCase):
         """Simulates a family who added a 2nd/3rd child then removed the
         middle one client-side, leaving gaps in the field numbering."""
         data = self._valid_post_data(
-            **{"child-2-name": "Alex", "child-2-family_name": "Doe", "child-2-date_of_birth": _dob(12),
-               "child-2-allergies_notes": "Peanut allergy"},
+            **{
+                "child-2-name": "Alex",
+                "child-2-family_name": "Doe",
+                "child-2-date_of_birth": _dob(12),
+                "child-2-allergies_notes": "Peanut allergy",
+            },
         )
         self.client.post(reverse("register_guardian"), data)
 
@@ -571,9 +602,14 @@ class RegisterGuardianViewTests(TestCase):
         self.assertContains(self.client.get(reverse("register_guardian")), "We use what we know about your family")
 
     def test_child_gender_is_saved_per_row(self):
-        data = self._valid_post_data(**{
-            "child-0-gender": Ninja.GIRL, "child-1-name": "Alex", "child-1-family_name": "Doe", "child-1-date_of_birth": _dob(9),
-        })
+        data = self._valid_post_data(
+            **{
+                "child-0-gender": Ninja.GIRL,
+                "child-1-name": "Alex",
+                "child-1-family_name": "Doe",
+                "child-1-date_of_birth": _dob(9),
+            }
+        )
         self.client.post(reverse("register_guardian"), data)
 
         guardian = User.objects.get(email="jane@example.com")
@@ -587,7 +623,9 @@ class RegisterGuardianViewTests(TestCase):
 
     def test_postcode_and_mail_language_are_saved(self):
         Municipality.objects.create(postal_code="9000", name="Gent", center=Point(3.7174, 51.0543, srid=4326))
-        self.client.post(reverse("register_guardian"), self._valid_post_data(postal_code="9000", preferred_language="fr-be"))
+        self.client.post(
+            reverse("register_guardian"), self._valid_post_data(postal_code="9000", preferred_language="fr-be")
+        )
 
         guardian = User.objects.get(email="jane@example.com")
         self.assertEqual((guardian.postal_code, guardian.preferred_language), ("9000", "fr-be"))
@@ -693,19 +731,26 @@ class BackgroundCheckValidPropertyTests(TestCase):
     def test_invalid_when_only_requested_or_submitted(self):
         for status in (User.CHECK_REQUESTED, User.CHECK_SUBMITTED, User.CHECK_REJECTED):
             with self.subTest(status=status):
-                user = User(username=status, background_check_status=status,
-                            background_check_expires_at=timezone.now() + timedelta(days=1))
+                user = User(
+                    username=status,
+                    background_check_status=status,
+                    background_check_expires_at=timezone.now() + timedelta(days=1),
+                )
                 self.assertFalse(user.background_check_valid)
 
     def test_invalid_when_validated_but_expired(self):
-        user = self._user(background_check_status=User.CHECK_VALIDATED,
-                          background_check_expires_at=timezone.now() - timedelta(days=1))
+        user = self._user(
+            background_check_status=User.CHECK_VALIDATED,
+            background_check_expires_at=timezone.now() - timedelta(days=1),
+        )
         self.assertFalse(user.background_check_valid)
         self.assertTrue(user.background_check_can_upload)
 
     def test_valid_when_validated_and_not_expired(self):
-        user = self._user(background_check_status=User.CHECK_VALIDATED,
-                          background_check_expires_at=timezone.now() + timedelta(days=1))
+        user = self._user(
+            background_check_status=User.CHECK_VALIDATED,
+            background_check_expires_at=timezone.now() + timedelta(days=1),
+        )
         self.assertTrue(user.background_check_valid)
         self.assertFalse(user.background_check_can_upload)
 
@@ -770,7 +815,11 @@ class NinjaBeltDisplayTests(TestCase):
         guardian = User.objects.create(username="g1", email="g1@example.com")
         child = make_ninja(guardian, "Kid")
         event = Event.objects.create(
-            name="Session", dojo=dojo, start_time="2020-01-01T10:00:00Z", end_time="2020-01-01T12:00:00Z", places=5,
+            name="Session",
+            dojo=dojo,
+            start_time="2020-01-01T10:00:00Z",
+            end_time="2020-01-01T12:00:00Z",
+            places=5,
         )
         Registration.objects.create(event=event, ninja=child, waiting_list=False, position=1)
         award_belt(child, white, dojo.champion_membership)
@@ -803,7 +852,11 @@ class NinjaBeltDisplayTests(TestCase):
         belted = make_ninja(guardian, "Belted")
         make_ninja(guardian, "Unbelted")
         event = Event.objects.create(
-            name="Session", dojo=dojo, start_time="2020-01-01T10:00:00Z", end_time="2020-01-01T12:00:00Z", places=5,
+            name="Session",
+            dojo=dojo,
+            start_time="2020-01-01T10:00:00Z",
+            end_time="2020-01-01T12:00:00Z",
+            places=5,
         )
         Registration.objects.create(event=event, ninja=belted, waiting_list=False, position=1)
         award_belt(belted, white, dojo.champion_membership)
@@ -957,17 +1010,28 @@ class NinjaAgeRuleTests(TestCase):
         grown_up.full_clean()  # unchanged date: still editable
 
     def test_add_child_rejects_an_out_of_range_age(self):
-        response = self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "Baby", "date_of_birth": _dob(3)})
+        response = self.client.post(
+            reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "Baby", "date_of_birth": _dob(3)}
+        )
         self.assertContains(response, "Ninjas are 7 to 17 years old")
         self.assertFalse(Ninja.objects.of_guardian(self.guardian).exists())
 
     def test_family_sign_up_flags_the_child_row(self):
         self.client.logout()
-        response = self.client.post(reverse("register_guardian"), {
-            "name": "Jane Doe", "email": "jane@example.com", "phone": "",
-            "password": PASSWORD, "password_confirm": PASSWORD,
-            **CHILD_ROWS, "child-0-name": "Old", "child-0-family_name": "Peeters", "child-0-date_of_birth": _dob(19),
-        })
+        response = self.client.post(
+            reverse("register_guardian"),
+            {
+                "name": "Jane Doe",
+                "email": "jane@example.com",
+                "phone": "",
+                "password": PASSWORD,
+                "password_confirm": PASSWORD,
+                **CHILD_ROWS,
+                "child-0-name": "Old",
+                "child-0-family_name": "Peeters",
+                "child-0-date_of_birth": _dob(19),
+            },
+        )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Ninjas are 7 to 17 years old")
         self.assertFalse(User.objects.filter(email="jane@example.com").exists())
@@ -998,7 +1062,10 @@ class NinjaLoginTests(TestCase):
 
         call_command("load_mail_templates", stdout=StringIO())
         self.guardian = User.objects.create(
-            username="ellen", email="ellen@example.com", first_name="Ellen", preferred_language="nl-be",
+            username="ellen",
+            email="ellen@example.com",
+            first_name="Ellen",
+            preferred_language="nl-be",
         )
         self.child = make_ninja(self.guardian, "Emma", date_of_birth=_dob(12))
         self.other_guardian = User.objects.create(username="other", email="other@example.com")
@@ -1020,7 +1087,9 @@ class NinjaLoginTests(TestCase):
         self.assertTemplateUsed(response, "accounts/partials/_ninja_login_card.html")
         self.child.refresh_from_db()
         account = self.child.account
-        self.assertEqual((account.account_type, account.email, account.first_name), (User.NINJA, "emma@example.com", "Emma"))
+        self.assertEqual(
+            (account.account_type, account.email, account.first_name), (User.NINJA, "emma@example.com", "Emma")
+        )
         self.assertEqual(account.preferred_language, "nl-be")
         self.assertFalse(account.has_usable_password())
         queued = EmailMessage.objects.get(template_key="ninja_account_created")
@@ -1116,7 +1185,9 @@ class NinjaLoginTests(TestCase):
         account = self.child.account
         account.set_password(PASSWORD)
         account.save()
-        add_member(make_dojo("Ghent", champion=make_champion(username="champ")), account, role=DojoMembership.YOUTH_MENTOR)
+        add_member(
+            make_dojo("Ghent", champion=make_champion(username="champ")), account, role=DojoMembership.YOUTH_MENTOR
+        )
         self.client.post(self._url("ninja_login_remove"))
 
         self.client.logout()
@@ -1126,7 +1197,9 @@ class NinjaLoginTests(TestCase):
 
     def test_guardian_keeps_editing_a_child_with_a_login(self):
         self._create()
-        response = self.client.post(self._url("edit_ninja"), {"name": "Emma P.", "date_of_birth": self.child.date_of_birth})
+        response = self.client.post(
+            self._url("edit_ninja"), {"name": "Emma P.", "date_of_birth": self.child.date_of_birth}
+        )
         self.assertEqual(response.status_code, 200)
         self.child.refresh_from_db()
         self.assertEqual(self.child.name, "Emma P.")
@@ -1135,8 +1208,12 @@ class NinjaLoginTests(TestCase):
         self._create()
         self.child.refresh_from_db()
         event = Event.objects.create(
-            dojo=make_dojo("Ghent"), name="Scratch", status=Event.OPEN, places=5,
-            start_time=timezone.now() + timedelta(days=3), end_time=timezone.now() + timedelta(days=3, hours=2),
+            dojo=make_dojo("Ghent"),
+            name="Scratch",
+            status=Event.OPEN,
+            places=5,
+            start_time=timezone.now() + timedelta(days=3),
+            end_time=timezone.now() + timedelta(days=3, hours=2),
         )
         registration = Registration.objects.create(event=event, ninja=self.child, position=1, waiting_list=False)
         self.client.force_login(self.child.account)
@@ -1161,8 +1238,12 @@ class HomeDojoTests(TestCase):
     def _signup(self, dojo):
         now = timezone.now()
         event = Event.objects.create(
-            name="S", dojo=dojo, status=Event.OPEN, places=5,
-            start_time=now + timedelta(days=3), end_time=now + timedelta(days=3, hours=2),
+            name="S",
+            dojo=dojo,
+            status=Event.OPEN,
+            places=5,
+            start_time=now + timedelta(days=3),
+            end_time=now + timedelta(days=3, hours=2),
         )
         self.client.post(reverse("event_signup", kwargs={"event_id": event.id}), {"child": [str(self.child.id)]})
         self.child.refresh_from_db()
@@ -1178,9 +1259,14 @@ class HomeDojoTests(TestCase):
         self.assertIsNone(self.child.home_dojo)
 
     def _edit(self, home_dojo):
-        return self.client.post(reverse("edit_ninja", kwargs={"ninja_id": self.child.id}), {
-            "name": "Kid", "date_of_birth": self.child.date_of_birth, "home_dojo": home_dojo,
-        })
+        return self.client.post(
+            reverse("edit_ninja", kwargs={"ninja_id": self.child.id}),
+            {
+                "name": "Kid",
+                "date_of_birth": self.child.date_of_birth,
+                "home_dojo": home_dojo,
+            },
+        )
 
     def test_guardian_changes_or_clears_it(self):
         self.child.home_dojo, self.child.member_since = self.ghent, timezone.localdate() - timedelta(days=400)
@@ -1213,8 +1299,13 @@ class HomeDojoTests(TestCase):
 
         past = timezone.now() - timedelta(days=30)
         for n, dojo in enumerate([self.aalst, self.ghent, self.ghent]):
-            event = Event.objects.create(name=f"S{n}", dojo=dojo, places=5, start_time=past + timedelta(days=n),
-                                         end_time=past + timedelta(days=n, hours=2))
+            event = Event.objects.create(
+                name=f"S{n}",
+                dojo=dojo,
+                places=5,
+                start_time=past + timedelta(days=n),
+                end_time=past + timedelta(days=n, hours=2),
+            )
             Registration.objects.create(event=event, ninja=self.child, position=1, waiting_list=False, attended=True)
 
         call_command("assign_home_dojos", stdout=StringIO())
@@ -1229,7 +1320,6 @@ class HomeDojoTests(TestCase):
         add_member(self.ghent, login, role=DojoMembership.YOUTH_MENTOR)
         response = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
         self.assertContains(response, "Youth mentor")
-
 
 
 class SeedCredentialsTests(TestCase):
@@ -1307,8 +1397,11 @@ class ChildHealthNotesTests(TestCase):
         self.edit_url = reverse("edit_ninja", kwargs={"ninja_id": self.child.id})
 
     def test_add_a_child_with_notes(self):
-        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "Lou", "allergies_notes": "  Gluten-free  "},
-                         HTTP_HX_REQUEST="true")
+        self.client.post(
+            reverse("add_ninja"),
+            {"consent": "on", "family_name": "Peeters", "name": "Lou", "allergies_notes": "  Gluten-free  "},
+            HTTP_HX_REQUEST="true",
+        )
         self.assertEqual(Ninja.objects.get(name="Lou").allergies_notes, "Gluten-free")
 
     def test_edit_form_shows_and_saves_the_notes(self):
@@ -1316,8 +1409,9 @@ class ChildHealthNotesTests(TestCase):
         self.assertContains(response, 'name="allergies_notes"')
         self.assertContains(response, "Peanut allergy")
         self.assertContains(response, "Only the champion")
-        response = self.client.post(self.edit_url, {"name": "Emma", "allergies_notes": "Asthma inhaler"},
-                                    HTTP_HX_REQUEST="true")
+        response = self.client.post(
+            self.edit_url, {"name": "Emma", "allergies_notes": "Asthma inhaler"}, HTTP_HX_REQUEST="true"
+        )
         self.assertContains(response, "Asthma inhaler")
         self.child.refresh_from_db()
         self.assertEqual(self.child.allergies_notes, "Asthma inhaler")
@@ -1385,7 +1479,11 @@ class TwoStepTestMixin:
         from two_factor.plugins.webauthn.models import WebauthnDevice
 
         return WebauthnDevice.objects.create(
-            user=user or self.user, name=name, public_key="pk", key_handle="cGFzc2tleQ", sign_count=0,
+            user=user or self.user,
+            name=name,
+            public_key="pk",
+            key_handle="cGFzc2tleQ",
+            sign_count=0,
         )
 
 
@@ -1439,7 +1537,9 @@ class TwoStepLoginTests(TwoStepTestMixin, TestCase):
         device = self.add_app()
         self.client.post(reverse("login"), login_data("ann", PASSWORD))
         self.client.post(reverse("login"), {**token_data(totp_code(device)), "token-remember": "on"})
-        remembered = {key: morsel.value for key, morsel in self.client.cookies.items() if key.startswith("remember-cookie_")}
+        remembered = {
+            key: morsel.value for key, morsel in self.client.cookies.items() if key.startswith("remember-cookie_")
+        }
         self.assertTrue(remembered)
         self.client.logout()  # the test client's logout drops every cookie; a browser keeps this one
         self.client.cookies.load(remembered)
@@ -1478,8 +1578,10 @@ class TwoStepLoginTests(TwoStepTestMixin, TestCase):
 
         self.add_passkey()
         self.client.post(reverse("login"), login_data("ann", PASSWORD))
-        with patch("two_factor.plugins.webauthn.forms.verify_authentication_response",
-                   side_effect=InvalidAuthenticationResponse("bad")):
+        with patch(
+            "two_factor.plugins.webauthn.forms.verify_authentication_response",
+            side_effect=InvalidAuthenticationResponse("bad"),
+        ):
             response = self.client.post(reverse("login"), token_data(FAKE_ASSERTION))
         self.assertEqual(response.status_code, 200)
         self.assertNotIn("_auth_user_id", self.client.session)
@@ -1581,8 +1683,10 @@ class SignInSecurityPageTests(TwoStepTestMixin, TestCase):
 
         self.client.force_login(self.user)
         self.client.get(reverse("account_security_passkey"))
-        with patch("two_factor.plugins.webauthn.method.verify_registration_response",
-                   side_effect=InvalidRegistrationResponse("bad")):
+        with patch(
+            "two_factor.plugins.webauthn.method.verify_registration_response",
+            side_effect=InvalidRegistrationResponse("bad"),
+        ):
             response = self.client.post(reverse("account_security_passkey"), {"token": FAKE_REGISTRATION})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["error"])
@@ -1681,7 +1785,9 @@ class SignInPolicyTests(TwoStepTestMixin, TestCase):
         from .models import SignInRequirement
 
         return SignInRequirement.objects.create(
-            role=role, level=level or SignInRequirement.TWO_STEP, required_from=required_from,
+            role=role,
+            level=level or SignInRequirement.TWO_STEP,
+            required_from=required_from,
         )
 
     def test_roles_of(self):
@@ -1696,9 +1802,7 @@ class SignInPolicyTests(TwoStepTestMixin, TestCase):
         ninja = User.objects.create(username="kid", account_type=User.NINJA)
         self.assertEqual(sign_in.roles_of(champion) - {SignInRequirement.ADULT}, {SignInRequirement.CHAMPION})
         self.assertEqual(sign_in.roles_of(mentor) - {SignInRequirement.ADULT}, {SignInRequirement.MENTOR})
-        self.assertEqual(
-            sign_in.roles_of(self.user), {SignInRequirement.ADULT, SignInRequirement.ORGANISATION_BOARD}
-        )
+        self.assertEqual(sign_in.roles_of(self.user), {SignInRequirement.ADULT, SignInRequirement.ORGANISATION_BOARD})
         self.assertEqual(sign_in.roles_of(ninja), set())
         self.assertIn(champion, sign_in.accounts_with_role(SignInRequirement.CHAMPION))
         self.assertIn(self.user, sign_in.accounts_with_role(SignInRequirement.ORGANISATION_BOARD))
@@ -1869,9 +1973,15 @@ class ManageSignInSecurityTests(TwoStepTestMixin, TestCase):
         data.update({"level_mentor": SignInRequirement.TWO_STEP, "from_mentor": "2030-01-01"})
         self.assertRedirects(self.client.post(reverse("manage_security"), data), reverse("manage_security"))
         row = SignInRequirement.objects.get()
-        self.assertEqual((row.role, row.level, str(row.required_from), row.updated_by), (
-            SignInRequirement.MENTOR, SignInRequirement.TWO_STEP, "2030-01-01", self.admin,
-        ))
+        self.assertEqual(
+            (row.role, row.level, str(row.required_from), row.updated_by),
+            (
+                SignInRequirement.MENTOR,
+                SignInRequirement.TWO_STEP,
+                "2030-01-01",
+                self.admin,
+            ),
+        )
 
     def test_counts_per_role(self):
         from .models import SignInRequirement
@@ -1960,8 +2070,15 @@ class ChildFamilyNameTests(TestCase):
     def test_sign_up_asks_for_each_childs_family_name(self):
         self.client.logout()
         data = {
-            "name": "Jane Doe", "email": "jane@example.com", "phone": "", "password": "a-brand-new-password-99",
-            "consent": "on", **CHILD_ROWS, "child-0-name": "Sam", "child-0-family_name": "", "child-0-date_of_birth": _dob(10),
+            "name": "Jane Doe",
+            "email": "jane@example.com",
+            "phone": "",
+            "password": "a-brand-new-password-99",
+            "consent": "on",
+            **CHILD_ROWS,
+            "child-0-name": "Sam",
+            "child-0-family_name": "",
+            "child-0-date_of_birth": _dob(10),
         }
         response = self.client.post(reverse("register_guardian"), data)
         self.assertContains(response, "Family name is required.")
@@ -1979,7 +2096,9 @@ class ChildFamilyNameTests(TestCase):
 
     def test_editing_saves_the_family_name(self):
         child = make_ninja(self.guardian, "Lou")
-        self.client.post(reverse("edit_ninja", kwargs={"ninja_id": child.id}), {"name": "Lou", "family_name": "Peeters"})
+        self.client.post(
+            reverse("edit_ninja", kwargs={"ninja_id": child.id}), {"name": "Lou", "family_name": "Peeters"}
+        )
         child.refresh_from_db()
         self.assertEqual(child.full_name, "Lou Peeters")
 
@@ -1987,8 +2106,12 @@ class ChildFamilyNameTests(TestCase):
         champion = make_champion(username="champ")
         dojo = make_dojo("Ghent", champion=champion)
         event = Event.objects.create(
-            name="Session", dojo=dojo, status=Event.OPEN, places=10,
-            start_time=timezone.now() + timedelta(days=2), end_time=timezone.now() + timedelta(days=2, hours=2),
+            name="Session",
+            dojo=dojo,
+            status=Event.OPEN,
+            places=10,
+            start_time=timezone.now() + timedelta(days=2),
+            end_time=timezone.now() + timedelta(days=2, hours=2),
         )
         child = Ninja.objects.create(name="Emma", family_name="Peeters")
         Registration.objects.create(event=event, ninja=child, waiting_list=False, position=1)

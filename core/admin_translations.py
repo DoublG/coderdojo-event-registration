@@ -27,10 +27,15 @@ class TranslationAdminMixin:
         for language in self._translation_languages(obj):
             for name in self.model.TRANSLATABLE_FIELDS:
                 model_field = model_fields[name]
-                widget = (forms.Textarea(attrs={"rows": 3, "cols": 80}) if isinstance(model_field, models.TextField)
-                          else forms.TextInput(attrs={"size": 80}))
+                widget = (
+                    forms.Textarea(attrs={"rows": 3, "cols": 80})
+                    if isinstance(model_field, models.TextField)
+                    else forms.TextInput(attrs={"size": 80})
+                )
                 fields[translation_field_name(language, name)] = forms.CharField(
-                    required=False, widget=widget, max_length=getattr(model_field, "max_length", None),
+                    required=False,
+                    widget=widget,
+                    max_length=getattr(model_field, "max_length", None),
                     label=f"{str(model_field.verbose_name).capitalize()} ({language_name(language)})",
                 )
         return fields
@@ -55,11 +60,15 @@ class TranslationAdminMixin:
             for title, options in super().get_fieldsets(request, obj)
         ]
         for language in self._translation_languages(obj):
-            fieldsets.append((
-                _("In %(language)s") % {"language": language_name(language)},
-                {"classes": ["collapse"],
-                 "fields": [translation_field_name(language, f) for f in self.model.TRANSLATABLE_FIELDS]},
-            ))
+            fieldsets.append(
+                (
+                    _("In %(language)s") % {"language": language_name(language)},
+                    {
+                        "classes": ["collapse"],
+                        "fields": [translation_field_name(language, f) for f in self.model.TRANSLATABLE_FIELDS],
+                    },
+                )
+            )
         return fieldsets
 
     def save_model(self, request, obj, form, change):

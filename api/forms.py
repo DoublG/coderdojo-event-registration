@@ -10,12 +10,16 @@ class ApiClientForm(forms.Form):
     ApiClientError becomes the form's error."""
 
     name = forms.CharField(
-        label=_("Name"), required=False, max_length=100,
+        label=_("Name"),
+        required=False,
+        max_length=100,
         widget=forms.TextInput(attrs={"placeholder": _("Scan app at the door"), "required": True}),
     )
     # Rendered by the page itself: each scope with its description.
     scope = forms.MultipleChoiceField(
-        label=_("What it may do"), required=False, choices=DojoApiClient.SCOPE_CHOICES,
+        label=_("What it may do"),
+        required=False,
+        choices=DojoApiClient.SCOPE_CHOICES,
         widget=forms.CheckboxSelectMultiple,
         initial=[value for value, _label in DojoApiClient.SCOPE_CHOICES],
     )

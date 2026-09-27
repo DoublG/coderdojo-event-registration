@@ -187,7 +187,9 @@ def _mail(user, key, **context):
     if not user.email:
         return
     send_or_log(
-        user, MailCategory.SERVICE, key,
+        user,
+        MailCategory.SERVICE,
+        key,
         {"security_url": settings.SITE_URL + reverse("account_security"), **context},
     )
 

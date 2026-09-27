@@ -17,7 +17,9 @@ from ..base import NINJA, USER, SegmentAttribute
 def _held_sessions(days):
     """Non-draft events that started in the last `days` days."""
     now = timezone.now()
-    return Event.objects.exclude(status=Event.DRAFT).filter(start_time__gte=now - timedelta(days=days), start_time__lte=now)
+    return Event.objects.exclude(status=Event.DRAFT).filter(
+        start_time__gte=now - timedelta(days=days), start_time__lte=now
+    )
 
 
 class ActiveTeamMemberAttribute(SegmentAttribute):
@@ -37,7 +39,8 @@ class ActiveTeamMemberAttribute(SegmentAttribute):
         if operator != "within_days":
             raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         memberships = DojoMembership.objects.managers().filter(
-            dojo__status=Dojo.ACTIVE, dojo_id__in=_held_sessions(value).values("dojo_id"),
+            dojo__status=Dojo.ACTIVE,
+            dojo_id__in=_held_sessions(value).values("dojo_id"),
         )
         return Q(pk__in=memberships.values("user_id"))
 

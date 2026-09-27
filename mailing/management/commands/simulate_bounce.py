@@ -33,8 +33,14 @@ class Command(BaseCommand):
         if kind == "complaint":
             raw = complaint_report(row.recipient, row.message_id)
         elif kind == "soft":
-            raw = dsn_report(row.recipient, row.message_id, action="delayed", status="4.2.2",
-                             diagnostic="smtp; 452 4.2.2 Mailbox full", to=bounce_to)
+            raw = dsn_report(
+                row.recipient,
+                row.message_id,
+                action="delayed",
+                status="4.2.2",
+                diagnostic="smtp; 452 4.2.2 Mailbox full",
+                to=bounce_to,
+            )
         else:
             raw = dsn_report(row.recipient, row.message_id, to=bounce_to)
 
@@ -47,4 +53,6 @@ class Command(BaseCommand):
 
             handled = BounceProcessor().process()
             row.refresh_from_db()
-            self.stdout.write(self.style.SUCCESS(f"Processed {handled} message(s); mail #{row.pk} is now {row.status}."))
+            self.stdout.write(
+                self.style.SUCCESS(f"Processed {handled} message(s); mail #{row.pk} is now {row.status}.")
+            )

@@ -48,7 +48,10 @@ def dojo_api_clients(request, dojo_id):
     if request.method == "POST" and form.is_valid():
         try:
             client, client_id, secret = services.create_client(
-                access.dojo, form.cleaned_data["name"], form.cleaned_data["scope"], request.user,
+                access.dojo,
+                form.cleaned_data["name"],
+                form.cleaned_data["scope"],
+                request.user,
             )
         except services.ApiClientError as error:
             form.add_error(None, str(error))

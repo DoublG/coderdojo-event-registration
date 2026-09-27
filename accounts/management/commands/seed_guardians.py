@@ -16,25 +16,82 @@ from dojos.models import Dojo, DojoMembership
 KID_AVATAR_FILES = [filename for filename, _label in TEMPLATE_KID_AVATARS]
 
 GUARDIAN_FIRST_NAMES = [
-    "Ellen", "Tom", "Sarah", "Bram", "Nathalie", "Wouter", "Julie", "Kevin",
-    "An", "Stijn", "Karen", "Dries", "Isabelle", "Pieter", "Veerle", "Bart", "Thomas"
+    "Ellen",
+    "Tom",
+    "Sarah",
+    "Bram",
+    "Nathalie",
+    "Wouter",
+    "Julie",
+    "Kevin",
+    "An",
+    "Stijn",
+    "Karen",
+    "Dries",
+    "Isabelle",
+    "Pieter",
+    "Veerle",
+    "Bart",
+    "Thomas",
 ]
 GUARDIAN_LAST_NAMES = [
-    "Peeters", "Janssens", "Maes", "Jacobs", "Mertens", "Willems", "Claes",
-    "Goossens", "Wouters", "De Smet", "Dubois", "Lambert", "Simon", "Michel",
+    "Peeters",
+    "Janssens",
+    "Maes",
+    "Jacobs",
+    "Mertens",
+    "Willems",
+    "Claes",
+    "Goossens",
+    "Wouters",
+    "De Smet",
+    "Dubois",
+    "Lambert",
+    "Simon",
+    "Michel",
 ]
 CHILD_FIRST_NAMES = [
-    "Emma", "Liam", "Olivia", "Noah", "Sophie", "Lucas", "Mila", "Finn", "Nina",
-    "Lotte", "Milan", "Fien", "Arthur", "Marie", "Louis", "Anna", "Jules", "Mara"
+    "Emma",
+    "Liam",
+    "Olivia",
+    "Noah",
+    "Sophie",
+    "Lucas",
+    "Mila",
+    "Finn",
+    "Nina",
+    "Lotte",
+    "Milan",
+    "Fien",
+    "Arthur",
+    "Marie",
+    "Louis",
+    "Anna",
+    "Jules",
+    "Mara",
 ]
 
 # The gender that goes with each first name above (kept as a separate map so
 # the name list, and so the shared RNG stream, stays unchanged).
 CHILD_GENDERS = {
-    "Emma": Ninja.GIRL, "Liam": Ninja.BOY, "Olivia": Ninja.GIRL, "Noah": Ninja.BOY, "Sophie": Ninja.GIRL,
-    "Lucas": Ninja.BOY, "Mila": Ninja.GIRL, "Finn": Ninja.BOY, "Nina": Ninja.GIRL, "Lotte": Ninja.GIRL,
-    "Milan": Ninja.BOY, "Fien": Ninja.GIRL, "Arthur": Ninja.BOY, "Marie": Ninja.GIRL, "Louis": Ninja.BOY,
-    "Anna": Ninja.GIRL, "Jules": Ninja.BOY, "Mara": Ninja.GIRL,
+    "Emma": Ninja.GIRL,
+    "Liam": Ninja.BOY,
+    "Olivia": Ninja.GIRL,
+    "Noah": Ninja.BOY,
+    "Sophie": Ninja.GIRL,
+    "Lucas": Ninja.BOY,
+    "Mila": Ninja.GIRL,
+    "Finn": Ninja.BOY,
+    "Nina": Ninja.GIRL,
+    "Lotte": Ninja.GIRL,
+    "Milan": Ninja.BOY,
+    "Fien": Ninja.GIRL,
+    "Arthur": Ninja.BOY,
+    "Marie": Ninja.GIRL,
+    "Louis": Ninja.BOY,
+    "Anna": Ninja.GIRL,
+    "Jules": Ninja.BOY,
+    "Mara": Ninja.GIRL,
 }
 # Share of seeded children whose parents leave gender as "Prefer not to say",
 # or pick "Other".
@@ -163,8 +220,12 @@ class Command(BaseCommand):
             if champion is None or DojoMembership.objects.filter(dojo=ninja.home_dojo, user=ninja.account).exists():
                 continue
             DojoMembership.objects.create(
-                dojo=ninja.home_dojo, user=ninja.account, role=DojoMembership.YOUTH_MENTOR,
-                status=DojoMembership.ACTIVE, promoted_by=champion, requested_by=champion.user,
+                dojo=ninja.home_dojo,
+                user=ninja.account,
+                role=DojoMembership.YOUTH_MENTOR,
+                status=DojoMembership.ACTIVE,
+                promoted_by=champion,
+                requested_by=champion.user,
                 joined_at=timezone.now(),
             )
             promoted += 1
@@ -174,11 +235,13 @@ class Command(BaseCommand):
         if child_credential_rows:
             write_credentials("child_account", child_credential_rows)
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Done. guardians={guardians_created} children={children_created} "
-            f"child_logins={child_logins_created} consents_recorded={consented}. Credentials for newly seeded accounts "
-            f"written to {CREDENTIALS_FILE}"
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Done. guardians={guardians_created} children={children_created} "
+                f"child_logins={child_logins_created} consents_recorded={consented}. Credentials for newly seeded accounts "
+                f"written to {CREDENTIALS_FILE}"
+            )
+        )
 
 
 def _consent_for(guardianship, position):
@@ -233,7 +296,8 @@ def _seed_locale(guardian, dojo):
         return "", rng.choice(["nl-be", "fr-be"])
     nearby = list(
         Municipality.objects.annotate(distance=DistanceSphere(F("center"), dojo.location))
-        .order_by("distance").values_list("postal_code", flat=True)[:5]
+        .order_by("distance")
+        .values_list("postal_code", flat=True)[:5]
     )
     province = dojo.province.name if dojo.province_id else ""
     if rng.random() < 0.1:

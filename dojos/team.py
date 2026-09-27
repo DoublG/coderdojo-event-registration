@@ -64,6 +64,7 @@ def _activate(membership, by=None):
 
 # --- joining ---------------------------------------------------------------
 
+
 def request_to_join(dojo, user):
     if not is_approved_mentor(user):
         raise TeamError(_("Only approved mentors can ask to join a dojo's team."))
@@ -79,8 +80,12 @@ def request_to_join(dojo, user):
     membership.requested_by = user
     membership.decided_by = None
     membership.save()
-    notify_managers(dojo, gettext_lazy("%(name)s asked to join the %(dojo)s team."), url=_team_url(dojo),
-                    params={"name": user.team_name, "dojo": dojo.name})
+    notify_managers(
+        dojo,
+        gettext_lazy("%(name)s asked to join the %(dojo)s team."),
+        url=_team_url(dojo),
+        params={"name": user.team_name, "dojo": dojo.name},
+    )
     return membership
 
 
@@ -89,7 +94,12 @@ def accept_request(membership, by):
         raise TeamError(_("That request has already been handled."))
     _activate(membership, by=by)
     membership.save()
-    notify(membership.user, gettext_lazy("You're now on the %(dojo)s team."), dojo=None, params={"dojo": membership.dojo.name})
+    notify(
+        membership.user,
+        gettext_lazy("You're now on the %(dojo)s team."),
+        dojo=None,
+        params={"dojo": membership.dojo.name},
+    )
     return membership
 
 
@@ -132,7 +142,10 @@ def promote_youth_mentor(dojo, ninja_user, by_membership):
     if not ninja_user.is_ninja:
         raise TeamError(_("Only a ninja's own account can be promoted to youth mentor."))
     if not ninja_user.is_active:
-        raise TeamError(_("%(name)s's login is switched off; their guardian can switch it back on.") % {"name": ninja_user.team_name})
+        raise TeamError(
+            _("%(name)s's login is switched off; their guardian can switch it back on.")
+            % {"name": ninja_user.team_name}
+        )
     membership = DojoMembership.objects.filter(dojo=dojo, user=ninja_user).first()
     if membership is not None and membership.status == DojoMembership.ACTIVE:
         raise TeamError(_("%(name)s is already on this team.") % {"name": ninja_user.team_name})
@@ -151,6 +164,7 @@ def promote_youth_mentor(dojo, ninja_user, by_membership):
 
 
 # --- leaving ----------------------------------------------------------------
+
 
 def _make_dormant(membership):
     membership.status = DojoMembership.DORMANT
@@ -195,13 +209,20 @@ def transfer_champion(dojo, from_membership, to_membership):
         or to_membership.status != DojoMembership.ACTIVE
         or not to_membership.user.background_check_valid
     ):
-        raise TeamError(_("The champion role can only go to an active mentor of this dojo with a valid background check."))
+        raise TeamError(
+            _("The champion role can only go to an active mentor of this dojo with a valid background check.")
+        )
     from_membership.role = DojoMembership.MENTOR
     from_membership.save(update_fields=["role"])
     to_membership.role = DojoMembership.CHAMPION
     to_membership.save(update_fields=["role"])
-    notify(to_membership.user, gettext_lazy("You're now the champion of %(dojo)s."), url=_team_url(dojo), dojo=dojo,
-           params={"dojo": dojo.name})
+    notify(
+        to_membership.user,
+        gettext_lazy("You're now the champion of %(dojo)s."),
+        url=_team_url(dojo),
+        dojo=dojo,
+        params={"dojo": dojo.name},
+    )
 
 
 # --- dojo lifecycle ------------------------------------------------------------
@@ -229,7 +250,9 @@ def change_status(dojo, action):
         raise TeamError(_("That change isn't possible from the dojo's current status."))
     if target in (Dojo.DORMANT, Dojo.ARCHIVED) and active_events(dojo).exists():
         raise TeamError(
-            _("This dojo still has upcoming events that are in draft or open for sign-ups. Close or finish those first.")
+            _(
+                "This dojo still has upcoming events that are in draft or open for sign-ups. Close or finish those first."
+            )
         )
     with transaction.atomic():
         dojo.status = target
@@ -252,5 +275,7 @@ def needs_dormancy_nudge(dojo):
     now = timezone.now()
     if dojo.event_set.filter(start_time__gte=now).exists():
         return False
-    last = dojo.event_set.filter(start_time__lt=now).order_by("-start_time").values_list("start_time", flat=True).first()
+    last = (
+        dojo.event_set.filter(start_time__lt=now).order_by("-start_time").values_list("start_time", flat=True).first()
+    )
     return last is not None and now - last > DORMANCY_NUDGE_AFTER

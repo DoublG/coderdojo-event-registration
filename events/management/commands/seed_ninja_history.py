@@ -21,24 +21,58 @@ SESSION_SLOT = (14, 0, 3)  # 14:00 start, 3 hours long — matches a typical Sat
 # at 5/10/15 visits. Each is a milestone Badge: unlocked by a repeat-count
 # threshold rather than a one-off thing you either did or didn't.
 BANDS = [
-    {"name": "White Band", "threshold": 1, "icon": "band-white.svg", "description": "Came to their first CoderDojo session."},
-    {"name": "Green Band", "threshold": 5, "icon": "band-green.svg", "description": "Back for the fifth time — a regular in the making."},
-    {"name": "Red Band", "threshold": 10, "icon": "band-red.svg", "description": "Ten sessions in — a genuine dojo regular."},
-    {"name": "Black Band", "threshold": 15, "icon": "band-black.svg", "description": "Fifteen sessions. A CoderDojo veteran."},
+    {
+        "name": "White Band",
+        "threshold": 1,
+        "icon": "band-white.svg",
+        "description": "Came to their first CoderDojo session.",
+    },
+    {
+        "name": "Green Band",
+        "threshold": 5,
+        "icon": "band-green.svg",
+        "description": "Back for the fifth time — a regular in the making.",
+    },
+    {
+        "name": "Red Band",
+        "threshold": 10,
+        "icon": "band-red.svg",
+        "description": "Ten sessions in — a genuine dojo regular.",
+    },
+    {
+        "name": "Black Band",
+        "threshold": 15,
+        "icon": "band-black.svg",
+        "description": "Fifteen sessions. A CoderDojo veteran.",
+    },
 ]
 
 # One-off Badges — no counter, tied to attending one specific event.
 SKILL_BADGES = [
-    {"name": "Code Explorer", "icon": None, "description": "Tried a pathway all the way through to a finished project.", "criteria": "Complete a pathway project."},
-    {"name": "Game Maker", "icon": None, "description": "Built a working game from scratch (pun intended).", "criteria": "Build and share a playable game."},
+    {
+        "name": "Code Explorer",
+        "icon": None,
+        "description": "Tried a pathway all the way through to a finished project.",
+        "criteria": "Complete a pathway project.",
+    },
+    {
+        "name": "Game Maker",
+        "icon": None,
+        "description": "Built a working game from scratch (pun intended).",
+        "criteria": "Build and share a playable game.",
+    },
 ]
 GIRLS_EVENT_BADGE = {
-    "name": "CoderDojo for Girls", "icon": "band-pink.svg",
-    "description": "Came along to a CoderDojo for Girls session.", "criteria": "Attend a CoderDojo for Girls session.",
+    "name": "CoderDojo for Girls",
+    "icon": "band-pink.svg",
+    "description": "Came along to a CoderDojo for Girls session.",
+    "criteria": "Attend a CoderDojo for Girls session.",
 }
 COOLEST_PROJECTS_BADGE = {
-    "name": "Coolest Projects 2026", "icon": "coolest-projects.svg",
-    "description": "Showed off a project at Coolest Projects 2026.", "criteria": "Attend Coolest Projects 2026.",
+    "name": "Coolest Projects 2026",
+    "icon": "coolest-projects.svg",
+    "description": "Showed off a project at Coolest Projects 2026.",
+    "criteria": "Attend Coolest Projects 2026.",
 }
 
 
@@ -84,7 +118,8 @@ class Command(BaseCommand):
         milestones = []
         for band in BANDS:
             award, was_created = Badge.objects.get_or_create(
-                name=band["name"], kind=Badge.MILESTONE,
+                name=band["name"],
+                kind=Badge.MILESTONE,
                 defaults={"threshold": band["threshold"], "description": band["description"]},
             )
             if was_created:
@@ -95,27 +130,35 @@ class Command(BaseCommand):
         skill_badges = []
         for badge in SKILL_BADGES:
             award, _ = Badge.objects.get_or_create(
-                name=badge["name"], kind=Badge.ONE_OFF, defaults={"description": badge["description"], "criteria": badge["criteria"]},
+                name=badge["name"],
+                kind=Badge.ONE_OFF,
+                defaults={"description": badge["description"], "criteria": badge["criteria"]},
             )
             skill_badges.append(award)
 
         girls_badge, was_created = Badge.objects.get_or_create(
-            name=GIRLS_EVENT_BADGE["name"], kind=Badge.ONE_OFF,
+            name=GIRLS_EVENT_BADGE["name"],
+            kind=Badge.ONE_OFF,
             defaults={"description": GIRLS_EVENT_BADGE["description"], "criteria": GIRLS_EVENT_BADGE["criteria"]},
         )
         if was_created:
             assign_icon(girls_badge, GIRLS_EVENT_BADGE["icon"])
 
         coolest_badge, was_created = Badge.objects.get_or_create(
-            name=COOLEST_PROJECTS_BADGE["name"], kind=Badge.ONE_OFF,
-            defaults={"description": COOLEST_PROJECTS_BADGE["description"], "criteria": COOLEST_PROJECTS_BADGE["criteria"]},
+            name=COOLEST_PROJECTS_BADGE["name"],
+            kind=Badge.ONE_OFF,
+            defaults={
+                "description": COOLEST_PROJECTS_BADGE["description"],
+                "criteria": COOLEST_PROJECTS_BADGE["criteria"],
+            },
         )
         if was_created:
             assign_icon(coolest_badge, COOLEST_PROJECTS_BADGE["icon"])
 
         belts = [
             Belt.objects.get_or_create(
-                level=level, defaults={"name": name, "colour": colour, "requirements": requirements},
+                level=level,
+                defaults={"name": name, "colour": colour, "requirements": requirements},
             )[0]
             for level, name, colour, requirements in BELTS
         ]
@@ -143,7 +186,8 @@ class Command(BaseCommand):
                 end_dt = start_dt + timedelta(hours=duration_hours)
                 session_name = dojo_rng.choice(SESSION_NAMES)
                 event, was_created = Event.objects.get_or_create(
-                    dojo=dojo, start_time=start_dt,
+                    dojo=dojo,
+                    start_time=start_dt,
                     defaults={
                         "name": session_name,
                         "status": Event.CLOSED,
@@ -179,7 +223,9 @@ class Command(BaseCommand):
                 defaults={
                     "name": "CoderDojo for Girls",
                     "end_time": timezone.make_aware(datetime(2023, 2, 11, 13, 0)),
-                    "places": 30, "location": girls_dojo.location, "status": Event.CLOSED,
+                    "places": 30,
+                    "location": girls_dojo.location,
+                    "status": Event.CLOSED,
                     "audience": Event.GIRLS,
                     "description": "A CoderDojo for Girls session, run for the International Day of Women and Girls in Science.",
                 },
@@ -195,7 +241,9 @@ class Command(BaseCommand):
                 defaults={
                     "name": "Coolest Projects 2026",
                     "end_time": timezone.make_aware(datetime(2026, 6, 6, 17, 0)),
-                    "places": 200, "location": projects_dojo.location, "status": Event.CLOSED,
+                    "places": 200,
+                    "location": projects_dojo.location,
+                    "status": Event.CLOSED,
                     "description": "CoderDojo's yearly showcase — ninjas demo the projects they've been building all year.",
                 },
             )
@@ -232,7 +280,8 @@ class Command(BaseCommand):
             for event in p_rng.sample(candidate_events, k=min(len(candidate_events), p_rng.randint(0, 25))):
                 attended = p_rng.random() < 0.85  # the odd no-show, otherwise present
                 registration, was_created = Registration.objects.get_or_create(
-                    event=event, ninja=ninja,
+                    event=event,
+                    ninja=ninja,
                     defaults={"waiting_list": False, "position": 1, "attended": attended},
                 )
                 if was_created:
@@ -263,8 +312,12 @@ class Command(BaseCommand):
                         break
                     awarder = random.Random(f"belt-{ninja.id}-{belt.level}").choice(awarders)
                     NinjaBelt.objects.create(
-                        ninja=ninja, belt=belt, awarded_on=event.start_time.date(),
-                        awarded_by=awarder.user, awarded_as_membership=awarder, awarded_as_role=awarder.role,
+                        ninja=ninja,
+                        belt=belt,
+                        awarded_on=event.start_time.date(),
+                        awarded_by=awarder.user,
+                        awarded_as_membership=awarder,
+                        awarded_as_role=awarder.role,
                     )
                     belts_created += 1
 
@@ -273,7 +326,8 @@ class Command(BaseCommand):
             for milestone in milestones:
                 if attended_count >= milestone.threshold:
                     _, was_created = NinjaBadge.objects.get_or_create(
-                        ninja=ninja, badge=milestone,
+                        ninja=ninja,
+                        badge=milestone,
                         defaults={
                             "earned_date": today - timedelta(days=p_rng.randint(10, 5 * 365)),
                             "progress_current": milestone.threshold,
@@ -283,7 +337,8 @@ class Command(BaseCommand):
                     awards_created += 1 if was_created else 0
                 else:
                     _, was_created = NinjaBadge.objects.get_or_create(
-                        ninja=ninja, badge=milestone,
+                        ninja=ninja,
+                        badge=milestone,
                         defaults={"progress_current": attended_count, "progress_total": milestone.threshold},
                     )
                     awards_created += 1 if was_created else 0
@@ -292,7 +347,8 @@ class Command(BaseCommand):
             if pathways and p_rng.random() < 0.5:
                 skill_award = p_rng.choice(skill_badges)
                 _, was_created = NinjaBadge.objects.get_or_create(
-                    ninja=ninja, badge=skill_award,
+                    ninja=ninja,
+                    badge=skill_award,
                     defaults={
                         "earned_date": (
                             today - timedelta(days=p_rng.randint(5, 5 * 365)) if p_rng.random() < 0.5 else None
@@ -306,30 +362,36 @@ class Command(BaseCommand):
             # wristbands work off real Registration rows too.
             if girls_event and p_rng.random() < 1 / 6:
                 _, was_created = Registration.objects.get_or_create(
-                    event=girls_event, ninja=ninja,
+                    event=girls_event,
+                    ninja=ninja,
                     defaults={"waiting_list": False, "position": 1, "attended": True},
                 )
                 registrations_created += 1 if was_created else 0
                 _, was_created = NinjaBadge.objects.get_or_create(
-                    ninja=ninja, badge=girls_badge,
+                    ninja=ninja,
+                    badge=girls_badge,
                     defaults={"earned_date": girls_event.start_time.date()},
                 )
                 awards_created += 1 if was_created else 0
 
             if coolest_event and p_rng.random() < 1 / 6 and coolest_event.start_time.date() <= today:
                 _, was_created = Registration.objects.get_or_create(
-                    event=coolest_event, ninja=ninja,
+                    event=coolest_event,
+                    ninja=ninja,
                     defaults={"waiting_list": False, "position": 1, "attended": True},
                 )
                 registrations_created += 1 if was_created else 0
                 _, was_created = NinjaBadge.objects.get_or_create(
-                    ninja=ninja, badge=coolest_badge,
+                    ninja=ninja,
+                    badge=coolest_badge,
                     defaults={"earned_date": coolest_event.start_time.date()},
                 )
                 awards_created += 1 if was_created else 0
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Done. past_events_created={events_created} special_events_created={special_created} "
-            f"registrations_created={registrations_created} badges_created={awards_created} "
-            f"belts_created={belts_created}."
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Done. past_events_created={events_created} special_events_created={special_created} "
+                f"registrations_created={registrations_created} badges_created={awards_created} "
+                f"belts_created={belts_created}."
+            )
+        )

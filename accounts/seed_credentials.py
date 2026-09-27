@@ -112,7 +112,11 @@ def _age(ninja):
     if not ninja.date_of_birth:
         return ""
     today = date.today()
-    years = today.year - ninja.date_of_birth.year - ((today.month, today.day) < (ninja.date_of_birth.month, ninja.date_of_birth.day))
+    years = (
+        today.year
+        - ninja.date_of_birth.year
+        - ((today.month, today.day) < (ninja.date_of_birth.month, ninja.date_of_birth.day))
+    )
     return f" ({years})"
 
 
@@ -127,8 +131,11 @@ def describe_account(user):
     if user.is_superuser:
         parts.append("Superuser (Django admin)")
     for role in user.organisation_roles.all():
-        parts.append("Organisation admin: /manage/ dashboard and Django admin" if role.role == role.ADMIN
-                     else "Organisation board: read-only Django admin")
+        parts.append(
+            "Organisation admin: /manage/ dashboard and Django admin"
+            if role.role == role.ADMIN
+            else "Organisation board: read-only Django admin"
+        )
     listing = OrganisationTeamMember.objects.filter(account=user).first()
     if listing:
         parts.append(f"on the organisation's team page as {listing.position}")
@@ -166,16 +173,26 @@ def describe_account(user):
         elif user.background_check_status == user.CHECK_SUBMITTED:
             parts.append("background check uploaded, awaiting review")
         elif user.background_check_can_upload:
-            parts.append(f"background check {user.get_background_check_status_display().split(' —')[0].lower()}"
-                         " (can upload from the account page)")
+            parts.append(
+                f"background check {user.get_background_check_status_display().split(' —')[0].lower()}"
+                " (can upload from the account page)"
+            )
 
     if user.is_ninja:
-        ninja = Ninja.objects.filter(account=user).prefetch_related("guardianships__guardian").select_related("home_dojo").first()
+        ninja = (
+            Ninja.objects.filter(account=user)
+            .prefetch_related("guardianships__guardian")
+            .select_related("home_dojo")
+            .first()
+        )
         if ninja:
             guardians = [g.guardian.username for g in ninja.guardianships.all()]
-            parts.insert(0, f"Child login of {ninja.name}{_age(ninja)}"
-                            f"{', home dojo ' + ninja.home_dojo.name if ninja.home_dojo else ''}"
-                            f"; guardian: {_names(guardians)}; can sign up for sessions itself")
+            parts.insert(
+                0,
+                f"Child login of {ninja.name}{_age(ninja)}"
+                f"{', home dojo ' + ninja.home_dojo.name if ninja.home_dojo else ''}"
+                f"; guardian: {_names(guardians)}; can sign up for sessions itself",
+            )
         if not user.email:
             parts.append("no email, so no mails")
     else:
@@ -190,15 +207,23 @@ def describe_account(user):
                 f"{' [no consent]' if c.id in no_consent else ''}"
                 for c in children
             ]
-            parts.append(f"Parent of {len(children)} child{'ren' if len(children) > 1 else ''}: {_names(described, 4)}")
+            parts.append(
+                f"Parent of {len(children)} child{'ren' if len(children) > 1 else ''}: {_names(described, 4)}"
+            )
         if not parts:
             parts.append("Plain adult account (no children, no roles)")
 
     from accounts import two_step
 
     if methods := two_step.methods(user):
-        kinds = sorted({"authenticator app (key in totp_secret; or manage.py totp_code <username>)"
-                        if two_step.kind_of(m) == two_step.APP else "passkey" for m in methods})
+        kinds = sorted(
+            {
+                "authenticator app (key in totp_secret; or manage.py totp_code <username>)"
+                if two_step.kind_of(m) == two_step.APP
+                else "passkey"
+                for m in methods
+            }
+        )
         parts.append(f"two-step login on: {' and '.join(kinds)}, {two_step.backup_codes_left(user)} backup codes")
     if not user.is_active:
         parts.append("DISABLED (can't log in)")

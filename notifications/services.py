@@ -35,7 +35,8 @@ def notify(recipient, text, url="", dojo=None, params=None):
     if channel_layer is not None:
         try:
             async_to_sync(channel_layer.group_send)(
-                _group_name(recipient.id), {"type": "notification.push"},
+                _group_name(recipient.id),
+                {"type": "notification.push"},
             )
         except Exception:
             pass

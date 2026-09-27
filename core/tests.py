@@ -134,33 +134,72 @@ class StrNeverQueriesTests(TestCase):
             (Guardianship.objects.create(guardian=user, ninja=ninja), "jan → Kid"),
             (OrganisationRole.objects.create(account=user, role=OrganisationRole.BOARD), "jan ("),
             (Application.objects.create(account=user, kind=Application.MENTOR), "jan — "),
-            (BackgroundCheckHistory.objects.create(account=user, decision="validated", reviewed_at=timezone.now()), "jan — "),
+            (
+                BackgroundCheckHistory.objects.create(account=user, decision="validated", reviewed_at=timezone.now()),
+                "jan — ",
+            ),
             (Announcement.objects.create(dojo=dojo, date=date(2026, 1, 1), text="Hi"), " - 2026-01-01"),
             (add_member(dojo, user), "(Mentor, Ghent)"),
             (NinjaBadge.objects.create(ninja=ninja, badge=Badge.objects.create(name="Star")), "Kid - Star"),
-            (NinjaBelt.objects.create(ninja=ninja, belt=Belt.objects.create(level=1, name="White"), awarded_on=date(2026, 1, 1)), "Kid - White"),
+            (
+                NinjaBelt.objects.create(
+                    ninja=ninja, belt=Belt.objects.create(level=1, name="White"), awarded_on=date(2026, 1, 1)
+                ),
+                "Kid - White",
+            ),
             (Notification.objects.create(recipient=user, text="Hello"), "jan: Hello"),
             (PathwayStep.objects.create(pathway=pathway, title="Start"), "Scratch step 0: Start"),
             (PathwayProject.objects.create(pathway=pathway, title="Game"), "Scratch: Game"),
             (SegmentGroup.objects.create(segment=Segment.objects.create(name="Girlz")), "Girlz ("),
-            (RegistrationCancellation.objects.create(ninja=ninja, event=Event.objects.create(
-                name="Gone", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()),
-                was_waitlisted=False), "Kid cancelled Gone"),
-            (NinjaEngagementChange.objects.create(ninja=ninja, from_stage="regular", to_stage="at_risk",
-                                                  changed_on=date(2026, 1, 1)), "Kid: regular"),
-            (JourneyDelivery.objects.create(journey=Journey.objects.create(name="Hi", template_key="x"), user=user),
-             "Hi → jan"),
-            (NinjaEngagement.objects.create(ninja=ninja, dojo=dojo, stage="regular", computed_on=date(2026, 1, 1)),
-             "Kid @ Ghent"),
+            (
+                RegistrationCancellation.objects.create(
+                    ninja=ninja,
+                    event=Event.objects.create(
+                        name="Gone", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()
+                    ),
+                    was_waitlisted=False,
+                ),
+                "Kid cancelled Gone",
+            ),
+            (
+                NinjaEngagementChange.objects.create(
+                    ninja=ninja, from_stage="regular", to_stage="at_risk", changed_on=date(2026, 1, 1)
+                ),
+                "Kid: regular",
+            ),
+            (
+                JourneyDelivery.objects.create(journey=Journey.objects.create(name="Hi", template_key="x"), user=user),
+                "Hi → jan",
+            ),
+            (
+                NinjaEngagement.objects.create(ninja=ninja, dojo=dojo, stage="regular", computed_on=date(2026, 1, 1)),
+                "Kid @ Ghent",
+            ),
             (EmailMessage.objects.create(user=user, category="service", subject="Hi", body=""), "jan — Hi"),
             (MailPreference.objects.create(user=user, category="newsletter", subscribed=True), "jan: newsletter on"),
-            (ConsentEvent.objects.create(user=user, category="newsletter", subscribed=True, source="signup"), "jan: newsletter on"),
-            (Promotion.objects.create(event=Event.objects.create(
-                name="Coolest", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()),
-                placement=Promotion.HOMEPAGE_HERO), "Coolest (Homepage"),
-            (TeamAttendance.objects.create(event=Event.objects.create(
-                name="Run", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()),
-                membership=add_member(dojo, User.objects.create(username="piet")), attended=True), "piet at Run"),
+            (
+                ConsentEvent.objects.create(user=user, category="newsletter", subscribed=True, source="signup"),
+                "jan: newsletter on",
+            ),
+            (
+                Promotion.objects.create(
+                    event=Event.objects.create(
+                        name="Coolest", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()
+                    ),
+                    placement=Promotion.HOMEPAGE_HERO,
+                ),
+                "Coolest (Homepage",
+            ),
+            (
+                TeamAttendance.objects.create(
+                    event=Event.objects.create(
+                        name="Run", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()
+                    ),
+                    membership=add_member(dojo, User.objects.create(username="piet")),
+                    attended=True,
+                ),
+                "piet at Run",
+            ),
         ]
         from django.utils import translation
 
@@ -181,7 +220,7 @@ class AdminStaysFullyUsableTests(TestCase):
     # (app_label.ModelName, permission) -> why it's not needed.
     EXCEPTIONS = {
         ("applications.BackgroundCheck", "add"): "a review list over existing accounts; the accounts themselves "
-                                                 "(check fields included) are fully editable in the User admin",
+        "(check fields included) are fully editable in the User admin",
         # The one exception to the rule (DATA_MODEL.md §14): a log anyone can
         # edit proves nothing. Entries are only removed by code (retention,
         # erasure) or manage.py auditlogflush.
@@ -233,8 +272,9 @@ class AdminStaysFullyUsableTests(TestCase):
         root = User.objects.create(username="root", is_staff=True, is_superuser=True)
         User.objects.create(username="someone", email="someone@example.com")
         dojo = make_dojo("Ghent")
-        Event.objects.create(name="Session", dojo=dojo, start_time="2030-01-01T10:00:00Z",
-                             end_time="2030-01-01T12:00:00Z", places=10)
+        Event.objects.create(
+            name="Session", dojo=dojo, start_time="2030-01-01T10:00:00Z", end_time="2030-01-01T12:00:00Z", places=10
+        )
         self.client.force_login(root)
         request = RequestFactory().get("/admin/")
         request.user = root
@@ -245,8 +285,11 @@ class AdminStaysFullyUsableTests(TestCase):
             if model_admin.has_add_permission(request):
                 urls.append(reverse(f"admin:{app}_{name}_add"))
             # From the admin's own list (a proxy like Background checks filters it).
-            obj = model_admin.get_queryset(request).exclude(pk=root.pk).first() if model is User else \
-                model_admin.get_queryset(request).first()
+            obj = (
+                model_admin.get_queryset(request).exclude(pk=root.pk).first()
+                if model is User
+                else model_admin.get_queryset(request).first()
+            )
             if obj is not None:
                 urls.append(reverse(f"admin:{app}_{name}_change", args=[obj.pk]))
             for url in urls:
@@ -262,11 +305,16 @@ class TranslationTests(TestCase):
 
     def test_switcher_offers_english_dutch_and_french(self):
         response = self.client.get(reverse("home"))
-        self.assertEqual([code for code, _name in response.context["AVAILABLE_LANGUAGES"]], ["en-us", "nl-be", "fr-be"])
+        self.assertEqual(
+            [code for code, _name in response.context["AVAILABLE_LANGUAGES"]], ["en-us", "nl-be", "fr-be"]
+        )
 
     def test_pages_follow_the_browser_language(self):
-        for language, heading in [("nl-be", "Bouw iets geweldigs met code."), ("fr-be", "Créez quelque chose de génial avec du code."),
-                                  ("en-us", "Build something awesome with code.")]:
+        for language, heading in [
+            ("nl-be", "Bouw iets geweldigs met code."),
+            ("fr-be", "Créez quelque chose de génial avec du code."),
+            ("en-us", "Build something awesome with code."),
+        ]:
             response = self.client.get(reverse("home"), HTTP_ACCEPT_LANGUAGE=language)
             self.assertContains(response, heading)
             self.assertContains(response, f'<html lang="{language}"')
@@ -281,7 +329,9 @@ class TranslationTests(TestCase):
         champion = make_champion(username="champ")
         dojo = make_dojo("Ghent", champion=champion)
         self.client.force_login(champion)
-        response = self.client.get(reverse("dojo_team_manage", kwargs={"dojo_id": dojo.id}), HTTP_ACCEPT_LANGUAGE="fr-be")
+        response = self.client.get(
+            reverse("dojo_team_manage", kwargs={"dojo_id": dojo.id}), HTTP_ACCEPT_LANGUAGE="fr-be"
+        )
         self.assertContains(response, "Équipe actuelle")
 
     def test_python_texts_are_translated_too(self):
@@ -297,7 +347,6 @@ class TranslationTests(TestCase):
             self.assertEqual(str(MailCategory.REMINDER.label), "Rappels")
 
 
-
 class ContentLanguagesTests(TestCase):
     """core.content_languages: the text in the asked language when the dojo
     wrote one, else the main language, flagged as a fallback."""
@@ -307,8 +356,14 @@ class ContentLanguagesTests(TestCase):
 
         dojo = make_dojo("Brussels", languages=["nl-be", "fr-be"], description="Nederlands")
         dojo.set_translation("fr-be", "description", "Français")
-        self.assertEqual((dojo.localized("description", "fr-be"), dojo.localized("description", "fr-be").is_fallback), ("Français", False))
-        self.assertEqual((dojo.localized("description", "nl"), dojo.localized("description", "nl").is_fallback), ("Nederlands", False))
+        self.assertEqual(
+            (dojo.localized("description", "fr-be"), dojo.localized("description", "fr-be").is_fallback),
+            ("Français", False),
+        )
+        self.assertEqual(
+            (dojo.localized("description", "nl"), dojo.localized("description", "nl").is_fallback),
+            ("Nederlands", False),
+        )
         english = dojo.localized("description", "en-us")
         self.assertEqual((english, english.is_fallback, english.language), ("Nederlands", True, "nl-be"))
         self.assertEqual(normalize("FR_be"), "fr-be")
@@ -318,7 +373,6 @@ class ContentLanguagesTests(TestCase):
         dojo.set_translation("fr-be", "tagline", "Salut")
         dojo.set_translation("fr-be", "tagline", "")
         self.assertEqual(dojo.translations, {})
-
 
 
 class OrganisationContentLanguagesTests(TestCase):
@@ -347,8 +401,17 @@ class OrganisationContentLanguagesTests(TestCase):
         self.assertContains(page, "tr__fr-be__description")
         self.assertNotContains(page, "tr__en-us__name")
 
-        data = {"name": "Web", "subtitle": "Build websites", "description": "HTML and CSS.", "min_age": "", "max_age": "",
-                "no_experience_needed": "on", "translations": "{}", "tr__nl-be__name": "Websites", "tr__fr-be__name": "Sites web"}
+        data = {
+            "name": "Web",
+            "subtitle": "Build websites",
+            "description": "HTML and CSS.",
+            "min_age": "",
+            "max_age": "",
+            "no_experience_needed": "on",
+            "translations": "{}",
+            "tr__nl-be__name": "Websites",
+            "tr__fr-be__name": "Sites web",
+        }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302, response.content[:3000])
         self.pathway.refresh_from_db()
@@ -371,7 +434,6 @@ class OrganisationContentLanguagesTests(TestCase):
         self.assertContains(response, "Alleen in het English")
 
 
-
 class SeedContentLanguagesTests(TestCase):
     """manage.py seed_content_languages: realistic languages per region and
     the seeded texts in them; rerun-safe."""
@@ -382,7 +444,8 @@ class SeedContentLanguagesTests(TestCase):
 
         def province(name):
             return AdministrativeBoundary.objects.create(
-                name=name, kind=AdministrativeBoundary.PROVINCE,
+                name=name,
+                kind=AdministrativeBoundary.PROVINCE,
                 boundary=MultiPolygon(Polygon(((4, 50), (5, 50), (5, 51), (4, 50)))),
             )
 
@@ -405,11 +468,27 @@ class SeedContentLanguagesTests(TestCase):
         from events.management.commands.seed_events import description_for
         from events.models import Event
 
-        dojo = make_dojo("Namur", languages=["fr-be", "en-us"], tagline="Seeing a kid's face light up when their code finally runs — that's the whole job.")
-        faq = FAQ.objects.create(dojo=dojo, question="Is there parking nearby?", answer="Yes, free parking is available right outside the venue.")
-        global_faq = FAQ.objects.create(question="Is it really free?", answer="Yes — every Dojo session is free, run entirely by volunteers.")
-        event = Event.objects.create(dojo=dojo, name="Coding Saturday", description=description_for("Coding Saturday"),
-                                     start_time=timezone.now(), end_time=timezone.now(), places=5)
+        dojo = make_dojo(
+            "Namur",
+            languages=["fr-be", "en-us"],
+            tagline="Seeing a kid's face light up when their code finally runs — that's the whole job.",
+        )
+        faq = FAQ.objects.create(
+            dojo=dojo,
+            question="Is there parking nearby?",
+            answer="Yes, free parking is available right outside the venue.",
+        )
+        global_faq = FAQ.objects.create(
+            question="Is it really free?", answer="Yes — every Dojo session is free, run entirely by volunteers."
+        )
+        event = Event.objects.create(
+            dojo=dojo,
+            name="Coding Saturday",
+            description=description_for("Coding Saturday"),
+            start_time=timezone.now(),
+            end_time=timezone.now(),
+            places=5,
+        )
         pathway = Pathway.objects.create(name="Web Development", subtitle="x")
 
         call_command("seed_content_languages", stdout=StringIO())
@@ -428,7 +507,6 @@ class SeedContentLanguagesTests(TestCase):
         out = StringIO()
         call_command("seed_content_languages", stdout=out)
         self.assertNotRegex(out.getvalue(), r"=[1-9]")
-
 
 
 class ContactAndCodeOfConductTests(TestCase):
@@ -582,8 +660,14 @@ class AuditLogTests(TestCase):
         champion = make_champion(username="champ")
         dojo = make_dojo("Ghent", champion=champion)
         start = timezone.now()
-        event = Event.objects.create(name="Coding", dojo=dojo, places=5, start_time=start,
-                                     end_time=start + timedelta(hours=2), status=Event.OPEN)
+        event = Event.objects.create(
+            name="Coding",
+            dojo=dojo,
+            places=5,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+            status=Event.OPEN,
+        )
         registration = Registration.objects.create(event=event, ninja=self.child, waiting_list=False, position=1)
         self.client.force_login(champion)
         self.client.post(reverse("dojo_event_attendance_mark_all", args=[dojo.id, event.id]))
@@ -626,8 +710,14 @@ class AuditLogAccessTests(TestCase):
         self.with_notes = Ninja.objects.create(name="Lotte", allergies_notes="Peanuts")
         self.without_notes = Ninja.objects.create(name="Mats")
         start = timezone.now() + timedelta(days=1)
-        self.event = Event.objects.create(name="Coding", dojo=self.dojo, places=5, start_time=start,
-                                          end_time=start + timedelta(hours=2), status=Event.OPEN)
+        self.event = Event.objects.create(
+            name="Coding",
+            dojo=self.dojo,
+            places=5,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+            status=Event.OPEN,
+        )
         for position, ninja in enumerate([self.with_notes, self.without_notes]):
             Guardianship.objects.create(guardian=parent, ninja=ninja)
             Registration.objects.create(event=self.event, ninja=ninja, waiting_list=False, position=position)
@@ -693,8 +783,10 @@ class AuditLogAdminTests(TestCase):
         self.client.force_login(self.admin)
         self.assertEqual(self.client.get(reverse("admin:auditlog_logentry_changelist")).status_code, 200)
         self.assertEqual(self.client.get(reverse("admin:dojos_dojo_auditlog", args=[self.dojo.id])).status_code, 200)
-        self.assertContains(self.client.get(reverse("admin:dojos_dojo_changelist")),
-                            reverse("admin:dojos_dojo_auditlog", args=[self.dojo.id]))
+        self.assertContains(
+            self.client.get(reverse("admin:dojos_dojo_changelist")),
+            reverse("admin:dojos_dojo_auditlog", args=[self.dojo.id]),
+        )
 
     def test_the_board_does_not(self):
         self.client.force_login(self.board)
@@ -751,7 +843,8 @@ class SiteFormRenderingTests(TestCase):
         html = self.form()["name"].as_field_group()
         self.assertInHTML(
             '<label class="cd-form__label label" for="id_name">Name'
-            '<span class="cd-form__required" aria-hidden="true">*</span></label>', html,
+            '<span class="cd-form__required" aria-hidden="true">*</span></label>',
+            html,
         )
         self.assertIn('class="cd-form__input body"', html)
         self.assertInHTML('<div class="cd-form__help caption" id="id_name_helptext">Your full name.</div>', html)
@@ -838,17 +931,37 @@ class SiteFormTextsAreTranslatedTests(TestCase):
         user = User.objects.create(username="u")
         bruges = make_dojo("Bruges")
         return [
-            SponsorForm(), PromotionForm(), BadgeForm(), DojoCreateForm(), AnnouncementForm(dojo=make_dojo("Ghent")),
-            NewTemplateForm(), TemplateVersionForm(), BackgroundCheckUploadForm(),
-            AppSetupForm(key="00" * 20, user=user), ConfirmPasswordForm(user),
-            LoginForm(), StyledPasswordResetForm(), StyledSetPasswordForm(user), ForcedPasswordChangeForm(user),
-            ChampionApplicationForm(account=user), MentorApplicationForm(account=user), RegisterGuardianForm(),
-            DojoProfileForm(instance=make_dojo("Antwerp")), EventForm(dojo=bruges, instance=Event(dojo=bruges)),
-            CampaignForm(), JourneyForm(), SegmentForm(), ConfirmUsernameForm(user),
-            ChildLoginForm(Ninja(name="Emma")), AddMentorForm(),
+            SponsorForm(),
+            PromotionForm(),
+            BadgeForm(),
+            DojoCreateForm(),
+            AnnouncementForm(dojo=make_dojo("Ghent")),
+            NewTemplateForm(),
+            TemplateVersionForm(),
+            BackgroundCheckUploadForm(),
+            AppSetupForm(key="00" * 20, user=user),
+            ConfirmPasswordForm(user),
+            LoginForm(),
+            StyledPasswordResetForm(),
+            StyledSetPasswordForm(user),
+            ForcedPasswordChangeForm(user),
+            ChampionApplicationForm(account=user),
+            MentorApplicationForm(account=user),
+            RegisterGuardianForm(),
+            DojoProfileForm(instance=make_dojo("Antwerp")),
+            EventForm(dojo=bruges, instance=Event(dojo=bruges)),
+            CampaignForm(),
+            JourneyForm(),
+            SegmentForm(),
+            ConfirmUsernameForm(user),
+            ChildLoginForm(Ninja(name="Emma")),
+            AddMentorForm(),
             PromoteYouthMentorForm(candidates=Ninja.objects.none()),
-            TransferChampionForm(candidates=bruges.memberships.all()), ApiClientForm(),
-            AddChildForm(guardian=User(last_name="Peeters")), EditChildForm(instance=Ninja(name="Emma")), SignUpChildForm(),
+            TransferChampionForm(candidates=bruges.memberships.all()),
+            ApiClientForm(),
+            AddChildForm(guardian=User(last_name="Peeters")),
+            EditChildForm(instance=Ninja(name="Emma")),
+            SignUpChildForm(),
             AwardBeltForm(registration=Registration(pk=1, ninja=Ninja(name="Emma")), offered=[]),
             AwardBadgeForm(registration=Registration(pk=1, ninja=Ninja(name="Emma")), offered=[]),
         ]

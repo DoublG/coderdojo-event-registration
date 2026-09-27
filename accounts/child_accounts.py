@@ -59,10 +59,13 @@ def _clean_email(email, account=None):
 def set_password_url(account):
     """A link to choose a password: Django's password-reset confirm page.
     It stops working once the password is set (the token covers it)."""
-    path = reverse("password_reset_confirm", kwargs={
-        "uidb64": urlsafe_base64_encode(force_bytes(account.pk)),
-        "token": default_token_generator.make_token(account),
-    })
+    path = reverse(
+        "password_reset_confirm",
+        kwargs={
+            "uidb64": urlsafe_base64_encode(force_bytes(account.pk)),
+            "token": default_token_generator.make_token(account),
+        },
+    )
     return settings.SITE_URL + path
 
 
@@ -70,11 +73,16 @@ def send_login_mail(guardian, account):
     from mailing.categories import MailCategory
     from mailing.services import send_or_log
 
-    return send_or_log(account, MailCategory.SERVICE, "ninja_account_created", {
-        "guardian_name": guardian.get_full_name() or guardian.get_username(),
-        "username": account.get_username(),
-        "set_password_url": set_password_url(account),
-    })
+    return send_or_log(
+        account,
+        MailCategory.SERVICE,
+        "ninja_account_created",
+        {
+            "guardian_name": guardian.get_full_name() or guardian.get_username(),
+            "username": account.get_username(),
+            "set_password_url": set_password_url(account),
+        },
+    )
 
 
 @transaction.atomic

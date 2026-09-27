@@ -62,7 +62,7 @@ def _claim_pending():
 
 
 def _chunks(ids, size):
-    return [ids[i:i + size] for i in range(0, len(ids), size)]
+    return [ids[i : i + size] for i in range(0, len(ids), size)]
 
 
 @shared_task
@@ -100,8 +100,11 @@ def _build(row):
         headers["List-Unsubscribe"] = f"<{unsubscribe_url(row.user, row.category)}>"
         headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
     message = QueuedEmail(
-        subject=row.subject, body=row.body, from_email=envelope_from,
-        to=[row.recipient], headers=headers,
+        subject=row.subject,
+        body=row.body,
+        from_email=envelope_from,
+        to=[row.recipient],
+        headers=headers,
     )
     return message, message_id
 
@@ -124,7 +127,8 @@ class SendBatchTask(Task):
         # Only after the last retry: whatever is still `sending` failed.
         ids = args[0] if args else kwargs.get("ids", [])
         EmailMessage.objects.filter(pk__in=ids, status=Status.SENDING).update(
-            status=Status.FAILED, status_reason=str(exc)[:255],
+            status=Status.FAILED,
+            status_reason=str(exc)[:255],
         )
 
 
@@ -151,7 +155,9 @@ def send_email_batch(self, ids):
             for row in rows:
                 # Again right before it goes out: a campaign drips out under
                 # the rate limit, and people unsubscribe (or bounce) meanwhile.
-                if row.user_id and (reason := suppressed_reason(row.user, row.category, row.recipient, test=row.is_test)):
+                if row.user_id and (
+                    reason := suppressed_reason(row.user, row.category, row.recipient, test=row.is_test)
+                ):
                     EmailMessage.objects.filter(pk=row.pk).update(status=Status.SUPPRESSED, status_reason=reason)
                     continue
                 message, message_id = _build(row)
@@ -163,7 +169,9 @@ def send_email_batch(self, ids):
                         raise TransientSendError(str(error)) from error
                     EmailMessage.objects.filter(pk=row.pk).update(status=Status.FAILED, status_reason=str(error)[:255])
                     continue
-                EmailMessage.objects.filter(pk=row.pk).update(status=Status.SENT, sent_at=timezone.now(), status_reason="")
+                EmailMessage.objects.filter(pk=row.pk).update(
+                    status=Status.SENT, sent_at=timezone.now(), status_reason=""
+                )
                 sent += 1
     except (smtplib.SMTPException, OSError) as error:
         # Opening or closing the connection failed.
@@ -179,15 +187,20 @@ def requeue_stuck_emails():
     queue's state, so a stopped worker gets noticed."""
     cutoff = timezone.now() - timedelta(minutes=settings.MAILING_CLAIM_TIMEOUT_MINUTES)
     requeued = EmailMessage.objects.filter(status=Status.SENDING, claimed_at__lt=cutoff).update(
-        status=Status.PENDING, claimed_at=None,
+        status=Status.PENDING,
+        claimed_at=None,
     )
     pending = EmailMessage.objects.filter(status=Status.PENDING)
     oldest = pending.aggregate(oldest=Min("created_at"))["oldest"]
     age = (timezone.now() - oldest) if oldest else None
     log = logger.warning if requeued or (age and age > timedelta(minutes=30)) else logger.info
-    log("mail queue: %d pending (oldest %s), %d sending, %d requeued", pending.count(),
+    log(
+        "mail queue: %d pending (oldest %s), %d sending, %d requeued",
+        pending.count(),
         f"{int(age.total_seconds() // 60)} min" if age else "none",
-        EmailMessage.objects.filter(status=Status.SENDING).count(), requeued)
+        EmailMessage.objects.filter(status=Status.SENDING).count(),
+        requeued,
+    )
     return requeued
 
 
@@ -225,7 +238,6 @@ def announce_new_sessions():
     from .automated import announce_new_sessions as run
 
     return run()
-
 
 
 @shared_task

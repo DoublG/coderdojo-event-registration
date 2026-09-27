@@ -19,9 +19,7 @@ def user_roles(request):
         approved_mentor = is_approved_mentor(request.user)
         # Kinds with a pending or approved application — no point offering
         # "Apply ..." for those again.
-        applied_kinds = set(
-            request.user.applications.exclude(status="rejected").values_list("kind", flat=True)
-        )
+        applied_kinds = set(request.user.applications.exclude(status="rejected").values_list("kind", flat=True))
         admin_dojo = accessible_dojos(request.user).first()
         organisation_role = request.user.organisation_roles.exists()
         organisation_admin = request.user.organisation_roles.filter(role="admin").exists()

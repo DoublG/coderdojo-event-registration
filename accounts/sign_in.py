@@ -76,8 +76,9 @@ def roles_of(user, among=None):
     team = {SignInRequirement.CHAMPION: DojoMembership.CHAMPION, SignInRequirement.MENTOR: DojoMembership.MENTOR}
     if among & team.keys():
         roles = set(
-            user.dojo_memberships.filter(status=DojoMembership.ACTIVE, role__in=team.values())
-            .values_list("role", flat=True)
+            user.dojo_memberships.filter(status=DojoMembership.ACTIVE, role__in=team.values()).values_list(
+                "role", flat=True
+            )
         )
         held |= {role for role, value in team.items() if role in among and value in roles}
     return held
@@ -181,14 +182,16 @@ def accounts_with_role(role):
         return accounts.filter(organisation_roles__role=OrganisationRole.BOARD).distinct()
     if role == SignInRequirement.REVIEWER:
         permissions = Permission.objects.filter(
-            content_type__app_label="applications", codename="can_review_background_checks",
+            content_type__app_label="applications",
+            codename="can_review_background_checks",
         )
         return accounts.filter(
             Q(is_superuser=True) | Q(user_permissions__in=permissions) | Q(groups__permissions__in=permissions)
         ).distinct()
     if role in (SignInRequirement.CHAMPION, SignInRequirement.MENTOR):
         return accounts.filter(
-            dojo_memberships__status=DojoMembership.ACTIVE, dojo_memberships__role=role,
+            dojo_memberships__status=DojoMembership.ACTIVE,
+            dojo_memberships__role=role,
         ).distinct()
     return accounts
 

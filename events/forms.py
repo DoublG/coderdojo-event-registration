@@ -41,7 +41,9 @@ class EventSearchForm(forms.Form):
     location = forms.CharField(
         required=False,
         max_length=200,
-        widget=forms.TextInput(attrs={"class": "cd-form__input body", "id": "ep-location", "placeholder": _("Postcode or city")}),
+        widget=forms.TextInput(
+            attrs={"class": "cd-form__input body", "id": "ep-location", "placeholder": _("Postcode or city")}
+        ),
     )
     date = forms.ChoiceField(
         required=False,
@@ -87,21 +89,24 @@ class EventForm(forms.ModelForm):
     representable through this form."""
 
     event_date = forms.DateField(
-        label=_("Date"), input_formats=[BELGIAN_DATE_FORMAT],
+        label=_("Date"),
+        input_formats=[BELGIAN_DATE_FORMAT],
         widget=forms.DateInput(
             attrs={"placeholder": _("dd/mm/yyyy"), "inputmode": "numeric"},
             format=BELGIAN_DATE_FORMAT,
         ),
     )
     start_time = forms.TimeField(
-        label=_("Starts"), input_formats=[BELGIAN_TIME_FORMAT],
+        label=_("Starts"),
+        input_formats=[BELGIAN_TIME_FORMAT],
         widget=forms.TimeInput(
             attrs={"placeholder": _("HH:MM")},
             format=BELGIAN_TIME_FORMAT,
         ),
     )
     end_time = forms.TimeField(
-        label=_("Ends"), input_formats=[BELGIAN_TIME_FORMAT],
+        label=_("Ends"),
+        input_formats=[BELGIAN_TIME_FORMAT],
         widget=forms.TimeInput(
             attrs={"placeholder": _("HH:MM")},
             format=BELGIAN_TIME_FORMAT,
@@ -120,14 +125,30 @@ class EventForm(forms.ModelForm):
     class Meta:
         model = Event
         fields = [
-            "name", "places", "external_registration_url", "venue_name", "image",
-            "description", "min_age", "max_age", "audience", "team", "pathways",
+            "name",
+            "places",
+            "external_registration_url",
+            "venue_name",
+            "image",
+            "description",
+            "min_age",
+            "max_age",
+            "audience",
+            "team",
+            "pathways",
         ]
         labels = {
-            "name": _("Name"), "places": _("Places"), "external_registration_url": _("Registration on another website"),
-            "venue_name": _("Venue"), "image": _("…or upload your own"), "description": _("Description"),
-            "min_age": _("Minimum age"), "max_age": _("Maximum age"), "audience": _("Aimed at"),
-            "team": _("Team for this session"), "pathways": _("Pathways this session covers"),
+            "name": _("Name"),
+            "places": _("Places"),
+            "external_registration_url": _("Registration on another website"),
+            "venue_name": _("Venue"),
+            "image": _("…or upload your own"),
+            "description": _("Description"),
+            "min_age": _("Minimum age"),
+            "max_age": _("Maximum age"),
+            "audience": _("Aimed at"),
+            "team": _("Team for this session"),
+            "pathways": _("Pathways this session covers"),
         }
         # Every shown help text translated; the model's own are English notes for the admin.
         help_texts = {
@@ -139,7 +160,11 @@ class EventForm(forms.ModelForm):
             "image": _("Uploading a file here overrides the template chosen above."),
             "description": _("Supports basic Markdown."),
             "audience": _("A girls' session gets a label on the site. Anyone can still sign up."),
-            "name": "", "min_age": "", "max_age": "", "team": "", "pathways": "",
+            "name": "",
+            "min_age": "",
+            "max_age": "",
+            "team": "",
+            "pathways": "",
         }
         # The input classes come from core.forms.SiteBoundField.
         widgets = {
@@ -147,9 +172,14 @@ class EventForm(forms.ModelForm):
             "places": forms.NumberInput(attrs={"placeholder": _("20")}),
             "external_registration_url": forms.URLInput(attrs={"placeholder": _("https://www.coolestprojects.org/…")}),
             "venue_name": forms.TextInput(attrs={"placeholder": _('e.g. "Ghent Public Library"')}),
-            "description": forms.Textarea(attrs={
-                "rows": 6, "placeholder": _("What this session is about, what to bring — shown on the session's public page."),
-            }),
+            "description": forms.Textarea(
+                attrs={
+                    "rows": 6,
+                    "placeholder": _(
+                        "What this session is about, what to bring — shown on the session's public page."
+                    ),
+                }
+            ),
             "min_age": forms.NumberInput(attrs={"placeholder": _("7")}),
             "max_age": forms.NumberInput(attrs={"placeholder": _("18")}),
             "team": forms.CheckboxSelectMultiple,
@@ -184,9 +214,14 @@ class EventForm(forms.ModelForm):
             self.fields["end_time"].initial = self.instance.end_time.time()
         # The session's name and description in the dojo's other languages.
         labels = {"name": _("Name"), "description": _("Description")}
-        self.translation_groups = bound_translation_groups(self, add_translation_fields(
-            self, self.instance, lambda field: optional_copy(self.fields[field], labels[field]),
-        ))
+        self.translation_groups = bound_translation_groups(
+            self,
+            add_translation_fields(
+                self,
+                self.instance,
+                lambda field: optional_copy(self.fields[field], labels[field]),
+            ),
+        )
 
     def clean_audience(self):
         return self.cleaned_data.get("audience") or Event.EVERYONE
@@ -234,11 +269,18 @@ class BadgeForm(forms.ModelForm):
         model = Badge
         fields = ["name", "kind", "description", "criteria", "threshold", "grants_belt", "library_icon", "icon"]
         labels = {
-            "name": _("Name"), "kind": _("Kind"), "description": _("Description"), "criteria": _("How to earn it"),
-            "threshold": _("Sessions needed"), "grants_belt": _("Also grants belt"), "icon": _("Icon"),
+            "name": _("Name"),
+            "kind": _("Kind"),
+            "description": _("Description"),
+            "criteria": _("How to earn it"),
+            "threshold": _("Sessions needed"),
+            "grants_belt": _("Also grants belt"),
+            "icon": _("Icon"),
         }
         help_texts = {
-            "kind": _("A one-off is earned by doing something once; a milestone is reached by attending a number of sessions."),
+            "kind": _(
+                "A one-off is earned by doing something once; a milestone is reached by attending a number of sessions."
+            ),
             "criteria": _("One-off only."),
             "threshold": _("Milestone only: how many sessions a ninja must attend."),
             "grants_belt": _("Milestone only, optional: reaching it also awards this belt."),
@@ -261,9 +303,14 @@ class BadgeForm(forms.ModelForm):
         ]
         self.fields["library_icon"].initial = library_filename(self.instance.icon, "awards")
         labels = {"name": _("Name"), "description": _("Description"), "criteria": _("How to earn it")}
-        self.translation_groups = bound_translation_groups(self, add_translation_fields(
-            self, self.instance, lambda field: optional_copy(self.fields[field], labels[field]),
-        ))
+        self.translation_groups = bound_translation_groups(
+            self,
+            add_translation_fields(
+                self,
+                self.instance,
+                lambda field: optional_copy(self.fields[field], labels[field]),
+            ),
+        )
 
     def main_fields(self):
         """The award's own fields, without the per-language copies."""

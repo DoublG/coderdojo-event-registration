@@ -15,9 +15,13 @@ BRUSSELS = "brussels"
 
 
 def _in_province(province_ids):
-    return Exists(AdministrativeBoundary.objects.filter(
-        kind=AdministrativeBoundary.PROVINCE, pk__in=province_ids, boundary__contains=OuterRef("center"),
-    ))
+    return Exists(
+        AdministrativeBoundary.objects.filter(
+            kind=AdministrativeBoundary.PROVINCE,
+            pk__in=province_ids,
+            boundary__contains=OuterRef("center"),
+        )
+    )
 
 
 class ProvinceAttribute(SegmentAttribute):
@@ -33,7 +37,9 @@ class ProvinceAttribute(SegmentAttribute):
 
     def choices(self):
         provinces = AdministrativeBoundary.objects.filter(kind=AdministrativeBoundary.PROVINCE).order_by("name")
-        return [SegmentChoice(p.pk, p.name) for p in provinces] + [SegmentChoice(BRUSSELS, _("Brussels-Capital Region"))]
+        return [SegmentChoice(p.pk, p.name) for p in provinces] + [
+            SegmentChoice(BRUSSELS, _("Brussels-Capital Region"))
+        ]
 
     def build_q(self, operator, value):
         values = [value] if operator == "equals" else value
@@ -43,9 +49,11 @@ class ProvinceAttribute(SegmentAttribute):
             matched |= Q(pk__in=Municipality.objects.filter(_in_province(province_ids)))
         if BRUSSELS in values:
             all_provinces = AdministrativeBoundary.objects.filter(kind=AdministrativeBoundary.PROVINCE)
-            matched |= Q(pk__in=Municipality.objects.filter(postal_code__startswith="1").exclude(
-                _in_province(all_provinces.values("pk"))
-            ))
+            matched |= Q(
+                pk__in=Municipality.objects.filter(postal_code__startswith="1").exclude(
+                    _in_province(all_provinces.values("pk"))
+                )
+            )
         postal_codes = Municipality.objects.filter(matched).values("postal_code")
         return choice_q("postal_code", "not_in" if operator == "not_in" else "in", postal_codes)
 
@@ -75,11 +83,17 @@ class NearDojoAttribute(SegmentAttribute):
     scope = USER
 
     def choices(self):
-        return [SegmentChoice(dojo.pk, dojo.name) for dojo in Dojo.objects.filter(kind=Dojo.DOJO).exclude(location=None).order_by("name")]
+        return [
+            SegmentChoice(dojo.pk, dojo.name)
+            for dojo in Dojo.objects.filter(kind=Dojo.DOJO).exclude(location=None).order_by("name")
+        ]
 
     def validate(self, operator, value):
         if operator not in self.operators:
-            raise ValueError(_("“%(label)s” supports %(join)s, not “%(operator)s”.") % {"label": self.label, "join": ', '.join(self.operators), "operator": operator})
+            raise ValueError(
+                _("“%(label)s” supports %(join)s, not “%(operator)s”.")
+                % {"label": self.label, "join": ", ".join(self.operators), "operator": operator}
+            )
         if not isinstance(value, dict) or not isinstance(value.get("km"), (int, float)) or value["km"] <= 0:
             raise ValueError(_('“Lives near dojo” needs a value like {"dojo": 12, "km": 25}.'))
         if value.get("dojo") not in {choice.value for choice in self.choices()}:
@@ -87,7 +101,10 @@ class NearDojoAttribute(SegmentAttribute):
 
     def describe(self, operator, value):
         names = {c.value: c.label for c in self.choices()}
-        return _("Lives within %(km)s km of %(dojo)s") % {"km": value.get("km"), "dojo": names.get(value.get("dojo"), _("a dojo"))}
+        return _("Lives within %(km)s km of %(dojo)s") % {
+            "km": value.get("km"),
+            "dojo": names.get(value.get("dojo"), _("a dojo")),
+        }
 
     def value_from_form(self, operator, data):
         try:

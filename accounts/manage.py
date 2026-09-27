@@ -47,22 +47,28 @@ def security_policy(request):
         accounts = list(
             User.objects.filter(account_type=User.ADULT)
             .filter(
-                Q(email__icontains=query) | Q(username__icontains=query)
-                | Q(first_name__icontains=query) | Q(last_name__icontains=query)
+                Q(email__icontains=query)
+                | Q(username__icontains=query)
+                | Q(first_name__icontains=query)
+                | Q(last_name__icontains=query)
             )
             .order_by("last_name", "first_name", "username")[:SEARCH_LIMIT]
         )
         for account in accounts:
             account.two_step_methods = two_step.methods(account)
     counts = _role_counts()
-    return render(request, "accounts/manage/security.html", {
-        "form": form,
-        "rows": [(*row, counts[row[0]]) for row in form.rows()],
-        "query": query,
-        "accounts": accounts,
-        "search_limit": SEARCH_LIMIT,
-        "active": "security",
-    })
+    return render(
+        request,
+        "accounts/manage/security.html",
+        {
+            "form": form,
+            "rows": [(*row, counts[row[0]]) for row in form.rows()],
+            "query": query,
+            "accounts": accounts,
+            "search_limit": SEARCH_LIMIT,
+            "active": "security",
+        },
+    )
 
 
 @login_required
@@ -80,5 +86,7 @@ def turn_off_two_step(request, user_id):
         messages.error(request, _("Change your own sign-in methods on your account's Sign-in security page."))
         return redirect(back)
     two_step.turn_off(account, by_organisation=True)
-    messages.success(request, _("Two-step login is off for %(name)s.") % {"name": account.get_full_name() or account.username})
+    messages.success(
+        request, _("Two-step login is off for %(name)s.") % {"name": account.get_full_name() or account.username}
+    )
     return redirect(back)

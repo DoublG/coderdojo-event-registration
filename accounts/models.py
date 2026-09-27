@@ -21,7 +21,7 @@ class User(AbstractUser):
     must_change_password = models.BooleanField(
         default=False,
         help_text="Forces a password change on next login (e.g. set by an admin who reset it). "
-                  "Enforced by accounts.middleware.ForcePasswordChangeMiddleware.",
+        "Enforced by accounts.middleware.ForcePasswordChangeMiddleware.",
     )
 
     # The account's *current* Belgian background check (uittreksel model 2,
@@ -45,24 +45,34 @@ class User(AbstractUser):
         (CHECK_REJECTED, "Rejected"),
     ]
     background_check_status = models.CharField(
-        max_length=20, choices=CHECK_STATUS_CHOICES, default=CHECK_NOT_REQUESTED,
+        max_length=20,
+        choices=CHECK_STATUS_CHOICES,
+        default=CHECK_NOT_REQUESTED,
     )
     background_check_token = models.UUIDField(
-        null=True, blank=True, unique=True, editable=False,
+        null=True,
+        blank=True,
+        unique=True,
+        editable=False,
         help_text="Set when a check is requested; builds the emailed upload link.",
     )
     background_check_document = models.FileField(
-        upload_to="background_checks/", storage=get_private_storage, null=True, blank=True,
+        upload_to="background_checks/",
+        storage=get_private_storage,
+        null=True,
+        blank=True,
         help_text="The uploaded uittreksel uit het strafregister, model 2 (Artikel 596.2). Only "
-                  "readable by a reviewer (applications.can_review_background_checks) via the "
-                  "protected download view — never a public media URL. Deleted as soon as a "
-                  "decision is made; only the decision is kept.",
+        "readable by a reviewer (applications.can_review_background_checks) via the "
+        "protected download view — never a public media URL. Deleted as soon as a "
+        "decision is made; only the decision is kept.",
     )
     background_check_requested_at = models.DateTimeField(null=True, blank=True)
     background_check_submitted_at = models.DateTimeField(null=True, blank=True)
     background_check_reviewed_at = models.DateTimeField(null=True, blank=True)
     background_check_expires_at = models.DateTimeField(
-        null=True, blank=True, help_text="Set on validation; the check must be redone after this date.",
+        null=True,
+        blank=True,
+        help_text="Set on validation; the check must be redone after this date.",
     )
 
     # The redesign's two account types (DATA_MODEL.md §10): a normal adult
@@ -77,27 +87,35 @@ class User(AbstractUser):
     account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default=ADULT)
     phone = models.CharField(max_length=30, blank=True, default="")
     preferred_language = models.CharField(
-        max_length=10, choices=settings.LANGUAGES, blank=True, default="",
+        max_length=10,
+        choices=settings.LANGUAGES,
+        blank=True,
+        default="",
         help_text="The language mails are sent in. Set from the site's language at sign-up; "
-                  "empty means the default (English).",
+        "empty means the default (English).",
     )
     postal_code = models.CharField(
-        max_length=4, blank=True, default="",
+        max_length=4,
+        blank=True,
+        default="",
         help_text="Belgian postcode where the family lives (geo.Municipality.postal_code). Used to "
-                  "tell families about dojos and sessions near them, never shown publicly.",
+        "tell families about dojos and sessions near them, never shown publicly.",
     )
 
     # The team-page profile: shown wherever this person appears on a dojo's
     # team (dojos.DojoMembership), and shared by every dojo they're on.
     display_name = models.CharField(
-        max_length=150, blank=True, default="",
+        max_length=150,
+        blank=True,
+        default="",
         help_text="How this person is named on team pages; defaults to their full name.",
     )
     title = models.CharField(max_length=200, blank=True, default="", help_text='e.g. "Software engineer"')
     bio = models.TextField(blank=True, default="")
     photo = models.ImageField(upload_to="profiles/", null=True, blank=True)
     show_on_team_pages = models.BooleanField(
-        default=True, help_text="Uncheck to keep this person off the public team pages.",
+        default=True,
+        help_text="Uncheck to keep this person off the public team pages.",
     )
 
     @property
@@ -152,7 +170,8 @@ def ninja_birth_date_error(date_of_birth):
         return None
     if not NINJA_MIN_AGE <= age_on(date_of_birth, date.today()) <= NINJA_MAX_AGE:
         return _("Ninjas are %(min)s to %(max)s years old — check the date of birth.") % {
-            "min": NINJA_MIN_AGE, "max": NINJA_MAX_AGE,
+            "min": NINJA_MIN_AGE,
+            "max": NINJA_MAX_AGE,
         }
     return None
 
@@ -189,9 +208,11 @@ class Ninja(models.Model):
     name = models.CharField("first name", max_length=200)
     family_name = models.CharField(max_length=200, blank=True, default="")
     gender = models.CharField(
-        max_length=12, choices=GENDER_CHOICES, default=UNSPECIFIED,
+        max_length=12,
+        choices=GENDER_CHOICES,
+        default=UNSPECIFIED,
         help_text="Optional, never shown publicly. Used to let families know about girls' sessions "
-                  "(Event.audience), never to restrict who can sign up.",
+        "(Event.audience), never to restrict who can sign up.",
     )
     account = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -200,8 +221,7 @@ class Ninja(models.Model):
         blank=True,
         related_name="ninja",
         limit_choices_to={"account_type": "ninja"},
-        help_text="The child's own login (an account of type ninja) — set only if a "
-                  "parent has allowed it.",
+        help_text="The child's own login (an account of type ninja) — set only if a parent has allowed it.",
     )
 
     date_of_birth = models.DateField(null=True, blank=True)
@@ -210,9 +230,10 @@ class Ninja(models.Model):
     )
     member_since = models.DateField(null=True, blank=True)
     allergies_notes = models.TextField(
-        blank=True, default="",
+        blank=True,
+        default="",
         help_text="Allergies or other notes from the family (health data). Shown to the champion only, on the "
-                  "attendance list of a session the child has a confirmed place at.",
+        "attendance list of a session the child has a confirmed place at.",
     )
     photo = models.ImageField(upload_to="participants/", null=True, blank=True)
 
@@ -268,7 +289,9 @@ class Guardianship(models.Model):
     RELATION_CHOICES = [(PARENT, "Parent"), (LEGAL_GUARDIAN, "Legal guardian"), (OTHER, "Other")]
 
     guardian = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="guardianships",
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="guardianships",
         limit_choices_to={"account_type": "adult"},
     )
     ninja = models.ForeignKey(Ninja, on_delete=models.CASCADE, related_name="guardianships")
@@ -276,9 +299,10 @@ class Guardianship(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     # The guardian's consent to the child's data being kept (accounts.consent).
     consent_given_at = models.DateTimeField(
-        null=True, blank=True,
+        null=True,
+        blank=True,
         help_text="When the guardian agreed to the child's data being kept; empty for links made before the "
-                  "consent was asked, or made in the admin.",
+        "consent was asked, or made in the admin.",
     )
     consent_wording_version = models.CharField(
         max_length=20, blank=True, default="", help_text="The wording agreed to (accounts.consent)."
@@ -313,7 +337,9 @@ class OrganisationRole(models.Model):
     ROLE_CHOICES = [(BOARD, "Board (read-only)"), (ADMIN, "Admin")]
 
     account = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="organisation_roles",
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="organisation_roles",
         limit_choices_to={"account_type": "adult"},
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
@@ -376,12 +402,17 @@ class SignInRequirement(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, unique=True)
     level = models.CharField(max_length=10, choices=LEVEL_CHOICES, default=PASSWORD)
     required_from = models.DateField(
-        null=True, blank=True,
+        null=True,
+        blank=True,
         help_text="From this day on the level is required; before it, the accounts see a notice. Empty = right away.",
     )
     updated_at = models.DateTimeField(auto_now=True)
     updated_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
     )
 
     objects = SignInRequirementManager()

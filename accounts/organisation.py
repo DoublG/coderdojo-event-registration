@@ -84,7 +84,8 @@ def _permissions(spec):
     for model, actions in spec.items():
         app_label, model_name = model.split(".")
         perms += Permission.objects.filter(
-            content_type__app_label=app_label, codename__in=[f"{a}_{model_name}" for a in actions],
+            content_type__app_label=app_label,
+            codename__in=[f"{a}_{model_name}" for a in actions],
         )
     return perms
 

@@ -41,9 +41,7 @@ def promotion_list(request):
     require_organisation_admin(request)
     now = timezone.now()
     promotions = list(Promotion.objects.order_by("placement", "rank", "starts_at", "id"))
-    visible = set(
-        Event.objects.visible().filter(pk__in={p.event_id for p in promotions}).values_list("pk", flat=True)
-    )
+    visible = set(Event.objects.visible().filter(pk__in={p.event_id for p in promotions}).values_list("pk", flat=True))
     groups = []
     for value, label in Promotion.PLACEMENT_CHOICES:
         rows = [(p, promotion_state(p, visible, now)) for p in promotions if p.placement == value]
@@ -74,9 +72,15 @@ def promotion_detail(request, promotion_id):
         form.save()
         messages.success(request, _("Promotion saved."))
         return redirect("manage_promotion_list")
-    return render(request, "content/manage/promotion_form.html", {
-        "form": form, "promotion": promotion, "active": "promotions",
-    })
+    return render(
+        request,
+        "content/manage/promotion_form.html",
+        {
+            "form": form,
+            "promotion": promotion,
+            "active": "promotions",
+        },
+    )
 
 
 @login_required
@@ -92,7 +96,9 @@ def promotion_delete(request, promotion_id):
 @login_required
 def sponsor_list(request):
     require_organisation_admin(request)
-    return render(request, "content/manage/sponsor_list.html", {"sponsors": Sponsor.objects.all(), "active": "sponsors"})
+    return render(
+        request, "content/manage/sponsor_list.html", {"sponsors": Sponsor.objects.all(), "active": "sponsors"}
+    )
 
 
 @login_required
@@ -115,7 +121,9 @@ def sponsor_detail(request, sponsor_id):
         form.save()
         messages.success(request, _("Sponsor saved."))
         return redirect("manage_sponsor_list")
-    return render(request, "content/manage/sponsor_form.html", {"form": form, "sponsor": sponsor, "active": "sponsors"})
+    return render(
+        request, "content/manage/sponsor_form.html", {"form": form, "sponsor": sponsor, "active": "sponsors"}
+    )
 
 
 @login_required
@@ -125,4 +133,3 @@ def sponsor_delete(request, sponsor_id):
     get_object_or_404(Sponsor, pk=sponsor_id).delete()
     messages.success(request, _("Sponsor removed."))
     return redirect("manage_sponsor_list")
-

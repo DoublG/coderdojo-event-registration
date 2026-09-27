@@ -26,9 +26,11 @@ def picks():
     return [
         seeded.filter(organisation_roles__role=OrganisationRole.ADMIN).first(),
         seeded.filter(active, dojo_memberships__role=DojoMembership.CHAMPION)
-        .exclude(dojo_memberships__dojo__kind=Dojo.ORGANISATION).first(),
+        .exclude(dojo_memberships__dojo__kind=Dojo.ORGANISATION)
+        .first(),
         seeded.filter(active, dojo_memberships__role=DojoMembership.MENTOR)
-        .exclude(dojo_memberships__role=DojoMembership.CHAMPION).first(),
+        .exclude(dojo_memberships__role=DojoMembership.CHAMPION)
+        .first(),
         seeded.filter(guardianships__isnull=False).exclude(team).first(),
     ]
 
@@ -50,7 +52,9 @@ class Command(BaseCommand):
             TOTPDevice.objects.create(user=user, name=two_step.DEFAULT_NAME)
             two_step.make_backup_codes(user)
             created.append(user.username)
-        self.stdout.write(self.style.SUCCESS(
-            f"Two-step login turned on for {len(created)} seeded accounts"
-            + (f": {', '.join(created)}." if created else " (already on).")
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Two-step login turned on for {len(created)} seeded accounts"
+                + (f": {', '.join(created)}." if created else " (already on).")
+            )
+        )

@@ -8,11 +8,14 @@ def _bounce_address():
     return (settings.MAILING_BOUNCE_ADDRESS or "bounces@example.org").replace("{id}", "0")
 
 
-def dsn_report(recipient, message_id="", action="failed", status="5.1.1", to=None,
-               diagnostic="smtp; 550 5.1.1 No such user"):
+def dsn_report(
+    recipient, message_id="", action="failed", status="5.1.1", to=None, diagnostic="smtp; 550 5.1.1 No such user"
+):
     """A delivery-status notification (RFC 3464), as a receiving server sends
     it back: action `failed` + 5.x.x is a hard bounce, `delayed` a soft one."""
-    original = f"Message-ID: {message_id}\nSubject: (original message)\n" if message_id else "Subject: (original message)\n"
+    original = (
+        f"Message-ID: {message_id}\nSubject: (original message)\n" if message_id else "Subject: (original message)\n"
+    )
     return f"""From: MAILER-DAEMON@mx.example.net
 To: {to or _bounce_address()}
 Subject: Undelivered Mail Returned to Sender

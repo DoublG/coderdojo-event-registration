@@ -56,15 +56,23 @@ class Application(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
     submitted_at = models.DateTimeField(auto_now_add=True)
     decided_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
     )
     decided_at = models.DateTimeField(null=True, blank=True)
 
     # Mentor applications.
     dojo = models.ForeignKey(
-        "dojos.Dojo", on_delete=models.SET_NULL, null=True, blank=True, related_name="applications",
+        "dojos.Dojo",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="applications",
         help_text="Mentor applications: the dojo they'd like to help at (blank = any). Approval "
-                  "files a join request there.",
+        "files a join request there.",
     )
     mentor_role = models.CharField(max_length=20, choices=MENTOR_ROLE_CHOICES, blank=True, default="")
 
@@ -74,11 +82,13 @@ class Application(models.Model):
     proposed_venue = models.CharField(max_length=200, blank=True, default="")
 
     message = models.TextField(blank=True, default="", help_text="Skills, interests, experience, anything useful.")
-    consent = models.BooleanField(default=False, help_text="Champions: understands sessions are free and volunteer-run.")
+    consent = models.BooleanField(
+        default=False, help_text="Champions: understands sessions are free and volunteer-run."
+    )
     background_check_consent = models.BooleanField(
         default=False,
         help_text="Understands a Belgian criminal record extract (model 2, Artikel 596.2) is required "
-                  "before working with minors.",
+        "before working with minors.",
     )
 
     objects = ApplicationManager()
@@ -110,11 +120,17 @@ class BackgroundCheckHistory(models.Model):
     DECISION_CHOICES = [(VALIDATED, _("Validated")), (REJECTED, _("Rejected"))]
 
     account = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="background_check_history",
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="background_check_history",
     )
     decision = models.CharField(max_length=10, choices=DECISION_CHOICES)
     reviewed_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
     )
     reviewed_at = models.DateTimeField()
     requested_at = models.DateTimeField(null=True, blank=True)

@@ -12,12 +12,38 @@ from core.audit import without_audit_log
 from dojos.models import Dojo, DojoMembership
 
 FIRST_NAMES = [
-    "Emma", "Liam", "Olivia", "Noah", "Sophie", "Lucas", "Mila", "Finn",
-    "Lotte", "Milan", "Fien", "Arthur", "Marie", "Louis", "Anna", "Jules",
+    "Emma",
+    "Liam",
+    "Olivia",
+    "Noah",
+    "Sophie",
+    "Lucas",
+    "Mila",
+    "Finn",
+    "Lotte",
+    "Milan",
+    "Fien",
+    "Arthur",
+    "Marie",
+    "Louis",
+    "Anna",
+    "Jules",
 ]
 LAST_NAMES = [
-    "Peeters", "Janssens", "Maes", "Jacobs", "Mertens", "Willems", "Claes",
-    "Goossens", "Wouters", "De Smet", "Dubois", "Lambert", "Simon", "Michel",
+    "Peeters",
+    "Janssens",
+    "Maes",
+    "Jacobs",
+    "Mertens",
+    "Willems",
+    "Claes",
+    "Goossens",
+    "Wouters",
+    "De Smet",
+    "Dubois",
+    "Lambert",
+    "Simon",
+    "Michel",
 ]
 
 
@@ -33,13 +59,19 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         rng = random.Random(1)
         created = reused = 0
-        skipped = Dojo.objects.filter(
-            memberships__role=DojoMembership.CHAMPION, memberships__status=DojoMembership.ACTIVE,
-        ).distinct().count()
+        skipped = (
+            Dojo.objects.filter(
+                memberships__role=DojoMembership.CHAMPION,
+                memberships__status=DojoMembership.ACTIVE,
+            )
+            .distinct()
+            .count()
+        )
         credential_rows = []
 
         for dojo in Dojo.objects.exclude(
-            memberships__role=DojoMembership.CHAMPION, memberships__status=DojoMembership.ACTIVE,
+            memberships__role=DojoMembership.CHAMPION,
+            memberships__status=DojoMembership.ACTIVE,
         ):
             slug = slugify(dojo.name) or f"dojo-{dojo.id}"
             username = f"owner-{dojo.id}-{slug}"[:150]
@@ -62,7 +94,8 @@ class Command(BaseCommand):
 
             approve_for_seeding(owner, Application.CHAMPION, rng, area=dojo.name)
             DojoMembership.objects.update_or_create(
-                dojo=dojo, user=owner,
+                dojo=dojo,
+                user=owner,
                 defaults={
                     "role": DojoMembership.CHAMPION,
                     "status": DojoMembership.ACTIVE,
@@ -75,15 +108,19 @@ class Command(BaseCommand):
         # before the onboarding redesign — without it they'd have no dashboard.
         approved = 0
         for membership in DojoMembership.objects.filter(role=DojoMembership.CHAMPION).select_related("user", "dojo"):
-            if not Application.objects.filter(account=membership.user, kind=Application.CHAMPION, status=Application.APPROVED).exists():
+            if not Application.objects.filter(
+                account=membership.user, kind=Application.CHAMPION, status=Application.APPROVED
+            ).exists():
                 approve_for_seeding(membership.user, Application.CHAMPION, rng, area=membership.dojo.name)
                 approved += 1
 
         if credential_rows:
             write_credentials("dojo_owner", credential_rows)
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Done. created={created} reused={reused} skipped={skipped} (already had a champion), "
-            f"approved={approved}. "
-            f"Credentials for newly seeded owners written to {CREDENTIALS_FILE}"
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Done. created={created} reused={reused} skipped={skipped} (already had a champion), "
+                f"approved={approved}. "
+                f"Credentials for newly seeded owners written to {CREDENTIALS_FILE}"
+            )
+        )

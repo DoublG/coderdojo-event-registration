@@ -22,17 +22,28 @@ def approve_for_seeding(user, kind, rng=None, **application_fields):
         user.background_check_submitted_at = reviewed_at - timedelta(days=3)
         user.background_check_reviewed_at = reviewed_at
         user.background_check_expires_at = reviewed_at + BACKGROUND_CHECK_VALIDITY
-        user.save(update_fields=[
-            "background_check_status", "background_check_requested_at", "background_check_submitted_at",
-            "background_check_reviewed_at", "background_check_expires_at",
-        ])
+        user.save(
+            update_fields=[
+                "background_check_status",
+                "background_check_requested_at",
+                "background_check_submitted_at",
+                "background_check_reviewed_at",
+                "background_check_expires_at",
+            ]
+        )
         BackgroundCheckHistory.objects.create(
-            account=user, decision=BackgroundCheckHistory.VALIDATED, reviewed_at=reviewed_at,
-            requested_at=user.background_check_requested_at, submitted_at=user.background_check_submitted_at,
-            expires_at=user.background_check_expires_at, note="Seed data",
+            account=user,
+            decision=BackgroundCheckHistory.VALIDATED,
+            reviewed_at=reviewed_at,
+            requested_at=user.background_check_requested_at,
+            submitted_at=user.background_check_submitted_at,
+            expires_at=user.background_check_expires_at,
+            note="Seed data",
         )
     application, _ = Application.objects.get_or_create(
-        account=user, kind=kind, status=Application.APPROVED,
+        account=user,
+        kind=kind,
+        status=Application.APPROVED,
         defaults={
             "decided_at": user.background_check_reviewed_at,
             "background_check_consent": True,

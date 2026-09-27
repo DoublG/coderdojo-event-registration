@@ -52,7 +52,9 @@ class Command(BaseCommand):
         created = 0
         for t in TESTIMONIALS:
             _, was_created = Testimonial.objects.get_or_create(
-                dojo=None, author=t["author"], quote=t["quote"],
+                dojo=None,
+                author=t["author"],
+                quote=t["quote"],
                 defaults={"role": t["role"]},
             )
             created += 1 if was_created else 0

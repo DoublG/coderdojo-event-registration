@@ -128,11 +128,11 @@ class Command(BaseCommand):
             # would shift every later choice on a rerun (duplicate events).
             if all_pathways and not dojo.pathways.exists():
                 pathway_rng = random.Random(f"dojo-pathways-{dojo.id}")
-                dojo.pathways.set(pathway_rng.sample(all_pathways, k=min(len(all_pathways), pathway_rng.randint(1, 3))))
+                dojo.pathways.set(
+                    pathway_rng.sample(all_pathways, k=min(len(all_pathways), pathway_rng.randint(1, 3)))
+                )
             dojo_pathways = list(dojo.pathways.all())
-            pattern = rng.choices(
-                list(PATTERN_WEIGHTS), weights=list(PATTERN_WEIGHTS.values())
-            )[0]
+            pattern = rng.choices(list(PATTERN_WEIGHTS), weights=list(PATTERN_WEIGHTS.values()))[0]
 
             if pattern == "weekend":
                 weekday = rng.choice([SATURDAY, SUNDAY])

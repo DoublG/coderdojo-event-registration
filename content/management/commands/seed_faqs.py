@@ -31,12 +31,18 @@ GLOBAL_FAQS = [
 # — real chapters would add their own through the admin.
 DOJO_FAQS = [
     {"question": "Is there parking nearby?", "answer": "Yes, free parking is available right outside the venue."},
-    {"question": "Is the venue wheelchair accessible?", "answer": "Yes, there's step-free access and an accessible toilet."},
+    {
+        "question": "Is the venue wheelchair accessible?",
+        "answer": "Yes, there's step-free access and an accessible toilet.",
+    },
 ]
 
 # A couple of session-specific examples, to exercise FAQ.objects.for_event().
 EVENT_FAQS = [
-    {"question": "Is there a waitlist if it's full?", "answer": "Yes — sign up anyway and we'll email you if a spot opens up."},
+    {
+        "question": "Is there a waitlist if it's full?",
+        "answer": "Yes — sign up anyway and we'll email you if a spot opens up.",
+    },
     {"question": "Can I drop in late?", "answer": "Yes, just check in at the door — you won't miss much."},
 ]
 
@@ -50,7 +56,10 @@ class Command(BaseCommand):
 
         for faq in GLOBAL_FAQS:
             _, was_created = FAQ.objects.get_or_create(
-                dojo=None, event=None, pathway=None, question=faq["question"],
+                dojo=None,
+                event=None,
+                pathway=None,
+                question=faq["question"],
                 defaults={"answer": faq["answer"], "order": faq["order"]},
             )
             created += 1 if was_created else 0
@@ -60,7 +69,10 @@ class Command(BaseCommand):
                 # By position, not by question: seed_content_languages rewrites
                 # a dojo's FAQs in its main language.
                 _, was_created = FAQ.objects.get_or_create(
-                    dojo=dojo, event=None, pathway=None, order=i,
+                    dojo=dojo,
+                    event=None,
+                    pathway=None,
+                    order=i,
                     defaults={"question": faq["question"], "answer": faq["answer"]},
                 )
                 created += 1 if was_created else 0
@@ -68,7 +80,10 @@ class Command(BaseCommand):
         for event in Event.objects.all()[:2]:
             for i, faq in enumerate(EVENT_FAQS):
                 _, was_created = FAQ.objects.get_or_create(
-                    dojo=None, event=event, pathway=None, order=i,
+                    dojo=None,
+                    event=event,
+                    pathway=None,
+                    order=i,
                     defaults={"question": faq["question"], "answer": faq["answer"]},
                 )
                 created += 1 if was_created else 0

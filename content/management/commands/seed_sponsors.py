@@ -13,14 +13,17 @@ SPONSORS = [
     ("EWI Vlaanderen", "https://www.ewi-vlaanderen.be/"),
     ("Flexmail", "https://flexmail.be/"),
     ("KBC", "https://www.kbc.be/particulieren/nl.html"),
-    ("STEM-academie", "https://www.vlaio.be/nl/vlaio-netwerk/stemvlaio/stem-de-vrije-tijd/erkende-stem-academies-2024"),
+    (
+        "STEM-academie",
+        "https://www.vlaio.be/nl/vlaio-netwerk/stemvlaio/stem-de-vrije-tijd/erkende-stem-academies-2024",
+    ),
     ("Telenet", "https://www.telenet.be"),
     ("Willow", "https://www.willow.co/"),
 ]
 
 
 class Command(BaseCommand):
-    help = "Seed the homepage's sponsors (\"Made possible by\"). Rerun-safe: only creates the ones that are missing."
+    help = 'Seed the homepage\'s sponsors ("Made possible by"). Rerun-safe: only creates the ones that are missing.'
 
     @without_audit_log
     def handle(self, *args, **options):

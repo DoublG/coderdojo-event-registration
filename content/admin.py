@@ -46,4 +46,3 @@ class SponsorAdmin(admin.ModelAdmin):
     list_display = ["name", "url", "order", "is_public"]
     list_editable = ["order", "is_public"]
     search_fields = ["name"]
-

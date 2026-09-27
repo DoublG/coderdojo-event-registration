@@ -45,21 +45,19 @@ def scrape_dojos(html):
         if not name_el:
             continue
 
-        dojos.append({
-            "id": marker_id,
-            "name": name_el.get_text(strip=True),
-            "address": address_el.get_text(strip=True) if address_el else "",
-        })
+        dojos.append(
+            {
+                "id": marker_id,
+                "name": name_el.get_text(strip=True),
+                "address": address_el.get_text(strip=True) if address_el else "",
+            }
+        )
     return dojos
 
 
 def find_nearest_municipality(lat, lon):
     point = Point(lon, lat, srid=4326)
-    return (
-        Municipality.objects.annotate(distance=Distance("center", point))
-        .order_by("distance")
-        .first()
-    )
+    return Municipality.objects.annotate(distance=Distance("center", point)).order_by("distance").first()
 
 
 class Command(BaseCommand):
@@ -108,7 +106,9 @@ class Command(BaseCommand):
                     continue
 
                 if coords is None:
-                    self.stderr.write(self.style.WARNING(f"Skipping '{name}': Nominatim found no match for '{address}'"))
+                    self.stderr.write(
+                        self.style.WARNING(f"Skipping '{name}': Nominatim found no match for '{address}'")
+                    )
                     skipped += 1
                     continue
 
@@ -147,6 +147,6 @@ class Command(BaseCommand):
             created += 1 if was_created else 0
             updated += 1 if not was_created else 0
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Done. created={created} updated={updated} unchanged={unchanged} skipped={skipped}"
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(f"Done. created={created} updated={updated} unchanged={unchanged} skipped={skipped}")
+        )

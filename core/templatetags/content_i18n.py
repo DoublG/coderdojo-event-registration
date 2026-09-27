@@ -25,7 +25,8 @@ def only_in(text):
         return ""
     return format_html(
         '<span class="cd-badge cd-badge--outline caption content-lang-note" lang="{}">{}</span>',
-        text.language, _("Only in %(language)s") % {"language": text.language_name},
+        text.language,
+        _("Only in %(language)s") % {"language": text.language_name},
     )
 
 

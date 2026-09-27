@@ -39,9 +39,11 @@ class SegmentGroup(models.Model):
     class Operator(models.TextChoices):
         AND = "and", _("AND")
         OR = "or", _("OR")
+
     class Scope(models.TextChoices):
         USER = "user", _("Accounts")
         NINJA = "ninja", _("Parents of a child who …")
+
     segment = models.ForeignKey(
         Segment,
         on_delete=models.CASCADE,
@@ -101,8 +103,12 @@ class SegmentRule(models.Model):
         except ValueError as error:
             raise ValidationError({"attribute": str(error)}) from error
         if self.group_id and attribute.scope != self.group.scope:
-            raise ValidationError({"attribute": f"“{attribute.label}” can't be used in a group about "
-                                                f"{self.group.get_scope_display().lower()}."})
+            raise ValidationError(
+                {
+                    "attribute": f"“{attribute.label}” can't be used in a group about "
+                    f"{self.group.get_scope_display().lower()}."
+                }
+            )
         try:
             attribute.validate(self.operator, self.value)
         except ValueError as error:
@@ -138,8 +144,9 @@ class Campaign(models.Model):
         max_length=100, help_text="EmailTemplate.key; each recipient gets the version in their language."
     )
     context = models.JSONField(
-        default=dict, blank=True,
-        help_text="Extra template variables for this campaign, e.g. {\"signup_url\": \"https://…\"}.",
+        default=dict,
+        blank=True,
+        help_text='Extra template variables for this campaign, e.g. {"signup_url": "https://…"}.',
     )
 
     status = models.CharField(
@@ -150,15 +157,25 @@ class Campaign(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     scheduled_at = models.DateTimeField(
-        null=True, blank=True, help_text="Leave empty to send as soon as it's launched.",
+        null=True,
+        blank=True,
+        help_text="Leave empty to send as soon as it's launched.",
     )
     # Set by mailing.campaigns.launch / the launch_campaign task.
     launched_at = models.DateTimeField(null=True, blank=True, editable=False)
     launched_by = models.ForeignKey(
-        "accounts.User", null=True, blank=True, on_delete=models.SET_NULL, editable=False, related_name="+",
+        "accounts.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        editable=False,
+        related_name="+",
     )
     queued_at = models.DateTimeField(
-        null=True, blank=True, editable=False, help_text="When every recipient's mail was queued.",
+        null=True,
+        blank=True,
+        editable=False,
+        help_text="When every recipient's mail was queued.",
     )
 
     def __str__(self):
@@ -182,7 +199,8 @@ class Journey(models.Model):
     template_key = models.CharField(max_length=100)
     context = models.JSONField(default=dict, blank=True)
     cooldown_days = models.PositiveIntegerField(
-        default=365, help_text="Someone who got it doesn't get it again for this many days.",
+        default=365,
+        help_text="Someone who got it doesn't get it again for this many days.",
     )
     is_active = models.BooleanField(default=False)
     activated_at = models.DateTimeField(null=True, blank=True, editable=False)
@@ -222,9 +240,7 @@ class EmailTemplate(models.Model):
     key = models.CharField(max_length=100)
     language = models.CharField(max_length=10, choices=settings.LANGUAGES)
     category = models.CharField(max_length=20, choices=MailCategory.choices)
-    description = models.CharField(
-        max_length=255, blank=True, help_text="When it's sent and which variables it uses."
-    )
+    description = models.CharField(max_length=255, blank=True, help_text="When it's sent and which variables it uses.")
     subject = models.CharField(max_length=255)
     body = models.TextField()
 
@@ -236,6 +252,7 @@ class EmailTemplate(models.Model):
 
     def __str__(self):
         return f"{self.key} [{self.language}]"
+
 
 class EmailMessageManager(models.Manager):
     def get_queryset(self):
@@ -256,6 +273,7 @@ class EmailMessage(models.Model):
         FAILED = "failed", _("Failed")
         BOUNCED = "bounced", _("Bounced")
         SUPPRESSED = "suppressed", _("Not sent (no consent, no address or blocked)")
+
     category = models.CharField(max_length=20, choices=MailCategory.choices)
     template_key = models.CharField(max_length=100, blank=True)
     user = models.ForeignKey(
@@ -281,7 +299,8 @@ class EmailMessage(models.Model):
     idempotency_key = models.CharField(max_length=200, null=True, blank=True, unique=True)
     message_id = models.CharField(max_length=255, blank=True, db_index=True, help_text="Our Message-ID header.")
     is_test = models.BooleanField(
-        default=False, help_text="A campaign test sent to its author: preferences don't apply (blocks still do).",
+        default=False,
+        help_text="A campaign test sent to its author: preferences don't apply (blocks still do).",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -397,7 +416,11 @@ class BounceRecord(models.Model):
     HARD = "hard"
     SOFT = "soft"
     COMPLAINT = "complaint"
-    KIND_CHOICES = [(HARD, _("Hard bounce (5.x.x)")), (SOFT, _("Soft bounce (4.x.x)")), (COMPLAINT, _("Spam complaint"))]
+    KIND_CHOICES = [
+        (HARD, _("Hard bounce (5.x.x)")),
+        (SOFT, _("Soft bounce (4.x.x)")),
+        (COMPLAINT, _("Spam complaint")),
+    ]
 
     email = models.EmailField(db_index=True, help_text="Stored lower-case.")
     kind = models.CharField(max_length=10, choices=KIND_CHOICES)
@@ -431,4 +454,3 @@ class ProcessedImapMessage(models.Model):
 
     def __str__(self):
         return f"{self.mailbox} #{self.uid}"
-

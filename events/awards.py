@@ -55,13 +55,23 @@ def award_belt(ninja, belt, membership, note="", awarded_on=None):
     current one."""
     _check_can_award(membership)
     if not Registration.objects.filter(ninja=ninja, event__dojo_id=membership.dojo_id).exists():
-        raise BeltError(_("%(ninja)s hasn't been to a session at %(dojo)s.") % {"ninja": ninja.full_name, "dojo": membership.dojo.name})
+        raise BeltError(
+            _("%(ninja)s hasn't been to a session at %(dojo)s.")
+            % {"ninja": ninja.full_name, "dojo": membership.dojo.name}
+        )
     current = ninja.current_belt
     if current and belt.level <= current.level:
-        raise BeltError(_("%(ninja)s already has the %(current)s (or higher).") % {"ninja": ninja.full_name, "current": current.name})
+        raise BeltError(
+            _("%(ninja)s already has the %(current)s (or higher).")
+            % {"ninja": ninja.full_name, "current": current.name}
+        )
     return NinjaBelt.objects.create(
-        ninja=ninja, belt=belt, awarded_on=awarded_on or timezone.localdate(),
-        awarded_by=membership.user, awarded_as_membership=membership, awarded_as_role=membership.role,
+        ninja=ninja,
+        belt=belt,
+        awarded_on=awarded_on or timezone.localdate(),
+        awarded_by=membership.user,
+        awarded_as_membership=membership,
+        awarded_as_role=membership.role,
         note=note.strip(),
     )
 
@@ -77,10 +87,15 @@ def award_badge(ninja, badge, membership, note="", awarded_on=None):
     if badge.kind != Badge.ONE_OFF:
         raise BadgeError(_("Milestones are awarded automatically when attendance is marked."))
     if not Registration.objects.filter(ninja=ninja, event__dojo_id=membership.dojo_id).exists():
-        raise BadgeError(_("%(ninja)s hasn't been to a session at %(dojo)s.") % {"ninja": ninja.full_name, "dojo": membership.dojo.name})
+        raise BadgeError(
+            _("%(ninja)s hasn't been to a session at %(dojo)s.")
+            % {"ninja": ninja.full_name, "dojo": membership.dojo.name}
+        )
     ninja_badge, created = NinjaBadge.objects.get_or_create(ninja=ninja, badge=badge)
     if not created and ninja_badge.earned_date:
-        raise BadgeError(_("%(ninja)s already has the %(badge)s badge.") % {"ninja": ninja.full_name, "badge": badge.name})
+        raise BadgeError(
+            _("%(ninja)s already has the %(badge)s badge.") % {"ninja": ninja.full_name, "badge": badge.name}
+        )
     ninja_badge.earned_date = awarded_on or timezone.localdate()
     ninja_badge.awarded_by = membership.user
     ninja_badge.awarded_as_membership = membership

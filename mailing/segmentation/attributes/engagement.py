@@ -62,20 +62,30 @@ class StageAtDojoAttribute(SegmentAttribute):
 
     def validate(self, operator, value):
         if operator != "in":
-            raise ValueError(_("“%(label)s” supports in, not “%(operator)s”.") % {"label": self.label, "operator": operator})
+            raise ValueError(
+                _("“%(label)s” supports in, not “%(operator)s”.") % {"label": self.label, "operator": operator}
+            )
         stages = {c.value for c in self.choices()}
-        if (not isinstance(value, dict) or value.get("dojo") not in {c.value for c in self.dojo_choices()}
-                or not value.get("stages") or not set(value["stages"]) <= stages):
+        if (
+            not isinstance(value, dict)
+            or value.get("dojo") not in {c.value for c in self.dojo_choices()}
+            or not value.get("stages")
+            or not set(value["stages"]) <= stages
+        ):
             raise ValueError(_("“%(label)s” needs a dojo and at least one stage.") % {"label": self.label})
 
     def build_q(self, operator, value):
-        return Q(pk__in=NinjaEngagement.objects.filter(dojo_id=value["dojo"], stage__in=value["stages"])
-                 .values("ninja_id"))
+        return Q(
+            pk__in=NinjaEngagement.objects.filter(dojo_id=value["dojo"], stage__in=value["stages"]).values("ninja_id")
+        )
 
     def describe(self, operator, value):
         labels = {c.value: c.label for c in self.choices()}
         dojo = dict((c.value, c.label) for c in self.dojo_choices()).get(value.get("dojo"), _("a dojo"))
-        return _("At %(dojo)s: %(stages)s") % {"dojo": dojo, "stages": ", ".join(str(labels.get(s, s)) for s in value.get("stages", []))}
+        return _("At %(dojo)s: %(stages)s") % {
+            "dojo": dojo,
+            "stages": ", ".join(str(labels.get(s, s)) for s in value.get("stages", [])),
+        }
 
     def value_from_form(self, operator, data):
         try:

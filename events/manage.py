@@ -28,11 +28,15 @@ def _with_counts(queryset):
 def badge_list(request):
     require_organisation_admin(request)
     badges = _with_counts(Badge.objects.select_related("grants_belt"))
-    return render(request, "events/manage/badge_list.html", {
-        "one_offs": [b for b in badges if b.kind == Badge.ONE_OFF],
-        "milestones": [b for b in badges if b.kind == Badge.MILESTONE],
-        "active": "awards",
-    })
+    return render(
+        request,
+        "events/manage/badge_list.html",
+        {
+            "one_offs": [b for b in badges if b.kind == Badge.ONE_OFF],
+            "milestones": [b for b in badges if b.kind == Badge.MILESTONE],
+            "active": "awards",
+        },
+    )
 
 
 @login_required

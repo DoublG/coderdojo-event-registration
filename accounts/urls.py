@@ -5,10 +5,13 @@ from . import manage, security_views, views
 
 # django-two-factor-auth reverses a few names in its own namespace; they point
 # at our pages (accounts.security_views), never at the package's views.
-_two_factor = ([
-    path("account/security/setup/", RedirectView.as_view(pattern_name="account_security"), name="setup"),
-    path("account/security/webauthn/", include("two_factor.plugins.webauthn.urls", namespace="webauthn")),
-], "two_factor")
+_two_factor = (
+    [
+        path("account/security/setup/", RedirectView.as_view(pattern_name="account_security"), name="setup"),
+        path("account/security/webauthn/", include("two_factor.plugins.webauthn.urls", namespace="webauthn")),
+    ],
+    "two_factor",
+)
 
 urlpatterns = [
     path("login/", views.login, name="login"),
@@ -35,12 +38,16 @@ urlpatterns = [
         name="account_security_remove",
     ),
     path("account/security/turn-off/", security_views.security_turn_off, name="account_security_turn_off"),
-    path("account/security/forget-browser/", security_views.security_forget_browser,
-         name="account_security_forget_browser"),
+    path(
+        "account/security/forget-browser/",
+        security_views.security_forget_browser,
+        name="account_security_forget_browser",
+    ),
     path("", include(_two_factor)),
     path("manage/security/", manage.security_policy, name="manage_security"),
-    path("manage/security/accounts/<int:user_id>/turn-off/", manage.turn_off_two_step,
-         name="manage_security_turn_off"),
+    path(
+        "manage/security/accounts/<int:user_id>/turn-off/", manage.turn_off_two_step, name="manage_security_turn_off"
+    ),
     path("account/ninja/add/", views.add_ninja, name="add_ninja"),
     path("account/ninja/<int:ninja_id>/", views.ninja_detail, name="ninja_detail"),
     path("account/ninja/<int:ninja_id>/edit/", views.edit_ninja, name="edit_ninja"),

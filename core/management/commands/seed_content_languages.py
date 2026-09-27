@@ -74,14 +74,20 @@ def localize(obj, fields, translator=None):
 
 
 class Command(BaseCommand):
-    help = "Give the seeded dojos languages by region and the seeded texts their Dutch and French versions (rerun-safe)."
+    help = (
+        "Give the seeded dojos languages by region and the seeded texts their Dutch and French versions (rerun-safe)."
+    )
 
     @without_audit_log
     def handle(self, *args, **options):
         counts = {}
 
-        dojos = Dojo.objects.filter(kind=Dojo.DOJO).select_related("province", "municipality").annotate(
-            km=ExpressionWrapper(DistanceSphere(F("location"), BRUSSELS) / 1000.0, output_field=FloatField()),
+        dojos = (
+            Dojo.objects.filter(kind=Dojo.DOJO)
+            .select_related("province", "municipality")
+            .annotate(
+                km=ExpressionWrapper(DistanceSphere(F("location"), BRUSSELS) / 1000.0, output_field=FloatField()),
+            )
         )
         for dojo in dojos:
             if dojo.languages == region_languages(dojo) and not dojo.translations:
@@ -99,12 +105,15 @@ class Command(BaseCommand):
 
         def event_translator(event):
             english_name = event.name
-            base_name = english_name[len(GIRLZ_PREFIX[EN]):] if english_name.startswith(GIRLZ_PREFIX[EN]) else english_name
+            base_name = (
+                english_name[len(GIRLZ_PREFIX[EN]) :] if english_name.startswith(GIRLZ_PREFIX[EN]) else english_name
+            )
 
             def translator(field, text, language):
                 if field == "name":
                     return translate(text, language)
                 return translate_session_description(text, base_name, language) or translate(text, language)
+
             return translator
 
         n = 0
@@ -114,7 +123,11 @@ class Command(BaseCommand):
 
         n = 0
         for announcement in Announcement.objects.select_related("dojo"):
-            n += localize(announcement, ["text"], lambda f, text, language, a=announcement: translate(text, language, a.dojo.name))
+            n += localize(
+                announcement,
+                ["text"],
+                lambda f, text, language, a=announcement: translate(text, language, a.dojo.name),
+            )
         counts["updates"] = n
 
         run("FAQs", FAQ.objects.select_related("dojo", "event__dojo"), ["question", "answer"])

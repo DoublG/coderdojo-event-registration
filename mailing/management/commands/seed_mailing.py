@@ -34,8 +34,10 @@ class Command(BaseCommand):
                 self.stdout.write(f"Skipped “{spec['name']}”: no dojo with a location to open.")
                 continue
             Campaign.objects.create(
-                name=spec["name"], segment=self._segment(spec["segment"]),
-                template_key=spec["template_key"], context=spec["context"],
+                name=spec["name"],
+                segment=self._segment(spec["segment"]),
+                template_key=spec["template_key"],
+                context=spec["context"],
             )
             campaigns_created += 1
 
@@ -52,14 +54,20 @@ class Command(BaseCommand):
         spec["context"] = {"dojo_name": dojo.name, "dojo_path": reverse("dojo_detail", args=[dojo.pk])}
         for group in spec["segment"]["groups"]:
             group["rules"] = [
-                (attribute, operator, {**value, "dojo": dojo.pk} if isinstance(value, dict) and value.get("dojo") == NEW_DOJO else value)
+                (
+                    attribute,
+                    operator,
+                    {**value, "dojo": dojo.pk} if isinstance(value, dict) and value.get("dojo") == NEW_DOJO else value,
+                )
                 for attribute, operator, value in group["rules"]
             ]
         self.stdout.write(f"“{spec['name']}” uses {dojo.name} ({dojo.get_status_display()}) as the new dojo.")
         return True
 
     def _segment(self, spec):
-        segment, created = Segment.objects.get_or_create(name=spec["name"], defaults={"description": spec["description"]})
+        segment, created = Segment.objects.get_or_create(
+            name=spec["name"], defaults={"description": spec["description"]}
+        )
         if created:
             for group_spec in spec["groups"]:
                 self._group(segment, group_spec)

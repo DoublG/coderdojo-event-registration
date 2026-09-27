@@ -46,58 +46,106 @@ class DojoProfileForm(forms.ModelForm):
     # The dojo's languages (Dojo.languages): the ones its sessions are given
     # in and its texts are written in; the main one comes first.
     languages = forms.MultipleChoiceField(
-        label=_("Languages"), choices=settings.LANGUAGES, widget=forms.CheckboxSelectMultiple, required=False,
+        label=_("Languages"),
+        choices=settings.LANGUAGES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
     )
     main_language = forms.ChoiceField(
-        label=_("Main language"), choices=settings.LANGUAGES, required=False,
-        help_text=_("The fields below are in this language. Other languages get their own section at the bottom once saved."),
+        label=_("Main language"),
+        choices=settings.LANGUAGES,
+        required=False,
+        help_text=_(
+            "The fields below are in this language. Other languages get their own section at the bottom once saved."
+        ),
     )
 
     TRANSLATION_LABELS = {
-        "tagline": _("Tagline"), "description": _("Description"),
-        "schedule_description": _("Meets"), "visit_notes": _("Extra info"),
+        "tagline": _("Tagline"),
+        "description": _("Description"),
+        "schedule_description": _("Meets"),
+        "visit_notes": _("Extra info"),
     }
 
     class Meta:
         model = Dojo
         fields = [
-            "name", "icon", "tagline", "description",
-            "schedule_description", "min_age", "max_age",
-            "email", "phone", "municipality", "address", "visit_notes", "pathways",
+            "name",
+            "icon",
+            "tagline",
+            "description",
+            "schedule_description",
+            "min_age",
+            "max_age",
+            "email",
+            "phone",
+            "municipality",
+            "address",
+            "visit_notes",
+            "pathways",
         ]
         labels = {
-            "name": _("Name"), "icon": _("…or upload your own"), "tagline": _("Tagline"), "description": _("Description"),
-            "schedule_description": _("Meets"), "min_age": _("Minimum age"), "max_age": _("Maximum age"),
-            "email": _("Email"), "phone": _("Phone"), "municipality": _("Municipality"), "address": _("Address"),
-            "visit_notes": _("Extra info"), "pathways": _("Pathways your dojo provides"),
+            "name": _("Name"),
+            "icon": _("…or upload your own"),
+            "tagline": _("Tagline"),
+            "description": _("Description"),
+            "schedule_description": _("Meets"),
+            "min_age": _("Minimum age"),
+            "max_age": _("Maximum age"),
+            "email": _("Email"),
+            "phone": _("Phone"),
+            "municipality": _("Municipality"),
+            "address": _("Address"),
+            "visit_notes": _("Extra info"),
+            "pathways": _("Pathways your dojo provides"),
         }
         # Every shown help text translated; the model's own are English notes for the admin.
         help_texts = {
             "icon": _("Uploading a file here overrides the template chosen above."),
             "tagline": _("Shown right under the dojo's name. Supports basic Markdown."),
             "description": _("Shown further down the page, above the team. Supports basic Markdown."),
-            "address": _('Used for the "Visit us" map link and for distance search — changing it updates the map location automatically.'),
-            "visit_notes": _("Parking, entrance, accessibility — anything extra for the Visit us section. Supports basic Markdown."),
-            "name": "", "schedule_description": "", "min_age": "", "max_age": "", "email": "", "phone": "",
-            "municipality": "", "pathways": "",
+            "address": _(
+                'Used for the "Visit us" map link and for distance search — changing it updates the map location automatically.'
+            ),
+            "visit_notes": _(
+                "Parking, entrance, accessibility — anything extra for the Visit us section. Supports basic Markdown."
+            ),
+            "name": "",
+            "schedule_description": "",
+            "min_age": "",
+            "max_age": "",
+            "email": "",
+            "phone": "",
+            "municipality": "",
+            "pathways": "",
         }
         # The input classes come from core.forms.SiteBoundField.
         widgets = {
             "pathways": forms.CheckboxSelectMultiple,
             "name": forms.TextInput(attrs={"placeholder": _("CoderDojo Ghent")}),
-            "tagline": forms.Textarea(attrs={"rows": 2, "placeholder": _("A short line shown right under the dojo's name.")}),
-            "description": forms.Textarea(attrs={
-                "rows": 6, "placeholder": _("Shown further down the page, above the team — what makes this dojo worth joining."),
-            }),
+            "tagline": forms.Textarea(
+                attrs={"rows": 2, "placeholder": _("A short line shown right under the dojo's name.")}
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "rows": 6,
+                    "placeholder": _(
+                        "Shown further down the page, above the team — what makes this dojo worth joining."
+                    ),
+                }
+            ),
             "schedule_description": forms.TextInput(attrs={"placeholder": _("e.g. Every 2nd Saturday")}),
             "min_age": forms.NumberInput(attrs={"placeholder": _("7")}),
             "max_age": forms.NumberInput(attrs={"placeholder": _("18")}),
             "email": forms.EmailInput(attrs={"placeholder": _("hello@example.org")}),
             "phone": forms.TextInput(attrs={"placeholder": _("+32 4xx xx xx xx")}),
             "address": forms.TextInput(attrs={"placeholder": _("Street, number, postcode, city")}),
-            "visit_notes": forms.Textarea(attrs={
-                "rows": 4, "placeholder": _("Parking, entrance, accessibility — anything extra for the Visit us section."),
-            }),
+            "visit_notes": forms.Textarea(
+                attrs={
+                    "rows": 4,
+                    "placeholder": _("Parking, entrance, accessibility — anything extra for the Visit us section."),
+                }
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -110,9 +158,14 @@ class DojoProfileForm(forms.ModelForm):
         self.fields["languages"].initial = languages
         self.fields["main_language"].initial = languages[0]
         # A field per text in each of the dojo's other (saved) languages.
-        self.translation_groups = bound_translation_groups(self, add_translation_fields(
-            self, self.instance, lambda field: optional_copy(self.fields[field], self.TRANSLATION_LABELS[field]),
-        ))
+        self.translation_groups = bound_translation_groups(
+            self,
+            add_translation_fields(
+                self,
+                self.instance,
+                lambda field: optional_copy(self.fields[field], self.TRANSLATION_LABELS[field]),
+            ),
+        )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -124,7 +177,9 @@ class DojoProfileForm(forms.ModelForm):
             cleaned_data["languages"] = None
         else:
             # The main language is always one of them, and always first.
-            cleaned_data["languages"] = clean_languages([main] + [code for code, _name in settings.LANGUAGES if code in chosen])
+            cleaned_data["languages"] = clean_languages(
+                [main] + [code for code, _name in settings.LANGUAGES if code in chosen]
+            )
         return cleaned_data
 
     def save(self, commit=True):
@@ -144,10 +199,12 @@ class DojoSearchForm(forms.Form):
     location = forms.CharField(
         required=False,
         max_length=200,
-        widget=forms.TextInput(attrs={
-            "class": "cd-dojo-finder__input body",
-            "placeholder": _("Enter your postcode or city"),
-        }),
+        widget=forms.TextInput(
+            attrs={
+                "class": "cd-dojo-finder__input body",
+                "placeholder": _("Enter your postcode or city"),
+            }
+        ),
     )
     # Set by the "Use my location" button via the browser Geolocation API
     # (see dojo_list.html's extra_script), bypassing the location field's
@@ -158,7 +215,9 @@ class DojoSearchForm(forms.Form):
     language = forms.ChoiceField(
         required=False,
         choices=[("", _("Any language"))] + list(settings.LANGUAGES),
-        widget=forms.Select(attrs={"class": "cd-form__select body", "id": "dojo-language", "aria-label": _("Language")}),
+        widget=forms.Select(
+            attrs={"class": "cd-form__select body", "id": "dojo-language", "aria-label": _("Language")}
+        ),
     )
 
 
@@ -186,9 +245,14 @@ class AnnouncementForm(forms.ModelForm):
         kwargs.setdefault("instance", Announcement(dojo=dojo))
         super().__init__(*args, **kwargs)
         # The same update in the dojo's other languages (optional).
-        self.translation_groups = bound_translation_groups(self, add_translation_fields(
-            self, self.instance, lambda field: optional_copy(self.fields[field], _("Update")),
-        ))
+        self.translation_groups = bound_translation_groups(
+            self,
+            add_translation_fields(
+                self,
+                self.instance,
+                lambda field: optional_copy(self.fields[field], _("Update")),
+            ),
+        )
 
     def save(self, commit=True):
         announcement = super().save(commit=False)
@@ -201,10 +265,14 @@ class AnnouncementForm(forms.ModelForm):
         model = Announcement
         fields = ["text"]
         widgets = {
-            "text": forms.Textarea(attrs={
-                "class": "cd-form__input body", "rows": 3, "maxlength": 500,
-                "placeholder": _("e.g. We've moved to the bigger room from October, same time, same entrance."),
-            }),
+            "text": forms.Textarea(
+                attrs={
+                    "class": "cd-form__input body",
+                    "rows": 3,
+                    "maxlength": 500,
+                    "placeholder": _("e.g. We've moved to the bigger room from October, same time, same entrance."),
+                }
+            ),
         }
         labels = {"text": _("New update")}
 
@@ -222,7 +290,8 @@ class AnnouncementForm(forms.ModelForm):
 
 class AddMentorForm(forms.Form):
     email = forms.EmailField(
-        label=_("Their account's email"), widget=forms.EmailInput(attrs={"placeholder": _("mentor@example.com")}),
+        label=_("Their account's email"),
+        widget=forms.EmailInput(attrs={"placeholder": _("mentor@example.com")}),
     )
 
 
@@ -289,7 +358,9 @@ class AwardBeltForm(AwardForm):
     field = "belt"
     note_placeholder = _("What %(name)s showed")
     belt = forms.ModelChoiceField(
-        label=_("Belt"), queryset=Belt.objects.none(), empty_label=None,
+        label=_("Belt"),
+        queryset=Belt.objects.none(),
+        empty_label=None,
         error_messages={"required": _("Pick a belt to award."), "invalid_choice": _("Pick a belt to award.")},
     )
 
@@ -298,7 +369,10 @@ class AwardBadgeForm(AwardForm):
     field = "badge"
     note_placeholder = _("What %(name)s did")
     badge = forms.ModelChoiceField(
-        label=_("Badge"), queryset=Badge.objects.none(), empty_label=None, widget=TitledSelect,
+        label=_("Badge"),
+        queryset=Badge.objects.none(),
+        empty_label=None,
+        widget=TitledSelect,
         error_messages={"required": _("Pick a badge to award."), "invalid_choice": _("Pick a badge to award.")},
     )
 

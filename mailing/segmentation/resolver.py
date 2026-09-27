@@ -64,12 +64,7 @@ class SegmentResolver:
         if not _has_rules(roots):
             return User.objects.none()
         query = reduce(and_, (self._user_q(root) for root in roots), Q())
-        return (
-            User.objects
-            .filter(is_active=True, account_type=User.ADULT)
-            .exclude(email="")
-            .filter(query)
-        )
+        return User.objects.filter(is_active=True, account_type=User.ADULT).exclude(email="").filter(query)
 
     def _user_q(self, group):
         """A Q on User for any group (a ninja group is projected to guardians)."""
@@ -106,6 +101,4 @@ class SegmentResolver:
             return reduce(and_, parts)
         if group["operator"] == SegmentGroup.Operator.OR:
             return reduce(or_, parts)
-        raise ValueError(
-            f"Unsupported group operator: {group['operator']}"
-        )
+        raise ValueError(f"Unsupported group operator: {group['operator']}")

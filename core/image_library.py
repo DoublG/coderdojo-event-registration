@@ -77,5 +77,5 @@ def library_filename(fieldfile, kind):
     (e.g. to preselect it in a picker), else None."""
     prefix = f"{LIBRARY_PREFIX}/{kind}/"
     if fieldfile and fieldfile.name.startswith(prefix):
-        return fieldfile.name[len(prefix):]
+        return fieldfile.name[len(prefix) :]
     return None

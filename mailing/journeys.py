@@ -32,7 +32,9 @@ def audience(journey):
 def due(journey, now=None):
     """Who gets it on the next run: matching now, and not within the cool-down."""
     now = now or timezone.now()
-    recent = JourneyDelivery.objects.filter(journey=journey, created_at__gte=now - timedelta(days=journey.cooldown_days))
+    recent = JourneyDelivery.objects.filter(
+        journey=journey, created_at__gte=now - timedelta(days=journey.cooldown_days)
+    )
     return audience(journey).exclude(pk__in=recent.values("user_id"))
 
 
@@ -61,8 +63,13 @@ def run_one(journey, now=None):
     today = timezone.localdate()
     sent = 0
     for user in due(journey, now).order_by("pk").iterator(chunk_size=500):
-        email = send(user, journey.category, journey.template_key, journey.context,
-                     idempotency_key=f"journey:{journey.pk}:{user.pk}:{today:%Y%m%d}")
+        email = send(
+            user,
+            journey.category,
+            journey.template_key,
+            journey.context,
+            idempotency_key=f"journey:{journey.pk}:{user.pk}:{today:%Y%m%d}",
+        )
         JourneyDelivery.objects.create(journey=journey, user=user, email=email)
         sent += 1
     return sent
@@ -72,8 +79,11 @@ def run(now=None):
     """All active journeys whose checks pass. Returns {journey id: sent}."""
     from .models import Journey
 
-    return {journey.pk: run_one(journey, now) for journey in Journey.objects.filter(is_active=True)
-            if not problems(journey)}
+    return {
+        journey.pk: run_one(journey, now)
+        for journey in Journey.objects.filter(is_active=True)
+        if not problems(journey)
+    }
 
 
 def stats(journey, days=30):

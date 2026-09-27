@@ -143,7 +143,8 @@ register(
     seen_by="The organisation (organisation dashboard, Django admin)",
     fields={
         "updated_by": keep(
-            Category.IDENTITY, "who last changed the policy stays traceable; points at the anonymised account",
+            Category.IDENTITY,
+            "who last changed the policy stays traceable; points at the anonymised account",
             export=False,
         ),
     },

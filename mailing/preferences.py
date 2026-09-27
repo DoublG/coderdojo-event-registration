@@ -41,7 +41,10 @@ def set_preference(user, category, subscribed, source):
         if before == subscribed:
             return False
         ConsentEvent.objects.create(
-            user=user, category=category, subscribed=subscribed, source=source,
+            user=user,
+            category=category,
+            subscribed=subscribed,
+            source=source,
             wording_version=PRIVACY_WORDING_VERSION,
         )
     return True

@@ -53,15 +53,15 @@ def is_aimed_at(ninja, event):
     return True
 
 
-def stage(*, age, dojo_max_age, attended_total, first_attended, last_attended, attended_window, rate, missed,
-          today):
+def stage(*, age, dojo_max_age, attended_total, first_attended, last_attended, attended_window, rate, missed, today):
     if age is not None and (age >= ADULT_AGE or (dojo_max_age is not None and age > dojo_max_age)):
         return NinjaEngagement.AGED_OUT
     if attended_total == 0:
         return NinjaEngagement.NEVER_ATTENDED
     recent = today - timedelta(days=WINDOW_DAYS)
     if first_attended >= today - timedelta(days=NEW_DAYS) or (
-            attended_total <= NEW_MAX_VISITS and last_attended >= recent):
+        attended_total <= NEW_MAX_VISITS and last_attended >= recent
+    ):
         return NinjaEngagement.NEW
     if attended_window == 0:
         return NinjaEngagement.LAPSED
@@ -80,8 +80,11 @@ def _metrics(ninja, dojo, sessions, visits, no_shows, now, overall):
     missed sessions."""
     window_start = now - timedelta(days=WINDOW_DAYS)
     history_start = now - timedelta(days=HISTORY_DAYS)
-    aimed = [s for s in sessions.get(dojo.pk, []) if s.start_time >= history_start and is_aimed_at(ninja, s)] \
-        if dojo is not None else []
+    aimed = (
+        [s for s in sessions.get(dojo.pk, []) if s.start_time >= history_start and is_aimed_at(ninja, s)]
+        if dojo is not None
+        else []
+    )
     offered = {s.pk for s in aimed if s.start_time >= window_start}
     counted = {pk for pk, event in visits.items() if overall or event.dojo_id == dojo.pk}
     recent_visits = {pk for pk in counted if visits[pk].start_time >= window_start}
@@ -100,7 +103,9 @@ def _metrics(ninja, dojo, sessions, visits, no_shows, now, overall):
         "attended_180d": attended_window,
         "attendance_rate": min(1.0, attended_window / len(offered)) if offered else 0.0,
         "missed_in_a_row": missed,
-        "no_shows_90d": sum(1 for s in no_shows if (overall or s.dojo_id == dojo.pk) and s.start_time >= no_show_since),
+        "no_shows_90d": sum(
+            1 for s in no_shows if (overall or s.dojo_id == dojo.pk) and s.start_time >= no_show_since
+        ),
     }
 
 
@@ -113,14 +118,27 @@ def _row(ninja, dojo, main, overall, visits, sessions, no_shows, upcoming, today
     first, last = (days[0], days[-1]) if days else (None, None)
     age = age_on(ninja.date_of_birth, today) if ninja.date_of_birth else None
     return NinjaEngagement(
-        ninja=ninja, dojo=None if overall else dojo, main_dojo=main,
-        stage=stage(age=age, dojo_max_age=measured_at.max_age if measured_at else None, attended_total=len(days),
-                    first_attended=first, last_attended=last, attended_window=metrics["attended_180d"],
-                    rate=metrics["attendance_rate"], missed=metrics["missed_in_a_row"], today=today),
-        first_attended=first, last_attended=last, attended_total=len(days),
+        ninja=ninja,
+        dojo=None if overall else dojo,
+        main_dojo=main,
+        stage=stage(
+            age=age,
+            dojo_max_age=measured_at.max_age if measured_at else None,
+            attended_total=len(days),
+            first_attended=first,
+            last_attended=last,
+            attended_window=metrics["attended_180d"],
+            rate=metrics["attendance_rate"],
+            missed=metrics["missed_in_a_row"],
+            today=today,
+        ),
+        first_attended=first,
+        last_attended=last,
+        attended_total=len(days),
         has_upcoming=bool(upcoming) if overall else dojo.pk in upcoming,
         from_marked_attendance=all(marked for _event, marked in counted.values()),
-        computed_on=today, **metrics,
+        computed_on=today,
+        **metrics,
     )
 
 
@@ -135,9 +153,9 @@ def rebuild(today=None):
         sessions[event.dojo_id].append(event)
     marked_events = set(Registration.objects.filter(attended__isnull=False).values_list("event_id", flat=True))
 
-    came = defaultdict(dict)       # ninja_id -> {event_id: (event, marked)}
-    no_shows = defaultdict(list)   # ninja_id -> [event]
-    upcoming = defaultdict(set)    # ninja_id -> {dojo_id}
+    came = defaultdict(dict)  # ninja_id -> {event_id: (event, marked)}
+    no_shows = defaultdict(list)  # ninja_id -> [event]
+    upcoming = defaultdict(set)  # ninja_id -> {dojo_id}
     for registration in Registration.objects.select_related("event__dojo").exclude(event__status=Event.DRAFT):
         event = registration.event
         if event.start_time > now:
@@ -161,8 +179,14 @@ def rebuild(today=None):
             main = max(visits.values(), key=lambda v: v[0].start_time)[0].dojo
         if main is not None:
             dojos.setdefault(main.pk, main)
-        shared = {"visits": visits, "sessions": sessions, "no_shows": no_shows.get(ninja.pk, []),
-                  "upcoming": upcoming.get(ninja.pk, set()), "today": today, "now": now}
+        shared = {
+            "visits": visits,
+            "sessions": sessions,
+            "no_shows": no_shows.get(ninja.pk, []),
+            "upcoming": upcoming.get(ninja.pk, set()),
+            "today": today,
+            "now": now,
+        }
         rows.append(_row(ninja, None, main, True, **shared))
         rows.extend(_row(ninja, dojo, main, False, **shared) for dojo in dojos.values())
 

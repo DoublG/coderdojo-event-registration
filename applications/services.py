@@ -49,6 +49,7 @@ def _account_url():
 
 # --- background check -----------------------------------------------------------
 
+
 def request_background_check(user, request):
     """Ask the account holder for a (new) document. Not limited to first
     requests: re-running it on an account whose check isn't currently valid
@@ -104,10 +105,14 @@ def validate_background_check(user, reviewer, note=""):
     user.background_check_reviewed_at = now
     user.background_check_expires_at = now + BACKGROUND_CHECK_VALIDITY
     _record_decision(user, reviewer, BackgroundCheckHistory.VALIDATED, note)
-    user.save(update_fields=[
-        "background_check_document", "background_check_status",
-        "background_check_reviewed_at", "background_check_expires_at",
-    ])
+    user.save(
+        update_fields=[
+            "background_check_document",
+            "background_check_status",
+            "background_check_reviewed_at",
+            "background_check_expires_at",
+        ]
+    )
     _send(user, "background_check_validated", {"expires_at": timezone.localtime(user.background_check_expires_at)})
 
 
@@ -122,6 +127,7 @@ def reject_background_check(user, reviewer, note=""):
 
 
 # --- applications ----------------------------------------------------------------
+
 
 def submit_application(account, kind, **fields):
     """One pending (or approved) application per account and kind."""
@@ -144,9 +150,13 @@ def submit_application(account, kind, **fields):
 
 def approve_application(application, reviewer):
     if application.status != Application.PENDING:
-        raise OnboardingError(_("Application %(application)s has already been decided.") % {"application": application.pk})
+        raise OnboardingError(
+            _("Application %(application)s has already been decided.") % {"application": application.pk}
+        )
     if not application.account.background_check_valid:
-        raise OnboardingError(_("%(account)s doesn't have a valid background check yet.") % {"account": application.account})
+        raise OnboardingError(
+            _("%(account)s doesn't have a valid background check yet.") % {"account": application.account}
+        )
     application.status = Application.APPROVED
     application.decided_by = reviewer
     application.decided_at = timezone.now()
@@ -161,14 +171,22 @@ def approve_application(application, reviewer):
             join_dojo_name = application.dojo.name
         except TeamError:
             pass
-    _send(application.account, "application_approved", {
-        "kind": application.kind, "join_dojo_name": join_dojo_name, "account_url": _account_url(),
-    })
+    _send(
+        application.account,
+        "application_approved",
+        {
+            "kind": application.kind,
+            "join_dojo_name": join_dojo_name,
+            "account_url": _account_url(),
+        },
+    )
 
 
 def reject_application(application, reviewer):
     if application.status != Application.PENDING:
-        raise OnboardingError(_("Application %(application)s has already been decided.") % {"application": application.pk})
+        raise OnboardingError(
+            _("Application %(application)s has already been decided.") % {"application": application.pk}
+        )
     application.status = Application.REJECTED
     application.decided_by = reviewer
     application.decided_at = timezone.now()
@@ -177,6 +195,7 @@ def reject_application(application, reviewer):
 
 
 # --- who is approved --------------------------------------------------------------
+
 
 def is_approved(user, kinds):
     return (

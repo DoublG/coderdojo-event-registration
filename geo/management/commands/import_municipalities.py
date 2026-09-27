@@ -20,8 +20,10 @@ class Command(BaseCommand):
         import geopandas
         import pandas as pd
 
-        municipalsectioncenter = geopandas.read_file(GEOPACKAGE_PATH, layer="municipalsectioncenter")[['namedut', 'namefre', 'geometry']]
-        postaldistrict = geopandas.read_file(GEOPACKAGE_PATH, layer="postaldistrict")[['postcode', 'geometry']]
+        municipalsectioncenter = geopandas.read_file(GEOPACKAGE_PATH, layer="municipalsectioncenter")[
+            ["namedut", "namefre", "geometry"]
+        ]
+        postaldistrict = geopandas.read_file(GEOPACKAGE_PATH, layer="postaldistrict")[["postcode", "geometry"]]
         frame = municipalsectioncenter.sjoin(postaldistrict)
 
         Municipality.objects.all().delete()

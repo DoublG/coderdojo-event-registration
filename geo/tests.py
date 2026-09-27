@@ -17,11 +17,13 @@ class FindProvinceTests(TestCase):
         # Two adjacent 1x1-degree squares — real boundaries are far more
         # detailed, but the point-in-polygon logic doesn't care.
         cls.east_flanders = AdministrativeBoundary.objects.create(
-            kind=AdministrativeBoundary.PROVINCE, name="East Flanders",
+            kind=AdministrativeBoundary.PROVINCE,
+            name="East Flanders",
             boundary=MultiPolygon(Polygon(((3, 51), (3, 52), (4, 52), (4, 51), (3, 51)))),
         )
         cls.antwerp = AdministrativeBoundary.objects.create(
-            kind=AdministrativeBoundary.PROVINCE, name="Antwerp",
+            kind=AdministrativeBoundary.PROVINCE,
+            name="Antwerp",
             boundary=MultiPolygon(Polygon(((4, 51), (4, 52), (5, 52), (5, 51), (4, 51)))),
         )
 

@@ -13,7 +13,7 @@ def _refresh_organisation_groups(sender, **kwargs):
 
 
 class AccountsConfig(AppConfig):
-    name = 'accounts'
+    name = "accounts"
 
     def ready(self):
         from . import (

@@ -42,32 +42,35 @@ CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
 # Set by the .devcontainer workspace (COOKIE_DOMAIN env var) so session/CSRF
 # cookies scope correctly to coolregistration.localhost behind the nginx
 # proxy; unset (None) for plain host-based `runserver` dev, which is fine.
-COOKIE_DOMAIN = env('COOKIE_DOMAIN')
+COOKIE_DOMAIN = env("COOKIE_DOMAIN")
 SESSION_COOKIE_DOMAIN = COOKIE_DOMAIN
 CSRF_COOKIE_DOMAIN = COOKIE_DOMAIN
 
 INTERNAL_IPS = [
-    '127.0.0.1',
+    "127.0.0.1",
 ]
+
 
 # Show the Debug Toolbar whenever Django's effective DEBUG setting is true.
 # Reading django.conf.settings here is intentional: test overrides such as
 # override_settings(DEBUG=False) should be respected by the callback.
 def _show_debug_toolbar(request):
     from django.conf import settings
+
     return settings.DEBUG
 
+
 DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': _show_debug_toolbar,
+    "SHOW_TOOLBAR_CALLBACK": _show_debug_toolbar,
 }
 
 
-AUTH_USER_MODEL = 'accounts.User'
-LOGIN_URL = 'login'
+AUTH_USER_MODEL = "accounts.User"
+LOGIN_URL = "login"
 
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.EmailOrUsernameBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    "accounts.backends.EmailOrUsernameBackend",
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
 # Two-step login (DATA_MODEL.md §15, accounts/two_step.py): django-otp holds
@@ -75,51 +78,49 @@ AUTHENTICATION_BACKENDS = [
 # as verified; django-two-factor-auth gives the login in steps, which
 # accounts.views.LoginView wraps. Which roles must use it is the
 # organisation's sign-in policy (accounts.SignInRequirement, /manage/security/).
-LOGIN_REDIRECT_URL = 'account_home'
+LOGIN_REDIRECT_URL = "account_home"
 TWO_FACTOR_REMEMBER_COOKIE_AGE = 30 * 24 * 3600  # "Don't ask again on this device for 30 days"
 TWO_FACTOR_REMEMBER_COOKIE_SECURE = True
 TWO_FACTOR_REMEMBER_COOKIE_DOMAIN = COOKIE_DOMAIN
 # The name authenticator apps show next to the code, and passkeys next to the account.
-TWO_FACTOR_ISSUER = 'CoderDojo Belgium'
+TWO_FACTOR_ISSUER = "CoderDojo Belgium"
 TWO_FACTOR_WEBAUTHN_RP_NAME = TWO_FACTOR_ISSUER
 # Passkeys are checked against SITE_URL's host and origin, not the request's:
 # nginx (and Level27's proxy) terminate TLS, so the request itself looks like http.
-TWO_FACTOR_WEBAUTHN_ENTITIES_FORM_MIXIN = 'accounts.webauthn_entities.SiteWebauthnEntitiesMixin'
+TWO_FACTOR_WEBAUTHN_ENTITIES_FORM_MIXIN = "accounts.webauthn_entities.SiteWebauthnEntitiesMixin"
 # Ask for the device's PIN or fingerprint when it has one, as passkeys normally do.
-TWO_FACTOR_WEBAUTHN_UV_REQUIREMENT = 'preferred'
+TWO_FACTOR_WEBAUTHN_UV_REQUIREMENT = "preferred"
 
 # Outgoing mail. Inside the .devcontainer workspace, EMAIL_HOST is set and
 # mail goes to the Mailpit catcher (see .devcontainer/docker-compose.yml);
 # outside it (plain host-based `runserver`), EMAIL_HOST is unset and mail
 # prints to the console.
-EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_HOST = env("EMAIL_HOST")
 if EMAIL_HOST:
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_PORT = env('EMAIL_PORT', default=2525)
-    EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-    EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True)
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_PORT = env("EMAIL_PORT", default=2525)
+    EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+    EMAIL_USE_TLS = env("EMAIL_USE_TLS", default=True)
 else:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-DEFAULT_FROM_EMAIL = env(
-    'DEFAULT_FROM_EMAIL', default='CoderDojo Belgium <no-reply@coderdojobelgium.example>'
-)
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="CoderDojo Belgium <no-reply@coderdojobelgium.example>")
 # A stuck SMTP connection fails (and the batch is retried) instead of
 # blocking the mailing worker.
-EMAIL_TIMEOUT = env.int('EMAIL_TIMEOUT', default=30)
+EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=30)
 
 # The site's own address, for links in mails (which are rendered in a
 # worker, with no request to build absolute URLs from).
-SITE_URL = env('SITE_URL', default='https://coolregistration.localhost').rstrip('/')
+SITE_URL = env("SITE_URL", default="https://coolregistration.localhost").rstrip("/")
 
 # The mail engine (mailing app, DATA_MODEL.md §11 "Sending pipeline").
-MAILING_CLAIM_LIMIT = env.int('MAILING_CLAIM_LIMIT', default=200)  # rows the dispatcher claims per run
-MAILING_BATCH_SIZE = env.int('MAILING_BATCH_SIZE', default=20)  # rows per send_email_batch subtask
+MAILING_CLAIM_LIMIT = env.int("MAILING_CLAIM_LIMIT", default=200)  # rows the dispatcher claims per run
+MAILING_BATCH_SIZE = env.int("MAILING_BATCH_SIZE", default=20)  # rows per send_email_batch subtask
 # Celery rate limit for send_email_batch (per worker; there is one mailing
 # worker). Throughput is at most this many batches times MAILING_BATCH_SIZE.
-MAILING_BATCH_RATE_LIMIT = env('MAILING_BATCH_RATE_LIMIT', default='6/m')
-MAILING_CLAIM_TIMEOUT_MINUTES = env.int('MAILING_CLAIM_TIMEOUT_MINUTES', default=60)
+MAILING_BATCH_RATE_LIMIT = env("MAILING_BATCH_RATE_LIMIT", default="6/m")
+MAILING_CLAIM_TIMEOUT_MINUTES = env.int("MAILING_CLAIM_TIMEOUT_MINUTES", default=60)
 # Automated mail (mailing.automated).
 MAILING_REMINDER_DAYS_BEFORE = 2  # the session reminder goes out this many days before
 MAILING_DOJO_NEWS_ACTIVE_DAYS = 365  # a family belongs to a dojo that long after a visit
@@ -128,19 +129,19 @@ MAILING_DOJO_NEWS_ACTIVE_DAYS = 365  # a family belongs to a dojo that long afte
 # in that mailbox. "{id}" is replaced by the EmailMessage id when the mail
 # host supports plus-addressing (VERP), e.g. "bounces+{id}@example.org";
 # empty sends bounces to DEFAULT_FROM_EMAIL as before.
-MAILING_BOUNCE_ADDRESS = env('MAILING_BOUNCE_ADDRESS', default='')
+MAILING_BOUNCE_ADDRESS = env("MAILING_BOUNCE_ADDRESS", default="")
 # The mailbox process_bounces reads; empty host = bounce processing is off.
 # IMAP in production; POP3 is there for the devcontainer, where Mailpit
 # (which only speaks POP3) is the bounce mailbox.
-MAILING_BOUNCE_PROTOCOL = env('MAILING_BOUNCE_PROTOCOL', default='imap')
-MAILING_BOUNCE_IMAP_HOST = env('MAILING_BOUNCE_IMAP_HOST', default='')
-MAILING_BOUNCE_IMAP_PORT = env.int('MAILING_BOUNCE_IMAP_PORT', default=993)
+MAILING_BOUNCE_PROTOCOL = env("MAILING_BOUNCE_PROTOCOL", default="imap")
+MAILING_BOUNCE_IMAP_HOST = env("MAILING_BOUNCE_IMAP_HOST", default="")
+MAILING_BOUNCE_IMAP_PORT = env.int("MAILING_BOUNCE_IMAP_PORT", default=993)
 # Plain (no TLS) only for the devcontainer's Mailpit.
-MAILING_BOUNCE_IMAP_SSL = env.bool('MAILING_BOUNCE_IMAP_SSL', default=True)
-MAILING_BOUNCE_IMAP_USER = env('MAILING_BOUNCE_IMAP_USER', default='')
-MAILING_BOUNCE_IMAP_PASSWORD = env('MAILING_BOUNCE_IMAP_PASSWORD', default='')
-MAILING_BOUNCE_IMAP_MAILBOX = env('MAILING_BOUNCE_IMAP_MAILBOX', default='INBOX')
-MAILING_BOUNCE_IMAP_TIMEOUT = env.int('MAILING_BOUNCE_IMAP_TIMEOUT', default=30)
+MAILING_BOUNCE_IMAP_SSL = env.bool("MAILING_BOUNCE_IMAP_SSL", default=True)
+MAILING_BOUNCE_IMAP_USER = env("MAILING_BOUNCE_IMAP_USER", default="")
+MAILING_BOUNCE_IMAP_PASSWORD = env("MAILING_BOUNCE_IMAP_PASSWORD", default="")
+MAILING_BOUNCE_IMAP_MAILBOX = env("MAILING_BOUNCE_IMAP_MAILBOX", default="INBOX")
+MAILING_BOUNCE_IMAP_TIMEOUT = env.int("MAILING_BOUNCE_IMAP_TIMEOUT", default=30)
 MAILING_BOUNCE_BATCH = 200  # messages per run, so the periodic worker stays quick
 # This many temporary failures (4.x.x) for one address within the window
 # block it, like a hard bounce.
@@ -155,7 +156,7 @@ CELERY_TIMEZONE = "Europe/Brussels"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
-CELERY_RESULT_BACKEND = 'django-db'
+CELERY_RESULT_BACKEND = "django-db"
 # Tasks report through the rows they change (EmailMessage.status, ...), not
 # through results: without this the 10-second dispatcher alone would write
 # thousands of TaskResult rows a day.
@@ -164,9 +165,9 @@ CELERY_TASK_IGNORE_RESULT = True
 # Redis db 0 is the cache and db 1 the Channels layer: the broker gets its
 # own, so a cache.clear() can never drop queued tasks.
 CELERY_BROKER_URL = "redis://{host}:{port}/{db}".format(
-    host=env('REDIS_HOST', default='127.0.0.1'),
-    port=env('REDIS_PORT', default='6379'),
-    db=env('CELERY_BROKER_DB', default='2'),
+    host=env("REDIS_HOST", default="127.0.0.1"),
+    port=env("REDIS_PORT", default="6379"),
+    db=env("CELERY_BROKER_DB", default="2"),
 )
 
 # A task is acknowledged only once it's done, so the broker hands out a
@@ -247,102 +248,102 @@ INSTALLED_APPS = [
     # serve over ASGI (via Daphne) instead of the default WSGI dev server,
     # which is what lets notifications/consumers.py's WebSocket route work
     # with zero changes to how the devcontainer/docs already invoke runserver.
-    'daphne',
+    "daphne",
     # Django's admin with core.admin_site.AdminSite as admin.site: it applies
     # the organisation's sign-in policy (accounts.sign_in) to /admin/.
-    'core.admin_apps.AdminConfig',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    "core.admin_apps.AdminConfig",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
     "django.contrib.gis",
     "debug_toolbar",
-    'core',
-    'geo',
-    'accounts',
-    'dojos',
-    'pathways',
-    'events',
-    'content',
-    'applications',
-    'notifications',
-    'django_celery_results',
-    'mailing',
-    'django_celery_beat',
-    'ninja',
-    'oauth2_provider',
-    'privacy',
-    'api',
-    'auditlog',
+    "core",
+    "geo",
+    "accounts",
+    "dojos",
+    "pathways",
+    "events",
+    "content",
+    "applications",
+    "notifications",
+    "django_celery_results",
+    "mailing",
+    "django_celery_beat",
+    "ninja",
+    "oauth2_provider",
+    "privacy",
+    "api",
+    "auditlog",
     # Two-step login (DATA_MODEL.md §15). No phone, email or YubiKey plugins.
-    'django_otp',
-    'django_otp.plugins.otp_totp',
-    'django_otp.plugins.otp_static',
-    'formtools',
-    'two_factor',
-    'two_factor.plugins.webauthn',
+    "django_otp",
+    "django_otp.plugins.otp_totp",
+    "django_otp.plugins.otp_static",
+    "formtools",
+    "two_factor",
+    "two_factor.plugins.webauthn",
     # Django's own form templates, last: the project's templates override them
     # (core/templates/django/forms/, see FORM_RENDERER).
-    'django.forms',
+    "django.forms",
 ]
 
 # The site's forms render through core/forms/field.html and core/forms/form.html
 # (core/forms.py): one layout for every field, and the site's input classes.
-FORM_RENDERER = 'core.forms.SiteFormRenderer'
+FORM_RENDERER = "core.forms.SiteFormRenderer"
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
     # Must come after SessionMiddleware, before CommonMiddleware, per
     # https://docs.djangoproject.com/en/6.1/topics/i18n/translation/#how-django-discovers-language-preference
-    'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    "django.middleware.locale.LocaleMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
     # Marks request.user as verified (is_verified()) when the session passed
     # two-step login; needs request.user.
-    'django_otp.middleware.OTPMiddleware',
+    "django_otp.middleware.OTPMiddleware",
     # Records who made each audit-log entry (DATA_MODEL.md §14); needs request.user.
-    'core.audit.AuditlogMiddleware',
-    'accounts.middleware.ForcePasswordChangeMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    "core.audit.AuditlogMiddleware",
+    "accounts.middleware.ForcePasswordChangeMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
     # Sends an account below its role's sign-in requirement to set up
     # two-step login (accounts.sign_in); after OTPMiddleware and
     # MessageMiddleware (it leaves a message when it logs someone out).
-    'accounts.middleware.SignInRequirementMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    "accounts.middleware.SignInRequirementMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
-ROOT_URLCONF = 'website.urls'
+ROOT_URLCONF = "website.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'accounts.context_processors.user_roles',
-                'accounts.context_processors.sign_in_notice',
-                'core.context_processors.organisation_contact',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "accounts.context_processors.user_roles",
+                "accounts.context_processors.sign_in_notice",
+                "core.context_processors.organisation_contact",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'website.wsgi.application'
+WSGI_APPLICATION = "website.wsgi.application"
 # What `daphne` (see INSTALLED_APPS) actually serves `runserver` through —
 # website/asgi.py routes plain HTTP requests through Django as usual and
 # WebSocket connections (notifications/routing.py) through Channels.
 # WSGI_APPLICATION is left in place for any WSGI-only tooling; it's not
 # what's actually handling requests once daphne is installed.
-ASGI_APPLICATION = 'website.asgi.application'
+ASGI_APPLICATION = "website.asgi.application"
 
 
 # Database
@@ -355,13 +356,13 @@ ASGI_APPLICATION = 'website.asgi.application'
 # point this at the `db` service instead.
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.mysql',
-        'NAME': env('DB_NAME', default='coderdojo'),
-        'USER': env('DB_USER', default='coderdojo'),
-        'PASSWORD': env('DB_PASSWORD', default='coderdojo'),
-        'HOST': env('DB_HOST', default='127.0.0.1'),
-        'PORT': env('DB_PORT', default='13306'),
+    "default": {
+        "ENGINE": "django.contrib.gis.db.backends.mysql",
+        "NAME": env("DB_NAME", default="coderdojo"),
+        "USER": env("DB_USER", default="coderdojo"),
+        "PASSWORD": env("DB_PASSWORD", default="coderdojo"),
+        "HOST": env("DB_HOST", default="127.0.0.1"),
+        "PORT": env("DB_PORT", default="13306"),
     }
 }
 
@@ -370,22 +371,22 @@ DATABASES = {
 # default port (or just won't connect until one exists — the cache is not
 # required for the app to boot).
 CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://{host}:{port}/0'.format(
-            host= env('REDIS_HOST', default='127.0.0.1'),
-            port= env('REDIS_PORT', default='6379'),
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://{host}:{port}/0".format(
+            host=env("REDIS_HOST", default="127.0.0.1"),
+            port=env("REDIS_PORT", default="6379"),
         ),
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
             # Cache reads/writes fail open rather than raising — without a
             # local Redis (e.g. host-based dev/tests outside the
             # devcontainer, where REDIS_HOST defaults to 127.0.0.1 with
             # nothing listening), every cache.get()/set() would otherwise
             # hard-error instead of just skipping the cache.
-            'IGNORE_EXCEPTIONS': True,
-            'SOCKET_CONNECT_TIMEOUT': 2,
-            'SOCKET_TIMEOUT': 2,
+            "IGNORE_EXCEPTIONS": True,
+            "SOCKET_CONNECT_TIMEOUT": 2,
+            "SOCKET_TIMEOUT": 2,
         },
     }
 }
@@ -406,13 +407,17 @@ if len(sys.argv) > 1 and sys.argv[1] == "test":
 # is caught there rather than here (a live push failing shouldn't break
 # the action that triggered the notification; the DB row is what matters).
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('redis://{host}:{port}/1'.format(
-                host=env('REDIS_HOST', default='127.0.0.1'),
-                port=env('REDIS_PORT', default='6379'),
-            ))],
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+                (
+                    "redis://{host}:{port}/1".format(
+                        host=env("REDIS_HOST", default="127.0.0.1"),
+                        port=env("REDIS_PORT", default="6379"),
+                    )
+                )
+            ],
         },
     },
 }
@@ -423,16 +428,16 @@ CHANNEL_LAYERS = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -440,16 +445,16 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
 # Offered in the menu's language switcher (django.views.i18n.set_language,
 # see website/urls.py) and as the mail language. The site's texts are
 # translated in locale/<nl_BE|fr_BE>/LC_MESSAGES/django.po (see CLAUDE.md,
 # "i18n"); German was dropped until German texts can be checked.
 LANGUAGES = [
-    ('en-us', 'English'),
-    ('nl-be', 'Nederlands (België)'),
-    ('fr-be', 'Français (Belgique)'),
+    ("en-us", "English"),
+    ("nl-be", "Nederlands (België)"),
+    ("fr-be", "Français (Belgique)"),
 ]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 # The languages the organisation writes its own content in (pathways, FAQs,
@@ -473,7 +478,7 @@ ORGANISATION_CONTACT = {
     "linkedin": "https://www.linkedin.com/company/coderdojo-belgium/",
 }
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -485,13 +490,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static"
-]
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
-MEDIA_URL = '/media/'
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # Background check documents (criminal record extracts) are sensitive and

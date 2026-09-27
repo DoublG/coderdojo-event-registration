@@ -23,6 +23,8 @@ class EventAdmin(TranslationAdminMixin, AuditHistoryAdminMixin, BelgiumGISModelA
     list_display = ["name", "dojo", "start_time", "status", "audience"]
     list_filter = ["status", "audience"]
     search_fields = ["name", "dojo__name"]
+
+
 admin.site.register(Registration)
 
 

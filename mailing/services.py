@@ -57,8 +57,9 @@ def suppressed_reason(user, category, address, test=False):
     return ""
 
 
-def send(user, category, template_key, context=None, *, idempotency_key=None, campaign=None, send_after=None,
-         test=False):
+def send(
+    user, category, template_key, context=None, *, idempotency_key=None, campaign=None, send_after=None, test=False
+):
     """Queue one mail to `user`. Renders `template_key` in the account's
     language now (so the row records exactly what was sent) and returns
     the EmailMessage: `pending`, or `suppressed` with the reason when the
@@ -85,11 +86,20 @@ def send(user, category, template_key, context=None, *, idempotency_key=None, ca
     try:
         with transaction.atomic():
             return EmailMessage.objects.create(
-                user=user, recipient=address, category=category, template_key=template_key,
-                language=language, subject=subject, body=body, campaign=campaign,
+                user=user,
+                recipient=address,
+                category=category,
+                template_key=template_key,
+                language=language,
+                subject=subject,
+                body=body,
+                campaign=campaign,
                 status=EmailMessage.Status.SUPPRESSED if reason else EmailMessage.Status.PENDING,
-                status_reason=reason, priority=PRIORITY[category], send_after=send_after,
-                idempotency_key=idempotency_key, is_test=test,
+                status_reason=reason,
+                priority=PRIORITY[category],
+                send_after=send_after,
+                idempotency_key=idempotency_key,
+                is_test=test,
             )
     except IntegrityError:
         # The same idempotency key queued concurrently: that row wins.
@@ -107,4 +117,3 @@ def send_or_log(user, category, template_key, context=None, **kwargs):
     except TemplateMissing:
         logger.exception("mail template %s is missing: nothing sent to %s", template_key, user)
         return None
-

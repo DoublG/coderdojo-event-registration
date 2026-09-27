@@ -72,7 +72,8 @@ RECORDED = {
     # phone); and the sign-in policy. Not what changes on every login.
     "accounts.SignInRequirement": {},
     "otp_totp.TOTPDevice": {
-        "exclude_fields": [*_LOGIN_BOOKKEEPING, "drift", "last_t"], "mask_fields": ["key"],
+        "exclude_fields": [*_LOGIN_BOOKKEEPING, "drift", "last_t"],
+        "mask_fields": ["key"],
     },
     "two_factor_webauthn.WebauthnDevice": {"exclude_fields": [*_LOGIN_BOOKKEEPING, "sign_count"]},
     "otp_static.StaticDevice": {"exclude_fields": _LOGIN_BOOKKEEPING},

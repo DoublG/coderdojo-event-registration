@@ -90,7 +90,8 @@ def cancel(campaign):
         campaign.status = Status.CANCELLED
         campaign.save(update_fields=["status"])
         EmailMessage.objects.filter(campaign=campaign, status=EmailMessage.Status.PENDING).update(
-            status=EmailMessage.Status.SUPPRESSED, status_reason="The campaign was cancelled.",
+            status=EmailMessage.Status.SUPPRESSED,
+            status_reason="The campaign was cancelled.",
         )
 
 
@@ -115,15 +116,24 @@ def queue_mail(campaign_id):
         if not claimed and campaign.status != Status.SENDING:
             return 0
         queued = 0
-        send_after = campaign.scheduled_at if campaign.scheduled_at and campaign.scheduled_at > timezone.now() else None
+        send_after = (
+            campaign.scheduled_at if campaign.scheduled_at and campaign.scheduled_at > timezone.now() else None
+        )
         for user in audience(campaign).order_by("pk").iterator(chunk_size=500):
             if Campaign.objects.filter(pk=campaign_id, status=Status.CANCELLED).exists():
                 return queued
             key = f"campaign:{campaign.pk}:{user.pk}"
             if EmailMessage.objects.filter(idempotency_key=key).exists():
                 continue
-            send(user, campaign.category, campaign.template_key, campaign.context,
-                 campaign=campaign, idempotency_key=key, send_after=send_after)
+            send(
+                user,
+                campaign.category,
+                campaign.template_key,
+                campaign.context,
+                campaign=campaign,
+                idempotency_key=key,
+                send_after=send_after,
+            )
             queued += 1
         Campaign.objects.filter(pk=campaign_id, status=Status.SENDING).update(queued_at=timezone.now())
         return queued
@@ -137,12 +147,10 @@ def launch_due(now=None):
     from .tasks import launch_campaign
 
     now = now or timezone.now()
-    due = list(
-        Campaign.objects.filter(status=Status.QUEUED, scheduled_at__isnull=True).values_list("pk", flat=True)
-    ) + list(
-        Campaign.objects.filter(status=Status.QUEUED, scheduled_at__lte=now).values_list("pk", flat=True)
-    ) + list(
-        Campaign.objects.filter(status=Status.SENDING, queued_at__isnull=True).values_list("pk", flat=True)
+    due = (
+        list(Campaign.objects.filter(status=Status.QUEUED, scheduled_at__isnull=True).values_list("pk", flat=True))
+        + list(Campaign.objects.filter(status=Status.QUEUED, scheduled_at__lte=now).values_list("pk", flat=True))
+        + list(Campaign.objects.filter(status=Status.SENDING, queued_at__isnull=True).values_list("pk", flat=True))
     )
     for campaign_id in due:
         launch_campaign.delay(campaign_id)
@@ -156,18 +164,23 @@ def launch_due(now=None):
 
 def stats(campaign):
     """The numbers for the campaign's page."""
-    counts = dict(
-        campaign.emailmessage_set.filter(is_test=False).values_list("status").annotate(n=Count("id"))
-    )
+    counts = dict(campaign.emailmessage_set.filter(is_test=False).values_list("status").annotate(n=Count("id")))
     result = {status: counts.get(status, 0) for status in EmailMessage.Status.values}
     result["queued"] = sum(counts.values())
     result["audience"] = audience(campaign).count() if (campaign.segment_id or campaign.segment_snapshot) else 0
     if campaign.launched_at:
         recipients = campaign.emailmessage_set.filter(is_test=False).values("user_id")
-        result["unsubscribed"] = ConsentEvent.objects.filter(
-            user_id__in=recipients, category=campaign.category, subscribed=False,
-            created_at__gte=campaign.launched_at,
-        ).values("user_id").distinct().count()
+        result["unsubscribed"] = (
+            ConsentEvent.objects.filter(
+                user_id__in=recipients,
+                category=campaign.category,
+                subscribed=False,
+                created_at__gte=campaign.launched_at,
+            )
+            .values("user_id")
+            .distinct()
+            .count()
+        )
     else:
         result["unsubscribed"] = 0
     result["rate_limit"] = settings.MAILING_BATCH_RATE_LIMIT

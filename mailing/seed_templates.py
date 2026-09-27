@@ -40,7 +40,7 @@ TEMPLATES = [
         "key": "registration_confirmed",
         "category": MailCategory.REGISTRATION,
         "description": "After signing a ninja up for a session with a free place. "
-                       "Variables: ninja_name, event_name, dojo_name, start_time, end_time, venue, event_url, account_url.",
+        "Variables: ninja_name, event_name, dojo_name, start_time, end_time, venue, event_url, account_url.",
         "subject": {
             "en-us": "{{ ninja_name }} is signed up for {{ event_name }}",
             "nl-be": "{{ ninja_name }} is ingeschreven voor {{ event_name }}",
@@ -95,7 +95,7 @@ pour quelqu'un de la liste d'attente : {{ account_url }}
         "key": "registration_waitlisted",
         "category": MailCategory.REGISTRATION,
         "description": "After signing a ninja up for a full session: they're on the waiting list. "
-                       "Variables: ninja_name, event_name, dojo_name, start_time, event_url, account_url.",
+        "Variables: ninja_name, event_name, dojo_name, start_time, event_url, account_url.",
         "subject": {
             "en-us": "{{ ninja_name }} is on the waiting list for {{ event_name }}",
             "nl-be": "{{ ninja_name }} staat op de wachtlijst voor {{ event_name }}",
@@ -138,7 +138,7 @@ Vos inscriptions : {{ account_url }}
         "key": "waitlist_promoted",
         "category": MailCategory.REGISTRATION,
         "description": "A place came free and a waitlisted ninja moved up. "
-                       "Variables: ninja_name, event_name, dojo_name, start_time, event_url, account_url.",
+        "Variables: ninja_name, event_name, dojo_name, start_time, event_url, account_url.",
         "subject": {
             "en-us": "Good news: {{ ninja_name }} has a place at {{ event_name }}",
             "nl-be": "Goed nieuws: {{ ninja_name }} heeft een plaats voor {{ event_name }}",
@@ -184,7 +184,7 @@ que la personne suivante reçoive la place : {{ account_url }}
         "key": "session_reminder",
         "category": MailCategory.REMINDER,
         "description": "Two days before a session, for every confirmed registration. "
-                       "Variables: ninja_name, event_name, dojo_name, start_time, end_time, venue, event_url, account_url.",
+        "Variables: ninja_name, event_name, dojo_name, start_time, end_time, venue, event_url, account_url.",
         "subject": {
             "en-us": "Reminder: {{ event_name }} on {{ start_time|date:'l' }}",
             "nl-be": "Herinnering: {{ event_name }} op {{ start_time|date:'l' }}",
@@ -237,7 +237,7 @@ la liste d'attente : {{ account_url }}
         "key": "new_sessions_at_dojo",
         "category": MailCategory.DOJO_NEWS,
         "description": "When a dojo publishes new sessions, to families who attended there. "
-                       "Variables: dojo_name, dojo_url, events (list of {name, start_time, url}).",
+        "Variables: dojo_name, dojo_url, events (list of {name, start_time, url}).",
         "subject": {
             "en-us": "New sessions at {{ dojo_name }}",
             "nl-be": "Nieuwe sessies bij {{ dojo_name }}",
@@ -281,7 +281,7 @@ Les places sont attribuées par ordre d'inscription. Toutes les sessions de ce d
         "key": "background_check_requested",
         "category": MailCategory.SERVICE,
         "description": "A reviewer asks a volunteer for their criminal record extract (model 2). "
-                       "Variables: upload_url. Same content as applications.services.request_background_check.",
+        "Variables: upload_url. Same content as applications.services.request_background_check.",
         "subject": {
             "en-us": "Action needed: background check document",
             "nl-be": "Actie nodig: uittreksel uit het strafregister",
@@ -409,8 +409,8 @@ si vous n'êtes pas sûr·e de ce qu'il faut.
         "key": "application_approved",
         "category": MailCategory.SERVICE,
         "description": "A reviewer approved a mentor or champion application. "
-                       "Variables: kind (mentor | champion), join_dojo_name (the dojo a join request was "
-                       "sent to, or empty), account_url.",
+        "Variables: kind (mentor | champion), join_dojo_name (the dojo a join request was "
+        "sent to, or empty), account_url.",
         "subject": {
             "en-us": "Your CoderDojo application has been approved",
             "nl-be": "Je aanvraag bij CoderDojo is goedgekeurd",
@@ -524,7 +524,7 @@ Si vous n'avez rien demandé, vous pouvez ignorer cet e-mail : votre mot de pass
         "key": "two_step_turned_on",
         "category": MailCategory.SERVICE,
         "description": "Two-step login was turned on for the account (accounts/two_step.py). "
-                       "Variables: method (app or passkey), security_url.",
+        "Variables: method (app or passkey), security_url.",
         "subject": {
             "en-us": "Two-step login is on",
             "nl-be": "Aanmelden in twee stappen staat aan",
@@ -570,7 +570,7 @@ Ce n'était pas vous ? Changez tout de suite votre mot de passe et vérifiez vos
         "key": "two_step_method_added",
         "category": MailCategory.SERVICE,
         "description": "A sign-in method was added to an account that already had two-step login "
-                       "(accounts/two_step.py). Variables: method (app or passkey), security_url.",
+        "(accounts/two_step.py). Variables: method (app or passkey), security_url.",
         "subject": {
             "en-us": "A new sign-in method on your account",
             "nl-be": "Een nieuwe aanmeldmethode op je account",
@@ -610,7 +610,7 @@ Ce n'était pas vous ? Supprimez-la et changez tout de suite votre mot de passe 
         "key": "two_step_method_removed",
         "category": MailCategory.SERVICE,
         "description": "A sign-in method was removed; two-step login stays on with the others "
-                       "(accounts/two_step.py). Variables: method (app or passkey), security_url.",
+        "(accounts/two_step.py). Variables: method (app or passkey), security_url.",
         "subject": {
             "en-us": "A sign-in method was removed from your account",
             "nl-be": "Er is een aanmeldmethode van je account verwijderd",
@@ -650,7 +650,7 @@ Ce n'était pas vous ? Changez tout de suite votre mot de passe et vérifiez vos
         "key": "two_step_turned_off",
         "category": MailCategory.SERVICE,
         "description": "Two-step login was turned off, by the account holder or by the organisation for someone "
-                       "who lost their phone (accounts/two_step.py). Variables: by_organisation, security_url.",
+        "who lost their phone (accounts/two_step.py). Variables: by_organisation, security_url.",
         "subject": {
             "en-us": "Two-step login is off",
             "nl-be": "Aanmelden in twee stappen staat uit",
@@ -696,7 +696,7 @@ Vous pouvez la réactiver ici :
         "key": "backup_code_used",
         "category": MailCategory.SERVICE,
         "description": "Someone logged in with one of the account's backup codes (accounts/two_step.py). "
-                       "Variables: codes_left, security_url.",
+        "Variables: codes_left, security_url.",
         "subject": {
             "en-us": "A backup code was used to log in",
             "nl-be": "Er is aangemeld met een back-upcode",
@@ -742,7 +742,7 @@ Ce n'était pas vous ? Changez tout de suite votre mot de passe et créez de nou
         "key": "ninja_account_created",
         "category": MailCategory.SERVICE,
         "description": "A guardian gave their child their own login (or switched it back on). Sent to the "
-                       "child's address. Variables: guardian_name, username, set_password_url.",
+        "child's address. Variables: guardian_name, username, set_password_url.",
         "subject": {
             "en-us": "Your own CoderDojo login",
             "nl-be": "Je eigen CoderDojo-login",
@@ -799,7 +799,7 @@ Tu ne t'attendais pas à cet e-mail ? Tu peux l'ignorer.
         "key": "account_deletion_reminder",
         "category": MailCategory.SERVICE,
         "description": "An unused account will be deleted (privacy.retention). Variables: deletion_date, login_url, "
-                       "children, volunteer, keeps_profile, champion_of.",
+        "children, volunteer, keeps_profile, champion_of.",
         "subject": {
             "en-us": "Your CoderDojo account will be deleted on {{ deletion_date|date:'j F Y' }}",
             "nl-be": "Je CoderDojo-account wordt op {{ deletion_date|date:'j F Y' }} verwijderd",
@@ -892,7 +892,7 @@ laissez un de vos enfants se connecter avec son propre compte){% endif %} :
         "key": "youth_mentor_promoted",
         "category": MailCategory.SERVICE,
         "description": "A dojo's team made a child a youth mentor; sent to the family (guardians, plus the "
-                       "child's own login). Variables: ninja_name, dojo_name, promoted_by, ninja_url.",
+        "child's own login). Variables: ninja_name, dojo_name, promoted_by, ninja_url.",
         "subject": {
             "en-us": "{{ ninja_name }} is now a youth mentor at {{ dojo_name }}",
             "nl-be": "{{ ninja_name }} is nu youth mentor bij {{ dojo_name }}",
@@ -952,7 +952,7 @@ prend fin aussi.
         "key": "campaign_coolest_projects",
         "category": MailCategory.NEWSLETTER,
         "description": "Campaign: invite every active family and volunteer to Coolest Projects. "
-                       "Variables: signup_url (campaign context).",
+        "Variables: signup_url (campaign context).",
         "subject": {
             "en-us": "Show what you made at Coolest Projects!",
             "nl-be": "Toon wat je gemaakt hebt op Coolest Projects!",
@@ -1005,7 +1005,7 @@ Ils vous aideront volontiers à transformer une idée en projet.
         "key": "campaign_girlz",
         "category": MailCategory.NEWSLETTER,
         "description": "Campaign: CoderDojo Girlz sessions, to families with a daughter or a child "
-                       "whose gender isn't listed. Variables: signup_url (campaign context).",
+        "whose gender isn't listed. Variables: signup_url (campaign context).",
         "subject": {
             "en-us": "CoderDojo Girlz: coding sessions especially for girls",
             "nl-be": "CoderDojo Girlz: codeersessies speciaal voor meisjes",
@@ -1054,7 +1054,7 @@ Vous connaissez quelqu'un que ça intéresserait ? N'hésitez pas à transférer
         "key": "campaign_new_dojo",
         "category": MailCategory.NEWSLETTER,
         "description": "Campaign: a new dojo is opening, to families living near it. "
-                       "Variables: dojo_name, dojo_path (campaign context), site_url.",
+        "Variables: dojo_name, dojo_path (campaign context), site_url.",
         "subject": {
             "en-us": "A new CoderDojo is opening near you: {{ dojo_name }}",
             "nl-be": "Er opent een nieuwe CoderDojo bij jou in de buurt: {{ dojo_name }}",
@@ -1161,37 +1161,81 @@ SAMPLE_CONTEXT = {
         "dojo_name": "CoderDojo Ghent",
         "dojo_url": "https://coolregistration.localhost/dojos/1/",
         "events": [
-            {"name": "Scratch for beginners", "start_time": _start, "url": "https://coolregistration.localhost/events/1/"},
-            {"name": "Python games", "start_time": datetime(2026, 10, 17, 14, 0),
-             "url": "https://coolregistration.localhost/events/2/"},
+            {
+                "name": "Scratch for beginners",
+                "start_time": _start,
+                "url": "https://coolregistration.localhost/events/1/",
+            },
+            {
+                "name": "Python games",
+                "start_time": datetime(2026, 10, 17, 14, 0),
+                "url": "https://coolregistration.localhost/events/2/",
+            },
         ],
     },
-    "background_check_requested": {**_common, "upload_url": "https://coolregistration.localhost/background-check/example/"},
+    "background_check_requested": {
+        **_common,
+        "upload_url": "https://coolregistration.localhost/background-check/example/",
+    },
     "background_check_validated": {**_common, "expires_at": datetime(2027, 9, 25)},
     "background_check_rejected": {**_common, "account_url": "https://coolregistration.localhost/account/"},
-    "application_approved": {**_common, "kind": "mentor", "join_dojo_name": "CoderDojo Ghent",
-                             "account_url": "https://coolregistration.localhost/account/"},
+    "application_approved": {
+        **_common,
+        "kind": "mentor",
+        "join_dojo_name": "CoderDojo Ghent",
+        "account_url": "https://coolregistration.localhost/account/",
+    },
     "application_rejected": {**_common},
-    "password_reset": {**_common, "reset_url": "https://coolregistration.localhost/password-reset/confirm/MQ/abc-123/"},
-    "two_step_turned_on": {**_common, "method": "app", "security_url": "https://coolregistration.localhost/account/security/"},
-    "two_step_method_added": {**_common, "method": "passkey",
-                              "security_url": "https://coolregistration.localhost/account/security/"},
-    "two_step_method_removed": {**_common, "method": "passkey",
-                                "security_url": "https://coolregistration.localhost/account/security/"},
-    "two_step_turned_off": {**_common, "by_organisation": False,
-                            "security_url": "https://coolregistration.localhost/account/security/"},
-    "backup_code_used": {**_common, "codes_left": 9, "security_url": "https://coolregistration.localhost/account/security/"},
+    "password_reset": {
+        **_common,
+        "reset_url": "https://coolregistration.localhost/password-reset/confirm/MQ/abc-123/",
+    },
+    "two_step_turned_on": {
+        **_common,
+        "method": "app",
+        "security_url": "https://coolregistration.localhost/account/security/",
+    },
+    "two_step_method_added": {
+        **_common,
+        "method": "passkey",
+        "security_url": "https://coolregistration.localhost/account/security/",
+    },
+    "two_step_method_removed": {
+        **_common,
+        "method": "passkey",
+        "security_url": "https://coolregistration.localhost/account/security/",
+    },
+    "two_step_turned_off": {
+        **_common,
+        "by_organisation": False,
+        "security_url": "https://coolregistration.localhost/account/security/",
+    },
+    "backup_code_used": {
+        **_common,
+        "codes_left": 9,
+        "security_url": "https://coolregistration.localhost/account/security/",
+    },
     "youth_mentor_promoted": {
-        **_common, "ninja_name": "Emma", "dojo_name": "CoderDojo Ghent", "promoted_by": "Jan Peeters",
+        **_common,
+        "ninja_name": "Emma",
+        "dojo_name": "CoderDojo Ghent",
+        "promoted_by": "Jan Peeters",
         "ninja_url": "https://coolregistration.localhost/account/ninja/1/",
     },
     "ninja_account_created": {
-        **_common, "recipient_name": "Emma", "guardian_name": "Ellen Peeters", "username": "emma",
+        **_common,
+        "recipient_name": "Emma",
+        "guardian_name": "Ellen Peeters",
+        "username": "emma",
         "set_password_url": "https://coolregistration.localhost/password-reset/confirm/MQ/abc-123/",
     },
     "account_deletion_reminder": {
-        **_common, "deletion_date": datetime(2026, 10, 26), "login_url": "https://coolregistration.localhost/login/",
-        "children": ["Emma", "Lucas"], "volunteer": False, "keeps_profile": False,
+        **_common,
+        "deletion_date": datetime(2026, 10, 26),
+        "login_url": "https://coolregistration.localhost/login/",
+        "children": ["Emma", "Lucas"],
+        "volunteer": False,
+        "keeps_profile": False,
         "champion_of": [],
     },
     "campaign_coolest_projects": {**_common, "signup_url": "https://coolestprojects.org"},
@@ -1209,14 +1253,21 @@ CAMPAIGNS = [
         "segment": {
             "name": "Everyone active",
             "description": f"Champions and mentors (active membership) of active dojos that held a session in "
-                           f"the last {ACTIVE_WITHIN_DAYS} days, and parents of a child who came to a session "
-                           f"in the last {ACTIVE_WITHIN_DAYS} days.",
+            f"the last {ACTIVE_WITHIN_DAYS} days, and parents of a child who came to a session "
+            f"in the last {ACTIVE_WITHIN_DAYS} days.",
             "groups": [
-                {"scope": "user", "operator": "or", "rules": [("active_team_member", "within_days", ACTIVE_WITHIN_DAYS)],
-                 "children": [
-                     {"scope": "ninja", "operator": "and",
-                      "rules": [("attended_within_days", "within_days", ACTIVE_WITHIN_DAYS)]},
-                 ]},
+                {
+                    "scope": "user",
+                    "operator": "or",
+                    "rules": [("active_team_member", "within_days", ACTIVE_WITHIN_DAYS)],
+                    "children": [
+                        {
+                            "scope": "ninja",
+                            "operator": "and",
+                            "rules": [("attended_within_days", "within_days", ACTIVE_WITHIN_DAYS)],
+                        },
+                    ],
+                },
             ],
         },
     },
@@ -1241,10 +1292,14 @@ CAMPAIGNS = [
             "name": "Families near the new dojo",
             "description": "Every family (an account with children) whose postcode is within 20 km of the new dojo.",
             "groups": [
-                {"scope": "user", "operator": "and", "rules": [
-                    ("has_children", "is", True),
-                    ("near_dojo", "within", {"dojo": NEW_DOJO, "km": 20}),
-                ]},
+                {
+                    "scope": "user",
+                    "operator": "and",
+                    "rules": [
+                        ("has_children", "is", True),
+                        ("near_dojo", "within", {"dojo": NEW_DOJO, "km": 20}),
+                    ],
+                },
             ],
         },
     },

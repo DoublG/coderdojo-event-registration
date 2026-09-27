@@ -25,7 +25,9 @@ def home(request):
     # "Meet the team" lists content.OrganisationTeamMember (display only,
     # each with a position, e.g. "Member of the board").
     team = cache.get_or_set(
-        "core:home:team", lambda: list(OrganisationTeamMember.objects.filter(is_public=True)), HOME_CONTENT_CACHE_TIMEOUT
+        "core:home:team",
+        lambda: list(OrganisationTeamMember.objects.filter(is_public=True)),
+        HOME_CONTENT_CACHE_TIMEOUT,
     )
 
     # A different quote on every load — order_by("?") is fine at this size
@@ -39,7 +41,9 @@ def home(request):
     # own searches happen via htmx against dojos.views.dojo_finder_widget,
     # this is just what renders before anyone has searched.
     dojo_widget_form = DojoSearchForm()
-    origin, dojo_widget_search_label, dojo_widget_geocode_failed = resolve_search_origin(dojo_widget_form, request.user)
+    origin, dojo_widget_search_label, dojo_widget_geocode_failed = resolve_search_origin(
+        dojo_widget_form, request.user
+    )
     dojos = attach_next_events(list(dojos_by_distance(origin)[:WIDGET_RESULTS_LIMIT]))
 
     # Initial batch for the "Upcoming sessions" carousel (events app) —
@@ -50,22 +54,26 @@ def home(request):
     if events_page.has_next():
         events_next_page_url = f"{reverse('upcoming_sessions_widget')}?page={events_page.next_page_number()}"
 
-    return render(request, "core/home.html", {
-        "pathways": pathways,
-        "team": team,
-        "testimonial": testimonial,
-        "faqs": faqs,
-        "form": dojo_widget_form,
-        "dojos": dojos,
-        "search_label": dojo_widget_search_label,
-        "geocode_failed": dojo_widget_geocode_failed,
-        "events": events_page.object_list,
-        "events_next_page_url": events_next_page_url,
-        # Featured events (content.Promotion, DATA_MODEL.md §12). Not cached:
-        # a promotion starts and ends on its own schedule.
-        "hero_promotions": Promotion.objects.showing(Promotion.HOMEPAGE_HERO),
-        "sponsors": Sponsor.objects.filter(is_public=True),
-    })
+    return render(
+        request,
+        "core/home.html",
+        {
+            "pathways": pathways,
+            "team": team,
+            "testimonial": testimonial,
+            "faqs": faqs,
+            "form": dojo_widget_form,
+            "dojos": dojos,
+            "search_label": dojo_widget_search_label,
+            "geocode_failed": dojo_widget_geocode_failed,
+            "events": events_page.object_list,
+            "events_next_page_url": events_next_page_url,
+            # Featured events (content.Promotion, DATA_MODEL.md §12). Not cached:
+            # a promotion starts and ends on its own schedule.
+            "hero_promotions": Promotion.objects.showing(Promotion.HOMEPAGE_HERO),
+            "sponsors": Sponsor.objects.filter(is_public=True),
+        },
+    )
 
 
 def contact(request):
@@ -77,4 +85,3 @@ def code_of_conduct(request):
     """How everyone at a dojo (ninjas, parents, mentors, champions) behaves,
     and where to go with a concern."""
     return render(request, "core/code_of_conduct.html")
-
