@@ -717,6 +717,9 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
    height, leaving a gap under a single input. */
 .cd-form > .cd-form__field, .cd-form__group > .cd-form__field { flex: 0 0 auto; }
 
+/* A radio or checkbox list (core/forms/field.html): a fieldset without the browser's box. */
+.cd-form__fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.cd-form__fieldset legend { padding: 0; margin-bottom: var(--space-1); }
 .cd-form__label { color: var(--ink); }
 /* An upload with a current file (core/widgets/clearable_file_input.html). */
 .cd-file-input { display: flex; flex-direction: column; gap: var(--space-2); }

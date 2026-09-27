@@ -6,18 +6,7 @@
 {% block manage_content %}
   <form class="cd-card cd-form" method="post" enctype="multipart/form-data" novalidate style="padding: var(--space-5); max-width: 640px;">
     {% csrf_token %}
-    {% for field in form %}
-      <div class="cd-form__field">
-        {% if field.name == "is_public" %}
-          <label class="cd-form__checkbox-row" for="{{ field.id_for_label }}">{{ field }}<span class="body-sm">{{ field.label }}</span></label>
-        {% else %}
-          <label class="cd-form__label label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="cd-form__required" aria-hidden="true">*</span>{% endif %}</label>
-          {{ field }}
-          {% if field.help_text %}<p class="cd-form__help caption">{{ field.help_text }}</p>{% endif %}
-        {% endif %}
-        <ul class="cd-form__errors">{% for error in field.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-      </div>
-    {% endfor %}
+    {{ form }}
     <div class="cd-form__actions">
       <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_sponsor_list' %}">{% translate "Cancel" %}</a>
       <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button>

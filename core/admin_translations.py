@@ -5,6 +5,7 @@ the main language. Put it first in the bases:
 `class PathwayAdmin(TranslationAdminMixin, admin.ModelAdmin)`."""
 
 from django import forms
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.translation import gettext as _
 
@@ -13,7 +14,12 @@ from .content_languages import language_name, save_translation_fields, translati
 
 class TranslationAdminMixin:
     def _translation_languages(self, obj):
-        return (obj if obj is not None else self.model()).content_languages()[1:]
+        try:
+            return (obj if obj is not None else self.model()).content_languages()[1:]
+        except ObjectDoesNotExist:
+            # A new event or announcement has no dojo yet, so no languages to
+            # ask for: its translation fields appear once it's saved.
+            return []
 
     def _translation_fields(self, obj):
         model_fields = {f.name: f for f in self.model._meta.fields}

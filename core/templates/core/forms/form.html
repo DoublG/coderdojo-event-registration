@@ -1,0 +1,10 @@
+{% comment %}
+  A whole site form (core/forms.py, SiteFormRenderer.form_template_name): what
+  {{ form }} renders inside a <form class="cd-form">. Errors that aren't about
+  one field first, then every field (core/forms/field.html), then the hidden ones.
+{% endcomment %}{% if errors %}
+<div class="cd-form__notes">
+  {% for error in errors %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endfor %}
+</div>{% endif %}
+{% for field, errors in fields %}{{ field.as_field_group }}
+{% endfor %}{% for field in hidden_fields %}{{ field }}{% endfor %}

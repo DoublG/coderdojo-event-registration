@@ -282,7 +282,14 @@ INSTALLED_APPS = [
     'formtools',
     'two_factor',
     'two_factor.plugins.webauthn',
+    # Django's own form templates, last: the project's templates override them
+    # (core/templates/django/forms/, see FORM_RENDERER).
+    'django.forms',
 ]
+
+# The site's forms render through core/forms/field.html and core/forms/form.html
+# (core/forms.py): one layout for every field, and the site's input classes.
+FORM_RENDERER = 'core.forms.SiteFormRenderer'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

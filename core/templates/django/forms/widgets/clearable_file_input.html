@@ -1,5 +1,7 @@
 {% comment %}
-  forms.ClearableFileInput on the site's own forms (set in core.apps): Django's
+  Overrides Django's own ClearableFileInput template for the site's forms
+  (core.forms.SiteFormRenderer reads the project's templates first; the admin's
+  file widget has its own template). Django's
   template puts loose text, a link and a checkbox straight into the field,
   which a .cd-form__field (a flex column) lays out one bit per line.
 {% endcomment %}<div class="cd-file-input">

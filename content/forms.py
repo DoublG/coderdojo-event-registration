@@ -81,10 +81,11 @@ class SponsorForm(forms.ModelForm):
         fields = ["name", "url", "logo", "order", "is_public"]
         labels = {"name": _("Name"), "url": _("Website"), "logo": _("Logo"), "order": _("Order"), "is_public": _("Shown on the homepage")}
         help_texts = {"logo": _("Optional. Without a logo, the sponsor's name is shown."), "order": _("Lower comes first.")}
+        # The input classes come from core.forms.SiteBoundField.
         widgets = {
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("e.g. Telenet")}),
-            "url": forms.URLInput(attrs={"class": "cd-form__input body", "placeholder": "https://"}),
-            "logo": forms.ClearableFileInput(attrs={"class": "cd-form__input body", "accept": "image/*"}),
-            "order": forms.NumberInput(attrs={"class": "cd-form__input body", "min": 0}),
+            "name": forms.TextInput(attrs={"placeholder": _("e.g. Telenet")}),
+            "url": forms.URLInput(attrs={"placeholder": "https://"}),
+            "logo": forms.ClearableFileInput(attrs={"accept": "image/*"}),
+            "order": forms.NumberInput(attrs={"min": 0}),
         }
 

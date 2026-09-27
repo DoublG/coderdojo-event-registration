@@ -1,0 +1,21 @@
+{% comment %}
+  One field of a site form (core/forms.py, SiteFormRenderer.field_template_name):
+  what {{ field.as_field_group }} and {{ form }} render. Label with the
+  required mark, the widget, the help text, then the errors: the same order
+  and markup on every form. A checkbox is a row with its label beside it; a
+  radio or checkbox list is a fieldset with a legend.
+{% endcomment %}{% if field.is_hidden %}{{ field }}{% elif field.widget_type == "checkbox" %}
+<div class="cd-form__field cd-form__field--checkbox">
+  <label class="cd-form__checkbox-row" for="{{ field.id_for_label }}">{{ field }}<span class="body-sm">{{ field.label }}</span></label>
+  {% include "core/forms/_help_and_errors.html" %}
+</div>{% elif field.use_fieldset %}
+<fieldset class="cd-form__field cd-form__fieldset"{% if field.aria_describedby %} aria-describedby="{{ field.aria_describedby }}"{% endif %}>
+  {% if field.label %}<legend class="cd-form__label label">{{ field.label }}{% if field.field.required %}<span class="cd-form__required" aria-hidden="true">*</span>{% endif %}</legend>{% endif %}
+  {{ field }}
+  {% include "core/forms/_help_and_errors.html" %}
+</fieldset>{% else %}
+<div class="cd-form__field">
+  {% if field.label %}<label class="cd-form__label label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="cd-form__required" aria-hidden="true">*</span>{% endif %}</label>{% endif %}
+  {{ field }}
+  {% include "core/forms/_help_and_errors.html" %}
+</div>{% endif %}

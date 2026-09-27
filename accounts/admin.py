@@ -56,6 +56,9 @@ class UserAdmin(LogAccessAdminMixin, AuditHistoryAdminMixin, BaseUserAdmin):
         }),
     )
     search_fields = ["username", "email", "first_name", "last_name"]
+    # Not editable on the model (a secret the upload link is made from), so it
+    # can only be shown here; asking to edit it broke the whole change page.
+    readonly_fields = ["background_check_token"]
     inlines = [GuardianshipInline, OrganisationRoleInline]
 
 

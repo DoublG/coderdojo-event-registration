@@ -219,6 +219,42 @@ class AdminStaysFullyUsableTests(TestCase):
                     missing.append(f"{label}: {permission}")
         self.assertEqual(missing, [], "the admin must stay fully usable for fixing things by hand")
 
+    def test_every_admin_page_opens(self):
+        """Not only allowed: the list, add and change page of every registered
+        model render for a superuser (a non-editable field in a fieldset, or a
+        new object without its dojo, used to crash a page)."""
+        from django.contrib import admin
+        from django.test import RequestFactory
+
+        from accounts.models import User
+        from dojos.testing import make_dojo
+        from events.models import Event
+
+        root = User.objects.create(username="root", is_staff=True, is_superuser=True)
+        User.objects.create(username="someone", email="someone@example.com")
+        dojo = make_dojo("Ghent")
+        Event.objects.create(name="Session", dojo=dojo, start_time="2030-01-01T10:00:00Z",
+                             end_time="2030-01-01T12:00:00Z", places=10)
+        self.client.force_login(root)
+        request = RequestFactory().get("/admin/")
+        request.user = root
+        broken = []
+        for model, model_admin in admin.site._registry.items():
+            app, name = model._meta.app_label, model._meta.model_name
+            urls = [reverse(f"admin:{app}_{name}_changelist")]
+            if model_admin.has_add_permission(request):
+                urls.append(reverse(f"admin:{app}_{name}_add"))
+            # From the admin's own list (a proxy like Background checks filters it).
+            obj = model_admin.get_queryset(request).exclude(pk=root.pk).first() if model is User else \
+                model_admin.get_queryset(request).first()
+            if obj is not None:
+                urls.append(reverse(f"admin:{app}_{name}_change", args=[obj.pk]))
+            for url in urls:
+                status = self.client.get(url).status_code
+                if status != 200:
+                    broken.append(f"{url}: {status}")
+        self.assertEqual(broken, [])
+
 
 class TranslationTests(TestCase):
     """The site's texts come in Dutch and French (locale/, CLAUDE.md "i18n"):
@@ -683,3 +719,76 @@ class AuditLogAdminTests(TestCase):
         self.assertFalse(model_admin.has_add_permission(request))
         self.assertFalse(model_admin.has_change_permission(request))
         self.assertFalse(model_admin.has_delete_permission(request))
+
+
+class SiteFormRenderingTests(TestCase):
+    """Forms render through core/forms/field.html and form.html (core/forms.py,
+    FORM_RENDERER): one layout for every field, the site's input classes."""
+
+    def form(self, data=None):
+        from django import forms
+
+        class SampleForm(forms.Form):
+            name = forms.CharField(label="Name", help_text="Your full name.")
+            notes = forms.CharField(label="Notes", required=False, widget=forms.Textarea)
+            kind = forms.ChoiceField(label="Kind", choices=[("a", "A"), ("b", "B")])
+            size = forms.ChoiceField(label="Size", choices=[("s", "S"), ("l", "L")], widget=forms.RadioSelect)
+            agree = forms.BooleanField(label="I agree", required=False)
+            own = forms.CharField(label="Own", required=False, widget=forms.TextInput(attrs={"class": "mine"}))
+            secret = forms.CharField(required=False, widget=forms.HiddenInput)
+
+            def clean(self):
+                raise forms.ValidationError("Something is off.")
+
+        return SampleForm(data)
+
+    def test_the_site_renderer_is_used(self):
+        from django.conf import settings
+
+        self.assertEqual(settings.FORM_RENDERER, "core.forms.SiteFormRenderer")
+
+    def test_a_field_group(self):
+        html = self.form()["name"].as_field_group()
+        self.assertInHTML(
+            '<label class="cd-form__label label" for="id_name">Name'
+            '<span class="cd-form__required" aria-hidden="true">*</span></label>', html,
+        )
+        self.assertIn('class="cd-form__input body"', html)
+        self.assertInHTML('<p class="cd-form__help caption" id="id_name_helptext">Your full name.</p>', html)
+        self.assertNotIn("cd-form__errors", html)
+
+    def test_input_classes_by_widget(self):
+        form = self.form()
+        self.assertIn('class="cd-form__textarea body"', str(form["notes"]))
+        self.assertIn('class="cd-form__select body"', str(form["kind"]))
+        self.assertIn('class="mine"', str(form["own"]))
+        self.assertNotIn("cd-form__input", str(form["agree"]))
+
+    def test_errors_come_under_the_input(self):
+        html = self.form({"kind": "a", "size": "s"})["name"].as_field_group()
+        self.assertLess(html.index("<input"), html.index('<ul class="cd-form__errors">'))
+        self.assertIn('aria-invalid="true"', html)
+
+    def test_checkbox_and_radio_layouts(self):
+        form = self.form()
+        self.assertIn('class="cd-form__checkbox-row"', form["agree"].as_field_group())
+        radio = form["size"].as_field_group()
+        self.assertIn('<fieldset class="cd-form__field cd-form__fieldset"', radio)
+        self.assertIn("<legend", radio)
+
+    def test_a_whole_form(self):
+        html = str(self.form({"name": "Ann", "kind": "a", "size": "s"}))
+        self.assertInHTML('<p class="cd-form__note cd-form__note--error caption">Something is off.</p>', html)
+        self.assertIn('type="hidden" name="secret"', html)
+        self.assertEqual(html.count('class="cd-form__field'), 6)
+
+    def test_an_upload_with_a_current_file(self):
+        from django import forms
+
+        class UploadForm(forms.Form):
+            file = forms.FileField(required=False)
+
+        form = UploadForm(initial={"file": type("F", (), {"url": "/media/x.png", "__str__": lambda self: "x.png"})()})
+        html = str(form["file"])
+        self.assertIn('class="cd-file-input"', html)
+        self.assertIn('class="cd-form__checkbox-row"', html)
