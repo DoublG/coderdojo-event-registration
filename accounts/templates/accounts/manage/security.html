@@ -1,0 +1,98 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Sign-in security" %}{% endblock %}
+{% block manage_heading %}{% translate "Sign-in security" %}{% endblock %}
+
+{% block manage_content %}
+  {% comment %}The sign-in policy per role (accounts.SignInRequirement, applied by accounts.sign_in) and turning off someone's two-step login (accounts/manage.py).{% endcomment %}
+  <p class="body-sm">{% translate "Choose how the accounts in each role must log in. Anyone can turn on two-step login themselves; here you make it required. A role asks for its level from the day you set (empty: right away). Before that day the accounts see a notice; from then on, an account without it is sent to set it up before it can use anything its role opens. An account with several roles gets the strongest level. Children's own logins are never asked." %}</p>
+
+  <form method="post" class="cd-card cd-form" style="padding: var(--space-5);" novalidate>
+    {% csrf_token %}
+    <div class="cd-table-wrap">
+      <table class="cd-table cd-table--zebra">
+        <thead>
+          <tr>
+            <th class="label" scope="col">{% translate "Role" %}</th>
+            <th class="label" scope="col">{% translate "Minimum sign-in" %}</th>
+            <th class="label" scope="col">{% translate "Required from" %}</th>
+            <th class="label cd-table__num" scope="col">{% translate "Accounts" %}</th>
+            <th class="label cd-table__num" scope="col">{% translate "Two-step login on" %}</th>
+            <th class="label cd-table__num" scope="col">{% translate "With a passkey" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for role, label, level, required_from, counts in rows %}
+            <tr>
+              <th class="body-sm" scope="row"><label for="{{ level.id_for_label }}">{{ label }}</label></th>
+              <td class="body-sm">{{ level }}{% for error in level.errors %}<p class="caption cd-form__note--error">{{ error }}</p>{% endfor %}</td>
+              <td class="body-sm">{{ required_from }}{% for error in required_from.errors %}<p class="caption cd-form__note--error">{{ error }}</p>{% endfor %}</td>
+              <td class="body-sm cd-table__num">{{ counts.total }}</td>
+              <td class="body-sm cd-table__num">{{ counts.on }}</td>
+              <td class="body-sm cd-table__num">{{ counts.passkey }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="cd-form__actions">
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button>
+    </div>
+  </form>
+
+  <h2 class="heading-md" style="margin-top: var(--space-6);">{% translate "Someone can't log in" %}</h2>
+  <p class="body-sm">{% translate "When someone lost their phone or passkey and their backup codes, check it's really them (for example by calling them), then turn off their two-step login here. They get a mail, and log in with only their password. If their role needs two-step login, they're asked to set it up again straight away." %}</p>
+
+  <form method="get" class="cd-card cd-form" style="padding: var(--space-5);">
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="security-q">{% translate "Name, email address or username" %}</label>
+      <input class="cd-form__input body" type="search" id="security-q" name="q" value="{{ query }}">
+    </div>
+    <div class="cd-form__actions">
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Search" %}</button>
+    </div>
+  </form>
+
+  {% if query %}
+    <div class="cd-table-wrap" style="margin-top: var(--space-5);">
+      <table class="cd-table cd-table--zebra">
+        <thead>
+          <tr>
+            <th class="label" scope="col">{% translate "Name" %}</th>
+            <th class="label" scope="col">{% translate "Email" %}</th>
+            <th class="label" scope="col">{% translate "Two-step login" %}</th>
+            <th class="label" scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for account in accounts %}
+            <tr>
+              <td class="body-sm">{{ account.get_full_name|default:account.username }}</td>
+              <td class="body-sm">{{ account.email }}</td>
+              <td class="body-sm">
+                {% if account.two_step_methods %}
+                  <span class="cd-badge cd-badge--success caption">{% translate "On" %}</span>
+                  {% blocktranslate count counter=account.two_step_methods|length trimmed %}{{ counter }} method{% plural %}{{ counter }} methods{% endblocktranslate %}
+                {% else %}
+                  <span class="cd-badge cd-badge--outline caption">{% translate "Off" %}</span>
+                {% endif %}
+              </td>
+              <td class="body-sm">
+                {% if account.two_step_methods and account != request.user %}
+                  <form method="post" action="{% url 'manage_security_turn_off' user_id=account.id %}"
+                        onsubmit="{% blocktranslate asvar confirm_msg with name=account.get_full_name|default:account.username %}Turn off two-step login for {{ name }}? Only do this once you're sure it's them.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
+                    {% csrf_token %}<input type="hidden" name="q" value="{{ query }}">
+                    <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Turn off two-step login" %}</button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td class="body-sm" colspan="4">{% translate "No account matches." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if accounts|length == search_limit %}<p class="caption">{% blocktranslate %}Showing the first {{ search_limit }} matches: search more precisely to find someone else.{% endblocktranslate %}</p>{% endif %}
+  {% endif %}
+{% endblock %}

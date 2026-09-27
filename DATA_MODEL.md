@@ -2949,142 +2949,158 @@ What we checked in its 3.4.1 source, and what the plan has to work around:
   follows the export's rule for links to someone else (`export=False`
   today).
 
-## 15. 2FA login for management accounts (later)
+## 15. Two-step login and the sign-in policy (built)
 
-**Not built yet; this is the plan.** Allow stronger logins than a
-username and password, with the login methods allowed depending on the
-security level of the account. Still to decide: whether to allow social
-login too (Facebook, Google, ...); it's not part of this plan.
+**Built.** Every adult account can turn on two-step login (an authenticator
+app, passkeys, backup codes); the organisation decides per role which ones
+**must** use it (the sign-in policy), from a day it chooses. For now every
+role is on "password only": two-step login is optional for everyone, and
+the enforcement is in place for when the organisation switches it on. Not
+part of it: social login (Facebook, Google, ...), left out for now.
 
-### The library, and its catch
+### The library
 
 [django-two-factor-auth](https://django-two-factor-auth.readthedocs.io/en/stable/)
-(1.18.1, September 2025) is built on **django-otp**, which stores the
-devices, checks the codes and marks a session as verified. On top of that
-it gives: a login in steps (password, then a code), a setup page with a QR
-code, backup codes, pages to turn 2FA off and see your devices, a
-"remember this browser" cookie, a protected admin login, `@otp_required` /
-`OTPRequiredMixin` / `request.user.is_verified()`, and the `user_verified`
-signal.
+1.18.1 on **django-otp** 1.7.3. django-otp holds the devices, checks codes
+and marks a session as verified (`request.user.is_verified()`, the session's
+`otp_device_id`); django-two-factor-auth gives the login in steps, the
+"remember this browser" cookie, the admin patch and the WebAuthn plugin
+(passkeys, on `webauthn` 2.8.0).
 
-**Catch:** it officially supports only Django 4.2–5.2 and Python up to
-3.13. We run Django 6.1 and production runs Python 3.14. It installs
-(`Django>=4.2`, no upper bound), but nobody has tested it on our versions.
-It also always pulls in `django-phonenumber-field`, `qrcode` and
-`django-formtools`, even without SMS.
+- It officially lists Django up to 5.2 and Python up to 3.13; we run it on
+  Django 6.1 and Python 3.14. The phase 0 test (full round trip, the admin,
+  the setup) passed, and so does our own test suite. If it ever breaks,
+  swap it for django-otp alone plus our own login steps: the device tables
+  and the verified session are django-otp's either way.
+- Its WebAuthn plugin caps `webauthn` below 3, and webauthn 2.x needs
+  `cbor2<6`: cbor2 is on 5.x (autobahn, which pulled in 6.x, accepts
+  >=5.2).
+- `django-phonenumber-field` is a hard dependency even without the phone
+  plugins; neither the phone, email nor YubiKey plugins are installed
+  (SMS costs money and is the weakest method; the email plugin would send
+  mail around `mailing.services.send`).
+- We use only its **login** (`accounts.views.LoginView`, a subclass with our
+  template and forms) and its admin patch. Setup, backup codes and turning
+  it off are our own pages (`accounts/security_views.py`), with the
+  package's forms underneath (`accounts/two_step_forms.py`): simpler than
+  its setup wizard, and in our style. Its `two_factor` URL namespace only
+  has the names it reverses itself, pointing at our pages.
 
-**Decision:** try django-two-factor-auth first (phase 0). If it doesn't
-work on Django 6.1, fall back to **django-otp alone** plus about three
-small views of our own. Nothing is lost either way: the device tables and
-the verified session belong to django-otp in both cases.
+### Devices, and the one login page
 
-### Phases
+```mermaid
+flowchart LR
+    A[Log in: email or username + password] -->|no app or passkey| OK[Logged in]
+    A -->|browser remembered| OK
+    A --> T{Second step}
+    T -->|app code| OK2[Logged in, verified]
+    T -->|passkey| OK2
+    T -->|backup code| OK2
+    OK2 -.->|backup code| M[Mail: backup_code_used]
+```
 
-0. **Compatibility test** (half a day). Install `django-two-factor-auth`
-   in the devcontainer; `manage.py check`, `migrate`, then a full round
-   trip: log in, set up a TOTP device, log out, log in with a code, use the
-   admin. Check its login form works with `EmailOrUsernameBackend` (it
-   should, it calls `authenticate()`). If it fails, take the
-   django-otp-only route.
-1. **Installation.**
-   - `requirements.txt`: `django-two-factor-auth`, `django-otp`, `qrcode`,
-     `django-formtools`, `django-phonenumber-field`, pinned (pure Python,
-     fine on Level27).
-   - `INSTALLED_APPS`: `django_otp`, `django_otp.plugins.otp_totp`,
-     `django_otp.plugins.otp_static` (backup codes), `two_factor`. No phone
-     plugins (SMS via Twilio costs money and is the weakest method). No
-     `otp_email` for now: it calls `send_mail` directly, which breaks the
-     rule that every mail goes through `mailing.services.send`. WebAuthn
-     (passkeys) can come later.
-   - `MIDDLEWARE`: `django_otp.middleware.OTPMiddleware` right after
-     `AuthenticationMiddleware`, before `ForcePasswordChangeMiddleware`.
-   - Settings: `TWO_FACTOR_REMEMBER_COOKIE_AGE` (e.g. 30 days),
-     `TWO_FACTOR_REMEMBER_COOKIE_SECURE = True`,
-     `TWO_FACTOR_REMEMBER_COOKIE_DOMAIN = COOKIE_DOMAIN`,
-     `TWO_FACTOR_LOGIN_TIMEOUT` at its default,
-     `OTP_TOTP_ISSUER = "CoderDojo Belgium"` (the name authenticator apps
-     show).
-2. **One login page only** (the docs warn that any second login route can
-   skip 2FA).
-   - Replace `accounts.views.login` with a subclass of
-     `two_factor.views.LoginView`: same URL name `login` and path
-     `/login/` (so `LOGIN_URL` doesn't change), our template (`cd-*`), and
-     `_post_login_redirect` afterwards.
-   - Include only the setup, backup, profile and disable views from
-     `two_factor.urls`, never its login route (`account/login/`). Its
-     paths are under `/account/two_factor/…`, no clash with ours.
-   - Every other place that logs someone in: `register_guardian` calls
-     `auth_login` (fine: a new account has no device); password reset
-     keeps `post_reset_login = False`; setting a child's password must not
-     log the child in.
-   - Admin: keep `TWO_FACTOR_PATCH_ADMIN = True` and make `admin.site` an
-     `AdminSiteOTPRequired`, so `/admin/` really requires a code, not only
-     a patched login page.
-3. **Who must use it** (policy, see open points).
-   - Proposal: required for organisation roles and superusers (the Django
-     admin and `/manage/`) and for active champions and mentors (they see
-     other families' children's data); optional for parents; never for
-     ninja accounts.
-   - One rule in one place: `accounts.two_factor.requires_2fa(user)`,
-     built on `accounts.organisation` and `dojos.access`.
-   - `accounts.middleware.RequireTwoFactorMiddleware`, like
-     `ForcePasswordChangeMiddleware`: an account that must use 2FA without
-     a device goes to setup; one with a device but an unverified session
-     goes to the code step; same exempt paths (logout, static, media, the
-     2FA pages).
-   - The real lock is in the access helpers: `dojos.access.
-     managing_membership` and `require_organisation_admin` also check
-     `is_verified()`. The middleware only guides people.
-   - WebSockets: `OTPMiddleware` doesn't run in Channels, so
-     `NotificationConsumer.connect()` checks verification itself, from the
-     `otp_device_id` django-otp keeps in the session.
-   - A role change (made champion, mentor or given an organisation role)
-     sends the person to setup on their next page, with a notification
-     explaining why.
-4. **Pages.**
-   - Override the `two_factor/*` templates with our shell (`core/base.html`,
-     `cd-*`); texts in our own nl/fr catalogs (the package's translations
-     don't match our tone).
-   - Account page: a "Two-step login" card with the status, set up / turn
-     off, backup codes, "forget remembered browsers".
-   - A mail when 2FA is turned on or off or a backup code is used: a new
-     `service` template in `mailing/seed_templates.py` (en/nl/fr), sent
-     through `mailing.services.send` from the `user_verified` signal.
-5. **Getting back in, admin, seed data.**
-   - Lost phone: the person's backup codes; otherwise an organisation admin
-     deletes their TOTP device in the Django admin (django-otp registers
-     those models). `AdminStaysFullyUsableTests` covers them.
-   - Seeded champion, mentor and organisation accounts get a TOTP device
-     with a fixed test secret, written to `seed_credentials.csv` by
-     `describe_seed_accounts`, so testers can add it to an authenticator
-     app. (Not a `TWO_FACTOR_ENFORCE` switch that's off in dev: dev would
-     then differ from production.)
-   - TOTP secrets are stored unencrypted in the database. Acceptable, but
-     noted.
-6. **Tests.** Enforcement breaks every existing test that logs in as a
-   mentor or organisation account. Add `core.testing.login_verified(client,
-   user)` (a TOTP device, `force_login`, `otp_device_id` in the session)
-   and switch those tests to it. New tests: the login steps (password only,
-   password plus code, wrong code, remembered browser), setup and backup
-   codes, `requires_2fa` per role, the middleware redirects, `dojos.access`
-   / `/manage/` / the admin / the consumer refusing an unverified session,
-   and no ninja account ever being asked to set up 2FA.
-7. **Docs and deploy.** A "Two-step login" help page in `docs/` (en/fr/nl),
-   a short section in `CLAUDE.md` ("Account model"), this section rewritten
-   as "built" with its diagram. `deploy.sh` needs no change (`migrate`
-   creates the tables). Roll out in two steps: optional for everyone for
-   about two weeks, then required.
+- **Methods** (`accounts/two_step.py`, the only place that changes them):
+  at most one authenticator app (`otp_totp.TOTPDevice`), any number of
+  passkeys (`two_factor_webauthn.WebauthnDevice`), and ten single-use
+  backup codes (`otp_static.StaticDevice` + `StaticToken`), made with the
+  first method and dropped with the last. Two-step login is "on" while the
+  account has an app or a passkey.
+- The package's login asks for the device named `default` and offers the
+  others as alternatives, so exactly one app or passkey carries that name:
+  the first one added, and another one when it's removed.
+- **One login page**: `/login/` (`LoginView`, `LOGIN_URL`). The admin's
+  login is patched to redirect there (`TWO_FACTOR_PATCH_ADMIN`). Family
+  sign-up logs a brand-new account in (no device yet), the password reset
+  doesn't log in (`post_reset_login = False`), and a child's set-password
+  link doesn't either.
+- **Remembered browser**: "Don't ask again in this browser for 30 days"
+  (`TWO_FACTOR_REMEMBER_COOKIE_AGE`), a signed cookie that includes the
+  password hash, so changing the password forgets every browser; the
+  Security page forgets the current one.
+- **Passkeys** are checked against `SITE_URL`'s host and origin
+  (`accounts/webauthn_entities.py`), not the request's: nginx and Level27's
+  proxy terminate TLS, so the request itself looks like http. The browser
+  side is `CoderDojo.initPasskey` in `bundle.js` (a button, never on page
+  load; WebAuthn is a browser API htmx can't reach).
+- **Changes** need a session that passed two-step login (an older session
+  logs in again first), and removing a method or turning it off asks for
+  the password. A mail goes out for every change
+  (`two_step_turned_on`, `two_step_method_added`, `two_step_method_removed`,
+  `two_step_turned_off`) and whenever a backup code is used
+  (`backup_code_used`); `service` templates in en/nl/fr.
+- **Lost everything**: the organisation turns it off on `/manage/security/`
+  (after checking it's really them), or in the Django admin by deleting
+  the devices (`manage.py two_factor_disable` works too). Never for their
+  own account there.
+
+### The sign-in policy
+
+`accounts.SignInRequirement`: one row per role, a `level` (`password` <
+`two_step` < `passkey`) and `required_from` (empty = right away); a role
+without a row is "password". The roles: superusers, organisation admins,
+board members, background-check reviewers, active champions, active
+mentors, and every adult account. An account's requirement is the strongest
+level among its roles whose day has come; a stronger one set for a later
+day is *upcoming* (a notice in every page shell, `sign_in_notice`). Ninja
+logins and the API's technical accounts are never asked. Rules in
+`accounts/sign_in.py`; set on the organisation dashboard's *Sign-in
+security* page (`/manage/security/`, `accounts/manage.py`), which also
+counts per role how many accounts already have two-step login or a passkey.
+
+```mermaid
+flowchart TD
+    R[Request from an adult account] --> L{Requirement today}
+    L -->|password| OK[Carry on]
+    L -->|two_step / passkey| D{Has the device?}
+    D -->|no| S[Sent to Sign-in security to set it up]
+    D -->|yes| V{Session verified?}
+    V -->|yes| OK
+    V -->|no| O[Logged out: log in again with the second step]
+```
+
+- **Guidance**: `accounts.middleware.SignInRequirementMiddleware` (after
+  `OTPMiddleware` and the messages middleware). Only the login, logout,
+  change-password, language, JavaScript-catalog and Sign-in security pages
+  stay open; htmx requests get an `HX-Redirect`.
+- **The lock**: what the roles open refuses a request that doesn't meet it,
+  middleware or not: `dojos.access.require_dojo_access` and
+  `accounts.organisation.require_organisation_admin` (404),
+  `core.admin_site.AdminSite.has_permission` (the Django admin; `admin.site`
+  is ours through `core.admin_apps.AdminConfig`), and the notification
+  WebSocket (`NotificationConsumer.connect`, which reads the session's
+  device itself: `OTPMiddleware` doesn't run in Channels).
+- The person can't turn two-step login off, or remove their last (passkey)
+  method, while their role requires it.
+
+### Seed data and tests
+
+- `manage.py seed_two_step` (fresh databases, from `start.sh`) turns on an
+  authenticator app plus backup codes for one seeded organisation admin,
+  champion, mentor and parent. `seed_credentials.csv` has a `totp_secret`
+  column with the app key (base32, to add to an authenticator app), and
+  `manage.py totp_code <username>` (DEBUG only) prints the current code.
+- Tests: `core.testing.login_data` / `token_data` post the login's steps,
+  `login_verified(client, user)` logs in with a verified session (giving
+  the account an app), `totp_code(device)` gives the current code. Passkey
+  tests mock the signature check (`verify_registration_response` /
+  `verify_authentication_response`), everything around it is real.
+- Privacy: the devices are classified in `privacy/privacy.py` (the secrets
+  `security`, never exported; which methods and when they were used are in
+  the export), retention `sign_in_methods`. Audit log: device rows and the
+  policy are recorded (not the fields every login updates); backup codes
+  are not.
 
 ### Open points
 
-- **Who must use it:** the proposal above (organisation roles, superusers,
-  active champions and mentors; optional for parents). Champions and
-  mentors required right away, or after a transition period?
-- **Methods:** TOTP (authenticator app) plus backup codes first. Passkeys
-  (WebAuthn) in the first version, or later?
-- **Social login** (Facebook, Google, ...): in or out, and if in, for which
-  account types (it would still need a second factor for management
-  accounts).
+- **When to require it**, and for which roles: the policy is ready; the
+  organisation sets it on `/manage/security/`, ideally with a
+  *Required from* a few weeks out.
+- **Passwordless login** with a passkey (no password at all) isn't built:
+  the passkey is always the second step.
+- **Forget every remembered browser** without changing the password isn't
+  possible with the package's cookie; changing the password does it.
+- TOTP secrets are stored unencrypted in the database, as django-otp does.
+- **Social login** (Facebook, Google, ...): out, for now.
 
 ## 16. GDPR: classifying personal data, export, erasure and retention (in progress)
 

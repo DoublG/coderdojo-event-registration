@@ -14,3 +14,39 @@ class TempMediaMixin:
         override.enable()
         self.addCleanup(override.disable)
         self.media_root = Path(media.name)
+
+
+def login_data(username, password):
+    """The POST of the login's first step (accounts.views.LoginView, a
+    django-two-factor-auth wizard: step name plus prefixed fields)."""
+    return {"login_view-current_step": "auth", "auth-username": username, "auth-password": password}
+
+
+def token_data(token, step="token"):
+    """The POST of the login's second step: a code, a backup code
+    (step="backup") or a passkey's answer."""
+    return {"login_view-current_step": step, f"{step}-otp_token": token}
+
+
+def totp_code(device):
+    """The code `device` (a django-otp TOTPDevice) shows right now."""
+    from django_otp.oath import totp
+
+    return str(totp(device.bin_key, device.step, device.t0, device.digits, device.drift)).zfill(device.digits)
+
+
+def login_verified(client, user):
+    """Log `user` in with two-step login passed, as after a code: gives the
+    account an authenticator app when it has none. For tests of what an
+    account whose role needs two-step login may do (accounts.sign_in)."""
+    from django_otp import DEVICE_ID_SESSION_KEY
+    from django_otp.plugins.otp_totp.models import TOTPDevice
+
+    device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
+    if device is None:
+        device = TOTPDevice.objects.create(user=user, name="default")
+    client.force_login(user)
+    session = client.session
+    session[DEVICE_ID_SESSION_KEY] = device.persistent_id
+    session.save()
+    return device

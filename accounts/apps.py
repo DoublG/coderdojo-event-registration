@@ -16,6 +16,9 @@ class AccountsConfig(AppConfig):
     name = 'accounts'
 
     def ready(self):
-        from . import organisation  # noqa: F401 — connects the role → staff/group signals
+        from . import (
+            organisation,  # noqa: F401 — connects the role → staff/group signals
+            two_step,  # noqa: F401 — connects the "backup code used" mail
+        )
 
         post_migrate.connect(_refresh_organisation_groups, dispatch_uid="accounts.refresh_organisation_groups")

@@ -2,9 +2,9 @@ import re
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, update_session_auth_hash
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -19,6 +19,9 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
+from two_factor.plugins.registry import registry
+from two_factor.views import LoginView as TwoFactorLoginView
+from two_factor.views.utils import IdempotentSessionWizardView
 
 from core.image_library import library_filename, use_library_image
 from dojos.access import accessible_dojos
@@ -29,7 +32,7 @@ from mailing.categories import MailCategory
 from mailing.models import ConsentEvent
 from mailing.preferences import set_preference
 
-from . import child_accounts, home_dojo
+from . import child_accounts, home_dojo, two_step
 from .consent import consent_fields
 from .forms import (
     ForcedPasswordChangeForm,
@@ -41,6 +44,7 @@ from .forms import (
 from .models import Guardianship, Ninja, User, ninja_birth_date_error
 from .provisioning import unique_username
 from .template_avatars import TEMPLATE_KID_AVATARS
+from .two_step_forms import BackupCodeForm, CodeTokenForm, PasskeyTokenForm
 
 # Small on purpose — small enough that most children's award shelf
 # actually spans more than one page, so the lazy-load carousel (same
@@ -88,30 +92,57 @@ def _post_login_redirect(request, user):
     return reverse("account_home")
 
 
-def login(request):
-    if request.user.is_authenticated:
-        return redirect(_post_login_redirect(request, request.user))
+class LoginView(TwoFactorLoginView):
+    """The one login page (/login/, LOGIN_URL): django-two-factor-auth's login
+    in steps. First email or username and password; an account with two-step
+    login on (accounts/two_step.py) then confirms with its authenticator app,
+    a passkey or a backup code, unless this browser was remembered. It must
+    stay the only way in: another login route would skip the second step
+    (the Django admin's login is patched to come here, TWO_FACTOR_PATCH_ADMIN).
+    A lapsed background check never blocks login — it only removes dojo-team
+    access (dojos.access); see the account page."""
 
-    error = None
-    if request.method == "POST":
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            user = authenticate(
-                request,
-                username=form.cleaned_data["email"],
-                password=form.cleaned_data["password"],
-            )
-            # A lapsed background check never blocks login — it only removes
-            # dojo-team access (dojos.access); see the account page.
-            if user is not None:
-                auth_login(request, user)
-                return redirect(_post_login_redirect(request, user))
-            else:
-                error = _("That email/password combination doesn't match an account.")
-    else:
-        form = LoginForm()
+    template_name = "accounts/login.html"
+    form_list = (
+        (TwoFactorLoginView.AUTH_STEP, LoginForm),
+        (TwoFactorLoginView.TOKEN_STEP, CodeTokenForm),
+        (TwoFactorLoginView.BACKUP_STEP, BackupCodeForm),
+    )
 
-    return render(request, "accounts/login.html", {"form": form, "error": error})
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect(_post_login_redirect(request, request.user))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form(self, step=None, **kwargs):
+        if (step or self.steps.current) == self.TOKEN_STEP:
+            # The package picks its own token form for the device; pick ours.
+            method = registry.method_from_device(self.get_device())
+            self.form_list[self.TOKEN_STEP] = PasskeyTokenForm if method.code == "webauthn" else CodeTokenForm
+            form = IdempotentSessionWizardView.get_form(self, step=step, **kwargs)
+            if self.show_timeout_error:
+                form.cleaned_data = getattr(form, "cleaned_data", {})
+                form.add_error(None, _("That took too long. Please log in again."))
+            return form
+        form = super().get_form(step=step, **kwargs)
+        if self.show_timeout_error:
+            form.errors.pop("__all__", None)
+            form.add_error(None, _("That took too long. Please log in again."))
+        return form
+
+    def get_success_url(self):
+        return _post_login_redirect(self.request, self.get_user())
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form, **kwargs)
+        if self.steps.current == self.TOKEN_STEP:
+            context["device_kind"] = two_step.kind_of(context["device"])
+            context["passkey_options"] = self.request.session.get("webauthn_request_options")
+            context["other_kinds"] = [(other.persistent_id, two_step.kind_of(other)) for other in context["other_devices"]]
+        return context
+
+
+login = LoginView.as_view()
 
 
 def logout(request):
@@ -318,6 +349,7 @@ def account_home(request):
         "applications": applications,
         "has_champion_application": "champion" in active_kinds,
         "has_mentor_application": "mentor" in active_kinds,
+        "two_step_on": two_step.is_on(request.user),
     })
 
 

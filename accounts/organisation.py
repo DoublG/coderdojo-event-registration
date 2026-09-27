@@ -137,10 +137,13 @@ def is_organisation_admin(user):
 
 def require_organisation_admin(request):
     """For every view of the organisation dashboard: 404 unless the account
-    holds the admin role (same no-leak reasoning as dojos.access)."""
+    holds the admin role (same no-leak reasoning as dojos.access), and its
+    login meets the organisation's sign-in policy (accounts.sign_in)."""
     from django.http import Http404
 
-    if not is_organisation_admin(request.user):
+    from .sign_in import meets_requirement
+
+    if not is_organisation_admin(request.user) or not meets_requirement(request):
         raise Http404
 
 

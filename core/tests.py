@@ -453,6 +453,7 @@ class AuditLogCoverageTests(TestCase):
         "oauth2_provider.IDToken": "OpenID Connect tokens (not enabled)",
         "oauth2_provider.DeviceGrant": "device codes (that grant isn't enabled)",
         "privacy.RetentionNotice": "written by the retention job; itself a log of reminders",
+        "otp_static.StaticToken": "backup codes: secrets, each deleted when it's used; the device row is recorded",
     }
 
     def test_every_model_is_recorded_or_has_a_reason(self):

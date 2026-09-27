@@ -521,6 +521,224 @@ Si vous n'avez rien demandé, vous pouvez ignorer cet e-mail : votre mot de pass
         },
     },
     {
+        "key": "two_step_turned_on",
+        "category": MailCategory.SERVICE,
+        "description": "Two-step login was turned on for the account (accounts/two_step.py). "
+                       "Variables: method (app or passkey), security_url.",
+        "subject": {
+            "en-us": "Two-step login is on",
+            "nl-be": "Aanmelden in twee stappen staat aan",
+            "fr-be": "La connexion en deux étapes est activée",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+Two-step login is now on for your CoderDojo account. From now on, logging in takes your password and {% if method == "passkey" %}your passkey{% else %}a code from your authenticator app{% endif %}.
+
+Keep your backup codes somewhere safe: they get you in if you lose your phone or passkey.
+
+Wasn't this you? Change your password straight away and check your sign-in methods:
+
+{{ security_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Aanmelden in twee stappen staat nu aan voor je CoderDojo-account. Voortaan meld je je aan met je wachtwoord en {% if method == "passkey" %}je toegangssleutel{% else %}een code uit je authenticator-app{% endif %}.
+
+Bewaar je back-upcodes op een veilige plek: daarmee kom je binnen als je je telefoon of toegangssleutel kwijt bent.
+
+Was jij dit niet? Verander dan meteen je wachtwoord en kijk je aanmeldmethoden na:
+
+{{ security_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+La connexion en deux étapes est maintenant activée sur votre compte CoderDojo. Désormais, vous vous connectez avec votre mot de passe et {% if method == "passkey" %}votre clé d'accès{% else %}un code de votre application d'authentification{% endif %}.
+
+Gardez vos codes de secours en lieu sûr : ils vous permettent de vous connecter si vous perdez votre téléphone ou votre clé d'accès.
+
+Ce n'était pas vous ? Changez tout de suite votre mot de passe et vérifiez vos méthodes de connexion :
+
+{{ security_url }}
+""",
+        },
+    },
+    {
+        "key": "two_step_method_added",
+        "category": MailCategory.SERVICE,
+        "description": "A sign-in method was added to an account that already had two-step login "
+                       "(accounts/two_step.py). Variables: method (app or passkey), security_url.",
+        "subject": {
+            "en-us": "A new sign-in method on your account",
+            "nl-be": "Een nieuwe aanmeldmethode op je account",
+            "fr-be": "Une nouvelle méthode de connexion sur votre compte",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{% if method == "passkey" %}A passkey{% else %}An authenticator app{% endif %} was just added to your CoderDojo account for two-step login.
+
+Wasn't this you? Remove it and change your password straight away:
+
+{{ security_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Er is net {% if method == "passkey" %}een toegangssleutel{% else %}een authenticator-app{% endif %} toegevoegd aan je CoderDojo-account om in twee stappen aan te melden.
+
+Was jij dit niet? Verwijder die dan en verander meteen je wachtwoord:
+
+{{ security_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{% if method == "passkey" %}Une clé d'accès vient d'être ajoutée{% else %}Une application d'authentification vient d'être ajoutée{% endif %} à votre compte CoderDojo pour la connexion en deux étapes.
+
+Ce n'était pas vous ? Supprimez-la et changez tout de suite votre mot de passe :
+
+{{ security_url }}
+""",
+        },
+    },
+    {
+        "key": "two_step_method_removed",
+        "category": MailCategory.SERVICE,
+        "description": "A sign-in method was removed; two-step login stays on with the others "
+                       "(accounts/two_step.py). Variables: method (app or passkey), security_url.",
+        "subject": {
+            "en-us": "A sign-in method was removed from your account",
+            "nl-be": "Er is een aanmeldmethode van je account verwijderd",
+            "fr-be": "Une méthode de connexion a été retirée de votre compte",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{% if method == "passkey" %}A passkey{% else %}Your authenticator app{% endif %} was just removed from your CoderDojo account. Two-step login stays on with your other sign-in methods.
+
+Wasn't this you? Change your password straight away and check your sign-in methods:
+
+{{ security_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Er is net {% if method == "passkey" %}een toegangssleutel{% else %}je authenticator-app{% endif %} van je CoderDojo-account verwijderd. Aanmelden in twee stappen blijft aan met je andere aanmeldmethoden.
+
+Was jij dit niet? Verander dan meteen je wachtwoord en kijk je aanmeldmethoden na:
+
+{{ security_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{% if method == "passkey" %}Une clé d'accès vient d'être retirée{% else %}Votre application d'authentification vient d'être retirée{% endif %} de votre compte CoderDojo. La connexion en deux étapes reste activée avec vos autres méthodes de connexion.
+
+Ce n'était pas vous ? Changez tout de suite votre mot de passe et vérifiez vos méthodes de connexion :
+
+{{ security_url }}
+""",
+        },
+    },
+    {
+        "key": "two_step_turned_off",
+        "category": MailCategory.SERVICE,
+        "description": "Two-step login was turned off, by the account holder or by the organisation for someone "
+                       "who lost their phone (accounts/two_step.py). Variables: by_organisation, security_url.",
+        "subject": {
+            "en-us": "Two-step login is off",
+            "nl-be": "Aanmelden in twee stappen staat uit",
+            "fr-be": "La connexion en deux étapes est désactivée",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{% if by_organisation %}As you asked us, we turned off two-step login for your CoderDojo account.{% else %}Two-step login was just turned off for your CoderDojo account.{% endif %} Logging in now only takes your password. Your app, passkeys and backup codes no longer work.
+
+You can turn it on again here:
+
+{{ security_url }}
+
+{% if by_organisation %}Didn't you ask for this? Please tell us straight away.{% else %}Wasn't this you? Change your password straight away and turn it on again.{% endif %}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{% if by_organisation %}Zoals je ons vroeg, hebben we aanmelden in twee stappen uitgezet voor je CoderDojo-account.{% else %}Aanmelden in twee stappen is net uitgezet voor je CoderDojo-account.{% endif %} Aanmelden vraagt nu alleen je wachtwoord. Je app, toegangssleutels en back-upcodes werken niet meer.
+
+Je kan het hier weer aanzetten:
+
+{{ security_url }}
+
+{% if by_organisation %}Heb je dit niet gevraagd? Laat het ons dan meteen weten.{% else %}Was jij dit niet? Verander dan meteen je wachtwoord en zet het weer aan.{% endif %}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{% if by_organisation %}Comme vous nous l'avez demandé, nous avons désactivé la connexion en deux étapes de votre compte CoderDojo.{% else %}La connexion en deux étapes vient d'être désactivée sur votre compte CoderDojo.{% endif %} Vous vous connectez maintenant avec votre seul mot de passe. Votre application, vos clés d'accès et vos codes de secours ne fonctionnent plus.
+
+Vous pouvez la réactiver ici :
+
+{{ security_url }}
+
+{% if by_organisation %}Vous n'avez rien demandé ? Prévenez-nous tout de suite.{% else %}Ce n'était pas vous ? Changez tout de suite votre mot de passe et réactivez-la.{% endif %}
+""",
+        },
+    },
+    {
+        "key": "backup_code_used",
+        "category": MailCategory.SERVICE,
+        "description": "Someone logged in with one of the account's backup codes (accounts/two_step.py). "
+                       "Variables: codes_left, security_url.",
+        "subject": {
+            "en-us": "A backup code was used to log in",
+            "nl-be": "Er is aangemeld met een back-upcode",
+            "fr-be": "Un code de secours a servi à se connecter",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+Someone just logged in to your CoderDojo account with one of your backup codes. You have {{ codes_left }} left.
+
+Lost your phone or passkey? Set up a new one, and make new backup codes, here:
+
+{{ security_url }}
+
+Wasn't this you? Change your password straight away and make new backup codes.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Er is net aangemeld op je CoderDojo-account met een van je back-upcodes. Je hebt er nog {{ codes_left }}.
+
+Ben je je telefoon of toegangssleutel kwijt? Stel dan hier een nieuwe in, en maak nieuwe back-upcodes:
+
+{{ security_url }}
+
+Was jij dit niet? Verander dan meteen je wachtwoord en maak nieuwe back-upcodes.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Quelqu'un vient de se connecter à votre compte CoderDojo avec un de vos codes de secours. Il vous en reste {{ codes_left }}.
+
+Vous avez perdu votre téléphone ou votre clé d'accès ? Configurez-en un nouveau, et créez de nouveaux codes de secours, ici :
+
+{{ security_url }}
+
+Ce n'était pas vous ? Changez tout de suite votre mot de passe et créez de nouveaux codes de secours.
+""",
+        },
+    },
+    {
         "key": "ninja_account_created",
         "category": MailCategory.SERVICE,
         "description": "A guardian gave their child their own login (or switched it back on). Sent to the "
@@ -955,6 +1173,14 @@ SAMPLE_CONTEXT = {
                              "account_url": "https://coolregistration.localhost/account/"},
     "application_rejected": {**_common},
     "password_reset": {**_common, "reset_url": "https://coolregistration.localhost/password-reset/confirm/MQ/abc-123/"},
+    "two_step_turned_on": {**_common, "method": "app", "security_url": "https://coolregistration.localhost/account/security/"},
+    "two_step_method_added": {**_common, "method": "passkey",
+                              "security_url": "https://coolregistration.localhost/account/security/"},
+    "two_step_method_removed": {**_common, "method": "passkey",
+                                "security_url": "https://coolregistration.localhost/account/security/"},
+    "two_step_turned_off": {**_common, "by_organisation": False,
+                            "security_url": "https://coolregistration.localhost/account/security/"},
+    "backup_code_used": {**_common, "codes_left": 9, "security_url": "https://coolregistration.localhost/account/security/"},
     "youth_mentor_promoted": {
         **_common, "ninja_name": "Emma", "dojo_name": "CoderDojo Ghent", "promoted_by": "Jan Peeters",
         "ninja_url": "https://coolregistration.localhost/account/ninja/1/",

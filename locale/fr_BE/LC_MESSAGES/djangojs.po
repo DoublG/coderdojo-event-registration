@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 18:37+0000\n"
+"POT-Creation-Date: 2026-09-27 03:47+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: fr_BE\n"
 "Language-Team: fr_BE <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Language: fr_BE\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "Generated-By: Babel 2.18.0\n"
 
 #: core/static/core/js/bundle.js:205
@@ -47,8 +47,28 @@ msgid "Locating…"
 msgstr "Localisation…"
 
 #: core/static/core/js/bundle.js:539
-msgid "Couldn't get your location — check your browser's location permission for this site and try again."
+msgid ""
+"Couldn't get your location — check your browser's location permission for "
+"this site and try again."
 msgstr ""
-"Impossible d'obtenir votre position. Vérifiez l'autorisation de localisation de votre navigateur "
-"pour ce site et réessayez."
+"Impossible d'obtenir votre position. Vérifiez l'autorisation de localisation "
+"de votre navigateur pour ce site et réessayez."
 
+#: core/static/core/js/bundle.js:617
+msgid ""
+"This browser can't use passkeys. Try another browser, or another way to "
+"confirm it's you."
+msgstr ""
+"Ce navigateur ne peut pas utiliser de clés d'accès. Essayez un autre "
+"navigateur, ou une autre façon de confirmer que c'est bien vous."
+
+#: core/static/core/js/bundle.js:654
+msgid "No passkey was made. You can try again."
+msgstr "Aucune clé d'accès n'a été créée. Vous pouvez réessayer."
+
+#: core/static/core/js/bundle.js:655
+msgid ""
+"Your passkey wasn't used. Try again, or use another way to confirm it's you."
+msgstr ""
+"Votre clé d'accès n'a pas été utilisée. Réessayez, ou confirmez autrement que"
+" c'est bien vous."

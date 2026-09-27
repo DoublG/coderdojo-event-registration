@@ -22,6 +22,8 @@ USER_OPTIONS = {
     "exclude_fields": ["last_login"],  # every login would be a change
     "mask_fields": ["password", "background_check_token"],
 }
+# What a two-step login device updates on every login.
+_LOGIN_BOOKKEEPING = ["last_used_at", "throttling_failure_timestamp", "throttling_failure_count"]
 RECORDED = {
     "accounts.User": {**USER_OPTIONS, "m2m_fields": ["groups", "user_permissions"]},
     # The Background checks admin saves through this proxy of User.
@@ -65,6 +67,15 @@ RECORDED = {
     # The API (DATA_MODEL.md §13): who made, renewed or revoked a dojo's client.
     "api.DojoApiClient": {},
     "oauth2_provider.Application": {"mask_fields": ["client_secret"]},
+    # Two-step login (DATA_MODEL.md §15): who turned it on or off, added or
+    # removed a method, or reset someone's (the organisation, for a lost
+    # phone); and the sign-in policy. Not what changes on every login.
+    "accounts.SignInRequirement": {},
+    "otp_totp.TOTPDevice": {
+        "exclude_fields": [*_LOGIN_BOOKKEEPING, "drift", "last_t"], "mask_fields": ["key"],
+    },
+    "two_factor_webauthn.WebauthnDevice": {"exclude_fields": [*_LOGIN_BOOKKEEPING, "sign_count"]},
+    "otp_static.StaticDevice": {"exclude_fields": _LOGIN_BOOKKEEPING},
 }
 
 

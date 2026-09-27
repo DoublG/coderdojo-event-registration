@@ -70,6 +70,24 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
+# Two-step login (DATA_MODEL.md §15, accounts/two_step.py): django-otp holds
+# the devices (authenticator app, passkeys, backup codes) and marks a session
+# as verified; django-two-factor-auth gives the login in steps, which
+# accounts.views.LoginView wraps. Which roles must use it is the
+# organisation's sign-in policy (accounts.SignInRequirement, /manage/security/).
+LOGIN_REDIRECT_URL = 'account_home'
+TWO_FACTOR_REMEMBER_COOKIE_AGE = 30 * 24 * 3600  # "Don't ask again on this device for 30 days"
+TWO_FACTOR_REMEMBER_COOKIE_SECURE = True
+TWO_FACTOR_REMEMBER_COOKIE_DOMAIN = COOKIE_DOMAIN
+# The name authenticator apps show next to the code, and passkeys next to the account.
+TWO_FACTOR_ISSUER = 'CoderDojo Belgium'
+TWO_FACTOR_WEBAUTHN_RP_NAME = TWO_FACTOR_ISSUER
+# Passkeys are checked against SITE_URL's host and origin, not the request's:
+# nginx (and Level27's proxy) terminate TLS, so the request itself looks like http.
+TWO_FACTOR_WEBAUTHN_ENTITIES_FORM_MIXIN = 'accounts.webauthn_entities.SiteWebauthnEntitiesMixin'
+# Ask for the device's PIN or fingerprint when it has one, as passkeys normally do.
+TWO_FACTOR_WEBAUTHN_UV_REQUIREMENT = 'preferred'
+
 # Outgoing mail. Inside the .devcontainer workspace, EMAIL_HOST is set and
 # mail goes to the Mailpit catcher (see .devcontainer/docker-compose.yml);
 # outside it (plain host-based `runserver`), EMAIL_HOST is unset and mail
@@ -230,7 +248,9 @@ INSTALLED_APPS = [
     # which is what lets notifications/consumers.py's WebSocket route work
     # with zero changes to how the devcontainer/docs already invoke runserver.
     'daphne',
-    'django.contrib.admin',
+    # Django's admin with core.admin_site.AdminSite as admin.site: it applies
+    # the organisation's sign-in policy (accounts.sign_in) to /admin/.
+    'core.admin_apps.AdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -255,6 +275,13 @@ INSTALLED_APPS = [
     'privacy',
     'api',
     'auditlog',
+    # Two-step login (DATA_MODEL.md §15). No phone, email or YubiKey plugins.
+    'django_otp',
+    'django_otp.plugins.otp_totp',
+    'django_otp.plugins.otp_static',
+    'formtools',
+    'two_factor',
+    'two_factor.plugins.webauthn',
 ]
 
 MIDDLEWARE = [
@@ -266,10 +293,17 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Marks request.user as verified (is_verified()) when the session passed
+    # two-step login; needs request.user.
+    'django_otp.middleware.OTPMiddleware',
     # Records who made each audit-log entry (DATA_MODEL.md §14); needs request.user.
     'core.audit.AuditlogMiddleware',
     'accounts.middleware.ForcePasswordChangeMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    # Sends an account below its role's sign-in requirement to set up
+    # two-step login (accounts.sign_in); after OTPMiddleware and
+    # MessageMiddleware (it leaves a message when it logs someone out).
+    'accounts.middleware.SignInRequirementMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
@@ -288,6 +322,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'accounts.context_processors.user_roles',
+                'accounts.context_processors.sign_in_notice',
                 'core.context_processors.organisation_contact',
             ],
         },

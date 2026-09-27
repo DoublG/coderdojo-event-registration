@@ -114,6 +114,14 @@
     </div>
 
     <div class="cd-card add-child" style="margin-top: var(--space-5); text-align: left;">
+      <h2 class="heading-md section-title">{% translate "Sign-in security" %}</h2>
+      <p class="body-sm">{% if two_step_on %}{% translate "Two-step login is on: logging in takes your password and a code or passkey." %}{% else %}{% translate "Protect your account with two-step login: a code from an app on your phone, or a passkey, after your password." %}{% endif %}</p>
+      <div class="cd-form__actions" style="justify-content: flex-start;">
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security' %}">{% translate "Sign-in security" %}</a>
+      </div>
+    </div>
+
+    <div class="cd-card add-child" style="margin-top: var(--space-5); text-align: left;">
       <h2 class="heading-md section-title">{% translate "Your data" %}</h2>
       <p class="body-sm">{% translate "Download a copy of everything we keep about you and your children, as a file you can open or take elsewhere." %}</p>
       <div class="cd-form__actions" style="justify-content: flex-start;">

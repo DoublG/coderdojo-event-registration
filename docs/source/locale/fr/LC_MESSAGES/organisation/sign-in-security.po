@@ -1,0 +1,132 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-27 03:50+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: fr <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/sign-in-security.rst:2
+msgid "Sign-in security"
+msgstr "Sécurité de connexion"
+
+#: ../../source/organisation/sign-in-security.rst:4
+msgid ""
+"Anyone can turn on two-step login for their own account (see "
+":doc:`../families/two-step-login`). On the organisation dashboard's **Sign-"
+"in security** page you decide which roles **must** use it."
+msgstr ""
+"Chacun peut activer la connexion en deux étapes pour son propre compte (voir"
+" :doc:`../families/two-step-login`). Sur la page **Sécurité de connexion** "
+"du tableau de bord de l'organisation, vous décidez quels rôles **doivent** "
+"l'utiliser."
+
+#: ../../source/organisation/sign-in-security.rst:9
+msgid "Minimum sign-in per role"
+msgstr "Connexion minimale par rôle"
+
+#: ../../source/organisation/sign-in-security.rst:11
+msgid "For each role, choose the minimum:"
+msgstr "Pour chaque rôle, choisissez le minimum :"
+
+#: ../../source/organisation/sign-in-security.rst:13
+msgid "**Password only (two-step login optional)**, the default."
+msgstr ""
+"**Mot de passe seul (connexion en deux étapes facultative)**, par défaut."
+
+#: ../../source/organisation/sign-in-security.rst:14
+msgid "**Two-step login (authenticator app or passkey)**."
+msgstr ""
+"**Connexion en deux étapes (application d'authentification ou clé "
+"d'accès)**."
+
+#: ../../source/organisation/sign-in-security.rst:15
+msgid ""
+"**Two-step login with a passkey**: the strongest, since a passkey can't be "
+"tricked by a fake site."
+msgstr ""
+"**Connexion en deux étapes avec une clé d'accès** : la plus forte, car un "
+"faux site ne peut pas tromper une clé d'accès."
+
+#: ../../source/organisation/sign-in-security.rst:18
+msgid ""
+"The roles are superusers, the organisation's admins, board members, "
+"background-check reviewers, champions, mentors and every adult account "
+"(parents too). An account with several roles gets the strongest level. "
+"Children's own logins are never asked."
+msgstr ""
+"Les rôles sont les superutilisateurs, les administrateurs de l'organisation,"
+" les membres du conseil d'administration, les évaluateurs des extraits de "
+"casier, les champions, les mentors et tout compte d'adulte (parents "
+"compris). Un compte avec plusieurs rôles reçoit le niveau le plus strict. "
+"Les comptes des enfants ne sont jamais concernés."
+
+#: ../../source/organisation/sign-in-security.rst:23
+msgid ""
+"With **Required from** you give people time: until that day they see a "
+"notice at the top of every page, with a link to set it up. From that day on "
+"(or right away, when you leave it empty), an account without the right "
+"second step is sent to set it up before it can use anything its role opens: "
+"the dojo's dashboard, this organisation dashboard, or the Django admin. "
+"Someone who is already logged in without their second step is asked to log "
+"in again."
+msgstr ""
+"Avec **Obligatoire à partir du**, vous laissez du temps : jusqu'à ce jour, "
+"les personnes voient un avis en haut de chaque page, avec un lien pour la "
+"configurer. À partir de ce jour (ou immédiatement si vous le laissez vide), "
+"un compte sans la bonne deuxième étape doit la configurer avant de pouvoir "
+"utiliser ce que son rôle ouvre : le tableau de bord du dojo, ce tableau de "
+"bord de l'organisation ou l'admin Django. Quelqu'un déjà connecté sans sa "
+"deuxième étape doit se reconnecter."
+
+#: ../../source/organisation/sign-in-security.rst:31
+msgid ""
+"The table shows, per role, how many accounts there are, how many already use"
+" two-step login and how many have a passkey, so you can see who still has to"
+" set it up before you make it required."
+msgstr ""
+"Le tableau montre, par rôle, combien de comptes il y a, combien utilisent "
+"déjà la connexion en deux étapes et combien ont une clé d'accès, pour voir "
+"qui doit encore la configurer avant de la rendre obligatoire."
+
+#: ../../source/organisation/sign-in-security.rst:36
+msgid "Someone can't log in"
+msgstr "Quelqu'un ne peut pas se connecter"
+
+#: ../../source/organisation/sign-in-security.rst:38
+msgid ""
+"When someone lost their phone or passkey **and** their backup codes, first "
+"check it's really them, for example by calling them. Then search for their "
+"account under **Someone can't log in** and choose **Turn off two-step "
+"login**. They get a mail and log in with their password only. If their role "
+"needs two-step login, they're asked to set it up again straight away."
+msgstr ""
+"Quand quelqu'un a perdu son téléphone ou sa clé d'accès **et** ses codes de "
+"secours, vérifiez d'abord que c'est bien la personne, par exemple en "
+"l'appelant. Cherchez ensuite son compte sous **Quelqu'un ne peut pas se "
+"connecter** et choisissez **Désactiver la connexion en deux étapes**. La "
+"personne reçoit un mail et se connecte avec son seul mot de passe. Si son "
+"rôle demande la connexion en deux étapes, elle doit la configurer à nouveau "
+"tout de suite."
+
+#: ../../source/organisation/sign-in-security.rst:44
+msgid ""
+"You can't do this for your own account: change your own sign-in methods on "
+"your account's Sign-in security page."
+msgstr ""
+"Ce n'est pas possible pour votre propre compte : modifiez vos méthodes de "
+"connexion sur la page Sécurité de connexion de votre compte."

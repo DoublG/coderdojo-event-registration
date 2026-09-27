@@ -15,12 +15,16 @@ def _notification_context(user, dojo_id):
 
 
 @database_sync_to_async
-def _has_dojo_access(user, dojo_id):
+def _has_dojo_access(user, session, dojo_id):
+    """dojos.access.require_dojo_access for a WebSocket: a managing role, and
+    a login that meets the sign-in policy (django_otp's middleware doesn't
+    run here, so the session's verification is read directly)."""
+    from accounts.sign_in import meets_requirement_for_session
     from dojos.access import dojo_role
     from dojos.models import Dojo
 
     dojo = Dojo.objects.filter(id=dojo_id).first()
-    return dojo is not None and dojo_role(user, dojo) is not None
+    return dojo is not None and dojo_role(user, dojo) is not None and meets_requirement_for_session(user, session)
 
 
 class NotificationConsumer(AsyncWebsocketConsumer):
@@ -45,7 +49,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         user = self.scope["user"]
         self.dojo_id = self.scope["url_route"]["kwargs"]["dojo_id"]
 
-        if not user.is_authenticated or not await _has_dojo_access(user, self.dojo_id):
+        if not user.is_authenticated or not await _has_dojo_access(user, self.scope.get("session") or {}, self.dojo_id):
             await self.close()
             return
 

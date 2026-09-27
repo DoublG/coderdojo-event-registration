@@ -47,6 +47,10 @@ if python manage.py shell -c "import sys; from events.models import Event; sys.e
     python manage.py seed_testimonials
     python manage.py seed_announcements
     python manage.py seed_sponsors
+    # A few seeded accounts with two-step login on (key in seed_credentials.csv's
+    # totp_secret column). Only here, so a restart never turns it back on for
+    # an account a tester turned it off for.
+    python manage.py seed_two_step
 else
     echo "Demo data already present (events exist) - skipping demo seed."
 fi

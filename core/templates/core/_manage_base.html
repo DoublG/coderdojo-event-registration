@@ -121,6 +121,12 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
               {% retention_attention_count as attention_count %}{% if attention_count %}<span class="cd-admin-nav__count caption" title="{% translate 'Needs attention' %}">{{ attention_count }}</span>{% endif %}
             </a>
           </li>
+          <li>
+            <a href="{% url 'manage_security' %}" class="cd-admin-nav__link label{% if active == 'security' %} cd-admin-nav__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              {% translate "Sign-in security" %}
+            </a>
+          </li>
         </ul>
       </div>
 
@@ -154,6 +160,7 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
           {% endfor %}
         </div>
       {% endif %}
+      {% include "accounts/partials/_sign_in_notice.html" %}
       {% block manage_content %}{% endblock %}
     </div>
   </div>

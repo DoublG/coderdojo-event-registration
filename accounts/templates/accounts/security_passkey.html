@@ -1,0 +1,27 @@
+{% extends "accounts/_security_base.html" %}
+{% load i18n %}
+{% block security_title %}{% translate "Add a passkey" %}{% endblock %}
+
+{% block security_content %}
+  {% comment %}accounts.security_views.security_passkey; the button runs CoderDojo.initPasskey (bundle.js).{% endcomment %}
+  <h1 class="heading-lg">{% translate "Add a passkey" %}</h1>
+  <p class="body">{% translate "Your browser asks where to keep the passkey: on this device, on your phone, or on a security key. Then it asks for your fingerprint, face or PIN." %}</p>
+  <p class="body-sm muted">{% translate "Next time you log in, after your password, you confirm with that same device." %}</p>
+
+  <form method="post" class="cd-form" id="passkey-form" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="token">
+    <p class="cd-form__note cd-form__note--error caption" data-passkey-error {% if not error %}hidden{% endif %}>{{ error|default:"" }}</p>
+    <div class="cd-form__actions" style="justify-content: flex-start;">
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security' %}">{% translate "Cancel" %}</a>
+      <button type="button" class="cd-btn cd-btn--primary label" data-passkey-button>{% translate "Make a passkey" %}</button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block extra_script %}
+  {{ passkey_options|json_script:"passkey-options" }}
+  <script>
+    CoderDojo.initPasskey(document.getElementById("passkey-form"), "passkey-options", "create");
+  </script>
+{% endblock %}

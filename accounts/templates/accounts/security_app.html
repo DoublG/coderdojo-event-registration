@@ -1,0 +1,28 @@
+{% extends "accounts/_security_base.html" %}
+{% load i18n %}
+{% block security_title %}{% translate "Set up an authenticator app" %}{% endblock %}
+
+{% block security_content %}
+  {% comment %}accounts.security_views.security_app{% endcomment %}
+  <h1 class="heading-lg">{% translate "Set up an authenticator app" %}</h1>
+  <ol class="body">
+    <li>{% translate "Open your authenticator app (for example Google Authenticator, Microsoft Authenticator or your password manager) and add an account." %}</li>
+    <li>{% translate "Scan this QR code. Or, on this phone, tap the key below, or type it in." %}</li>
+    <li>{% translate "Enter the six-digit code the app now shows for CoderDojo Belgium." %}</li>
+  </ol>
+  <div class="security-qr" role="img" aria-label="{% translate 'QR code for your authenticator app' %}">{{ qr_svg|safe }}</div>
+  <p class="body-sm">{% translate "Key:" %} <a class="security-secret" href="{{ otpauth_url }}">{{ secret }}</a></p>
+
+  <form method="post" class="cd-form" novalidate>
+    {% csrf_token %}
+    <div class="cd-form__field" style="flex: none; max-width: 240px;">
+      <label class="cd-form__label label" for="{{ form.token.id_for_label }}">{{ form.token.label }}</label>
+      {{ form.token }}
+      {% if form.token.errors %}<ul class="cd-form__errors">{% for error in form.token.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+    <div class="cd-form__actions" style="justify-content: flex-start;">
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security' %}">{% translate "Cancel" %}</a>
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Turn it on" %}</button>
+    </div>
+  </form>
+{% endblock %}

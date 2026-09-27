@@ -1,14 +1,21 @@
 from django import forms
 from django.conf import settings
-from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    PasswordChangeForm,
+    PasswordResetForm,
+    SetPasswordForm,
+    UsernameField,
+)
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 
 from geo.models import Municipality
 
-from .models import User
+from .models import SignInRequirement, User
 
 
 class StyledFormMixin:
@@ -46,18 +53,30 @@ class StyledSetPasswordForm(StyledFormMixin, SetPasswordForm):
     pass
 
 
-class LoginForm(forms.Form):
-    email = forms.CharField(
+class LoginForm(AuthenticationForm):
+    """The login's first step (accounts.views.LoginView): email or username
+    (accounts.backends.EmailOrUsernameBackend) and password. A Django
+    AuthenticationForm, as django-two-factor-auth's login expects, so its
+    field is called `username`."""
+
+    username = UsernameField(
         label=_("Email"),
         widget=forms.TextInput(attrs={
             "class": "cd-form__input body",
             "placeholder": "you@example.com",
             "autofocus": True,
+            "autocomplete": "username",
         }),
     )
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"class": "cd-form__input body"}),
+        label=_("Password"),
+        strip=False,
+        widget=forms.PasswordInput(attrs={"class": "cd-form__input body", "autocomplete": "current-password"}),
     )
+    error_messages = {
+        "invalid_login": _("That email/password combination doesn't match an account."),
+        "inactive": _("That email/password combination doesn't match an account."),
+    }
 
 
 class RegisterGuardianForm(forms.Form):
@@ -117,3 +136,53 @@ class RegisterGuardianForm(forms.Form):
         # ones enforced everywhere else a password is set.
         validate_password(password)
         return password
+
+
+class SignInPolicyForm(forms.Form):
+    """The organisation's sign-in policy (/manage/security/, accounts/manage.py):
+    per role a level and the day it's required from. Field names are
+    `level_<role>` and `from_<role>`."""
+
+    def __init__(self, *args, requirements=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        requirements = requirements or {}
+        for role, label in SignInRequirement.ROLE_CHOICES:
+            current = requirements.get(role)
+            self.fields[f"level_{role}"] = forms.ChoiceField(
+                label=label, choices=SignInRequirement.LEVEL_CHOICES,
+                initial=current.level if current else SignInRequirement.PASSWORD,
+                widget=forms.Select(attrs={"class": "cd-form__input body"}),
+            )
+            self.fields[f"from_{role}"] = forms.DateField(
+                label=_("Required from"), required=False,
+                initial=current.required_from if current else None,
+                widget=forms.DateInput(
+                    attrs={"class": "cd-form__input body", "type": "date",
+                           "aria-label": format_lazy("{}: {}", label, _("Required from"))},
+                    format="%Y-%m-%d",
+                ),
+            )
+
+    def rows(self):
+        return [
+            (role, label, self[f"level_{role}"], self[f"from_{role}"])
+            for role, label in SignInRequirement.ROLE_CHOICES
+        ]
+
+    def save(self, updated_by):
+        """Store every role's row; returns the roles that changed."""
+        changed = []
+        for role, _label in SignInRequirement.ROLE_CHOICES:
+            level = self.cleaned_data[f"level_{role}"]
+            required_from = self.cleaned_data[f"from_{role}"] if level != SignInRequirement.PASSWORD else None
+            row = SignInRequirement.objects.filter(role=role).first()
+            if row is None:
+                if level == SignInRequirement.PASSWORD:
+                    continue
+                row = SignInRequirement(role=role)
+            elif row.level == level and row.required_from == required_from:
+                continue
+            row.level, row.required_from, row.updated_by = level, required_from, updated_by
+            row.save()
+            changed.append(role)
+        return changed

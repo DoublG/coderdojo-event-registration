@@ -34,3 +34,27 @@ def user_roles(request):
         "user_has_organisation_role": organisation_role,
         "user_is_organisation_admin": organisation_admin,
     }
+
+
+def sign_in_notice(request):
+    """`sign_in_notice`, for the notice in the page shells
+    (accounts/partials/_sign_in_notice.html): the stronger login the account's
+    role will need from a later day (accounts.sign_in), while the account
+    doesn't have it yet; otherwise None. Lazy: worked out only on a page that
+    shows it, once per request."""
+    from functools import cache
+
+    @cache
+    def notice():
+        from . import sign_in, two_step
+
+        user = request.user
+        if not user.is_authenticated or user.account_type != "adult":
+            return None
+        _enforced, upcoming = sign_in.requirements_for(user)
+        if upcoming is None:
+            return None
+        has = two_step.has_passkey(user) if upcoming.level == sign_in.PASSKEY else two_step.is_on(user)
+        return None if has else upcoming
+
+    return {"sign_in_notice": notice}

@@ -159,10 +159,13 @@ def require_dojo_access(request, dojo_id, capability=None):
     404, not a 403, so a guessed id doesn't even confirm another dojo
     exists (same reasoning as accounts._get_own_ninja). A role that lacks
     `capability` is a 403: they already know the dojo, they just can't do
-    this part."""
+    this part. A login below the organisation's sign-in policy
+    (accounts.sign_in) gets a 404 too."""
+    from accounts.sign_in import meets_requirement
+
     dojo = get_object_or_404(Dojo, id=dojo_id)
     membership = managing_membership(request.user, dojo)
-    if membership is None:
+    if membership is None or not meets_requirement(request):
         raise Http404
     access = DojoAccess(dojo=dojo, role=membership.role, membership=membership)
     if capability is not None and not access.can(capability):

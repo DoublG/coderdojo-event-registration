@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from applications.models import Application
-from core.testing import TempMediaMixin
+from core.testing import TempMediaMixin, login_data
 from dojos.models import Dojo, DojoMembership
 from dojos.testing import add_member, make_champion, make_dojo, make_mentor
 from events.models import Event, Registration
@@ -46,19 +46,19 @@ class LoginViewTests(TestCase):
         self.assertTemplateUsed(response, "accounts/login.html")
 
     def test_valid_login_by_email_redirects_to_account_page(self):
-        response = self.client.post(reverse("login"), {"email": self.guardian.email, "password": PASSWORD})
+        response = self.client.post(reverse("login"), login_data(self.guardian.email, PASSWORD))
         self.assertRedirects(response, reverse("account_home"))
 
     def test_valid_login_by_username(self):
         """EmailOrUsernameBackend accepts either — seeded demo accounts are
         keyed by username."""
-        response = self.client.post(reverse("login"), {"email": self.guardian.username, "password": PASSWORD})
+        response = self.client.post(reverse("login"), login_data(self.guardian.username, PASSWORD))
         self.assertRedirects(response, reverse("account_home"))
 
     def test_invalid_password_shows_error(self):
-        response = self.client.post(reverse("login"), {"email": self.guardian.email, "password": "wrong"})
+        response = self.client.post(reverse("login"), login_data(self.guardian.email, "wrong"))
         self.assertEqual(response.status_code, 200)
-        self.assertIsNotNone(response.context["error"])
+        self.assertTrue(response.context["form"].non_field_errors())
 
     def test_already_authenticated_redirects_away_from_form(self):
         self.client.force_login(self.guardian)
@@ -696,7 +696,7 @@ class LapsedCheckNeverBlocksLoginTests(TestCase):
         owner.save()
         dojo = make_dojo("Ghent", champion=owner)
 
-        response = self.client.post(reverse("login"), {"email": "owner1@example.com", "password": PASSWORD})
+        response = self.client.post(reverse("login"), login_data("owner1@example.com", PASSWORD))
 
         self.assertEqual(int(self.client.session["_auth_user_id"]), owner.id)
         self.assertRedirects(response, reverse("account_home"))
@@ -1006,7 +1006,7 @@ class NinjaLoginTests(TestCase):
         self.client.logout()
         form = self.client.get(urlsplit(link).path, follow=True)
         self.client.post(form.redirect_chain[-1][0], {"new_password1": PASSWORD, "new_password2": PASSWORD})
-        response = self.client.post(reverse("login"), {"email": "emma@example.com", "password": PASSWORD})
+        response = self.client.post(reverse("login"), login_data("emma@example.com", PASSWORD))
         self.assertRedirects(response, reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
 
     def test_email_is_required_and_unique(self):
@@ -1095,9 +1095,9 @@ class NinjaLoginTests(TestCase):
         self.client.post(self._url("ninja_login_remove"))
 
         self.client.logout()
-        response = self.client.post(reverse("login"), {"email": "emma@example.com", "password": PASSWORD})
+        response = self.client.post(reverse("login"), login_data("emma@example.com", PASSWORD))
         self.assertEqual(response.status_code, 200)
-        self.assertIsNotNone(response.context["error"])
+        self.assertTrue(response.context["form"].non_field_errors())
 
     def test_guardian_keeps_editing_a_child_with_a_login(self):
         self._create()
@@ -1318,3 +1318,602 @@ class ChildHealthNotesTests(TestCase):
         self.assertEqual(response.status_code, 404)
         self.child.refresh_from_db()
         self.assertEqual(self.child.allergies_notes, "Peanut allergy")
+
+
+# --- Two-step login and the sign-in policy (DATA_MODEL.md §15) -------------
+
+FAKE_REGISTRATION = (
+    '{"id": "cGFzc2tleQ", "rawId": "cGFzc2tleQ", "type": "public-key", '
+    '"response": {"clientDataJSON": "e30", "attestationObject": "oA"}}'
+)
+FAKE_ASSERTION = (
+    '{"id": "cGFzc2tleQ", "rawId": "cGFzc2tleQ", "type": "public-key", '
+    '"response": {"clientDataJSON": "e30", "authenticatorData": "AA", "signature": "AA", "userHandle": null}}'
+)
+
+
+class TwoStepTestMixin:
+    """An adult account with a password, and the mail templates loaded."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        super().setUp()
+        call_command("load_mail_templates", stdout=StringIO())
+        self.user = User.objects.create(username="ann", email="ann@example.com", first_name="Ann")
+        self.user.set_password(PASSWORD)
+        self.user.save()
+
+    def queued(self, key):
+        from mailing.models import EmailMessage
+
+        return EmailMessage.objects.filter(user=self.user, template_key=key)
+
+    def add_app(self, user=None):
+        from django_otp.plugins.otp_totp.models import TOTPDevice
+
+        return TOTPDevice.objects.create(user=user or self.user, name="default")
+
+    def add_passkey(self, user=None, name="default"):
+        from two_factor.plugins.webauthn.models import WebauthnDevice
+
+        return WebauthnDevice.objects.create(
+            user=user or self.user, name=name, public_key="pk", key_handle="cGFzc2tleQ", sign_count=0,
+        )
+
+
+class TwoStepLoginTests(TwoStepTestMixin, TestCase):
+    """accounts.views.LoginView: password, then a code, passkey or backup code."""
+
+    def test_without_two_step_login_the_password_is_enough(self):
+        response = self.client.post(reverse("login"), login_data("ann@example.com", PASSWORD))
+        self.assertRedirects(response, reverse("account_home"))
+
+    def test_with_an_app_the_password_leads_to_the_code_step(self):
+        self.add_app()
+        response = self.client.post(reverse("login"), login_data("ann@example.com", PASSWORD))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["wizard"]["steps"].current, "token")
+        self.assertEqual(response.context["device_kind"], "app")
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_a_wrong_code_is_refused(self):
+        from core.testing import token_data
+
+        self.add_app()
+        self.client.post(reverse("login"), login_data("ann@example.com", PASSWORD))
+        response = self.client.post(reverse("login"), token_data("000000"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_the_right_code_logs_in_verified(self):
+        from django_otp import DEVICE_ID_SESSION_KEY
+
+        from core.testing import token_data, totp_code
+
+        device = self.add_app()
+        self.client.post(reverse("login"), login_data("ann", PASSWORD))
+        response = self.client.post(reverse("login"), token_data(totp_code(device)))
+        self.assertRedirects(response, reverse("account_home"))
+        self.assertEqual(self.client.session[DEVICE_ID_SESSION_KEY], device.persistent_id)
+
+    def test_next_survives_both_steps(self):
+        from core.testing import token_data, totp_code
+
+        device = self.add_app()
+        url = reverse("login") + "?next=/account/security/"
+        self.client.post(url, {**login_data("ann", PASSWORD), "next": "/account/security/"})
+        response = self.client.post(url, {**token_data(totp_code(device)), "next": "/account/security/"})
+        self.assertRedirects(response, "/account/security/")
+
+    def test_a_remembered_browser_skips_the_code_step(self):
+        from core.testing import token_data, totp_code
+
+        device = self.add_app()
+        self.client.post(reverse("login"), login_data("ann", PASSWORD))
+        self.client.post(reverse("login"), {**token_data(totp_code(device)), "token-remember": "on"})
+        remembered = {key: morsel.value for key, morsel in self.client.cookies.items() if key.startswith("remember-cookie_")}
+        self.assertTrue(remembered)
+        self.client.logout()  # the test client's logout drops every cookie; a browser keeps this one
+        self.client.cookies.load(remembered)
+        response = self.client.post(reverse("login"), login_data("ann", PASSWORD))
+        self.assertRedirects(response, reverse("account_home"))
+
+    def test_a_backup_code_logs_in_once_and_mails(self):
+        from core.testing import token_data
+
+        from . import two_step
+
+        self.add_app()
+        code = two_step.make_backup_codes(self.user)[0]
+        self.client.post(reverse("login"), login_data("ann", PASSWORD))
+        self.client.post(reverse("login"), {"login_view-current_step": "token", "wizard_goto_step": "backup"})
+        response = self.client.post(reverse("login"), token_data(code, step="backup"))
+        self.assertRedirects(response, reverse("account_home"))
+        self.assertEqual(two_step.backup_codes_left(self.user), two_step.BACKUP_CODE_COUNT - 1)
+        self.assertIn("9", self.queued("backup_code_used").get().body)
+
+    def test_a_passkey_logs_in(self):
+        from core.testing import token_data
+
+        self.add_passkey()
+        response = self.client.post(reverse("login"), login_data("ann", PASSWORD))
+        self.assertEqual(response.context["device_kind"], "passkey")
+        self.assertIn("challenge", response.context["passkey_options"])
+        with patch("two_factor.plugins.webauthn.forms.verify_authentication_response", return_value=1):
+            response = self.client.post(reverse("login"), token_data(FAKE_ASSERTION))
+        self.assertRedirects(response, reverse("account_home"))
+
+    def test_a_passkey_that_doesnt_check_out_is_refused(self):
+        from webauthn.helpers.exceptions import InvalidAuthenticationResponse
+
+        from core.testing import token_data
+
+        self.add_passkey()
+        self.client.post(reverse("login"), login_data("ann", PASSWORD))
+        with patch("two_factor.plugins.webauthn.forms.verify_authentication_response",
+                   side_effect=InvalidAuthenticationResponse("bad")):
+            response = self.client.post(reverse("login"), token_data(FAKE_ASSERTION))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_the_other_method_is_offered(self):
+        self.add_app()
+        self.add_passkey(name="passkey")
+        response = self.client.post(reverse("login"), login_data("ann", PASSWORD))
+        self.assertEqual([kind for _id, kind in response.context["other_kinds"]], ["passkey"])
+
+    def test_the_admin_login_sends_to_the_site_login(self):
+        response = self.client.get("/admin/login/")
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response["Location"].startswith(reverse("login")))
+
+
+class SignInSecurityPageTests(TwoStepTestMixin, TestCase):
+    """accounts.security_views: the account's own Sign-in security pages."""
+
+    def verified(self):
+        from core.testing import login_verified
+
+        return login_verified(self.client, self.user)
+
+    def test_needs_a_login(self):
+        response = self.client.get(reverse("account_security"))
+        self.assertIn(reverse("login"), response["Location"])
+
+    def test_a_ninja_login_gets_a_404(self):
+        ninja = User.objects.create(username="kid", account_type=User.NINJA)
+        self.client.force_login(ninja)
+        self.assertEqual(self.client.get(reverse("account_security")).status_code, 404)
+        self.assertEqual(self.client.get(reverse("account_security_app")).status_code, 404)
+
+    def test_the_account_page_links_to_it(self):
+        self.client.force_login(self.user)
+        self.assertContains(self.client.get(reverse("account_home")), reverse("account_security"))
+
+    def test_setting_up_an_app_turns_two_step_login_on(self):
+        from django_otp import DEVICE_ID_SESSION_KEY
+        from django_otp.plugins.otp_totp.models import TOTPDevice
+        from django_otp.util import random_hex
+
+        from core.testing import totp_code
+
+        from . import two_step
+        from .security_views import APP_KEY_SESSION
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("account_security_app"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("<svg", response.context["qr_svg"])
+        key = self.client.session[APP_KEY_SESSION]
+        code = totp_code(TOTPDevice(key=key or random_hex(20)))
+        response = self.client.post(reverse("account_security_app"), {"token": code})
+        self.assertRedirects(response, reverse("account_security_backup_codes"), fetch_redirect_response=False)
+        device = two_step.app_device(self.user)
+        self.assertEqual(device.name, "default")
+        self.assertEqual(self.client.session[DEVICE_ID_SESSION_KEY], device.persistent_id)
+        self.assertEqual(len(self.client.get(reverse("account_security_backup_codes")).context["codes"]), 10)
+        self.assertEqual(self.queued("two_step_turned_on").count(), 1)
+
+    def test_a_wrong_first_code_saves_nothing(self):
+        from . import two_step
+
+        self.client.force_login(self.user)
+        self.client.get(reverse("account_security_app"))
+        response = self.client.post(reverse("account_security_app"), {"token": "000000"})
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(two_step.is_on(self.user))
+
+    def test_adding_a_passkey(self):
+        from . import two_step
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("account_security_passkey"))
+        self.assertIn("challenge", response.context["passkey_options"])
+        with patch("two_factor.plugins.webauthn.method.verify_registration_response", return_value=("pk", "kh", 0)):
+            response = self.client.post(reverse("account_security_passkey"), {"token": FAKE_REGISTRATION})
+        self.assertRedirects(response, reverse("account_security_backup_codes"))
+        self.assertTrue(two_step.has_passkey(self.user))
+        self.assertIn("your passkey", self.queued("two_step_turned_on").get().body)
+
+    def test_a_second_method_is_not_the_default_and_mails_as_added(self):
+        from django_otp.plugins.otp_totp.models import TOTPDevice
+
+        self.verified()
+        self.client.get(reverse("account_security_passkey"))
+        with patch("two_factor.plugins.webauthn.method.verify_registration_response", return_value=("pk", "kh", 0)):
+            response = self.client.post(reverse("account_security_passkey"), {"token": FAKE_REGISTRATION})
+        self.assertRedirects(response, reverse("account_security"))
+        self.assertEqual(TOTPDevice.objects.get(user=self.user).name, "default")
+        self.assertEqual(self.queued("two_step_method_added").count(), 1)
+
+    def test_a_passkey_that_doesnt_check_out_is_not_saved(self):
+        from webauthn.helpers.exceptions import InvalidRegistrationResponse
+
+        from . import two_step
+
+        self.client.force_login(self.user)
+        self.client.get(reverse("account_security_passkey"))
+        with patch("two_factor.plugins.webauthn.method.verify_registration_response",
+                   side_effect=InvalidRegistrationResponse("bad")):
+            response = self.client.post(reverse("account_security_passkey"), {"token": FAKE_REGISTRATION})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["error"])
+        self.assertFalse(two_step.is_on(self.user))
+
+    def test_changes_need_a_session_that_passed_two_step_login(self):
+        self.add_app()
+        self.client.force_login(self.user)  # an older login, before the app
+        response = self.client.get(reverse("account_security_backup_codes"))
+        self.assertTrue(response["Location"].startswith(reverse("login")))
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_removing_needs_the_password(self):
+        from . import two_step
+
+        device = self.verified()
+        url = reverse("account_security_remove", kwargs={"kind": "app", "device_id": device.pk})
+        self.assertEqual(self.client.post(url, {"password": "wrong"}).status_code, 200)
+        self.assertTrue(two_step.is_on(self.user))
+        self.assertRedirects(self.client.post(url, {"password": PASSWORD}), reverse("account_security"))
+        self.assertFalse(two_step.is_on(self.user))
+
+    def test_removing_the_last_method_turns_it_off_and_drops_the_backup_codes(self):
+        from django_otp.plugins.otp_static.models import StaticDevice
+
+        from . import two_step
+
+        device = self.verified()
+        two_step.make_backup_codes(self.user)
+        url = reverse("account_security_remove", kwargs={"kind": "app", "device_id": device.pk})
+        self.client.post(url, {"password": PASSWORD})
+        self.assertFalse(StaticDevice.objects.filter(user=self.user).exists())
+        self.assertEqual(self.queued("two_step_turned_off").count(), 1)
+
+    def test_removing_the_default_makes_another_method_the_default(self):
+        from . import two_step
+
+        device = self.verified()
+        passkey = self.add_passkey(name="passkey")
+        url = reverse("account_security_remove", kwargs={"kind": "app", "device_id": device.pk})
+        self.client.post(url, {"password": PASSWORD})
+        passkey.refresh_from_db()
+        self.assertEqual(passkey.name, "default")
+        self.assertTrue(two_step.is_on(self.user))
+        self.assertEqual(self.queued("two_step_method_removed").count(), 1)
+
+    def test_someone_elses_device_is_a_404(self):
+        other = User.objects.create(username="bob")
+        device = self.add_app(user=other)
+        self.verified()
+        url = reverse("account_security_remove", kwargs={"kind": "app", "device_id": device.pk})
+        self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_turning_it_off(self):
+        from . import two_step
+
+        self.verified()
+        self.add_passkey(name="passkey")
+        response = self.client.post(reverse("account_security_turn_off"), {"password": PASSWORD})
+        self.assertRedirects(response, reverse("account_security"))
+        self.assertFalse(two_step.is_on(self.user))
+
+    def test_a_role_that_needs_it_blocks_turning_it_off(self):
+        from . import two_step
+        from .models import SignInRequirement
+
+        SignInRequirement.objects.create(role=SignInRequirement.ADULT, level=SignInRequirement.TWO_STEP)
+        self.verified()
+        response = self.client.post(reverse("account_security_turn_off"), {"password": PASSWORD})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["blocked"])
+        self.assertTrue(two_step.is_on(self.user))
+
+    def test_new_backup_codes_replace_the_old_ones(self):
+        from . import two_step
+
+        self.verified()
+        old = two_step.make_backup_codes(self.user)
+        self.client.post(reverse("account_security_backup_codes"))
+        new = self.client.get(reverse("account_security_backup_codes")).context["codes"]
+        self.assertFalse(set(old) & set(new))
+        self.assertIsNone(self.client.get(reverse("account_security_backup_codes")).context["codes"])
+
+    def test_forgetting_this_browser_deletes_the_cookie(self):
+        self.verified()
+        self.client.cookies["remember-cookie_abc"] = "x"
+        response = self.client.post(reverse("account_security_forget_browser"))
+        self.assertEqual(response.cookies["remember-cookie_abc"].value, "")
+
+
+class SignInPolicyTests(TwoStepTestMixin, TestCase):
+    """accounts.sign_in: the organisation's sign-in policy per role, and
+    where it's applied."""
+
+    def require(self, role, level=None, required_from=None):
+        from .models import SignInRequirement
+
+        return SignInRequirement.objects.create(
+            role=role, level=level or SignInRequirement.TWO_STEP, required_from=required_from,
+        )
+
+    def test_roles_of(self):
+        from . import sign_in
+        from .models import OrganisationRole, SignInRequirement
+
+        champion = make_champion(username="champ")
+        make_dojo("Ghent", champion=champion)
+        mentor = make_mentor(username="ment")
+        add_member(Dojo.objects.get(name="Ghent"), mentor)
+        OrganisationRole.objects.create(account=self.user, role=OrganisationRole.BOARD)
+        ninja = User.objects.create(username="kid", account_type=User.NINJA)
+        self.assertEqual(sign_in.roles_of(champion) - {SignInRequirement.ADULT}, {SignInRequirement.CHAMPION})
+        self.assertEqual(sign_in.roles_of(mentor) - {SignInRequirement.ADULT}, {SignInRequirement.MENTOR})
+        self.assertEqual(
+            sign_in.roles_of(self.user), {SignInRequirement.ADULT, SignInRequirement.ORGANISATION_BOARD}
+        )
+        self.assertEqual(sign_in.roles_of(ninja), set())
+        self.assertIn(champion, sign_in.accounts_with_role(SignInRequirement.CHAMPION))
+        self.assertIn(self.user, sign_in.accounts_with_role(SignInRequirement.ORGANISATION_BOARD))
+
+    def test_the_strongest_level_applies_and_a_later_one_is_upcoming(self):
+        from . import sign_in
+        from .models import OrganisationRole, SignInRequirement
+
+        OrganisationRole.objects.create(account=self.user, role=OrganisationRole.ADMIN)
+        self.require(SignInRequirement.ADULT)
+        later = timezone.localdate() + timedelta(days=10)
+        self.require(SignInRequirement.ORGANISATION_ADMIN, SignInRequirement.PASSKEY, required_from=later)
+        enforced, upcoming = sign_in.requirements_for(self.user)
+        self.assertEqual(enforced.level, SignInRequirement.TWO_STEP)
+        self.assertEqual((upcoming.level, upcoming.required_from), (SignInRequirement.PASSKEY, later))
+        enforced, upcoming = sign_in.requirements_for(self.user, today=later)
+        self.assertEqual((enforced.level, upcoming), (SignInRequirement.PASSKEY, None))
+
+    def test_without_a_policy_nothing_changes(self):
+        from . import sign_in
+
+        enforced, upcoming = sign_in.requirements_for(self.user)
+        self.assertEqual((enforced.level, upcoming), (sign_in.PASSWORD, None))
+
+    def test_status(self):
+        from . import sign_in
+        from .sign_in import Requirement
+
+        two_step_rule, passkey_rule = Requirement(sign_in.TWO_STEP), Requirement(sign_in.PASSKEY)
+        self.assertEqual(sign_in.status(self.user, False, two_step_rule), sign_in.NEEDS_SETUP)
+        self.add_app()
+        self.assertEqual(sign_in.status(self.user, False, two_step_rule), sign_in.NEEDS_VERIFY)
+        self.assertEqual(sign_in.status(self.user, True, two_step_rule), sign_in.OK)
+        self.assertEqual(sign_in.status(self.user, True, passkey_rule), sign_in.NEEDS_SETUP)
+
+    def test_an_account_without_the_device_is_sent_to_set_it_up(self):
+        from .models import SignInRequirement
+
+        self.require(SignInRequirement.ADULT)
+        self.client.force_login(self.user)
+        self.assertRedirects(self.client.get(reverse("account_home")), reverse("account_security"))
+        self.assertEqual(self.client.get(reverse("account_security")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("account_security_app")).status_code, 200)
+
+    def test_htmx_gets_a_whole_page_redirect(self):
+        from .models import SignInRequirement
+
+        self.require(SignInRequirement.ADULT)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("account_home"), headers={"HX-Request": "true"})
+        self.assertEqual(response["HX-Redirect"], reverse("account_security"))
+
+    def test_a_session_that_skipped_the_second_step_logs_in_again(self):
+        from .models import SignInRequirement
+
+        self.require(SignInRequirement.ADULT)
+        self.add_app()
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("account_home"))
+        self.assertTrue(response["Location"].startswith(reverse("login")))
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_a_verified_session_carries_on(self):
+        from core.testing import login_verified
+
+        from .models import SignInRequirement
+
+        self.require(SignInRequirement.ADULT)
+        login_verified(self.client, self.user)
+        self.assertEqual(self.client.get(reverse("account_home")).status_code, 200)
+
+    def test_a_ninja_login_is_never_asked(self):
+        from .models import SignInRequirement
+
+        self.require(SignInRequirement.ADULT)
+        child = make_ninja(self.user, "Emma")
+        login = User.objects.create(username="emma", account_type=User.NINJA)
+        child.account = login
+        child.save()
+        self.client.force_login(login)
+        self.assertEqual(self.client.get(reverse("ninja_detail", kwargs={"ninja_id": child.id})).status_code, 200)
+
+    def test_a_future_requirement_is_only_a_notice(self):
+        from .models import SignInRequirement
+
+        self.require(SignInRequirement.ADULT, required_from=timezone.localdate() + timedelta(days=7))
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("account_home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context["sign_in_notice"]())
+        self.assertContains(response, reverse("account_security"))
+
+    def test_the_dojo_area_needs_it_for_mentors(self):
+        from core.testing import login_verified
+
+        from .models import SignInRequirement
+
+        champion = make_champion(username="champ")
+        dojo = make_dojo("Ghent", champion=champion)
+        self.require(SignInRequirement.CHAMPION)
+        self.client.force_login(champion)
+        dashboard = reverse("dojo_dashboard", kwargs={"dojo_id": dojo.id})
+        self.assertRedirects(self.client.get(dashboard), reverse("account_security"))
+        login_verified(self.client, champion)
+        self.assertEqual(self.client.get(dashboard).status_code, 200)
+
+    def test_the_access_helpers_refuse_even_without_the_middleware(self):
+        from django.http import Http404
+        from django.test import RequestFactory
+
+        from dojos.access import require_dojo_access
+
+        from .models import OrganisationRole, SignInRequirement
+        from .organisation import require_organisation_admin
+
+        champion = make_champion(username="champ")
+        dojo = make_dojo("Ghent", champion=champion)
+        OrganisationRole.objects.create(account=champion, role=OrganisationRole.ADMIN)
+        self.require(SignInRequirement.CHAMPION)
+        self.require(SignInRequirement.ORGANISATION_ADMIN)
+        request = RequestFactory().get("/")
+        request.user = champion
+        with self.assertRaises(Http404):
+            require_dojo_access(request, dojo.id)
+        with self.assertRaises(Http404):
+            require_organisation_admin(request)
+
+    def test_the_django_admin_needs_it_for_superusers(self):
+        from django.contrib import admin
+        from django.test import RequestFactory
+
+        from core.testing import login_verified
+
+        from .models import SignInRequirement
+
+        root = User.objects.create(username="root", is_staff=True, is_superuser=True)
+        self.require(SignInRequirement.SUPERUSER)
+        request = RequestFactory().get("/admin/")
+        request.user = root
+        self.assertFalse(admin.site.has_permission(request))
+        login_verified(self.client, root)
+        self.assertEqual(self.client.get("/admin/").status_code, 200)
+
+
+class ManageSignInSecurityTests(TwoStepTestMixin, TestCase):
+    """accounts.manage: the organisation dashboard's Sign-in security page."""
+
+    def setUp(self):
+        from .models import OrganisationRole
+
+        super().setUp()
+        self.admin = User.objects.create(username="orgadmin", email="orgadmin@example.com")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+
+    def test_only_the_organisation_admin_role(self):
+        self.client.force_login(self.user)
+        self.assertEqual(self.client.get(reverse("manage_security")).status_code, 404)
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("manage_security"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/manage/security.html")
+
+    def test_saving_the_policy(self):
+        from .models import SignInRequirement
+
+        self.client.force_login(self.admin)
+        data = {f"level_{role}": SignInRequirement.PASSWORD for role, _label in SignInRequirement.ROLE_CHOICES}
+        data.update({"level_mentor": SignInRequirement.TWO_STEP, "from_mentor": "2030-01-01"})
+        self.assertRedirects(self.client.post(reverse("manage_security"), data), reverse("manage_security"))
+        row = SignInRequirement.objects.get()
+        self.assertEqual((row.role, row.level, str(row.required_from), row.updated_by), (
+            SignInRequirement.MENTOR, SignInRequirement.TWO_STEP, "2030-01-01", self.admin,
+        ))
+
+    def test_counts_per_role(self):
+        from .models import SignInRequirement
+
+        self.add_app()
+        self.client.force_login(self.admin)
+        rows = {row[0]: row[-1] for row in self.client.get(reverse("manage_security")).context["rows"]}
+        self.assertEqual(rows[SignInRequirement.ADULT], {"total": 2, "on": 1, "passkey": 0})
+
+    def test_turning_off_someones_two_step_login(self):
+        from . import two_step
+
+        self.add_app()
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("manage_security"), {"q": "ann"})
+        self.assertEqual([account.pk for account in response.context["accounts"]], [self.user.pk])
+        self.client.post(reverse("manage_security_turn_off", kwargs={"user_id": self.user.pk}))
+        self.assertFalse(two_step.is_on(self.user))
+        self.assertIn("As you asked us", self.queued("two_step_turned_off").get().body)
+
+    def test_not_ones_own(self):
+        from . import two_step
+
+        self.add_app(user=self.admin)
+        self.client.force_login(self.admin)
+        self.client.post(reverse("manage_security_turn_off", kwargs={"user_id": self.admin.pk}))
+        self.assertTrue(two_step.is_on(self.admin))
+
+
+class SeedTwoStepTests(TestCase):
+    """seed_two_step, totp_code and the credentials file's totp_secret column."""
+
+    def test_seeds_one_account_per_kind_once(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from . import two_step
+        from .models import OrganisationRole
+        from .seed_credentials import totp_secret
+
+        admin = User.objects.create(username="org-a", email="a@coderdojobelgium.example")
+        OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
+        parent = User.objects.create(username="parent-a", email="p@coderdojo-demo.example")
+        make_ninja(parent, "Emma")
+        outsider = User.objects.create(username="real", email="real@example.com")
+        call_command("seed_two_step", stdout=StringIO())
+        self.assertTrue(two_step.is_on(admin) and two_step.is_on(parent))
+        self.assertFalse(two_step.is_on(outsider))
+        self.assertEqual(two_step.backup_codes_left(admin), two_step.BACKUP_CODE_COUNT)
+        key = totp_secret(admin)
+        self.assertEqual(len(key), 32)
+        call_command("seed_two_step", stdout=StringIO())
+        self.assertEqual(totp_secret(admin), key)
+        self.assertEqual(totp_secret(outsider), "")
+
+    @override_settings(DEBUG=True)
+    def test_totp_code_prints_the_current_code(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+        from django_otp.plugins.otp_totp.models import TOTPDevice
+
+        from core.testing import totp_code
+
+        user = User.objects.create(username="ann")
+        device = TOTPDevice.objects.create(user=user, name="default")
+        out = StringIO()
+        call_command("totp_code", "ann", stdout=out)
+        self.assertEqual(out.getvalue().strip(), totp_code(device))

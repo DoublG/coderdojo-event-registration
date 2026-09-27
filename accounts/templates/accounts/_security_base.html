@@ -1,0 +1,42 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% comment %}
+  The Sign-in security pages (accounts/security_views.py): one card on a
+  sunken page, like Mail preferences. A page fills security_title and
+  security_content.
+{% endcomment %}
+{% block title %}{% block security_title %}{% translate "Sign-in security" %}{% endblock %} · CoderDojo Belgium{% endblock %}
+{% block root_class %}security-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .security-root { background: var(--surface-sunken); }
+  .security-root .shell { max-width: 720px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+  .security-root h1 { margin-top: 0; }
+  .security-root .muted { color: var(--ink-muted); }
+  .security-root .security-section { padding: var(--space-4) 0; border-top: 1px solid var(--border); }
+  .security-root .security-section h2 { margin: 0 0 var(--space-2); }
+  .security-root .security-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; padding: var(--space-2) 0; }
+  .security-root .security-row p { margin: 0; }
+  .security-root .security-notice { background: var(--surface-sunken); border-radius: var(--radius-md); padding: var(--space-4); margin: 0 0 var(--space-5); }
+  .security-root .security-notice p { margin: 0; }
+  .security-root .security-notice p + p { margin-top: var(--space-2); }
+  .security-root .security-qr { width: 200px; height: 200px; background: #fff; padding: var(--space-3); border-radius: var(--radius-md); }
+  .security-root .security-qr svg { width: 100%; height: 100%; }
+  .security-root .security-secret { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.05em; word-break: break-all; }
+  .security-root .backup-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--space-2); padding: 0; list-style: none; margin: var(--space-4) 0; }
+  .security-root .backup-codes li { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 16px; background: var(--surface-sunken); border-radius: var(--radius-sm, 6px); padding: var(--space-2) var(--space-3); text-align: center; }
+  @media print { .security-root .cd-nav, .security-root .cd-footer, .security-root .no-print { display: none !important; } }
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="shell">
+    <div class="cd-card" style="padding: var(--space-6);">
+      {% for message in messages %}
+        <p class="cd-form__note {% if message.level_tag == 'error' %}cd-form__note--error{% else %}cd-form__note--success{% endif %} caption">{{ message }}</p>
+      {% endfor %}
+      {% block security_content %}{% endblock %}
+    </div>
+  </div>
+{% endblock %}

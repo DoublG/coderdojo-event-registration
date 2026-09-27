@@ -14,50 +14,144 @@
     justify-content: center;
     padding: var(--space-6) 0;
   }
+  .login-page-root .login-alternatives { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border); }
+  .login-page-root .login-alternatives p { color: var(--ink-muted); margin: 0 0 var(--space-3); }
+  .login-page-root .login-alternatives form + form { margin-top: var(--space-2); }
 </style>
 {% endblock %}
 
 {% block content %}
+  {% comment %}
+    accounts.views.LoginView: django-two-factor-auth's login in steps (auth →
+    token or backup). Every step posts the wizard's management form; `next`
+    travels along on each step.
+  {% endcomment %}
   <div class="shell login-stage">
     <div class="cd-card cd-login" style="padding: var(--space-6); width: 100%; max-width: 400px;">
 
       <div class="cd-login__header">
-        <h2 class="cd-login__title heading-lg">{% translate "Welcome back" %}</h2>
-        <p class="cd-login__subtitle body-sm">{% translate "Log in to see your dojo's schedule and manage your account." %}</p>
+        {% if wizard.steps.current == "auth" %}
+          <h2 class="cd-login__title heading-lg">{% translate "Welcome back" %}</h2>
+          <p class="cd-login__subtitle body-sm">{% translate "Log in to see your dojo's schedule and manage your account." %}</p>
+        {% else %}
+          <h2 class="cd-login__title heading-lg">{% translate "Confirm it's you" %}</h2>
+          <p class="cd-login__subtitle body-sm">
+            {% if wizard.steps.current == "backup" %}
+              {% translate "Enter one of the backup codes you saved when you turned on two-step login. Each code works once." %}
+            {% elif device_kind == "passkey" %}
+              {% translate "Use your passkey: your phone, computer or security key will ask for your fingerprint, face or PIN." %}
+            {% else %}
+              {% translate "Enter the six-digit code your authenticator app shows for CoderDojo Belgium." %}
+            {% endif %}
+          </p>
+        {% endif %}
       </div>
 
-      <form class="cd-login__fields" method="post" novalidate>
-        {% csrf_token %}
-        {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
+      {% if messages %}
+        <div class="cd-form__notes">
+          {% for message in messages %}<p class="cd-form__note caption">{{ message }}</p>{% endfor %}
+        </div>
+      {% endif %}
 
-        {% if error %}
+      <form class="cd-login__fields" method="post" novalidate id="login-form">
+        {% csrf_token %}
+        {{ wizard.management_form }}
+        {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% elif request.POST.next %}<input type="hidden" name="next" value="{{ request.POST.next }}">{% endif %}
+
+        {% if form.non_field_errors %}
           <div class="cd-form__notes">
-            <p class="cd-form__note cd-form__note--error caption">{{ error }}</p>
+            {% for error in form.non_field_errors %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endfor %}
           </div>
         {% endif %}
 
-        <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.email.id_for_label }}">{% translate "Email" %}</label>
-          {{ form.email }}
-        </div>
-        <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.password.id_for_label }}">{% translate "Password" %}</label>
-          {{ form.password }}
-        </div>
-
-        <div class="cd-login__row">
-          <div class="cd-form__checkbox-row">
-            <input type="checkbox" id="lp-login-remember">
-            <label class="body-sm" for="lp-login-remember">{% translate "Remember me" %}</label>
+        {% if wizard.steps.current == "auth" %}
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
           </div>
-          <a href="{% url 'password_reset' %}" class="cd-login__forgot body-sm">{% translate "Forgot password?" %}</a>
-        </div>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+            {{ form.password }}
+          </div>
 
-        <button type="submit" class="cd-btn cd-btn--primary cd-btn--block label">{% translate "Log in" %}</button>
+          <div class="cd-login__row">
+            <div class="cd-form__checkbox-row">
+              <input type="checkbox" id="lp-login-remember">
+              <label class="body-sm" for="lp-login-remember">{% translate "Remember me" %}</label>
+            </div>
+            <a href="{% url 'password_reset' %}" class="cd-login__forgot body-sm">{% translate "Forgot password?" %}</a>
+          </div>
+
+          <button type="submit" class="cd-btn cd-btn--primary cd-btn--block label">{% translate "Log in" %}</button>
+        {% else %}
+          {% if device_kind == "passkey" and wizard.steps.current == "token" %}
+            {{ form.otp_token }}
+            <p class="cd-form__note cd-form__note--error caption" data-passkey-error hidden></p>
+          {% else %}
+            <div class="cd-form__field">
+              <label class="cd-form__label label" for="{{ form.otp_token.id_for_label }}">{{ form.otp_token.label }}</label>
+              {{ form.otp_token }}
+              <ul class="cd-form__errors">{% for error in form.otp_token.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+            </div>
+          {% endif %}
+          {% if form.remember %}
+            <label class="cd-form__checkbox-row" for="{{ form.remember.id_for_label }}">{{ form.remember }}<span class="body-sm">{{ form.remember.label }}</span></label>
+          {% endif %}
+          {% if device_kind == "passkey" and wizard.steps.current == "token" %}
+            <button type="button" class="cd-btn cd-btn--primary cd-btn--block label" data-passkey-button>{% translate "Use my passkey" %}</button>
+          {% else %}
+            <button type="submit" class="cd-btn cd-btn--primary cd-btn--block label">{% translate "Confirm" %}</button>
+          {% endif %}
+        {% endif %}
       </form>
 
-      <p class="cd-login__footer body-sm">{% translate "New to CoderDojo?" %} <a href="{% url 'register' %}">{% translate "Create an account" %}</a></p>
+      {% if wizard.steps.current != "auth" %}
+        <div class="login-alternatives">
+          {% if other_kinds or backup_tokens or wizard.steps.current == "backup" %}
+            <p class="body-sm">{% translate "Can't use this?" %}</p>
+          {% endif %}
+          {% for persistent_id, kind in other_kinds %}
+            <form method="post">
+              {% csrf_token %}
+              {{ wizard.management_form }}
+              {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
+              <button name="challenge_device" value="{{ persistent_id }}" type="submit" class="cd-btn cd-btn--ghost cd-btn--block label">
+                {% if kind == "passkey" %}{% translate "Use a passkey instead" %}{% else %}{% translate "Use my authenticator app instead" %}{% endif %}
+              </button>
+            </form>
+          {% endfor %}
+          {% if backup_tokens and wizard.steps.current == "token" %}
+            <form method="post">
+              {% csrf_token %}
+              {{ wizard.management_form }}
+              {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
+              <button name="wizard_goto_step" value="backup" type="submit" class="cd-btn cd-btn--ghost cd-btn--block label">{% translate "Use a backup code" %}</button>
+            </form>
+          {% endif %}
+          <p class="caption" style="margin-top: var(--space-4);">
+            {% blocktranslate with email=organisation.email trimmed %}
+              Lost your phone and your backup codes? Mail us at {{ email }}: we'll check it's you and turn off two-step login.
+            {% endblocktranslate %}
+          </p>
+          <form method="post">
+            {% csrf_token %}
+            {{ wizard.management_form }}
+            <button name="wizard_goto_step" value="auth" type="submit" class="cd-btn cd-btn--ghost label">{% translate "Log in as someone else" %}</button>
+          </form>
+        </div>
+      {% else %}
+        <p class="cd-login__footer body-sm">{% translate "New to CoderDojo?" %} <a href="{% url 'register' %}">{% translate "Create an account" %}</a></p>
+      {% endif %}
 
     </div>
   </div>
+{% endblock %}
+
+{% block extra_script %}
+  {% if device_kind == "passkey" and wizard.steps.current == "token" and passkey_options %}
+    {{ passkey_options|json_script:"passkey-options" }}
+    <script>
+      CoderDojo.initPasskey(document.getElementById("login-form"), "passkey-options", "get");
+    </script>
+  {% endif %}
 {% endblock %}

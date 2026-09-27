@@ -27,6 +27,7 @@
 <div class="cd-root {% block root_class %}{% endblock %}" style="padding: 0;">
   <div class="shell">
     {% block menu %}{% include "core/menu.html" %}{% endblock %}
+    {% include "accounts/partials/_sign_in_notice.html" %}
   </div>
 
   {% block content %}{% endblock %}

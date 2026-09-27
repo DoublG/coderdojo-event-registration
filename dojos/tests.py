@@ -1426,6 +1426,35 @@ class NotificationConsumerTests(TransactionTestCase):
         await communicator.disconnect()
 
 
+    async def test_the_sign_in_policy_applies_to_the_socket(self):
+        """accounts.sign_in: a champion whose role needs two-step login gets
+        the socket only from a session that passed it."""
+        from django_otp import DEVICE_ID_SESSION_KEY
+        from django_otp.plugins.otp_totp.models import TOTPDevice
+
+        from accounts.models import SignInRequirement
+
+        await sync_to_async(SignInRequirement.objects.create)(
+            role=SignInRequirement.CHAMPION, level=SignInRequirement.TWO_STEP,
+        )
+        device = await sync_to_async(TOTPDevice.objects.create)(user=self.owner, name="default")
+
+        async def connect(session):
+            communicator = WebsocketCommunicator(
+                NotificationConsumer.as_asgi(), f"/ws/dojos/{self.dojo.id}/notifications/"
+            )
+            communicator.scope["url_route"] = {"kwargs": {"dojo_id": self.dojo.id}}
+            communicator.scope["user"] = self.owner
+            communicator.scope["session"] = session
+            connected, _ = await communicator.connect()
+            if connected:
+                await communicator.disconnect()
+            return connected
+
+        self.assertFalse(await connect({}))
+        self.assertTrue(await connect({DEVICE_ID_SESSION_KEY: device.persistent_id}))
+
+
 class TeamMemberDetailViewTests(TestCase):
     """The organisation's team details page (content.OrganisationTeamMember,
     display only — e.g. "Member of the board")."""

@@ -15,7 +15,10 @@ from django_celery_beat.models import (
     SolarSchedule,
 )
 from django_celery_results.models import ChordCounter, GroupResult, TaskResult
+from django_otp.plugins.otp_static.models import StaticDevice, StaticToken
+from django_otp.plugins.otp_totp.models import TOTPDevice
 from oauth2_provider.models import AccessToken, Application, DeviceGrant, Grant, IDToken, RefreshToken
+from two_factor.plugins.webauthn.models import WebauthnDevice
 
 from privacy.models import ErasureRecord, RetentionNotice
 from privacy.registry import Category, LegalBasis, Subject, keep, personal, register, register_not_personal
@@ -141,3 +144,45 @@ register(
 # client and token belongs to a dojo API client's technical account.
 for model in (Application, AccessToken, RefreshToken, Grant, IDToken, DeviceGrant):
     register_not_personal(model, "API clients and their tokens, all of technical accounts (client credentials only)")
+
+# Two-step login (DATA_MODEL.md §15, accounts/two_step.py): the account's
+# authenticator app, passkeys and backup codes. The export shows which
+# methods an account has and when they were used, never a secret.
+_SIGN_IN = {
+    "subjects": {Subject.ACCOUNT: "user"},
+    "legal_basis": LegalBasis.LEGITIMATE_INTEREST,
+    "retention": "sign_in_methods",
+    "seen_by": "Nobody reads it; the site checks logins against it. The organisation (Django admin)",
+}
+_DEVICE_FIELDS = {
+    ("user", "name", "confirmed", "created_at", "last_used_at"): personal(Category.IDENTITY),
+    ("throttling_failure_timestamp", "throttling_failure_count"): personal(Category.SECURITY, export=False),
+}
+register(
+    TOTPDevice,
+    purpose="Two-step login with an authenticator app",
+    fields={**_DEVICE_FIELDS, "key": personal(Category.SECURITY, export=False)},
+    not_personal=["id", "step", "t0", "digits", "tolerance", "drift", "last_t"],
+    **_SIGN_IN,
+)
+register(
+    WebauthnDevice,
+    purpose="Two-step login with a passkey",
+    fields={**_DEVICE_FIELDS, ("public_key", "key_handle", "sign_count"): personal(Category.SECURITY, export=False)},
+    not_personal=["id"],
+    **_SIGN_IN,
+)
+register(
+    StaticDevice,
+    purpose="Two-step login: the holder of the backup codes",
+    fields=_DEVICE_FIELDS,
+    not_personal=["id"],
+    **_SIGN_IN,
+)
+register(
+    StaticToken,
+    purpose="Two-step login: the backup codes, each used once",
+    fields={"token": personal(Category.SECURITY, export=False)},
+    not_personal=["id", "device"],
+    **{**_SIGN_IN, "subjects": {Subject.ACCOUNT: "device__user"}},
+)

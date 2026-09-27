@@ -106,6 +106,9 @@ RETENTION_RULES = {
     "two years after the entry when no account is behind it.",
     "task_result": "Until the task result expires.",
     "erasure_log": "As long as backups made before the erasure exist.",
+    "sign_in_methods": "While two-step login is on: removed when it's turned off, and with the account.",
+    "sign_in_policy": "While the policy applies; who last changed a role's row points at an anonymised account after "
+    "erasure.",
 }
 
 _UNSET = object()

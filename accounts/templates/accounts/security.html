@@ -1,0 +1,94 @@
+{% extends "accounts/_security_base.html" %}
+{% load i18n %}
+
+{% block security_content %}
+  {% comment %}accounts.security_views.security: the account's sign-in methods (accounts/two_step.py) and what its role requires (accounts/sign_in.py).{% endcomment %}
+  <h1 class="heading-lg">{% translate "Sign-in security" %}</h1>
+  <p class="body muted">{% translate "With two-step login, logging in takes your password and a second step: a code from an app on your phone, or a passkey. Someone who finds out your password still can't get in." %}</p>
+
+  {% if status == "needs_setup" and enforced %}
+    <div class="security-notice">
+      <p class="body"><strong>{% if enforced.level == "passkey" %}{% translate "Your role needs a passkey." %}{% else %}{% translate "Your role needs two-step login." %}{% endif %}</strong></p>
+      <p class="body-sm">{% blocktranslate with roles=enforced.role_labels|join:", " trimmed %}The organisation asks this of: {{ roles }}. Set it up below to carry on.{% endblocktranslate %}</p>
+    </div>
+  {% elif upcoming %}
+    <div class="security-notice">
+      <p class="body"><strong>{% blocktranslate with date=upcoming.required_from|date:"j F Y" level=upcoming.level_label trimmed %}From {{ date }}, your role needs: {{ level }}.{% endblocktranslate %}</strong></p>
+      <p class="body-sm">{% blocktranslate with roles=upcoming.role_labels|join:", " trimmed %}The organisation asks this of: {{ roles }}. You can set it up now.{% endblocktranslate %}</p>
+    </div>
+  {% elif enforced %}
+    <p class="body-sm muted">{% blocktranslate with level=enforced.level_label trimmed %}Your role needs: {{ level }}.{% endblocktranslate %}</p>
+  {% endif %}
+
+  <div class="security-section">
+    <div class="security-row">
+      <h2 class="heading-md">{% translate "Two-step login" %}</h2>
+      {% if is_on %}<span class="cd-badge cd-badge--success caption">{% translate "On" %}</span>{% else %}<span class="cd-badge cd-badge--outline caption">{% translate "Off" %}</span>{% endif %}
+    </div>
+    {% if not is_on %}
+      <p class="body-sm muted">{% translate "Choose your second step. You can add the other one later too." %}</p>
+    {% endif %}
+  </div>
+
+  <div class="security-section">
+    <h2 class="heading-md">{% translate "Authenticator app" %}</h2>
+    {% if app %}
+      <div class="security-row">
+        <p class="body-sm">{% blocktranslate with date=app.created_at|date:"j F Y" trimmed %}Added on {{ date }}.{% endblocktranslate %}{% if app.last_used_at %} {% blocktranslate with date=app.last_used_at|date:"j F Y" trimmed %}Last used on {{ date }}.{% endblocktranslate %}{% endif %}</p>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security_remove' kind='app' device_id=app.pk %}">{% translate "Remove" %}</a>
+      </div>
+    {% else %}
+      <div class="security-row">
+        <p class="body-sm muted">{% translate "An app such as Google Authenticator, Microsoft Authenticator or your password manager shows a new six-digit code every 30 seconds." %}</p>
+        <a class="cd-btn cd-btn--primary label" href="{% url 'account_security_app' %}">{% translate "Set up an app" %}</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="security-section">
+    <h2 class="heading-md">{% translate "Passkeys" %}</h2>
+    {% for passkey in passkeys %}
+      <div class="security-row">
+        <p class="body-sm">{% blocktranslate with number=forloop.counter date=passkey.created_at|date:"j F Y" trimmed %}Passkey {{ number }}, added on {{ date }}.{% endblocktranslate %}{% if passkey.last_used_at %} {% blocktranslate with date=passkey.last_used_at|date:"j F Y" trimmed %}Last used on {{ date }}.{% endblocktranslate %}{% endif %}</p>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security_remove' kind='passkey' device_id=passkey.pk %}">{% translate "Remove" %}</a>
+      </div>
+    {% endfor %}
+    <div class="security-row">
+      <p class="body-sm muted">{% translate "Your phone, computer or a security key confirms it's you with your fingerprint, face or PIN. Nothing to type, and it can't be tricked by a fake site." %}</p>
+      <a class="cd-btn {% if passkeys or app %}cd-btn--ghost{% else %}cd-btn--primary{% endif %} label" href="{% url 'account_security_passkey' %}">{% if passkeys %}{% translate "Add another passkey" %}{% else %}{% translate "Add a passkey" %}{% endif %}</a>
+    </div>
+  </div>
+
+  {% if is_on %}
+    <div class="security-section">
+      <h2 class="heading-md">{% translate "Backup codes" %}</h2>
+      <div class="security-row">
+        <p class="body-sm">{% blocktranslate count counter=backup_codes_left trimmed %}{{ counter }} code left, for when you can't use your phone or passkey.{% plural %}{{ counter }} codes left, for when you can't use your phone or passkey.{% endblocktranslate %}</p>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security_backup_codes' %}">{% translate "Backup codes" %}</a>
+      </div>
+    </div>
+
+    <div class="security-section">
+      <h2 class="heading-md">{% translate "This browser" %}</h2>
+      <div class="security-row">
+        {% if remembered %}
+          <p class="body-sm">{% translate "This browser is remembered: logging in here skips the second step for 30 days." %}</p>
+          <form method="post" action="{% url 'account_security_forget_browser' %}">{% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Forget this browser" %}</button></form>
+        {% else %}
+          <p class="body-sm muted">{% translate "Not remembered: logging in here always asks for the second step. Changing your password makes every browser forget you." %}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="security-section">
+      <div class="security-row">
+        <p class="body-sm muted">{% translate "Turning two-step login off removes your app, passkeys and backup codes." %}</p>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security_turn_off' %}">{% translate "Turn off two-step login" %}</a>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="cd-form__actions no-print" style="justify-content: flex-start; margin-top: var(--space-4);">
+    <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">{% translate "Back to my account" %}</a>
+  </div>
+{% endblock %}

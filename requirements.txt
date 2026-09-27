@@ -26,7 +26,8 @@ asgiref==3.12.1
 attrs==26.1.0
 autobahn==26.7.1
 Automat==25.4.16
-cbor2==6.1.4
+# 5.x, not 6: webauthn 2.x (below) needs cbor2<6; autobahn takes >=5.2.
+cbor2==5.9.0
 certifi==2026.7.22
 cffi==2.1.1
 charset-normalizer==3.5.1
@@ -86,3 +87,18 @@ pydantic==2.13.5
 pydantic_core==2.46.5
 annotated-types==0.8.0
 typing-inspection==0.4.4
+
+# Two-step login (DATA_MODEL.md §15): django-two-factor-auth on django-otp,
+# with passkeys through its WebAuthn plugin. django-two-factor-auth 1.18.1
+# officially lists Django up to 5.2; tested here on 6.1 and Python 3.14.
+# Its WebAuthn plugin caps webauthn below 3, which is why cbor2 stays on 5.x.
+django-two-factor-auth==1.18.1
+django-otp==1.7.3
+webauthn==2.8.0
+# Pulled in by the above (django-phonenumber-field is a hard dependency of
+# django-two-factor-auth even without its phone plugins, which we don't install):
+django-formtools==2.7
+django-phonenumber-field==8.5.0
+qrcode==8.2
+pyasn1==0.6.4
+pyasn1-modules==0.4.2

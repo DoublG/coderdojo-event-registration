@@ -1,0 +1,45 @@
+Sign-in security
+================
+
+Anyone can turn on two-step login for their own account (see
+:doc:`../families/two-step-login`). On the organisation dashboard's
+**Sign-in security** page you decide which roles **must** use it.
+
+Minimum sign-in per role
+------------------------
+
+For each role, choose the minimum:
+
+- **Password only (two-step login optional)**, the default.
+- **Two-step login (authenticator app or passkey)**.
+- **Two-step login with a passkey**: the strongest, since a passkey can't
+  be tricked by a fake site.
+
+The roles are superusers, the organisation's admins, board members,
+background-check reviewers, champions, mentors and every adult account
+(parents too). An account with several roles gets the strongest level.
+Children's own logins are never asked.
+
+With **Required from** you give people time: until that day they see a
+notice at the top of every page, with a link to set it up. From that day on
+(or right away, when you leave it empty), an account without the right
+second step is sent to set it up before it can use anything its role opens:
+the dojo's dashboard, this organisation dashboard, or the Django admin.
+Someone who is already logged in without their second step is asked to log
+in again.
+
+The table shows, per role, how many accounts there are, how many already
+use two-step login and how many have a passkey, so you can see who still
+has to set it up before you make it required.
+
+Someone can't log in
+--------------------
+
+When someone lost their phone or passkey **and** their backup codes, first
+check it's really them, for example by calling them. Then search for their
+account under **Someone can't log in** and choose **Turn off two-step
+login**. They get a mail and log in with their password only. If their role
+needs two-step login, they're asked to set it up again straight away.
+
+You can't do this for your own account: change your own sign-in methods on
+your account's Sign-in security page.

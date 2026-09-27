@@ -23,7 +23,9 @@ from django.conf import settings
 
 CREDENTIALS_FILE = Path(settings.BASE_DIR) / "seed_credentials.csv"
 _REAL_CREDENTIALS_FILE = CREDENTIALS_FILE
-FIELDNAMES = ["role", "username", "email", "password", "description"]
+# totp_secret: the key of the account's authenticator app when it has two-step
+# login on (seed_two_step); add it to an app, or use `manage.py totp_code`.
+FIELDNAMES = ["role", "username", "email", "password", "totp_secret", "description"]
 
 # Seeded accounts use these domains (seeded child logins have no email).
 SEED_EMAIL_DOMAINS = ("@coderdojo-demo.example", "@coderdojobelgium.example")
@@ -86,7 +88,18 @@ def describe_rows(rows):
     for row in rows:
         user = users.get(row["username"])
         row["description"] = describe_account(user) if user else "Account no longer exists."
+        row["totp_secret"] = totp_secret(user) if user else ""
     return rows
+
+
+def totp_secret(user):
+    """The key of the account's authenticator app, as apps take it (base32), or ""."""
+    from base64 import b32encode
+
+    from django_otp.plugins.otp_totp.models import TOTPDevice
+
+    device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
+    return b32encode(device.bin_key).decode("ascii") if device else ""
 
 
 def _names(items, limit=3):
@@ -181,6 +194,12 @@ def describe_account(user):
         if not parts:
             parts.append("Plain adult account (no children, no roles)")
 
+    from accounts import two_step
+
+    if methods := two_step.methods(user):
+        kinds = sorted({"authenticator app (key in totp_secret; or manage.py totp_code <username>)"
+                        if two_step.kind_of(m) == two_step.APP else "passkey" for m in methods})
+        parts.append(f"two-step login on: {' and '.join(kinds)}, {two_step.backup_codes_left(user)} backup codes")
     if not user.is_active:
         parts.append("DISABLED (can't log in)")
     if user.preferred_language:

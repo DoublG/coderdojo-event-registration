@@ -321,3 +321,68 @@ class OrganisationRole(models.Model):
     def clean(self):
         if self.account_id and self.account.is_ninja:
             raise ValidationError("Only an adult account can have an organisation role.")
+
+
+class SignInRequirementManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("updated_by")
+
+
+class SignInRequirement(models.Model):
+    """The organisation's sign-in policy (DATA_MODEL.md §15): the minimum
+    way an account holding `role` must log in, from `required_from` on (empty
+    = right away). One row per role; a role without a row needs only a
+    password. Set on the organisation dashboard (/manage/security/); applied
+    by accounts.sign_in, which also says who holds which role. Ninja accounts
+    and the API's technical accounts are never asked."""
+
+    SUPERUSER = "superuser"
+    ORGANISATION_ADMIN = "organisation_admin"
+    ORGANISATION_BOARD = "organisation_board"
+    REVIEWER = "reviewer"
+    CHAMPION = "champion"
+    MENTOR = "mentor"
+    ADULT = "adult"
+    ROLE_CHOICES = [
+        (SUPERUSER, _("Superusers")),
+        (ORGANISATION_ADMIN, _("Organisation admins")),
+        (ORGANISATION_BOARD, _("Board members")),
+        (REVIEWER, _("Background-check reviewers")),
+        (CHAMPION, _("Champions")),
+        (MENTOR, _("Mentors")),
+        (ADULT, _("Every adult account (parents too)")),
+    ]
+
+    # In order of strength: a stronger level also meets a weaker one.
+    PASSWORD = "password"
+    TWO_STEP = "two_step"
+    PASSKEY = "passkey"
+    LEVEL_CHOICES = [
+        (PASSWORD, _("Password only (two-step login optional)")),
+        (TWO_STEP, _("Two-step login (authenticator app or passkey)")),
+        (PASSKEY, _("Two-step login with a passkey")),
+    ]
+    LEVELS = [PASSWORD, TWO_STEP, PASSKEY]
+
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, unique=True)
+    level = models.CharField(max_length=10, choices=LEVEL_CHOICES, default=PASSWORD)
+    required_from = models.DateField(
+        null=True, blank=True,
+        help_text="From this day on the level is required; before it, the accounts see a notice. Empty = right away.",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
+    )
+
+    objects = SignInRequirementManager()
+
+    class Meta:
+        ordering = ["role"]
+
+    def __str__(self):
+        return f"{self.get_role_display()}: {self.get_level_display()}"
+
+    @classmethod
+    def strength(cls, level):
+        return cls.LEVELS.index(level)

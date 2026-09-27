@@ -21,3 +21,8 @@ use the API (see :doc:`api-clients`), which stay with the champion. If you
 help at,
 or run, more than one dojo, click the dojo's name at the top of the
 sidebar to switch between them.
+
+The organisation can decide that champions and mentors need **two-step
+login**: your password plus a code from an app on your phone, or a passkey.
+If it does, you're asked to set it up before you can open the dashboard.
+See :doc:`../families/two-step-login`.

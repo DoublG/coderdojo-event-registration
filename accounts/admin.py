@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from core.audit import AuditHistoryAdminMixin, LogAccessAdminMixin
 
-from .models import Guardianship, Ninja, OrganisationRole, User
+from .models import Guardianship, Ninja, OrganisationRole, SignInRequirement, User
 
 
 class GuardianshipInline(admin.TabularInline):
@@ -27,6 +27,16 @@ class OrganisationRoleAdmin(admin.ModelAdmin):
     list_display = ["account", "role", "granted_at"]
     list_filter = ["role"]
     autocomplete_fields = ["account"]
+
+
+@admin.register(SignInRequirement)
+class SignInRequirementAdmin(admin.ModelAdmin):
+    """The organisation's sign-in policy, set day to day on the organisation
+    dashboard (/manage/security/, accounts/manage.py). Here for fixing it by
+    hand: e.g. lowering a level that locks people out."""
+
+    list_display = ["role", "level", "required_from", "updated_at", "updated_by"]
+    raw_id_fields = ["updated_by"]
 
 
 @admin.register(User)

@@ -1,0 +1,12 @@
+{% load i18n %}{% comment %}
+  In the page shells (core/base.html, dojos/_admin_base.html,
+  core/_manage_base.html): a stronger login the account's role needs from a
+  later day (accounts.context_processors.sign_in_notice).
+{% endcomment %}{% with notice=sign_in_notice %}{% if notice and request.resolver_match.url_name != "account_security" %}
+  <div class="cd-form__notes" style="margin-bottom: var(--space-4);" role="status">
+    <p class="cd-form__note caption">
+      {% blocktranslate with date=notice.required_from|date:"j F Y" level=notice.level_label trimmed %}From {{ date }}, your role needs: {{ level }}.{% endblocktranslate %}
+      <a href="{% url 'account_security' %}">{% translate "Set it up now" %}</a>
+    </p>
+  </div>
+{% endif %}{% endwith %}

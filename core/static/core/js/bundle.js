@@ -576,6 +576,87 @@ if (typeof window.gettext !== "function") {
     updateButtons();
   }
 
+  // Passkeys for two-step login (accounts/two_step.py): asks the browser to
+  // make a passkey (mode "create", the Sign-in security page) or use one
+  // (mode "get", the login's second step) with the options the server put in
+  // the page as a json_script, then posts the answer in the form's hidden
+  // field. Hand-written: WebAuthn is a browser API htmx can't reach.
+  // Usage: CoderDojo.initPasskey(formEl, "options-script-id", "create" | "get")
+  function base64urlToBuffer(value) {
+    var base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+    var binary = atob(base64 + "===".slice((base64.length + 3) % 4));
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes.buffer;
+  }
+
+  function bufferToBase64url(buffer) {
+    if (!buffer) return null;
+    var bytes = new Uint8Array(buffer);
+    var binary = "";
+    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+
+  function initPasskey(form, optionsId, mode) {
+    if (!form) return;
+    var button = form.querySelector("[data-passkey-button]");
+    var errorEl = form.querySelector("[data-passkey-error]");
+    var field = form.querySelector(mode === "create" ? "[name=token]" : "[name$=otp_token]");
+    var script = document.getElementById(optionsId);
+    if (!button || !field || !script) return;
+
+    function showError(text) {
+      if (!errorEl) return;
+      errorEl.textContent = text;
+      errorEl.removeAttribute("hidden");
+    }
+
+    if (!window.PublicKeyCredential || !navigator.credentials) {
+      button.disabled = true;
+      showError(gettext("This browser can't use passkeys. Try another browser, or another way to confirm it's you."));
+      return;
+    }
+
+    button.addEventListener("click", function () {
+      var options = JSON.parse(script.textContent);
+      if (typeof options === "string") options = JSON.parse(options);
+      options.challenge = base64urlToBuffer(options.challenge);
+      var listed = mode === "create" ? options.excludeCredentials : options.allowCredentials;
+      (listed || []).forEach(function (credential) { credential.id = base64urlToBuffer(credential.id); });
+      if (mode === "create") options.user.id = base64urlToBuffer(options.user.id);
+
+      button.disabled = true;
+      var call = mode === "create"
+        ? navigator.credentials.create({ publicKey: options })
+        : navigator.credentials.get({ publicKey: options });
+      call.then(function (credential) {
+        var response = credential.response;
+        var answer = {
+          id: credential.id,
+          rawId: bufferToBase64url(credential.rawId),
+          type: credential.type,
+          response: { clientDataJSON: bufferToBase64url(response.clientDataJSON) },
+        };
+        if (mode === "create") {
+          answer.response.attestationObject = bufferToBase64url(response.attestationObject);
+          if (response.getTransports) answer.response.transports = response.getTransports();
+        } else {
+          answer.response.authenticatorData = bufferToBase64url(response.authenticatorData);
+          answer.response.signature = bufferToBase64url(response.signature);
+          answer.response.userHandle = bufferToBase64url(response.userHandle);
+        }
+        field.value = JSON.stringify(answer);
+        form.submit();
+      }, function () {
+        button.disabled = false;
+        showError(mode === "create"
+          ? gettext("No passkey was made. You can try again.")
+          : gettext("Your passkey wasn't used. Try again, or use another way to confirm it's you."));
+      });
+    });
+  }
+
   window.CoderDojo = {
     version: 1,
     initFaq: initFaq,
@@ -588,5 +669,6 @@ if (typeof window.gettext !== "function") {
     initDojoSwitcher: initDojoSwitcher,
     initDojoLocationSearch: initDojoLocationSearch,
     initCarousel: initCarousel,
+    initPasskey: initPasskey,
   };
 })();

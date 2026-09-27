@@ -1,0 +1,179 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-27 03:50+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: nl <LL@li.org>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/families/two-step-login.rst:2
+msgid "Two-step login"
+msgstr "Aanmelden in twee stappen"
+
+#: ../../source/families/two-step-login.rst:4
+msgid ""
+"With two-step login, logging in takes your password **and** a second step. "
+"Someone who finds out your password still can't get into your account. It "
+"works for every account: parents, mentors, champions and the organisation. "
+"Children's own logins never use it."
+msgstr ""
+"Met aanmelden in twee stappen meld je je aan met je wachtwoord **en** een "
+"tweede stap. Wie je wachtwoord te weten komt, kan dan nog altijd niet in je "
+"account. Het werkt voor elk account: ouders, mentors, champions en de "
+"organisatie. De eigen logins van kinderen gebruiken het nooit."
+
+#: ../../source/families/two-step-login.rst:9
+msgid "Open your account page and choose **Sign-in security**."
+msgstr "Open je accountpagina en kies **Aanmeldbeveiliging**."
+
+#: ../../source/families/two-step-login.rst:12
+msgid "Your second step"
+msgstr "Je tweede stap"
+
+#: ../../source/families/two-step-login.rst:14
+msgid "You can use one of these, or both:"
+msgstr "Je kan een van deze gebruiken, of allebei:"
+
+#: ../../source/families/two-step-login.rst:16
+msgid ""
+"**An authenticator app** on your phone, such as Google Authenticator, "
+"Microsoft Authenticator or your password manager. It shows a new six-digit "
+"code every 30 seconds. Choose **Set up an app**, scan the QR code with the "
+"app (or type in the key under it), and enter the code the app shows for "
+"CoderDojo Belgium."
+msgstr ""
+"**Een authenticator-app** op je telefoon, zoals Google Authenticator, "
+"Microsoft Authenticator of je wachtwoordbeheerder. Die toont elke 30 "
+"seconden een nieuwe code van zes cijfers. Kies **Een app instellen**, scan "
+"de QR-code met de app (of typ de sleutel eronder over) en vul de code in die"
+" de app toont voor CoderDojo Belgium."
+
+#: ../../source/families/two-step-login.rst:21
+msgid ""
+"**A passkey**: your phone, computer or a security key confirms it's you with"
+" your fingerprint, face or PIN. There's nothing to type, and a fake site "
+"can't trick it. Choose **Add a passkey** and follow what your browser asks. "
+"You can add more than one, for example one on your phone and one on your "
+"laptop."
+msgstr ""
+"**Een toegangssleutel**: je telefoon, computer of een beveiligingssleutel "
+"bevestigt met je vingerafdruk, gezicht of pincode dat jij het bent. Er is "
+"niets te typen, en een valse site kan hem niet misleiden. Kies **Een "
+"toegangssleutel toevoegen** en volg wat je browser vraagt. Je kan er meer "
+"dan één toevoegen, bijvoorbeeld een op je telefoon en een op je laptop."
+
+#: ../../source/families/two-step-login.rst:27
+msgid ""
+"We send you a mail whenever two-step login is turned on or off, or a sign-in"
+" method is added or removed. If you didn't do that yourself, change your "
+"password straight away."
+msgstr ""
+"We sturen je een mail telkens aanmelden in twee stappen aan- of uitgezet "
+"wordt, of een aanmeldmethode toegevoegd of verwijderd wordt. Heb je dat niet"
+" zelf gedaan? Verander dan meteen je wachtwoord."
+
+#: ../../source/families/two-step-login.rst:32
+msgid "Backup codes"
+msgstr "Back-upcodes"
+
+#: ../../source/families/two-step-login.rst:34
+msgid ""
+"When you set up your first second step, you get ten **backup codes**. Save "
+"them now (print them or keep them in your password manager): you only see "
+"them once. If you lose your phone or passkey, each code lets you log in "
+"once. We mail you whenever one is used. Under **Backup codes** you see how "
+"many you have left and can make a new set; the old codes then stop working."
+msgstr ""
+"Als je je eerste tweede stap instelt, krijg je tien **back-upcodes**. Bewaar"
+" ze meteen (druk ze af of bewaar ze in je wachtwoordbeheerder): je ziet ze "
+"maar één keer. Ben je je telefoon of toegangssleutel kwijt, dan kan je je "
+"met elke code één keer aanmelden. We mailen je telkens er een gebruikt "
+"wordt. Onder **Back-upcodes** zie je hoeveel je er nog hebt en kan je nieuwe"
+" maken; de oude codes werken dan niet meer."
+
+#: ../../source/families/two-step-login.rst:41
+msgid "Logging in"
+msgstr "Aanmelden"
+
+#: ../../source/families/two-step-login.rst:43
+msgid ""
+"Log in with your email address and password as usual. Then the site asks you"
+" to confirm it's you: enter the code from your app, or choose **Use my "
+"passkey**. Under **Can't use this?** you can switch to your other method or "
+"to a backup code."
+msgstr ""
+"Meld je zoals gewoonlijk aan met je e-mailadres en wachtwoord. Daarna vraagt"
+" de site te bevestigen dat jij het bent: vul de code uit je app in, of kies "
+"**Mijn toegangssleutel gebruiken**. Onder **Lukt dit niet?** kan je "
+"overschakelen naar je andere methode of naar een back-upcode."
+
+#: ../../source/families/two-step-login.rst:48
+msgid ""
+"Tick **Don't ask again in this browser for 30 days** on your own computer or"
+" phone to skip the second step there for a month. On the **Sign-in "
+"security** page you can make the browser you're using forget this again. "
+"Changing your password makes every browser forget it."
+msgstr ""
+"Vink op je eigen computer of telefoon **Niet meer vragen in deze browser, 30"
+" dagen lang** aan om daar een maand lang de tweede stap over te slaan. Op de"
+" pagina **Aanmeldbeveiliging** kan je de browser die je gebruikt dat weer "
+"laten vergeten. Als je je wachtwoord verandert, vergeten alle browsers het."
+
+#: ../../source/families/two-step-login.rst:54
+msgid "Turning it off"
+msgstr "Uitzetten"
+
+#: ../../source/families/two-step-login.rst:56
+msgid ""
+"**Turn off two-step login** removes your app, passkeys and backup codes; you"
+" confirm it with your password. You can also remove one method and keep the "
+"others."
+msgstr ""
+"**Aanmelden in twee stappen uitzetten** verwijdert je app, toegangssleutels "
+"en back-upcodes; je bevestigt het met je wachtwoord. Je kan ook één methode "
+"verwijderen en de andere houden."
+
+#: ../../source/families/two-step-login.rst:60
+msgid ""
+"Some roles need two-step login, for example champions, mentors or the "
+"organisation's admins, when the organisation has decided so (see "
+":doc:`../organisation/sign-in-security`). If yours does, you can't turn it "
+"off, and you can only remove a method once you've added another one. When "
+"such a rule starts on a later day, you see a notice at the top of the page "
+"until you've set it up."
+msgstr ""
+"Sommige rollen hebben aanmelden in twee stappen nodig, bijvoorbeeld "
+"champions, mentors of de beheerders van de organisatie, als de organisatie "
+"dat zo beslist heeft (zie :doc:`../organisation/sign-in-security`). Geldt "
+"dat voor jouw rol, dan kan je het niet uitzetten, en kan je een methode pas "
+"verwijderen als je een andere hebt toegevoegd. Start zo'n regel pas op een "
+"latere dag, dan zie je bovenaan de pagina een melding tot je het hebt "
+"ingesteld."
+
+#: ../../source/families/two-step-login.rst:68
+msgid "Lost your phone and your backup codes?"
+msgstr "Je telefoon en je back-upcodes kwijt?"
+
+#: ../../source/families/two-step-login.rst:70
+msgid ""
+"Mail the organisation (the address is on the login page). Once they've "
+"checked it's really you, they turn off your two-step login and you log in "
+"with your password only. Then set it up again."
+msgstr ""
+"Mail de organisatie (het adres staat op de aanmeldpagina). Zodra die "
+"gecontroleerd heeft dat jij het echt bent, zet ze aanmelden in twee stappen "
+"uit en meld je je aan met alleen je wachtwoord. Stel het daarna opnieuw in."

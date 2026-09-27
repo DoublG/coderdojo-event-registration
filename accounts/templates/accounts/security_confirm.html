@@ -1,0 +1,32 @@
+{% extends "accounts/_security_base.html" %}
+{% load i18n %}
+{% block security_title %}{% if last %}{% translate "Turn off two-step login" %}{% else %}{% translate "Remove a sign-in method" %}{% endif %}{% endblock %}
+
+{% block security_content %}
+  {% comment %}accounts.security_views.security_remove / security_turn_off: confirmed with the password.{% endcomment %}
+  <h1 class="heading-lg">{% if last %}{% translate "Turn off two-step login" %}{% elif kind == "passkey" %}{% translate "Remove this passkey" %}{% else %}{% translate "Remove your authenticator app" %}{% endif %}</h1>
+  {% if blocked %}
+    <p class="body">{{ blocked }}</p>
+    <div class="cd-form__actions" style="justify-content: flex-start;">
+      <a class="cd-btn cd-btn--primary label" href="{% url 'account_security' %}">{% translate "Back" %}</a>
+    </div>
+  {% else %}
+    {% if last %}
+      <p class="body">{% translate "Logging in will only take your password again. Your app, passkeys and backup codes are removed." %}</p>
+    {% else %}
+      <p class="body">{% translate "Your other sign-in methods keep working." %}</p>
+    {% endif %}
+    <form method="post" action="{{ action }}" class="cd-form" novalidate>
+      {% csrf_token %}
+      <div class="cd-form__field" style="flex: none; max-width: 320px;">
+        <label class="cd-form__label label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+        {{ form.password }}
+        {% if form.password.errors %}<ul class="cd-form__errors">{% for error in form.password.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      <div class="cd-form__actions" style="justify-content: flex-start;">
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security' %}">{% translate "Cancel" %}</a>
+        <button type="submit" class="cd-btn cd-btn--primary label">{% if last %}{% translate "Turn off" %}{% else %}{% translate "Remove" %}{% endif %}</button>
+      </div>
+    </form>
+  {% endif %}
+{% endblock %}

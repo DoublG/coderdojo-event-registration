@@ -1,0 +1,25 @@
+{% extends "accounts/_security_base.html" %}
+{% load i18n %}
+{% block security_title %}{% translate "Backup codes" %}{% endblock %}
+
+{% block security_content %}
+  {% comment %}accounts.security_views.security_backup_codes: new codes are shown once, right after they're made.{% endcomment %}
+  <h1 class="heading-lg">{% translate "Backup codes" %}</h1>
+  {% if codes %}
+    <p class="body"><strong>{% translate "Save these codes now: this is the only time you see them." %}</strong></p>
+    <p class="body-sm muted">{% translate "Print them or keep them in your password manager. If you lose your phone or passkey, each code lets you log in once." %}</p>
+    <ul class="backup-codes">{% for code in codes %}<li>{{ code }}</li>{% endfor %}</ul>
+    <div class="cd-form__actions no-print" style="justify-content: flex-start;">
+      <button type="button" class="cd-btn cd-btn--ghost label" onclick="window.print()">{% translate "Print" %}</button>
+      <a class="cd-btn cd-btn--primary label" href="{% url 'account_security' %}">{% translate "I've saved them" %}</a>
+    </div>
+  {% else %}
+    <p class="body">{% blocktranslate count counter=codes_left trimmed %}You have {{ counter }} backup code left.{% plural %}You have {{ counter }} backup codes left.{% endblocktranslate %}</p>
+    <p class="body-sm muted">{% translate "Lost them, or used most of them? Make a new set: the old codes stop working." %}</p>
+    <form method="post" class="cd-form__actions no-print" style="justify-content: flex-start;">
+      {% csrf_token %}
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security' %}">{% translate "Back" %}</a>
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Make new codes" %}</button>
+    </form>
+  {% endif %}
+{% endblock %}

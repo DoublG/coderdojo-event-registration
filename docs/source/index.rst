@@ -21,6 +21,7 @@ the people using the site, not for the people building it.
    families/signing-up-for-a-session
    families/managing-your-account
    families/mail-preferences
+   families/two-step-login
 
 .. toctree::
    :maxdepth: 2
@@ -50,6 +51,7 @@ the people using the site, not for the people building it.
    organisation/promotions
    organisation/sponsors
    organisation/awards
+   organisation/sign-in-security
 
 .. toctree::
    :maxdepth: 1

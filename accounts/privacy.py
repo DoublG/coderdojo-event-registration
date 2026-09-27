@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password
 
 from privacy.registry import Category, Computed, LegalBasis, Subject, anonymise, keep, personal, register
 
-from .models import Guardianship, Ninja, OrganisationRole, User
+from .models import Guardianship, Ninja, OrganisationRole, SignInRequirement, User
 
 FAMILY_AND_TEAM = (
     "The family (every guardian, and the child's own login); the team of a dojo the child signs up at; "
@@ -132,4 +132,19 @@ register(
     seen_by="The organisation (Django admin)",
     fields={("account", "role", "granted_at"): personal(Category.IDENTITY)},
     not_personal=["id"],
+)
+
+register(
+    SignInRequirement,
+    purpose="The organisation's sign-in policy per role",
+    legal_basis=LegalBasis.LEGITIMATE_INTEREST,
+    retention="sign_in_policy",
+    seen_by="The organisation (organisation dashboard, Django admin)",
+    fields={
+        "updated_by": keep(
+            Category.IDENTITY, "who last changed the policy stays traceable; points at the anonymised account",
+            export=False,
+        ),
+    },
+    not_personal=["id", "role", "level", "required_from", "updated_at"],
 )
