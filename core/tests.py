@@ -754,7 +754,7 @@ class SiteFormRenderingTests(TestCase):
             '<span class="cd-form__required" aria-hidden="true">*</span></label>', html,
         )
         self.assertIn('class="cd-form__input body"', html)
-        self.assertInHTML('<p class="cd-form__help caption" id="id_name_helptext">Your full name.</p>', html)
+        self.assertInHTML('<div class="cd-form__help caption" id="id_name_helptext">Your full name.</div>', html)
         self.assertNotIn("cd-form__errors", html)
 
     def test_input_classes_by_widget(self):
@@ -802,6 +802,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
     as_field_group here."""
 
     def forms(self):
+        from accounts.forms import ForcedPasswordChangeForm, LoginForm, StyledPasswordResetForm, StyledSetPasswordForm
         from accounts.models import User
         from accounts.two_step_forms import AppSetupForm, ConfirmPasswordForm
         from applications.forms import BackgroundCheckUploadForm
@@ -816,6 +817,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             SponsorForm(), PromotionForm(), BadgeForm(), DojoCreateForm(), AnnouncementForm(dojo=make_dojo("Ghent")),
             NewTemplateForm(), TemplateVersionForm(), BackgroundCheckUploadForm(),
             AppSetupForm(key="00" * 20, user=user), ConfirmPasswordForm(user),
+            LoginForm(), StyledPasswordResetForm(), StyledSetPasswordForm(user), ForcedPasswordChangeForm(user),
         ]
 
     def test_labels_and_help_texts_are_translated(self):

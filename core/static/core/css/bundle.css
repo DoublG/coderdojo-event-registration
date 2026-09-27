@@ -719,6 +719,8 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
 
 /* A radio or checkbox list (core/forms/field.html): a fieldset without the browser's box. */
 .cd-form__fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+/* A help text can be a list (Django's password rules). */
+.cd-form__help ul { margin: 0; padding-left: 1.2em; }
 .cd-form__fieldset legend { padding: 0; margin-bottom: var(--space-1); }
 .cd-form__label { color: var(--ink); }
 /* An upload with a current file (core/widgets/clearable_file_input.html). */

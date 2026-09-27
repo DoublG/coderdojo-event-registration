@@ -7,9 +7,12 @@ from django.contrib.auth.forms import (
     SetPasswordForm,
     UsernameField,
 )
+from django.contrib.auth import password_validation
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.utils.functional import lazy
+from django.utils.safestring import SafeString
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 
@@ -18,24 +21,41 @@ from geo.models import Municipality
 from .models import SignInRequirement, User
 
 
-class StyledFormMixin:
-    """Applies the site's input styling to every field — used for the
-    handful of forms built on Django's stock auth forms, which otherwise
-    render plain unstyled widgets."""
+def _password_rules():
+    """The password rules as a list (Django's own texts), in the visitor's
+    language: Django builds this help text once, when the form class loads."""
+    return password_validation.password_validators_help_text_html()
+
+
+class NewPasswordLabelsMixin:
+    """The site's wording for a new password and its confirmation, and the
+    rules as the new password's help text."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            field.widget.attrs["class"] = "cd-form__input body"
+        self.fields["new_password1"].label = _("New password")
+        self.fields["new_password1"].help_text = lazy(_password_rules, SafeString)()
+        self.fields["new_password2"].label = _("Confirm new password")
+        self.fields["new_password2"].help_text = ""
 
 
-class ForcedPasswordChangeForm(StyledFormMixin, PasswordChangeForm):
-    """PasswordChangeForm, styled to match the rest of the auth pages.
-    Still requires the current (temporary) password — a user who's been
-    emailed one shouldn't be able to skip straight past it."""
+class ForcedPasswordChangeForm(NewPasswordLabelsMixin, PasswordChangeForm):
+    """PasswordChangeForm with the site's wording. Still requires the current
+    (temporary) password — a user who's been emailed one shouldn't be able to
+    skip straight past it."""
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(user, *args, **kwargs)
+        self.fields["old_password"].label = (
+            _("Temporary password") if user.must_change_password else _("Current password")
+        )
 
 
-class StyledPasswordResetForm(StyledFormMixin, PasswordResetForm):
+class StyledPasswordResetForm(PasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["email"].label = _("Email")
+
     def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email,
                   html_email_template_name=None):
         """Every mail goes through the mail engine (mailing.services.send):
@@ -49,7 +69,7 @@ class StyledPasswordResetForm(StyledFormMixin, PasswordResetForm):
              {"reset_url": f"{context['protocol']}://{context['domain']}{path}"})
 
 
-class StyledSetPasswordForm(StyledFormMixin, SetPasswordForm):
+class StyledSetPasswordForm(NewPasswordLabelsMixin, SetPasswordForm):
     pass
 
 

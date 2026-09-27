@@ -65,14 +65,8 @@
         {% endif %}
 
         {% if wizard.steps.current == "auth" %}
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
-            {{ form.username }}
-          </div>
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
-            {{ form.password }}
-          </div>
+          {{ form.username.as_field_group }}
+          {{ form.password.as_field_group }}
 
           <div class="cd-login__row">
             <div class="cd-form__checkbox-row">
@@ -88,14 +82,10 @@
             {{ form.otp_token }}
             <p class="cd-form__note cd-form__note--error caption" data-passkey-error hidden></p>
           {% else %}
-            <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.otp_token.id_for_label }}">{{ form.otp_token.label }}</label>
-              {{ form.otp_token }}
-              <ul class="cd-form__errors">{% for error in form.otp_token.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-            </div>
+            {{ form.otp_token.as_field_group }}
           {% endif %}
           {% if form.remember %}
-            <label class="cd-form__checkbox-row" for="{{ form.remember.id_for_label }}">{{ form.remember }}<span class="body-sm">{{ form.remember.label }}</span></label>
+            {{ form.remember.as_field_group }}
           {% endif %}
           {% if device_kind == "passkey" and wizard.steps.current == "token" %}
             <button type="button" class="cd-btn cd-btn--primary cd-btn--block label" data-passkey-button>{% translate "Use my passkey" %}</button>
