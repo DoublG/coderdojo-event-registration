@@ -3,7 +3,10 @@ import re
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import lazy
+from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from geo.models import Municipality
@@ -20,11 +23,11 @@ class MailPreferencesForm(forms.Form):
 
     preferred_language = forms.ChoiceField(
         label=_("Language for emails"), choices=settings.LANGUAGES,
-        widget=forms.Select(attrs={"class": "cd-form__select body"}),
     )
     postal_code = forms.CharField(
         label=_("Postcode"), required=False, max_length=4,
-        widget=forms.TextInput(attrs={"class": "cd-form__input body", "inputmode": "numeric", "placeholder": _("9000")}),
+        help_text=_("So we can tell you about dojos and sessions near you."),
+        widget=forms.TextInput(attrs={"inputmode": "numeric", "placeholder": _("9000")}),
     )
 
     def __init__(self, *args, user, **kwargs):
@@ -91,12 +94,14 @@ class MailingFormMixin:
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["name"].label = _("Name")
+        self.fields["name"].help_text = ""
+        self.fields["category"].label = _("Kind of mail")
+        self.fields["category"].help_text = _("Only people who want this kind of mail get it.")
         self.fields["category"].choices = [(c.value, c.label) for c in MailCategory if CAN_OPT_OUT[c]]
         keys = EmailTemplate.objects.order_by("key").values_list("key", flat=True).distinct()
-        self.fields["template_key"] = forms.ChoiceField(
-            label=_("Template"), choices=[(k, k) for k in keys],
-            widget=forms.Select(attrs={"class": "cd-form__select body"}),
-        )
+        self.fields["template_key"] = forms.ChoiceField(label=_("Template"), choices=[(k, k) for k in keys])
+        self.fields["segment"].label = _("Segment")
         self.fields["segment"].queryset = Segment.objects.filter(is_active=True).order_by("name")
         self.fields["segment"].required = True
         if not self.is_bound:
@@ -122,10 +127,14 @@ class MailingFormMixin:
 def _variables_field():
     return forms.CharField(
         label=_("Template variables"), required=False,
-        widget=forms.Textarea(attrs={"class": "cd-form__input body", "rows": 3,
-                                     "placeholder": _("signup_url: https://coolestprojects.org")}),
+        widget=forms.Textarea(attrs={"rows": 3, "placeholder": _("signup_url: https://coolestprojects.org")}),
         help_text=_("One per line, as name: value. The template uses them as {{ name }}."),
     )
+
+
+def _segments_help():
+    """The Segment field's help, with a link to the Segments page."""
+    return mark_safe(_('<a href="%(url)s">Segments</a> describe who gets it.') % {"url": reverse("manage_segment_list")})
 
 
 class CampaignForm(MailingFormMixin, forms.ModelForm):
@@ -137,12 +146,10 @@ class CampaignForm(MailingFormMixin, forms.ModelForm):
     class Meta:
         model = Campaign
         fields = ["name", "category", "template_key", "segment", "scheduled_at"]
+        # The input classes come from core.forms.SiteBoundField.
         widgets = {
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Coolest Projects 2027")}),
-            "category": forms.Select(attrs={"class": "cd-form__select body"}),
-            "segment": forms.Select(attrs={"class": "cd-form__select body"}),
-            "scheduled_at": forms.DateTimeInput(attrs={"class": "cd-form__input body", "type": "datetime-local"},
-                                                format="%Y-%m-%dT%H:%M"),
+            "name": forms.TextInput(attrs={"placeholder": _("Coolest Projects 2027")}),
+            "scheduled_at": forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
         }
 
     def __init__(self, *args, **kwargs):
@@ -150,6 +157,7 @@ class CampaignForm(MailingFormMixin, forms.ModelForm):
         self.fields["scheduled_at"].input_formats = ["%Y-%m-%dT%H:%M"]
         self.fields["scheduled_at"].label = _("Send at")
         self.fields["scheduled_at"].help_text = _("Leave empty to send as soon as it's launched.")
+        self.fields["segment"].help_text = lazy(_segments_help, SafeString)()
 
     def clean_scheduled_at(self):
         when = self.cleaned_data["scheduled_at"]
@@ -162,12 +170,14 @@ class SegmentForm(forms.ModelForm):
     class Meta:
         model = Segment
         fields = ["name", "description", "is_active"]
+        # The input classes come from core.forms.SiteBoundField.
         widgets = {
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Families near Ghent")}),
-            "description": forms.Textarea(attrs={"class": "cd-form__input body", "rows": 2,
-                                                 "placeholder": _("Who this is, in a sentence.")}),
+            "name": forms.TextInput(attrs={"placeholder": _("Families near Ghent")}),
+            "description": forms.Textarea(attrs={"rows": 2, "placeholder": _("Who this is, in a sentence.")}),
         }
-        labels = {"is_active": _("Active (offered when creating a campaign)")}
+        labels = {"name": _("Name"), "description": _("Description"), "is_active": _("Active (offered when creating a campaign)")}
+        # The model's help texts are English notes for the admin.
+        help_texts = {"name": "", "description": "", "is_active": ""}
 
 
 class TemplateVersionForm(forms.ModelForm):
@@ -234,11 +244,18 @@ class JourneyForm(MailingFormMixin, forms.ModelForm):
     class Meta:
         model = Journey
         fields = ["name", "category", "template_key", "segment", "cooldown_days"]
+        labels = {"cooldown_days": _("Not again for (days)")}
         help_texts = {"cooldown_days": _("Someone who got it doesn't get it again for this many days.")}
+        # The input classes come from core.forms.SiteBoundField.
         widgets = {
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("We miss you")}),
-            "category": forms.Select(attrs={"class": "cd-form__select body"}),
-            "segment": forms.Select(attrs={"class": "cd-form__select body"}),
-            "cooldown_days": forms.NumberInput(attrs={"class": "cd-form__input body", "min": 1}),
+            "name": forms.TextInput(attrs={"placeholder": _("We miss you")}),
+            "cooldown_days": forms.NumberInput(attrs={"min": 1}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["segment"].help_text = _(
+            'Tip: a rule like "How the child comes to sessions changed: became At risk in the last 7 days" '
+            "makes it a triggered mail."
+        )
 

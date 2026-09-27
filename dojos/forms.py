@@ -48,7 +48,7 @@ class DojoProfileForm(forms.ModelForm):
     )
     main_language = forms.ChoiceField(
         label=_("Main language"), choices=settings.LANGUAGES, required=False,
-        widget=forms.Select(attrs={"class": "cd-form__select body"}),
+        help_text=_("The fields below are in this language. Other languages get their own section at the bottom once saved."),
     )
 
     TRANSLATION_LABELS = {
@@ -63,28 +63,38 @@ class DojoProfileForm(forms.ModelForm):
             "schedule_description", "min_age", "max_age",
             "email", "phone", "municipality", "address", "visit_notes", "pathways",
         ]
+        labels = {
+            "name": _("Name"), "icon": _("…or upload your own"), "tagline": _("Tagline"), "description": _("Description"),
+            "schedule_description": _("Meets"), "min_age": _("Minimum age"), "max_age": _("Maximum age"),
+            "email": _("Email"), "phone": _("Phone"), "municipality": _("Municipality"), "address": _("Address"),
+            "visit_notes": _("Extra info"), "pathways": _("Pathways your dojo provides"),
+        }
+        # Every shown help text translated; the model's own are English notes for the admin.
+        help_texts = {
+            "icon": _("Uploading a file here overrides the template chosen above."),
+            "tagline": _("Shown right under the dojo's name. Supports basic Markdown."),
+            "description": _("Shown further down the page, above the team. Supports basic Markdown."),
+            "address": _('Used for the "Visit us" map link and for distance search — changing it updates the map location automatically.'),
+            "visit_notes": _("Parking, entrance, accessibility — anything extra for the Visit us section. Supports basic Markdown."),
+            "name": "", "schedule_description": "", "min_age": "", "max_age": "", "email": "", "phone": "",
+            "municipality": "", "pathways": "",
+        }
+        # The input classes come from core.forms.SiteBoundField.
         widgets = {
             "pathways": forms.CheckboxSelectMultiple,
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("CoderDojo Ghent")}),
-            "icon": forms.ClearableFileInput(attrs={"class": "cd-form__input body"}),
-            "tagline": forms.Textarea(attrs={
-                "class": "cd-form__input body", "rows": 2,
-                "placeholder": _("A short line shown right under the dojo's name."),
-            }),
+            "name": forms.TextInput(attrs={"placeholder": _("CoderDojo Ghent")}),
+            "tagline": forms.Textarea(attrs={"rows": 2, "placeholder": _("A short line shown right under the dojo's name.")}),
             "description": forms.Textarea(attrs={
-                "class": "cd-form__input body", "rows": 6,
-                "placeholder": _("Shown further down the page, above the team — what makes this dojo worth joining."),
+                "rows": 6, "placeholder": _("Shown further down the page, above the team — what makes this dojo worth joining."),
             }),
-            "schedule_description": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("e.g. Every 2nd Saturday")}),
-            "min_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": _("7")}),
-            "max_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": _("18")}),
-            "email": forms.EmailInput(attrs={"class": "cd-form__input body", "placeholder": _("hello@example.org")}),
-            "phone": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("+32 4xx xx xx xx")}),
-            "municipality": forms.Select(attrs={"class": "cd-form__select body"}),
-            "address": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Street, number, postcode, city")}),
+            "schedule_description": forms.TextInput(attrs={"placeholder": _("e.g. Every 2nd Saturday")}),
+            "min_age": forms.NumberInput(attrs={"placeholder": _("7")}),
+            "max_age": forms.NumberInput(attrs={"placeholder": _("18")}),
+            "email": forms.EmailInput(attrs={"placeholder": _("hello@example.org")}),
+            "phone": forms.TextInput(attrs={"placeholder": _("+32 4xx xx xx xx")}),
+            "address": forms.TextInput(attrs={"placeholder": _("Street, number, postcode, city")}),
             "visit_notes": forms.Textarea(attrs={
-                "class": "cd-form__input body", "rows": 4,
-                "placeholder": _("Parking, entrance, accessibility — anything extra for the Visit us section."),
+                "rows": 4, "placeholder": _("Parking, entrance, accessibility — anything extra for the Visit us section."),
             }),
         }
 

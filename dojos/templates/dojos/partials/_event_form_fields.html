@@ -14,53 +14,22 @@ Expects `form` (an events.forms.EventForm) in context, and optionally
       {% translate "New sessions start as a draft, hidden from the public site — publish it from the events list once it's ready." %}
     {% endif %}
   </p>
-  <div class="cd-form__field">
-    <label class="cd-form__label label" for="{{ form.name.id_for_label }}">{% translate "Name" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
-    <ul class="cd-form__errors">{% for error in form.name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-    {{ form.name }}
-  </div>
+  {{ form.name.as_field_group }}
   <div class="cd-form__row">
-    <div class="cd-form__field">
-      <label class="cd-form__label label" for="{{ form.event_date.id_for_label }}">{% translate "Date" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
-      <ul class="cd-form__errors">{% for error in form.event_date.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-      {{ form.event_date }}
-    </div>
-    <div class="cd-form__field">
-      <label class="cd-form__label label" for="{{ form.start_time.id_for_label }}">{% translate "Starts" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
-      <ul class="cd-form__errors">{% for error in form.start_time.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-      {{ form.start_time }}
-    </div>
-    <div class="cd-form__field">
-      <label class="cd-form__label label" for="{{ form.end_time.id_for_label }}">{% translate "Ends" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
-      <ul class="cd-form__errors">{% for error in form.end_time.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-      {{ form.end_time }}
-    </div>
+    {{ form.event_date.as_field_group }}
+    {{ form.start_time.as_field_group }}
+    {{ form.end_time.as_field_group }}
   </div>
   <p class="cd-form__help caption">{% translate "A session always runs within a single day." %}</p>
-  <div class="cd-form__field">
-    <label class="cd-form__label label" for="{{ form.places.id_for_label }}">{% translate "Places" %}{% if form.places.field.required %}<span class="cd-form__required" aria-hidden="true">*</span>{% endif %}</label>
-    <ul class="cd-form__errors">{% for error in form.places.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-    {{ form.places }}
-    <p class="cd-form__help caption">{% translate "How many children can register before new sign-ups go on the waiting list." %}</p>
-  </div>
+  {{ form.places.as_field_group }}
   {% if form.external_registration_url %}
-    <div class="cd-form__field">
-      <label class="cd-form__label label" for="{{ form.external_registration_url.id_for_label }}">{% translate "Registration on another website" %}</label>
-      <ul class="cd-form__errors">{% for error in form.external_registration_url.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-      {{ form.external_registration_url }}
-      <p class="cd-form__help caption">{% translate "Optional. When set, the event page links there instead of showing the sign-up form, and Places isn't needed." %}</p>
-    </div>
+    {{ form.external_registration_url.as_field_group }}
   {% endif %}
 </div>
 
 <div class="cd-form__group">
   <h3 class="cd-form__group-title heading-md">{% translate "Location" %}</h3>
-  <div class="cd-form__field">
-    <label class="cd-form__label label" for="{{ form.venue_name.id_for_label }}">{% translate "Venue" %}</label>
-    <ul class="cd-form__errors">{% for error in form.venue_name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-    {{ form.venue_name }}
-    <p class="cd-form__help caption">{% translate "Leave blank to use the dojo's own address." %}</p>
-  </div>
+  {{ form.venue_name.as_field_group }}
 </div>
 
 <div class="cd-form__group">
@@ -89,28 +58,18 @@ Expects `form` (an events.forms.EventForm) in context, and optionally
     </div>
     <ul class="cd-form__errors">{% for error in form.template_image.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
   </div>
-  <div class="cd-form__field">
-    <label class="cd-form__label label" for="{{ form.image.id_for_label }}">{% translate "…or upload your own" %}</label>
-    {{ form.image }}
-    <p class="cd-form__help caption">{% translate "Uploading a file here overrides the template chosen above." %}</p>
-    <ul class="cd-form__errors">{% for error in form.image.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-  </div>
+  {{ form.image.as_field_group }}
 </div>
 
 <div class="cd-form__group">
   <h3 class="cd-form__group-title heading-md">{% translate "About this session" %}</h3>
-  <div class="cd-form__field">
-    <label class="cd-form__label label" for="{{ form.description.id_for_label }}">{% translate "Description" %}</label>
-    {{ form.description }}
-    <p class="cd-form__help caption">{% translate "Supports basic Markdown." %}</p>
-    <ul class="cd-form__errors">{% for error in form.description.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-  </div>
+  {{ form.description.as_field_group }}
 </div>
 
 <div class="cd-form__group">
   <h3 class="cd-form__group-title heading-md">{% translate "Pathways" %}</h3>
   <div class="cd-form__field">
-    <label class="cd-form__label label">{% translate "Pathways this session covers" %}</label>
+    <span class="cd-form__label label">{{ form.pathways.label }}</span>
     <ul class="cd-form__errors">{% for error in form.pathways.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
     <div class="cd-form__checkbox-list">
       {% for checkbox in form.pathways %}
@@ -127,25 +86,12 @@ Expects `form` (an events.forms.EventForm) in context, and optionally
 <div class="cd-form__group">
   <h3 class="cd-form__group-title heading-md">{% translate "Ages &amp; mentors" %}</h3>
   <div class="cd-form__row">
-    <div class="cd-form__field">
-      <label class="cd-form__label label" for="{{ form.min_age.id_for_label }}">{% translate "Minimum age" %}</label>
-      <ul class="cd-form__errors">{% for error in form.min_age.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-      {{ form.min_age }}
-    </div>
-    <div class="cd-form__field">
-      <label class="cd-form__label label" for="{{ form.max_age.id_for_label }}">{% translate "Maximum age" %}</label>
-      <ul class="cd-form__errors">{% for error in form.max_age.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-      {{ form.max_age }}
-    </div>
-    <div class="cd-form__field">
-      <label class="cd-form__label label" for="{{ form.audience.id_for_label }}">{% translate "Aimed at" %}</label>
-      <ul class="cd-form__errors">{% for error in form.audience.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-      {{ form.audience }}
-      <p class="cd-form__help caption">{% translate "A girls' session gets a label on the site. Anyone can still sign up." %}</p>
-    </div>
+    {{ form.min_age.as_field_group }}
+    {{ form.max_age.as_field_group }}
+    {{ form.audience.as_field_group }}
   </div>
   <div class="cd-form__field">
-    <label class="cd-form__label label">{% translate "Team for this session" %}</label>
+    <span class="cd-form__label label">{{ form.team.label }}</span>
     <ul class="cd-form__errors">{% for error in form.team.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
     {% if form.team.field.queryset.exists %}
       <div class="cd-form__checkbox-list">

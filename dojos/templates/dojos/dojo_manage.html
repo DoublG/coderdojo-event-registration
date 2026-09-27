@@ -82,17 +82,13 @@
         <p class="cd-form__group-desc body-sm">{% translate "The languages your sessions are given in and your dojo's texts are written in. Families see them on your dojo's page and can search on them. The main language is the one every text is written in first." %}</p>
         <div class="cd-form__row">
           <div class="cd-form__field">
-            <span class="cd-form__label label">{% translate "Languages" %}</span>
+            <span class="cd-form__label label">{{ form.languages.label }}</span>
             {% for checkbox in form.languages %}
               <label class="cd-form__checkbox-row" for="{{ checkbox.id_for_label }}">{{ checkbox.tag }}<span class="body-sm">{{ checkbox.choice_label }}</span></label>
             {% endfor %}
             <ul class="cd-form__errors">{% for error in form.languages.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
           </div>
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.main_language.id_for_label }}">{% translate "Main language" %}</label>
-            {{ form.main_language }}
-            <p class="cd-form__help caption">{% translate "The fields below are in this language. Other languages get their own section at the bottom once saved." %}</p>
-          </div>
+          {{ form.main_language.as_field_group }}
         </div>
       </div>
 
@@ -100,11 +96,7 @@
         <h3 class="cd-form__group-title heading-md">{% translate "Basics" %}</h3>
         <p class="cd-form__group-desc body-sm">{% translate "The name, icon, and one-line tagline shown at the top of your dojo's page." %}</p>
         <div class="cd-form__row">
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.name.id_for_label }}">{% translate "Name" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
-            <ul class="cd-form__errors">{% for error in form.name.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-            {{ form.name }}
-          </div>
+          {{ form.name.as_field_group }}
         </div>
         <div class="cd-form__field">
           <label class="cd-form__label label">{% translate "Icon" %}</label>
@@ -127,34 +119,19 @@
           </div>
           <ul class="cd-form__errors">{% for error in form.template_icon.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
         </div>
-        <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.icon.id_for_label }}">{% translate "…or upload your own" %}</label>
-          {{ form.icon }}
-          <p class="cd-form__help caption">{% translate "Uploading a file here overrides the template chosen above." %}</p>
-          <ul class="cd-form__errors">{% for error in form.icon.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-        </div>
-        <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.tagline.id_for_label }}">{% translate "Tagline" %}</label>
-          {{ form.tagline }}
-          <p class="cd-form__help caption">{% translate "Shown right under the dojo's name. Supports basic Markdown." %}</p>
-          <ul class="cd-form__errors">{% for error in form.tagline.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-        </div>
+        {{ form.icon.as_field_group }}
+        {{ form.tagline.as_field_group }}
       </div>
 
       <div class="cd-form__group">
         <h3 class="cd-form__group-title heading-md">{% translate "About this dojo" %}</h3>
-        <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.description.id_for_label }}">{% translate "Description" %}</label>
-          {{ form.description }}
-          <p class="cd-form__help caption">{% translate "Shown further down the page, above the team. Supports basic Markdown." %}</p>
-          <ul class="cd-form__errors">{% for error in form.description.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-        </div>
+        {{ form.description.as_field_group }}
       </div>
 
       <div class="cd-form__group">
         <h3 class="cd-form__group-title heading-md">{% translate "Pathways" %}</h3>
           <div class="cd-form__field">
-            <label class="cd-form__label label">{% translate "Pathways your dojo provides" %}</label>
+            <span class="cd-form__label label">{{ form.pathways.label }}</span>
             <ul class="cd-form__errors">{% for error in form.pathways.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
             <div class="cd-form__checkbox-list">
               {% for checkbox in form.pathways %}
@@ -171,61 +148,27 @@
       <div class="cd-form__group">
         <h3 class="cd-form__group-title heading-md">{% translate "Schedule &amp; ages" %}</h3>
         <div class="cd-form__row">
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.schedule_description.id_for_label }}">{% translate "Meets" %}</label>
-            <ul class="cd-form__errors">{% for error in form.schedule_description.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-            {{ form.schedule_description }}
-          </div>
+          {{ form.schedule_description.as_field_group }}
         </div>
         <div class="cd-form__row">
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.min_age.id_for_label }}">{% translate "Minimum age" %}</label>
-            <ul class="cd-form__errors">{% for error in form.min_age.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-            {{ form.min_age }}
-          </div>
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.max_age.id_for_label }}">{% translate "Maximum age" %}</label>
-            <ul class="cd-form__errors">{% for error in form.max_age.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-            {{ form.max_age }}
-          </div>
+          {{ form.min_age.as_field_group }}
+          {{ form.max_age.as_field_group }}
         </div>
       </div>
 
       <div class="cd-form__group">
         <h3 class="cd-form__group-title heading-md">{% translate "Contact &amp; location" %}</h3>
         <div class="cd-form__row">
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.email.id_for_label }}">{% translate "Email" %}</label>
-            <ul class="cd-form__errors">{% for error in form.email.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-            {{ form.email }}
-          </div>
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.phone.id_for_label }}">{% translate "Phone" %}</label>
-            <ul class="cd-form__errors">{% for error in form.phone.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-            {{ form.phone }}
-          </div>
+          {{ form.email.as_field_group }}
+          {{ form.phone.as_field_group }}
         </div>
-        <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.municipality.id_for_label }}">{% translate "Municipality" %}</label>
-          <ul class="cd-form__errors">{% for error in form.municipality.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-          {{ form.municipality }}
-        </div>
-        <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.address.id_for_label }}">{% translate "Address" %}</label>
-          {{ form.address }}
-          <p class="cd-form__help caption">{% blocktranslate %}Used for the "Visit us" map link and for distance search — changing it updates the map location automatically.{% endblocktranslate %}</p>
-          <ul class="cd-form__errors">{% for error in form.address.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-        </div>
+        {{ form.municipality.as_field_group }}
+        {{ form.address.as_field_group }}
       </div>
 
       <div class="cd-form__group">
         <h3 class="cd-form__group-title heading-md">{% translate "Visit us notes" %}</h3>
-        <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.visit_notes.id_for_label }}">{% translate "Extra info" %}</label>
-          {{ form.visit_notes }}
-          <p class="cd-form__help caption">{% translate "Parking, entrance, accessibility — anything extra for the Visit us section. Supports basic Markdown." %}</p>
-          <ul class="cd-form__errors">{% for error in form.visit_notes.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-        </div>
+        {{ form.visit_notes.as_field_group }}
       </div>
 
       {% include "dojos/partials/_translation_fields.html" %}

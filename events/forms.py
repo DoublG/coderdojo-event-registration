@@ -87,23 +87,23 @@ class EventForm(forms.ModelForm):
     representable through this form."""
 
     event_date = forms.DateField(
-        input_formats=[BELGIAN_DATE_FORMAT],
+        label=_("Date"), input_formats=[BELGIAN_DATE_FORMAT],
         widget=forms.DateInput(
-            attrs={"class": "cd-form__input body", "placeholder": _("dd/mm/yyyy"), "inputmode": "numeric"},
+            attrs={"placeholder": _("dd/mm/yyyy"), "inputmode": "numeric"},
             format=BELGIAN_DATE_FORMAT,
         ),
     )
     start_time = forms.TimeField(
-        input_formats=[BELGIAN_TIME_FORMAT],
+        label=_("Starts"), input_formats=[BELGIAN_TIME_FORMAT],
         widget=forms.TimeInput(
-            attrs={"class": "cd-form__input body", "placeholder": _("HH:MM")},
+            attrs={"placeholder": _("HH:MM")},
             format=BELGIAN_TIME_FORMAT,
         ),
     )
     end_time = forms.TimeField(
-        input_formats=[BELGIAN_TIME_FORMAT],
+        label=_("Ends"), input_formats=[BELGIAN_TIME_FORMAT],
         widget=forms.TimeInput(
-            attrs={"class": "cd-form__input body", "placeholder": _("HH:MM")},
+            attrs={"placeholder": _("HH:MM")},
             format=BELGIAN_TIME_FORMAT,
         ),
     )
@@ -123,21 +123,35 @@ class EventForm(forms.ModelForm):
             "name", "places", "external_registration_url", "venue_name", "image",
             "description", "min_age", "max_age", "audience", "team", "pathways",
         ]
+        labels = {
+            "name": _("Name"), "places": _("Places"), "external_registration_url": _("Registration on another website"),
+            "venue_name": _("Venue"), "image": _("…or upload your own"), "description": _("Description"),
+            "min_age": _("Minimum age"), "max_age": _("Maximum age"), "audience": _("Aimed at"),
+            "team": _("Team for this session"), "pathways": _("Pathways this session covers"),
+        }
+        # Every shown help text translated; the model's own are English notes for the admin.
+        help_texts = {
+            "places": _("How many children can register before new sign-ups go on the waiting list."),
+            "external_registration_url": _(
+                "Optional. When set, the event page links there instead of showing the sign-up form, and Places isn't needed."
+            ),
+            "venue_name": _("Leave blank to use the dojo's own address."),
+            "image": _("Uploading a file here overrides the template chosen above."),
+            "description": _("Supports basic Markdown."),
+            "audience": _("A girls' session gets a label on the site. Anyone can still sign up."),
+            "name": "", "min_age": "", "max_age": "", "team": "", "pathways": "",
+        }
+        # The input classes come from core.forms.SiteBoundField.
         widgets = {
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Coding Saturday")}),
-            "places": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": _("20")}),
-            "external_registration_url": forms.URLInput(attrs={
-                "class": "cd-form__input body", "placeholder": _("https://www.coolestprojects.org/…"),
-            }),
-            "venue_name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _('e.g. "Ghent Public Library"')}),
-            "image": forms.ClearableFileInput(attrs={"class": "cd-form__input body"}),
+            "name": forms.TextInput(attrs={"placeholder": _("Coding Saturday")}),
+            "places": forms.NumberInput(attrs={"placeholder": _("20")}),
+            "external_registration_url": forms.URLInput(attrs={"placeholder": _("https://www.coolestprojects.org/…")}),
+            "venue_name": forms.TextInput(attrs={"placeholder": _('e.g. "Ghent Public Library"')}),
             "description": forms.Textarea(attrs={
-                "class": "cd-form__input body", "rows": 6,
-                "placeholder": _("What this session is about, what to bring — shown on the session's public page."),
+                "rows": 6, "placeholder": _("What this session is about, what to bring — shown on the session's public page."),
             }),
-            "min_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": _("7")}),
-            "max_age": forms.NumberInput(attrs={"class": "cd-form__input body", "placeholder": _("18")}),
-            "audience": forms.Select(attrs={"class": "cd-form__select body"}),
+            "min_age": forms.NumberInput(attrs={"placeholder": _("7")}),
+            "max_age": forms.NumberInput(attrs={"placeholder": _("18")}),
             "team": forms.CheckboxSelectMultiple,
             "pathways": forms.CheckboxSelectMultiple,
         }

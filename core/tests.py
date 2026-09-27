@@ -813,18 +813,23 @@ class SiteFormTextsAreTranslatedTests(TestCase):
         from accounts.two_step_forms import AppSetupForm, ConfirmPasswordForm
         from applications.forms import BackgroundCheckUploadForm, ChampionApplicationForm, MentorApplicationForm
         from content.forms import PromotionForm, SponsorForm
-        from dojos.forms import AnnouncementForm, DojoCreateForm
+        from dojos.forms import AnnouncementForm, DojoCreateForm, DojoProfileForm
         from dojos.testing import make_dojo
-        from events.forms import BadgeForm
-        from mailing.forms import NewTemplateForm, TemplateVersionForm
+        from events.forms import BadgeForm, EventForm
+        from mailing.forms import CampaignForm, JourneyForm, NewTemplateForm, SegmentForm, TemplateVersionForm
+
+        from events.models import Event
 
         user = User.objects.create(username="u")
+        bruges = make_dojo("Bruges")
         return [
             SponsorForm(), PromotionForm(), BadgeForm(), DojoCreateForm(), AnnouncementForm(dojo=make_dojo("Ghent")),
             NewTemplateForm(), TemplateVersionForm(), BackgroundCheckUploadForm(),
             AppSetupForm(key="00" * 20, user=user), ConfirmPasswordForm(user),
             LoginForm(), StyledPasswordResetForm(), StyledSetPasswordForm(user), ForcedPasswordChangeForm(user),
             ChampionApplicationForm(account=user), MentorApplicationForm(account=user), RegisterGuardianForm(),
+            DojoProfileForm(instance=make_dojo("Antwerp")), EventForm(dojo=bruges, instance=Event(dojo=bruges)),
+            CampaignForm(), JourneyForm(), SegmentForm(),
         ]
 
     def test_labels_and_help_texts_are_translated(self):

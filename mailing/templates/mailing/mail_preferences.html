@@ -56,17 +56,9 @@
           </div>
         {% endif %}
         <div class="cd-form__row">
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.preferred_language.id_for_label }}">{{ form.preferred_language.label }}</label>
-            {{ form.preferred_language }}
-          </div>
+          {{ form.preferred_language.as_field_group }}
           {% if form.postal_code %}
-            <div class="cd-form__field">
-              <label class="cd-form__label label" for="{{ form.postal_code.id_for_label }}">{{ form.postal_code.label }}</label>
-              {{ form.postal_code }}
-              <p class="cd-form__help caption">{% translate "So we can tell you about dojos and sessions near you." %}</p>
-              <ul class="cd-form__errors">{% for error in form.postal_code.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-            </div>
+            {{ form.postal_code.as_field_group }}
           {% endif %}
         </div>
 
