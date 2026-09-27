@@ -29,21 +29,15 @@
       {% csrf_token %}
       <h2 class="heading-md">{{ language_name }}</h2>
       {% if is_new_version %}<p class="cd-form__note caption">{% blocktranslate %}There's no {{ language_name }} version yet: until there is, people who chose {{ language_name }} get the English one. This form starts from the English text.{% endblocktranslate %}</p>{% endif %}
+      {{ form.subject.as_field_group }}
       <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ form.subject.id_for_label }}">{% translate "Subject" %}</label>
-        <ul class="cd-form__errors">{% for error in form.subject.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-        {{ form.subject }}
-      </div>
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ form.body.id_for_label }}">{% translate "Text" %}</label>
-        <ul class="cd-form__errors">{% for error in form.body.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+        {# The body stays hand-written: its help text lists this template's variables. #}
+        <label class="cd-form__label label" for="{{ form.body.id_for_label }}">{{ form.body.label }}<span class="cd-form__required" aria-hidden="true">*</span></label>
         {{ form.body }}
         <p class="cd-form__help caption">{% translate "Variables you can use:" %} {% for name in sample_names %}<code>{% templatetag openvariable %} {{ name }} {% templatetag closevariable %}</code>{% if not forloop.last %}, {% endif %}{% endfor %}. {% translate "Dates take a format, e.g." %} <code>{% templatetag openvariable %} start_time|date:"l j F" {% templatetag closevariable %}</code> {% translate "(day and month names follow the language)." %}</p>
+        {% if form.body.errors %}<ul class="cd-form__errors">{% for error in form.body.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>{% endif %}
       </div>
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ form.description.id_for_label }}">{% translate "Description" %}</label>
-        {{ form.description }}
-      </div>
+      {{ form.description.as_field_group }}
       <div class="cd-form__actions" style="justify-content: space-between;">
         <span>
           {% if not is_new_version and language != fallback %}

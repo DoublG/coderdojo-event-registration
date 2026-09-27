@@ -178,10 +178,12 @@ class TemplateVersionForm(forms.ModelForm):
     class Meta:
         model = EmailTemplate
         fields = ["subject", "body", "description"]
+        labels = {"subject": _("Subject"), "body": _("Text"), "description": _("Description")}
+        help_texts = {"description": _("When it's sent and which variables it uses.")}
+        # The body keeps its own class: an 18-row text box styled like an input.
         widgets = {
-            "subject": forms.TextInput(attrs={"class": "cd-form__input body"}),
             "body": forms.Textarea(attrs={"class": "cd-form__input body", "rows": 18, "spellcheck": "true"}),
-            "description": forms.TextInput(attrs={"class": "cd-form__input body"}),
+            "description": forms.TextInput(),
         }
 
     def __init__(self, *args, sample_context=None, **kwargs):
@@ -205,11 +207,11 @@ class TemplateVersionForm(forms.ModelForm):
 class NewTemplateForm(forms.Form):
     key = forms.SlugField(
         label=_("Name"), max_length=100, help_text=_("Lowercase, with _ between words, e.g. campaign_summer_camp."),
-        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("campaign_summer_camp")}),
+        widget=forms.TextInput(attrs={"placeholder": _("campaign_summer_camp")}),
     )
-    category = forms.ChoiceField(label=_("Kind of mail"), widget=forms.Select(attrs={"class": "cd-form__select body"}))
+    category = forms.ChoiceField(label=_("Kind of mail"))
     description = forms.CharField(
-        required=False, max_length=255, widget=forms.TextInput(attrs={"class": "cd-form__input body"}),
+        label=_("Description"), required=False, max_length=255,
         help_text=_("When it's used and which variables it takes."),
     )
 

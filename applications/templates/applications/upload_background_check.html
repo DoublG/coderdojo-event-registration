@@ -60,19 +60,7 @@
         <form class="cd-form" id="upload-background-check-form" method="post" enctype="multipart/form-data" novalidate>
           {% csrf_token %}
 
-          {% if form.non_field_errors %}
-            <div class="cd-form__notes">
-              {% for error in form.non_field_errors %}
-                <p class="cd-form__note cd-form__note--error caption">{{ error }}</p>
-              {% endfor %}
-            </div>
-          {% endif %}
-
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="{{ form.document.id_for_label }}">{% translate "Document" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
-            {{ form.document }}
-            <ul class="cd-form__errors">{% for error in form.document.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-          </div>
+          {{ form }}
 
           <div class="cd-form__actions">
             <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Upload document" %}</button>

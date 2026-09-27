@@ -30,11 +30,7 @@ POST_UPDATES; anyone with admin access can read the list.
       <p class="body-sm muted">{% translate "A short, dated note on the dojo's public page: a room change, a call for mentors, news from a session. Recurring facts belong in the FAQ; dates of sessions on the events list." %}</p>
       <form class="cd-form" method="post" action="{% url 'dojo_updates' dojo_id=dojo.id %}">
         {% csrf_token %}
-        <div class="cd-form__field">
-          <label class="cd-form__label label" for="{{ form.text.id_for_label }}">{{ form.text.label }}</label>
-          <ul class="cd-form__errors">{% for error in form.text.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-          {{ form.text }}
-        </div>
+        {{ form.text.as_field_group }}
         {% include "dojos/partials/_translation_fields.html" %}
         <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Post update" %}</button>
       </form>

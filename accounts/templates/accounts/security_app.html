@@ -15,11 +15,7 @@
 
   <form method="post" class="cd-form" novalidate>
     {% csrf_token %}
-    <div class="cd-form__field" style="flex: none; max-width: 240px;">
-      <label class="cd-form__label label" for="{{ form.token.id_for_label }}">{{ form.token.label }}</label>
-      {{ form.token }}
-      {% if form.token.errors %}<ul class="cd-form__errors">{% for error in form.token.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>{% endif %}
-    </div>
+    {{ form.token.as_field_group }}
     <div class="cd-form__actions" style="justify-content: flex-start;">
       <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security' %}">{% translate "Cancel" %}</a>
       <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Turn it on" %}</button>

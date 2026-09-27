@@ -9,15 +9,8 @@
   {% endif %}
   <form class="cd-card cd-form" method="post" enctype="multipart/form-data" novalidate style="padding: var(--space-5); max-width: 640px;">
     {% csrf_token %}
-    <ul class="cd-form__errors">{% for error in form.non_field_errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-    {% for field in form.main_fields %}
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="cd-form__required" aria-hidden="true">*</span>{% endif %}</label>
-        {{ field }}
-        {% if field.help_text %}<p class="cd-form__help caption">{{ field.help_text }}</p>{% endif %}
-        <ul class="cd-form__errors">{% for error in field.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-      </div>
-    {% endfor %}
+    {% if form.non_field_errors %}<div class="cd-form__notes">{% for error in form.non_field_errors %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endfor %}</div>{% endif %}
+    {% for field in form.main_fields %}{{ field.as_field_group }}{% endfor %}
     {% include "dojos/partials/_translation_fields.html" %}
     <div class="cd-form__actions">
       <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_badge_list' %}">{% translate "Cancel" %}</a>

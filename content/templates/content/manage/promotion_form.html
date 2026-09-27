@@ -7,57 +7,21 @@
 {% block manage_content %}
   <form method="post" enctype="multipart/form-data" class="cd-card cd-form" style="padding: var(--space-5);" novalidate>
     {% csrf_token %}
-    <ul class="cd-form__errors">{% for error in form.non_field_errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
+    {% if form.non_field_errors %}<div class="cd-form__notes">{% for error in form.non_field_errors %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endfor %}</div>{% endif %}
     <div class="cd-form__row">
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ form.event.id_for_label }}">{% translate "Event" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
-        <ul class="cd-form__errors">{% for error in form.event.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-        {{ form.event }}
-        <p class="cd-form__help caption">{% translate "A draft event can be picked: the promotion shows once the event is published." %}</p>
-      </div>
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ form.placement.id_for_label }}">{% translate "Where" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
-        <ul class="cd-form__errors">{% for error in form.placement.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-        {{ form.placement }}
-      </div>
+      {{ form.event.as_field_group }}
+      {{ form.placement.as_field_group }}
     </div>
     <div class="cd-form__row">
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ form.starts_at.id_for_label }}">{{ form.starts_at.label }}<span class="cd-form__required" aria-hidden="true">*</span></label>
-        <ul class="cd-form__errors">{% for error in form.starts_at.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-        {{ form.starts_at }}
-      </div>
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ form.ends_at.id_for_label }}">{{ form.ends_at.label }}</label>
-        <ul class="cd-form__errors">{% for error in form.ends_at.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-        {{ form.ends_at }}
-        <p class="cd-form__help caption">{{ form.ends_at.help_text }}</p>
-      </div>
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ form.rank.id_for_label }}">{% translate "Rank" %}</label>
-        <ul class="cd-form__errors">{% for error in form.rank.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-        {{ form.rank }}
-        <p class="cd-form__help caption">{{ form.rank.help_text }}</p>
-      </div>
+      {{ form.starts_at.as_field_group }}
+      {{ form.ends_at.as_field_group }}
+      {{ form.rank.as_field_group }}
     </div>
     <div class="cd-form__row">
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ form.title.id_for_label }}">{% translate "Title" %}</label>
-        <ul class="cd-form__errors">{% for error in form.title.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-        {{ form.title }}
-      </div>
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="{{ form.text.id_for_label }}">{% translate "Short pitch" %}</label>
-        <ul class="cd-form__errors">{% for error in form.text.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-        {{ form.text }}
-      </div>
+      {{ form.title.as_field_group }}
+      {{ form.text.as_field_group }}
     </div>
-    <div class="cd-form__field">
-      <label class="cd-form__label label" for="{{ form.image.id_for_label }}">{% translate "Image" %}</label>
-      <ul class="cd-form__errors">{% for error in form.image.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
-      {{ form.image }}
-      <p class="cd-form__help caption">{{ form.image.help_text }}</p>
-    </div>
+    {{ form.image.as_field_group }}
     {% include "dojos/partials/_translation_fields.html" %}
 
     <div class="cd-form__actions">
@@ -67,7 +31,7 @@
   </form>
 
   {% if promotion %}
-    <form method="post" action="{% url 'manage_promotion_delete' promotion_id=promotion.id %}" style="margin-top: var(--space-5);" onsubmit="return confirm('Remove this promotion?');">
+    <form method="post" action="{% url 'manage_promotion_delete' promotion_id=promotion.id %}" style="margin-top: var(--space-5);" onsubmit="{% translate 'Remove this promotion?' as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
       {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Remove promotion" %}</button>
     </form>
   {% endif %}

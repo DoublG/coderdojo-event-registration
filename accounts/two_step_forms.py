@@ -8,8 +8,6 @@ from django.utils.translation import ngettext_lazy
 from two_factor.forms import AuthenticationTokenForm, BackupTokenForm, TOTPDeviceForm
 from two_factor.plugins.webauthn.forms import WebauthnAuthenticationTokenForm, WebauthnDeviceValidationForm
 
-INPUT = "cd-form__input body"
-
 OTP_ERROR_MESSAGES = {
     "token_required": _("Please enter the code."),
     "invalid_token": _("That code isn't right. Please check it and try again."),
@@ -33,7 +31,6 @@ class _StyledTokenMixin:
 
     def _style(self):
         self.fields["otp_token"].label = self.token_label
-        self.fields["otp_token"].widget.attrs["class"] = INPUT
         if "remember" in self.fields:
             self.fields["remember"].label = _("Don't ask again in this browser for 30 days")
 
@@ -90,7 +87,7 @@ class AppSetupForm(TOTPDeviceForm):
         super().__init__(*args, **kwargs)
         field = self.fields["token"]
         field.label = _("The code the app shows")
-        field.widget.attrs.update({"class": INPUT, "placeholder": "123456"})
+        field.widget.attrs["placeholder"] = "123456"
 
 
 class PasskeySetupForm(WebauthnDeviceValidationForm):
@@ -117,7 +114,7 @@ class ConfirmPasswordForm(forms.Form):
     password = forms.CharField(
         label=_("Your password"),
         strip=False,
-        widget=forms.PasswordInput(attrs={"class": INPUT, "autocomplete": "current-password"}),
+        widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}),
     )
 
     def __init__(self, user, *args, **kwargs):

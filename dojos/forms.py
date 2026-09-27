@@ -160,9 +160,9 @@ class DojoCreateForm(forms.ModelForm):
         fields = ["name", "address", "email"]
         labels = {"name": _("Name"), "address": _("Address"), "email": _("Email")}
         widgets = {
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("e.g. CoderDojo Leuven")}),
-            "address": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Street and number, postcode, city")}),
-            "email": forms.EmailInput(attrs={"class": "cd-form__input body", "placeholder": _("hello@yourdojo.example")}),
+            "name": forms.TextInput(attrs={"placeholder": _("e.g. CoderDojo Leuven")}),
+            "address": forms.TextInput(attrs={"placeholder": _("Street and number, postcode, city")}),
+            "email": forms.EmailInput(attrs={"placeholder": _("hello@yourdojo.example")}),
         }
 
 

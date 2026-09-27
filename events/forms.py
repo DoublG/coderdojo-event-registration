@@ -214,10 +214,7 @@ class BadgeForm(forms.ModelForm):
     image library, see core.image_library) or an uploaded raster image; an
     upload wins. SVG is deliberately not uploadable: it can carry script."""
 
-    library_icon = forms.ChoiceField(
-        required=False, label=_("Standard icon"),
-        widget=forms.Select(attrs={"class": "cd-form__select body"}),
-    )
+    library_icon = forms.ChoiceField(required=False, label=_("Standard icon"))
 
     class Meta:
         model = Badge
@@ -233,14 +230,13 @@ class BadgeForm(forms.ModelForm):
             "grants_belt": _("Milestone only, optional: reaching it also awards this belt."),
             "icon": _("Optional: upload your own icon instead (PNG, JPG or WebP, square works best)."),
         }
+        # The input classes come from core.forms.SiteBoundField.
         widgets = {
-            "name": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("e.g. Game Maker")}),
-            "kind": forms.Select(attrs={"class": "cd-form__select body"}),
-            "description": forms.TextInput(attrs={"class": "cd-form__input body"}),
-            "criteria": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("e.g. Build and share a playable game.")}),
-            "threshold": forms.NumberInput(attrs={"class": "cd-form__input body", "min": 1}),
-            "grants_belt": forms.Select(attrs={"class": "cd-form__select body"}),
-            "icon": forms.ClearableFileInput(attrs={"class": "cd-form__input body", "accept": "image/*"}),
+            "name": forms.TextInput(attrs={"placeholder": _("e.g. Game Maker")}),
+            "description": forms.TextInput(),
+            "criteria": forms.TextInput(attrs={"placeholder": _("e.g. Build and share a playable game.")}),
+            "threshold": forms.NumberInput(attrs={"min": 1}),
+            "icon": forms.ClearableFileInput(attrs={"accept": "image/*"}),
         }
 
     def __init__(self, *args, **kwargs):

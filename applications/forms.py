@@ -7,10 +7,7 @@ from .models import Application
 
 
 class BackgroundCheckUploadForm(forms.Form):
-    document = forms.FileField(
-        label=_("Uittreksel uit het strafregister (model 2)"),
-        widget=forms.ClearableFileInput(attrs={"class": "cd-form__input body"}),
-    )
+    document = forms.FileField(label=_("Document"))
 
 
 class _ApplicationForm(forms.ModelForm):

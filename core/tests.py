@@ -792,3 +792,40 @@ class SiteFormRenderingTests(TestCase):
         html = str(form["file"])
         self.assertIn('class="cd-file-input"', html)
         self.assertIn('class="cd-form__checkbox-row"', html)
+
+
+class SiteFormTextsAreTranslatedTests(TestCase):
+    """A form that renders through Django's form templates (core/forms.py)
+    shows its fields' labels and help texts, so each must be a translated
+    text: a model's own verbose_name/help_text is English-only (it's meant for
+    the Django admin). Add every form that moves to {{ form }} or
+    as_field_group here."""
+
+    def forms(self):
+        from accounts.models import User
+        from accounts.two_step_forms import AppSetupForm, ConfirmPasswordForm
+        from applications.forms import BackgroundCheckUploadForm
+        from content.forms import PromotionForm, SponsorForm
+        from dojos.forms import AnnouncementForm, DojoCreateForm
+        from dojos.testing import make_dojo
+        from events.forms import BadgeForm
+        from mailing.forms import NewTemplateForm, TemplateVersionForm
+
+        user = User.objects.create(username="u")
+        return [
+            SponsorForm(), PromotionForm(), BadgeForm(), DojoCreateForm(), AnnouncementForm(dojo=make_dojo("Ghent")),
+            NewTemplateForm(), TemplateVersionForm(), BackgroundCheckUploadForm(),
+            AppSetupForm(key="00" * 20, user=user), ConfirmPasswordForm(user),
+        ]
+
+    def test_labels_and_help_texts_are_translated(self):
+        from django.utils.functional import Promise
+
+        untranslated = [
+            f"{type(form).__name__}.{name}.{attr}: {value!r}"
+            for form in self.forms()
+            for name, field in form.fields.items()
+            for attr in ("label", "help_text")
+            if (value := getattr(field, attr)) and not isinstance(value, Promise)
+        ]
+        self.assertEqual(untranslated, [])

@@ -16,7 +16,7 @@ DATETIME_FORMAT = "%Y-%m-%dT%H:%M"
 
 
 def _datetime_input():
-    return forms.DateTimeInput(attrs={"class": "cd-form__input body", "type": "datetime-local"}, format=DATETIME_FORMAT)
+    return forms.DateTimeInput(attrs={"type": "datetime-local"}, format=DATETIME_FORMAT)
 
 
 class PromotionForm(forms.ModelForm):
@@ -28,15 +28,23 @@ class PromotionForm(forms.ModelForm):
     class Meta:
         model = Promotion
         fields = ["event", "placement", "rank", "starts_at", "ends_at", "title", "text", "image"]
+        labels = {
+            "event": _("Event"), "placement": _("Where"), "rank": _("Rank"), "title": _("Title"),
+            "text": _("Short pitch"), "image": _("Image"),
+        }
+        # Every help text here, translated: a model's own help_text is English-only (for the admin).
+        help_texts = {
+            "event": _("A draft event can be picked: the promotion shows once the event is published."),
+            "title": _("Optional: replaces the event's name."),
+            "text": _("Optional short pitch."),
+        }
+        # The input classes come from core.forms.SiteBoundField.
         widgets = {
-            "event": forms.Select(attrs={"class": "cd-form__select body"}),
-            "placement": forms.Select(attrs={"class": "cd-form__select body"}),
-            "rank": forms.NumberInput(attrs={"class": "cd-form__input body", "min": 0}),
+            "rank": forms.NumberInput(attrs={"min": 0}),
             "starts_at": _datetime_input(),
             "ends_at": _datetime_input(),
-            "title": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Leave empty to use the event's name")}),
-            "text": forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("Show your project to the world!")}),
-            "image": forms.ClearableFileInput(attrs={"class": "cd-form__input body"}),
+            "title": forms.TextInput(attrs={"placeholder": _("Leave empty to use the event's name")}),
+            "text": forms.TextInput(attrs={"placeholder": _("Show your project to the world!")}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -80,7 +88,10 @@ class SponsorForm(forms.ModelForm):
         model = Sponsor
         fields = ["name", "url", "logo", "order", "is_public"]
         labels = {"name": _("Name"), "url": _("Website"), "logo": _("Logo"), "order": _("Order"), "is_public": _("Shown on the homepage")}
-        help_texts = {"logo": _("Optional. Without a logo, the sponsor's name is shown."), "order": _("Lower comes first.")}
+        help_texts = {
+            "logo": _("Optional. Without a logo, the sponsor's name is shown."), "order": _("Lower comes first."),
+            "is_public": _("Uncheck to hide it from the homepage."),
+        }
         # The input classes come from core.forms.SiteBoundField.
         widgets = {
             "name": forms.TextInput(attrs={"placeholder": _("e.g. Telenet")}),
