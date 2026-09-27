@@ -15,6 +15,7 @@ from dojos.access import MANAGE_API, require_dojo_access
 from dojos.views import _admin_context
 
 from . import services
+from .forms import ApiClientForm
 from .models import DojoApiClient
 
 
@@ -27,7 +28,7 @@ def _page(request, access, **extra):
         "api/dojo_api_clients.html",
         {
             "clients": clients,
-            "scope_choices": DojoApiClient.SCOPE_CHOICES,
+            "form": ApiClientForm(),
             # The site's public address, as in mails: behind the proxy the
             # request itself looks like plain http.
             "token_url": settings.SITE_URL + reverse("oauth2_token"),
@@ -43,18 +44,17 @@ def _page(request, access, **extra):
 @login_required
 def dojo_api_clients(request, dojo_id):
     access = require_dojo_access(request, dojo_id, MANAGE_API)
-    if request.method == "POST":
+    form = ApiClientForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
         try:
             client, client_id, secret = services.create_client(
-                access.dojo,
-                request.POST.get("name"),
-                request.POST.getlist("scope"),
-                request.user,
+                access.dojo, form.cleaned_data["name"], form.cleaned_data["scope"], request.user,
             )
         except services.ApiClientError as error:
-            return _page(request, access, error=str(error), name=request.POST.get("name", ""))
-        return _page(request, access, new_client=client, new_client_id=client_id, new_secret=secret)
-    return _page(request, access)
+            form.add_error(None, str(error))
+        else:
+            return _page(request, access, new_client=client, new_client_id=client_id, new_secret=secret)
+    return _page(request, access, form=form)
 
 
 @login_required

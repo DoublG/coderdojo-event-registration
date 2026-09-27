@@ -105,7 +105,7 @@ class ClientPageTests(ApiTestCase):
     def test_a_client_needs_a_name_and_a_scope(self):
         self.client.force_login(self.champion)
         response = self.client.post(reverse("dojo_api_clients", args=[self.dojo.id]), {"name": "Scan app"})
-        self.assertTrue(response.context["error"])
+        self.assertTrue(response.context["form"].non_field_errors())
         self.assertFalse(DojoApiClient.objects.exists())
 
     def test_new_secret(self):

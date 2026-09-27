@@ -813,6 +813,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
         )
         from accounts.models import Ninja, User
         from accounts.two_step_forms import AppSetupForm
+        from api.forms import ApiClientForm
         from applications.forms import BackgroundCheckUploadForm, ChampionApplicationForm, MentorApplicationForm
         from content.forms import PromotionForm, SponsorForm
         from dojos.forms import (
@@ -841,7 +842,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             CampaignForm(), JourneyForm(), SegmentForm(), ConfirmUsernameForm(user),
             ChildLoginForm(Ninja(name="Emma")), AddMentorForm(),
             PromoteYouthMentorForm(candidates=Ninja.objects.none()),
-            TransferChampionForm(candidates=bruges.memberships.all()),
+            TransferChampionForm(candidates=bruges.memberships.all()), ApiClientForm(),
         ]
 
     def test_labels_and_help_texts_are_translated(self):

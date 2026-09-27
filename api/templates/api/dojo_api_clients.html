@@ -45,21 +45,18 @@ shown here once and only its hash is kept.
 
   <section class="cd-card">
     <h2 class="heading-md">{% translate "Add a client" %}</h2>
-    {% if error %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endif %}
     <form class="cd-form" method="post" action="{% url 'dojo_api_clients' dojo_id=dojo.id %}">
       {% csrf_token %}
+      {% if form.non_field_errors %}<div class="cd-form__notes">{% for error in form.non_field_errors %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endfor %}</div>{% endif %}
       <div class="cd-form__row">
-        <div class="cd-form__field">
-          <label class="cd-form__label label" for="api-name">{% translate "Name" %}</label>
-          <input class="cd-form__input body" type="text" id="api-name" name="name" maxlength="100" value="{{ name|default:'' }}" placeholder="{% translate 'Scan app at the door' %}" required>
-        </div>
+        {{ form.name.as_field_group }}
       </div>
       <div class="scopes" role="group" aria-labelledby="api-scopes-label">
-        <p class="cd-form__label label" id="api-scopes-label">{% translate "What it may do" %}</p>
-        {% for value, label in scope_choices %}
-          <label class="scope-row body-sm" for="api-scope-{{ forloop.counter }}">
-            <input type="checkbox" id="api-scope-{{ forloop.counter }}" name="scope" value="{{ value }}" checked>
-            <span>{% if value == "attendance:read" %}{% translate "See the sessions and who has a place" %}{% else %}{% translate "Mark who came" %}{% endif %} <code class="muted">{{ value }}</code></span>
+        <p class="cd-form__label label" id="api-scopes-label">{{ form.scope.label }}</p>
+        {% for checkbox in form.scope %}
+          <label class="scope-row body-sm" for="{{ checkbox.id_for_label }}">
+            {{ checkbox.tag }}
+            <span>{% if checkbox.data.value == "attendance:read" %}{% translate "See the sessions and who has a place" %}{% else %}{% translate "Mark who came" %}{% endif %} <code class="muted">{{ checkbox.data.value }}</code></span>
           </label>
         {% endfor %}
       </div>
