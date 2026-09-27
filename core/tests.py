@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.gis.geos import MultiPolygon, Polygon
 from django.contrib.staticfiles import finders
 from django.core.cache import cache
+from django.templatetags.static import static
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -1070,3 +1071,47 @@ class JavaScriptCatalogTests(TestCase):
                 file_changed.send(sender=None, file_path=mo)
                 self.assertNotEqual(jsi18n.catalog_version(), before)
         jsi18n.catalog_version.cache_clear()
+
+
+class FontsTests(TestCase):
+    """Nunito and Fredoka come from our own static files
+    (core/static/core/fonts/), on every page shell."""
+
+    def test_every_font_file_exists(self):
+        css_path = finders.find("core/fonts/fonts.css")
+        css = open(css_path).read()
+        files = re.findall(r'url\("([^"]+)"\)', css)
+        self.assertEqual(len(files), 4)
+        for name in files:
+            self.assertIsNotNone(finders.find(f"core/fonts/{name}"), f"{name} doesn't exist")
+        for family in ("Nunito", "Fredoka"):
+            self.assertIn(f'font-family: "{family}";', css)
+
+    def assert_page_loads_the_fonts(self, response):
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertIn(static("core/fonts/fonts.css"), html)
+        preloads = re.findall(r'<link rel="preload" href="([^"]+)" as="font"', html)
+        self.assertEqual(len(preloads), 2)
+        for url in preloads:
+            self.assertIsNotNone(finders.find(url.removeprefix(settings.STATIC_URL)), f"{url} doesn't exist")
+
+    def test_the_public_site(self):
+        cache.clear()
+        self.assert_page_loads_the_fonts(self.client.get(reverse("home")))
+
+    def test_the_dojo_admin_area(self):
+        from dojos.testing import make_champion
+
+        champion = make_champion(username="champ")
+        dojo = make_dojo("Ghent", champion=champion)
+        self.client.force_login(champion)
+        self.assert_page_loads_the_fonts(self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": dojo.id})))
+
+    def test_the_organisation_dashboard(self):
+        from accounts.models import OrganisationRole, User
+
+        admin = User.objects.create(username="orgadmin")
+        OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
+        self.client.force_login(admin)
+        self.assert_page_loads_the_fonts(self.client.get(reverse("manage_home"), follow=True))
