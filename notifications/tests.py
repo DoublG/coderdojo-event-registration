@@ -1,5 +1,8 @@
 from unittest.mock import AsyncMock, Mock, patch
 
+from channels_redis.core import RedisChannelLayer
+from channels_redis.utils import create_pool
+from django.conf import settings
 from django.test import TestCase
 
 from dojos.testing import make_champion, make_dojo
@@ -79,3 +82,14 @@ class NotifyTests(TestCase):
         the real group_send() call."""
         notification = notify(self.owner, "Real call, real channel layer.", dojo=self.dojo)
         self.assertTrue(Notification.objects.filter(pk=notification.pk).exists())
+
+
+class ChannelLayerSettingsTests(TestCase):
+    def test_the_redis_socket_outwaits_the_layers_blocking_read(self):
+        """channels_redis waits up to brpop_timeout for the next message; a
+        socket timeout that isn't longer (redis-py 8 defaults to 5 seconds,
+        the same as that wait) makes the read fail and closes every
+        notification socket a few seconds after it opens."""
+        for host in settings.CHANNEL_LAYERS["default"]["CONFIG"]["hosts"]:
+            timeout = create_pool(host).make_connection().socket_timeout
+            self.assertTrue(timeout is None or timeout > RedisChannelLayer.brpop_timeout, timeout)

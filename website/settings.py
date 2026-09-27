@@ -411,12 +411,18 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [
-                (
-                    "redis://{host}:{port}/1".format(
+                {
+                    "address": "redis://{host}:{port}/1".format(
                         host=env("REDIS_HOST", default="127.0.0.1"),
                         port=env("REDIS_PORT", default="6379"),
-                    )
-                )
+                    ),
+                    # Longer than channels_redis's 5-second blocking wait for
+                    # the next message (RedisChannelLayer.brpop_timeout).
+                    # redis-py 8 defaults to a 5-second socket timeout, which
+                    # makes that wait time out and closes every notification
+                    # socket a few seconds after it opens.
+                    "socket_timeout": 10,
+                }
             ],
         },
     },
