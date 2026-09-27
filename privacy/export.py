@@ -92,7 +92,7 @@ def export_person(user):
     return {
         "generated_at": timezone.now(),
         "account": user.get_username(),
-        "children": [child.name for child in children],
+        "children": [child.full_name for child in children],
         "data": data,
     }
 

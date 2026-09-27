@@ -17,7 +17,7 @@ a full page reload).
         <div class="child-card__person">
           {% include "accounts/partials/_child_avatar.html" with child=entry.child %}
           <div>
-            <p class="heading-sm child-card__name">{{ entry.child.name }}</p>
+            <p class="heading-sm child-card__name">{{ entry.child.full_name }}</p>
             <p class="body-sm child-card__meta">
               {% if entry.child.age %}{% blocktranslate with age=entry.child.age %}Age {{ age }}{% endblocktranslate %}{% endif %}
               {% if entry.child.home_dojo %} · {{ entry.child.home_dojo.name }}{% endif %}

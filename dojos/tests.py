@@ -672,6 +672,27 @@ class DojoEventDetailViewTests(TestCase):
         self.assertEqual(form["start_time"].value(), time(10, 0))
         self.assertEqual(form["end_time"].value(), time(12, 0))
 
+    def test_form_shows_belgian_date_and_time_and_saves_them_back_unchanged(self):
+        """The edit form shows dd/mm/yyyy and 24h HH:MM whatever the browser's
+        locale, and those exact values save back: an unchanged date used to be
+        shown as 2030-01-01, which the form then refused."""
+        import re
+
+        self.client.force_login(self.owner)
+        html = self.client.get(self._url()).content.decode()
+        shown = {
+            name: re.search(rf'name="{name}" value="([^"]*)"', html).group(1)
+            for name in ("event_date", "start_time", "end_time")
+        }
+        self.assertEqual(shown, {"event_date": "01/01/2030", "start_time": "10:00", "end_time": "12:00"})
+        self.assertNotIn('type="time"', html)
+
+        response = self.client.post(self._url(), self._valid_post_data(**shown))
+
+        self.assertTrue(response.context["saved"], response.context["form"].errors)
+        self.event.refresh_from_db()
+        self.assertEqual(timezone.localtime(self.event.start_time).strftime("%d/%m/%Y %H:%M"), "01/01/2030 10:00")
+
     def test_valid_post_saves_changes_in_place(self):
         self.client.force_login(self.owner)
 

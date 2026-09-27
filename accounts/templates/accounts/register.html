@@ -12,7 +12,8 @@
   .register-choice-root .choice-header p { color: var(--ink-muted); margin: 0; }
   .register-choice-root .row { display: flex; gap: var(--space-5); flex-wrap: wrap; }
   .register-choice-root .row > * { flex: 1 1 280px; }
-  .register-choice-root .choice-card { display: flex; flex-direction: column; height: 100%; padding: var(--space-6); }
+  /* No height: 100% (the row has no height, so it would stop the cards stretching to one height). */
+  .register-choice-root .choice-card { display: flex; flex-direction: column; padding: var(--space-6); }
   .register-choice-root .choice-card .eyebrow { color: var(--primary); margin: 0 0 var(--space-2); }
   .register-choice-root .choice-card h3 { color: var(--ink); margin: 0 0 var(--space-2); }
   .register-choice-root .choice-card p { color: var(--ink-muted); margin: 0 0 var(--space-4); flex: 1; }

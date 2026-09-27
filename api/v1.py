@@ -112,7 +112,7 @@ def _event_out(event):
 
 
 def _child_out(registration):
-    return ChildOut(registration_id=registration.id, name=registration.ninja.name, attended=registration.attended)
+    return ChildOut(registration_id=registration.id, name=registration.ninja.full_name, attended=registration.attended)
 
 
 def _team_out(row):

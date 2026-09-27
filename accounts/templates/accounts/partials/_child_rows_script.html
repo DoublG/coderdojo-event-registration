@@ -12,7 +12,10 @@
       var option = document.createElement("option");
       option.value = choice[0];
       option.textContent = choice[1];
-      if (choice[0] === "unspecified") option.selected = true;
+      // defaultSelected sets the attribute, which outerHTML carries; the
+      // selected property alone doesn't, and every added child got the
+      // first choice ("Girl") instead of "Prefer not to say".
+      if (choice[0] === "unspecified") option.defaultSelected = true;
       return option.outerHTML;
     }).join("");
 
@@ -23,6 +26,8 @@
       remove: "{% translate 'Remove' as t %}{{ t|escapejs }}",
       firstName: "{% translate 'First name' as t %}{{ t|escapejs }}",
       sam: "{% translate 'Sam' as t %}{{ t|escapejs }}",
+      familyName: "{% translate 'Family name' as t %}{{ t|escapejs }}",
+      peeters: "{% translate 'Peeters' as t %}{{ t|escapejs }}",
       dob: "{% translate 'Date of birth' as t %}{{ t|escapejs }}",
       notes: "{% translate 'Allergies or notes' as t %}{{ t|escapejs }}",
       none: "{% translate 'None' as t %}{{ t|escapejs }}",
@@ -44,8 +49,19 @@
               '<input class="cd-form__input body" id="rp-c' + n + '-name" name="child_' + n + '_name" type="text" placeholder="' + T.sam + '" required>' +
             '</div>' +
             '<div class="cd-form__field">' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-family-name">' + T.familyName + '<span class="cd-form__required" aria-hidden="true">*</span></label>' +
+              '<input class="cd-form__input body" id="rp-c' + n + '-family-name" name="child_' + n + '_family_name" type="text" placeholder="' + T.peeters + '" required>' +
+            '</div>' +
+          '</div>' +
+          '<div class="cd-form__row">' +
+            '<div class="cd-form__field">' +
               '<label class="cd-form__label label" for="rp-c' + n + '-dob">' + T.dob + '<span class="cd-form__required" aria-hidden="true">*</span></label>' +
               '<input class="cd-form__input body" id="rp-c' + n + '-dob" name="child_' + n + '_dob" type="date" required>' +
+            '</div>' +
+            '<div class="cd-form__field">' +
+              '<label class="cd-form__label label" for="rp-c' + n + '-gender">' + T.gender + '</label>' +
+              '<select class="cd-form__select body" id="rp-c' + n + '-gender" name="child_' + n + '_gender">' + genderOptions + '</select>' +
+              '<p class="cd-form__help caption">' + T.genderHelp + '</p>' +
             '</div>' +
           '</div>' +
           '<div class="cd-form__row">' +
@@ -53,11 +69,6 @@
               '<label class="cd-form__label label" for="rp-c' + n + '-notes">' + T.notes + '</label>' +
               '<input class="cd-form__input body" id="rp-c' + n + '-notes" name="child_' + n + '_notes" type="text" placeholder="' + T.none + '">' +
               '<p class="cd-form__help caption">' + T.notesHelp + '</p>' +
-            '</div>' +
-            '<div class="cd-form__field">' +
-              '<label class="cd-form__label label" for="rp-c' + n + '-gender">' + T.gender + '</label>' +
-              '<select class="cd-form__select body" id="rp-c' + n + '-gender" name="child_' + n + '_gender">' + genderOptions + '</select>' +
-              '<p class="cd-form__help caption">' + T.genderHelp + '</p>' +
             '</div>' +
           '</div>' +
         '</div>'
@@ -106,6 +117,9 @@
       wrapper.innerHTML = subgroupHtml(n);
       var subgroup = wrapper.firstElementChild;
       subgroup.querySelector(".cd-form__remove").addEventListener("click", onRemove);
+      // Brothers and sisters usually share a family name: start from the previous child's.
+      var previous = childrenEl.querySelectorAll("[name$='_family_name']");
+      if (previous.length) subgroup.querySelector("[name$='_family_name']").value = previous[previous.length - 1].value;
       childrenEl.appendChild(subgroup);
       syncRemoveButtons();
     });

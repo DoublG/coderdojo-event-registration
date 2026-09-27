@@ -11,9 +11,10 @@
   .api-manage .muted { color: var(--ink-muted); }
   .api-manage code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; word-break: break-all; }
   .api-manage .secret { background: var(--surface-sunken); border: 1px solid var(--border); border-radius: var(--radius-md, 8px); padding: var(--space-3); margin: var(--space-2) 0; }
-  .api-manage dl { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-2) var(--space-4); margin: 0; }
+  /* minmax(0, 1fr): long URLs wrap instead of widening the page on a phone. */
+  .api-manage dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-2) var(--space-4); margin: 0; }
   .api-manage dt { font-weight: 700; }
-  .api-manage dd { margin: 0; }
+  .api-manage dd { margin: 0; overflow-wrap: anywhere; }
   .api-manage .scopes { display: flex; flex-direction: column; gap: var(--space-2); }
   .api-manage .scopes .cd-form__label { margin: 0; }
   .api-manage .scope-row { display: flex; gap: var(--space-2); align-items: center; margin: 0; }

@@ -3,11 +3,19 @@
 {% block manage_page_title %}{% translate "Sign-in security" %}{% endblock %}
 {% block manage_heading %}{% translate "Sign-in security" %}{% endblock %}
 
+{% block manage_extra_style %}
+<style>
+  /* The level names are long; a squeezed select would cut them off. The table scrolls on a phone. */
+  .sign-in-policy select { min-width: 18rem; }
+  .sign-in-policy input[type="date"] { min-width: 10rem; }
+</style>
+{% endblock %}
+
 {% block manage_content %}
   {% comment %}The sign-in policy per role (accounts.SignInRequirement, applied by accounts.sign_in) and turning off someone's two-step login (accounts/manage.py).{% endcomment %}
   <p class="body-sm">{% translate "Choose how the accounts in each role must log in. Anyone can turn on two-step login themselves; here you make it required. A role asks for its level from the day you set (empty: right away). Before that day the accounts see a notice; from then on, an account without it is sent to set it up before it can use anything its role opens. An account with several roles gets the strongest level. Children's own logins are never asked." %}</p>
 
-  <form method="post" class="cd-card cd-form" style="padding: var(--space-5);" novalidate>
+  <form method="post" class="cd-card cd-form sign-in-policy" style="padding: var(--space-5);" novalidate>
     {% csrf_token %}
     <div class="cd-table-wrap">
       <table class="cd-table cd-table--zebra">

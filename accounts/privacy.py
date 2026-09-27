@@ -87,6 +87,7 @@ register(
     fields={
         # Kept anonymised, so the sessions the child came to keep their numbers.
         "name": anonymise(Category.CHILD, "Former ninja #{pk}"),
+        "family_name": personal(Category.CHILD),
         "gender": anonymise(Category.CHILD, "unspecified"),
         ("date_of_birth", "photo", "account"): personal(Category.CHILD),
         ("home_dojo", "member_since"): keep(Category.CHILD, "a dojo's member numbers"),

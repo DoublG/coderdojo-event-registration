@@ -178,7 +178,7 @@ def _attendance_context(event):
         event.registration_set.filter(waiting_list=False)
         .select_related("ninja", "ninja__home_dojo")
         .prefetch_related("pathways", "ninja__belts__belt", "ninja__badges")
-        .order_by("ninja__name")
+        .order_by("ninja__name", "ninja__family_name")
     )
     event_pathway_ids = set(event.pathways.values_list("id", flat=True))
     team_rows = _team_attendance_rows(event)

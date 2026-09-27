@@ -8,11 +8,12 @@
 <style>
   .register-dojo-root { background: var(--surface-sunken); }
   .register-dojo-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
-  .register-dojo-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) 0; }
+  .register-dojo-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
   .register-dojo-root .back-link { color: var(--secondary); }
   .register-dojo-root .page-title { color: var(--ink); margin: var(--space-2) 0 var(--space-2); }
   .register-dojo-root .page-subtitle { color: var(--ink-muted); margin: 0 0 var(--space-5); }
   .register-dojo-root .form-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
+  @media (max-width: 560px) { .register-dojo-root .form-card { padding: var(--space-4); } }
 </style>
 {% endblock %}
 

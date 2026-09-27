@@ -18,7 +18,8 @@ upcoming sessions (including anything they're on the waiting list for,
 clearly marked), along with each child's current belt once they have one.
 From here you can:
 
-- **Add a child** — name, date of birth, an optional icon, an optional
+- **Add a child** — first name and family name (your own family name is
+  filled in; change it if your child's is different), date of birth, an optional icon, an optional
   gender and optional allergies or notes. Ninjas are 7 to 17, so a date
   of birth outside that range isn't accepted. Gender is never shown
   publicly. As at sign-up, an optional box lets us use the child's details

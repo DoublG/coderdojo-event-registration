@@ -943,7 +943,7 @@ class AutomatedMailTests(TestCase):
                                           preferred_language="nl-be")
         self.co_parent = User.objects.create(username="co", email="co@example.com")
         self.teen_login = User.objects.create(username="teen", email="t@example.com", account_type=User.NINJA)
-        self.kid = Ninja.objects.create(name="Emma Peeters", account=self.teen_login, home_dojo=self.dojo)
+        self.kid = Ninja.objects.create(name="Emma", family_name="Peeters", account=self.teen_login, home_dojo=self.dojo)
         for guardian in (self.parent, self.co_parent):
             Guardianship.objects.create(guardian=guardian, ninja=self.kid)
 

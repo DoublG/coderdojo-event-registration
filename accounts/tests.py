@@ -197,18 +197,18 @@ class AddChildViewTests(TempMediaMixin, TestCase):
         cls.guardian = User.objects.create(username="g1", email="g1@example.com")
 
     def test_login_required(self):
-        response = self.client.post(reverse("add_ninja"), {"consent": "on", "name": "Kid"})
+        response = self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "Kid"})
         self.assertEqual(response.status_code, 302)
 
     def test_the_consent_is_optional_and_recorded(self):
         from accounts.consent import CHILD_DATA_WORDING_VERSION
 
         self.client.force_login(self.guardian)
-        self.client.post(reverse("add_ninja"), {"name": "No Consent", "date_of_birth": _dob(10)})
+        self.client.post(reverse("add_ninja"), {"family_name": "Peeters", "name": "No Consent", "date_of_birth": _dob(10)})
         guardianship = Guardianship.objects.get(ninja__name="No Consent")
         self.assertIsNone(guardianship.consent_given_at)
 
-        self.client.post(reverse("add_ninja"), {"consent": "on", "name": "Consented", "date_of_birth": _dob(10)})
+        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "Consented", "date_of_birth": _dob(10)})
         guardianship = Guardianship.objects.get(ninja__name="Consented")
         self.assertIsNotNone(guardianship.consent_given_at)
         self.assertEqual(guardianship.consent_wording_version, CHILD_DATA_WORDING_VERSION)
@@ -223,22 +223,22 @@ class AddChildViewTests(TempMediaMixin, TestCase):
         self.client.force_login(self.guardian)
         response = self.client.post(
             reverse("add_ninja"),
-            {"consent": "on", "name": "New Kid", "date_of_birth": _dob(10)},
+            {"consent": "on", "family_name": "Peeters", "name": "New Kid", "date_of_birth": _dob(10)},
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Ninja.objects.of_guardian(self.guardian).filter(name="New Kid").exists())
 
     def test_picked_icon_links_the_standard_avatar(self):
         self.client.force_login(self.guardian)
-        self.client.post(reverse("add_ninja"), {"consent": "on", "name": "A", "date_of_birth": _dob(10), "icon": "alien-01-green.svg"})
-        self.client.post(reverse("add_ninja"), {"consent": "on", "name": "B", "date_of_birth": _dob(10), "icon": "alien-01-green.svg"})
+        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "A", "date_of_birth": _dob(10), "icon": "alien-01-green.svg"})
+        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "B", "date_of_birth": _dob(10), "icon": "alien-01-green.svg"})
         photos = set(Ninja.objects.of_guardian(self.guardian).values_list("photo", flat=True))
         self.assertEqual(photos, {"library/ninjas/alien-01-green.svg"})
         self.assertFalse((self.media_root / "participants").exists())
 
     def test_unknown_icon_is_ignored(self):
         self.client.force_login(self.guardian)
-        self.client.post(reverse("add_ninja"), {"consent": "on", "name": "A", "date_of_birth": _dob(10), "icon": "../../settings.py"})
+        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "A", "date_of_birth": _dob(10), "icon": "../../settings.py"})
         self.assertFalse(Ninja.objects.get(name="A").photo)
 
     def test_any_adult_account_can_add_children(self):
@@ -246,26 +246,26 @@ class AddChildViewTests(TempMediaMixin, TestCase):
         their own child from their account page directly."""
         owner = make_champion(username="owner1")
         self.client.force_login(owner)
-        self.client.post(reverse("add_ninja"), {"consent": "on", "name": "Owner Kid"})
+        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "Owner Kid"})
         self.assertEqual(list(Ninja.objects.of_guardian(owner).values_list("name", flat=True)), ["Owner Kid"])
 
     def test_ninja_login_cannot_add_children(self):
         ninja_login = User.objects.create(username="kid", account_type=User.NINJA)
         self.client.force_login(ninja_login)
-        response = self.client.post(reverse("add_ninja"), {"consent": "on", "name": "Nope"})
+        response = self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "Nope"})
         self.assertEqual(response.status_code, 404)
         self.assertFalse(Ninja.objects.exists())
 
     def test_blank_name_creates_nothing(self):
         self.client.force_login(self.guardian)
-        self.client.post(reverse("add_ninja"), {"consent": "on", "name": "  "})
+        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "  "})
         self.assertEqual(Ninja.objects.of_guardian(self.guardian).count(), 0)
 
     def test_gender_is_saved_and_optional(self):
         self.client.force_login(self.guardian)
-        self.client.post(reverse("add_ninja"), {"consent": "on", "name": "A", "gender": Ninja.GIRL})
-        self.client.post(reverse("add_ninja"), {"consent": "on", "name": "B"})
-        self.client.post(reverse("add_ninja"), {"consent": "on", "name": "C", "gender": "dragon"})
+        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "A", "gender": Ninja.GIRL})
+        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "B"})
+        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "C", "gender": "dragon"})
         genders = dict(Ninja.objects.of_guardian(self.guardian).values_list("name", "gender"))
         self.assertEqual(genders, {"A": Ninja.GIRL, "B": Ninja.UNSPECIFIED, "C": Ninja.UNSPECIFIED})
 
@@ -477,7 +477,7 @@ class RegisterGuardianViewTests(TestCase):
             "phone": "",
             "password": self.valid_password,
             "consent": "on",
-            "child_1_name": "Sam",
+            "child_1_name": "Sam", "child_1_family_name": "Peeters",
             "child_1_dob": _dob(10),
             "child_1_notes": "",
         }
@@ -518,7 +518,7 @@ class RegisterGuardianViewTests(TestCase):
         """Simulates a family who added a 2nd/3rd child then removed the
         middle one client-side, leaving gaps in the field numbering."""
         data = self._valid_post_data(
-            child_3_name="Alex", child_3_dob=_dob(12), child_3_notes="Peanut allergy",
+            child_3_name="Alex", child_3_family_name="Doe", child_3_dob=_dob(12), child_3_notes="Peanut allergy",
         )
         self.client.post(reverse("register_guardian"), data)
 
@@ -547,7 +547,7 @@ class RegisterGuardianViewTests(TestCase):
         self.assertContains(self.client.get(reverse("register_guardian")), "We use what we know about your family")
 
     def test_child_gender_is_saved_per_row(self):
-        data = self._valid_post_data(child_1_gender=Ninja.GIRL, child_2_name="Alex", child_2_dob=_dob(9))
+        data = self._valid_post_data(child_1_gender=Ninja.GIRL, child_2_name="Alex", child_2_family_name="Doe", child_2_dob=_dob(9))
         self.client.post(reverse("register_guardian"), data)
 
         guardian = User.objects.get(email="jane@example.com")
@@ -932,7 +932,7 @@ class NinjaAgeRuleTests(TestCase):
         grown_up.full_clean()  # unchanged date: still editable
 
     def test_add_child_rejects_an_out_of_range_age(self):
-        response = self.client.post(reverse("add_ninja"), {"consent": "on", "name": "Baby", "date_of_birth": _dob(3)})
+        response = self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "Baby", "date_of_birth": _dob(3)})
         self.assertContains(response, "Ninjas are 7 to 17 years old")
         self.assertFalse(Ninja.objects.of_guardian(self.guardian).exists())
 
@@ -941,7 +941,7 @@ class NinjaAgeRuleTests(TestCase):
         response = self.client.post(reverse("register_guardian"), {
             "name": "Jane Doe", "email": "jane@example.com", "phone": "",
             "password": PASSWORD, "password_confirm": PASSWORD,
-            "child_1_name": "Old", "child_1_dob": _dob(19), "child_1_notes": "",
+            "child_1_name": "Old", "child_1_family_name": "Peeters", "child_1_dob": _dob(19), "child_1_notes": "",
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Ninjas are 7 to 17 years old")
@@ -1282,7 +1282,7 @@ class ChildHealthNotesTests(TestCase):
         self.edit_url = reverse("edit_ninja", kwargs={"ninja_id": self.child.id})
 
     def test_add_a_child_with_notes(self):
-        self.client.post(reverse("add_ninja"), {"consent": "on", "name": "Lou", "allergies_notes": "  Gluten-free  "},
+        self.client.post(reverse("add_ninja"), {"consent": "on", "family_name": "Peeters", "name": "Lou", "allergies_notes": "  Gluten-free  "},
                          HTTP_HX_REQUEST="true")
         self.assertEqual(Ninja.objects.get(name="Lou").allergies_notes, "Gluten-free")
 
@@ -1917,3 +1917,70 @@ class SeedTwoStepTests(TestCase):
         out = StringIO()
         call_command("totp_code", "ann", stdout=out)
         self.assertEqual(out.getvalue().strip(), totp_code(device))
+
+
+class ChildFamilyNameTests(TestCase):
+    """A child's first and family name (Ninja.name + family_name): asked for
+    when a child is added, shown in full to the dojo team."""
+
+    def setUp(self):
+        self.guardian = User.objects.create(username="g", email="g@example.com", first_name="Ann", last_name="Peeters")
+        self.client.force_login(self.guardian)
+
+    def test_full_name(self):
+        self.assertEqual(Ninja(name="Emma", family_name="Peeters").full_name, "Emma Peeters")
+        self.assertEqual(str(Ninja(name="Emma", family_name="Peeters")), "Emma Peeters")
+        self.assertEqual(Ninja(name="Emma").full_name, "Emma")
+
+    def test_sign_up_asks_for_each_childs_family_name(self):
+        self.client.logout()
+        data = {
+            "name": "Jane Doe", "email": "jane@example.com", "phone": "", "password": "a-brand-new-password-99",
+            "consent": "on", "child_1_name": "Sam", "child_1_family_name": "", "child_1_dob": _dob(10),
+        }
+        response = self.client.post(reverse("register_guardian"), data)
+        self.assertContains(response, "Family name is required.")
+        self.assertFalse(Ninja.objects.exists())
+        data["child_1_family_name"] = "Doe"
+        self.client.post(reverse("register_guardian"), data)
+        self.assertEqual(Ninja.objects.get().full_name, "Sam Doe")
+
+    def test_add_a_child_prefills_and_needs_the_family_name(self):
+        self.assertContains(self.client.get(reverse("account_home")), 'name="family_name" value="Peeters"')
+        response = self.client.post(reverse("add_ninja"), {"consent": "on", "name": "Lou", "family_name": ""})
+        self.assertContains(response, "Family name is required.")
+        self.client.post(reverse("add_ninja"), {"consent": "on", "name": "Lou", "family_name": "Maes"})
+        self.assertEqual(Ninja.objects.of_guardian(self.guardian).get().full_name, "Lou Maes")
+
+    def test_editing_saves_the_family_name(self):
+        child = make_ninja(self.guardian, "Lou")
+        self.client.post(reverse("edit_ninja", kwargs={"ninja_id": child.id}), {"name": "Lou", "family_name": "Peeters"})
+        child.refresh_from_db()
+        self.assertEqual(child.full_name, "Lou Peeters")
+
+    def test_the_dojo_team_sees_the_full_name(self):
+        champion = make_champion(username="champ")
+        dojo = make_dojo("Ghent", champion=champion)
+        event = Event.objects.create(
+            name="Session", dojo=dojo, status=Event.OPEN, places=10,
+            start_time=timezone.now() + timedelta(days=2), end_time=timezone.now() + timedelta(days=2, hours=2),
+        )
+        child = Ninja.objects.create(name="Emma", family_name="Peeters")
+        Registration.objects.create(event=event, ninja=child, waiting_list=False, position=1)
+        self.client.force_login(champion)
+        url = reverse("dojo_event_attendance", kwargs={"dojo_id": dojo.id, "event_id": event.id})
+        self.assertContains(self.client.get(url), "Emma Peeters")
+
+    def test_the_migration_splits_only_a_guardians_family_name(self):
+        from importlib import import_module
+
+        from django.apps import apps
+
+        split = import_module("accounts.migrations.0011_ninja_family_name").split_family_names
+        known = make_ninja(self.guardian, "Emma Peeters")
+        unknown = make_ninja(self.guardian, "Lou Van Damme")
+        split(apps, None)
+        known.refresh_from_db()
+        unknown.refresh_from_db()
+        self.assertEqual((known.name, known.family_name), ("Emma", "Peeters"))
+        self.assertEqual((unknown.name, unknown.family_name), ("Lou Van Damme", ""))

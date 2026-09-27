@@ -210,7 +210,7 @@ def register(request):
 
 def _parse_child_rows(post_data):
     """Parses the family-registration form's dynamically-numbered child
-    fields (child_<n>_name/dob/notes) into a list of row dicts, one
+    fields (child_<n>_name/family_name/dob/notes/gender) into a list of row dicts, one
     per index actually present in the POST data. Not a Form/formset: the
     page's "Add another child"/"Remove" buttons (see the template's
     extra_script block) can leave gaps in the numbering (e.g. child_1,
@@ -222,6 +222,7 @@ def _parse_child_rows(post_data):
     rows = []
     for n in indices:
         name = post_data.get(f"child_{n}_name", "").strip()
+        family_name = post_data.get(f"child_{n}_family_name", "").strip()
         dob_raw = post_data.get(f"child_{n}_dob", "")
         notes = post_data.get(f"child_{n}_notes", "").strip()
         gender = _clean_gender(post_data.get(f"child_{n}_gender"))
@@ -229,6 +230,8 @@ def _parse_child_rows(post_data):
         errors = {}
         if not name:
             errors["name"] = _("First name is required.")
+        if not family_name:
+            errors["family_name"] = _("Family name is required.")
         date_of_birth = parse_date(dob_raw) if dob_raw else None
         if not date_of_birth:
             errors["dob"] = _("Date of birth is required.")
@@ -236,7 +239,7 @@ def _parse_child_rows(post_data):
             errors["dob"] = dob_error
 
         rows.append({
-            "index": n, "name": name, "dob": dob_raw, "date_of_birth": date_of_birth,
+            "index": n, "name": name, "family_name": family_name, "dob": dob_raw, "date_of_birth": date_of_birth,
             "notes": notes, "gender": gender, "errors": errors,
         })
     return rows
@@ -251,7 +254,7 @@ def _clean_gender(value):
 def _create_ninjas(parent, child_rows, consent=False):
     for row in child_rows:
         ninja = Ninja.objects.create(
-            name=row["name"], date_of_birth=row["date_of_birth"], allergies_notes=row["notes"], gender=row["gender"],
+            name=row["name"], family_name=row["family_name"], date_of_birth=row["date_of_birth"], allergies_notes=row["notes"], gender=row["gender"],
         )
         Guardianship.objects.create(guardian=parent, ninja=ninja, **consent_fields(consent))
 
@@ -309,7 +312,7 @@ def register_guardian(request):
 
     return render(request, "accounts/register_guardian.html", {
         "form": form,
-        "child_rows": child_rows or [{"index": 1, "name": "", "dob": "", "notes": "", "gender": Ninja.UNSPECIFIED, "errors": {}}],
+        "child_rows": child_rows or [{"index": 1, "name": "", "family_name": "", "dob": "", "notes": "", "gender": Ninja.UNSPECIFIED, "errors": {}}],
         "children_error": children_error,
         "gender_choices": Ninja.GENDER_CHOICES,
     })
@@ -365,10 +368,13 @@ def add_ninja(request):
     add_error = None
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
+        family_name = request.POST.get("family_name", "").strip()
         date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
         add_error = ninja_birth_date_error(date_of_birth)
+        if name and not family_name:
+            add_error = _("Family name is required.")
         if name and not add_error:
-            ninja = Ninja(name=name, date_of_birth=date_of_birth, gender=_clean_gender(request.POST.get("gender")),
+            ninja = Ninja(name=name, family_name=family_name, date_of_birth=date_of_birth, gender=_clean_gender(request.POST.get("gender")),
                           allergies_notes=request.POST.get("allergies_notes", "").strip())
             _set_icon(ninja, request.POST.get("icon", ""))
             with transaction.atomic():  # a child never exists without a guardian
@@ -459,6 +465,10 @@ def edit_ninja(request, ninja_id):
         name = request.POST.get("name", "").strip()
         if name:
             child.name = name
+        # Saved as given: a child added before family names were asked for
+        # can still be edited without one.
+        if "family_name" in request.POST:
+            child.family_name = request.POST["family_name"].strip()
         date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
         if date_of_birth != child.date_of_birth and (dob_error := ninja_birth_date_error(date_of_birth)):
             return render(request, "accounts/partials/_child_header_edit.html", _edit_context(child, dob_error=dob_error))

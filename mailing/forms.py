@@ -46,11 +46,11 @@ class MailPreferencesForm(forms.Form):
             del self.fields["postal_code"]
         # Per child: may their details choose which mails we send (accounts.consent)?
         self.guardianships = [] if user.is_ninja else list(
-            user.guardianships.select_related("ninja").order_by("ninja__name")
+            user.guardianships.select_related("ninja").order_by("ninja__name", "ninja__family_name")
         )
         for guardianship in self.guardianships:
             self.fields[f"child_{guardianship.ninja_id}"] = forms.BooleanField(
-                required=False, label=guardianship.ninja.name,
+                required=False, label=guardianship.ninja.full_name,
                 initial=guardianship.consent_given_at is not None,
             )
 

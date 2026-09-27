@@ -1,6 +1,6 @@
 {% load i18n %}{% comment %}
   Used by register_guardian.html — the dynamically-numbered
-  child_<n>_name/dob/notes/gender rows (see accounts.views._parse_child_rows)
+  child_<n>_name/family_name/dob/notes/gender rows (see accounts.views._parse_child_rows)
   plus the "Add another child" button. Expects child_rows, children_error and
   gender_choices in context.
 {% endcomment %}
@@ -27,16 +27,16 @@
             <input class="cd-form__input body" id="rp-c{{ row.index }}-name" name="child_{{ row.index }}_name" type="text" placeholder="{% translate "Sam" %}" value="{{ row.name }}" required>
           </div>
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="rp-c{{ row.index }}-dob">{% translate "Date of birth" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
-            <ul class="cd-form__errors">{% if row.errors.dob %}<li class="caption">{{ row.errors.dob }}</li>{% endif %}</ul>
-            <input class="cd-form__input body" id="rp-c{{ row.index }}-dob" name="child_{{ row.index }}_dob" type="date" value="{{ row.dob }}" required>
+            <label class="cd-form__label label" for="rp-c{{ row.index }}-family-name">{% translate "Family name" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
+            <ul class="cd-form__errors">{% if row.errors.family_name %}<li class="caption">{{ row.errors.family_name }}</li>{% endif %}</ul>
+            <input class="cd-form__input body" id="rp-c{{ row.index }}-family-name" name="child_{{ row.index }}_family_name" type="text" placeholder="{% translate "Peeters" %}" value="{{ row.family_name }}" required>
           </div>
         </div>
         <div class="cd-form__row">
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="rp-c{{ row.index }}-notes">{% translate "Allergies or notes" %}</label>
-            <input class="cd-form__input body" id="rp-c{{ row.index }}-notes" name="child_{{ row.index }}_notes" type="text" placeholder="{% translate "None" %}" value="{{ row.notes }}">
-            <p class="cd-form__help caption">{% translate "Only the champion (the person running the dojo) sees this, on the list of a session your child is signed up for." %}</p>
+            <label class="cd-form__label label" for="rp-c{{ row.index }}-dob">{% translate "Date of birth" %}<span class="cd-form__required" aria-hidden="true">*</span></label>
+            <ul class="cd-form__errors">{% if row.errors.dob %}<li class="caption">{{ row.errors.dob }}</li>{% endif %}</ul>
+            <input class="cd-form__input body" id="rp-c{{ row.index }}-dob" name="child_{{ row.index }}_dob" type="date" value="{{ row.dob }}" required>
           </div>
           <div class="cd-form__field">
             <label class="cd-form__label label" for="rp-c{{ row.index }}-gender">{% translate "Gender" %}</label>
@@ -44,6 +44,13 @@
               {% for value, label in gender_choices %}<option value="{{ value }}"{% if value == row.gender %} selected{% endif %}>{{ label }}</option>{% endfor %}
             </select>
             <p class="cd-form__help caption">{% translate "Optional, never shown publicly. Lets us tell you about girls' sessions." %}</p>
+          </div>
+        </div>
+        <div class="cd-form__row">
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="rp-c{{ row.index }}-notes">{% translate "Allergies or notes" %}</label>
+            <input class="cd-form__input body" id="rp-c{{ row.index }}-notes" name="child_{{ row.index }}_notes" type="text" placeholder="{% translate "None" %}" value="{{ row.notes }}">
+            <p class="cd-form__help caption">{% translate "Only the champion (the person running the dojo) sees this, on the list of a session your child is signed up for." %}</p>
           </div>
         </div>
       </div>

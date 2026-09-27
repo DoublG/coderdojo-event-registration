@@ -65,7 +65,7 @@ class NinjaEngagementAdmin(admin.ModelAdmin):
 
     list_display = ["ninja", "dojo", "stage", "attended_180d", "offered_180d", "missed_in_a_row", "last_attended"]
     list_filter = ["stage", "computed_on"]
-    search_fields = ["ninja__name"]
+    search_fields = ["ninja__name", "ninja__family_name"]
 
 
 @admin.register(RegistrationCancellation)
@@ -74,7 +74,7 @@ class RegistrationCancellationAdmin(admin.ModelAdmin):
 
     list_display = ["cancelled_at", "ninja", "event", "was_waitlisted", "cancelled_by"]
     list_filter = ["was_waitlisted"]
-    search_fields = ["ninja__name", "event__name"]
+    search_fields = ["ninja__name", "ninja__family_name", "event__name"]
 
 
 @admin.register(NinjaEngagementChange)
@@ -83,7 +83,7 @@ class NinjaEngagementChangeAdmin(admin.ModelAdmin):
 
     list_display = ["changed_on", "ninja", "from_stage", "to_stage"]
     list_filter = ["to_stage", "from_stage", "changed_on"]
-    search_fields = ["ninja__name"]
+    search_fields = ["ninja__name", "ninja__family_name"]
 
 
 @admin.register(TeamAttendance)

@@ -14,7 +14,7 @@ from .models import TeamAttendance
 
 def confirmed_registrations(event):
     """The children with a confirmed (not waitlisted) place, by name."""
-    return event.registration_set.filter(waiting_list=False).select_related("ninja").order_by("ninja__name")
+    return event.registration_set.filter(waiting_list=False).select_related("ninja").order_by("ninja__name", "ninja__family_name")
 
 
 def team_rows(event):

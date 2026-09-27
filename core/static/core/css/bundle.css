@@ -9,6 +9,8 @@
   background: var(--surface);
   color: var(--ink);
   font-family: var(--font-sans);
+  /* A short page's background still reaches the bottom of the window. */
+  min-height: 100vh;
 }
 
 /* Visible keyboard focus on every interactive element */
@@ -82,6 +84,11 @@
   padding: var(--space-4);
   box-shadow: var(--shadow-sm);
 }
+
+/* The menu's and the footer's frame (core/base.html): the same on every page.
+   Each page sizes its own .shell (720px for a form, none at all on some), which
+   made the menu jump in width, or wrap the name, from one page to the next. */
+.cd-root > .shell.site-shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); box-sizing: border-box; }
 
 /* ---------- NavBar ---------- */
 .cd-nav {
@@ -165,6 +172,58 @@
   font: inherit;
 }
 .cd-nav__account-link:hover { background: var(--surface-sunken); }
+
+/* The hamburger: only below 820px, where the links fold into a panel under
+   the bar (menu.html toggles .cd-nav--open). */
+.cd-nav__menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+.cd-nav__menu-toggle:hover { background: var(--surface-sunken); }
+.cd-nav__menu-icon { width: 22px; height: 22px; }
+.cd-nav__menu-icon--close { display: none; }
+@media (max-width: 820px) {
+  .cd-nav { position: relative; }
+  .cd-nav__menu-toggle { display: inline-flex; }
+  .cd-nav--open .cd-nav__menu-icon--open { display: none; }
+  .cd-nav--open .cd-nav__menu-icon--close { display: block; }
+  .cd-nav__links {
+    display: none;
+    position: absolute;
+    top: calc(100% + var(--space-2));
+    left: 0;
+    right: 0;
+    z-index: 30;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: var(--space-2);
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+  }
+  .cd-nav--open .cd-nav__links { display: flex; }
+  .cd-nav__links > li { display: flex; align-items: center; }
+  .cd-nav__links .cd-nav__link { display: block; width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); }
+  .cd-nav__links .cd-nav__link:hover { background: var(--surface-sunken); }
+  .cd-nav__links .cd-nav__lang { padding: var(--space-2) var(--space-3); }
+  .cd-nav__links .cd-nav__lang form, .cd-nav__links .cd-nav__lang-select { width: 100%; }
+  .cd-nav__links .cd-nav__theme-toggle { margin: var(--space-1) var(--space-2); }
+  .cd-nav__links .cd-btn { width: 100%; justify-content: center; margin-top: var(--space-2); }
+  /* The account menu opens inside the panel instead of floating over it. */
+  .cd-nav__links .cd-nav__account { flex-direction: column; align-items: stretch; }
+  .cd-nav__links .cd-nav__account > button.cd-nav__link { justify-content: space-between; }
+  .cd-nav__links .cd-nav__account-menu { position: static; box-shadow: none; border: none; min-width: 0; padding-left: var(--space-3); }
+}
 
 /* ---------- Hero ---------- */
 .cd-hero {
@@ -271,7 +330,7 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
   border-radius: var(--radius-lg);
   color: var(--ink-muted);
 }
-.cd-footer__links { display: flex; gap: var(--space-5); flex-wrap: wrap; list-style: none; margin: 0; padding: 0; }
+.cd-footer__links { display: flex; gap: var(--space-2) var(--space-5); flex-wrap: wrap; list-style: none; margin: 0; padding: 0; }
 .cd-footer__links a { color: var(--ink-muted); text-decoration: underline; }
 .cd-footer__links a:hover { color: var(--ink); }
 .cd-footer p a { color: inherit; }
@@ -389,6 +448,8 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
   border-radius: var(--radius-md);
 }
 .cd-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+/* A button in a row stays on one line ("Close registrations" wrapped inside its pill). */
+.cd-table .cd-btn { white-space: nowrap; }
 .cd-table thead th {
   padding: var(--space-3) var(--space-4);
   text-align: left;
@@ -584,6 +645,9 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
   background: var(--surface);
   margin: 0;
 }
+/* display: flex above would otherwise override the hidden attribute (e.g. the
+   passkey error note that CoderDojo.initPasskey only shows on a failure). */
+.cd-form__note[hidden] { display: none; }
 .cd-form__note svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
 .cd-form__note--error { background: var(--danger-surface); border-color: var(--danger); color: var(--danger); }
 .cd-form__note--warning { background: var(--warning-surface); border-color: var(--warning); color: var(--warning); }
@@ -612,6 +676,8 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
   border: 1.5px dashed var(--border-strong);
   border-radius: var(--radius-sm);
 }
+/* Children added on family sign-up: a gap, not two dashed borders touching. */
+.cd-form__subgroup + .cd-form__subgroup { margin-top: var(--space-3); }
 .cd-form__subgroup-header {
   display: flex;
   align-items: center;
@@ -646,8 +712,16 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
 /* A row of fields laid side by side, wrapping on narrow widths */
 .cd-form__row { display: flex; flex-wrap: wrap; gap: var(--space-4); }
 .cd-form__field { display: flex; flex-direction: column; gap: var(--space-1); flex: 1 1 160px; min-width: 160px; }
+/* flex: 1 1 160px is a width for fields side by side in a .cd-form__row. Stacked
+   straight in a column (.cd-form, .cd-form__group) it would be a 160px minimum
+   height, leaving a gap under a single input. */
+.cd-form > .cd-form__field, .cd-form__group > .cd-form__field { flex: 0 0 auto; }
 
 .cd-form__label { color: var(--ink); }
+/* An upload with a current file (core/widgets/clearable_file_input.html). */
+.cd-file-input { display: flex; flex-direction: column; gap: var(--space-2); }
+.cd-file-input__current { color: var(--ink-muted); margin: 0; overflow-wrap: anywhere; }
+.cd-file-input__current a { color: var(--secondary); }
 .cd-form__required { color: var(--danger); margin-left: var(--space-1); }
 
 .cd-form__input,
@@ -684,6 +758,9 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
    where there's no sibling to stay aligned with. */
 .cd-form__errors { list-style: none; margin: 0; padding: 0; min-height: 18px; display: flex; flex-direction: column; gap: 2px; }
 .cd-form__errors li { color: var(--danger); }
+/* No errors: no reserved line. The list often sits between the label and the
+   input, where an empty 18px line reads as a gap (e.g. family sign-up). */
+.cd-form__errors:not(:has(li)) { display: none; }
 
 .cd-form__checkbox-row {
   display: flex;
@@ -997,12 +1074,14 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
   align-items: center;
   justify-content: center;
   line-height: 1.1;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) 0;
   border-radius: var(--radius-sm);
   background: var(--primary);
   color: var(--on-primary);
   flex-shrink: 0;
-  min-width: 56px;
+  /* A fixed width (fits "248.7"), so the names line up whatever the distance. */
+  width: 64px;
+  box-sizing: border-box;
 }
 
 .cd-dojo-finder__info { flex: 1; display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }

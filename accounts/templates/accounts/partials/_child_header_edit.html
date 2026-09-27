@@ -14,8 +14,12 @@ Expects `child`, `icon_choices`, `current_icon`, `gender_choices` and
   <div class="child-header__fields">
     <div class="cd-form__row">
       <div class="cd-form__field">
-        <label class="cd-form__label label" for="ec-name">{% translate "Name" %}</label>
+        <label class="cd-form__label label" for="ec-name">{% translate "First name" %}</label>
         <input class="cd-form__input body" type="text" id="ec-name" name="name" value="{{ child.name }}" autofocus required>
+      </div>
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="ec-family-name">{% translate "Family name" %}</label>
+        <input class="cd-form__input body" type="text" id="ec-family-name" name="family_name" value="{{ child.family_name }}">
       </div>
       <div class="cd-form__field">
         <label class="cd-form__label label" for="ec-dob">{% translate "Date of birth" %}</label>

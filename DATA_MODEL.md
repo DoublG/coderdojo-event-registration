@@ -139,7 +139,8 @@ classDiagram
         +relation  parent | legal_guardian | other
     }
     class Ninja {
-        +name  a child aged 7–17
+        +name  first name; a child aged 7–17
+        +family_name  full_name = name + family_name
         +date_of_birth
         +gender  girl | boy | other | unspecified
         +allergies_notes
@@ -1192,7 +1193,8 @@ erDiagram
     }
     NINJA {
         bigint id PK
-        string name
+        string name "first name"
+        string family_name
         date date_of_birth "ninjas are 7-17"
         bigint ninja_account_id FK "nullable, unique"
         bigint home_dojo_id FK

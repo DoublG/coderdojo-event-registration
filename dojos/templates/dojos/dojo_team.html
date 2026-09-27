@@ -31,7 +31,8 @@
   .mentor-detail-root .team-section { margin-top: var(--space-8); }
   .mentor-detail-root .team-section h2 { color: var(--ink); text-align: center; margin: 0 0 var(--space-1); }
   .mentor-detail-root .team-section .team-desc { color: var(--ink-muted); text-align: center; margin: 0 auto var(--space-5); max-width: 560px; }
-  .mentor-detail-root .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+  /* Centred under the centred heading, and never narrower than a name needs (a fixed 3-column grid squeezed cards to ~85px on a phone). */
+  .mentor-detail-root .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 220px)); justify-content: center; gap: var(--space-4); }
   .mentor-detail-root .team-grid .cd-mentor {
     flex-direction: column; align-items: center; text-align: center; gap: var(--space-2);
     background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);

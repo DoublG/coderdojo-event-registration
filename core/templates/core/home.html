@@ -8,19 +8,24 @@
 <style>
   .home-root { background: var(--surface); }
   .home-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
-  .home-root .section { padding: var(--space-8) 0; }
+  /* .shell's side padding stays: without it the sections sit wider than the
+     hero on desktop and touch the screen edge on a phone. */
+  .home-root .section { padding: var(--space-8) var(--space-4); }
   .home-root .section-head { max-width: 640px; margin: 0 0 var(--space-5); }
   .home-root .section-head h2 { color: var(--ink); margin: 0 0 var(--space-2); }
   .home-root .section-head p { color: var(--ink-muted); margin: 0; }
   .home-root .row { display: flex; gap: var(--space-5); flex-wrap: wrap; }
   .home-root .row > * { flex: 1 1 220px; }
   .home-root .center { display: flex; justify-content: center; }
+  .home-root .finder-box { background: var(--surface-sunken); border-radius: var(--radius-lg); padding: var(--space-6); }
+  .home-root .finder-box .cd-dojo-finder { max-width: none; }  /* the box's full width, like the dojo finder page */
+  @media (max-width: 640px) { .home-root .finder-box { padding: var(--space-5) var(--space-4); } }
   .home-root .cta-wrap { background: var(--surface-raised); border-radius: var(--radius-lg); }
   @media (max-width: 640px) {
-    .home-root .section { padding: var(--space-7) 0; }
+    .home-root .section { padding: var(--space-7) var(--space-4); }
   }
 
-  .home-root .carousel-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+  .home-root .carousel-section-head { max-width: none; display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
   .home-root .carousel__controls { display: flex; gap: var(--space-2); flex-shrink: 0; }
   .home-root .carousel__nav {
     display: inline-flex; align-items: center; justify-content: center;
@@ -86,12 +91,12 @@
     </div>
   </div>
 
-  <div class="shell section" style="background: var(--surface-sunken); border-radius: var(--radius-lg); padding: var(--space-6);">
-    <div class="section-head">
-      <h2 class="heading-lg">{% translate "Find a dojo near you" %}</h2>
-      <p class="body">{% translate "Every session is free and run by local volunteers." %}</p>
-    </div>
-    <div class="center">
+  <div class="shell section">
+    <div class="finder-box">
+      <div class="section-head">
+        <h2 class="heading-lg">{% translate "Find a dojo near you" %}</h2>
+        <p class="body">{% translate "Every session is free and run by local volunteers." %}</p>
+      </div>
       {% include "dojos/partials/_dojo_finder_widget.html" %}
     </div>
   </div>

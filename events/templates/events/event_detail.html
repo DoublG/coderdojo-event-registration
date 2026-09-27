@@ -17,8 +17,8 @@
   .eventdetail-root .event-header__image {
     width: 88px; height: 88px; border-radius: var(--radius-md); object-fit: cover; flex-shrink: 0;
   }
-  .eventdetail-root .event-header .hosted-by { color: var(--secondary); }
-  .eventdetail-root .event-header h1 { color: var(--ink); margin: 0; }
+  .eventdetail-root .event-header .hosted-by a { color: var(--secondary); }
+  .eventdetail-root .event-header h1 { color: var(--ink); margin: 0; overflow-wrap: anywhere; }
   .eventdetail-root .event-header p.meta { color: var(--ink-muted); margin: var(--space-2) 0 0; }
   .eventdetail-root h2.section-title { color: var(--ink); margin: 0 0 var(--space-4); }
   .eventdetail-root .markdown-content { color: var(--ink); }
@@ -43,6 +43,12 @@
   @media (max-width: 800px) {
     .eventdetail-root .event-layout { flex-direction: column; }
     .eventdetail-root .event-side { position: static; width: 100%; flex-basis: auto; }
+    /* The booking card first: on a phone it would otherwise end up under everything. */
+    .eventdetail-root .event-side { order: -1; }
+  }
+  @media (max-width: 560px) {
+    .eventdetail-root .event-header__image { width: 56px; height: 56px; }
+    .eventdetail-root .event-header h1 { font-size: 32px; }
   }
 </style>
 {% endblock %}
@@ -62,7 +68,7 @@
         {{ event.start_time|date:"D j M" }} · {{ event.start_time|time:"H:i" }}–{{ event.end_time|time:"H:i" }}
         {% if event.venue_name %} · {{ event.venue_name }}{% endif %}
       </p>
-      <p class="body">{% include "events/partials/_organiser.html" %}</p>
+      <p class="body hosted-by">{% include "events/partials/_organiser.html" %}</p>
     </div>
 
     <div class="event-layout">

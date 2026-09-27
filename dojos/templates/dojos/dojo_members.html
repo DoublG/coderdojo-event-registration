@@ -50,7 +50,7 @@ session's attendance list instead. "Promote" posts to dojo_team_action
               <div class="member-person">
                 {% include "accounts/partials/_child_avatar.html" with child=ninja %}
                 <div>
-                  <p>{{ ninja.name }}</p>
+                  <p>{{ ninja.full_name }}</p>
                   <p class="caption muted">{% if ninja.age %}{% blocktranslate with age=ninja.age %}Age {{ age }}{% endblocktranslate %}{% endif %}{% if row.has_login %}{% if ninja.age %} · {% endif %}{% translate "Own login" %}{% endif %}</p>
                 </div>
               </div>
@@ -70,7 +70,7 @@ session's attendance list instead. "Promote" posts to dojo_team_action
                 <span class="cd-badge cd-badge--accent caption">{% translate "Youth mentor" %}</span>
               {% elif row.can_promote %}
                 <form method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}"
-                      onsubmit="{% blocktranslate asvar confirm_msg with ninja=ninja.name dojo=dojo.name %}Make {{ ninja }} a youth mentor at {{ dojo }}? Their family gets a mail about it.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
+                      onsubmit="{% blocktranslate asvar confirm_msg with ninja=ninja.full_name dojo=dojo.name %}Make {{ ninja }} a youth mentor at {{ dojo }}? Their family gets a mail about it.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="promote">
                   <input type="hidden" name="ninja_id" value="{{ ninja.id }}">

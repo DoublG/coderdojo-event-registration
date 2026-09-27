@@ -59,6 +59,7 @@ def manage_privacy(request):
                 | Q(first_name__icontains=query)
                 | Q(last_name__icontains=query)
                 | Q(guardianships__ninja__name__icontains=query)
+                | Q(guardianships__ninja__family_name__icontains=query)
             )
             .annotate(children_count=Count("guardianships", distinct=True))
             .distinct()

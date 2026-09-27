@@ -90,6 +90,7 @@ def give_login(guardian, ninja, email):
             username=unique_username(slugify(ninja.name) or "ninja"),
             account_type=User.NINJA,
             first_name=ninja.name,
+            last_name=ninja.family_name,
             preferred_language=guardian.preferred_language,
         )
     account.is_active = True

@@ -1,0 +1,16 @@
+{% comment %}
+  forms.ClearableFileInput on the site's own forms (set in core.apps): Django's
+  template puts loose text, a link and a checkbox straight into the field,
+  which a .cd-form__field (a flex column) lays out one bit per line.
+{% endcomment %}<div class="cd-file-input">
+  {% if widget.is_initial %}
+    <p class="cd-file-input__current caption">{{ widget.initial_text }}: <a href="{{ widget.value.url }}">{{ widget.value }}</a></p>
+    {% if not widget.required %}
+      <label class="cd-form__checkbox-row" for="{{ widget.checkbox_id }}">
+        <input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}"{% if widget.attrs.disabled %} disabled{% endif %}{% if widget.attrs.checked %} checked{% endif %}>
+        <span class="body-sm">{{ widget.clear_checkbox_label }}</span>
+      </label>
+    {% endif %}
+  {% endif %}
+  <input type="{{ widget.type }}" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+</div>

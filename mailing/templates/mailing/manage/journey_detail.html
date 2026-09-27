@@ -6,7 +6,7 @@
 {% block manage_extra_style %}
 <style>
   .campaign-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-5); align-items: start; }
-  @media (max-width: 960px) { .campaign-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 960px) { .campaign-grid { grid-template-columns: minmax(0, 1fr); } }
   .campaign-card { padding: var(--space-5); margin-bottom: var(--space-5); }
   .campaign-card h2 { margin-top: 0; }
   .campaign-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: var(--space-3); }

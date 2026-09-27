@@ -63,8 +63,10 @@ class EventSearchForm(forms.Form):
 
 # Belgium's own date/time notation — day before month, 24-hour clock — used
 # for EventForm's date/start_time/end_time fields regardless of the
-# visitor's own browser/OS locale (a native <input type="date"> can't be
-# forced to a fixed display order, so these are plain text fields instead).
+# visitor's own browser/OS locale (a native <input type="date"> or
+# type="time" can't be forced to a fixed display order or to 24 hours, so these
+# are plain text fields instead). The widgets carry the format too, so an
+# existing event's values are shown the way the fields read them back.
 BELGIAN_DATE_FORMAT = "%d/%m/%Y"
 BELGIAN_TIME_FORMAT = "%H:%M"
 
@@ -86,19 +88,22 @@ class EventForm(forms.ModelForm):
 
     event_date = forms.DateField(
         input_formats=[BELGIAN_DATE_FORMAT],
-        widget=forms.TextInput(attrs={"class": "cd-form__input body", "placeholder": _("dd/mm/yyyy"), "inputmode": "numeric"}),
+        widget=forms.DateInput(
+            attrs={"class": "cd-form__input body", "placeholder": _("dd/mm/yyyy"), "inputmode": "numeric"},
+            format=BELGIAN_DATE_FORMAT,
+        ),
     )
     start_time = forms.TimeField(
         input_formats=[BELGIAN_TIME_FORMAT],
         widget=forms.TimeInput(
-            attrs={"class": "cd-form__input body", "type": "time", "step": "60", "placeholder": _("HH:MM")},
+            attrs={"class": "cd-form__input body", "placeholder": _("HH:MM")},
             format=BELGIAN_TIME_FORMAT,
         ),
     )
     end_time = forms.TimeField(
         input_formats=[BELGIAN_TIME_FORMAT],
         widget=forms.TimeInput(
-            attrs={"class": "cd-form__input body", "type": "time", "step": "60", "placeholder": _("HH:MM")},
+            attrs={"class": "cd-form__input body", "placeholder": _("HH:MM")},
             format=BELGIAN_TIME_FORMAT,
         ),
     )

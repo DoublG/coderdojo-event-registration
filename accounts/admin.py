@@ -73,9 +73,9 @@ class NinjaAdmin(LogAccessAdminMixin, AuditHistoryAdminMixin, admin.ModelAdmin):
     jobs leave it and its own login alone (the retention job,
     privacy.retention), so it stays until it's handled here."""
 
-    list_display = ["name", "date_of_birth", "gender", "home_dojo", "current_belt", "account"]
+    list_display = ["name", "family_name", "date_of_birth", "gender", "home_dojo", "current_belt", "account"]
     list_filter = ["gender"]
-    search_fields = ["name"]
+    search_fields = ["name", "family_name"]
     inlines = [NinjaGuardianshipInline]
 
     def get_queryset(self, request):

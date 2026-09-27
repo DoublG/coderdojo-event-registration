@@ -182,7 +182,12 @@ class Ninja(models.Model):
     UNSPECIFIED = "unspecified"
     GENDER_CHOICES = [(GIRL, _("Girl")), (BOY, _("Boy")), (OTHER, _("Other")), (UNSPECIFIED, _("Prefer not to say"))]
 
-    name = models.CharField(max_length=200)
+    # The child's first name; `full_name` adds the family name. Family pages
+    # say just the first name in sentences; the dojo team's lists, the API and
+    # anything a child is picked from show the full name, so two children with
+    # the same first name stay apart.
+    name = models.CharField("first name", max_length=200)
+    family_name = models.CharField(max_length=200, blank=True, default="")
     gender = models.CharField(
         max_length=12, choices=GENDER_CHOICES, default=UNSPECIFIED,
         help_text="Optional, never shown publicly. Used to let families know about girls' sessions "
@@ -214,7 +219,11 @@ class Ninja(models.Model):
     objects = NinjaQuerySet.as_manager()
 
     def __str__(self):
-        return self.name
+        return self.full_name
+
+    @property
+    def full_name(self):
+        return f"{self.name} {self.family_name}".strip()
 
     @property
     def age(self):

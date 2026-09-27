@@ -14,7 +14,7 @@ the ninja views their own page — then the name isn't clickable).
         {% if can_edit %}title="{% translate "Click to edit" %}"
         hx-get="{% url 'edit_ninja' ninja_id=child.id %}"
         hx-target="#child-header" hx-swap="outerHTML"{% endif %}>
-      {{ child.name }}
+      {{ child.full_name }}
     </h1>
     <p class="body">
       {% if child.age %}{% blocktranslate with age=child.age %}Age {{ age }}{% endblocktranslate %}{% endif %}

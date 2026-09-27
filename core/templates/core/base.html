@@ -25,14 +25,14 @@
 <script src="{% static 'core/js/bundle.js' %}"></script>
 
 <div class="cd-root {% block root_class %}{% endblock %}" style="padding: 0;">
-  <div class="shell">
+  <div class="shell site-shell">
     {% block menu %}{% include "core/menu.html" %}{% endblock %}
     {% include "accounts/partials/_sign_in_notice.html" %}
   </div>
 
   {% block content %}{% endblock %}
 
-  <div class="shell">
+  <div class="shell site-shell">
     <footer class="cd-footer" style="margin-top: var(--space-8);">
       <p class="body-sm" style="margin:0;">{{ organisation.legal_name }} · {{ organisation.office|join:", " }} · <a href="mailto:{{ organisation.email }}">{{ organisation.email }}</a></p>
       <ul class="cd-footer__links body-sm">

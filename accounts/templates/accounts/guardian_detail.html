@@ -73,8 +73,12 @@
             </select>
           </div>
           <div class="cd-form__field">
-            <label class="cd-form__label label" for="ac-name">{% translate "Child's name" %}</label>
+            <label class="cd-form__label label" for="ac-name">{% translate "First name" %}</label>
             <input class="cd-form__input body" type="text" id="ac-name" name="name" required>
+          </div>
+          <div class="cd-form__field">
+            <label class="cd-form__label label" for="ac-family-name">{% translate "Family name" %}</label>
+            <input class="cd-form__input body" type="text" id="ac-family-name" name="family_name" value="{{ guardian.last_name }}" required>
           </div>
           <div class="cd-form__field">
             <label class="cd-form__label label" for="ac-dob">{% translate "Date of birth (optional)" %}</label>

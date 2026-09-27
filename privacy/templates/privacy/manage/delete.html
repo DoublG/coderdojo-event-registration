@@ -19,8 +19,8 @@
       <p class="body-sm">{% translate "Only for a request from the account holder, made by mail or post; families can also delete their account themselves from their account page. It happens right away and can't be undone." %}</p>
       <ul class="body-sm">
         <li>{% if preview.volunteer %}{% translate "A champion or mentor: the account is cleaned. Their name stays on past sessions and on belts and badges they awarded; the rest is deleted." %}{% if preview.keeps_profile %} {% translate "Their team-page profile stays, as they chose to show it." %}{% endif %}{% else %}{% translate "The account is erased: login, contact details, mail preferences and applications." %}{% endif %}</li>
-        <li>{% translate "Children erased with it:" %} {% for child in preview.children %}{{ child.name }}{% if not forloop.last %}, {% endif %}{% empty %}{% translate "none" %}{% endfor %}</li>
-        {% if preview.shared_children %}<li>{% translate "Children who stay with their other guardian:" %} {% for child in preview.shared_children %}{{ child.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>{% endif %}
+        <li>{% translate "Children erased with it:" %} {% for child in preview.children %}{{ child.full_name }}{% if not forloop.last %}, {% endif %}{% empty %}{% translate "none" %}{% endfor %}</li>
+        {% if preview.shared_children %}<li>{% translate "Children who stay with their other guardian:" %} {% for child in preview.shared_children %}{{ child.full_name }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>{% endif %}
       </ul>
       <p class="body-sm">{% url 'manage_privacy_export' user_id=account.id as export_url %}{% blocktranslate %}If they asked for a copy too, <a href="{{ export_url }}">download their data</a> first.{% endblocktranslate %}</p>
 

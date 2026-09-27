@@ -34,7 +34,7 @@
         <p class="body-sm">{% if preview.volunteer %}{% translate "Your login, your contact details, your mail preferences, your applications and your background-check details." %}{% else %}{% translate "Your login, your contact details and your mail preferences." %}{% endif %}</p>
         {% if preview.children %}
           <p class="body-sm">{% translate "These children are deleted with your account: their details, their own login if they have one, their belts and badges. The sessions they came to keep counting, without their name." %}</p>
-          <ul class="children body-sm">{% for child in preview.children %}<li>{{ child.name }}</li>{% endfor %}</ul>
+          <ul class="children body-sm">{% for child in preview.children %}<li>{{ child.full_name }}</li>{% endfor %}</ul>
         {% endif %}
 
         {% if preview.volunteer or preview.shared_children %}
@@ -44,7 +44,7 @@
           {% endif %}
           {% if preview.shared_children %}
             <p class="body-sm">{% translate "These children stay, with their other parent or guardian:" %}</p>
-            <ul class="children body-sm">{% for child in preview.shared_children %}<li>{{ child.name }}</li>{% endfor %}</ul>
+            <ul class="children body-sm">{% for child in preview.shared_children %}<li>{{ child.full_name }}</li>{% endfor %}</ul>
           {% endif %}
         {% endif %}
 

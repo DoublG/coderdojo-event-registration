@@ -98,6 +98,7 @@ class Command(BaseCommand):
                     account = User(
                         username=child_username,
                         first_name=child_first_name,
+                        last_name=last_name,
                         account_type=User.NINJA,
                     )
                     account.set_password(child_password)
@@ -106,7 +107,8 @@ class Command(BaseCommand):
                     child_credential_rows.append((child_username, "", child_password))
 
                 ninja = Ninja.objects.create(
-                    name=f"{child_first_name} {last_name}",
+                    name=child_first_name,
+                    family_name=last_name,
                     account=account,
                     home_dojo=rng.choice(dojos) if dojos else None,
                     member_since=today - timedelta(days=rng.randint(30, 5 * 365)),

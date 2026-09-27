@@ -29,6 +29,13 @@
   .event-root .event-row .info .meta { color: var(--ink-muted); margin: 0; }
   .event-root .event-row .badges { display: flex; gap: var(--space-2); margin-top: var(--space-2); flex-wrap: wrap; }
   .event-root .event-row .action { flex: 0 0 auto; }
+  .event-root .promotion-slot > * { margin-bottom: var(--space-6); }
+  /* On a phone the button goes under the text, so the title keeps the width. */
+  @media (max-width: 560px) {
+    .event-root .event-row { flex-wrap: wrap; align-items: flex-start; }
+    .event-root .event-row .info { flex-basis: calc(100% - 56px - var(--space-4)); }
+    .event-root .event-row .action { flex-basis: 100%; padding-left: calc(56px + var(--space-4)); }
+  }
   .event-root .find-cta { padding: var(--space-6); text-align: center; margin-top: var(--space-7); }
   .event-root .find-cta p { color: var(--ink-muted); margin: 0 0 var(--space-4); }
   .event-root .filter-chip {
@@ -94,7 +101,7 @@
       </div>
     {% endif %}
 
-    {% include "content/partials/_promotion_banner.html" %}
+    <div class="promotion-slot">{% include "content/partials/_promotion_banner.html" %}</div>
 
     {% include "events/partials/_event_results_page.html" %}
 

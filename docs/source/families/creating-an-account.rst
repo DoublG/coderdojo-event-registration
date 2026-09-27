@@ -14,8 +14,8 @@ To create an account:
    live, and we can let you know about dojos and sessions near you. Pick
    the language you'd like to receive emails in; it starts as the language
    you're browsing the site in.
-#. Add each child who'll be attending — their name and date of birth are
-   required (dojos are for ninjas aged 7 to 17, so a date of birth outside
+#. Add each child who'll be attending — their first name, family name and
+   date of birth are required (dojos are for ninjas aged 7 to 17, so a date of birth outside
    that range is flagged); allergies/notes are optional and only shown
    to the champion of a dojo where your child is signed up for a
    session. There's no need to describe your child's

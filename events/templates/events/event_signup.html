@@ -80,7 +80,7 @@
             <ul class="confirmation-list">
               {% for result in results %}
                 <li>
-                  <span class="body">{{ result.child.name }}</span>
+                  <span class="body">{{ result.child.full_name }}</span>
                   {% if result.waiting_list %}
                     <span class="cd-badge cd-badge--warning caption">{% translate "Waiting list" %}</span>
                   {% else %}
@@ -136,7 +136,7 @@
                     <input type="checkbox" disabled>
                     {% include "accounts/partials/_child_avatar.html" with child=child %}
                     <label>
-                      <span class="body">{{ child.name }}</span>
+                      <span class="body">{{ child.full_name }}</span>
                       <span class="body-sm">{% if child.age %}{% blocktranslate with age=child.age %}Age {{ age }}{% endblocktranslate %}{% endif %}{% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}</span>
                     </label>
                     {% if entry.registration.waiting_list %}
@@ -150,7 +150,7 @@
                     <input type="checkbox" id="es-child-{{ child.id }}" name="child" value="{{ child.id }}">
                     {% include "accounts/partials/_child_avatar.html" with child=child %}
                     <label for="es-child-{{ child.id }}">
-                      <span class="body">{{ child.name }}</span>
+                      <span class="body">{{ child.full_name }}</span>
                       <span class="body-sm">{% if child.age %}{% blocktranslate with age=child.age %}Age {{ age }}{% endblocktranslate %}{% endif %}{% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}</span>
                     </label>
                     <span class="child-select-row__status cd-badge caption" data-status style="display:none;"></span>

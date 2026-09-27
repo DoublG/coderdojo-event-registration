@@ -50,7 +50,7 @@ def _session_context(registration, user=None):
     dojo wrote one (core.content_languages)."""
     event = registration.event
     return {
-        "ninja_name": registration.ninja.name.split()[0],
+        "ninja_name": registration.ninja.name,
         "event_name": event.localized("name", _mail_language(user)) if user else event.name,
         "dojo_name": event.dojo.name,
         "start_time": timezone.localtime(event.start_time),
@@ -106,7 +106,7 @@ def youth_mentor_promoted_mail(membership):
     if ninja is None:
         return 0
     context = {
-        "ninja_name": ninja.name.split()[0],
+        "ninja_name": ninja.name,
         "dojo_name": membership.dojo.name,
         "promoted_by": membership.promoted_by.name if membership.promoted_by_id else "",
         "ninja_url": settings.SITE_URL + reverse("ninja_detail", kwargs={"ninja_id": ninja.pk}),

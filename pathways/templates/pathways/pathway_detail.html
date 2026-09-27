@@ -16,6 +16,9 @@
   .pathwaydetail-root .pathway-header .tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
   .pathwaydetail-root .section { padding: var(--space-7) 0; }
   .pathwaydetail-root .section h2 { color: var(--ink); margin: 0 0 var(--space-2); }
+  /* The description's paragraphs (|linebreaks) would add their margins on top of the section padding. */
+  .pathwaydetail-root .pathway-about p:first-child { margin-top: 0; }
+  .pathwaydetail-root .pathway-about p:last-child { margin-bottom: 0; }
   .pathwaydetail-root .section > p.section-desc { color: var(--ink-muted); margin: 0 0 var(--space-5); }
   .pathwaydetail-root .row { display: flex; gap: var(--space-5); flex-wrap: wrap; }
   .pathwaydetail-root .row > * { flex: 1 1 260px; }

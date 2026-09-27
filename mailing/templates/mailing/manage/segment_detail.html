@@ -6,7 +6,7 @@
 {% block manage_extra_style %}
 <style>
   .segment-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-5); align-items: start; }
-  @media (max-width: 960px) { .segment-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 960px) { .segment-grid { grid-template-columns: minmax(0, 1fr); } }
   .segment-card { padding: var(--space-5); margin-bottom: var(--space-5); }
   .segment-card h2 { margin-top: 0; }
   .segment-group { border: 1px solid var(--border); border-left: 4px solid var(--accent, var(--border)); border-radius: var(--radius-md, 8px); padding: var(--space-4); margin: var(--space-3) 0; }
