@@ -16,9 +16,11 @@ from django.utils.safestring import SafeString
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 
+from core.image_library import library_filename
 from geo.models import Municipality
 
-from .models import SignInRequirement, User
+from .models import Ninja, SignInRequirement, User
+from .template_avatars import TEMPLATE_KID_AVATARS
 
 
 def _password_rules():
@@ -241,3 +243,104 @@ class ChildLoginForm(forms.Form):
         self.fields["email"].label = lazy(lambda: _("%(name)s's email address") % {"name": child.name}, str)()
         if child.account is not None:
             self.fields["email"].initial = child.account.email
+
+
+class LenientChoiceField(forms.ChoiceField):
+    """A choice that's never an error: anything unknown (or missing) becomes
+    `fallback`. For optional pickers where a stale or tampered value should
+    just fall back, like the child's gender (_clean_gender) or avatar."""
+
+    def __init__(self, *args, fallback="", **kwargs):
+        self.fallback = fallback
+        super().__init__(*args, required=False, **kwargs)
+
+    def to_python(self, value):
+        value = super().to_python(value)
+        return value if self.valid_value(value) else self.fallback
+
+
+class ChildForm(forms.ModelForm):
+    """A child's details, as the family enters them: Add a child
+    (AddChildForm) and the child page's edit header (EditChildForm). The
+    7–17 rule on the date of birth is Ninja.clean()'s (only for a date that
+    changes)."""
+
+    gender = LenientChoiceField(label=_("Gender (optional)"), choices=Ninja.GENDER_CHOICES, fallback=Ninja.UNSPECIFIED)
+    # A standard avatar (accounts.views._set_icon links it); anything else
+    # leaves the photo as it is.
+    icon = LenientChoiceField(label=_("Avatar"), choices=TEMPLATE_KID_AVATARS)
+
+    class Meta:
+        model = Ninja
+        fields = ["name", "family_name", "date_of_birth", "gender", "allergies_notes"]
+        labels = {
+            "name": _("First name"),
+            "family_name": _("Family name"),
+            "allergies_notes": _("Allergies or notes (optional)"),
+        }
+        help_texts = {
+            "allergies_notes": _("Only the champion (the person running the dojo) sees this, on the list of a session your child is signed up for."),
+        }
+        error_messages = {
+            "name": {"required": _("First name is required.")},
+            "family_name": {"required": _("Family name is required.")},
+        }
+        widgets = {
+            "date_of_birth": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            "allergies_notes": forms.Textarea(attrs={"rows": 2, "placeholder": _("None")}),
+        }
+
+
+class AddChildForm(ChildForm):
+    """The account page's "Register another child" form (accounts.views.add_ninja)."""
+
+    # The approved wording is a partial (_child_data_consent.html), so the
+    # page writes this checkbox's label itself.
+    consent = forms.BooleanField(required=False)
+
+    field_order = ["icon", "name", "family_name", "date_of_birth", "gender", "allergies_notes"]
+
+    def __init__(self, *args, guardian, **kwargs):
+        kwargs.setdefault("auto_id", "ac-%s")
+        kwargs.setdefault("initial", {"family_name": guardian.last_name, "gender": Ninja.UNSPECIFIED})
+        super().__init__(*args, **kwargs)
+        self.fields["family_name"].required = True
+        self.fields["date_of_birth"].label = _("Date of birth (optional)")
+
+
+class EditChildForm(ChildForm):
+    """The child page's edit header (accounts.views.edit_ninja). A field the
+    post leaves out keeps what's stored, and the family name stays optional:
+    a child added before it was asked for can still be edited."""
+
+    KEPT_WHEN_MISSING = ["family_name", "date_of_birth", "gender", "allergies_notes", "home_dojo"]
+
+    home_dojo = forms.ModelChoiceField(label=_("Home dojo"), queryset=None, required=False, empty_label=_("None yet"))
+
+    field_order = ["name", "family_name", "date_of_birth", "gender", "home_dojo", "icon", "allergies_notes"]
+
+    def __init__(self, *args, **kwargs):
+        from django.db.models import Q
+
+        from dojos.models import Dojo
+
+        from . import home_dojo
+
+        kwargs.setdefault("auto_id", "ec-%s")
+        super().__init__(*args, **kwargs)
+        child = self.instance
+        self.fields["name"].widget.attrs["autofocus"] = True
+        self.fields["date_of_birth"].label = _("Date of birth")
+        # The public dojos, plus the current one if it's no longer public.
+        self.fields["home_dojo"].queryset = Dojo.objects.filter(
+            Q(pk__in=home_dojo.home_dojo_choices().values("pk")) | Q(pk=child.home_dojo_id)
+        ).order_by("name")
+        self.fields["home_dojo"].label_from_instance = lambda dojo: dojo.name
+        self.fields["home_dojo"].initial = child.home_dojo_id
+        self.fields["icon"].initial = library_filename(child.photo, "ninjas")
+        if self.is_bound:
+            data = self.data.copy()
+            for name in self.KEPT_WHEN_MISSING:
+                if name not in data:
+                    data[name] = self.get_initial_for_field(self.fields[name], name) or ""
+            self.data = data

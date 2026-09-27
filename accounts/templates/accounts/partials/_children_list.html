@@ -5,11 +5,10 @@ and `children` (list of {child, registrations} dicts, one row per
 session) in context — see accounts.views.account_home and
 accounts.views.add_ninja, which both render this same partial (the latter
 as an htmx swap target after adding a child, so the list updates without
-a full page reload).
+a full page reload, with the add form after it, out of band).
 {% endcomment %}
 <section id="children-list">
   <h2 class="heading-lg section-title">{% translate "Your children" %}</h2>
-  {% if add_error %}<p class="caption" role="alert" style="color: var(--danger, #b3261e);">{{ add_error }}</p>{% endif %}
 
   {% for entry in children %}
     <div class="cd-card child-card">
@@ -68,3 +67,4 @@ a full page reload).
     <p class="body" style="color: var(--ink-muted);">{% translate "No children registered yet." %}</p>
   {% endfor %}
 </section>
+{% if add_child_oob %}{% include "accounts/partials/_add_child.html" with form=add_child_form oob=True %}{% endif %}

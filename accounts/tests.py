@@ -1179,7 +1179,7 @@ class HomeDojoTests(TestCase):
 
     def test_edit_form_offers_public_dojos(self):
         response = self.client.get(reverse("edit_ninja", kwargs={"ninja_id": self.child.id}))
-        self.assertEqual(set(response.context["home_dojo_choices"]), {self.ghent, self.aalst})
+        self.assertEqual(set(response.context["form"].fields["home_dojo"].queryset), {self.ghent, self.aalst})
 
     def test_backfill_picks_the_most_attended_dojo(self):
         from io import StringIO

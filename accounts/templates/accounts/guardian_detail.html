@@ -39,7 +39,7 @@
   .guardian-root .add-child summary p { color: var(--ink-muted); margin: 0 0 var(--space-4); }
   .guardian-root .add-child[open] summary { display: none; }
   .guardian-root .add-child form { text-align: left; }
-  .guardian-root .add-child .cd-form__row { align-items: flex-end; }
+  .guardian-root .add-child .cd-form__row { align-items: flex-start; }
   .guardian-root .add-child .cd-form__row .cd-form__field { flex: 1 1 180px; }
 </style>
 {% endblock %}
@@ -54,60 +54,7 @@
 
     {% include "accounts/partials/_children_list.html" %}
 
-    <details class="cd-card add-child">
-      <summary>
-        <p class="body">{% translate "Registering another child?" %}</p>
-        <span class="cd-btn cd-btn--primary label">{% translate "Register another child" %}</span>
-      </summary>
-      <form class="cd-form" method="post" action="{% url 'add_ninja' %}"
-            hx-post="{% url 'add_ninja' %}" hx-target="#children-list" hx-swap="outerHTML"
-            hx-on::after-request="if(event.detail.successful){this.reset(); this.closest('details').open=false;}">
-        {% csrf_token %}
-        <div class="cd-form__row">
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="ac-icon">{% translate "Avatar" %}</label>
-            <select class="cd-form__select body" id="ac-icon" name="icon">
-              {% for value, label in icon_choices %}
-                <option value="{{ value }}">{{ label }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="ac-name">{% translate "First name" %}</label>
-            <input class="cd-form__input body" type="text" id="ac-name" name="name" required>
-          </div>
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="ac-family-name">{% translate "Family name" %}</label>
-            <input class="cd-form__input body" type="text" id="ac-family-name" name="family_name" value="{{ guardian.last_name }}" required>
-          </div>
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="ac-dob">{% translate "Date of birth (optional)" %}</label>
-            <input class="cd-form__input body" type="date" id="ac-dob" name="date_of_birth">
-          </div>
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="ac-gender">{% translate "Gender (optional)" %}</label>
-            <select class="cd-form__select body" id="ac-gender" name="gender">
-              {% for value, label in gender_choices %}<option value="{{ value }}"{% if value == "unspecified" %} selected{% endif %}>{{ label }}</option>{% endfor %}
-            </select>
-          </div>
-        </div>
-        <div class="cd-form__row">
-          <div class="cd-form__field">
-            <label class="cd-form__label label" for="ac-notes">{% translate "Allergies or notes (optional)" %}</label>
-            <textarea class="cd-form__textarea body" id="ac-notes" name="allergies_notes" rows="2" placeholder="{% translate "None" %}"></textarea>
-            <p class="cd-form__help caption">{% translate "Only the champion (the person running the dojo) sees this, on the list of a session your child is signed up for." %}</p>
-          </div>
-        </div>
-        <div class="cd-form__checkbox-row">
-          <input type="checkbox" id="ac-consent" name="consent">
-          <label class="body-sm" for="ac-consent">{% include "accounts/partials/_child_data_consent.html" %} <span class="caption">{% translate "Optional; you can change it for each child on your Mail preferences page." %}</span></label>
-        </div>
-        <div class="cd-form__actions">
-          <button type="button" class="cd-btn cd-btn--ghost label" onclick="this.closest('details').open=false;">{% translate "Cancel" %}</button>
-          <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Add child" %}</button>
-        </div>
-      </form>
-    </details>
+    {% include "accounts/partials/_add_child.html" with form=add_child_form %}
 
     <div class="cd-card add-child" style="margin-top: var(--space-5); text-align: left;">
       <h2 class="heading-md section-title">{% translate "Mail preferences" %}</h2>

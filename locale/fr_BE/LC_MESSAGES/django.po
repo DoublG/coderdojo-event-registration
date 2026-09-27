@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 09:28+0000\n"
+"POT-Creation-Date: 2026-09-27 09:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -26,7 +26,7 @@ msgstr "L'adresse e-mail de votre enfant est nécessaire pour un compte."
 msgid "Enter a valid email address."
 msgstr "Saisissez une adresse e-mail valide."
 
-#: accounts/child_accounts.py:55 accounts/forms.py:138
+#: accounts/child_accounts.py:55 accounts/forms.py:140
 msgid "An account already exists with this email."
 msgstr "Un compte existe déjà avec cette adresse e-mail."
 
@@ -40,23 +40,23 @@ msgstr "%(name)s a déjà un compte."
 msgid "%(name)s doesn't have a login."
 msgstr "%(name)s n'a pas de compte."
 
-#: accounts/forms.py:36
+#: accounts/forms.py:38
 msgid "New password"
 msgstr "Nouveau mot de passe"
 
-#: accounts/forms.py:38
+#: accounts/forms.py:40
 msgid "Confirm new password"
 msgstr "Confirmez le nouveau mot de passe"
 
-#: accounts/forms.py:50
+#: accounts/forms.py:52
 msgid "Temporary password"
 msgstr "Mot de passe temporaire"
 
-#: accounts/forms.py:50
+#: accounts/forms.py:52
 msgid "Current password"
 msgstr "Mot de passe actuel"
 
-#: accounts/forms.py:57 accounts/forms.py:83 accounts/forms.py:110
+#: accounts/forms.py:59 accounts/forms.py:85 accounts/forms.py:112
 #: accounts/templates/accounts/manage/security.html:71
 #: core/templates/core/contact.html:34 dojos/forms.py:69 dojos/forms.py:171
 #: dojos/templates/dojos/dojo_detail.html:238
@@ -64,44 +64,44 @@ msgstr "Mot de passe actuel"
 msgid "Email"
 msgstr "E-mail"
 
-#: accounts/forms.py:92 accounts/forms.py:116
+#: accounts/forms.py:94 accounts/forms.py:118
 msgid "Password"
 msgstr "Mot de passe"
 
-#: accounts/forms.py:97 accounts/forms.py:98
+#: accounts/forms.py:99 accounts/forms.py:100
 msgid "That email/password combination doesn't match an account."
 msgstr "Cette combinaison e-mail et mot de passe ne correspond à aucun compte."
 
-#: accounts/forms.py:109
+#: accounts/forms.py:111
 msgid "Full name"
 msgstr "Nom complet"
 
-#: accounts/forms.py:112 applications/forms.py:19 dojos/forms.py:69
+#: accounts/forms.py:114 applications/forms.py:19 dojos/forms.py:69
 #: dojos/templates/dojos/dojo_detail.html:244
 msgid "Phone"
 msgstr "Téléphone"
 
-#: accounts/forms.py:113
+#: accounts/forms.py:115
 msgid "Only used if we need to reach you during a session."
 msgstr "Utilisé uniquement si nous devons vous joindre pendant une session."
 
-#: accounts/forms.py:118 mailing/forms.py:28
+#: accounts/forms.py:120 mailing/forms.py:28
 msgid "Postcode"
 msgstr "Code postal"
 
-#: accounts/forms.py:119 mailing/forms.py:29
+#: accounts/forms.py:121 mailing/forms.py:29
 msgid "So we can tell you about dojos and sessions near you."
 msgstr "Pour vous informer des dojos et sessions près de chez vous."
 
-#: accounts/forms.py:122 mailing/forms.py:25
+#: accounts/forms.py:124 mailing/forms.py:25
 msgid "Language for emails"
 msgstr "Langue des e-mails"
 
-#: accounts/forms.py:124
+#: accounts/forms.py:126
 msgid "I am the parent or legal guardian of the children listed below."
 msgstr "Je suis le parent ou le tuteur légal des enfants ci-dessous."
 
-#: accounts/forms.py:131
+#: accounts/forms.py:133
 msgid ""
 "Send me the CoderDojo Belgium newsletter and news about events like Coolest "
 "Projects and CoderDojo Girlz."
@@ -109,14 +109,93 @@ msgstr ""
 "Envoyez-moi la newsletter de CoderDojo Belgium et les nouvelles d'événements "
 "comme Coolest Projects et CoderDojo Girlz."
 
-#: accounts/forms.py:144 mailing/forms.py:63
+#: accounts/forms.py:146 mailing/forms.py:63
 msgid "That isn't a Belgian postcode we know."
 msgstr "Ce code postal belge nous est inconnu."
 
-#: accounts/forms.py:172 accounts/forms.py:176
+#: accounts/forms.py:174 accounts/forms.py:178
 #: accounts/templates/accounts/manage/security.html:27
 msgid "Required from"
 msgstr "Obligatoire à partir du"
+
+#: accounts/forms.py:214
+msgid "Your password"
+msgstr "Votre mot de passe"
+
+#: accounts/forms.py:228
+msgid "That password isn't right."
+msgstr "Ce mot de passe n'est pas correct."
+
+#: accounts/forms.py:243
+#, python-format
+msgid "%(name)s's email address"
+msgstr "Adresse e-mail de %(name)s"
+
+#: accounts/forms.py:268
+msgid "Gender (optional)"
+msgstr "Genre (facultatif)"
+
+#: accounts/forms.py:271
+msgid "Avatar"
+msgstr "Avatar"
+
+#: accounts/forms.py:277
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:25
+#: accounts/templates/accounts/partials/_child_rows_script.html:27
+msgid "First name"
+msgstr "Prénom"
+
+#: accounts/forms.py:278
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:30
+#: accounts/templates/accounts/partials/_child_rows_script.html:29
+msgid "Family name"
+msgstr "Nom de famille"
+
+#: accounts/forms.py:279
+msgid "Allergies or notes (optional)"
+msgstr "Allergies ou remarques (facultatif)"
+
+#: accounts/forms.py:282
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:53
+#: accounts/templates/accounts/partials/_child_rows_script.html:34
+msgid ""
+"Only the champion (the person running the dojo) sees this, on the list of a "
+"session your child is signed up for."
+msgstr ""
+"Seul le champion (la personne qui dirige le dojo) voit ceci, sur la liste "
+"d'une session à laquelle votre enfant est inscrit."
+
+#: accounts/forms.py:285 accounts/views.py:229
+msgid "First name is required."
+msgstr "Le prénom est obligatoire."
+
+#: accounts/forms.py:286 accounts/views.py:231
+msgid "Family name is required."
+msgstr "Le nom de famille est obligatoire."
+
+#: accounts/forms.py:290
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:52
+#: accounts/templates/accounts/partials/_child_rows_script.html:33
+msgid "None"
+msgstr "Aucune"
+
+#: accounts/forms.py:308
+msgid "Date of birth (optional)"
+msgstr "Date de naissance (facultatif)"
+
+#: accounts/forms.py:318
+msgid "Home dojo"
+msgstr "Dojo d'attache"
+
+#: accounts/forms.py:318
+msgid "None yet"
+msgstr "Aucun pour l'instant"
+
+#: accounts/forms.py:333
+#: accounts/templates/accounts/partials/_child_rows_fieldset.html:37
+#: accounts/templates/accounts/partials/_child_rows_script.html:31
+msgid "Date of birth"
+msgstr "Date de naissance"
 
 #: accounts/manage.py:41
 msgid "Sign-in policy saved."
@@ -206,44 +285,44 @@ msgstr ""
 msgid "Two-step login with a passkey"
 msgstr "Connexion en deux étapes avec une clé d'accès"
 
-#: accounts/security_views.py:50
+#: accounts/security_views.py:51
 msgid "Please log in again, with your second step, to change how you sign in."
 msgstr ""
 "Reconnectez-vous, avec votre deuxième étape, pour modifier votre façon de "
 "vous connecter."
 
-#: accounts/security_views.py:99
+#: accounts/security_views.py:100
 msgid "This account already has an authenticator app."
 msgstr "Ce compte a déjà une application d'authentification."
 
-#: accounts/security_views.py:112
+#: accounts/security_views.py:113
 msgid "Your authenticator app is set up."
 msgstr "Votre application d'authentification est configurée."
 
-#: accounts/security_views.py:144
+#: accounts/security_views.py:145
 msgid "Your passkey is added."
 msgstr "Votre clé d'accès est ajoutée."
 
-#: accounts/security_views.py:147 accounts/two_step.py:123
+#: accounts/security_views.py:148 accounts/two_step.py:123
 #: accounts/two_step_forms.py:64 accounts/two_step_forms.py:106
 msgid "That passkey couldn't be checked. Please try again."
 msgstr "Cette clé d'accès n'a pas pu être vérifiée. Veuillez réessayer."
 
-#: accounts/security_views.py:197 accounts/security_views.py:222
+#: accounts/security_views.py:198 accounts/security_views.py:223
 msgid "Two-step login is off."
 msgstr "La connexion en deux étapes est désactivée."
 
-#: accounts/security_views.py:197
+#: accounts/security_views.py:198
 msgid "That sign-in method is removed."
 msgstr "Cette méthode de connexion est retirée."
 
-#: accounts/security_views.py:240
+#: accounts/security_views.py:241
 msgid "This browser is no longer remembered."
 msgstr "Ce navigateur n'est plus mémorisé."
 
 #: accounts/templates/accounts/_security_base.html:8
-#: accounts/templates/accounts/guardian_detail.html:121
-#: accounts/templates/accounts/guardian_detail.html:124
+#: accounts/templates/accounts/guardian_detail.html:68
+#: accounts/templates/accounts/guardian_detail.html:71
 #: accounts/templates/accounts/manage/security.html:3
 #: accounts/templates/accounts/manage/security.html:4
 #: accounts/templates/accounts/security.html:7
@@ -318,13 +397,13 @@ msgid "Actions"
 msgstr "Actions"
 
 #: accounts/templates/accounts/child_detail.html:81
-#: accounts/templates/accounts/partials/_children_list.html:33
+#: accounts/templates/accounts/partials/_children_list.html:32
 #, python-format
 msgid "Remove %(child)s from %(event)s?"
 msgstr "Désinscrire %(child)s de %(event)s ?"
 
 #: accounts/templates/accounts/child_detail.html:86
-#: accounts/templates/accounts/partials/_children_list.html:43
+#: accounts/templates/accounts/partials/_children_list.html:42
 #: events/templates/events/event_signup.html:85
 #: events/templates/events/event_signup.html:183
 msgid "Waiting list"
@@ -336,14 +415,14 @@ msgid "View"
 msgstr "Voir"
 
 #: accounts/templates/accounts/child_detail.html:95
-#: accounts/templates/accounts/partials/_children_list.html:56
+#: accounts/templates/accounts/partials/_children_list.html:55
 msgid "Leave waiting list"
 msgstr "Quitter la liste d'attente"
 
 #: accounts/templates/accounts/child_detail.html:95
-#: accounts/templates/accounts/guardian_detail.html:106
-#: accounts/templates/accounts/partials/_child_header_edit.html:60
-#: accounts/templates/accounts/partials/_children_list.html:56
+#: accounts/templates/accounts/partials/_add_child.html:30
+#: accounts/templates/accounts/partials/_child_header_edit.html:26
+#: accounts/templates/accounts/partials/_children_list.html:55
 #: accounts/templates/accounts/register_guardian.html:64
 #: accounts/templates/accounts/security_app.html:21
 #: accounts/templates/accounts/security_confirm.html:24
@@ -360,8 +439,8 @@ msgstr "Quitter la liste d'attente"
 #: mailing/templates/mailing/manage/journey_form.html:11
 #: mailing/templates/mailing/manage/segment_form.html:11
 #: mailing/templates/mailing/manage/template_new.html:11
-#: privacy/templates/privacy/delete_account.html:62
-#: privacy/templates/privacy/manage/delete.html:36
+#: privacy/templates/privacy/delete_account.html:58
+#: privacy/templates/privacy/manage/delete.html:32
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -413,7 +492,7 @@ msgid "No past sessions yet."
 msgstr "Aucune session passée pour l'instant."
 
 #: accounts/templates/accounts/child_detail.html:199
-#: accounts/templates/accounts/guardian_detail.html:129
+#: accounts/templates/accounts/guardian_detail.html:76
 msgid "Your data"
 msgstr "Vos données"
 
@@ -426,7 +505,7 @@ msgstr ""
 "fichier que vous pouvez ouvrir ou emporter ailleurs."
 
 #: accounts/templates/accounts/child_detail.html:201
-#: accounts/templates/accounts/guardian_detail.html:132
+#: accounts/templates/accounts/guardian_detail.html:79
 msgid "Download my data"
 msgstr "Télécharger mes données"
 
@@ -448,97 +527,26 @@ msgstr "Bon retour"
 msgid "Here's what's coming up for your children."
 msgstr "Voici ce qui attend vos enfants."
 
-#: accounts/templates/accounts/guardian_detail.html:59
-msgid "Registering another child?"
-msgstr "Enregistrer un autre enfant ?"
-
 #: accounts/templates/accounts/guardian_detail.html:60
-msgid "Register another child"
-msgstr "Enregistrer un autre enfant"
-
-#: accounts/templates/accounts/guardian_detail.html:68
-#: accounts/templates/accounts/partials/_child_header_edit.html:44
-msgid "Avatar"
-msgstr "Avatar"
-
-#: accounts/templates/accounts/guardian_detail.html:76
-#: accounts/templates/accounts/partials/_child_header_edit.html:17
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:25
-#: accounts/templates/accounts/partials/_child_rows_script.html:27
-msgid "First name"
-msgstr "Prénom"
-
-#: accounts/templates/accounts/guardian_detail.html:80
-#: accounts/templates/accounts/partials/_child_header_edit.html:21
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:30
-#: accounts/templates/accounts/partials/_child_rows_script.html:29
-msgid "Family name"
-msgstr "Nom de famille"
-
-#: accounts/templates/accounts/guardian_detail.html:84
-msgid "Date of birth (optional)"
-msgstr "Date de naissance (facultatif)"
-
-#: accounts/templates/accounts/guardian_detail.html:88
-#: accounts/templates/accounts/partials/_child_header_edit.html:30
-msgid "Gender (optional)"
-msgstr "Genre (facultatif)"
-
-#: accounts/templates/accounts/guardian_detail.html:96
-#: accounts/templates/accounts/partials/_child_header_edit.html:54
-msgid "Allergies or notes (optional)"
-msgstr "Allergies ou remarques (facultatif)"
-
-#: accounts/templates/accounts/guardian_detail.html:97
-#: accounts/templates/accounts/partials/_child_header_edit.html:55
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:52
-#: accounts/templates/accounts/partials/_child_rows_script.html:33
-msgid "None"
-msgstr "Aucune"
-
-#: accounts/templates/accounts/guardian_detail.html:98
-#: accounts/templates/accounts/partials/_child_header_edit.html:56
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:53
-#: accounts/templates/accounts/partials/_child_rows_script.html:34
-msgid ""
-"Only the champion (the person running the dojo) sees this, on the list of a "
-"session your child is signed up for."
-msgstr ""
-"Seul le champion (la personne qui dirige le dojo) voit ceci, sur la liste "
-"d'une session à laquelle votre enfant est inscrit."
-
-#: accounts/templates/accounts/guardian_detail.html:103
-#: accounts/templates/accounts/register_guardian.html:54
-msgid ""
-"Optional; you can change it for each child on your Mail preferences page."
-msgstr ""
-"Facultatif ; vous pouvez le modifier pour chaque enfant sur votre page "
-"Préférences e-mail."
-
-#: accounts/templates/accounts/guardian_detail.html:107
-msgid "Add child"
-msgstr "Ajouter l'enfant"
-
-#: accounts/templates/accounts/guardian_detail.html:113
-#: accounts/templates/accounts/guardian_detail.html:116
+#: accounts/templates/accounts/guardian_detail.html:63
 #: mailing/templates/mailing/mail_preferences.html:3
 #: mailing/templates/mailing/mail_preferences.html:21
 msgid "Mail preferences"
 msgstr "Préférences e-mail"
 
-#: accounts/templates/accounts/guardian_detail.html:114
+#: accounts/templates/accounts/guardian_detail.html:61
 msgid "Choose which mails you get, the language they're in, and your postcode."
 msgstr ""
 "Choisissez les e-mails que vous recevez, leur langue et votre code postal."
 
-#: accounts/templates/accounts/guardian_detail.html:122
+#: accounts/templates/accounts/guardian_detail.html:69
 msgid ""
 "Two-step login is on: logging in takes your password and a code or passkey."
 msgstr ""
 "La connexion en deux étapes est activée : vous vous connectez avec votre mot "
 "de passe et un code ou une clé d'accès."
 
-#: accounts/templates/accounts/guardian_detail.html:122
+#: accounts/templates/accounts/guardian_detail.html:69
 msgid ""
 "Protect your account with two-step login: a code from an app on your phone, "
 "or a passkey, after your password."
@@ -546,91 +554,91 @@ msgstr ""
 "Protégez votre compte avec la connexion en deux étapes : après votre mot de "
 "passe, un code d'une application sur votre téléphone, ou une clé d'accès."
 
-#: accounts/templates/accounts/guardian_detail.html:130
+#: accounts/templates/accounts/guardian_detail.html:77
 msgid ""
 "Download a copy of everything we keep about you and your children, as a file "
 "you can open or take elsewhere."
 msgstr ""
-"Téléchargez une copie de tout ce que nous conservons à votre sujet et à celui"
-" de vos enfants, dans un fichier que vous pouvez ouvrir ou emporter ailleurs."
+"Téléchargez une copie de tout ce que nous conservons à votre sujet et à "
+"celui de vos enfants, dans un fichier que vous pouvez ouvrir ou emporter "
+"ailleurs."
 
-#: accounts/templates/accounts/guardian_detail.html:133
+#: accounts/templates/accounts/guardian_detail.html:80
 #: privacy/templates/privacy/delete_account.html:3
 #: privacy/templates/privacy/delete_account.html:22
-#: privacy/templates/privacy/delete_account.html:63
+#: privacy/templates/privacy/delete_account.html:59
 msgid "Delete my account"
 msgstr "Supprimer mon compte"
 
-#: accounts/templates/accounts/guardian_detail.html:144
-#: mailing/categories.py:18
+#: accounts/templates/accounts/guardian_detail.html:91 mailing/categories.py:18
 msgid "Volunteering"
 msgstr "Bénévolat"
 
-#: accounts/templates/accounts/guardian_detail.html:148
+#: accounts/templates/accounts/guardian_detail.html:95
 #, python-format
 msgid "%(kind)s application"
 msgstr "Candidature %(kind)s"
 
-#: accounts/templates/accounts/guardian_detail.html:150
+#: accounts/templates/accounts/guardian_detail.html:97
 #, python-format
 msgid "sent %(date)s"
 msgstr "envoyée le %(date)s"
 
-#: accounts/templates/accounts/guardian_detail.html:156
+#: accounts/templates/accounts/guardian_detail.html:103
 msgid "Background check:"
 msgstr "Extrait de casier judiciaire :"
 
-#: accounts/templates/accounts/guardian_detail.html:158
+#: accounts/templates/accounts/guardian_detail.html:105
 #, python-format
 msgid "<strong>valid</strong> until %(date)s."
 msgstr "<strong>valable</strong> jusqu'au %(date)s."
 
-#: accounts/templates/accounts/guardian_detail.html:160
+#: accounts/templates/accounts/guardian_detail.html:107
 msgid "<strong>uploaded</strong>, waiting for review."
 msgstr "<strong>envoyé</strong>, en attente de vérification."
 
-#: accounts/templates/accounts/guardian_detail.html:162
+#: accounts/templates/accounts/guardian_detail.html:109
 msgid "expired"
 msgstr "expiré"
 
-#: accounts/templates/accounts/guardian_detail.html:162
+#: accounts/templates/accounts/guardian_detail.html:109
 msgid "needs a new document"
 msgstr "nouveau document requis"
 
-#: accounts/templates/accounts/guardian_detail.html:162
+#: accounts/templates/accounts/guardian_detail.html:109
 msgid "requested"
 msgstr "demandé"
 
-#: accounts/templates/accounts/guardian_detail.html:163
+#: accounts/templates/accounts/guardian_detail.html:110
 msgid "upload your document"
 msgstr "envoyez votre document"
 
-#: accounts/templates/accounts/guardian_detail.html:164
+#: accounts/templates/accounts/guardian_detail.html:111
 msgid "Until then you can't open your dojo dashboards."
 msgstr "D'ici là, vous ne pouvez pas ouvrir vos tableaux de bord de dojo."
 
-#: accounts/templates/accounts/guardian_detail.html:166
+#: accounts/templates/accounts/guardian_detail.html:113
 msgid ""
 "not requested yet — we'll email you once your application has been looked at."
 msgstr ""
 "pas encore demandé. Nous vous écrirons dès que votre candidature aura été "
 "examinée."
 
-#: accounts/templates/accounts/guardian_detail.html:173
+#: accounts/templates/accounts/guardian_detail.html:120
 #: core/templates/core/menu.html:58
 msgid "Create a dojo"
 msgstr "Créer un dojo"
 
-#: accounts/templates/accounts/guardian_detail.html:175
+#: accounts/templates/accounts/guardian_detail.html:122
 #: core/templates/core/menu.html:60
 msgid "Apply to start a dojo"
 msgstr "Lancer un dojo"
 
-#: accounts/templates/accounts/guardian_detail.html:178
+#: accounts/templates/accounts/guardian_detail.html:125
 msgid "Find a dojo to help at"
 msgstr "Trouver un dojo où aider"
 
-#: accounts/templates/accounts/guardian_detail.html:180
+#: accounts/templates/accounts/guardian_detail.html:127
 #: core/templates/core/menu.html:66
 msgid "Apply to volunteer"
 msgstr "Devenir bénévole"
@@ -709,8 +717,8 @@ msgstr "Utiliser un code de secours"
 #: accounts/templates/accounts/login.html:123
 #, python-format
 msgid ""
-"Lost your phone and your backup codes? Mail us at %(email)s: we'll check it's"
-" you and turn off two-step login."
+"Lost your phone and your backup codes? Mail us at %(email)s: we'll check "
+"it's you and turn off two-step login."
 msgstr ""
 "Vous avez perdu votre téléphone et vos codes de secours ? Écrivez-nous à "
 "%(email)s : nous vérifierons que c'est bien vous et désactiverons la "
@@ -730,9 +738,9 @@ msgstr "Créer un compte"
 
 #: accounts/templates/accounts/manage/security.html:17
 msgid ""
-"Choose how the accounts in each role must log in. Anyone can turn on two-step"
-" login themselves; here you make it required. A role asks for its level from "
-"the day you set (empty: right away). Before that day the accounts see a "
+"Choose how the accounts in each role must log in. Anyone can turn on two-"
+"step login themselves; here you make it required. A role asks for its level "
+"from the day you set (empty: right away). Before that day the accounts see a "
 "notice; from then on, an account without it is sent to set it up before it "
 "can use anything its role opens. An account with several roles gets the "
 "strongest level. Children's own logins are never asked."
@@ -741,9 +749,9 @@ msgstr ""
 "peut activer lui-même la connexion en deux étapes ; ici, vous la rendez "
 "obligatoire. Un rôle demande son niveau à partir du jour choisi (vide : "
 "immédiatement). Avant ce jour, les comptes voient un avis ; ensuite, un "
-"compte qui ne l'a pas doit la configurer avant de pouvoir utiliser ce que son"
-" rôle ouvre. Un compte avec plusieurs rôles reçoit le niveau le plus strict. "
-"Les comptes des enfants ne sont jamais concernés."
+"compte qui ne l'a pas doit la configurer avant de pouvoir utiliser ce que "
+"son rôle ouvre. Un compte avec plusieurs rôles reçoit le niveau le plus "
+"strict. Les comptes des enfants ne sont jamais concernés."
 
 #: accounts/templates/accounts/manage/security.html:25 applications/forms.py:73
 msgid "Role"
@@ -769,7 +777,7 @@ msgid "With a passkey"
 msgstr "Avec clé d'accès"
 
 #: accounts/templates/accounts/manage/security.html:48
-#: accounts/templates/accounts/partials/_child_header_edit.html:61
+#: accounts/templates/accounts/partials/_child_header_edit.html:27
 #: content/templates/content/manage/promotion_form.html:29
 #: content/templates/content/manage/sponsor_form.html:12
 #: events/templates/events/manage/badge_form.html:17
@@ -788,9 +796,9 @@ msgstr "Quelqu'un ne peut pas se connecter"
 #: accounts/templates/accounts/manage/security.html:53
 msgid ""
 "When someone lost their phone or passkey and their backup codes, check it's "
-"really them (for example by calling them), then turn off their two-step login"
-" here. They get a mail, and log in with only their password. If their role "
-"needs two-step login, they're asked to set it up again straight away."
+"really them (for example by calling them), then turn off their two-step "
+"login here. They get a mail, and log in with only their password. If their "
+"role needs two-step login, they're asked to set it up again straight away."
 msgstr ""
 "Quand quelqu'un a perdu son téléphone ou sa clé d'accès et ses codes de "
 "secours, vérifiez que c'est bien la personne (par exemple en l'appelant), "
@@ -811,9 +819,8 @@ msgstr "Nom, adresse e-mail ou nom d'utilisateur"
 msgid "Search"
 msgstr "Rechercher"
 
-#: accounts/templates/accounts/manage/security.html:70
-#: api/templates/api/dojo_api_clients.html:53
-#: api/templates/api/dojo_api_clients.html:79 content/forms.py:90
+#: accounts/templates/accounts/manage/security.html:70 api/forms.py:13
+#: api/templates/api/dojo_api_clients.html:76 content/forms.py:90
 #: content/templates/content/manage/sponsor_list.html:16 dojos/forms.py:67
 #: dojos/forms.py:171 dojos/templates/dojos/dojo_event_list.html:24
 #: events/forms.py:127 events/forms.py:186 events/forms.py:237
@@ -855,8 +862,8 @@ msgid ""
 "Turn off two-step login for %(name)s? Only do this once you're sure it's "
 "them."
 msgstr ""
-"Désactiver la connexion en deux étapes pour %(name)s ? Faites-le seulement si"
-" vous êtes sûr que c'est bien la personne."
+"Désactiver la connexion en deux étapes pour %(name)s ? Faites-le seulement "
+"si vous êtes sûr que c'est bien la personne."
 
 #: accounts/templates/accounts/manage/security.html:94
 #: accounts/templates/accounts/security.html:87
@@ -877,6 +884,26 @@ msgid ""
 msgstr ""
 "Voici les %(search_limit)s premiers résultats : précisez la recherche pour "
 "trouver quelqu'un d'autre."
+
+#: accounts/templates/accounts/partials/_add_child.html:9
+msgid "Registering another child?"
+msgstr "Enregistrer un autre enfant ?"
+
+#: accounts/templates/accounts/partials/_add_child.html:10
+msgid "Register another child"
+msgstr "Enregistrer un autre enfant"
+
+#: accounts/templates/accounts/partials/_add_child.html:27
+#: accounts/templates/accounts/register_guardian.html:54
+msgid ""
+"Optional; you can change it for each child on your Mail preferences page."
+msgstr ""
+"Facultatif ; vous pouvez le modifier pour chaque enfant sur votre page "
+"Préférences e-mail."
+
+#: accounts/templates/accounts/partials/_add_child.html:31
+msgid "Add child"
+msgstr "Ajouter l'enfant"
 
 #: accounts/templates/accounts/partials/_badge_card.html:26
 #, python-format
@@ -904,8 +931,8 @@ msgid ""
 "Girlz and Coolest Projects I get."
 msgstr ""
 "Utiliser les données de mes enfants (leur âge, leur genre, les sessions "
-"auxquelles ils participent et leurs ceintures) pour choisir les nouvelles que"
-" je reçois sur les sessions et les événements comme CoderDojo Girlz et "
+"auxquelles ils participent et leurs ceintures) pour choisir les nouvelles "
+"que je reçois sur les sessions et les événements comme CoderDojo Girlz et "
 "Coolest Projects."
 
 #: accounts/templates/accounts/partials/_child_header_display.html:14
@@ -913,7 +940,7 @@ msgid "Click to edit"
 msgstr "Cliquer pour modifier"
 
 #: accounts/templates/accounts/partials/_child_header_display.html:20
-#: accounts/templates/accounts/partials/_children_list.html:22
+#: accounts/templates/accounts/partials/_children_list.html:21
 #: dojos/templates/dojos/dojo_members.html:54
 #: dojos/templates/dojos/partials/_attendance_row.html:21
 #: events/templates/events/event_signup.html:140
@@ -944,20 +971,6 @@ msgstr "Jeune mentor"
 #, python-format
 msgid "at %(dojo)s"
 msgstr "à %(dojo)s"
-
-#: accounts/templates/accounts/partials/_child_header_edit.html:25
-#: accounts/templates/accounts/partials/_child_rows_fieldset.html:37
-#: accounts/templates/accounts/partials/_child_rows_script.html:31
-msgid "Date of birth"
-msgstr "Date de naissance"
-
-#: accounts/templates/accounts/partials/_child_header_edit.html:36
-msgid "Home dojo"
-msgstr "Dojo d'attache"
-
-#: accounts/templates/accounts/partials/_child_header_edit.html:38
-msgid "None yet"
-msgstr "Aucun pour l'instant"
 
 #: accounts/templates/accounts/partials/_child_rows_fieldset.html:9
 #: privacy/templates/privacy/manage/privacy.html:60
@@ -1019,46 +1032,46 @@ msgstr "Enfant {n}"
 msgid "Your children"
 msgstr "Vos enfants"
 
-#: accounts/templates/accounts/partials/_children_list.html:25
+#: accounts/templates/accounts/partials/_children_list.html:24
 msgid "Has own login"
 msgstr "A son propre compte"
 
-#: accounts/templates/accounts/partials/_children_list.html:26
+#: accounts/templates/accounts/partials/_children_list.html:25
 #, python-format
 msgid "Youth mentor at %(dojo)s"
 msgstr "Jeune mentor à %(dojo)s"
 
-#: accounts/templates/accounts/partials/_children_list.html:30
+#: accounts/templates/accounts/partials/_children_list.html:29
 #, python-format
 msgid "View %(name)s's belts, badges &amp; history →"
 msgstr "Voir les ceintures, badges et sessions de %(name)s →"
 
-#: accounts/templates/accounts/partials/_children_list.html:52
+#: accounts/templates/accounts/partials/_children_list.html:51
 #: content/templates/content/manage/promotion_form.html:5
 #: content/templates/content/partials/_promotion_banner.html:20
 #: events/templates/events/partials/_event_row.html:40
 msgid "View event"
 msgstr "Voir l'événement"
 
-#: accounts/templates/accounts/partials/_children_list.html:62
+#: accounts/templates/accounts/partials/_children_list.html:61
 msgid "Not registered for an upcoming session."
 msgstr "Pas inscrit à une prochaine session."
 
-#: accounts/templates/accounts/partials/_children_list.html:63
+#: accounts/templates/accounts/partials/_children_list.html:62
 #: core/templates/core/home.html:68
 msgid "Browse events"
 msgstr "Voir les événements"
 
-#: accounts/templates/accounts/partials/_children_list.html:68
+#: accounts/templates/accounts/partials/_children_list.html:67
 msgid "No children registered yet."
 msgstr "Aucun enfant enregistré pour l'instant."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:10
+#: accounts/templates/accounts/partials/_ninja_login_card.html:11
 #: dojos/templates/dojos/dojo_members.html:54
 msgid "Own login"
 msgstr "Propre compte"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:21
+#: accounts/templates/accounts/partials/_ninja_login_card.html:22
 #, python-format
 msgid ""
 "%(name)s logs in with <strong>%(email)s</strong> (username "
@@ -1067,11 +1080,11 @@ msgstr ""
 "%(name)s se connecte avec <strong>%(email)s</strong> (nom d'utilisateur "
 "<strong>%(username)s</strong>)."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:22
+#: accounts/templates/accounts/partials/_ninja_login_card.html:23
 msgid "They haven't chosen a password yet."
 msgstr "Aucun mot de passe n'a encore été choisi."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:23
+#: accounts/templates/accounts/partials/_ninja_login_card.html:24
 msgid ""
 "With their login they see this page and can sign themselves up for sessions; "
 "you keep managing their details."
@@ -1079,11 +1092,11 @@ msgstr ""
 "Avec ce compte, votre enfant voit cette page et peut s'inscrire lui-même aux "
 "sessions ; vous continuez à gérer ses données."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:30
+#: accounts/templates/accounts/partials/_ninja_login_card.html:31
 msgid "Send the password mail again"
 msgstr "Renvoyer l'e-mail du mot de passe"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:35
+#: accounts/templates/accounts/partials/_ninja_login_card.html:36
 #, python-format
 msgid ""
 "Remove %(name)s's login? They can't log in any more; their sessions, belts "
@@ -1092,20 +1105,20 @@ msgstr ""
 "Supprimer le compte de %(name)s ? Votre enfant ne pourra plus se connecter ; "
 "ses sessions, ceintures et badges sont conservés."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:37
+#: accounts/templates/accounts/partials/_ninja_login_card.html:38
 msgid "Remove login"
 msgstr "Supprimer le compte"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:43
+#: accounts/templates/accounts/partials/_ninja_login_card.html:44
 #, python-format
 msgid ""
-"%(name)s's login is switched off. Switch it back on with their email address:"
-" they get a mail to choose a new password."
+"%(name)s's login is switched off. Switch it back on with their email "
+"address: they get a mail to choose a new password."
 msgstr ""
 "Le compte de %(name)s est désactivé. Réactivez-le avec l'adresse e-mail de "
 "votre enfant : il recevra un e-mail pour choisir un nouveau mot de passe."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:45
+#: accounts/templates/accounts/partials/_ninja_login_card.html:46
 #, python-format
 msgid ""
 "Give %(name)s their own login, so they can see their belt, badges and "
@@ -1113,21 +1126,16 @@ msgid ""
 "details, and can remove the login at any time. They get a mail to choose a "
 "password."
 msgstr ""
-"Donnez à %(name)s son propre compte, pour voir sa ceinture, ses badges et ses"
-" sessions et s'inscrire lui-même aux sessions. Vous continuez à gérer ses "
+"Donnez à %(name)s son propre compte, pour voir sa ceinture, ses badges et "
+"ses sessions et s'inscrire lui-même aux sessions. Vous continuez à gérer ses "
 "données et pouvez supprimer le compte à tout moment. Votre enfant recevra un "
 "e-mail pour choisir un mot de passe."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:53
-#, python-format
-msgid "%(name)s's email address"
-msgstr "Adresse e-mail de %(name)s"
-
-#: accounts/templates/accounts/partials/_ninja_login_card.html:58
+#: accounts/templates/accounts/partials/_ninja_login_card.html:55
 msgid "Switch login back on"
 msgstr "Réactiver le compte"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:58
+#: accounts/templates/accounts/partials/_ninja_login_card.html:55
 msgid "Create login"
 msgstr "Créer le compte"
 
@@ -1155,8 +1163,8 @@ msgid ""
 "Enter the email on your account and we'll send you a link to set a new "
 "password."
 msgstr ""
-"Indiquez l'adresse e-mail de votre compte et nous vous enverrons un lien pour"
-" choisir un nouveau mot de passe."
+"Indiquez l'adresse e-mail de votre compte et nous vous enverrons un lien "
+"pour choisir un nouveau mot de passe."
 
 #: accounts/templates/accounts/password_reset.html:33
 msgid "Send reset link"
@@ -1274,8 +1282,8 @@ msgid ""
 "Help out at an existing dojo — no teaching experience required, just a "
 "Saturday morning."
 msgstr ""
-"Aidez dans un dojo existant : aucune expérience d'enseignement requise, juste"
-" un samedi matin."
+"Aidez dans un dojo existant : aucune expérience d'enseignement requise, "
+"juste un samedi matin."
 
 #: accounts/templates/accounts/register.html:51
 msgid "Apply to volunteer →"
@@ -1302,8 +1310,8 @@ msgid ""
 "You can change this, and which other mails you get, on your account's Mail "
 "preferences page."
 msgstr ""
-"Vous pouvez modifier cela, ainsi que les autres e-mails que vous recevez, sur"
-" la page Préférences e-mail de votre compte."
+"Vous pouvez modifier cela, ainsi que les autres e-mails que vous recevez, "
+"sur la page Préférences e-mail de votre compte."
 
 #: accounts/templates/accounts/register_guardian.html:65
 msgid "Create account"
@@ -1311,14 +1319,14 @@ msgstr "Créer le compte"
 
 #: accounts/templates/accounts/security.html:8
 msgid ""
-"With two-step login, logging in takes your password and a second step: a code"
-" from an app on your phone, or a passkey. Someone who finds out your password"
-" still can't get in."
+"With two-step login, logging in takes your password and a second step: a "
+"code from an app on your phone, or a passkey. Someone who finds out your "
+"password still can't get in."
 msgstr ""
-"Avec la connexion en deux étapes, vous vous connectez avec votre mot de passe"
-" et une deuxième étape : un code d'une application sur votre téléphone, ou "
-"une clé d'accès. Quelqu'un qui découvre votre mot de passe ne peut toujours "
-"pas entrer."
+"Avec la connexion en deux étapes, vous vous connectez avec votre mot de "
+"passe et une deuxième étape : un code d'une application sur votre téléphone, "
+"ou une clé d'accès. Quelqu'un qui découvre votre mot de passe ne peut "
+"toujours pas entrer."
 
 #: accounts/templates/accounts/security.html:12
 msgid "Your role needs a passkey."
@@ -1370,8 +1378,8 @@ msgstr "Dernière utilisation le %(date)s."
 
 #: accounts/templates/accounts/security.html:43
 msgid ""
-"An app such as Google Authenticator, Microsoft Authenticator or your password"
-" manager shows a new six-digit code every 30 seconds."
+"An app such as Google Authenticator, Microsoft Authenticator or your "
+"password manager shows a new six-digit code every 30 seconds."
 msgstr ""
 "Une application comme Google Authenticator, Microsoft Authenticator ou votre "
 "gestionnaire de mots de passe affiche un nouveau code à six chiffres toutes "
@@ -1397,8 +1405,8 @@ msgid ""
 "site."
 msgstr ""
 "Votre téléphone, votre ordinateur ou une clé de sécurité confirme que c'est "
-"bien vous avec votre empreinte, votre visage ou votre code PIN. Rien à taper,"
-" et un faux site ne peut pas la tromper."
+"bien vous avec votre empreinte, votre visage ou votre code PIN. Rien à "
+"taper, et un faux site ne peut pas la tromper."
 
 #: accounts/templates/accounts/security.html:59
 msgid "Add another passkey"
@@ -1427,8 +1435,8 @@ msgstr[0] ""
 "Il vous reste %(counter)s code, pour quand vous ne pouvez pas utiliser votre "
 "téléphone ou votre clé d'accès."
 msgstr[1] ""
-"Il vous reste %(counter)s codes, pour quand vous ne pouvez pas utiliser votre"
-" téléphone ou votre clé d'accès."
+"Il vous reste %(counter)s codes, pour quand vous ne pouvez pas utiliser "
+"votre téléphone ou votre clé d'accès."
 
 #: accounts/templates/accounts/security.html:73
 msgid "This browser"
@@ -1566,8 +1574,8 @@ msgid ""
 "Logging in will only take your password again. Your app, passkeys and backup "
 "codes are removed."
 msgstr ""
-"La connexion ne demandera plus que votre mot de passe. Votre application, vos"
-" clés d'accès et vos codes de secours sont retirés."
+"La connexion ne demandera plus que votre mot de passe. Votre application, "
+"vos clés d'accès et vos codes de secours sont retirés."
 
 #: accounts/templates/accounts/security_confirm.html:18
 msgid "Your other sign-in methods keep working."
@@ -1621,8 +1629,8 @@ msgstr ""
 
 #: accounts/two_step.py:147
 msgid ""
-"Your role needs two-step login, so you can't remove your last sign-in method."
-" Add another one first."
+"Your role needs two-step login, so you can't remove your last sign-in "
+"method. Add another one first."
 msgstr ""
 "Votre rôle demande la connexion en deux étapes : vous ne pouvez pas retirer "
 "votre dernière méthode de connexion. Ajoutez-en d'abord une autre."
@@ -1695,68 +1703,60 @@ msgstr "Votre navigateur n'a pas créé de clé d'accès. Veuillez réessayer."
 msgid "That took too long. Please try again."
 msgstr "Cela a pris trop de temps. Veuillez réessayer."
 
-#: accounts/two_step_forms.py:115
-msgid "Your password"
-msgstr "Votre mot de passe"
-
-#: accounts/two_step_forms.py:127
-msgid "That password isn't right."
-msgstr "Ce mot de passe n'est pas correct."
-
-#: accounts/views.py:125 accounts/views.py:130
+#: accounts/views.py:122 accounts/views.py:127
 msgid "That took too long. Please log in again."
 msgstr "Cela a pris trop de temps. Reconnectez-vous."
 
-#: accounts/views.py:232
-msgid "First name is required."
-msgstr "Le prénom est obligatoire."
-
-#: accounts/views.py:234 accounts/views.py:375
-msgid "Family name is required."
-msgstr "Le nom de famille est obligatoire."
-
-#: accounts/views.py:237
+#: accounts/views.py:234
 msgid "Date of birth is required."
 msgstr "La date de naissance est obligatoire."
 
-#: accounts/views.py:287
+#: accounts/views.py:284
 msgid "Add at least one child."
 msgstr "Ajoutez au moins un enfant."
 
-#: accounts/views.py:525
+#: accounts/views.py:478
 #, python-format
 msgid "Login created: we've mailed %(email)s a link to choose a password."
 msgstr ""
 "Compte créé : nous avons envoyé à %(email)s un lien pour choisir un mot de "
 "passe."
 
-#: accounts/views.py:539
+#: accounts/views.py:493
 #, python-format
 msgid "We've mailed %(email)s a new link to choose a password."
 msgstr ""
 "Nous avons envoyé à %(email)s un nouveau lien pour choisir un mot de passe."
 
-#: accounts/views.py:554
+#: accounts/views.py:508
 #, python-format
 msgid ""
 "%(name)s's login is switched off. It was on a dojo team, so it's kept for "
 "that team's history; their team places have ended."
 msgstr ""
 "Le compte de %(name)s est désactivé. Comme il faisait partie d'une équipe de "
-"dojo, il est conservé pour l'historique de cette équipe ; ses places dans les"
-" équipes ont pris fin."
+"dojo, il est conservé pour l'historique de cette équipe ; ses places dans "
+"les équipes ont pris fin."
 
-#: accounts/views.py:557
+#: accounts/views.py:511
 #, python-format
 msgid "%(name)s's login is removed."
 msgstr "Le compte de %(name)s est supprimé."
 
-#: accounts/views.py:609
+#: accounts/views.py:563
 #, python-format
 msgid "A spot opened up in %(event)s — a waitlisted family is now confirmed."
 msgstr ""
 "Une place s'est libérée pour %(event)s : une famille de la liste d'attente "
 "est maintenant confirmée."
+
+#: api/forms.py:14
+msgid "Scan app at the door"
+msgstr "Application de scan à l'entrée"
+
+#: api/forms.py:18
+msgid "What it may do"
+msgstr "Ce qu'il peut faire"
 
 #: api/services.py:25
 msgid "Give the client a name."
@@ -1768,7 +1768,7 @@ msgstr "Choisissez ce que le client peut faire."
 
 #: api/templates/api/dojo_api_clients.html:3
 #: api/templates/api/dojo_api_clients.html:4
-#: api/templates/api/dojo_api_clients.html:115
+#: api/templates/api/dojo_api_clients.html:112
 #: dojos/templates/dojos/_admin_base.html:144
 msgid "API"
 msgstr "API"
@@ -1776,12 +1776,12 @@ msgstr "API"
 #: api/templates/api/dojo_api_clients.html:33
 msgid ""
 "An API client is an app or website that works for this dojo, for now an app "
-"at the door that marks who came. It logs in with its own client ID and secret"
-" (OAuth 2.0 client credentials) and can only do what you allow here, for this"
-" dojo only. Only you, as the champion, see this page."
+"at the door that marks who came. It logs in with its own client ID and "
+"secret (OAuth 2.0 client credentials) and can only do what you allow here, "
+"for this dojo only. Only you, as the champion, see this page."
 msgstr ""
-"Un client API est une application ou un site qui travaille pour ce dojo, pour"
-" l'instant une application à l'entrée qui indique qui est venu. Il se "
+"Un client API est une application ou un site qui travaille pour ce dojo, "
+"pour l'instant une application à l'entrée qui indique qui est venu. Il se "
 "connecte avec son propre identifiant client et son secret (OAuth 2.0 client "
 "credentials) et ne peut faire que ce que vous autorisez ici, pour ce dojo "
 "uniquement. Vous seul, en tant que champion, voyez cette page."
@@ -1800,7 +1800,7 @@ msgstr ""
 "perd, renouvelez-le ci-dessous."
 
 #: api/templates/api/dojo_api_clients.html:40
-#: api/templates/api/dojo_api_clients.html:80
+#: api/templates/api/dojo_api_clients.html:77
 msgid "Client ID"
 msgstr "Identifiant client"
 
@@ -1812,87 +1812,79 @@ msgstr "Secret client"
 msgid "Add a client"
 msgstr "Ajouter un client"
 
-#: api/templates/api/dojo_api_clients.html:54
-msgid "Scan app at the door"
-msgstr "Application de scan à l'entrée"
-
-#: api/templates/api/dojo_api_clients.html:58
-msgid "What it may do"
-msgstr "Ce qu'il peut faire"
-
-#: api/templates/api/dojo_api_clients.html:62
+#: api/templates/api/dojo_api_clients.html:59
 msgid "See the sessions and who has a place"
 msgstr "Voir les sessions et qui a une place"
 
-#: api/templates/api/dojo_api_clients.html:62
+#: api/templates/api/dojo_api_clients.html:59
 msgid "Mark who came"
 msgstr "Indiquer qui est venu"
 
-#: api/templates/api/dojo_api_clients.html:67
+#: api/templates/api/dojo_api_clients.html:64
 msgid "Add client"
 msgstr "Ajouter le client"
 
-#: api/templates/api/dojo_api_clients.html:73
+#: api/templates/api/dojo_api_clients.html:70
 msgid "Your clients"
 msgstr "Vos clients"
 
-#: api/templates/api/dojo_api_clients.html:81
+#: api/templates/api/dojo_api_clients.html:78
 msgid "May"
 msgstr "Peut"
 
-#: api/templates/api/dojo_api_clients.html:82
+#: api/templates/api/dojo_api_clients.html:79
 msgid "Last used"
 msgstr "Dernière utilisation"
 
-#: api/templates/api/dojo_api_clients.html:89
+#: api/templates/api/dojo_api_clients.html:86
 #, python-format
 msgid "added %(date)s"
 msgstr "ajouté le %(date)s"
 
-#: api/templates/api/dojo_api_clients.html:95
+#: api/templates/api/dojo_api_clients.html:92
 #, python-format
 msgid "Give %(name)s a new secret? The old one stops working at once."
 msgstr ""
 "Donner un nouveau secret à %(name)s ? L'ancien cesse de fonctionner "
 "immédiatement."
 
-#: api/templates/api/dojo_api_clients.html:96
+#: api/templates/api/dojo_api_clients.html:93
 msgid "New secret"
 msgstr "Nouveau secret"
 
-#: api/templates/api/dojo_api_clients.html:97
+#: api/templates/api/dojo_api_clients.html:94
 #, python-format
 msgid "Delete %(name)s? It stops working at once and leaves this list."
 msgstr ""
 "Supprimer %(name)s ? Il cesse de fonctionner immédiatement et quitte cette "
 "liste."
 
-#: api/templates/api/dojo_api_clients.html:98
+#: api/templates/api/dojo_api_clients.html:95
 #: mailing/templates/mailing/manage/segment_detail.html:58
 msgid "Delete"
 msgstr "Supprimer"
 
 # | msgid "No mentors listed yet."
-#: api/templates/api/dojo_api_clients.html:107
+#: api/templates/api/dojo_api_clients.html:104
 msgid "No clients yet."
 msgstr "Pas encore de clients."
 
-#: api/templates/api/dojo_api_clients.html:112
+#: api/templates/api/dojo_api_clients.html:109
 msgid "For the app's developer"
 msgstr "Pour le développeur de l'application"
 
-#: api/templates/api/dojo_api_clients.html:114
+#: api/templates/api/dojo_api_clients.html:111
 msgid "Token"
 msgstr "Jeton"
 
-#: api/templates/api/dojo_api_clients.html:116
+#: api/templates/api/dojo_api_clients.html:113
 msgid "Reference"
 msgstr "Référence"
 
-#: api/templates/api/dojo_api_clients.html:118
+#: api/templates/api/dojo_api_clients.html:115
 msgid ""
-"A token lasts an hour; the app asks for a new one with the same client ID and"
-" secret."
+"A token lasts an hour; the app asks for a new one with the same client ID "
+"and secret."
 msgstr ""
 "Un jeton est valable une heure ; l'application en demande un nouveau avec le "
 "même identifiant client et secret."
@@ -1941,8 +1933,8 @@ msgid ""
 "I understand a Belgian criminal record extract (model 2, Artikel 596.2) will "
 "be required."
 msgstr ""
-"Je comprends qu'un extrait de casier judiciaire belge (modèle 2, article 596,"
-" al. 2) sera demandé."
+"Je comprends qu'un extrait de casier judiciaire belge (modèle 2, article "
+"596, al. 2) sera demandé."
 
 #: applications/forms.py:45
 msgid "Not confirmed yet? That's fine — we can help you find one."
@@ -2100,8 +2092,8 @@ msgstr ""
 #: applications/templates/applications/register_dojo.html:40
 msgid ""
 "Tell us about your venue and we'll help take it from there — every dojo "
-"starts with someone like you saying yes. A board member will follow up within"
-" a week."
+"starts with someone like you saying yes. A board member will follow up "
+"within a week."
 msgstr ""
 "Parlez-nous de votre lieu et nous vous aiderons pour la suite : chaque dojo "
 "commence par quelqu'un comme vous qui dit oui. Un membre du conseil vous "
@@ -2130,25 +2122,26 @@ msgstr "Dites-nous en plus"
 msgid ""
 "As a dojo's champion works directly with minors, Belgian law requires a "
 "specific criminal record extract: <em>\"Artikel 596.2 ('minderjarigenmodel') "
-"is nodig voor specifieke activiteiten met contacten met kinderen en jongeren,"
-" zoals opvoeding, psycho-medisch-sociale begeleiding, hulpverlening aan de "
-"jeugd, kinderbescherming, animatie of begeleiding van minderjarigen.\"</em> "
-"We'll email you a private upload link once your application is reviewed. Only"
-" an approved reviewer can access the document, it's discarded as soon as it's"
-" validated, and the validation itself expires after a year — we'll email you "
-"again to renew it, and your login is disabled until it's back in order."
+"is nodig voor specifieke activiteiten met contacten met kinderen en "
+"jongeren, zoals opvoeding, psycho-medisch-sociale begeleiding, hulpverlening "
+"aan de jeugd, kinderbescherming, animatie of begeleiding van minderjarigen."
+"\"</em> We'll email you a private upload link once your application is "
+"reviewed. Only an approved reviewer can access the document, it's discarded "
+"as soon as it's validated, and the validation itself expires after a year — "
+"we'll email you again to renew it, and your login is disabled until it's "
+"back in order."
 msgstr ""
 "Comme le champion d'un dojo travaille directement avec des mineurs, la loi "
-"belge exige un extrait de casier judiciaire spécifique : <em>« L'article 596,"
-" alinéa 2 (modèle 2) est requis pour les activités spécifiques impliquant des"
-" contacts avec des enfants et des jeunes, comme l'éducation, l'accompagnement"
-" psycho-médico-social, l'aide à la jeunesse, la protection de l'enfance, "
-"l'animation ou l'encadrement de mineurs. »</em> Nous vous enverrons un lien "
-"privé pour l'envoyer une fois votre candidature examinée. Seul un "
-"vérificateur approuvé peut consulter le document, il est supprimé dès qu'il "
-"est validé, et cette validation expire après un an : nous vous écrirons alors"
-" pour le renouveler, et d'ici là vous n'avez plus accès à votre tableau de "
-"bord de dojo."
+"belge exige un extrait de casier judiciaire spécifique : <em>« L'article "
+"596, alinéa 2 (modèle 2) est requis pour les activités spécifiques "
+"impliquant des contacts avec des enfants et des jeunes, comme l'éducation, "
+"l'accompagnement psycho-médico-social, l'aide à la jeunesse, la protection "
+"de l'enfance, l'animation ou l'encadrement de mineurs. »</em> Nous vous "
+"enverrons un lien privé pour l'envoyer une fois votre candidature examinée. "
+"Seul un vérificateur approuvé peut consulter le document, il est supprimé "
+"dès qu'il est validé, et cette validation expire après un an : nous vous "
+"écrirons alors pour le renouveler, et d'ici là vous n'avez plus accès à "
+"votre tableau de bord de dojo."
 
 # | msgid "%(kind)s application"
 #: applications/templates/applications/register_dojo.html:92
@@ -2172,8 +2165,8 @@ msgstr ""
 
 #: applications/templates/applications/register_helper.html:39
 msgid ""
-"However much time you can give, we can use it — from mentoring most Saturdays"
-" to helping out at one big event a year."
+"However much time you can give, we can use it — from mentoring most "
+"Saturdays to helping out at one big event a year."
 msgstr ""
 "Quel que soit le temps que vous pouvez donner, il nous est utile : d'être "
 "mentor presque tous les samedis à aider lors d'un grand événement par an."
@@ -2189,9 +2182,9 @@ msgstr "Un mot sur vous"
 
 #: applications/templates/applications/register_helper.html:73
 msgid ""
-"Belgian law requires a specific criminal record extract for anyone in contact"
-" with minors: <em>\"Artikel 596.2 ('minderjarigenmodel') is nodig voor "
-"specifieke activiteiten met contacten met kinderen en jongeren, zoals "
+"Belgian law requires a specific criminal record extract for anyone in "
+"contact with minors: <em>\"Artikel 596.2 ('minderjarigenmodel') is nodig "
+"voor specifieke activiteiten met contacten met kinderen en jongeren, zoals "
 "opvoeding, psycho-medisch-sociale begeleiding, hulpverlening aan de jeugd, "
 "kinderbescherming, animatie of begeleiding van minderjarigen.\"</em> We'll "
 "email you a private upload link once your application is reviewed. Only an "
@@ -2201,8 +2194,8 @@ msgid ""
 msgstr ""
 "La loi belge exige un extrait de casier judiciaire spécifique pour toute "
 "personne en contact avec des mineurs : <em>« L'article 596, alinéa 2 (modèle "
-"2) est requis pour les activités spécifiques impliquant des contacts avec des"
-" enfants et des jeunes, comme l'éducation, l'accompagnement psycho-médico-"
+"2) est requis pour les activités spécifiques impliquant des contacts avec "
+"des enfants et des jeunes, comme l'éducation, l'accompagnement psycho-médico-"
 "social, l'aide à la jeunesse, la protection de l'enfance, l'animation ou "
 "l'encadrement de mineurs. »</em> Nous vous enverrons un lien privé pour "
 "l'envoyer une fois votre candidature examinée. Seul un vérificateur approuvé "
@@ -2221,8 +2214,8 @@ msgstr "Merci, document reçu"
 
 #: applications/templates/applications/upload_background_check.html:25
 msgid ""
-"We've received your document. A reviewer will validate it before your account"
-" is set up."
+"We've received your document. A reviewer will validate it before your "
+"account is set up."
 msgstr ""
 "Nous avons reçu votre document. Un vérificateur le validera avant que votre "
 "compte ne soit prêt."
@@ -2248,8 +2241,8 @@ msgstr ""
 
 #: applications/templates/applications/upload_background_check.html:33
 msgid ""
-"We already have your document and it's waiting for review — no need to upload"
-" another."
+"We already have your document and it's waiting for review — no need to "
+"upload another."
 msgstr ""
 "Nous avons déjà votre document, il est en attente de vérification : inutile "
 "d'en envoyer un autre."
@@ -2273,8 +2266,8 @@ msgid ""
 "Hi %(name)s — your background check has expired; upload a new one to keep "
 "helping at your dojo."
 msgstr ""
-"Bonjour %(name)s, votre extrait de casier judiciaire a expiré ; envoyez-en un"
-" nouveau pour continuer à aider dans votre dojo."
+"Bonjour %(name)s, votre extrait de casier judiciaire a expiré ; envoyez-en "
+"un nouveau pour continuer à aider dans votre dojo."
 
 #: applications/templates/applications/upload_background_check.html:41
 #, python-format
@@ -2290,9 +2283,9 @@ msgid ""
 "mention it's for volunteering with minors (model 2 / Artikel 596.2)."
 msgstr ""
 "Vous pouvez demander cet « extrait de casier judiciaire, modèle 2 » "
-"gratuitement auprès de votre commune, ou en ligne via mondossier.rrn.fgov.be."
-" Précisez qu'il s'agit de bénévolat avec des mineurs (modèle 2 / article 596,"
-" al. 2)."
+"gratuitement auprès de votre commune, ou en ligne via mondossier.rrn.fgov."
+"be. Précisez qu'il s'agit de bénévolat avec des mineurs (modèle 2 / article "
+"596, al. 2)."
 
 #: applications/templates/applications/upload_background_check.html:55
 msgid ""
@@ -2301,8 +2294,8 @@ msgid ""
 "validation expires after a year, after which it needs to be redone."
 msgstr ""
 "Seul un vérificateur approuvé peut consulter ce document. Il est supprimé de "
-"nos systèmes dès qu'il est validé : nous ne gardons que le résultat, et cette"
-" validation expire après un an, après quoi il faut la renouveler."
+"nos systèmes dès qu'il est validé : nous ne gardons que le résultat, et "
+"cette validation expire après un an, après quoi il faut la renouveler."
 
 # | msgid "upload your document"
 #: applications/templates/applications/upload_background_check.html:66
@@ -2552,8 +2545,8 @@ msgstr "Sponsors"
 #: content/templates/content/manage/sponsor_list.html:10
 msgid ""
 "The sponsors and partners shown under \"Made possible by\" on the homepage, "
-"lowest order first. Each links to its website and shows its logo, or its name"
-" when it has no logo."
+"lowest order first. Each links to its website and shows its logo, or its "
+"name when it has no logo."
 msgstr ""
 "Les sponsors et partenaires affichés sous « Rendu possible grâce à » sur la "
 "page d'accueil, l'ordre le plus bas en premier. Chacun renvoie vers son site "
@@ -2564,10 +2557,11 @@ msgid "Hidden"
 msgstr "Masqué"
 
 #: content/templates/content/manage/sponsor_list.html:32
-msgid "No sponsors yet. Without any, the homepage leaves out \"Made possible by\"."
+msgid ""
+"No sponsors yet. Without any, the homepage leaves out \"Made possible by\"."
 msgstr ""
-"Pas encore de sponsors. Sans sponsor, la page d'accueil n'affiche pas « Rendu"
-" possible grâce à »."
+"Pas encore de sponsors. Sans sponsor, la page d'accueil n'affiche pas « "
+"Rendu possible grâce à »."
 
 #: content/templates/content/partials/_promotion_banner.html:15
 #: content/templates/content/partials/_promotion_hero.html:12
@@ -2694,15 +2688,15 @@ msgstr "Contact"
 
 #: core/templates/core/code_of_conduct.html:32
 msgid ""
-"A dojo is a place where children and teenagers learn to code by doing, trying"
-" and making mistakes, together with volunteers. To keep it safe and fun for "
-"everyone, everybody at a dojo follows this code: ninjas, parents and "
+"A dojo is a place where children and teenagers learn to code by doing, "
+"trying and making mistakes, together with volunteers. To keep it safe and "
+"fun for everyone, everybody at a dojo follows this code: ninjas, parents and "
 "guardians, mentors, champions and visitors."
 msgstr ""
 "Un dojo est un lieu où enfants et adolescents apprennent à coder en faisant, "
 "en essayant et en se trompant, avec des bénévoles. Pour que ce soit sûr et "
-"agréable pour tous, chacun au dojo suit ce code de conduite : ninjas, parents"
-" et tuteurs, mentors, champions et visiteurs."
+"agréable pour tous, chacun au dojo suit ce code de conduite : ninjas, "
+"parents et tuteurs, mentors, champions et visiteurs."
 
 #: core/templates/core/code_of_conduct.html:34
 msgid "What CoderDojo stands for"
@@ -2746,8 +2740,8 @@ msgstr ""
 
 #: core/templates/core/code_of_conduct.html:45
 msgid ""
-"Help each other: asking a question and sharing what you know are both part of"
-" learning."
+"Help each other: asking a question and sharing what you know are both part "
+"of learning."
 msgstr ""
 "Entraidez-vous : poser une question et partager ce que l'on sait font tous "
 "deux partie de l'apprentissage."
@@ -2791,8 +2785,8 @@ msgid ""
 "Tell a mentor, or your parents, if something online or at the dojo makes you "
 "feel uncomfortable."
 msgstr ""
-"Parlez-en à un mentor, ou à vos parents, si quelque chose en ligne ou au dojo"
-" vous met mal à l'aise."
+"Parlez-en à un mentor, ou à vos parents, si quelque chose en ligne ou au "
+"dojo vous met mal à l'aise."
 
 # | msgid "For parents &amp; guardians"
 #: core/templates/core/code_of_conduct.html:58
@@ -2801,8 +2795,8 @@ msgstr "Parents et tuteurs"
 
 #: core/templates/core/code_of_conduct.html:60
 msgid ""
-"Children under 12 need an adult on site for the whole session; older children"
-" can be dropped off and picked up on time."
+"Children under 12 need an adult on site for the whole session; older "
+"children can be dropped off and picked up on time."
 msgstr ""
 "Les moins de 12 ans doivent être accompagnés d'un adulte sur place pendant "
 "toute la session ; les plus grands peuvent être déposés et repris à l'heure."
@@ -2833,16 +2827,16 @@ msgid ""
 "Keep your background check (criminal record extract, model 2) valid; without "
 "it you can't help at a dojo."
 msgstr ""
-"Gardez votre extrait de casier judiciaire (modèle 2) valable ; sans lui, vous"
-" ne pouvez pas aider dans un dojo."
+"Gardez votre extrait de casier judiciaire (modèle 2) valable ; sans lui, "
+"vous ne pouvez pas aider dans un dojo."
 
 #: core/templates/core/code_of_conduct.html:68
 msgid ""
 "Stay in sight of others: don't be alone with a ninja out of view, and don't "
 "contact ninjas privately outside the dojo (messages, social media)."
 msgstr ""
-"Restez à la vue des autres : ne restez pas seul avec un ninja hors de vue, et"
-" ne contactez pas les ninjas en privé en dehors du dojo (messages, réseaux "
+"Restez à la vue des autres : ne restez pas seul avec un ninja hors de vue, "
+"et ne contactez pas les ninjas en privé en dehors du dojo (messages, réseaux "
 "sociaux)."
 
 #: core/templates/core/code_of_conduct.html:69
@@ -2853,8 +2847,8 @@ msgstr ""
 
 #: core/templates/core/code_of_conduct.html:70
 msgid ""
-"Make everyone feel welcome, first-timers most of all, and let ninjas find the"
-" answer themselves."
+"Make everyone feel welcome, first-timers most of all, and let ninjas find "
+"the answer themselves."
 msgstr ""
 "Faites en sorte que chacun se sente bienvenu, les nouveaux en premier, et "
 "laissez les ninjas trouver la réponse eux-mêmes."
@@ -2871,13 +2865,12 @@ msgstr ""
 #: core/templates/core/code_of_conduct.html:77
 #, python-format
 msgid ""
-"You can always contact CoderDojo Belgium at <a "
-"href=\"mailto:%(email)s\">%(email)s</a>; we treat every report "
-"confidentially."
+"You can always contact CoderDojo Belgium at <a href=\"mailto:"
+"%(email)s\">%(email)s</a>; we treat every report confidentially."
 msgstr ""
-"Vous pouvez toujours contacter CoderDojo Belgium à <a "
-"href=\"mailto:%(email)s\">%(email)s</a> ; chaque signalement est traité de "
-"façon confidentielle."
+"Vous pouvez toujours contacter CoderDojo Belgium à <a href=\"mailto:"
+"%(email)s\">%(email)s</a> ; chaque signalement est traité de façon "
+"confidentielle."
 
 #: core/templates/core/code_of_conduct.html:78
 msgid "If a child is in danger, call 112."
@@ -2907,8 +2900,8 @@ msgid ""
 "Questions about CoderDojo in Belgium, volunteering, starting a dojo or "
 "becoming a partner? We're happy to help."
 msgstr ""
-"Des questions sur CoderDojo en Belgique, le bénévolat, le lancement d'un dojo"
-" ou un partenariat ? Nous vous aidons volontiers."
+"Des questions sur CoderDojo en Belgique, le bénévolat, le lancement d'un "
+"dojo ou un partenariat ? Nous vous aidons volontiers."
 
 #: core/templates/core/contact.html:36
 msgid "For general questions about CoderDojo Belgium."
@@ -2973,8 +2966,8 @@ msgstr "Créez quelque chose de génial avec du code."
 
 #: core/templates/core/home.html:65
 msgid ""
-"Free, for ages 7–18. No experience needed — bring a laptop and an idea, we'll"
-" help with the rest."
+"Free, for ages 7–18. No experience needed — bring a laptop and an idea, "
+"we'll help with the rest."
 msgstr ""
 "Gratuit, de 7 à 18 ans. Aucune expérience requise : apportez un ordinateur "
 "portable et une idée, nous vous aidons pour le reste."
@@ -3058,8 +3051,8 @@ msgid ""
 "Free, for ages 7–18. No experience needed — spots are limited, so sign up "
 "before Saturday."
 msgstr ""
-"Gratuit, de 7 à 18 ans. Aucune expérience requise. Les places sont limitées :"
-" inscrivez-vous avant samedi."
+"Gratuit, de 7 à 18 ans. Aucune expérience requise. Les places sont "
+"limitées : inscrivez-vous avant samedi."
 
 #: core/templates/core/menu.html:13
 msgid "Home"
@@ -3309,6 +3302,23 @@ msgstr "Nouvelle nouvelle"
 msgid "Keep it short: 500 characters at most."
 msgstr "Restez bref : 500 caractères maximum."
 
+#: dojos/forms.py:223
+msgid "Their account's email"
+msgstr "Adresse e-mail de leur compte"
+
+#: dojos/forms.py:223
+msgid "mentor@example.com"
+msgstr "mentor@exemple.be"
+
+#: dojos/forms.py:228 dojos/templates/dojos/dojo_members.html:36
+msgid "Ninja"
+msgstr "Ninja"
+
+# | msgid "Champion"
+#: dojos/forms.py:237
+msgid "New champion"
+msgstr "Nouveau champion"
+
 #: dojos/models.py:49 dojos/templates/dojos/dojo_event_detail.html:35
 #: dojos/templates/dojos/dojo_event_list.html:37 events/models.py:32
 #: mailing/templates/mailing/manage/_status_badge.html:1
@@ -3462,7 +3472,7 @@ msgstr ""
 msgid "You're now the champion of %(dojo)s."
 msgstr "Vous êtes maintenant le champion de %(dojo)s."
 
-#: dojos/team.py:226 dojos/views.py:500
+#: dojos/team.py:226 dojos/views.py:518
 msgid "Unknown action."
 msgstr "Action inconnue."
 
@@ -3581,7 +3591,8 @@ msgstr "Aucune session n'a été planifiée depuis plus de six mois."
 
 #: dojos/templates/dojos/dojo_dashboard.html:25
 #, python-format
-msgid "Plan your next session under <a href=\"%(new_event_url)s\">New event</a>."
+msgid ""
+"Plan your next session under <a href=\"%(new_event_url)s\">New event</a>."
 msgstr ""
 "Planifiez votre prochaine session via <a href=\"%(new_event_url)s\">Nouvel "
 "événement</a>."
@@ -3593,7 +3604,8 @@ msgstr "Planifiez votre prochaine session."
 
 #: dojos/templates/dojos/dojo_dashboard.html:26
 #, python-format
-msgid "Or mark the dojo dormant under <a href=\"%(settings_url)s\">Settings</a>."
+msgid ""
+"Or mark the dojo dormant under <a href=\"%(settings_url)s\">Settings</a>."
 msgstr ""
 "Ou mettez le dojo en pause dans <a href=\"%(settings_url)s\">Paramètres</a>."
 
@@ -3831,12 +3843,12 @@ msgstr "Trouver un dojo"
 
 #: dojos/templates/dojos/dojo_list.html:32
 msgid ""
-"Every CoderDojo in Belgium is free, run by local volunteers, and open to kids"
-" aged 7–18 — enter a postcode or city to see what's nearby."
+"Every CoderDojo in Belgium is free, run by local volunteers, and open to "
+"kids aged 7–18 — enter a postcode or city to see what's nearby."
 msgstr ""
 "Chaque CoderDojo en Belgique est gratuit, animé par des bénévoles locaux et "
-"ouvert aux enfants de 7 à 18 ans. Indiquez un code postal ou une commune pour"
-" voir ce qui existe près de chez vous."
+"ouvert aux enfants de 7 à 18 ans. Indiquez un code postal ou une commune "
+"pour voir ce qui existe près de chez vous."
 
 #: dojos/templates/dojos/dojo_list.html:49
 #: dojos/templates/dojos/partials/_dojo_finder_widget.html:25
@@ -3906,8 +3918,8 @@ msgstr "Rouvrir en brouillon"
 
 #: dojos/templates/dojos/dojo_manage.html:47
 msgid ""
-"Hidden from the public site while you set it up. Launch it when your profile,"
-" team and first sessions are ready."
+"Hidden from the public site while you set it up. Launch it when your "
+"profile, team and first sessions are ready."
 msgstr ""
 "Caché du site public pendant la mise en place. Lancez-le quand votre profil, "
 "votre équipe et vos premières sessions sont prêts."
@@ -4035,11 +4047,6 @@ msgstr ""
 "autre dojo sont marqués « En visite » sur la liste de présences de chaque "
 "session."
 
-#: dojos/templates/dojos/dojo_members.html:36
-#: dojos/templates/dojos/dojo_team_manage.html:116
-msgid "Ninja"
-msgstr "Ninja"
-
 #: dojos/templates/dojos/dojo_members.html:38
 msgid "Comes"
 msgstr "Assiduité"
@@ -4083,7 +4090,7 @@ msgstr ""
 "par e-mail."
 
 #: dojos/templates/dojos/dojo_members.html:78
-#: dojos/templates/dojos/dojo_team_manage.html:123
+#: dojos/templates/dojos/dojo_team_manage.html:113
 msgid "Promote"
 msgstr "Promouvoir"
 
@@ -4140,8 +4147,8 @@ msgid ""
 "same thing out loud, so the ring is never the only clue."
 msgstr ""
 "Chaque dojo est dirigé par son champion, avec des mentors et des jeunes "
-"mentors. Un petit anneau autour de chaque avatar indique le rôle ; le texte à"
-" côté dit toujours la même chose, l'anneau n'est donc jamais le seul indice."
+"mentors. Un petit anneau autour de chaque avatar indique le rôle ; le texte "
+"à côté dit toujours la même chose, l'anneau n'est donc jamais le seul indice."
 
 #: dojos/templates/dojos/dojo_team.html:91
 msgid "No other mentors listed yet."
@@ -4217,27 +4224,19 @@ msgstr ""
 "la page publique du dojo."
 
 #: dojos/templates/dojos/dojo_team_manage.html:101
-msgid "Their account's email"
-msgstr "Adresse e-mail de leur compte"
-
-#: dojos/templates/dojos/dojo_team_manage.html:102
-msgid "mentor@example.com"
-msgstr "mentor@exemple.be"
-
-#: dojos/templates/dojos/dojo_team_manage.html:104
 msgid "Add to team"
 msgstr "Ajouter à l'équipe"
 
 # | msgid "Youth mentor"
-#: dojos/templates/dojos/dojo_team_manage.html:109
+#: dojos/templates/dojos/dojo_team_manage.html:106
 msgid "Promote a youth mentor"
 msgstr "Promouvoir un jeune mentor"
 
-#: dojos/templates/dojos/dojo_team_manage.html:111
+#: dojos/templates/dojos/dojo_team_manage.html:108
 msgid "A ninja with their own login who helps run sessions here."
 msgstr "Un ninja avec son propre compte qui aide à animer les sessions ici."
 
-#: dojos/templates/dojos/dojo_team_manage.html:126
+#: dojos/templates/dojos/dojo_team_manage.html:116
 msgid ""
 "No ninjas with their own login are linked to this dojo yet (through their "
 "home dojo or a session sign-up)."
@@ -4245,11 +4244,11 @@ msgstr ""
 "Aucun ninja avec son propre compte n'est encore lié à ce dojo (par son dojo "
 "d'attache ou une inscription à une session)."
 
-#: dojos/templates/dojos/dojo_team_manage.html:133
+#: dojos/templates/dojos/dojo_team_manage.html:123
 msgid "Hand over the champion role"
 msgstr "Transférer le rôle de champion"
 
-#: dojos/templates/dojos/dojo_team_manage.html:135
+#: dojos/templates/dojos/dojo_team_manage.html:125
 msgid ""
 "Make one of your mentors this dojo's champion. You stay on the team as a "
 "mentor."
@@ -4257,20 +4256,15 @@ msgstr ""
 "Faites d'un de vos mentors le champion de ce dojo. Vous restez dans l'équipe "
 "en tant que mentor."
 
-#: dojos/templates/dojos/dojo_team_manage.html:137
+#: dojos/templates/dojos/dojo_team_manage.html:127
 msgid "Hand over the champion role? You become a mentor."
 msgstr "Transférer le rôle de champion ? Vous devenez mentor."
 
-# | msgid "Champion"
-#: dojos/templates/dojos/dojo_team_manage.html:141
-msgid "New champion"
-msgstr "Nouveau champion"
-
-#: dojos/templates/dojos/dojo_team_manage.html:148
+#: dojos/templates/dojos/dojo_team_manage.html:131
 msgid "Hand over"
 msgstr "Transférer"
 
-#: dojos/templates/dojos/dojo_team_manage.html:151
+#: dojos/templates/dojos/dojo_team_manage.html:134
 msgid ""
 "You need at least one active mentor on the team to hand the champion role to."
 msgstr ""
@@ -4278,18 +4272,18 @@ msgstr ""
 "rôle de champion."
 
 # | msgid "No team members listed yet."
-#: dojos/templates/dojos/dojo_team_manage.html:158
+#: dojos/templates/dojos/dojo_team_manage.html:141
 msgid "Former team members"
 msgstr "Anciens membres de l'équipe"
 
-#: dojos/templates/dojos/dojo_team_manage.html:159
+#: dojos/templates/dojos/dojo_team_manage.html:142
 msgid "No longer on the team, but still shown on the sessions they helped run."
 msgstr ""
 "Ne font plus partie de l'équipe, mais restent affichés sur les sessions "
 "qu'ils ont animées."
 
 # | msgid "sent %(date)s"
-#: dojos/templates/dojos/dojo_team_manage.html:166
+#: dojos/templates/dojos/dojo_team_manage.html:149
 #, python-format
 msgid "left %(date)s"
 msgstr "parti en %(date)s"
@@ -4590,90 +4584,90 @@ msgid "Get in touch with %(name)s"
 msgstr "Contacter %(name)s"
 
 # | msgid "Your request to join this team is waiting for an answer."
-#: dojos/views.py:166
+#: dojos/views.py:174
 #, python-format
 msgid "Your request to join %(dojo)s has been sent to its team."
 msgstr "Votre demande pour rejoindre %(dojo)s a été envoyée à son équipe."
 
-#: dojos/views.py:263
+#: dojos/views.py:271
 msgid ""
 "Only approved champions with a valid background check can create a dojo."
 msgstr ""
 "Seuls les champions approuvés avec un extrait de casier judiciaire valable "
 "peuvent créer un dojo."
 
-#: dojos/views.py:281
+#: dojos/views.py:289
 #, python-format
 msgid ""
 "%(dojo)s has been created as a draft. Fill in its profile, then launch it."
 msgstr ""
 "%(dojo)s a été créé en brouillon. Complétez son profil, puis lancez-le."
 
-#: dojos/views.py:283
+#: dojos/views.py:291
 msgid "We couldn't find that address on the map; check it on this page."
 msgstr ""
 "Nous n'avons pas trouvé cette adresse sur la carte ; vérifiez-la sur cette "
 "page."
 
-#: dojos/views.py:336
+#: dojos/views.py:344
 #, python-format
 msgid "%(dojo)s is now %(lower)s."
 msgstr "%(dojo)s est maintenant %(lower)s."
 
-#: dojos/views.py:405
+#: dojos/views.py:413
 msgid "Update posted on the dojo's page."
 msgstr "Nouvelle publiée sur la page du dojo."
 
-#: dojos/views.py:422
+#: dojos/views.py:430
 msgid "Update removed."
 msgstr "Nouvelle retirée."
 
 # | msgid "Youth mentor at %(dojo)s"
-#: dojos/views.py:466
+#: dojos/views.py:479
 #, python-format
 msgid "You've left the %(dojo)s team."
 msgstr "Vous avez quitté l'équipe de %(dojo)s."
 
-#: dojos/views.py:472
+#: dojos/views.py:485
 #, python-format
 msgid "%(membership)s is now the champion of %(dojo)s."
 msgstr "%(membership)s est maintenant le champion de %(dojo)s."
 
-#: dojos/views.py:481
+#: dojos/views.py:494
 #, python-format
 msgid "%(membership)s is now on the team."
 msgstr "%(membership)s fait maintenant partie de l'équipe."
 
 # | msgid "Request a new link"
-#: dojos/views.py:484
+#: dojos/views.py:497
 msgid "Request declined."
 msgstr "Demande refusée."
 
-#: dojos/views.py:487
+#: dojos/views.py:500
 #, python-format
 msgid "%(membership)s has been removed from the team."
 msgstr "%(membership)s a été retiré de l'équipe."
 
 # | msgid "Enter a valid email address."
-#: dojos/views.py:492
+#: dojos/views.py:507
 msgid "No account uses that email address."
 msgstr "Aucun compte n'utilise cette adresse e-mail."
 
-#: dojos/views.py:494
+#: dojos/views.py:509
 #, python-format
 msgid "%(name)s has been added to the team."
 msgstr "%(name)s a été ajouté à l'équipe."
 
-#: dojos/views.py:498
+#: dojos/views.py:516
 #, python-format
 msgid "%(name)s is now a youth mentor."
 msgstr "%(name)s est maintenant jeune mentor."
 
-#: dojos/views.py:716
+#: dojos/views.py:734
 msgid "Pick a belt to award."
 msgstr "Choisissez une ceinture à décerner."
 
-#: dojos/views.py:753
+#: dojos/views.py:771
 msgid "Pick a badge to award."
 msgstr "Choisissez un badge à décerner."
 
@@ -4780,8 +4774,8 @@ msgstr ""
 
 #: events/forms.py:136
 msgid ""
-"Optional. When set, the event page links there instead of showing the sign-up"
-" form, and Places isn't needed."
+"Optional. When set, the event page links there instead of showing the sign-"
+"up form, and Places isn't needed."
 msgstr ""
 "Facultatif. S'il est rempli, la page de l'événement renvoie vers ce site au "
 "lieu d'afficher le formulaire d'inscription, et Places n'est pas nécessaire."
@@ -5178,9 +5172,9 @@ msgid ""
 "automatically when a ninja has attended enough sessions."
 msgstr ""
 "Les distinctions que les ninjas peuvent obtenir. Seule l'organisation les "
-"crée ; les équipes des dojos les décernent aux ninjas lors de leurs sessions."
-" Les paliers sont décernés automatiquement quand un ninja a participé à assez"
-" de sessions."
+"crée ; les équipes des dojos les décernent aux ninjas lors de leurs "
+"sessions. Les paliers sont décernés automatiquement quand un ninja a "
+"participé à assez de sessions."
 
 #: events/templates/events/manage/badge_list.html:12
 msgid "One-off awards"
@@ -5279,8 +5273,8 @@ msgstr "Newsletter et campagnes"
 msgid ""
 "Password resets, background-check requests and other mail about your account."
 msgstr ""
-"Réinitialisations de mot de passe, demandes d'extrait de casier judiciaire et"
-" autres e-mails sur votre compte."
+"Réinitialisations de mot de passe, demandes d'extrait de casier judiciaire "
+"et autres e-mails sur votre compte."
 
 #: mailing/categories.py:80
 msgid "Confirmations and changes for the sessions you signed up for."
@@ -5335,8 +5329,8 @@ msgstr "Segment"
 msgid ""
 "Line %(number)s: write it as name: value (a name in lowercase letters and _)."
 msgstr ""
-"Ligne %(number)s : écrivez-la sous la forme nom: valeur (un nom en minuscules"
-" et _)."
+"Ligne %(number)s : écrivez-la sous la forme nom: valeur (un nom en "
+"minuscules et _)."
 
 # | msgid "Spot available"
 #: mailing/forms.py:129
@@ -5350,8 +5344,8 @@ msgstr "signup_url: https://coolestprojects.org"
 #: mailing/forms.py:131
 msgid "One per line, as name: value. The template uses them as {{ name }}."
 msgstr ""
-"Une par ligne, sous la forme nom: valeur. Le modèle les utilise comme {{ name"
-" }}."
+"Une par ligne, sous la forme nom: valeur. Le modèle les utilise comme "
+"{{ name }}."
 
 #: mailing/forms.py:137
 #, python-format
@@ -5434,8 +5428,8 @@ msgstr "Vous nous manquez"
 
 #: mailing/forms.py:258
 msgid ""
-"Tip: a rule like \"How the child comes to sessions changed: became At risk in"
-" the last 7 days\" makes it a triggered mail."
+"Tip: a rule like \"How the child comes to sessions changed: became At risk "
+"in the last 7 days\" makes it a triggered mail."
 msgstr ""
 "Astuce : une règle comme « L'assiduité de l'enfant a changé : est devenu "
 "Risque de décrocher ces 7 derniers jours » en fait un e-mail déclenché."
@@ -6163,8 +6157,8 @@ msgstr "Personne pour l'instant."
 #: mailing/templates/mailing/manage/campaign_detail.html:74
 #, python-format
 msgid ""
-"Goes out at up to %(rate)s batches a minute; held-back mail is for people who"
-" unsubscribed, blocked addresses or inactive accounts."
+"Goes out at up to %(rate)s batches a minute; held-back mail is for people "
+"who unsubscribed, blocked addresses or inactive accounts."
 msgstr ""
 "Part à raison de %(rate)s lots par minute au maximum ; les e-mails retenus "
 "concernent des personnes désabonnées, des adresses bloquées ou des comptes "
@@ -6303,14 +6297,14 @@ msgstr "Qui en fait partie"
 
 #: mailing/templates/mailing/manage/segment_detail.html:28
 msgid ""
-"Groups at the top level must all match. Inside a group, choose whether all or"
-" any of its rules must match. A \"Parents of a child who…\" group describes "
-"one child: all its rules are about the same child."
+"Groups at the top level must all match. Inside a group, choose whether all "
+"or any of its rules must match. A \"Parents of a child who…\" group "
+"describes one child: all its rules are about the same child."
 msgstr ""
 "Les groupes du premier niveau doivent tous correspondre. Dans un groupe, "
 "choisissez si toutes ses règles ou l'une d'elles doivent correspondre. Un "
-"groupe « Parents d'un enfant qui… » décrit un seul enfant : toutes ses règles"
-" portent sur le même enfant."
+"groupe « Parents d'un enfant qui… » décrit un seul enfant : toutes ses "
+"règles portent sur le même enfant."
 
 #: mailing/templates/mailing/manage/segment_detail.html:28
 msgid ""
@@ -6498,12 +6492,12 @@ msgid ""
 "about sessions at your dojo, a new dojo near you, or events like Coolest "
 "Projects and CoderDojo Girlz."
 msgstr ""
-"Nous utilisons ce que nous savons de votre famille pour vous envoyer des "
-"e-mails pertinents : votre code postal et votre langue et, pour les enfants "
+"Nous utilisons ce que nous savons de votre famille pour vous envoyer des e-"
+"mails pertinents : votre code postal et votre langue et, pour les enfants "
 "pour lesquels vous l'acceptez, les sessions auxquelles ils participent, leur "
-"âge et leur genre. C'est ainsi que vous entendez parler des sessions de votre"
-" dojo, d'un nouveau dojo près de chez vous ou d'événements comme Coolest "
-"Projects et CoderDojo Girlz."
+"âge et leur genre. C'est ainsi que vous entendez parler des sessions de "
+"votre dojo, d'un nouveau dojo près de chez vous ou d'événements comme "
+"Coolest Projects et CoderDojo Girlz."
 
 #: mailing/templates/mailing/partials/_privacy_explanation.html:11
 msgid ""
@@ -6655,9 +6649,9 @@ msgid ""
 "champion: the role has to go to one of the dojo's mentors first (on the "
 "dojo's Team page)."
 msgstr ""
-"Ce compte est champion de %(dojos)s. Un dojo ne peut pas rester sans champion"
-" : le rôle doit d'abord passer à un des mentors du dojo (sur la page Équipe "
-"du dojo)."
+"Ce compte est champion de %(dojos)s. Un dojo ne peut pas rester sans "
+"champion : le rôle doit d'abord passer à un des mentors du dojo (sur la page "
+"Équipe du dojo)."
 
 #: privacy/deletion.py:74
 msgid "This account has an organisation role. It has to be taken away first."
@@ -6672,6 +6666,15 @@ msgstr ""
 "C'est le compte d'un administrateur technique (superuser) ; il ne peut pas "
 "être supprimé ici."
 
+#: privacy/forms.py:17
+#, python-format
+msgid "Type the username, %(username)s, to confirm"
+msgstr "Tapez le nom d'utilisateur, %(username)s, pour confirmer"
+
+#: privacy/forms.py:22
+msgid "Type the account's username to confirm."
+msgstr "Tapez le nom d'utilisateur du compte pour confirmer."
+
 #: privacy/retention.py:251
 #, python-format
 msgid ""
@@ -6680,9 +6683,9 @@ msgid ""
 "champion. Ask them to hand the role to a mentor, or contact the organisation."
 msgstr ""
 "%(name)s, champion de %(dojo)s, ne s'est plus connecté depuis deux ans. Son "
-"compte devait être nettoyé le %(date)s, mais ce n'est pas possible tant qu'il"
-" reste champion. Demandez-lui de passer le rôle à un mentor, ou contactez "
-"l'organisation."
+"compte devait être nettoyé le %(date)s, mais ce n'est pas possible tant "
+"qu'il reste champion. Demandez-lui de passer le rôle à un mentor, ou "
+"contactez l'organisation."
 
 #: privacy/retention.py:257
 #, python-format
@@ -6755,8 +6758,8 @@ msgid ""
 "awarded, and your profile on the dojos' team pages."
 msgstr ""
 "Votre nom sur les sessions que vous avez encadrées et sur les ceintures et "
-"badges que vous avez remis, ainsi que votre profil sur les pages d'équipe des"
-" dojos."
+"badges que vous avez remis, ainsi que votre profil sur les pages d'équipe "
+"des dojos."
 
 #: privacy/templates/privacy/delete_account.html:44
 msgid ""
@@ -6775,10 +6778,6 @@ msgstr "Ces enfants restent, avec leur autre parent ou tuteur :"
 msgid "Want a copy first? <a href=\"%(download_url)s\">Download my data</a>."
 msgstr ""
 "Une copie d'abord ? <a href=\"%(download_url)s\">Télécharger mes données</a>."
-
-#: privacy/templates/privacy/delete_account.html:57
-msgid "Your password, to confirm"
-msgstr "Votre mot de passe, pour confirmer"
 
 #: privacy/templates/privacy/manage/delete.html:3
 #: privacy/templates/privacy/manage/delete.html:4
@@ -6800,8 +6799,9 @@ msgid ""
 "A champion or mentor: the account is cleaned. Their name stays on past "
 "sessions and on belts and badges they awarded; the rest is deleted."
 msgstr ""
-"Un champion ou mentor : le compte est nettoyé. Son nom reste sur les sessions"
-" passées et sur les ceintures et badges remis ; le reste est supprimé."
+"Un champion ou mentor : le compte est nettoyé. Son nom reste sur les "
+"sessions passées et sur les ceintures et badges remis ; le reste est "
+"supprimé."
 
 #: privacy/templates/privacy/manage/delete.html:22
 msgid "Their team-page profile stays, as they chose to show it."
@@ -6838,13 +6838,8 @@ msgstr ""
 "Si la personne a aussi demandé une copie, <a "
 "href=\"%(export_url)s\">téléchargez ses données</a> d'abord."
 
-#: privacy/templates/privacy/manage/delete.html:31
-#, python-format
-msgid "Type the username, %(username)s, to confirm"
-msgstr "Tapez le nom d'utilisateur, %(username)s, pour confirmer"
-
 # | msgid "Meet the team"
-#: privacy/templates/privacy/manage/delete.html:37
+#: privacy/templates/privacy/manage/delete.html:33
 msgid "Delete the account"
 msgstr "Supprimer le compte"
 
@@ -6853,14 +6848,14 @@ msgid ""
 "These champions haven't logged in for almost two years. Their account is "
 "cleaned on the date shown, but not while they're the champion of an active "
 "dojo: the role has to move to one of the dojo's mentors first, or the dojo "
-"has to go dormant. The dojo's mentors have been told on their dashboard. Once"
-" the role has moved, the champion leaves this list."
+"has to go dormant. The dojo's mentors have been told on their dashboard. "
+"Once the role has moved, the champion leaves this list."
 msgstr ""
 "Ces champions ne se sont plus connectés depuis presque deux ans. Leur compte "
 "est nettoyé à la date indiquée, mais pas tant qu'ils sont champion d'un dojo "
-"actif : le rôle doit d'abord passer à un des mentors du dojo, ou le dojo doit"
-" passer en sommeil. Les mentors du dojo ont été prévenus sur leur tableau de "
-"bord. Dès que le rôle est passé, le champion quitte cette liste."
+"actif : le rôle doit d'abord passer à un des mentors du dojo, ou le dojo "
+"doit passer en sommeil. Les mentors du dojo ont été prévenus sur leur "
+"tableau de bord. Dès que le rôle est passé, le champion quitte cette liste."
 
 #: privacy/templates/privacy/manage/privacy.html:19
 msgid "Last login"
@@ -6885,8 +6880,8 @@ msgstr "Ouvrir le dojo"
 
 #: privacy/templates/privacy/manage/privacy.html:40
 msgid ""
-"When someone asks for a copy of their data, or to have it deleted, by mail or"
-" post, find their account here. The file holds everything the site keeps "
+"When someone asks for a copy of their data, or to have it deleted, by mail "
+"or post, find their account here. The file holds everything the site keeps "
 "about the account and the children it's a guardian of, as the family gets it "
 "with Download my data on their account page. Send it only to the account's "
 "own email address."
@@ -6927,27 +6922,26 @@ msgstr "Aucun compte ne correspond."
 msgid ""
 "Showing the first %(search_limit)s; search more precisely to find others."
 msgstr ""
-"Seuls les %(search_limit)s premiers sont affichés ; affinez la recherche pour"
-" en trouver d'autres."
+"Seuls les %(search_limit)s premiers sont affichés ; affinez la recherche "
+"pour en trouver d'autres."
 
-#: privacy/views.py:42
+#: privacy/views.py:44
 msgid ""
 "You just downloaded your data. Please wait a minute before trying again."
 msgstr ""
-"Vous venez de télécharger vos données. Veuillez patienter une minute avant de"
-" réessayer."
+"Vous venez de télécharger vos données. Veuillez patienter une minute avant "
+"de réessayer."
 
-#: privacy/views.py:101
-msgid "That isn't your password."
-msgstr "Ce n'est pas votre mot de passe."
+#: privacy/views.py:100
+msgid "Your password, to confirm"
+msgstr "Votre mot de passe, pour confirmer"
 
-#: privacy/views.py:119
-msgid "Type the account's username to confirm."
-msgstr "Tapez le nom d'utilisateur du compte pour confirmer."
-
-#: privacy/views.py:122
+#: privacy/views.py:118
 msgid "The account has been deleted."
 msgstr "Le compte a été supprimé."
+
+#~ msgid "That isn't your password."
+#~ msgstr "Ce n'est pas votre mot de passe."
 
 #~ msgid "Uittreksel uit het strafregister (model 2)"
 #~ msgstr "Extrait de casier judiciaire (modèle 2)"
@@ -6973,20 +6967,21 @@ msgstr "Le compte a été supprimé."
 #~ "I'm the parent or legal guardian of the children I add, and I agree that "
 #~ "CoderDojo Belgium keeps their details (name, date of birth, gender, and "
 #~ "allergies or notes if I fill them in) to sign them up for sessions and to "
-#~ "keep track of their sessions, belts and badges. Allergies and notes are only "
-#~ "shown to the champion of a dojo they come to. I can download or delete this "
-#~ "data at any time from my account page."
+#~ "keep track of their sessions, belts and badges. Allergies and notes are "
+#~ "only shown to the champion of a dojo they come to. I can download or "
+#~ "delete this data at any time from my account page."
 #~ msgstr ""
-#~ "Je suis le parent ou le tuteur légal des enfants que j'ajoute, et j'accepte "
-#~ "que CoderDojo Belgium conserve leurs données (nom, date de naissance, genre, "
-#~ "et allergies ou remarques si je les indique) pour les inscrire aux sessions "
-#~ "et suivre leurs sessions, ceintures et badges. Les allergies et remarques ne "
-#~ "sont montrées qu'au champion d'un dojo où ils vont. Je peux télécharger ou "
-#~ "supprimer ces données à tout moment depuis ma page de compte."
+#~ "Je suis le parent ou le tuteur légal des enfants que j'ajoute, et "
+#~ "j'accepte que CoderDojo Belgium conserve leurs données (nom, date de "
+#~ "naissance, genre, et allergies ou remarques si je les indique) pour les "
+#~ "inscrire aux sessions et suivre leurs sessions, ceintures et badges. Les "
+#~ "allergies et remarques ne sont montrées qu'au champion d'un dojo où ils "
+#~ "vont. Je peux télécharger ou supprimer ces données à tout moment depuis "
+#~ "ma page de compte."
 
 #~ msgid ""
-#~ "Please confirm that you're the child's parent or guardian and agree to how we"
-#~ " keep their data."
+#~ "Please confirm that you're the child's parent or guardian and agree to "
+#~ "how we keep their data."
 #~ msgstr ""
 #~ "Confirmez que vous êtes le parent ou le tuteur de l'enfant et que vous "
 #~ "acceptez la façon dont nous conservons ses données."

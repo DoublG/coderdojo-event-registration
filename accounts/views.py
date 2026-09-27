@@ -23,7 +23,7 @@ from two_factor.plugins.registry import registry
 from two_factor.views import LoginView as TwoFactorLoginView
 from two_factor.views.utils import IdempotentSessionWizardView
 
-from core.image_library import library_filename, use_library_image
+from core.image_library import use_library_image
 from dojos.access import accessible_dojos
 from dojos.team import notify_managers
 from events.models import Registration, RegistrationCancellation
@@ -35,7 +35,9 @@ from mailing.preferences import set_preference
 from . import child_accounts, home_dojo, two_step
 from .consent import consent_fields
 from .forms import (
+    AddChildForm,
     ChildLoginForm,
+    EditChildForm,
     ForcedPasswordChangeForm,
     LoginForm,
     RegisterGuardianForm,
@@ -54,12 +56,6 @@ from .two_step_forms import BackupCodeForm, CodeTokenForm, PasskeyTokenForm
 BADGES_PAGE_SIZE = 4
 
 CHILD_NAME_FIELD_RE = re.compile(r"^child_(\d+)_name$")
-
-
-def _icon_choices():
-    # Same set as seed_guardians.py — a guardian adding a child through the
-    # quick-add widget picks one of these instead of getting a random one.
-    return TEMPLATE_KID_AVATARS
 
 
 def _get_own_ninja(request, ninja_id, allow_self=False):
@@ -348,8 +344,7 @@ def account_home(request):
     applications = list(request.user.applications.all())
     active_kinds = {a.kind for a in applications if a.status != "rejected"}
     return render(request, "accounts/guardian_detail.html", {
-        "guardian": request.user, "children": children, "icon_choices": _icon_choices(),
-        "gender_choices": Ninja.GENDER_CHOICES,
+        "guardian": request.user, "children": children, "add_child_form": AddChildForm(guardian=request.user),
         "applications": applications,
         "has_champion_application": "champion" in active_kinds,
         "has_mentor_application": "mentor" in active_kinds,
@@ -359,35 +354,24 @@ def account_home(request):
 
 @login_required
 def add_ninja(request):
-    """The "+ Add a child" widget on the account page (see
-    accounts/partials/_children_list.html) — posts here via htmx and
-    swaps in the freshly rendered list, so the page updates without a
-    full reload."""
+    """The "Register another child" form on the account page
+    (accounts/partials/_add_child.html, AddChildForm) — posts here via htmx
+    and swaps in the freshly rendered list, plus the form itself out of
+    band: a fresh one after adding, or the posted one with its errors."""
     if request.user.is_ninja:
         raise Http404
     guardian = request.user
-    add_error = None
-    if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-        family_name = request.POST.get("family_name", "").strip()
-        date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
-        add_error = ninja_birth_date_error(date_of_birth)
-        if name and not family_name:
-            add_error = _("Family name is required.")
-        if name and not add_error:
-            ninja = Ninja(name=name, family_name=family_name, date_of_birth=date_of_birth, gender=_clean_gender(request.POST.get("gender")),
-                          allergies_notes=request.POST.get("allergies_notes", "").strip())
-            _set_icon(ninja, request.POST.get("icon", ""))
-            with transaction.atomic():  # a child never exists without a guardian
-                ninja.save()
-                Guardianship.objects.create(
-                    guardian=guardian, ninja=ninja, **consent_fields(bool(request.POST.get("consent")))
-                )
-    children = _children_context(guardian)
+    form = AddChildForm(request.POST or None, guardian=guardian)
+    if request.method == "POST" and form.is_valid():
+        ninja = form.save(commit=False)
+        _set_icon(ninja, form.cleaned_data["icon"])
+        with transaction.atomic():  # a child never exists without a guardian
+            ninja.save()
+            Guardianship.objects.create(guardian=guardian, ninja=ninja, **consent_fields(form.cleaned_data["consent"]))
+        form = AddChildForm(guardian=guardian)
     return render(request, "accounts/partials/_children_list.html", {
-        "guardian": guardian, "children": children, "add_error": add_error,
+        "guardian": guardian, "children": _children_context(guardian), "add_child_form": form, "add_child_oob": True,
     })
-
 
 def _badges_queryset(child):
     return child.badges.select_related("badge").order_by("id")
@@ -441,20 +425,6 @@ def _set_icon(child, icon):
         use_library_image(child, "photo", "ninjas", icon)
 
 
-def _edit_context(child, **extra):
-    return {
-        "child": child, "gender_choices": Ninja.GENDER_CHOICES,
-        "icon_choices": _icon_choices(), "current_icon": _current_icon_value(child),
-        "home_dojo_choices": home_dojo.home_dojo_choices(), **extra,
-    }
-
-
-def _current_icon_value(child):
-    """The dropdown's filename for the child's current photo, so the edit
-    form can preselect it (None for an uploaded photo or none at all)."""
-    return library_filename(child.photo, "ninjas")
-
-
 @login_required
 def edit_ninja(request, ninja_id):
     """Click-to-edit for the child detail page's header (see
@@ -462,41 +432,16 @@ def edit_ninja(request, ninja_id):
     for a small inline form over htmx; POST saves it and swaps back.
     Guardians only; a ninja's own login can't edit its profile."""
     child = _get_own_ninja(request, ninja_id)
-
-    if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-        if name:
-            child.name = name
-        # Saved as given: a child added before family names were asked for
-        # can still be edited without one.
-        if "family_name" in request.POST:
-            child.family_name = request.POST["family_name"].strip()
-        date_of_birth = parse_date(request.POST.get("date_of_birth", ""))
-        if date_of_birth != child.date_of_birth and (dob_error := ninja_birth_date_error(date_of_birth)):
-            return render(request, "accounts/partials/_child_header_edit.html", _edit_context(child, dob_error=dob_error))
-        child.date_of_birth = date_of_birth
-        if "gender" in request.POST:
-            child.gender = _clean_gender(request.POST["gender"])
-        if "allergies_notes" in request.POST:
-            child.allergies_notes = request.POST["allergies_notes"].strip()
-        # Like gender: a form without the field keeps what's stored, and an
-        # unknown id (not a public dojo) changes nothing.
-        if "home_dojo" in request.POST:
-            dojo_id = request.POST["home_dojo"]
-            if not dojo_id:
-                home_dojo.set_home_dojo(child, None)
-            elif dojo := home_dojo.home_dojo_choices().filter(pk=dojo_id).first():
-                home_dojo.set_home_dojo(child, dojo)
-
-        _set_icon(child, request.POST.get("icon", ""))
+    form = EditChildForm(request.POST or None, instance=child)
+    if request.method == "POST" and form.is_valid():
+        child = form.save(commit=False)
+        home_dojo.set_home_dojo(child, form.cleaned_data["home_dojo"])
+        _set_icon(child, form.cleaned_data["icon"])
         child.save()
-
         return render(request, "accounts/partials/_child_header_display.html", {
             "child": child, "can_edit": True,
         })
-
-    return render(request, "accounts/partials/_child_header_edit.html", _edit_context(child))
-
+    return render(request, "accounts/partials/_child_header_edit.html", {"child": child, "form": form})
 
 def _login_card(request, child, error=None, notice=None, login_form=None):
     """The child page's "Own login" card, after an htmx action on it; a

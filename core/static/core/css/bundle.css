@@ -753,14 +753,11 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
 
 .cd-form__help { color: var(--ink-muted); margin: 0; }
 
-/* Per-field errors, aligned with Django's forms convention: a plain <ul>
-   (Django's own .errorlist) placed ABOVE the widget — label, then errors,
-   then the input — not below it, and able to hold more than one message. */
-/* min-height reserves one caption line even when empty — render this ul for
-   every field in a .cd-form__row that CAN error (not just the one that
-   currently does), so a sibling field's input doesn't jump out of alignment
-   the moment one of them gets an error. Skip it on fields outside a row,
-   where there's no sibling to stay aligned with. */
+/* Per-field errors: a plain <ul> (like Django's own .errorlist) under the
+   input and its help text (core/forms/_help_and_errors.html), able to hold
+   more than one message. Under the input, an error never moves a sibling
+   field's input in a .cd-form__row, as long as the row keeps its fields
+   aligned at the top. */
 .cd-form__errors { list-style: none; margin: 0; padding: 0; min-height: 18px; display: flex; flex-direction: column; gap: 2px; }
 .cd-form__errors li { color: var(--danger); }
 /* No errors: no reserved line. The list often sits between the label and the

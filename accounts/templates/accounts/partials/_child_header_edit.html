@@ -3,8 +3,7 @@ The child detail page's header, swapped in over htmx when the name is
 clicked (see _child_header_display.html). Submitting saves the name,
 avatar, birthday and the other details and swaps back to the display header; Cancel just
 reloads, since nothing's been saved yet.
-Expects `child`, `icon_choices`, `current_icon`, `gender_choices` and
-`home_dojo_choices` (public dojos, accounts.home_dojo) in context.
+Expects `child` and `form` (accounts.forms.EditChildForm) in context.
 {% endcomment %}
 <form class="child-header child-header--editing" id="child-header" method="post"
       hx-post="{% url 'edit_ninja' ninja_id=child.id %}"
@@ -13,48 +12,15 @@ Expects `child`, `icon_choices`, `current_icon`, `gender_choices` and
   {% include "accounts/partials/_child_avatar.html" with child=child %}
   <div class="child-header__fields">
     <div class="cd-form__row">
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="ec-name">{% translate "First name" %}</label>
-        <input class="cd-form__input body" type="text" id="ec-name" name="name" value="{{ child.name }}" autofocus required>
-      </div>
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="ec-family-name">{% translate "Family name" %}</label>
-        <input class="cd-form__input body" type="text" id="ec-family-name" name="family_name" value="{{ child.family_name }}">
-      </div>
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="ec-dob">{% translate "Date of birth" %}</label>
-        <input class="cd-form__input body" type="date" id="ec-dob" name="date_of_birth" value="{{ child.date_of_birth|date:'Y-m-d' }}">
-        {% if dob_error %}<ul class="cd-form__errors"><li class="caption" role="alert">{{ dob_error }}</li></ul>{% endif %}
-      </div>
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="ec-gender">{% translate "Gender (optional)" %}</label>
-        <select class="cd-form__select body" id="ec-gender" name="gender">
-          {% for value, label in gender_choices %}<option value="{{ value }}"{% if value == child.gender %} selected{% endif %}>{{ label }}</option>{% endfor %}
-        </select>
-      </div>
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="ec-home-dojo">{% translate "Home dojo" %}</label>
-        <select class="cd-form__select body" id="ec-home-dojo" name="home_dojo">
-          <option value="">{% translate "None yet" %}</option>
-          {% if child.home_dojo and child.home_dojo not in home_dojo_choices %}<option value="{{ child.home_dojo_id }}" selected>{{ child.home_dojo.name }}</option>{% endif %}
-          {% for dojo in home_dojo_choices %}<option value="{{ dojo.id }}"{% if dojo.id == child.home_dojo_id %} selected{% endif %}>{{ dojo.name }}</option>{% endfor %}
-        </select>
-      </div>
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="ec-icon">{% translate "Avatar" %}</label>
-        <select class="cd-form__select body" id="ec-icon" name="icon">
-          {% for value, label in icon_choices %}
-            <option value="{{ value }}" {% if value == current_icon %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
+      {{ form.name.as_field_group }}
+      {{ form.family_name.as_field_group }}
+      {{ form.date_of_birth.as_field_group }}
+      {{ form.gender.as_field_group }}
+      {{ form.home_dojo.as_field_group }}
+      {{ form.icon.as_field_group }}
     </div>
     <div class="cd-form__row">
-      <div class="cd-form__field">
-        <label class="cd-form__label label" for="ec-notes">{% translate "Allergies or notes (optional)" %}</label>
-        <textarea class="cd-form__textarea body" id="ec-notes" name="allergies_notes" rows="2" placeholder="{% translate "None" %}">{{ child.allergies_notes }}</textarea>
-        <p class="cd-form__help caption">{% translate "Only the champion (the person running the dojo) sees this, on the list of a session your child is signed up for." %}</p>
-      </div>
+      {{ form.allergies_notes.as_field_group }}
     </div>
     <div class="cd-form__actions">
       <button type="button" class="cd-btn cd-btn--ghost label" onclick="window.location.reload();">{% translate "Cancel" %}</button>
