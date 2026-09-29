@@ -1,50 +1,25 @@
-{% load i18n %}{% load static %}{% load js_catalog %}<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ dojo.name }} · {% block admin_page_title %}{% endblock %}</title>
-<link rel="icon" type="image/png" sizes="32x32" href="{% static 'core/img/favicon-32x32.png' %}">
-<link rel="shortcut icon" href="{% static 'core/img/favicon.ico' %}">
-<link rel="preload" href="{% static 'core/fonts/nunito-5.3.0/nunito-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="{% static 'core/fonts/fredoka-5.3.0/fredoka-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="{% static 'core/fonts/fonts.css' %}">
-<link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
-<link rel="stylesheet" href="{% static 'core/css/bundle.css' %}">
-<style>
-  html, body { margin: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-</style>
-</head>
-<body>
-<script src="{% static 'core/vendor/htmx/htmx-2.0.4.min.js' %}"></script>
-<script src="{% static 'core/vendor/htmx/htmx-ext-ws-2.0.1.js' %}"></script>
-<script src="{% javascript_catalog_url %}"></script>
-<script src="{% static 'core/js/bundle.js' %}"></script>
+{% extends "core/_manage_shell.html" %}
+{% load i18n %}{% load static %}
+{% comment %}
+A dojo's admin area (/dojos/<id>/…), in the management area's shared shell
+(core/_manage_shell.html, DATA_MODEL.md §20) with the dojo's sections in the
+sidebar and the notification bell in the top bar. Pages fill
+admin_page_title / admin_heading / admin_content (and optionally
+admin_topbar_extra, admin_extra_style, admin_extra_script), pass `active`
+for the sidebar link to highlight, and render with dojos.views._admin_context.
+{% endcomment %}
+{% block shell_title %}{{ dojo.name }} · {% block admin_page_title %}{% endblock %}{% endblock %}
+{% block shell_extra_style %}{% block admin_extra_style %}{% endblock %}{% endblock %}
+{% block shell_head_scripts %}<script src="{% static 'core/vendor/htmx/htmx-ext-ws-2.0.1.js' %}"></script>{% endblock %}
+{% block shell_body_start %}
 <!-- Never swapped by anything (not the bell's own oob updates, not mark-all-read) — this is
      purely what holds the WebSocket open for the life of the page; see
      dojos/templates/dojos/partials/_notification_bell.html for why the bell itself stays separate. -->
 <div hx-ext="ws" ws-connect="/ws/dojos/{{ dojo.id }}/notifications/" style="display:none"></div>
-<style>
-  .admin-page-root .admin-main { flex: 1; min-width: 0; padding: var(--space-5) var(--space-6); box-sizing: border-box; }
-  .admin-page-root .admin-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5); gap: var(--space-4); }
-  .admin-page-root .admin-topbar h1 { color: var(--ink); margin: 0; }
-  /* The bell and any page-specific buttons (admin_topbar_extra) are one
-     flex item together, not two separate ones — with three top-level
-     children, .admin-topbar's justify-content: space-between would strand
-     the bell in the middle of the bar instead of next to the buttons on
-     the right, the moment a page actually fills admin_topbar_extra. */
-  .admin-page-root .admin-topbar__actions { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; justify-content: flex-end; }
-</style>
-{% block admin_extra_style %}{% endblock %}
+{% endblock %}
+{% block shell_nav_label %}{% translate "Dojo admin" %}{% endblock %}
 
-<div class="cd-root admin-page-root" style="padding: 0;">
-  <div class="cd-admin-nav-shell" style="display: flex;" id="adminnav-page">
-
-    <div class="cd-admin-nav__backdrop" data-cd-adminnav-backdrop data-open="false"></div>
-
-    <nav class="cd-admin-nav" data-cd-adminnav data-open="false" aria-label="{% translate "Dojo admin" %}">
-      <div class="cd-admin-nav__brand">
+{% block shell_brand %}
         {% if admin_dojos|length > 1 %}
           <div class="cd-admin-nav__switcher" data-cd-adminnav-switcher>
             <button type="button" class="cd-admin-nav__switcher-toggle" data-cd-adminnav-switcher-toggle aria-haspopup="true" aria-expanded="false">
@@ -70,18 +45,18 @@
             <p class="cd-admin-nav__brand-role caption">{{ dojo_access.role_label }}</p>
           </div>
         {% endif %}
-        <button type="button" class="cd-admin-nav__pin" data-cd-adminnav-pin aria-pressed="false" aria-label="{% translate "Pin sidebar open" %}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v4"/><path d="M8 3h8l-1 7 3 3v1H6v-1l3-3z"/></svg>
-        </button>
-      </div>
+{% endblock %}
 
+{% block shell_create %}
       {% if dojo_access.can_manage_events %}
         <a href="{% url 'dojo_event_create' dojo_id=dojo.id %}" class="cd-btn cd-btn--primary cd-admin-nav__create label">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
           {% translate "New event" %}
         </a>
       {% endif %}
+{% endblock %}
 
+{% block shell_nav %}
       <div class="cd-admin-nav__group">
         <p class="cd-admin-nav__group-label caption">{% translate "Overview" %}</p>
         <ul class="cd-admin-nav__list">
@@ -151,51 +126,18 @@
           </ul>
         </div>
       {% endif %}
+{% endblock %}
 
-      <div class="cd-admin-nav__footer">
-        <div class="cd-admin-nav__avatar" aria-hidden="true">{{ request.user.first_name|first }}{{ request.user.last_name|first }}</div>
-        <div class="cd-admin-nav__footer-info">
-          <p class="cd-admin-nav__footer-name body-sm">{{ request.user.get_full_name|default:request.user.get_username }}</p>
-          <p class="caption">{{ dojo_access.role_label }}</p>
-        </div>
-        <a href="{% url 'logout' %}" class="cd-admin-nav__signout" aria-label="{% translate "Sign out" %}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-        </a>
-      </div>
-    </nav>
-
-    <div class="admin-main">
-      <button type="button" class="cd-admin-nav__toggle label" data-cd-adminnav-toggle aria-expanded="false" style="margin-bottom: var(--space-4);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-        {% translate "Menu" %}
-      </button>
-
-      <div class="admin-topbar">
-        <h1 class="heading-lg">{% block admin_heading %}{% endblock %}</h1>
-        <div class="admin-topbar__actions">
+{% block shell_role %}{{ dojo_access.role_label }}{% endblock %}
+{% block shell_heading %}{% block admin_heading %}{% endblock %}{% endblock %}
+{% block shell_topbar_actions %}
           {% include "dojos/partials/_notification_bell.html" %}
           {% block admin_topbar_extra %}{% endblock %}
-        </div>
-      </div>
-
-      {% if messages %}
-        <div class="cd-form__notes" style="margin-bottom: var(--space-4);">
-          {% for message in messages %}
-            <p class="cd-form__note {% if message.level_tag == 'error' %}cd-form__note--error{% else %}cd-form__note--success{% endif %}">{{ message }}</p>
-          {% endfor %}
-        </div>
-      {% endif %}
-      {% include "accounts/partials/_sign_in_notice.html" %}
-      {% block admin_content %}{% endblock %}
-    </div>
-
-  </div>
-</div>
+{% endblock %}
+{% block shell_content %}{% block admin_content %}{% endblock %}{% endblock %}
+{% block shell_scripts %}
 <script>
-  CoderDojo.initAdminNav(document.getElementById("adminnav-page"));
-  CoderDojo.initDojoSwitcher(document.getElementById("adminnav-page"));
   CoderDojo.initNotifications(document.getElementById("notif-admin-page"));
 </script>
 {% block admin_extra_script %}{% endblock %}
-</body>
-</html>
+{% endblock %}
