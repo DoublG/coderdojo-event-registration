@@ -27,6 +27,7 @@ urlpatterns = [
     path("manage/journeys/<int:journey_id>/activate/", manage.journey_activate, name="manage_journey_activate"),
     path("manage/journeys/<int:journey_id>/pause/", manage.journey_pause, name="manage_journey_pause"),
     path("manage/journeys/<int:journey_id>/test/", manage.journey_test, name="manage_journey_test"),
+    path("manage/mail/", manage.mail_queue, name="manage_mail_queue"),
     path("manage/segments/", manage.segment_list, name="manage_segment_list"),
     path("manage/segments/new/", manage.segment_create, name="manage_segment_create"),
     path("manage/segments/<int:segment_id>/", manage.segment_detail, name="manage_segment_detail"),

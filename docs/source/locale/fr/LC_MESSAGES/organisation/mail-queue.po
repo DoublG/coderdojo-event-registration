@@ -1,0 +1,138 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-29 09:45+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: fr <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/mail-queue.rst:2
+msgid "Mail queue"
+msgstr "File d'attente des e-mails"
+
+#: ../../source/organisation/mail-queue.rst:4
+msgid ""
+"Every mail the site sends, from a booking confirmation to a campaign, first "
+"waits in a queue and goes out within a minute or so. **Mail queue** (under "
+"**Communication**) shows that queue, so you can check that mail is going out"
+" and see what went wrong for someone who says they got nothing. The page "
+"only shows; it doesn't change anything."
+msgstr ""
+"Chaque e-mail envoyé par le site, d'une confirmation d'inscription à une "
+"campagne, attend d'abord dans une file et part en une minute environ. **File"
+" d'attente des e-mails** (sous **Communication**) montre cette file : vous "
+"pouvez vérifier que les e-mails partent et voir ce qui s'est mal passé pour "
+"quelqu'un qui dit n'avoir rien reçu. La page ne fait qu'afficher ; elle ne "
+"modifie rien."
+
+#: ../../source/organisation/mail-queue.rst:10
+msgid ""
+"At the top are the numbers: mail waiting to be sent, being sent right now, "
+"scheduled for later, sent in the last 24 hours, and failed mail, bounces and"
+" blocked addresses."
+msgstr ""
+"En haut figurent les chiffres : les e-mails en attente d'envoi, en cours "
+"d'envoi, prévus pour plus tard, envoyés ces dernières 24 heures, ainsi que "
+"les e-mails échoués, les retours et les adresses bloquées."
+
+#: ../../source/organisation/mail-queue.rst:14
+msgid ""
+"If mail that should have gone out has been waiting for more than half an "
+"hour, the page says **Mail isn't going out**. The programs that send the "
+"mail have probably stopped; ask whoever runs the server to check them. "
+"Nothing is lost: the waiting mail goes out as soon as they run again."
+msgstr ""
+"Si des e-mails qui auraient dû partir attendent depuis plus d'une demi-"
+"heure, la page affiche **Les e-mails ne partent pas**. Les programmes qui "
+"envoient les e-mails se sont probablement arrêtés ; demandez à la personne "
+"qui gère le serveur de les vérifier. Rien n'est perdu : les e-mails en "
+"attente partent dès qu'ils tournent à nouveau."
+
+#: ../../source/organisation/mail-queue.rst:19
+msgid ""
+"To look up one person, type (part of) their email address in the search box:"
+" every section then only shows mail for that address."
+msgstr ""
+"Pour retrouver une personne, tapez (une partie de) son adresse e-mail dans "
+"le champ de recherche : chaque section n'affiche alors que les e-mails de "
+"cette adresse."
+
+#: ../../source/organisation/mail-queue.rst:23
+msgid "The sections"
+msgstr "Les sections"
+
+#: ../../source/organisation/mail-queue.rst:25
+msgid ""
+"**Waiting to be sent**: mail in the queue, in the order it goes out. Account"
+" and booking mail goes before campaigns, so a big campaign never holds up a "
+"booking confirmation. **Not before** is set for mail that's scheduled for "
+"later."
+msgstr ""
+"**En attente d'envoi** : les e-mails dans la file, dans l'ordre où ils "
+"partent. Les e-mails de compte et d'inscription passent avant les campagnes,"
+" pour qu'une grande campagne ne retarde jamais une confirmation "
+"d'inscription. **Pas avant** est rempli pour les e-mails prévus pour plus "
+"tard."
+
+#: ../../source/organisation/mail-queue.rst:29
+msgid ""
+"**Failed**: mail from the last 30 days that the mail server refused, or that"
+" still couldn't be sent after several tries, with the reason."
+msgstr ""
+"**Échoués** : les e-mails des 30 derniers jours que le serveur de messagerie"
+" a refusés, ou qui n'ont toujours pas pu être envoyés après plusieurs "
+"essais, avec la raison."
+
+#: ../../source/organisation/mail-queue.rst:31
+msgid ""
+"**Bounces and complaints**: mail from the last 30 days that came back from "
+"the recipient's mail server (for example because the address doesn't exist),"
+" or that the recipient marked as spam. A *hard bounce* (the address doesn't "
+"work) or a complaint stops all mail to that address straight away; a *soft "
+"bounce* (a full mailbox, a server that's down for a while) only does after "
+"it happens a few times."
+msgstr ""
+"**Retours et plaintes** : les e-mails des 30 derniers jours revenus du "
+"serveur de messagerie du destinataire (par exemple parce que l'adresse "
+"n'existe pas), ou que le destinataire a marqués comme spam. Un *rejet "
+"définitif* (l'adresse ne fonctionne pas) ou une plainte arrête immédiatement"
+" tous les e-mails vers cette adresse ; un *rejet temporaire* (une boîte "
+"pleine, un serveur momentanément indisponible) seulement s'il se répète "
+"quelques fois."
+
+#: ../../source/organisation/mail-queue.rst:37
+msgid ""
+"**Blocked addresses**: addresses nothing is sent to any more, whatever the "
+"person chose on their **Mail preferences** page, with the reason."
+msgstr ""
+"**Adresses bloquées** : les adresses auxquelles plus rien n'est envoyé, "
+"quels que soient les choix de la personne sur sa page **Préférences "
+"d'e-mail**, avec la raison."
+
+#: ../../source/organisation/mail-queue.rst:41
+msgid "Fixing something"
+msgstr "Corriger quelque chose"
+
+#: ../../source/organisation/mail-queue.rst:43
+msgid ""
+"Sending a failed mail again, or unblocking an address (for example after the"
+" person fixed their mailbox), is done in the Django admin, which you ask for"
+" when you need it (see :doc:`django-admin`)."
+msgstr ""
+"Renvoyer un e-mail échoué, ou débloquer une adresse (par exemple après que "
+"la personne a réparé sa boîte), se fait dans l'admin Django, dont vous "
+"demandez l'accès quand vous en avez besoin (voir :doc:`django-admin`)."

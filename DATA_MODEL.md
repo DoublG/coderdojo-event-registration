@@ -2890,8 +2890,8 @@ What we checked in its 3.4.1 source, and what the plan has to work around:
 4. **The admin.** The log is shown **only in the Django admin**
    (`/admin/`, decided): no page on the organisation dashboard
    (`/manage/`) or in a dojo's admin area, and nothing in the family
-   pages. It's a technical tool for investigating, like the mail log and
-   bounces (`CLAUDE.md`: the Django admin is for technical interventions).
+   pages. It's a technical tool for investigating, like the full mail log
+   (`CLAUDE.md`: the Django admin is for technical interventions).
    - **Read-only, the one exception to "the admin always stays fully
      usable"** (decided): auditlog's own `LogEntryAdmin` stays as it is
      (no add, no change, no delete from its pages), because a log anyone

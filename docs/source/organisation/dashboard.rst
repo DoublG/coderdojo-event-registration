@@ -28,6 +28,8 @@ The sidebar has these sections:
   instead of a list (see :doc:`segments`).
 - **Mail templates**: the text of every mail the site sends, in each
   language (see :doc:`mail-templates`).
+- **Mail queue**: the mail waiting to go out, failed mail, bounces and
+  blocked addresses (see :doc:`mail-queue`).
 - **Promotions**: which events are featured where on the public site (see
   :doc:`promotions`).
 - **Sponsors**: the sponsors and partners on the homepage (see
@@ -52,9 +54,9 @@ it gets on its **Mail preferences** page; the newsletter and campaigns only
 go to people who opted in, and children's own logins never get campaigns.
 Addresses that bounced are skipped automatically.
 
-The technical side of the site (the full mail log, bounces, blocked
-addresses) stays in the site's technical admin, the Django admin, for fixing
-things when something goes wrong. You ask for it when you need it (see
+Fixing things by hand when something goes wrong (sending a failed mail
+again, unblocking an address, the full mail log) stays in the site's
+technical admin, the Django admin. You ask for it when you need it (see
 :doc:`django-admin`).
 
 The bell at the top of the dashboard shows notifications for the

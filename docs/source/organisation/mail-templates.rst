@@ -18,6 +18,12 @@ Dates take a format, like ``{{ start_time|date:"l j F" }}``, and day and
 month names follow the mail's language. A template that doesn't work is
 refused with an explanation, so a broken mail never goes out.
 
+Mail is sent as plain text, so what's filled in shows exactly as it was
+typed: an ``&``, ``<`` or apostrophe in a name or a dojo's name stays that
+character, and is never turned into codes like ``&amp;``. For the same
+reason HTML doesn't work in a template: tags show up in the mail as they
+are.
+
 A language that has no version of its own uses the English one. Opening
 that language's tab starts from the English text, ready to translate.
 

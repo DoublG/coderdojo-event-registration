@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 09:27+0000\n"
+"POT-Creation-Date: 2026-09-29 09:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -102,13 +102,21 @@ msgstr ""
 
 #: ../../source/organisation/dashboard.rst:31
 msgid ""
+"**Mail queue**: the mail waiting to go out, failed mail, bounces and blocked"
+" addresses (see :doc:`mail-queue`)."
+msgstr ""
+"**E-mailwachtrij**: de e-mail die wacht om te vertrekken, mislukte e-mail, "
+"teruggekomen e-mail en geblokkeerde adressen (zie :doc:`mail-queue`)."
+
+#: ../../source/organisation/dashboard.rst:33
+msgid ""
 "**Promotions**: which events are featured where on the public site (see "
 ":doc:`promotions`)."
 msgstr ""
 "**Promoties**: welke evenementen waar op de openbare site in de kijker staan"
 " (zie :doc:`promotions`)."
 
-#: ../../source/organisation/dashboard.rst:33
+#: ../../source/organisation/dashboard.rst:35
 msgid ""
 "**Sponsors**: the sponsors and partners on the homepage (see "
 ":doc:`sponsors`)."
@@ -116,14 +124,14 @@ msgstr ""
 "**Sponsors**: de sponsors en partners op de startpagina (zie "
 ":doc:`sponsors`)."
 
-#: ../../source/organisation/dashboard.rst:35
+#: ../../source/organisation/dashboard.rst:37
 msgid ""
 "**Awards**: the badges ninjas can earn at their dojo (see :doc:`awards`)."
 msgstr ""
 "**Onderscheidingen**: de badges die ninja's in hun dojo kunnen verdienen "
 "(zie :doc:`awards`)."
 
-#: ../../source/organisation/dashboard.rst:37
+#: ../../source/organisation/dashboard.rst:39
 msgid ""
 "**Background checks** and **Applications** (under **Volunteers**): the "
 "criminal-record extracts and applications of new champions and mentors, for "
@@ -135,7 +143,7 @@ msgstr ""
 "mentors, alleen voor wie de rol **Beoordelaar van uittreksels** heeft (zie "
 ":doc:`volunteers`)."
 
-#: ../../source/organisation/dashboard.rst:41
+#: ../../source/organisation/dashboard.rst:43
 msgid ""
 "**Privacy**: a copy of someone's data, or deleting their account, when they "
 "ask by mail or post (see :doc:`privacy`)."
@@ -144,7 +152,7 @@ msgstr ""
 "haar account, als die persoon erom vraagt per e-mail of per post (zie "
 ":doc:`privacy`)."
 
-#: ../../source/organisation/dashboard.rst:43
+#: ../../source/organisation/dashboard.rst:45
 msgid ""
 "**Sign-in security**: which roles must use two-step login (see :doc:`sign-"
 "in-security`)."
@@ -152,7 +160,7 @@ msgstr ""
 "**Aanmeldbeveiliging**: welke rollen tweestapsaanmelding moeten gebruiken "
 "(zie :doc:`sign-in-security`)."
 
-#: ../../source/organisation/dashboard.rst:45
+#: ../../source/organisation/dashboard.rst:47
 msgid ""
 "**People** (under **Organisation**): who has which role, giving and taking "
 "away roles, and inviting someone new (see :doc:`people`)."
@@ -160,7 +168,7 @@ msgstr ""
 "**Mensen** (onder **Organisatie**): wie welke rol heeft, rollen geven en "
 "wegnemen, en iemand nieuw uitnodigen (zie :doc:`people`)."
 
-#: ../../source/organisation/dashboard.rst:47
+#: ../../source/organisation/dashboard.rst:49
 msgid ""
 "**Django admin** (under **Organisation**): asking for the site's technical "
 "admin, for 12 hours, for every role (see :doc:`django-admin`)."
@@ -168,7 +176,7 @@ msgstr ""
 "**Django-admin** (onder **Organisatie**): toegang tot het technische beheer "
 "van de site vragen, voor 12 uur, voor elke rol (zie :doc:`django-admin`)."
 
-#: ../../source/organisation/dashboard.rst:50
+#: ../../source/organisation/dashboard.rst:52
 msgid ""
 "People only get mail they want. Every account chooses which kinds of mail it"
 " gets on its **Mail preferences** page; the newsletter and campaigns only go"
@@ -181,19 +189,19 @@ msgstr ""
 "logins van kinderen krijgen nooit campagnes. Adressen waarvoor e-mails "
 "terugkwamen worden automatisch overgeslagen."
 
-#: ../../source/organisation/dashboard.rst:55
+#: ../../source/organisation/dashboard.rst:57
 msgid ""
-"The technical side of the site (the full mail log, bounces, blocked "
-"addresses) stays in the site's technical admin, the Django admin, for fixing"
-" things when something goes wrong. You ask for it when you need it (see "
+"Fixing things by hand when something goes wrong (sending a failed mail "
+"again, unblocking an address, the full mail log) stays in the site's "
+"technical admin, the Django admin. You ask for it when you need it (see "
 ":doc:`django-admin`)."
 msgstr ""
-"De technische kant van de site (het volledige e-maillogboek, teruggekomen "
-"e-mails, geblokkeerde adressen) blijft in het technische beheer van de site,"
-" de Django-admin, om dingen te herstellen als er iets misloopt. Je vraagt er"
-" toegang toe als je die nodig hebt (zie :doc:`django-admin`)."
+"Dingen met de hand rechtzetten als er iets misloopt (een mislukte e-mail "
+"opnieuw versturen, een adres deblokkeren, het volledige e-maillogboek) "
+"blijft in de technische admin van de site, de Django-admin. Je vraagt er "
+"toegang toe wanneer je hem nodig hebt (zie :doc:`django-admin`)."
 
-#: ../../source/organisation/dashboard.rst:60
+#: ../../source/organisation/dashboard.rst:62
 msgid ""
 "The bell at the top of the dashboard shows notifications for the "
 "organisation, for example when someone opens the Django admin or accepts an "

@@ -56,7 +56,7 @@ class Area:
     """The organisation dashboard's areas (DATA_MODEL.md §23), in the order
     the sidebar shows them; /manage/ opens the first one an account has."""
 
-    COMMUNICATION = "communication"  # campaigns, journeys, segments, mail templates
+    COMMUNICATION = "communication"  # campaigns, journeys, segments, mail templates, the mail queue
     VOLUNTEERS = "volunteers"  # background checks and applications (§21)
     PUBLIC_SITE = "public_site"  # promotions and sponsors
     NINJAS = "ninjas"  # awards
@@ -78,7 +78,7 @@ AREA_PERMISSIONS = {
 
 # The areas as the People pages name them (DATA_MODEL.md §23).
 AREA_LABELS = {
-    Area.COMMUNICATION: gettext_lazy("Communication: campaigns, journeys, segments, mail templates"),
+    Area.COMMUNICATION: gettext_lazy("Communication: campaigns, journeys, segments, mail templates, mail queue"),
     Area.VOLUNTEERS: gettext_lazy("Volunteers: background checks, applications"),
     Area.PUBLIC_SITE: gettext_lazy("Public site: promotions, sponsors"),
     Area.NINJAS: gettext_lazy("Ninjas: awards"),

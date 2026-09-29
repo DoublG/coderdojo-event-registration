@@ -1,14 +1,19 @@
 """The organisation's management dashboard for mail (/manage/…, shell
-core/_manage_base.html): campaigns and segments. Only the Communication area gets in
+core/_manage_base.html): campaigns, journeys, segments, mail templates and the mail queue. Only the Communication area gets in
 (accounts.organisation.require_area, the admin role, DATA_MODEL.md §23);
 every campaign change goes through mailing.campaigns."""
+
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db.models import Min, Q
+from django.db.models.functions import Coalesce
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
@@ -16,7 +21,17 @@ from accounts.organisation import Area, require_area
 
 from . import campaigns, journeys
 from .forms import CampaignForm, JourneyForm, NewTemplateForm, SegmentForm, TemplateVersionForm
-from .models import Campaign, EmailTemplate, Journey, Segment, SegmentGroup, SegmentRule
+from .models import (
+    BounceRecord,
+    Campaign,
+    EmailMessage,
+    EmailSuppression,
+    EmailTemplate,
+    Journey,
+    Segment,
+    SegmentGroup,
+    SegmentRule,
+)
 from .rendering import FALLBACK_LANGUAGE
 from .rendering import render as render_template
 from .seed_templates import GENERIC_SAMPLE_CONTEXT, SAMPLE_CONTEXT, SYSTEM_TEMPLATE_KEYS
@@ -540,4 +555,71 @@ def journey_test(request, journey_id):
         journey_id,
         lambda j: journeys.send_test(j, request.user),
         f"A test is on its way to {request.user.email}.",
+    )
+
+
+# --- the mail queue: what's waiting, what failed, bounces and blocked addresses ---
+
+MAIL_QUEUE_LIMIT = 50  # rows per section
+MAIL_QUEUE_RECENT_DAYS = 30  # how far back failures and bounces are shown
+# Mail due longer than this and still waiting means the workers aren't sending
+# (the same threshold as requeue_stuck_emails' warning in the log).
+MAIL_QUEUE_STALLED_AFTER = timedelta(minutes=30)
+
+
+@login_required
+def mail_queue(request):
+    """The mail queue at a glance (read-only): mail waiting to go out, mail
+    that failed, bounces and complaints read from the bounce mailbox, and
+    the addresses nothing is sent to any more. Fixing things (retrying a
+    mail, unblocking an address) stays in the Django admin."""
+    require_area(request, Area.COMMUNICATION)
+    now = timezone.now()
+    since = now - timedelta(days=MAIL_QUEUE_RECENT_DAYS)
+    Status = EmailMessage.Status
+    query = request.GET.get("q", "").strip()
+
+    mail = EmailMessage.objects.select_related("campaign")
+    bounces = BounceRecord.objects.select_related("message")
+    blocked = EmailSuppression.objects.all()
+    if query:
+        mail = mail.filter(Q(recipient__icontains=query) | Q(user__email__icontains=query))
+        bounces = bounces.filter(email__icontains=query)
+        blocked = blocked.filter(email__icontains=query)
+
+    due = Q(send_after__isnull=True) | Q(send_after__lte=now)
+    oldest_due = (
+        EmailMessage.objects.filter(due, status=Status.PENDING)
+        .annotate(due_at=Coalesce("send_after", "created_at"))
+        .aggregate(oldest=Min("due_at"))["oldest"]
+    )
+    waiting = mail.filter(status__in=[Status.PENDING, Status.SENDING])
+    failed = mail.filter(status=Status.FAILED, created_at__gte=since)
+    recent_bounces = bounces.filter(created_at__gte=since)
+    counts = {
+        "pending": EmailMessage.objects.filter(due, status=Status.PENDING).count(),
+        "scheduled": EmailMessage.objects.filter(status=Status.PENDING, send_after__gt=now).count(),
+        "sending": EmailMessage.objects.filter(status=Status.SENDING).count(),
+        "sent_today": EmailMessage.objects.filter(status=Status.SENT, sent_at__gte=now - timedelta(days=1)).count(),
+        "failed": EmailMessage.objects.filter(status=Status.FAILED, created_at__gte=since).count(),
+        "bounces": BounceRecord.objects.filter(created_at__gte=since).count(),
+        "blocked": EmailSuppression.objects.count(),
+    }
+    return render(
+        request,
+        "mailing/manage/mail_queue.html",
+        {
+            "active": "mail_queue",
+            "query": query,
+            "counts": counts,
+            "recent_days": MAIL_QUEUE_RECENT_DAYS,
+            "limit": MAIL_QUEUE_LIMIT,
+            "oldest_due": oldest_due,
+            "stalled": bool(oldest_due and now - oldest_due > MAIL_QUEUE_STALLED_AFTER),
+            "bounce_mailbox_on": bool(settings.MAILING_BOUNCE_IMAP_HOST),
+            "waiting": waiting.order_by("priority", "created_at")[:MAIL_QUEUE_LIMIT],
+            "failed": failed.order_by("-created_at")[:MAIL_QUEUE_LIMIT],
+            "bounces": recent_bounces[:MAIL_QUEUE_LIMIT],
+            "blocked": blocked.order_by("-created_at")[:MAIL_QUEUE_LIMIT],
+        },
     )

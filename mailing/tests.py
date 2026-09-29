@@ -1969,3 +1969,108 @@ class OrganisationEventsInDigestTests(TestCase):
         make_dojo("CoderDojo Belgium", kind=Dojo.ORGANISATION, location=Point(4.35, 50.85, srid=4326))
         ghent = make_dojo("Ghent", location=Point(3.72, 51.05, srid=4326))
         self.assertEqual([c.value for c in get_attribute("near_dojo").choices()], [ghent.pk])
+
+
+# --- the mail queue on the organisation dashboard -----------------------------------
+
+
+class MailQueueDashboardTests(TestCase):
+    def setUp(self):
+        from accounts.models import OrganisationRole
+
+        self.admin = User.objects.create(username="orgadmin", email="ann@example.com")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.url = reverse("manage_mail_queue")
+        self.client.force_login(self.admin)
+
+    def _mail(self, recipient, subject, status=EmailMessage.Status.PENDING, **fields):
+        return EmailMessage.objects.create(
+            category=MailCategory.SERVICE, recipient=recipient, subject=subject, body="…", status=status, **fields
+        )
+
+    def test_only_the_communication_area_gets_in(self):
+        from accounts.models import OrganisationRole
+
+        self.client.logout()
+        self.assertEqual(self.client.get(self.url).status_code, 302)  # to login
+        board = User.objects.create(username="board", email="bo@example.com")
+        OrganisationRole.objects.create(account=board, role=OrganisationRole.BOARD)
+        family = _family("fam", Ninja.GIRL)
+        for user in (board, family):
+            self.client.force_login(user)
+            self.assertEqual(self.client.get(self.url).status_code, 404)
+        self.client.force_login(self.admin)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "mailing/manage/mail_queue.html")
+        self.assertContains(response, f'href="{self.url}"')  # the sidebar link
+
+    def test_shows_what_waits_failed_bounced_and_is_blocked(self):
+        waiting = self._mail("wait@example.com", "Waiting mail")
+        self._mail("busy@example.com", "Being sent", status=EmailMessage.Status.SENDING)
+        self._mail("done@example.com", "Already sent", status=EmailMessage.Status.SENT, sent_at=timezone.now())
+        self._mail(
+            "bad@example.com", "Refused mail", status=EmailMessage.Status.FAILED, status_reason="550 no such user"
+        )
+        BounceRecord.objects.create(
+            email="gone@example.com",
+            kind=BounceRecord.HARD,
+            status_code="5.1.1",
+            diagnostic="mailbox unknown",
+            message=waiting,
+        )
+        EmailSuppression.objects.create(email="blocked@example.com", reason=EmailSuppression.COMPLAINT)
+
+        response = self.client.get(self.url)
+        for text in ("Waiting mail", "Being sent", "Refused mail", "550 no such user", "gone@example.com", "5.1.1"):
+            self.assertContains(response, text)
+        self.assertContains(response, "blocked@example.com")
+        self.assertNotContains(response, "Already sent")
+        counts = response.context["counts"]
+        self.assertEqual(
+            (
+                counts["pending"],
+                counts["sending"],
+                counts["sent_today"],
+                counts["failed"],
+                counts["bounces"],
+                counts["blocked"],
+            ),
+            (1, 1, 1, 1, 1, 1),
+        )
+        self.assertFalse(response.context["stalled"])
+
+    def test_scheduled_mail_is_counted_apart_and_never_looks_stalled(self):
+        mail = self._mail("later@example.com", "Later", send_after=timezone.now() + timedelta(days=1))
+        EmailMessage.objects.filter(pk=mail.pk).update(created_at=timezone.now() - timedelta(hours=3))
+        response = self.client.get(self.url)
+        self.assertEqual((response.context["counts"]["pending"], response.context["counts"]["scheduled"]), (0, 1))
+        self.assertFalse(response.context["stalled"])
+
+    def test_warns_when_due_mail_has_waited_too_long(self):
+        mail = self._mail("stuck@example.com", "Stuck")
+        EmailMessage.objects.filter(pk=mail.pk).update(created_at=timezone.now() - timedelta(hours=1))
+        response = self.client.get(self.url)
+        self.assertTrue(response.context["stalled"])
+        self.assertContains(response, "Mail isn't going out.")
+
+    def test_old_failures_and_bounces_drop_off(self):
+        old = timezone.now() - timedelta(days=40)
+        mail = self._mail("old@example.com", "Old failure", status=EmailMessage.Status.FAILED)
+        EmailMessage.objects.filter(pk=mail.pk).update(created_at=old)
+        bounce = BounceRecord.objects.create(email="oldbounce@example.com", kind=BounceRecord.SOFT)
+        BounceRecord.objects.filter(pk=bounce.pk).update(created_at=old)
+        response = self.client.get(self.url)
+        self.assertNotContains(response, "Old failure")
+        self.assertNotContains(response, "oldbounce@example.com")
+
+    def test_search_narrows_every_section_to_one_address(self):
+        self._mail("ann@example.com", "For Ann")
+        self._mail("bob@example.com", "For Bob")
+        BounceRecord.objects.create(email="bob@example.com", kind=BounceRecord.SOFT)
+        EmailSuppression.objects.create(email="bob-old@example.com", reason=EmailSuppression.MANUAL)
+        response = self.client.get(self.url, {"q": "ann@"})
+        self.assertContains(response, "For Ann")
+        self.assertNotContains(response, "For Bob")
+        self.assertNotContains(response, "bob@example.com")
+        self.assertNotContains(response, "bob-old@example.com")

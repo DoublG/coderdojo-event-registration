@@ -1,0 +1,176 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Mail queue" %}{% endblock %}
+{% block manage_heading %}{% translate "Mail queue" %}{% endblock %}
+
+{% block manage_extra_style %}
+<style>
+  .queue-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-6); }
+  .queue-stats div { border: 1px solid var(--border); border-radius: var(--radius-md, 8px); padding: var(--space-3); background: var(--surface); }
+  .queue-stats strong { display: block; font-size: 1.4rem; color: var(--ink); }
+  .queue-alert { padding: var(--space-4) var(--space-5); margin-bottom: var(--space-5); border-left: 4px solid var(--warning, #d97706); }
+  .queue-section { margin-top: var(--space-6); }
+</style>
+{% endblock %}
+
+{% block manage_content %}
+  {% comment %}The mail queue (mailing.manage.mail_queue): read-only; fixing things stays in the Django admin.{% endcomment %}
+  <p class="body-sm">{% translate "Every mail the site sends waits here first and goes out within a minute or so. Use this page to check that mail is going out, and to see which mail failed or bounced and which addresses get nothing any more." %}</p>
+
+  {% if stalled %}
+    <div class="cd-card queue-alert" role="alert">
+      <p class="body-sm"><strong>{% translate "Mail isn't going out." %}</strong>
+      {% blocktranslate with since=oldest_due|date:"d/m/Y H:i" %}The oldest mail has been waiting since {{ since }}. The mail workers are probably not running: ask whoever runs the server to check them. Nothing is lost; the mail goes out once they run again.{% endblocktranslate %}</p>
+    </div>
+  {% endif %}
+
+  <div class="queue-stats">
+    <div><strong>{{ counts.pending }}</strong><span class="caption">{% translate "waiting to be sent" %}</span></div>
+    <div><strong>{{ counts.sending }}</strong><span class="caption">{% translate "being sent" %}</span></div>
+    <div><strong>{{ counts.scheduled }}</strong><span class="caption">{% translate "scheduled for later" %}</span></div>
+    <div><strong>{{ counts.sent_today }}</strong><span class="caption">{% translate "sent in the last 24 hours" %}</span></div>
+    <div><strong>{{ counts.failed }}</strong><span class="caption">{% blocktranslate with days=recent_days %}failed in the last {{ days }} days{% endblocktranslate %}</span></div>
+    <div><strong>{{ counts.bounces }}</strong><span class="caption">{% blocktranslate with days=recent_days %}bounces in the last {{ days }} days{% endblocktranslate %}</span></div>
+    <div><strong>{{ counts.blocked }}</strong><span class="caption">{% translate "blocked addresses" %}</span></div>
+  </div>
+
+  <form method="get" class="cd-card cd-form" style="padding: var(--space-5);">
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="queue-q">{% translate "Only show mail for an email address" %}</label>
+      <input class="cd-form__input body" type="search" id="queue-q" name="q" value="{{ query }}">
+    </div>
+    <div class="cd-form__actions">
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Search" %}</button>
+      {% if query %}<a class="cd-btn cd-btn--ghost label" href="{% url 'manage_mail_queue' %}">{% translate "Show everything" %}</a>{% endif %}
+    </div>
+  </form>
+
+  <section class="queue-section">
+    <h2 class="heading-md">{% translate "Waiting to be sent" %}</h2>
+    <p class="body-sm">{% translate "In the order they go out: account and booking mail before campaigns." %}</p>
+    <div class="cd-table-wrap">
+      <table class="cd-table cd-table--zebra">
+        <thead>
+          <tr>
+            <th class="label" scope="col">{% translate "To" %}</th>
+            <th class="label" scope="col">{% translate "Subject" %}</th>
+            <th class="label" scope="col">{% translate "Kind of mail" %}</th>
+            <th class="label" scope="col">{% translate "Status" %}</th>
+            <th class="label" scope="col">{% translate "Queued" %}</th>
+            <th class="label" scope="col">{% translate "Not before" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for message in waiting %}
+            <tr>
+              <td class="body-sm">{{ message.recipient|default:"—" }}</td>
+              <td class="body-sm">{{ message.subject }}{% if message.campaign %}<br><span class="caption">{{ message.campaign.name }}</span>{% endif %}</td>
+              <td class="body-sm">{{ message.get_category_display }}</td>
+              <td class="body-sm">{% if message.status == 'sending' %}<span class="cd-badge cd-badge--warning caption">{% translate "Being sent" %}</span>{% else %}<span class="cd-badge cd-badge--outline caption">{% translate "Waiting" %}</span>{% endif %}{% if message.attempts %} <span class="caption">{% blocktranslate count counter=message.attempts %}{{ counter }} attempt{% plural %}{{ counter }} attempts{% endblocktranslate %}</span>{% endif %}</td>
+              <td class="body-sm">{{ message.created_at|date:"d/m/Y H:i" }}</td>
+              <td class="body-sm">{{ message.send_after|date:"d/m/Y H:i"|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td class="body-sm" colspan="6">{% translate "Nothing is waiting: all mail has gone out." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if waiting|length == limit %}<p class="caption">{% blocktranslate %}Showing the first {{ limit }}.{% endblocktranslate %}</p>{% endif %}
+  </section>
+
+  <section class="queue-section">
+    <h2 class="heading-md">{% translate "Failed" %}</h2>
+    <p class="body-sm">{% blocktranslate with days=recent_days %}Mail the mail server refused, or that still couldn't be sent after several tries, in the last {{ days }} days.{% endblocktranslate %}</p>
+    <div class="cd-table-wrap">
+      <table class="cd-table cd-table--zebra">
+        <thead>
+          <tr>
+            <th class="label" scope="col">{% translate "To" %}</th>
+            <th class="label" scope="col">{% translate "Subject" %}</th>
+            <th class="label" scope="col">{% translate "Why" %}</th>
+            <th class="label" scope="col">{% translate "Queued" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for message in failed %}
+            <tr>
+              <td class="body-sm">{{ message.recipient|default:"—" }}</td>
+              <td class="body-sm">{{ message.subject }}</td>
+              <td class="body-sm">{{ message.status_reason|default:"—" }}</td>
+              <td class="body-sm">{{ message.created_at|date:"d/m/Y H:i" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td class="body-sm" colspan="4">{% translate "No failed mail." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if failed|length == limit %}<p class="caption">{% blocktranslate %}Showing the first {{ limit }}.{% endblocktranslate %}</p>{% endif %}
+  </section>
+
+  <section class="queue-section">
+    <h2 class="heading-md">{% translate "Bounces and complaints" %}</h2>
+    <p class="body-sm">{% blocktranslate with days=recent_days %}Mail that came back from the recipient's mail server, or that the recipient marked as spam, in the last {{ days }} days. A hard bounce or a complaint stops mail to that address straight away; repeated soft bounces do too.{% endblocktranslate %}</p>
+    {% if not bounce_mailbox_on %}<p class="caption">{% translate "The bounce mailbox isn't set up on this site, so no bounces are read." %}</p>{% endif %}
+    <div class="cd-table-wrap">
+      <table class="cd-table cd-table--zebra">
+        <thead>
+          <tr>
+            <th class="label" scope="col">{% translate "Address" %}</th>
+            <th class="label" scope="col">{% translate "Kind" %}</th>
+            <th class="label" scope="col">{% translate "What the mail server said" %}</th>
+            <th class="label" scope="col">{% translate "Mail" %}</th>
+            <th class="label" scope="col">{% translate "When" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for bounce in bounces %}
+            <tr>
+              <td class="body-sm">{{ bounce.email }}</td>
+              <td class="body-sm">{% if bounce.kind == 'soft' %}<span class="cd-badge cd-badge--warning caption">{% else %}<span class="cd-badge cd-badge--danger caption">{% endif %}{{ bounce.get_kind_display }}</span></td>
+              <td class="body-sm">{% if bounce.status_code %}{{ bounce.status_code }} {% endif %}{{ bounce.diagnostic|default:"" }}</td>
+              <td class="body-sm">{{ bounce.message.subject|default:"—" }}</td>
+              <td class="body-sm">{{ bounce.created_at|date:"d/m/Y H:i" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td class="body-sm" colspan="5">{% translate "No bounces." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if bounces|length == limit %}<p class="caption">{% blocktranslate %}Showing the first {{ limit }}.{% endblocktranslate %}</p>{% endif %}
+  </section>
+
+  <section class="queue-section">
+    <h2 class="heading-md">{% translate "Blocked addresses" %}</h2>
+    <p class="body-sm">{% translate "Nothing is sent to these addresses any more, whatever the person chose." %}</p>
+    <div class="cd-table-wrap">
+      <table class="cd-table cd-table--zebra">
+        <thead>
+          <tr>
+            <th class="label" scope="col">{% translate "Address" %}</th>
+            <th class="label" scope="col">{% translate "Why" %}</th>
+            <th class="label" scope="col">{% translate "Note" %}</th>
+            <th class="label" scope="col">{% translate "Since" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for suppression in blocked %}
+            <tr>
+              <td class="body-sm">{{ suppression.email }}</td>
+              <td class="body-sm">{{ suppression.get_reason_display }}</td>
+              <td class="body-sm">{{ suppression.note|default:"—" }}</td>
+              <td class="body-sm">{{ suppression.created_at|date:"d/m/Y H:i" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td class="body-sm" colspan="4">{% translate "No blocked addresses." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if blocked|length == limit %}<p class="caption">{% blocktranslate %}Showing the first {{ limit }}.{% endblocktranslate %}</p>{% endif %}
+  </section>
+
+  <p class="caption queue-section">{% translate "To send a failed mail again or unblock an address, ask for the Django admin (Organisation → Django admin)." %}</p>
+{% endblock %}
