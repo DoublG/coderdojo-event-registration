@@ -1371,7 +1371,8 @@ class OrganisationAreaTests(TestCase):
         reviewer = self._account("reviewer", role=OrganisationRole.REVIEWER)
         board = self._account("board", role=OrganisationRole.BOARD)
         self.assertEqual(
-            areas_of(admin), [Area.COMMUNICATION, Area.PUBLIC_SITE, Area.NINJAS, Area.PRIVACY, Area.SECURITY]
+            areas_of(admin),
+            [Area.COMMUNICATION, Area.PUBLIC_SITE, Area.NINJAS, Area.PRIVACY, Area.SECURITY, Area.PEOPLE],
         )
         self.assertEqual(areas_of(reviewer), [Area.VOLUNTEERS])
         self.assertEqual(areas_of(board), [])

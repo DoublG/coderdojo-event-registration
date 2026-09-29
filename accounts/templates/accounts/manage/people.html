@@ -1,0 +1,84 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}{% load tz %}
+{% block manage_page_title %}{% translate "People" %}{% endblock %}
+{% block manage_heading %}{% translate "People" %}{% endblock %}
+{% block manage_topbar_extra %}
+  <a class="cd-btn cd-btn--primary label" href="{% url 'manage_people_add' %}">{% translate "Add a person" %}</a>
+{% endblock %}
+
+{% block manage_content %}
+  {% comment %}Who holds which organisation role (accounts/people.py, accounts.organisation_people, DATA_MODEL.md §23).{% endcomment %}
+  <p class="body-sm">{% translate "Everyone with an organisation role. A role opens parts of this dashboard all the time, and the Django admin only when asked for, 12 hours at a time." %} <a href="{% url 'manage_people_roles' %}">{% translate "What each role opens" %}</a></p>
+
+  {% timezone "Europe/Brussels" %}
+  <div class="cd-table-wrap">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label" scope="col">{% translate "Name" %}</th>
+          <th class="label" scope="col">{% translate "Email" %}</th>
+          <th class="label" scope="col">{% translate "Roles" %}</th>
+          <th class="label" scope="col">{% translate "Since" %}</th>
+          <th class="label" scope="col">{% translate "Sign-in" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for person in people %}
+          <tr>
+            <th class="body-sm" scope="row"><a href="{% url 'manage_person' user_id=person.account.pk %}">{{ person.account.team_name }}</a></th>
+            <td class="body-sm">{{ person.account.email }}</td>
+            <td class="body-sm">{{ person.roles|join:", " }}</td>
+            <td class="body-sm">{{ person.granted_at|date:"d/m/Y" }}</td>
+            <td class="body-sm">{% if person.needs_sign_in_setup %}<a href="{% url 'manage_security' %}">{% translate "Two-step login not set up yet" %}</a>{% else %}{% translate "OK" %}{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td class="body-sm" colspan="5">{% translate "Nobody has an organisation role yet." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="heading-md" style="margin-top: var(--space-6);">{% translate "Open access to the Django admin" %}</h2>
+  {% if open_grants %}
+    <div class="cd-table-wrap">
+      <table class="cd-table cd-table--zebra">
+        <thead>
+          <tr>
+            <th class="label" scope="col">{% translate "Name" %}</th>
+            <th class="label" scope="col">{% translate "Reason" %}</th>
+            <th class="label" scope="col">{% translate "Until" %}</th>
+            <th class="label" scope="col" aria-label="{% translate "Actions" %}"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for grant in open_grants %}
+            <tr>
+              <th class="body-sm" scope="row"><a href="{% url 'manage_person' user_id=grant.account_id %}">{{ grant.account.team_name }}</a></th>
+              <td class="body-sm">{{ grant.reason }}</td>
+              <td class="body-sm">{{ grant.expires_at|date:"d/m/Y H:i" }}</td>
+              <td class="body-sm">
+                <form method="post" action="{% url 'manage_people_end_access' grant_id=grant.pk %}">
+                  {% csrf_token %}
+                  <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "End now" %}</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="body-sm">{% translate "Nobody has access to the Django admin right now." %}</p>
+  {% endif %}
+  {% endtimezone %}
+
+  <h2 class="heading-md" style="margin-top: var(--space-6);">{% translate "Superusers" %}</h2>
+  <p class="body-sm">{% translate "Superusers can do everything in the Django admin, without asking. They're made on the server, for technical interventions, never here." %}</p>
+  {% if superusers %}
+    <ul class="body-sm">
+      {% for superuser in superusers %}<li>{{ superuser.team_name }} ({{ superuser.username }})</li>{% endfor %}
+    </ul>
+  {% else %}
+    <p class="body-sm">{% translate "There are no superusers." %}</p>
+  {% endif %}
+{% endblock %}

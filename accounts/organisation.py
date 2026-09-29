@@ -39,6 +39,7 @@ or revoked; it's also safe to call by hand.
 from django.contrib.auth.models import Group, Permission
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from django.utils.translation import gettext_lazy
 
 from .models import OrganisationRole
 
@@ -61,6 +62,7 @@ class Area:
     NINJAS = "ninjas"  # awards
     PRIVACY = "privacy"  # a person's data: export, deletion, email change
     SECURITY = "security"  # the sign-in policy
+    PEOPLE = "people"  # who holds which organisation role (accounts.organisation_people)
 
 
 AREA_PERMISSIONS = {
@@ -71,6 +73,18 @@ AREA_PERMISSIONS = {
     Area.NINJAS: "accounts.manage_ninjas",
     Area.PRIVACY: "accounts.manage_privacy",
     Area.SECURITY: "accounts.manage_security",
+    Area.PEOPLE: "accounts.manage_people",
+}
+
+# The areas as the People pages name them (DATA_MODEL.md §23).
+AREA_LABELS = {
+    Area.COMMUNICATION: gettext_lazy("Communication: campaigns, journeys, segments, mail templates"),
+    Area.VOLUNTEERS: gettext_lazy("Volunteers: background checks, applications"),
+    Area.PUBLIC_SITE: gettext_lazy("Public site: promotions, sponsors"),
+    Area.NINJAS: gettext_lazy("Ninjas: awards"),
+    Area.PRIVACY: gettext_lazy("Privacy: data export, account deletion, email changes"),
+    Area.SECURITY: gettext_lazy("Sign-in security"),
+    Area.PEOPLE: gettext_lazy("People: organisation roles"),
 }
 
 _VIEW = ["view"]
@@ -124,6 +138,7 @@ ADMIN_PERMISSIONS = {
         "manage_ninjas",
         "manage_privacy",
         "manage_security",
+        "manage_people",
     ],
 }
 # Criminal-record extracts (GDPR art. 10): this role only, never the board or
@@ -139,6 +154,15 @@ ROLE_PERMISSIONS = {
     OrganisationRole.ADMIN: ADMIN_PERMISSIONS,
     OrganisationRole.REVIEWER: REVIEWER_PERMISSIONS,
 }
+
+
+def role_areas(role):
+    """The areas `role` opens, from ROLE_PERMISSIONS (the Roles page)."""
+    held = set()
+    for model, actions in ROLE_PERMISSIONS[role].items():
+        app_label, model_name = model.split(".")
+        held |= {f"{app_label}.{a if '_' in a else f'{a}_{model_name}'}" for a in actions}
+    return [area for area, perm in AREA_PERMISSIONS.items() if perm in held]
 
 
 def _permissions(spec):

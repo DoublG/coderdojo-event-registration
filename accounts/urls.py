@@ -1,7 +1,7 @@
 from django.urls import include, path
 from django.views.generic import RedirectView
 
-from . import manage, security_views, views
+from . import manage, people, security_views, views
 
 # django-two-factor-auth reverses a few names in its own namespace; they point
 # at our pages (accounts.security_views), never at the package's views.
@@ -47,6 +47,11 @@ urlpatterns = [
     path("manage/security/", manage.security_policy, name="manage_security"),
     path("manage/django-admin/", manage.manage_admin_access, name="manage_admin_access"),
     path("manage/django-admin/end/", manage.manage_admin_access_end, name="manage_admin_access_end"),
+    path("manage/people/", people.manage_people, name="manage_people"),
+    path("manage/people/add/", people.manage_people_add, name="manage_people_add"),
+    path("manage/people/roles/", people.manage_people_roles, name="manage_people_roles"),
+    path("manage/people/<int:user_id>/", people.manage_person, name="manage_person"),
+    path("manage/people/access/<int:grant_id>/end/", people.manage_people_end_access, name="manage_people_end_access"),
     path(
         "manage/security/accounts/<int:user_id>/turn-off/", manage.turn_off_two_step, name="manage_security_turn_off"
     ),

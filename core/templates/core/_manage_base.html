@@ -167,17 +167,27 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
         </div>
       {% endif %}
 
-      {% if contexts.admin_access %}
-        {# Time-boxed access to the Django admin (DATA_MODEL.md §23): every organisation role. #}
+      {% if contexts.can.people or contexts.admin_access %}
+        {# People and their roles (the People area), and time-boxed access to the Django admin (every organisation role), DATA_MODEL.md §23. #}
         <div class="cd-admin-nav__group">
-          <p class="cd-admin-nav__group-label caption">{% translate "Technical" %}</p>
+          <p class="cd-admin-nav__group-label caption">{% translate "Organisation" %}</p>
           <ul class="cd-admin-nav__list">
+            {% if contexts.can.people %}
+            <li>
+              <a href="{% url 'manage_people' %}" class="cd-admin-nav__link label{% if active == 'people' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 19c0-3.4 2.9-6 6.5-6s6.5 2.6 6.5 6"/><circle cx="17" cy="7" r="2.4"/><path d="M16 13.2c3 .2 5.5 2.4 5.5 5.3"/></svg>
+                {% translate "People" %}
+              </a>
+            </li>
+            {% endif %}
+            {% if contexts.admin_access %}
             <li>
               <a href="{% url 'manage_admin_access' %}" class="cd-admin-nav__link label{% if active == 'admin_access' %} cd-admin-nav__link--active{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>
                 {% translate "Django admin" %}
               </a>
             </li>
+            {% endif %}
           </ul>
         </div>
       {% endif %}

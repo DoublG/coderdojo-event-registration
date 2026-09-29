@@ -1,0 +1,79 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}{% load tz %}
+{% block manage_page_title %}{{ account.team_name }}{% endblock %}
+{% block manage_heading %}{{ account.team_name }}{% endblock %}
+
+{% block manage_content %}
+  {% comment %}One person's organisation roles (accounts/people.py, accounts.organisation_people, DATA_MODEL.md §23).{% endcomment %}
+  <p class="body-sm"><a href="{% url 'manage_people' %}">{% translate "Back to People" %}</a> · {{ account.email }}</p>
+
+  <form method="post" class="cd-card cd-form" style="padding: var(--space-5);">
+    {% csrf_token %}
+    <fieldset class="cd-form__field">
+      <legend class="cd-form__label label">{% translate "Organisation roles" %}</legend>
+      {% for role, label, description, held in roles %}
+        <label class="body-sm" style="display: flex; gap: var(--space-2); align-items: flex-start; margin-top: var(--space-3);">
+          <input type="checkbox" name="roles" value="{{ role }}"{% if held %} checked{% endif %}{% if is_self %} disabled{% endif %}>
+          <span><strong>{{ label }}</strong><br><span class="caption">{{ description }}</span></span>
+        </label>
+      {% endfor %}
+    </fieldset>
+    {% if is_self %}
+      <p class="caption">{% translate "You can't change your own roles: ask another organisation admin." %}</p>
+    {% else %}
+      {% if needs_sign_in_setup %}<p class="caption">{% translate "The sign-in policy asks this person for two-step login, which they haven't set up yet: they'll be asked to at their next login." %}</p>{% endif %}
+      <div class="cd-form__actions">
+        <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save roles" %}</button>
+      </div>
+    {% endif %}
+  </form>
+
+  {% timezone "Europe/Brussels" %}
+  <h2 class="heading-md" style="margin-top: var(--space-6);">{% translate "Access to the Django admin" %}</h2>
+  {% if open_grant %}
+    <p class="body-sm">{% blocktranslate with until=open_grant.expires_at|date:"H:i" reason=open_grant.reason %}Open until {{ until }}: {{ reason }}{% endblocktranslate %}</p>
+    <form method="post" action="{% url 'manage_people_end_access' grant_id=open_grant.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="person">
+      <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "End now" %}</button>
+    </form>
+  {% endif %}
+  {% if grants %}
+    <div class="cd-table-wrap">
+      <table class="cd-table cd-table--zebra">
+        <thead>
+          <tr>
+            <th class="label" scope="col">{% translate "From" %}</th>
+            <th class="label" scope="col">{% translate "Until" %}</th>
+            <th class="label" scope="col">{% translate "Reason" %}</th>
+            <th class="label" scope="col">{% translate "Ended" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in grants %}
+            <tr>
+              <td class="body-sm">{{ row.started_at|date:"d/m/Y H:i" }}</td>
+              <td class="body-sm">{% if row.ended_at %}{{ row.ended_at|date:"d/m/Y H:i" }}{% else %}{{ row.expires_at|date:"d/m/Y H:i" }}{% endif %}</td>
+              <td class="body-sm">{{ row.reason }}</td>
+              <td class="body-sm">{% if row.end_reason %}{{ row.get_end_reason_display }}{% if row.ended_by and row.ended_by_id != row.account_id %} ({{ row.ended_by.team_name }}){% endif %}{% else %}{% translate "Open" %}{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif not open_grant %}
+    <p class="body-sm">{% translate "Never asked for." %}</p>
+  {% endif %}
+
+  <h2 class="heading-md" style="margin-top: var(--space-6);">{% translate "Role changes" %}</h2>
+  {% if history %}
+    <ul class="body-sm">
+      {% for entry, role, granted in history %}
+        <li>{{ entry.timestamp|date:"d/m/Y H:i" }}: {% if granted %}{% blocktranslate %}{{ role }} given{% endblocktranslate %}{% else %}{% blocktranslate %}{{ role }} taken away{% endblocktranslate %}{% endif %}{% if entry.actor %} · {{ entry.actor.team_name }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="body-sm">{% translate "No role changes recorded." %}</p>
+  {% endif %}
+  {% endtimezone %}
+{% endblock %}

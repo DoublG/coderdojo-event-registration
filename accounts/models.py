@@ -372,6 +372,7 @@ class OrganisationRole(models.Model):
             ("manage_ninjas", "Organisation dashboard: awards"),
             ("manage_privacy", "Organisation dashboard: privacy (data export, deletion, email change)"),
             ("manage_security", "Organisation dashboard: sign-in security"),
+            ("manage_people", "Organisation dashboard: people and their organisation roles"),
         ]
 
     def __str__(self):

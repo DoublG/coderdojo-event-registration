@@ -20,6 +20,7 @@ AREA_LANDINGS = {
     Area.NINJAS: "manage_badge_list",
     Area.PRIVACY: "manage_privacy",
     Area.SECURITY: "manage_security",
+    Area.PEOPLE: "manage_people",
 }
 
 

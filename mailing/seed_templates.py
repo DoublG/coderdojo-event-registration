@@ -689,6 +689,65 @@ Ce n'était pas vous ? Contactez-nous immédiatement :
         },
     },
     {
+        "key": "organisation_role_changed",
+        "category": MailCategory.SERVICE,
+        "description": "An organisation admin gave or took away the account's organisation roles "
+        "(accounts/organisation_people.py). Variables: roles (the keys it now holds: admin, reviewer, "
+        "board; empty = none left), changed_by, manage_url, contact_url.",
+        "subject": {
+            "en-us": "Your role in the CoderDojo Belgium organisation",
+            "nl-be": "Je rol in de organisatie van CoderDojo Belgium",
+            "fr-be": "Votre rôle dans l'organisation de CoderDojo Belgium",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{% if roles %}{{ changed_by }} changed your roles in the CoderDojo Belgium organisation. You now have:
+{% for role in roles %}
+- {% if role == "admin" %}Admin: the organisation dashboard (campaigns, content, awards, privacy, sign-in security and people){% elif role == "reviewer" %}Background-check reviewer: background checks and applications{% else %}Board: read-only oversight{% endif %}{% endfor %}
+
+You find it under Manage, where you can also ask for the Django admin when you need it (12 hours at a time):
+
+{{ manage_url }}{% else %}{{ changed_by }} took away your roles in the CoderDojo Belgium organisation. Your account stays as it was.{% endif %}
+
+Questions? Contact us:
+
+{{ contact_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{% if roles %}{{ changed_by }} heeft je rollen in de organisatie van CoderDojo Belgium gewijzigd. Je hebt nu:
+{% for role in roles %}
+- {% if role == "admin" %}Beheerder: het organisatiedashboard (campagnes, inhoud, awards, privacy, aanmeldbeveiliging en mensen){% elif role == "reviewer" %}Beoordelaar van uittreksels: uittreksels uit het strafregister en aanvragen{% else %}Bestuur: toezicht, alleen lezen{% endif %}{% endfor %}
+
+Je vindt het onder Beheren, waar je ook toegang tot de Django-admin kunt vragen als je die nodig hebt (telkens 12 uur):
+
+{{ manage_url }}{% else %}{{ changed_by }} heeft je rollen in de organisatie van CoderDojo Belgium weggenomen. Je account blijft zoals het was.{% endif %}
+
+Vragen? Neem contact met ons op:
+
+{{ contact_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{% if roles %}{{ changed_by }} a modifié vos rôles dans l'organisation de CoderDojo Belgium. Vous avez maintenant :
+{% for role in roles %}
+- {% if role == "admin" %}Administrateur : le tableau de bord de l'organisation (campagnes, contenu, récompenses, vie privée, sécurité de connexion et personnes){% elif role == "reviewer" %}Évaluateur des extraits de casier : extraits de casier judiciaire et candidatures{% else %}Conseil d'administration : supervision, en lecture seule{% endif %}{% endfor %}
+
+Vous le trouvez sous Gérer, où vous pouvez aussi demander l'accès à l'admin Django quand vous en avez besoin (12 heures à la fois) :
+
+{{ manage_url }}{% else %}{{ changed_by }} vous a retiré vos rôles dans l'organisation de CoderDojo Belgium. Votre compte reste tel quel.{% endif %}
+
+Des questions ? Contactez-nous :
+
+{{ contact_url }}
+""",
+        },
+    },
+    {
         "key": "two_step_turned_on",
         "category": MailCategory.SERVICE,
         "description": "Two-step login was turned on for the account (accounts/two_step.py). "
@@ -1381,6 +1440,13 @@ SAMPLE_CONTEXT = {
         **_common,
         "new_email": "ellen.new@example.com",
         "changed_at": datetime(2026, 10, 3, 14, 30),
+        "contact_url": "https://coolregistration.localhost/contact/",
+    },
+    "organisation_role_changed": {
+        **_common,
+        "roles": ["admin", "reviewer"],
+        "changed_by": "Priya Nair",
+        "manage_url": "https://coolregistration.localhost/manage/",
         "contact_url": "https://coolregistration.localhost/contact/",
     },
     "two_step_turned_on": {

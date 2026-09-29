@@ -2688,3 +2688,138 @@ class OrganisationNotificationTests(TestCase):
         url = reverse("open_organisation_notification", kwargs={"notification_id": self.mine.id})
         self.assertEqual(self.client.get(url).status_code, 404)
         self.assertEqual(self.client.post(reverse("mark_all_organisation_notifications_read")).status_code, 404)
+
+
+class OrganisationPeopleTests(TestCase):
+    """The People pages (accounts/people.py, accounts.organisation_people,
+    DATA_MODEL.md §23): an organisation admin gives and takes away the fixed
+    roles, never their own, and the organisation keeps at least one admin."""
+
+    def setUp(self):
+        from django.core.management import call_command
+
+        from .models import OrganisationRole
+
+        call_command("load_mail_templates", verbosity=0)
+        self.admin = User.objects.create(username="admin1", email="a1@example.com", first_name="Priya")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.person = User.objects.create(username="jan", email="jan@example.com", first_name="Jan")
+        self.client.force_login(self.admin)
+
+    def _url(self, account):
+        return reverse("manage_person", kwargs={"user_id": account.pk})
+
+    def _save(self, account, *roles):
+        with self.captureOnCommitCallbacks(execute=True):
+            return self.client.post(self._url(account), {"roles": list(roles)})
+
+    def test_the_people_area_is_the_admin_roles(self):
+        from .models import OrganisationRole
+
+        reviewer = User.objects.create(username="rev")
+        OrganisationRole.objects.create(account=reviewer, role=OrganisationRole.REVIEWER)
+        self.client.force_login(reviewer)
+        for url in (reverse("manage_people"), reverse("manage_people_add"), self._url(self.person)):
+            self.assertEqual(self.client.get(url).status_code, 404, url)
+
+    def test_giving_roles(self):
+        from mailing.models import EmailMessage
+
+        from .models import OrganisationRole
+
+        response = self._save(self.person, OrganisationRole.ADMIN, OrganisationRole.REVIEWER)
+        self.assertRedirects(response, self._url(self.person))
+        self.assertEqual(
+            set(self.person.organisation_roles.values_list("role", flat=True)),
+            {OrganisationRole.ADMIN, OrganisationRole.REVIEWER},
+        )
+        person = User.objects.get(pk=self.person.pk)
+        self.assertTrue(person.has_perm("accounts.manage_people"))
+        self.assertFalse(person.is_staff)
+        mail = EmailMessage.objects.get(template_key="organisation_role_changed")
+        self.assertEqual(mail.user, self.person)
+        self.assertIn("Priya", mail.body)
+        response = self.client.get(reverse("manage_people"))
+        self.assertContains(response, self._url(self.person))
+        self.assertContains(response, "Background-check reviewer")
+
+    def test_taking_the_last_role_away_ends_django_admin_access(self):
+        from core.testing import with_admin_access
+
+        from .models import AdminAccessGrant, OrganisationRole
+
+        OrganisationRole.objects.create(account=self.person, role=OrganisationRole.BOARD)
+        with_admin_access(self.person)
+        self._save(self.person)
+        self.assertFalse(self.person.organisation_roles.exists())
+        self.assertFalse(User.objects.get(pk=self.person.pk).is_staff)
+        self.assertEqual(AdminAccessGrant.objects.get().end_reason, AdminAccessGrant.ROLE_REMOVED)
+
+    def test_nobody_changes_their_own_roles(self):
+        from .models import OrganisationRole
+
+        OrganisationRole.objects.create(account=self.person, role=OrganisationRole.ADMIN)
+        response = self._save(self.admin)
+        self.assertTrue(self.admin.organisation_roles.filter(role=OrganisationRole.ADMIN).exists())
+        self.assertContains(self.client.get(response.url), "You can&#x27;t change your own roles")
+
+    def test_the_organisation_keeps_an_admin(self):
+        from .models import OrganisationRole
+        from .organisation_people import OrganisationPeopleError, set_roles
+
+        other = User.objects.create(username="other")
+        OrganisationRole.objects.create(account=other, role=OrganisationRole.ADMIN)
+        set_roles(self.admin, [], by=other)  # another admin is left
+        with self.assertRaises(OrganisationPeopleError):
+            set_roles(other, [], by=self.person)
+
+    def test_only_active_adults(self):
+        from .organisation_people import OrganisationPeopleError, set_roles
+
+        ninja = User.objects.create(username="kid", account_type=User.NINJA)
+        self.assertEqual(self.client.get(self._url(ninja)).status_code, 404)
+        service = User.objects.create(username="app", account_type=User.SERVICE)
+        for account in (service, User.objects.create(username="gone", is_active=False)):
+            with self.assertRaises(OrganisationPeopleError):
+                set_roles(account, ["board"], by=self.admin)
+
+    def test_ending_someone_elses_django_admin_access(self):
+        from core.testing import with_admin_access
+
+        from .models import AdminAccessGrant, OrganisationRole
+
+        OrganisationRole.objects.create(account=self.person, role=OrganisationRole.BOARD)
+        with_admin_access(self.person, reason="Check a dojo")
+        grant = AdminAccessGrant.objects.get()
+        self.assertContains(self.client.get(reverse("manage_people")), "Check a dojo")
+        response = self.client.post(reverse("manage_people_end_access", kwargs={"grant_id": grant.pk}))
+        self.assertRedirects(response, reverse("manage_people"))
+        grant.refresh_from_db()
+        self.assertEqual((grant.end_reason, grant.ended_by), (AdminAccessGrant.REVOKED, self.admin))
+        self.assertFalse(User.objects.get(pk=self.person.pk).is_staff)
+
+    def test_the_person_page_shows_role_changes_and_access(self):
+        from .models import OrganisationRole
+
+        self._save(self.person, OrganisationRole.BOARD)
+        self._save(self.person)
+        response = self.client.get(self._url(self.person))
+        self.assertContains(response, "Board given")
+        self.assertContains(response, "Board taken away")
+        self.assertContains(response, "Never asked for.")
+
+    def test_finding_an_account(self):
+        response = self.client.get(reverse("manage_people_add"), {"q": "jan@"})
+        self.assertContains(response, self._url(self.person))
+
+    def test_the_roles_page(self):
+        response = self.client.get(reverse("manage_people_roles"))
+        self.assertContains(response, "People: organisation roles")
+        self.assertContains(response, "Volunteers: background checks, applications")
+
+    def test_superusers_are_listed_but_never_managed_here(self):
+        root = User.objects.create(username="root", is_superuser=True, is_staff=True)
+        self.assertContains(self.client.get(reverse("manage_people")), "(root)")
+        self._save(root, "board")
+        root.refresh_from_db()
+        self.assertTrue(root.is_superuser and root.is_staff)

@@ -90,7 +90,7 @@ def _notify_admins(grant):
     admins = User.objects.filter(
         organisation_roles__role=OrganisationRole.ADMIN, is_active=True, account_type=User.ADULT
     ).exclude(pk=grant.account_id)
-    url = reverse("manage_admin_access")
+    url = reverse("manage_people")
     for admin in admins.distinct():
         notify(
             admin,

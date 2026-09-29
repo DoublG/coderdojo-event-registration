@@ -1,0 +1,33 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Add a person" %}{% endblock %}
+{% block manage_heading %}{% translate "Add a person" %}{% endblock %}
+
+{% block manage_content %}
+  {% comment %}Find an existing account to give an organisation role (accounts/people.py, DATA_MODEL.md §23).{% endcomment %}
+  <p class="body-sm"><a href="{% url 'manage_people' %}">{% translate "Back to People" %}</a></p>
+  <p class="body-sm">{% translate "Find the person's account, then choose their roles on the next page." %}</p>
+
+  <form method="get" class="cd-card cd-form" style="padding: var(--space-5);">
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="people-q">{% translate "Name, email address or username" %}</label>
+      <input class="cd-form__input body" type="search" id="people-q" name="q" value="{{ query }}">
+    </div>
+    <div class="cd-form__actions">
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Search" %}</button>
+    </div>
+  </form>
+
+  {% if query %}
+    {% if accounts %}
+      <ul class="body-sm" style="margin-top: var(--space-5);">
+        {% for account in accounts %}
+          <li><a href="{% url 'manage_person' user_id=account.pk %}">{{ account.team_name }}</a> · {{ account.email }}{% if account.organisation_roles.all %} · {% translate "already has a role" %}{% endif %}</li>
+        {% endfor %}
+      </ul>
+      {% if accounts|length == search_limit %}<p class="caption">{% blocktranslate %}Only the first {{ search_limit }} are shown: search more precisely.{% endblocktranslate %}</p>{% endif %}
+    {% else %}
+      <p class="body-sm" style="margin-top: var(--space-5);">{% translate "No account found." %}</p>
+    {% endif %}
+  {% endif %}
+{% endblock %}

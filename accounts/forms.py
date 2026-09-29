@@ -309,6 +309,20 @@ class AdminAccessForm(ConfirmPasswordForm):
     field_order = ["reason", "password"]
 
 
+class OrganisationRolesForm(forms.Form):
+    """An account's organisation roles on the People pages (DATA_MODEL.md
+    §23). The page renders the checkboxes itself, each with what the role
+    opens; accounts.organisation_people decides what's allowed."""
+
+    roles = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple)
+
+    def __init__(self, *args, **kwargs):
+        from .organisation_people import ROLES
+
+        super().__init__(*args, **kwargs)
+        self.fields["roles"].choices = [(role, label) for role, label, _description in ROLES]
+
+
 class _NewEmailMixin:
     """The new address of an email change, checked by the service that
     makes it (accounts.email_change.check_new_address)."""

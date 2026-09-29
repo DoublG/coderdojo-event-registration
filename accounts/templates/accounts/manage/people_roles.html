@@ -1,0 +1,32 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "What each role opens" %}{% endblock %}
+{% block manage_heading %}{% translate "What each role opens" %}{% endblock %}
+
+{% block manage_content %}
+  {% comment %}The areas each organisation role opens, read-only: the roles are fixed in code (accounts.organisation, DATA_MODEL.md §23).{% endcomment %}
+  <p class="body-sm"><a href="{% url 'manage_people' %}">{% translate "Back to People" %}</a></p>
+  <p class="body-sm">{% translate "The roles are fixed; this is what each one opens on this dashboard. Someone with several roles gets everything their roles open." %}</p>
+  <div class="cd-table-wrap">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label" scope="col">{% translate "Part of the dashboard" %}</th>
+          {% for role, label, description in roles %}<th class="label" scope="col">{{ label }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for label, opens in rows %}
+          <tr>
+            <th class="body-sm" scope="row">{{ label }}</th>
+            {% for yes in opens %}<td class="body-sm">{% if yes %}✓{% else %}–{% endif %}</td>{% endfor %}
+          </tr>
+        {% endfor %}
+        <tr>
+          <th class="body-sm" scope="row">{% blocktranslate %}The Django admin, when asked for ({{ hours }} hours), with the role's permissions{% endblocktranslate %}</th>
+          {% for role in roles %}<td class="body-sm">✓</td>{% endfor %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
