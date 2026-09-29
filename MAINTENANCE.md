@@ -1,0 +1,220 @@
+# Maintenance: versions, updates, vulnerabilities and audits
+
+How the platform stays supported and secure: which versions run where and until when, how to update,
+how to react to a vulnerability, and how the code is audited. For developers and whoever runs the
+platform. Conventions for changing the code are in [`CLAUDE.md`](CLAUDE.md); deploying is in its
+"Deploying (Level27)" section.
+
+**Last checked: 30 September 2026.** Dates from [endoflife.date](https://endoflife.date), the
+[Django roadmap](https://www.djangoproject.com/download/) and [PEP 790](https://peps.python.org/pep-0790/).
+Review this page every quarter (see [Calendar](#calendar)) and whenever a version changes.
+
+---
+
+## Versions and support
+
+*Security until* is the last day a version gets security fixes; after that it is end of life (EOL).
+*Bugfixes until* is when regular maintenance stops (security fixes only after that).
+
+### Production (Level27, `c40a7b15f.l27powered.eu`)
+
+| Component | Version | Released | Bugfixes until | Security until | Status and action |
+|---|---|---|---|---|---|
+| Operating system | Ubuntu 22.04.5 LTS | Apr 2022 | ended Sep 2024 | **1 Jun 2027** (Ubuntu Pro/ESM to Apr 2032) | Plan the move to 24.04 LTS (to May 2029) or 26.04 LTS (to May 2031) with Level27 **before June 2027**. |
+| Python | 3.14.7 (pyenv `py10102-3.14.7`) | 7 Oct 2025 | 1 Oct 2027 | **31 Oct 2030** | Current. Take each 3.14.x patch release. |
+| Django | 6.1.1 | 5 Aug 2026 | 30 Apr 2027 | **31 Dec 2027** | Upgrade to **6.2 LTS** (Apr 2027, security to Apr 2030) between May and Dec 2027. |
+| MySQL client | 8.0.46 | Apr 2018 (8.0) | ended Apr 2025 | **ended 30 Apr 2026** | **EOL.** The database *server* version is still to confirm (see [below](#still-to-confirm)); move to **8.4 LTS** (security to Apr 2032) or 9.7 LTS (to Apr 2034). |
+| Redis (Celery broker, cache, Channels) | to confirm | | | | See [below](#still-to-confirm). |
+| gunicorn / uvicorn | 26.2.0 / 0.53.0 | | | | No fixed support windows: stay on the latest release. |
+
+### Development (the devcontainer)
+
+| Component | Version | Security until | Status and action |
+|---|---|---|---|
+| Workspace image | `python:3.14-bookworm` (Debian 12) | Debian 12: regular support ended 11 Jul 2026, LTS to **30 Jun 2028** | Move to `python:3.14-trixie` (Debian 13, to Jun 2030). |
+| MySQL | `mysql:latest`, running **9.1.0** | **ended 21 Jan 2025** (an innovation release, supported only until the next one) | `latest` is only pulled once, so it went stale. Pin **`mysql:8.4`** (the LTS production should run too). |
+| Redis | `redis:latest`, running 7.2.5 | 7.2: 1 Dec 2029 | Pin the version production runs. |
+| nginx | `nginx:1.27-alpine` (1.27.5) | **ended 24 Jun 2025** | Pin the current stable, `nginx:1.30-alpine`. Development only. |
+| Mailpit, phpMyAdmin, 2FAuth | `latest` | | Development only; fine on `latest`. |
+
+Development should run the versions production runs (or will run next), so upgrades are tried there
+first. Prefer a pinned tag (`mysql:8.4`) over `latest`: a `latest` image is pulled once and then never
+moves, so it silently ages.
+
+### Python packages
+
+Everything the site imports is pinned in [`requirements.txt`](requirements.txt) (production) and
+[`requirements-dev.txt`](requirements-dev.txt) (development tools on top). Most have no support
+calendar: stay on the latest release. Watch these:
+
+| Package | Pinned | Note |
+|---|---|---|
+| Django | 6.1.1 | Take every 6.1.x release (security fixes come as patch releases). See the table above for 6.2 LTS. |
+| django-two-factor-auth | 1.18.1 | Officially supports Django up to 5.2; we run and test it on 6.1. Check its release notes on every Django upgrade. |
+| django-oauth-toolkit | 3.4.1 | Officially lists Django up to 6.0; tested here on 6.1. Its `oauthlib` has an open advisory (see [Security log](#security-log)). |
+| celery, kombu, channels, channels-redis | 5.6.3, 5.6.2, 4.3.2, (see file) | Upgrade together with Redis. |
+| mysqlclient | 2.3.0 | Needs the MySQL client headers on the server (missing on Level27 today, see CLAUDE.md). |
+
+### Still to confirm
+
+- **The production database server's version.** The server only shows the MySQL 8.0 *client*. Ask
+  Level27, or run on the server: `mysql -h <DB_HOST> -u <DB_USER> -p -N -e 'SELECT VERSION()'`. If it's 8.0,
+  it is past end of life: ask Level27 for 8.4 LTS.
+- **The production Redis version:** `redis-cli -h <REDIS_HOST> INFO server | grep redis_version`.
+- **Who patches what on the server.** On Level27's managed hosting the operating system, MySQL and Redis are
+  expected to be theirs to patch, and Python (pyenv) and the Python packages ours. Confirm this with
+  Level27 and note it here.
+
+---
+
+## Calendar
+
+| When | What |
+|---|---|
+| Every week (5 minutes) | Read the security announcements (see [Sources](#sources-to-watch)) and the GitHub Dependabot alerts. |
+| Every month | Run the [update check](#routine-updates): `pip-audit`, outdated packages, Django patch release. Deploy what's safe. |
+| Every quarter | Review the tables on this page against endoflife.date; bump the *Last checked* date. Run the [code audit](#code-audits) checks. |
+| Every year | A deeper [security review](#code-audits) of the code and of access to production. |
+| **Now (Sep 2026)** | Confirm the production database and Redis versions; move MySQL off 8.0; pin the devcontainer images. |
+| **Oct 2026** | Python 3.15 is released (1 Oct): no action, 3.14 is supported to 2030. |
+| **Apr–Dec 2027** | Django 6.2 LTS is out in April: upgrade before 6.1's security support ends (31 Dec 2027). |
+| **Before Jun 2027** | Ubuntu 22.04's standard security support ends (1 Jun 2027): the server moves to 24.04 or 26.04 LTS. |
+| Oct 2030 | Python 3.14 reaches end of life: be on a newer Python well before. |
+
+---
+
+## Routine updates
+
+Monthly, inside the workspace container, from the repo root:
+
+```sh
+pip install pip-audit                        # once
+pip-audit -r requirements.txt                # known vulnerabilities in what production runs
+pip list --outdated                          # what has a newer release
+```
+
+For each update:
+
+1. **Read the release notes**, especially for a new major or minor version (deprecations, dropped
+   support, changed defaults). For Django, also the "backwards incompatible changes" section.
+2. **Change the pin** in `requirements.txt` (or `requirements-dev.txt` for a development tool), then
+   `pip install -r requirements-dev.txt` in the container (or rebuild it).
+3. **Run everything:** `python manage.py test`, `ruff check .`, `python manage.py makemigrations --check`
+   (an upgrade can need a migration), and click through the pages the package touches. Run the tests
+   with warnings on (`python -W error::DeprecationWarning manage.py test <app>`) before a Django upgrade.
+4. **Deploy:** `scripts/deploy.sh --check`, then `scripts/deploy.sh`. The deploy runs `manage.py check`
+   on the new code before touching the live site, and restarts the Celery workers.
+5. **Update this page** when a row changes.
+
+Patch releases (6.1.1 → 6.1.2) are safe to take quickly. Minor and major versions (Django 6.1 → 6.2,
+Celery 5 → 6) get their own change, tested on the devcontainer first. Never upgrade on production only.
+
+**Django upgrades** follow Django's own advice: first the latest patch of the current version with
+deprecation warnings fixed, then the next version. Check that django-two-factor-auth, django-otp,
+django-oauth-toolkit, django-auditlog, django-ninja, channels and django-celery-beat support it; the
+test suite runs all of them.
+
+**Python upgrades** (3.14 → 3.15): a new pyenv environment on the server (`deploy.sh` installs into the
+one gunicorn runs from, see CLAUDE.md), the devcontainer's base image, and the Celery units in
+`scripts/systemd/`, which name the Python path.
+
+**Operating system, MySQL and Redis** upgrades on production go through Level27. Try the new versions
+in the devcontainer first by changing the image tags in `.devcontainer/docker-compose.yml`.
+
+---
+
+## Responding to a vulnerability
+
+### Sources to watch
+
+- **Django:** the security announcements on the [Django weblog](https://www.djangoproject.com/weblog/)
+  and the `django-announce` mailing list. Django pre-announces security releases a week ahead.
+- **Python:** [python.org security](https://www.python.org/dev/security/) and the release announcements.
+- **Our dependencies:** GitHub's **Dependabot alerts** for this repository (Settings → Code security →
+  enable *Dependabot alerts*; free for public repositories), and `pip-audit`.
+- **Server:** Ubuntu security notices ([USN](https://ubuntu.com/security/notices)), MySQL and Redis
+  advisories, and whatever Level27 sends.
+
+### Triage
+
+For every advisory, first ask: **is the vulnerable code reachable in our setup?** Check which feature it
+is in and whether we use it (for example, the open oauthlib advisory is in the authorization-code flow,
+which our API doesn't offer). Then:
+
+| Severity (in our setup) | Examples | Fix within |
+|---|---|---|
+| Critical | Remote code execution, authentication bypass, access to children's data, criminal-record extracts or health notes | 24–48 hours, outside the monthly routine |
+| High | Privilege escalation between roles, cross-site scripting on a logged-in page, SQL injection | 7 days |
+| Medium | Denial of service, information leaks without personal data | The next monthly update (30 days) |
+| Low, or not reachable here | A feature we don't use | Record it in the [Security log](#security-log); fixed with the next regular upgrade |
+
+### Fixing
+
+1. Update the package (see [Routine updates](#routine-updates)), or apply the advisory's workaround if no
+   fixed version exists yet.
+2. Run the full test suite and `pip-audit` again.
+3. Deploy with `scripts/deploy.sh`.
+4. Record it in the [Security log](#security-log): what, when found, assessment, when fixed.
+
+### If personal data may have leaked
+
+1. **Contain:** take the affected feature offline (or the site), revoke what may be compromised.
+2. **Rotate secrets** that may be exposed: `SECRET_KEY` and the database, Redis and mail passwords in
+   `~/app/.env` on the server (a new `SECRET_KEY` logs everyone out and invalidates password-reset and
+   login links); the dojos' API client secrets (*Renew secret* on each dojo's API page, or
+   `api.services.renew_secret`); and SSH keys.
+3. **Find out what happened** with the audit log (who changed or viewed what; the organisation dashboard's
+   *Audit log*, or the Django admin's) and the server logs.
+4. **Notify within 72 hours:** under GDPR art. 33, a breach of personal data is reported to the Belgian
+   Data Protection Authority ([GBA/APD](https://www.dataprotectionauthority.be)) within 72 hours of
+   becoming aware of it, unless it's unlikely to harm anyone. Most data here is about children, so assume
+   it must be reported. When the risk to people is high (art. 34), tell the families too.
+5. **Record** the breach, its effects and the measures taken (GDPR art. 33.5), even when it wasn't reported.
+
+---
+
+## Code audits
+
+### On every change (already in place)
+
+- **The test suite** (about 1,000 tests), including guard tests that fail when new code forgets a rule:
+  every field has a privacy classification, every model an audit-log decision, every model is fully usable
+  in the admin, the API's schema never exposes sensitive fields, no page loads scripts from another site.
+- **`ruff check .`** for lint.
+- **Access goes through helpers** (`dojos.access`, `accounts.organisation.require_area`), never ad hoc
+  checks: a review looks for views that skip them.
+- **Claude Code's `/security-review`** on a change before it's committed, and `/code-review` on a branch.
+
+### Every quarter
+
+```sh
+pip-audit -r requirements.txt                          # known vulnerabilities
+ruff check --select S .                                # flake8-bandit: security-sensitive patterns
+DEBUG=false python manage.py check --deploy            # Django's production security settings
+```
+
+Look at every finding (many of the `S` rules are false positives in tests and seed commands), fix what's
+real, and note the rest.
+
+### Every year
+
+A deeper review, by a person with Claude Code's help:
+
+- **Authorization:** every view under `/dojos/<id>/…` goes through `require_dojo_access`, every
+  organisation page through `require_area`, the API only reaches the client's own dojo.
+- **Sensitive data:** criminal-record extracts (never a public URL, deleted on decision), health notes
+  (champion only, logged), the privacy registry's classifications still right.
+- **Authentication:** the sign-in policy per role, two-step login, login links, session handling.
+- **Access to production:** who has SSH keys, who holds organisation roles and superuser rights, and the
+  Django admin access grants in the audit log. Remove what's no longer needed.
+- **Dependencies:** packages that aren't needed any more, and ones that stopped being maintained.
+
+---
+
+## Security log
+
+| Found | What | Assessment | Status |
+|---|---|---|---|
+| 30 Sep 2026 | **oauthlib 3.3.1**, CVE-2026-49265 / GHSA-xpv3-w29h-x7cv: timing side channel in PKCE (authorization-code flow). Fixed in 4.0.0. | **Not reachable here:** our API offers only the client-credentials grant (`api/services.py`), which doesn't use PKCE. Low. django-oauth-toolkit 3.4.1 requires `oauthlib>=3.3.0` and doesn't list 4.0 yet. | Open: try oauthlib 4.0.0 with the API tests in the devcontainer; upgrade when django-oauth-toolkit supports it. |
+| 30 Sep 2026 | **MySQL 8.0** (the production client, possibly the server) reached end of life on 30 Apr 2026: no more security fixes. | Depends on the server version (to confirm). | Open: confirm with Level27, move to 8.4 LTS. |
+| 30 Sep 2026 | **Devcontainer images** past end of life: MySQL 9.1 (`latest` gone stale), nginx 1.27. | Development only, not reachable from outside. | Open: pin `mysql:8.4` and `nginx:1.30-alpine`. |
