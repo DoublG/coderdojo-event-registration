@@ -136,3 +136,6 @@ docs/source/locale/*/LC_MESSAGES/**/*.mo
 seed_credentials.csv
 # collectstatic output (STATIC_ROOT, devcontainer with DEBUG off)
 /staticfiles/
+
+# User-journey screenshots (intermediate; the PDFs in user-journeys/en and nl are kept)
+user-journeys/.shots/
