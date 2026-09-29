@@ -33,6 +33,8 @@ update its diagram in the same change.
 11. [Mailing, segmentation and campaigns](#11-mailing-segmentation-and-campaigns)
 12. [Organisation events and promotion (later)](#12-organisation-events-and-promotion-later)
 
+Sections 13–22 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard and changing an email address; [section 23](#23-organisation-people-roles-and-page-access-on-the-dashboard-plan) plans managing organisation people and roles on the dashboard.
+
 ---
 
 ## 1. Overview
@@ -3963,3 +3965,186 @@ confirmed from the new address.
 ### Open points
 
 None yet.
+
+## 23. Organisation people, roles and page access on the dashboard (plan)
+
+**Planned, nothing built yet.** Today an organisation role
+(`accounts.OrganisationRole`: `board`, `admin`, `reviewer`) can only be
+granted or revoked in the Django admin, by someone who may edit that
+model there (in practice a superuser: no role's group holds
+`accounts.organisationrole`). Someone who has no account yet has to sign
+up as a family first and then be found in the admin. And which
+management page each role opens is spread over the views as
+`require_organisation_admin` / `require_reviewer` calls and repeated in
+the sidebar (`core/_manage_base.html`) and the switcher
+(`core.manage_nav`). This plan moves granting roles to the organisation
+dashboard, adds inviting someone new, and gives every management page one
+declared access rule.
+
+### What the code does today, and what that means
+
+- **Roles are code, not data.** `accounts.organisation.ROLE_PERMISSIONS`
+  maps each role to a permission group, and `ensure_groups()` resets each
+  group to exactly that on every grant or revoke. Anything edited on a
+  group in the admin is silently undone the next time a role changes.
+- **Page access is two yes/no questions**: "is organisation admin" (every
+  page except *Volunteers*) and "is reviewer" (`has_perm` on
+  `applications.can_review_background_checks`, so a superuser or a
+  permission granted by hand counts too). `is_organisation_admin` asks for
+  the role row, so a superuser without the role doesn't get the dashboard.
+- **Every account is created by its own holder** (CLAUDE.md, "Account
+  model"): no admin-provisioned logins, no temporary passwords. Creating
+  an organisation user has to keep that.
+- **Granting a role already does the right things**: the signals in
+  `accounts.organisation` set `is_staff` and the groups,
+  `OrganisationRole` is recorded in the audit log (`core.audit.RECORDED`),
+  the sign-in policy (§15) applies per role, and deletion and retention
+  (§16) already leave organisation-role holders alone.
+- **The board role has no dashboard pages**; its only way in is the
+  *Organisation* link to the Django admin (`core/menu.html`).
+
+### Decisions (proposed)
+
+- **Page access by area, declared once.** Each group of the organisation
+  sidebar becomes an *area*, a custom permission on `OrganisationRole`
+  (`Meta.permissions`, e.g. `accounts.manage_communication`):
+
+  | Area | Pages | Today |
+  |---|---|---|
+  | `communication` | Campaigns, Journeys, Segments, Mail templates | admin |
+  | `public_site` | Promotions, Sponsors | admin |
+  | `ninjas` | Awards | admin |
+  | `privacy` | Privacy (export, delete, change email) | admin |
+  | `security` | Sign-in security | admin |
+  | `people` | People and roles (new, below) | superuser only, in the admin |
+  | `volunteers` | Background checks, Applications | reviewer |
+
+  The areas go into the role groups through `ROLE_PERMISSIONS` like any
+  other permission (admin: every area except `volunteers`; reviewer:
+  `volunteers`; board: none yet). One helper replaces the two:
+  `require_area(request, area)` (404 without the permission or below the
+  sign-in policy, same no-leak reasoning as now), and `manage_contexts`
+  gets the set of areas the account may open, which drives both the
+  sidebar groups and `/manage/`'s landing. `require_organisation_admin`
+  and `require_reviewer` stay as thin wrappers until every view has moved,
+  then go. Because it's `has_perm`, a superuser opens every area, and a
+  permission granted by hand keeps working, as `is_reviewer` already does.
+- **Roles stay defined in code (proposed, see open point 1).** The
+  dashboard grants and revokes the three roles; it doesn't create new
+  roles or change what a role opens. A *Roles* page shows the matrix above
+  read-only, from `ROLE_PERMISSIONS`, so the organisation can see who can
+  do what. Reasons: two areas hold special-category and criminal-record
+  data (`privacy`, `volunteers`), which shouldn't be one checkbox away,
+  and `ensure_groups()` would have to stop resetting groups.
+- **Who manages people: the `people` area, i.e. organisation admins.**
+  Rules, in a service `accounts/organisation_people.py` (views only call
+  it; `OrganisationPeopleError` carries a user-facing message), like
+  `dojos/team.py`:
+  - nobody changes their own roles (as nobody reviews their own check,
+    §21);
+  - there is always at least one account with the `admin` role who isn't
+    a superuser only: revoking the last one is refused;
+  - only adult accounts, never ninja logins or service accounts (the model
+    already checks this in `clean()`; the service calls it);
+  - the dashboard never touches `is_superuser`, `is_staff` or groups
+    directly; the signals keep doing that. Superusers stay a command-line
+    and Django-admin matter.
+- **Granting to an existing account:** find it by name or email (the
+  search `/manage/privacy/` already has, shared), tick roles, save. The
+  person gets a service mail (`organisation_role_changed`: which roles
+  they now hold, where to find the dashboard, and what the sign-in policy
+  asks of them), and the other admins a dashboard notification. The audit
+  log records the change with the admin as actor.
+- **Inviting someone without an account: an invitation, not a created
+  login.** An admin enters an email address, a name (to recognise the
+  invitation by) and the roles. We store an `accounts.OrganisationInvitation`
+  (email, roles, invited_by, created_at, expires_at, accepted_at, accepted_by,
+  a hashed token) and mail a link (`organisation_invitation`, service mail
+  through `send(..., address=)`, §22). The link leads to sign-up (email
+  prefilled, not editable) or to login when an account with that address
+  exists; the roles are granted when the invitation is **accepted by an
+  account with that same email address** (case-insensitive), so a
+  forwarded link grants nothing. The person creates their own account and
+  password, so "every account is created by its own holder" still holds.
+  Valid 14 days, single use, withdrawable; an address that already has an
+  account and no pending invitation gets the "existing account" flow
+  instead. Throttled like the email change (one invitation per admin per
+  minute) so it can't be used to mail arbitrary addresses in bulk.
+- **Sign-up for an invited person is lighter than a family's**: no child
+  rows (they're optional to add later from the account page). Proposed as
+  a variant of `RegisterGuardianForm` without the children formset,
+  reached only through a valid invitation.
+- **Revoking** takes effect on the next request (every page checks per
+  request); the person gets the same `organisation_role_changed` mail.
+  It doesn't delete the account, which stays a normal adult account.
+- **Privacy (§16):** `OrganisationInvitation` gets its classification
+  (email and name `personal`, `invited_by` `export=False`), `subjects`
+  `{Subject.EMAIL: "email"}`, and a retention rule: accepted, expired or
+  withdrawn invitations are deleted after 30 days by the daily retention
+  job. Recorded in the audit log (`core.audit.RECORDED`, token excluded).
+
+### Screens (an *Organisation* group in the sidebar, `people` area)
+
+1. **People** (`/manage/people/`): everyone holding an organisation role,
+   with their roles, when granted, and whether their sign-in meets the
+   policy (a warning when a role asks for two-step login and they haven't
+   set it up; links to *Sign-in security*). Pending invitations below, with
+   *Send again* and *Withdraw*. *Add a person* at the top.
+2. **Add a person** (`/manage/people/add/`): search an existing account,
+   or "Invite by email" when there's none; the role checkboxes each say
+   what the role opens (from the matrix) and, for `reviewer`, that it
+   reads criminal-record extracts.
+3. **One person** (`/manage/people/<id>/`): their roles as checkboxes
+   (disabled for your own account, with the reason), save; the history of
+   their role changes from the audit log.
+4. **Roles** (`/manage/people/roles/`): the area × role matrix, read-only.
+5. **Accepting an invitation** (`/invitation/<token>/`, public): who
+   invited you to which roles, then *Create an account* or *Log in*;
+   afterwards `/manage/`. An expired, used or withdrawn link says so.
+
+Everything keeps its full Django admin page (`OrganisationRoleAdmin`, and
+an `OrganisationInvitationAdmin`, whose docstring says an edit there skips
+the rules above).
+
+### Phases
+
+1. **Areas:** the custom permissions (migration), the areas in
+   `ROLE_PERMISSIONS`, `require_area`, every organisation view moved to it,
+   `manage_contexts` and the sidebar driven by the area set, `/manage/`'s
+   landing. No visible change for today's admins and reviewers; tests that
+   each page 404s without its area, and that a superuser opens all.
+2. **People and roles for existing accounts:** the service and its rules,
+   screens 1, 3 and 4, the `organisation_role_changed` mail (en/nl/fr in
+   `mailing/seed_templates.py`, `SYSTEM_TEMPLATE_KEYS`), the notification
+   to other admins. Tests: no self-change, the last admin, ninja and
+   service accounts refused, staff and groups following, the audit actor.
+3. **Invitations:** the model (with privacy classification, export,
+   retention and audit decisions), the invitation mail, screen 2's invite
+   path and screen 5, the invited sign-up form. Tests: accepted only by
+   the matching address, expiry, single use, withdraw, throttle, retention.
+4. **Board on the dashboard (optional):** give `board` read-only areas
+   once pages have a read-only mode; until then its *Organisation* link to
+   the Django admin stays.
+5. **Finishing:** Dutch and French, the help docs (a new
+   *organisation/people.rst*; *dashboard.rst* and *volunteers.rst* no
+   longer say roles are given in the technical admin; *sign-in-security.rst*
+   linking to People), CLAUDE.md ("Organisation roles", the organisation
+   dashboard's groups) and §2's table ("the role is granted in the admin").
+
+### Open points
+
+1. **Fixed roles or editable roles?** The plan keeps the three roles in
+   code and shows what they open. If the organisation wants to define its
+   own roles or change which areas a role opens, roles become data (a
+   `OrganisationRoleDefinition` with its areas, `OrganisationRole` pointing
+   at it), `ensure_groups()` builds groups from those rows instead of code,
+   and the *Roles* page becomes editable, with `privacy` and `volunteers`
+   only grantable together with a warning. Phase 1's areas are needed
+   either way, so this can be decided after it.
+2. **Who may grant `admin`?** Proposed: any admin. Stricter: only
+   superusers, or a second admin has to confirm.
+3. **Should an invited person also be asked to set up two-step login right
+   away** when their role's policy asks for it? The middleware already
+   sends them there on their first page; nothing extra is planned.
+4. **Listing on the team page** (`content.OrganisationTeamMember`) stays
+   separate; a later *Also list on the team page* shortcut is possible.
