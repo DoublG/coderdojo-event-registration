@@ -1,0 +1,20 @@
+{
+  "v": 4,
+  "createdOnFiles": { "v": 1, "at": "2026-09-29T22:55:00Z" },
+  "title": "CoderDojo België platform pitch (NL)",
+  "cover": "cover",
+  "order": ["cover", "why", "who", "journeys", "parent-find", "parent-manage", "ninja", "volunteer", "on-the-day", "champion", "reviewer", "organisation", "trust", "built", "figures", "timeline", "approach", "next"],
+  "sections": {
+    "s1": { "description": "Wat het platform is en voor wie", "start": "cover" },
+    "s2": { "description": "De gebruikersreizen, persona per persona", "start": "journeys" },
+    "s3": { "description": "Hoe het gebouwd is: feiten, cijfers en aanpak", "start": "built" },
+    "s4": { "description": "Wat er nodig is om live te gaan", "start": "next" }
+  },
+  "faces": {
+    "fredoka": { "family": "Fredoka", "href": "https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&display=swap" },
+    "nunito": { "family": "Nunito", "href": "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" }
+  },
+  "designSystems": [
+    { "title": "CoderDojo", "namespace": "coderdojo", "artifact": "https://claude.ai/artifact/DzLMBrthmeyHm5ybT5vRGc", "version": "1790714141-7859", "copiedAt": "2026-09-29T22:55:00Z" }
+  ]
+}

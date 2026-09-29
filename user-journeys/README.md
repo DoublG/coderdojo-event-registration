@@ -10,6 +10,15 @@ One PDF per persona, walking through the site with screenshots, in English (`en/
 | 4 | Champion | [en/4-champion-journey.pdf](en/4-champion-journey.pdf) | [nl/4-champion.pdf](nl/4-champion.pdf) |
 | 5 | Background-check reviewer / beoordelaar | [en/5-reviewer-journey.pdf](en/5-reviewer-journey.pdf) | [nl/5-beoordelaar.pdf](nl/5-beoordelaar.pdf) |
 | 6 | Organisation admin / beheerder | [en/6-organisation-journey.pdf](en/6-organisation-journey.pdf) | [nl/6-organisatie.pdf](nl/6-organisatie.pdf) |
+| | **Pitch deck**: the journeys plus facts and figures about the development | [en/pitch-deck.pdf](en/pitch-deck.pdf) | [nl/pitchdeck.pdf](nl/pitchdeck.pdf) |
+
+The pitch decks are Slides artifacts on claude.ai (private until shared from their Share menu, which
+also exports them to PowerPoint): [English](https://claude.ai/artifact/LDyAfN3vCf5RdS8oxhTDPt),
+[Nederlands](https://claude.ai/artifact/RDPZX7Ua73bKdzqvpifhqa). `pitch-deck/<lang>/` is a copy of their
+slide files, and `python scripts/build_pitch.py en|nl` renders that copy to the PDFs here (the
+screenshots come from `.shots/`, so run the journeys first; icons are drawn as simple line icons). A
+change made in the artifact needs copying back into `pitch-deck/` before rebuilding. The last slide's
+"ask" is still placeholders in brackets.
 
 Alongside them, **[technical-foundation-and-data-model.pdf](technical-foundation-and-data-model.pdf)**
 explains how the site is built, how its data fits together and why: a summary of `DATA_MODEL.md` and
