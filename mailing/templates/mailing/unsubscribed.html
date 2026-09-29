@@ -7,7 +7,7 @@
     <div class="cd-card" style="padding: var(--space-6);">
       <h1 class="heading-lg" style="margin-top: 0;">{% translate "You're unsubscribed" %}</h1>
       <p class="body">
-        {% if everything %}{% translate "You won't get any optional mails from us any more." %}{% else %}{% blocktranslate with label=category.label|lower %}You won't get <strong>{{ label }}</strong> mails any more.{% endblocktranslate %}{% endif %}
+        {% if dojo %}{% blocktranslate with name=dojo.name %}You won't get news from <strong>{{ name }}</strong> any more. News from your other dojos still comes.{% endblocktranslate %}{% elif everything %}{% translate "You won't get any optional mails from us any more." %}{% else %}{% blocktranslate with label=category.label|lower %}You won't get <strong>{{ label }}</strong> mails any more.{% endblocktranslate %}{% endif %}
         {% translate "Mails about your account and your bookings are still sent." %}
       </p>
       <p class="body-sm">{% url 'mail_preferences' as prefs_url %}{% blocktranslate %}You can change this any time on your <a href="{{ prefs_url }}">Mail preferences</a> page.{% endblocktranslate %}</p>

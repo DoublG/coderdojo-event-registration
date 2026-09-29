@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 12:15+0000\n"
+"POT-Creation-Date: 2026-09-29 15:15+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -236,7 +236,7 @@ msgstr "Code postal"
 msgid "So we can tell you about dojos and sessions near you."
 msgstr "Pour vous informer des dojos et sessions près de chez vous."
 
-#: accounts/forms.py:258 accounts/forms.py:469 mailing/forms.py:24
+#: accounts/forms.py:258 accounts/forms.py:469 mailing/forms.py:28
 msgid "Language for emails"
 msgstr "Langue des e-mails"
 
@@ -674,7 +674,7 @@ msgstr "Personnes : rôles dans l'organisation"
 msgid "Audit log: who changed what (read-only)"
 msgstr "Journal d'audit : qui a modifié quoi (lecture seule)"
 
-#: accounts/organisation_people.py:30 mailing/models.py:363
+#: accounts/organisation_people.py:30 mailing/models.py:367
 msgid "Admin"
 msgstr "Administration"
 
@@ -1687,8 +1687,8 @@ msgstr "Ce que chaque rôle ouvre"
 #: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:170
 #: events/forms.py:245 events/forms.py:301 events/forms.py:334
 #: events/templates/events/manage/badge_list.html:18
-#: events/templates/events/manage/badge_list.html:44 mailing/forms.py:93
-#: mailing/forms.py:181 mailing/forms.py:225
+#: events/templates/events/manage/badge_list.html:44 mailing/forms.py:116
+#: mailing/forms.py:204 mailing/forms.py:248
 #: mailing/templates/mailing/manage/campaign_list.html:12
 #: mailing/templates/mailing/manage/journey_list.html:13
 #: mailing/templates/mailing/manage/segment_list.html:12
@@ -1965,7 +1965,7 @@ msgstr "Avec un lien de connexion"
 #: content/templates/content/manage/promotion_form.html:29
 #: content/templates/content/manage/sponsor_form.html:12
 #: events/templates/events/manage/badge_form.html:17
-#: mailing/templates/mailing/mail_preferences.html:64
+#: mailing/templates/mailing/mail_preferences.html:77
 #: mailing/templates/mailing/manage/campaign_detail.html:29
 #: mailing/templates/mailing/manage/journey_detail.html:28
 #: mailing/templates/mailing/manage/segment_detail.html:47
@@ -5138,6 +5138,7 @@ msgid "Switch between what you manage"
 msgstr "Passer d'un espace que vous gérez à l'autre"
 
 #: core/templates/core/partials/_manage_switcher.html:32
+#: mailing/templates/mailing/mail_preferences.html:48
 msgid "Your dojos"
 msgstr "Vos dojos"
 
@@ -5179,8 +5180,8 @@ msgstr "Slogan"
 
 # | msgid "Questions"
 #: dojos/forms.py:65 dojos/forms.py:91 events/forms.py:175 events/forms.py:245
-#: events/forms.py:303 events/forms.py:334 mailing/forms.py:182
-#: mailing/forms.py:197 mailing/forms.py:232
+#: events/forms.py:303 events/forms.py:334 mailing/forms.py:205
+#: mailing/forms.py:220 mailing/forms.py:255
 #: mailing/templates/mailing/manage/segment_list.html:13
 msgid "Description"
 msgstr "Description"
@@ -7326,26 +7327,26 @@ msgstr ""
 "La newsletter de CoderDojo Belgium et des événements comme Coolest Projects "
 "et CoderDojo Girlz."
 
-#: mailing/forms.py:95 mailing/forms.py:230
+#: mailing/forms.py:118 mailing/forms.py:253
 #: mailing/templates/mailing/manage/mail_queue.html:58
 #: mailing/templates/mailing/manage/template_list.html:13
 msgid "Kind of mail"
 msgstr "Type d'e-mail"
 
-#: mailing/forms.py:96
+#: mailing/forms.py:119
 msgid "Only people who want this kind of mail get it."
 msgstr "Seules les personnes qui veulent ce type d'e-mail le reçoivent."
 
-#: mailing/forms.py:99 mailing/templates/mailing/manage/template_list.html:12
+#: mailing/forms.py:122 mailing/templates/mailing/manage/template_list.html:12
 msgid "Template"
 msgstr "Modèle"
 
-#: mailing/forms.py:100 mailing/templates/mailing/manage/campaign_list.html:14
+#: mailing/forms.py:123 mailing/templates/mailing/manage/campaign_list.html:14
 #: mailing/templates/mailing/manage/journey_list.html:15
 msgid "Segment"
 msgstr "Segment"
 
-#: mailing/forms.py:115
+#: mailing/forms.py:138
 #, python-format
 msgid ""
 "Line %(number)s: write it as name: value (a name in lowercase letters and _)."
@@ -7354,101 +7355,101 @@ msgstr ""
 "minuscules et _)."
 
 # | msgid "Spot available"
-#: mailing/forms.py:128
+#: mailing/forms.py:151
 msgid "Template variables"
 msgstr "Variables du modèle"
 
-#: mailing/forms.py:130
+#: mailing/forms.py:153
 msgid "signup_url: https://coolestprojects.org"
 msgstr "signup_url: https://coolestprojects.org"
 
-#: mailing/forms.py:131
+#: mailing/forms.py:154
 msgid "One per line, as name: value. The template uses them as {{ name }}."
 msgstr ""
 "Une par ligne, sous la forme nom: valeur. Le modèle les utilise comme "
 "{{ name }}."
 
-#: mailing/forms.py:138
+#: mailing/forms.py:161
 #, python-format
 msgid "<a href=\"%(url)s\">Segments</a> describe who gets it."
 msgstr "<a href=\"%(url)s\">Les segments</a> définissent qui le reçoit."
 
-#: mailing/forms.py:153
+#: mailing/forms.py:176
 msgid "Coolest Projects 2027"
 msgstr "Coolest Projects 2027"
 
 # | msgid "Aimed at"
-#: mailing/forms.py:160
+#: mailing/forms.py:183
 msgid "Send at"
 msgstr "Envoyer le"
 
 # | msgid "Leave empty to use the event's name"
-#: mailing/forms.py:161
+#: mailing/forms.py:184
 msgid "Leave empty to send as soon as it's launched."
 msgstr "Laisser vide pour envoyer dès le lancement."
 
-#: mailing/forms.py:167
+#: mailing/forms.py:190
 msgid "Pick a time in the future, or leave it empty to send when launched."
 msgstr ""
 "Choisissez un moment dans le futur, ou laissez vide pour envoyer au "
 "lancement."
 
-#: mailing/forms.py:177
+#: mailing/forms.py:200
 msgid "Families near Ghent"
 msgstr "Familles près de Gand"
 
-#: mailing/forms.py:178
+#: mailing/forms.py:201
 msgid "Who this is, in a sentence."
 msgstr "De qui il s'agit, en une phrase."
 
-#: mailing/forms.py:183
+#: mailing/forms.py:206
 msgid "Active (offered when creating a campaign)"
 msgstr "Actif (proposé lors de la création d'une campagne)"
 
-#: mailing/forms.py:197 mailing/templates/mailing/manage/mail_queue.html:57
+#: mailing/forms.py:220 mailing/templates/mailing/manage/mail_queue.html:57
 #: mailing/templates/mailing/manage/mail_queue.html:91
 msgid "Subject"
 msgstr "Objet"
 
-#: mailing/forms.py:197
+#: mailing/forms.py:220
 msgid "Text"
 msgstr "Texte"
 
-#: mailing/forms.py:198
+#: mailing/forms.py:221
 msgid "When it's sent and which variables it uses."
 msgstr "Quand il est envoyé et quelles variables il utilise."
 
-#: mailing/forms.py:227
+#: mailing/forms.py:250
 msgid "Lowercase, with _ between words, e.g. campaign_summer_camp."
 msgstr "En minuscules, avec _ entre les mots, p. ex. campaign_summer_camp."
 
-#: mailing/forms.py:228
+#: mailing/forms.py:251
 msgid "campaign_summer_camp"
 msgstr "campaign_summer_camp"
 
-#: mailing/forms.py:235
+#: mailing/forms.py:258
 msgid "When it's used and which variables it takes."
 msgstr "Quand il est utilisé et quelles variables il reçoit."
 
-#: mailing/forms.py:245
+#: mailing/forms.py:268
 msgid "A template with this name already exists."
 msgstr "Un modèle avec ce nom existe déjà."
 
-#: mailing/forms.py:257
+#: mailing/forms.py:280
 msgid "Not again for (days)"
 msgstr "Pas à nouveau pendant (jours)"
 
-#: mailing/forms.py:258
+#: mailing/forms.py:281
 msgid "Someone who got it doesn't get it again for this many days."
 msgstr ""
 "Une personne qui l'a reçu ne le reçoit plus pendant ce nombre de jours."
 
 # | msgid "Which mails you get"
-#: mailing/forms.py:261
+#: mailing/forms.py:284
 msgid "We miss you"
 msgstr "Vous nous manquez"
 
-#: mailing/forms.py:268
+#: mailing/forms.py:291
 msgid ""
 "Tip: a rule like \"How the child comes to sessions changed: became At risk "
 "in the last 7 days\" makes it a triggered mail."
@@ -7562,45 +7563,45 @@ msgid "Not sent (no consent, no address or blocked)"
 msgstr "Non envoyé (pas de consentement, pas d'adresse ou bloqué)"
 
 # | msgid "Sign up now"
-#: mailing/models.py:360
+#: mailing/models.py:364
 msgid "Sign-up form"
 msgstr "Formulaire d'inscription"
 
 # | msgid "Mail preferences"
-#: mailing/models.py:361
+#: mailing/models.py:365
 msgid "Mail preferences page"
 msgstr "Page des préférences e-mail"
 
 # | msgid "Unsubscribe"
-#: mailing/models.py:362
+#: mailing/models.py:366
 msgid "Unsubscribe link"
 msgstr "Lien de désabonnement"
 
-#: mailing/models.py:364
+#: mailing/models.py:368
 msgid "Bounce or complaint"
 msgstr "Rejet ou plainte"
 
-#: mailing/models.py:392
+#: mailing/models.py:423
 msgid "Hard bounce"
 msgstr "Rejet définitif"
 
-#: mailing/models.py:393
+#: mailing/models.py:424
 msgid "Repeated soft bounces"
 msgstr "Rejets temporaires répétés"
 
-#: mailing/models.py:394 mailing/models.py:422
+#: mailing/models.py:425 mailing/models.py:453
 msgid "Spam complaint"
 msgstr "Plainte pour spam"
 
-#: mailing/models.py:395
+#: mailing/models.py:426
 msgid "Blocked by hand"
 msgstr "Bloqué manuellement"
 
-#: mailing/models.py:420
+#: mailing/models.py:451
 msgid "Hard bounce (5.x.x)"
 msgstr "Rejet définitif (5.x.x)"
 
-#: mailing/models.py:421
+#: mailing/models.py:452
 msgid "Soft bounce (4.x.x)"
 msgstr "Rejet temporaire (4.x.x)"
 
@@ -7935,15 +7936,21 @@ msgstr "%(label)s (toujours activé)"
 msgid "Always on"
 msgstr "Toujours activé"
 
-#: mailing/templates/mailing/mail_preferences.html:48
+#: mailing/templates/mailing/mail_preferences.html:49
+msgid ""
+"News from these dojos, as long as News from your dojo is on. Switch off a "
+"dojo to stop only its mails."
+msgstr "Les nouvelles de ces dojos, tant que « Nouvelles de votre dojo » est activé. Désactivez un dojo pour n'arrêter que ses mails."
+
+#: mailing/templates/mailing/mail_preferences.html:61
 msgid "Your children's details"
 msgstr "Les données de vos enfants"
 
-#: mailing/templates/mailing/mail_preferences.html:49
+#: mailing/templates/mailing/mail_preferences.html:62
 msgid "Per child; signing up for sessions never depends on it."
 msgstr "Par enfant ; l'inscription aux sessions n'en dépend jamais."
 
-#: mailing/templates/mailing/mail_preferences.html:63
+#: mailing/templates/mailing/mail_preferences.html:76
 msgid "Back to your account"
 msgstr "Retour à votre compte"
 
@@ -8710,21 +8717,40 @@ msgstr ""
 
 #: mailing/templates/mailing/unsubscribe.html:3
 #: mailing/templates/mailing/unsubscribe.html:8
-#: mailing/templates/mailing/unsubscribe.html:17
+#: mailing/templates/mailing/unsubscribe.html:35
 msgid "Unsubscribe"
 msgstr "Se désabonner"
 
-#: mailing/templates/mailing/unsubscribe.html:9
+# | msgid "Apply to start a dojo"
+# | msgid "Champion (start a dojo)"
+#: mailing/templates/mailing/unsubscribe.html:12
+msgid "Which mails do you want to stop?"
+msgstr "Quels mails voulez-vous arrêter ?"
+
+#: mailing/templates/mailing/unsubscribe.html:15
+#, python-format
+msgid "Only the news from <strong>%(name)s</strong>"
+msgstr "Uniquement les nouvelles de <strong>%(name)s</strong>"
+
+#: mailing/templates/mailing/unsubscribe.html:19
+msgid "The news from every dojo"
+msgstr "Les nouvelles de tous les dojos"
+
+#: mailing/templates/mailing/unsubscribe.html:23
+msgid "All optional mails"
+msgstr "Tous les mails facultatifs"
+
+#: mailing/templates/mailing/unsubscribe.html:27
 #, python-format
 msgid "Stop getting <strong>%(label)s</strong> mails from CoderDojo Belgium?"
 msgstr ""
 "Ne plus recevoir d'e-mails <strong>%(label)s</strong> de CoderDojo Belgium ?"
 
-#: mailing/templates/mailing/unsubscribe.html:13
+#: mailing/templates/mailing/unsubscribe.html:30
 msgid "Unsubscribe from all optional mails"
 msgstr "Se désabonner de tous les e-mails facultatifs"
 
-#: mailing/templates/mailing/unsubscribe.html:15
+#: mailing/templates/mailing/unsubscribe.html:33
 msgid "Mails about your account and your bookings are always sent."
 msgstr ""
 "Les e-mails concernant votre compte et vos réservations sont toujours "
@@ -8737,6 +8763,13 @@ msgstr "Désabonné"
 #: mailing/templates/mailing/unsubscribed.html:8
 msgid "You're unsubscribed"
 msgstr "Vous êtes désabonné"
+
+#: mailing/templates/mailing/unsubscribed.html:10
+#, python-format
+msgid ""
+"You won't get news from <strong>%(name)s</strong> any more. News from your "
+"other dojos still comes."
+msgstr "Vous ne recevrez plus de nouvelles de <strong>%(name)s</strong>. Les nouvelles de vos autres dojos continuent d'arriver."
 
 #: mailing/templates/mailing/unsubscribed.html:10
 msgid "You won't get any optional mails from us any more."
@@ -8761,7 +8794,7 @@ msgstr ""
 "Vous pouvez modifier cela à tout moment sur votre page <a "
 "href=\"%(prefs_url)s\">Préférences e-mail</a>."
 
-#: mailing/views.py:35
+#: mailing/views.py:39
 msgid "Your mail preferences are saved."
 msgstr "Vos préférences e-mail sont enregistrées."
 

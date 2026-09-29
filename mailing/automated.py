@@ -16,7 +16,6 @@ import logging
 from datetime import timedelta
 
 from django.conf import settings
-from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
@@ -25,6 +24,7 @@ from dojos.models import Dojo
 from events.models import Event, Registration
 
 from .categories import MailCategory
+from .dojo_families import active_since, family_accounts
 from .models import EmailMessage
 from .rendering import TemplateMissing
 from .services import send
@@ -61,12 +61,12 @@ def _session_context(registration, user=None):
     }
 
 
-def _queue(user, category, template_key, context, key):
+def _queue(user, category, template_key, context, key, dojo=None):
     """send() with an idempotency key; returns 1 when this call queued a new
     pending mail (not a repeat, not suppressed), else 0."""
     if EmailMessage.objects.filter(idempotency_key=key).exists():
         return 0
-    row = send(user, category, template_key, context, idempotency_key=key)
+    row = send(user, category, template_key, context, idempotency_key=key, dojo=dojo)
     return int(row.status == EmailMessage.Status.PENDING)
 
 
@@ -153,7 +153,8 @@ def announce_new_sessions(now=None):
     """Tell the families of each dojo about its sessions that opened since
     the last run: one mail per family and dojo, listing them. A family
     belongs to a dojo when a child has it as home dojo or came to one of its
-    sessions in the last MAILING_DOJO_NEWS_ACTIVE_DAYS days. The
+    sessions in the last MAILING_DOJO_NEWS_ACTIVE_DAYS days
+    (mailing.dojo_families); a family that muted the dojo doesn't get it. The
     organisation's own events (an organisation dojo, DATA_MODEL.md §12)
     aren't a dojo's news: they reach people through campaigns."""
     now = now or timezone.now()
@@ -168,25 +169,9 @@ def announce_new_sessions(now=None):
         by_dojo.setdefault(event.dojo, []).append(event)
 
     sent = 0
-    since = now - timedelta(days=settings.MAILING_DOJO_NEWS_ACTIVE_DAYS)
+    since = active_since(now)
     for dojo, events in by_dojo.items():
-        ninjas = Ninja.objects.filter(
-            Q(home_dojo=dojo)
-            | Q(
-                pk__in=Registration.objects.filter(
-                    event__dojo=dojo, attended=True, event__start_time__gte=since
-                ).values("ninja_id")
-            )
-        )
-        users = (
-            User.objects.filter(
-                Q(pk__in=Guardianship.objects.filter(ninja__in=ninjas).values("guardian_id"))
-                | Q(pk__in=ninjas.exclude(account=None).values("account_id")),
-                is_active=True,
-            )
-            .exclude(email="")
-            .order_by("id")
-        )
+        users = family_accounts(dojo, since)
 
         def context_for(user, dojo=dojo, events=events):
             return {
@@ -206,7 +191,12 @@ def announce_new_sessions(now=None):
         for user in users:
             try:
                 sent += _queue(
-                    user, MailCategory.DOJO_NEWS, "new_sessions_at_dojo", context_for(user), f"{key}:{user.pk}"
+                    user,
+                    MailCategory.DOJO_NEWS,
+                    "new_sessions_at_dojo",
+                    context_for(user),
+                    f"{key}:{user.pk}",
+                    dojo=dojo,
                 )
             except TemplateMissing:
                 logger.exception("mail template new_sessions_at_dojo is missing: nothing sent")

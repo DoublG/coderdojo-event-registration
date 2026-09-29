@@ -5,6 +5,7 @@ from .models import (
     BounceRecord,
     Campaign,
     ConsentEvent,
+    DojoMailMute,
     EmailMessage,
     EmailSuppression,
     EmailTemplate,
@@ -124,9 +125,21 @@ class ConsentEventAdmin(admin.ModelAdmin):
     """The consent log, append-only in normal use (mailing.preferences).
     Editable here only for emergencies, e.g. erasing a person's data."""
 
-    list_display = ["created_at", "user", "category", "subscribed", "source", "wording_version"]
+    list_display = ["created_at", "user", "category", "dojo", "subscribed", "source", "wording_version"]
     list_filter = ["category", "source", "subscribed"]
     search_fields = ["user__email", "user__username"]
+
+
+@admin.register(DojoMailMute)
+class DojoMailMuteAdmin(admin.ModelAdmin):
+    """Dojos an account muted (DATA_MODEL.md §25). They change through Mail
+    preferences or a dojo mail's unsubscribe link, which also log a
+    ConsentEvent. An edit here does NOT log one: only for fixing something
+    by hand (and note why)."""
+
+    list_display = ["user", "dojo", "created_at"]
+    list_filter = ["dojo"]
+    search_fields = ["user__email", "user__username", "dojo__name"]
 
 
 @admin.register(BounceRecord)

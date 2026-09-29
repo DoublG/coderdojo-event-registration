@@ -287,6 +287,10 @@ class EmailMessage(models.Model):
     subject = models.CharField(max_length=255)
     body = models.TextField()
     campaign = models.ForeignKey(Campaign, null=True, blank=True, on_delete=models.SET_NULL)
+    # The dojo a `dojo_news` mail is from: a family that muted it doesn't get
+    # it (checked again right before sending), and its unsubscribe link
+    # offers "not from this dojo" (DATA_MODEL.md §25).
+    dojo = models.ForeignKey("dojos.Dojo", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
 
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     status_reason = models.CharField(max_length=255, blank=True, help_text="Why it was suppressed or failed.")
@@ -343,7 +347,7 @@ class MailPreference(models.Model):
 
 class ConsentEventManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().select_related("user")
+        return super().get_queryset().select_related("user", "dojo")
 
 
 class ConsentEvent(models.Model):
@@ -366,6 +370,8 @@ class ConsentEvent(models.Model):
 
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="consent_events")
     category = models.CharField(max_length=20, choices=MailCategory.choices)
+    # Set when the change is about one dojo's mail only (DojoMailMute).
+    dojo = models.ForeignKey("dojos.Dojo", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     subscribed = models.BooleanField()
     source = models.CharField(max_length=20, choices=SOURCE_CHOICES)
     wording_version = models.CharField(max_length=20, blank=True)
@@ -377,7 +383,32 @@ class ConsentEvent(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.user}: {self.category} {'on' if self.subscribed else 'off'} ({self.source})"
+        where = f" from {self.dojo}" if self.dojo_id else ""
+        return f"{self.user}: {self.category}{where} {'on' if self.subscribed else 'off'} ({self.source})"
+
+
+class DojoMailMuteManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("user", "dojo")
+
+
+class DojoMailMute(models.Model):
+    """An account doesn't want `dojo_news` mail from this one dojo (its own
+    mailings and the automated "new sessions" mail), while still getting
+    other dojos' (DATA_MODEL.md §25). Changed only through
+    mailing.preferences.set_dojo_mute, which also logs a ConsentEvent."""
+
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="dojo_mail_mutes")
+    dojo = models.ForeignKey("dojos.Dojo", on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = DojoMailMuteManager()
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["user", "dojo"], name="unique_dojo_mail_mute")]
+
+    def __str__(self):
+        return f"{self.user}: muted {self.dojo}"
 
 
 class EmailSuppression(models.Model):

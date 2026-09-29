@@ -6,6 +6,7 @@ from .models import (
     BounceRecord,
     Campaign,
     ConsentEvent,
+    DojoMailMute,
     EmailMessage,
     EmailSuppression,
     EmailTemplate,
@@ -35,6 +36,7 @@ register(
             "template_key",
             "language",
             "campaign",
+            "dojo",
             "status",
             "status_reason",
             "created_at",
@@ -58,6 +60,17 @@ register(
 )
 
 register(
+    DojoMailMute,
+    subjects={Subject.ACCOUNT: "user", Subject.CHILD: "user__ninja"},
+    purpose="Which dojos' news the account doesn't want",
+    legal_basis=LegalBasis.CONSENT,
+    retention="account",
+    seen_by="The account holder; the organisation (Django admin)",
+    fields={("user", "dojo", "created_at"): personal(Category.IDENTITY)},
+    not_personal=["id"],
+)
+
+register(
     ConsentEvent,
     subjects={Subject.ACCOUNT: "user", Subject.CHILD: "user__ninja"},
     purpose="Proof of every consent given or withdrawn (art. 7.1)",
@@ -65,7 +78,7 @@ register(
     retention="consent_proof",
     seen_by="The organisation (Django admin)",
     fields={
-        ("user", "category", "subscribed", "source", "wording_version", "created_at"): keep(
+        ("user", "category", "dojo", "subscribed", "source", "wording_version", "created_at"): keep(
             Category.IDENTITY, "proof of consent; points at the anonymised account"
         ),
     },

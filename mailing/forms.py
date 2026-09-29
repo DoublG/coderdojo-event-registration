@@ -9,13 +9,17 @@ from django.utils.functional import lazy
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import gettext_lazy as _
 
+from dojos.models import Dojo
+
 from .categories import CAN_OPT_OUT, DESCRIPTIONS, MailCategory, categories_for
+from .dojo_families import active_since, dojos_of
 from .models import Campaign, EmailTemplate, Journey, Segment
-from .preferences import preferences_for
+from .preferences import muted_dojo_ids, preferences_for
 
 
 class MailPreferencesForm(forms.Form):
-    """One checkbox per category the account can switch off, plus the mail
+    """One checkbox per category the account can switch off, one per dojo
+    whose news reaches the family (on = not muted), plus the mail
     language. Categories that can't be switched off are listed by the
     template, not as fields. (The postcode is on the account page's
     details, accounts.forms.EditAccountForm.)"""
@@ -43,6 +47,18 @@ class MailPreferencesForm(forms.Form):
                     label=category.label,
                     help_text=DESCRIPTIONS[category],
                 )
+        # Per dojo: its news, unless muted (DATA_MODEL.md §25). The family's
+        # dojos, plus any it muted earlier, so it can always switch one back.
+        muted = muted_dojo_ids(user)
+        self.dojos = []
+        if MailCategory.DOJO_NEWS in self.categories:
+            self.dojos = list(
+                (dojos_of(user, active_since()) | Dojo.objects.filter(pk__in=muted)).distinct().order_by("name")
+            )
+        for dojo in self.dojos:
+            self.fields[f"dojo_{dojo.pk}"] = forms.BooleanField(
+                required=False, label=dojo.name, initial=dojo.pk not in muted
+            )
         # Per child: may their details choose which mails we send (accounts.consent)?
         self.guardianships = (
             []
@@ -58,6 +74,13 @@ class MailPreferencesForm(forms.Form):
 
     def category_fields(self):
         return [self[name] for name in self.fields if name.startswith("category_")]
+
+    def dojo_fields(self):
+        return [self[name] for name in self.fields if name.startswith("dojo_")]
+
+    def dojo_choices(self):
+        """(dojo, wants its news) for every dojo, from the cleaned data."""
+        return [(dojo, self.cleaned_data[f"dojo_{dojo.pk}"]) for dojo in self.dojos]
 
     def child_fields(self):
         return [self[name] for name in self.fields if name.startswith("child_")]

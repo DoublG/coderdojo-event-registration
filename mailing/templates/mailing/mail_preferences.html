@@ -43,6 +43,19 @@
           {% endfor %}
         </div>
 
+        {% if form.dojo_fields %}
+          <div class="cd-form__group">
+            <h2 class="cd-form__group-title heading-md">{% translate "Your dojos" %}</h2>
+            <p class="caption">{% translate "News from these dojos, as long as News from your dojo is on. Switch off a dojo to stop only its mails." %}</p>
+            {% for field in form.dojo_fields %}
+              <label class="mail-category" for="{{ field.id_for_label }}">
+                {{ field }}
+                <span><p class="body">{{ field.label }}</p></span>
+              </label>
+            {% endfor %}
+          </div>
+        {% endif %}
+
         {% if form.child_fields %}
           <div class="cd-form__group">
             <h2 class="cd-form__group-title heading-md">{% translate "Your children's details" %}</h2>

@@ -45,6 +45,16 @@ kind of mail:
 Mails about your account (such as a password reset) and about your bookings
 (confirmations, a place coming free on the waiting list) are always sent.
 
+Your dojos
+----------
+
+If your family goes to more than one dojo, you may want news from one and
+not from another. Under **Your dojos** there's a switch per dojo your
+family goes to: switch one off and you no longer get its news, while news
+from your other dojos still comes. A dojo you switched off stays in the
+list, so you can switch it back on later. These switches only matter while
+**News from your dojo** is on.
+
 On the same page you can pick the **language** your mails are in. Your
 **postcode**, which we use to tell you about dojos and sessions near you, is
 with your own details on your family page (see
@@ -58,6 +68,10 @@ works without signing in: open it and confirm, or tick **Unsubscribe from
 all optional mails** to switch everything optional off at once. Many mail
 apps also show their own **Unsubscribe** button for our mails, which does
 the same thing.
+
+In news from a dojo, the link asks which mails you want to stop: only the
+news from that dojo (what your mail app's **Unsubscribe** button does
+too), the news from every dojo, or all optional mails.
 
 Children with their own login
 -----------------------------

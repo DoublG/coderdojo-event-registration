@@ -120,6 +120,7 @@ class StrNeverQueriesTests(TestCase):
         )
         from mailing.models import (
             ConsentEvent,
+            DojoMailMute,
             EmailMessage,
             Journey,
             JourneyDelivery,
@@ -186,6 +187,13 @@ class StrNeverQueriesTests(TestCase):
                 ConsentEvent.objects.create(user=user, category="newsletter", subscribed=True, source="signup"),
                 "jan: newsletter on",
             ),
+            (
+                ConsentEvent.objects.create(
+                    user=user, category="dojo_news", dojo=dojo, subscribed=False, source="preferences"
+                ),
+                "jan: dojo_news from Ghent",
+            ),
+            (DojoMailMute.objects.create(user=user, dojo=dojo), "jan: muted Ghent"),
             (
                 Promotion.objects.create(
                     event=Event.objects.create(
@@ -562,6 +570,7 @@ class AuditLogCoverageTests(TestCase):
         "geo.Municipality": "reference data, from seed files",
         "mailing.BounceRecord": "written by the bounce processing; itself a log",
         "mailing.EmailMessage": "the mail queue, updated by the workers on every send",
+        "mailing.DojoMailMute": "every mute and unmute is a ConsentEvent, which is recorded",
         "mailing.JourneyDelivery": "written by the journeys job; itself a log",
         "mailing.ProcessedImapMessage": "bounce-mailbox bookkeeping",
         "notifications.Notification": "written by the site; marking read is no change worth recording",

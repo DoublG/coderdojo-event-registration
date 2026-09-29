@@ -2074,3 +2074,190 @@ class MailQueueDashboardTests(TestCase):
         self.assertNotContains(response, "For Bob")
         self.assertNotContains(response, "bob@example.com")
         self.assertNotContains(response, "bob-old@example.com")
+
+
+# --- §25 phase 1: muting one dojo's news ----------------------------------------
+
+
+class DojoMailMuteTests(TestCase):
+    """A family can stop one dojo's `dojo_news` mail and keep the others'
+    (DATA_MODEL.md §25)."""
+
+    def setUp(self):
+        from .preferences import set_dojo_mute
+
+        self.set_dojo_mute = set_dojo_mute
+        EmailTemplate.objects.create(
+            key="dojo_note",
+            language="en-us",
+            category=MailCategory.DOJO_NEWS,
+            subject="News",
+            body="News. {{ unsubscribe_url }}",
+        )
+        self.ghent, self.antwerp = make_dojo("Ghent"), make_dojo("Antwerp")
+        self.parent = User.objects.create(username="parent", email="p@example.com")
+        self.kid = Ninja.objects.create(name="Emma", home_dojo=self.ghent)
+        Guardianship.objects.create(guardian=self.parent, ninja=self.kid)
+
+    def _news(self, dojo, **kwargs):
+        return send(self.parent, MailCategory.DOJO_NEWS, "dojo_note", dojo=dojo, **kwargs)
+
+    def test_muting_logs_consent_once_and_unmuting_logs_again(self):
+        self.assertTrue(self.set_dojo_mute(self.parent, self.ghent, True, ConsentEvent.PREFERENCES))
+        self.assertFalse(self.set_dojo_mute(self.parent, self.ghent, True, ConsentEvent.PREFERENCES))
+        self.assertTrue(self.set_dojo_mute(self.parent, self.ghent, False, ConsentEvent.PREFERENCES))
+        events = list(ConsentEvent.objects.order_by("id").values_list("category", "dojo", "subscribed"))
+        self.assertEqual(
+            events,
+            [(MailCategory.DOJO_NEWS, self.ghent.pk, False), (MailCategory.DOJO_NEWS, self.ghent.pk, True)],
+        )
+
+    def test_a_muted_dojos_news_is_suppressed_and_other_dojos_still_come(self):
+        self.set_dojo_mute(self.parent, self.ghent, True, ConsentEvent.PREFERENCES)
+        muted, other = self._news(self.ghent), self._news(self.antwerp)
+        self.assertEqual(
+            (muted.status, muted.status_reason), (Status.SUPPRESSED, "The recipient muted this dojo's news.")
+        )
+        self.assertEqual(muted.dojo, self.ghent)
+        self.assertEqual(other.status, Status.PENDING)
+        # A test mail skips preferences, the mute included.
+        self.assertEqual(self._news(self.ghent, test=True).status, Status.PENDING)
+
+    def test_the_mute_only_applies_to_dojo_news(self):
+        EmailTemplate.objects.create(
+            key="reminder_note", language="en-us", category=MailCategory.REMINDER, subject="R", body="R"
+        )
+        self.set_dojo_mute(self.parent, self.ghent, True, ConsentEvent.PREFERENCES)
+        row = send(self.parent, MailCategory.REMINDER, "reminder_note", dojo=self.ghent)
+        self.assertEqual(row.status, Status.PENDING)
+
+    def test_muting_after_queuing_stops_it_before_sending(self):
+        row = self._news(self.ghent)
+        EmailMessage.objects.filter(pk=row.pk).update(status=Status.SENDING, claimed_at=timezone.now())
+        self.set_dojo_mute(self.parent, self.ghent, True, ConsentEvent.PREFERENCES)
+        connection = _FakeConnection()
+        with patch("mailing.tasks.mail.get_connection", return_value=connection):
+            send_email_batch([row.pk])
+        self.assertEqual(connection.sent, [])
+        self.assertEqual(EmailMessage.objects.get(pk=row.pk).status, Status.SUPPRESSED)
+
+    def test_the_unsubscribe_link_and_header_carry_the_dojo(self):
+        from .services import read_unsubscribe_token
+
+        row = self._news(self.ghent)
+        token = re.search(r"/mail/unsubscribe/([^/]+)/", row.body).group(1)
+        self.assertEqual(read_unsubscribe_token(token), (self.parent.pk, MailCategory.DOJO_NEWS, self.ghent.pk))
+        EmailMessage.objects.filter(pk=row.pk).update(status=Status.SENDING, claimed_at=timezone.now())
+        connection = _FakeConnection()
+        with patch("mailing.tasks.mail.get_connection", return_value=connection):
+            send_email_batch([row.pk])
+        header = connection.sent[0].extra_headers["List-Unsubscribe"]
+        self.assertIn(token, header)
+
+    def test_the_new_sessions_mail_skips_a_family_that_muted_the_dojo(self):
+        from .automated import announce_new_sessions
+
+        call_command("load_mail_templates", stdout=StringIO())
+        start = timezone.now() + timedelta(days=10)
+        Event.objects.create(
+            name="Scratch", dojo=self.ghent, status=Event.OPEN, places=5, start_time=start, end_time=start
+        )
+        self.set_dojo_mute(self.parent, self.ghent, True, ConsentEvent.PREFERENCES)
+        self.assertEqual(announce_new_sessions(), 0)
+        row = EmailMessage.objects.get(template_key="new_sessions_at_dojo")
+        self.assertEqual((row.status, row.dojo), (Status.SUPPRESSED, self.ghent))
+
+
+class DojoUnsubscribeViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username="parent", email="p@example.com")
+        self.dojo = make_dojo("Ghent")
+        token = unsubscribe_token(self.user, MailCategory.DOJO_NEWS, self.dojo)
+        self.url = reverse("mail_unsubscribe", kwargs={"token": token})
+
+    def _muted(self):
+        from .preferences import is_dojo_muted
+
+        return is_dojo_muted(self.user, self.dojo)
+
+    def test_get_offers_the_three_choices_and_changes_nothing(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, 'value="dojo" checked')
+        self.assertContains(response, 'value="category"')
+        self.assertContains(response, 'value="all"')
+        self.assertContains(response, "Ghent")
+        self.assertFalse(self._muted())
+
+    def test_one_click_post_mutes_only_that_dojo(self):
+        response = Client(enforce_csrf_checks=True).post(self.url, {"List-Unsubscribe": "One-Click"})
+        self.assertContains(response, "News from your other dojos still comes")
+        self.assertTrue(self._muted())
+        self.assertTrue(is_subscribed(self.user, MailCategory.DOJO_NEWS))
+        self.assertEqual(ConsentEvent.objects.get().source, ConsentEvent.UNSUBSCRIBE_LINK)
+
+    def test_every_dojos_news(self):
+        self.client.post(self.url, {"scope": "category"})
+        self.assertFalse(is_subscribed(self.user, MailCategory.DOJO_NEWS))
+        self.assertFalse(self._muted())
+        self.assertTrue(is_subscribed(self.user, MailCategory.REMINDER))
+
+    def test_everything_optional(self):
+        self.client.post(self.url, {"scope": "all"})
+        self.assertFalse(is_subscribed(self.user, MailCategory.REMINDER))
+
+    def test_a_deleted_dojo_falls_back_to_the_category(self):
+        self.dojo.delete()
+        response = self.client.get(self.url)
+        self.assertNotContains(response, 'value="dojo"')
+        self.client.post(self.url)
+        self.assertFalse(is_subscribed(self.user, MailCategory.DOJO_NEWS))
+
+
+class MailPreferencesDojoTests(TestCase):
+    def setUp(self):
+        self.parent = User.objects.create(username="parent", email="p@example.com")
+        self.ghent, self.antwerp, self.bruges = make_dojo("Ghent"), make_dojo("Antwerp"), make_dojo("Bruges")
+        kid = Ninja.objects.create(name="Emma", home_dojo=self.ghent)
+        Guardianship.objects.create(guardian=self.parent, ninja=kid)
+        # A visit to Antwerp last month makes it one of the family's dojos too.
+        start = timezone.now() - timedelta(days=30)
+        visit = Event.objects.create(
+            name="Visit", dojo=self.antwerp, status=Event.CLOSED, places=5, start_time=start, end_time=start
+        )
+        Registration.objects.create(event=visit, ninja=kid, waiting_list=False, position=1, attended=True)
+        self.client.force_login(self.parent)
+
+    def _post(self, **dojos):
+        data = {"category_dojo_news": "on", "category_reminder": "on", "preferred_language": "en-us"}
+        data.update({f"dojo_{pk}": "on" for pk in dojos.values()})
+        return self.client.post(reverse("mail_preferences"), data)
+
+    def test_lists_the_familys_dojos_switched_on(self):
+        form = self.client.get(reverse("mail_preferences")).context["form"]
+        self.assertEqual([d.name for d in form.dojos], ["Antwerp", "Ghent"])
+        self.assertTrue(all(field.value() for field in form.dojo_fields()))
+
+    def test_switching_one_off_mutes_it_and_it_stays_listed(self):
+        from .preferences import muted_dojo_ids
+
+        self.assertRedirects(self._post(ghent=self.ghent.pk), reverse("mail_preferences"))
+        self.assertEqual(muted_dojo_ids(self.parent), {self.antwerp.pk})
+        self.assertTrue(is_subscribed(self.parent, MailCategory.DOJO_NEWS))
+        # Even once the visit is too long ago, a muted dojo stays listed to switch back on.
+        Registration.objects.all().delete()
+        form = self.client.get(reverse("mail_preferences")).context["form"]
+        self.assertEqual([d.name for d in form.dojos], ["Antwerp", "Ghent"])
+        self.assertFalse(form[f"dojo_{self.antwerp.pk}"].value())
+        self._post(ghent=self.ghent.pk, antwerp=self.antwerp.pk)
+        self.assertEqual(muted_dojo_ids(self.parent), set())
+
+    def test_an_account_without_children_has_no_dojo_switches(self):
+        self.client.force_login(User.objects.create(username="solo", email="s@example.com"))
+        self.assertNotContains(self.client.get(reverse("mail_preferences")), "Your dojos")
+
+    def test_a_ninja_login_sees_its_own_dojo(self):
+        teen = User.objects.create(username="teen", email="t@example.com", account_type=User.NINJA)
+        Ninja.objects.create(name="Teen", home_dojo=self.bruges, account=teen)
+        self.client.force_login(teen)
+        form = self.client.get(reverse("mail_preferences")).context["form"]
+        self.assertEqual([d.name for d in form.dojos], ["Bruges"])

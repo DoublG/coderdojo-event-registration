@@ -33,7 +33,7 @@ update its diagram in the same change.
 11. [Mailing, segmentation and campaigns](#11-mailing-segmentation-and-campaigns)
 12. [Organisation events and promotion (later)](#12-organisation-events-and-promotion-later)
 
-Sections 13–25 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address, organisation people and roles, [logging in with an emailed link](#24-logging-in-with-an-emailed-link-built), and [mail from a dojo to its families](#25-mail-from-a-dojo-to-its-families-planned) (planned).
+Sections 13–25 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address, organisation people and roles, [logging in with an emailed link](#24-logging-in-with-an-emailed-link-built), and [mail from a dojo to its families](#25-mail-from-a-dojo-to-its-families-in-progress) (in progress).
 
 ---
 
@@ -1620,6 +1620,7 @@ plan they were built from, with its decisions.
 erDiagram
     USER ||--o{ MAIL_PREFERENCE : "choice per category"
     USER ||--o{ CONSENT_EVENT : "append-only log"
+    USER ||--o{ DOJO_MAIL_MUTE : "muted dojos"
     USER |o--o{ EMAIL_MESSAGE : "recipient account"
     EMAIL_MESSAGE |o--o{ BOUNCE_RECORD : "matched bounce"
 
@@ -1631,6 +1632,7 @@ erDiagram
     CONSENT_EVENT {
         bigint user_id FK
         string category
+        bigint dojo_id FK "nullable: muting one dojo's news (§25)"
         bool subscribed
         string source "signup | preferences | unsubscribe_link | admin | bounce"
         string wording_version "PRIVACY_WORDING_VERSION"
@@ -1656,6 +1658,11 @@ erDiagram
         string message_id "our Message-ID"
         bool is_test "a campaign test to its author"
         bigint campaign_id FK "nullable"
+        bigint dojo_id FK "nullable: the dojo a dojo_news mail is from (§25)"
+    }
+    DOJO_MAIL_MUTE {
+        bigint user_id FK "unique with dojo"
+        bigint dojo_id FK "no dojo_news from this dojo (§25)"
     }
     BOUNCE_RECORD {
         string email
@@ -4649,10 +4656,15 @@ flowchart TD
 
 ---
 
-## 25. Mail from a dojo to its families (planned)
+## 25. Mail from a dojo to its families (in progress)
 
-**Planned, not built.** The decisions below were confirmed on
-2026-09-29. This reverses §11's
+**Phase 1 built** (muting one dojo): `mailing.DojoMailMute`,
+`ConsentEvent.dojo` and `EmailMessage.dojo`, `mailing.preferences.set_dojo_mute`,
+`send(dojo=...)` (checked again by the workers before sending), the
+dojo in the unsubscribe token, *Your dojos* on Mail preferences and
+`mailing/dojo_families.py` (the one definition of a dojo's families,
+used by `announce_new_sessions` too). Phases 2–6 are still to do. The
+decisions below were confirmed on 2026-09-29. This reverses §11's
 decision 3 ("Champions don't send campaigns; dojo-level mail stays
 automatic") in part: a dojo's team gets **a narrow slice** of the mail
 engine, enough to write to the families of *its own* dojo, with audiences
@@ -4829,6 +4841,7 @@ erDiagram
         bigint dojo_id FK "new, nullable: set for a dojo mute"
     }
     EMAIL_MESSAGE {
+        bigint dojo_id FK "new (phase 1), nullable: the dojo a dojo_news mail is from"
         string reply_to "new, blank for all other mail"
     }
 ```
@@ -4856,7 +4869,7 @@ the dojo's content, not personal) and its place in `core.audit.RECORDED`.
 
 ### Phases
 
-1. **Muting a dojo:** `DojoMailMute`, `ConsentEvent.dojo`,
+1. **Muting a dojo** (built): `DojoMailMute`, `ConsentEvent.dojo`, `EmailMessage.dojo`,
    `set_dojo_mute`, `send(dojo=...)` and the new suppression reason,
    `announce_new_sessions` passing its dojo, the *Mail preferences*
    switches and the unsubscribe page's choices. Useful on its own for the

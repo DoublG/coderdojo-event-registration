@@ -97,7 +97,7 @@ def _build(row):
     headers = {"Message-ID": message_id, "From": settings.DEFAULT_FROM_EMAIL}
     envelope_from = settings.MAILING_BOUNCE_ADDRESS.replace("{id}", str(row.pk)) or settings.DEFAULT_FROM_EMAIL
     if CAN_OPT_OUT[row.category] and row.user_id:
-        headers["List-Unsubscribe"] = f"<{unsubscribe_url(row.user, row.category)}>"
+        headers["List-Unsubscribe"] = f"<{unsubscribe_url(row.user, row.category, row.dojo_id)}>"
         headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
     message = QueuedEmail(
         subject=row.subject,
@@ -156,7 +156,9 @@ def send_email_batch(self, ids):
                 # Again right before it goes out: a campaign drips out under
                 # the rate limit, and people unsubscribe (or bounce) meanwhile.
                 if row.user_id and (
-                    reason := suppressed_reason(row.user, row.category, row.recipient, test=row.is_test)
+                    reason := suppressed_reason(
+                        row.user, row.category, row.recipient, test=row.is_test, dojo=row.dojo_id
+                    )
                 ):
                     EmailMessage.objects.filter(pk=row.pk).update(status=Status.SUPPRESSED, status_reason=reason)
                     continue
