@@ -190,6 +190,21 @@ celery -A website worker -n periodic@%h -Q periodic -c 1 -B \
     --scheduler django_celery_beat.schedulers:DatabaseScheduler -l INFO > celery-periodic.log 2>&1 &
 celery -A website worker -n mailing@%h -Q celery -c 1 -l INFO > celery-mailing.log 2>&1 &
 
+# Where to go: everything is behind nginx on 443 (docker-compose.yml publishes
+# no other port), so these, not VS Code's localhost:<port>, are the addresses.
+# *.localhost resolves to this machine by itself; no hosts-file entry needed.
+cat <<'EOF'
+
+  CoderDojo dev environment (the site answers once the server below has started):
+    Site               https://coolregistration.localhost/
+    Mail (Mailpit)     https://coolregistration.localhost/mails/
+    phpMyAdmin         https://coolregistration.localhost/phpmyadmin/
+    Login codes (2FA)  https://coolregistration.localhost/otp/
+    Help docs          https://coolregistration.localhost/docs/
+    Seeded logins      seed_credentials.csv
+
+EOF
+
 # start server: runserver while developing (reloads on every change, serves the
 # static files); with DEBUG off the command production runs (gunicorn with
 # uvicorn workers, main.py), so what you measure is how the site behaves there.

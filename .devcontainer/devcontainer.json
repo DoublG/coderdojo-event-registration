@@ -7,6 +7,12 @@
 
   "postCreateCommand": "bash .devcontainer/start.sh",
 
+  // No port forwarding: the only way in is nginx on 443, at
+  // https://coolregistration.localhost (start.sh prints every address). VS Code
+  // would otherwise auto-forward runserver's 8000 to localhost:8000, which skips
+  // nginx (no TLS, /mails/, /otp/, WebSockets) and fails ALLOWED_HOSTS checks.
+  "otherPortsAttributes": { "onAutoForward": "ignore" },
+
   "customizations": {
     "vscode": {
       "extensions": [
