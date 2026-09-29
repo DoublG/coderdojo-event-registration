@@ -37,6 +37,7 @@ register(
             "language",
             "campaign",
             "dojo",
+            "reply_to",
             "status",
             "status_reason",
             "created_at",
@@ -127,11 +128,13 @@ register(
 
 register(
     Campaign,
-    purpose="Who launched a campaign",
+    purpose="Who wrote and launched a campaign",
     legal_basis=LegalBasis.LEGITIMATE_INTEREST,
     retention="account",
     seen_by="The organisation",
-    fields={"launched_by": keep(Category.IDENTITY, "points at the anonymised account", export=False)},
+    fields={
+        ("launched_by", "created_by"): keep(Category.IDENTITY, "points at the anonymised account", export=False)
+    },
     not_personal=[
         "id",
         "segment",
@@ -145,6 +148,14 @@ register(
         "scheduled_at",
         "launched_at",
         "queued_at",
+        # A dojo mailing (DATA_MODEL.md §25): the dojo's own text and which
+        # prepared audience it went to, never a list of people.
+        "dojo",
+        "audience",
+        "audience_params",
+        "subject",
+        "message",
+        "translations",
     ],
 )
 

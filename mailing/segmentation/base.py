@@ -50,6 +50,9 @@ class SegmentAttribute(ABC):
     label: str
     value_type: str
     scope: str
+    # False keeps it out of the organisation's segment builder (its kind of
+    # value has no fields there); dojo audiences still use it.
+    in_builder = True
 
     @abstractmethod
     def choices(self) -> list[SegmentChoice]:

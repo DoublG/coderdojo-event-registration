@@ -4663,8 +4663,21 @@ flowchart TD
 `send(dojo=...)` (checked again by the workers before sending), the
 dojo in the unsubscribe token, *Your dojos* on Mail preferences and
 `mailing/dojo_families.py` (the one definition of a dojo's families,
-used by `announce_new_sessions` too). Phases 2–6 are still to do. The
-decisions below were confirmed on 2026-09-29. This reverses §11's
+used by `announce_new_sessions` too). **Phases 2 and 3 built** (the
+audiences and dojo mailings on `Campaign`): `mailing/dojo_audiences.py`
+(`AUDIENCES`, `clean_params`, `definition`, `describe`, `reach`), the
+attributes in `mailing/segmentation/attributes/dojo.py` (`dojo_family`,
+`ninja_of_dojo`, `family_booked_for_event`, `family_waitlisted_for_event`,
+and `family_visited_dojo`, which `in_builder = False` keeps out of the
+organisation's builder), `SegmentResolver(require_consent=False)` for the
+"left out" count, the `Campaign` fields, the `dojo_message` template, the
+dojo branch in `mailing/campaigns.py` and `EmailMessage.reply_to`. Where
+the build differs from the text below: like every campaign, a dojo
+mailing reaches **adults only** (the resolver's rule), so a child's own
+login doesn't get it; and an audience about a session reaches the
+families with a place there even when the child isn't otherwise one of
+the dojo's (a visitor), instead of being ANDed with "family of this
+dojo". The decisions below were confirmed on 2026-09-29. This reverses §11's
 decision 3 ("Champions don't send campaigns; dojo-level mail stays
 automatic") in part: a dojo's team gets **a narrow slice** of the mail
 engine, enough to write to the families of *its own* dojo, with audiences
@@ -4875,12 +4888,12 @@ the dojo's content, not personal) and its place in `core.audit.RECORDED`.
    switches and the unsubscribe page's choices. Useful on its own for the
    automated mail. Tests: muted dojo suppressed, other dojo still sent,
    consent log, token for a dojo mail.
-2. **The audiences:** the `dojo_family` helper and attribute (shared with
+2. **The audiences** (built): the `dojo_family` helper and attribute (shared with
    `announce_new_sessions`), `mailing/dojo_audiences.py` with the list
    above, each audience limited to its dojo. Tests per audience: the right
    families, never another dojo's, consent-needing ones only with the
    child-data consent, ninja logins only where `dojo_news` allows them.
-3. **Dojo mailings on `Campaign`:** the new fields, the `dojo_message`
+3. **Dojo mailings on `Campaign`** (built): the new fields, the `dojo_message`
    template (en/nl/fr in `mailing/seed_templates.py`, via
    `load_mail_templates`), `EmailMessage.reply_to` and the From display
    name, `launch_problems` for a dojo mailing (audience, dojo email, the

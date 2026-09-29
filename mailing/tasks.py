@@ -14,7 +14,7 @@ import email.policy
 import logging
 import smtplib
 from datetime import timedelta
-from email.utils import make_msgid
+from email.utils import formataddr, make_msgid, parseaddr
 from urllib.parse import urlparse
 
 from celery import Task, group, shared_task
@@ -95,6 +95,13 @@ def _build(row):
     # takes plus-addressing), so bounces come back to process_bounces; the
     # From header people see stays DEFAULT_FROM_EMAIL.
     headers = {"Message-ID": message_id, "From": settings.DEFAULT_FROM_EMAIL}
+    if row.reply_to:
+        # A dojo's own mailing (DATA_MODEL.md §25): replies reach the dojo,
+        # and the name people see says who wrote it; the address stays ours.
+        headers["Reply-To"] = row.reply_to
+        if row.dojo_id:
+            name, address = parseaddr(settings.DEFAULT_FROM_EMAIL)
+            headers["From"] = formataddr((f"{row.dojo.name} via {name or 'CoderDojo Belgium'}", address))
     envelope_from = settings.MAILING_BOUNCE_ADDRESS.replace("{id}", str(row.pk)) or settings.DEFAULT_FROM_EMAIL
     if CAN_OPT_OUT[row.category] and row.user_id:
         headers["List-Unsubscribe"] = f"<{unsubscribe_url(row.user, row.category, row.dojo_id)}>"

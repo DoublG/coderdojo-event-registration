@@ -1,6 +1,13 @@
 from .attributes.account import AccountTypeAttribute, HasChildrenAttribute
 from .attributes.activity import ActiveTeamMemberAttribute, AttendedWithinDaysAttribute
 from .attributes.changes import NoNewBeltAttribute, NotOnATeamAttribute, StageChangedAttribute
+from .attributes.dojo import (
+    ChildOfDojoAttribute,
+    DojoFamilyAttribute,
+    FamilyBookedAttribute,
+    FamilyVisitedDojoAttribute,
+    FamilyWaitlistedAttribute,
+)
 from .attributes.engagement import (
     AttendanceRateAttribute,
     DaysSinceLastVisitAttribute,
@@ -62,6 +69,11 @@ SEGMENT_ATTRIBUTES = {
         MainDojoStatusAttribute,
         EventAttribute,
         AttendedEventAttribute,
+        DojoFamilyAttribute,
+        FamilyBookedAttribute,
+        FamilyWaitlistedAttribute,
+        FamilyVisitedDojoAttribute,
+        ChildOfDojoAttribute,
     ]
 }
 

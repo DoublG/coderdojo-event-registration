@@ -79,6 +79,7 @@ def send(
     test=False,
     address=None,
     dojo=None,
+    reply_to="",
 ):
     """Queue one mail to `user`. Renders `template_key` in the account's
     language now (so the row records exactly what was sent) and returns
@@ -91,7 +92,8 @@ def send(
     `user.email`: the confirmation of a new address before it's the
     account's (accounts.email_change). Blocks apply to it as to any other.
     `dojo` is the dojo a `dojo_news` mail is from: not sent to an account
-    that muted it, and its unsubscribe link can mute just that dojo."""
+    that muted it, and its unsubscribe link can mute just that dojo.
+    `reply_to` is where replies go (a dojo mailing's dojo address)."""
     if idempotency_key and (existing := EmailMessage.objects.filter(idempotency_key=idempotency_key).first()):
         return existing
 
@@ -122,6 +124,7 @@ def send(
                 body=body,
                 campaign=campaign,
                 dojo=dojo,
+                reply_to=reply_to,
                 status=EmailMessage.Status.SUPPRESSED if reason else EmailMessage.Status.PENDING,
                 status_reason=reason,
                 priority=PRIORITY[category],

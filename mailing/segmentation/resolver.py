@@ -52,7 +52,14 @@ class SegmentResolver:
 
     The result is always active adult accounts with an email address:
     campaigns never go to ninja accounts. A segment without any rule
-    resolves to nobody, never to everyone."""
+    resolves to nobody, never to everyone.
+
+    `require_consent=False` also counts guardians who didn't give the
+    child-data consent: only to tell a dojo's team how many families an
+    audience leaves out (mailing.dojo_audiences), never to send."""
+
+    def __init__(self, require_consent=True):
+        self.require_consent = require_consent
 
     def resolve(self, segment):
         return self.resolve_definition(serialize_segment(segment))
@@ -72,8 +79,10 @@ class SegmentResolver:
             # Only the guardians who agreed to this child's details choosing
             # their mail (accounts.consent).
             ninjas = Ninja.objects.filter(self._ninja_q(group))
-            consented = Guardianship.objects.filter(ninja__in=ninjas, consent_given_at__isnull=False)
-            return Q(pk__in=consented.values("guardian_id"))
+            guardianships = Guardianship.objects.filter(ninja__in=ninjas)
+            if self.require_consent:
+                guardianships = guardianships.filter(consent_given_at__isnull=False)
+            return Q(pk__in=guardianships.values("guardian_id"))
 
         parts = [self._rule_q(rule, User) for rule in group["rules"]]
         parts += [self._user_q(child) for child in group["children"]]

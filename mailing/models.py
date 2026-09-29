@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from core.content_languages import TranslatableModel
+
 from .categories import MailCategory
 
 
@@ -115,9 +117,15 @@ class SegmentRule(models.Model):
             raise ValidationError(str(error)) from error
 
 
-class Campaign(models.Model):
-    """One mailing to a segment's audience. Only the organisation's admin
-    role creates campaigns (DATA_MODEL.md §11, decisions)."""
+class Campaign(TranslatableModel):
+    """One mailing to a segment's audience. The organisation's admin role
+    creates campaigns (DATA_MODEL.md §11, decisions); a dojo's champion
+    writes a dojo mailing (`dojo` set, DATA_MODEL.md §25): always
+    `dojo_news`, to one of the prepared audiences (mailing.dojo_audiences),
+    with the dojo's own text in its languages, sent with the `dojo_message`
+    template."""
+
+    TRANSLATABLE_FIELDS = ("subject", "message")
 
     class Status(models.TextChoices):
         DRAFT = "draft"
@@ -136,6 +144,16 @@ class Campaign(models.Model):
 
     # Immutable copy of the segment definition at launch; empty while a draft.
     segment_snapshot = models.JSONField(null=True, blank=True)
+
+    # A dojo mailing (DATA_MODEL.md §25); empty for the organisation's campaigns.
+    dojo = models.ForeignKey("dojos.Dojo", null=True, blank=True, on_delete=models.CASCADE, related_name="mailings")
+    audience = models.CharField(
+        max_length=30, blank=True, help_text="A dojo mailing's audience (mailing.dojo_audiences)."
+    )
+    audience_params = models.JSONField(default=dict, blank=True)
+    subject = models.CharField(max_length=150, blank=True, help_text="A dojo mailing's subject, main language.")
+    message = models.TextField(blank=True, help_text="A dojo mailing's text (plain text), main language.")
+    created_by = models.ForeignKey("accounts.User", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
 
     name = models.CharField(max_length=200)
 
@@ -184,6 +202,13 @@ class Campaign(models.Model):
     @property
     def is_editable(self):
         return self.status == self.Status.DRAFT
+
+    @property
+    def is_dojo_mailing(self):
+        return self.dojo_id is not None
+
+    def content_languages(self):
+        return self.dojo.content_languages() if self.dojo_id else [settings.LANGUAGE_CODE]
 
 
 class Journey(models.Model):
@@ -291,6 +316,8 @@ class EmailMessage(models.Model):
     # it (checked again right before sending), and its unsubscribe link
     # offers "not from this dojo" (DATA_MODEL.md §25).
     dojo = models.ForeignKey("dojos.Dojo", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    # Replies go here instead of the organisation: a dojo mailing's dojo address.
+    reply_to = models.EmailField(blank=True)
 
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     status_reason = models.CharField(max_length=255, blank=True, help_text="Why it was suppressed or failed.")

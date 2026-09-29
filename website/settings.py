@@ -137,6 +137,10 @@ MAILING_CLAIM_TIMEOUT_MINUTES = env.int("MAILING_CLAIM_TIMEOUT_MINUTES", default
 # Automated mail (mailing.automated).
 MAILING_REMINDER_DAYS_BEFORE = 2  # the session reminder goes out this many days before
 MAILING_DOJO_NEWS_ACTIVE_DAYS = 365  # a family belongs to a dojo that long after a visit
+# A dojo's own mailings to its families (DATA_MODEL.md §25): at most this many
+# launched per dojo in any 30 days, and a message at most this long.
+MAILING_DOJO_MAILINGS_PER_30_DAYS = 4
+MAILING_DOJO_MESSAGE_MAX_LENGTH = 5000
 
 # Bounces (mailing.bounce): the envelope sender of every mail, so bounces land
 # in that mailbox. "{id}" is replaced by the EmailMessage id when the mail

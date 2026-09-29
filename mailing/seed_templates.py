@@ -28,8 +28,10 @@ _UNSUBSCRIBE = {
 }
 
 
-def _body(language, text, unsubscribe=False):
-    body = text.strip() + "\n\n" + _SIGNATURE[language]
+def _body(language, text, unsubscribe=False, signature=True):
+    body = text.strip()
+    if signature:
+        body += "\n\n" + _SIGNATURE[language]
     if unsubscribe:
         body += "\n\n--\n" + _UNSUBSCRIBE[language]
     return body
@@ -276,6 +278,56 @@ Les places sont attribuées par ordre d'inscription. Toutes les sessions de ce d
 """,
         },
         "unsubscribe": True,
+    },
+    {
+        "key": "dojo_message",
+        "category": MailCategory.DOJO_NEWS,
+        "description": "A dojo's own mailing to its families (DATA_MODEL.md §25): the dojo team's text, "
+        "never template code, inside this frame. Variables: dojo_name, dojo_url, subject, message.",
+        "subject": {
+            "en-us": "{{ dojo_name }}: {{ subject }}",
+            "nl-be": "{{ dojo_name }}: {{ subject }}",
+            "fr-be": "{{ dojo_name }} : {{ subject }}",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{{ message }}
+
+{{ dojo_name }}
+{{ dojo_url }}
+
+--
+The team of {{ dojo_name }} sent you this mail through CoderDojo Belgium, because your child goes to this dojo. Reply to reach the dojo.
+Stop the mails from this dojo, or from every dojo: {{ unsubscribe_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{{ message }}
+
+{{ dojo_name }}
+{{ dojo_url }}
+
+--
+Het team van {{ dojo_name }} stuurde je deze mail via CoderDojo Belgium, omdat je kind naar deze dojo gaat. Antwoord op deze mail om de dojo te bereiken.
+Geen mails meer van deze dojo, of van alle dojo's: {{ unsubscribe_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{{ message }}
+
+{{ dojo_name }}
+{{ dojo_url }}
+
+--
+L'équipe du {{ dojo_name }} vous envoie ce mail via CoderDojo Belgium, parce que votre enfant fréquente ce dojo. Répondez à ce mail pour joindre le dojo.
+Ne plus recevoir les mails de ce dojo, ou de tous les dojos : {{ unsubscribe_url }}
+""",
+        },
+        "signature": False,
     },
     {
         "key": "background_check_requested",
@@ -1657,7 +1709,12 @@ def template_rows():
                 "category": entry["category"],
                 "description": entry["description"],
                 "subject": subject,
-                "body": _body(language, entry["body"][language], entry.get("unsubscribe", False)),
+                "body": _body(
+                    language,
+                    entry["body"][language],
+                    entry.get("unsubscribe", False),
+                    entry.get("signature", True),
+                ),
             }
 
 
@@ -1707,6 +1764,13 @@ SAMPLE_CONTEXT = {
                 "url": "https://coolregistration.localhost/events/2/",
             },
         ],
+    },
+    "dojo_message": {
+        **_common,
+        "dojo_name": "CoderDojo Ghent",
+        "dojo_url": "https://coolregistration.localhost/dojos/1/",
+        "subject": "No session next Saturday",
+        "message": "Hi all,\n\nOur venue is closed next Saturday, so there's no session. See you the week after!",
     },
     "background_check_requested": {
         **_common,

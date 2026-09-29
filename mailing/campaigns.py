@@ -17,17 +17,29 @@ person using the dashboard).
   only the accounts who want this kind of mail, and queues one mail each
   through mailing.services.send(). Idempotency keys make it safe to run
   again after a crash.
+
+A dojo mailing (DATA_MODEL.md §25, `campaign.dojo` set) takes the same
+path, with its own checks: always `dojo_news`, one of the prepared
+audiences (mailing.dojo_audiences) instead of a segment, the dojo's text in
+the `dojo_message` template (in each recipient's language when the dojo
+wrote it), replies to the dojo, never to a family that muted the dojo, and
+at most MAILING_DOJO_MAILINGS_PER_30_DAYS launched per dojo.
 """
+
+from datetime import timedelta
 
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from .categories import CAN_OPT_OUT
-from .models import Campaign, ConsentEvent, EmailMessage, EmailTemplate
+from core.content_languages import language_name
+
+from . import dojo_audiences
+from .categories import CAN_OPT_OUT, MailCategory
+from .models import Campaign, ConsentEvent, DojoMailMute, EmailMessage, EmailTemplate
 from .preferences import subscribed_q
 from .rendering import FALLBACK_LANGUAGE
 from .segmentation.resolver import SegmentResolver, serialize_segment
@@ -41,8 +53,88 @@ class CampaignError(Exception):
     pass
 
 
+DOJO_TEMPLATE = "dojo_message"
+
+
+def wanting_dojo_news(accounts, dojo):
+    """The accounts among `accounts` who want `dojo`'s news: `dojo_news` on
+    and the dojo not muted."""
+    muted = DojoMailMute.objects.filter(dojo=dojo).values("user_id")
+    return accounts.filter(subscribed_q(MailCategory.DOJO_NEWS)).exclude(pk__in=muted)
+
+
+def dojo_launches(dojo, now=None):
+    """How many mailings `dojo` launched in the last 30 days (a cancelled
+    one only counts when some of its mail went out)."""
+    since = (now or timezone.now()) - timedelta(days=30)
+    launched = Campaign.objects.filter(dojo=dojo, launched_at__gte=since)
+    cancelled_unsent = launched.filter(status=Status.CANCELLED).exclude(
+        emailmessage__status=EmailMessage.Status.SENT, emailmessage__is_test=False
+    )
+    return launched.exclude(pk__in=cancelled_unsent.values("pk")).count()
+
+
+def _dojo_launch_problems(campaign):
+    problems = []
+    if campaign.status != Status.DRAFT:
+        problems.append(_("Only a draft can be sent."))
+    if campaign.category != MailCategory.DOJO_NEWS:
+        problems.append(_("A dojo's mail is always news from the dojo."))
+    try:
+        definition = dojo_audiences.definition(campaign.audience, campaign.dojo, campaign.audience_params)
+    except dojo_audiences.DojoAudienceError as error:
+        problems.append(str(error))
+    else:
+        if not wanting_dojo_news(SegmentResolver().resolve_definition(definition), campaign.dojo).exists():
+            problems.append(_("Nobody would get it: the audience has no families who want your dojo's news."))
+    if not campaign.subject.strip() or not campaign.message.strip():
+        problems.append(
+            _("Write a subject and a message in %(language)s, your dojo's main language.")
+            % {"language": language_name(campaign.main_language())}
+        )
+    if not campaign.dojo.email:
+        problems.append(_("Add your dojo's email address in its settings first: families' replies go there."))
+    limit = settings.MAILING_DOJO_MAILINGS_PER_30_DAYS
+    if campaign.status == Status.DRAFT and dojo_launches(campaign.dojo) >= limit:
+        problems.append(
+            _("Your dojo already sent %(limit)s mails in the last 30 days, the most it can send.") % {"limit": limit}
+        )
+    if not EmailTemplate.objects.filter(key=DOJO_TEMPLATE, language=FALLBACK_LANGUAGE).exists():
+        problems.append(_("The mail layout for dojos is missing. Please tell the organisation."))
+    return problems
+
+
+def dojo_context(campaign, user):
+    """The `dojo_message` variables for `user`: the dojo's text in their
+    mail language when the dojo wrote it, else its main language."""
+    from django.urls import reverse
+
+    language = user.preferred_language or FALLBACK_LANGUAGE
+    return {
+        "dojo_name": campaign.dojo.name,
+        "dojo_url": settings.SITE_URL + reverse("dojo_detail", kwargs={"dojo_id": campaign.dojo_id}),
+        "subject": str(campaign.localized("subject", language)),
+        "message": str(campaign.localized("message", language)),
+    }
+
+
+def _send_kwargs(campaign):
+    if campaign.is_dojo_mailing:
+        return {"dojo": campaign.dojo, "reply_to": campaign.dojo.email}
+    return {}
+
+
+def _mail(campaign, user):
+    """(template_key, context) for `user`."""
+    if campaign.is_dojo_mailing:
+        return DOJO_TEMPLATE, dojo_context(campaign, user)
+    return campaign.template_key, campaign.context
+
+
 def launch_problems(campaign):
     """What stops `campaign` from being launched, as readable sentences."""
+    if campaign.is_dojo_mailing:
+        return _dojo_launch_problems(campaign)
     problems = []
     if campaign.status != Status.DRAFT:
         problems.append("Only a draft can be launched.")
@@ -62,6 +154,14 @@ def audience(campaign):
     launched, the live segment while it's a draft; only accounts who want
     this kind of mail."""
     resolver = SegmentResolver()
+    if campaign.is_dojo_mailing:
+        definition = campaign.segment_snapshot
+        if not definition:
+            try:
+                definition = dojo_audiences.definition(campaign.audience, campaign.dojo, campaign.audience_params)
+            except dojo_audiences.DojoAudienceError:
+                definition = None
+        return wanting_dojo_news(resolver.resolve_definition(definition), campaign.dojo)
     if campaign.segment_snapshot:
         accounts = resolver.resolve_definition(campaign.segment_snapshot)
     elif campaign.segment_id:
@@ -74,7 +174,12 @@ def audience(campaign):
 def launch(campaign, user):
     if problems := launch_problems(campaign):
         raise CampaignError(_(" ").join(problems))
-    campaign.segment_snapshot = serialize_segment(campaign.segment)
+    if campaign.is_dojo_mailing:
+        campaign.segment_snapshot = dojo_audiences.definition(
+            campaign.audience, campaign.dojo, campaign.audience_params
+        )
+    else:
+        campaign.segment_snapshot = serialize_segment(campaign.segment)
     campaign.status = Status.QUEUED
     campaign.launched_at = timezone.now()
     campaign.launched_by = user
@@ -97,11 +202,12 @@ def cancel(campaign):
 
 def send_test(campaign, user):
     """The campaign's mail to its author, now, in their own language."""
-    if not EmailTemplate.objects.filter(key=campaign.template_key).exists():
-        raise CampaignError(_("There's no template “%(template_key)s”.") % {"template_key": campaign.template_key})
+    template_key, context = _mail(campaign, user)
+    if not EmailTemplate.objects.filter(key=template_key).exists():
+        raise CampaignError(_("There's no template “%(template_key)s”.") % {"template_key": template_key})
     if not user.email:
         raise CampaignError(_("Your account has no email address to send the test to."))
-    return send(user, campaign.category, campaign.template_key, campaign.context, campaign=campaign, test=True)
+    return send(user, campaign.category, template_key, context, campaign=campaign, test=True, **_send_kwargs(campaign))
 
 
 def queue_mail(campaign_id):
@@ -125,14 +231,16 @@ def queue_mail(campaign_id):
             key = f"campaign:{campaign.pk}:{user.pk}"
             if EmailMessage.objects.filter(idempotency_key=key).exists():
                 continue
+            template_key, context = _mail(campaign, user)
             send(
                 user,
                 campaign.category,
-                campaign.template_key,
-                campaign.context,
+                template_key,
+                context,
                 campaign=campaign,
                 idempotency_key=key,
                 send_after=send_after,
+                **_send_kwargs(campaign),
             )
             queued += 1
         Campaign.objects.filter(pk=campaign_id, status=Status.SENDING).update(queued_at=timezone.now())
@@ -167,7 +275,8 @@ def stats(campaign):
     counts = dict(campaign.emailmessage_set.filter(is_test=False).values_list("status").annotate(n=Count("id")))
     result = {status: counts.get(status, 0) for status in EmailMessage.Status.values}
     result["queued"] = sum(counts.values())
-    result["audience"] = audience(campaign).count() if (campaign.segment_id or campaign.segment_snapshot) else 0
+    has_audience = campaign.segment_id or campaign.segment_snapshot or campaign.is_dojo_mailing
+    result["audience"] = audience(campaign).count() if has_audience else 0
     if campaign.launched_at:
         recipients = campaign.emailmessage_set.filter(is_test=False).values("user_id")
         result["unsubscribed"] = (
@@ -177,6 +286,8 @@ def stats(campaign):
                 subscribed=False,
                 created_at__gte=campaign.launched_at,
             )
+            # A dojo mailing: stopping every dojo's news, or this dojo's.
+            .filter(Q(dojo__isnull=True) | Q(dojo=campaign.dojo_id))
             .values("user_id")
             .distinct()
             .count()

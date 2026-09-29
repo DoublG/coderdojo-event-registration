@@ -176,7 +176,7 @@ def _tree(segment):
 
 
 def _attributes_for(scope):
-    return [a for a in get_attributes() if a.scope == scope]
+    return [a for a in get_attributes() if a.scope == scope and a.in_builder]
 
 
 @login_required

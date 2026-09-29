@@ -2261,3 +2261,214 @@ class MailPreferencesDojoTests(TestCase):
         self.client.force_login(teen)
         form = self.client.get(reverse("mail_preferences")).context["form"]
         self.assertEqual([d.name for d in form.dojos], ["Bruges"])
+
+
+# --- §25 phases 2 and 3: a dojo's audiences and its mailings --------------------
+
+
+def _kid(guardian, dojo=None, age=10, consent=True, name="kid"):
+    today = timezone.localdate()
+    ninja = Ninja.objects.create(
+        name=f"{guardian.username}-{name}", home_dojo=dojo, date_of_birth=today.replace(year=today.year - age)
+    )
+    Guardianship.objects.create(guardian=guardian, ninja=ninja, **consent_fields(consent))
+    return ninja
+
+
+def _place(event, ninja, waiting_list=False, attended=None):
+    return Registration.objects.create(
+        event=event, ninja=ninja, waiting_list=waiting_list, position=1, attended=attended
+    )
+
+
+class DojoAudienceTests(TestCase):
+    """mailing.dojo_audiences: each prepared audience reaches the right
+    families of that one dojo, and the child-based ones only with consent."""
+
+    def setUp(self):
+        from . import dojo_audiences
+
+        self.audiences = dojo_audiences
+        self.ghent, self.antwerp = make_dojo("Ghent"), make_dojo("Antwerp")
+        self.home = User.objects.create(username="home", email="home@example.com")
+        self.home_kid = _kid(self.home, self.ghent, age=10)
+        self.visitor = User.objects.create(username="visitor", email="visitor@example.com")
+        self.visitor_kid = _kid(self.visitor, self.antwerp, age=14, consent=False)
+        _place(_session(self.ghent, days_ago=20), self.visitor_kid, attended=True)
+        self.elsewhere = User.objects.create(username="elsewhere", email="elsewhere@example.com")
+        self.elsewhere_kid = _kid(self.elsewhere, self.antwerp, age=10)
+        _place(_session(self.antwerp, days_ago=10), self.elsewhere_kid, attended=True)
+        self.upcoming = _session(self.ghent, days_ago=-7, status=Event.OPEN)
+
+    def _who(self, key, dojo=None, **params):
+        definition = self.audiences.definition(key, dojo or self.ghent, params)
+        return set(SegmentResolver().resolve_definition(definition).values_list("username", flat=True))
+
+    def test_all_families_of_the_dojo_home_and_visitors(self):
+        self.assertEqual(self._who("all_families"), {"home", "visitor"})
+        self.assertEqual(self._who("all_families", self.antwerp), {"visitor", "elsewhere"})
+
+    def test_booked_and_waiting_list(self):
+        waiting = User.objects.create(username="waiting", email="w@example.com")
+        _place(self.upcoming, self.home_kid)
+        _place(self.upcoming, _kid(waiting, self.antwerp), waiting_list=True)
+        self.assertEqual(self._who("session", event=self.upcoming.pk), {"home"})
+        self.assertEqual(self._who("session", event=self.upcoming.pk, include_waiting_list="on"), {"home", "waiting"})
+        self.assertEqual(self._who("waiting_list", event=self.upcoming.pk), {"waiting"})
+
+    def test_came_recently(self):
+        self.assertEqual(self._who("recent", days=90), {"visitor"})
+        self.assertEqual(self._who("recent", days=90, dojo=self.antwerp), {"elsewhere"})
+
+    def test_child_based_audiences_need_the_consent(self):
+        self.assertEqual(self._who("age", min_age=9, max_age=11), {"home"})
+        # The visitor is 14 but didn't agree: left out, and counted as such.
+        self.assertEqual(self._who("age", min_age=13, max_age=15), set())
+        self.assertEqual(self.audiences.reach("age", self.ghent, {"min_age": 13, "max_age": 15}), (0, 1))
+        # A child of another dojo isn't one of this dojo's children.
+        self.assertEqual(self._who("age", min_age=9, max_age=11, dojo=self.antwerp), {"elsewhere"})
+
+    def test_engagement_stages_at_this_dojo(self):
+        from events.models import NinjaEngagement
+
+        today = timezone.localdate()
+        NinjaEngagement.objects.create(ninja=self.home_kid, dojo=self.ghent, stage="at_risk", computed_on=today)
+        NinjaEngagement.objects.create(ninja=self.elsewhere_kid, dojo=self.antwerp, stage="at_risk", computed_on=today)
+        self.assertEqual(self._who("missed"), {"home"})
+        self.assertEqual(self._who("new_families"), set())
+
+    def test_pathway_only_offered_with_the_dojos_pathways(self):
+        from pathways.models import Pathway
+
+        keys = lambda: {a.key for a in self.audiences.available(self.ghent)}  # noqa: E731
+        self.assertNotIn("pathway", keys())
+        scratch, python = Pathway.objects.create(name="Scratch"), Pathway.objects.create(name="Python")
+        self.ghent.pathways.add(scratch)
+        self.assertIn("pathway", keys())
+        registration = _place(_session(self.ghent, days_ago=5), self.home_kid, attended=True)
+        registration.pathways.add(scratch)
+        self.assertEqual(self._who("pathway", pathway=scratch.pk), {"home"})
+        with self.assertRaises(self.audiences.DojoAudienceError):
+            self._who("pathway", pathway=python.pk)
+
+    def test_another_dojos_session_or_bad_values_are_refused(self):
+        other = _session(self.antwerp, days_ago=-3, status=Event.OPEN)
+        for key, params in [
+            ("session", {"event": other.pk}),
+            ("waiting_list", {"event": "nope"}),
+            ("recent", {"days": 12}),
+            ("age", {"min_age": 12, "max_age": 9}),
+            ("age", {"min_age": 2, "max_age": 9}),
+            ("nonsense", {}),
+        ]:
+            with self.subTest(key=key, params=params), self.assertRaises(self.audiences.DojoAudienceError):
+                self.audiences.definition(key, self.ghent, params)
+
+    def test_reach_leaves_out_who_doesnt_want_the_dojos_news(self):
+        from .preferences import set_dojo_mute
+
+        self.assertEqual(self.audiences.reach("all_families", self.ghent, {}), (2, 0))
+        set_dojo_mute(self.home, self.ghent, True, ConsentEvent.PREFERENCES)
+        set_preference(self.visitor, MailCategory.DOJO_NEWS, False, ConsentEvent.PREFERENCES)
+        self.assertEqual(self.audiences.reach("all_families", self.ghent, {}), (0, 0))
+
+    def test_the_dojo_only_attribute_stays_out_of_the_organisations_builder(self):
+        from .manage import _attributes_for
+
+        keys = {a.key for a in _attributes_for("user")}
+        self.assertIn("dojo_family", keys)
+        self.assertNotIn("family_visited_dojo", keys)
+
+
+class DojoMailingTests(TestCase):
+    """A dojo mailing goes through the campaign pipeline with its own rules."""
+
+    def setUp(self):
+        call_command("load_mail_templates", stdout=StringIO())
+        self.champion = User.objects.create(username="champ", email="champ@example.com")
+        self.dojo = make_dojo("Ghent", champion=self.champion, email="ghent@example.com", languages=["nl-be", "fr-be"])
+        self.nl = User.objects.create(username="nl", email="nl@example.com", preferred_language="nl-be")
+        self.fr = User.objects.create(username="fr", email="fr@example.com", preferred_language="fr-be")
+        self.en = User.objects.create(username="en", email="en@example.com")
+        for parent in (self.nl, self.fr, self.en):
+            _kid(parent, self.dojo)
+
+    def _mailing(self, **fields):
+        fields = {
+            "name": "Geen sessie",
+            "dojo": self.dojo,
+            "category": MailCategory.DOJO_NEWS,
+            "template_key": "dojo_message",
+            "audience": "all_families",
+            "subject": "Geen sessie zaterdag",
+            "message": "Beste families, {{ site_url }} blijft letterlijk staan.",
+            "created_by": self.champion,
+            **fields,
+        }
+        campaign = Campaign.objects.create(**fields)
+        campaign.set_translation("fr-be", "subject", "Pas de session samedi")
+        campaign.save()
+        return campaign
+
+    def test_launch_sends_the_dojos_text_in_each_language_with_reply_to_the_dojo(self):
+        campaign = self._mailing()
+        self.assertEqual(campaigns.launch_problems(campaign), [])
+        campaigns.launch(campaign, self.champion)
+        self.assertEqual(campaign.segment_snapshot["groups"][0]["rules"][0]["attribute"], "dojo_family")
+        self.assertEqual(campaigns.queue_mail(campaign.pk), 3)
+
+        rows = {row.user.username: row for row in EmailMessage.objects.filter(campaign=campaign)}
+        self.assertEqual(rows["nl"].subject, "Ghent: Geen sessie zaterdag")
+        self.assertEqual(rows["fr"].subject, "Ghent : Pas de session samedi")
+        # French has no message of its own, so the main language's; English isn't one of the dojo's.
+        self.assertIn("Beste families", rows["fr"].body)
+        self.assertEqual(rows["en"].subject, "Ghent: Geen sessie zaterdag")
+        # The dojo's text is inserted, never rendered as a template.
+        self.assertIn("{{ site_url }} blijft letterlijk staan", rows["nl"].body)
+        self.assertEqual({(r.dojo_id, r.reply_to) for r in rows.values()}, {(self.dojo.pk, "ghent@example.com")})
+
+        row = rows["nl"]
+        EmailMessage.objects.filter(pk=row.pk).update(status=Status.SENDING, claimed_at=timezone.now())
+        connection = _FakeConnection()
+        with (
+            override_settings(DEFAULT_FROM_EMAIL="CoderDojo Belgium <noreply@example.org>"),
+            patch("mailing.tasks.mail.get_connection", return_value=connection),
+        ):
+            send_email_batch([row.pk])
+        headers = connection.sent[0].extra_headers
+        self.assertEqual(headers["Reply-To"], "ghent@example.com")
+        self.assertEqual(headers["From"], "Ghent via CoderDojo Belgium <noreply@example.org>")
+
+    def test_a_family_that_muted_the_dojo_is_not_in_the_audience(self):
+        from .preferences import set_dojo_mute
+
+        set_dojo_mute(self.en, self.dojo, True, ConsentEvent.PREFERENCES)
+        self.assertEqual(set(campaigns.audience(self._mailing()).values_list("username", flat=True)), {"nl", "fr"})
+
+    def test_launch_problems(self):
+        self.dojo.email = ""
+        self.dojo.save()
+        campaign = self._mailing(subject="", audience="session", audience_params={})
+        problems = " ".join(campaigns.launch_problems(campaign))
+        self.assertIn("Pick one of your dojo's sessions", problems)
+        self.assertIn("in Nederlands", problems)
+        self.assertIn("email address", problems)
+
+    def test_at_most_four_mailings_in_30_days(self):
+        for _ in range(4):
+            campaigns.launch(self._mailing(), self.champion)
+        problems = campaigns.launch_problems(self._mailing())
+        self.assertTrue(any("4 mails in the last 30 days" in p for p in problems))
+        # A cancelled one that sent nothing gives its place back.
+        cancelled = Campaign.objects.filter(dojo=self.dojo).first()
+        campaigns.cancel(cancelled)
+        self.assertEqual(campaigns.launch_problems(self._mailing()), [])
+        # Older than 30 days doesn't count.
+        Campaign.objects.filter(dojo=self.dojo).update(launched_at=timezone.now() - timedelta(days=31))
+        self.assertEqual(campaigns.dojo_launches(self.dojo), 0)
+
+    def test_test_mail_goes_to_the_author_as_the_family_would_get_it(self):
+        row = campaigns.send_test(self._mailing(), self.champion)
+        self.assertEqual((row.recipient, row.is_test, row.template_key), ("champ@example.com", True, "dojo_message"))
+        self.assertTrue(row.subject.startswith("[Test] Ghent:"))
+        self.assertEqual(Campaign.objects.get().status, Campaign.Status.DRAFT)
