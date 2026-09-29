@@ -2432,6 +2432,57 @@ class SeedTwoStepTests(TestCase):
         self.assertEqual(out.getvalue().strip(), totp_code(device))
 
 
+class SeedOtpVaultTests(TestCase):
+    """seed_otp_vault: the testers' authenticator (2FAuth) follows the data's apps."""
+
+    def run_command(self, existing):
+        from io import StringIO
+        from unittest import mock
+
+        from django.core.management import call_command
+
+        session = mock.MagicMock()
+        session.get.return_value.json.return_value = existing
+        with mock.patch("accounts.management.commands.seed_otp_vault.requests.Session", return_value=session):
+            call_command("seed_otp_vault", stdout=StringIO())
+        return session
+
+    @override_settings(OTP_VAULT_URL="")
+    def test_does_nothing_without_a_vault(self):
+        session = self.run_command([])
+        session.get.assert_not_called()
+
+    @override_settings(OTP_VAULT_URL="http://otp:8000")
+    def test_adds_new_keys_replaces_changed_ones_and_keeps_the_rest(self):
+        from base64 import b32encode
+
+        from django_otp.plugins.otp_totp.models import TOTPDevice
+
+        from .management.commands.seed_otp_vault import SERVICE
+
+        def entry(pk, device, secret=None):
+            key = secret or b32encode(device.bin_key).decode("ascii")
+            account = device.user.username
+            return {"id": pk, "service": SERVICE, "account": account, "secret": key, "digits": 6, "period": 30}
+
+        same = TOTPDevice.objects.create(user=User.objects.create(username="same"), name="default")
+        changed = TOTPDevice.objects.create(user=User.objects.create(username="changed"), name="default")
+        new = TOTPDevice.objects.create(user=User.objects.create(username="new"), name="default")
+        TOTPDevice.objects.create(user=User.objects.create(username="unconfirmed"), name="default", confirmed=False)
+        gone = {"id": 4, "service": SERVICE, "account": "gone", "secret": "AAAA", "digits": 6, "period": 30}
+        by_hand = {"id": 5, "service": "Something else", "account": "x", "secret": "BBBB", "digits": 6, "period": 30}
+
+        session = self.run_command([entry(1, same), entry(2, changed, secret="OLDKEY"), gone, by_hand])
+
+        deleted = sorted(call.args[0] for call in session.delete.call_args_list)
+        self.assertEqual(deleted, ["http://otp:8000/api/v1/twofaccounts/2", "http://otp:8000/api/v1/twofaccounts/4"])
+        posted = sorted(call.kwargs["json"]["account"] for call in session.post.call_args_list)
+        self.assertEqual(posted, ["changed", "new"])
+        new_entry = next(c.kwargs["json"] for c in session.post.call_args_list if c.kwargs["json"]["account"] == "new")
+        self.assertEqual(new_entry["secret"], b32encode(new.bin_key).decode("ascii"))
+        self.assertEqual(session.headers.update.call_args.args[0]["Remote-User"], "testers")
+
+
 class ChildFamilyNameTests(TestCase):
     """A child's first and family name (Ninja.name + family_name): asked for
     when a child is added, shown in full to the dojo team."""

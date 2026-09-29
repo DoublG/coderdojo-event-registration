@@ -122,6 +122,11 @@ EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=30)
 # worker, with no request to build absolute URLs from).
 SITE_URL = env("SITE_URL", default="https://coolregistration.localhost").rstrip("/")
 
+# The testers' authenticator in the devcontainer (2FAuth, the `otp` service),
+# which `manage.py seed_otp_vault` fills with the seeded accounts' app keys.
+# Empty everywhere else (production), and the command then does nothing.
+OTP_VAULT_URL = env("OTP_VAULT_URL", default="").rstrip("/")
+
 # The mail engine (mailing app, DATA_MODEL.md §11 "Sending pipeline").
 MAILING_CLAIM_LIMIT = env.int("MAILING_CLAIM_LIMIT", default=200)  # rows the dispatcher claims per run
 MAILING_BATCH_SIZE = env.int("MAILING_BATCH_SIZE", default=20)  # rows per send_email_batch subtask

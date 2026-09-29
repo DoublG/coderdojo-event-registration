@@ -3117,6 +3117,10 @@ flowchart TD
   champion, mentor and parent. `seed_credentials.csv` has a `totp_secret`
   column with the app key (base32, to add to an authenticator app), and
   `manage.py totp_code <username>` (DEBUG only) prints the current code.
+  In the devcontainer, testers read the codes at
+  `https://coolregistration.localhost/otp/`: 2FAuth (the `otp` service),
+  filled from the data by `manage.py seed_otp_vault` (end of `start.sh`;
+  every account with an app, synced, only its own entries).
 - Tests: `core.testing.login_data` / `token_data` post the login's steps,
   `login_verified(client, user)` logs in with a verified session (giving
   the account an app), `totp_code(device)` gives the current code. Passkey

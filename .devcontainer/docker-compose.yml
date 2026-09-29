@@ -75,6 +75,11 @@ services:
       # a container rebuild.
       CLAUDE_CONFIG_DIR: /root/.claude
 
+      # The testers' authenticator (the `otp` service, 2FAuth): `manage.py
+      # seed_otp_vault` (end of start.sh) puts every seeded account's
+      # authenticator-app key in it. Unset (production) = the command does nothing.
+      OTP_VAULT_URL: http://otp:8000
+
     volumes:
       - ..:/workspace:cached
       # Persist Claude Code auth/sessions across rebuilds (see CLAUDE_CONFIG_DIR).
@@ -84,13 +89,8 @@ services:
 
     command: sleep infinity
 
-    ports:
-      - "8000:8000"
-      - "3000:3000"
-      - "3001:3001"
-      - "3002:3002"
-      - "3004:3004"
-      - "3005:3005"
+    # No ports: the only way in from the host is nginx on 443 (the `proxy`
+    # service), which reaches every container by its service name.
 
     depends_on:
       - db
@@ -116,14 +116,19 @@ services:
     container_name: ${PROJECT_NAME:-coolregistration-dev}-redis
     restart: unless-stopped
 
+  # The only container with a port on the host: https://coolregistration.localhost
+  # (443). Everything else is a path behind it (nginx/nginx.conf): the site,
+  # /docs/, /mails/ (Mailpit), /phpmyadmin/ and /otp/ (the testers' authenticator).
   proxy:
     image: nginx:1.27-alpine
     container_name: ${PROJECT_NAME:-coolregistration-dev}-proxy
     restart: unless-stopped
     depends_on:
       - workspace
+      - mailpit
+      - phpmyadmin
+      - otp
     ports:
-      - "80:80"
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -141,10 +146,10 @@ services:
     container_name: ${PROJECT_NAME:-coolregistration-dev}-phpmyadmin
     image: phpmyadmin
     restart: unless-stopped
-    ports:
-      - "3006:80"
     environment:
       PMA_HOST: db
+      # Served under https://coolregistration.localhost/phpmyadmin/ (nginx.conf).
+      PMA_ABSOLUTE_URI: https://coolregistration.localhost/phpmyadmin/
 
   mailpit:
     image: axllent/mailpit:latest
@@ -163,12 +168,33 @@ services:
       # mailbox in dev (matches MAILING_BOUNCE_IMAP_USER/PASSWORD above).
       MP_POP3_AUTH: "bounces:bounces"
 
-    ports:
-      - "1025:1025"
-      - "8025:8025"
+  # The testers' authenticator app: 2FAuth (https://github.com/Bubka/2FAuth) at
+  # https://coolregistration.localhost/otp/, showing the current code of every
+  # seeded account with two-step login. Filled from the demo data by
+  # `manage.py seed_otp_vault` (start.sh; run it again after changing someone's
+  # app). No login: nginx signs everyone in as one shared user through the
+  # Remote-User header (reverse-proxy guard), which the seeder sends too.
+  # Development only: it shows login codes to anyone who can reach it.
+  otp:
+    image: 2fauth/2fauth:latest
+    container_name: ${PROJECT_NAME:-coolregistration-dev}-otp
+    restart: unless-stopped
+    volumes:
+      - otp-data:/2fauth
+    environment:
+      APP_NAME: CoderDojo test authenticator
+      # A fixed dev-only key: it has to stay the same across restarts.
+      APP_KEY: base64:3oZ7uYxkE0m1S2lqf6rVJ0p0bW4nY1tq8Hc9aR2dKxI=
+      APP_URL: https://coolregistration.localhost/otp
+      APP_SUBDIRECTORY: otp
+      AUTHENTICATION_GUARD: reverse-proxy-guard
+      AUTH_PROXY_HEADER_FOR_USER: HTTP_REMOTE_USER
+      TRUSTED_PROXIES: "*"
+      THROTTLE_API: 1000
 
 
 volumes:
   db-data:
   claude-config:
   mailpit-data:
+  otp-data:

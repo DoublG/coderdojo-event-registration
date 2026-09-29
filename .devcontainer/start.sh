@@ -176,6 +176,11 @@ python manage.py rebuild_engagement
 # from the file a new password (DEBUG only).
 python manage.py describe_seed_accounts
 
+# The testers' authenticator (2FAuth at /otp/, the `otp` service): the current
+# code of every account with two-step login, filled from the data. Run it again
+# after someone's app changes. A vault that's down never stops the site starting.
+python manage.py seed_otp_vault || echo "seed_otp_vault failed: the testers' authenticator at /otp/ isn't filled."
+
 # Background jobs: the same two Celery workers as production (DATA_MODEL.md
 # §11, "Production: two Celery workers under systemd"). `periodic` runs beat
 # embedded (-B, the only beat) plus the jobs beat triggers; `mailing` runs
