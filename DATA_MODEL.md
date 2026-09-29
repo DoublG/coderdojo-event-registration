@@ -4076,6 +4076,22 @@ the sidebar (`core/_manage_base.html`) and the switcher
   - **Seen while it's open.** The Django admin's header shows "Technical
     access until 21:40 · End now", and the dashboard's People page lists
     every open grant with its reason.
+  - **No second person approves (decided).** The reason, the password
+    and the audit log are the safeguard.
+  - **The other organisation admins get a notification (decided)** when
+    someone opens technical access: "*Name* opened technical access to the
+    Django admin until 21:40: *reason*", linking to the People page (one
+    row per admin, through `notifications.services.notify`, in each
+    recipient's language; not to the requester). No mail. The
+    organisation dashboard has no notification bell yet (it's per dojo,
+    §8, §20), so this adds one: a new `Notification.organisation` flag
+    (a plain `dojo=None` isn't enough, since personal notices such as
+    "You've been added to the … team" are stored without a dojo too),
+    the bell in `core/_manage_base.html` showing the account's
+    organisation notifications, and a second consumer
+    (`ws/manage/notifications/`, organisation roles only, closing the
+    socket otherwise) so it updates live like a dojo's bell. The flag is
+    classified `not_personal` (§16).
   - **The board** reaches its read-only oversight the same way: its
     *Organisation* link in the menu goes to the request page instead of
     straight to `/admin/`.
@@ -4099,7 +4115,9 @@ the sidebar (`core/_manage_base.html`) and the switcher
   and `is_organisation_admin` stays a role check), the People page lists
   them read-only so the organisation sees who holds one, and the sign-in
   policy's *Superusers* row should be set to the strongest level.
-  Whether their admin use is time-boxed too is open point 1.
+  **Not time-boxed (decided):** being a superuser is itself a technical
+  intervention on the server, so they keep the Django admin without asking
+  and `AdminSite.has_permission` lets them in as today.
 - **Who manages people: the `people` area, i.e. organisation admins.**
   Rules, in a service `accounts/organisation_people.py` (views only call
   it; `OrganisationPeopleError` carries a user-facing message), like
@@ -4192,11 +4210,16 @@ docstrings say an edit there skips the rules above).
    classification, audit registration, admin), the request page, the
    check in `AdminSite.has_permission`, `sync_organisation_access` no
    longer setting `is_staff`, the beat job, the header in the Django admin,
-   the menu's *Organisation* link. Existing role holders lose standing
-   staff status in the same migration. Tests: no admin without an open
+   the menu's *Organisation* link, and the organisation's notification
+   bell (the `Notification.organisation` flag, the bell in the
+   organisation shell, its consumer) with the notice to the other admins.
+   Existing role holders lose standing staff status in the same migration. Tests: no admin without an open
    grant, access stopping at 12 hours without the job, the job ending and
    clearing `is_staff`, ending early, one grant at a time, losing the role
-   ending it, a superuser unaffected, the audit entries and their actors.
+   ending it, a superuser unaffected, the audit entries and their actors,
+   the notice reaching every other admin and not the requester, the
+   organisation consumer refusing accounts without a role
+   (`TransactionTestCase`, as the dojo consumer's tests).
 3. **People and roles for existing accounts:** the service and its rules,
    screens 1, 3 and 4 (with open grants and *End*), the
    `organisation_role_changed` mail (en/nl/fr in
@@ -4220,16 +4243,5 @@ docstrings say an edit there skips the rules above).
 
 ### Open points
 
-1. **Time-box superusers too?** Proposed: yes, the same request, reason
-   and 12 hours, so every use of the Django admin is recorded; a
-   superuser's grant also opens `/admin/` when the dashboard is down
-   (the request page is a plain view, not dependent on the rest).
-   Alternative: superusers keep standing access, being very few.
-2. **Does a request need a second person's approval?** As a start, no:
-   the reason, the password and the audit log. Possible later: a request
-   waits until another organisation admin approves it.
-3. **Tell the other admins** when someone opens technical access (a mail,
-   or a notice on the dashboard)? Not planned as a start; the People page
-   shows open grants.
-4. **Listing on the team page** (`content.OrganisationTeamMember`) stays
+1. **Listing on the team page** (`content.OrganisationTeamMember`) stays
    separate; a later *Also list on the team page* shortcut is possible.
