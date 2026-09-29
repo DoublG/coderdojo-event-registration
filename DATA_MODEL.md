@@ -4651,8 +4651,8 @@ flowchart TD
 
 ## 25. Mail from a dojo to its families (planned)
 
-**Planned, not built.** The decisions below are proposals until confirmed
-(marked *to confirm* where there's a real choice). This reverses §11's
+**Planned, not built.** The decisions below were confirmed on
+2026-09-29. This reverses §11's
 decision 3 ("Champions don't send campaigns; dojo-level mail stays
 automatic") in part: a dojo's team gets **a narrow slice** of the mail
 engine, enough to write to the families of *its own* dojo, with audiences
@@ -4740,7 +4740,7 @@ list outside the site, or asking the organisation.
    resolver only picks guardians who gave it; the page says how many
    families it reaches and that some aren't counted because they didn't
    agree. **Gender, belts, badges, cancellations and no-shows are not
-   offered to dojos** (*to confirm*): they're the most sensitive profiling
+   offered to dojos** (decided): they're the most sensitive profiling
    and a dojo has no need to target on them. Adding an audience later is a
    code change, reviewed like any other.
 3. **The audience is always limited to the dojo**, whatever the
@@ -4776,8 +4776,8 @@ list outside the site, or asking the organisation.
    this dojo, stop all dojo news, stop everything optional. Mail
    preferences lists the family's dojos with a switch each.
 6. **Who sends: a new capability `SEND_MAIL`** (`dojos/access.py`).
-   *To confirm:* champion only (proposed, like `MANAGE_API`: it speaks for
-   the whole dojo), or champion and mentors. Anyone with dojo access can
+   Champion only (decided), like `MANAGE_API`: it speaks for the whole
+   dojo. Anyone with dojo access can
    see the list of past mailings.
 7. **Reply-To is the dojo.** `EmailMessage.reply_to` (new, blank for all
    other mail), set to `Dojo.email`; launching needs a dojo email (a
@@ -4785,10 +4785,10 @@ list outside the site, or asking the organisation.
    (SPF/DKIM), with the dojo's name as display name ("CoderDojo Gent via
    CoderDojo Belgium").
 8. **Limits against overuse:** at most `DOJO_MAILINGS_PER_30_DAYS` = 4
-   launched per dojo (*to confirm*), a message length limit, and plain
+   launched per dojo (decided), a message length limit, and plain
    text only (links are fine; no attachments, no images). A test mail to
    the sender is always allowed and doesn't count.
-9. **No approval by the organisation before sending** (*to confirm*). The
+9. **No approval by the organisation before sending** (decided). The
    organisation sees every dojo mailing on its *Campaigns* page (a Dojo
    column and filter, read-only except *Cancel*), can cancel one that
    hasn't gone out, and the audit log records the campaign. Approval per
@@ -4798,7 +4798,7 @@ list outside the site, or asking the organisation.
     list of addresses. They already see the children's names on their
     attendance lists; the addresses stay with the engine.
 11. **Organisation dojos** (§12) can use it the same way: their team
-    writes to the families who came to their events. *To confirm.*
+    writes to the families who came to their events (decided).
 12. **Journeys stay the organisation's** for now (a dojo's "we miss you"
     is a one-off mailing, not a standing one). Possible later.
 
@@ -4888,12 +4888,10 @@ the dojo's content, not personal) and its place in `core.audit.RECORDED`.
 
 ### Open points
 
-1. The *to confirm* items above: gender/belt targeting kept out, who has
-   `SEND_MAIL`, the monthly limit, no approval, organisation dojos.
-2. **Should the dojo's team get the mail too?** A "team" audience (active
+1. **Should the dojo's team get the mail too?** A "team" audience (active
    champion and mentors, `volunteer` category) would let a champion write
    to their own mentors; it's a different category and consent, so it's
    left out of the first version.
-3. **The privacy explanation** (`mailing/partials/_privacy_explanation.html`)
+2. **The privacy explanation** (`mailing/partials/_privacy_explanation.html`)
    may need a sentence that the dojo's team can write to families through
    the site; if so, a new `PRIVACY_WORDING_VERSION`.
