@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 11:52+0000\n"
+"POT-Creation-Date: 2026-09-29 12:15+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -783,7 +783,7 @@ msgid "That passkey couldn't be checked. Please try again."
 msgstr "Cette clé d'accès n'a pas pu être vérifiée. Veuillez réessayer."
 
 #: accounts/security_views.py:219 accounts/security_views.py:252
-#: accounts/templates/accounts/partials/_ninja_login_card.html:31
+#: accounts/templates/accounts/partials/_ninja_login_card.html:35
 msgid "Two-step login is off."
 msgstr "La connexion en deux étapes est désactivée."
 
@@ -882,7 +882,7 @@ msgstr "Robot turquoise à lumières"
 #: accounts/templates/accounts/confirm_email_change.html:33
 #: accounts/templates/accounts/ninja_login_action.html:3
 #: accounts/templates/accounts/partials/_account_details_edit.html:22
-#: accounts/templates/accounts/partials/_ninja_login_card.html:41
+#: accounts/templates/accounts/partials/_ninja_login_card.html:45
 msgid "Change email address"
 msgstr "Changer d'adresse e-mail"
 
@@ -909,7 +909,7 @@ msgstr ""
 
 #: accounts/templates/accounts/change_email.html:30
 #: accounts/templates/accounts/child_detail.html:99
-#: accounts/templates/accounts/ninja_login_action.html:36
+#: accounts/templates/accounts/ninja_login_action.html:40
 #: accounts/templates/accounts/partials/_account_details_edit.html:30
 #: accounts/templates/accounts/partials/_add_child.html:30
 #: accounts/templates/accounts/partials/_child_avatar_picker.html:28
@@ -940,7 +940,7 @@ msgid "Cancel"
 msgstr "Annuler"
 
 #: accounts/templates/accounts/change_email.html:31
-#: accounts/templates/accounts/ninja_login_action.html:37
+#: accounts/templates/accounts/ninja_login_action.html:41
 #: privacy/templates/privacy/manage/email.html:26
 msgid "Send the link"
 msgstr "Envoyer le lien"
@@ -2036,7 +2036,7 @@ msgstr ""
 
 #: accounts/templates/accounts/manage/security.html:98
 #: accounts/templates/accounts/ninja_login_action.html:3
-#: accounts/templates/accounts/partials/_ninja_login_card.html:46
+#: accounts/templates/accounts/partials/_ninja_login_card.html:50
 #: accounts/templates/accounts/security.html:106
 #: accounts/templates/accounts/security_confirm.html:3
 #: accounts/templates/accounts/security_confirm.html:8
@@ -2068,7 +2068,7 @@ msgstr "Utiliser plutôt un mot de passe"
 msgid "Change %(name)s's email address"
 msgstr "Changer l'adresse e-mail de %(name)s"
 
-#: accounts/templates/accounts/ninja_login_action.html:15
+#: accounts/templates/accounts/ninja_login_action.html:16
 #, python-format
 msgid ""
 "%(name)s logs in with <strong>%(email)s</strong>, and we send their mail "
@@ -2077,7 +2077,16 @@ msgstr ""
 "%(name)s se connecte avec <strong>%(email)s</strong>, et nous y envoyons ses "
 "e-mails."
 
-#: accounts/templates/accounts/ninja_login_action.html:16
+#: accounts/templates/accounts/ninja_login_action.html:18
+#, python-format
+msgid ""
+"%(name)s's login has no email address yet. Once it has one, they can get "
+"mails and use a login link."
+msgstr ""
+"Le compte de %(name)s n'a pas encore d'adresse e-mail. Une fois qu'il en a "
+"une, il peut recevoir des e-mails et utiliser un lien de connexion."
+
+#: accounts/templates/accounts/ninja_login_action.html:20
 #, python-format
 msgid ""
 "We send a link to the new address. It changes once that link is opened, "
@@ -2089,12 +2098,12 @@ msgstr ""
 "prévenons l'ancienne adresse et vous-même, et %(name)s est déconnecté sur "
 "ses autres appareils."
 
-#: accounts/templates/accounts/ninja_login_action.html:18
+#: accounts/templates/accounts/ninja_login_action.html:22
 #, python-format
 msgid "%(name)s logs in with a password"
 msgstr "%(name)s se connecte avec un mot de passe"
 
-#: accounts/templates/accounts/ninja_login_action.html:19
+#: accounts/templates/accounts/ninja_login_action.html:23
 #, python-format
 msgid ""
 "%(name)s now logs in with a link we mail to %(email)s. Switch back to a "
@@ -2104,12 +2113,12 @@ msgstr ""
 "Revenez à un mot de passe, et nous lui envoyons un lien pour en choisir un ; "
 "les liens de connexion ne fonctionnent plus."
 
-#: accounts/templates/accounts/ninja_login_action.html:21
+#: accounts/templates/accounts/ninja_login_action.html:25
 #, python-format
 msgid "Turn off %(name)s's two-step login"
 msgstr "Désactiver la connexion en deux étapes de %(name)s"
 
-#: accounts/templates/accounts/ninja_login_action.html:22
+#: accounts/templates/accounts/ninja_login_action.html:26
 #, python-format
 msgid ""
 "For when %(name)s lost their phone or passkey and their backup codes: their "
@@ -2121,12 +2130,12 @@ msgstr ""
 "supprimés, et la connexion se fait sans deuxième étape. Elle peut être "
 "réactivée ensuite."
 
-#: accounts/templates/accounts/ninja_login_action.html:37
-#: accounts/templates/accounts/partials/_ninja_login_card.html:43
+#: accounts/templates/accounts/ninja_login_action.html:41
+#: accounts/templates/accounts/partials/_ninja_login_card.html:47
 msgid "Switch to a password"
 msgstr "Passer à un mot de passe"
 
-#: accounts/templates/accounts/ninja_login_action.html:37
+#: accounts/templates/accounts/ninja_login_action.html:41
 #: accounts/templates/accounts/security_confirm.html:25
 msgid "Turn off"
 msgstr "Désactiver"
@@ -2349,7 +2358,7 @@ msgstr "Envoyez-moi un lien de confirmation"
 msgid "Own login"
 msgstr "Propre compte"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:25
+#: accounts/templates/accounts/partials/_ninja_login_card.html:26
 #, python-format
 msgid ""
 "%(name)s logs in with <strong>%(email)s</strong> (username "
@@ -2358,15 +2367,27 @@ msgstr ""
 "%(name)s se connecte avec <strong>%(email)s</strong> (nom d'utilisateur "
 "<strong>%(username)s</strong>)."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:26
+#: accounts/templates/accounts/partials/_ninja_login_card.html:28
+#, python-format
+msgid ""
+"%(name)s logs in with the username <strong>%(username)s</strong>. There's no "
+"email address on their login, so they get no mails and can't use a login "
+"link: add one below."
+msgstr ""
+"%(name)s se connecte avec le nom d'utilisateur <strong>%(username)s</"
+"strong>. Son compte n'a pas d'adresse e-mail : il ne reçoit donc pas d'e-"
+"mails et ne peut pas utiliser de lien de connexion. Ajoutez-en une ci-"
+"dessous."
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:30
 msgid "They haven't logged in yet."
 msgstr "Votre enfant ne s'est pas encore connecté."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:26
+#: accounts/templates/accounts/partials/_ninja_login_card.html:30
 msgid "They haven't chosen a password yet."
 msgstr "Aucun mot de passe n'a encore été choisi."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:27
+#: accounts/templates/accounts/partials/_ninja_login_card.html:31
 msgid ""
 "With their login they see this page and can sign themselves up for sessions; "
 "you keep managing their details."
@@ -2374,27 +2395,31 @@ msgstr ""
 "Avec ce compte, votre enfant voit cette page et peut s'inscrire lui-même aux "
 "sessions ; vous continuez à gérer ses données."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:30
+#: accounts/templates/accounts/partials/_ninja_login_card.html:34
 msgid "Logs in with a link we mail them each time."
 msgstr "Se connecte avec un lien que nous envoyons chaque fois."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:30
+#: accounts/templates/accounts/partials/_ninja_login_card.html:34
 msgid "Logs in with a password."
 msgstr "Se connecte avec un mot de passe."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:31
+#: accounts/templates/accounts/partials/_ninja_login_card.html:35
 msgid "Two-step login is on."
 msgstr "La connexion en deux étapes est activée."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:38
+#: accounts/templates/accounts/partials/_ninja_login_card.html:42
 msgid "Send the login mail again"
 msgstr "Renvoyer l'e-mail de connexion"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:38
+#: accounts/templates/accounts/partials/_ninja_login_card.html:42
 msgid "Send the password mail again"
 msgstr "Renvoyer l'e-mail du mot de passe"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:50
+#: accounts/templates/accounts/partials/_ninja_login_card.html:45
+msgid "Add an email address"
+msgstr "Ajouter une adresse e-mail"
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:54
 #, python-format
 msgid ""
 "Remove %(name)s's login? They can't log in any more; their sessions, belts "
@@ -2403,11 +2428,11 @@ msgstr ""
 "Supprimer le compte de %(name)s ? Votre enfant ne pourra plus se connecter ; "
 "ses sessions, ceintures et badges sont conservés."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:52
+#: accounts/templates/accounts/partials/_ninja_login_card.html:56
 msgid "Remove login"
 msgstr "Supprimer le compte"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:58
+#: accounts/templates/accounts/partials/_ninja_login_card.html:62
 #, python-format
 msgid ""
 "%(name)s's login is switched off. Switch it back on with their email "
@@ -2417,7 +2442,7 @@ msgstr ""
 "un e-mail arrive pour choisir un nouveau mot de passe, ou le premier lien de "
 "connexion."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:60
+#: accounts/templates/accounts/partials/_ninja_login_card.html:64
 #, python-format
 msgid ""
 "Give %(name)s their own login, so they can see their belt, badges and "
@@ -2430,11 +2455,11 @@ msgstr ""
 "données et pouvez supprimer le compte à tout moment. Votre enfant reçoit un "
 "e-mail pour choisir un mot de passe, ou son premier lien de connexion."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:70
+#: accounts/templates/accounts/partials/_ninja_login_card.html:74
 msgid "Switch login back on"
 msgstr "Réactiver le compte"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:70
+#: accounts/templates/accounts/partials/_ninja_login_card.html:74
 msgid "Create login"
 msgstr "Créer le compte"
 

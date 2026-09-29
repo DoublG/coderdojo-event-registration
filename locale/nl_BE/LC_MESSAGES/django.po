@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 11:52+0000\n"
+"POT-Creation-Date: 2026-09-29 12:15+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -777,7 +777,7 @@ msgstr ""
 "Die toegangssleutel kon niet worden gecontroleerd. Probeer het opnieuw."
 
 #: accounts/security_views.py:219 accounts/security_views.py:252
-#: accounts/templates/accounts/partials/_ninja_login_card.html:31
+#: accounts/templates/accounts/partials/_ninja_login_card.html:35
 msgid "Two-step login is off."
 msgstr "Aanmelden in twee stappen staat uit."
 
@@ -874,7 +874,7 @@ msgstr "Blauwgroene lampjesrobot"
 #: accounts/templates/accounts/confirm_email_change.html:33
 #: accounts/templates/accounts/ninja_login_action.html:3
 #: accounts/templates/accounts/partials/_account_details_edit.html:22
-#: accounts/templates/accounts/partials/_ninja_login_card.html:41
+#: accounts/templates/accounts/partials/_ninja_login_card.html:45
 msgid "Change email address"
 msgstr "E-mailadres wijzigen"
 
@@ -901,7 +901,7 @@ msgstr ""
 
 #: accounts/templates/accounts/change_email.html:30
 #: accounts/templates/accounts/child_detail.html:99
-#: accounts/templates/accounts/ninja_login_action.html:36
+#: accounts/templates/accounts/ninja_login_action.html:40
 #: accounts/templates/accounts/partials/_account_details_edit.html:30
 #: accounts/templates/accounts/partials/_add_child.html:30
 #: accounts/templates/accounts/partials/_child_avatar_picker.html:28
@@ -932,7 +932,7 @@ msgid "Cancel"
 msgstr "Annuleren"
 
 #: accounts/templates/accounts/change_email.html:31
-#: accounts/templates/accounts/ninja_login_action.html:37
+#: accounts/templates/accounts/ninja_login_action.html:41
 #: privacy/templates/privacy/manage/email.html:26
 msgid "Send the link"
 msgstr "Link versturen"
@@ -2015,7 +2015,7 @@ msgstr ""
 
 #: accounts/templates/accounts/manage/security.html:98
 #: accounts/templates/accounts/ninja_login_action.html:3
-#: accounts/templates/accounts/partials/_ninja_login_card.html:46
+#: accounts/templates/accounts/partials/_ninja_login_card.html:50
 #: accounts/templates/accounts/security.html:106
 #: accounts/templates/accounts/security_confirm.html:3
 #: accounts/templates/accounts/security_confirm.html:8
@@ -2047,7 +2047,7 @@ msgstr "Toch een wachtwoord gebruiken"
 msgid "Change %(name)s's email address"
 msgstr "Het e-mailadres van %(name)s wijzigen"
 
-#: accounts/templates/accounts/ninja_login_action.html:15
+#: accounts/templates/accounts/ninja_login_action.html:16
 #, python-format
 msgid ""
 "%(name)s logs in with <strong>%(email)s</strong>, and we send their mail "
@@ -2056,7 +2056,16 @@ msgstr ""
 "%(name)s meldt zich aan met <strong>%(email)s</strong>, en we sturen de "
 "mails daarheen."
 
-#: accounts/templates/accounts/ninja_login_action.html:16
+#: accounts/templates/accounts/ninja_login_action.html:18
+#, python-format
+msgid ""
+"%(name)s's login has no email address yet. Once it has one, they can get "
+"mails and use a login link."
+msgstr ""
+"De login van %(name)s heeft nog geen e-mailadres. Zodra er een is, kunnen er "
+"mails komen en kan een inloglink gebruikt worden."
+
+#: accounts/templates/accounts/ninja_login_action.html:20
 #, python-format
 msgid ""
 "We send a link to the new address. It changes once that link is opened, "
@@ -2068,12 +2077,12 @@ msgstr ""
 "laten we het het oude adres en jou weten, en wordt %(name)s afgemeld op de "
 "andere toestellen."
 
-#: accounts/templates/accounts/ninja_login_action.html:18
+#: accounts/templates/accounts/ninja_login_action.html:22
 #, python-format
 msgid "%(name)s logs in with a password"
 msgstr "%(name)s meldt zich aan met een wachtwoord"
 
-#: accounts/templates/accounts/ninja_login_action.html:19
+#: accounts/templates/accounts/ninja_login_action.html:23
 #, python-format
 msgid ""
 "%(name)s now logs in with a link we mail to %(email)s. Switch back to a "
@@ -2083,12 +2092,12 @@ msgstr ""
 "het terug op een wachtwoord, dan mailen we een link om er een te kiezen; "
 "inloglinks werken dan niet meer."
 
-#: accounts/templates/accounts/ninja_login_action.html:21
+#: accounts/templates/accounts/ninja_login_action.html:25
 #, python-format
 msgid "Turn off %(name)s's two-step login"
 msgstr "Aanmelden in twee stappen uitzetten voor %(name)s"
 
-#: accounts/templates/accounts/ninja_login_action.html:22
+#: accounts/templates/accounts/ninja_login_action.html:26
 #, python-format
 msgid ""
 "For when %(name)s lost their phone or passkey and their backup codes: their "
@@ -2099,12 +2108,12 @@ msgstr ""
 "is: de app, toegangssleutels en back-upcodes worden verwijderd, en aanmelden "
 "gaat zonder tweede stap. Daarna kan het opnieuw ingesteld worden."
 
-#: accounts/templates/accounts/ninja_login_action.html:37
-#: accounts/templates/accounts/partials/_ninja_login_card.html:43
+#: accounts/templates/accounts/ninja_login_action.html:41
+#: accounts/templates/accounts/partials/_ninja_login_card.html:47
 msgid "Switch to a password"
 msgstr "Overschakelen naar een wachtwoord"
 
-#: accounts/templates/accounts/ninja_login_action.html:37
+#: accounts/templates/accounts/ninja_login_action.html:41
 #: accounts/templates/accounts/security_confirm.html:25
 msgid "Turn off"
 msgstr "Uitzetten"
@@ -2325,7 +2334,7 @@ msgstr "Mail me een bevestigingslink"
 msgid "Own login"
 msgstr "Eigen login"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:25
+#: accounts/templates/accounts/partials/_ninja_login_card.html:26
 #, python-format
 msgid ""
 "%(name)s logs in with <strong>%(email)s</strong> (username "
@@ -2334,15 +2343,26 @@ msgstr ""
 "%(name)s meldt zich aan met <strong>%(email)s</strong> (gebruikersnaam "
 "<strong>%(username)s</strong>)."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:26
+#: accounts/templates/accounts/partials/_ninja_login_card.html:28
+#, python-format
+msgid ""
+"%(name)s logs in with the username <strong>%(username)s</strong>. There's no "
+"email address on their login, so they get no mails and can't use a login "
+"link: add one below."
+msgstr ""
+"%(name)s meldt zich aan met de gebruikersnaam <strong>%(username)s</strong>. "
+"Er staat geen e-mailadres op de login, dus er komen geen mails en een "
+"inloglink kan niet: voeg er hieronder een toe."
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:30
 msgid "They haven't logged in yet."
 msgstr "Je kind heeft zich nog niet aangemeld."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:26
+#: accounts/templates/accounts/partials/_ninja_login_card.html:30
 msgid "They haven't chosen a password yet."
 msgstr "Er is nog geen wachtwoord gekozen."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:27
+#: accounts/templates/accounts/partials/_ninja_login_card.html:31
 msgid ""
 "With their login they see this page and can sign themselves up for sessions; "
 "you keep managing their details."
@@ -2350,27 +2370,31 @@ msgstr ""
 "Met die login ziet je kind deze pagina en kan het zich zelf inschrijven voor "
 "sessies. Jij blijft de gegevens beheren."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:30
+#: accounts/templates/accounts/partials/_ninja_login_card.html:34
 msgid "Logs in with a link we mail them each time."
 msgstr "Meldt zich aan met een link die we telkens mailen."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:30
+#: accounts/templates/accounts/partials/_ninja_login_card.html:34
 msgid "Logs in with a password."
 msgstr "Meldt zich aan met een wachtwoord."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:31
+#: accounts/templates/accounts/partials/_ninja_login_card.html:35
 msgid "Two-step login is on."
 msgstr "Aanmelden in twee stappen staat aan."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:38
+#: accounts/templates/accounts/partials/_ninja_login_card.html:42
 msgid "Send the login mail again"
 msgstr "De aanmeldmail opnieuw sturen"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:38
+#: accounts/templates/accounts/partials/_ninja_login_card.html:42
 msgid "Send the password mail again"
 msgstr "Stuur de wachtwoordmail opnieuw"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:50
+#: accounts/templates/accounts/partials/_ninja_login_card.html:45
+msgid "Add an email address"
+msgstr "E-mailadres toevoegen"
+
+#: accounts/templates/accounts/partials/_ninja_login_card.html:54
 #, python-format
 msgid ""
 "Remove %(name)s's login? They can't log in any more; their sessions, belts "
@@ -2379,11 +2403,11 @@ msgstr ""
 "De login van %(name)s verwijderen? Je kind kan dan niet meer aanmelden; "
 "sessies, gordels en badges blijven bewaard."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:52
+#: accounts/templates/accounts/partials/_ninja_login_card.html:56
 msgid "Remove login"
 msgstr "Login verwijderen"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:58
+#: accounts/templates/accounts/partials/_ninja_login_card.html:62
 #, python-format
 msgid ""
 "%(name)s's login is switched off. Switch it back on with their email "
@@ -2392,7 +2416,7 @@ msgstr ""
 "De login van %(name)s staat uit. Zet hem weer aan met diens e-mailadres: dan "
 "komt er een mail om een nieuw wachtwoord te kiezen, of de eerste inloglink."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:60
+#: accounts/templates/accounts/partials/_ninja_login_card.html:64
 #, python-format
 msgid ""
 "Give %(name)s their own login, so they can see their belt, badges and "
@@ -2405,11 +2429,11 @@ msgstr ""
 "beheren en kan de login altijd weer verwijderen. Je kind krijgt een mail om "
 "een wachtwoord te kiezen, of de eerste inloglink."
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:70
+#: accounts/templates/accounts/partials/_ninja_login_card.html:74
 msgid "Switch login back on"
 msgstr "Login opnieuw inschakelen"
 
-#: accounts/templates/accounts/partials/_ninja_login_card.html:70
+#: accounts/templates/accounts/partials/_ninja_login_card.html:74
 msgid "Create login"
 msgstr "Login aanmaken"
 

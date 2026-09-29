@@ -11,7 +11,11 @@
   {% with name=child.name email=child.account.email %}
     {% if kind == "email" %}
       <h1 class="heading-lg">{% blocktranslate %}Change {{ name }}'s email address{% endblocktranslate %}</h1>
-      <p class="body">{% blocktranslate %}{{ name }} logs in with <strong>{{ email }}</strong>, and we send their mail there.{% endblocktranslate %}</p>
+      {% if email %}
+        <p class="body">{% blocktranslate %}{{ name }} logs in with <strong>{{ email }}</strong>, and we send their mail there.{% endblocktranslate %}</p>
+      {% else %}
+        <p class="body">{% blocktranslate %}{{ name }}'s login has no email address yet. Once it has one, they can get mails and use a login link.{% endblocktranslate %}</p>
+      {% endif %}
       <p class="body-sm muted">{% blocktranslate with hours=valid_hours %}We send a link to the new address. It changes once that link is opened, within {{ hours }} hours; nothing changes until then. Then we let the old address and you know, and {{ name }} is logged out on their other devices.{% endblocktranslate %}</p>
     {% elif kind == "use_password" %}
       <h1 class="heading-lg">{% blocktranslate %}{{ name }} logs in with a password{% endblocktranslate %}</h1>

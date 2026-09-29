@@ -3675,6 +3675,29 @@ class SeedLoginLinksTests(TestCase):
         self.assertEqual((row["role"], row["password"]), ("guardian", LOGIN_LINK_PASSWORD))
 
 
+class ChildLoginWithoutEmailTests(LoginLinkTestMixin, TestCase):
+    """A child login without an email address (older seeded data): the card
+    says so instead of leaving a gap, and offers to add one."""
+
+    def test_the_card_offers_to_add_an_address(self):
+        guardian = User.objects.create(username="ellen", email="ellen@example.com")
+        guardian.set_password(PASSWORD)
+        guardian.save()
+        account = User.objects.create(username="finn-login", email="", account_type=User.NINJA)
+        child = make_ninja(guardian, "Finn", account=account)
+        self.client.force_login(guardian)
+        response = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": child.id}))
+        self.assertContains(response, "logs in with the username <strong>finn-login</strong>")
+        self.assertNotContains(response, "logs in with <strong></strong>")
+        self.assertContains(response, "Add an email address")
+
+        self.client.post(
+            reverse("ninja_login_email", kwargs={"ninja_id": child.id}),
+            {"new_email": "finn@example.com", "password": PASSWORD},
+        )
+        self.assertEqual(self.mails("email_change_confirm").get().recipient, "finn@example.com")
+
+
 def settings_site_url():
     from django.conf import settings
 
