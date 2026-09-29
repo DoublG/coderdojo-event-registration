@@ -3829,3 +3829,107 @@ Everything keeps its full Django admin page.
    en/nl/fr).
 5. **Finishing:** tests, Dutch and French, the help docs (a new
    organisation page, the volunteer pages on the reminder), CLAUDE.md and §6.
+
+## 22. Changing an account's email address (planned)
+
+**Planned, not built.** The account page's details (`accounts.views.edit_account`)
+edit the name, phone and postcode in place; the email address is shown
+read-only there. It can't simply be another field: it's a login name
+(`accounts.backends.EmailOrUsernameBackend`), where every mail goes
+(`mailing.services.send` reads `user.email`), and a mistyped address would
+lock the family out of password resets. So changing it is its own flow,
+confirmed from the new address. Until then, the organisation changes it in
+the Django admin on request.
+
+### What the code does today, and what that means
+
+- `User.email` has **no unique constraint** in the database (Django's
+  `AbstractUser`); family sign-up and a child's login check it
+  case-insensitively in their forms. The change has to check it too, both
+  when it's asked for and again when it's confirmed.
+- A queued mail keeps the address it was queued with
+  (`EmailMessage.recipient`, "the address used, as it was at the time"). So
+  a notice queued *before* the address changes still goes to the old one,
+  and mail already in the queue isn't redirected.
+- `send()` always mails `user.email`. The confirmation has to go to the
+  *new* address before it's the account's, which `send()` can't do yet.
+- Django's password-reset links include the email in their hash, so every
+  reset link that's still open stops working once the address changes
+  (wanted).
+- A passkey's user name is the email (`accounts/webauthn_entities.py`);
+  existing passkeys keep showing the old one in the authenticator, and
+  still work.
+- `EmailSuppression` blocks an address whatever the account: a new address
+  that bounced before can't receive the confirmation.
+
+### Decisions (proposed)
+
+- **Confirmed from the new address.** The account holder asks for the
+  change with their **current password** (`accounts.forms.ConfirmPasswordForm`
+  already exists) and the new address; we mail a link there; the address
+  only changes when that link is used. Nothing changes until then.
+- **No new model: a signed link.** `django.core.signing` of account id, new
+  address and the *current* address (salt `accounts.email_change`, valid
+  `EMAIL_CHANGE_MAX_AGE` = 24 hours). Including the current address makes
+  the link single-use: once the address has changed, it no longer matches.
+  No row with a pending address means nothing new to classify for privacy
+  (§16), keep or erase.
+- **The link needs the same account logged in.** Opening it logged out goes
+  through `/login/` (the old address or the username still work); another
+  account gets a 404. That proves both the account and the new mailbox.
+  **GET shows a confirmation page, POST changes it**, so a mail scanner that
+  follows links can't do it (same as the unsubscribe page).
+- **The old address is told.** When the change is made, an
+  `email_changed` service mail is queued to the old address (queued before
+  saving, so it keeps that address): what changed, when, and to contact us
+  if it wasn't them. The new address gets the confirmation link
+  (`email_change_confirm`). No mail when the change is only asked for.
+- **Service mail to another address:** `send()` gets an optional
+  `address=` for `service` mail only, used as the recipient and checked
+  against `EmailSuppression` like any other; everything else still goes to
+  `user.email`.
+- **Throttled:** one request per account per minute through the cache (as
+  the data export), so the form can't be used to send mail to arbitrary
+  addresses in bulk.
+- **Out of scope:** a child's own login's address (the guardian's *Own
+  login* card, `accounts/child_accounts.py`, would reuse the same service
+  later), and changing the username.
+
+### Screens
+
+1. The details form's email line gets a **Change email address** link to
+   `/account/email/` (`change_email`, a full page like the password change:
+   the new address, the current password, what happens next). Posting
+   shows "Check your inbox at *new address*", and the account page keeps
+   showing the current address.
+2. `/account/email/confirm/<token>/` (`confirm_email_change`): "Change your
+   email address from *old* to *new*?" with one button; afterwards the
+   account page with "Your email address is now *new*". An expired or used
+   link says so and links to step 1.
+
+### Phases
+
+1. **Mail engine:** `send(..., address=)` for service mail, the two
+   templates (`email_change_confirm`, `email_changed`) in en/nl/fr in
+   `mailing/seed_templates.py` with their sample context and in
+   `SYSTEM_TEMPLATE_KEYS` (production gets them through
+   `load_mail_templates` at deploy).
+2. **Service:** `accounts/email_change.py` (`request_change`,
+   `read_token`, `confirm_change`; `EmailChangeError` with a user-facing
+   message): the uniqueness check (case-insensitive, at both steps), the
+   suppression check, the throttle, the notice to the old address and the
+   save (through `save()`, so the audit log has it).
+3. **Pages:** the two views and templates, the link on the details form,
+   tests (password required, taken address, suppressed address, link for
+   another account, expired and reused link, the notice's recipient, the
+   old reset link failing, the audit entry).
+4. **Finishing:** Dutch and French, the help docs (*Managing your account*,
+   *Your own details*), CLAUDE.md.
+
+### Open points
+
+- Should an **organisation admin** be able to start the same flow for
+  someone from `/manage/privacy/` (a family that lost access to the old
+  mailbox), instead of editing it in the Django admin?
+- Should the change also **log out the account's other sessions**, as a
+  password change does?
