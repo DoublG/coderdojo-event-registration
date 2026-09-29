@@ -336,14 +336,15 @@ class OrganisationRoleManager(models.Manager):
 
 
 class OrganisationRole(models.Model):
-    """Access to the organisation's management dashboards — for now the
-    Django admin (DATA_MODEL.md §10, decision 4). Separate from being
-    *listed* on the organisation's team page (content.OrganisationTeamMember):
-    not everyone with access is listed, and vice versa.
+    """Access to the organisation's management side: the organisation
+    dashboard's areas, and the Django admin when asked for (12 hours at a
+    time, AdminAccessGrant; DATA_MODEL.md §23). Separate from being *listed*
+    on the organisation's team page (content.OrganisationTeamMember): not
+    everyone with access is listed, and vice versa.
 
-    A role makes the account staff and puts it in the matching group, whose
-    permissions are defined in accounts.organisation (kept in sync by the
-    signals there — don't set is_staff or these groups by hand)."""
+    A role puts the account in the matching group, whose permissions are
+    defined in accounts.organisation (kept in sync by the signals there —
+    don't set these groups by hand; is_staff follows AdminAccessGrant)."""
 
     BOARD = "board"
     ADMIN = "admin"
@@ -379,6 +380,71 @@ class OrganisationRole(models.Model):
     def clean(self):
         if self.account_id and self.account.is_ninja:
             raise ValidationError("Only an adult account can have an organisation role.")
+
+
+class AdminAccessGrantQuerySet(models.QuerySet):
+    def open(self, now=None):
+        """Grants that let their account into the Django admin right now."""
+        now = now or timezone.now()
+        return self.filter(ended_at__isnull=True, started_at__lte=now, expires_at__gt=now)
+
+
+AdminAccessGrantManager = models.Manager.from_queryset(AdminAccessGrantQuerySet)
+
+
+class _AdminAccessGrantManager(AdminAccessGrantManager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("account")
+
+
+class AdminAccessGrant(models.Model):
+    """Time-boxed access to the Django admin (DATA_MODEL.md §23): an
+    organisation role no longer opens /admin/ by itself; its holder asks for
+    it, with a reason, for `ADMIN_ACCESS_HOURS`. Made and ended only through
+    accounts.admin_access, which also keeps `User.is_staff` in step; the
+    admin site checks for an open grant on every request
+    (core.admin_site.AdminSite), so access stops at `expires_at` whatever
+    the job that closes grants does. Recorded in the audit log. Superusers
+    don't need one."""
+
+    EXPIRED = "expired"
+    ENDED = "ended"
+    REVOKED = "revoked"
+    ROLE_REMOVED = "role_removed"
+    END_REASON_CHOICES = [
+        (EXPIRED, _("Expired")),
+        (ENDED, _("Ended early")),
+        (REVOKED, _("Ended by an organisation admin")),
+        (ROLE_REMOVED, _("Organisation role removed")),
+    ]
+
+    account = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="admin_access_grants")
+    reason = models.CharField(max_length=300, help_text="Why the account holder asked for access.")
+    started_at = models.DateTimeField(default=timezone.now)
+    expires_at = models.DateTimeField()
+    ended_at = models.DateTimeField(null=True, blank=True)
+    ended_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        help_text="Who ended it early; empty when it expired.",
+    )
+    end_reason = models.CharField(max_length=20, choices=END_REASON_CHOICES, blank=True)
+
+    objects = _AdminAccessGrantManager()
+
+    class Meta:
+        ordering = ["-started_at"]
+
+    def __str__(self):
+        return f"{self.account} ({self.started_at:%Y-%m-%d %H:%M})"
+
+    @property
+    def is_open(self):
+        now = timezone.now()
+        return self.ended_at is None and self.started_at <= now < self.expires_at
 
 
 class SignInRequirementManager(models.Manager):

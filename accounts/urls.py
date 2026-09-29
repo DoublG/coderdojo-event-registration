@@ -45,6 +45,8 @@ urlpatterns = [
     ),
     path("", include(_two_factor)),
     path("manage/security/", manage.security_policy, name="manage_security"),
+    path("manage/django-admin/", manage.manage_admin_access, name="manage_admin_access"),
+    path("manage/django-admin/end/", manage.manage_admin_access_end, name="manage_admin_access_end"),
     path(
         "manage/security/accounts/<int:user_id>/turn-off/", manage.turn_off_two_step, name="manage_security_turn_off"
     ),

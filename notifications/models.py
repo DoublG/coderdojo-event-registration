@@ -22,6 +22,11 @@ class Notification(models.Model):
         "recipient, sharing the same dojo/text/url but each with its own independent read "
         "flag — see notifications.services.notify.",
     )
+    organisation = models.BooleanField(
+        default=False,
+        help_text="For the organisation dashboard's bell (DATA_MODEL.md §23), e.g. someone opened "
+        "access to the Django admin. Personal notices without a dojo leave it off.",
+    )
     text = models.CharField(max_length=300)
     url = models.CharField(max_length=300, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)

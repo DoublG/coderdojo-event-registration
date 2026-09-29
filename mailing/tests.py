@@ -1285,7 +1285,8 @@ class CampaignDashboardTests(TestCase):
         for url in urls:
             self.assertEqual(self.client.get(url).status_code, 200)
 
-    def test_nav_links_admins_to_the_dashboard_and_the_board_to_the_admin(self):
+    def test_nav_links_every_role_to_the_management_area(self):
+        """The board too: it asks for the Django admin there (DATA_MODEL.md §23)."""
         from accounts.models import OrganisationRole
 
         self.assertContains(self.client.get(reverse("account_home")), f'href="{reverse("manage_home")}"')
@@ -1293,8 +1294,8 @@ class CampaignDashboardTests(TestCase):
         OrganisationRole.objects.create(account=board, role=OrganisationRole.BOARD)
         self.client.force_login(board)
         response = self.client.get(reverse("account_home"))
-        self.assertNotContains(response, f'href="{reverse("manage_home")}"')
-        self.assertContains(response, 'href="/admin/"')
+        self.assertContains(response, f'href="{reverse("manage_home")}"')
+        self.assertNotContains(response, 'href="/admin/"')
 
     # the draft
 

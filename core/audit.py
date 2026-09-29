@@ -32,6 +32,9 @@ RECORDED = {
     "accounts.Ninja": {"mask_fields": ["allergies_notes"]},
     "accounts.Guardianship": {},
     "accounts.OrganisationRole": {},
+    # Time-boxed access to the Django admin (DATA_MODEL.md §23): who asked,
+    # why, until when, and how it ended.
+    "accounts.AdminAccessGrant": {},
     # The organisation roles' permission groups (accounts/organisation.py).
     "auth.Group": {"m2m_fields": ["permissions"]},
     "dojos.Dojo": {},

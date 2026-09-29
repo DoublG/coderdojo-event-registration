@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password
 
 from privacy.registry import Category, Computed, LegalBasis, Subject, anonymise, keep, personal, register
 
-from .models import Guardianship, Ninja, OrganisationRole, SignInRequirement, User
+from .models import AdminAccessGrant, Guardianship, Ninja, OrganisationRole, SignInRequirement, User
 
 FAMILY_AND_TEAM = (
     "The family (every guardian, and the child's own login); the team of a dojo the child signs up at; "
@@ -132,6 +132,21 @@ register(
     retention="organisation_role",
     seen_by="The organisation (Django admin)",
     fields={("account", "role", "granted_at"): personal(Category.IDENTITY)},
+    not_personal=["id"],
+)
+
+register(
+    AdminAccessGrant,
+    subjects={Subject.ACCOUNT: "account"},
+    purpose="Time-boxed access to the Django admin: who had it, when and why",
+    legal_basis=LegalBasis.LEGITIMATE_INTEREST,
+    retention="admin_access",
+    seen_by="The account holder; the organisation's admins (organisation dashboard, Django admin)",
+    fields={
+        # Not `security` (that's for secrets): the account holder may see their own requests.
+        ("account", "reason", "started_at", "expires_at", "ended_at", "end_reason"): personal(Category.IDENTITY),
+        "ended_by": personal(Category.IDENTITY, export=False),
+    },
     not_personal=["id"],
 )
 

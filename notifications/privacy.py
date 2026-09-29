@@ -15,5 +15,5 @@ register(
         # The text names the person it's about (a join request, a waitlisted child).
         ("recipient", "text", "url", "created_at", "read"): personal(Category.IDENTITY),
     },
-    not_personal=["id", "dojo"],
+    not_personal=["id", "dojo", "organisation"],
 )

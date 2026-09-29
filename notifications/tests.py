@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, Mock, patch
 from channels_redis.core import RedisChannelLayer
 from channels_redis.utils import create_pool
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase, override_settings
 
 from dojos.testing import make_champion, make_dojo
 
@@ -93,3 +93,42 @@ class ChannelLayerSettingsTests(TestCase):
         for host in settings.CHANNEL_LAYERS["default"]["CONFIG"]["hosts"]:
             timeout = create_pool(host).make_connection().socket_timeout
             self.assertTrue(timeout is None or timeout > RedisChannelLayer.brpop_timeout, timeout)
+
+
+@override_settings(CHANNEL_LAYERS={"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}})
+class OrganisationNotificationConsumerTests(TransactionTestCase):
+    """notifications.consumers.OrganisationNotificationConsumer: the
+    organisation dashboard's bell, live (DATA_MODEL.md §23). A
+    TransactionTestCase, as dojos.tests.NotificationConsumerTests explains."""
+
+    def setUp(self):
+        from accounts.models import OrganisationRole, User
+
+        self.board = User.objects.create(username="board")
+        OrganisationRole.objects.create(account=self.board, role=OrganisationRole.BOARD)
+        self.parent = User.objects.create(username="parent")
+
+    async def _connect(self, user):
+        from channels.testing import WebsocketCommunicator
+
+        from .consumers import OrganisationNotificationConsumer
+
+        communicator = WebsocketCommunicator(OrganisationNotificationConsumer.as_asgi(), "/ws/manage/notifications/")
+        communicator.scope["user"] = user
+        connected, _ = await communicator.connect()
+        return communicator, connected
+
+    async def test_an_organisation_role_connects_and_gets_pushes(self):
+        from asgiref.sync import sync_to_async
+
+        communicator, connected = await self._connect(self.board)
+        self.assertTrue(connected)
+        await sync_to_async(notify)(self.board, "Opened access", organisation=True)
+        message = await communicator.receive_from()
+        self.assertIn("Opened access", message)
+        self.assertIn('id="notif-admin-page"', message)
+        await communicator.disconnect()
+
+    async def test_anyone_else_is_refused(self):
+        _communicator, connected = await self._connect(self.parent)
+        self.assertFalse(connected)

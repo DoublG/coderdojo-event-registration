@@ -35,4 +35,6 @@ def manage_home(request):
         raise Http404
     if contexts.areas:
         return redirect(AREA_LANDINGS[contexts.areas[0]])
+    if contexts.admin_access:  # a role without an area (the board): its Django admin access page
+        return redirect("manage_admin_access")
     return redirect("dojo_dashboard", dojo_id=contexts.first_dojo.id)

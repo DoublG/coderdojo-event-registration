@@ -1,7 +1,9 @@
 """Organisation roles (accounts.OrganisationRole): who may use the
 organisation's management dashboards, which for now are the Django admin
 (DATA_MODEL.md §10, decision 4). Each role is a Django group with the
-permissions below; holding any role makes the account staff.
+permissions below. A role opens the organisation dashboard's areas all the
+time, but the Django admin only while its holder has asked for it, 12 hours
+at a time (accounts.admin_access, DATA_MODEL.md §23).
 
 - BOARD: read-only oversight (dojos, teams, events, applications, badges
   and belts) plus maintaining the organisation's team listing
@@ -161,10 +163,13 @@ def ensure_groups():
 
 
 def sync_organisation_access(user):
-    """Put `user` in exactly the groups of the roles they hold, and make them
-    staff while they hold any. Losing the last role only drops staff status
-    when nothing else needs it (superuser, direct permissions or other
-    groups — e.g. a background-check reviewer)."""
+    """Put `user` in exactly the groups of the roles they hold. A role no
+    longer makes the account staff: the Django admin is asked for, 12 hours
+    at a time (accounts.admin_access, DATA_MODEL.md §23), so losing the last
+    role ends any access still open."""
+    from . import admin_access
+    from .models import AdminAccessGrant
+
     groups = ensure_groups()
     roles = set(user.organisation_roles.values_list("role", flat=True))
     for role, group in groups.items():
@@ -172,22 +177,9 @@ def sync_organisation_access(user):
             user.groups.add(group)
         else:
             user.groups.remove(group)
-
-    if roles:
-        needs_staff = True
-    else:
-        needs_staff = (
-            user.is_superuser
-            or user.user_permissions.exists()
-            or user.groups.exclude(name__in=GROUP_NAMES.values()).exists()
-        )
-    if user.is_staff != needs_staff:
-        user.is_staff = needs_staff
-        user.save(update_fields=["is_staff"])
-
-
-def is_organisation_member(user):
-    return user.is_authenticated and user.organisation_roles.exists()
+    if not roles:
+        admin_access.end_for(user, end_reason=AdminAccessGrant.ROLE_REMOVED)
+    admin_access.sync_staff(user)
 
 
 def is_organisation_admin(user):

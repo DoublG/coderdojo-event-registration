@@ -1,0 +1,58 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}{% load tz %}
+{% block manage_page_title %}{% translate "Django admin" %}{% endblock %}
+{% block manage_heading %}{% translate "Django admin" %}{% endblock %}
+
+{% block manage_content %}
+  {% comment %}Time-boxed access to the Django admin (accounts.admin_access, accounts/manage.py, DATA_MODEL.md §23).{% endcomment %}
+  {% if grant %}
+    <div class="cd-card" style="padding: var(--space-5);">
+      <h2 class="heading-md">{% blocktranslate %}You have access until {{ until }}{% endblocktranslate %}</h2>
+      <p class="body-sm">{% blocktranslate with reason=grant.reason %}Your reason: {{ reason }}{% endblocktranslate %}</p>
+      <div class="cd-form__actions">
+        <a class="cd-btn cd-btn--primary label" href="{% url 'admin:index' %}">{% translate "Open the Django admin" %}</a>
+        <form method="post" action="{% url 'manage_admin_access_end' %}">
+          {% csrf_token %}
+          <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "End access now" %}</button>
+        </form>
+      </div>
+    </div>
+  {% else %}
+    <p class="body-sm">{% blocktranslate %}The Django admin is the technical tool for fixing data by hand. You get it for {{ hours }} hours, with your role's permissions; after that it closes by itself. Your request and its end are recorded in the audit log, and the other organisation admins get a notification.{% endblocktranslate %}</p>
+    <form method="post" class="cd-card cd-form" style="padding: var(--space-5);" novalidate>
+      {% csrf_token %}
+      {{ form }}
+      <div class="cd-form__actions">
+        <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Ask for access" %}</button>
+      </div>
+    </form>
+  {% endif %}
+
+  {% if history %}
+    <h2 class="heading-md" style="margin-top: var(--space-6);">{% translate "Your earlier access" %}</h2>
+    <div class="cd-table-wrap">
+      <table class="cd-table cd-table--zebra">
+        <thead>
+          <tr>
+            <th class="label" scope="col">{% translate "From" %}</th>
+            <th class="label" scope="col">{% translate "Until" %}</th>
+            <th class="label" scope="col">{% translate "Reason" %}</th>
+            <th class="label" scope="col">{% translate "Ended" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% timezone "Europe/Brussels" %}
+          {% for row in history %}
+            <tr>
+              <td class="body-sm">{{ row.started_at|date:"d/m/Y H:i" }}</td>
+              <td class="body-sm">{% if row.ended_at %}{{ row.ended_at|date:"d/m/Y H:i" }}{% else %}{{ row.expires_at|date:"d/m/Y H:i" }}{% endif %}</td>
+              <td class="body-sm">{{ row.reason }}</td>
+              <td class="body-sm">{% if row.end_reason %}{{ row.get_end_reason_display }}{% else %}{% translate "Open" %}{% endif %}</td>
+            </tr>
+          {% endfor %}
+          {% endtimezone %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}

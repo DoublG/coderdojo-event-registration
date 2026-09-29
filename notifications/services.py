@@ -10,7 +10,7 @@ def _group_name(recipient_id):
     return f"notifications_user_{recipient_id}"
 
 
-def notify(recipient, text, url="", dojo=None, params=None):
+def notify(recipient, text, url="", dojo=None, params=None, organisation=False):
     """Creates a Notification and nudges that recipient's open WebSocket
     connection(s) (notifications.consumers.NotificationConsumer) to
     re-render and push themselves — see dojos.templates.dojos.partials.
@@ -26,10 +26,15 @@ def notify(recipient, text, url="", dojo=None, params=None):
     The text is stored as it's shown, so it's written in the recipient's
     language: pass a gettext_lazy() message and its `params` (the
     %(name)s values), and it's rendered here under the recipient's
-    preferred_language."""
+    preferred_language.
+
+    `dojo` puts it in that dojo's bell; `organisation=True` in the
+    organisation dashboard's bell (DATA_MODEL.md §23)."""
     with translation.override(recipient.preferred_language or settings.LANGUAGE_CODE):
         text = str(text) % params if params else str(text)
-    notification = Notification.objects.create(recipient=recipient, text=text, url=url, dojo=dojo)
+    notification = Notification.objects.create(
+        recipient=recipient, text=text, url=url, dojo=dojo, organisation=organisation
+    )
 
     channel_layer = get_channel_layer()
     if channel_layer is not None:

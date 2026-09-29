@@ -210,6 +210,13 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 15 * 60.0,
         "options": {"expires": 15 * 60},
     },
+    # Time-boxed access to the Django admin (accounts.admin_access, DATA_MODEL.md
+    # §23): records the end of access whose 12 hours are up. Short, so on `periodic`.
+    "close-admin-access": {
+        "task": "accounts.tasks.close_admin_access",
+        "schedule": 5 * 60.0,
+        "options": {"expires": 5 * 60},
+    },
     # Heavier daily jobs run on the default queue (the mailing worker), so
     # they never hold up the 10-second dispatcher: an explicit "queue".
     "session-reminders": {

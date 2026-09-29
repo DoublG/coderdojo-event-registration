@@ -14,8 +14,10 @@ from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from . import sign_in, two_step
-from .forms import SignInPolicyForm
+from core.manage_nav import require_organisation_context
+
+from . import admin_access, sign_in, two_step
+from .forms import AdminAccessForm, SignInPolicyForm
 from .models import SignInRequirement, User
 from .organisation import Area, require_area
 
@@ -90,3 +92,55 @@ def turn_off_two_step(request, user_id):
         request, _("Two-step login is off for %(name)s.") % {"name": account.get_full_name() or account.username}
     )
     return redirect(back)
+
+
+def _require_may_ask(request):
+    """The Django admin access page: any organisation role (a 404 otherwise,
+    also for a superuser without one: theirs is never time-boxed)."""
+    from django.http import Http404
+
+    require_organisation_context(request)
+    if not admin_access.may_ask(request.user):
+        raise Http404
+
+
+@login_required
+def manage_admin_access(request):
+    """Ask for the Django admin for 12 hours, see when it ends, and your
+    earlier grants (DATA_MODEL.md §23)."""
+    _require_may_ask(request)
+    grant = admin_access.open_grant(request.user)
+    form = AdminAccessForm(request.user, request.POST or None)
+    if request.method == "POST" and grant is None and form.is_valid():
+        try:
+            grant = admin_access.request_access(request.user, form.cleaned_data["reason"])
+        except admin_access.AdminAccessError as error:
+            form.add_error(None, str(error))
+        else:
+            messages.success(
+                request,
+                _("You have access to the Django admin until %(until)s.") % {"until": admin_access.until_label(grant)},
+            )
+            return redirect("manage_admin_access")
+    return render(
+        request,
+        "accounts/manage/admin_access.html",
+        {
+            "form": form,
+            "grant": grant,
+            "until": admin_access.until_label(grant) if grant else "",
+            "hours": admin_access.ADMIN_ACCESS_HOURS,
+            "history": request.user.admin_access_grants.all()[:20],
+            "active": "admin_access",
+        },
+    )
+
+
+@login_required
+@require_POST
+def manage_admin_access_end(request):
+    """End your own access now."""
+    _require_may_ask(request)
+    if admin_access.end_for(request.user, by=request.user):
+        messages.success(request, _("Your access to the Django admin has ended."))
+    return redirect("manage_admin_access")

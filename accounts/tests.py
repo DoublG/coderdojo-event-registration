@@ -1234,8 +1234,9 @@ class NinjaBeltDisplayTests(TestCase):
 
 
 class OrganisationRoleTests(TestCase):
-    """OrganisationRole → staff status + a permission group (accounts.organisation):
-    the board is read-only (plus the team listing), admins edit the catalogue."""
+    """OrganisationRole → a permission group (accounts.organisation): the board
+    is read-only (plus the team listing), admins edit the catalogue. Staff
+    status only while the Django admin was asked for (accounts.admin_access)."""
 
     def setUp(self):
         self.user = User.objects.create(username="board1", email="b@example.com")
@@ -1248,13 +1249,13 @@ class OrganisationRoleTests(TestCase):
     def _fresh(self):
         return User.objects.get(pk=self.user.pk)  # has_perm caches per instance
 
-    def test_board_role_is_read_only_staff(self):
+    def test_board_role_is_read_only(self):
         from .models import OrganisationRole
 
         self._grant(OrganisationRole.BOARD)
         user = self._fresh()
 
-        self.assertTrue(user.is_staff)
+        self.assertFalse(user.is_staff)  # only while the Django admin was asked for
         self.assertTrue(user.has_perm("dojos.view_dojo"))
         self.assertTrue(user.has_perm("events.view_ninjabelt"))
         self.assertTrue(user.has_perm("content.change_organisationteammember"))
@@ -1316,14 +1317,16 @@ class OrganisationRoleTests(TestCase):
         self.assertFalse(user.is_staff)
         self.assertFalse(user.groups.exists())
 
-    def test_revoking_keeps_staff_that_is_needed_for_something_else(self):
-        from django.contrib.auth.models import Permission
+    def test_revoking_the_last_role_ends_access_to_the_django_admin(self):
+        from core.testing import with_admin_access
 
-        from .models import OrganisationRole
+        from .models import AdminAccessGrant, OrganisationRole
 
-        self.user.user_permissions.add(Permission.objects.get(codename="can_review_background_checks"))
-        self._grant(OrganisationRole.BOARD).delete()
-        self.assertTrue(self._fresh().is_staff)
+        role = self._grant(OrganisationRole.BOARD)
+        self.assertTrue(with_admin_access(self._fresh()).is_staff)
+        role.delete()
+        self.assertFalse(self._fresh().is_staff)
+        self.assertEqual(AdminAccessGrant.objects.get().end_reason, AdminAccessGrant.ROLE_REMOVED)
 
     def test_ninja_accounts_cannot_hold_a_role(self):
         from django.core.exceptions import ValidationError
@@ -1334,19 +1337,25 @@ class OrganisationRoleTests(TestCase):
         with self.assertRaises(ValidationError):
             OrganisationRole(account=ninja, role=OrganisationRole.BOARD).full_clean()
 
-    def test_menu_links_role_holders_to_the_management_dashboards(self):
+    def test_menu_links_role_holders_to_the_management_area(self):
+        """Every role, the board too, gets the one Manage link; the Django
+        admin is asked for there (DATA_MODEL.md §23), never linked directly."""
         from .models import OrganisationRole
 
         self.client.force_login(self.user)
-        self.assertNotContains(self.client.get(reverse("account_home")), reverse("admin:index"))
+        self.assertNotContains(self.client.get(reverse("account_home")), f'href="{reverse("manage_home")}"')
         self._grant(OrganisationRole.BOARD)
-        self.assertContains(self.client.get(reverse("account_home")), reverse("admin:index"))
+        response = self.client.get(reverse("account_home"))
+        self.assertContains(response, f'href="{reverse("manage_home")}"')
+        self.assertNotContains(response, f'href="{reverse("admin:index")}"')
 
     def test_board_sees_applications_but_cannot_run_the_review_actions(self):
+        from core.testing import with_admin_access
+
         from .models import OrganisationRole
 
         self._grant(OrganisationRole.BOARD)
-        self.client.force_login(self._fresh())
+        self.client.force_login(with_admin_access(self._fresh()))
         response = self.client.get(reverse("admin:applications_application_changelist"))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "approve_applications")
@@ -2496,3 +2505,186 @@ class ChildFamilyNameTests(TestCase):
         unknown.refresh_from_db()
         self.assertEqual((known.name, known.family_name), ("Emma", "Peeters"))
         self.assertEqual((unknown.name, unknown.family_name), ("Lou Van Damme", ""))
+
+
+class AdminAccessTests(TestCase):
+    """Time-boxed access to the Django admin (accounts.admin_access,
+    DATA_MODEL.md §23): asked for with a reason and the password, 12 hours,
+    then closed; recorded in the audit log, and the other organisation
+    admins get a notification. Superusers are never time-boxed."""
+
+    def setUp(self):
+        from .models import OrganisationRole
+
+        self.admin = User.objects.create(username="admin1", email="a1@example.com", first_name="Ann")
+        self.admin.set_password(PASSWORD)
+        self.admin.save()
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.other_admin = User.objects.create(username="admin2", email="a2@example.com")
+        OrganisationRole.objects.create(account=self.other_admin, role=OrganisationRole.ADMIN)
+        self.reviewer = User.objects.create(username="rev", email="rev@example.com")
+        OrganisationRole.objects.create(account=self.reviewer, role=OrganisationRole.REVIEWER)
+
+    def _ask(self, reason="Fix a registration", password=PASSWORD):
+        self.client.force_login(self.admin)
+        with self.captureOnCommitCallbacks(execute=True):
+            return self.client.post(reverse("manage_admin_access"), {"reason": reason, "password": password})
+
+    def _fresh(self, user):
+        return User.objects.get(pk=user.pk)
+
+    def test_a_role_alone_never_opens_the_django_admin(self):
+        self.client.force_login(self.admin)
+        self.assertFalse(self._fresh(self.admin).is_staff)
+        self.assertEqual(self.client.get(reverse("admin:index")).status_code, 302)
+
+    def test_asking_opens_it_for_twelve_hours(self):
+        from .models import AdminAccessGrant
+
+        response = self._ask()
+        self.assertRedirects(response, reverse("manage_admin_access"))
+        grant = AdminAccessGrant.objects.get()
+        self.assertEqual((grant.account, grant.reason), (self.admin, "Fix a registration"))
+        self.assertEqual(grant.expires_at - grant.started_at, timedelta(hours=12))
+        self.assertTrue(self._fresh(self.admin).is_staff)
+        response = self.client.get(reverse("admin:index"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "access until")
+
+    def test_asking_needs_a_reason_and_the_password(self):
+        from .models import AdminAccessGrant
+
+        self.assertContains(self._ask(password="wrong"), "That password isn&#x27;t right.")
+        self.assertEqual(self._ask(reason="").status_code, 200)
+        self.assertFalse(AdminAccessGrant.objects.exists())
+
+    def test_access_stops_at_twelve_hours_without_the_job(self):
+        from .models import AdminAccessGrant
+
+        self._ask()
+        AdminAccessGrant.objects.update(expires_at=timezone.now() - timedelta(minutes=1))
+        self.assertTrue(self._fresh(self.admin).is_staff)  # the job hasn't run
+        self.assertEqual(self.client.get(reverse("admin:index")).status_code, 302)
+
+    def test_the_job_closes_it_and_takes_staff_away(self):
+        from .admin_access import close_expired
+        from .models import AdminAccessGrant
+
+        self._ask()
+        expired = timezone.now() - timedelta(minutes=1)
+        AdminAccessGrant.objects.update(expires_at=expired)
+        self.assertEqual(close_expired(), 1)
+        grant = AdminAccessGrant.objects.get()
+        self.assertEqual((grant.end_reason, grant.ended_at, grant.ended_by), (AdminAccessGrant.EXPIRED, expired, None))
+        self.assertFalse(self._fresh(self.admin).is_staff)
+        self.assertEqual(close_expired(), 0)
+
+    def test_ending_early(self):
+        from .models import AdminAccessGrant
+
+        self._ask()
+        self.assertRedirects(self.client.post(reverse("manage_admin_access_end")), reverse("manage_admin_access"))
+        grant = AdminAccessGrant.objects.get()
+        self.assertEqual((grant.end_reason, grant.ended_by), (AdminAccessGrant.ENDED, self.admin))
+        self.assertFalse(self._fresh(self.admin).is_staff)
+        self.assertEqual(self.client.get(reverse("admin:index")).status_code, 302)
+
+    def test_one_open_grant_at_a_time(self):
+        from .admin_access import AdminAccessError, request_access
+
+        self._ask()
+        with self.assertRaises(AdminAccessError):
+            request_access(self._fresh(self.admin), "Again")
+
+    def test_only_organisation_roles_may_ask(self):
+        from .admin_access import AdminAccessError, request_access
+
+        parent = User.objects.create(username="parent", email="p@example.com")
+        with self.assertRaises(AdminAccessError):
+            request_access(parent, "Please")
+        self.client.force_login(parent)
+        self.assertEqual(self.client.get(reverse("manage_admin_access")).status_code, 404)
+
+    def test_a_superuser_is_never_time_boxed(self):
+        root = User.objects.create(username="root", is_superuser=True, is_staff=True)
+        self.client.force_login(root)
+        self.assertEqual(self.client.get(reverse("admin:index")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("manage_admin_access")).status_code, 404)
+        from .admin_access import close_expired
+
+        close_expired()
+        self.assertTrue(self._fresh(root).is_staff)
+
+    def test_the_other_admins_get_a_notification(self):
+        from notifications.models import Notification
+
+        self._ask(reason="Merge two accounts")
+        notification = Notification.objects.get()
+        self.assertEqual(notification.recipient, self.other_admin)
+        self.assertTrue(notification.organisation)
+        self.assertIsNone(notification.dojo)
+        self.assertIn("Merge two accounts", notification.text)
+        self.assertIn("Ann", notification.text)
+
+    def test_the_request_and_its_end_are_in_the_audit_log(self):
+        from auditlog.models import LogEntry
+
+        from .models import AdminAccessGrant
+
+        self._ask()
+        self.client.post(reverse("manage_admin_access_end"))
+        entries = LogEntry.objects.get_for_object(AdminAccessGrant.objects.get()).order_by("timestamp")
+        self.assertEqual(
+            [(e.action, e.actor) for e in entries],
+            [(LogEntry.Action.CREATE, self.admin), (LogEntry.Action.UPDATE, self.admin)],
+        )
+
+    def test_the_page_shows_the_open_access_and_the_history(self):
+        self._ask(reason="Fix a registration")
+        response = self.client.get(reverse("manage_admin_access"))
+        self.assertContains(response, "You have access until")
+        self.assertContains(response, reverse("admin:index"))
+        self.assertContains(response, "Fix a registration")
+
+
+class OrganisationNotificationTests(TestCase):
+    """The organisation dashboard's notification bell (DATA_MODEL.md §23)."""
+
+    def setUp(self):
+        from notifications.services import notify
+
+        from .models import OrganisationRole
+
+        self.admin = User.objects.create(username="admin1", email="a1@example.com")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.mine = notify(self.admin, "Someone opened access", url=reverse("manage_admin_access"), organisation=True)
+        self.dojo_notice = notify(self.admin, "A personal notice")
+        self.client.force_login(self.admin)
+
+    def test_the_bell_shows_only_organisation_notifications(self):
+        response = self.client.get(reverse("manage_campaign_list"))
+        self.assertContains(response, 'id="notif-admin-page"')
+        self.assertContains(response, 'ws-connect="/ws/manage/notifications/"')
+        self.assertContains(response, "Someone opened access")
+        self.assertNotContains(response, "A personal notice")
+
+    def test_opening_one_marks_it_read_and_follows_it(self):
+        url = reverse("open_organisation_notification", kwargs={"notification_id": self.mine.id})
+        self.assertRedirects(self.client.get(url), reverse("manage_admin_access"))
+        self.mine.refresh_from_db()
+        self.assertTrue(self.mine.read)
+        other = reverse("open_organisation_notification", kwargs={"notification_id": self.dojo_notice.id})
+        self.assertEqual(self.client.get(other).status_code, 404)
+
+    def test_mark_all_read(self):
+        response = self.client.post(reverse("mark_all_organisation_notifications_read"))
+        self.assertContains(response, 'hx-swap-oob="true"')
+        self.mine.refresh_from_db()
+        self.dojo_notice.refresh_from_db()
+        self.assertEqual((self.mine.read, self.dojo_notice.read), (True, False))
+
+    def test_a_parent_gets_a_404(self):
+        self.client.force_login(User.objects.create(username="parent"))
+        url = reverse("open_organisation_notification", kwargs={"notification_id": self.mine.id})
+        self.assertEqual(self.client.get(url).status_code, 404)
+        self.assertEqual(self.client.post(reverse("mark_all_organisation_notifications_read")).status_code, 404)

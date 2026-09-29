@@ -296,6 +296,19 @@ class ConfirmPasswordForm(forms.Form):
         return password
 
 
+class AdminAccessForm(ConfirmPasswordForm):
+    """Asking for the Django admin (accounts.admin_access, DATA_MODEL.md
+    §23): why, and the password again."""
+
+    reason = forms.CharField(
+        label=_("Why do you need it?"),
+        max_length=300,
+        help_text=_("For example: fix a registration by hand. The other organisation admins see this."),
+        widget=forms.Textarea(attrs={"rows": 2}),
+    )
+    field_order = ["reason", "password"]
+
+
 class _NewEmailMixin:
     """The new address of an email change, checked by the service that
     makes it (accounts.email_change.check_new_address)."""

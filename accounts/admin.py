@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from core.audit import AuditHistoryAdminMixin, LogAccessAdminMixin
 
-from .models import Guardianship, Ninja, OrganisationRole, SignInRequirement, User
+from .models import AdminAccessGrant, Guardianship, Ninja, OrganisationRole, SignInRequirement, User
 
 
 class GuardianshipInline(admin.TabularInline):
@@ -27,6 +27,20 @@ class OrganisationRoleAdmin(admin.ModelAdmin):
     list_display = ["account", "role", "granted_at"]
     list_filter = ["role"]
     autocomplete_fields = ["account"]
+
+
+@admin.register(AdminAccessGrant)
+class AdminAccessGrantAdmin(admin.ModelAdmin):
+    """Time-boxed access to the Django admin (DATA_MODEL.md §23), asked for
+    and ended on the organisation dashboard (accounts.admin_access). An edit
+    here skips its rules: it doesn't notify anyone, and staff status only
+    follows at the next run of the closing job (the admin site itself
+    checks the grant on every request)."""
+
+    list_display = ["account", "started_at", "expires_at", "ended_at", "end_reason"]
+    list_filter = ["end_reason"]
+    search_fields = ["account__username", "account__email", "reason"]
+    raw_id_fields = ["account", "ended_by"]
 
 
 @admin.register(SignInRequirement)

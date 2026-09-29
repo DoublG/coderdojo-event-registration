@@ -103,7 +103,7 @@ class StrNeverQueriesTests(TestCase):
 
         from django.utils import timezone
 
-        from accounts.models import Guardianship, Ninja, OrganisationRole, User
+        from accounts.models import AdminAccessGrant, Guardianship, Ninja, OrganisationRole, User
         from applications.models import Application, BackgroundCheckHistory
         from content.models import Announcement, Promotion
         from dojos.testing import add_member, make_dojo
@@ -137,6 +137,7 @@ class StrNeverQueriesTests(TestCase):
         rows = [
             (Guardianship.objects.create(guardian=user, ninja=ninja), "jan → Kid"),
             (OrganisationRole.objects.create(account=user, role=OrganisationRole.BOARD), "jan ("),
+            (AdminAccessGrant.objects.create(account=user, reason="Fix", expires_at=timezone.now()), "jan ("),
             (Application.objects.create(account=user, kind=Application.MENTOR), "jan — "),
             (
                 BackgroundCheckHistory.objects.create(account=user, decision="validated", reviewed_at=timezone.now()),
@@ -793,7 +794,9 @@ class AuditLogAdminTests(TestCase):
         self.dojo = make_dojo("Ghent")
 
     def test_the_admin_role_sees_the_audit_log(self):
-        self.client.force_login(self.admin)
+        from core.testing import with_admin_access
+
+        self.client.force_login(with_admin_access(self.admin))
         self.assertEqual(self.client.get(reverse("admin:auditlog_logentry_changelist")).status_code, 200)
         self.assertEqual(self.client.get(reverse("admin:dojos_dojo_auditlog", args=[self.dojo.id])).status_code, 200)
         self.assertContains(
@@ -802,7 +805,9 @@ class AuditLogAdminTests(TestCase):
         )
 
     def test_the_board_does_not(self):
-        self.client.force_login(self.board)
+        from core.testing import with_admin_access
+
+        self.client.force_login(with_admin_access(self.board))
         self.assertEqual(self.client.get(reverse("admin:auditlog_logentry_changelist")).status_code, 403)
         # The board may view dojos, but not their audit history.
         self.assertEqual(self.client.get(reverse("admin:dojos_dojo_auditlog", args=[self.dojo.id])).status_code, 403)
@@ -1248,12 +1253,8 @@ class ManagementAreaTests(TestCase):
     def test_manage_is_a_404_for_anyone_else(self):
         from accounts.models import User
 
-        board = User.objects.create(username="board")
-        self.OrganisationRole.objects.create(account=board, role=self.OrganisationRole.BOARD)
-        for user in (board, User.objects.create(username="parent")):
-            with self.subTest(user=user.username):
-                self.client.force_login(user)
-                self.assertEqual(self.client.get(reverse("manage_home")).status_code, 404)
+        self.client.force_login(User.objects.create(username="parent"))
+        self.assertEqual(self.client.get(reverse("manage_home")).status_code, 404)
         self.client.logout()
         self.assertEqual(self.client.get(reverse("manage_home")).status_code, 302)  # to login
 
@@ -1398,11 +1399,16 @@ class OrganisationAreaTests(TestCase):
                     self.client.get(reverse("manage_home")), self.landings[landing], fetch_redirect_response=False
                 )
 
-    def test_without_an_area_the_organisation_is_a_404(self):
+    def test_a_role_without_an_area_only_gets_the_django_admin_page(self):
+        """The board has no area yet: /manage/ opens its page to ask for the
+        Django admin (DATA_MODEL.md §23), and every area is a 404."""
         from accounts.models import OrganisationRole
 
         self.client.force_login(self._account("board", role=OrganisationRole.BOARD))
-        self.assertEqual(self.client.get(reverse("manage_home")).status_code, 404)
+        self.assertRedirects(
+            self.client.get(reverse("manage_home")), reverse("manage_admin_access"), fetch_redirect_response=False
+        )
+        self.assertEqual(self.client.get(reverse("manage_admin_access")).status_code, 200)
         for url in self.landings.values():
             self.assertEqual(self.client.get(url).status_code, 404, url)
 

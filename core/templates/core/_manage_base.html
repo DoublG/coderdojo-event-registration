@@ -1,5 +1,5 @@
 {% extends "core/_manage_shell.html" %}
-{% load i18n %}{% load retention %}{% load manage_nav %}{% load reviewing %}
+{% load i18n %}{% load static %}{% load retention %}{% load manage_nav %}{% load reviewing %}
 {% comment %}
 The organisation's management dashboard (/manage/…), in the management
 area's shared shell (core/_manage_shell.html, DATA_MODEL.md §20) with the
@@ -14,6 +14,12 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
 {% endcomment %}
 {% block shell_title %}CoderDojo Belgium · {% block manage_page_title %}{% endblock %}{% endblock %}
 {% block shell_extra_style %}{% block manage_extra_style %}{% endblock %}{% endblock %}
+{% block shell_head_scripts %}<script src="{% static 'core/vendor/htmx/htmx-ext-ws-2.0.1.js' %}"></script>{% endblock %}
+{% block shell_body_start %}
+<!-- Holds the organisation bell's WebSocket open (notifications.consumers.OrganisationNotificationConsumer);
+     never swapped, like the dojo admin's (dojos/_admin_base.html). -->
+<div hx-ext="ws" ws-connect="/ws/manage/notifications/" style="display:none"></div>
+{% endblock %}
 {% block shell_nav_label %}{% translate "Organisation dashboard" %}{% endblock %}
 
 {% block shell_brand %}{% manage_switcher %}{% endblock %}
@@ -160,10 +166,30 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
           </ul>
         </div>
       {% endif %}
+
+      {% if contexts.admin_access %}
+        {# Time-boxed access to the Django admin (DATA_MODEL.md §23): every organisation role. #}
+        <div class="cd-admin-nav__group">
+          <p class="cd-admin-nav__group-label caption">{% translate "Technical" %}</p>
+          <ul class="cd-admin-nav__list">
+            <li>
+              <a href="{% url 'manage_admin_access' %}" class="cd-admin-nav__link label{% if active == 'admin_access' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>
+                {% translate "Django admin" %}
+              </a>
+            </li>
+          </ul>
+        </div>
+      {% endif %}
 {% endblock %}
 
 {% block shell_role %}{% manage_contexts as contexts %}{{ contexts.organisation_role_label }}{% endblock %}
 {% block shell_heading %}{% block manage_heading %}{% endblock %}{% endblock %}
-{% block shell_topbar_actions %}{% block manage_topbar_extra %}{% endblock %}{% endblock %}
+{% block shell_topbar_actions %}{% organisation_bell %}{% block manage_topbar_extra %}{% endblock %}{% endblock %}
 {% block shell_content %}{% block manage_content %}{% endblock %}{% endblock %}
-{% block shell_scripts %}{% block manage_extra_script %}{% endblock %}{% endblock %}
+{% block shell_scripts %}
+<script>
+  CoderDojo.initNotifications(document.getElementById("notif-admin-page"));
+</script>
+{% block manage_extra_script %}{% endblock %}
+{% endblock %}

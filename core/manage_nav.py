@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 
 from django.utils.translation import gettext_lazy as _
 
+from accounts.admin_access import may_ask
 from accounts.models import OrganisationRole
 from accounts.organisation import areas_of
 from dojos.access import accessible_dojos
@@ -24,14 +25,16 @@ from dojos.access import accessible_dojos
 class ManageContexts:
     areas: list = field(default_factory=list)  # the organisation dashboard's areas it may open (Area, §23)
     organisation_roles: set = field(default_factory=set)  # its OrganisationRole roles, for the sidebar's label
+    admin_access: bool = False  # may ask for the Django admin (any organisation role, accounts.admin_access)
     organisation_dojos: list = field(default_factory=list)  # organisation dojos on whose team the account is
     dojos: list = field(default_factory=list)  # regular dojos on whose team the account is
 
     @property
     def organisation(self):
-        """The Organisation context opens for any area; its sidebar shows
-        each group only to an account that may open its area."""
-        return bool(self.areas)
+        """The Organisation context opens for any area, or for an
+        organisation role (to ask for the Django admin, §23); its sidebar
+        shows each group only to an account that may open its area."""
+        return bool(self.areas) or self.admin_access
 
     @property
     def can(self):
@@ -46,6 +49,8 @@ class ManageContexts:
             return _("Organisation admin")
         if OrganisationRole.REVIEWER in self.organisation_roles:
             return _("Background-check reviewer")
+        if OrganisationRole.BOARD in self.organisation_roles:
+            return _("Board member")
         return _("Organisation")
 
     @property
@@ -71,6 +76,7 @@ def manage_contexts(user):
     return ManageContexts(
         areas=areas_of(user),
         organisation_roles=set(user.organisation_roles.values_list("role", flat=True)),
+        admin_access=may_ask(user),
         organisation_dojos=[d for d in dojos if d.is_organisation],
         dojos=[d for d in dojos if not d.is_organisation],
     )
@@ -82,3 +88,15 @@ def request_manage_contexts(request):
     if not hasattr(request, "_manage_contexts"):
         request._manage_contexts = manage_contexts(request.user)
     return request._manage_contexts
+
+
+def require_organisation_context(request):
+    """For pages every organisation member may open whatever their areas
+    (the notification bell, the Django admin access page): 404 without the
+    Organisation context, or below the sign-in policy."""
+    from django.http import Http404
+
+    from accounts.sign_in import meets_requirement
+
+    if not request_manage_contexts(request).organisation or not meets_requirement(request):
+        raise Http404

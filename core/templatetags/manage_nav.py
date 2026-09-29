@@ -25,3 +25,11 @@ def manage_contexts(context):
     """core.manage_nav's contexts for the request's account, e.g. for the
     Organisation sidebar's links to organisation events."""
     return request_manage_contexts(context["request"])
+
+
+@register.inclusion_tag("dojos/partials/_notification_bell.html", takes_context=True)
+def organisation_bell(context):
+    """The organisation dashboard's notification bell (DATA_MODEL.md §23)."""
+    from notifications.consumers import organisation_notification_context
+
+    return {**organisation_notification_context(context["request"].user), "csrf_token": context.get("csrf_token")}

@@ -1,6 +1,8 @@
 {% load i18n %}{% comment %}
-  The dojo admin sidebar's notification bell — real data (dojos.views.
-  _notification_context), rendered from this one partial by three different
+  The management area's notification bell: a dojo's (dojos.views.
+  _notification_context) or, with no `dojo`, the organisation dashboard's
+  (notifications.consumers.organisation_notification_context, DATA_MODEL.md
+  §23; its links go to the notifications app's own views), rendered from this one partial by three different
   callers that must all stay in sync: the initial page load
   (dojos/templates/dojos/_admin_base.html), mark_all_notifications_read
   (a normal htmx response), and NotificationConsumer.notification_push (a
@@ -25,8 +27,8 @@
   <div class="cd-notif__panel" data-cd-notif-panel hidden role="menu" aria-label="{% translate "Notifications" %}">
     <div class="cd-notif__header">
       <h3 class="cd-notif__title heading-sm">{% translate "Notifications" %}</h3>
-      <form method="post" action="{% url 'mark_all_notifications_read' dojo_id=dojo.id %}"
-            hx-post="{% url 'mark_all_notifications_read' dojo_id=dojo.id %}" hx-swap="none">
+      {% if dojo %}{% url 'mark_all_notifications_read' dojo_id=dojo.id as mark_all_url %}{% else %}{% url 'mark_all_organisation_notifications_read' as mark_all_url %}{% endif %}
+      <form method="post" action="{{ mark_all_url }}" hx-post="{{ mark_all_url }}" hx-swap="none">
         {% csrf_token %}
         <button type="submit" class="cd-notif__mark-all label" data-cd-notif-mark-all {% if not unread_count %}disabled{% endif %}>
           {% translate "Mark all as read" %}
@@ -38,7 +40,7 @@
       <ul class="cd-notif__list">
         {% for notification in notifications %}
           <li class="cd-notif__item" data-cd-notif-item {% if not notification.read %}data-unread{% endif %}>
-            <a class="cd-notif__item-btn" href="{% url 'open_notification' dojo_id=dojo.id notification_id=notification.id %}">
+            <a class="cd-notif__item-btn" href="{% if dojo %}{% url 'open_notification' dojo_id=dojo.id notification_id=notification.id %}{% else %}{% url 'open_organisation_notification' notification_id=notification.id %}{% endif %}">
               <span class="cd-notif__dot" aria-hidden="true"></span>
               <span class="cd-notif__body">
                 <p class="cd-notif__text body-sm">{{ notification.text }}</p>

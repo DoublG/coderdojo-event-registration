@@ -8,8 +8,8 @@ def user_roles(request):
     the management area (/manage/, core.manage_nav), applies: an account
     that may open an organisation dashboard area (accounts.organisation,
     e.g. an organisation admin or a background-check reviewer) or a dojo's
-    champion/mentor. The board's role gets its "Organisation" link to the
-    Django admin."""
+    champion/mentor, or any organisation role (the board too: its page to
+    ask for the Django admin, DATA_MODEL.md §23)."""
     from applications.services import is_approved_champion, is_approved_mentor
     from dojos.access import accessible_dojos
 
@@ -18,7 +18,7 @@ def user_roles(request):
     approved_champion = approved_mentor = False
     applied_kinds = set()
     admin_dojo = None
-    organisation_role = organisation_admin = organisation_board = has_areas = False
+    organisation_role = organisation_admin = has_areas = False
     if request.user.is_authenticated and not request.user.is_ninja:
         approved_champion = is_approved_champion(request.user)
         approved_mentor = is_approved_mentor(request.user)
@@ -29,7 +29,6 @@ def user_roles(request):
         roles = set(request.user.organisation_roles.values_list("role", flat=True))
         organisation_role = bool(roles)
         organisation_admin = "admin" in roles
-        organisation_board = "board" in roles
         has_areas = bool(areas_of(request.user))
     return {
         "user_is_approved_champion": approved_champion,
@@ -39,8 +38,7 @@ def user_roles(request):
         "user_admin_dojo": admin_dojo,
         "user_has_organisation_role": organisation_role,
         "user_is_organisation_admin": organisation_admin,
-        "user_is_organisation_board": organisation_board,
-        "user_can_manage": admin_dojo is not None or has_areas,
+        "user_can_manage": admin_dojo is not None or has_areas or organisation_role,
     }
 
 
