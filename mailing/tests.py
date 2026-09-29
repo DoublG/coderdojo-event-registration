@@ -734,7 +734,7 @@ class MailPreferencesViewTests(TestCase):
         self.assertContains(response, 'id="id_category_reminder_helptext"')
         self.assertContains(response, "Always on")
 
-    def test_saving_changes_preferences_language_and_postcode(self):
+    def test_saving_changes_preferences_and_language(self):
         self.client.force_login(self.parent)
         response = self.client.post(
             reverse("mail_preferences"),
@@ -743,6 +743,7 @@ class MailPreferencesViewTests(TestCase):
                 "category_dojo_news": "on",
                 "category_volunteer": "on",
                 "preferred_language": "fr-be",
+                # The postcode moved to the account page's details (accounts.views.edit_account).
                 "postal_code": "9000",
             },
         )
@@ -750,7 +751,8 @@ class MailPreferencesViewTests(TestCase):
         self.assertTrue(is_subscribed(self.parent, MailCategory.NEWSLETTER))
         self.assertFalse(is_subscribed(self.parent, MailCategory.REMINDER))
         self.parent.refresh_from_db()
-        self.assertEqual((self.parent.preferred_language, self.parent.postal_code), ("fr-be", "9000"))
+        self.assertEqual((self.parent.preferred_language, self.parent.postal_code), ("fr-be", ""))
+        self.assertNotContains(self.client.get(reverse("mail_preferences")), 'name="postal_code"')
         self.assertEqual(
             set(ConsentEvent.objects.values_list("category", "source")),
             {("newsletter", "preferences"), ("reminder", "preferences")},

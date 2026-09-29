@@ -9,8 +9,6 @@ from django.utils.functional import lazy
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from geo.models import Municipality
-
 from .categories import CAN_OPT_OUT, DESCRIPTIONS, MailCategory, categories_for
 from .models import Campaign, EmailTemplate, Journey, Segment
 from .preferences import preferences_for
@@ -18,19 +16,13 @@ from .preferences import preferences_for
 
 class MailPreferencesForm(forms.Form):
     """One checkbox per category the account can switch off, plus the mail
-    language and (adults) the postcode. Categories that can't be switched
-    off are listed by the template, not as fields."""
+    language. Categories that can't be switched off are listed by the
+    template, not as fields. (The postcode is on the account page's
+    details, accounts.forms.EditAccountForm.)"""
 
     preferred_language = forms.ChoiceField(
         label=_("Language for emails"),
         choices=settings.LANGUAGES,
-    )
-    postal_code = forms.CharField(
-        label=_("Postcode"),
-        required=False,
-        max_length=4,
-        help_text=_("So we can tell you about dojos and sessions near you."),
-        widget=forms.TextInput(attrs={"inputmode": "numeric", "placeholder": _("9000")}),
     )
 
     def __init__(self, *args, user, **kwargs):
@@ -39,7 +31,6 @@ class MailPreferencesForm(forms.Form):
         kwargs.setdefault("initial", {}).update(
             {
                 "preferred_language": user.preferred_language or settings.LANGUAGES[0][0],
-                "postal_code": user.postal_code,
                 **{f"category_{category}": subscribed for category, subscribed in current.items()},
             }
         )
@@ -52,8 +43,6 @@ class MailPreferencesForm(forms.Form):
                     label=category.label,
                     help_text=DESCRIPTIONS[category],
                 )
-        if user.is_ninja:
-            del self.fields["postal_code"]
         # Per child: may their details choose which mails we send (accounts.consent)?
         self.guardianships = (
             []
@@ -66,12 +55,6 @@ class MailPreferencesForm(forms.Form):
                 label=guardianship.ninja.full_name,
                 initial=guardianship.consent_given_at is not None,
             )
-
-    def clean_postal_code(self):
-        postal_code = self.cleaned_data["postal_code"].strip()
-        if postal_code and not Municipality.objects.filter(postal_code=postal_code).exists():
-            raise ValidationError(_("That isn't a Belgian postcode we know."))
-        return postal_code
 
     def category_fields(self):
         return [self[name] for name in self.fields if name.startswith("category_")]

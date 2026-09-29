@@ -1,0 +1,33 @@
+{% load i18n %}{% comment %}
+The account page's details as a form, swapped in over htmx (see
+_account_details_display.html). Saving swaps back to the display block;
+Cancel goes back to the account page, since nothing's been saved yet.
+The email address is shown, not edited: it's the login and where every
+mail goes, so it can't be changed here.
+Expects `guardian` and `form` (accounts.forms.EditAccountForm).
+{% endcomment %}
+<form class="account-header account-header--editing col" id="account-header" method="post"
+      action="{% url 'edit_account' %}"
+      hx-post="{% url 'edit_account' %}" hx-target="#account-header" hx-swap="outerHTML">
+  {% csrf_token %}
+  <h1 class="display-lg">{% translate "Your details" %}</h1>
+  <div class="cd-form__row">
+    {{ form.first_name.as_field_group }}
+    {{ form.last_name.as_field_group }}
+  </div>
+  <div class="cd-form__row">
+    <div class="cd-form__field">
+      <span class="cd-form__label label">{% translate "Email" %}</span>
+      <p class="body account-details__email">{{ guardian.email }}</p>
+      <div class="cd-form__help caption">{% translate "You log in with this address and we send every mail to it, so it can't be changed here." %}</div>
+    </div>
+  </div>
+  <div class="cd-form__row">
+    {{ form.phone.as_field_group }}
+    {{ form.postal_code.as_field_group }}
+  </div>
+  <div class="cd-form__actions">
+    <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">{% translate "Cancel" %}</a>
+    <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button>
+  </div>
+</form>

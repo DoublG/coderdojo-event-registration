@@ -110,6 +110,15 @@ class LoginForm(AuthenticationForm):
     }
 
 
+def clean_belgian_postal_code(value):
+    """An optional Belgian postcode (User.postal_code): empty, or one of
+    geo.Municipality's. Shared by family sign-up and the account's details."""
+    postal_code = value.strip()
+    if postal_code and not Municipality.objects.filter(postal_code=postal_code).exists():
+        raise ValidationError(_("That isn't a Belgian postcode we know."))
+    return postal_code
+
+
 class RegisterGuardianForm(forms.Form):
     """The parent/guardian half of the family-registration page; the
     children are ChildRowsFormSet, next to it."""
@@ -157,10 +166,7 @@ class RegisterGuardianForm(forms.Form):
         return email
 
     def clean_postal_code(self):
-        postal_code = self.cleaned_data["postal_code"].strip()
-        if postal_code and not Municipality.objects.filter(postal_code=postal_code).exists():
-            raise ValidationError(_("That isn't a Belgian postcode we know."))
-        return postal_code
+        return clean_belgian_postal_code(self.cleaned_data["postal_code"])
 
     def clean_password(self):
         password = self.cleaned_data["password"]
@@ -169,6 +175,46 @@ class RegisterGuardianForm(forms.Form):
         # ones enforced everywhere else a password is set.
         validate_password(password)
         return password
+
+
+class EditAccountForm(forms.ModelForm):
+    """The account page's details (accounts.views.edit_account): name, phone
+    and postcode. The email address is shown, not edited here: it's the
+    login and where every mail goes, so changing it needs its own
+    confirmed flow. The mail language stays on Mail preferences."""
+
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "phone", "postal_code"]
+        labels = {
+            "first_name": _("First name"),
+            "last_name": _("Last name"),
+            "phone": _("Phone"),
+            "postal_code": _("Postcode"),
+        }
+        # The model's help texts are English notes for the admin.
+        help_texts = {
+            "first_name": "",
+            "last_name": "",
+            "phone": _("Only used if we need to reach you during a session."),
+            "postal_code": _("So we can tell you about dojos and sessions near you."),
+        }
+        # The input classes come from core.forms.SiteBoundField.
+        widgets = {
+            "phone": forms.TextInput(attrs={"placeholder": "+32 4xx xx xx xx", "autocomplete": "tel"}),
+            "postal_code": forms.TextInput(
+                attrs={"placeholder": "9000", "inputmode": "numeric", "autocomplete": "postal-code"}
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["first_name"].required = True
+        self.fields["first_name"].widget.attrs["autocomplete"] = "given-name"
+        self.fields["last_name"].widget.attrs["autocomplete"] = "family-name"
+
+    def clean_postal_code(self):
+        return clean_belgian_postal_code(self.cleaned_data["postal_code"])
 
 
 class SignInPolicyForm(forms.Form):

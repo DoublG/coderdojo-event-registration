@@ -48,6 +48,7 @@ urlpatterns = [
     path(
         "manage/security/accounts/<int:user_id>/turn-off/", manage.turn_off_two_step, name="manage_security_turn_off"
     ),
+    path("account/edit/", views.edit_account, name="edit_account"),
     path("account/ninja/add/", views.add_ninja, name="add_ninja"),
     path("account/ninja/<int:ninja_id>/", views.ninja_detail, name="ninja_detail"),
     path("account/ninja/<int:ninja_id>/edit/", views.edit_ninja, name="edit_ninja"),

@@ -633,7 +633,7 @@ class AuditLogTests(TestCase):
         self.client.force_login(self.parent)
         self.client.post(
             reverse("mail_preferences"),
-            {"category_newsletter": "on", "postal_code": "", "preferred_language": "en-us"},
+            {"category_newsletter": "on", "preferred_language": "en-us"},
             HTTP_X_FORWARDED_FOR="203.0.113.7",
             HTTP_X_FORWARDED_PORT="443",
         )
@@ -912,6 +912,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             AddChildForm,
             ChildLoginForm,
             ConfirmPasswordForm,
+            EditAccountForm,
             EditChildForm,
             ForcedPasswordChangeForm,
             LoginForm,
@@ -974,6 +975,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             ApiClientForm(),
             AddChildForm(guardian=User(last_name="Peeters")),
             EditChildForm(instance=Ninja(name="Emma")),
+            EditAccountForm(instance=user),
             SignUpChildForm(),
             AwardBeltForm(registration=Registration(pk=1, ninja=Ninja(name="Emma")), offered=[]),
             AwardBadgeForm(registration=Registration(pk=1, ninja=Ninja(name="Emma")), offered=[]),

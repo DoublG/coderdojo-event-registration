@@ -412,6 +412,109 @@ class EditChildViewTests(TestCase):
         self.assertContains(response, '<option value="other" selected>')
 
 
+class EditAccountViewTests(TestCase):
+    """The account page's own details (accounts.views.edit_account): the same
+    click-to-edit over htmx as a child's header. The email address is shown,
+    never edited here."""
+
+    HTMX = {"HTTP_HX_REQUEST": "true"}
+
+    @classmethod
+    def setUpTestData(cls):
+        Municipality.objects.create(postal_code="9000", name="Gent", center=Point(3.7174, 51.0543, srid=4326))
+        cls.guardian = User.objects.create(
+            username="g1", email="g1@example.com", first_name="Jane", last_name="Doe", phone="0470 11 22 33"
+        )
+        cls.other = User.objects.create(username="g2", email="g2@example.com", first_name="Other")
+
+    def post(self, data, **extra):
+        return self.client.post(
+            reverse("edit_account"),
+            {"first_name": "Janet", "last_name": "Peeters", "phone": "", "postal_code": "9000", **data},
+            **extra,
+        )
+
+    def test_anonymous_redirected_to_login(self):
+        response = self.client.get(reverse("edit_account"), **self.HTMX)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response.url)
+
+    def test_a_ninja_login_gets_a_404(self):
+        ninja_login = User.objects.create(username="kid", account_type=User.NINJA)
+        make_ninja(self.guardian, "Kid", account=ninja_login)
+        self.client.force_login(ninja_login)
+        self.assertEqual(self.client.get(reverse("edit_account"), **self.HTMX).status_code, 404)
+        self.assertEqual(self.post({}, **self.HTMX).status_code, 404)
+
+    def test_the_account_page_shows_the_details_with_an_edit_link(self):
+        self.client.force_login(self.guardian)
+        response = self.client.get(reverse("account_home"))
+        self.assertTemplateUsed(response, "accounts/partials/_account_details_display.html")
+        self.assertContains(response, "g1@example.com")
+        self.assertContains(response, "0470 11 22 33")
+        self.assertContains(response, f'hx-get="{reverse("edit_account")}"')
+
+    def test_get_returns_the_form_with_the_email_read_only(self):
+        self.client.force_login(self.guardian)
+        response = self.client.get(reverse("edit_account"), **self.HTMX)
+        self.assertTemplateUsed(response, "accounts/partials/_account_details_edit.html")
+        self.assertTemplateNotUsed(response, "accounts/guardian_detail.html")
+        self.assertContains(response, 'value="Jane"')
+        self.assertContains(response, "g1@example.com")
+        self.assertNotContains(response, 'name="email"')
+
+    def test_post_saves_the_details_and_swaps_back(self):
+        self.client.force_login(self.guardian)
+        response = self.post({"phone": "+32 470 99 88 77"}, **self.HTMX)
+        self.assertTemplateUsed(response, "accounts/partials/_account_details_display.html")
+        self.assertContains(response, "Welcome back, Janet")
+        self.guardian.refresh_from_db()
+        self.assertEqual(
+            (self.guardian.first_name, self.guardian.last_name, self.guardian.phone, self.guardian.postal_code),
+            ("Janet", "Peeters", "+32 470 99 88 77", "9000"),
+        )
+        self.other.refresh_from_db()
+        self.assertEqual(self.other.first_name, "Other")
+
+    def test_a_posted_email_is_ignored(self):
+        self.client.force_login(self.guardian)
+        self.post({"email": "someone-else@example.com"}, **self.HTMX)
+        self.guardian.refresh_from_db()
+        self.assertEqual(self.guardian.email, "g1@example.com")
+
+    def test_an_unknown_postcode_or_no_first_name_saves_nothing(self):
+        self.client.force_login(self.guardian)
+        for data, field in (({"postal_code": "0001"}, "postal_code"), ({"first_name": ""}, "first_name")):
+            response = self.post(data, **self.HTMX)
+            self.assertTemplateUsed(response, "accounts/partials/_account_details_edit.html")
+            self.assertIn(field, response.context["form"].errors)
+        self.guardian.refresh_from_db()
+        self.assertEqual((self.guardian.first_name, self.guardian.postal_code), ("Jane", ""))
+
+    def test_without_htmx_it_uses_the_account_page(self):
+        self.client.force_login(self.guardian)
+        page = self.client.get(reverse("edit_account"))
+        self.assertTemplateUsed(page, "accounts/guardian_detail.html")
+        self.assertTemplateUsed(page, "accounts/partials/_account_details_edit.html")
+
+        invalid = self.post({"postal_code": "0001"})
+        self.assertTemplateUsed(invalid, "accounts/guardian_detail.html")
+        self.assertContains(invalid, "That isn&#x27;t a Belgian postcode we know.")
+
+        self.assertRedirects(self.post({}), reverse("account_home"))
+        self.guardian.refresh_from_db()
+        self.assertEqual(self.guardian.first_name, "Janet")
+
+    def test_the_change_is_in_the_audit_log(self):
+        from auditlog.models import LogEntry
+
+        self.client.force_login(self.guardian)
+        self.post({}, **self.HTMX)
+        entry = LogEntry.objects.get_for_object(self.guardian).latest("pk")
+        self.assertEqual(entry.actor, self.guardian)
+        self.assertEqual(entry.changes_dict["first_name"], ["Jane", "Janet"])
+
+
 class BadgeWidgetViewTests(TestCase):
     def test_login_required(self):
         guardian = User.objects.create(username="g1", email="g1@example.com")

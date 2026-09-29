@@ -44,6 +44,23 @@ From here you can:
   attendance wristbands, which update as the dojo takes attendance), and
   their session history.
 
+Your own details
+------------------
+
+At the top of your family page are your own details: your name, email
+address, phone number and postcode. Use **Edit my details** (or click the
+greeting) to change them in place, then **Save**.
+
+- **Phone** is optional and only used if a dojo needs to reach you during a
+  session.
+- **Postcode** is optional. It's used to tell you about dojos and sessions
+  near you, and the dojo finder starts from it when you're signed in.
+- **Email address** can't be changed here: you log in with it and every
+  mail goes to it. If it needs to change, get in touch with us through the
+  **Contact** page.
+
+The language your mails are in is set on :doc:`mail-preferences`.
+
 Giving your child their own login
 -----------------------------------
 

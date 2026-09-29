@@ -45,10 +45,10 @@ kind of mail:
 Mails about your account (such as a password reset) and about your bookings
 (confirmations, a place coming free on the waiting list) are always sent.
 
-On the same page you can pick the **language** your mails are in, and set
-or change your **postcode**. The postcode is optional; it's used to tell you
-about dojos and sessions near you, and the dojo finder starts from it when
-you're signed in.
+On the same page you can pick the **language** your mails are in. Your
+**postcode**, which we use to tell you about dojos and sessions near you, is
+with your own details on your family page (see
+:doc:`managing-your-account`).
 
 Unsubscribing from a mail
 -------------------------

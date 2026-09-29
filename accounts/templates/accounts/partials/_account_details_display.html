@@ -1,0 +1,24 @@
+{% load i18n %}{% comment %}
+The account page's header with the account holder's own details, in its
+normal (read-only) state. The name or "Edit my details" swaps this whole
+block for _account_details_edit.html over htmx (accounts.views.edit_account),
+the same click-to-edit shape as the child page's header
+(_child_header_display.html). Without JavaScript the link opens the account
+page with the form in place.
+Expects `guardian` (the logged-in account).
+{% endcomment %}
+<div class="account-header col" id="account-header">
+  <h1 class="display-lg account-header__name" title="{% translate "Click to edit" %}"
+      hx-get="{% url 'edit_account' %}" hx-target="#account-header" hx-swap="outerHTML">{% if guardian.first_name %}{% blocktranslate with name=guardian.first_name %}Welcome back, {{ name }}{% endblocktranslate %}{% else %}{% translate "Welcome back" %}{% endif %}</h1>
+  <p class="body-lg">{% translate "Here's what's coming up for your children." %}</p>
+  <div class="account-details">
+    <p class="body-sm account-details__line">
+      <span>{{ guardian.get_full_name|default:guardian.username }}</span>
+      <span>{{ guardian.email }}</span>
+      <span>{% if guardian.phone %}{{ guardian.phone }}{% else %}{% translate "No phone number" %}{% endif %}</span>
+      <span>{% if guardian.postal_code %}{% blocktranslate with code=guardian.postal_code %}Postcode {{ code }}{% endblocktranslate %}{% else %}{% translate "No postcode" %}{% endif %}</span>
+    </p>
+    <a class="cd-btn cd-btn--ghost label" href="{% url 'edit_account' %}"
+       hx-get="{% url 'edit_account' %}" hx-target="#account-header" hx-swap="outerHTML">{% translate "Edit my details" %}</a>
+  </div>
+</div>

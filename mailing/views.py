@@ -20,8 +20,9 @@ from .services import read_unsubscribe_token
 def mail_preferences(request):
     """The account's Mail preferences page: a switch per kind of mail it can
     turn off, a switch per child for using their details to choose mails
-    (accounts.consent), the mail language, and (adults) the postcode. Above them, the
-    approved explanation of what we use to pick relevant mails."""
+    (accounts.consent) and the mail language. Above them, the approved
+    explanation of what we use to pick relevant mails. (The postcode is on
+    the account page's details, accounts.views.edit_account.)"""
     user = request.user
     form = MailPreferencesForm(request.POST or None, user=user)
     if request.method == "POST" and form.is_valid():
@@ -30,11 +31,7 @@ def mail_preferences(request):
         for guardianship, given in form.child_consents():
             set_consent(guardianship, given)
         user.preferred_language = form.cleaned_data["preferred_language"]
-        fields = ["preferred_language"]
-        if "postal_code" in form.cleaned_data:
-            user.postal_code = form.cleaned_data["postal_code"]
-            fields.append("postal_code")
-        user.save(update_fields=fields)
+        user.save(update_fields=["preferred_language"])
         messages.success(request, _("Your mail preferences are saved."))
         return redirect("mail_preferences")
     return render(request, "mailing/mail_preferences.html", {"form": form})

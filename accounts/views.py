@@ -35,6 +35,7 @@ from .forms import (
     AddChildForm,
     ChildLoginForm,
     ChildRowsFormSet,
+    EditAccountForm,
     EditChildForm,
     ForcedPasswordChangeForm,
     LoginForm,
@@ -286,6 +287,12 @@ def account_home(request):
     is sent to its ninja page instead."""
     if request.user.is_ninja:
         return redirect(_post_login_redirect(request, request.user))
+    return _render_account_home(request)
+
+
+def _render_account_home(request, details_form=None):
+    """The account page; with `details_form`, its details are shown as that
+    form (edit_account without htmx)."""
     children = _children_context(request.user)
     applications = list(request.user.applications.all())
     active_kinds = {a.kind for a in applications if a.status != "rejected"}
@@ -294,6 +301,7 @@ def account_home(request):
         "accounts/guardian_detail.html",
         {
             "guardian": request.user,
+            "form": details_form,
             "children": children,
             "add_child_form": AddChildForm(guardian=request.user),
             "applications": applications,
@@ -302,6 +310,32 @@ def account_home(request):
             "two_step_on": two_step.is_on(request.user),
         },
     )
+
+
+@login_required
+def edit_account(request):
+    """Click-to-edit for the account page's details (see
+    partials/_account_details_display.html), the same shape as edit_ninja:
+    GET swaps the details for a small inline form over htmx, POST saves them
+    and swaps back. Always the logged-in account's own details; a ninja's
+    own login has no account page, so it gets a 404. Without htmx (no
+    JavaScript) it shows the whole account page with the form open, and a
+    saved form goes back to it."""
+    if request.user.is_ninja:
+        raise Http404
+    is_htmx = request.headers.get("HX-Request") == "true"
+    # A copy: validating writes the posted values onto the instance, and an
+    # invalid post mustn't change request.user for the rest of the page.
+    form = EditAccountForm(request.POST or None, instance=User.objects.get(pk=request.user.pk))
+    if request.method == "POST" and form.is_valid():
+        account = form.save()
+        if not is_htmx:
+            messages.success(request, _("Your details are saved."))
+            return redirect("account_home")
+        return render(request, "accounts/partials/_account_details_display.html", {"guardian": account})
+    if not is_htmx:
+        return _render_account_home(request, details_form=form)
+    return render(request, "accounts/partials/_account_details_edit.html", {"guardian": request.user, "form": form})
 
 
 @login_required
