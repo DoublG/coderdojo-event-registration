@@ -1,11 +1,14 @@
 {% load i18n %}{% comment %}
 The child page's "Own login" card, for the child's guardians only (see
 accounts.child_accounts, DATA_MODEL.md §17): give the child a login with
-their own email, mail the set-password link again, or remove the login.
-Each form posts over htmx and swaps this card; without htmx the view
-redirects back to the page, with the outcome as a message. Expects
-`child` and `login_form` (accounts.forms.ChildLoginForm), and optionally
-`login_error` and `login_notice`.
+their own email and a password or a login link, mail the first mail again,
+or remove the login; and links to the actions that ask the guardian to
+confirm it's them (turn off two-step login, back to a password, a new
+address; DATA_MODEL.md §24). Each form posts over htmx and swaps this
+card; without htmx the view redirects back to the page, with the outcome as
+a message. Expects `child`, `login_form` (accounts.forms.ChildLoginForm),
+`login_two_step` and `login_waiting` (accounts.views._login_card_context),
+and optionally `login_error` and `login_notice`.
 {% endcomment %}
 <section class="section cd-card login-card" id="ninja-login-card" aria-labelledby="login-heading">
   <h2 class="heading-md section-title" id="login-heading">{% translate "Own login" %}</h2>
@@ -20,16 +23,27 @@ redirects back to the page, with the outcome as a message. Expects
     {% if account and account.is_active %}
       <p class="body-sm">
         {% blocktranslate trimmed with name=child.name email=account.email username=account.username %}{{ name }} logs in with <strong>{{ email }}</strong> (username <strong>{{ username }}</strong>).{% endblocktranslate %}
-        {% if not account.has_usable_password %}{% translate "They haven't chosen a password yet." %}{% endif %}
+        {% if login_waiting %}{% if account.uses_login_link %}{% translate "They haven't logged in yet." %}{% else %}{% translate "They haven't chosen a password yet." %}{% endif %}{% endif %}
         {% translate "With their login they see this page and can sign themselves up for sessions; you keep managing their details." %}
       </p>
-      <div class="cd-form__actions" style="justify-content: flex-start;">
-        {% if not account.has_usable_password %}
+      <ul class="body-sm login-facts">
+        <li>{% if account.uses_login_link %}{% translate "Logs in with a link we mail them each time." %}{% else %}{% translate "Logs in with a password." %}{% endif %}</li>
+        <li>{% if login_two_step %}{% translate "Two-step login is on." %}{% else %}{% translate "Two-step login is off." %}{% endif %}</li>
+      </ul>
+      <div class="cd-form__actions" style="justify-content: flex-start; flex-wrap: wrap;">
+        {% if login_waiting %}
           <form method="post" action="{% url 'ninja_login_resend' ninja_id=child.id %}"
                 hx-post="{% url 'ninja_login_resend' ninja_id=child.id %}" hx-target="#ninja-login-card" hx-swap="outerHTML">
             {% csrf_token %}
-            <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Send the password mail again" %}</button>
+            <button type="submit" class="cd-btn cd-btn--ghost label">{% if account.uses_login_link %}{% translate "Send the login mail again" %}{% else %}{% translate "Send the password mail again" %}{% endif %}</button>
           </form>
+        {% endif %}
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'ninja_login_email' ninja_id=child.id %}">{% translate "Change email address" %}</a>
+        {% if account.uses_login_link %}
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'ninja_login_use_password' ninja_id=child.id %}">{% translate "Switch to a password" %}</a>
+        {% endif %}
+        {% if login_two_step %}
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'ninja_login_two_step_off' ninja_id=child.id %}">{% translate "Turn off two-step login" %}</a>
         {% endif %}
         <form method="post" action="{% url 'ninja_login_remove' ninja_id=child.id %}"
               hx-post="{% url 'ninja_login_remove' ninja_id=child.id %}" hx-target="#ninja-login-card" hx-swap="outerHTML"
@@ -41,16 +55,17 @@ redirects back to the page, with the outcome as a message. Expects
     {% else %}
       <p class="body-sm">
         {% if account %}
-          {% blocktranslate with name=child.name %}{{ name }}'s login is switched off. Switch it back on with their email address: they get a mail to choose a new password.{% endblocktranslate %}
+          {% blocktranslate with name=child.name %}{{ name }}'s login is switched off. Switch it back on with their email address: they get a mail to choose a new password, or their first login link.{% endblocktranslate %}
         {% else %}
           {% blocktranslate trimmed with name=child.name %}Give {{ name }} their own login, so they can see their belt, badges and sessions and sign themselves up for sessions.
-          You keep managing their details, and can remove the login at any time. They get a mail to choose a password.{% endblocktranslate %}
+          You keep managing their details, and can remove the login at any time. They get a mail to choose a password, or their first login link.{% endblocktranslate %}
         {% endif %}
       </p>
       <form class="cd-form" method="post" action="{% url 'ninja_login_create' ninja_id=child.id %}"
             hx-post="{% url 'ninja_login_create' ninja_id=child.id %}" hx-target="#ninja-login-card" hx-swap="outerHTML">
         {% csrf_token %}
         {{ login_form.email.as_field_group }}
+        {{ login_form.login_method.as_field_group }}
         <div class="cd-form__actions" style="justify-content: flex-start;">
           <button type="submit" class="cd-btn cd-btn--primary label">{% if account %}{% translate "Switch login back on" %}{% else %}{% translate "Create login" %}{% endif %}</button>
         </div>

@@ -1,0 +1,39 @@
+{% extends "accounts/_security_base.html" %}
+{% load i18n %}
+{% block security_title %}{% if kind == "email" %}{% translate "Change email address" %}{% elif kind == "use_password" %}{% translate "Use a password instead" %}{% else %}{% translate "Turn off two-step login" %}{% endif %}{% endblock %}
+
+{% block security_content %}
+  {% comment %}
+    A guardian's action on their child's own login, confirmed with the
+    guardian's own password or recent login (accounts.views._guardian_login_action,
+    DATA_MODEL.md §24): `kind` is two_step_off, use_password or email.
+  {% endcomment %}
+  {% with name=child.name email=child.account.email %}
+    {% if kind == "email" %}
+      <h1 class="heading-lg">{% blocktranslate %}Change {{ name }}'s email address{% endblocktranslate %}</h1>
+      <p class="body">{% blocktranslate %}{{ name }} logs in with <strong>{{ email }}</strong>, and we send their mail there.{% endblocktranslate %}</p>
+      <p class="body-sm muted">{% blocktranslate with hours=valid_hours %}We send a link to the new address. It changes once that link is opened, within {{ hours }} hours; nothing changes until then. Then we let the old address and you know, and {{ name }} is logged out on their other devices.{% endblocktranslate %}</p>
+    {% elif kind == "use_password" %}
+      <h1 class="heading-lg">{% blocktranslate %}{{ name }} logs in with a password{% endblocktranslate %}</h1>
+      <p class="body">{% blocktranslate %}{{ name }} now logs in with a link we mail to {{ email }}. Switch back to a password, and we mail them a link to choose one; login links stop working.{% endblocktranslate %}</p>
+    {% else %}
+      <h1 class="heading-lg">{% blocktranslate %}Turn off {{ name }}'s two-step login{% endblocktranslate %}</h1>
+      <p class="body">{% blocktranslate %}For when {{ name }} lost their phone or passkey and their backup codes: their app, passkeys and backup codes are removed, and they log in without the second step. They can set it up again afterwards.{% endblocktranslate %}</p>
+    {% endif %}
+  {% endwith %}
+
+  <form method="post" class="cd-form" novalidate>
+    {% csrf_token %}
+    {% if kind == "email" %}
+      {{ form }}
+      {% include "accounts/partials/_confirm_identity.html" with rendered=True %}
+    {% else %}
+      {% for error in form.non_field_errors %}{% if not form.uses_link %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endif %}{% endfor %}
+      {% include "accounts/partials/_confirm_identity.html" %}
+    {% endif %}
+    <div class="cd-form__actions" style="justify-content: flex-start;">
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'ninja_detail' ninja_id=child.id %}">{% translate "Cancel" %}</a>
+      <button type="submit" class="cd-btn cd-btn--primary label">{% if kind == "email" %}{% translate "Send the link" %}{% elif kind == "use_password" %}{% translate "Switch to a password" %}{% else %}{% translate "Turn off" %}{% endif %}</button>
+    </div>
+  </form>
+{% endblock %}

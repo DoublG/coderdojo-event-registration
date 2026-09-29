@@ -54,6 +54,7 @@
   .child-page-root .login-card { padding: var(--space-5); }
   .child-page-root .login-card .cd-form__note { margin: 0 0 var(--space-3); }
   .child-page-root .login-card .cd-form__actions { gap: var(--space-3); flex-wrap: wrap; }
+  .child-page-root .login-card .login-facts { margin: 0 0 var(--space-3); padding-left: var(--space-5); }
   .child-page-root .upcoming-actions { display: flex; gap: var(--space-2); justify-content: flex-end; flex-wrap: wrap; }
 </style>
 {% endblock %}
@@ -202,6 +203,11 @@
         <h2 class="heading-lg section-title">{% translate "Your data" %}</h2>
         <p class="body-sm">{% translate "Download a copy of everything we keep about you, as a file you can open or take elsewhere." %}</p>
         <a class="cd-btn cd-btn--ghost label" href="{% url 'download_my_data' %}">{% translate "Download my data" %}</a>
+      </section>
+      <section class="section">
+        <h2 class="heading-lg section-title">{% translate "Sign-in security" %}</h2>
+        <p class="body-sm">{% translate "How you log in (a password or a link we mail you) and two-step login." %}</p>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security' %}">{% translate "Sign-in security" %}</a>
       </section>
     {% endif %}
 

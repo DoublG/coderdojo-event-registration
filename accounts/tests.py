@@ -1983,11 +1983,15 @@ class SignInSecurityPageTests(TwoStepTestMixin, TestCase):
         response = self.client.get(reverse("account_security"))
         self.assertIn(reverse("login"), response["Location"])
 
-    def test_a_ninja_login_gets_a_404(self):
+    def test_a_ninja_login_has_it_too_but_not_a_service_account(self):
+        """Every person's login has the same options (DATA_MODEL.md §24)."""
         ninja = User.objects.create(username="kid", account_type=User.NINJA)
         self.client.force_login(ninja)
+        self.assertEqual(self.client.get(reverse("account_security")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("account_security_app")).status_code, 200)
+        service = User.objects.create(username="svc", account_type=User.SERVICE)
+        self.client.force_login(service)
         self.assertEqual(self.client.get(reverse("account_security")).status_code, 404)
-        self.assertEqual(self.client.get(reverse("account_security_app")).status_code, 404)
 
     def test_the_account_page_links_to_it(self):
         self.client.force_login(self.user)
@@ -3431,6 +3435,210 @@ class SignUpWithLoginLinkTests(LoginLinkTestMixin, TestCase):
         self.assertTrue(nora.uses_login_link)
         self.assertFalse(nora.has_usable_password())
         self.assertEqual(int(self.client.session["_auth_user_id"]), nora.pk)
+
+
+class NinjaLoginOptionsTests(LoginLinkTestMixin, TwoStepTestMixin, TestCase):
+    """A child's own login has the same options as an adult's, and the
+    guardian helps with it from the Own login card (DATA_MODEL.md §24)."""
+
+    def setUp(self):
+        super().setUp()
+        self.guardian = User.objects.create(username="ellen", email="ellen@example.com", first_name="Ellen")
+        self.guardian.set_password(PASSWORD)
+        self.guardian.save()
+        self.child = make_ninja(self.guardian, "Emma", date_of_birth=_dob(12))
+        self.client.force_login(self.guardian)
+
+    def url(self, name):
+        return reverse(name, kwargs={"ninja_id": self.child.id})
+
+    def give(self, login_method):
+        self.client.post(self.url("ninja_login_create"), {"email": "emma@example.com", "login_method": login_method})
+        self.child.refresh_from_db()
+        return self.child.account
+
+    def test_a_guardian_gives_a_login_on_a_link(self):
+        from core.testing import link_login_data
+
+        account = self.give("link")
+        self.assertTrue(account.uses_login_link)
+        self.assertFalse(account.has_usable_password())
+        mail = self.mails("ninja_account_created", account).get()
+        self.assertIn("/login/link/", mail.body)
+        self.assertContains(self.client.get(self.url("ninja_detail")), "Send the login mail again")
+
+        self.client.logout()
+        link = self.link_path("ninja_account_created", account)
+        response = self.client.post(link, link_login_data())
+        self.assertRedirects(response, self.url("ninja_detail"))
+        # The child can ask for the next link itself.
+        self.client.logout()
+        self.client.post(reverse("login_link_request"), {"email": "emma@example.com"})
+        self.assertEqual(self.mails("login_link", account).count(), 1)
+
+    def test_a_ninja_login_sets_up_two_step_login_and_the_family_hears_of_it(self):
+        from django.contrib.sessions.backends.db import SessionStore
+        from django.test import RequestFactory
+
+        from accounts import two_step
+
+        account = self.give("password")
+        device = self.add_app(account)
+        request = RequestFactory().post("/")
+        request.user, request.session = account, SessionStore()
+        two_step._added(request, device)
+        self.assertEqual(self.mails("two_step_turned_on", account).count(), 1)
+        notice = self.mails("child_login_changed", self.guardian).get()
+        self.assertIn("Emma turned on two-step login", notice.body)
+
+    def test_the_guardian_turns_off_the_childs_two_step_login(self):
+        account = self.give("password")
+        self.add_app(account)
+        self.assertContains(self.client.get(self.url("ninja_detail")), "Two-step login is on")
+        response = self.client.post(self.url("ninja_login_two_step_off"), {"password": "wrong"})
+        self.assertTrue(account.totpdevice_set.exists())
+        response = self.client.post(self.url("ninja_login_two_step_off"), {"password": PASSWORD})
+        self.assertRedirects(response, self.url("ninja_detail"))
+        self.assertFalse(account.totpdevice_set.exists())
+        mail = self.mails("two_step_turned_off", account).get()
+        self.assertIn("Ellen turned off two-step login", mail.body)
+        self.assertIn(
+            "Two-step login was turned off for Emma", self.mails("child_login_changed", self.guardian).get().body
+        )
+
+    def test_the_guardian_switches_the_child_back_to_a_password(self):
+        account = self.give("link")
+        response = self.client.post(self.url("ninja_login_use_password"), {"password": PASSWORD})
+        self.assertRedirects(response, self.url("ninja_detail"))
+        account.refresh_from_db()
+        self.assertEqual(account.login_method, User.LOGIN_PASSWORD)
+        self.assertFalse(account.has_usable_password())
+        self.assertIn("/password-reset/confirm/", self.mails("ninja_account_created", account).latest("pk").body)
+        self.assertIn("switched your CoderDojo login back", self.mails("login_method_changed", account).get().body)
+
+    def test_the_child_switches_itself_to_a_link(self):
+        account = self.give("password")
+        account.set_password(PASSWORD)
+        account.save()
+        self.client.force_login(account)
+        self.client.post(reverse("account_login_method"), {"password": PASSWORD})
+        self.client.post(self.link_path("login_method_confirm", account))
+        account.refresh_from_db()
+        self.assertTrue(account.uses_login_link)
+        self.assertIn("Emma now logs in with a link", self.mails("child_login_changed", self.guardian).get().body)
+
+    def test_only_the_childs_guardians(self):
+        self.give("link")
+        stranger = User.objects.create(username="stranger", email="stranger@example.com")
+        self.client.force_login(stranger)
+        for name in ("ninja_login_two_step_off", "ninja_login_use_password", "ninja_login_email"):
+            self.assertEqual(self.client.get(self.url(name)).status_code, 404)
+        self.client.force_login(self.child.account)
+        for name in ("ninja_login_two_step_off", "ninja_login_use_password", "ninja_login_email"):
+            self.assertEqual(self.client.get(self.url(name)).status_code, 404)
+
+    def test_the_policy_never_requires_anything_of_a_ninja_login(self):
+        from accounts.models import SignInRequirement
+
+        account = self.give("password")
+        SignInRequirement.objects.create(role=SignInRequirement.ADULT, level=SignInRequirement.TWO_STEP)
+        self.client.force_login(account)
+        self.assertEqual(self.client.get(self.url("ninja_detail")).status_code, 200)
+
+
+class GuardianChangesChildAddressTests(LoginLinkTestMixin, TestCase):
+    """The guardian changes the address of their child's login, through the
+    confirmed email change (accounts.email_change, DATA_MODEL.md §24)."""
+
+    def setUp(self):
+        super().setUp()
+        self.guardian = User.objects.create(username="ellen", email="ellen@example.com", first_name="Ellen")
+        self.guardian.set_password(PASSWORD)
+        self.guardian.save()
+        self.second = User.objects.create(username="bram", email="bram@example.com", first_name="Bram")
+        self.second.set_password(PASSWORD)
+        self.second.save()
+        self.account = User.objects.create(username="emma", email="emma@example.com", account_type=User.NINJA)
+        self.child = make_ninja(self.guardian, "Emma", account=self.account)
+        Guardianship.objects.create(guardian=self.second, ninja=self.child)
+        self.client.force_login(self.guardian)
+
+    def url(self):
+        return reverse("ninja_login_email", kwargs={"ninja_id": self.child.id})
+
+    def ask(self, new_email="emma.new@example.com", password=PASSWORD):
+        return self.client.post(self.url(), {"new_email": new_email, "password": password})
+
+    def confirm_path(self):
+        import re
+        from urllib.parse import urlparse
+
+        body = self.mails("email_change_confirm").latest("pk").body
+        return urlparse(re.search(r"\S+/account/email/confirm/\S+", body).group(0)).path
+
+    def test_the_link_goes_to_the_new_address_and_works_logged_out(self):
+        from auditlog.models import LogEntry
+
+        response = self.ask()
+        self.assertRedirects(response, reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
+        mail = self.mails("email_change_confirm").get()
+        self.assertEqual(mail.recipient, "emma.new@example.com")
+        self.assertIn("Ellen is changing the email address", mail.body)
+        self.account.refresh_from_db()
+        self.assertEqual(self.account.email, "emma@example.com")
+
+        self.client.logout()
+        path = self.confirm_path()
+        self.client.post(path)
+        self.account.refresh_from_db()
+        self.assertEqual(self.account.email, "emma.new@example.com")
+        self.assertEqual(self.mails("email_changed", self.account).get().recipient, "emma@example.com")
+        notices = self.mails("child_login_changed")
+        self.assertEqual({notice.user for notice in notices}, {self.guardian, self.second})
+        self.assertIn("emma.new@example.com", notices.first().body)
+        entry = LogEntry.objects.get_for_object(self.account).latest("timestamp")
+        self.assertEqual(entry.actor, self.guardian)
+
+    def test_needs_the_guardians_password(self):
+        self.ask(password="wrong")
+        self.assertFalse(self.mails("email_change_confirm").exists())
+
+    def test_a_second_guardian_can_start_it(self):
+        self.client.force_login(self.second)
+        self.ask()
+        self.assertIn("Bram is changing", self.mails("email_change_confirm").get().body)
+
+    def test_refused_once_the_starter_is_no_longer_a_guardian(self):
+        self.ask()
+        Guardianship.objects.filter(guardian=self.guardian).delete()
+        self.client.logout()
+        response = self.client.post(self.confirm_path())
+        self.assertEqual(response.status_code, 400)
+        self.account.refresh_from_db()
+        self.assertEqual(self.account.email, "emma@example.com")
+
+    def test_a_taken_address_is_refused(self):
+        response = self.ask(new_email="bram@example.com")
+        self.assertContains(response, "An account already exists with this email.")
+
+    def test_the_childs_other_sessions_end(self):
+        from django.test import Client
+
+        child_client = Client()
+        child_client.force_login(self.account)
+        self.ask()
+        self.client.logout()
+        self.client.post(self.confirm_path())
+        self.assertEqual(
+            child_client.get(reverse("ninja_detail", kwargs={"ninja_id": self.child.id})).status_code, 302
+        )
+
+    def test_the_organisation_still_cannot_change_a_ninja_login(self):
+        from .email_change import EmailChangeError, request_change
+
+        admin = User.objects.create(username="boss", email="boss@example.com")
+        with self.assertRaises(EmailChangeError):
+            request_change(self.account, "emma.new@example.com", started_by=admin)
 
 
 def settings_site_url():

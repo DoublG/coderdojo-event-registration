@@ -606,7 +606,7 @@ Si vous n'avez rien demandé, vous pouvez ignorer cet e-mail : votre mot de pass
         "category": MailCategory.SERVICE,
         "description": "Sent to the NEW address when someone asks to change the account's email "
         "(accounts/email_change.py). Variables: new_email, old_email, confirm_url, valid_hours, "
-        "by_organisation (true when the organisation started it).",
+        "by_organisation, by_guardian (a guardian's name, for a child's login).",
         "subject": {
             "en-us": "Confirm your new email address",
             "nl-be": "Bevestig je nieuwe e-mailadres",
@@ -616,7 +616,7 @@ Si vous n'avez rien demandé, vous pouvez ignorer cet e-mail : votre mot de pass
             "en-us": """
 Hi {{ recipient_name }},
 
-{% if by_organisation %}At your request, CoderDojo Belgium is changing the email address of your CoderDojo account from {{ old_email }} to {{ new_email }}.{% else %}You asked to change the email address of your CoderDojo account from {{ old_email }} to {{ new_email }}.{% endif %}
+{% if by_guardian %}{{ by_guardian }} is changing the email address of your CoderDojo login from {{ old_email }} to {{ new_email }}.{% elif by_organisation %}At your request, CoderDojo Belgium is changing the email address of your CoderDojo account from {{ old_email }} to {{ new_email }}.{% else %}You asked to change the email address of your CoderDojo account from {{ old_email }} to {{ new_email }}.{% endif %}
 
 To confirm, open this link within {{ valid_hours }} hours:
 
@@ -627,7 +627,7 @@ Nothing changes until you do. If you didn't ask for this, you can ignore this em
             "nl-be": """
 Hallo {{ recipient_name }},
 
-{% if by_organisation %}Op jouw vraag wijzigt CoderDojo Belgium het e-mailadres van je CoderDojo-account van {{ old_email }} naar {{ new_email }}.{% else %}Je vroeg om het e-mailadres van je CoderDojo-account te wijzigen van {{ old_email }} naar {{ new_email }}.{% endif %}
+{% if by_guardian %}{{ by_guardian }} wijzigt het e-mailadres van je CoderDojo-login van {{ old_email }} naar {{ new_email }}.{% elif by_organisation %}Op jouw vraag wijzigt CoderDojo Belgium het e-mailadres van je CoderDojo-account van {{ old_email }} naar {{ new_email }}.{% else %}Je vroeg om het e-mailadres van je CoderDojo-account te wijzigen van {{ old_email }} naar {{ new_email }}.{% endif %}
 
 Open deze link binnen {{ valid_hours }} uur om het te bevestigen:
 
@@ -638,7 +638,7 @@ Tot dan verandert er niets. Heb je dit niet gevraagd? Dan kan je deze e-mail neg
             "fr-be": """
 Bonjour {{ recipient_name }},
 
-{% if by_organisation %}À votre demande, CoderDojo Belgium change l'adresse e-mail de votre compte CoderDojo : {{ old_email }} devient {{ new_email }}.{% else %}Vous avez demandé à changer l'adresse e-mail de votre compte CoderDojo : {{ old_email }} devient {{ new_email }}.{% endif %}
+{% if by_guardian %}{{ by_guardian }} change l'adresse e-mail de votre connexion CoderDojo : {{ old_email }} devient {{ new_email }}.{% elif by_organisation %}À votre demande, CoderDojo Belgium change l'adresse e-mail de votre compte CoderDojo : {{ old_email }} devient {{ new_email }}.{% else %}Vous avez demandé à changer l'adresse e-mail de votre compte CoderDojo : {{ old_email }} devient {{ new_email }}.{% endif %}
 
 Pour confirmer, ouvrez ce lien dans les {{ valid_hours }} heures :
 
@@ -1173,7 +1173,7 @@ Ce n'était pas vous ? Changez tout de suite votre mot de passe et vérifiez vos
         "key": "two_step_turned_off",
         "category": MailCategory.SERVICE,
         "description": "Two-step login was turned off, by the account holder or by the organisation for someone "
-        "who lost their phone (accounts/two_step.py). Variables: by_organisation, security_url.",
+        "who lost their phone (accounts/two_step.py). Variables: by_organisation, by_guardian, security_url.",
         "subject": {
             "en-us": "Two-step login is off",
             "nl-be": "Aanmelden in twee stappen staat uit",
@@ -1183,35 +1183,35 @@ Ce n'était pas vous ? Changez tout de suite votre mot de passe et vérifiez vos
             "en-us": """
 Hi {{ recipient_name }},
 
-{% if by_organisation %}As you asked us, we turned off two-step login for your CoderDojo account.{% else %}Two-step login was just turned off for your CoderDojo account.{% endif %} Logging in now only takes your password. Your app, passkeys and backup codes no longer work.
+{% if by_guardian %}{{ by_guardian }} turned off two-step login for your CoderDojo login.{% elif by_organisation %}As you asked us, we turned off two-step login for your CoderDojo account.{% else %}Two-step login was just turned off for your CoderDojo account.{% endif %} Logging in now only takes your password. Your app, passkeys and backup codes no longer work.
 
 You can turn it on again here:
 
 {{ security_url }}
 
-{% if by_organisation %}Didn't you ask for this? Please tell us straight away.{% else %}Wasn't this you? Change your password straight away and turn it on again.{% endif %}
+{% if by_guardian %}Questions about it? Ask {{ by_guardian }}.{% elif by_organisation %}Didn't you ask for this? Please tell us straight away.{% else %}Wasn't this you? Change your password straight away and turn it on again.{% endif %}
 """,
             "nl-be": """
 Hallo {{ recipient_name }},
 
-{% if by_organisation %}Zoals je ons vroeg, hebben we aanmelden in twee stappen uitgezet voor je CoderDojo-account.{% else %}Aanmelden in twee stappen is net uitgezet voor je CoderDojo-account.{% endif %} Aanmelden vraagt nu alleen je wachtwoord. Je app, toegangssleutels en back-upcodes werken niet meer.
+{% if by_guardian %}{{ by_guardian }} zette aanmelden in twee stappen uit voor je CoderDojo-login.{% elif by_organisation %}Zoals je ons vroeg, hebben we aanmelden in twee stappen uitgezet voor je CoderDojo-account.{% else %}Aanmelden in twee stappen is net uitgezet voor je CoderDojo-account.{% endif %} Aanmelden vraagt nu alleen je wachtwoord. Je app, toegangssleutels en back-upcodes werken niet meer.
 
 Je kan het hier weer aanzetten:
 
 {{ security_url }}
 
-{% if by_organisation %}Heb je dit niet gevraagd? Laat het ons dan meteen weten.{% else %}Was jij dit niet? Verander dan meteen je wachtwoord en zet het weer aan.{% endif %}
+{% if by_guardian %}Vragen? Stel ze aan {{ by_guardian }}.{% elif by_organisation %}Heb je dit niet gevraagd? Laat het ons dan meteen weten.{% else %}Was jij dit niet? Verander dan meteen je wachtwoord en zet het weer aan.{% endif %}
 """,
             "fr-be": """
 Bonjour {{ recipient_name }},
 
-{% if by_organisation %}Comme vous nous l'avez demandé, nous avons désactivé la connexion en deux étapes de votre compte CoderDojo.{% else %}La connexion en deux étapes vient d'être désactivée sur votre compte CoderDojo.{% endif %} Vous vous connectez maintenant avec votre seul mot de passe. Votre application, vos clés d'accès et vos codes de secours ne fonctionnent plus.
+{% if by_guardian %}{{ by_guardian }} a désactivé la connexion en deux étapes de votre connexion CoderDojo.{% elif by_organisation %}Comme vous nous l'avez demandé, nous avons désactivé la connexion en deux étapes de votre compte CoderDojo.{% else %}La connexion en deux étapes vient d'être désactivée sur votre compte CoderDojo.{% endif %} Vous vous connectez maintenant avec votre seul mot de passe. Votre application, vos clés d'accès et vos codes de secours ne fonctionnent plus.
 
 Vous pouvez la réactiver ici :
 
 {{ security_url }}
 
-{% if by_organisation %}Vous n'avez rien demandé ? Prévenez-nous tout de suite.{% else %}Ce n'était pas vous ? Changez tout de suite votre mot de passe et réactivez-la.{% endif %}
+{% if by_guardian %}Des questions ? Posez-les à {{ by_guardian }}.{% elif by_organisation %}Vous n'avez rien demandé ? Prévenez-nous tout de suite.{% else %}Ce n'était pas vous ? Changez tout de suite votre mot de passe et réactivez-la.{% endif %}
 """,
         },
     },
@@ -1265,7 +1265,7 @@ Ce n'était pas vous ? Changez tout de suite votre mot de passe et créez de nou
         "key": "ninja_account_created",
         "category": MailCategory.SERVICE,
         "description": "A guardian gave their child their own login (or switched it back on). Sent to the "
-        "child's address. Variables: guardian_name, username, set_password_url.",
+        "child's address. Variables: guardian_name, username, uses_link, set_password_url or login_url, valid_days.",
         "subject": {
             "en-us": "Your own CoderDojo login",
             "nl-be": "Je eigen CoderDojo-login",
@@ -1278,11 +1278,15 @@ Hi {{ recipient_name }},
 {{ guardian_name }} made you your own CoderDojo login. With it you can see your belt,
 your badges and the sessions you've been to, and sign yourself up for sessions.
 
-Choose your password here:
+{% if uses_link %}You log in with a link we mail you, so there's no password to remember. Open this link within {{ valid_days }} days to log in for the first time:
+
+{{ login_url }}
+
+Next time, enter this email address on the login page and choose "Log in with an emailed link".{% else %}Choose your password here:
 
 {{ set_password_url }}
 
-After that, log in with this email address (or your username, {{ username }}).
+After that, log in with this email address (or your username, {{ username }}).{% endif %}
 
 Didn't expect this mail? Then you can ignore it.
 """,
@@ -1293,11 +1297,15 @@ Hallo {{ recipient_name }},
 gordel, je badges en de sessies waar je naartoe ging, en kan je je zelf inschrijven
 voor sessies.
 
-Kies hier je wachtwoord:
+{% if uses_link %}Je meldt je aan met een link die we je mailen, dus je hoeft geen wachtwoord te onthouden. Open deze link binnen {{ valid_days }} dagen om je de eerste keer aan te melden:
+
+{{ login_url }}
+
+Vul de volgende keer dit e-mailadres in op de aanmeldpagina en kies "Aanmelden met een link per e-mail".{% else %}Kies hier je wachtwoord:
 
 {{ set_password_url }}
 
-Daarna log je in met dit e-mailadres (of je gebruikersnaam, {{ username }}).
+Daarna log je in met dit e-mailadres (of je gebruikersnaam, {{ username }}).{% endif %}
 
 Had je deze e-mail niet verwacht? Dan kan je hem negeren.
 """,
@@ -1308,11 +1316,15 @@ Bonjour {{ recipient_name }},
 tes badges et les sessions auxquelles tu as participé, et t'inscrire toi-même à des
 sessions.
 
-Choisis ton mot de passe ici :
+{% if uses_link %}Tu te connectes avec un lien que nous t'envoyons par e-mail : pas de mot de passe à retenir. Ouvre ce lien dans les {{ valid_days }} jours pour te connecter la première fois :
+
+{{ login_url }}
+
+La prochaine fois, entre cette adresse e-mail sur la page de connexion et choisis « Se connecter avec un lien par e-mail ».{% else %}Choisis ton mot de passe ici :
 
 {{ set_password_url }}
 
-Ensuite, connecte-toi avec cette adresse e-mail (ou ton nom d'utilisateur, {{ username }}).
+Ensuite, connecte-toi avec cette adresse e-mail (ou ton nom d'utilisateur, {{ username }}).{% endif %}
 
 Tu ne t'attendais pas à cet e-mail ? Tu peux l'ignorer.
 """,
@@ -1731,6 +1743,7 @@ SAMPLE_CONTEXT = {
         "confirm_url": "https://coolregistration.localhost/account/email/confirm/abc-123/",
         "valid_hours": 24,
         "by_organisation": False,
+        "by_guardian": "",
     },
     "email_changed": {
         **_common,
@@ -1803,6 +1816,7 @@ SAMPLE_CONTEXT = {
     "two_step_turned_off": {
         **_common,
         "by_organisation": False,
+        "by_guardian": "",
         "security_url": "https://coolregistration.localhost/account/security/",
     },
     "backup_code_used": {
@@ -1822,7 +1836,10 @@ SAMPLE_CONTEXT = {
         "recipient_name": "Emma",
         "guardian_name": "Ellen Peeters",
         "username": "emma",
+        "uses_link": False,
         "set_password_url": "https://coolregistration.localhost/password-reset/confirm/MQ/abc-123/",
+        "login_url": "https://coolregistration.localhost/login/link/MQ/abc-123/",
+        "valid_days": 3,
     },
     "account_deletion_reminder": {
         **_common,

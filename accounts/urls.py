@@ -93,6 +93,17 @@ urlpatterns = [
     path("account/ninja/<int:ninja_id>/login/resend/", views.ninja_login_resend, name="ninja_login_resend"),
     path("account/ninja/<int:ninja_id>/login/remove/", views.ninja_login_remove, name="ninja_login_remove"),
     path(
+        "account/ninja/<int:ninja_id>/login/two-step-off/",
+        views.ninja_login_two_step_off,
+        name="ninja_login_two_step_off",
+    ),
+    path(
+        "account/ninja/<int:ninja_id>/login/use-password/",
+        views.ninja_login_use_password,
+        name="ninja_login_use_password",
+    ),
+    path("account/ninja/<int:ninja_id>/login/email/", views.ninja_login_email, name="ninja_login_email"),
+    path(
         "account/registration/<int:registration_id>/cancel/",
         views.cancel_registration,
         name="cancel_registration",

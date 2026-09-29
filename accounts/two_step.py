@@ -164,7 +164,7 @@ def remove(user, device):
         _mail(user, "two_step_turned_off", by_organisation=False)
 
 
-def turn_off(user, by_organisation=False):
+def turn_off(user, by_organisation=False, by_guardian=None):
     """Remove every app, passkey and backup code. The person checks this
     themselves (their password, and their role's requirement); the
     organisation uses it for someone who lost their phone
@@ -177,7 +177,12 @@ def turn_off(user, by_organisation=False):
         TOTPDevice.objects.filter(user=user).delete()
         WebauthnDevice.objects.filter(user=user).delete()
         StaticDevice.objects.filter(user=user).delete()
-    _mail(user, "two_step_turned_off", by_organisation=by_organisation)
+    _mail(
+        user,
+        "two_step_turned_off",
+        by_organisation=by_organisation,
+        by_guardian=(by_guardian.get_full_name() or by_guardian.get_username()) if by_guardian else "",
+    )
 
 
 def _mail(user, key, **context):

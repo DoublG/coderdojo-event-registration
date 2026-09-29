@@ -1,8 +1,9 @@
 """The account's Sign-in security page (/account/security/, DATA_MODEL.md
 §15): two-step login with an authenticator app, passkeys and backup codes.
-Changes go through accounts/two_step.py. Adult accounts only (never a
-ninja's own login), and an account with two-step login on only changes it
-from a session that passed it."""
+Changes go through accounts/two_step.py and accounts/login_links.py. Every
+person's login has it, an adult's or a ninja's own (DATA_MODEL.md §24), and
+an account with two-step login on only changes it from a session that
+passed it."""
 
 from base64 import b32encode
 from binascii import unhexlify
@@ -37,9 +38,9 @@ NEW_CODES_SESSION = "two_step_new_backup_codes"
 
 
 def _own_account(request):
-    """404 for anything but an adult account (a ninja's own login never
-    sets up two-step login)."""
-    if request.user.account_type != User.ADULT:
+    """404 for the API's technical accounts: every person's login, an adult's
+    or a ninja's own, has the same options (DATA_MODEL.md §24)."""
+    if request.user.account_type not in (User.ADULT, User.NINJA):
         raise Http404
 
 

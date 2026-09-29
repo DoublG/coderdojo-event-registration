@@ -536,11 +536,43 @@ class ChildLoginForm(forms.Form):
     # Not required here: an empty address gets the service's own message.
     email = forms.EmailField(required=False, widget=forms.EmailInput(attrs={"autocomplete": "off", "required": True}))
 
+    login_method = forms.ChoiceField(
+        label=_("How will they log in?"),
+        choices=[
+            (User.LOGIN_PASSWORD, _("With a password they choose")),
+            (User.LOGIN_LINK, _("With a link we mail them each time (no password)")),
+        ],
+        initial=User.LOGIN_PASSWORD,
+        required=False,
+        widget=forms.RadioSelect,
+    )
+
     def __init__(self, child, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["email"].label = lazy(lambda: _("%(name)s's email address") % {"name": child.name}, str)()
         if child.account is not None:
             self.fields["email"].initial = child.account.email
+            self.fields["login_method"].initial = child.account.login_method
+
+    def clean_login_method(self):
+        return self.cleaned_data["login_method"] or User.LOGIN_PASSWORD
+
+
+class ChildEmailChangeForm(_NewEmailMixin, ConfirmIdentityForm):
+    """A guardian changes the address of their child's login
+    (accounts.views.ninja_login_email): the new address, and the guardian's
+    own password (or recent login) to show it's them (DATA_MODEL.md §24)."""
+
+    new_email = _new_email_field()
+    field_order = ["new_email", "password"]
+
+    def __init__(self, guardian, account, *args, **kwargs):
+        super().__init__(guardian, *args, label=_("Your password"), **kwargs)
+        self.account = account
+        self.fields["new_email"].help_text = _(
+            "We send a link there. The address only changes once it's opened; your child doesn't need to log in "
+            "for that."
+        )
 
 
 class LenientChoiceField(forms.ChoiceField):

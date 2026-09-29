@@ -5,8 +5,9 @@ straight from a form: request_change() mails a signed link to the new
 address, and only confirm_change() (from that link) changes it, telling the
 old address. The family asks with its password (accounts.views.change_email);
 an organisation admin can start it for a family that lost its old mailbox
-(privacy.views.manage_privacy_email), and then the link works without
-logging in. Nothing is stored until the change is made: the link carries
+(privacy.views.manage_privacy_email), and a guardian for their child's own
+login (accounts.child_accounts.change_email, DATA_MODEL.md §24); those links
+work without logging in. Nothing is stored until the change is made: the link carries
 the account, the new address and a fingerprint of the current one, so it
 stops working once the address has changed (single use) or after
 VALID_HOURS.
@@ -30,6 +31,7 @@ from mailing.rendering import TemplateMissing
 from mailing.services import is_suppressed_address, send, send_or_log
 
 from .models import User
+from .security_mail import EMAIL_CHANGED, tell_guardians
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +40,10 @@ BELGIAN_TIME = ZoneInfo("Europe/Brussels")
 VALID_HOURS = 24
 # One request per account per minute: the form mails any address it's given.
 REQUEST_INTERVAL_SECONDS = 60
+
+# Who started a change, when it wasn't the account holder (`started_as`).
+ORGANISATION = "organisation"
+GUARDIAN = "guardian"
 
 
 class EmailChangeError(Exception):
@@ -55,6 +61,7 @@ class ChangeRequest:
     user: User
     new_email: str
     started_by: User | None = None
+    started_as: str | None = None  # ORGANISATION, GUARDIAN, or None: the account holder
 
 
 def _same(a, b):
@@ -96,13 +103,25 @@ def _fingerprint(email):
     return salted_hmac(SALT, (email or "").strip().lower(), algorithm="sha256").hexdigest()[:16]
 
 
-def make_token(user, new_email, started_by=None):
+def is_guardian_of(guardian, account):
+    """Whether `guardian` is a guardian of the child whose own login is `account`."""
+    from .models import Guardianship
+
+    return (
+        guardian is not None
+        and account.is_ninja
+        and Guardianship.objects.filter(guardian=guardian, ninja__account=account).exists()
+    )
+
+
+def make_token(user, new_email, started_by=None, started_as=None):
     return signing.dumps(
         {
             "u": user.pk,
             "e": new_email.strip(),
             "o": _fingerprint(user.email),
             "b": started_by.pk if started_by else None,
+            "a": (started_as or ORGANISATION) if started_by else None,
         },
         salt=SALT,
     )
@@ -127,17 +146,25 @@ def read_token(token):
     if _fingerprint(user.email) != data["o"]:
         raise EmailChangeError(_("This link has already been used, or the address changed since."))
     started_by = User.objects.filter(pk=data["b"]).first() if data["b"] else None
-    return ChangeRequest(user=user, new_email=data["e"], started_by=started_by)
+    # A link from before `started_as` existed: only the organisation started those.
+    started_as = (data.get("a") or ORGANISATION) if started_by else None
+    return ChangeRequest(user=user, new_email=data["e"], started_by=started_by, started_as=started_as)
 
 
-def request_change(user, new_email, started_by=None):
+def request_change(user, new_email, started_by=None, started_as=None):
     """Mail a confirmation link for `user`'s new address to that address.
-    `started_by` is the organisation admin who started it, if it wasn't the
-    account holder."""
+    `started_by` is who started it, if it wasn't the account holder: an
+    organisation admin (`started_as` ORGANISATION, the default), or a
+    guardian of the child whose login it is (GUARDIAN)."""
     new_email = new_email.strip()
     check_new_address(user, new_email)
-    if started_by is not None and (blocker := organisation_blocker(user)):
-        raise EmailChangeError(blocker)
+    if started_by is not None:
+        started_as = started_as or ORGANISATION
+        if started_as == GUARDIAN:
+            if not is_guardian_of(started_by, user) or not user.is_active:
+                raise EmailChangeError(_("Only a child's guardian can change the address of their login."))
+        elif blocker := organisation_blocker(user):
+            raise EmailChangeError(blocker)
     # cache.add is False when the key exists; None when the cache is down
     # (IGNORE_EXCEPTIONS), and then the request goes ahead.
     if cache.add(f"accounts:email-change:{user.pk}", 1, REQUEST_INTERVAL_SECONDS) is False:
@@ -145,9 +172,10 @@ def request_change(user, new_email, started_by=None):
     context = {
         "new_email": new_email,
         "old_email": user.email,
-        "confirm_url": confirm_url(make_token(user, new_email, started_by)),
+        "confirm_url": confirm_url(make_token(user, new_email, started_by, started_as)),
         "valid_hours": VALID_HOURS,
-        "by_organisation": started_by is not None,
+        "by_organisation": started_by is not None and started_as == ORGANISATION,
+        "by_guardian": (started_by.get_full_name() or started_by.get_username()) if started_as == GUARDIAN else "",
     }
     try:
         send(user, MailCategory.SERVICE, "email_change_confirm", context, address=new_email)
@@ -164,6 +192,10 @@ def confirm_change(change):
         user = User.objects.select_for_update().get(pk=change.user.pk)
         if not _same(user.email, change.user.email):
             raise EmailChangeError(_("This link has already been used, or the address changed since."))
+        if change.started_as == GUARDIAN and not is_guardian_of(change.started_by, user):
+            raise EmailChangeError(
+                _("This link isn't valid any more: whoever asked for it is no longer the guardian.")
+            )
         check_new_address(user, change.new_email)
         # Queued before the save, so it keeps the old address as its recipient.
         send_or_log(
@@ -179,4 +211,6 @@ def confirm_change(change):
         )
         user.email = change.new_email
         user.save(update_fields=["email"])
+    # A child's own login: its guardians hear about it too.
+    tell_guardians(user, EMAIL_CHANGED, new_email=user.email)
     return user
