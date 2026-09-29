@@ -3982,8 +3982,9 @@ None yet.
 
 ## 23. Organisation people, roles and page access on the dashboard (built)
 
-**Built: phases 1–4 and 6**, as planned below; phase 5 (read-only pages
-for the board) is still open. The code: areas in `accounts.organisation`
+**Built: phases 1–4 and 6**, as planned below. Phase 5 (read-only pages
+for the board) is dropped for now (decided, 2026-09-29): the board doesn't
+need dashboard access; it asks for the Django admin like every role. The code: areas in `accounts.organisation`
 (`Area`, `AREA_PERMISSIONS`, `require_area`), time-boxed Django admin
 access in `accounts/admin_access.py` (`AdminAccessGrant`, the page
 `/manage/django-admin/`, `core.admin_site.AdminSite`, the beat job
@@ -4262,7 +4263,7 @@ docstrings say an edit there skips the rules above).
    retention and audit decisions), the invitation mail, screen 2's invite
    path and screen 6, the invited sign-up form. Tests: accepted only by
    the matching address, expiry, single use, withdraw, throttle, retention.
-5. **Board on the dashboard (optional, later):** give `board` read-only
+5. **Board on the dashboard (dropped for now, see the status above):** give `board` read-only
    areas once pages have a read-only mode, so it rarely needs technical
    access.
 6. **Finishing:** Dutch and French, the help docs (new
