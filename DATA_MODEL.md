@@ -3664,3 +3664,85 @@ sees the **main language**, with an "Only in ..." note.
   in its main language with versions in its others, and the organisation's
   content in all three (`core/seed_translations.py`). The organisation dojo
   is English-main, like the rest of the organisation's content.
+
+## 20. One management area for the organisation and its dojos (planned)
+
+**Planned.** Today the organisation dashboard (`/manage/…`,
+`core/_manage_base.html`) and a dojo's admin area (`/dojos/<id>/…`,
+`dojos/_admin_base.html`) are two copies of the same sidebar shell with
+different menus, reached through two nav links (*Organisation* and
+*Manage*). Preparing the organisation's own events (on an organisation dojo,
+§12) and promoting them means switching between the two. They become one
+management area: one entry point, one sidebar, and a switcher between the
+contexts you can manage.
+
+### Decisions
+
+- **Navigation merges, access doesn't (decided).** The organisation `admin`
+  role still opens the organisation's pages; a dojo, an organisation dojo
+  included, still needs an active champion/mentor membership and a valid
+  background check (`dojos.access`, §12). The merge grants nobody anything
+  new.
+- **No background check, no dojos (decided).** Not everyone in the
+  organisation needs a background check. Without one, an organisation
+  member sees only the **Organisation** context: no dojos at all, also not
+  the organisation dojo, and a dojo's URL is a 404 (`accessible_dojos` and
+  `managing_membership` already return nothing without a valid check). With
+  a check and a place on the organisation dojo's team it shows up; when the
+  check lapses it disappears again by itself. Promoting an event needs no
+  check: the Promotions page shows no children's data.
+- **Promoting stays an organisation action (decided).** Only the
+  organisation `admin` role creates promotions; dojo teams don't promote
+  their own sessions for now (the model would allow it later).
+- **URLs stay where they are.** Dojo pages keep `/dojos/<id>/…`: stored
+  notification links and mails point there, and moving them changes nothing
+  anyone sees. Possible later, with permanent redirects.
+- **The board role** keeps the Django admin for its read-only oversight;
+  dashboard pages for it are separate work.
+
+### Contexts
+
+`manage_contexts(user)` (planned in `core/manage_nav.py`) builds the
+switcher from the existing access helpers, in three groups:
+
+| Group | Shown when | Source |
+|---|---|---|
+| **Organisation** | the account holds the organisation `admin` role | `accounts.organisation.is_organisation_admin` |
+| **Organisation events** | active champion/mentor membership + valid check on an organisation dojo | `accessible_dojos(user)` with `kind=organisation` |
+| **Your dojos** | the same, on a regular dojo | `accessible_dojos(user)` with `kind=dojo` |
+
+Someone with one context sees no switcher, as today. The notification bell
+(and its WebSocket) stays in dojo contexts only: the consumer works per dojo.
+
+### Phases
+
+1. **One shared shell, no visible change.** `core/_manage_shell.html` holds
+   the head, the sidebar frame, the top bar, messages and the sign-in
+   notice; `core/_manage_base.html` and `dojos/_admin_base.html` extend it
+   and only fill in their sidebar menus. Their block names (`manage_*`,
+   `admin_*`) stay, so the page templates don't change.
+2. **The context switcher.** `manage_contexts(user)` feeds one switcher in
+   both bases (replacing the dojo-only one). Picking a dojo goes to its
+   dashboard, picking Organisation to `/manage/`. The footer's role label
+   follows the context.
+3. **One entry point.** `manage_home` (`/manage/`) becomes the landing: the
+   organisation for an organisation admin, else the first accessible dojo,
+   else a 404. The nav gets one *Manage* link instead of *Manage* and
+   *Organisation*, and the post-login redirect
+   (`accounts.views._post_login_redirect`) follows the same rule.
+4. **Organisation events and promotions together.** The Organisation
+   context gets an *Organisation events* group linking to each organisation
+   dojo's Events page the account can open. An event's detail page gets a
+   **Promotions** card for organisation admins: the event's current and
+   planned promotions and **Promote this event**
+   (`manage_promotion_create?event=<id>`, event prefilled). The Promotions
+   list links each promotion to its event's admin page when the account can
+   open it. Optionally, the Organisation context notes how to get access to
+   organisation events (a background check and a place on the team) when
+   the account has none.
+5. **Finishing.** Tests: who sees which context (a mentor never sees
+   Organisation; an organisation admin without a check or membership never
+   sees a dojo), where `/manage/` sends each role, the Promotions card's
+   visibility and the prefilled event. Dutch and French for the new texts,
+   CLAUDE.md, and the help docs (en/fr/nl) where they describe the *Manage*
+   link.
