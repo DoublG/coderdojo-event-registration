@@ -18,12 +18,12 @@
       <tbody>
         {% for label, opens in rows %}
           <tr>
-            <th class="body-sm" scope="row">{{ label }}</th>
+            <td class="body-sm">{{ label }}</td>
             {% for yes in opens %}<td class="body-sm">{% if yes %}✓{% else %}–{% endif %}</td>{% endfor %}
           </tr>
         {% endfor %}
         <tr>
-          <th class="body-sm" scope="row">{% blocktranslate %}The Django admin, when asked for ({{ hours }} hours), with the role's permissions{% endblocktranslate %}</th>
+          <td class="body-sm">{% blocktranslate %}The Django admin, when asked for ({{ hours }} hours), with the role's permissions{% endblocktranslate %}</td>
           {% for role in roles %}<td class="body-sm">✓</td>{% endfor %}
         </tr>
       </tbody>

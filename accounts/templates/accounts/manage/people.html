@@ -25,7 +25,7 @@
       <tbody>
         {% for person in people %}
           <tr>
-            <th class="body-sm" scope="row"><a href="{% url 'manage_person' user_id=person.account.pk %}">{{ person.account.team_name }}</a></th>
+            <td class="body-sm"><a href="{% url 'manage_person' user_id=person.account.pk %}">{{ person.account.team_name }}</a></td>
             <td class="body-sm">{{ person.account.email }}</td>
             <td class="body-sm">{{ person.roles|join:", " }}</td>
             <td class="body-sm">{{ person.granted_at|date:"d/m/Y" }}</td>
@@ -54,7 +54,7 @@
         <tbody>
           {% for invitation, roles in invitations %}
             <tr>
-              <th class="body-sm" scope="row">{{ invitation.name }}</th>
+              <td class="body-sm">{{ invitation.name }}</td>
               <td class="body-sm">{{ invitation.email }}</td>
               <td class="body-sm">{{ roles|join:", " }}</td>
               <td class="body-sm">{{ invitation.expires_at|date:"d/m/Y" }}</td>
@@ -92,7 +92,7 @@
         <tbody>
           {% for grant in open_grants %}
             <tr>
-              <th class="body-sm" scope="row"><a href="{% url 'manage_person' user_id=grant.account_id %}">{{ grant.account.team_name }}</a></th>
+              <td class="body-sm"><a href="{% url 'manage_person' user_id=grant.account_id %}">{{ grant.account.team_name }}</a></td>
               <td class="body-sm">{{ grant.reason }}</td>
               <td class="body-sm">{{ grant.expires_at|date:"d/m/Y H:i" }}</td>
               <td class="body-sm">

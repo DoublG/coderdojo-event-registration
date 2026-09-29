@@ -720,7 +720,7 @@ Hallo {{ recipient_name }},
 
 {% if roles %}{{ changed_by }} heeft je rollen in de organisatie van CoderDojo Belgium gewijzigd. Je hebt nu:
 {% for role in roles %}
-- {% if role == "admin" %}Beheerder: het organisatiedashboard (campagnes, inhoud, awards, privacy, aanmeldbeveiliging en mensen){% elif role == "reviewer" %}Beoordelaar van uittreksels: uittreksels uit het strafregister en aanvragen{% else %}Bestuur: toezicht, alleen lezen{% endif %}{% endfor %}
+- {% if role == "admin" %}Beheerder: het organisatiedashboard (campagnes, inhoud, onderscheidingen, privacy, aanmeldbeveiliging en mensen){% elif role == "reviewer" %}Beoordelaar van uittreksels: uittreksels uit het strafregister en aanvragen{% else %}Bestuur: toezicht, alleen lezen{% endif %}{% endfor %}
 
 Je vindt het onder Beheren, waar je ook toegang tot de Django-admin kunt vragen als je die nodig hebt (telkens 12 uur):
 
@@ -735,7 +735,7 @@ Bonjour {{ recipient_name }},
 
 {% if roles %}{{ changed_by }} a modifié vos rôles dans l'organisation de CoderDojo Belgium. Vous avez maintenant :
 {% for role in roles %}
-- {% if role == "admin" %}Administrateur : le tableau de bord de l'organisation (campagnes, contenu, récompenses, vie privée, sécurité de connexion et personnes){% elif role == "reviewer" %}Évaluateur des extraits de casier : extraits de casier judiciaire et candidatures{% else %}Conseil d'administration : supervision, en lecture seule{% endif %}{% endfor %}
+- {% if role == "admin" %}Administrateur : le tableau de bord de l'organisation (campagnes, contenu, distinctions, vie privée, sécurité de connexion et personnes){% elif role == "reviewer" %}Évaluateur des extraits de casier : extraits de casier judiciaire et candidatures{% else %}Conseil d'administration : supervision, en lecture seule{% endif %}{% endfor %}
 
 Vous le trouvez sous Gérer, où vous pouvez aussi demander l'accès à l'admin Django quand vous en avez besoin (12 heures à la fois) :
 
@@ -777,7 +777,7 @@ Hallo {{ recipient_name }},
 
 {{ invited_by }} nodigt je uit in het organisatieteam van CoderDojo Belgium, met deze rollen:
 {% for role in roles %}
-- {% if role == "admin" %}Beheerder: het organisatiedashboard (campagnes, inhoud, awards, privacy, aanmeldbeveiliging en mensen){% elif role == "reviewer" %}Beoordelaar van uittreksels: uittreksels uit het strafregister en aanvragen{% else %}Bestuur: toezicht, alleen lezen{% endif %}{% endfor %}
+- {% if role == "admin" %}Beheerder: het organisatiedashboard (campagnes, inhoud, onderscheidingen, privacy, aanmeldbeveiliging en mensen){% elif role == "reviewer" %}Beoordelaar van uittreksels: uittreksels uit het strafregister en aanvragen{% else %}Bestuur: toezicht, alleen lezen{% endif %}{% endfor %}
 
 Maak je account aan (of meld je aan, als je er al een hebt met dit adres) en aanvaard hier:
 
@@ -790,7 +790,7 @@ Bonjour {{ recipient_name }},
 
 {{ invited_by }} vous invite dans l'équipe de l'organisation de CoderDojo Belgium, avec ces rôles :
 {% for role in roles %}
-- {% if role == "admin" %}Administrateur : le tableau de bord de l'organisation (campagnes, contenu, récompenses, vie privée, sécurité de connexion et personnes){% elif role == "reviewer" %}Évaluateur des extraits de casier : extraits de casier judiciaire et candidatures{% else %}Conseil d'administration : supervision, en lecture seule{% endif %}{% endfor %}
+- {% if role == "admin" %}Administrateur : le tableau de bord de l'organisation (campagnes, contenu, distinctions, vie privée, sécurité de connexion et personnes){% elif role == "reviewer" %}Évaluateur des extraits de casier : extraits de casier judiciaire et candidatures{% else %}Conseil d'administration : supervision, en lecture seule{% endif %}{% endfor %}
 
 Créez votre compte (ou connectez-vous, si vous en avez déjà un avec cette adresse) et acceptez ici :
 

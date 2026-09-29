@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 06:36+0000\n"
+"POT-Creation-Date: 2026-09-29 08:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -17,11 +17,35 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Generated-By: Babel 2.18.0\n"
 
+#: accounts/admin_access.py:72
+msgid ""
+"Only an account with an organisation role can ask for the Django admin."
+msgstr ""
+"Alleen een account met een rol in de organisatie kan toegang tot de Django-"
+"admin vragen."
+
+#: accounts/admin_access.py:74
+msgid "Say why you need the Django admin."
+msgstr "Zeg waarom je de Django-admin nodig hebt."
+
+#: accounts/admin_access.py:76
+msgid "You already have access to the Django admin."
+msgstr "Je hebt al toegang tot de Django-admin."
+
+#: accounts/admin_access.py:97
+#, python-format
+msgid "%(name)s opened access to the Django admin until %(until)s: %(reason)s"
+msgstr "%(name)s heeft toegang tot de Django-admin tot %(until)s: %(reason)s"
+
+#: accounts/admin_access.py:107 accounts/organisation_people.py:137
+msgid "This access has already ended."
+msgstr "Deze toegang is al afgelopen."
+
 #: accounts/child_accounts.py:46
 msgid "Your child's own email address is needed for a login."
 msgstr "Voor een login is het eigen e-mailadres van je kind nodig."
 
-#: accounts/child_accounts.py:50
+#: accounts/child_accounts.py:50 accounts/invitations.py:94
 msgid "Enter a valid email address."
 msgstr "Vul een geldig e-mailadres in."
 
@@ -118,6 +142,8 @@ msgid "Current password"
 msgstr "Huidig wachtwoord"
 
 #: accounts/forms.py:61 accounts/forms.py:92 accounts/forms.py:130
+#: accounts/templates/accounts/manage/people.html:20
+#: accounts/templates/accounts/manage/people.html:49
 #: accounts/templates/accounts/manage/security.html:71
 #: accounts/templates/accounts/partials/_account_details_edit.html:20
 #: core/templates/core/contact.html:34 dojos/forms.py:95 dojos/forms.py:232
@@ -126,24 +152,26 @@ msgstr "Huidig wachtwoord"
 msgid "Email"
 msgstr "E-mail"
 
-#: accounts/forms.py:103 accounts/forms.py:138
+#: accounts/forms.py:103 accounts/forms.py:138 accounts/forms.py:342
 msgid "Password"
 msgstr "Wachtwoord"
 
 #: accounts/forms.py:108 accounts/forms.py:109
 msgid "That email/password combination doesn't match an account."
-msgstr "Die combinatie van e-mail en wachtwoord hoort bij geen enkele account."
+msgstr ""
+"Die combinatie van e-mail en wachtwoord hoort bij geen enkele account."
 
 #: accounts/forms.py:118
 msgid "That isn't a Belgian postcode we know."
 msgstr "Dat is geen Belgische postcode die we kennen."
 
-#: accounts/forms.py:128
+#: accounts/forms.py:128 accounts/forms.py:340
 msgid "Full name"
 msgstr "Volledige naam"
 
-#: accounts/forms.py:132 accounts/forms.py:192 applications/forms.py:19
-#: dojos/forms.py:96 dojos/templates/dojos/dojo_detail.html:244
+#: accounts/forms.py:132 accounts/forms.py:192 accounts/forms.py:341
+#: applications/forms.py:19 dojos/forms.py:96
+#: dojos/templates/dojos/dojo_detail.html:244
 msgid "Phone"
 msgstr "Telefoon"
 
@@ -160,7 +188,7 @@ msgid "So we can tell you about dojos and sessions near you."
 msgstr ""
 "Zo kunnen we je laten weten welke dojo's en sessies er in je buurt zijn."
 
-#: accounts/forms.py:146 mailing/forms.py:24
+#: accounts/forms.py:146 accounts/forms.py:343 mailing/forms.py:24
 msgid "Language for emails"
 msgstr "Taal van de e-mails"
 
@@ -176,7 +204,7 @@ msgstr ""
 "Stuur me de nieuwsbrief van CoderDojo Belgium en nieuws over evenementen "
 "zoals Coolest Projects en CoderDojo Girlz."
 
-#: accounts/forms.py:190 accounts/forms.py:397
+#: accounts/forms.py:190 accounts/forms.py:449
 msgid "First name"
 msgstr "Voornaam"
 
@@ -189,7 +217,7 @@ msgstr "Achternaam"
 msgid "Required from"
 msgstr "Verplicht vanaf"
 
-#: accounts/forms.py:281 accounts/forms.py:330
+#: accounts/forms.py:281 accounts/forms.py:382
 msgid "Your password"
 msgstr "Je wachtwoord"
 
@@ -197,49 +225,73 @@ msgstr "Je wachtwoord"
 msgid "That password isn't right."
 msgstr "Dat wachtwoord klopt niet."
 
-#: accounts/forms.py:316
+#: accounts/forms.py:304
+msgid "Why do you need it?"
+msgstr "Waarom heb je die nodig?"
+
+#: accounts/forms.py:306
+msgid ""
+"For example: fix a registration by hand. The other organisation admins see "
+"this."
+msgstr ""
+"Bijvoorbeeld: een inschrijving met de hand rechtzetten. De andere beheerders"
+" van de organisatie zien dit."
+
+#: accounts/forms.py:330
+msgid "Their name"
+msgstr "Naam"
+
+#: accounts/forms.py:331
+msgid "Their email address"
+msgstr "E-mailadres"
+
+#: accounts/forms.py:332
+msgid "Language of the invitation"
+msgstr "Taal van de uitnodiging"
+
+#: accounts/forms.py:368
 msgid "New email address"
 msgstr "Nieuw e-mailadres"
 
-#: accounts/forms.py:317
+#: accounts/forms.py:369
 msgid "We send a link there. The address only changes once you open it."
 msgstr ""
 "We sturen daar een link naartoe. Het adres verandert pas als je die opent."
 
-#: accounts/forms.py:340
+#: accounts/forms.py:392
 msgid "I've checked that this request comes from the account holder."
 msgstr "Ik heb nagekeken dat deze vraag van de accounthouder komt."
 
-#: accounts/forms.py:348
+#: accounts/forms.py:400
 msgid ""
-"We send a link there. The address only changes once they open it; they don't "
-"need to log in for that."
+"We send a link there. The address only changes once they open it; they don't"
+" need to log in for that."
 msgstr ""
 "We sturen daar een link naartoe. Het adres verandert pas als die geopend "
 "wordt; aanmelden is daarvoor niet nodig."
 
-#: accounts/forms.py:363
+#: accounts/forms.py:415
 #, python-format
 msgid "%(name)s's email address"
 msgstr "E-mailadres van %(name)s"
 
-#: accounts/forms.py:388
+#: accounts/forms.py:440
 msgid "Gender (optional)"
 msgstr "Gender (optioneel)"
 
-#: accounts/forms.py:391
+#: accounts/forms.py:443
 msgid "Avatar"
 msgstr "Avatar"
 
-#: accounts/forms.py:398
+#: accounts/forms.py:450
 msgid "Family name"
 msgstr "Familienaam"
 
-#: accounts/forms.py:399
+#: accounts/forms.py:451
 msgid "Allergies or notes (optional)"
 msgstr "Allergieën of opmerkingen (optioneel)"
 
-#: accounts/forms.py:403
+#: accounts/forms.py:455
 msgid ""
 "Only the champion (the person running the dojo) sees this, on the list of a "
 "session your child is signed up for."
@@ -247,94 +299,151 @@ msgstr ""
 "Alleen de champion (wie de dojo leidt) ziet dit, op de lijst van een sessie "
 "waarvoor je kind is ingeschreven."
 
-#: accounts/forms.py:407
+#: accounts/forms.py:459
 msgid "First name is required."
 msgstr "Voornaam is verplicht."
 
-#: accounts/forms.py:408
+#: accounts/forms.py:460
 msgid "Family name is required."
 msgstr "Familienaam is verplicht."
 
-#: accounts/forms.py:412 accounts/forms.py:510
+#: accounts/forms.py:464 accounts/forms.py:562
 msgid "None"
 msgstr "Geen"
 
-#: accounts/forms.py:430
+#: accounts/forms.py:482
 msgid "Date of birth (optional)"
 msgstr "Geboortedatum (optioneel)"
 
-#: accounts/forms.py:440
+#: accounts/forms.py:492
 msgid "Home dojo"
 msgstr "Thuisdojo"
 
-#: accounts/forms.py:440
+#: accounts/forms.py:492
 msgid "None yet"
 msgstr "Nog geen"
 
-#: accounts/forms.py:455 accounts/forms.py:498
+#: accounts/forms.py:507 accounts/forms.py:550
 msgid "Date of birth"
 msgstr "Geboortedatum"
 
-#: accounts/forms.py:466
+#: accounts/forms.py:518
 msgid "Keep the current photo"
 msgstr "De huidige foto houden"
 
-#: accounts/forms.py:466
+#: accounts/forms.py:518
 msgid "No avatar"
 msgstr "Geen avatar"
 
-#: accounts/forms.py:482
+#: accounts/forms.py:534
 #: accounts/templates/accounts/partials/_child_header_display.html:14
 msgid "Pick your avatar"
 msgstr "Kies je avatar"
 
-#: accounts/forms.py:499
+#: accounts/forms.py:551
 #: accounts/templates/accounts/partials/_child_header_display.html:34
 #: dojos/templates/dojos/partials/_attendance_row.html:25
 msgid "Allergies or notes"
 msgstr "Allergieën of opmerkingen"
 
-#: accounts/forms.py:504
+#: accounts/forms.py:556
 msgid "Date of birth is required."
 msgstr "Geboortedatum is verplicht."
 
-#: accounts/forms.py:508
+#: accounts/forms.py:560
 msgid "Sam"
 msgstr "Sam"
 
-#: accounts/forms.py:509
+#: accounts/forms.py:561
 msgid "Peeters"
 msgstr "Peeters"
 
-#: accounts/forms.py:517
+#: accounts/forms.py:569
 msgid "Gender"
 msgstr "Gender"
 
-#: accounts/forms.py:518
-msgid "Optional, never shown publicly. Lets us tell you about girls' sessions."
+#: accounts/forms.py:570
+msgid ""
+"Optional, never shown publicly. Lets us tell you about girls' sessions."
 msgstr ""
 "Optioneel, nooit openbaar. Zo kunnen we je laten weten wanneer er "
 "meisjessessies zijn."
 
-#: accounts/forms.py:542
+#: accounts/forms.py:594
 msgid "Add at least one child."
 msgstr "Voeg minstens één kind toe."
 
-#: accounts/manage.py:41
+#: accounts/invitations.py:67
+msgid "You've just sent an invitation: wait a minute before the next one."
+msgstr ""
+"Je hebt net een uitnodiging verstuurd: wacht een minuut voor de volgende."
+
+#: accounts/invitations.py:97
+msgid "Choose at least one role."
+msgstr "Kies minstens één rol."
+
+#: accounts/invitations.py:99
+msgid "Enter the person's name."
+msgstr "Vul de naam van de persoon in."
+
+#: accounts/invitations.py:101
+msgid ""
+"An account already exists with this email: give it roles from its page "
+"instead."
+msgstr ""
+"Er bestaat al een account met dit e-mailadres: geef die account rollen via "
+"zijn eigen pagina."
+
+#: accounts/invitations.py:103
+msgid ""
+"This address already has an invitation waiting: send it again from People."
+msgstr "Voor dit adres wacht al een uitnodiging: stuur ze opnieuw via Mensen."
+
+#: accounts/invitations.py:125
+msgid "This invitation was already accepted or withdrawn."
+msgstr "Deze uitnodiging is al aanvaard of ingetrokken."
+
+#: accounts/invitations.py:136
+msgid "This invitation isn't waiting any more."
+msgstr "Deze uitnodiging wacht niet meer."
+
+#: accounts/invitations.py:160
+msgid "This invitation isn't valid any more."
+msgstr "Deze uitnodiging is niet meer geldig."
+
+#: accounts/invitations.py:162
+msgid "This invitation is for another email address."
+msgstr "Deze uitnodiging is voor een ander e-mailadres."
+
+#: accounts/invitations.py:173
+#, python-format
+msgid "%(name)s accepted your invitation to the organisation."
+msgstr "%(name)s heeft je uitnodiging voor de organisatie aanvaard."
+
+#: accounts/manage.py:43
 msgid "Sign-in policy saved."
 msgstr "Aanmeldbeleid opgeslagen."
 
-#: accounts/manage.py:86
+#: accounts/manage.py:88
 msgid ""
 "Change your own sign-in methods on your account's Sign-in security page."
 msgstr ""
 "Je eigen aanmeldmethoden verander je op de pagina Aanmeldbeveiliging van je "
 "account."
 
-#: accounts/manage.py:90
+#: accounts/manage.py:92
 #, python-format
 msgid "Two-step login is off for %(name)s."
 msgstr "Aanmelden in twee stappen staat uit voor %(name)s."
+
+#: accounts/manage.py:122
+#, python-format
+msgid "You have access to the Django admin until %(until)s."
+msgstr "Je hebt toegang tot de Django-admin tot %(until)s."
+
+#: accounts/manage.py:145
+msgid "Your access to the Django admin has ended."
+msgstr "Je toegang tot de Django-admin is afgelopen."
 
 #: accounts/middleware.py:84
 msgid ""
@@ -364,52 +473,196 @@ msgstr "Anders"
 msgid "Prefer not to say"
 msgstr "Zeg ik liever niet"
 
-#: accounts/models.py:396
+#: accounts/models.py:416
+#: applications/templates/applications/manage/check_list.html:38
+msgid "Expired"
+msgstr "Vervallen"
+
+#: accounts/models.py:417
+msgid "Ended early"
+msgstr "Vroeger beëindigd"
+
+# | msgid "Organisation"
+#: accounts/models.py:418
+msgid "Ended by an organisation admin"
+msgstr "Beëindigd door een beheerder van de organisatie"
+
+# | msgid "Organisation"
+#: accounts/models.py:419
+msgid "Organisation role removed"
+msgstr "Rol in de organisatie weggenomen"
+
+#: accounts/models.py:525 accounts/templates/accounts/manage/people.html:115
 msgid "Superusers"
 msgstr "Superusers"
 
 # | msgid "Organisation"
-#: accounts/models.py:397
+#: accounts/models.py:526
 msgid "Organisation admins"
 msgstr "Beheerders van de organisatie"
 
 # | msgid "No team members listed yet."
-#: accounts/models.py:398
+#: accounts/models.py:527
 msgid "Board members"
 msgstr "Bestuursleden"
 
-#: accounts/models.py:399
+#: accounts/models.py:528
 msgid "Background-check reviewers"
 msgstr "Beoordelaars van uittreksels"
 
-#: accounts/models.py:400
+#: accounts/models.py:529
 msgid "Champions"
 msgstr "Champions"
 
-#: accounts/models.py:401 accounts/templates/accounts/child_detail.html:177
+#: accounts/models.py:530 accounts/templates/accounts/child_detail.html:177
 msgid "Mentors"
 msgstr "Mentors"
 
-#: accounts/models.py:402
+#: accounts/models.py:531
 msgid "Every adult account (parents too)"
 msgstr "Elk account van een volwassene (ook ouders)"
 
-#: accounts/models.py:410
+#: accounts/models.py:539
 msgid "Password only (two-step login optional)"
 msgstr "Alleen wachtwoord (aanmelden in twee stappen is vrij te kiezen)"
 
-#: accounts/models.py:411
+#: accounts/models.py:540
 msgid "Two-step login (authenticator app or passkey)"
 msgstr "Aanmelden in twee stappen (authenticator-app of toegangssleutel)"
 
-#: accounts/models.py:412
+#: accounts/models.py:541
 msgid "Two-step login with a passkey"
 msgstr "Aanmelden in twee stappen met een toegangssleutel"
+
+#: accounts/organisation.py:81
+msgid "Communication: campaigns, journeys, segments, mail templates"
+msgstr "Communicatie: campagnes, trajecten, segmenten, e-mailsjablonen"
+
+#: accounts/organisation.py:82
+msgid "Volunteers: background checks, applications"
+msgstr "Vrijwilligers: uittreksels strafregister, aanvragen"
+
+#: accounts/organisation.py:83
+msgid "Public site: promotions, sponsors"
+msgstr "Publieke site: promoties, sponsors"
+
+#: accounts/organisation.py:84
+msgid "Ninjas: awards"
+msgstr "Ninja's: onderscheidingen"
+
+#: accounts/organisation.py:85
+msgid "Privacy: data export, account deletion, email changes"
+msgstr ""
+"Privacy: gegevens downloaden, accounts verwijderen, e-mailadressen wijzigen"
+
+#: accounts/organisation.py:86
+#: accounts/templates/accounts/_security_base.html:8
+#: accounts/templates/accounts/guardian_detail.html:77
+#: accounts/templates/accounts/guardian_detail.html:80
+#: accounts/templates/accounts/manage/security.html:3
+#: accounts/templates/accounts/manage/security.html:4
+#: accounts/templates/accounts/security.html:7
+#: core/templates/core/_manage_base.html:162
+msgid "Sign-in security"
+msgstr "Aanmeldbeveiliging"
+
+# | msgid "Organisation"
+#: accounts/organisation.py:87
+msgid "People: organisation roles"
+msgstr "Mensen: rollen in de organisatie"
+
+#: accounts/organisation_people.py:30 mailing/models.py:363
+msgid "Admin"
+msgstr "Beheer"
+
+#: accounts/organisation_people.py:32
+msgid ""
+"The organisation dashboard: campaigns, journeys, segments, mail templates, "
+"promotions, sponsors, awards, privacy, sign-in security and these People "
+"pages."
+msgstr ""
+"Het organisatiedashboard: campagnes, trajecten, segmenten, e-mailsjablonen, "
+"promoties, sponsors, onderscheidingen, privacy, aanmeldbeveiliging en deze "
+"pagina's over mensen."
+
+#: accounts/organisation_people.py:38 core/manage_nav.py:51
+msgid "Background-check reviewer"
+msgstr "Beoordelaar van uittreksels"
+
+#: accounts/organisation_people.py:40
+msgid ""
+"Background checks and applications. Reads criminal-record extracts: only "
+"give it to the people who need it."
+msgstr ""
+"Uittreksels uit het strafregister en aanvragen. Leest uittreksels uit het "
+"strafregister: geef deze rol alleen aan wie hem nodig heeft."
+
+#: accounts/organisation_people.py:46
+msgid "Board"
+msgstr "Bestuur"
+
+#: accounts/organisation_people.py:47
+msgid "Read-only oversight, in the Django admin."
+msgstr "Toezicht, alleen lezen, in de Django-admin."
+
+#: accounts/organisation_people.py:84
+#: accounts/templates/accounts/manage/person.html:23
+msgid "You can't change your own roles: ask another organisation admin."
+msgstr ""
+"Je kan je eigen rollen niet wijzigen: vraag het aan een andere beheerder van"
+" de organisatie."
+
+#: accounts/organisation_people.py:86
+msgid "Only an active adult account can have an organisation role."
+msgstr ""
+"Alleen een actieve account van een volwassene kan een rol in de organisatie "
+"hebben."
+
+#: accounts/organisation_people.py:95
+msgid "Unknown role."
+msgstr "Onbekende rol."
+
+#: accounts/organisation_people.py:104
+msgid ""
+"The organisation needs at least one admin: make someone else admin first."
+msgstr ""
+"De organisatie heeft minstens één beheerder nodig: maak eerst iemand anders "
+"beheerder."
+
+#: accounts/people.py:74
+#, python-format
+msgid "Invitation sent to %(email)s."
+msgstr "Uitnodiging verstuurd naar %(email)s."
+
+#: accounts/people.py:121
+#, python-format
+msgid "Roles saved. %(name)s gets a mail."
+msgstr "Rollen bewaard. %(name)s krijgt een e-mail."
+
+#: accounts/people.py:173
+#, python-format
+msgid "%(name)s's access to the Django admin has ended."
+msgstr "De toegang van %(name)s tot de Django-admin is afgelopen."
+
+#: accounts/people.py:191
+#, python-format
+msgid "Invitation sent again to %(email)s."
+msgstr "Uitnodiging opnieuw verstuurd naar %(email)s."
+
+#: accounts/people.py:205
+#, python-format
+msgid "Invitation to %(email)s withdrawn."
+msgstr "Uitnodiging voor %(email)s ingetrokken."
+
+#: accounts/people.py:226 accounts/people.py:266
+msgid "Welcome to the organisation's team."
+msgstr "Welkom in het team van de organisatie."
 
 #: accounts/security_views.py:51
 msgid "Please log in again, with your second step, to change how you sign in."
 msgstr ""
-"Meld je opnieuw aan, met je tweede stap, om te veranderen hoe je je aanmeldt."
+"Meld je opnieuw aan, met je tweede stap, om te veranderen hoe je je "
+"aanmeldt."
 
 #: accounts/security_views.py:104
 msgid "This account already has an authenticator app."
@@ -513,16 +766,6 @@ msgstr "Blauwe spookrobot"
 msgid "Teal Lights Robot"
 msgstr "Blauwgroene lampjesrobot"
 
-#: accounts/templates/accounts/_security_base.html:8
-#: accounts/templates/accounts/guardian_detail.html:77
-#: accounts/templates/accounts/guardian_detail.html:80
-#: accounts/templates/accounts/manage/security.html:3
-#: accounts/templates/accounts/manage/security.html:4
-#: accounts/templates/accounts/security.html:7
-#: core/templates/core/_manage_base.html:149
-msgid "Sign-in security"
-msgstr "Aanmeldbeveiliging"
-
 #: accounts/templates/accounts/change_email.html:3
 #: accounts/templates/accounts/change_email.html:20
 #: accounts/templates/accounts/confirm_email_change.html:31
@@ -533,8 +776,8 @@ msgstr "E-mailadres wijzigen"
 #: accounts/templates/accounts/change_email.html:22
 #, python-format
 msgid ""
-"Your current email address is <strong>%(email)s</strong>. You log in with it "
-"and we send every mail to it."
+"Your current email address is <strong>%(email)s</strong>. You log in with it"
+" and we send every mail to it."
 msgstr ""
 "Je huidige e-mailadres is <strong>%(email)s</strong>. Je meldt je ermee aan "
 "en we sturen er elke mail naartoe."
@@ -542,8 +785,8 @@ msgstr ""
 #: accounts/templates/accounts/change_email.html:23
 #, python-format
 msgid ""
-"We send a link to the new address. Open it within %(hours)s hours to confirm "
-"the change: nothing changes until then. Once it's changed, we let your old "
+"We send a link to the new address. Open it within %(hours)s hours to confirm"
+" the change: nothing changes until then. Once it's changed, we let your old "
 "address know, and you're logged out on your other devices."
 msgstr ""
 "We sturen een link naar het nieuwe adres. Open die binnen %(hours)s uur om "
@@ -648,6 +891,8 @@ msgid "Dojo"
 msgstr "Dojo"
 
 #: accounts/templates/accounts/child_detail.html:79
+#: accounts/templates/accounts/manage/people.html:52
+#: accounts/templates/accounts/manage/people.html:90
 #: mailing/templates/mailing/manage/campaign_detail.html:78
 #: mailing/templates/mailing/manage/journey_detail.html:62
 msgid "Actions"
@@ -765,28 +1010,29 @@ msgstr ""
 
 #: accounts/templates/accounts/confirm_email_change.html:38
 msgid ""
-"Don't know your password any more? We can mail a link to your new address to "
-"set a new one."
+"Don't know your password any more? We can mail a link to your new address to"
+" set a new one."
 msgstr ""
 "Weet je je wachtwoord niet meer? We kunnen een link naar je nieuwe adres "
 "mailen om een nieuw wachtwoord te kiezen."
 
 #: accounts/templates/accounts/confirm_email_change.html:43
+#: accounts/templates/accounts/invitation.html:40
 #: accounts/templates/accounts/login.html:3
 #: accounts/templates/accounts/login.html:80
 #: accounts/templates/accounts/password_reset_complete.html:27
-#: core/templates/core/menu.html:74
+#: core/templates/core/menu.html:70
 msgid "Log in"
 msgstr "Aanmelden"
 
 #: accounts/templates/accounts/confirm_email_change.html:48
 #, python-format
 msgid ""
-"Change the email address of your CoderDojo account from <strong>%(old)s</"
-"strong> to <strong>%(new)s</strong>?"
+"Change the email address of your CoderDojo account from "
+"<strong>%(old)s</strong> to <strong>%(new)s</strong>?"
 msgstr ""
-"Het e-mailadres van je CoderDojo-account wijzigen van <strong>%(old)s</"
-"strong> naar <strong>%(new)s</strong>?"
+"Het e-mailadres van je CoderDojo-account wijzigen van "
+"<strong>%(old)s</strong> naar <strong>%(new)s</strong>?"
 
 #: accounts/templates/accounts/confirm_email_change.html:49
 msgid ""
@@ -828,13 +1074,13 @@ msgid ""
 "Protect your account with two-step login: a code from an app on your phone, "
 "or a passkey, after your password."
 msgstr ""
-"Beveilig je account met aanmelden in twee stappen: na je wachtwoord een code "
-"uit een app op je telefoon, of een toegangssleutel."
+"Beveilig je account met aanmelden in twee stappen: na je wachtwoord een code"
+" uit een app op je telefoon, of een toegangssleutel."
 
 #: accounts/templates/accounts/guardian_detail.html:86
 msgid ""
-"Download a copy of everything we keep about you and your children, as a file "
-"you can open or take elsewhere."
+"Download a copy of everything we keep about you and your children, as a file"
+" you can open or take elsewhere."
 msgstr ""
 "Download een kopie van alles wat we over jou en je kinderen bijhouden, als "
 "bestand dat je kunt openen of meenemen naar elders."
@@ -896,16 +1142,17 @@ msgstr "Tot dan kun je je dojodashboards niet openen."
 
 #: accounts/templates/accounts/guardian_detail.html:122
 msgid ""
-"not requested yet — we'll email you once your application has been looked at."
+"not requested yet — we'll email you once your application has been looked "
+"at."
 msgstr "nog niet gevraagd. We mailen je zodra je aanvraag bekeken is."
 
 #: accounts/templates/accounts/guardian_detail.html:129
-#: core/templates/core/menu.html:57
+#: core/templates/core/menu.html:53
 msgid "Create a dojo"
 msgstr "Een dojo aanmaken"
 
 #: accounts/templates/accounts/guardian_detail.html:131
-#: core/templates/core/menu.html:59
+#: core/templates/core/menu.html:55
 msgid "Apply to start a dojo"
 msgstr "Een dojo starten"
 
@@ -914,9 +1161,79 @@ msgid "Find a dojo to help at"
 msgstr "Zoek een dojo om te helpen"
 
 #: accounts/templates/accounts/guardian_detail.html:136
-#: core/templates/core/menu.html:65
+#: core/templates/core/menu.html:61
 msgid "Apply to volunteer"
 msgstr "Word vrijwilliger"
+
+#: accounts/templates/accounts/invitation.html:3
+#: accounts/templates/accounts/invitation.html:25
+msgid "Invitation to the organisation"
+msgstr "Uitnodiging voor de organisatie"
+
+#: accounts/templates/accounts/invitation.html:28
+msgid ""
+"This invitation isn't valid any more: it was used, withdrawn or has expired."
+" Ask the person who invited you to send it again."
+msgstr ""
+"Deze uitnodiging is niet meer geldig: ze is al gebruikt, ingetrokken of "
+"verlopen. Vraag wie je uitnodigde om ze opnieuw te sturen."
+
+#: accounts/templates/accounts/invitation.html:30
+#, python-format
+msgid ""
+"%(name)s invites you to CoderDojo Belgium's organisation team, with these "
+"roles:"
+msgstr ""
+"%(name)s nodigt je uit in het organisatieteam van CoderDojo Belgium, met "
+"deze rollen:"
+
+#: accounts/templates/accounts/invitation.html:33
+#, python-format
+msgid "Create your account with <strong>%(email)s</strong> to accept."
+msgstr "Maak je account aan met <strong>%(email)s</strong> om te aanvaarden."
+
+#: accounts/templates/accounts/invitation.html:35
+msgid "Create my account"
+msgstr "Mijn account aanmaken"
+
+#: accounts/templates/accounts/invitation.html:38
+#, python-format
+msgid ""
+"There's already an account with <strong>%(email)s</strong>: log in with it "
+"to accept."
+msgstr ""
+"Er is al een account met <strong>%(email)s</strong>: meld je daarmee aan om "
+"te aanvaarden."
+
+#: accounts/templates/accounts/invitation.html:43
+#, python-format
+msgid ""
+"This invitation is for <strong>%(email)s</strong>. Log out, then open the "
+"link again and log in with that address, or create an account with it."
+msgstr ""
+"Deze uitnodiging is voor <strong>%(email)s</strong>. Meld je af, open de "
+"link opnieuw en meld je aan met dat adres, of maak er een account mee aan."
+
+#: accounts/templates/accounts/invitation.html:48
+msgid "Accept the invitation"
+msgstr "De uitnodiging aanvaarden"
+
+#: accounts/templates/accounts/invitation_sign_up.html:3
+#: accounts/templates/accounts/invitation_sign_up.html:20
+msgid "Create your account"
+msgstr "Maak je account aan"
+
+#: accounts/templates/accounts/invitation_sign_up.html:22
+#, python-format
+msgid ""
+"You log in with <strong>%(email)s</strong>, the address you were invited at."
+msgstr ""
+"Je meldt je aan met <strong>%(email)s</strong>, het adres waarop je "
+"uitgenodigd bent."
+
+#: accounts/templates/accounts/invitation_sign_up.html:27
+msgid "Create my account and accept"
+msgstr "Mijn account aanmaken en aanvaarden"
 
 #: accounts/templates/accounts/login.html:35
 #: accounts/templates/accounts/partials/_account_details_display.html:12
@@ -952,8 +1269,8 @@ msgstr ""
 msgid ""
 "Enter the six-digit code your authenticator app shows for CoderDojo Belgium."
 msgstr ""
-"Vul de code van zes cijfers in die je authenticator-app toont voor CoderDojo "
-"Belgium."
+"Vul de code van zes cijfers in die je authenticator-app toont voor CoderDojo"
+" Belgium."
 
 #: accounts/templates/accounts/login.html:75
 msgid "Remember me"
@@ -1008,24 +1325,361 @@ msgstr "Nieuw bij CoderDojo?"
 msgid "Create an account"
 msgstr "Maak een account aan"
 
+#: accounts/templates/accounts/manage/admin_access.html:3
+#: accounts/templates/accounts/manage/admin_access.html:4
+#: core/templates/core/_manage_base.html:187
+msgid "Django admin"
+msgstr "Django-admin"
+
+#: accounts/templates/accounts/manage/admin_access.html:11
+#, python-format
+msgid "You have access until %(until)s"
+msgstr "Je hebt toegang tot %(until)s"
+
+#: accounts/templates/accounts/manage/admin_access.html:12
+#, python-format
+msgid "Your reason: %(reason)s"
+msgstr "Je reden: %(reason)s"
+
+# | msgid "Create a dojo"
+#: accounts/templates/accounts/manage/admin_access.html:14
+msgid "Open the Django admin"
+msgstr "De Django-admin openen"
+
+#: accounts/templates/accounts/manage/admin_access.html:17
+msgid "End access now"
+msgstr "Toegang nu beëindigen"
+
+#: accounts/templates/accounts/manage/admin_access.html:22
+#, python-format
+msgid ""
+"The Django admin is the technical tool for fixing data by hand. You get it "
+"for %(hours)s hours, with your role's permissions; after that it closes by "
+"itself. Your request and its end are recorded in the audit log, and the "
+"other organisation admins get a notification."
+msgstr ""
+"De Django-admin is het technische hulpmiddel om gegevens met de hand recht "
+"te zetten. Je krijgt hem %(hours)s uur, met de rechten van je rol; daarna "
+"sluit hij vanzelf. Je vraag en het einde ervan worden bijgehouden in het "
+"auditlogboek, en de andere beheerders van de organisatie krijgen een "
+"melding."
+
+#: accounts/templates/accounts/manage/admin_access.html:27
+msgid "Ask for access"
+msgstr "Toegang vragen"
+
+#: accounts/templates/accounts/manage/admin_access.html:33
+msgid "Your earlier access"
+msgstr "Je vroegere toegang"
+
+#: accounts/templates/accounts/manage/admin_access.html:38
+#: accounts/templates/accounts/manage/person.html:47
+msgid "From"
+msgstr "Van"
+
+#: accounts/templates/accounts/manage/admin_access.html:39
+#: accounts/templates/accounts/manage/people.html:89
+#: accounts/templates/accounts/manage/person.html:48
+msgid "Until"
+msgstr "Tot"
+
+#: accounts/templates/accounts/manage/admin_access.html:40
+#: accounts/templates/accounts/manage/people.html:88
+#: accounts/templates/accounts/manage/person.html:49
+msgid "Reason"
+msgstr "Reden"
+
+#: accounts/templates/accounts/manage/admin_access.html:41
+#: accounts/templates/accounts/manage/person.html:50
+#: content/templates/content/manage/promotion_list.html:43
+#: dojos/templates/dojos/partials/_event_promotions.html:23
+msgid "Ended"
+msgstr "Afgelopen"
+
+#: accounts/templates/accounts/manage/admin_access.html:51
+#: accounts/templates/accounts/manage/person.html:59
+#: applications/templates/applications/manage/_check_table.html:36
+#: dojos/templates/dojos/dojo_detail.html:121
+#: dojos/templates/dojos/dojo_event_detail.html:41
+#: dojos/templates/dojos/dojo_event_list.html:39
+#: dojos/templates/dojos/partials/_dojo_result.html:33 events/models.py:33
+#: events/templates/events/event_signup.html:60
+#: events/templates/events/partials/_event_row.html:34
+msgid "Open"
+msgstr "Open"
+
+#: accounts/templates/accounts/manage/people.html:3
+#: accounts/templates/accounts/manage/people.html:4
+#: core/templates/core/_manage_base.html:179
+msgid "People"
+msgstr "Mensen"
+
+#: accounts/templates/accounts/manage/people.html:6
+#: accounts/templates/accounts/manage/people_add.html:3
+#: accounts/templates/accounts/manage/people_add.html:4
+msgid "Add a person"
+msgstr "Iemand toevoegen"
+
+#: accounts/templates/accounts/manage/people.html:12
+msgid ""
+"Everyone with an organisation role. A role opens parts of this dashboard all"
+" the time, and the Django admin only when asked for, 12 hours at a time."
+msgstr ""
+"Iedereen met een rol in de organisatie. Een rol opent delen van dit "
+"dashboard altijd, en de Django-admin alleen op vraag, telkens 12 uur."
+
+#: accounts/templates/accounts/manage/people.html:12
+#: accounts/templates/accounts/manage/people_roles.html:3
+#: accounts/templates/accounts/manage/people_roles.html:4
+msgid "What each role opens"
+msgstr "Wat elke rol opent"
+
+#: accounts/templates/accounts/manage/people.html:19
+#: accounts/templates/accounts/manage/people.html:48
+#: accounts/templates/accounts/manage/people.html:87
+#: accounts/templates/accounts/manage/security.html:70 api/forms.py:13
+#: api/templates/api/dojo_api_clients.html:76
+#: applications/templates/applications/manage/_check_table.html:10
+#: applications/templates/applications/manage/application_list.html:37
+#: content/forms.py:100 content/templates/content/manage/sponsor_list.html:16
+#: dojos/forms.py:88 dojos/forms.py:232
+#: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:170
+#: events/forms.py:245 events/forms.py:301 events/forms.py:334
+#: events/templates/events/manage/badge_list.html:18
+#: events/templates/events/manage/badge_list.html:44 mailing/forms.py:93
+#: mailing/forms.py:181 mailing/forms.py:225
+#: mailing/templates/mailing/manage/campaign_list.html:12
+#: mailing/templates/mailing/manage/journey_list.html:13
+#: mailing/templates/mailing/manage/segment_list.html:12
+#: privacy/templates/privacy/manage/privacy.html:57
+msgid "Name"
+msgstr "Naam"
+
+#: accounts/templates/accounts/manage/people.html:21
+#: accounts/templates/accounts/manage/people.html:50
+msgid "Roles"
+msgstr "Rollen"
+
+#: accounts/templates/accounts/manage/people.html:22
+msgid "Since"
+msgstr "Sinds"
+
+#: accounts/templates/accounts/manage/people.html:23
+msgid "Sign-in"
+msgstr "Aanmelden"
+
+#: accounts/templates/accounts/manage/people.html:33
+msgid "Two-step login not set up yet"
+msgstr "Aanmelden in twee stappen nog niet ingesteld"
+
+#: accounts/templates/accounts/manage/people.html:33
+msgid "OK"
+msgstr "OK"
+
+#: accounts/templates/accounts/manage/people.html:36
+msgid "Nobody has an organisation role yet."
+msgstr "Nog niemand heeft een rol in de organisatie."
+
+#: accounts/templates/accounts/manage/people.html:42
+msgid "Invitations waiting"
+msgstr "Wachtende uitnodigingen"
+
+#: accounts/templates/accounts/manage/people.html:51
+#: applications/templates/applications/manage/check_detail.html:65
+msgid "Valid until"
+msgstr "Geldig tot"
+
+# | msgid "Aimed at"
+#: accounts/templates/accounts/manage/people.html:65
+msgid "Send again"
+msgstr "Opnieuw sturen"
+
+#: accounts/templates/accounts/manage/people.html:69
+msgid "Withdraw"
+msgstr "Intrekken"
+
+#: accounts/templates/accounts/manage/people.html:78
+msgid "No invitations waiting."
+msgstr "Geen wachtende uitnodigingen."
+
+#: accounts/templates/accounts/manage/people.html:78
+msgid "Invite someone"
+msgstr "Iemand uitnodigen"
+
+#: accounts/templates/accounts/manage/people.html:81
+msgid "Open access to the Django admin"
+msgstr "Open toegang tot de Django-admin"
+
+#: accounts/templates/accounts/manage/people.html:102
+#: accounts/templates/accounts/manage/person.html:39
+msgid "End now"
+msgstr "Nu beëindigen"
+
+#: accounts/templates/accounts/manage/people.html:111
+msgid "Nobody has access to the Django admin right now."
+msgstr "Niemand heeft nu toegang tot de Django-admin."
+
+#: accounts/templates/accounts/manage/people.html:116
+msgid ""
+"Superusers can do everything in the Django admin, without asking. They're "
+"made on the server, for technical interventions, never here."
+msgstr ""
+"Superusers kunnen alles in de Django-admin, zonder te vragen. Ze worden op "
+"de server aangemaakt, voor technische ingrepen, nooit hier."
+
+#: accounts/templates/accounts/manage/people.html:122
+msgid "There are no superusers."
+msgstr "Er zijn geen superusers."
+
+# | msgid "Back to log in"
+#: accounts/templates/accounts/manage/people_add.html:9
+#: accounts/templates/accounts/manage/people_roles.html:9
+#: accounts/templates/accounts/manage/person.html:9
+msgid "Back to People"
+msgstr "Terug naar Mensen"
+
+#: accounts/templates/accounts/manage/people_add.html:10
+msgid ""
+"Find the person's account, then choose their roles on the next page. No "
+"account yet? Invite them below."
+msgstr ""
+"Zoek de account van de persoon en kies op de volgende pagina de rollen. Nog "
+"geen account? Nodig de persoon hieronder uit."
+
+#: accounts/templates/accounts/manage/people_add.html:14
+#: accounts/templates/accounts/manage/security.html:57
+#: privacy/templates/privacy/manage/privacy.html:44
+msgid "Name, email address or username"
+msgstr "Naam, e-mailadres of gebruikersnaam"
+
+#: accounts/templates/accounts/manage/people_add.html:18
+#: accounts/templates/accounts/manage/security.html:61
+#: applications/templates/applications/manage/check_list.html:17
+#: dojos/templates/dojos/dojo_list.html:40
+#: dojos/templates/dojos/partials/_dojo_finder_widget.html:16
+#: events/templates/events/event_list.html:91
+#: privacy/templates/privacy/manage/privacy.html:48
+msgid "Search"
+msgstr "Zoeken"
+
+#: accounts/templates/accounts/manage/people_add.html:26
+msgid "already has a role"
+msgstr "heeft al een rol"
+
+#: accounts/templates/accounts/manage/people_add.html:29
+#, python-format
+msgid "Only the first %(search_limit)s are shown: search more precisely."
+msgstr "Alleen de eerste %(search_limit)s worden getoond: zoek gerichter."
+
+#: accounts/templates/accounts/manage/people_add.html:31
+msgid "No account found."
+msgstr "Geen account gevonden."
+
+#: accounts/templates/accounts/manage/people_add.html:35
+msgid "Invite someone without an account"
+msgstr "Iemand zonder account uitnodigen"
+
+#: accounts/templates/accounts/manage/people_add.html:36
+msgid ""
+"They get a link to create their own account; the roles are theirs once they "
+"accept with this same email address. The link works for 14 days."
+msgstr ""
+"De persoon krijgt een link om een eigen account aan te maken; de rollen zijn"
+" van hem of haar zodra hij of zij aanvaardt met hetzelfde e-mailadres. De "
+"link werkt 14 dagen."
+
+# | msgid "Organisation"
+#: accounts/templates/accounts/manage/people_add.html:46
+#: accounts/templates/accounts/manage/person.html:14
+msgid "Organisation roles"
+msgstr "Rollen in de organisatie"
+
+#: accounts/templates/accounts/manage/people_add.html:56
+msgid "Send the invitation"
+msgstr "De uitnodiging versturen"
+
+#: accounts/templates/accounts/manage/people_roles.html:10
+msgid ""
+"The roles are fixed; this is what each one opens on this dashboard. Someone "
+"with several roles gets everything their roles open."
+msgstr ""
+"De rollen liggen vast; dit is wat elke rol opent op dit dashboard. Wie "
+"meerdere rollen heeft, krijgt alles wat die rollen openen."
+
+# | msgid "Organisation"
+#: accounts/templates/accounts/manage/people_roles.html:15
+msgid "Part of the dashboard"
+msgstr "Deel van het dashboard"
+
+#: accounts/templates/accounts/manage/people_roles.html:27
+#, python-format
+msgid ""
+"The Django admin, when asked for (%(hours)s hours), with the role's "
+"permissions"
+msgstr "De Django-admin, op vraag (%(hours)s uur), met de rechten van de rol"
+
+#: accounts/templates/accounts/manage/person.html:25
+msgid ""
+"The sign-in policy asks this person for two-step login, which they haven't "
+"set up yet: they'll be asked to at their next login."
+msgstr ""
+"Het aanmeldbeleid vraagt deze persoon om aanmelden in twee stappen, wat nog "
+"niet ingesteld is: dat wordt gevraagd bij de volgende aanmelding."
+
+#: accounts/templates/accounts/manage/person.html:27
+msgid "Save roles"
+msgstr "Rollen bewaren"
+
+#: accounts/templates/accounts/manage/person.html:33
+msgid "Access to the Django admin"
+msgstr "Toegang tot de Django-admin"
+
+#: accounts/templates/accounts/manage/person.html:35
+#, python-format
+msgid "Open until %(until)s: %(reason)s"
+msgstr "Open tot %(until)s: %(reason)s"
+
+#: accounts/templates/accounts/manage/person.html:66
+msgid "Never asked for."
+msgstr "Nooit gevraagd."
+
+#: accounts/templates/accounts/manage/person.html:69
+msgid "Role changes"
+msgstr "Wijzigingen van rollen"
+
+#: accounts/templates/accounts/manage/person.html:73
+#, python-format
+msgid "%(role)s given"
+msgstr "%(role)s gegeven"
+
+#: accounts/templates/accounts/manage/person.html:73
+#, python-format
+msgid "%(role)s taken away"
+msgstr "%(role)s weggenomen"
+
+#: accounts/templates/accounts/manage/person.html:77
+msgid "No role changes recorded."
+msgstr "Geen wijzigingen van rollen bijgehouden."
+
 #: accounts/templates/accounts/manage/security.html:17
 msgid ""
 "Choose how the accounts in each role must log in. Anyone can turn on two-"
 "step login themselves; here you make it required. A role asks for its level "
-"from the day you set (empty: right away). Before that day the accounts see a "
-"notice; from then on, an account without it is sent to set it up before it "
+"from the day you set (empty: right away). Before that day the accounts see a"
+" notice; from then on, an account without it is sent to set it up before it "
 "can use anything its role opens. An account with several roles gets the "
 "strongest level. Children's own logins are never asked."
 msgstr ""
 "Kies hoe de accounts in elke rol zich moeten aanmelden. Iedereen kan "
 "aanmelden in twee stappen zelf aanzetten; hier maak je het verplicht. Een "
-"rol vraagt het niveau vanaf de dag die je kiest (leeg: meteen). Voor die dag "
-"zien de accounts een melding; daarna moet een account zonder het eerst "
+"rol vraagt het niveau vanaf de dag die je kiest (leeg: meteen). Voor die dag"
+" zien de accounts een melding; daarna moet een account zonder het eerst "
 "instellen voor het iets kan gebruiken wat zijn rol opent. Een account met "
 "meerdere rollen krijgt het strengste niveau. De eigen logins van kinderen "
 "krijgen dit nooit."
 
-#: accounts/templates/accounts/manage/security.html:25 applications/forms.py:90
+#: accounts/templates/accounts/manage/security.html:25
+#: applications/forms.py:90
 #: applications/templates/applications/manage/application_detail.html:18
 msgid "Role"
 msgstr "Rol"
@@ -1036,7 +1690,7 @@ msgstr "Minimale aanmelding"
 
 # | msgid "My Account"
 #: accounts/templates/accounts/manage/security.html:28
-#: core/templates/core/_manage_base.html:137 mailing/models.py:44
+#: core/templates/core/_manage_base.html:147 mailing/models.py:44
 #: mailing/templates/mailing/manage/segment_list.html:14
 msgid "Accounts"
 msgstr "Accounts"
@@ -1078,40 +1732,8 @@ msgstr ""
 "Is iemand zijn telefoon of toegangssleutel en zijn back-upcodes kwijt? "
 "Controleer dat het echt die persoon is (bijvoorbeeld door te bellen) en zet "
 "dan hier aanmelden in twee stappen uit. De persoon krijgt een mail en meldt "
-"zich aan met alleen het wachtwoord. Vraagt de rol aanmelden in twee stappen, "
-"dan moet die het meteen opnieuw instellen."
-
-#: accounts/templates/accounts/manage/security.html:57
-#: privacy/templates/privacy/manage/privacy.html:44
-msgid "Name, email address or username"
-msgstr "Naam, e-mailadres of gebruikersnaam"
-
-#: accounts/templates/accounts/manage/security.html:61
-#: applications/templates/applications/manage/check_list.html:17
-#: dojos/templates/dojos/dojo_list.html:40
-#: dojos/templates/dojos/partials/_dojo_finder_widget.html:16
-#: events/templates/events/event_list.html:91
-#: privacy/templates/privacy/manage/privacy.html:48
-msgid "Search"
-msgstr "Zoeken"
-
-#: accounts/templates/accounts/manage/security.html:70 api/forms.py:13
-#: api/templates/api/dojo_api_clients.html:76
-#: applications/templates/applications/manage/_check_table.html:10
-#: applications/templates/applications/manage/application_list.html:37
-#: content/forms.py:100 content/templates/content/manage/sponsor_list.html:16
-#: dojos/forms.py:88 dojos/forms.py:232
-#: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:170
-#: events/forms.py:245 events/forms.py:301 events/forms.py:334
-#: events/templates/events/manage/badge_list.html:18
-#: events/templates/events/manage/badge_list.html:44 mailing/forms.py:93
-#: mailing/forms.py:181 mailing/forms.py:225
-#: mailing/templates/mailing/manage/campaign_list.html:12
-#: mailing/templates/mailing/manage/journey_list.html:13
-#: mailing/templates/mailing/manage/segment_list.html:12
-#: privacy/templates/privacy/manage/privacy.html:57
-msgid "Name"
-msgstr "Naam"
+"zich aan met alleen het wachtwoord. Vraagt de rol aanmelden in twee stappen,"
+" dan moet die het meteen opnieuw instellen."
 
 #: accounts/templates/accounts/manage/security.html:72
 #: accounts/templates/accounts/security.html:26
@@ -1254,8 +1876,8 @@ msgid ""
 "their belts) to choose which news about sessions and events like CoderDojo "
 "Girlz and Coolest Projects I get."
 msgstr ""
-"Gebruik de gegevens van mijn kinderen (hun leeftijd, gender, de sessies waar "
-"ze naartoe komen en hun gordels) om te kiezen welk nieuws over sessies en "
+"Gebruik de gegevens van mijn kinderen (hun leeftijd, gender, de sessies waar"
+" ze naartoe komen en hun gordels) om te kiezen welk nieuws over sessies en "
 "evenementen zoals CoderDojo Girlz en Coolest Projects ik krijg."
 
 #: accounts/templates/accounts/partials/_child_header_display.html:29
@@ -1375,11 +1997,11 @@ msgstr "Er is nog geen wachtwoord gekozen."
 
 #: accounts/templates/accounts/partials/_ninja_login_card.html:24
 msgid ""
-"With their login they see this page and can sign themselves up for sessions; "
-"you keep managing their details."
+"With their login they see this page and can sign themselves up for sessions;"
+" you keep managing their details."
 msgstr ""
-"Met die login ziet je kind deze pagina en kan het zich zelf inschrijven voor "
-"sessies. Jij blijft de gegevens beheren."
+"Met die login ziet je kind deze pagina en kan het zich zelf inschrijven voor"
+" sessies. Jij blijft de gegevens beheren."
 
 #: accounts/templates/accounts/partials/_ninja_login_card.html:31
 msgid "Send the password mail again"
@@ -1404,9 +2026,9 @@ msgid ""
 "%(name)s's login is switched off. Switch it back on with their email "
 "address: they get a mail to choose a new password."
 msgstr ""
-"De login van %(name)s is uitgeschakeld. Schakel hem opnieuw in met het e-"
-"mailadres van je kind: het krijgt dan een e-mail om een nieuw wachtwoord te "
-"kiezen."
+"De login van %(name)s is uitgeschakeld. Schakel hem opnieuw in met het "
+"e-mailadres van je kind: het krijgt dan een e-mail om een nieuw wachtwoord "
+"te kiezen."
 
 #: accounts/templates/accounts/partials/_ninja_login_card.html:46
 #, python-format
@@ -1497,9 +2119,9 @@ msgid ""
 "If that email matches an account, we've sent a link to reset your password. "
 "It'll expire soon, so use it right away."
 msgstr ""
-"Als dat e-mailadres bij een account hoort, hebben we je een link gestuurd om "
-"je wachtwoord opnieuw in te stellen. De link verloopt snel, dus gebruik hem "
-"meteen."
+"Als dat e-mailadres bij een account hoort, hebben we je een link gestuurd om"
+" je wachtwoord opnieuw in te stellen. De link verloopt snel, dus gebruik hem"
+" meteen."
 
 #: accounts/templates/accounts/register.html:3
 msgid "Get involved"
@@ -1601,8 +2223,8 @@ msgid ""
 "You can change this, and which other mails you get, on your account's Mail "
 "preferences page."
 msgstr ""
-"Je kunt dit, en welke andere e-mails je krijgt, aanpassen op de pagina E-"
-"mailvoorkeuren van je account."
+"Je kunt dit, en welke andere e-mails je krijgt, aanpassen op de pagina "
+"E-mailvoorkeuren van je account."
 
 #: accounts/templates/accounts/register_guardian.html:65
 msgid "Create account"
@@ -1614,8 +2236,8 @@ msgid ""
 "code from an app on your phone, or a passkey. Someone who finds out your "
 "password still can't get in."
 msgstr ""
-"Met aanmelden in twee stappen meld je je aan met je wachtwoord en een tweede "
-"stap: een code uit een app op je telefoon, of een toegangssleutel. Wie je "
+"Met aanmelden in twee stappen meld je je aan met je wachtwoord en een tweede"
+" stap: een code uit een app op je telefoon, of een toegangssleutel. Wie je "
 "wachtwoord te weten komt, kan dan nog altijd niet binnen."
 
 #: accounts/templates/accounts/security.html:12
@@ -1630,8 +2252,8 @@ msgstr "Je rol vraagt aanmelden in twee stappen."
 #, python-format
 msgid "The organisation asks this of: %(roles)s. Set it up below to carry on."
 msgstr ""
-"De organisatie vraagt dit van: %(roles)s. Stel het hieronder in om verder te "
-"gaan."
+"De organisatie vraagt dit van: %(roles)s. Stel het hieronder in om verder te"
+" gaan."
 
 #: accounts/templates/accounts/security.html:18
 #, python-format
@@ -1686,8 +2308,8 @@ msgstr "Toegangssleutel %(number)s, toegevoegd op %(date)s."
 #: accounts/templates/accounts/security.html:58
 msgid ""
 "Your phone, computer or a security key confirms it's you with your "
-"fingerprint, face or PIN. Nothing to type, and it can't be tricked by a fake "
-"site."
+"fingerprint, face or PIN. Nothing to type, and it can't be tricked by a fake"
+" site."
 msgstr ""
 "Je telefoon, computer of een beveiligingssleutel bevestigt met je "
 "vingerafdruk, gezicht of pincode dat jij het bent. Niets te typen, en een "
@@ -1748,7 +2370,8 @@ msgstr ""
 "wachtwoord verandert, vergeten alle browsers je."
 
 #: accounts/templates/accounts/security.html:86
-msgid "Turning two-step login off removes your app, passkeys and backup codes."
+msgid ""
+"Turning two-step login off removes your app, passkeys and backup codes."
 msgstr ""
 "Als je aanmelden in twee stappen uitzet, worden je app, toegangssleutels en "
 "back-upcodes verwijderd."
@@ -1772,7 +2395,8 @@ msgstr ""
 "Authenticator of je wachtwoordbeheerder) en voeg een account toe."
 
 #: accounts/templates/accounts/security_app.html:11
-msgid "Scan this QR code. Or, on this phone, tap the key below, or type it in."
+msgid ""
+"Scan this QR code. Or, on this phone, tap the key below, or type it in."
 msgstr ""
 "Scan deze QR-code. Of tik op deze telefoon op de sleutel hieronder, of typ "
 "hem over."
@@ -1854,8 +2478,8 @@ msgstr "Je authenticator-app verwijderen"
 
 #: accounts/templates/accounts/security_confirm.html:16
 msgid ""
-"Logging in will only take your password again. Your app, passkeys and backup "
-"codes are removed."
+"Logging in will only take your password again. Your app, passkeys and backup"
+" codes are removed."
 msgstr ""
 "Aanmelden vraagt dan weer alleen je wachtwoord. Je app, toegangssleutels en "
 "back-upcodes worden verwijderd."
@@ -1879,7 +2503,8 @@ msgstr ""
 
 #: accounts/templates/accounts/security_passkey.html:10
 msgid ""
-"Next time you log in, after your password, you confirm with that same device."
+"Next time you log in, after your password, you confirm with that same "
+"device."
 msgstr ""
 "De volgende keer dat je je aanmeldt, bevestig je na je wachtwoord met "
 "datzelfde toestel."
@@ -1932,9 +2557,11 @@ msgstr "Die code klopt niet. Kijk hem na en probeer opnieuw."
 #: accounts/two_step_forms.py:15
 #, python-format
 msgid ""
-"Too many wrong tries (%(failure_count)d). Please wait a moment and try again."
+"Too many wrong tries (%(failure_count)d). Please wait a moment and try "
+"again."
 msgid_plural ""
-"Too many wrong tries (%(failure_count)d). Please wait a moment and try again."
+"Too many wrong tries (%(failure_count)d). Please wait a moment and try "
+"again."
 msgstr[0] ""
 "Te veel foute pogingen (%(failure_count)d). Wacht even en probeer opnieuw."
 msgstr[1] ""
@@ -1999,8 +2626,8 @@ msgid ""
 "We sent a link to %(email)s. Open it within %(hours)s hours to confirm; "
 "until then your address stays %(current)s."
 msgstr ""
-"We hebben een link naar %(email)s gestuurd. Open die binnen %(hours)s uur om "
-"te bevestigen; tot dan blijft je adres %(current)s."
+"We hebben een link naar %(email)s gestuurd. Open die binnen %(hours)s uur om"
+" te bevestigen; tot dan blijft je adres %(current)s."
 
 #: accounts/views.py:404
 #, python-format
@@ -2011,8 +2638,8 @@ msgstr "Je e-mailadres is nu %(email)s."
 #, python-format
 msgid "Login created: we've mailed %(email)s a link to choose a password."
 msgstr ""
-"Login aangemaakt: we hebben %(email)s een link gestuurd om een wachtwoord te "
-"kiezen."
+"Login aangemaakt: we hebben %(email)s een link gestuurd om een wachtwoord te"
+" kiezen."
 
 #: accounts/views.py:612
 #, python-format
@@ -2072,10 +2699,11 @@ msgid ""
 "secret (OAuth 2.0 client credentials) and can only do what you allow here, "
 "for this dojo only. Only you, as the champion, see this page."
 msgstr ""
-"Een API-client is een app of website die voor deze dojo werkt, voorlopig een "
-"app aan de deur die aanduidt wie er kwam. Hij logt in met een eigen client-"
+"Een API-client is een app of website die voor deze dojo werkt, voorlopig een"
+" app aan de deur die aanduidt wie er kwam. Hij logt in met een eigen client-"
 "ID en geheim (OAuth 2.0 client credentials) en kan alleen doen wat je hier "
-"toelaat, en enkel voor deze dojo. Alleen jij, als champion, ziet deze pagina."
+"toelaat, en enkel voor deze dojo. Alleen jij, als champion, ziet deze "
+"pagina."
 
 #: api/templates/api/dojo_api_clients.html:37
 #, python-format
@@ -2145,7 +2773,8 @@ msgstr "Nieuw geheim"
 #, python-format
 msgid "Delete %(name)s? It stops working at once and leaves this list."
 msgstr ""
-"%(name)s verwijderen? Hij werkt meteen niet meer en verdwijnt uit deze lijst."
+"%(name)s verwijderen? Hij werkt meteen niet meer en verdwijnt uit deze "
+"lijst."
 
 #: api/templates/api/dojo_api_clients.html:95
 #: mailing/templates/mailing/manage/segment_detail.html:58
@@ -2219,8 +2848,8 @@ msgstr ""
 
 #: applications/forms.py:46 applications/forms.py:93
 msgid ""
-"I understand a Belgian criminal record extract (model 2, Artikel 596.2) will "
-"be required."
+"I understand a Belgian criminal record extract (model 2, Artikel 596.2) will"
+" be required."
 msgstr ""
 "Ik begrijp dat een Belgisch uittreksel uit het strafregister (model 2, "
 "Artikel 596.2) nodig is."
@@ -2336,7 +2965,7 @@ msgstr "Mentor"
 msgid "Champion (start a dojo)"
 msgstr "Champion (een dojo starten)"
 
-#: applications/models.py:45 core/templates/core/_manage_base.html:98
+#: applications/models.py:45 core/templates/core/_manage_base.html:104
 #: mailing/models.py:270
 msgid "Pending"
 msgstr "In behandeling"
@@ -2393,7 +3022,8 @@ msgid "Only adult accounts can apply."
 msgstr "Alleen volwassen accounts kunnen zich kandidaat stellen."
 
 #: applications/services.py:146 applications/views.py:25
-msgid "You've already applied for this — see your account page for its status."
+msgid ""
+"You've already applied for this — see your account page for its status."
 msgstr ""
 "Je hebt je hier al voor kandidaat gesteld. Bekijk de status op je "
 "accountpagina."
@@ -2416,7 +3046,7 @@ msgstr "%(account)s heeft nog geen geldig uittreksel uit het strafregister."
 
 #: applications/templates/applications/manage/_check_status.html:2
 #: applications/templates/applications/manage/check_list.html:28
-#: core/templates/core/_manage_base.html:91
+#: core/templates/core/_manage_base.html:97
 msgid "Awaiting review"
 msgstr "Wacht op nazicht"
 
@@ -2460,16 +3090,6 @@ msgstr "Aangevraagd als"
 #: mailing/templates/mailing/manage/journey_list.html:14
 msgid "Status"
 msgstr "Status"
-
-#: applications/templates/applications/manage/_check_table.html:36
-#: dojos/templates/dojos/dojo_detail.html:121
-#: dojos/templates/dojos/dojo_event_detail.html:41
-#: dojos/templates/dojos/dojo_event_list.html:39
-#: dojos/templates/dojos/partials/_dojo_result.html:33 events/models.py:33
-#: events/templates/events/event_signup.html:60
-#: events/templates/events/partials/_event_row.html:34
-msgid "Open"
-msgstr "Open"
 
 #: applications/templates/applications/manage/application_detail.html:3
 msgid "Application"
@@ -2539,18 +3159,18 @@ msgstr "Goedkeuren kan pas met een geldig uittreksel uit het strafregister."
 
 #: applications/templates/applications/manage/application_list.html:3
 #: applications/templates/applications/manage/application_list.html:4
-#: core/templates/core/_manage_base.html:97
+#: core/templates/core/_manage_base.html:103
 msgid "Applications"
 msgstr "Aanvragen"
 
 #: applications/templates/applications/manage/application_list.html:9
 msgid ""
-"People who applied to become a mentor or to start a dojo. An application can "
-"only be approved once the person's background check is valid."
+"People who applied to become a mentor or to start a dojo. An application can"
+" only be approved once the person's background check is valid."
 msgstr ""
 "Mensen die zich kandidaat stelden als mentor of om een dojo te starten. Een "
-"aanvraag kan pas goedgekeurd worden als het uittreksel uit het strafregister "
-"van die persoon geldig is."
+"aanvraag kan pas goedgekeurd worden als het uittreksel uit het strafregister"
+" van die persoon geldig is."
 
 #: applications/templates/applications/manage/application_list.html:17
 #: applications/templates/applications/manage/application_list.html:23
@@ -2617,8 +3237,8 @@ msgid ""
 "Every download is recorded. Don't keep a copy: delete the file once you've "
 "decided."
 msgstr ""
-"Elke download wordt geregistreerd. Hou geen kopie bij: verwijder het bestand "
-"zodra je beslist hebt."
+"Elke download wordt geregistreerd. Hou geen kopie bij: verwijder het bestand"
+" zodra je beslist hebt."
 
 #: applications/templates/applications/manage/check_detail.html:40
 msgid ""
@@ -2634,8 +3254,8 @@ msgid ""
 "Mails the person a link to upload their extract. It's also on their account "
 "page."
 msgstr ""
-"Mailt de persoon een link om het uittreksel op te laden. Die staat ook op de "
-"accountpagina."
+"Mailt de persoon een link om het uittreksel op te laden. Die staat ook op de"
+" accountpagina."
 
 #: applications/templates/applications/manage/check_detail.html:57
 msgid "Earlier decisions"
@@ -2649,17 +3269,13 @@ msgstr "Beslissing"
 msgid "By"
 msgstr "Door"
 
-#: applications/templates/applications/manage/check_detail.html:65
-msgid "Valid until"
-msgstr "Geldig tot"
-
 #: applications/templates/applications/manage/check_detail.html:79
 msgid "No decisions yet."
 msgstr "Nog geen beslissingen."
 
 #: applications/templates/applications/manage/check_list.html:3
 #: applications/templates/applications/manage/check_list.html:4
-#: core/templates/core/_manage_base.html:90
+#: core/templates/core/_manage_base.html:96
 msgid "Background checks"
 msgstr "Uittreksels strafregister"
 
@@ -2667,8 +3283,8 @@ msgstr "Uittreksels strafregister"
 msgid ""
 "Champions and mentors need a valid extract from the criminal record (model "
 "2, Article 596.2) before they can work with children. Open a person to "
-"download their document and decide on it: the document is deleted as soon as "
-"you do, only the decision is kept."
+"download their document and decide on it: the document is deleted as soon as"
+" you do, only the decision is kept."
 msgstr ""
 "Champions en mentors hebben een geldig uittreksel uit het strafregister "
 "(model 2, artikel 596.2) nodig voor ze met kinderen mogen werken. Open "
@@ -2706,19 +3322,15 @@ msgstr "Niets na te kijken."
 
 #: applications/templates/applications/manage/check_list.html:34
 msgid ""
-"Asked for, or rejected and waiting for a new one. The person uploads it from "
-"the link in their mail or from their account page."
+"Asked for, or rejected and waiting for a new one. The person uploads it from"
+" the link in their mail or from their account page."
 msgstr ""
-"Gevraagd, of afgewezen en wachtend op een nieuw. De persoon laadt het op via "
-"de link in de mail of via de accountpagina."
+"Gevraagd, of afgewezen en wachtend op een nieuw. De persoon laadt het op via"
+" de link in de mail of via de accountpagina."
 
 #: applications/templates/applications/manage/check_list.html:35
 msgid "Nobody is waiting to upload."
 msgstr "Niemand moet nog iets opladen."
-
-#: applications/templates/applications/manage/check_list.html:38
-msgid "Expired"
-msgstr "Vervallen"
 
 #: applications/templates/applications/manage/check_list.html:39
 msgid ""
@@ -2814,27 +3426,27 @@ msgstr "Vertel ons meer"
 #: applications/templates/applications/register_dojo.html:77
 msgid ""
 "As a dojo's champion works directly with minors, Belgian law requires a "
-"specific criminal record extract: <em>\"Artikel 596.2 ('minderjarigenmodel') "
-"is nodig voor specifieke activiteiten met contacten met kinderen en "
-"jongeren, zoals opvoeding, psycho-medisch-sociale begeleiding, hulpverlening "
-"aan de jeugd, kinderbescherming, animatie of begeleiding van minderjarigen."
-"\"</em> We'll email you a private upload link once your application is "
-"reviewed. Only an approved reviewer can access the document, it's discarded "
-"as soon as it's validated, and the validation itself expires after a year — "
-"we'll email you again to renew it, and your login is disabled until it's "
-"back in order."
+"specific criminal record extract: <em>\"Artikel 596.2 ('minderjarigenmodel')"
+" is nodig voor specifieke activiteiten met contacten met kinderen en "
+"jongeren, zoals opvoeding, psycho-medisch-sociale begeleiding, hulpverlening"
+" aan de jeugd, kinderbescherming, animatie of begeleiding van "
+"minderjarigen.\"</em> We'll email you a private upload link once your "
+"application is reviewed. Only an approved reviewer can access the document, "
+"it's discarded as soon as it's validated, and the validation itself expires "
+"after a year — we'll email you again to renew it, and your login is disabled"
+" until it's back in order."
 msgstr ""
-"Omdat de champion van een dojo rechtstreeks met minderjarigen werkt, vereist "
-"de Belgische wet een specifiek uittreksel uit het strafregister: "
+"Omdat de champion van een dojo rechtstreeks met minderjarigen werkt, vereist"
+" de Belgische wet een specifiek uittreksel uit het strafregister: "
 "<em>\"Artikel 596.2 ('minderjarigenmodel') is nodig voor specifieke "
-"activiteiten met contacten met kinderen en jongeren, zoals opvoeding, psycho-"
-"medisch-sociale begeleiding, hulpverlening aan de jeugd, kinderbescherming, "
-"animatie of begeleiding van minderjarigen.\"</em> Zodra je aanvraag bekeken "
-"is, mailen we je een persoonlijke link om het op te laden. Alleen een "
-"goedgekeurde beoordelaar kan het document inkijken, het wordt verwijderd "
-"zodra het goedgekeurd is, en die goedkeuring verloopt na een jaar. We mailen "
-"je dan opnieuw om het te vernieuwen, en tot dan heb je geen toegang tot je "
-"dojodashboard."
+"activiteiten met contacten met kinderen en jongeren, zoals opvoeding, "
+"psycho-medisch-sociale begeleiding, hulpverlening aan de jeugd, "
+"kinderbescherming, animatie of begeleiding van minderjarigen.\"</em> Zodra "
+"je aanvraag bekeken is, mailen we je een persoonlijke link om het op te "
+"laden. Alleen een goedgekeurde beoordelaar kan het document inkijken, het "
+"wordt verwijderd zodra het goedgekeurd is, en die goedkeuring verloopt na "
+"een jaar. We mailen je dan opnieuw om het te vernieuwen, en tot dan heb je "
+"geen toegang tot je dojodashboard."
 
 # | msgid "%(kind)s application"
 #: applications/templates/applications/register_dojo.html:92
@@ -2849,8 +3461,8 @@ msgstr "Word vrijwilliger"
 
 #: applications/templates/applications/register_helper.html:31
 msgid ""
-"We've got your application. Next, we'll email you to ask for your background "
-"check — you can follow along on your account page."
+"We've got your application. Next, we'll email you to ask for your background"
+" check — you can follow along on your account page."
 msgstr ""
 "We hebben je aanvraag ontvangen. Daarna mailen we je om je uittreksel uit "
 "het strafregister te vragen. Je kunt alles volgen op je accountpagina."
@@ -2884,8 +3496,8 @@ msgid ""
 "validated, and the validation itself expires after a year — we'll email you "
 "again to renew it, and your login is disabled until it's back in order."
 msgstr ""
-"De Belgische wet vereist een specifiek uittreksel uit het strafregister voor "
-"iedereen die met minderjarigen in contact komt: <em>\"Artikel 596.2 "
+"De Belgische wet vereist een specifiek uittreksel uit het strafregister voor"
+" iedereen die met minderjarigen in contact komt: <em>\"Artikel 596.2 "
 "('minderjarigenmodel') is nodig voor specifieke activiteiten met contacten "
 "met kinderen en jongeren, zoals opvoeding, psycho-medisch-sociale "
 "begeleiding, hulpverlening aan de jeugd, kinderbescherming, animatie of "
@@ -2948,10 +3560,11 @@ msgstr "Laad je uittreksel uit het strafregister op"
 #: applications/templates/applications/upload_background_check.html:41
 #, python-format
 msgid ""
-"Hi %(name)s — we couldn't accept your last document; please upload a new one."
+"Hi %(name)s — we couldn't accept your last document; please upload a new "
+"one."
 msgstr ""
-"Hallo %(name)s, we konden je vorige document niet aanvaarden. Laad een nieuw "
-"op."
+"Hallo %(name)s, we konden je vorige document niet aanvaarden. Laad een nieuw"
+" op."
 
 #: applications/templates/applications/upload_background_check.html:41
 #, python-format
@@ -2974,8 +3587,8 @@ msgid ""
 "mention it's for volunteering with minors (model 2 / Artikel 596.2)."
 msgstr ""
 "Je kunt dit \"uittreksel uit het strafregister, model 2\" gratis aanvragen "
-"bij je gemeente, of online via mijndossier.rrn.fgov.be. Vermeld dat het voor "
-"vrijwilligerswerk met minderjarigen is (model 2 / Artikel 596.2)."
+"bij je gemeente, of online via mijndossier.rrn.fgov.be. Vermeld dat het voor"
+" vrijwilligerswerk met minderjarigen is (model 2 / Artikel 596.2)."
 
 #: applications/templates/applications/upload_background_check.html:55
 msgid ""
@@ -2983,8 +3596,8 @@ msgid ""
 "systems as soon as it's validated — we only keep the outcome, and that "
 "validation expires after a year, after which it needs to be redone."
 msgstr ""
-"Alleen een goedgekeurde beoordelaar kan dit document inkijken. Het wordt uit "
-"onze systemen verwijderd zodra het goedgekeurd is. We houden alleen de "
+"Alleen een goedgekeurde beoordelaar kan dit document inkijken. Het wordt uit"
+" onze systemen verwijderd zodra het goedgekeurd is. We houden alleen de "
 "uitkomst bij, en die goedkeuring verloopt na een jaar, waarna het opnieuw "
 "moet."
 
@@ -3020,7 +3633,8 @@ msgstr "Afbeelding"
 
 #: content/forms.py:41
 msgid ""
-"A draft event can be picked: the promotion shows once the event is published."
+"A draft event can be picked: the promotion shows once the event is "
+"published."
 msgstr ""
 "Je kunt een evenement in ontwerp kiezen: de promotie verschijnt zodra het "
 "evenement gepubliceerd is."
@@ -3159,7 +3773,7 @@ msgstr "Promotie verwijderen"
 
 #: content/templates/content/manage/promotion_list.html:3
 #: content/templates/content/manage/promotion_list.html:4
-#: core/templates/core/_manage_base.html:112
+#: core/templates/core/_manage_base.html:118
 #: dojos/templates/dojos/partials/_event_promotions.html:9
 msgid "Promotions"
 msgstr "Promoties"
@@ -3170,8 +3784,8 @@ msgid ""
 "Within a place, the lowest rank shows first. Without an end, a promotion "
 "stops when its event starts."
 msgstr ""
-"Een promotie zet een evenement een tijdlang in de kijker op één plaats op de "
-"publieke site. Binnen een plaats komt de laagste volgorde eerst. Zonder "
+"Een promotie zet een evenement een tijdlang in de kijker op één plaats op de"
+" publieke site. Binnen een plaats komt de laagste volgorde eerst. Zonder "
 "einddatum stopt een promotie wanneer het evenement begint."
 
 #: content/templates/content/manage/promotion_list.html:11
@@ -3181,8 +3795,8 @@ msgid ""
 "organisation's dojo."
 msgstr ""
 "Je kunt elk aankomend evenement promoten. Om de eigen evenementen van de "
-"organisatie zelf voor te bereiden, heb je een geldige achtergrondcontrole en "
-"een plaats in het team van de dojo van de organisatie nodig."
+"organisatie zelf voor te bereiden, heb je een geldige achtergrondcontrole en"
+" een plaats in het team van de dojo van de organisatie nodig."
 
 #: content/templates/content/manage/promotion_list.html:22
 #: content/templates/content/manage/sponsor_list.html:29
@@ -3204,11 +3818,6 @@ msgstr "Gepland"
 #: dojos/templates/dojos/partials/_event_promotions.html:22
 msgid "Event not public"
 msgstr "Evenement niet openbaar"
-
-#: content/templates/content/manage/promotion_list.html:43
-#: dojos/templates/dojos/partials/_event_promotions.html:23
-msgid "Ended"
-msgstr "Afgelopen"
 
 #: content/templates/content/manage/promotion_list.html:47
 msgid "Nothing promoted here."
@@ -3235,7 +3844,7 @@ msgstr "Sponsor verwijderen"
 
 #: content/templates/content/manage/sponsor_list.html:3
 #: content/templates/content/manage/sponsor_list.html:4
-#: core/templates/core/_manage_base.html:118
+#: core/templates/core/_manage_base.html:124
 msgid "Sponsors"
 msgstr "Sponsors"
 
@@ -3270,6 +3879,11 @@ msgstr "In de kijker"
 msgid "Find out more"
 msgstr "Meer weten"
 
+#: core/admin_site.py:32
+#, python-format
+msgid "%(header)s · access until %(until)s"
+msgstr "%(header)s · toegang tot %(until)s"
+
 # | msgid "Language"
 # | msgid "Languages"
 #: core/admin_translations.py:65
@@ -3279,12 +3893,29 @@ msgid "In %(language)s"
 msgstr "In het %(language)s"
 
 # | msgid "Organisation"
-#: core/templates/core/_manage_base.html:17
+#: core/manage_nav.py:49
+msgid "Organisation admin"
+msgstr "Organisatiebeheerder"
+
+# | msgid "No team members listed yet."
+#: core/manage_nav.py:53
+msgid "Board member"
+msgstr "Bestuurslid"
+
+#: core/manage_nav.py:54 core/templates/core/_manage_base.html:173
+#: core/templates/core/partials/_manage_switcher.html:12
+#: core/templates/core/partials/_manage_switcher.html:18
+#: core/templates/core/partials/_manage_switcher.html:42 dojos/models.py:58
+msgid "Organisation"
+msgstr "Organisatie"
+
+# | msgid "Organisation"
+#: core/templates/core/_manage_base.html:23
 msgid "Organisation dashboard"
 msgstr "Organisatiedashboard"
 
 # | msgid "Newsletter and campaigns"
-#: core/templates/core/_manage_base.html:26
+#: core/templates/core/_manage_base.html:32
 #: mailing/templates/mailing/manage/campaign_form.html:3
 #: mailing/templates/mailing/manage/campaign_form.html:4
 #: mailing/templates/mailing/manage/campaign_list.html:5
@@ -3292,78 +3923,69 @@ msgid "New campaign"
 msgstr "Nieuwe campagne"
 
 # | msgid "Location"
-#: core/templates/core/_manage_base.html:35
+#: core/templates/core/_manage_base.html:41
 msgid "Communication"
 msgstr "Communicatie"
 
-#: core/templates/core/_manage_base.html:40
+#: core/templates/core/_manage_base.html:46
 #: mailing/templates/mailing/manage/campaign_list.html:3
 #: mailing/templates/mailing/manage/campaign_list.html:4
 msgid "Campaigns"
 msgstr "Campagnes"
 
-#: core/templates/core/_manage_base.html:46
+#: core/templates/core/_manage_base.html:52
 #: mailing/templates/mailing/manage/journey_list.html:3
 #: mailing/templates/mailing/manage/journey_list.html:4
 msgid "Journeys"
 msgstr "Trajecten"
 
-#: core/templates/core/_manage_base.html:52
+#: core/templates/core/_manage_base.html:58
 #: mailing/templates/mailing/manage/segment_list.html:3
 #: mailing/templates/mailing/manage/segment_list.html:4
 msgid "Segments"
 msgstr "Segmenten"
 
-#: core/templates/core/_manage_base.html:58
+#: core/templates/core/_manage_base.html:64
 #: mailing/templates/mailing/manage/template_list.html:3
 #: mailing/templates/mailing/manage/template_list.html:4
 msgid "Mail templates"
 msgstr "E-mailsjablonen"
 
-#: core/templates/core/_manage_base.html:68
+#: core/templates/core/_manage_base.html:74
 #: core/templates/core/partials/_manage_switcher.html:26
 msgid "Organisation events"
 msgstr "Organisatie-evenementen"
 
-#: core/templates/core/_manage_base.html:85
+#: core/templates/core/_manage_base.html:91
 msgid "Volunteers"
 msgstr "Vrijwilligers"
 
-#: core/templates/core/_manage_base.html:107
+#: core/templates/core/_manage_base.html:113
 msgid "Public site"
 msgstr "Publieke site"
 
-#: core/templates/core/_manage_base.html:125
+#: core/templates/core/_manage_base.html:133
 #: core/templates/core/code_of_conduct.html:50
 msgid "Ninjas"
 msgstr "Ninja's"
 
-#: core/templates/core/_manage_base.html:130
+#: core/templates/core/_manage_base.html:138
 #: events/templates/events/manage/badge_list.html:3
 #: events/templates/events/manage/badge_list.html:4
 msgid "Awards"
 msgstr "Onderscheidingen"
 
-#: core/templates/core/_manage_base.html:142
+#: core/templates/core/_manage_base.html:153
 #: privacy/templates/privacy/manage/privacy.html:3
 #: privacy/templates/privacy/manage/privacy.html:4
 msgid "Privacy"
 msgstr "Privacy"
 
 # | msgid "Has own login"
-#: core/templates/core/_manage_base.html:143
+#: core/templates/core/_manage_base.html:154
 #: privacy/templates/privacy/manage/privacy.html:11
 msgid "Needs attention"
 msgstr "Vraagt aandacht"
-
-# | msgid "Organisation"
-#: core/templates/core/_manage_base.html:157
-msgid "Organisation admin"
-msgstr "Organisatiebeheerder"
-
-#: core/templates/core/_manage_base.html:157
-msgid "Background-check reviewer"
-msgstr "Beoordelaar van uittreksels"
 
 #: core/templates/core/_manage_shell.html:52
 msgid "Pin sidebar open"
@@ -3392,8 +4014,8 @@ msgstr "Contact"
 msgid ""
 "A dojo is a place where children and teenagers learn to code by doing, "
 "trying and making mistakes, together with volunteers. To keep it safe and "
-"fun for everyone, everybody at a dojo follows this code: ninjas, parents and "
-"guardians, mentors, champions and visitors."
+"fun for everyone, everybody at a dojo follows this code: ninjas, parents and"
+" guardians, mentors, champions and visitors."
 msgstr ""
 "Een dojo is een plek waar kinderen en jongeren leren programmeren door te "
 "doen, te proberen en fouten te maken, samen met vrijwilligers. Om het voor "
@@ -3406,7 +4028,8 @@ msgstr "Waar CoderDojo voor staat"
 
 #: core/templates/core/code_of_conduct.html:36
 msgid ""
-"Free: no fees, a venue that's lent to us, and volunteers who give their time."
+"Free: no fees, a venue that's lent to us, and volunteers who give their "
+"time."
 msgstr ""
 "Gratis: geen inschrijvingsgeld, een locatie die we mogen gebruiken en "
 "vrijwilligers die hun tijd geven."
@@ -3416,7 +4039,8 @@ msgid ""
 "Open to everyone, whatever their background, home situation, gender or "
 "disability."
 msgstr ""
-"Open voor iedereen, ongeacht achtergrond, thuissituatie, gender of beperking."
+"Open voor iedereen, ongeacht achtergrond, thuissituatie, gender of "
+"beperking."
 
 #: core/templates/core/code_of_conduct.html:38
 msgid "Outside school and non-commercial: nobody sells anything at a dojo."
@@ -3456,8 +4080,8 @@ msgstr ""
 
 #: core/templates/core/code_of_conduct.html:47
 msgid ""
-"Ask before taking a photo or video of someone; for a child, ask their parent "
-"or guardian."
+"Ask before taking a photo or video of someone; for a child, ask their parent"
+" or guardian."
 msgstr ""
 "Vraag toestemming voor je iemand fotografeert of filmt; bij een kind vraag "
 "je het aan de ouder of voogd."
@@ -3483,8 +4107,8 @@ msgstr ""
 
 #: core/templates/core/code_of_conduct.html:55
 msgid ""
-"Tell a mentor, or your parents, if something online or at the dojo makes you "
-"feel uncomfortable."
+"Tell a mentor, or your parents, if something online or at the dojo makes you"
+" feel uncomfortable."
 msgstr ""
 "Zeg het aan een mentor, of aan je ouders, als iets online of in de dojo je "
 "een ongemakkelijk gevoel geeft."
@@ -3504,19 +4128,19 @@ msgstr ""
 
 #: core/templates/core/code_of_conduct.html:61
 msgid ""
-"Tell the dojo about allergies or anything else the team should know, in your "
-"child's details on this site."
+"Tell the dojo about allergies or anything else the team should know, in your"
+" child's details on this site."
 msgstr ""
-"Laat de dojo weten welke allergieën of andere zaken het team moet weten, bij "
-"de gegevens van je kind op deze site."
+"Laat de dojo weten welke allergieën of andere zaken het team moet weten, bij"
+" de gegevens van je kind op deze site."
 
 #: core/templates/core/code_of_conduct.html:62
 msgid ""
 "Cancel a place you can't use, so a child on the waiting list can come "
 "instead."
 msgstr ""
-"Annuleer een plaats die je niet gebruikt, zodat een kind op de wachtlijst in "
-"de plaats kan komen."
+"Annuleer een plaats die je niet gebruikt, zodat een kind op de wachtlijst in"
+" de plaats kan komen."
 
 # | msgid "Newsletter and campaigns"
 #: core/templates/core/code_of_conduct.html:65
@@ -3525,8 +4149,8 @@ msgstr "Mentors en champions"
 
 #: core/templates/core/code_of_conduct.html:67
 msgid ""
-"Keep your background check (criminal record extract, model 2) valid; without "
-"it you can't help at a dojo."
+"Keep your background check (criminal record extract, model 2) valid; without"
+" it you can't help at a dojo."
 msgstr ""
 "Hou je uittreksel uit het strafregister (model 2) geldig; zonder dat kun je "
 "niet helpen in een dojo."
@@ -3543,7 +4167,8 @@ msgstr ""
 #: core/templates/core/code_of_conduct.html:69
 msgid "Use families' details only for the dojo, never for anything else."
 msgstr ""
-"Gebruik de gegevens van gezinnen alleen voor de dojo, nooit voor iets anders."
+"Gebruik de gegevens van gezinnen alleen voor de dojo, nooit voor iets "
+"anders."
 
 #: core/templates/core/code_of_conduct.html:70
 msgid ""
@@ -3565,11 +4190,13 @@ msgstr ""
 #: core/templates/core/code_of_conduct.html:77
 #, python-format
 msgid ""
-"You can always contact CoderDojo Belgium at <a href=\"mailto:"
-"%(email)s\">%(email)s</a>; we treat every report confidentially."
+"You can always contact CoderDojo Belgium at <a "
+"href=\"mailto:%(email)s\">%(email)s</a>; we treat every report "
+"confidentially."
 msgstr ""
-"Je kunt CoderDojo Belgium altijd contacteren via <a href=\"mailto:"
-"%(email)s\">%(email)s</a>; we behandelen elke melding vertrouwelijk."
+"Je kunt CoderDojo Belgium altijd contacteren via <a "
+"href=\"mailto:%(email)s\">%(email)s</a>; we behandelen elke melding "
+"vertrouwelijk."
 
 #: core/templates/core/code_of_conduct.html:78
 msgid "If a child is in danger, call 112."
@@ -3585,8 +4212,8 @@ msgstr ""
 
 #: core/templates/core/code_of_conduct.html:83
 msgid ""
-"If someone doesn't follow this code, the dojo team can ask them to leave the "
-"session, and CoderDojo Belgium can end a volunteer's role or close an "
+"If someone doesn't follow this code, the dojo team can ask them to leave the"
+" session, and CoderDojo Belgium can end a volunteer's role or close an "
 "account."
 msgstr ""
 "Houdt iemand zich niet aan deze gedragscode, dan kan het dojoteam die "
@@ -3667,8 +4294,8 @@ msgid ""
 "Free, for ages 7–18. No experience needed — bring a laptop and an idea, "
 "we'll help with the rest."
 msgstr ""
-"Gratis, van 7 tot 18 jaar. Geen ervaring nodig: breng een laptop en een idee "
-"mee, wij helpen met de rest."
+"Gratis, van 7 tot 18 jaar. Geen ervaring nodig: breng een laptop en een idee"
+" mee, wij helpen met de rest."
 
 #: core/templates/core/home.html:67 core/templates/core/home.html:200
 #: dojos/templates/dojos/dojo_detail.html:108
@@ -3732,7 +4359,8 @@ msgstr "Ons team en de vrijwilligers die elke dojo draaiende houden."
 msgid "No team members listed yet."
 msgstr "Nog geen teamleden."
 
-#: core/templates/core/home.html:163 dojos/templates/dojos/dojo_detail.html:191
+#: core/templates/core/home.html:163
+#: dojos/templates/dojos/dojo_detail.html:191
 msgid "Frequently asked questions"
 msgstr "Veelgestelde vragen"
 
@@ -3768,7 +4396,7 @@ msgstr "Dojo's"
 msgid "Language"
 msgstr "Taal"
 
-#: core/templates/core/menu.html:32 core/templates/core/menu.html:80
+#: core/templates/core/menu.html:32 core/templates/core/menu.html:76
 msgid "Switch to dark mode"
 msgstr "Donkere modus"
 
@@ -3780,27 +4408,21 @@ msgstr "Mijn account"
 msgid "Manage"
 msgstr "Beheren"
 
-#: core/templates/core/menu.html:54
-#: core/templates/core/partials/_manage_switcher.html:12
-#: core/templates/core/partials/_manage_switcher.html:18
-#: core/templates/core/partials/_manage_switcher.html:42 dojos/models.py:58
-msgid "Organisation"
-msgstr "Organisatie"
-
-#: core/templates/core/menu.html:63
+#: core/templates/core/menu.html:59
 msgid "Help at another dojo"
 msgstr "Help bij een andere dojo"
 
-#: core/templates/core/menu.html:69
+#: core/templates/core/menu.html:65
 msgid "Log out"
 msgstr "Afmelden"
 
-#: core/templates/core/menu.html:75 events/templates/events/event_signup.html:4
+#: core/templates/core/menu.html:71
+#: events/templates/events/event_signup.html:4
 #: events/templates/events/event_signup.html:171
 msgid "Sign up"
 msgstr "Inschrijven"
 
-#: core/templates/core/menu.html:80
+#: core/templates/core/menu.html:76
 msgid "Switch to light mode"
 msgstr "Lichte modus"
 
@@ -3838,8 +4460,8 @@ msgstr "Hoofdtaal"
 
 #: dojos/forms.py:59
 msgid ""
-"The fields below are in this language. Other languages get their own section "
-"at the bottom once saved."
+"The fields below are in this language. Other languages get their own section"
+" at the bottom once saved."
 msgstr ""
 "De velden hieronder zijn in deze taal. Andere talen krijgen onderaan een "
 "eigen deel zodra je opslaat."
@@ -3908,8 +4530,8 @@ msgid ""
 "Used for the \"Visit us\" map link and for distance search — changing it "
 "updates the map location automatically."
 msgstr ""
-"Gebruikt voor de kaartlink bij \"Bezoek ons\" en voor zoeken op afstand. Als "
-"je het wijzigt, wordt de locatie op de kaart automatisch bijgewerkt."
+"Gebruikt voor de kaartlink bij \"Bezoek ons\" en voor zoeken op afstand. Als"
+" je het wijzigt, wordt de locatie op de kaart automatisch bijgewerkt."
 
 #: dojos/forms.py:111
 msgid ""
@@ -4103,7 +4725,8 @@ msgstr ""
 # | msgid "This session isn't accepting new registrations"
 #: dojos/team.py:72
 msgid "This dojo isn't accepting join requests right now."
-msgstr "Deze dojo aanvaardt momenteel geen aanvragen om bij het team te komen."
+msgstr ""
+"Deze dojo aanvaardt momenteel geen aanvragen om bij het team te komen."
 
 #: dojos/team.py:75
 msgid "You're already on this team, or your request is pending."
@@ -4133,7 +4756,8 @@ msgstr "Je aanvraag om bij %(dojo)s te komen werd geweigerd."
 
 #: dojos/team.py:121
 #, python-format
-msgid "Your request to join %(dojo)s was closed: the dojo is no longer active."
+msgid ""
+"Your request to join %(dojo)s was closed: the dojo is no longer active."
 msgstr ""
 "Je aanvraag om bij %(dojo)s te komen werd afgesloten: de dojo is niet meer "
 "actief."
@@ -4164,9 +4788,11 @@ msgstr ""
 
 #: dojos/team.py:146
 #, python-format
-msgid "%(name)s's login is switched off; their guardian can switch it back on."
+msgid ""
+"%(name)s's login is switched off; their guardian can switch it back on."
 msgstr ""
-"De login van %(name)s is uitgeschakeld; de ouder kan hem opnieuw inschakelen."
+"De login van %(name)s is uitgeschakeld; de ouder kan hem opnieuw "
+"inschakelen."
 
 #: dojos/team.py:177
 msgid "The champion can't be removed; transfer the champion role first."
@@ -4181,8 +4807,8 @@ msgstr "Alleen actieve teamleden kunnen verwijderd worden."
 msgid ""
 "As champion you can't leave; transfer the champion role to a mentor first."
 msgstr ""
-"Als champion kun je niet vertrekken; draag de championrol eerst over aan een "
-"mentor."
+"Als champion kun je niet vertrekken; draag de championrol eerst over aan een"
+" mentor."
 
 #: dojos/team.py:205
 msgid "Only the champion can hand over the champion role."
@@ -4278,12 +4904,12 @@ msgstr "Maak je dojo aan"
 
 #: dojos/templates/dojos/dojo_create.html:24
 msgid ""
-"Your dojo starts as a draft, hidden from the public site. You'll fill in the "
-"rest of its profile, add your team and plan sessions, then launch it when "
+"Your dojo starts as a draft, hidden from the public site. You'll fill in the"
+" rest of its profile, add your team and plan sessions, then launch it when "
 "it's ready."
 msgstr ""
-"Je dojo begint als ontwerp, verborgen voor de publieke site. Je vult de rest "
-"van het profiel in, voegt je team toe en plant sessies, en lanceert hem "
+"Je dojo begint als ontwerp, verborgen voor de publieke site. Je vult de rest"
+" van het profiel in, voegt je team toe en plant sessies, en lanceert hem "
 "wanneer hij klaar is."
 
 # | msgid "Create a dojo"
@@ -4316,11 +4942,10 @@ msgstr "Er zijn al meer dan zes maanden geen sessies gepland."
 
 #: dojos/templates/dojos/dojo_dashboard.html:25
 #, python-format
-msgid ""
-"Plan your next session under <a href=\"%(new_event_url)s\">New event</a>."
+msgid "Plan your next session under <a href=\"%(new_event_url)s\">New event</a>."
 msgstr ""
-"Plan je volgende sessie bij <a href=\"%(new_event_url)s\">Nieuw evenement</"
-"a>."
+"Plan je volgende sessie bij <a href=\"%(new_event_url)s\">Nieuw "
+"evenement</a>."
 
 # | msgid "Next session"
 #: dojos/templates/dojos/dojo_dashboard.html:25
@@ -4329,8 +4954,7 @@ msgstr "Plan je volgende sessie."
 
 #: dojos/templates/dojos/dojo_dashboard.html:26
 #, python-format
-msgid ""
-"Or mark the dojo dormant under <a href=\"%(settings_url)s\">Settings</a>."
+msgid "Or mark the dojo dormant under <a href=\"%(settings_url)s\">Settings</a>."
 msgstr ""
 "Of zet de dojo op slapend bij <a href=\"%(settings_url)s\">Instellingen</a>."
 
@@ -4516,13 +5140,13 @@ msgid ""
 "Visible on the public site, but no new sign-ups. Reopen to accept sign-ups "
 "again."
 msgstr ""
-"Zichtbaar op de publieke site, maar zonder nieuwe inschrijvingen. Heropen om "
-"weer inschrijvingen te aanvaarden."
+"Zichtbaar op de publieke site, maar zonder nieuwe inschrijvingen. Heropen om"
+" weer inschrijvingen te aanvaarden."
 
 #: dojos/templates/dojos/dojo_event_detail.html:74
 msgid ""
-"You can switch between any of these at any time — existing registrations are "
-"always kept."
+"You can switch between any of these at any time — existing registrations are"
+" always kept."
 msgstr ""
 "Je kunt op elk moment tussen deze statussen wisselen; bestaande "
 "inschrijvingen blijven altijd behouden."
@@ -4562,8 +5186,8 @@ msgid ""
 "Every CoderDojo in Belgium is free, run by local volunteers, and open to "
 "kids aged 7–18 — enter a postcode or city to see what's nearby."
 msgstr ""
-"Elke CoderDojo in België is gratis, wordt begeleid door vrijwilligers uit de "
-"buurt en staat open voor kinderen van 7 tot 18 jaar. Vul een postcode of "
+"Elke CoderDojo in België is gratis, wordt begeleid door vrijwilligers uit de"
+" buurt en staat open voor kinderen van 7 tot 18 jaar. Vul een postcode of "
 "gemeente in om te zien wat er in de buurt is."
 
 #: dojos/templates/dojos/dojo_list.html:49
@@ -4639,13 +5263,15 @@ msgid ""
 "Hidden from the public site while you set it up. Launch it when your "
 "profile, team and first sessions are ready."
 msgstr ""
-"Verborgen voor de publieke site terwijl je hem opzet. Lanceer hem wanneer je "
-"profiel, team en eerste sessies klaar zijn."
+"Verborgen voor de publieke site terwijl je hem opzet. Lanceer hem wanneer je"
+" profiel, team en eerste sessies klaar zijn."
 
 #: dojos/templates/dojos/dojo_manage.html:49
-msgid "Public: listed in the dojo finder, with its sessions open for sign-ups."
+msgid ""
+"Public: listed in the dojo finder, with its sessions open for sign-ups."
 msgstr ""
-"Openbaar: staat in de dojozoeker en de sessies zijn open voor inschrijvingen."
+"Openbaar: staat in de dojozoeker en de sessies zijn open voor "
+"inschrijvingen."
 
 #: dojos/templates/dojos/dojo_manage.html:50
 #, python-format
@@ -4656,8 +5282,8 @@ msgid_plural ""
 "It has %(counter)s upcoming sessions in draft or open, so it can't be made "
 "dormant or archived yet."
 msgstr[0] ""
-"Er is nog %(counter)s komende sessie in ontwerp of open, dus de dojo kan nog "
-"niet op slapend of gearchiveerd."
+"Er is nog %(counter)s komende sessie in ontwerp of open, dus de dojo kan nog"
+" niet op slapend of gearchiveerd."
 msgstr[1] ""
 "Er zijn nog %(counter)s komende sessies in ontwerp of open, dus de dojo kan "
 "nog niet op slapend of gearchiveerd."
@@ -4675,8 +5301,8 @@ msgid ""
 "Closed: hidden from the public site, kept in ninjas' history. Reopening "
 "brings it back as a draft."
 msgstr ""
-"Gesloten: verborgen voor de publieke site, bewaard in de geschiedenis van de "
-"ninja's. Heropenen maakt er opnieuw een ontwerp van."
+"Gesloten: verborgen voor de publieke site, bewaard in de geschiedenis van de"
+" ninja's. Heropenen maakt er opnieuw een ontwerp van."
 
 #: dojos/templates/dojos/dojo_manage.html:56
 msgid "Only the dojo's champion can change its status."
@@ -4691,8 +5317,8 @@ msgid ""
 "We couldn't find that address on the map, so the \"Visit us\" map link and "
 "distance search still use the old location. Everything else was saved."
 msgstr ""
-"We vonden dat adres niet op de kaart, dus de kaartlink bij \"Bezoek ons\" en "
-"het zoeken op afstand gebruiken nog de oude locatie. Al de rest is "
+"We vonden dat adres niet op de kaart, dus de kaartlink bij \"Bezoek ons\" en"
+" het zoeken op afstand gebruiken nog de oude locatie. Al de rest is "
 "opgeslagen."
 
 #: dojos/templates/dojos/dojo_manage.html:83
@@ -4799,7 +5425,8 @@ msgstr "; miste de laatste %(missed)s"
 #: dojos/templates/dojos/dojo_members.html:73
 #, python-format
 msgid ""
-"Make %(ninja)s a youth mentor at %(dojo)s? Their family gets a mail about it."
+"Make %(ninja)s a youth mentor at %(dojo)s? Their family gets a mail about "
+"it."
 msgstr ""
 "%(ninja)s youth mentor maken bij %(dojo)s? Het gezin krijgt daar een e-mail "
 "over."
@@ -4931,8 +5558,8 @@ msgstr "Een mentor toevoegen"
 
 #: dojos/templates/dojos/dojo_team_manage.html:96
 msgid ""
-"Only approved mentors (with a valid background check) can be added. They can "
-"also ask to join from the dojo's public page."
+"Only approved mentors (with a valid background check) can be added. They can"
+" also ask to join from the dojo's public page."
 msgstr ""
 "Alleen goedgekeurde mentors (met een geldig uittreksel uit het "
 "strafregister) kunnen toegevoegd worden. Ze kunnen ook vragen om erbij te "
@@ -4981,7 +5608,8 @@ msgstr "Overdragen"
 
 #: dojos/templates/dojos/dojo_team_manage.html:134
 msgid ""
-"You need at least one active mentor on the team to hand the champion role to."
+"You need at least one active mentor on the team to hand the champion role "
+"to."
 msgstr ""
 "Je hebt minstens één actieve mentor in het team nodig om de championrol aan "
 "over te dragen."
@@ -4992,7 +5620,8 @@ msgid "Former team members"
 msgstr "Vroegere teamleden"
 
 #: dojos/templates/dojos/dojo_team_manage.html:142
-msgid "No longer on the team, but still shown on the sessions they helped run."
+msgid ""
+"No longer on the team, but still shown on the sessions they helped run."
 msgstr ""
 "Niet meer in het team, maar nog altijd zichtbaar bij de sessies die ze mee "
 "begeleidden."
@@ -5015,8 +5644,8 @@ msgid ""
 "sessions on the events list."
 msgstr ""
 "Een korte, gedateerde melding op de publieke pagina van de dojo: een andere "
-"zaal, een oproep voor mentors, nieuws van een sessie. Vaste info hoort in de "
-"FAQ, sessiedata in de lijst met evenementen."
+"zaal, een oproep voor mentors, nieuws van een sessie. Vaste info hoort in de"
+" FAQ, sessiedata in de lijst met evenementen."
 
 # | msgid "Password updated"
 #: dojos/templates/dojos/dojo_updates.html:35
@@ -5146,8 +5775,7 @@ msgstr "team: %(team_present_count)s van %(total)s"
 #: dojos/templates/dojos/partials/_dojo_finder_widget_results.html:11
 #, python-format
 msgid "Couldn't find \"%(search_label)s\" — showing dojos near Ghent instead."
-msgstr ""
-"\"%(search_label)s\" niet gevonden: we tonen dojo's in de buurt van Gent."
+msgstr "\"%(search_label)s\" niet gevonden: we tonen dojo's in de buurt van Gent."
 
 #: dojos/templates/dojos/partials/_dojo_finder_widget_results.html:13
 #, python-format
@@ -5175,16 +5803,16 @@ msgstr "Geen komende sessies"
 
 #: dojos/templates/dojos/partials/_event_form_fields.html:12
 msgid ""
-"A session's visibility and whether it's open for registration are controlled "
-"by its status above, not by these fields."
+"A session's visibility and whether it's open for registration are controlled"
+" by its status above, not by these fields."
 msgstr ""
 "Of een sessie zichtbaar is en open voor inschrijvingen, hangt af van de "
 "status hierboven, niet van deze velden."
 
 #: dojos/templates/dojos/partials/_event_form_fields.html:14
 msgid ""
-"New sessions start as a draft, hidden from the public site — publish it from "
-"the events list once it's ready."
+"New sessions start as a draft, hidden from the public site — publish it from"
+" the events list once it's ready."
 msgstr ""
 "Nieuwe sessies beginnen als ontwerp, verborgen voor de publieke site. "
 "Publiceer ze vanuit de lijst met evenementen zodra ze klaar zijn."
@@ -5223,8 +5851,8 @@ msgstr "Over deze sessie"
 
 #: dojos/templates/dojos/partials/_event_form_fields.html:82
 msgid ""
-"Optional — shown on the session's public page. A new session starts with the "
-"pathways your dojo provides."
+"Optional — shown on the session's public page. A new session starts with the"
+" pathways your dojo provides."
 msgstr ""
 "Optioneel: getoond op de publieke pagina van de sessie. Een nieuwe sessie "
 "begint met de leertrajecten van je dojo."
@@ -5247,24 +5875,24 @@ msgid "This event isn't promoted anywhere on the public site."
 msgstr "Dit evenement staat nergens op de openbare site in de kijker."
 
 # | msgid "Location"
-#: dojos/templates/dojos/partials/_notification_bell.html:17
-#: dojos/templates/dojos/partials/_notification_bell.html:25
+#: dojos/templates/dojos/partials/_notification_bell.html:19
 #: dojos/templates/dojos/partials/_notification_bell.html:27
+#: dojos/templates/dojos/partials/_notification_bell.html:29
 msgid "Notifications"
 msgstr "Meldingen"
 
-#: dojos/templates/dojos/partials/_notification_bell.html:32
+#: dojos/templates/dojos/partials/_notification_bell.html:34
 msgid "Mark all as read"
 msgstr "Alles als gelezen markeren"
 
 # | msgid "%(name)s team"
-#: dojos/templates/dojos/partials/_notification_bell.html:45
+#: dojos/templates/dojos/partials/_notification_bell.html:47
 #, python-format
 msgid "%(since)s ago"
 msgstr "%(since)s geleden"
 
 # | msgid "You're all set"
-#: dojos/templates/dojos/partials/_notification_bell.html:52
+#: dojos/templates/dojos/partials/_notification_bell.html:54
 msgid "You're all caught up."
 msgstr "Je bent helemaal bij."
 
@@ -5273,8 +5901,8 @@ msgid ""
 "Optional. Leave a text empty and visitors who read this language see the "
 "main-language version."
 msgstr ""
-"Optioneel. Laat je een tekst leeg, dan zien bezoekers die deze taal lezen de "
-"versie in de hoofdtaal."
+"Optioneel. Laat je een tekst leeg, dan zien bezoekers die deze taal lezen de"
+" versie in de hoofdtaal."
 
 #: dojos/templates/dojos/team_member_detail.html:68
 msgid "Focus areas"
@@ -5565,7 +6193,8 @@ msgstr ""
 
 #: events/forms.py:316
 msgid ""
-"Optional: upload your own icon instead (PNG, JPG or WebP, square works best)."
+"Optional: upload your own icon instead (PNG, JPG or WebP, square works "
+"best)."
 msgstr ""
 "Optioneel: upload in de plaats je eigen icoon (PNG, JPG of WebP, vierkant "
 "werkt het best)."
@@ -5770,7 +6399,8 @@ msgid ""
 msgstr "Al je kinderen zijn al ingeschreven voor deze sessie, zie hieronder."
 
 #: events/templates/events/event_signup.html:127
-msgid "Tick each child you'd like to add to the waiting list for this session."
+msgid ""
+"Tick each child you'd like to add to the waiting list for this session."
 msgstr ""
 "Vink elk kind aan dat je op de wachtlijst voor deze sessie wilt zetten."
 
@@ -5960,7 +6590,8 @@ msgstr "Nieuwsbrief en campagnes"
 
 #: mailing/categories.py:80
 msgid ""
-"Password resets, background-check requests and other mail about your account."
+"Password resets, background-check requests and other mail about your "
+"account."
 msgstr ""
 "Wachtwoordherstel, vragen om een uittreksel uit het strafregister en andere "
 "e-mails over je account."
@@ -6010,7 +6641,8 @@ msgstr "Segment"
 #: mailing/forms.py:115
 #, python-format
 msgid ""
-"Line %(number)s: write it as name: value (a name in lowercase letters and _)."
+"Line %(number)s: write it as name: value (a name in lowercase letters and "
+"_)."
 msgstr ""
 "Regel %(number)s: schrijf het als naam: waarde (een naam in kleine letters "
 "en _)."
@@ -6232,10 +6864,6 @@ msgstr "Pagina e-mailvoorkeuren"
 #: mailing/models.py:362
 msgid "Unsubscribe link"
 msgstr "Uitschrijflink"
-
-#: mailing/models.py:363
-msgid "Admin"
-msgstr "Beheer"
 
 #: mailing/models.py:364
 msgid "Bounce or complaint"
@@ -6837,8 +7465,8 @@ msgid ""
 "Goes out at up to %(rate)s batches a minute; held-back mail is for people "
 "who unsubscribed, blocked addresses or inactive accounts."
 msgstr ""
-"Gaat de deur uit aan maximaal %(rate)s batches per minuut; tegengehouden e-"
-"mails zijn voor mensen die zich uitschreven, geblokkeerde adressen of "
+"Gaat de deur uit aan maximaal %(rate)s batches per minuut; tegengehouden "
+"e-mails zijn voor mensen die zich uitschreven, geblokkeerde adressen of "
 "inactieve accounts."
 
 #: mailing/templates/mailing/manage/campaign_detail.html:82
@@ -6863,8 +7491,8 @@ msgstr "Lanceren"
 #: mailing/templates/mailing/manage/campaign_detail.html:92
 msgid "Cancel this campaign? Mail that hasn't gone out yet won't be sent."
 msgstr ""
-"Deze campagne annuleren? E-mails die nog niet verstuurd zijn, gaan niet meer "
-"weg."
+"Deze campagne annuleren? E-mails die nog niet verstuurd zijn, gaan niet meer"
+" weg."
 
 #: mailing/templates/mailing/manage/campaign_detail.html:93
 msgid "Cancel campaign"
@@ -6978,8 +7606,8 @@ msgid ""
 "or any of its rules must match. A \"Parents of a child who…\" group "
 "describes one child: all its rules are about the same child."
 msgstr ""
-"Groepen op het hoogste niveau moeten allemaal kloppen. Binnen een groep kies "
-"je of alle regels of één ervan moeten kloppen. Een groep \"Ouders van een "
+"Groepen op het hoogste niveau moeten allemaal kloppen. Binnen een groep kies"
+" je of alle regels of één ervan moeten kloppen. Een groep \"Ouders van een "
 "kind dat…\" beschrijft één kind: al zijn regels gaan over hetzelfde kind."
 
 #: mailing/templates/mailing/manage/segment_detail.html:28
@@ -7039,7 +7667,8 @@ msgstr "Die zouden een nieuw segment nodig hebben."
 
 #: mailing/templates/mailing/manage/segment_detail.html:60
 msgid "Launched campaigns keep their own copy of who they went to."
-msgstr "Gelanceerde campagnes houden hun eigen kopie bij van wie ze bereikten."
+msgstr ""
+"Gelanceerde campagnes houden hun eigen kopie bij van wie ze bereikten."
 
 #: mailing/templates/mailing/manage/segment_detail.html:61
 msgid "Delete this segment?"
@@ -7073,8 +7702,8 @@ msgstr "Nog geen segmenten."
 
 #: mailing/templates/mailing/manage/segment_list.html:30
 msgid ""
-"Accounts: active adults with an email the segment describes, before anyone's "
-"mail preferences."
+"Accounts: active adults with an email the segment describes, before anyone's"
+" mail preferences."
 msgstr ""
 "Accounts: actieve volwassenen met een e-mailadres die het segment "
 "beschrijft, vóór ieders e-mailvoorkeuren."
@@ -7162,14 +7791,14 @@ msgstr "Nog geen sjablonen."
 
 #: mailing/templates/mailing/partials/_privacy_explanation.html:8
 msgid ""
-"We use what we know about your family to send you mails that are relevant to "
-"you: your postcode and your language and, for the children you agree to it "
+"We use what we know about your family to send you mails that are relevant to"
+" you: your postcode and your language and, for the children you agree to it "
 "for, which sessions they come to, their age and gender. That's how you hear "
 "about sessions at your dojo, a new dojo near you, or events like Coolest "
 "Projects and CoderDojo Girlz."
 msgstr ""
-"We gebruiken wat we over je gezin weten om je e-mails te sturen die voor jou "
-"relevant zijn: je postcode en je taal en, voor de kinderen waarvoor je "
+"We gebruiken wat we over je gezin weten om je e-mails te sturen die voor jou"
+" relevant zijn: je postcode en je taal en, voor de kinderen waarvoor je "
 "akkoord gaat, naar welke sessies ze komen, hun leeftijd en gender. Zo hoor "
 "je over sessies in je dojo, een nieuwe dojo in je buurt, of evenementen "
 "zoals Coolest Projects en CoderDojo Girlz."
@@ -7230,8 +7859,8 @@ msgid ""
 "You can change this any time on your <a href=\"%(prefs_url)s\">Mail "
 "preferences</a> page."
 msgstr ""
-"Je kunt dit altijd aanpassen op je pagina <a href=\"%(prefs_url)s\">E-"
-"mailvoorkeuren</a>."
+"Je kunt dit altijd aanpassen op je pagina <a "
+"href=\"%(prefs_url)s\">E-mailvoorkeuren</a>."
 
 #: mailing/views.py:35
 msgid "Your mail preferences are saved."
@@ -7324,9 +7953,9 @@ msgid ""
 "champion: the role has to go to one of the dojo's mentors first (on the "
 "dojo's Team page)."
 msgstr ""
-"Dit account is champion van %(dojos)s. Een dojo kan niet zonder champion: de "
-"rol moet eerst naar een van de mentors van de dojo (op de Team-pagina van de "
-"dojo)."
+"Dit account is champion van %(dojos)s. Een dojo kan niet zonder champion: de"
+" rol moet eerst naar een van de mentors van de dojo (op de Team-pagina van "
+"de dojo)."
 
 #: privacy/deletion.py:74
 msgid "This account has an organisation role. It has to be taken away first."
@@ -7336,8 +7965,8 @@ msgstr ""
 
 #: privacy/deletion.py:76
 msgid ""
-"This is a technical administrator's account (superuser); it can't be deleted "
-"here."
+"This is a technical administrator's account (superuser); it can't be deleted"
+" here."
 msgstr ""
 "Dit is het account van een technisch beheerder (superuser); het kan hier "
 "niet verwijderd worden."
@@ -7351,24 +7980,25 @@ msgstr "Typ de gebruikersnaam, %(username)s, om te bevestigen"
 msgid "Type the account's username to confirm."
 msgstr "Typ de gebruikersnaam van het account om te bevestigen."
 
-#: privacy/retention.py:251
+#: privacy/retention.py:252
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
 "account was due to be cleaned on %(date)s, but can't be while they're the "
-"champion. Ask them to hand the role to a mentor, or contact the organisation."
+"champion. Ask them to hand the role to a mentor, or contact the "
+"organisation."
 msgstr ""
 "%(name)s, de champion van %(dojo)s, heeft al twee jaar niet meer ingelogd. "
 "Het account had op %(date)s opgeschoond moeten worden, maar dat kan niet "
 "zolang die persoon champion is. Vraag om de rol door te geven aan een "
 "mentor, of neem contact op met de organisatie."
 
-#: privacy/retention.py:257
+#: privacy/retention.py:258
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
-"account will be cleaned on %(date)s, but not while they're the champion. Ask "
-"them to hand the role to a mentor, or contact the organisation."
+"account will be cleaned on %(date)s, but not while they're the champion. Ask"
+" them to hand the role to a mentor, or contact the organisation."
 msgstr ""
 "%(name)s, de champion van %(dojo)s, heeft al twee jaar niet meer ingelogd. "
 "Het account wordt op %(date)s opgeschoond, maar niet zolang die persoon "
@@ -7383,8 +8013,8 @@ msgstr "Je account is verwijderd"
 
 #: privacy/templates/privacy/account_deleted.html:9
 msgid ""
-"Thanks for coding with us. You're always welcome back: a new account takes a "
-"minute."
+"Thanks for coding with us. You're always welcome back: a new account takes a"
+" minute."
 msgstr ""
 "Bedankt om met ons te coderen. Je bent altijd welkom terug: een nieuw "
 "account maak je in een minuutje."
@@ -7408,8 +8038,8 @@ msgid ""
 "Your login, your contact details, your mail preferences, your applications "
 "and your background-check details."
 msgstr ""
-"Je login, je contactgegevens, je mailvoorkeuren, je aanvragen en de gegevens "
-"van je uittreksel uit het strafregister."
+"Je login, je contactgegevens, je mailvoorkeuren, je aanvragen en de gegevens"
+" van je uittreksel uit het strafregister."
 
 #: privacy/templates/privacy/delete_account.html:35
 msgid "Your login, your contact details and your mail preferences."
@@ -7417,8 +8047,8 @@ msgstr "Je login, je contactgegevens en je mailvoorkeuren."
 
 #: privacy/templates/privacy/delete_account.html:37
 msgid ""
-"These children are deleted with your account: their details, their own login "
-"if they have one, their belts and badges. The sessions they came to keep "
+"These children are deleted with your account: their details, their own login"
+" if they have one, their belts and badges. The sessions they came to keep "
 "counting, without their name."
 msgstr ""
 "Deze kinderen worden samen met je account verwijderd: hun gegevens, hun "
@@ -7434,16 +8064,16 @@ msgid ""
 "Your name on the sessions you helped run and on the belts and badges you "
 "awarded, and your profile on the dojos' team pages."
 msgstr ""
-"Je naam bij de sessies die je mee begeleidde en bij de gordels en badges die "
-"je uitreikte, en je profiel op de teampagina's van de dojo's."
+"Je naam bij de sessies die je mee begeleidde en bij de gordels en badges die"
+" je uitreikte, en je profiel op de teampagina's van de dojo's."
 
 #: privacy/templates/privacy/delete_account.html:44
 msgid ""
 "Your name on the sessions you helped run and on the belts and badges you "
 "awarded."
 msgstr ""
-"Je naam bij de sessies die je mee begeleidde en bij de gordels en badges die "
-"je uitreikte."
+"Je naam bij de sessies die je mee begeleidde en bij de gordels en badges die"
+" je uitreikte."
 
 #: privacy/templates/privacy/delete_account.html:47
 msgid "These children stay, with their other parent or guardian:"
@@ -7463,8 +8093,8 @@ msgstr "Een account verwijderen"
 #: privacy/templates/privacy/manage/delete.html:20
 msgid ""
 "Only for a request from the account holder, made by mail or post; families "
-"can also delete their account themselves from their account page. It happens "
-"right away and can't be undone."
+"can also delete their account themselves from their account page. It happens"
+" right away and can't be undone."
 msgstr ""
 "Alleen voor een vraag van de accounthouder zelf, per mail of per post; "
 "gezinnen kunnen hun account ook zelf verwijderen via hun accountpagina. Het "
@@ -7510,8 +8140,8 @@ msgid ""
 "If they asked for a copy too, <a href=\"%(export_url)s\">download their "
 "data</a> first."
 msgstr ""
-"Vroegen ze ook een kopie? <a href=\"%(export_url)s\">Download hun gegevens</"
-"a> dan eerst."
+"Vroegen ze ook een kopie? <a href=\"%(export_url)s\">Download hun "
+"gegevens</a> dan eerst."
 
 # | msgid "Meet the team"
 #: privacy/templates/privacy/manage/delete.html:33
@@ -7527,8 +8157,8 @@ msgstr "Een e-mailadres wijzigen"
 msgid ""
 "For a family that can't get into its old mailbox any more; families can "
 "change their address themselves from their account page. Check who's asking "
-"by other means first (a call, their children's details): whoever has the new "
-"mailbox gets the account."
+"by other means first (a call, their children's details): whoever has the new"
+" mailbox gets the account."
 msgstr ""
 "Voor een gezin dat niet meer in zijn oude mailbox kan; gezinnen kunnen hun "
 "adres zelf wijzigen op hun accountpagina. Controleer eerst op een andere "
@@ -7541,8 +8171,8 @@ msgid ""
 "the old address is told, and every session on the account ends. The page "
 "then offers them a new password."
 msgstr ""
-"We sturen een link naar het nieuwe adres. Zodra die geopend wordt, verandert "
-"het adres, krijgt het oude adres bericht en worden alle sessies van de "
+"We sturen een link naar het nieuwe adres. Zodra die geopend wordt, verandert"
+" het adres, krijgt het oude adres bericht en worden alle sessies van de "
 "account beëindigd. De pagina biedt dan een nieuw wachtwoord aan."
 
 #: privacy/templates/privacy/manage/privacy.html:12
@@ -7555,10 +8185,10 @@ msgid ""
 msgstr ""
 "Deze champions hebben al bijna twee jaar niet meer ingelogd. Hun account "
 "wordt opgeschoond op de getoonde datum, maar niet zolang ze champion zijn "
-"van een actieve dojo: de rol moet eerst naar een van de mentors van de dojo, "
-"of de dojo moet slapend worden. De mentors van de dojo kregen een melding op "
-"hun dashboard. Zodra de rol doorgegeven is, verdwijnt de champion van deze "
-"lijst."
+"van een actieve dojo: de rol moet eerst naar een van de mentors van de dojo,"
+" of de dojo moet slapend worden. De mentors van de dojo kregen een melding "
+"op hun dashboard. Zodra de rol doorgegeven is, verdwijnt de champion van "
+"deze lijst."
 
 #: privacy/templates/privacy/manage/privacy.html:19
 msgid "Last login"
@@ -7585,8 +8215,8 @@ msgstr "Dojo openen"
 msgid ""
 "When someone asks for a copy of their data, or to have it deleted, by mail "
 "or post, find their account here. The file holds everything the site keeps "
-"about the account and the children it's a guardian of, as the family gets it "
-"with Download my data on their account page. Send it only to the account's "
+"about the account and the children it's a guardian of, as the family gets it"
+" with Download my data on their account page. Send it only to the account's "
 "own email address."
 msgstr ""
 "Vraagt iemand per mail of per post een kopie van zijn gegevens, of om ze te "
@@ -7682,21 +8312,21 @@ msgstr ""
 #~ "I'm the parent or legal guardian of the children I add, and I agree that "
 #~ "CoderDojo Belgium keeps their details (name, date of birth, gender, and "
 #~ "allergies or notes if I fill them in) to sign them up for sessions and to "
-#~ "keep track of their sessions, belts and badges. Allergies and notes are "
-#~ "only shown to the champion of a dojo they come to. I can download or "
-#~ "delete this data at any time from my account page."
+#~ "keep track of their sessions, belts and badges. Allergies and notes are only"
+#~ " shown to the champion of a dojo they come to. I can download or delete this"
+#~ " data at any time from my account page."
 #~ msgstr ""
 #~ "Ik ben de ouder of voogd van de kinderen die ik toevoeg, en ik ga ermee "
 #~ "akkoord dat CoderDojo Belgium hun gegevens bijhoudt (naam, geboortedatum, "
 #~ "gender, en allergieën of opmerkingen als ik die invul) om hen in te "
 #~ "schrijven voor sessies en hun sessies, gordels en badges bij te houden. "
-#~ "Allergieën en opmerkingen worden alleen getoond aan de champion van een "
-#~ "dojo waar ze naartoe gaan. Ik kan deze gegevens op elk moment downloaden "
-#~ "of verwijderen via mijn accountpagina."
+#~ "Allergieën en opmerkingen worden alleen getoond aan de champion van een dojo"
+#~ " waar ze naartoe gaan. Ik kan deze gegevens op elk moment downloaden of "
+#~ "verwijderen via mijn accountpagina."
 
 #~ msgid ""
-#~ "Please confirm that you're the child's parent or guardian and agree to "
-#~ "how we keep their data."
+#~ "Please confirm that you're the child's parent or guardian and agree to how "
+#~ "we keep their data."
 #~ msgstr ""
-#~ "Bevestig dat je de ouder of voogd van het kind bent en akkoord gaat met "
-#~ "hoe we zijn of haar gegevens bijhouden."
+#~ "Bevestig dat je de ouder of voogd van het kind bent en akkoord gaat met hoe "
+#~ "we zijn of haar gegevens bijhouden."
