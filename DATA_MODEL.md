@@ -33,7 +33,7 @@ update its diagram in the same change.
 11. [Mailing, segmentation and campaigns](#11-mailing-segmentation-and-campaigns)
 12. [Organisation events and promotion (later)](#12-organisation-events-and-promotion-later)
 
-Sections 13–22 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard and changing an email address; [section 23](#23-organisation-people-roles-and-page-access-on-the-dashboard-plan) plans managing organisation people and roles on the dashboard.
+Sections 13–23 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address and organisation people and roles; [section 24](#24-logging-in-with-an-emailed-link-plan) plans logging in with an emailed link.
 
 ---
 
@@ -3127,7 +3127,8 @@ flowchart TD
   organisation sets it on `/manage/security/`, ideally with a
   *Required from* a few weeks out.
 - **Passwordless login** with a passkey (no password at all) isn't built:
-  the passkey is always the second step.
+  the passkey is always the second step. Logging in with an emailed link instead of a
+  password is planned in [§24](#24-logging-in-with-an-emailed-link-plan).
 - **Forget every remembered browser** without changing the password isn't
   possible with the package's cookie; changing the password does it.
 - TOTP secrets are stored unencrypted in the database, as django-otp does.
@@ -4286,3 +4287,247 @@ docstrings say an edit there skips the rules above).
 
 1. **Listing on the team page** (`content.OrganisationTeamMember`) stays
    separate; a later *Also list on the team page* shortcut is possible.
+
+## 24. Logging in with an emailed link (plan)
+
+**Planned, nothing built yet.** Today every adult account logs in with its
+email (or username) and a password, then the second step when two-step
+login is on (§15). This plan lets each account holder **choose** how they
+log in: with a **password**, as now, or with a **login link** we mail
+them every time (a "magic link": no password to remember). It's the
+account's choice, not the organisation's; two-step login and the sign-in
+policy work the same on top of either. In the site's texts it's a "login
+link" (*inloglink*, *lien de connexion*), never "magic link".
+
+### What the code does today, and what that means
+
+- **One login route** (`accounts.views.LoginView`, a django-two-factor-auth
+  wizard: `auth` → `token`/`backup`). A second way in must not skip the
+  second step, so a login link has to go *through* that wizard, not around
+  it. The wizard's first step only has to leave `form.user_cache` and
+  `authentication_time` behind (`process_step`); the token step, the
+  remembered-browser cookie and `done()` (which calls `login()`) then work
+  unchanged.
+- **The password confirms things.** `accounts.forms.ConfirmPasswordForm`
+  (and `ChangeEmailForm`, `AdminAccessForm` built on it) guards: removing a
+  sign-in method and turning off two-step login (`security_views.py`),
+  deleting the account (`privacy.views`), changing the email address, and
+  asking for Django admin access. An account without a password needs
+  another way to prove it's them there.
+- **An unusable password already exists** for ninja logins before they set
+  one and for API service accounts (`set_unusable_password()`);
+  `EmailOrUsernameBackend` refuses them (`check_password` is false), and
+  Django's `PasswordResetForm` skips them (`get_users` requires
+  `has_usable_password()`), so a passwordless account asking for a reset
+  today gets nothing.
+- **The password hash is in two signatures:** the session auth hash
+  (`User._get_session_auth_hash`, plus the email since §22) and the
+  remembered-browser cookie. Removing or setting a password therefore ends
+  the other sessions and forgets remembered browsers (wanted, as for a
+  password change).
+- **The mailbox already is the key:** anyone who reads the account's mail
+  can reset its password. A login link adds no new way in for an attacker;
+  it only takes away the password as a second one (and phishing/reuse of
+  the password with it).
+- Family sign-up (`register_guardian`) and the invitation sign-up
+  (`accounts.people`, `organisation_invitation_sign_up`) ask for a
+  password and log the new account in. The family's address is **not
+  confirmed** at sign-up; the invitation's is (the invite link came to it).
+
+### Decisions
+
+- **A choice per account:** `User.login_method` = `password` (default,
+  every existing account) or `link`. An account on `link` has **no
+  password** (`set_unusable_password()`), so a password can't be guessed,
+  reused or phished; an account on `password` can't ask for links. Two
+  options, not "both": the choice has to mean something.
+- **Only adult accounts.** Ninja logins keep their password (the
+  guardian's set-password flow, §17) and service accounts have none; both
+  out of scope (open point 1).
+- **The link is a first step, never the whole login.** An account with
+  two-step login still gets its code/passkey step after the link (or skips
+  it on a remembered browser), and the sign-in policy (§15) applies
+  unchanged: its lowest level, "password", becomes "Password or login
+  link".
+- **No new model: a signed token**, like §22 and Django's password reset:
+  `accounts/login_links.py` with a `PasswordResetTokenGenerator` subclass
+  (own `key_salt` `accounts.login_link`) whose hash covers the account's
+  pk, password hash, `last_login`, email and `login_method`. So a link is
+  **single use** (logging in changes `last_login`), dies when the address
+  or the method changes, and is valid **`VALID_MINUTES` = 15** (its own
+  timeout, not `PASSWORD_RESET_TIMEOUT`). URL
+  `/login/link/<uidb64>/<token>/`. Nothing stored, so nothing new to
+  classify, keep or erase (§16) apart from the field itself.
+- **GET asks, POST logs in** (as the email-change and unsubscribe pages):
+  "Log in as *name*?" and one button, so a mail scanner that follows links
+  can't use it up or log itself in. An expired or used link says so and
+  offers a new one.
+- **Through the wizard.** `accounts.views.LoginLinkView` subclasses
+  `LoginView` with a different first step, `LoginLinkForm` (no fields;
+  checks the token from the URL and sets `user_cache`). Posting it either
+  logs in (no second step needed) or continues to the same token/backup
+  step on the same URL. `next` travels as on `/login/` (checked with
+  `url_has_allowed_host_and_scheme`), so a link can bring someone back to
+  the page they were on.
+- **Asking for a link never tells who has an account.** `/login/link/`
+  (`login_link_request`) takes an address and always answers "If this
+  address belongs to an account that logs in with a link, we've sent one;
+  it works for 15 minutes." Behind it: a `link` account gets
+  `login_link`; a `password` account gets `login_link_not_available`
+  ("your account logs in with a password; forgot it? [reset]; you can
+  switch on *Sign-in security*"); an unknown address gets nothing.
+  Throttled per address (one a minute) and per IP (`LINK_REQUESTS_PER_HOUR`
+  = 10) through the cache, as the export and email change do. Inactive
+  accounts and blocked addresses are left to `send()` (suppressed as
+  always).
+- **"Forgot password?" works for link accounts too:**
+  `StyledPasswordResetForm` sends a link account the `login_link` mail
+  instead of nothing.
+- **Switching to a login link is confirmed from the mailbox.** On *Sign-in
+  security* the account holder chooses *Log in with an emailed link*,
+  confirms with their password, and we mail a link
+  (`login_method_confirm`, same token idea with its own salt); only
+  opening it (GET asks, POST switches) removes the password. So a mailbox
+  that doesn't receive our mail (typo, spam filter, bounce) never locks
+  anyone out.
+- **Switching back to a password** is setting one (Django's
+  `SetPasswordForm`, the site's wording), which needs a recent
+  confirmation (below). The change password page, for a link account,
+  becomes this page.
+- **Either switch** saves through `save()` (audit log), keeps the current
+  session (`update_session_auth_hash`), ends the others, forgets
+  remembered browsers, clears `must_change_password`, and sends
+  `login_method_changed` to the account (a security mail like the
+  `two_step_*` ones: "if this wasn't you, contact us").
+- **Confirming it's you without a password: a recent login.** A signal
+  on `user_logged_in` records the time in the session
+  (`accounts/reauth.py`, `recently_authenticated(request)`,
+  `RECENT_MINUTES` = 10). `ConfirmPasswordForm` becomes
+  `ConfirmIdentityForm`: a password field for a password account; for a
+  link account no field, valid when the session logged in recently,
+  otherwise it shows *Send me a confirmation link* (a login link with
+  `next` = this page; opening it logs in again and brings them back, now
+  recent). Every place listed above uses it, with no view changing its
+  own rule.
+- **Sign-up offers the choice** (family sign-up and the invitation
+  sign-up): *How do you want to log in?* Password (as now) or *Email me a
+  login link each time* (the password fields hide with plain CSS on the
+  radio, and aren't required then). The invitation sign-up logs the new
+  account in either way (the invite link proved the address). **Family
+  sign-up with a link doesn't log in** (decided, can be revisited): the
+  account and children are saved, we mail the first login link, and the
+  page says "Check your inbox". Opening it is the first login, so a
+  mistyped address can't create an account nobody can get into; one that
+  never logs in is removed by the retention job as usual (open point 3).
+- **The organisation doesn't change anyone's method** on the dashboard;
+  it sees it (*Accounts → Privacy*, and a count per role on *Sign-in
+  security*). For "I can't get into my mailbox" the existing flows stay:
+  the organisation's *Change email address* (§22), whose logged-out
+  confirmation offers a login link instead of a password reset to a link
+  account.
+- **Mails** (`service`, en/nl/fr, `mailing/seed_templates.py` with
+  `SAMPLE_CONTEXT`, in `SYSTEM_TEMPLATE_KEYS`, production through
+  `load_mail_templates`): `login_link` (the link, valid 15 minutes, "if
+  you didn't ask, ignore this: nobody can log in without this mail"),
+  `login_link_not_available`, `login_method_confirm`, `login_method_changed`.
+  Login links must never sit in the queue behind a campaign: `service` is
+  already the highest priority. A link that arrives after 15 minutes is
+  useless, so `requeue_stuck_emails`' warning is what tells us the
+  workers are down.
+
+```mermaid
+flowchart TD
+    L[/login/] -->|password account| P[Email + password]
+    L -->|"Log in with a link"| R[/login/link/: email/]
+    R -->|link account| M1[Mail: login_link]
+    R -->|password account| M2[Mail: login_link_not_available]
+    R -->|unknown| N[Nothing, same answer on screen]
+    M1 --> G[/login/link/uid/token/: GET asks/]
+    G -->|POST| T{Two-step on and browser not remembered?}
+    P --> T
+    T -->|no| OK[Logged in]
+    T -->|yes| S[Code, passkey or backup code]
+    S --> OK
+```
+
+### Screens
+
+1. **Login page** (`accounts/login.html`): unchanged fields, plus under
+   the form *Log in with an emailed link instead* → `/login/link/`.
+2. **`/login/link/`**: one email field, *Email me a login link*; then the
+   neutral "check your inbox" text.
+3. **`/login/link/<uidb64>/<token>/`**: "Log in as *name* (*email*)?" and
+   *Log in*; then the second step when needed, on the same card as
+   `/login/`. Expired/used: "This link has expired or was already used"
+   and the form from screen 2.
+4. **Sign-in security** (`/account/security/`): a new card *How you log
+   in* on top: the current method, and *Switch to a login link* (password
+   → mail → confirmation page) or *Use a password instead* (set password,
+   after a recent login). The *Change password* link hides for a link
+   account.
+5. **Confirmations** (removing a method, turning off two-step login,
+   deleting the account, changing the email address, Django admin access):
+   for a link account, no password field; either "You logged in a moment
+   ago" and the button, or *Send me a confirmation link*.
+6. **Sign-up** (family and invitation): the *How do you want to log in?*
+   choice; the family's "Check your inbox" page after a link sign-up.
+7. **Organisation:** the method on an account's *Privacy* page; on
+   *Sign-in security*, how many accounts per role use a link.
+
+### Phases
+
+1. **Model and mail:** `User.login_method` (migration; every existing
+   account `password`), its privacy classification (`security`, exported)
+   and its place in `User`'s audit `include_fields`; `accounts/login_links.py`
+   (token generators, `request_link`, the throttles, `LoginLinkError`); the
+   four templates. Tests: token single use, expiry, invalid after an email
+   or method change, throttles.
+2. **Logging in with a link:** `login_link_request`, `LoginLinkView`
+   (GET/POST, the wizard hand-off, `next`), the login page link, the
+   password-reset form sending a link. Tests: GET never logs in, no
+   enumeration (same response and status for all three cases, and which
+   mail went where), two-step still asked, remembered browser respected,
+   the sign-in policy middleware after a link login, the Django admin
+   still redirecting to `/login/`, an inactive account, a suppressed
+   address.
+3. **Choosing on Sign-in security:** the card, both switches, the
+   confirmation mail and page, `login_method_changed`, sessions and
+   remembered browsers. Tests: password removed only after the mailed
+   confirmation, other sessions ended and this one kept, audit entries.
+4. **Confirming without a password:** `accounts/reauth.py`,
+   `ConfirmIdentityForm` in the five places, the change password page for
+   link accounts, the organisation's email-change confirmation offering a
+   link. Tests per place: link account with and without a recent login,
+   the confirmation link returning to `next`.
+5. **Sign-up:** the choice on family and invitation sign-up, the "check
+   your inbox" page. Tests: no password stored, first link logs in, the
+   invitation sign-up logging in directly.
+6. **Finishing:** the policy label, the organisation's counts and Privacy
+   line, `seed_two_step`'s sibling seeding one parent and one mentor on
+   `link` (the `password` column in `seed_credentials.csv` says "login
+   link", `describe_seed_accounts` explains Mailpit), Dutch and French,
+   the help docs (*families/managing-your-account* "Logging in",
+   *families/creating-an-account*, *families/two-step-login* "Logging in",
+   *dojo-team/logging-in*, *organisation/sign-in-security*,
+   *organisation/people* for the invited sign-up) and their fr/nl
+   catalogs, §2 (`User.login_method` in the diagram), §15's flow,
+   CLAUDE.md ("Two-step login and the sign-in policy" becomes the place
+   that names both first steps; "Account model" for the sign-up).
+
+### Open points
+
+1. **Ninja logins with a link:** a child with its own mailbox could use
+   one too, but it's the guardian's to decide (§17); later, from the *Own
+   login* card.
+2. **May the organisation restrict it?** E.g. organisation admins always
+   on a password *and* two-step login. The policy could get a "no login
+   link" flag per role; not needed while two-step login covers the risk.
+3. **Unconfirmed family sign-ups** that never open their first link:
+   today's retention (two years without a login) removes them; a shorter
+   clean-up (e.g. 7 days) would be a new `RETENTION_RULES` entry.
+4. **Passwordless with a passkey** (§15's open point) fits the same
+   `login_method` field later (`passkey`), without the mail.
+5. **Opening the link on another device** logs in *that* device (the
+   usual behaviour, and what the mail says). Tying it to the requesting
+   browser (a cookie check, or "approve on your phone") is stricter but
+   breaks "request on laptop, open on phone"; not planned.
