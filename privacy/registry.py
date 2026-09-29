@@ -109,6 +109,8 @@ RETENTION_RULES = {
     "sign_in_methods": "While two-step login is on: removed when it's turned off, and with the account.",
     "sign_in_policy": "While the policy applies; who last changed a role's row points at an anonymised account after "
     "erasure.",
+    "dev_profiling": "Development system only (django-silk is never installed in production): until a developer "
+    "clears it (`manage.py silk_clear_request_log`); the devcontainer holds seeded demo data only.",
 }
 
 _UNSET = object()

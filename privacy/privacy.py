@@ -2,6 +2,7 @@
 Our own apps declare theirs in their own privacy.py."""
 
 from auditlog.models import LogEntry as AuditLogEntry
+from django.apps import apps
 from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -186,3 +187,74 @@ register(
     not_personal=["id", "device"],
     **{**_SIGN_IN, "subjects": {Subject.ACCOUNT: "device__user"}},
 )
+
+
+# django-silk: request profiling on the development system only (it's in
+# requirements-dev.txt, never in production). It stores whole requests and
+# responses and every SQL query, so whatever a page posts or shows can be in
+# there: passwords, children's details, health notes. Classified as the
+# worst it can hold, never exported, and only while the app is installed.
+if apps.is_installed("silk"):
+    from silk.models import Profile as SilkProfile
+    from silk.models import Request as SilkRequest
+    from silk.models import Response as SilkResponse
+    from silk.models import SQLQuery as SilkSQLQuery
+
+    _SILK = {
+        "purpose": "Development only: profiling the site's speed (django-silk)",
+        "legal_basis": LegalBasis.LEGITIMATE_INTEREST,
+        "retention": "dev_profiling",
+        "seen_by": "Developers, on the development system",
+    }
+    register(
+        SilkRequest,
+        **_SILK,
+        fields={
+            # Headers hold the session and CSRF cookies; bodies and query
+            # strings whatever was posted or searched for.
+            "encoded_headers": personal(Category.SECURITY, export=False),
+            ("query_params", "raw_body", "body"): personal(Category.SPECIAL, export=False),
+        },
+        not_personal=[
+            "id",
+            "path",
+            "method",
+            "start_time",
+            "view_name",
+            "end_time",
+            "time_taken",
+            "meta_time",
+            "meta_num_queries",
+            "meta_time_spent_queries",
+            "pyprofile",
+            "prof_file",
+            "num_sql_queries",
+        ],
+    )
+    register(
+        SilkResponse,
+        **_SILK,
+        fields={
+            "encoded_headers": personal(Category.SECURITY, export=False),
+            ("raw_body", "body"): personal(Category.SPECIAL, export=False),
+        },
+        not_personal=["id", "request", "status_code"],
+    )
+    register(
+        SilkSQLQuery,
+        **_SILK,
+        # The SQL with its parameters: any row a page read or wrote.
+        fields={"query": personal(Category.SPECIAL, export=False)},
+        not_personal=[
+            "id",
+            "profiles",
+            "start_time",
+            "end_time",
+            "time_taken",
+            "identifier",
+            "request",
+            "traceback",
+            "analysis",
+        ],
+    )
+    register_not_personal(SilkProfile, "timings of profiled code blocks: function names and line numbers")

@@ -572,6 +572,11 @@ class AuditLogCoverageTests(TestCase):
         "oauth2_provider.DeviceGrant": "device codes (that grant isn't enabled)",
         "privacy.RetentionNotice": "written by the retention job; itself a log of reminders",
         "otp_static.StaticToken": "backup codes: secrets, each deleted when it's used; the device row is recorded",
+        # django-silk: development-only profiling, never installed in production.
+        "silk.Request": "development-only profiling (django-silk), written on every request",
+        "silk.Response": "development-only profiling (django-silk), written on every request",
+        "silk.SQLQuery": "development-only profiling (django-silk), written on every query",
+        "silk.Profile": "development-only profiling (django-silk)",
     }
 
     def test_every_model_is_recorded_or_has_a_reason(self):
@@ -586,7 +591,11 @@ class AuditLogCoverageTests(TestCase):
             and model._meta.label not in self.NOT_RECORDED
         )
         self.assertEqual(undecided, [], "add it to AUDITLOG_INCLUDE_TRACKING_MODELS, or to NOT_RECORDED with a reason")
-        both = sorted(label for label in self.NOT_RECORDED if auditlog.contains(apps.get_model(label)))
+        # A development-only app (django-silk) isn't installed everywhere.
+        installed = {model._meta.label: model for model in apps.get_models()}
+        both = sorted(
+            label for label in self.NOT_RECORDED if label in installed and auditlog.contains(installed[label])
+        )
         self.assertEqual(both, [], "recorded, so remove it from NOT_RECORDED")
 
 
