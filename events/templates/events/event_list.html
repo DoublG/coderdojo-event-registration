@@ -94,9 +94,9 @@
       </div>
     </form>
 
-    {% if form.cleaned_data.dojo %}
+    {% if form.dojo_filter_label %}
       <div class="filter-chip">
-        <span class="body-sm">{% translate "Filtered by:" %} <strong>{{ form.cleaned_data.dojo.name }}</strong></span>
+        <span class="body-sm">{% translate "Filtered by:" %} <strong>{{ form.dojo_filter_label }}</strong></span>
         <a href="{% querystring dojo=None %}" aria-label="{% translate "Clear dojo filter" %}">×</a>
       </div>
     {% endif %}

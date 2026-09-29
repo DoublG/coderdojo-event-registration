@@ -31,11 +31,15 @@ AGE_RANGES = {
 }
 
 
+DOJO_ORGANISATION = "organisation"
+
+
 class EventSearchForm(forms.Form):
-    dojo = forms.ModelChoiceField(
-        queryset=Dojo.objects.public().order_by("name"),
+    # A public dojo's id, or DOJO_ORGANISATION for the events of every
+    # organisation dojo (Dojo.kind, DATA_MODEL.md §12), which are never
+    # listed one by one. Cleaned to a Dojo, DOJO_ORGANISATION or None.
+    dojo = forms.ChoiceField(
         required=False,
-        empty_label=_("All dojos"),
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-dojo"}),
     )
     location = forms.CharField(
@@ -61,6 +65,31 @@ class EventSearchForm(forms.Form):
         choices=[(AGE_ANY, _("All ages"))] + [(key, key.replace("-", "–")) for key in AGE_RANGES],
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-age"}),
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["dojo"].choices = [
+            ("", _("All dojos")),
+            (DOJO_ORGANISATION, self.organisation_label()),
+        ] + [(dojo.pk, str(dojo)) for dojo in Dojo.objects.public().order_by("name")]
+
+    @staticmethod
+    def organisation_label():
+        return _("%(name)s (organisation)") % {"name": settings.ORGANISATION_CONTACT["name"]}
+
+    def clean_dojo(self):
+        value = self.cleaned_data["dojo"]
+        if value == DOJO_ORGANISATION:
+            return value
+        # The choices already limit it to a public dojo.
+        return Dojo.objects.public().filter(pk=value).first() if value else None
+
+    def dojo_filter_label(self):
+        """What the "Filtered by" chip says, or "" without a dojo filter."""
+        dojo = getattr(self, "cleaned_data", {}).get("dojo")
+        if dojo == DOJO_ORGANISATION:
+            return self.organisation_label()
+        return dojo.name if dojo else ""
 
 
 # Belgium's own date/time notation — day before month, 24-hour clock — used

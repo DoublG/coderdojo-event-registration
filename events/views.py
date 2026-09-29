@@ -15,7 +15,7 @@ from content.models import FAQ, Promotion
 from dojos.models import Dojo
 from mailing.automated import booking_mail
 
-from .forms import AGE_RANGES, EventSearchForm
+from .forms import AGE_RANGES, DOJO_ORGANISATION, EventSearchForm
 from .models import Event, Registration
 from .search import WIDGET_PAGE_SIZE, upcoming_available_events
 
@@ -26,13 +26,12 @@ def event_list(request):
     form = EventSearchForm(request.GET)
     now = timezone.now()
 
-    base_events = Event.objects.visible().filter(start_time__gte=now)
-    dojo_choices = Dojo.objects.public().filter(event__in=base_events).distinct().order_by("name")
-
-    events = base_events.select_related("dojo")
+    events = Event.objects.visible().filter(start_time__gte=now).select_related("dojo")
     if form.is_valid():
         dojo = form.cleaned_data.get("dojo")
-        if dojo:
+        if dojo == DOJO_ORGANISATION:
+            events = events.filter(dojo__kind=Dojo.ORGANISATION)
+        elif dojo:
             events = events.filter(dojo=dojo)
 
         location = form.cleaned_data.get("location")
@@ -72,7 +71,6 @@ def event_list(request):
     context = {
         "form": form,
         "events": page.object_list,
-        "dojo_choices": dojo_choices,
         "total_count": paginator.count,
         "next_page_url": next_page_url,
         # Pinned above the date-ordered list (content.Promotion), on the

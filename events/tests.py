@@ -580,9 +580,32 @@ class OrganisationAndExternalEventTests(TestCase):
         response = self.client.get(reverse("event_list"))
         self.assertContains(response, "Register on coolestprojects.be")
 
-    def test_event_filter_does_not_offer_the_organisation(self):
+    def test_event_filter_offers_the_organisation_as_one_entry(self):
+        dojo = make_dojo("Ghent")
         response = self.client.get(reverse("event_list"))
-        self.assertNotIn(self.org, response.context["dojo_choices"])
+        choices = dict(response.context["form"].fields["dojo"].choices)
+        self.assertEqual(choices["organisation"], "CoderDojo Belgium (organisation)")
+        self.assertIn(dojo.pk, choices)
+        # The organisation dojo itself is never listed like a dojo.
+        self.assertNotIn(self.org.pk, choices)
+
+    def test_event_filter_shows_only_the_organisations_events(self):
+        other_org = make_dojo("CoderDojo Girlz", kind=Dojo.ORGANISATION)
+        girlz_event = _future_event(other_org, name="Girlz day")
+        _future_event(make_dojo("Ghent"))
+
+        response = self.client.get(reverse("event_list"), {"dojo": "organisation"})
+
+        self.assertEqual(set(response.context["events"]), {self.event, girlz_event})
+        self.assertContains(response, "Filtered by:")
+        self.assertContains(response, "<strong>CoderDojo Belgium (organisation)</strong>", html=True)
+
+    def test_event_filter_rejects_the_organisation_dojos_own_id(self):
+        _future_event(make_dojo("Ghent"))
+        response = self.client.get(reverse("event_list"), {"dojo": self.org.pk})
+        # Not a choice: the form is invalid, so no filter applies.
+        self.assertFalse(response.context["form"].is_valid())
+        self.assertEqual(len(response.context["events"]), 2)
 
 
 class EventLanguageTests(TestCase):
