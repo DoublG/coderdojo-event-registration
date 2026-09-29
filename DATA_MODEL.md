@@ -33,7 +33,7 @@ update its diagram in the same change.
 11. [Mailing, segmentation and campaigns](#11-mailing-segmentation-and-campaigns)
 12. [Organisation events and promotion (later)](#12-organisation-events-and-promotion-later)
 
-Sections 13–24 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address, organisation people and roles, and [logging in with an emailed link](#24-logging-in-with-an-emailed-link-built).
+Sections 13–25 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address, organisation people and roles, [logging in with an emailed link](#24-logging-in-with-an-emailed-link-built), and [mail from a dojo to its families](#25-mail-from-a-dojo-to-its-families-planned) (planned).
 
 ---
 
@@ -2427,7 +2427,9 @@ the side.
    used for promotion and statistics. Nothing stops any child from signing
    up.
 3. **Only the organisation `admin` role sends campaigns.** Champions don't;
-   dojo-level mail stays automatic (`dojo_news`, reminders).
+   dojo-level mail stays automatic (`dojo_news`, reminders). §25 plans a
+   narrow exception: a dojo's own `dojo_news` mail to its own families,
+   with audiences prepared in code.
 4. **`reminder` and `dojo_news` are on by default** for existing families.
    The newsletter is explicit opt-in.
 5. **Mail infrastructure is classic SMTP (send) and IMAP (bounces).** No
@@ -4644,3 +4646,254 @@ flowchart TD
    usual behaviour, and what the mail says). Tying it to the requesting
    browser (a cookie check, or "approve on your phone") is stricter but
    breaks "request on laptop, open on phone"; not planned.
+
+---
+
+## 25. Mail from a dojo to its families (planned)
+
+**Planned, not built.** The decisions below are proposals until confirmed
+(marked *to confirm* where there's a real choice). This reverses §11's
+decision 3 ("Champions don't send campaigns; dojo-level mail stays
+automatic") in part: a dojo's team gets **a narrow slice** of the mail
+engine, enough to write to the families of *its own* dojo, with audiences
+prepared in code for that dojo. They never get the segment builder, the
+organisation's templates, other dojos' families or the newsletter.
+
+What a champion wants to do, in practice: "we're closed next Saturday",
+"bring a laptop charger", "our summer session is open, tell the families
+who came this year", "we miss you" to children who stopped coming, "next
+session is for the 12+ group". Today the only way is the dojo's own mailing
+list outside the site, or asking the organisation.
+
+### What the code does today, and what that means
+
+- **The engine is ready for it.** `mailing.services.send()` checks
+  category, preference, account type and blocks for every mail, so a
+  dojo's mail can't reach someone who opted out as long as it goes through
+  it. `Campaign` already has the whole pipeline: `launch()` freezes a
+  segment definition in `segment_snapshot`, `queue_mail` queues through
+  `send()` with an idempotency key, `cancel`, `send_test`, `stats`. A
+  dojo's mailing can be a `Campaign` with a dojo on it, not a new
+  pipeline.
+- **The resolver takes a definition, not only a `Segment` row**
+  (`SegmentResolver.resolve_definition`). A prepared audience can build
+  that definition in code for one dojo and never exist as a `Segment` row
+  a dojo team could edit. The dojo-scoped attributes already exist:
+  `ninja_home_dojo`, `engagement_stage_at_dojo`, `event`,
+  `attended_event`, `waitlisted_for_event`, `ninja_age`, `pathway` (all
+  `ninja` scope).
+- **Consent comes in two kinds today, and both apply:**
+  - *Which mail* (`MailPreference` per account and category, `ConsentEvent`
+    log). `dojo_news` ("New sessions and news from the dojos your family
+    goes to") is on by default and can be switched off. That's exactly the
+    kind of mail this is.
+  - *Using the child's details to choose mail* (`Guardianship.consent_given_at`,
+    `accounts.consent`, §16): a `ninja` group in a segment only selects
+    guardians who gave it. Every prepared audience that picks children by
+    their details (age, stage, pathway) goes through a `ninja` group, so
+    it gets this check for free.
+- **"A family of this dojo" is already defined once**, in
+  `mailing.automated.announce_new_sessions`: a child with it as home dojo,
+  or who came to one of its sessions in the last
+  `MAILING_DOJO_NEWS_ACTIVE_DAYS`; guardians plus the child's own login
+  with an email. That automated mail uses no child-data consent (it's the
+  existing relationship, like a booking). The dojo's own mail should use
+  the **same** definition, moved to one helper.
+- **Preferences are per category, not per dojo.** A family at two dojos
+  can only switch off `dojo_news` for both. With dojos writing their own
+  mail, "not this dojo" becomes necessary.
+- **Templates are Django template syntax** and only the organisation
+  writes them. A dojo team must not write template code (it can read
+  every variable in the context, and it's a support burden); their text
+  is plain text, inserted as a variable into one organisation template.
+- **`EmailMessage` has no Reply-To.** Mail goes from `DEFAULT_FROM_EMAIL`.
+  A family answering a dojo's mail should reach the dojo (`Dojo.email`,
+  the public contact address), not the organisation's noreply.
+- **Dojo access is capabilities** (`dojos/access.py`). Sending to every
+  family acts for the whole dojo, like the API clients (`MANAGE_API`,
+  champion only).
+
+### Decisions
+
+1. **Only `dojo_news` mail, only to the dojo's own families.** A dojo's
+   mailing always has category `dojo_news`; the dojo team can't pick
+   another. Families who switched `dojo_news` off, or muted this dojo
+   (decision 5), never get it. Newsletter, volunteer and campaign mail
+   stay the organisation's.
+2. **Prepared audiences, no segment builder.** A dojo picks one audience
+   from a fixed list in code (`mailing/dojo_audiences.py`), each a
+   function `(dojo, params) -> segment definition` in the resolver's
+   format, always starting from "families of this dojo". Proposed list:
+
+   | Audience | Parameters | Child-data consent needed? |
+   |---|---|---|
+   | All families of the dojo | — | no (existing relationship, as today's automated `dojo_news`) |
+   | Families booked for a session | one of the dojo's upcoming sessions; include waiting list yes/no | no (it's about their booking) |
+   | Families on the waiting list of a session | a session | no |
+   | Families who came recently | within 90 / 180 / 365 days | no |
+   | New families | first visit within 90 days | yes (engagement) |
+   | "We miss you" | stage at this dojo: at risk, lapsed | yes |
+   | Children in an age range | min–max age (within the dojo's own range) | yes |
+   | Children on a pathway | one of the dojo's pathways | yes |
+
+   "Needs consent" audiences are built with a `ninja` group, so the
+   resolver only picks guardians who gave it; the page says how many
+   families it reaches and that some aren't counted because they didn't
+   agree. **Gender, belts, badges, cancellations and no-shows are not
+   offered to dojos** (*to confirm*): they're the most sensitive profiling
+   and a dojo has no need to target on them. Adding an audience later is a
+   code change, reviewed like any other.
+3. **The audience is always limited to the dojo**, whatever the
+   parameters: every definition ANDs a root group "family of this dojo"
+   (a new `dojo_family` attribute, `user` scope, `{"dojo": id, "days":
+   MAILING_DOJO_NEWS_ACTIVE_DAYS}`, the helper from
+   `announce_new_sessions`), and a session or pathway parameter is checked
+   to belong to the dojo (another dojo's → the form refuses it). The
+   `dojo_family` attribute is also registered for the organisation's
+   builder.
+4. **A dojo mailing is a `Campaign` with `dojo` set.** New fields:
+   `Campaign.dojo` (FK, null = the organisation's), `audience` (the
+   prepared audience's key) and `audience_params` (JSON), `created_by`,
+   and the dojo's text: `subject` and `message`, a
+   `TranslatableModel` in the dojo's languages (§19: main language in the
+   columns, others in `translations`). `template_key` is fixed to
+   `dojo_message`, an organisation `service`-owned template (in
+   `SYSTEM_TEMPLATE_KEYS`) that wraps the text: greeting, the dojo's name,
+   the message, "you get this because your child goes to <dojo>", the
+   mute and unsubscribe links. The recipient gets the version in their
+   `preferred_language` when the dojo wrote one, else the dojo's main
+   language. The text is passed as a context variable, never rendered as
+   a template. `launch()` freezes the audience's definition in
+   `segment_snapshot` as now, so the pipeline, stats, cancel and the
+   engine's checks are unchanged.
+5. **Muting one dojo.** A new `mailing.DojoMailMute` (user, dojo,
+   created_at; unique) plus a nullable `dojo` on `ConsentEvent`, written
+   only through `mailing.preferences.set_dojo_mute(user, dojo, muted,
+   source)`. `send()` gets a `dojo=` argument; a muted dojo suppresses
+   with reason "muted this dojo". It applies to **all** of a dojo's
+   `dojo_news`, the automated "new sessions" mail included. The
+   unsubscribe page for a dojo mail offers three choices: stop mail from
+   this dojo, stop all dojo news, stop everything optional. Mail
+   preferences lists the family's dojos with a switch each.
+6. **Who sends: a new capability `SEND_MAIL`** (`dojos/access.py`).
+   *To confirm:* champion only (proposed, like `MANAGE_API`: it speaks for
+   the whole dojo), or champion and mentors. Anyone with dojo access can
+   see the list of past mailings.
+7. **Reply-To is the dojo.** `EmailMessage.reply_to` (new, blank for all
+   other mail), set to `Dojo.email`; launching needs a dojo email (a
+   launch problem otherwise). The From address stays the organisation's
+   (SPF/DKIM), with the dojo's name as display name ("CoderDojo Gent via
+   CoderDojo Belgium").
+8. **Limits against overuse:** at most `DOJO_MAILINGS_PER_30_DAYS` = 4
+   launched per dojo (*to confirm*), a message length limit, and plain
+   text only (links are fine; no attachments, no images). A test mail to
+   the sender is always allowed and doesn't count.
+9. **No approval by the organisation before sending** (*to confirm*). The
+   organisation sees every dojo mailing on its *Campaigns* page (a Dojo
+   column and filter, read-only except *Cancel*), can cancel one that
+   hasn't gone out, and the audit log records the campaign. Approval per
+   mailing would make "we're closed tomorrow" useless.
+10. **What the dojo team sees about the audience:** the number of families
+    it reaches (and how many aren't counted for lack of consent), never a
+    list of addresses. They already see the children's names on their
+    attendance lists; the addresses stay with the engine.
+11. **Organisation dojos** (§12) can use it the same way: their team
+    writes to the families who came to their events. *To confirm.*
+12. **Journeys stay the organisation's** for now (a dojo's "we miss you"
+    is a one-off mailing, not a standing one). Possible later.
+
+### Model changes
+
+```mermaid
+erDiagram
+    DOJO |o--o{ CAMPAIGN : "a dojo's mailing (null = organisation)"
+    USER ||--o{ DOJO_MAIL_MUTE : "muted dojos"
+    DOJO ||--o{ DOJO_MAIL_MUTE : "muted by"
+    DOJO |o--o{ CONSENT_EVENT : "a dojo mute or unmute"
+
+    CAMPAIGN {
+        bigint dojo_id FK "new, nullable"
+        string audience "new: prepared audience key (dojo mailings)"
+        json audience_params "new"
+        bigint created_by FK "new"
+        string subject "new: the dojo's text, main language"
+        text message "new: plain text"
+        json translations "new: the dojo's other languages"
+    }
+    DOJO_MAIL_MUTE {
+        bigint user_id FK "unique with dojo"
+        bigint dojo_id FK
+        datetime created_at
+    }
+    CONSENT_EVENT {
+        bigint dojo_id FK "new, nullable: set for a dojo mute"
+    }
+    EMAIL_MESSAGE {
+        string reply_to "new, blank for all other mail"
+    }
+```
+
+Each new field gets its privacy classification (§16: `DojoMailMute` is
+`identity` with `subjects`, erased with the account; the message text is
+the dojo's content, not personal) and its place in `core.audit.RECORDED`.
+
+### Screens
+
+- **Dojo area, *Mail* in the sidebar** (`/dojos/<id>/manage/mail/`,
+  `mailing/dojo_views.py`, `require_dojo_access(..., SEND_MAIL)` for
+  writing, any role for the list): past and draft mailings with their
+  results (sent, not delivered, unsubscribed from this dojo).
+- **New mailing** (`/dojos/<id>/manage/mail/new/`): pick an audience (a
+  radio list with a sentence each; its parameters appear via htmx), the
+  live count, subject and message per dojo language
+  (`add_translation_fields`), preview as the family sees it, *Send me a
+  test*, *Send* (or schedule). After launch it's read-only with a
+  *Cancel* while mail is still waiting.
+- **Family side:** *Mail preferences* gets "Your dojos" with a switch per
+  dojo; the unsubscribe page for a dojo mail gets the three choices.
+- **Organisation dashboard:** *Campaigns* shows dojo mailings with a Dojo
+  column and filter; *Mail queue* unchanged.
+
+### Phases
+
+1. **Muting a dojo:** `DojoMailMute`, `ConsentEvent.dojo`,
+   `set_dojo_mute`, `send(dojo=...)` and the new suppression reason,
+   `announce_new_sessions` passing its dojo, the *Mail preferences*
+   switches and the unsubscribe page's choices. Useful on its own for the
+   automated mail. Tests: muted dojo suppressed, other dojo still sent,
+   consent log, token for a dojo mail.
+2. **The audiences:** the `dojo_family` helper and attribute (shared with
+   `announce_new_sessions`), `mailing/dojo_audiences.py` with the list
+   above, each audience limited to its dojo. Tests per audience: the right
+   families, never another dojo's, consent-needing ones only with the
+   child-data consent, ninja logins only where `dojo_news` allows them.
+3. **Dojo mailings on `Campaign`:** the new fields, the `dojo_message`
+   template (en/nl/fr in `mailing/seed_templates.py`, via
+   `load_mail_templates`), `EmailMessage.reply_to` and the From display
+   name, `launch_problems` for a dojo mailing (audience, dojo email, the
+   30-day limit, text in the main language), `queue_mail` picking the
+   text per recipient language. Tests: the text never rendered as a
+   template, snapshot frozen at launch, idempotency, the limit.
+4. **The dojo pages:** `SEND_MAIL` in `dojos/access.py`, the sidebar item,
+   list, new/edit, preview, test, launch, cancel. Tests in the route
+   style: 404 without access, 403 without `SEND_MAIL`, another dojo's
+   session or mailing refused, the DB effect of each POST.
+5. **Organisation oversight:** Dojo column, filter and cancel on
+   *Campaigns*; the organisation's own campaign pages never editing a dojo
+   mailing's text.
+6. **Finishing:** Dutch and French, seeds (a sent and a draft mailing for
+   one seeded dojo), help pages (*dojo-team/mailing-your-families*, the
+   families' *mail preferences* page) and their catalogs, §11's decision 3
+   and diagrams, CLAUDE.md ("Mailing" and the dojo admin area).
+
+### Open points
+
+1. The *to confirm* items above: gender/belt targeting kept out, who has
+   `SEND_MAIL`, the monthly limit, no approval, organisation dojos.
+2. **Should the dojo's team get the mail too?** A "team" audience (active
+   champion and mentors, `volunteer` category) would let a champion write
+   to their own mentors; it's a different category and consent, so it's
+   left out of the first version.
+3. **The privacy explanation** (`mailing/partials/_privacy_explanation.html`)
+   may need a sentence that the dojo's team can write to families through
+   the site; if so, a new `PRIVACY_WORDING_VERSION`.
