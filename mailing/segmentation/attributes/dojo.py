@@ -150,3 +150,27 @@ class FamilyVisitedDojoAttribute(SegmentAttribute):
     def describe(self, operator, value):
         dojo = Dojo.objects.filter(pk=value.get("dojo")).values_list("name", flat=True).first() or _("a dojo")
         return _("A child came to %(dojo)s in the last %(days)s days") % {"dojo": dojo, "days": value.get("days")}
+
+
+class DojoTeamAttribute(SegmentAttribute):
+    """An active champion or mentor of the dojo (not a youth mentor, not a
+    requested or dormant membership): who a dojo's mail to its team goes to."""
+
+    key = "dojo_team"
+    label = _("On the team of dojo")
+    value_type = "choice"
+    scope = USER
+
+    def choices(self):
+        return _dojo_choices()
+
+    def build_q(self, operator, value):
+        from dojos.models import DojoMembership
+
+        members = DojoMembership.objects.filter(
+            dojo_id__in=_ids(operator, value),
+            status=DojoMembership.ACTIVE,
+            role__in=[DojoMembership.CHAMPION, DojoMembership.MENTOR],
+        )
+        matched = Q(pk__in=members.values("user_id"))
+        return ~matched if operator == "not_in" else matched

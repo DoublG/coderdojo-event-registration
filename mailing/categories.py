@@ -65,7 +65,7 @@ PRIORITY = {
 
 # Which version of the privacy explanation (DATA_MODEL.md §11, "Sending
 # pipeline" step 5) a consent was given under; recorded on ConsentEvent.
-PRIVACY_WORDING_VERSION = "2026-09-26"
+PRIVACY_WORDING_VERSION = "2026-09-29"
 
 
 def categories_for(user):
@@ -81,7 +81,9 @@ DESCRIPTIONS = {
     MailCategory.REGISTRATION: _("Confirmations and changes for the sessions you signed up for."),
     MailCategory.REMINDER: _("A reminder two days before a session you signed up for."),
     MailCategory.DOJO_NEWS: _("New sessions and news from the dojos your family goes to."),
-    MailCategory.VOLUNTEER: _("News for champions and mentors, and calls for volunteers."),
+    MailCategory.VOLUNTEER: _(
+        "News for champions and mentors, mail from your dojo's champion, and calls for volunteers."
+    ),
     MailCategory.NEWSLETTER: _(
         "The CoderDojo Belgium newsletter and events like Coolest Projects and CoderDojo Girlz."
     ),

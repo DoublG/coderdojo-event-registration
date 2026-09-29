@@ -2724,7 +2724,7 @@ class DojoMailQueueTests(TestCase):
         )
         [row] = response.context["rows"]
         self.assertEqual((row["label"], row["sent"], row["not_delivered"], row["held_back"]), ("Geen sessie", 1, 1, 1))
-        self.assertEqual(response.context["held_back"], [("The family stopped your dojo's mail.", 1)])
+        self.assertEqual(response.context["held_back"], [("The family stopped your dojo's news.", 1)])
         for family in self.families:
             self.assertNotContains(response, family.email)
         self.assertNotContains(response, "Antwerp news")
@@ -2764,3 +2764,100 @@ class DojoMailQueueTests(TestCase):
         other = reverse("dojo_mail_queue", kwargs={"dojo_id": self.other.pk})
         self.assertEqual(self.client.get(other).status_code, 404)
         self.assertContains(self.client.get(reverse("dojo_mail_list", kwargs={"dojo_id": self.dojo.pk})), self.url)
+
+
+class DojoTeamMailTests(TestCase):
+    """A champion's mail to the dojo's own team: volunteer mail to its
+    active champion and mentors, outside the limit on mail to families."""
+
+    def setUp(self):
+        from dojos.testing import make_champion, make_mentor
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.champion = make_champion(username="champ", email="champ@example.com")
+        self.mentor = make_mentor(username="mentor", email="mentor@example.com")
+        self.dojo = make_dojo("Ghent", champion=self.champion, email="ghent@example.com")
+        add_member(self.dojo, self.mentor)
+        add_member(
+            self.dojo, make_mentor(username="asked", email="asked@example.com"), status=DojoMembership.REQUESTED
+        )
+        add_member(self.dojo, make_mentor(username="gone", email="gone@example.com"), status=DojoMembership.DORMANT)
+        teen = User.objects.create(username="teen", email="teen@example.com", account_type=User.NINJA)
+        add_member(self.dojo, teen, DojoMembership.YOUTH_MENTOR)
+        other = make_dojo("Antwerp")
+        add_member(other, make_mentor(username="elsewhere", email="e@example.com"))
+        self.parent = User.objects.create(username="parent", email="p@example.com")
+        _kid(self.parent, self.dojo)
+
+    def _team_mailing(self):
+        from .dojo_audiences import TEAM_TEMPLATE
+
+        return Campaign.objects.create(
+            name="Planning",
+            dojo=self.dojo,
+            category=MailCategory.VOLUNTEER,
+            template_key=TEAM_TEMPLATE,
+            audience="team",
+            subject="Planning",
+            message="Who can help on Saturday?",
+        )
+
+    def test_the_team_is_the_active_champion_and_mentors(self):
+        from . import dojo_audiences
+
+        definition = dojo_audiences.definition("team", self.dojo, {})
+        who = set(SegmentResolver().resolve_definition(definition).values_list("username", flat=True))
+        self.assertEqual(who, {"champ", "mentor"})
+        set_preference(self.mentor, MailCategory.VOLUNTEER, False, ConsentEvent.PREFERENCES)
+        self.assertEqual(dojo_audiences.reach("team", self.dojo, {}), (1, 0))
+
+    def test_writing_to_the_team_through_the_form(self):
+        self.client.force_login(self.champion)
+        self.client.post(
+            reverse("dojo_mail_create", kwargs={"dojo_id": self.dojo.pk}),
+            {"audience": "team", "subject": "Planning", "message": "Who can help?"},
+        )
+        campaign = Campaign.objects.get()
+        self.assertEqual((campaign.category, campaign.template_key), (MailCategory.VOLUNTEER, "dojo_team_message"))
+        response = self.client.get(reverse("dojo_mail_reach", kwargs={"dojo_id": self.dojo.pk}), {"audience": "team"})
+        self.assertContains(response, "Reaches 2 team members.")
+
+    def test_team_mail_goes_out_as_volunteer_mail_and_a_mute_doesnt_stop_it(self):
+        from .preferences import set_dojo_mute
+        from .services import read_unsubscribe_token
+
+        set_dojo_mute(self.mentor, self.dojo, True, ConsentEvent.PREFERENCES)
+        campaign = self._team_mailing()
+        self.assertEqual(campaigns.launch_problems(campaign), [])
+        campaigns.launch(campaign, self.champion)
+        self.assertEqual(campaigns.queue_mail(campaign.pk), 2)
+        row = EmailMessage.objects.get(user=self.mentor)
+        self.assertEqual(
+            (row.category, row.status, row.reply_to), (MailCategory.VOLUNTEER, Status.PENDING, "ghent@example.com")
+        )
+        self.assertTrue(row.subject.startswith("Ghent team: Planning"))
+        self.assertIn("because you're on the dojo's team", row.body)
+        # Its unsubscribe link is about volunteering mail, not this dojo's news.
+        token = re.search(r"/mail/unsubscribe/([^/]+)/", row.body).group(1)
+        self.assertEqual(read_unsubscribe_token(token), (self.mentor.pk, MailCategory.VOLUNTEER, None))
+
+    def test_team_mail_doesnt_count_towards_the_limit_on_mail_to_families(self):
+        for _ in range(5):
+            campaigns.launch(self._team_mailing(), self.champion)
+        self.assertEqual(campaigns.dojo_launches(self.dojo), 0)
+
+    def test_a_mismatched_kind_of_mail_is_refused(self):
+        campaign = self._team_mailing()
+        campaign.category = MailCategory.DOJO_NEWS
+        self.assertIn(
+            "A dojo's mail is news for its families, or mail for its team.", campaigns.launch_problems(campaign)
+        )
+
+
+class PrivacyExplanationTests(TestCase):
+    def test_it_says_the_dojo_can_write_and_has_a_new_version(self):
+        user = User.objects.create(username="parent", email="p@example.com")
+        self.client.force_login(user)
+        response = self.client.get(reverse("mail_preferences"))
+        self.assertContains(response, "The team of the dojo your child goes to can also write to you")
+        self.assertEqual(PRIVACY_WORDING_VERSION, "2026-09-29")

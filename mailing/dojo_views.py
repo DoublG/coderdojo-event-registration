@@ -23,7 +23,6 @@ from dojos.access import SEND_MAIL, require_dojo_access
 from dojos.views import _admin_context
 
 from . import campaigns, dojo_audiences, queue_status, services
-from .categories import MailCategory
 from .forms import DojoMailingForm
 from .models import Campaign, EmailMessage
 from .rendering import TemplateMissing
@@ -59,7 +58,7 @@ def mail_previews(campaign):
             "unsubscribe_url": settings.SITE_URL + "/mail/unsubscribe/…/",
         }
         try:
-            subject, body = render_mail(campaigns.DOJO_TEMPLATE, language, context)
+            subject, body = render_mail(campaign.template_key, language, context)
         except TemplateMissing:
             return []
         previews.append({"language": language_name(language), "code": language, "subject": subject, "body": body})
@@ -78,7 +77,13 @@ def _reach(dojo, audience, params):
         reached, left_out = dojo_audiences.reach(audience, dojo, params)
     except dojo_audiences.DojoAudienceError as error:
         return {"error": str(error)}
-    return {"reached": reached, "left_out": left_out, "needs_consent": dojo_audiences.get(audience).needs_consent}
+    audience = dojo_audiences.get(audience)
+    return {
+        "reached": reached,
+        "left_out": left_out,
+        "needs_consent": audience.needs_consent,
+        "team": audience.is_team,
+    }
 
 
 @login_required
@@ -204,8 +209,8 @@ QUEUE_RECENT_DAYS = 30
 
 # EmailMessage.status_reason of held-back mail, in words for the dojo's team.
 HELD_BACK_REASONS = {
-    services.MUTED_DOJO: gettext_lazy("The family stopped your dojo's mail."),
-    services.NOT_SUBSCRIBED: gettext_lazy("The family stopped all news from dojos."),
+    services.MUTED_DOJO: gettext_lazy("The family stopped your dojo's news."),
+    services.NOT_SUBSCRIBED: gettext_lazy("They switched off this kind of mail (news from dojos, or volunteering)."),
     services.BLOCKED: gettext_lazy("The address is blocked: earlier mail to it bounced, or it was marked as spam."),
     services.INACTIVE: gettext_lazy("The account was switched off."),
     services.NO_ADDRESS: gettext_lazy("The account has no email address."),
@@ -225,7 +230,8 @@ def dojo_mail_queue(request, dojo_id):
     now = timezone.now()
     since = now - timedelta(days=QUEUE_RECENT_DAYS)
     Status = EmailMessage.Status
-    mail = EmailMessage.objects.filter(dojo=access.dojo, category=MailCategory.DOJO_NEWS)
+    # Everything from the dojo: news to its families, and mail to its team.
+    mail = EmailMessage.objects.filter(dojo=access.dojo)
     open_statuses = [Status.PENDING, Status.SENDING]
     shown = mail.filter(Q(created_at__gte=since) | Q(status__in=open_statuses))
 

@@ -62,7 +62,7 @@ audience with CSS alone (:has); the reach under it comes from htmx.
               {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Send me a test" %}</button>
             </form>
             <form method="post" action="{% url 'dojo_mail_launch' dojo_id=dojo.id campaign_id=campaign.id %}"
-                  onsubmit="{% blocktranslate asvar confirm_msg count counter=reach.reached %}Send this mail to {{ counter }} family now?{% plural %}Send this mail to {{ counter }} families now?{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
+                  onsubmit="{% if reach.team %}{% blocktranslate asvar confirm_msg count counter=reach.reached %}Send this mail to {{ counter }} team member now?{% plural %}Send this mail to {{ counter }} team members now?{% endblocktranslate %}{% else %}{% blocktranslate asvar confirm_msg count counter=reach.reached %}Send this mail to {{ counter }} family now?{% plural %}Send this mail to {{ counter }} families now?{% endblocktranslate %}{% endif %}return confirm('{{ confirm_msg|escapejs }}');">
               {% csrf_token %}<button type="submit" class="cd-btn cd-btn--primary label"{% if problems %} disabled{% endif %}>{% translate "Send" %}</button>
             </form>
             <form method="post" action="{% url 'dojo_mail_cancel' dojo_id=dojo.id campaign_id=campaign.id %}"

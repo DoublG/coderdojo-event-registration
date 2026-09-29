@@ -330,6 +330,53 @@ Ne plus recevoir les mails de ce dojo, ou de tous les dojos : {{ unsubscribe_url
         "signature": False,
     },
     {
+        "key": "dojo_team_message",
+        "category": MailCategory.VOLUNTEER,
+        "description": "A dojo's own mail to its team (champion and mentors, DATA_MODEL.md §25): the "
+        "champion's text, never template code, inside this frame. Variables: dojo_name, dojo_url, subject, message.",
+        "subject": {
+            "en-us": "{{ dojo_name }} team: {{ subject }}",
+            "nl-be": "Team {{ dojo_name }}: {{ subject }}",
+            "fr-be": "Équipe {{ dojo_name }} : {{ subject }}",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{{ message }}
+
+{{ dojo_name }}
+
+--
+The champion of {{ dojo_name }} sent you this mail through CoderDojo Belgium, because you're on the dojo's team. Reply to reach the dojo.
+Stop volunteering mail: {{ unsubscribe_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{{ message }}
+
+{{ dojo_name }}
+
+--
+De champion van {{ dojo_name }} stuurde je deze mail via CoderDojo Belgium, omdat je in het team van de dojo zit. Antwoord op deze mail om de dojo te bereiken.
+Geen vrijwilligersmails meer: {{ unsubscribe_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{{ message }}
+
+{{ dojo_name }}
+
+--
+Le champion du {{ dojo_name }} vous envoie ce mail via CoderDojo Belgium, parce que vous faites partie de l'équipe du dojo. Répondez à ce mail pour joindre le dojo.
+Ne plus recevoir les mails pour les bénévoles : {{ unsubscribe_url }}
+""",
+        },
+        "signature": False,
+    },
+    {
         "key": "background_check_requested",
         "category": MailCategory.SERVICE,
         "description": "A reviewer asks a volunteer for their criminal record extract (model 2). "
@@ -1771,6 +1818,13 @@ SAMPLE_CONTEXT = {
         "dojo_url": "https://coolregistration.localhost/dojos/1/",
         "subject": "No session next Saturday",
         "message": "Hi all,\n\nOur venue is closed next Saturday, so there's no session. See you the week after!",
+    },
+    "dojo_team_message": {
+        **_common,
+        "dojo_name": "CoderDojo Ghent",
+        "dojo_url": "https://coolregistration.localhost/dojos/1/",
+        "subject": "Planning the autumn sessions",
+        "message": "Hi all,\n\nCan you let me know by Friday which Saturdays you can help?",
     },
     "background_check_requested": {
         **_common,

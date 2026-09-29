@@ -395,12 +395,13 @@ class DojoMailingForm(forms.ModelForm):
         return cleaned
 
     def save(self, commit=True):
-        from .campaigns import DOJO_TEMPLATE
+        from . import dojo_audiences
 
+        audience = dojo_audiences.get(self.cleaned_data["audience"])
         campaign = super().save(commit=False)
         campaign.dojo = self.dojo
-        campaign.category = MailCategory.DOJO_NEWS
-        campaign.template_key = DOJO_TEMPLATE
+        campaign.category = audience.category
+        campaign.template_key = audience.template
         campaign.name = campaign.subject[:200]
         campaign.audience = self.cleaned_data["audience"]
         campaign.audience_params = self.params

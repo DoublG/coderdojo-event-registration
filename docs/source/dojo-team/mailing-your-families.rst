@@ -25,6 +25,11 @@ First pick who gets it:
   pathway** (one of your dojo's pathways). These choose by the children's
   details, so they only reach families who agreed to that.
 
+You can also pick **Your dojo's team**: the dojo's champion and mentors,
+for example to plan the next sessions. It goes out as volunteering mail
+(mentors can switch that off like families can switch off your news) and
+doesn't count towards the limit below.
+
 Under your choice you see how many families it reaches. You never see who
 they are. Only families who want news from your dojo count: a family can
 stop your dojo's mail, or all news from dojos, at any time.
@@ -47,7 +52,7 @@ Sending it
 **Send** sends it right away. The mail goes out over the next few minutes,
 from CoderDojo Belgium with your dojo's name, and **replies go to your
 dojo's email address**, so fill that in under **Settings** first. You can
-send at most four mails in 30 days. While it's going out, **Stop sending**
+send at most four mails to families in 30 days. While it's going out, **Stop sending**
 stops the mails that haven't gone out yet.
 
 Afterwards the mail's page shows how many were sent, how many couldn't be

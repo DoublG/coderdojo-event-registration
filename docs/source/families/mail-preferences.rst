@@ -14,6 +14,10 @@ to it for, which sessions they come to, their age and gender. That's how
 you hear about sessions at your dojo, a new dojo near you, or events like
 Coolest Projects and CoderDojo Girlz.
 
+The team of the dojo your child goes to can also write to you through this
+site, without seeing your email address. If you reply, your reply goes to
+the dojo.
+
 Your children's details
 -----------------------
 
@@ -37,8 +41,9 @@ kind of mail:
   goes to (your child's home dojo, or a dojo they came to in the last
   year), and mails the dojo's team writes to its families themselves. On
   unless you switch it off.
-- **Volunteering**: news for champions and mentors, and calls for
-  volunteers. On unless you switch it off.
+- **Volunteering**: news for champions and mentors, mail from your dojo's
+  champion to its team, and calls for volunteers. On unless you switch it
+  off.
 - **Newsletter and campaigns**: the CoderDojo Belgium newsletter and events
   like Coolest Projects and CoderDojo Girlz. **Off until you switch it on**
   (or tick the box when you create your account).

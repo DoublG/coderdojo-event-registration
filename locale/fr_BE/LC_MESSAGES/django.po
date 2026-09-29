@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 15:51+0000\n"
+"POT-Creation-Date: 2026-09-29 16:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -4567,7 +4567,7 @@ msgid "Mail templates"
 msgstr "Modèles d'e-mail"
 
 #: core/templates/core/_manage_base.html:70
-#: mailing/templates/mailing/dojo/mail_list.html:22
+#: mailing/templates/mailing/dojo/mail_list.html:23
 #: mailing/templates/mailing/dojo/mail_queue.html:3
 #: mailing/templates/mailing/dojo/mail_queue.html:4
 #: mailing/templates/mailing/manage/mail_queue.html:3
@@ -5587,7 +5587,7 @@ msgstr "Nouvelles"
 
 #: dojos/templates/dojos/_admin_base.html:70
 #: mailing/templates/mailing/dojo/mail_list.html:3
-#: mailing/templates/mailing/dojo/mail_queue.html:41
+#: mailing/templates/mailing/dojo/mail_queue.html:42
 #: mailing/templates/mailing/manage/mail_queue.html:124
 msgid "Mail"
 msgstr "E-mail"
@@ -7269,22 +7269,21 @@ msgstr "Choisissez au moins un enfant."
 msgid "The child(ren) you selected are already signed up for this session."
 msgstr "Les enfants choisis sont déjà inscrits à cette session."
 
-#: mailing/campaigns.py:84
+#: mailing/campaigns.py:88
 msgid "Only a draft can be sent."
 msgstr "Seul un brouillon peut être envoyé."
 
-#: mailing/campaigns.py:86
-msgid "A dojo's mail is always news from the dojo."
-msgstr "Un mail d'un dojo est toujours une nouvelle du dojo."
+#: mailing/campaigns.py:91
+msgid "A dojo's mail is news for its families, or mail for its team."
+msgstr "Un mail d'un dojo est une nouvelle pour ses familles, ou un mail pour son équipe."
 
-#: mailing/campaigns.py:93
+#: mailing/campaigns.py:99
 msgid ""
-"Nobody would get it: the audience has no families who want your dojo's news."
-msgstr ""
-"Personne ne le recevrait : ce public ne compte aucune famille qui souhaite "
-"les nouvelles de votre dojo."
+"Nobody would get it: nobody in this audience wants this kind of mail from "
+"your dojo."
+msgstr "Personne ne le recevrait : personne dans ce public ne souhaite ce type de mail de votre dojo."
 
-#: mailing/campaigns.py:96
+#: mailing/campaigns.py:102
 #, python-format
 msgid ""
 "Write a subject and a message in %(language)s, your dojo's main language."
@@ -7292,15 +7291,11 @@ msgstr ""
 "Écrivez un objet et un message en %(language)s, la langue principale de "
 "votre dojo."
 
-#: mailing/campaigns.py:100
-msgid ""
-"Add your dojo's email address in its settings first: families' replies go "
-"there."
-msgstr ""
-"Ajoutez d'abord l'adresse e-mail de votre dojo dans ses paramètres : les "
-"réponses des familles y arrivent."
+#: mailing/campaigns.py:106
+msgid "Add your dojo's email address in its settings first: replies go there."
+msgstr "Ajoutez d'abord l'adresse e-mail de votre dojo dans ses paramètres : les réponses y arrivent."
 
-#: mailing/campaigns.py:104
+#: mailing/campaigns.py:111
 #, python-format
 msgid ""
 "Your dojo already sent %(limit)s mails in the last 30 days, the most it can "
@@ -7308,27 +7303,27 @@ msgid ""
 msgstr ""
 "Votre dojo a déjà envoyé %(limit)s mails ces 30 derniers jours, le maximum."
 
-#: mailing/campaigns.py:107
+#: mailing/campaigns.py:114
 msgid "The mail layout for dojos is missing. Please tell the organisation."
 msgstr ""
 "La mise en page des mails des dojos est manquante. Merci de prévenir "
 "l'organisation."
 
-#: mailing/campaigns.py:182 mailing/journeys.py:43
+#: mailing/campaigns.py:189 mailing/journeys.py:43
 msgid " "
 msgstr " "
 
-#: mailing/campaigns.py:199
+#: mailing/campaigns.py:206
 msgid "This campaign has already finished."
 msgstr "Cette campagne est déjà terminée."
 
-#: mailing/campaigns.py:213
+#: mailing/campaigns.py:220
 #, python-format
 msgid "There's no template “%(template_key)s”."
 msgstr "Il n'y a pas de modèle « %(template_key)s »."
 
 # | msgid "Your child's own email address is needed for a login."
-#: mailing/campaigns.py:215 mailing/journeys.py:56
+#: mailing/campaigns.py:222 mailing/journeys.py:56
 msgid "Your account has no email address to send the test to."
 msgstr "Votre compte n'a pas d'adresse e-mail pour envoyer le test."
 
@@ -7373,11 +7368,13 @@ msgid "New sessions and news from the dojos your family goes to."
 msgstr ""
 "Nouvelles sessions et nouvelles des dojos fréquentés par votre famille."
 
-#: mailing/categories.py:84
-msgid "News for champions and mentors, and calls for volunteers."
-msgstr "Nouvelles pour les champions et mentors, et appels à bénévoles."
+#: mailing/categories.py:85
+msgid ""
+"News for champions and mentors, mail from your dojo's champion, and calls "
+"for volunteers."
+msgstr "Des nouvelles pour les champions et les mentors, les mails du champion de votre dojo et des appels aux bénévoles."
 
-#: mailing/categories.py:86
+#: mailing/categories.py:88
 msgid ""
 "The CoderDojo Belgium newsletter and events like Coolest Projects and "
 "CoderDojo Girlz."
@@ -7385,11 +7382,11 @@ msgstr ""
 "La newsletter de CoderDojo Belgium et des événements comme Coolest Projects "
 "et CoderDojo Girlz."
 
-#: mailing/dojo_audiences.py:58
+#: mailing/dojo_audiences.py:74
 msgid "All families of the dojo"
 msgstr "Toutes les familles du dojo"
 
-#: mailing/dojo_audiences.py:59
+#: mailing/dojo_audiences.py:75
 msgid ""
 "Families whose child has the dojo as home dojo, or came to one of its "
 "sessions in the last year."
@@ -7397,11 +7394,11 @@ msgstr ""
 "Les familles dont un enfant a ce dojo comme dojo d'attache, ou est venu à "
 "l'une de ses sessions au cours de l'année écoulée."
 
-#: mailing/dojo_audiences.py:63
+#: mailing/dojo_audiences.py:79
 msgid "Families booked for a session"
 msgstr "Familles inscrites à une session"
 
-#: mailing/dojo_audiences.py:64
+#: mailing/dojo_audiences.py:80
 msgid ""
 "Families with a place for one of your sessions, and if you like those on its "
 "waiting list."
@@ -7409,38 +7406,38 @@ msgstr ""
 "Les familles qui ont une place pour l'une de vos sessions et, si vous le "
 "souhaitez, celles de la liste d'attente."
 
-#: mailing/dojo_audiences.py:69
+#: mailing/dojo_audiences.py:85
 msgid "Families on a session's waiting list"
 msgstr "Familles sur la liste d'attente d'une session"
 
-#: mailing/dojo_audiences.py:70
+#: mailing/dojo_audiences.py:86
 msgid "For example to tell them about an extra session."
 msgstr "Par exemple pour leur annoncer une session supplémentaire."
 
-#: mailing/dojo_audiences.py:75
+#: mailing/dojo_audiences.py:91
 msgid "Families who came recently"
 msgstr "Familles venues récemment"
 
-#: mailing/dojo_audiences.py:76
+#: mailing/dojo_audiences.py:92
 msgid "Families whose child came to one of your sessions in the chosen period."
 msgstr ""
 "Les familles dont un enfant est venu à l'une de vos sessions pendant la "
 "période choisie."
 
-#: mailing/dojo_audiences.py:81
+#: mailing/dojo_audiences.py:97
 msgid "New families"
 msgstr "Nouvelles familles"
 
-#: mailing/dojo_audiences.py:82
+#: mailing/dojo_audiences.py:98
 msgid "Children who only just started coming to your dojo."
 msgstr "Les enfants qui viennent de commencer à fréquenter votre dojo."
 
 # | msgid "Which mails you get"
-#: mailing/dojo_audiences.py:87 mailing/forms.py:290
+#: mailing/dojo_audiences.py:103 mailing/forms.py:290
 msgid "We miss you"
 msgstr "Vous nous manquez"
 
-#: mailing/dojo_audiences.py:88
+#: mailing/dojo_audiences.py:104
 msgid ""
 "Children who used to come to your dojo but missed several sessions in a row "
 "or stopped coming."
@@ -7448,149 +7445,162 @@ msgstr ""
 "Les enfants qui venaient à votre dojo mais ont manqué plusieurs sessions "
 "d'affilée ou ne viennent plus."
 
-#: mailing/dojo_audiences.py:93
+#: mailing/dojo_audiences.py:109
 msgid "Children of an age"
 msgstr "Enfants d'un certain âge"
 
-#: mailing/dojo_audiences.py:94
+#: mailing/dojo_audiences.py:110
 msgid "Children of your dojo within an age range."
 msgstr "Les enfants de votre dojo dans une tranche d'âge."
 
-#: mailing/dojo_audiences.py:100
+#: mailing/dojo_audiences.py:116
 msgid "Children on a pathway"
 msgstr "Enfants sur un parcours"
 
-#: mailing/dojo_audiences.py:101
+#: mailing/dojo_audiences.py:117
 msgid "Children of your dojo who worked on one of your pathways at a session."
 msgstr ""
 "Les enfants de votre dojo qui ont travaillé sur l'un de vos parcours pendant "
 "une session."
 
-#: mailing/dojo_audiences.py:113
+#: mailing/dojo_audiences.py:123
+msgid "Your dojo's team"
+msgstr "L'équipe de votre dojo"
+
+#: mailing/dojo_audiences.py:125
+msgid ""
+"The dojo's champion and mentors, for example to plan the next sessions. It "
+"goes out as volunteering mail and doesn't count towards your mails to "
+"families."
+msgstr "Le champion et les mentors du dojo, par exemple pour planifier les prochaines sessions. Il part comme mail pour les bénévoles et ne compte pas dans vos mails aux familles."
+
+#: mailing/dojo_audiences.py:139
 msgid "Pick who should get the mail."
 msgstr "Choisissez qui reçoit le mail."
 
-#: mailing/dojo_audiences.py:149
+#: mailing/dojo_audiences.py:175
 msgid "Pick one of your dojo's sessions."
 msgstr "Choisissez l'une des sessions de votre dojo."
 
-#: mailing/dojo_audiences.py:156
+#: mailing/dojo_audiences.py:182
 msgid "Pick a period."
 msgstr "Choisissez une période."
 
-#: mailing/dojo_audiences.py:162
+#: mailing/dojo_audiences.py:188
 #, python-format
 msgid "Give an age range between %(min)s and %(max)s, the youngest age first."
 msgstr ""
 "Indiquez une tranche d'âge entre %(min)s et %(max)s, l'âge le plus jeune "
 "d'abord."
 
-#: mailing/dojo_audiences.py:169
+#: mailing/dojo_audiences.py:195
 msgid "Pick one of your dojo's pathways."
 msgstr "Choisissez l'un des parcours de votre dojo."
 
-#: mailing/dojo_audiences.py:229
+#: mailing/dojo_audiences.py:257
 msgid "a session"
 msgstr "une session"
 
 # | msgid "Join the waiting list"
-#: mailing/dojo_audiences.py:232
+#: mailing/dojo_audiences.py:260
 #, python-format
 msgid "Families on the waiting list for %(session)s (%(date)s)"
 msgstr "Familles sur la liste d'attente de %(session)s (%(date)s)"
 
-#: mailing/dojo_audiences.py:234
+#: mailing/dojo_audiences.py:262
 #, python-format
 msgid "Families booked for %(session)s (%(date)s), waiting list included"
 msgstr "Familles inscrites à %(session)s (%(date)s), liste d'attente comprise"
 
-#: mailing/dojo_audiences.py:238
+#: mailing/dojo_audiences.py:266
 #, python-format
 msgid "Families booked for %(session)s (%(date)s)"
 msgstr "Familles inscrites à %(session)s (%(date)s)"
 
-#: mailing/dojo_audiences.py:240
+#: mailing/dojo_audiences.py:268
 #, python-format
 msgid "Families whose child came in the last %(days)s days"
 msgstr "Familles dont un enfant est venu ces %(days)s derniers jours"
 
-#: mailing/dojo_audiences.py:242
+#: mailing/dojo_audiences.py:270
 #, python-format
 msgid "Children aged %(min)s to %(max)s"
 msgstr "Enfants de %(min)s à %(max)s ans"
 
-#: mailing/dojo_audiences.py:248
+#: mailing/dojo_audiences.py:276
 #, python-format
 msgid "Children on the pathway %(pathway)s"
 msgstr "Enfants sur le parcours %(pathway)s"
 
-#: mailing/dojo_views.py:108
+#: mailing/dojo_views.py:113
 msgid "Draft saved. Check the preview, send yourself a test, then send it."
 msgstr ""
 "Brouillon enregistré. Vérifiez l'aperçu, envoyez-vous un test, puis envoyez-"
 "le."
 
-#: mailing/dojo_views.py:125
+#: mailing/dojo_views.py:130
 msgid "Draft saved."
 msgstr "Brouillon enregistré."
 
-#: mailing/dojo_views.py:165
+#: mailing/dojo_views.py:170
 #, python-format
 msgid "A test is on its way to %(email)s."
 msgstr "Un test est en route vers %(email)s."
 
-#: mailing/dojo_views.py:179
+#: mailing/dojo_views.py:184
 msgid "Sent. The mails go out over the next few minutes."
 msgstr "Envoyé. Les mails partent dans les prochaines minutes."
 
-#: mailing/dojo_views.py:190
+#: mailing/dojo_views.py:195
 msgid "Draft deleted."
 msgstr "Brouillon supprimé."
 
-#: mailing/dojo_views.py:197
+#: mailing/dojo_views.py:202
 msgid "Stopped. Mails that hadn't gone out yet won't be sent."
 msgstr ""
 "Arrêté. Les mails qui n'étaient pas encore partis ne seront pas envoyés."
 
-#: mailing/dojo_views.py:207
-msgid "The family stopped your dojo's mail."
-msgstr "La famille a arrêté les mails de votre dojo."
+#: mailing/dojo_views.py:212
+msgid "The family stopped your dojo's news."
+msgstr "La famille a arrêté les nouvelles de votre dojo."
 
-#: mailing/dojo_views.py:208
-msgid "The family stopped all news from dojos."
-msgstr "La famille a arrêté toutes les nouvelles des dojos."
+#: mailing/dojo_views.py:213
+msgid "They switched off this kind of mail (news from dojos, or volunteering)."
+msgstr "Ils ont désactivé ce type de mail (nouvelles des dojos, ou bénévolat)."
 
-#: mailing/dojo_views.py:209
+#: mailing/dojo_views.py:214
 msgid ""
 "The address is blocked: earlier mail to it bounced, or it was marked as spam."
-msgstr "L'adresse est bloquée : un mail précédent est revenu, ou a été signalé comme spam."
+msgstr ""
+"L'adresse est bloquée : un mail précédent est revenu, ou a été signalé comme "
+"spam."
 
-#: mailing/dojo_views.py:210
+#: mailing/dojo_views.py:215
 msgid "The account was switched off."
 msgstr "Le compte a été désactivé."
 
 # | msgid "Enter a valid email address."
-#: mailing/dojo_views.py:211
+#: mailing/dojo_views.py:216
 msgid "The account has no email address."
 msgstr "Le compte n'a pas d'adresse e-mail."
 
-#: mailing/dojo_views.py:212
+#: mailing/dojo_views.py:217
 msgid "This kind of mail doesn't go to this kind of account."
 msgstr "Ce type de mail n'est pas envoyé à ce type de compte."
 
-#: mailing/dojo_views.py:213
+#: mailing/dojo_views.py:218
 msgid "You stopped the mail before it went out."
 msgstr "Vous avez arrêté le mail avant son départ."
 
-#: mailing/dojo_views.py:255
+#: mailing/dojo_views.py:261
 msgid "Another reason."
 msgstr "Une autre raison."
 
-#: mailing/dojo_views.py:283
+#: mailing/dojo_views.py:289
 msgid "Tests sent to yourself"
 msgstr "Tests envoyés à vous-même"
 
-#: mailing/dojo_views.py:287
+#: mailing/dojo_views.py:293
 msgid "New sessions (the automatic mail)"
 msgstr "Nouvelles sessions (le mail automatique)"
 
@@ -7864,7 +7874,7 @@ msgstr "Parents d'un enfant qui …"
 msgid "Sending"
 msgstr "Envoi en cours"
 
-#: mailing/models.py:297 mailing/templates/mailing/dojo/mail_queue.html:44
+#: mailing/models.py:297 mailing/templates/mailing/dojo/mail_queue.html:45
 #: mailing/templates/mailing/manage/_status_badge.html:1
 #: mailing/templates/mailing/manage/campaign_list.html:27
 msgid "Sent"
@@ -8044,6 +8054,11 @@ msgstr "un dojo"
 #, python-format
 msgid "A child came to %(dojo)s in the last %(days)s days"
 msgstr "Un enfant est venu à %(dojo)s ces %(days)s derniers jours"
+
+# | msgid "Create a dojo"
+#: mailing/segmentation/attributes/dojo.py:160
+msgid "On the team of dojo"
+msgstr "Dans l'équipe du dojo"
 
 # | msgid "View this dojo's sessions"
 #: mailing/segmentation/attributes/engagement.py:36
@@ -8277,21 +8292,33 @@ msgstr "« %(operator)s » a besoin d'une liste de valeurs non vide."
 msgid "Unknown value(s) for “%(label)s”: %(unknown)s."
 msgstr "Valeur(s) inconnue(s) pour « %(label)s » : %(unknown)s."
 
-#: mailing/templates/mailing/dojo/_reach.html:8
+#: mailing/templates/mailing/dojo/_reach.html:9
+#, python-format
+msgid "Reaches %(counter)s team member."
+msgid_plural "Reaches %(counter)s team members."
+msgstr[0] "Atteint %(counter)s membre de l'équipe."
+msgstr[1] "Atteint %(counter)s membres de l'équipe."
+
+#: mailing/templates/mailing/dojo/_reach.html:10
+msgid ""
+"Only team members who want volunteering mail count; the rest never get it."
+msgstr "Seuls les membres de l'équipe qui souhaitent les mails pour les bénévoles comptent ; les autres ne le reçoivent jamais."
+
+#: mailing/templates/mailing/dojo/_reach.html:12
 #, python-format
 msgid "Reaches %(counter)s family."
 msgid_plural "Reaches %(counter)s families."
 msgstr[0] "Atteint %(counter)s famille."
 msgstr[1] "Atteint %(counter)s familles."
 
-#: mailing/templates/mailing/dojo/_reach.html:9
+#: mailing/templates/mailing/dojo/_reach.html:13
 msgid ""
 "Only families who want news from your dojo count; the rest never get it."
 msgstr ""
 "Seules les familles qui souhaitent les nouvelles de votre dojo comptent ; "
 "les autres ne le reçoivent jamais."
 
-#: mailing/templates/mailing/dojo/_reach.html:11
+#: mailing/templates/mailing/dojo/_reach.html:16
 #, python-format
 msgid ""
 "%(counter)s more family isn't counted: they didn't agree to their child's "
@@ -8328,7 +8355,7 @@ msgstr "ont arrêté vos nouvelles depuis"
 
 #: mailing/templates/mailing/dojo/mail_detail.html:13
 #: mailing/templates/mailing/dojo/mail_form.html:14
-#: mailing/templates/mailing/dojo/mail_queue.html:17
+#: mailing/templates/mailing/dojo/mail_queue.html:18
 msgid "All mails"
 msgstr "Tous les mails"
 
@@ -8372,7 +8399,7 @@ msgstr "Arrêter l'envoi"
 
 #: mailing/templates/mailing/dojo/mail_form.html:3
 #: mailing/templates/mailing/dojo/mail_form.html:4
-#: mailing/templates/mailing/dojo/mail_list.html:20
+#: mailing/templates/mailing/dojo/mail_list.html:21
 msgid "Write a mail"
 msgstr "Écrire un mail"
 
@@ -8404,6 +8431,13 @@ msgstr "M'envoyer un test"
 
 #: mailing/templates/mailing/dojo/mail_form.html:65
 #, python-format
+msgid "Send this mail to %(counter)s team member now?"
+msgid_plural "Send this mail to %(counter)s team members now?"
+msgstr[0] "Envoyer ce mail à %(counter)s membre de l'équipe maintenant ?"
+msgstr[1] "Envoyer ce mail à %(counter)s membres de l'équipe maintenant ?"
+
+#: mailing/templates/mailing/dojo/mail_form.html:65
+#, python-format
 msgid "Send this mail to %(counter)s family now?"
 msgid_plural "Send this mail to %(counter)s families now?"
 msgstr[0] "Envoyer ce mail à %(counter)s famille maintenant ?"
@@ -8423,7 +8457,7 @@ msgid "Delete draft"
 msgstr "Supprimer le brouillon"
 
 #: mailing/templates/mailing/dojo/mail_form.html:73
-#: mailing/templates/mailing/dojo/mail_list.html:17
+#: mailing/templates/mailing/dojo/mail_list.html:18
 #, python-format
 msgid "%(counter)s of %(limit)s mails sent in the last 30 days."
 msgid_plural "%(counter)s of %(limit)s mails sent in the last 30 days."
@@ -8460,129 +8494,144 @@ msgstr ""
 "mail leur permet d'arrêter. Les réponses arrivent à l'adresse e-mail de "
 "votre dojo."
 
-#: mailing/templates/mailing/dojo/mail_list.html:25
+#: mailing/templates/mailing/dojo/mail_list.html:17
+msgid "You can also write to your own team: the dojo's champion and mentors."
+msgstr "Vous pouvez aussi écrire à votre propre équipe : le champion et les mentors du dojo."
+
+#: mailing/templates/mailing/dojo/mail_list.html:26
 msgid "Only the champion writes and sends the dojo's mail."
 msgstr "Seul le champion écrit et envoie le mail du dojo."
 
-#: mailing/templates/mailing/dojo/mail_list.html:30
+#: mailing/templates/mailing/dojo/mail_list.html:31
 msgid "Your mails"
 msgstr "Vos mails"
 
-#: mailing/templates/mailing/dojo/mail_list.html:35
+#: mailing/templates/mailing/dojo/mail_list.html:36
 #, python-format
 msgid "sent %(when)s"
 msgstr "envoyé le %(when)s"
 
 # | msgid "Next session: %(when)s"
-#: mailing/templates/mailing/dojo/mail_list.html:35
+#: mailing/templates/mailing/dojo/mail_list.html:36
 #, python-format
 msgid "written %(when)s"
 msgstr "écrit le %(when)s"
 
-#: mailing/templates/mailing/dojo/mail_list.html:37
+#: mailing/templates/mailing/dojo/mail_list.html:38
 #, python-format
 msgid "%(counter)s sent"
 msgid_plural "%(counter)s sent"
 msgstr[0] "%(counter)s envoyé"
 msgstr[1] "%(counter)s envoyés"
 
-#: mailing/templates/mailing/dojo/mail_list.html:40
+#: mailing/templates/mailing/dojo/mail_list.html:41
 msgid "No mails yet."
 msgstr "Pas encore de mails."
 
-#: mailing/templates/mailing/dojo/mail_queue.html:18
+#: mailing/templates/mailing/dojo/mail_queue.html:19
 msgid ""
 "Every mail from your dojo waits here first and goes out within a minute or "
 "so: your own mails and the automatic mail about new sessions. Use this page "
 "to check that they go out, and why some families didn't get them."
-msgstr "Chaque mail de votre dojo attend ici d'abord et part en une minute environ : vos propres mails et le mail automatique sur les nouvelles sessions. Vérifiez ici qu'ils partent, et pourquoi certaines familles ne les ont pas reçus."
+msgstr ""
+"Chaque mail de votre dojo attend ici d'abord et part en une minute environ : "
+"vos propres mails et le mail automatique sur les nouvelles sessions. "
+"Vérifiez ici qu'ils partent, et pourquoi certaines familles ne les ont pas "
+"reçus."
 
-#: mailing/templates/mailing/dojo/mail_queue.html:22
+#: mailing/templates/mailing/dojo/mail_queue.html:23
 #: mailing/templates/mailing/manage/mail_queue.html:23
 msgid "Mail isn't going out."
 msgstr "Les e-mails ne partent pas."
 
-#: mailing/templates/mailing/dojo/mail_queue.html:23
+#: mailing/templates/mailing/dojo/mail_queue.html:24
 #, python-format
 msgid ""
 "The site's mail has been waiting since %(since)s. The organisation is "
 "looking into it; nothing is lost, the mail goes out once it's fixed."
-msgstr "Les mails du site attendent depuis le %(since)s. L'organisation s'en occupe ; rien n'est perdu, les mails partent dès que c'est réglé."
+msgstr ""
+"Les mails du site attendent depuis le %(since)s. L'organisation s'en "
+"occupe ; rien n'est perdu, les mails partent dès que c'est réglé."
 
-#: mailing/templates/mailing/dojo/mail_queue.html:28
+#: mailing/templates/mailing/dojo/mail_queue.html:29
 #: mailing/templates/mailing/manage/mail_queue.html:29
 msgid "waiting to be sent"
 msgstr "en attente d'envoi"
 
-#: mailing/templates/mailing/dojo/mail_queue.html:29
+#: mailing/templates/mailing/dojo/mail_queue.html:30
 #: mailing/templates/mailing/manage/mail_queue.html:32
 msgid "sent in the last 24 hours"
 msgstr "envoyés ces dernières 24 heures"
 
-#: mailing/templates/mailing/dojo/mail_queue.html:30
+#: mailing/templates/mailing/dojo/mail_queue.html:31
 #, python-format
 msgid "not delivered in the last %(days)s days"
 msgstr "non distribués ces %(days)s derniers jours"
 
-#: mailing/templates/mailing/dojo/mail_queue.html:31
+#: mailing/templates/mailing/dojo/mail_queue.html:32
 #, python-format
 msgid "held back in the last %(days)s days"
 msgstr "retenus ces %(days)s derniers jours"
 
-#: mailing/templates/mailing/dojo/mail_queue.html:35
+#: mailing/templates/mailing/dojo/mail_queue.html:36
 msgid "Per mail"
 msgstr "Par mail"
 
-#: mailing/templates/mailing/dojo/mail_queue.html:36
+#: mailing/templates/mailing/dojo/mail_queue.html:37
 #, python-format
 msgid "The last %(days)s days, and anything still waiting."
 msgstr "Les %(days)s derniers jours, et tout ce qui attend encore."
 
-#: mailing/templates/mailing/dojo/mail_queue.html:42
+#: mailing/templates/mailing/dojo/mail_queue.html:43
 #: mailing/templates/mailing/manage/mail_queue.html:60
 #: mailing/templates/mailing/manage/mail_queue.html:93
 msgid "Queued"
 msgstr "Mis en file"
 
 # | msgid "Waiting list"
-#: mailing/templates/mailing/dojo/mail_queue.html:43
+#: mailing/templates/mailing/dojo/mail_queue.html:44
 #: mailing/templates/mailing/manage/mail_queue.html:70
 msgid "Waiting"
 msgstr "En attente"
 
-#: mailing/templates/mailing/dojo/mail_queue.html:45
+#: mailing/templates/mailing/dojo/mail_queue.html:46
 msgid "Not delivered"
 msgstr "Non distribués"
 
 # | msgid "Welcome back"
-#: mailing/templates/mailing/dojo/mail_queue.html:46
+#: mailing/templates/mailing/dojo/mail_queue.html:47
 msgid "Held back"
 msgstr "Retenus"
 
-#: mailing/templates/mailing/dojo/mail_queue.html:60
+#: mailing/templates/mailing/dojo/mail_queue.html:61
 msgid "No mail from your dojo in this period."
 msgstr "Aucun mail de votre dojo pendant cette période."
 
-#: mailing/templates/mailing/dojo/mail_queue.html:68
+#: mailing/templates/mailing/dojo/mail_queue.html:69
 msgid "Why mail was held back"
 msgstr "Pourquoi des mails ont été retenus"
 
-#: mailing/templates/mailing/dojo/mail_queue.html:69
+#: mailing/templates/mailing/dojo/mail_queue.html:70
 #, python-format
 msgid "In the last %(days)s days. Held-back mail is never sent later."
-msgstr "Ces %(days)s derniers jours. Un mail retenu n'est jamais envoyé plus tard."
+msgstr ""
+"Ces %(days)s derniers jours. Un mail retenu n'est jamais envoyé plus tard."
 
-#: mailing/templates/mailing/dojo/mail_queue.html:73
+#: mailing/templates/mailing/dojo/mail_queue.html:74
 msgid "Nothing was held back."
 msgstr "Rien n'a été retenu."
 
-#: mailing/templates/mailing/dojo/mail_queue.html:77
+#: mailing/templates/mailing/dojo/mail_queue.html:78
 msgid ""
 "Addresses aren't shown here, only numbers. Mail that wasn't delivered "
 "usually means a mistyped or closed address; after a bounce the address gets "
 "no more mail. If something looks wrong, ask the organisation: they can look "
 "into a single mail."
-msgstr "Les adresses ne sont pas affichées ici, seulement des chiffres. Un mail non distribué signifie en général une adresse mal tapée ou fermée ; après un rebond, l'adresse ne reçoit plus de mails. Si quelque chose semble anormal, demandez à l'organisation : elle peut examiner un mail précis."
+msgstr ""
+"Les adresses ne sont pas affichées ici, seulement des chiffres. Un mail non "
+"distribué signifie en général une adresse mal tapée ou fermée ; après un "
+"rebond, l'adresse ne reçoit plus de mails. Si quelque chose semble anormal, "
+"demandez à l'organisation : elle peut examiner un mail précis."
 
 #: mailing/templates/mailing/mail_preferences.html:31
 msgid "Which mails you get"
@@ -9362,7 +9411,14 @@ msgstr ""
 "votre dojo, d'un nouveau dojo près de chez vous ou d'événements comme "
 "Coolest Projects et CoderDojo Girlz."
 
-#: mailing/templates/mailing/partials/_privacy_explanation.html:11
+#: mailing/templates/mailing/partials/_privacy_explanation.html:12
+msgid ""
+"The team of the dojo your child goes to can also write to you through this "
+"site, without seeing your email address; if you reply, your reply goes to "
+"the dojo."
+msgstr "L'équipe du dojo que fréquente votre enfant peut aussi vous écrire via ce site, sans voir votre adresse e-mail ; si vous répondez, votre réponse va au dojo."
+
+#: mailing/templates/mailing/partials/_privacy_explanation.html:13
 msgid ""
 "Below you choose which mails you get. Mails about your account and your "
 "bookings are always sent."
@@ -9871,6 +9927,12 @@ msgid ""
 msgstr ""
 "Un lien de confirmation a été envoyé à %(email)s. L'adresse change dès qu'il "
 "est ouvert (dans les %(hours)s heures)."
+
+#~ msgid "A dojo's mail is always news from the dojo."
+#~ msgstr "Un mail d'un dojo est toujours une nouvelle du dojo."
+
+#~ msgid "The family stopped all news from dojos."
+#~ msgstr "La famille a arrêté toutes les nouvelles des dojos."
 
 #~ msgid "9000"
 #~ msgstr "9000"

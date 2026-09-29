@@ -4,6 +4,7 @@ from .attributes.changes import NoNewBeltAttribute, NotOnATeamAttribute, StageCh
 from .attributes.dojo import (
     ChildOfDojoAttribute,
     DojoFamilyAttribute,
+    DojoTeamAttribute,
     FamilyBookedAttribute,
     FamilyVisitedDojoAttribute,
     FamilyWaitlistedAttribute,
@@ -74,6 +75,7 @@ SEGMENT_ATTRIBUTES = {
         FamilyWaitlistedAttribute,
         FamilyVisitedDojoAttribute,
         ChildOfDojoAttribute,
+        DojoTeamAttribute,
     ]
 }
 

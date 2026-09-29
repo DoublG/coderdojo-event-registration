@@ -10,7 +10,12 @@ one of its sessions. The ones that pick children by their details (how they
 come to the dojo, their age, a pathway) are `ninja` groups, so the resolver
 only picks guardians who gave the child-data consent (accounts.consent).
 Gender, belts, badges, cancellations and no-shows are deliberately not
-offered (decided). As for every campaign, only adults get the mail."""
+offered (decided). As for every campaign, only adults get the mail.
+
+One audience isn't families: the dojo's own team (its active champion and
+mentors), which gets `volunteer` mail in the `dojo_team_message` frame
+instead of `dojo_news` in `dojo_message`, and doesn't count towards the
+limit on mail to families."""
 
 from dataclasses import dataclass
 from datetime import timedelta
@@ -21,7 +26,11 @@ from django.utils.translation import gettext_lazy as _
 
 from events.models import Event, NinjaEngagement
 
+from .categories import MailCategory
 from .segmentation.resolver import SegmentResolver
+
+FAMILY_TEMPLATE = "dojo_message"
+TEAM_TEMPLATE = "dojo_team_message"
 
 RECENT_DAYS = (90, 180, 365)
 DEFAULT_RECENT_DAYS = 180
@@ -41,6 +50,12 @@ class Audience:
     description: str
     params: tuple = ()
     needs_consent: bool = False
+    category: str = MailCategory.DOJO_NEWS
+    template: str = FAMILY_TEMPLATE
+
+    @property
+    def is_team(self):
+        return self.category == MailCategory.VOLUNTEER
 
 
 ALL_FAMILIES = "all_families"
@@ -51,6 +66,7 @@ NEW_FAMILIES = "new_families"
 MISSED = "missed"
 AGE = "age"
 PATHWAY = "pathway"
+TEAM = "team"
 
 AUDIENCES = [
     Audience(
@@ -101,6 +117,16 @@ AUDIENCES = [
         _("Children of your dojo who worked on one of your pathways at a session."),
         params=("pathway",),
         needs_consent=True,
+    ),
+    Audience(
+        TEAM,
+        _("Your dojo's team"),
+        _(
+            "The dojo's champion and mentors, for example to plan the next sessions. "
+            "It goes out as volunteering mail and doesn't count towards your mails to families."
+        ),
+        category=MailCategory.VOLUNTEER,
+        template=TEAM_TEMPLATE,
     ),
 ]
 BY_KEY = {audience.key: audience for audience in AUDIENCES}
@@ -186,6 +212,8 @@ def definition(key, dojo, params):
     child_of_dojo = _rule("ninja_of_dojo", "equals", dojo.pk)
     if key == ALL_FAMILIES:
         groups = [_group("user", [_rule("dojo_family", "equals", dojo.pk)])]
+    elif key == TEAM:
+        groups = [_group("user", [_rule("dojo_team", "equals", dojo.pk)])]
     elif key == SESSION:
         rules = [_rule("family_booked_for_event", "equals", params["event"])]
         if params["include_waiting_list"]:
@@ -252,13 +280,15 @@ def describe(key, dojo, params):
 
 
 def reach(key, dojo, params):
-    """(families it reaches, families it leaves out for lack of the
-    child-data consent): only accounts who want this dojo's news count."""
-    from .campaigns import wanting_dojo_news
+    """(accounts it reaches, families it leaves out for lack of the
+    child-data consent): only accounts who want this kind of mail from the
+    dojo count."""
+    from .campaigns import wanting
 
+    audience = get(key)
     snapshot = definition(key, dojo, params)
-    reached = wanting_dojo_news(SegmentResolver().resolve_definition(snapshot), dojo)
-    if not get(key).needs_consent:
+    reached = wanting(SegmentResolver().resolve_definition(snapshot), dojo, audience.category)
+    if not audience.needs_consent:
         return reached.count(), 0
-    everyone = wanting_dojo_news(SegmentResolver(require_consent=False).resolve_definition(snapshot), dojo)
+    everyone = wanting(SegmentResolver(require_consent=False).resolve_definition(snapshot), dojo, audience.category)
     return reached.count(), everyone.exclude(pk__in=reached.values("pk")).count()

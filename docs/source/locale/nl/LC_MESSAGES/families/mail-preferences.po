@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 15:46+0000\n"
+"POT-Creation-Date: 2026-09-29 16:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -52,11 +52,18 @@ msgstr ""
 "hoor je over sessies in je dojo, een nieuwe dojo in je buurt, of "
 "evenementen zoals Coolest Projects en CoderDojo Girlz."
 
-#: ../../source/families/mail-preferences.rst:18
+#: ../../source/families/mail-preferences.rst:17
+msgid ""
+"The team of the dojo your child goes to can also write to you through "
+"this site, without seeing your email address. If you reply, your reply "
+"goes to the dojo."
+msgstr "Het team van de dojo waar je kind naartoe gaat, kan je via deze site ook zelf mailen, zonder je e-mailadres te zien. Als je antwoordt, gaat je antwoord naar de dojo."
+
+#: ../../source/families/mail-preferences.rst:22
 msgid "Your children's details"
 msgstr "De gegevens van je kinderen"
 
-#: ../../source/families/mail-preferences.rst:20
+#: ../../source/families/mail-preferences.rst:24
 msgid ""
 "Under **Your children's details** there's a switch per child: whether we "
 "may use that child's details (their age, gender, the sessions they come "
@@ -75,11 +82,11 @@ msgstr ""
 "inschrijven voor sessies, de gordels en badges hangen er nooit van af. "
 "Hebben beide ouders een account, dan kiest elk voor zich."
 
-#: ../../source/families/mail-preferences.rst:29
+#: ../../source/families/mail-preferences.rst:33
 msgid "Choosing which mails you get"
 msgstr "Kiezen welke e-mails u krijgt"
 
-#: ../../source/families/mail-preferences.rst:31
+#: ../../source/families/mail-preferences.rst:35
 msgid ""
 "On your account page, open **Mail preferences**. You'll see one switch "
 "per kind of mail:"
@@ -87,7 +94,7 @@ msgstr ""
 "Open op uw accountpagina **E-mailvoorkeuren**. U ziet één schakelaar per "
 "soort e-mail:"
 
-#: ../../source/families/mail-preferences.rst:34
+#: ../../source/families/mail-preferences.rst:38
 msgid ""
 "**Reminders**: a reminder before a session you signed up for. On unless "
 "you switch it off."
@@ -95,23 +102,26 @@ msgstr ""
 "**Herinneringen**: een herinnering vóór een sessie waarvoor u bent "
 "ingeschreven. Aan, tenzij u ze uitzet."
 
-#: ../../source/families/mail-preferences.rst:36
+#: ../../source/families/mail-preferences.rst:40
 msgid ""
 "**News from your dojo**: new sessions and news from the dojos your family"
 " goes to (your child's home dojo, or a dojo they came to in the last "
 "year), and mails the dojo's team writes to its families themselves. On "
 "unless you switch it off."
-msgstr "**Nieuws van je dojo**: nieuwe sessies en nieuws van de dojo's waar je gezin naartoe gaat (de thuisdojo van je kind, of een dojo waar het het afgelopen jaar naartoe kwam), en mails die het team van de dojo zelf aan zijn gezinnen schrijft. Aan, tenzij je het uitzet."
-
-#: ../../source/families/mail-preferences.rst:40
-msgid ""
-"**Volunteering**: news for champions and mentors, and calls for "
-"volunteers. On unless you switch it off."
 msgstr ""
-"**Vrijwilligerswerk**: nieuws voor champions en mentoren, en oproepen "
-"voor vrijwilligers. Aan, tenzij u het uitzet."
+"**Nieuws van je dojo**: nieuwe sessies en nieuws van de dojo's waar je "
+"gezin naartoe gaat (de thuisdojo van je kind, of een dojo waar het het "
+"afgelopen jaar naartoe kwam), en mails die het team van de dojo zelf aan "
+"zijn gezinnen schrijft. Aan, tenzij je het uitzet."
 
-#: ../../source/families/mail-preferences.rst:42
+#: ../../source/families/mail-preferences.rst:44
+msgid ""
+"**Volunteering**: news for champions and mentors, mail from your dojo's "
+"champion to its team, and calls for volunteers. On unless you switch it "
+"off."
+msgstr "**Vrijwilligerswerk**: nieuws voor champions en mentors, mails van de champion van je dojo aan het team, en oproepen voor vrijwilligers. Aan, tenzij je het uitzet."
+
+#: ../../source/families/mail-preferences.rst:47
 msgid ""
 "**Newsletter and campaigns**: the CoderDojo Belgium newsletter and events"
 " like Coolest Projects and CoderDojo Girlz. **Off until you switch it "
@@ -121,7 +131,7 @@ msgstr ""
 "evenementen zoals Coolest Projects en CoderDojo Girlz. **Uit tot u ze "
 "aanzet** (of het vakje aanvinkt wanneer u uw account aanmaakt)."
 
-#: ../../source/families/mail-preferences.rst:46
+#: ../../source/families/mail-preferences.rst:51
 msgid ""
 "Mails about your account (such as a password reset) and about your "
 "bookings (confirmations, a place coming free on the waiting list) are "
@@ -131,11 +141,11 @@ msgstr ""
 " (bevestigingen, een vrijgekomen plaats op de wachtlijst) worden altijd "
 "verstuurd."
 
-#: ../../source/families/mail-preferences.rst:50
+#: ../../source/families/mail-preferences.rst:55
 msgid "Your dojos"
 msgstr "Jouw dojo's"
 
-#: ../../source/families/mail-preferences.rst:52
+#: ../../source/families/mail-preferences.rst:57
 msgid ""
 "If your family goes to more than one dojo, you may want news from one and"
 " not from another. Under **Your dojos** there's a switch per dojo your "
@@ -152,7 +162,7 @@ msgstr ""
 "je hem later weer aan kunt zetten. Deze schakelaars tellen alleen zolang "
 "**Nieuws van je dojo** aan staat."
 
-#: ../../source/families/mail-preferences.rst:59
+#: ../../source/families/mail-preferences.rst:64
 msgid ""
 "On the same page you can pick the **language** your mails are in. Your "
 "**postcode**, which we use to tell you about dojos and sessions near you,"
@@ -164,11 +174,11 @@ msgstr ""
 "zijn, staat bij uw eigen gegevens op uw gezinspagina (zie :doc:`managing-"
 "your-account`)."
 
-#: ../../source/families/mail-preferences.rst:65
+#: ../../source/families/mail-preferences.rst:70
 msgid "Unsubscribing from a mail"
 msgstr "Uitschrijven voor een e-mail"
 
-#: ../../source/families/mail-preferences.rst:67
+#: ../../source/families/mail-preferences.rst:72
 msgid ""
 "Every mail you can switch off has an unsubscribe link at the bottom. It "
 "works without signing in: open it and confirm, or tick **Unsubscribe from"
@@ -182,7 +192,7 @@ msgstr ""
 "is in één keer uit te zetten. Veel e-mailapps tonen voor onze e-mails ook"
 " een eigen knop **Uitschrijven**, die hetzelfde doet."
 
-#: ../../source/families/mail-preferences.rst:73
+#: ../../source/families/mail-preferences.rst:78
 msgid ""
 "In news from a dojo, the link asks which mails you want to stop: only the"
 " news from that dojo (what your mail app's **Unsubscribe** button does "
@@ -192,11 +202,11 @@ msgstr ""
 "alleen het nieuws van die dojo (wat ook de knop **Uitschrijven** van je "
 "mailapp doet), het nieuws van alle dojo's, of alle optionele e-mails."
 
-#: ../../source/families/mail-preferences.rst:78
+#: ../../source/families/mail-preferences.rst:83
 msgid "Children with their own login"
 msgstr "Kinderen met een eigen login"
 
-#: ../../source/families/mail-preferences.rst:80
+#: ../../source/families/mail-preferences.rst:85
 msgid ""
 "A child with their own login and email address gets mail about their own "
 "bookings and their dojo, and can choose on their own Mail preferences "

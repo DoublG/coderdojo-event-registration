@@ -14,6 +14,7 @@ and sending need SEND_MAIL (the champion).
   <section class="cd-card">
     <h2 class="heading-md">{% translate "Write to the families of your dojo" %}</h2>
     <p class="body-sm muted">{% translate "A mail from your dojo, through the site: to all your families, to those booked for a session, or to a group you pick. Only families who want news from your dojo get it, and every mail lets them stop. Replies go to your dojo's email address." %}</p>
+    <p class="body-sm muted">{% translate "You can also write to your own team: the dojo's champion and mentors." %}</p>
     <p class="body-sm">{% blocktranslate count counter=launched with limit=limit %}{{ counter }} of {{ limit }} mails sent in the last 30 days.{% plural %}{{ counter }} of {{ limit }} mails sent in the last 30 days.{% endblocktranslate %}</p>
     <div class="mail-actions">
       {% if dojo_access.can_send_mail %}

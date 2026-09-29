@@ -4934,10 +4934,19 @@ the dojo's content, not personal) and its place in `core.audit.RECORDED`.
 
 ### Open points
 
-1. **Should the dojo's team get the mail too?** A "team" audience (active
-   champion and mentors, `volunteer` category) would let a champion write
-   to their own mentors; it's a different category and consent, so it's
-   left out of the first version.
-2. **The privacy explanation** (`mailing/partials/_privacy_explanation.html`)
-   may need a sentence that the dojo's team can write to families through
-   the site; if so, a new `PRIVACY_WORDING_VERSION`.
+Both earlier open points were settled on 2026-09-29 and are built:
+
+1. **Mail to the dojo's own team** (decided: yes). An audience *Your
+   dojo's team* (`dojo_audiences.TEAM`, attribute `dojo_team`: the active
+   champion and mentors, never youth mentors, requested or dormant
+   memberships) sends `volunteer` mail in its own frame,
+   `dojo_team_message` (each `Audience` carries its `category` and
+   `template`; `launch_problems` refuses a mailing whose kind doesn't
+   match its audience). A mute of the dojo doesn't stop it (a mute is
+   about the families' news), the volunteering opt-out does, and it
+   doesn't count towards `MAILING_DOJO_MAILINGS_PER_30_DAYS` (that limit
+   is on mail to families).
+2. **The privacy explanation** (decided: yes) now says the team of the
+   child's dojo can also write through the site without seeing the
+   address, and that a reply goes to the dojo; `PRIVACY_WORDING_VERSION`
+   is `2026-09-29`.
