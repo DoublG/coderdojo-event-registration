@@ -5,19 +5,20 @@ def user_roles(request):
     and/or mentor (applications.services), and the first dojo whose admin
     area it can open (dojos.access); whether it holds an organisation role
     (accounts.organisation); and whether the nav's one "Manage" link, to
-    the management area (/manage/, core.manage_nav), applies: an
-    organisation admin, a background-check reviewer or a dojo's
+    the management area (/manage/, core.manage_nav), applies: an account
+    that may open an organisation dashboard area (accounts.organisation,
+    e.g. an organisation admin or a background-check reviewer) or a dojo's
     champion/mentor. The board's role gets its "Organisation" link to the
     Django admin."""
     from applications.services import is_approved_champion, is_approved_mentor
     from dojos.access import accessible_dojos
 
-    from .organisation import is_reviewer
+    from .organisation import areas_of
 
     approved_champion = approved_mentor = False
     applied_kinds = set()
     admin_dojo = None
-    organisation_role = organisation_admin = organisation_board = reviewer = False
+    organisation_role = organisation_admin = organisation_board = has_areas = False
     if request.user.is_authenticated and not request.user.is_ninja:
         approved_champion = is_approved_champion(request.user)
         approved_mentor = is_approved_mentor(request.user)
@@ -29,7 +30,7 @@ def user_roles(request):
         organisation_role = bool(roles)
         organisation_admin = "admin" in roles
         organisation_board = "board" in roles
-        reviewer = is_reviewer(request.user)
+        has_areas = bool(areas_of(request.user))
     return {
         "user_is_approved_champion": approved_champion,
         "user_is_approved_mentor": approved_mentor,
@@ -39,7 +40,7 @@ def user_roles(request):
         "user_has_organisation_role": organisation_role,
         "user_is_organisation_admin": organisation_admin,
         "user_is_organisation_board": organisation_board,
-        "user_can_manage": admin_dojo is not None or organisation_admin or reviewer,
+        "user_can_manage": admin_dojo is not None or has_areas,
     }
 
 

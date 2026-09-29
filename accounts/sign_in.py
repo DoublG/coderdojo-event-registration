@@ -13,7 +13,7 @@ Where it's applied:
   missing the device its role needs goes to its Sign-in security page; one
   with the device but an unverified session logs in again.
 - The real lock is on what the roles open: `dojos.access.require_dojo_access`,
-  `accounts.organisation.require_organisation_admin`, the Django admin
+  `accounts.organisation.require_area`, the Django admin
   (`core.admin_site.AdminSite`) and the notification WebSocket
   (`notifications.consumers`) all refuse a request that doesn't meet it.
 """

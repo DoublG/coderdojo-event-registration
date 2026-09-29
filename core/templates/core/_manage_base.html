@@ -7,9 +7,9 @@ organisation's sections in the sidebar instead of a dojo's. Pages fill
 manage_page_title / manage_heading / manage_content (and optionally
 manage_topbar_extra, manage_extra_style, manage_extra_script) and pass
 `active` for the sidebar link to highlight. Every view behind it checks
-accounts.organisation.require_organisation_admin, or require_reviewer for
-the Volunteers pages (DATA_MODEL.md §21); the sidebar shows each group only
-to the role that may open it (core.manage_nav). Non-technical
+its area with accounts.organisation.require_area (DATA_MODEL.md §23), and
+the sidebar shows each group only to an account that may open its area
+(core.manage_nav). Non-technical
 organisation work lives here, not in the Django admin (CLAUDE.md).
 {% endcomment %}
 {% block shell_title %}CoderDojo Belgium · {% block manage_page_title %}{% endblock %}{% endblock %}
@@ -20,7 +20,7 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
 
 {% block shell_create %}
       {% manage_contexts as contexts %}
-      {% if contexts.organisation_admin %}
+      {% if contexts.can.communication %}
       <a href="{% url 'manage_campaign_create' %}" class="cd-btn cd-btn--primary cd-admin-nav__create label">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         {% translate "New campaign" %}
@@ -30,7 +30,7 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
 
 {% block shell_nav %}
       {% manage_contexts as contexts %}
-      {% if contexts.organisation_admin %}
+      {% if contexts.can.communication %}
         <div class="cd-admin-nav__group">
           <p class="cd-admin-nav__group-label caption">{% translate "Communication" %}</p>
           <ul class="cd-admin-nav__list">
@@ -79,8 +79,8 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
         </div>
       {% endif %}
 
-      {% if contexts.reviewer %}
-        {# Background checks and applications (DATA_MODEL.md §21): the reviewer role only. #}
+      {% if contexts.can.volunteers %}
+        {# Background checks and applications (DATA_MODEL.md §21): the Volunteers area, i.e. the reviewer role. #}
         <div class="cd-admin-nav__group">
           <p class="cd-admin-nav__group-label caption">{% translate "Volunteers" %}</p>
           <ul class="cd-admin-nav__list">
@@ -102,7 +102,7 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
         </div>
       {% endif %}
 
-      {% if contexts.organisation_admin %}
+      {% if contexts.can.public_site %}
         <div class="cd-admin-nav__group">
           <p class="cd-admin-nav__group-label caption">{% translate "Public site" %}</p>
           <ul class="cd-admin-nav__list">
@@ -120,7 +120,9 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
             </li>
           </ul>
         </div>
+      {% endif %}
 
+      {% if contexts.can.ninjas %}
         <div class="cd-admin-nav__group">
           <p class="cd-admin-nav__group-label caption">{% translate "Ninjas" %}</p>
           <ul class="cd-admin-nav__list">
@@ -132,10 +134,13 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
             </li>
           </ul>
         </div>
+      {% endif %}
 
+      {% if contexts.can.privacy or contexts.can.security %}
         <div class="cd-admin-nav__group">
           <p class="cd-admin-nav__group-label caption">{% translate "Accounts" %}</p>
           <ul class="cd-admin-nav__list">
+            {% if contexts.can.privacy %}
             <li>
               <a href="{% url 'manage_privacy' %}" class="cd-admin-nav__link label{% if active == 'privacy' %} cd-admin-nav__link--active{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>
@@ -143,18 +148,21 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
                 {% retention_attention_count as attention_count %}{% if attention_count %}<span class="cd-admin-nav__count caption" title="{% translate 'Needs attention' %}">{{ attention_count }}</span>{% endif %}
               </a>
             </li>
+            {% endif %}
+            {% if contexts.can.security %}
             <li>
               <a href="{% url 'manage_security' %}" class="cd-admin-nav__link label{% if active == 'security' %} cd-admin-nav__link--active{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
                 {% translate "Sign-in security" %}
               </a>
             </li>
+            {% endif %}
           </ul>
         </div>
       {% endif %}
 {% endblock %}
 
-{% block shell_role %}{% manage_contexts as contexts %}{% if contexts.organisation_admin %}{% translate "Organisation admin" %}{% else %}{% translate "Background-check reviewer" %}{% endif %}{% endblock %}
+{% block shell_role %}{% manage_contexts as contexts %}{{ contexts.organisation_role_label }}{% endblock %}
 {% block shell_heading %}{% block manage_heading %}{% endblock %}{% endblock %}
 {% block shell_topbar_actions %}{% block manage_topbar_extra %}{% endblock %}{% endblock %}
 {% block shell_content %}{% block manage_content %}{% endblock %}{% endblock %}

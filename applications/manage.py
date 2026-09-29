@@ -1,7 +1,7 @@
 """The organisation dashboard's Volunteers pages (shell core/_manage_base.html,
 DATA_MODEL.md §21): background checks (/manage/checks/) and applications
-(/manage/applications/). Reviewer role only
-(accounts.organisation.require_reviewer, 404 otherwise); every decision goes
+(/manage/applications/). The Volunteers area only (accounts.organisation.require_area,
+the reviewer role, 404 otherwise); every decision goes
 through applications.services, which deletes the document the moment a
 check is decided."""
 
@@ -17,7 +17,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from accounts.models import User
-from accounts.organisation import require_reviewer
+from accounts.organisation import Area, require_area
 from core.audit import log_access
 
 from . import services
@@ -36,7 +36,7 @@ def _with_applications(accounts):
 def check_list(request):
     """The reviewers' work queue: documents to review first, then checks
     waiting for a document, expired ones and those that expire soon."""
-    require_reviewer(request)
+    require_area(request, Area.VOLUNTEERS)
     now = timezone.now()
     checks = _with_applications(User.objects.exclude(background_check_status=User.CHECK_NOT_REQUESTED))
     query = request.GET.get("q", "").strip()
@@ -76,7 +76,7 @@ def check_detail(request, user_id):
     """One account's check: what they applied for, the earlier decisions, the
     document while there is one, and the decision. Recorded as a view in the
     audit log: it shows criminal-record data (DATA_MODEL.md §14)."""
-    require_reviewer(request)
+    require_area(request, Area.VOLUNTEERS)
     account = get_object_or_404(User, pk=user_id, account_type=User.ADULT)
     log_access(account)
     return render(
@@ -98,7 +98,7 @@ def check_detail(request, user_id):
 @login_required
 @require_POST
 def check_decide(request, user_id):
-    require_reviewer(request)
+    require_area(request, Area.VOLUNTEERS)
     account = get_object_or_404(User, pk=user_id, account_type=User.ADULT)
     form = BackgroundCheckDecisionForm(request.POST)
     if not form.is_valid():
@@ -127,7 +127,7 @@ def check_decide(request, user_id):
 def check_request(request, user_id):
     """Ask for a (new) document: a first check, a renewal after expiry, or
     the upload link again."""
-    require_reviewer(request)
+    require_area(request, Area.VOLUNTEERS)
     account = get_object_or_404(User, pk=user_id, account_type=User.ADULT)
     try:
         services.request_background_check(account, request)
@@ -152,7 +152,7 @@ STATUS_FILTERS = [Application.PENDING, Application.APPROVED, Application.REJECTE
 
 @login_required
 def application_list(request):
-    require_reviewer(request)
+    require_area(request, Area.VOLUNTEERS)
     status = request.GET.get("status", Application.PENDING)
     kind = request.GET.get("kind", "")
     applications = Application.objects.select_related("account", "dojo").order_by("submitted_at")
@@ -176,7 +176,7 @@ def application_list(request):
 
 @login_required
 def application_detail(request, application_id):
-    require_reviewer(request)
+    require_area(request, Area.VOLUNTEERS)
     application = get_object_or_404(Application.objects.select_related("account", "dojo"), pk=application_id)
     account = application.account
     return render(
@@ -196,7 +196,7 @@ def application_detail(request, application_id):
 @login_required
 @require_POST
 def application_decide(request, application_id):
-    require_reviewer(request)
+    require_area(request, Area.VOLUNTEERS)
     application = get_object_or_404(Application.objects.select_related("account", "dojo"), pk=application_id)
     action = request.POST.get("action")
     try:

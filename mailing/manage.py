@@ -1,6 +1,6 @@
 """The organisation's management dashboard for mail (/manage/…, shell
-core/_manage_base.html): campaigns and segments. Only the organisation's
-admin role gets in (accounts.organisation.require_organisation_admin);
+core/_manage_base.html): campaigns and segments. Only the Communication area gets in
+(accounts.organisation.require_area, the admin role, DATA_MODEL.md §23);
 every campaign change goes through mailing.campaigns."""
 
 from django.conf import settings
@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from accounts.organisation import require_organisation_admin
+from accounts.organisation import Area, require_area
 
 from . import campaigns, journeys
 from .forms import CampaignForm, JourneyForm, NewTemplateForm, SegmentForm, TemplateVersionForm
@@ -29,14 +29,14 @@ AUDIENCE_SAMPLE = 10
 
 @login_required
 def campaign_list(request):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     rows = [(c, campaigns.stats(c)) for c in Campaign.objects.select_related("segment").order_by("-created_at")]
     return render(request, "mailing/manage/campaign_list.html", {"rows": rows, "active": "campaigns"})
 
 
 @login_required
 def campaign_create(request):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     form = CampaignForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         campaign = form.save()
@@ -63,7 +63,7 @@ def _previews(campaign, user):
 
 @login_required
 def campaign_detail(request, campaign_id):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     campaign = get_object_or_404(Campaign.objects.select_related("segment", "launched_by"), pk=campaign_id)
     form = None
     if campaign.is_editable:
@@ -89,7 +89,7 @@ def campaign_detail(request, campaign_id):
 
 
 def _campaign_action(request, campaign_id, action, success):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     campaign = get_object_or_404(Campaign, pk=campaign_id)
     try:
         action(campaign)
@@ -130,7 +130,7 @@ def campaign_cancel(request, campaign_id):
 
 @login_required
 def segment_list(request):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     resolver = SegmentResolver()
     rows = [(s, resolver.resolve(s).count()) for s in Segment.objects.order_by("name")]
     return render(request, "mailing/manage/segment_list.html", {"rows": rows, "active": "segments"})
@@ -166,7 +166,7 @@ def _attributes_for(scope):
 
 @login_required
 def segment_create(request):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     form = SegmentForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         segment = form.save()
@@ -177,7 +177,7 @@ def segment_create(request):
 
 @login_required
 def segment_detail(request, segment_id):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     segment = get_object_or_404(Segment, pk=segment_id)
     form = SegmentForm(request.POST or None, instance=segment)
     if request.method == "POST" and form.is_valid():
@@ -221,7 +221,7 @@ def _validation_text(error):
 @login_required
 @require_POST
 def segment_add_group(request, segment_id):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     segment = get_object_or_404(Segment, pk=segment_id)
     parent = (
         get_object_or_404(SegmentGroup, pk=request.POST["parent"], segment=segment)
@@ -245,7 +245,7 @@ def segment_add_group(request, segment_id):
 @login_required
 @require_POST
 def segment_update_group(request, segment_id, group_id):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     group = get_object_or_404(SegmentGroup, pk=group_id, segment_id=segment_id)
     if request.POST.get("operator") in SegmentGroup.Operator.values:
         group.operator = request.POST["operator"]
@@ -256,7 +256,7 @@ def segment_update_group(request, segment_id, group_id):
 @login_required
 @require_POST
 def segment_delete_group(request, segment_id, group_id):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     group = get_object_or_404(SegmentGroup, pk=group_id, segment_id=segment_id)
     segment = group.segment
     group.delete()  # its rules and child groups go with it
@@ -266,7 +266,7 @@ def segment_delete_group(request, segment_id, group_id):
 @login_required
 def segment_rule_fields(request, segment_id, group_id):
     """htmx: the operator and value fields for the attribute just picked."""
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     group = get_object_or_404(SegmentGroup, pk=group_id, segment_id=segment_id)
     try:
         attribute = get_attribute(request.GET.get("attribute", ""))
@@ -287,7 +287,7 @@ def segment_rule_fields(request, segment_id, group_id):
 @login_required
 @require_POST
 def segment_add_rule(request, segment_id, group_id):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     group = get_object_or_404(SegmentGroup, pk=group_id, segment_id=segment_id)
     try:
         attribute = get_attribute(request.POST.get("attribute", ""))
@@ -311,7 +311,7 @@ def segment_add_rule(request, segment_id, group_id):
 @login_required
 @require_POST
 def segment_delete_rule(request, segment_id, rule_id):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     rule = get_object_or_404(SegmentRule, pk=rule_id, group__segment_id=segment_id)
     segment = rule.group.segment
     rule.delete()
@@ -321,7 +321,7 @@ def segment_delete_rule(request, segment_id, rule_id):
 @login_required
 @require_POST
 def segment_delete(request, segment_id):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     segment = get_object_or_404(Segment, pk=segment_id)
     segment.delete()  # launched campaigns keep their frozen copy
     messages.success(request, _("Segment “%(segment)s” deleted.") % {"segment": segment.name})
@@ -337,7 +337,7 @@ def _sample_context(key):
 
 @login_required
 def template_list(request):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     languages = dict(settings.LANGUAGES)
     rows = {}
     for template in EmailTemplate.objects.order_by("key", "language"):
@@ -362,7 +362,7 @@ def template_list(request):
 
 @login_required
 def template_create(request):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     form = NewTemplateForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         EmailTemplate.objects.create(
@@ -386,7 +386,7 @@ def template_create(request):
 
 @login_required
 def template_edit(request, key, language):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     languages = dict(settings.LANGUAGES)
     if language not in languages:
         raise Http404
@@ -437,7 +437,7 @@ def template_delete(request, key, language=None):
     """Delete one language version, or (language empty) a whole campaign
     template. The site's own templates, and the English fallback of any
     template, stay; so does a template a draft campaign still uses."""
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     versions = EmailTemplate.objects.filter(key=key)
     if not versions.exists():
         raise Http404
@@ -465,14 +465,14 @@ def template_delete(request, key, language=None):
 
 @login_required
 def journey_list(request):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     rows = [(j, journeys.stats(j)) for j in Journey.objects.select_related("segment").order_by("name")]
     return render(request, "mailing/manage/journey_list.html", {"rows": rows, "active": "journeys"})
 
 
 @login_required
 def journey_create(request):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     form = JourneyForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         journey = form.save()
@@ -483,7 +483,7 @@ def journey_create(request):
 
 @login_required
 def journey_detail(request, journey_id):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     journey = get_object_or_404(Journey.objects.select_related("segment"), pk=journey_id)
     form = JourneyForm(request.POST or None, instance=journey)
     if request.method == "POST" and form.is_valid():
@@ -507,7 +507,7 @@ def journey_detail(request, journey_id):
 
 
 def _journey_action(request, journey_id, action, success):
-    require_organisation_admin(request)
+    require_area(request, Area.COMMUNICATION)
     journey = get_object_or_404(Journey, pk=journey_id)
     try:
         action(journey)

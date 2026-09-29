@@ -1,8 +1,8 @@
 """The organisation dashboard's public-site pages (shell core/_manage_base.html):
 Promotions (/manage/promotions/: which events are featured where,
 content.Promotion, DATA_MODEL.md §12) and Sponsors (/manage/sponsors/: the
-homepage's "Made possible by", content.Sponsor). Organisation admin role
-only (accounts.organisation.require_organisation_admin)."""
+homepage's "Made possible by", content.Sponsor). The Public site area
+only (accounts.organisation.require_area, the admin role, DATA_MODEL.md §23)."""
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from accounts.organisation import require_organisation_admin
+from accounts.organisation import Area, require_area
 from core.manage_nav import request_manage_contexts
 from events.models import Event
 
@@ -39,7 +39,7 @@ def promotion_state(promotion, visible_event_ids, now=None):
 
 @login_required
 def promotion_list(request):
-    require_organisation_admin(request)
+    require_area(request, Area.PUBLIC_SITE)
     now = timezone.now()
     promotions = list(Promotion.objects.order_by("placement", "rank", "starts_at", "id"))
     visible = set(Event.objects.visible().filter(pk__in={p.event_id for p in promotions}).values_list("pk", flat=True))
@@ -62,7 +62,7 @@ def promotion_list(request):
 
 @login_required
 def promotion_create(request):
-    require_organisation_admin(request)
+    require_area(request, Area.PUBLIC_SITE)
     initial = {"event": request.GET.get("event")} if request.GET.get("event") else None
     form = PromotionForm(request.POST or None, request.FILES or None, initial=initial)
     if request.method == "POST" and form.is_valid():
@@ -74,7 +74,7 @@ def promotion_create(request):
 
 @login_required
 def promotion_detail(request, promotion_id):
-    require_organisation_admin(request)
+    require_area(request, Area.PUBLIC_SITE)
     promotion = get_object_or_404(Promotion, pk=promotion_id)
     form = PromotionForm(request.POST or None, request.FILES or None, instance=promotion)
     if request.method == "POST" and form.is_valid():
@@ -95,7 +95,7 @@ def promotion_detail(request, promotion_id):
 @login_required
 @require_POST
 def promotion_delete(request, promotion_id):
-    require_organisation_admin(request)
+    require_area(request, Area.PUBLIC_SITE)
     promotion = get_object_or_404(Promotion, pk=promotion_id)
     promotion.delete()
     messages.success(request, _("Promotion removed."))
@@ -104,7 +104,7 @@ def promotion_delete(request, promotion_id):
 
 @login_required
 def sponsor_list(request):
-    require_organisation_admin(request)
+    require_area(request, Area.PUBLIC_SITE)
     return render(
         request, "content/manage/sponsor_list.html", {"sponsors": Sponsor.objects.all(), "active": "sponsors"}
     )
@@ -112,7 +112,7 @@ def sponsor_list(request):
 
 @login_required
 def sponsor_create(request):
-    require_organisation_admin(request)
+    require_area(request, Area.PUBLIC_SITE)
     form = SponsorForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -123,7 +123,7 @@ def sponsor_create(request):
 
 @login_required
 def sponsor_detail(request, sponsor_id):
-    require_organisation_admin(request)
+    require_area(request, Area.PUBLIC_SITE)
     sponsor = get_object_or_404(Sponsor, pk=sponsor_id)
     form = SponsorForm(request.POST or None, request.FILES or None, instance=sponsor)
     if request.method == "POST" and form.is_valid():
@@ -138,7 +138,7 @@ def sponsor_detail(request, sponsor_id):
 @login_required
 @require_POST
 def sponsor_delete(request, sponsor_id):
-    require_organisation_admin(request)
+    require_area(request, Area.PUBLIC_SITE)
     get_object_or_404(Sponsor, pk=sponsor_id).delete()
     messages.success(request, _("Sponsor removed."))
     return redirect("manage_sponsor_list")

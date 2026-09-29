@@ -412,7 +412,7 @@ class DownloadBackgroundCheckTests(_CleanupDocumentsMixin, TestCase):
         self.url = reverse("download_background_check", kwargs={"user_id": self.user.pk})
 
     def test_requires_the_reviewer_permission(self):
-        """A 404 like the rest of the dashboard (accounts.organisation.require_reviewer)."""
+        """A 404 like the rest of the dashboard (accounts.organisation.require_area)."""
         self.assertEqual(self.client.get(self.url).status_code, 302)  # to login
         self.client.force_login(User.objects.create(username="staff", is_staff=True))
         self.assertEqual(self.client.get(self.url).status_code, 404)

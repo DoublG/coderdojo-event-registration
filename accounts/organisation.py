@@ -10,19 +10,25 @@ permissions below; holding any role makes the account staff.
 - ADMIN: everything the board has, plus editing dojos and events, the site
   content (FAQs, testimonials, announcements), the pathway, badge and
   belt catalogues, the mail templates, campaigns and segments (run day to
-  day from the organisation dashboard, /manage/, which only this role
-  opens: is_organisation_admin), plus viewing sent mail (DATA_MODEL.md §11:
+  day from the organisation dashboard, /manage/: every area but
+  Volunteers), plus viewing sent mail (DATA_MODEL.md §11:
   the board gets no mailing access, since segments and sent mail show
   families' personal data).
 
 - REVIEWER: reviews background checks and decides applications
-  (DATA_MODEL.md §21), on the organisation dashboard's Volunteers pages
-  (require_reviewer) and in the Django admin. Combinable with the others.
+  (DATA_MODEL.md §21), on the organisation dashboard's Volunteers area
+  and in the Django admin. Combinable with the others.
 
 No role can award belts (only a dojo's active champion/mentors can,
 events.awards). Only the reviewer role reviews background checks
 (applications.can_review_background_checks; a permission granted by hand
 before the role existed still counts, see is_reviewer).
+
+Which organisation dashboard pages a role opens is by *area* (DATA_MODEL.md
+§23): one permission per group of the dashboard's sidebar (`AREA_PERMISSIONS`),
+held through the role groups like any other permission and checked with
+`require_area`. Since it's `has_perm`, an area granted by hand counts too,
+and a superuser opens every area.
 
 `sync_organisation_access` is called by signals whenever a role is granted
 or revoked; it's also safe to call by hand.
@@ -38,6 +44,31 @@ GROUP_NAMES = {
     OrganisationRole.BOARD: "Organisation: board",
     OrganisationRole.ADMIN: "Organisation: admin",
     OrganisationRole.REVIEWER: "Organisation: background-check reviewer",
+}
+
+REVIEW_PERMISSION = "applications.can_review_background_checks"
+
+
+class Area:
+    """The organisation dashboard's areas (DATA_MODEL.md §23), in the order
+    the sidebar shows them; /manage/ opens the first one an account has."""
+
+    COMMUNICATION = "communication"  # campaigns, journeys, segments, mail templates
+    VOLUNTEERS = "volunteers"  # background checks and applications (§21)
+    PUBLIC_SITE = "public_site"  # promotions and sponsors
+    NINJAS = "ninjas"  # awards
+    PRIVACY = "privacy"  # a person's data: export, deletion, email change
+    SECURITY = "security"  # the sign-in policy
+
+
+AREA_PERMISSIONS = {
+    Area.COMMUNICATION: "accounts.manage_communication",
+    # The review permission itself, so one granted by hand keeps working.
+    Area.VOLUNTEERS: REVIEW_PERMISSION,
+    Area.PUBLIC_SITE: "accounts.manage_public_site",
+    Area.NINJAS: "accounts.manage_ninjas",
+    Area.PRIVACY: "accounts.manage_privacy",
+    Area.SECURITY: "accounts.manage_security",
 }
 
 _VIEW = ["view"]
@@ -84,6 +115,14 @@ ADMIN_PERMISSIONS = {
     "mailing.bouncerecord": _VIEW,
     # The audit log (DATA_MODEL.md §14): the admin role only, never the board.
     "auditlog.logentry": _VIEW,
+    # Its organisation dashboard areas (DATA_MODEL.md §23): all but Volunteers.
+    "accounts.organisationrole": [
+        "manage_communication",
+        "manage_public_site",
+        "manage_ninjas",
+        "manage_privacy",
+        "manage_security",
+    ],
 }
 # Criminal-record extracts (GDPR art. 10): this role only, never the board or
 # the admin role by themselves. An action with an underscore is a whole
@@ -98,7 +137,6 @@ ROLE_PERMISSIONS = {
     OrganisationRole.ADMIN: ADMIN_PERMISSIONS,
     OrganisationRole.REVIEWER: REVIEWER_PERMISSIONS,
 }
-REVIEW_PERMISSION = "applications.can_review_background_checks"
 
 
 def _permissions(spec):
@@ -153,40 +191,38 @@ def is_organisation_member(user):
 
 
 def is_organisation_admin(user):
-    """Holds the `admin` organisation role: may use the organisation's
-    management dashboard (/manage/, e.g. campaigns)."""
+    """Holds the `admin` organisation role. Which dashboard pages that opens
+    is a matter of areas (has_area); this is the role itself."""
     return user.is_authenticated and user.organisation_roles.filter(role=OrganisationRole.ADMIN).exists()
 
 
-def require_organisation_admin(request):
+def has_area(user, area):
+    """May open the organisation dashboard's `area` (an `Area`)."""
+    return user.is_authenticated and user.has_perm(AREA_PERMISSIONS[area])
+
+
+def areas_of(user):
+    """The areas `user` may open, in the sidebar's order."""
+    return [area for area in AREA_PERMISSIONS if has_area(user, area)]
+
+
+def require_area(request, area):
     """For every view of the organisation dashboard: 404 unless the account
-    holds the admin role (same no-leak reasoning as dojos.access), and its
-    login meets the organisation's sign-in policy (accounts.sign_in)."""
+    may open `area` (same no-leak reasoning as dojos.access), and its login
+    meets the organisation's sign-in policy (accounts.sign_in)."""
     from django.http import Http404
 
     from .sign_in import meets_requirement
 
-    if not is_organisation_admin(request.user) or not meets_requirement(request):
+    if not has_area(request.user, area) or not meets_requirement(request):
         raise Http404
 
 
 def is_reviewer(user):
     """May review background checks and decide applications (DATA_MODEL.md
-    §21): the reviewer role, or the permission granted some other way (by
-    hand, or a superuser)."""
-    return user.is_authenticated and user.has_perm(REVIEW_PERMISSION)
-
-
-def require_reviewer(request):
-    """For every Volunteers page of the organisation dashboard and the
-    background-check document: 404 unless the account may review, and its
-    login meets the organisation's sign-in policy (accounts.sign_in)."""
-    from django.http import Http404
-
-    from .sign_in import meets_requirement
-
-    if not is_reviewer(request.user) or not meets_requirement(request):
-        raise Http404
+    §21): the Volunteers area, i.e. the reviewer role or the permission
+    granted some other way (by hand, or a superuser)."""
+    return has_area(user, Area.VOLUNTEERS)
 
 
 @receiver(post_save, sender=OrganisationRole)

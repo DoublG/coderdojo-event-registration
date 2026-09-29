@@ -2280,7 +2280,7 @@ class SignInPolicyTests(TwoStepTestMixin, TestCase):
         from dojos.access import require_dojo_access
 
         from .models import OrganisationRole, SignInRequirement
-        from .organisation import require_organisation_admin
+        from .organisation import Area, require_area
 
         champion = make_champion(username="champ")
         dojo = make_dojo("Ghent", champion=champion)
@@ -2292,7 +2292,7 @@ class SignInPolicyTests(TwoStepTestMixin, TestCase):
         with self.assertRaises(Http404):
             require_dojo_access(request, dojo.id)
         with self.assertRaises(Http404):
-            require_organisation_admin(request)
+            require_area(request, Area.COMMUNICATION)
 
     def test_the_django_admin_needs_it_for_superusers(self):
         from django.contrib import admin

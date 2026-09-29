@@ -2,8 +2,8 @@
 shell core/_manage_base.html, DATA_MODEL.md §15): the sign-in policy per role
 (accounts.SignInRequirement, applied by accounts.sign_in), how many accounts
 in each role already meet it, and turning off someone's two-step login when
-they lost their phone and their backup codes. Organisation admin role only
-(accounts.organisation.require_organisation_admin)."""
+they lost their phone and their backup codes. The Security area only
+(accounts.organisation.require_area, the admin role, DATA_MODEL.md §23)."""
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -17,7 +17,7 @@ from django.views.decorators.http import require_POST
 from . import sign_in, two_step
 from .forms import SignInPolicyForm
 from .models import SignInRequirement, User
-from .organisation import require_organisation_admin
+from .organisation import Area, require_area
 
 SEARCH_LIMIT = 25
 
@@ -33,7 +33,7 @@ def _role_counts():
 
 @login_required
 def security_policy(request):
-    require_organisation_admin(request)
+    require_area(request, Area.SECURITY)
     requirements = {row.role: row for row in SignInRequirement.objects.all()}
     form = SignInPolicyForm(request.POST or None, requirements=requirements)
     if request.method == "POST" and form.is_valid():
@@ -77,7 +77,7 @@ def turn_off_two_step(request, user_id):
     """For someone who lost every way to confirm it's them: removes their
     apps, passkeys and backup codes, and mails them. If their role needs
     two-step login, they set it up again at their next login."""
-    require_organisation_admin(request)
+    require_area(request, Area.SECURITY)
     account = get_object_or_404(User, pk=user_id, account_type=User.ADULT)
     back = reverse("manage_security")
     if request.POST.get("q"):

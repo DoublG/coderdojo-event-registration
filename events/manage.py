@@ -1,8 +1,8 @@
 """The organisation dashboard's Awards page (/manage/awards/, shell
 core/_manage_base.html): the badges ninjas can earn (events.Badge). Only the
 organisation defines awards, here or in the Django admin; dojo teams never
-create them, they only award them (events.awards). Organisation admin role
-only (accounts.organisation.require_organisation_admin)."""
+create them, they only award them (events.awards). The Ninjas area only
+(accounts.organisation.require_area, the admin role, DATA_MODEL.md §23)."""
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from accounts.organisation import require_organisation_admin
+from accounts.organisation import Area, require_area
 
 from .forms import BadgeForm
 from .models import Badge
@@ -26,7 +26,7 @@ def _with_counts(queryset):
 
 @login_required
 def badge_list(request):
-    require_organisation_admin(request)
+    require_area(request, Area.NINJAS)
     badges = _with_counts(Badge.objects.select_related("grants_belt"))
     return render(
         request,
@@ -41,7 +41,7 @@ def badge_list(request):
 
 @login_required
 def badge_create(request):
-    require_organisation_admin(request)
+    require_area(request, Area.NINJAS)
     form = BadgeForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
         form.save()
@@ -52,7 +52,7 @@ def badge_create(request):
 
 @login_required
 def badge_detail(request, badge_id):
-    require_organisation_admin(request)
+    require_area(request, Area.NINJAS)
     badge = get_object_or_404(_with_counts(Badge.objects.all()), pk=badge_id)
     form = BadgeForm(request.POST or None, request.FILES or None, instance=badge)
     if request.method == "POST" and form.is_valid():
@@ -67,7 +67,7 @@ def badge_detail(request, badge_id):
 def badge_delete(request, badge_id):
     """Removes an award nobody has yet. One that ninjas already have (or are
     working toward) stays: deleting it would take it off their pages."""
-    require_organisation_admin(request)
+    require_area(request, Area.NINJAS)
     badge = get_object_or_404(Badge, pk=badge_id)
     if badge.ninja_badges.exists():
         messages.error(request, _("Ninjas already have this award, so it can't be removed."))

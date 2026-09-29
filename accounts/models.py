@@ -363,6 +363,15 @@ class OrganisationRole(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["account", "role"], name="unique_organisation_role")]
+        # The organisation dashboard's areas (accounts.organisation.AREA_PERMISSIONS,
+        # DATA_MODEL.md §23); Volunteers is the review permission on Application.
+        permissions = [
+            ("manage_communication", "Organisation dashboard: campaigns, journeys, segments and mail templates"),
+            ("manage_public_site", "Organisation dashboard: promotions and sponsors"),
+            ("manage_ninjas", "Organisation dashboard: awards"),
+            ("manage_privacy", "Organisation dashboard: privacy (data export, deletion, email change)"),
+            ("manage_security", "Organisation dashboard: sign-in security"),
+        ]
 
     def __str__(self):
         return f"{self.account} ({self.get_role_display()})"

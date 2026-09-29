@@ -16,7 +16,7 @@ from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 
 from accounts.models import Ninja, User
-from accounts.organisation import is_organisation_admin
+from accounts.organisation import Area, has_area
 from applications.services import is_approved_champion
 from content.manage import promotion_state
 from content.models import FAQ, OrganisationTeamMember, Promotion
@@ -689,12 +689,12 @@ def dojo_event_detail(request, dojo_id, event_id):
 
 
 def _event_promotions_context(request, event):
-    """The event page's Promotions card (DATA_MODEL.md §20): for an
-    organisation admin only, since promoting is the organisation's work
-    (content.manage), the event's promotions with where each stands, and
+    """The event page's Promotions card (DATA_MODEL.md §20): only for an
+    account with the organisation dashboard's Public site area (§23: the
+    admin role), since promoting is the organisation's work (content.manage), the event's promotions with where each stands, and
     whether it can still get one (the promotion form offers events that
     haven't ended)."""
-    if not is_organisation_admin(request.user):
+    if not has_area(request.user, Area.PUBLIC_SITE):
         return {"can_promote": False}
     promotions = list(event.promotions.order_by("placement", "rank", "starts_at", "id"))
     visible = set(Event.objects.visible().filter(pk=event.pk).values_list("pk", flat=True))

@@ -1337,6 +1337,93 @@ class ManagementAreaTests(TestCase):
         self.assertContains(self.client.get(reverse("manage_promotion_list")), "you need a valid background check")
 
 
+class OrganisationAreaTests(TestCase):
+    """The organisation dashboard's areas (DATA_MODEL.md §23): each group of
+    its sidebar is a permission (accounts.organisation.AREA_PERMISSIONS),
+    held through the role groups or granted by hand, and checked by every
+    page (require_area), the sidebar and /manage/'s landing."""
+
+    def setUp(self):
+        from core.manage import AREA_LANDINGS
+
+        self.landings = {area: reverse(name) for area, name in AREA_LANDINGS.items()}
+
+    def _account(self, username, *areas, role=None, **fields):
+        from django.contrib.auth.models import Permission
+
+        from accounts.models import OrganisationRole, User
+        from accounts.organisation import AREA_PERMISSIONS
+
+        user = User.objects.create(username=username, email=f"{username}@example.com", **fields)
+        for area in areas:
+            app_label, codename = AREA_PERMISSIONS[area].split(".")
+            user.user_permissions.add(Permission.objects.get(content_type__app_label=app_label, codename=codename))
+        if role:
+            OrganisationRole.objects.create(account=user, role=role)
+        return User.objects.get(pk=user.pk)  # a fresh permission cache
+
+    def test_each_role_opens_its_areas(self):
+        from accounts.models import OrganisationRole
+        from accounts.organisation import Area, areas_of
+
+        admin = self._account("admin", role=OrganisationRole.ADMIN)
+        reviewer = self._account("reviewer", role=OrganisationRole.REVIEWER)
+        board = self._account("board", role=OrganisationRole.BOARD)
+        self.assertEqual(
+            areas_of(admin), [Area.COMMUNICATION, Area.PUBLIC_SITE, Area.NINJAS, Area.PRIVACY, Area.SECURITY]
+        )
+        self.assertEqual(areas_of(reviewer), [Area.VOLUNTEERS])
+        self.assertEqual(areas_of(board), [])
+
+    def test_each_page_needs_its_own_area(self):
+        for area, url in self.landings.items():
+            with self.subTest(area=area):
+                self.client.force_login(self._account(f"only-{area}", area))
+                self.assertEqual(self.client.get(url).status_code, 200)
+                for other, other_url in self.landings.items():
+                    if other != area:
+                        self.assertEqual(self.client.get(other_url).status_code, 404, other)
+
+    def test_manage_opens_the_first_area_the_account_has(self):
+        from accounts.organisation import Area
+
+        for areas, landing in (
+            ((Area.SECURITY,), Area.SECURITY),
+            ((Area.PRIVACY, Area.NINJAS), Area.NINJAS),
+            ((Area.VOLUNTEERS, Area.COMMUNICATION), Area.COMMUNICATION),
+        ):
+            with self.subTest(areas=areas):
+                self.client.force_login(self._account("-".join(areas), *areas))
+                self.assertRedirects(
+                    self.client.get(reverse("manage_home")), self.landings[landing], fetch_redirect_response=False
+                )
+
+    def test_without_an_area_the_organisation_is_a_404(self):
+        from accounts.models import OrganisationRole
+
+        self.client.force_login(self._account("board", role=OrganisationRole.BOARD))
+        self.assertEqual(self.client.get(reverse("manage_home")).status_code, 404)
+        for url in self.landings.values():
+            self.assertEqual(self.client.get(url).status_code, 404, url)
+
+    def test_the_sidebar_shows_only_the_groups_of_its_areas(self):
+        from accounts.organisation import Area
+
+        self.client.force_login(self._account("privacy", Area.PRIVACY))
+        response = self.client.get(self.landings[Area.PRIVACY])
+        self.assertContains(response, "Accounts")
+        self.assertContains(response, f'href="{self.landings[Area.PRIVACY]}"')
+        for area in (Area.COMMUNICATION, Area.VOLUNTEERS, Area.PUBLIC_SITE, Area.NINJAS, Area.SECURITY):
+            self.assertNotContains(response, f'href="{self.landings[area]}"')
+        self.assertNotContains(response, reverse("manage_campaign_create"))
+
+    def test_a_superuser_opens_every_area(self):
+        root = self._account("root", is_superuser=True, is_staff=True)
+        self.client.force_login(root)
+        for url in self.landings.values():
+            self.assertEqual(self.client.get(url).status_code, 200, url)
+
+
 class ProfilingTests(TestCase):
     """core.profiling.profile: django-silk's silk_profile while silk is on
     (settings.SILK_ENABLED, development only), otherwise nothing at all, so

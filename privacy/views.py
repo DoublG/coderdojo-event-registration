@@ -17,7 +17,7 @@ from django.utils.translation import gettext as _
 from accounts import email_change
 from accounts.forms import ConfirmPasswordForm, OrganisationEmailChangeForm
 from accounts.models import User
-from accounts.organisation import require_organisation_admin
+from accounts.organisation import Area, require_area
 from core.audit import log_access
 
 from .deletion import delete_account, preview
@@ -52,7 +52,7 @@ def download_my_data(request):
 def manage_privacy(request):
     """Find an account to answer a request for a copy of someone's data,
     and the champions the retention job is waiting on."""
-    require_organisation_admin(request)
+    require_area(request, Area.PRIVACY)
     query = request.GET.get("q", "").strip()
     accounts = []
     if query:
@@ -84,7 +84,7 @@ def manage_privacy(request):
 
 @login_required
 def manage_privacy_export(request, user_id):
-    require_organisation_admin(request)
+    require_area(request, Area.PRIVACY)
     user = get_object_or_404(User, pk=user_id)
     log_access(user)  # who handed out whose data: recorded in the audit log
     return _download(user)
@@ -111,7 +111,7 @@ def delete_my_account(request):
 def manage_privacy_delete(request, user_id):
     """The organisation deletes an account on a request by mail or post:
     the same preview, confirmed by typing the account's username."""
-    require_organisation_admin(request)
+    require_area(request, Area.PRIVACY)
     account = get_object_or_404(User, pk=user_id)
     result = preview(account)
     form = ConfirmUsernameForm(account, request.POST or None)
@@ -132,7 +132,7 @@ def manage_privacy_email(request, user_id):
     old mailbox (DATA_MODEL.md §22): a link goes to the new address, which
     they confirm without logging in. Not for ninja logins, superusers or
     organisation roles (accounts.email_change.organisation_blocker)."""
-    require_organisation_admin(request)
+    require_area(request, Area.PRIVACY)
     account = get_object_or_404(User, pk=user_id)
     blocker = email_change.organisation_blocker(account)
     form = OrganisationEmailChangeForm(account, request.POST or None)

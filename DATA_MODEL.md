@@ -3966,9 +3966,17 @@ confirmed from the new address.
 
 None yet.
 
-## 23. Organisation people, roles and page access on the dashboard (plan)
+## 23. Organisation people, roles and page access on the dashboard (in progress)
 
-**Planned, nothing built yet.** Today an organisation role
+**Phase 1 (areas) is built**: `accounts.organisation.Area`,
+`AREA_PERMISSIONS`, `has_area` / `areas_of` / `require_area`, the
+migration `accounts.0013_organisation_dashboard_areas`, the sidebar and
+`/manage/` (`core.manage.AREA_LANDINGS`) following the areas, and
+`core.tests.OrganisationAreaTests`. `require_organisation_admin` and
+`require_reviewer` are gone: every view moved in the same change. The
+`people` area comes with its pages (phase 3). The rest is planned.
+
+Before this, an organisation role
 (`accounts.OrganisationRole`: `board`, `admin`, `reviewer`) can only be
 granted or revoked in the Django admin, by someone who may edit that
 model there (in practice a superuser: no role's group holds
@@ -4043,8 +4051,7 @@ the sidebar (`core/_manage_base.html`) and the switcher
   sign-in policy, same no-leak reasoning as now), and `manage_contexts`
   gets the set of areas the account may open, which drives both the
   sidebar groups and `/manage/`'s landing. `require_organisation_admin`
-  and `require_reviewer` stay as thin wrappers until every view has moved,
-  then go. It's `has_perm`, so a permission granted by hand keeps working,
+  and `require_reviewer` are gone (every view moved at once). It's `has_perm`, so a permission granted by hand keeps working,
   as `is_reviewer` already does.
 - **The Django admin is time-boxed: asked for, 12 hours, then closed
   (decided).** A role no longer makes an account staff. An organisation
