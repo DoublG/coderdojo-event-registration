@@ -1,0 +1,57 @@
+# Publishes the help centre (docs/, Sphinx, en/fr/nl) to GitHub Pages:
+# https://doublg.github.io/coderdojo-event-registration/ (fr/, nl/).
+# Runs on every push to main that changes docs/, and by hand from the Actions tab.
+# One-time setup: Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
+name: Help centre on GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; a newer push replaces a waiting one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
+      - name: Install Sphinx
+        run: pip install -r docs/requirements.txt
+      - name: Build en, fr and nl
+        working-directory: docs
+        env:
+          # The language switcher's links (docs/source/conf.py): the Pages path, not the dev site's /docs/.
+          DOCS_BASE_URL: /${{ github.event.repository.name }}/
+        run: |
+          make html-all SPHINXOPTS="-W --keep-going"
+          touch build/html/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/build/html
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

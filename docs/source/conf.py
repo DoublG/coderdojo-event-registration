@@ -4,6 +4,8 @@
 # registration platform (families, volunteers, dojo teams) — not developer
 # documentation. For that, see /CLAUDE.md at the repo root.
 
+import os
+
 project = "CoderDojo Belgium — Help Centre"
 copyright = "CoderDojo Belgium"
 author = "CoderDojo Belgium"
@@ -43,12 +45,15 @@ html_show_sourcelink = False
 # so it's recognizable regardless of which language you're currently
 # reading — same convention as the main site's language switcher
 # (core/templates/core/menu.html). Root-relative: this is injected
-# unchanged on every page regardless of nesting depth, and the site is
-# always served at /docs/ (see .devcontainer/nginx/nginx.conf).
+# unchanged on every page regardless of nesting depth. The devcontainer
+# serves the docs at /docs/ (see .devcontainer/nginx/nginx.conf); the
+# GitHub Pages build (.github/workflows/docs.yml) sets DOCS_BASE_URL to the
+# Pages path instead.
+_base = os.environ.get("DOCS_BASE_URL", "/docs/")
 html_theme_options = {
     "announcement": (
-        "<a href='/docs/'>English</a> &middot; "
-        "<a href='/docs/fr/'>Fran&ccedil;ais</a> &middot; "
-        "<a href='/docs/nl/'>Nederlands</a>"
+        f"<a href='{_base}'>English</a> &middot; "
+        f"<a href='{_base}fr/'>Fran&ccedil;ais</a> &middot; "
+        f"<a href='{_base}nl/'>Nederlands</a>"
     ),
 }

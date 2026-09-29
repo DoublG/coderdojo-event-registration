@@ -1,5 +1,10 @@
 # CoderDojo Belgium — Help Centre (Sphinx)
 
+Published at <https://doublg.github.io/coderdojo-event-registration/> (`fr/`, `nl/`) by
+`../.github/workflows/docs.yml` on every push to main that changes `docs/`. That build treats Sphinx
+warnings as errors, and sets `DOCS_BASE_URL` so the language switcher links to the Pages path
+instead of the devcontainer's `/docs/`.
+
 End-user documentation (families, volunteers, dojo teams) — see `../CLAUDE.md`
 for developer docs, this is a separate audience. Available in English, French
 (`fr`), and Dutch (`nl`).

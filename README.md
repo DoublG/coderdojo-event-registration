@@ -20,7 +20,7 @@ workers for all mail, and Django Channels for live notifications.
 |---|---|---|
 | Everyone | [User journeys](#user-journeys-pdf) | One PDF per persona with screenshots, in English, Dutch and French |
 | Decision makers | [Pitch deck](#pitch-deck) | The journeys plus facts and figures about the development |
-| Families, volunteers, dojo teams, the organisation | [Help centre](#help-centre) (`docs/`) | How to use the site, in English, French and Dutch |
+| Families, volunteers, dojo teams, the organisation | [Help centre](https://doublg.github.io/coderdojo-event-registration/) ([sources](#help-centre)) | How to use the site, in English, French and Dutch |
 | Developers | [Technical foundation and data model (PDF)](user-journeys/technical-foundation-and-data-model.pdf) | How the site is built, the data model and the rationale, with diagrams |
 | Developers | [`DATA_MODEL.md`](DATA_MODEL.md) | The data model, one Mermaid diagram per area, and the design decisions behind every larger change |
 | Developers and AI agents | [`CLAUDE.md`](CLAUDE.md) | Conventions, architecture and workflow rules for changing the code safely ([`AGENTS.md`](AGENTS.md) is the same file) |
@@ -50,8 +50,10 @@ The last slide's "ask" is still placeholders.
 
 ### Help centre
 
-The end-user documentation (Sphinx) in [`docs/`](docs/), served by the dev environment at
-`https://coolregistration.localhost/docs/` (`/docs/fr/`, `/docs/nl/`). Building and translating it:
+The end-user documentation (Sphinx) in [`docs/`](docs/), published at
+**<https://doublg.github.io/coderdojo-event-registration/>** ([Français](https://doublg.github.io/coderdojo-event-registration/fr/),
+[Nederlands](https://doublg.github.io/coderdojo-event-registration/nl/)) on every push to main that changes it,
+and served by the dev environment at `https://coolregistration.localhost/docs/`. Building and translating it:
 [`docs/README.md`](docs/README.md).
 
 | Audience | Pages |
