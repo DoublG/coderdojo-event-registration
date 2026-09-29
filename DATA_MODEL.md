@@ -4290,13 +4290,15 @@ docstrings say an edit there skips the rules above).
 
 ## 24. Logging in with an emailed link (plan)
 
-**Planned, nothing built yet.** Today every adult account logs in with its
-email (or username) and a password, then the second step when two-step
-login is on (§15). This plan lets each account holder **choose** how they
+**Planned, nothing built yet.** Today every account logs in with its
+email (or username) and a password, and only adult accounts can add the
+second step (§15). This plan lets each account holder **choose** how they
 log in: with a **password**, as now, or with a **login link** we mail
 them every time (a "magic link": no password to remember). It's the
 account's choice, not the organisation's; two-step login and the sign-in
-policy work the same on top of either. In the site's texts it's a "login
+policy work the same on top of either. **Every login gets the same login
+page and the same options** (decided, 2026-09-29): adults and a ninja's
+own login alike, so this also opens two-step login to ninja logins. In the site's texts it's a "login
 link" (*inloglink*, *lien de connexion*), never "magic link".
 
 ### What the code does today, and what that means
@@ -4329,6 +4331,12 @@ link" (*inloglink*, *lien de connexion*), never "magic link".
   can reset its password. A login link adds no new way in for an attacker;
   it only takes away the password as a second one (and phishing/reuse of
   the password with it).
+- **Ninja logins are kept out of the second step today:** the Sign-in
+  security pages 404 for anything but an adult (`security_views.py`, the
+  `account_type != User.ADULT` check), and the sign-in policy never looks
+  at them (`accounts/sign_in.py`). A ninja login starts with no usable
+  password and gets a set-password mail from the guardian's *Own login*
+  card (§17, `accounts/child_accounts.give_login`).
 - Family sign-up (`register_guardian`) and the invitation sign-up
   (`accounts.people`, `organisation_invitation_sign_up`) ask for a
   password and log the new account in. The family's address is **not
@@ -4341,9 +4349,27 @@ link" (*inloglink*, *lien de connexion*), never "magic link".
   password** (`set_unusable_password()`), so a password can't be guessed,
   reused or phished; an account on `password` can't ask for links. Two
   options, not "both": the choice has to mean something.
-- **Only adult accounts.** Ninja logins keep their password (the
-  guardian's set-password flow, §17) and service accounts have none; both
-  out of scope (open point 1).
+- **Every login, the same (decided).** Adult accounts and ninja logins
+  have the same login page, the same choice of password or login link,
+  and the same *Sign-in security* page with the same two-step login
+  (authenticator app, passkeys, backup codes). Only the API's service
+  accounts are left out: they never log in. The adult-only checks in
+  `security_views.py` go; `accounts/two_step.py` already works per
+  `User`.
+- **A ninja login stays the guardian's to give (§17), and they can help
+  with it.** *Give a login* on the child's *Own login* card asks how the
+  child will log in: a password (today's set-password mail) or a login
+  link (the first link goes to the child's address, which confirms it, as
+  for family sign-up). The card shows the child's method and whether
+  two-step login is on, and the guardian can **turn off the child's
+  two-step login** (a lost phone, the same as the organisation does for
+  adults on `/manage/security/`) and **switch the child back to a
+  password** (a fresh set-password mail). The child manages the rest
+  itself on its own *Sign-in security* page. The security mails about a
+  child's login (`login_method_changed`, `two_step_*`, `backup_code_used`)
+  go to the child's login **and** its guardians (`family_of`).
+- **The sign-in policy still never requires anything of a ninja login**:
+  it's something they may use, not something they must (open point 2).
 - **The link is a first step, never the whole login.** An account with
   two-step login still gets its code/passkey step after the link (or skips
   it on a remembered browser), and the sign-in policy (§15) applies
@@ -4408,13 +4434,15 @@ link" (*inloglink*, *lien de connexion*), never "magic link".
   otherwise it shows *Send me a confirmation link* (a login link with
   `next` = this page; opening it logs in again and brings them back, now
   recent). Every place listed above uses it, with no view changing its
-  own rule.
+  own rule. For a ninja login that's only the *Sign-in security*
+  confirmations: it can't delete its account, change its address or ask
+  for admin access anyway.
 - **Sign-up offers the choice** (family sign-up and the invitation
   sign-up): *How do you want to log in?* Password (as now) or *Email me a
   login link each time* (the password fields hide with plain CSS on the
   radio, and aren't required then). The invitation sign-up logs the new
   account in either way (the invite link proved the address). **Family
-  sign-up with a link doesn't log in** (decided, can be revisited): the
+  sign-up with a link doesn't log in** (decided, 2026-09-29): the
   account and children are saved, we mail the first login link, and the
   page says "Check your inbox". Opening it is the first login, so a
   mistyped address can't create an account nobody can get into; one that
@@ -4471,7 +4499,13 @@ flowchart TD
    ago" and the button, or *Send me a confirmation link*.
 6. **Sign-up** (family and invitation): the *How do you want to log in?*
    choice; the family's "Check your inbox" page after a link sign-up.
-7. **Organisation:** the method on an account's *Privacy* page; on
+7. **The guardian's *Own login* card** (`_ninja_login_card.html`): *Give
+   a login* with the password/link choice; with a login, "Logs in with a
+   password / a login link", "Two-step login: on/off", *Turn off two-step
+   login* and *Switch to a password* (each confirmed as the guardian's
+   own confirmations are). The child's own page links to its *Sign-in
+   security*.
+8. **Organisation:** the method on an account's *Privacy* page; on
    *Sign-in security*, how many accounts per role use a link.
 
 ### Phases
@@ -4502,32 +4536,47 @@ flowchart TD
 5. **Sign-up:** the choice on family and invitation sign-up, the "check
    your inbox" page. Tests: no password stored, first link logs in, the
    invitation sign-up logging in directly.
-6. **Finishing:** the policy label, the organisation's counts and Privacy
+6. **Ninja logins:** *Sign-in security* open to ninja logins (the
+   adult-only check removed, the page's texts right for a child), the
+   *Own login* card's choice and its two guardian actions (in
+   `accounts/child_accounts.py`, guardians only), the security mails to
+   the family. Tests: a ninja login with each method and with two-step
+   login, the guardian turning it off and switching back, another
+   guardian's child 404, the child's login unable to use the guardian
+   actions, the policy still not applying, the mails' recipients.
+7. **Finishing:** the policy label, the organisation's counts and Privacy
    line, `seed_two_step`'s sibling seeding one parent and one mentor on
    `link` (the `password` column in `seed_credentials.csv` says "login
    link", `describe_seed_accounts` explains Mailpit), Dutch and French,
    the help docs (*families/managing-your-account* "Logging in",
    *families/creating-an-account*, *families/two-step-login* "Logging in",
    *dojo-team/logging-in*, *organisation/sign-in-security*,
-   *organisation/people* for the invited sign-up) and their fr/nl
-   catalogs, §2 (`User.login_method` in the diagram), §15's flow,
+   *organisation/people* for the invited sign-up; *two-step-login* no
+   longer saying children's logins never use it, and the child-login part
+   of *managing-your-account*) and their fr/nl catalogs, §2
+   (`User.login_method` in the diagram), §15's flow and "Ninja logins ...
+   are never asked" (now: never *required*), §17's *Creating*,
    CLAUDE.md ("Two-step login and the sign-in policy" becomes the place
    that names both first steps; "Account model" for the sign-up).
 
 ### Open points
 
-1. **Ninja logins with a link:** a child with its own mailbox could use
-   one too, but it's the guardian's to decide (§17); later, from the *Own
-   login* card.
-2. **May the organisation restrict it?** E.g. organisation admins always
+1. **Changing a child login's address** (out of scope in §22) matters
+   more for a child on a login link: today the guardian can only remove
+   the login and give it again. A later step for the *Own login* card,
+   reusing `accounts/email_change.py`.
+2. **Requiring two-step login of youth mentors:** the policy could get a
+   *youth mentor* role once the organisation wants it; the rest is in
+   place after phase 6.
+3. **May the organisation restrict it?** E.g. organisation admins always
    on a password *and* two-step login. The policy could get a "no login
    link" flag per role; not needed while two-step login covers the risk.
-3. **Unconfirmed family sign-ups** that never open their first link:
+4. **Unconfirmed family sign-ups** that never open their first link:
    today's retention (two years without a login) removes them; a shorter
    clean-up (e.g. 7 days) would be a new `RETENTION_RULES` entry.
-4. **Passwordless with a passkey** (§15's open point) fits the same
+5. **Passwordless with a passkey** (§15's open point) fits the same
    `login_method` field later (`passkey`), without the mail.
-5. **Opening the link on another device** logs in *that* device (the
+6. **Opening the link on another device** logs in *that* device (the
    usual behaviour, and what the mail says). Tying it to the requesting
    browser (a cookie check, or "approve on your phone") is stricter but
    breaks "request on laptop, open on phone"; not planned.
