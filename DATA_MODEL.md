@@ -3862,7 +3862,7 @@ the Django admin on request.
 - `EmailSuppression` blocks an address whatever the account: a new address
   that bounced before can't receive the confirmation.
 
-### Decisions (proposed)
+### Decisions
 
 - **Confirmed from the new address.** The account holder asks for the
   change with their **current password** (`accounts.forms.ConfirmPasswordForm`
@@ -3874,9 +3874,10 @@ the Django admin on request.
   the link single-use: once the address has changed, it no longer matches.
   No row with a pending address means nothing new to classify for privacy
   (§16), keep or erase.
-- **The link needs the same account logged in.** Opening it logged out goes
-  through `/login/` (the old address or the username still work); another
-  account gets a 404. That proves both the account and the new mailbox.
+- **The family's own link needs the same account logged in.** Opening it
+  logged out goes through `/login/` (the old address or the username still
+  work); another account gets a 404. (A link the organisation started
+  doesn't, see below.) That proves both the account and the new mailbox.
   **GET shows a confirmation page, POST changes it**, so a mail scanner that
   follows links can't do it (same as the unsubscribe page).
 - **The old address is told.** When the change is made, an
@@ -3891,6 +3892,25 @@ the Django admin on request.
 - **Throttled:** one request per account per minute through the cache (as
   the data export), so the form can't be used to send mail to arbitrary
   addresses in bulk.
+- **The organisation can start it too (decided).** For a family that
+  lost access to its old mailbox, an organisation admin opens the account
+  on *Accounts → Privacy* (`/manage/privacy/`) and uses **Change email
+  address** (`/manage/privacy/<id>/email/`, `require_organisation_admin`),
+  after checking who they're dealing with by other means. The same link
+  goes to the new address and the same notice to the old one. Their link
+  carries who started it and **can be confirmed without logging in**: the
+  family may not be able to log in any more (a password reset goes to the
+  old mailbox). After confirming, that page offers a password reset to the
+  new address. The audit log's actor for that change is the admin who
+  started it (`auditlog.context.set_actor`), since nobody is logged in.
+  Not for a ninja's own login, a superuser or an organisation-role holder
+  (the Django admin, as for deletion).
+- **Other sessions end (decided).** Changing the address logs the account
+  out everywhere else, as a password change does: `User.get_session_auth_hash`
+  also covers the email, so every session made with the old address stops
+  being valid, and the confirming session is kept with
+  `update_session_auth_hash`. That also holds when someone changes an
+  address in the Django admin.
 - **Out of scope:** a child's own login's address (the guardian's *Own
   login* card, `accounts/child_accounts.py`, would reuse the same service
   later), and changing the username.
@@ -3904,8 +3924,12 @@ the Django admin on request.
    showing the current address.
 2. `/account/email/confirm/<token>/` (`confirm_email_change`): "Change your
    email address from *old* to *new*?" with one button; afterwards the
-   account page with "Your email address is now *new*". An expired or used
-   link says so and links to step 1.
+   account page with "Your email address is now *new*" (logged out: a page
+   saying so, with *Set a new password*, which sends the reset to the new
+   address). An expired or used link says so and links to step 1.
+3. The organisation's **Change email address** on an account in *Accounts →
+   Privacy*: the current address, the new one, a reminder to check who's
+   asking; afterwards "A confirmation link was sent to *new*".
 
 ### Phases
 
@@ -3914,22 +3938,24 @@ the Django admin on request.
    `mailing/seed_templates.py` with their sample context and in
    `SYSTEM_TEMPLATE_KEYS` (production gets them through
    `load_mail_templates` at deploy).
-2. **Service:** `accounts/email_change.py` (`request_change`,
-   `read_token`, `confirm_change`; `EmailChangeError` with a user-facing
-   message): the uniqueness check (case-insensitive, at both steps), the
-   suppression check, the throttle, the notice to the old address and the
-   save (through `save()`, so the audit log has it).
-3. **Pages:** the two views and templates, the link on the details form,
-   tests (password required, taken address, suppressed address, link for
-   another account, expired and reused link, the notice's recipient, the
-   old reset link failing, the audit entry).
-4. **Finishing:** Dutch and French, the help docs (*Managing your account*,
-   *Your own details*), CLAUDE.md.
+2. **Service:** `accounts/email_change.py` (`request_change(user, new,
+   started_by=None)`, `read_token`, `confirm_change`; `EmailChangeError`
+   with a user-facing message): the uniqueness check (case-insensitive, at
+   both steps), the suppression check, the throttle, the notice to the old
+   address and the save (through `save()`, so the audit log has it); the
+   email in `User.get_session_auth_hash`.
+3. **Family pages:** the two views and templates, the link on the details
+   form, tests (password required, taken address, suppressed address, link
+   for another account, expired and reused link, the notice's recipient,
+   the old reset link failing, other sessions logged out and this one kept,
+   the audit entry).
+4. **Organisation page:** *Change email address* on *Accounts → Privacy*,
+   the logged-out confirmation with the password-reset offer, tests (404
+   without the admin role, not for organisation roles, superusers or
+   ninja logins, the audit actor).
+5. **Finishing:** Dutch and French, the help docs (*Managing your account*,
+   *Your own details*; the organisation's *Privacy* page), CLAUDE.md.
 
 ### Open points
 
-- Should an **organisation admin** be able to start the same flow for
-  someone from `/manage/privacy/` (a family that lost access to the old
-  mailbox), instead of editing it in the Django admin?
-- Should the change also **log out the account's other sessions**, as a
-  password change does?
+None yet.
