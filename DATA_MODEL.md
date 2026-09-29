@@ -3748,3 +3748,77 @@ Someone with one context sees no switcher, as today. The notification bell
    visibility and the prefilled event. Dutch and French for the new texts,
    CLAUDE.md, and the help docs (en/fr/nl) where they describe the *Manage*
    link.
+
+## 21. Background checks and applications on the organisation dashboard (planned)
+
+**Planned.** Reviewing background checks and deciding applications (§6) was
+Django-admin only: the review permission
+(`applications.can_review_background_checks`) was granted to each person by
+hand, neither organisation role could decide an application (both only view
+them), so in practice only a superuser could, and nobody was told when a
+document arrived. This moves that work to the organisation dashboard. The
+flow itself (§6) doesn't change: `applications.services` still decides, and
+the document is still deleted the moment a decision is made.
+
+### Decisions
+
+- **A third organisation role, `reviewer` (decided).** Granted and revoked
+  like `board` and `admin` (and combinable with them); its permission group
+  holds the review permission, deciding applications (`change`
+  application) and the background-check pages in the Django admin. A
+  permission granted by hand before keeps working (`is_reviewer` asks
+  `has_perm`). The sign-in policy's "Background-check reviewers" row
+  already applies to it; asking reviewers for two-step login is a later
+  policy setting, not part of this.
+- **Reviewers decide applications (decided)**, since approving depends on
+  the background check they review. Organisation admins don't, unless they
+  also hold the reviewer role.
+- **Nobody reviews their own check or decides their own application**
+  (`applications.services`, a new rule).
+- **No renewal before expiry; a reminder instead (decided).** A daily job
+  mails the account holder 30 days before their check expires (service
+  mail, once per expiry date), so they can request a new extract in time.
+  The rule that a renewal can only be uploaded once the check has lapsed
+  stays.
+- **Access like the rest of the dashboard.** `require_reviewer(request)`
+  (`accounts.organisation`): a 404 without the role, or below the sign-in
+  policy. It also guards the document download, which now also tells the
+  browser not to keep a copy (`Cache-Control: no-store`). The Organisation
+  context (§20) opens for a reviewer who isn't an organisation admin too,
+  but each sidebar group shows only what the account may open: a reviewer
+  sees *Volunteers*, an admin the rest. `/manage/` sends each to the first
+  page they can open.
+
+### Screens (a *Volunteers* group in the organisation sidebar)
+
+1. **Background checks** (`/manage/checks/`): a work queue. *Awaiting
+   review* (uploaded, oldest first, counted on the sidebar link),
+   *Waiting for a document* (requested or rejected, with "Send the link
+   again"), *Expired* (with "Ask for a new one") and *Expiring within 30
+   days* (the reminder goes by itself). Search by name or email.
+2. **One person's check** (`/manage/checks/<id>/`): what they applied for,
+   the earlier decisions, **Download the document** (recorded in the audit
+   log), **Validate** or **Reject** with an optional note (its help text:
+   never copy anything from the extract), saying the document is deleted
+   with the decision. The page itself is recorded as a view in the audit
+   log (criminal-record data, §14).
+3. **Applications** (`/manage/applications/`): pending first, filter by
+   kind and status, each with the account's check status. A detail page
+   with the application's fields and the next step: ask for the background
+   check, **Approve** (only with a valid check) or **Reject**.
+
+Everything keeps its full Django admin page.
+
+### Phases
+
+1. **Access:** the `reviewer` role (and its group), `is_reviewer` /
+   `require_reviewer`, the self-review rule, the download's access and
+   `no-store`, and the Organisation context for reviewers.
+2. **Background checks** pages.
+3. **Applications** pages.
+4. **Attention and reminders:** counts on the sidebar links, a daily mail to
+   reviewers while documents wait for review, and the expiry reminder to
+   the account holder (`applications/tasks.py`, two mail templates in
+   en/nl/fr).
+5. **Finishing:** tests, Dutch and French, the help docs (a new
+   organisation page, the volunteer pages on the reminder), CLAUDE.md and §6.
