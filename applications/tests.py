@@ -682,9 +682,7 @@ class ReviewerDashboardTests(_CleanupDocumentsMixin, TestCase):
         self.assertRedirects(response, reverse("manage_check_list"))
         account.refresh_from_db()
         self.assertEqual(account.background_check_status, User.CHECK_REQUESTED)
-        self.assertTrue(
-            EmailMessage.objects.filter(user=account, template_key="background_check_requested").exists()
-        )
+        self.assertTrue(EmailMessage.objects.filter(user=account, template_key="background_check_requested").exists())
 
     def test_an_unsafe_next_goes_back_to_the_check(self):
         account = User.objects.create(username="new", email="new@example.com")
@@ -736,3 +734,81 @@ class ReviewerDashboardTests(_CleanupDocumentsMixin, TestCase):
         )
         application.refresh_from_db()
         self.assertEqual(application.status, Application.PENDING)
+
+
+class BackgroundCheckMailTests(_CleanupDocumentsMixin, TestCase):
+    """The daily background-check mail (applications.reminders, DATA_MODEL.md §21)."""
+
+    def setUp(self):
+        call_command("load_mail_templates", stdout=io.StringIO())
+
+    def _expiring_in(self, username, days):
+        return User.objects.create(
+            username=username,
+            email=f"{username}@example.com",
+            background_check_status=User.CHECK_VALIDATED,
+            background_check_expires_at=timezone.now() + timedelta(days=days),
+        )
+
+    def test_a_check_expiring_within_30_days_gets_one_reminder(self):
+        from .reminders import remind_expiring_checks
+
+        soon = self._expiring_in("soon", 20)
+        self._expiring_in("later", 40)
+        User.objects.create(
+            username="lapsed",
+            email="lapsed@example.com",
+            background_check_status=User.CHECK_VALIDATED,
+            background_check_expires_at=timezone.now() - timedelta(days=1),
+        )
+        remind_expiring_checks()
+        remind_expiring_checks()  # a second run the same (or a later) day mails nobody again
+        sent = EmailMessage.objects.filter(template_key="background_check_expiring")
+        self.assertEqual([mail.user for mail in sent], [soon])
+        self.assertIn(timezone.localtime(soon.background_check_expires_at).strftime("%d/%m/%Y"), sent[0].subject)
+
+    def test_a_new_check_gets_its_own_reminder(self):
+        from .reminders import remind_expiring_checks
+
+        soon = self._expiring_in("soon", 20)
+        remind_expiring_checks()
+        soon.background_check_expires_at = timezone.now() + timedelta(days=25)
+        soon.save(update_fields=["background_check_expires_at"])
+        remind_expiring_checks()
+        self.assertEqual(EmailMessage.objects.filter(template_key="background_check_expiring").count(), 2)
+
+    def test_reviewers_hear_about_documents_waiting(self):
+        from accounts.models import OrganisationRole
+
+        from .reminders import mail_reviewers
+
+        reviewer = _reviewer()
+        admin = User.objects.create(username="orgadmin", email="orgadmin@example.com")
+        OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
+        self.assertEqual(mail_reviewers(), 0)  # nothing waiting
+
+        _submitted_account("one")
+        _submitted_account("two")
+        self.assertEqual(mail_reviewers(), 1)
+        mail_reviewers()  # once a day
+        sent = EmailMessage.objects.get(template_key="background_checks_waiting")
+        self.assertEqual(sent.user, reviewer)
+        self.assertIn("(2)", sent.subject)
+
+    def test_a_reviewer_isnt_told_about_their_own_document(self):
+        from .reminders import mail_reviewers
+
+        reviewer = _reviewer()
+        reviewer.background_check_status = User.CHECK_REQUESTED
+        reviewer.save(update_fields=["background_check_status"])
+        services.submit_background_check(reviewer, _uploaded())
+        self.assertEqual(mail_reviewers(), 0)
+
+    def test_the_jobs_are_scheduled(self):
+        from django.conf import settings
+
+        from . import tasks
+
+        tasks_by_name = {entry["task"] for entry in settings.CELERY_BEAT_SCHEDULE.values()}
+        for task in (tasks.remind_expiring_background_checks, tasks.mail_background_check_reviewers):
+            self.assertIn(task.name, tasks_by_name)

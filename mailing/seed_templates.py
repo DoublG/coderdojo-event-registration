@@ -368,6 +368,87 @@ Nous vous préviendrons à temps lorsqu'il faudra le renouveler.
         },
     },
     {
+        "key": "background_check_expiring",
+        "category": MailCategory.SERVICE,
+        "description": "30 days before a volunteer's background check expires (applications.reminders). "
+        "Variables: expires_at (date), account_url.",
+        "subject": {
+            "en-us": 'Your background check expires on {{ expires_at|date:"d/m/Y" }}',
+            "nl-be": 'Je uittreksel uit het strafregister vervalt op {{ expires_at|date:"d/m/Y" }}',
+            "fr-be": 'Votre extrait de casier judiciaire expire le {{ expires_at|date:"d/m/Y" }}',
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+Your background check is valid until {{ expires_at|date:"d/m/Y" }}. To keep helping at your dojo
+without a break, ask your municipality (or mijndossier.rrn.fgov.be) for a new extract from the
+criminal record, model 2 (Article 596.2), now: it can take a few days.
+
+From {{ expires_at|date:"d/m/Y" }} you can upload it on your account page:
+{{ account_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Je uittreksel uit het strafregister is geldig tot {{ expires_at|date:"d/m/Y" }}. Om zonder onderbreking
+te kunnen blijven helpen in je dojo, vraag je nu best een nieuw uittreksel (model 2, artikel 596.2) aan
+bij je gemeente of via mijndossier.rrn.fgov.be: dat kan een paar dagen duren.
+
+Vanaf {{ expires_at|date:"d/m/Y" }} kan je het opladen via je accountpagina:
+{{ account_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Votre extrait de casier judiciaire est valable jusqu'au {{ expires_at|date:"d/m/Y" }}. Pour continuer à
+aider dans votre dojo sans interruption, demandez dès maintenant un nouvel extrait (modèle 2, article
+596.2) à votre commune ou via mijndossier.rrn.fgov.be : cela peut prendre quelques jours.
+
+À partir du {{ expires_at|date:"d/m/Y" }}, vous pourrez le déposer depuis la page de votre compte :
+{{ account_url }}
+""",
+        },
+    },
+    {
+        "key": "background_checks_waiting",
+        "category": MailCategory.SERVICE,
+        "description": "Daily, to background-check reviewers while uploaded documents wait for a decision "
+        "(applications.reminders). Variables: count, oldest (date), checks_url.",
+        "subject": {
+            "en-us": "Background checks waiting for review ({{ count }})",
+            "nl-be": "Uittreksels uit het strafregister om na te kijken ({{ count }})",
+            "fr-be": "Extraits de casier judiciaire à vérifier ({{ count }})",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+Uploaded background check documents waiting for your review: {{ count }}, the oldest since
+{{ oldest|date:"d/m/Y" }}. Until one is decided, that volunteer can't start at their dojo.
+
+{{ checks_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Opgeladen uittreksels uit het strafregister die op je nazicht wachten: {{ count }}, het oudste sinds
+{{ oldest|date:"d/m/Y" }}. Zolang er geen beslissing is, kan die vrijwilliger niet beginnen in de dojo.
+
+{{ checks_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Extraits de casier judiciaire déposés en attente de votre vérification : {{ count }}, le plus ancien
+depuis le {{ oldest|date:"d/m/Y" }}. Tant qu'il n'y a pas de décision, ce bénévole ne peut pas
+commencer dans son dojo.
+
+{{ checks_url }}
+""",
+        },
+    },
+    {
         "key": "background_check_rejected",
         "category": MailCategory.SERVICE,
         "description": "A reviewer couldn't accept the uploaded document. Variables: account_url.",
@@ -1179,6 +1260,17 @@ SAMPLE_CONTEXT = {
     },
     "background_check_validated": {**_common, "expires_at": datetime(2027, 9, 25)},
     "background_check_rejected": {**_common, "account_url": "https://coolregistration.localhost/account/"},
+    "background_check_expiring": {
+        **_common,
+        "expires_at": datetime(2026, 10, 29),
+        "account_url": "https://coolregistration.localhost/account/",
+    },
+    "background_checks_waiting": {
+        **_common,
+        "count": 3,
+        "oldest": datetime(2026, 9, 22),
+        "checks_url": "https://coolregistration.localhost/manage/checks/",
+    },
     "application_approved": {
         **_common,
         "kind": "mentor",

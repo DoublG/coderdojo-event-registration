@@ -242,6 +242,18 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=10, minute=0),
         "options": {"queue": "celery", "expires": 6 * 3600},
     },
+    # Background checks (applications.reminders, DATA_MODEL.md §21): the
+    # 30-day expiry reminder, and reviewers told about documents waiting.
+    "background-check-expiry-reminders": {
+        "task": "applications.tasks.remind_expiring_background_checks",
+        "schedule": crontab(hour=10, minute=30),
+        "options": {"queue": "celery", "expires": 6 * 3600},
+    },
+    "background-checks-waiting": {
+        "task": "applications.tasks.mail_background_check_reviewers",
+        "schedule": crontab(hour=9, minute=0),
+        "options": {"queue": "celery", "expires": 6 * 3600},
+    },
 }
 CELERY_TASK_ROUTES = {
     entry["task"]: {"queue": PERIODIC_QUEUE}
