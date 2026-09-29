@@ -6,6 +6,8 @@
 
 {% block extra_style %}
 <style>
+  /* A login link needs no password (DATA_MODEL.md §24). */
+  .cd-form:has(input[name="login_method"][value="link"]:checked) .signup-password { display: none; }
   .register-root { background: var(--surface-sunken); }
   .register-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
   .register-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
@@ -42,6 +44,9 @@
           </div>
           <div class="cd-form__row">
             {{ form.phone.as_field_group }}
+          </div>
+          {{ form.login_method.as_field_group }}
+          <div class="cd-form__row signup-password">
             {{ form.password.as_field_group }}
           </div>
           <div class="cd-form__row">

@@ -6,6 +6,8 @@
 
 {% block extra_style %}
 <style>
+  /* A login link needs no password (DATA_MODEL.md §24). */
+  .cd-form:has(input[name="login_method"][value="link"]:checked) .cd-form__field:has(input[name="password"]) { display: none; }
   .invitation-root { background: var(--surface-sunken); }
   .invitation-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
   .invitation-root .page-title { color: var(--ink); margin: 0 0 var(--space-4); }

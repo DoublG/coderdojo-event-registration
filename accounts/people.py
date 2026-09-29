@@ -258,7 +258,12 @@ def organisation_invitation_sign_up(request, token):
             phone=data["phone"],
             preferred_language=data["preferred_language"] or _site_language(request),
         )
-        account.set_password(data["password"])
+        if form.uses_link:
+            # The invitation came to this address: no need to prove it again.
+            account.login_method = User.LOGIN_LINK
+            account.set_unusable_password()
+        else:
+            account.set_password(data["password"])
         with transaction.atomic():
             account.save()
             invitations.accept(invitation, account)

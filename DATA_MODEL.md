@@ -4290,7 +4290,7 @@ docstrings say an edit there skips the rules above).
 
 ## 24. Logging in with an emailed link (in progress)
 
-**In progress: phases 1–4 built** (`accounts/login_links.py`, `accounts/reauth.py`,
+**In progress: phases 1–5 built** (`accounts/login_links.py`, `accounts/reauth.py`,
 `accounts.views.LoginLinkView` / `login_link_request`,
 `accounts/security_mail.py`). Today every account logs in with its
 email (or username) and a password, and only adult accounts can add the

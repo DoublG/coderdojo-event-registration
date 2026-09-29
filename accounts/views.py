@@ -338,7 +338,11 @@ def register_guardian(request):
                 postal_code=form.cleaned_data["postal_code"],
                 preferred_language=form.cleaned_data["preferred_language"] or _site_language(request),
             )
-            parent.set_password(form.cleaned_data["password"])
+            if form.uses_link:
+                parent.login_method = User.LOGIN_LINK
+                parent.set_unusable_password()
+            else:
+                parent.set_password(form.cleaned_data["password"])
             # A child never exists without a guardian: all or nothing.
             with transaction.atomic():
                 parent.save()
@@ -346,6 +350,15 @@ def register_guardian(request):
                 if form.cleaned_data["newsletter"]:
                     set_preference(parent, MailCategory.NEWSLETTER, True, ConsentEvent.SIGNUP)
 
+            if form.uses_link:
+                # Not logged in yet: opening the first link is the first
+                # login, and proves the address (DATA_MODEL.md §24).
+                login_links.send_login_link(parent, first=True)
+                return render(
+                    request,
+                    "accounts/register_check_inbox.html",
+                    {"email": parent.email, "valid_days": login_links.FIRST_LINK_VALID_DAYS},
+                )
             auth_login(request, parent, backend="accounts.backends.EmailOrUsernameBackend")
             return redirect("account_home")
     else:

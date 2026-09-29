@@ -3366,6 +3366,73 @@ class ConfirmIdentityWithoutPasswordTests(LoginLinkTestMixin, TwoStepTestMixin, 
         self.assertNotIn("evil", self.link_path())
 
 
+class SignUpWithLoginLinkTests(LoginLinkTestMixin, TestCase):
+    """Choosing a login link at sign-up (DATA_MODEL.md §24)."""
+
+    def family_data(self, **overrides):
+        return {
+            "name": "Jane Doe",
+            "email": "jane@example.com",
+            "phone": "",
+            "consent": "on",
+            **CHILD_ROWS,
+            "child-0-name": "Sam",
+            "child-0-family_name": "Peeters",
+            "child-0-date_of_birth": _dob(10),
+            "child-0-allergies_notes": "",
+            **overrides,
+        }
+
+    def test_the_page_offers_the_choice(self):
+        self.assertContains(self.client.get(reverse("register_guardian")), "How do you want to log in?")
+
+    def test_a_password_is_still_needed_when_it_is_chosen(self):
+        response = self.client.post(reverse("register_guardian"), self.family_data(login_method="password"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["form"].errors["password"])
+        self.assertFalse(User.objects.filter(email="jane@example.com").exists())
+
+    def test_a_family_on_a_link_confirms_the_address_with_its_first_login(self):
+        from core.testing import link_login_data
+
+        response = self.client.post(
+            reverse("register_guardian"), self.family_data(login_method="link", password="ignored")
+        )
+        self.assertContains(response, "Check your inbox")
+        jane = User.objects.get(email="jane@example.com")
+        self.assertTrue(jane.uses_login_link)
+        self.assertFalse(jane.has_usable_password())
+        self.assertEqual(list(Ninja.objects.of_guardian(jane).values_list("name", flat=True)), ["Sam"])
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.assertTrue(self.mails("login_link", jane).get().subject.startswith("Welcome"))
+
+        link = self.link_path(user=jane)
+        response = self.client.post(link, link_login_data())
+        self.assertRedirects(response, reverse("account_home"))
+        self.assertEqual(int(self.client.session["_auth_user_id"]), jane.pk)
+        self.client.logout()
+        self.assertContains(self.client.get(link), "Email me a new login link")  # the first link is used up
+
+    def test_an_invited_account_on_a_link_logs_in_straight_away(self):
+        from .invitations import invite
+
+        admin = User.objects.create(username="boss", email="boss@example.com")
+        from .models import OrganisationRole
+
+        OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
+        with patch("accounts.invitations.secrets.token_urlsafe", return_value="tok-123"):
+            invite("new@example.com", "Nora New", ["reviewer"], admin, "en-us")
+        response = self.client.post(
+            reverse("organisation_invitation_sign_up", kwargs={"token": "tok-123"}),
+            {"name": "Nora New", "phone": "", "login_method": "link", "preferred_language": "nl-be"},
+        )
+        self.assertRedirects(response, reverse("manage_home"), fetch_redirect_response=False)
+        nora = User.objects.get(email="new@example.com")
+        self.assertTrue(nora.uses_login_link)
+        self.assertFalse(nora.has_usable_password())
+        self.assertEqual(int(self.client.session["_auth_user_id"]), nora.pk)
+
+
 def settings_site_url():
     from django.conf import settings
 

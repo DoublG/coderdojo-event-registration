@@ -1,0 +1,29 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Check your inbox" %} · CoderDojo Belgium{% endblock %}
+{% block root_class %}login-page-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .login-page-root { background: var(--surface-sunken); }
+  .login-page-root .login-stage { min-height: 480px; display: flex; align-items: center; justify-content: center; padding: var(--space-6) var(--space-4); }
+</style>
+{% endblock %}
+
+{% block content %}
+  {% comment %}accounts.views.register_guardian after a sign-up with a login link (DATA_MODEL.md §24): the account exists, and opening the first link is the first login.{% endcomment %}
+  <div class="shell login-stage">
+    <div class="cd-card cd-login" style="padding: var(--space-6); width: 100%; max-width: 440px;">
+      <div class="cd-login__header">
+        <h2 class="cd-login__title heading-lg">{% translate "Check your inbox" %}</h2>
+        <p class="cd-login__subtitle body-sm">
+          {% blocktranslate trimmed with email=email days=valid_days %}
+            Your account is ready. We've mailed a link to <strong>{{ email }}</strong>: open it within {{ days }} days to log in for the first time. That also confirms your address.
+          {% endblocktranslate %}
+        </p>
+      </div>
+      <p class="body-sm">{% translate "Nothing arrived? Look in your spam folder. Later on, you ask for a new link on the login page each time you log in." %}</p>
+      <a class="cd-btn cd-btn--ghost cd-btn--block label" href="{% url 'login_link_request' %}">{% translate "Ask for a new link" %}</a>
+    </div>
+  </div>
+{% endblock %}

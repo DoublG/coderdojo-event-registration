@@ -187,7 +187,51 @@ def clean_belgian_postal_code(value):
     return postal_code
 
 
-class RegisterGuardianForm(forms.Form):
+class LoginMethodChoiceMixin:
+    """Sign-up's "How do you want to log in?" (DATA_MODEL.md §24): a
+    password, or a login link mailed each time; the password is only asked
+    for the first. The page hides the password field while the link is
+    chosen (plain CSS on the radio)."""
+
+    def _add_login_method(self):
+        self.fields["login_method"] = forms.ChoiceField(
+            label=_("How do you want to log in?"),
+            choices=[
+                (User.LOGIN_PASSWORD, _("With a password")),
+                (User.LOGIN_LINK, _("With a link we mail you each time (no password to remember)")),
+            ],
+            initial=User.LOGIN_PASSWORD,
+            # Not sent at all (an older page): a password, as before.
+            required=False,
+            widget=forms.RadioSelect,
+        )
+        self.fields["password"].required = False
+
+    def clean_login_method(self):
+        return self.cleaned_data["login_method"] or User.LOGIN_PASSWORD
+
+    def clean_password(self):
+        password = self.cleaned_data["password"]
+        if password and self.data.get(self.add_prefix("login_method")) != User.LOGIN_LINK:
+            # Raises ValidationError with one message per failed validator —
+            # Django's own AUTH_PASSWORD_VALIDATORS (website/settings.py), same
+            # ones enforced everywhere else a password is set.
+            validate_password(password)
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("login_method") == User.LOGIN_PASSWORD and not cleaned_data.get("password"):
+            if "password" not in self.errors:
+                self.add_error("password", forms.ValidationError(_("Choose a password."), code="required"))
+        return cleaned_data
+
+    @property
+    def uses_link(self):
+        return self.cleaned_data.get("login_method") == User.LOGIN_LINK
+
+
+class RegisterGuardianForm(LoginMethodChoiceMixin, forms.Form):
     """The parent/guardian half of the family-registration page; the
     children are ChildRowsFormSet, next to it."""
 
@@ -233,16 +277,12 @@ class RegisterGuardianForm(forms.Form):
             raise ValidationError(_("An account already exists with this email."))
         return email
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._add_login_method()
+
     def clean_postal_code(self):
         return clean_belgian_postal_code(self.cleaned_data["postal_code"])
-
-    def clean_password(self):
-        password = self.cleaned_data["password"]
-        # Raises ValidationError with one message per failed validator —
-        # Django's own AUTH_PASSWORD_VALIDATORS (website/settings.py), same
-        # ones enforced everywhere else a password is set.
-        validate_password(password)
-        return password
 
 
 class EditAccountForm(forms.ModelForm):
@@ -419,7 +459,7 @@ class InvitationForm(OrganisationRolesForm):
     field_order = ["name", "email", "language", "roles"]
 
 
-class InvitedSignUpForm(forms.Form):
+class InvitedSignUpForm(LoginMethodChoiceMixin, forms.Form):
     """Creating your own account from an organisation invitation: like family
     sign-up without the children, and the address is the invited one."""
 
@@ -428,10 +468,10 @@ class InvitedSignUpForm(forms.Form):
     password = forms.CharField(label=_("Password"), widget=forms.PasswordInput())
     preferred_language = forms.ChoiceField(label=_("Language for emails"), required=False, choices=settings.LANGUAGES)
 
-    def clean_password(self):
-        password = self.cleaned_data["password"]
-        validate_password(password)
-        return password
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._add_login_method()
+        self.order_fields(["name", "phone", "login_method", "password", "preferred_language"])
 
 
 class _NewEmailMixin:
