@@ -2823,3 +2823,153 @@ class OrganisationPeopleTests(TestCase):
         self._save(root, "board")
         root.refresh_from_db()
         self.assertTrue(root.is_superuser and root.is_staff)
+
+
+class OrganisationInvitationTests(TestCase):
+    """Inviting someone without an account to organisation roles
+    (accounts.invitations, DATA_MODEL.md §23): they create their own account
+    from the link, and only an account with the invited address gets the
+    roles."""
+
+    def setUp(self):
+        from django.core.cache import cache
+        from django.core.management import call_command
+
+        from .models import OrganisationRole
+
+        cache.clear()  # the one-invitation-a-minute throttle
+        call_command("load_mail_templates", verbosity=0)
+        self.admin = User.objects.create(username="admin1", email="a1@example.com", first_name="Priya")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.client.force_login(self.admin)
+
+    def _invite(self, email="new@example.com", roles=("reviewer",)):
+        return self.client.post(
+            reverse("manage_people_add"),
+            {"name": "Nora New", "email": email, "language": "nl-be", "roles": list(roles)},
+        )
+
+    def _token(self):
+        import re
+
+        from mailing.models import EmailMessage
+
+        body = EmailMessage.objects.filter(template_key="organisation_invitation").latest("pk").body
+        return re.search(r"/invitation/([^/\s]+)/", body).group(1)
+
+    def _link(self, token=None):
+        return reverse("organisation_invitation", kwargs={"token": token or self._token()})
+
+    def test_inviting_mails_a_link_to_the_address(self):
+        from mailing.models import EmailMessage
+
+        from .models import OrganisationInvitation
+
+        self.assertRedirects(self._invite(), reverse("manage_people"))
+        invitation = OrganisationInvitation.objects.get()
+        self.assertEqual(
+            (invitation.email, invitation.roles, invitation.invited_by), ("new@example.com", ["reviewer"], self.admin)
+        )
+        mail = EmailMessage.objects.get(template_key="organisation_invitation")
+        self.assertEqual((mail.recipient, mail.user, mail.language), ("new@example.com", None, "nl-be"))
+        self.assertIn("Nora New", mail.body)
+        self.assertNotIn(self._token(), invitation.token_hash)  # only the hash is stored
+        self.assertContains(self.client.get(reverse("manage_people")), "new@example.com")
+
+    def test_an_address_with_an_account_gets_roles_from_its_page_instead(self):
+        from .models import OrganisationInvitation
+
+        User.objects.create(username="jan", email="New@Example.com")
+        self.assertContains(self._invite(), "An account already exists with this email")
+        self.assertFalse(OrganisationInvitation.objects.exists())
+
+    def test_one_invitation_a_minute(self):
+        self._invite()
+        self.assertContains(self._invite(email="other@example.com"), "wait a minute")
+
+    def test_signing_up_from_the_link(self):
+        from notifications.models import Notification
+
+        from .models import OrganisationInvitation
+
+        self._invite()
+        token = self._token()
+        self.client.logout()
+        self.assertContains(self.client.get(self._link(token)), "Create my account")
+        response = self.client.post(
+            reverse("organisation_invitation_sign_up", kwargs={"token": token}),
+            {"name": "Nora New", "phone": "", "password": PASSWORD, "preferred_language": "nl-be"},
+        )
+        self.assertRedirects(response, reverse("manage_home"), fetch_redirect_response=False)
+        account = User.objects.get(email="new@example.com")
+        self.assertEqual(set(account.organisation_roles.values_list("role", flat=True)), {"reviewer"})
+        self.assertEqual(int(self.client.session["_auth_user_id"]), account.pk)
+        invitation = OrganisationInvitation.objects.get()
+        self.assertEqual(invitation.accepted_by, account)
+        notice = Notification.objects.get(recipient=self.admin)
+        self.assertTrue(notice.organisation)
+        # Used: the link says so, and signs nobody up again.
+        self.client.logout()
+        self.assertContains(self.client.get(self._link(token)), "isn't valid any more")
+
+    def test_only_the_invited_address_can_accept(self):
+        self._invite()
+        token = self._token()
+        someone = User.objects.create(username="someone", email="someone@example.com")
+        self.client.force_login(someone)
+        self.assertContains(self.client.get(self._link(token)), "This invitation is for")
+        self.assertEqual(self.client.post(self._link(token)).status_code, 404)
+        self.assertFalse(someone.organisation_roles.exists())
+
+    def test_an_account_made_since_logs_in_and_accepts(self):
+        self._invite()
+        token = self._token()
+        account = User.objects.create(username="nora", email="NEW@example.com")
+        self.client.logout()
+        self.assertContains(self.client.get(self._link(token)), "log in with it to accept")
+        self.client.force_login(account)
+        self.assertRedirects(
+            self.client.post(self._link(token)), reverse("manage_home"), fetch_redirect_response=False
+        )
+        self.assertTrue(account.organisation_roles.filter(role="reviewer").exists())
+
+    def test_resending_replaces_the_link_and_withdrawing_ends_it(self):
+        from django.core.cache import cache
+
+        from .models import OrganisationInvitation
+
+        self._invite()
+        old = self._token()
+        invitation = OrganisationInvitation.objects.get()
+        cache.clear()
+        self.client.post(reverse("manage_invitation_resend", kwargs={"invitation_id": invitation.pk}))
+        new = self._token()
+        self.assertNotEqual(old, new)
+        self.assertContains(self.client.get(self._link(old)), "isn't valid any more")
+        self.client.post(reverse("manage_invitation_withdraw", kwargs={"invitation_id": invitation.pk}))
+        self.assertContains(self.client.get(self._link(new)), "isn't valid any more")
+
+    def test_an_expired_link(self):
+        from .models import OrganisationInvitation
+
+        self._invite()
+        OrganisationInvitation.objects.update(expires_at=timezone.now() - timedelta(minutes=1))
+        self.client.logout()
+        self.assertContains(self.client.get(self._link()), "isn't valid any more")
+
+    def test_old_invitations_are_removed(self):
+        from .invitations import remove_old
+        from .models import OrganisationInvitation
+
+        self._invite()
+        self.assertEqual(remove_old(), 0)
+        OrganisationInvitation.objects.update(withdrawn_at=timezone.now() - timedelta(days=31))
+        self.assertEqual(remove_old(), 1)
+
+    def test_the_people_area_only(self):
+        from .models import OrganisationRole
+
+        reviewer = User.objects.create(username="rev")
+        OrganisationRole.objects.create(account=reviewer, role=OrganisationRole.REVIEWER)
+        self.client.force_login(reviewer)
+        self.assertEqual(self._invite().status_code, 404)

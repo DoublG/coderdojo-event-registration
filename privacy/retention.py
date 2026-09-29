@@ -170,6 +170,7 @@ def apply_retention(today=None):
         if outcome:
             done[outcome] += 1
     done["audit_log_entries"] = remove_old_audit_log_entries()
+    done["organisation_invitations"] = remove_old_invitations()
     done["sessions"] = Session.objects.filter(expire_date__lt=timezone.now()).delete()[0]
     logger.info("retention: %s", done)
     return done
@@ -302,6 +303,14 @@ def champions_needing_attention(today=None):
 
 
 # --- the audit log -----------------------------------------------------------
+
+
+def remove_old_invitations():
+    """Organisation invitations 30 days after they were accepted, withdrawn
+    or expired (accounts.invitations, DATA_MODEL.md §23)."""
+    from accounts.invitations import remove_old
+
+    return remove_old()
 
 
 def remove_old_audit_log_entries():

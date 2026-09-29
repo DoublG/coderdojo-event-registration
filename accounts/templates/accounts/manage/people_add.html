@@ -6,7 +6,7 @@
 {% block manage_content %}
   {% comment %}Find an existing account to give an organisation role (accounts/people.py, DATA_MODEL.md §23).{% endcomment %}
   <p class="body-sm"><a href="{% url 'manage_people' %}">{% translate "Back to People" %}</a></p>
-  <p class="body-sm">{% translate "Find the person's account, then choose their roles on the next page." %}</p>
+  <p class="body-sm">{% translate "Find the person's account, then choose their roles on the next page. No account yet? Invite them below." %}</p>
 
   <form method="get" class="cd-card cd-form" style="padding: var(--space-5);">
     <div class="cd-form__field">
@@ -30,4 +30,29 @@
       <p class="body-sm" style="margin-top: var(--space-5);">{% translate "No account found." %}</p>
     {% endif %}
   {% endif %}
+
+  <h2 class="heading-md" style="margin-top: var(--space-6);" id="invite">{% translate "Invite someone without an account" %}</h2>
+  <p class="body-sm">{% translate "They get a link to create their own account; the roles are theirs once they accept with this same email address. The link works for 14 days." %}</p>
+  <form method="post" class="cd-card cd-form" style="padding: var(--space-5);" action="{% url 'manage_people_add' %}#invite" novalidate>
+    {% csrf_token %}
+    {% if invite_form.non_field_errors %}<div class="cd-form__notes">{% for error in invite_form.non_field_errors %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endfor %}</div>{% endif %}
+    <div class="cd-form__row">
+      {{ invite_form.name.as_field_group }}
+      {{ invite_form.email.as_field_group }}
+    </div>
+    {{ invite_form.language.as_field_group }}
+    <fieldset class="cd-form__field">
+      <legend class="cd-form__label label">{% translate "Organisation roles" %}</legend>
+      {% for role, label, description in role_descriptions %}
+        <label class="body-sm" style="display: flex; gap: var(--space-2); align-items: flex-start; margin-top: var(--space-3);">
+          <input type="checkbox" name="roles" value="{{ role }}"{% if role in invite_form.roles.value %} checked{% endif %}>
+          <span><strong>{{ label }}</strong><br><span class="caption">{{ description }}</span></span>
+        </label>
+      {% endfor %}
+      {% for error in invite_form.roles.errors %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endfor %}
+    </fieldset>
+    <div class="cd-form__actions">
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Send the invitation" %}</button>
+    </div>
+  </form>
 {% endblock %}

@@ -35,6 +35,8 @@ RECORDED = {
     # Time-boxed access to the Django admin (DATA_MODEL.md §23): who asked,
     # why, until when, and how it ended.
     "accounts.AdminAccessGrant": {},
+    # Who invited whom to which roles, and when it was accepted or withdrawn.
+    "accounts.OrganisationInvitation": {"exclude_fields": ["token_hash"]},
     # The organisation roles' permission groups (accounts/organisation.py).
     "auth.Group": {"m2m_fields": ["permissions"]},
     "dojos.Dojo": {},

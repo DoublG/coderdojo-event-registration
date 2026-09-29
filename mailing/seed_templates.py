@@ -748,6 +748,59 @@ Des questions ? Contactez-nous :
         },
     },
     {
+        "key": "organisation_invitation",
+        "category": MailCategory.SERVICE,
+        "description": "An invitation to someone without an account to take organisation roles "
+        "(accounts/invitations.py; sent to the address, no account yet). Variables: invited_by, roles "
+        "(admin, reviewer, board), accept_url, valid_days.",
+        "subject": {
+            "en-us": "You're invited to the CoderDojo Belgium organisation",
+            "nl-be": "Je bent uitgenodigd in de organisatie van CoderDojo Belgium",
+            "fr-be": "Vous êtes invité·e dans l'organisation de CoderDojo Belgium",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{{ invited_by }} invites you to CoderDojo Belgium's organisation team, with these roles:
+{% for role in roles %}
+- {% if role == "admin" %}Admin: the organisation dashboard (campaigns, content, awards, privacy, sign-in security and people){% elif role == "reviewer" %}Background-check reviewer: background checks and applications{% else %}Board: read-only oversight{% endif %}{% endfor %}
+
+Create your account (or log in, if you have one with this address) and accept here:
+
+{{ accept_url }}
+
+The link works for {{ valid_days }} days. Didn't expect this? You can ignore this email.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{{ invited_by }} nodigt je uit in het organisatieteam van CoderDojo Belgium, met deze rollen:
+{% for role in roles %}
+- {% if role == "admin" %}Beheerder: het organisatiedashboard (campagnes, inhoud, awards, privacy, aanmeldbeveiliging en mensen){% elif role == "reviewer" %}Beoordelaar van uittreksels: uittreksels uit het strafregister en aanvragen{% else %}Bestuur: toezicht, alleen lezen{% endif %}{% endfor %}
+
+Maak je account aan (of meld je aan, als je er al een hebt met dit adres) en aanvaard hier:
+
+{{ accept_url }}
+
+De link werkt {{ valid_days }} dagen. Verwachtte je dit niet? Dan mag je deze e-mail negeren.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{{ invited_by }} vous invite dans l'équipe de l'organisation de CoderDojo Belgium, avec ces rôles :
+{% for role in roles %}
+- {% if role == "admin" %}Administrateur : le tableau de bord de l'organisation (campagnes, contenu, récompenses, vie privée, sécurité de connexion et personnes){% elif role == "reviewer" %}Évaluateur des extraits de casier : extraits de casier judiciaire et candidatures{% else %}Conseil d'administration : supervision, en lecture seule{% endif %}{% endfor %}
+
+Créez votre compte (ou connectez-vous, si vous en avez déjà un avec cette adresse) et acceptez ici :
+
+{{ accept_url }}
+
+Le lien est valable {{ valid_days }} jours. Vous ne vous y attendiez pas ? Vous pouvez ignorer cet e-mail.
+""",
+        },
+    },
+    {
         "key": "two_step_turned_on",
         "category": MailCategory.SERVICE,
         "description": "Two-step login was turned on for the account (accounts/two_step.py). "
@@ -1441,6 +1494,13 @@ SAMPLE_CONTEXT = {
         "new_email": "ellen.new@example.com",
         "changed_at": datetime(2026, 10, 3, 14, 30),
         "contact_url": "https://coolregistration.localhost/contact/",
+    },
+    "organisation_invitation": {
+        **_common,
+        "invited_by": "Priya Nair",
+        "roles": ["reviewer"],
+        "accept_url": "https://coolregistration.localhost/invitation/abc-123/",
+        "valid_days": 14,
     },
     "organisation_role_changed": {
         **_common,

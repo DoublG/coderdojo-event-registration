@@ -87,6 +87,7 @@ class Erasure(TextChoices):
 RETENTION_RULES = {
     "account": "Until two years after the last login: reminder mails 30 and 7 days before, then erased.",
     "organisation_role": "While the organisation role is held.",
+    "organisation_invitation": "Deleted 30 days after it was accepted, withdrawn or expired.",
     "admin_access": "With the audit log: until the account is erased (two years after its last login, or on request).",
     "child": "Until N years after the child's last session, or after they turn 18.",
     "registration": "The link to the child is anonymised N years after the session; the numbers stay.",

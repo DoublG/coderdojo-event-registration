@@ -448,6 +448,59 @@ class AdminAccessGrant(models.Model):
         return self.ended_at is None and self.started_at <= now < self.expires_at
 
 
+class OrganisationInvitationQuerySet(models.QuerySet):
+    def pending(self, now=None):
+        """Not accepted, withdrawn or expired yet."""
+        now = now or timezone.now()
+        return self.filter(accepted_at__isnull=True, withdrawn_at__isnull=True, expires_at__gt=now)
+
+
+class OrganisationInvitationManager(models.Manager.from_queryset(OrganisationInvitationQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().select_related("invited_by")
+
+
+class OrganisationInvitation(models.Model):
+    """An invitation to someone without an account to take organisation roles
+    (DATA_MODEL.md §23). The person creates their own account from the
+    mailed link (or logs in, if they made one since), and the roles are
+    granted when an account with this same address accepts it. Made,
+    resent, withdrawn and accepted only through accounts.invitations; the
+    link's token is stored only as a hash."""
+
+    email = models.EmailField()
+    name = models.CharField(max_length=150, help_text="To recognise the invitation by; the mail greets them with it.")
+    roles = models.JSONField(default=list, help_text="The OrganisationRole roles it grants.")
+    language = models.CharField(max_length=10, blank=True, help_text="The invitation mail's language.")
+    invited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    token_hash = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    expires_at = models.DateTimeField()
+    accepted_at = models.DateTimeField(null=True, blank=True)
+    accepted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="organisation_invitations",
+    )
+    withdrawn_at = models.DateTimeField(null=True, blank=True)
+
+    objects = OrganisationInvitationManager()
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.email} ({self.created_at:%Y-%m-%d})"
+
+    @property
+    def is_pending(self):
+        return self.accepted_at is None and self.withdrawn_at is None and self.expires_at > timezone.now()
+
+
 class SignInRequirementManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().select_related("updated_by")

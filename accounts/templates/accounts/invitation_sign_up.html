@@ -1,0 +1,31 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Create your account" %} · CoderDojo Belgium{% endblock %}
+{% block root_class %}invitation-root{% endblock %}
+{% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
+
+{% block extra_style %}
+<style>
+  .invitation-root { background: var(--surface-sunken); }
+  .invitation-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+  .invitation-root .page-title { color: var(--ink); margin: 0 0 var(--space-4); }
+  .invitation-root .form-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
+</style>
+{% endblock %}
+
+{% block content %}
+  {% comment %}Creating your own account from an organisation invitation (accounts/people.py organisation_invitation_sign_up, DATA_MODEL.md §23).{% endcomment %}
+  <div class="page">
+    <h1 class="display-lg page-title">{% translate "Create your account" %}</h1>
+    <div class="form-card">
+      <p class="body-sm">{% blocktranslate with email=invitation.email %}You log in with <strong>{{ email }}</strong>, the address you were invited at.{% endblocktranslate %}</p>
+      <form method="post" class="cd-form" novalidate>
+        {% csrf_token %}
+        {{ form }}
+        <div class="cd-form__actions">
+          <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Create my account and accept" %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

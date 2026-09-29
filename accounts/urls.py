@@ -53,6 +53,22 @@ urlpatterns = [
     path("manage/people/<int:user_id>/", people.manage_person, name="manage_person"),
     path("manage/people/access/<int:grant_id>/end/", people.manage_people_end_access, name="manage_people_end_access"),
     path(
+        "manage/people/invitations/<int:invitation_id>/resend/",
+        people.manage_invitation_resend,
+        name="manage_invitation_resend",
+    ),
+    path(
+        "manage/people/invitations/<int:invitation_id>/withdraw/",
+        people.manage_invitation_withdraw,
+        name="manage_invitation_withdraw",
+    ),
+    path("invitation/<str:token>/", people.organisation_invitation, name="organisation_invitation"),
+    path(
+        "invitation/<str:token>/sign-up/",
+        people.organisation_invitation_sign_up,
+        name="organisation_invitation_sign_up",
+    ),
+    path(
         "manage/security/accounts/<int:user_id>/turn-off/", manage.turn_off_two_step, name="manage_security_turn_off"
     ),
     path("account/edit/", views.edit_account, name="edit_account"),

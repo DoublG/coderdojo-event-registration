@@ -323,6 +323,31 @@ class OrganisationRolesForm(forms.Form):
         self.fields["roles"].choices = [(role, label) for role, label, _description in ROLES]
 
 
+class InvitationForm(OrganisationRolesForm):
+    """Inviting someone without an account to organisation roles (the People
+    pages, accounts.invitations, DATA_MODEL.md §23)."""
+
+    name = forms.CharField(label=_("Their name"), max_length=150)
+    email = forms.EmailField(label=_("Their email address"))
+    language = forms.ChoiceField(label=_("Language of the invitation"), choices=settings.LANGUAGES)
+    field_order = ["name", "email", "language", "roles"]
+
+
+class InvitedSignUpForm(forms.Form):
+    """Creating your own account from an organisation invitation: like family
+    sign-up without the children, and the address is the invited one."""
+
+    name = forms.CharField(label=_("Full name"), max_length=150)
+    phone = forms.CharField(label=_("Phone"), required=False, max_length=30)
+    password = forms.CharField(label=_("Password"), widget=forms.PasswordInput())
+    preferred_language = forms.ChoiceField(label=_("Language for emails"), required=False, choices=settings.LANGUAGES)
+
+    def clean_password(self):
+        password = self.cleaned_data["password"]
+        validate_password(password)
+        return password
+
+
 class _NewEmailMixin:
     """The new address of an email change, checked by the service that
     makes it (accounts.email_change.check_new_address)."""

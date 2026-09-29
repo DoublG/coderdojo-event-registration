@@ -122,6 +122,36 @@ def send(
         raise
 
 
+def send_to_address(address, template_key, context=None, *, language, name=""):
+    """Queue one service mail to someone without an account yet: an
+    invitation to the organisation (accounts.invitations, DATA_MODEL.md
+    §23). Like send(), rendered now in `language` and blocked for a
+    suppressed address, but with no account: no preferences to check, and
+    the row's `user` stays empty."""
+    address = (address or "").strip()
+    language = language or FALLBACK_LANGUAGE
+    context = {"recipient_name": name, "site_url": settings.SITE_URL, **(context or {})}
+    subject, body = render(template_key, language, context)
+    if not address:
+        reason = "No address."
+    elif is_suppressed_address(address):
+        reason = "The address is blocked (bounce, complaint or by hand)."
+    else:
+        reason = ""
+    return EmailMessage.objects.create(
+        user=None,
+        recipient=address,
+        category=MailCategory.SERVICE,
+        template_key=template_key,
+        language=language,
+        subject=subject,
+        body=body,
+        status=EmailMessage.Status.SUPPRESSED if reason else EmailMessage.Status.PENDING,
+        status_reason=reason,
+        priority=PRIORITY[MailCategory.SERVICE],
+    )
+
+
 def send_or_log(user, category, template_key, context=None, **kwargs):
     """send(), but a missing template is logged instead of raised: for mail
     sent as a side effect of something else (a reviewer's decision, a

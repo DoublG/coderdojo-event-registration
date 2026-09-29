@@ -38,6 +38,45 @@
     </table>
   </div>
 
+  <h2 class="heading-md" style="margin-top: var(--space-6);">{% translate "Invitations waiting" %}</h2>
+  {% if invitations %}
+    <div class="cd-table-wrap">
+      <table class="cd-table cd-table--zebra">
+        <thead>
+          <tr>
+            <th class="label" scope="col">{% translate "Name" %}</th>
+            <th class="label" scope="col">{% translate "Email" %}</th>
+            <th class="label" scope="col">{% translate "Roles" %}</th>
+            <th class="label" scope="col">{% translate "Valid until" %}</th>
+            <th class="label" scope="col" aria-label="{% translate "Actions" %}"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for invitation, roles in invitations %}
+            <tr>
+              <th class="body-sm" scope="row">{{ invitation.name }}</th>
+              <td class="body-sm">{{ invitation.email }}</td>
+              <td class="body-sm">{{ roles|join:", " }}</td>
+              <td class="body-sm">{{ invitation.expires_at|date:"d/m/Y" }}</td>
+              <td class="body-sm" style="display: flex; gap: var(--space-2);">
+                <form method="post" action="{% url 'manage_invitation_resend' invitation_id=invitation.pk %}">
+                  {% csrf_token %}
+                  <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Send again" %}</button>
+                </form>
+                <form method="post" action="{% url 'manage_invitation_withdraw' invitation_id=invitation.pk %}">
+                  {% csrf_token %}
+                  <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Withdraw" %}</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="body-sm">{% translate "No invitations waiting." %} <a href="{% url 'manage_people_add' %}#invite">{% translate "Invite someone" %}</a></p>
+  {% endif %}
+
   <h2 class="heading-md" style="margin-top: var(--space-6);">{% translate "Open access to the Django admin" %}</h2>
   {% if open_grants %}
     <div class="cd-table-wrap">

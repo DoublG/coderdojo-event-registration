@@ -3,7 +3,15 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from core.audit import AuditHistoryAdminMixin, LogAccessAdminMixin
 
-from .models import AdminAccessGrant, Guardianship, Ninja, OrganisationRole, SignInRequirement, User
+from .models import (
+    AdminAccessGrant,
+    Guardianship,
+    Ninja,
+    OrganisationInvitation,
+    OrganisationRole,
+    SignInRequirement,
+    User,
+)
 
 
 class GuardianshipInline(admin.TabularInline):
@@ -41,6 +49,18 @@ class AdminAccessGrantAdmin(admin.ModelAdmin):
     list_filter = ["end_reason"]
     search_fields = ["account__username", "account__email", "reason"]
     raw_id_fields = ["account", "ended_by"]
+
+
+@admin.register(OrganisationInvitation)
+class OrganisationInvitationAdmin(admin.ModelAdmin):
+    """Invitations to organisation roles (DATA_MODEL.md §23), sent, resent
+    and withdrawn on the organisation dashboard's People pages
+    (accounts.invitations). An edit here skips its rules: no mail goes out,
+    and the link's token is only a hash (a new link is sent from People)."""
+
+    list_display = ["email", "name", "created_at", "expires_at", "accepted_at", "withdrawn_at"]
+    search_fields = ["email", "name"]
+    raw_id_fields = ["invited_by", "accepted_by"]
 
 
 @admin.register(SignInRequirement)

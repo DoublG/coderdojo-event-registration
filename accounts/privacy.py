@@ -4,7 +4,15 @@ from django.contrib.auth.hashers import make_password
 
 from privacy.registry import Category, Computed, LegalBasis, Subject, anonymise, keep, personal, register
 
-from .models import AdminAccessGrant, Guardianship, Ninja, OrganisationRole, SignInRequirement, User
+from .models import (
+    AdminAccessGrant,
+    Guardianship,
+    Ninja,
+    OrganisationInvitation,
+    OrganisationRole,
+    SignInRequirement,
+    User,
+)
 
 FAMILY_AND_TEAM = (
     "The family (every guardian, and the child's own login); the team of a dojo the child signs up at; "
@@ -148,6 +156,20 @@ register(
         "ended_by": personal(Category.IDENTITY, export=False),
     },
     not_personal=["id"],
+)
+
+register(
+    OrganisationInvitation,
+    subjects={Subject.EMAIL: "email", Subject.ACCOUNT: "accepted_by"},
+    purpose="Inviting someone without an account to take organisation roles",
+    legal_basis=LegalBasis.LEGITIMATE_INTEREST,
+    retention="organisation_invitation",
+    seen_by="The organisation's admins (organisation dashboard, Django admin)",
+    fields={
+        ("email", "name", "accepted_by"): personal(Category.IDENTITY),
+        "invited_by": personal(Category.IDENTITY, export=False),
+    },
+    not_personal=["id", "roles", "language", "token_hash", "created_at", "expires_at", "accepted_at", "withdrawn_at"],
 )
 
 register(
