@@ -6,6 +6,9 @@ Logging in
 
 Use the **Log in** link and enter your email and password. (Your
 username also works if you know it, but email is what's asked for.)
+Rather log in without a password? Choose **Log in with an emailed link**
+on the login page, or switch to it for good (see
+:doc:`logging-in-with-a-link`).
 
 Forgot your password? Use **Forgot password** on the login page — you'll
 get an email with a link to set a new one.
@@ -72,9 +75,23 @@ A child can have their own login. Open the child's page from your family page
 and use the **Own login** card:
 
 - **Create login** — enter your child's own email address (it can't be one
-  that's already used by another account). Your child gets an email with a
-  link to choose their password, then logs in with that email address.
-  If the mail got lost, use **Send the password mail again**.
+  that's already used by another account) and choose how they'll log in:
+  with a password, or with a link we mail them each time (see
+  :doc:`logging-in-with-a-link`). Your child gets an email with a link to
+  choose their password, or their first login link, and then logs in with
+  that email address. If the mail got lost, use **Send the password mail
+  again** (or **Send the login mail again**).
+- **Change email address** — for a new address for your child's login.
+  Confirm with your own password; we send a link to the new address, and
+  it only changes once that link is opened (within 24 hours; your child
+  doesn't need to log in for that). Then we let the old address and you
+  know. Any of the child's parents or guardians can do this.
+- **Switch to a password** — for a child who logs in with a link: they get
+  a mail to choose a password.
+- **Turn off two-step login** — when your child uses two-step login and
+  lost their phone or passkey and their backup codes. Confirm with your
+  own password; they then log in without the second step and can set it up
+  again.
 - **Remove login** — your child can't log in any more. Their sessions,
   belt and badges stay on your family page. If your child has helped run
   sessions as a youth mentor, the login is switched off rather than
@@ -82,6 +99,12 @@ and use the **Own login** card:
   on those dojo teams ends. You can switch it back on later with
   **Switch login back on**: your child gets a new mail to choose a new
   password.
+
+The card shows how your child logs in and whether two-step login is on.
+Your child can choose between a password and a login link, and turn on
+two-step login, themselves, from **Sign-in security** on their own page,
+just like you (see :doc:`two-step-login`). We mail you whenever that
+changes.
 
 With their own login, your child sees their own page (their belt, badges,
 upcoming sessions and session history) and can sign themselves up for
@@ -121,7 +144,7 @@ will happen: which of your children are deleted with your account (those
 only you are a parent or guardian of, with their own logins, belts and
 badges; the sessions they came to keep counting, without their name),
 and which stay with their other parent or guardian. Enter your password to
-confirm; your account is deleted right away, and that can't be undone.
+confirm (with a login link: see :doc:`logging-in-with-a-link`); your account is deleted right away, and that can't be undone.
 Download your data first if you'd like a copy.
 
 **Champions and mentors:** your name stays on the sessions you helped run

@@ -33,7 +33,7 @@ update its diagram in the same change.
 11. [Mailing, segmentation and campaigns](#11-mailing-segmentation-and-campaigns)
 12. [Organisation events and promotion (later)](#12-organisation-events-and-promotion-later)
 
-Sections 13–23 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address and organisation people and roles; [section 24](#24-logging-in-with-an-emailed-link-in-progress) plans logging in with an emailed link.
+Sections 13–24 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address, organisation people and roles, and [logging in with an emailed link](#24-logging-in-with-an-emailed-link-built).
 
 ---
 
@@ -108,6 +108,9 @@ role subclasses (redesign phases 1–3, section 10).
   checked whenever a date of birth is entered or changed) is **not** a user. It
   gets a login (a `User` with `account_type="ninja"`, linked through
   `Ninja.account`) only if a parent opts it in.
+- **Every login** logs in with a password or with an emailed login link,
+  its holder's choice (`User.login_method`, §24), with two-step login on
+  top of either (§15); a ninja's own login has the same options.
 - **Organisation accounts** are adult accounts with an `OrganisationRole`
   (`board`, `admin` or `reviewer`, fixed in code): a matching permission
   group (`accounts.organisation`, kept in sync by signals) that opens the
@@ -130,6 +133,7 @@ classDiagram
         +email
         +phone
         +account_type  adult | ninja
+        +login_method  password | link (then no usable password)
         +preferred_language  mail language, empty = English
         +postal_code  optional, Belgian postcode
         +display_name, title, bio, photo  team-page profile
@@ -2982,7 +2986,7 @@ What we checked in its 3.4.1 source, and what the plan has to work around:
 
 ## 15. Two-step login and the sign-in policy (built)
 
-**Built.** Every adult account can turn on two-step login (an authenticator
+**Built.** Every account (an adult's, and since §24 a ninja's own login too) can turn on two-step login (an authenticator
 app, passkeys, backup codes); the organisation decides per role which ones
 **must** use it (the sign-in policy), from a day it chooses. For now every
 role is on "password only": two-step login is optional for everyone, and
@@ -3040,7 +3044,9 @@ flowchart LR
   others as alternatives, so exactly one app or passkey carries that name:
   the first one added, and another one when it's removed.
 - **One login page**: `/login/` (`LoginView`, `LOGIN_URL`). The admin's
-  login is patched to redirect there (`TWO_FACTOR_PATCH_ADMIN`). Family
+  login is patched to redirect there (`TWO_FACTOR_PATCH_ADMIN`). A login
+  link (§24) goes through the same steps: `LoginLinkView` is `LoginView`
+  with another first step. Family
   sign-up logs a brand-new account in (no device yet), the password reset
   doesn't log in (`post_reset_login = False`), and a child's set-password
   link doesn't either.
@@ -3073,7 +3079,8 @@ board members, background-check reviewers, active champions, active
 mentors, and every adult account. An account's requirement is the strongest
 level among its roles whose day has come; a stronger one set for a later
 day is *upcoming* (a notice in every page shell, `sign_in_notice`). Ninja
-logins and the API's technical accounts are never asked. Rules in
+logins and the API's technical accounts are never asked (a ninja's own
+login may use two-step login, §24; it's never required of it). Rules in
 `accounts/sign_in.py`; set on the organisation dashboard's *Sign-in
 security* page (`/manage/security/`, `accounts/manage.py`), which also
 counts per role how many accounts already have two-step login or a passkey.
@@ -3128,7 +3135,7 @@ flowchart TD
   *Required from* a few weeks out.
 - **Passwordless login** with a passkey (no password at all) isn't built:
   the passkey is always the second step. Logging in with an emailed link instead of a
-  password is planned in [§24](#24-logging-in-with-an-emailed-link-in-progress).
+  password is planned in [§24](#24-logging-in-with-an-emailed-link-built).
 - **Forget every remembered browser** without changing the password isn't
   possible with the package's cookie; changing the password does it.
 - TOTP secrets are stored unencrypted in the database, as django-otp does.
@@ -3574,8 +3581,9 @@ carries the message for the guardian); the views
   `unique_username`, the guardian's mail language) with **no usable
   password**, links it as `Ninja.account`, and queues the
   `ninja_account_created` service mail with a set-password link (Django's
-  password-reset confirm page, built on `SITE_URL`). No temporary password
-  is ever mailed. "Send the password mail again" is there as long as no
+  password-reset confirm page, built on `SITE_URL`), or, when the guardian
+  chose a login link (§24), the child's first login link. No temporary
+  password is ever mailed. "Send the password mail again" is there as long as no
   password has been chosen (the normal "Forgot password" skips accounts
   without a usable password).
 - **Deletion — decided:** removing a login **deletes** the account, unless
@@ -4288,12 +4296,29 @@ docstrings say an edit there skips the rules above).
 1. **Listing on the team page** (`content.OrganisationTeamMember`) stays
    separate; a later *Also list on the team page* shortcut is possible.
 
-## 24. Logging in with an emailed link (in progress)
+## 24. Logging in with an emailed link (built)
 
-**In progress: phases 1–6 built** (`accounts/login_links.py`, `accounts/reauth.py`,
-`accounts.views.LoginLinkView` / `login_link_request`,
-`accounts/security_mail.py`). Today every account logs in with its
-email (or username) and a password, and only adult accounts can add the
+**Built** (all seven phases, as planned below). The code:
+`User.login_method`; the tokens, the request and the switches in
+`accounts/login_links.py`; the login itself in
+`accounts.views.LoginLinkView` / `login_link_request`; confirming without a
+password in `accounts/reauth.py` and `accounts.forms.ConfirmIdentityForm`
+(template `accounts/partials/_confirm_identity.html`); the *How you log in*
+card and its pages in `accounts/security_views.py`; the guardian's actions
+in `accounts/child_accounts.py` (`turn_off_two_step`, `switch_to_password`,
+`change_email`) and `accounts.views._guardian_login_action`; the security
+mails (and the guardians' `child_login_changed` notice) in
+`accounts/security_mail.py`; `manage.py seed_login_links`. Help page:
+`docs/source/families/logging-in-with-a-link.rst`. Where the build differs
+from the plan text: no per-IP throttle (see the decision); the guardian's
+email change is throttled per child login, as the account's own; the mail
+templates that changed (the child's first mail, the guardian-started email
+change, two-step login turned off by a guardian) reach existing databases
+through a data migration (`mailing/migrations/0012_…`) that only updates a
+row still exactly as seeded, since `load_mail_templates` never overwrites.
+
+Before this, every account logged in with its
+email (or username) and a password, and only adult accounts could add the
 second step (§15). This plan lets each account holder **choose** how they
 log in: with a **password**, as now, or with a **login link** we mail
 them every time (a "magic link": no password to remember). It's the
@@ -4389,7 +4414,7 @@ link" (*inloglink*, *lien de connexion*), never "magic link".
     organisation's), and on confirming it's checked again that the
     starter is still a guardian of that child.
   - The same checks (taken address, blocked address, one request a
-    minute, per guardian), the `email_changed` notice to the old address
+    minute, per child login), the `email_changed` notice to the old address
     **and** to the guardians, the child's other sessions ended, the audit
     log's actor the guardian (`set_actor`). Afterwards the page offers the
     child a password-reset mail or a login link, depending on its method.

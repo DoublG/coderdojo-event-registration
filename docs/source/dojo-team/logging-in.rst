@@ -4,7 +4,8 @@ Logging in as a dojo team member
 Champions and mentors use their own CoderDojo account — the same account
 they applied with (see :doc:`../volunteering/become-a-mentor-or-volunteer`
 and :doc:`../volunteering/start-a-new-dojo`). There's no separate login
-for your dojo work: log in at **Log in** as usual.
+for your dojo work: log in at **Log in** as usual, with your password or a
+login link (see :doc:`../families/logging-in-with-a-link`).
 
 After that, logging in takes you straight to your dojo's dashboard — as
 its **champion** (the person who runs the dojo), or as a **mentor** once

@@ -638,7 +638,7 @@ Tot dan verandert er niets. Heb je dit niet gevraagd? Dan kan je deze e-mail neg
             "fr-be": """
 Bonjour {{ recipient_name }},
 
-{% if by_guardian %}{{ by_guardian }} change l'adresse e-mail de votre connexion CoderDojo : {{ old_email }} devient {{ new_email }}.{% elif by_organisation %}À votre demande, CoderDojo Belgium change l'adresse e-mail de votre compte CoderDojo : {{ old_email }} devient {{ new_email }}.{% else %}Vous avez demandé à changer l'adresse e-mail de votre compte CoderDojo : {{ old_email }} devient {{ new_email }}.{% endif %}
+{% if by_guardian %}{{ by_guardian }} change l'adresse e-mail de votre compte CoderDojo : {{ old_email }} devient {{ new_email }}.{% elif by_organisation %}À votre demande, CoderDojo Belgium change l'adresse e-mail de votre compte CoderDojo : {{ old_email }} devient {{ new_email }}.{% else %}Vous avez demandé à changer l'adresse e-mail de votre compte CoderDojo : {{ old_email }} devient {{ new_email }}.{% endif %}
 
 Pour confirmer, ouvrez ce lien dans les {{ valid_hours }} heures :
 
@@ -873,7 +873,7 @@ Was jij dit niet? Neem dan meteen contact met ons op:
             "fr-be": """
 Bonjour {{ recipient_name }},
 
-{% if method == "link" %}Désormais, vous vous connectez à CoderDojo avec un lien que nous vous envoyons par e-mail. Votre mot de passe ne fonctionne plus.{% elif by_guardian %}{{ by_guardian }} a remis votre connexion CoderDojo sur un mot de passe. Nous vous avons envoyé un autre e-mail pour en choisir un.{% else %}Désormais, vous vous connectez à CoderDojo avec votre nouveau mot de passe. Les liens de connexion ne fonctionnent plus.{% endif %}
+{% if method == "link" %}Désormais, vous vous connectez à CoderDojo avec un lien que nous vous envoyons par e-mail. Votre mot de passe ne fonctionne plus.{% elif by_guardian %}{{ by_guardian }} a remis votre compte CoderDojo sur un mot de passe. Nous vous avons envoyé un autre e-mail pour en choisir un.{% else %}Désormais, vous vous connectez à CoderDojo avec votre nouveau mot de passe. Les liens de connexion ne fonctionnent plus.{% endif %}
 
 Vous pouvez le voir et le changer sur votre page Sécurité de connexion :
 
@@ -893,7 +893,7 @@ Ce n'était pas vous ? Contactez-nous immédiatement :
         "subject": {
             "en-us": "{{ child_name }}'s CoderDojo login changed",
             "nl-be": "De CoderDojo-login van {{ child_name }} is gewijzigd",
-            "fr-be": "La connexion CoderDojo de {{ child_name }} a changé",
+            "fr-be": "Le compte CoderDojo de {{ child_name }} a changé",
         },
         "body": {
             "en-us": """
@@ -921,9 +921,9 @@ Iets wat je niet herkent? Bekijk het samen, of neem contact met ons op.
             "fr-be": """
 Bonjour {{ recipient_name }},
 
-{% if change == "two_step_turned_on" %}{{ child_name }} a activé la connexion en deux étapes.{% elif change == "two_step_method_added" %}{{ child_name }} a ajouté une méthode de connexion en deux étapes.{% elif change == "two_step_method_removed" %}{{ child_name }} a supprimé une méthode de connexion en deux étapes.{% elif change == "two_step_turned_off" %}La connexion en deux étapes a été désactivée pour la connexion de {{ child_name }}.{% elif change == "backup_code_used" %}{{ child_name }} s'est connecté avec un code de secours.{% elif change == "login_method_changed" %}{% if method == "link" %}{{ child_name }} se connecte maintenant avec un lien envoyé par e-mail.{% else %}{{ child_name }} se connecte maintenant avec un mot de passe.{% endif %}{% elif change == "email_changed" %}La connexion de {{ child_name }} utilise maintenant l'adresse {{ new_email }}.{% endif %}
+{% if change == "two_step_turned_on" %}{{ child_name }} a activé la connexion en deux étapes.{% elif change == "two_step_method_added" %}{{ child_name }} a ajouté une méthode de connexion en deux étapes.{% elif change == "two_step_method_removed" %}{{ child_name }} a supprimé une méthode de connexion en deux étapes.{% elif change == "two_step_turned_off" %}La connexion en deux étapes a été désactivée pour le compte de {{ child_name }}.{% elif change == "backup_code_used" %}{{ child_name }} s'est connecté avec un code de secours.{% elif change == "login_method_changed" %}{% if method == "link" %}{{ child_name }} se connecte maintenant avec un lien envoyé par e-mail.{% else %}{{ child_name }} se connecte maintenant avec un mot de passe.{% endif %}{% elif change == "email_changed" %}Le compte de {{ child_name }} utilise maintenant l'adresse {{ new_email }}.{% endif %}
 
-Vous gérez la connexion de {{ child_name }} sur sa page :
+Vous gérez le compte de {{ child_name }} sur sa page :
 
 {{ child_url }}
 
@@ -1205,7 +1205,7 @@ Je kan het hier weer aanzetten:
             "fr-be": """
 Bonjour {{ recipient_name }},
 
-{% if by_guardian %}{{ by_guardian }} a désactivé la connexion en deux étapes de votre connexion CoderDojo.{% elif by_organisation %}Comme vous nous l'avez demandé, nous avons désactivé la connexion en deux étapes de votre compte CoderDojo.{% else %}La connexion en deux étapes vient d'être désactivée sur votre compte CoderDojo.{% endif %} Vous vous connectez maintenant avec votre seul mot de passe. Votre application, vos clés d'accès et vos codes de secours ne fonctionnent plus.
+{% if by_guardian %}{{ by_guardian }} a désactivé la connexion en deux étapes de votre compte CoderDojo.{% elif by_organisation %}Comme vous nous l'avez demandé, nous avons désactivé la connexion en deux étapes de votre compte CoderDojo.{% else %}La connexion en deux étapes vient d'être désactivée sur votre compte CoderDojo.{% endif %} Vous vous connectez maintenant avec votre seul mot de passe. Votre application, vos clés d'accès et vos codes de secours ne fonctionnent plus.
 
 Vous pouvez la réactiver ici :
 

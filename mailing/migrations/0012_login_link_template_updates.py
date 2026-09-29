@@ -43,7 +43,7 @@ UPDATES = [
         "subject": "Confirmez votre nouvelle adresse e-mail",
         "body": "Bonjour {{ recipient_name }},\n"
         "\n"
-        "{% if by_guardian %}{{ by_guardian }} change l'adresse e-mail de votre connexion CoderDojo : {{ "
+        "{% if by_guardian %}{{ by_guardian }} change l'adresse e-mail de votre compte CoderDojo : {{ "
         "old_email }} devient {{ new_email }}.{% elif by_organisation %}À votre demande, CoderDojo Belgium "
         "change l'adresse e-mail de votre compte CoderDojo : {{ old_email }} devient {{ new_email }}.{% "
         "else %}Vous avez demandé à changer l'adresse e-mail de votre compte CoderDojo : {{ old_email }} "
@@ -207,7 +207,7 @@ UPDATES = [
         "subject": "La connexion en deux étapes est désactivée",
         "body": "Bonjour {{ recipient_name }},\n"
         "\n"
-        "{% if by_guardian %}{{ by_guardian }} a désactivé la connexion en deux étapes de votre connexion "
+        "{% if by_guardian %}{{ by_guardian }} a désactivé la connexion en deux étapes de votre compte "
         "CoderDojo.{% elif by_organisation %}Comme vous nous l'avez demandé, nous avons désactivé la "
         "connexion en deux étapes de votre compte CoderDojo.{% else %}La connexion en deux étapes vient "
         "d'être désactivée sur votre compte CoderDojo.{% endif %} Vous vous connectez maintenant avec "

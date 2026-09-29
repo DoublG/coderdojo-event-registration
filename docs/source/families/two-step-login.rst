@@ -1,10 +1,11 @@
 Two-step login
 ==============
 
-With two-step login, logging in takes your password **and** a second step.
-Someone who finds out your password still can't get into your account. It
-works for every account: parents, mentors, champions and the organisation.
-Children's own logins never use it.
+With two-step login, logging in takes your password (or your login link,
+see :doc:`logging-in-with-a-link`) **and** a second step. Someone who
+finds out your password, or gets into your mailbox, still can't get into
+your account. It works for every account: parents, mentors, champions, the
+organisation and children's own logins.
 
 Open your account page and choose **Sign-in security**.
 
@@ -40,8 +41,8 @@ many you have left and can make a new set; the old codes then stop working.
 Logging in
 ----------
 
-Log in with your email address and password as usual. Then the site asks
-you to confirm it's you: enter the code from your app, or choose **Use my
+Log in with your email address and password, or your login link, as usual.
+Then the site asks you to confirm it's you: enter the code from your app, or choose **Use my
 passkey**. Under **Can't use this?** you can switch to your other method
 or to a backup code.
 
@@ -69,4 +70,9 @@ Lost your phone and your backup codes?
 
 Mail the organisation (the address is on the login page). Once they've
 checked it's really you, they turn off your two-step login and you log in
-with your password only. Then set it up again.
+without the second step. Then set it up again.
+
+For a child's own login, their parent or guardian does this instead, from
+the **Own login** card on the child's page (see
+:doc:`managing-your-account`). When a child changes their two-step login,
+their parents or guardians get a mail too.

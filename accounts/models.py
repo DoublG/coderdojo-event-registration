@@ -555,7 +555,7 @@ class SignInRequirement(models.Model):
     TWO_STEP = "two_step"
     PASSKEY = "passkey"
     LEVEL_CHOICES = [
-        (PASSWORD, _("Password only (two-step login optional)")),
+        (PASSWORD, _("Password or login link (two-step login optional)")),
         (TWO_STEP, _("Two-step login (authenticator app or passkey)")),
         (PASSKEY, _("Two-step login with a passkey")),
     ]

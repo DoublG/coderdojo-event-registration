@@ -2364,9 +2364,10 @@ class ManageSignInSecurityTests(TwoStepTestMixin, TestCase):
         from .models import SignInRequirement
 
         self.add_app()
+        User.objects.filter(pk=self.user.pk).update(login_method=User.LOGIN_LINK)
         self.client.force_login(self.admin)
         rows = {row[0]: row[-1] for row in self.client.get(reverse("manage_security")).context["rows"]}
-        self.assertEqual(rows[SignInRequirement.ADULT], {"total": 2, "on": 1, "passkey": 0})
+        self.assertEqual(rows[SignInRequirement.ADULT], {"total": 2, "on": 1, "passkey": 0, "link": 1})
 
     def test_turning_off_someones_two_step_login(self):
         from . import two_step
@@ -3639,6 +3640,39 @@ class GuardianChangesChildAddressTests(LoginLinkTestMixin, TestCase):
         admin = User.objects.create(username="boss", email="boss@example.com")
         with self.assertRaises(EmailChangeError):
             request_change(self.account, "emma.new@example.com", started_by=admin)
+
+
+class SeedLoginLinksTests(TestCase):
+    """seed_login_links and the credentials file's note for those accounts."""
+
+    def test_switches_a_parent_and_a_mentor_but_never_the_two_step_picks(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from .seed_credentials import LOGIN_LINK_PASSWORD, describe_account, describe_rows
+
+        dojo = make_dojo("Dojo Test", champion=User.objects.create(username="champ", email="c@coderdojo-demo.example"))
+        mentors = [User.objects.create(username=f"mentor-{i}", email=f"m{i}@coderdojo-demo.example") for i in (1, 2)]
+        for mentor in mentors:
+            add_member(dojo, mentor, DojoMembership.MENTOR)
+        parents = [User.objects.create(username=f"parent-{i}", email=f"p{i}@coderdojo-demo.example") for i in (1, 2)]
+        for parent in parents:
+            make_ninja(parent, "Kid")
+        outsider = User.objects.create(username="real", email="real@example.com")
+        make_ninja(outsider, "Other")
+        call_command("seed_two_step", stdout=StringIO())
+        call_command("seed_login_links", stdout=StringIO())
+        switched = set(User.objects.filter(login_method=User.LOGIN_LINK).values_list("username", flat=True))
+        self.assertEqual(switched, {"mentor-2", "parent-2"})
+        self.assertFalse(User.objects.get(username="parent-2").has_usable_password())
+        call_command("seed_login_links", stdout=StringIO())  # rerun-safe
+        self.assertEqual(User.objects.filter(login_method=User.LOGIN_LINK).count(), 2)
+
+        parent = User.objects.get(username="parent-2")
+        self.assertIn("LOGIN LINK", describe_account(parent))
+        row = describe_rows([{"role": "guardian", "username": "parent-2", "email": parent.email, "password": "x"}])[0]
+        self.assertEqual((row["role"], row["password"]), ("guardian", LOGIN_LINK_PASSWORD))
 
 
 def settings_site_url():

@@ -9,7 +9,9 @@ To create an account:
 
 #. Go to **Get involved** and choose **Register your family**, or go
    directly to the registration page.
-#. Fill in your own details (name, email, and a password).
+#. Fill in your own details (name and email), and choose how you want to
+   log in: with a password, or with a link we mail you each time (see
+   :doc:`logging-in-with-a-link`). Only a password needs filling in.
 #. Optionally add your postcode. The dojo finder then starts from where you
    live, and we can let you know about dojos and sessions near you. Pick
    the language you'd like to receive emails in; it starts as the language
@@ -35,8 +37,10 @@ To create an account:
 #. Submit the form.
 
 Unlike applying to volunteer or start a dojo, there's no review step —
-your account is created immediately and you're taken straight to your
-family's page, signed in.
+your account is created immediately. With a password, you're taken
+straight to your family's page, signed in. With a login link, we mail you
+your first link: open it within 3 days to log in for the first time, which
+also confirms your email address.
 
 .. note::
 

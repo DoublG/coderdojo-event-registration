@@ -26,6 +26,8 @@ _REAL_CREDENTIALS_FILE = CREDENTIALS_FILE
 # totp_secret: the key of the account's authenticator app when it has two-step
 # login on (seed_two_step); add it to an app, or use `manage.py totp_code`.
 FIELDNAMES = ["role", "username", "email", "password", "totp_secret", "description"]
+# The password column of an account that logs in with a link (DATA_MODEL.md §24).
+LOGIN_LINK_PASSWORD = "(login link)"
 
 # Seeded accounts use these domains (seeded child logins have no email).
 SEED_EMAIL_DOMAINS = ("@coderdojo-demo.example", "@coderdojobelgium.example")
@@ -89,6 +91,8 @@ def describe_rows(rows):
         user = users.get(row["username"])
         row["description"] = describe_account(user) if user else "Account no longer exists."
         row["totp_secret"] = totp_secret(user) if user else ""
+        if user and user.uses_login_link:
+            row["password"] = LOGIN_LINK_PASSWORD
     return rows
 
 
@@ -226,6 +230,10 @@ def describe_account(user):
             }
         )
         parts.append(f"two-step login on: {' and '.join(kinds)}, {two_step.backup_codes_left(user)} backup codes")
+    if user.uses_login_link:
+        parts.append(
+            "logs in with an emailed LOGIN LINK, no password: ask for one on /login/link/, read it in Mailpit (/mails/)"
+        )
     if not user.is_active:
         parts.append("DISABLED (can't log in)")
     if user.preferred_language:

@@ -45,7 +45,9 @@ class Command(BaseCommand):
             for domain in SEED_EMAIL_DOMAINS:
                 seeded |= Q(email__iendswith=domain)
             missing = (
-                User.objects.filter(seeded).exclude(username__in=[row["username"] for row in rows]).order_by("id")
+                User.objects.filter(seeded, login_method=User.LOGIN_PASSWORD)
+                .exclude(username__in=[row["username"] for row in rows])
+                .order_by("id")
             )
             for user in missing:
                 password = generate_password()

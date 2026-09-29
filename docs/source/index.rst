@@ -21,6 +21,7 @@ the people using the site, not for the people building it.
    families/signing-up-for-a-session
    families/managing-your-account
    families/mail-preferences
+   families/logging-in-with-a-link
    families/two-step-login
 
 .. toctree::

@@ -1,0 +1,144 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-29 11:54+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/families/logging-in-with-a-link.rst:2
+msgid "Logging in with a link"
+msgstr "Se connecter avec un lien"
+
+#: ../../source/families/logging-in-with-a-link.rst:4
+msgid ""
+"You can log in with a password, or with a **login link**: a link we mail "
+"you each time you log in, so there's no password to remember. You choose "
+"which, and you can switch whenever you like. It works the same for every "
+"account: parents, volunteers, the organisation and children's own logins."
+msgstr ""
+"Vous pouvez vous connecter avec un mot de passe, ou avec un **lien de "
+"connexion** : un lien que nous vous envoyons par e-mail chaque fois que "
+"vous vous connectez, sans mot de passe à retenir. Vous choisissez, et "
+"vous pouvez changer quand vous voulez. Cela fonctionne de la même façon "
+"pour chaque compte : parents, bénévoles, l'organisation et les comptes "
+"propres des enfants."
+
+#: ../../source/families/logging-in-with-a-link.rst:10
+msgid "Logging in"
+msgstr "Se connecter"
+
+#: ../../source/families/logging-in-with-a-link.rst:12
+msgid ""
+"On the login page, choose **Log in with an emailed link**, enter your "
+"email address and choose **Email me a login link**. Open the mail and "
+"click the link; the page asks whether to log in, and you're in. A link "
+"works once, within 15 minutes, and logs in the device you open it on."
+msgstr ""
+"Sur la page de connexion, choisissez **Se connecter avec un lien par "
+"e-mail**, entrez votre adresse e-mail et choisissez **Envoyez-moi un lien"
+" de connexion**. Ouvrez l'e-mail et cliquez sur le lien ; la page vous "
+"demande si vous voulez vous connecter, et c'est fait. Un lien fonctionne "
+"une fois, dans les 15 minutes, et connecte l'appareil sur lequel vous "
+"l'ouvrez."
+
+#: ../../source/families/logging-in-with-a-link.rst:17
+msgid ""
+"If you use two-step login, you're still asked for your second step after "
+"the link (see :doc:`two-step-login`)."
+msgstr ""
+"Si vous utilisez la connexion en deux étapes, votre deuxième étape est "
+"toujours demandée après le lien (voir :doc:`two-step-login`)."
+
+#: ../../source/families/logging-in-with-a-link.rst:20
+msgid ""
+"Nothing arrived? Look in your spam folder, or ask again after a minute. "
+"If your account logs in with a password, the mail says so, with a link to"
+" choose a new password."
+msgstr ""
+"Rien reçu ? Regardez dans vos spams, ou redemandez après une minute. Si "
+"votre compte se connecte avec un mot de passe, l'e-mail vous le dit, avec"
+" un lien pour choisir un nouveau mot de passe."
+
+#: ../../source/families/logging-in-with-a-link.rst:25
+msgid "Switching to a login link"
+msgstr "Passer à un lien de connexion"
+
+#: ../../source/families/logging-in-with-a-link.rst:27
+msgid ""
+"On your account page, open **Sign-in security** and choose **Switch to a "
+"login link**. Confirm with your password: we mail you a confirmation, and"
+" your password only stops working once you open it (within 24 hours). So "
+"if our mail never reaches you, nothing changes. Once it's done, you're "
+"logged out on your other devices."
+msgstr ""
+"Sur votre page de compte, ouvrez **Sécurité de connexion** et choisissez "
+"**Passer à un lien de connexion**. Confirmez avec votre mot de passe : "
+"nous vous envoyons une confirmation, et votre mot de passe ne cesse de "
+"fonctionner qu'une fois celle-ci ouverte (dans les 24 heures). Si notre "
+"e-mail ne vous parvient jamais, rien ne change donc. Ensuite, vous êtes "
+"déconnecté sur vos autres appareils."
+
+#: ../../source/families/logging-in-with-a-link.rst:33
+msgid ""
+"You can also choose a login link when you create your account (see :doc"
+":`creating-an-account`)."
+msgstr ""
+"Vous pouvez aussi choisir un lien de connexion en créant votre compte "
+"(voir :doc:`creating-an-account`)."
+
+#: ../../source/families/logging-in-with-a-link.rst:37
+msgid "Switching back to a password"
+msgstr "Revenir à un mot de passe"
+
+#: ../../source/families/logging-in-with-a-link.rst:39
+msgid ""
+"On **Sign-in security**, choose **Use a password instead** and choose a "
+"password. From then on you log in with it, and login links stop working."
+msgstr ""
+"Sur **Sécurité de connexion**, choisissez **Utiliser plutôt un mot de "
+"passe** et choisissez un mot de passe. Ensuite, vous vous connectez avec "
+"lui et les liens de connexion ne fonctionnent plus."
+
+#: ../../source/families/logging-in-with-a-link.rst:43
+msgid "Confirming it's you without a password"
+msgstr "Confirmer que c'est vous, sans mot de passe"
+
+#: ../../source/families/logging-in-with-a-link.rst:45
+msgid ""
+"Some changes ask you to confirm it's you first: turning off two-step "
+"login, changing your email address or deleting your account, for example."
+" With a password, you type it in. With a login link, having logged in "
+"during the last ten minutes is enough; otherwise choose **Mail me a "
+"confirmation link**. That link logs you in again and brings you back to "
+"the page."
+msgstr ""
+"Certaines modifications vous demandent d'abord de confirmer que c'est "
+"bien vous : désactiver la connexion en deux étapes, changer votre adresse"
+" e-mail ou supprimer votre compte, par exemple. Avec un mot de passe, "
+"vous le tapez. Avec un lien de connexion, il suffit de vous être connecté"
+" dans les dix dernières minutes ; sinon, choisissez **Envoyez-moi un lien"
+" de confirmation**. Ce lien vous reconnecte et vous ramène sur la page."
+
+#: ../../source/families/logging-in-with-a-link.rst:51
+msgid ""
+"We mail you whenever the way you log in changes. If you didn't do that "
+"yourself, contact us straight away."
+msgstr ""
+"Nous vous écrivons chaque fois que votre façon de vous connecter change. "
+"Si ce n'était pas vous, contactez-nous immédiatement."
+

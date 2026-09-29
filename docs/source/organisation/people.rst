@@ -47,8 +47,8 @@ Inviting someone without an account
 When the person has no account yet, fill in **Invite someone without an
 account** on the **Add a person** page: their name, their email address,
 the language of the invitation and their roles. They get a mail with a link
-that works for 14 days. With it, they create their own account (or log in,
-if they made one since) and accept. The roles only go to an account with
+that works for 14 days. With it, they create their own account, with a
+password or a login link (or log in, if they made one since), and accept. The roles only go to an account with
 the email address you invited, so a forwarded link gives nobody anything.
 
 Invitations that haven't been accepted yet are listed on the People page,

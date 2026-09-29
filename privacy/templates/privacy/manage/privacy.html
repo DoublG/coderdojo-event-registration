@@ -65,7 +65,7 @@
             <tr>
               <td class="body-sm">{{ account.get_full_name|default:account.username }}</td>
               <td class="body-sm">{{ account.email|default:"—" }}</td>
-              <td class="body-sm">{% if account.is_ninja %}{% translate "Ninja login" %}{% else %}{% translate "Adult" %}{% endif %}{% if not account.is_active %} <span class="cd-badge cd-badge--outline caption">{% translate "Inactive" %}</span>{% endif %}</td>
+              <td class="body-sm">{% if account.is_ninja %}{% translate "Ninja login" %}{% else %}{% translate "Adult" %}{% endif %}<br><span class="caption">{% if account.uses_login_link %}{% translate "Logs in with a link" %}{% else %}{% translate "Logs in with a password" %}{% endif %}</span>{% if not account.is_active %} <span class="cd-badge cd-badge--outline caption">{% translate "Inactive" %}</span>{% endif %}</td>
               <td class="body-sm cd-table__num">{{ account.children_count }}</td>
               <td class="body-sm"><a class="cd-btn cd-btn--ghost label" href="{% url 'manage_privacy_export' user_id=account.id %}">{% translate "Download data" %}</a>{% if account.is_active and not account.is_ninja %} <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_privacy_email' user_id=account.id %}">{% translate "Change email…" %}</a> <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_privacy_delete' user_id=account.id %}">{% translate "Delete…" %}</a>{% endif %}</td>
             </tr>

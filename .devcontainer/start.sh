@@ -149,6 +149,9 @@ if python manage.py shell -c "import sys; from events.models import Event; sys.e
     # totp_secret column). Only here, so a restart never turns it back on for
     # an account a tester turned it off for.
     python manage.py seed_two_step
+    # A seeded parent and mentor that log in with an emailed link (DATA_MODEL.md
+    # §24); the links arrive in Mailpit. Fresh databases only, like the above.
+    python manage.py seed_login_links
 else
     echo "Demo data already present (events exist) - skipping demo seed."
 fi

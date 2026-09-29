@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 06:08+0000\n"
+"POT-Creation-Date: 2026-09-29 11:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -26,18 +26,22 @@ msgstr "Uw account beheren"
 
 #: ../../source/families/managing-your-account.rst:5
 msgid "Logging in"
-msgstr "Inloggen"
+msgstr "Aanmelden"
 
 #: ../../source/families/managing-your-account.rst:7
 msgid ""
 "Use the **Log in** link and enter your email and password. (Your username"
-" also works if you know it, but email is what's asked for.)"
+" also works if you know it, but email is what's asked for.) Rather log in"
+" without a password? Choose **Log in with an emailed link** on the login "
+"page, or switch to it for good (see :doc:`logging-in-with-a-link`)."
 msgstr ""
-"Gebruik de link **Inloggen** en voer uw e-mailadres en wachtwoord in. (Uw"
-" gebruikersnaam werkt ook als u die kent, maar er wordt om het "
-"e-mailadres gevraagd.)"
+"Gebruik de link **Aanmelden** en vul je e-mail en wachtwoord in. (Je "
+"gebruikersnaam werkt ook als je die kent, maar er wordt om je e-mail "
+"gevraagd.) Liever zonder wachtwoord? Kies **Aanmelden met een link per "
+"e-mail** op de aanmeldpagina, of schakel er voorgoed op over (zie :doc"
+":`logging-in-with-a-link`)."
 
-#: ../../source/families/managing-your-account.rst:10
+#: ../../source/families/managing-your-account.rst:13
 msgid ""
 "Forgot your password? Use **Forgot password** on the login page — you'll "
 "get an email with a link to set a new one."
@@ -45,11 +49,11 @@ msgstr ""
 "Wachtwoord vergeten? Gebruik **Wachtwoord vergeten** op de inlogpagina — "
 "u ontvangt een e-mail met een link om een nieuw wachtwoord in te stellen."
 
-#: ../../source/families/managing-your-account.rst:14
+#: ../../source/families/managing-your-account.rst:17
 msgid "Your family page"
 msgstr "Uw gezinspagina"
 
-#: ../../source/families/managing-your-account.rst:16
+#: ../../source/families/managing-your-account.rst:19
 msgid ""
 "Once logged in, your family page lists each of your children and their "
 "upcoming sessions (including anything they're on the waiting list for, "
@@ -61,7 +65,7 @@ msgstr ""
 "duidelijk aangeduid), samen met de huidige gordel van elk kind zodra het "
 "er een heeft. Van hieruit kunt u:"
 
-#: ../../source/families/managing-your-account.rst:21
+#: ../../source/families/managing-your-account.rst:24
 msgid ""
 "**Add a child** — first name and family name (your own family name is "
 "filled in; change it if your child's is different), date of birth, an "
@@ -80,7 +84,7 @@ msgstr ""
 " de gegevens van het kind gebruiken om te kiezen welk nieuws je krijgt "
 "(zie :doc:`mail-preferences`)."
 
-#: ../../source/families/managing-your-account.rst:27
+#: ../../source/families/managing-your-account.rst:30
 msgid ""
 "**Edit a child's details** — click their name/header to edit it inline. A"
 " child who has turned 18 stays on your account; only a newly entered date"
@@ -90,7 +94,7 @@ msgstr ""
 "plaatse te bewerken. Een kind dat 18 is geworden blijft op uw account; "
 "alleen een nieuw ingevoerde geboortedatum wordt gecontroleerd."
 
-#: ../../source/families/managing-your-account.rst:30
+#: ../../source/families/managing-your-account.rst:33
 msgid ""
 "**Keep allergies or notes up to date** — anything the dojo should know "
 "(an allergy, medication, ...), on the same form. Only the champion (the "
@@ -103,7 +107,7 @@ msgstr ""
 "waarvoor uw kind is ingeschreven; andere mentoren en andere gezinnen "
 "nooit."
 
-#: ../../source/families/managing-your-account.rst:34
+#: ../../source/families/managing-your-account.rst:37
 msgid ""
 "**Choose their home dojo** — the dojo your child mainly goes to, which "
 "gets news about its sessions to you and lists your child with that dojo's"
@@ -117,7 +121,7 @@ msgstr ""
 " van uw kind, en een inschrijving elders wijzigt hem nooit; u kunt hem "
 "wijzigen (of leegmaken) wanneer u de gegevens van uw kind bewerkt."
 
-#: ../../source/families/managing-your-account.rst:39
+#: ../../source/families/managing-your-account.rst:42
 msgid ""
 "**Cancel a registration** — frees the spot for the next child on that "
 "session's waiting list."
@@ -125,7 +129,7 @@ msgstr ""
 "**Een inschrijving annuleren** — maakt de plaats vrij voor het volgende "
 "kind op de wachtlijst van die sessie."
 
-#: ../../source/families/managing-your-account.rst:41
+#: ../../source/families/managing-your-account.rst:44
 msgid ""
 "**View a child's belt and badges** — their current belt (their coding "
 "level, awarded by their dojo's champion or mentors) with the belts they "
@@ -139,11 +143,11 @@ msgstr ""
 "waaraan het werkt (bv. de aanwezigheidspolsbandjes, die bijgewerkt worden"
 " wanneer de dojo de aanwezigheid bijhoudt), en de sessiegeschiedenis."
 
-#: ../../source/families/managing-your-account.rst:48
+#: ../../source/families/managing-your-account.rst:51
 msgid "Your own details"
 msgstr "Uw eigen gegevens"
 
-#: ../../source/families/managing-your-account.rst:50
+#: ../../source/families/managing-your-account.rst:53
 msgid ""
 "At the top of your family page are your own details: your name, email "
 "address, phone number and postcode. Use **Edit my details** (or click the"
@@ -153,7 +157,7 @@ msgstr ""
 "telefoonnummer en postcode. Gebruik **Mijn gegevens aanpassen** (of klik "
 "op de begroeting) om ze ter plaatse te wijzigen, en daarna **Opslaan**."
 
-#: ../../source/families/managing-your-account.rst:54
+#: ../../source/families/managing-your-account.rst:57
 msgid ""
 "**Phone** is optional and only used if a dojo needs to reach you during a"
 " session."
@@ -161,7 +165,7 @@ msgstr ""
 "**Telefoon** is optioneel en wordt alleen gebruikt als een dojo u tijdens"
 " een sessie moet bereiken."
 
-#: ../../source/families/managing-your-account.rst:56
+#: ../../source/families/managing-your-account.rst:59
 msgid ""
 "**Postcode** is optional. It's used to tell you about dojos and sessions "
 "near you, and the dojo finder starts from it when you're signed in."
@@ -170,7 +174,7 @@ msgstr ""
 "dojo's en sessies er bij u in de buurt zijn, en de dojozoeker start ervan"
 " wanneer u bent aangemeld."
 
-#: ../../source/families/managing-your-account.rst:58
+#: ../../source/families/managing-your-account.rst:61
 msgid ""
 "**Email address** isn't changed on this form: you log in with it and "
 "every mail goes to it. Use **Change email address** (next to it), enter "
@@ -189,15 +193,15 @@ msgstr ""
 "wachtwoord niet meer? Neem dan contact met ons op via de pagina "
 "**Contact**."
 
-#: ../../source/families/managing-your-account.rst:66
+#: ../../source/families/managing-your-account.rst:69
 msgid "The language your mails are in is set on :doc:`mail-preferences`."
 msgstr "De taal van uw e-mails stelt u in bij :doc:`mail-preferences`."
 
-#: ../../source/families/managing-your-account.rst:69
+#: ../../source/families/managing-your-account.rst:72
 msgid "Giving your child their own login"
 msgstr "Uw kind een eigen login geven"
 
-#: ../../source/families/managing-your-account.rst:71
+#: ../../source/families/managing-your-account.rst:74
 msgid ""
 "A child can have their own login. Open the child's page from your family "
 "page and use the **Own login** card:"
@@ -205,20 +209,60 @@ msgstr ""
 "Een kind kan een eigen login hebben. Open de pagina van het kind vanaf uw"
 " gezinspagina en gebruik de kaart **Eigen login**:"
 
-#: ../../source/families/managing-your-account.rst:74
+#: ../../source/families/managing-your-account.rst:77
 msgid ""
 "**Create login** — enter your child's own email address (it can't be one "
-"that's already used by another account). Your child gets an email with a "
-"link to choose their password, then logs in with that email address. If "
-"the mail got lost, use **Send the password mail again**."
+"that's already used by another account) and choose how they'll log in: "
+"with a password, or with a link we mail them each time (see :doc"
+":`logging-in-with-a-link`). Your child gets an email with a link to "
+"choose their password, or their first login link, and then logs in with "
+"that email address. If the mail got lost, use **Send the password mail "
+"again** (or **Send the login mail again**)."
 msgstr ""
-"**Login aanmaken** — vul het eigen e-mailadres van uw kind in (het mag "
-"nog niet door een ander account gebruikt worden). Uw kind krijgt een "
-"e-mail met een link om een wachtwoord te kiezen en logt daarna in met dat"
-" e-mailadres. Is de e-mail zoekgeraakt? Gebruik dan **Wachtwoordmail "
-"opnieuw sturen**."
+"**Login aanmaken** — vul het eigen e-mailadres van je kind in (het mag "
+"niet al door een ander account gebruikt worden) en kies hoe je kind zich "
+"aanmeldt: met een wachtwoord, of met een link die we telkens mailen (zie "
+":doc:`logging-in-with-a-link`). Je kind krijgt een e-mail met een link om"
+" een wachtwoord te kiezen, of de eerste inloglink, en meldt zich daarna "
+"aan met dat e-mailadres. Is de mail verloren gegaan, gebruik dan **Stuur "
+"de wachtwoordmail opnieuw** (of **De aanmeldmail opnieuw sturen**)."
 
-#: ../../source/families/managing-your-account.rst:78
+#: ../../source/families/managing-your-account.rst:84
+msgid ""
+"**Change email address** — for a new address for your child's login. "
+"Confirm with your own password; we send a link to the new address, and it"
+" only changes once that link is opened (within 24 hours; your child "
+"doesn't need to log in for that). Then we let the old address and you "
+"know. Any of the child's parents or guardians can do this."
+msgstr ""
+"**E-mailadres wijzigen** — voor een nieuw adres voor de login van je "
+"kind. Bevestig met je eigen wachtwoord; we sturen een link naar het "
+"nieuwe adres, en het verandert pas als die link geopend wordt (binnen 24 "
+"uur; je kind hoeft zich daarvoor niet aan te melden). Daarna laten we het"
+" het oude adres en jou weten. Elke ouder of voogd van het kind kan dit "
+"doen."
+
+#: ../../source/families/managing-your-account.rst:89
+msgid ""
+"**Switch to a password** — for a child who logs in with a link: they get "
+"a mail to choose a password."
+msgstr ""
+"**Overschakelen naar een wachtwoord** — voor een kind dat zich met een "
+"link aanmeldt: het krijgt een mail om een wachtwoord te kiezen."
+
+#: ../../source/families/managing-your-account.rst:91
+msgid ""
+"**Turn off two-step login** — when your child uses two-step login and "
+"lost their phone or passkey and their backup codes. Confirm with your own"
+" password; they then log in without the second step and can set it up "
+"again."
+msgstr ""
+"**Aanmelden in twee stappen uitzetten** — als je kind aanmelden in twee "
+"stappen gebruikt en de telefoon of toegangssleutel en de back-upcodes "
+"kwijt is. Bevestig met je eigen wachtwoord; je kind meldt zich dan aan "
+"zonder tweede stap en kan het opnieuw instellen."
+
+#: ../../source/families/managing-your-account.rst:95
 msgid ""
 "**Remove login** — your child can't log in any more. Their sessions, belt"
 " and badges stay on your family page. If your child has helped run "
@@ -235,7 +279,21 @@ msgstr ""
 "opnieuw inschakelen met **Login opnieuw inschakelen**: uw kind krijgt dan"
 " een nieuwe e-mail om een nieuw wachtwoord te kiezen."
 
-#: ../../source/families/managing-your-account.rst:86
+#: ../../source/families/managing-your-account.rst:103
+msgid ""
+"The card shows how your child logs in and whether two-step login is on. "
+"Your child can choose between a password and a login link, and turn on "
+"two-step login, themselves, from **Sign-in security** on their own page, "
+"just like you (see :doc:`two-step-login`). We mail you whenever that "
+"changes."
+msgstr ""
+"De kaart toont hoe je kind zich aanmeldt en of aanmelden in twee stappen "
+"aanstaat. Je kind kan zelf kiezen tussen een wachtwoord en een inloglink,"
+" en aanmelden in twee stappen aanzetten, via **Aanmeldbeveiliging** op de"
+" eigen pagina, net als jij (zie :doc:`two-step-login`). We mailen je "
+"telkens dat verandert."
+
+#: ../../source/families/managing-your-account.rst:109
 msgid ""
 "With their own login, your child sees their own page (their belt, badges,"
 " upcoming sessions and session history) and can sign themselves up for "
@@ -243,9 +301,15 @@ msgid ""
 "they can't change them, you still can. The one thing they can change "
 "themselves is their avatar: clicking it on their page shows the standard "
 "avatars to pick from."
-msgstr "Met een eigen login ziet uw kind zijn eigen pagina (zijn gordel, badges, komende sessies en sessiegeschiedenis) en kan het zich zelf inschrijven voor sessies of zijn eigen plaatsen annuleren. Zijn gegevens beheert u: uw kind kan ze niet wijzigen, u wel. Het enige wat uw kind zelf kan veranderen, is zijn avatar: door erop te klikken op zijn pagina kiest het uit de standaardavatars."
+msgstr ""
+"Met een eigen login ziet uw kind zijn eigen pagina (zijn gordel, badges, "
+"komende sessies en sessiegeschiedenis) en kan het zich zelf inschrijven "
+"voor sessies of zijn eigen plaatsen annuleren. Zijn gegevens beheert u: "
+"uw kind kan ze niet wijzigen, u wel. Het enige wat uw kind zelf kan "
+"veranderen, is zijn avatar: door erop te klikken op zijn pagina kiest het"
+" uit de standaardavatars."
 
-#: ../../source/families/managing-your-account.rst:93
+#: ../../source/families/managing-your-account.rst:116
 msgid ""
 "A dojo's team can make a child with their own login a **youth mentor**: "
 "they help other ninjas during sessions. You get an email when that "
@@ -259,11 +323,11 @@ msgstr ""
 "Spreek het team van de dojo aan, of verwijder de login van uw kind: dan "
 "stopt de rol ook."
 
-#: ../../source/families/managing-your-account.rst:100
+#: ../../source/families/managing-your-account.rst:123
 msgid "Getting a copy of your data"
 msgstr "Een kopie van uw gegevens krijgen"
 
-#: ../../source/families/managing-your-account.rst:102
+#: ../../source/families/managing-your-account.rst:125
 msgid ""
 "Your family page has a **Your data** card. **Download my data** gives you"
 " a file with everything we keep about you and your children: your account"
@@ -283,7 +347,7 @@ msgstr ""
 "tekst die u in elke teksteditor kunt openen of naar een andere dienst "
 "kunt meenemen."
 
-#: ../../source/families/managing-your-account.rst:110
+#: ../../source/families/managing-your-account.rst:133
 msgid ""
 "A child with their own login finds the same button on their own page; "
 "their file holds only their own data."
@@ -291,7 +355,7 @@ msgstr ""
 "Een kind met een eigen login vindt dezelfde knop op zijn eigen pagina; "
 "zijn bestand bevat alleen zijn eigen gegevens."
 
-#: ../../source/families/managing-your-account.rst:113
+#: ../../source/families/managing-your-account.rst:136
 msgid ""
 "You can download it once a minute. If you'd rather ask by email or post, "
 "contact us and we'll send it to your account's email address."
@@ -300,30 +364,32 @@ msgstr ""
 " of per post, neem dan contact met ons op en we sturen het naar het "
 "e-mailadres van uw account."
 
-#: ../../source/families/managing-your-account.rst:117
+#: ../../source/families/managing-your-account.rst:140
 msgid "Deleting your account"
 msgstr "Je account verwijderen"
 
-#: ../../source/families/managing-your-account.rst:119
+#: ../../source/families/managing-your-account.rst:142
 msgid ""
 "**Delete my account**, on the same **Your data** card, first shows what "
 "will happen: which of your children are deleted with your account (those "
 "only you are a parent or guardian of, with their own logins, belts and "
 "badges; the sessions they came to keep counting, without their name), and"
 " which stay with their other parent or guardian. Enter your password to "
-"confirm; your account is deleted right away, and that can't be undone. "
-"Download your data first if you'd like a copy."
+"confirm (with a login link: see :doc:`logging-in-with-a-link`); your "
+"account is deleted right away, and that can't be undone. Download your "
+"data first if you'd like a copy."
 msgstr ""
 "**Mijn account verwijderen**, op dezelfde kaart **Jouw gegevens**, toont "
 "eerst wat er zal gebeuren: welke van je kinderen samen met je account "
 "verwijderd worden (die van wie alleen jij ouder of voogd bent, met hun "
 "eigen logins, gordels en badges; de sessies waar ze naartoe kwamen "
 "blijven meetellen, zonder hun naam), en welke bij hun andere ouder of "
-"voogd blijven. Bevestig met je wachtwoord; je account wordt meteen "
-"verwijderd, en dat kan niet ongedaan gemaakt worden. Download eerst je "
-"gegevens als je een kopie wil."
+"voogd blijven. Bevestig met je wachtwoord (met een inloglink: zie :doc"
+":`logging-in-with-a-link`); je account wordt meteen verwijderd, en dat "
+"kan niet ongedaan gemaakt worden. Download eerst je gegevens als je een "
+"kopie wil."
 
-#: ../../source/families/managing-your-account.rst:127
+#: ../../source/families/managing-your-account.rst:150
 msgid ""
 "**Champions and mentors:** your name stays on the sessions you helped run"
 " and on the belts and badges you awarded, and so does your profile on the"
@@ -336,17 +402,17 @@ msgstr ""
 " Als champion van een actieve dojo geef je de rol eerst door aan een van "
 "de mentors."
 
-#: ../../source/families/managing-your-account.rst:132
+#: ../../source/families/managing-your-account.rst:155
 msgid "You can also ask us by email or post; we'll delete it for you."
 msgstr ""
 "Je kan het ons ook per mail of per post vragen; dan verwijderen wij het "
 "voor je."
 
-#: ../../source/families/managing-your-account.rst:135
+#: ../../source/families/managing-your-account.rst:158
 msgid "Accounts you no longer use"
 msgstr "Accounts die je niet meer gebruikt"
 
-#: ../../source/families/managing-your-account.rst:137
+#: ../../source/families/managing-your-account.rst:160
 msgid ""
 "We don't keep data we no longer need. If you don't log in for **two "
 "years**, your account is deleted. A month before that date, and again a "
@@ -362,7 +428,7 @@ msgstr ""
 "beginnen de twee jaar opnieuw. Ook de eigen logins van je kinderen tellen"
 " mee: zolang een van hen inlogt, blijft je account."
 
-#: ../../source/families/managing-your-account.rst:144
+#: ../../source/families/managing-your-account.rst:167
 msgid ""
 "Children only you are a guardian of are deleted with your account: their "
 "details, belts and badges. The sessions they came to keep counting, "
@@ -374,7 +440,7 @@ msgstr ""
 "naartoe kwamen blijven meetellen, zonder hun naam. Een kind dat ook op "
 "het account van een andere ouder staat, blijft bij dat account."
 
-#: ../../source/families/managing-your-account.rst:149
+#: ../../source/families/managing-your-account.rst:172
 msgid ""
 "A child's own login has no date of its own: it goes when the child does, "
 "and the mails about it come to you."
@@ -382,7 +448,7 @@ msgstr ""
 "De eigen login van een kind heeft geen eigen datum: hij verdwijnt samen "
 "met het kind, en de mails daarover krijg jij."
 
-#: ../../source/families/managing-your-account.rst:152
+#: ../../source/families/managing-your-account.rst:175
 msgid ""
 "**Champions and mentors:** your name stays on the sessions you helped run"
 " and on the belts and badges you awarded, and so does your profile on the"
@@ -397,11 +463,11 @@ msgstr ""
 "dojo, blijft je account tot je de rol doorgeeft aan een van de mentors "
 "van de dojo."
 
-#: ../../source/families/managing-your-account.rst:159
+#: ../../source/families/managing-your-account.rst:182
 msgid "Already a champion or mentor?"
 msgstr "Al champion of mentor?"
 
-#: ../../source/families/managing-your-account.rst:161
+#: ../../source/families/managing-your-account.rst:184
 msgid ""
 "Every account has a family page: open **My Account** from your account "
 "menu and use **Add a child** there. Your children are added to the same "
@@ -412,11 +478,11 @@ msgstr ""
 "toegevoegd aan dezelfde login die u al gebruikt, zonder aparte "
 "registratie of tweede account."
 
-#: ../../source/families/managing-your-account.rst:166
+#: ../../source/families/managing-your-account.rst:189
 msgid "Changing your password"
 msgstr "Uw wachtwoord wijzigen"
 
-#: ../../source/families/managing-your-account.rst:168
+#: ../../source/families/managing-your-account.rst:191
 msgid ""
 "Go to **Change password** (also linked from your account page). You'll "
 "need your current password to set a new one."
@@ -424,11 +490,11 @@ msgstr ""
 "Ga naar **Wachtwoord wijzigen** (ook toegankelijk via uw accountpagina). "
 "U hebt uw huidige wachtwoord nodig om een nieuw wachtwoord in te stellen."
 
-#: ../../source/families/managing-your-account.rst:172
+#: ../../source/families/managing-your-account.rst:195
 msgid "Volunteering"
 msgstr "Vrijwilligerswerk"
 
-#: ../../source/families/managing-your-account.rst:174
+#: ../../source/families/managing-your-account.rst:197
 msgid ""
 "The **Volunteering** section of your account page shows any application "
 "you've made to become a mentor or start a dojo, and where your background"

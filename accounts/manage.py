@@ -29,7 +29,12 @@ def _role_counts():
     for role, _label in SignInRequirement.ROLE_CHOICES:
         accounts = sign_in.accounts_with_role(role)
         on, passkey = sign_in.with_two_step(accounts)
-        counts[role] = {"total": accounts.count(), "on": on.count(), "passkey": passkey.count()}
+        counts[role] = {
+            "total": accounts.count(),
+            "on": on.count(),
+            "passkey": passkey.count(),
+            "link": accounts.filter(login_method=User.LOGIN_LINK).count(),
+        }
     return counts
 
 
