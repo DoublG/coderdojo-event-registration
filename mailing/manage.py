@@ -18,8 +18,10 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from accounts.organisation import Area, require_area
+from dojos.models import Dojo
 
-from . import campaigns, journeys
+from . import campaigns, dojo_audiences, journeys
+from .dojo_views import mail_previews
 from .forms import CampaignForm, JourneyForm, NewTemplateForm, SegmentForm, TemplateVersionForm
 from .models import (
     BounceRecord,
@@ -44,9 +46,31 @@ AUDIENCE_SAMPLE = 10
 
 @login_required
 def campaign_list(request):
+    """The organisation's campaigns and every dojo's own mailings
+    (DATA_MODEL.md §25), filtered by who sent them (`from`: "organisation",
+    "dojos" or a dojo's id)."""
     require_area(request, Area.COMMUNICATION)
-    rows = [(c, campaigns.stats(c)) for c in Campaign.objects.select_related("segment").order_by("-created_at")]
-    return render(request, "mailing/manage/campaign_list.html", {"rows": rows, "active": "campaigns"})
+    shown = Campaign.objects.select_related("segment", "dojo").order_by("-created_at")
+    source = request.GET.get("from", "")
+    if source == "organisation":
+        shown = shown.filter(dojo__isnull=True)
+    elif source == "dojos":
+        shown = shown.filter(dojo__isnull=False)
+    elif source.isdigit():
+        shown = shown.filter(dojo_id=int(source))
+    rows = [(c, campaigns.stats(c), _dojo_audience(c)) for c in shown]
+    dojos = Dojo.objects.filter(pk__in=Campaign.objects.exclude(dojo=None).values("dojo_id")).order_by("name")
+    return render(
+        request,
+        "mailing/manage/campaign_list.html",
+        {"rows": rows, "active": "campaigns", "source": source, "dojos": dojos},
+    )
+
+
+def _dojo_audience(campaign):
+    if not campaign.is_dojo_mailing:
+        return ""
+    return dojo_audiences.describe(campaign.audience, campaign.dojo, campaign.audience_params)
 
 
 @login_required
@@ -79,9 +103,11 @@ def _previews(campaign, user):
 @login_required
 def campaign_detail(request, campaign_id):
     require_area(request, Area.COMMUNICATION)
-    campaign = get_object_or_404(Campaign.objects.select_related("segment", "launched_by"), pk=campaign_id)
+    campaign = get_object_or_404(Campaign.objects.select_related("segment", "launched_by", "dojo"), pk=campaign_id)
     form = None
-    if campaign.is_editable:
+    # A dojo's mailing is the dojo's to write and send; the organisation
+    # sees it and can stop it (DATA_MODEL.md §25).
+    if campaign.is_editable and not campaign.is_dojo_mailing:
         form = CampaignForm(request.POST or None, instance=campaign)
         if request.method == "POST" and form.is_valid():
             form.save()
@@ -98,14 +124,20 @@ def campaign_detail(request, campaign_id):
             "stats": campaigns.stats(campaign),
             "audience_sample": audience.order_by("pk")[:AUDIENCE_SAMPLE],
             "problems": campaigns.launch_problems(campaign) if campaign.is_editable else [],
-            "previews": _previews(campaign, request.user),
+            "previews": mail_previews(campaign) if campaign.is_dojo_mailing else _previews(campaign, request.user),
+            "dojo_audience": _dojo_audience(campaign),
         },
     )
 
 
-def _campaign_action(request, campaign_id, action, success):
+def _campaign_action(request, campaign_id, action, success, for_dojo_mailings=False):
     require_area(request, Area.COMMUNICATION)
     campaign = get_object_or_404(Campaign, pk=campaign_id)
+    if campaign.is_dojo_mailing and not (for_dojo_mailings and not campaign.is_editable):
+        # Testing and sending a dojo's mail is its champion's; the
+        # organisation can only stop one that's going out.
+        messages.error(request, _("This is a dojo's own mail: only its champion tests and sends it."))
+        return redirect("manage_campaign_detail", campaign_id=campaign.pk)
     try:
         action(campaign)
     except campaigns.CampaignError as error:
@@ -140,7 +172,9 @@ def campaign_launch(request, campaign_id):
 @login_required
 @require_POST
 def campaign_cancel(request, campaign_id):
-    return _campaign_action(request, campaign_id, campaigns.cancel, lambda c: "Campaign cancelled.")
+    return _campaign_action(
+        request, campaign_id, campaigns.cancel, lambda c: "Campaign cancelled.", for_dojo_mailings=True
+    )
 
 
 @login_required

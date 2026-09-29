@@ -28,6 +28,12 @@
         {% include "mailing/manage/_campaign_fields.html" %}
         <div class="cd-form__actions"><button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button></div>
       </form>
+    {% elif campaign.dojo %}
+      <div class="cd-card campaign-card">
+        <h2 class="heading-md">{% translate "A dojo's own mail" %}</h2>
+        <p class="body-sm">{% blocktranslate with dojo=campaign.dojo.name audience=dojo_audience %}Written by the team of <strong>{{ dojo }}</strong> for its families: {{ audience }}.{% endblocktranslate %}</p>
+        <p class="body-sm">{% if campaign.launched_at %}{% blocktranslate with when=campaign.launched_at|date:"d/m/Y H:i" %}Sent {{ when }}{% endblocktranslate %}{% if campaign.launched_by %} {% blocktranslate with name=campaign.launched_by.get_full_name|default:campaign.launched_by.get_username %}by {{ name }}{% endblocktranslate %}{% endif %}.{% else %}{% translate "Still a draft: only the dojo's champion edits and sends it." %}{% endif %}</p>
+      </div>
     {% else %}
       <div class="cd-card campaign-card">
         <h2 class="heading-md">{% translate "Campaign" %}</h2>
@@ -76,6 +82,18 @@
 
     <div class="cd-card campaign-card">
       <h2 class="heading-md">{% translate "Actions" %}</h2>
+      {% if campaign.dojo %}
+      <div class="campaign-actions">
+        {% if campaign.status == 'queued' or campaign.status == 'sending' %}
+          <form method="post" action="{% url 'manage_campaign_cancel' campaign_id=campaign.id %}"
+                onsubmit="{% translate "Stop this dojo's mail? Mail that hasn't gone out yet won't be sent." as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
+            {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Stop sending" %}</button>
+          </form>
+        {% else %}
+          <p class="body-sm">{% translate "Nothing to do: the organisation can stop a dojo's mail while it's going out." %}</p>
+        {% endif %}
+      </div>
+      {% else %}
       {% for problem in problems %}<p class="cd-form__note cd-form__note--error caption">{{ problem }}</p>{% endfor %}
       <div class="campaign-actions">
         <form method="post" action="{% url 'manage_campaign_test' campaign_id=campaign.id %}">
@@ -94,6 +112,7 @@
           </form>
         {% endif %}
       </div>
+      {% endif %}
     </div>
   </div>
 </div>

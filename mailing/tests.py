@@ -2593,3 +2593,65 @@ class DojoMailPagesTests(TestCase):
             {"audience": "all_families", "subject": "Changed", "message": "Changed"},
         )
         self.assertEqual(Campaign.objects.get().subject, "Hi")
+
+
+# --- §25 phase 5: the organisation sees every dojo's mail --------------------------
+
+
+class OrganisationSeesDojoMailTests(TestCase):
+    def setUp(self):
+        from accounts.models import OrganisationRole
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.admin = User.objects.create(username="orgadmin", email="ann@example.com")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.champion = User.objects.create(username="champ", email="champ@example.com")
+        self.dojo = make_dojo("Ghent", champion=self.champion, email="ghent@example.com")
+        self.parent = User.objects.create(username="parent", email="p@example.com")
+        _kid(self.parent, self.dojo)
+        self.mailing = Campaign.objects.create(
+            name="Geen sessie",
+            dojo=self.dojo,
+            category=MailCategory.DOJO_NEWS,
+            template_key="dojo_message",
+            audience="all_families",
+            subject="Geen sessie",
+            message="Tot volgende week",
+        )
+        self.own = Campaign.objects.create(name="Newsletter", template_key="campaign_girlz")
+        self.client.force_login(self.admin)
+
+    def _url(self, name):
+        return reverse(name, kwargs={"campaign_id": self.mailing.pk})
+
+    def test_the_list_shows_who_sent_what_and_filters(self):
+        url = reverse("manage_campaign_list")
+        response = self.client.get(url)
+        self.assertContains(response, "Geen sessie")
+        self.assertContains(response, "All families of the dojo")
+        self.assertContains(response, "Newsletter")
+        only_dojos = self.client.get(url, {"from": "dojos"})
+        self.assertContains(only_dojos, "Geen sessie")
+        self.assertNotContains(only_dojos, ">Newsletter<")
+        self.assertNotContains(self.client.get(url, {"from": "organisation"}), "Geen sessie")
+        self.assertContains(self.client.get(url, {"from": str(self.dojo.pk)}), "Geen sessie")
+
+    def test_the_organisation_never_edits_tests_or_sends_a_dojos_draft(self):
+        response = self.client.get(self._url("manage_campaign_detail"))
+        self.assertIsNone(response.context["form"])
+        self.assertContains(response, "Tot volgende week")  # the preview
+        self.client.post(self._url("manage_campaign_detail"), {"name": "Changed"})
+        self.client.post(self._url("manage_campaign_test"))
+        self.client.post(self._url("manage_campaign_launch"))
+        self.client.post(self._url("manage_campaign_cancel"))
+        self.mailing.refresh_from_db()
+        self.assertEqual((self.mailing.name, self.mailing.status), ("Geen sessie", Campaign.Status.DRAFT))
+        self.assertFalse(EmailMessage.objects.exists())
+
+    def test_the_organisation_can_stop_one_going_out(self):
+        campaigns.launch(self.mailing, self.champion)
+        campaigns.queue_mail(self.mailing.pk)
+        self.client.post(self._url("manage_campaign_cancel"))
+        self.mailing.refresh_from_db()
+        self.assertEqual(self.mailing.status, Campaign.Status.CANCELLED)
+        self.assertEqual(EmailMessage.objects.get().status, Status.SUPPRESSED)

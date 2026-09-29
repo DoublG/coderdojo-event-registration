@@ -42,7 +42,7 @@ def _context(request, access, **extra):
     }
 
 
-def _previews(campaign):
+def mail_previews(campaign):
     """The mail as a family would get it, per dojo language."""
     previews = []
     for language in campaign.content_languages():
@@ -131,7 +131,7 @@ def dojo_mail_detail(request, dojo_id, campaign_id):
             audience=dojo_audiences.describe(campaign.audience, access.dojo, campaign.audience_params),
             reach=_reach(access.dojo, campaign.audience, campaign.audience_params) if campaign.is_editable else None,
             problems=campaigns.launch_problems(campaign) if campaign.is_editable else [],
-            previews=_previews(campaign),
+            previews=mail_previews(campaign),
             stats=campaigns.stats(campaign) if campaign.launched_at else None,
         ),
     )

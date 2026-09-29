@@ -4678,7 +4678,10 @@ login doesn't get it; and an audience about a session reaches the
 families with a place there even when the child isn't otherwise one of
 the dojo's (a visitor), instead of being ANDed with "family of this
 dojo". **Phase 4 built** (the dojo's *Mail* pages, `mailing/dojo_views.py`,
-`SEND_MAIL`); a mailing is sent right away, there's no scheduling yet. The
+`SEND_MAIL`); a mailing is sent right away, there's no scheduling yet.
+**Phase 5 built**: the organisation's *Campaigns* list shows every dojo's
+mail (a *Sent by* column and filter), its page shows the dojo's text and
+audience, and the organisation can only stop one that's going out. The
 decisions below were confirmed on 2026-09-29. This reverses §11's
 decision 3 ("Champions don't send campaigns; dojo-level mail stays
 automatic") in part: a dojo's team gets **a narrow slice** of the mail
@@ -4906,7 +4909,7 @@ the dojo's content, not personal) and its place in `core.audit.RECORDED`.
    list, new/edit, preview, test, launch, cancel. Tests in the route
    style: 404 without access, 403 without `SEND_MAIL`, another dojo's
    session or mailing refused, the DB effect of each POST.
-5. **Organisation oversight:** Dojo column, filter and cancel on
+5. **Organisation oversight** (built): Dojo column, filter and cancel on
    *Campaigns*; the organisation's own campaign pages never editing a dojo
    mailing's text.
 6. **Finishing:** Dutch and French, seeds (a sent and a draft mailing for
