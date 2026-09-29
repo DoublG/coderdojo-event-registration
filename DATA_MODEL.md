@@ -2525,7 +2525,8 @@ What was built, and the details settled while building it:
   the one rule for what's live: started, not ended (`ends_at`, or the
   event's start when empty), the event not finished, and the event in
   `Event.objects.visible()`. Saving or deleting a promotion clears the
-  carousel's cache (`events.search`).
+  carousel's cache (`events.search`), as saving a dojo, event or
+  registration does (`events/signals.py`).
 - Managed on the organisation dashboard (`/manage/promotions/`,
   `content/manage.py`, organisation `admin` role) with a full Django admin
   page as well. Any upcoming event can be picked, drafts included (it

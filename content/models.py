@@ -150,11 +150,9 @@ class OrganisationTeamMember(OrganisationContent):
 
 
 def _clear_upcoming_cache():
-    from django.core.cache import cache
+    from events.search import clear_upcoming_cache
 
-    from events.search import CACHE_KEY
-
-    cache.delete(CACHE_KEY)
+    clear_upcoming_cache()
 
 
 class PromotionQuerySet(models.QuerySet):

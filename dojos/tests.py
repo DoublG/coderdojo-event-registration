@@ -1813,7 +1813,7 @@ class DojoLifecycleTests(TestCase):
 
         self._act("go_dormant")
 
-        # change_status clears the finder's cached default list itself.
+        # Saving the dojo clears the finder's cached default list (events/signals.py).
         self.assertNotIn(self.dojo, list(self.client.get(reverse("dojo_list")).context["dojos"]))
 
 

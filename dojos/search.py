@@ -1,6 +1,7 @@
 import requests
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
+from django.db import transaction
 from django.db.models import ExpressionWrapper, F, FloatField
 from django.utils import timezone
 
@@ -18,10 +19,23 @@ DEFAULT_SEARCH_LABEL = "Ghent, Belgium"
 
 # Every homepage load and every bare (no search submitted) dojo_list visit
 # resolves to this exact origin — by far the most common case, so it's the
-# one worth caching. Short TTL: dojo data changes rarely, but this keeps a
-# newly-added dojo from being invisible for long.
+# one worth caching. Saving or deleting a dojo clears it (events/signals.py),
+# so a change shows at once; the short TTL is only a safety net for writes
+# that skip save(), like QuerySet.update().
 DEFAULT_SEARCH_CACHE_KEY = "dojos:by_distance:default_origin"
 DEFAULT_SEARCH_CACHE_TIMEOUT = 60
+
+
+def clear_default_search_cache():
+    """Forget the cached default list: now, and again once the current
+    transaction commits, so a visitor who refilled it in between (from the
+    old, still committed data) doesn't keep the change hidden."""
+    _clear_now_and_on_commit(DEFAULT_SEARCH_CACHE_KEY)
+
+
+def _clear_now_and_on_commit(key):
+    cache.delete(key)
+    transaction.on_commit(lambda: cache.delete(key))
 
 
 def postal_code_origin(postal_code):

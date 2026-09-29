@@ -18,7 +18,6 @@ Every rule violation raises TeamError with a message fit to show the user.
 
 from datetime import timedelta
 
-from django.core.cache import cache
 from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
@@ -30,7 +29,6 @@ from notifications.services import notify
 
 from .access import is_approved_mentor
 from .models import Dojo, DojoMembership
-from .search import DEFAULT_SEARCH_CACHE_KEY
 
 # How long an active dojo can go without events before its team and the
 # board are nudged to plan a session or mark it dormant.
@@ -256,9 +254,8 @@ def change_status(dojo, action):
         )
     with transaction.atomic():
         dojo.status = target
+        # Saving clears the dojo finder's and the carousel's caches (events/signals.py).
         dojo.save(update_fields=["status"])
-        # The dojo finder caches its default (unfiltered) result list.
-        cache.delete(DEFAULT_SEARCH_CACHE_KEY)
         if target in (Dojo.DORMANT, Dojo.ARCHIVED):
             for membership in dojo.memberships.filter(status=DojoMembership.REQUESTED).select_related("user", "dojo"):
                 decline_request(membership, by=None, reason="dojo_inactive")

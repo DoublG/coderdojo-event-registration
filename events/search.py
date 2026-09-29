@@ -1,4 +1,5 @@
 from django.core.cache import cache
+from django.db import transaction
 from django.db.models import Count, F, Q
 from django.utils import timezone
 
@@ -9,11 +10,20 @@ WIDGET_PAGE_SIZE = 10
 # Backs both the homepage's and the account page's "upcoming sessions"/
 # "awards" style lazy-loaded carousels — every page of either one comes
 # from this same cached, pre-evaluated list, sliced in Python instead of
-# re-querying per page. Short TTL: the confirmed_count aggregate this
-# filters on changes every time someone signs up for a session.
+# re-querying per page. Saving or deleting a dojo, an event, a registration
+# or a promotion clears it (events/signals.py, content.Promotion), so a
+# change shows at once; the short TTL is only a safety net for writes that
+# skip save(), like QuerySet.update().
 CACHE_KEY = "events:upcoming_available"
 CACHE_TIMEOUT = 60
 CACHE_LIMIT = 200  # bound the cached list's size regardless of how far out events are scheduled
+
+
+def clear_upcoming_cache():
+    """Forget the cached list: now, and again once the current transaction
+    commits (see dojos.search.clear_default_search_cache)."""
+    cache.delete(CACHE_KEY)
+    transaction.on_commit(lambda: cache.delete(CACHE_KEY))
 
 
 def upcoming_available_events():

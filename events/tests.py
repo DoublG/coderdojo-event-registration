@@ -11,10 +11,12 @@ from PIL import Image
 from accounts.models import Guardianship, Ninja, OrganisationRole, User
 from core.testing import TempMediaMixin
 from dojos.models import Dojo
+from dojos.search import DEFAULT_SEARCH_ORIGIN, dojos_by_distance
 from dojos.testing import make_dojo
 
 from .engagement import is_aimed_at
 from .models import Badge, Belt, Event, NinjaBadge, Registration
+from .search import CACHE_KEY, upcoming_available_events
 
 
 def _future_event(dojo, **kwargs):
@@ -76,6 +78,76 @@ class UpcomingSessionsWidgetViewTests(TestCase):
         response = self.client.get(reverse("upcoming_sessions_widget"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "events/partials/_upcoming_sessions_page.html")
+
+
+class PublicCacheInvalidationTests(TestCase):
+    """The dojo finder's default list and the upcoming-sessions carousel are
+    cached; saving or deleting a dojo, event or registration clears them
+    (events/signals.py), so a change is visible at once."""
+
+    def setUp(self):
+        cache.clear()
+        self.dojo = make_dojo("Ghent")
+
+    def _upcoming(self):
+        return upcoming_available_events()
+
+    def test_publishing_an_event_shows_it_at_once(self):
+        event = _future_event(self.dojo, status=Event.DRAFT)
+        self.assertNotIn(event, self._upcoming())
+        event.status = Event.OPEN
+        event.save()
+        self.assertIn(event, self._upcoming())
+
+    def test_an_edited_event_shows_its_new_name(self):
+        event = _future_event(self.dojo)
+        self.assertEqual(self._upcoming()[0].name, "Session")
+        event.name = "Robot day"
+        event.save()
+        self.assertEqual(self._upcoming()[0].name, "Robot day")
+
+    def test_a_deleted_event_disappears(self):
+        event = _future_event(self.dojo)
+        self.assertIn(event, self._upcoming())
+        event.delete()
+        self.assertNotIn(event, self._upcoming())
+
+    def test_a_full_session_leaves_the_carousel_and_returns_on_a_cancellation(self):
+        event = _future_event(self.dojo, places=1)
+        self.assertIn(event, self._upcoming())
+        registration = Registration.objects.create(
+            event=event, ninja=Ninja.objects.create(name="Mila"), waiting_list=False, position=1
+        )
+        self.assertNotIn(event, self._upcoming())
+        registration.delete()
+        self.assertIn(event, self._upcoming())
+
+    def test_an_edited_dojo_shows_in_the_finder_and_the_carousel(self):
+        _future_event(self.dojo)
+        self.assertEqual(dojos_by_distance(DEFAULT_SEARCH_ORIGIN)[0].name, "Ghent")
+        self.assertEqual(self._upcoming()[0].dojo.name, "Ghent")
+        self.dojo.name = "Gent"
+        self.dojo.save()
+        self.assertEqual(dojos_by_distance(DEFAULT_SEARCH_ORIGIN)[0].name, "Gent")
+        self.assertEqual(self._upcoming()[0].dojo.name, "Gent")
+
+    def test_a_dojo_that_goes_dormant_takes_its_events_off_the_carousel(self):
+        event = _future_event(self.dojo)
+        self.assertIn(event, self._upcoming())
+        self.dojo.status = Dojo.DORMANT
+        self.dojo.save()
+        self.assertNotIn(event, self._upcoming())
+        self.assertNotIn(self.dojo, dojos_by_distance(DEFAULT_SEARCH_ORIGIN))
+
+    def test_the_cache_is_cleared_again_on_commit(self):
+        """A visitor refilling the cache before the commit (from the old data)
+        mustn't keep the change hidden."""
+        event = _future_event(self.dojo, status=Event.DRAFT)
+        with self.captureOnCommitCallbacks(execute=True):
+            event.status = Event.OPEN
+            event.save()
+            cache.set(CACHE_KEY, [], 60)  # a stale refill mid-transaction
+        self.assertIn(event, self._upcoming())
 
 
 class EventDetailViewTests(TestCase):
