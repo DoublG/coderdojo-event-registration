@@ -3,10 +3,11 @@ The organisation dashboard
 
 The organisation dashboard is where CoderDojo Belgium's own team runs mail to
 families and volunteers, chooses which events the public site features, and
-handles privacy requests. It's open to accounts with the organisation's
-**admin** role: they find it under **Manage** in the account menu. People
-with the **background-check reviewer** role find their pages there too,
-and see only those (see :doc:`volunteers`).
+handles privacy requests. Everyone with a role in the organisation finds
+it under **Manage** in the account menu, and sees the parts their role opens
+(see :doc:`people`): the **admin** role everything except background checks,
+the **background-check reviewer** role only those (see :doc:`volunteers`),
+and the **board** only the page to ask for the Django admin.
 
 If you're also on a dojo's team, the dashboard and your dojos are in the
 same place: click **CoderDojo Belgium** at the top of the sidebar to switch
@@ -41,6 +42,10 @@ The sidebar has these sections:
   they ask by mail or post (see :doc:`privacy`).
 - **Sign-in security**: which roles must use two-step login (see
   :doc:`sign-in-security`).
+- **People** (under **Organisation**): who has which role, giving and
+  taking away roles, and inviting someone new (see :doc:`people`).
+- **Django admin** (under **Organisation**): asking for the site's technical
+  admin, for 12 hours, for every role (see :doc:`django-admin`).
 
 People only get mail they want. Every account chooses which kinds of mail
 it gets on its **Mail preferences** page; the newsletter and campaigns only
@@ -48,5 +53,10 @@ go to people who opted in, and children's own logins never get campaigns.
 Addresses that bounced are skipped automatically.
 
 The technical side of the site (the full mail log, bounces, blocked
-addresses) stays in the site's technical admin, for fixing things when
-something goes wrong.
+addresses) stays in the site's technical admin, the Django admin, for fixing
+things when something goes wrong. You ask for it when you need it (see
+:doc:`django-admin`).
+
+The bell at the top of the dashboard shows notifications for the
+organisation, for example when someone opens the Django admin or accepts an
+invitation.

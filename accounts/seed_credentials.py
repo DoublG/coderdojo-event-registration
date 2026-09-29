@@ -131,8 +131,8 @@ def describe_account(user):
     if user.is_superuser:
         parts.append("Superuser (Django admin)")
     role_descriptions = {
-        "admin": "Organisation admin: /manage/ dashboard and Django admin",
-        "board": "Organisation board: read-only Django admin",
+        "admin": "Organisation admin: /manage/ dashboard incl. People; Django admin on request (12 h)",
+        "board": "Organisation board: read-only Django admin on request (12 h, /manage/django-admin/)",
         "reviewer": "Background-check reviewer: /manage/checks/ and /manage/applications/",
     }
     for role in user.organisation_roles.all():

@@ -109,16 +109,18 @@ role subclasses (redesign phases 1–3, section 10).
   gets a login (a `User` with `account_type="ninja"`, linked through
   `Ninja.account`) only if a parent opts it in.
 - **Organisation accounts** are adult accounts with an `OrganisationRole`
-  (`board` or `admin`): access to the organisation's management
-  dashboards, which for now are the Django admin. A role makes the account
-  staff and puts it in a matching permission group (`accounts.organisation`,
-  kept in sync by signals): the **board** gets read-only oversight (dojos,
-  teams, events, applications, badges and belts) and maintains the
-  organisation's team listing; **admins** also edit dojos, events, site
-  content and the pathway/badge/belt catalogues. Neither can award belts,
-  review background checks (a separate permission) or see families'
-  personal data. Being listed on the organisation's team page
-  (`content.OrganisationTeamMember`) is separate from having a role.
+  (`board`, `admin` or `reviewer`, fixed in code): a matching permission
+  group (`accounts.organisation`, kept in sync by signals) that opens the
+  organisation dashboard's *areas* (§23: `admin` all but Volunteers,
+  `reviewer` Volunteers, `board` none yet). The Django admin is never open
+  by the role alone: its holder asks for it, 12 hours at a time
+  (`AdminAccessGrant`, §23), and it opens with the role's permissions
+  (the **board** read-only oversight and the team listing; **admins** also
+  editing dojos, events, content and catalogues). Admins give and take
+  away roles on the dashboard's People pages, and invite people without an
+  account (`OrganisationInvitation`). No role can award belts. Being listed
+  on the organisation's team page (`content.OrganisationTeamMember`) is
+  separate from having a role.
 
 ```mermaid
 classDiagram
@@ -155,10 +157,22 @@ classDiagram
     Ninja "0..1" --> "0..1" User : account (ninja login)
     Ninja "*" --> "0..1" Dojo : home_dojo
     class OrganisationRole {
-        +role  board | admin
+        +role  board | admin | reviewer
         +granted_at
     }
+    class AdminAccessGrant {
+        +reason
+        +started_at, expires_at  12 hours
+        +ended_at, end_reason
+    }
+    class OrganisationInvitation {
+        +email, name, roles
+        +token_hash  14 days
+        +accepted_at, withdrawn_at
+    }
     User "1" --> "*" OrganisationRole : organisation_roles
+    User "1" --> "*" AdminAccessGrant : admin_access_grants
+    OrganisationInvitation "*" --> "0..1" User : accepted_by
 ```
 
 Which account does what:
@@ -168,7 +182,7 @@ Which account does what:
 | adult (parent) | self-service sign-up (`register_guardian`) | never needed | their account page (`/account/`) |
 | adult champion / mentor | the same self-service sign-up, then an approved `Application` | required for dojo access (a lapsed check blocks the dashboards, never the login) | first accessible dojo's dashboard |
 | ninja | a parent opts a child in | none | the ninja's own page (`/account/ninja/<id>/`) |
-| adult with an `OrganisationRole` | the same sign-up; the role is granted in the admin | not for the role itself | as any adult; the menu's **Organisation** link opens the admin |
+| adult with an `OrganisationRole` | the same sign-up, or the sign-up behind an organisation invitation; the role is given on the dashboard's People page | not for the role itself | the organisation dashboard (`/manage/`); the Django admin only when asked for (12 hours) |
 
 ---
 
@@ -3966,15 +3980,26 @@ confirmed from the new address.
 
 None yet.
 
-## 23. Organisation people, roles and page access on the dashboard (in progress)
+## 23. Organisation people, roles and page access on the dashboard (built)
 
-**Phase 1 (areas) is built**: `accounts.organisation.Area`,
-`AREA_PERMISSIONS`, `has_area` / `areas_of` / `require_area`, the
-migration `accounts.0013_organisation_dashboard_areas`, the sidebar and
-`/manage/` (`core.manage.AREA_LANDINGS`) following the areas, and
-`core.tests.OrganisationAreaTests`. `require_organisation_admin` and
-`require_reviewer` are gone: every view moved in the same change. The
-`people` area comes with its pages (phase 3). The rest is planned.
+**Built: phases 1–4 and 6**, as planned below; phase 5 (read-only pages
+for the board) is still open. The code: areas in `accounts.organisation`
+(`Area`, `AREA_PERMISSIONS`, `require_area`), time-boxed Django admin
+access in `accounts/admin_access.py` (`AdminAccessGrant`, the page
+`/manage/django-admin/`, `core.admin_site.AdminSite`, the beat job
+`accounts.tasks.close_admin_access`), the People pages in
+`accounts/people.py` with the rules in `accounts/organisation_people.py`,
+invitations in `accounts/invitations.py` (`OrganisationInvitation`,
+`mailing.services.send_to_address`), and the organisation dashboard's
+notification bell (`Notification.organisation`,
+`notifications.consumers.OrganisationNotificationConsumer`). Help pages:
+`docs/source/organisation/people.rst` and `django-admin.rst`. Where the
+build differs from the plan text: the Django admin's header shows the end
+time through the admin site's `site_header` (the admin's own templates
+can't be overridden from `core`), and *End now* is on the dashboard; the
+invitation mail goes through a new `send_to_address` (no account yet)
+rather than `send(..., address=)`; the dashboard's sidebar group is
+*Organisation* (*People*, *Django admin*).
 
 Before this, an organisation role
 (`accounts.OrganisationRole`: `board`, `admin`, `reviewer`) can only be

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 03:50+0000\n"
+"POT-Creation-Date: 2026-09-29 09:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr <LL@li.org>\n"
@@ -97,17 +97,21 @@ msgstr ""
 msgid ""
 "The table shows, per role, how many accounts there are, how many already use"
 " two-step login and how many have a passkey, so you can see who still has to"
-" set it up before you make it required."
+" set it up before you make it required. The **People** page marks each "
+"person whose role asks for two-step login they haven't set up yet (see "
+":doc:`people`)."
 msgstr ""
-"Le tableau montre, par rôle, combien de comptes il y a, combien utilisent "
+"Le tableau indique, par rôle, combien de comptes il y a, combien utilisent "
 "déjà la connexion en deux étapes et combien ont une clé d'accès, pour voir "
-"qui doit encore la configurer avant de la rendre obligatoire."
+"qui doit encore la configurer avant de la rendre obligatoire. La page "
+"**Personnes** signale chaque personne dont le rôle demande la connexion en "
+"deux étapes et qui ne l'a pas encore configurée (voir :doc:`people`)."
 
-#: ../../source/organisation/sign-in-security.rst:36
+#: ../../source/organisation/sign-in-security.rst:38
 msgid "Someone can't log in"
 msgstr "Quelqu'un ne peut pas se connecter"
 
-#: ../../source/organisation/sign-in-security.rst:38
+#: ../../source/organisation/sign-in-security.rst:40
 msgid ""
 "When someone lost their phone or passkey **and** their backup codes, first "
 "check it's really them, for example by calling them. Then search for their "
@@ -123,7 +127,7 @@ msgstr ""
 "rôle demande la connexion en deux étapes, elle doit la configurer à nouveau "
 "tout de suite."
 
-#: ../../source/organisation/sign-in-security.rst:44
+#: ../../source/organisation/sign-in-security.rst:46
 msgid ""
 "You can't do this for your own account: change your own sign-in methods on "
 "your account's Sign-in security page."

@@ -66,6 +66,7 @@ The person gets a mail with the outcome either way.
 Who can review
 ---------------
 
-The reviewer role is given in the site's technical admin, like the other
-organisation roles, and can be combined with them. Reviewers read
-criminal-record extracts, so only give it to the people who need it.
+The organisation's admins give the reviewer role on the **People** page,
+like the other organisation roles, and it can be combined with them (see
+:doc:`people`). Reviewers read criminal-record extracts, so only give it to
+the people who need it.

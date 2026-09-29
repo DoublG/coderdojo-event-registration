@@ -54,6 +54,8 @@ the people using the site, not for the people building it.
    organisation/volunteers
    organisation/privacy
    organisation/sign-in-security
+   organisation/people
+   organisation/django-admin
 
 .. toctree::
    :maxdepth: 1

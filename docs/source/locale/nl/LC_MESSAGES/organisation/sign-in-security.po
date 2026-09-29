@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 03:50+0000\n"
+"POT-Creation-Date: 2026-09-29 09:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -94,17 +94,21 @@ msgstr ""
 msgid ""
 "The table shows, per role, how many accounts there are, how many already use"
 " two-step login and how many have a passkey, so you can see who still has to"
-" set it up before you make it required."
+" set it up before you make it required. The **People** page marks each "
+"person whose role asks for two-step login they haven't set up yet (see "
+":doc:`people`)."
 msgstr ""
 "De tabel toont per rol hoeveel accounts er zijn, hoeveel al aanmelden in "
 "twee stappen gebruiken en hoeveel een toegangssleutel hebben, zodat je ziet "
-"wie het nog moet instellen voor je het verplicht maakt."
+"wie het nog moet instellen voor je het verplicht maakt. De pagina **Mensen**"
+" duidt iedereen aan wiens rol aanmelden in twee stappen vraagt dat nog niet "
+"ingesteld is (zie :doc:`people`)."
 
-#: ../../source/organisation/sign-in-security.rst:36
+#: ../../source/organisation/sign-in-security.rst:38
 msgid "Someone can't log in"
 msgstr "Iemand kan zich niet aanmelden"
 
-#: ../../source/organisation/sign-in-security.rst:38
+#: ../../source/organisation/sign-in-security.rst:40
 msgid ""
 "When someone lost their phone or passkey **and** their backup codes, first "
 "check it's really them, for example by calling them. Then search for their "
@@ -119,7 +123,7 @@ msgstr ""
 "meldt zich aan met alleen het wachtwoord. Vraagt de rol aanmelden in twee "
 "stappen, dan moet die het meteen opnieuw instellen."
 
-#: ../../source/organisation/sign-in-security.rst:44
+#: ../../source/organisation/sign-in-security.rst:46
 msgid ""
 "You can't do this for your own account: change your own sign-in methods on "
 "your account's Sign-in security page."

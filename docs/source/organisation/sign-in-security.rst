@@ -30,7 +30,9 @@ in again.
 
 The table shows, per role, how many accounts there are, how many already
 use two-step login and how many have a passkey, so you can see who still
-has to set it up before you make it required.
+has to set it up before you make it required. The **People** page marks each
+person whose role asks for two-step login they haven't set up yet (see
+:doc:`people`).
 
 Someone can't log in
 --------------------

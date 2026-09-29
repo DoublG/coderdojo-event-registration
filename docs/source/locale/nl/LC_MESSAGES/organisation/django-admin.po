@@ -1,0 +1,82 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-29 09:27+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: nl <LL@li.org>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/django-admin.rst:2
+msgid "The Django admin"
+msgstr "De Django-admin"
+
+#: ../../source/organisation/django-admin.rst:4
+msgid ""
+"The Django admin is the site's technical tool, for fixing data by hand when "
+"something went wrong or has no page on the dashboard yet. It isn't open all "
+"the time: anyone with a role in the organisation asks for it, and gets it "
+"for 12 hours."
+msgstr ""
+"De Django-admin is het technische hulpmiddel van de site, om gegevens met de"
+" hand recht te zetten als er iets misliep of als er nog geen pagina voor is "
+"op het dashboard. Hij staat niet altijd open: wie een rol in de organisatie "
+"heeft, vraagt erom en krijgt hem 12 uur."
+
+#: ../../source/organisation/django-admin.rst:10
+msgid "Asking for access"
+msgstr "Toegang vragen"
+
+#: ../../source/organisation/django-admin.rst:12
+msgid ""
+"On the organisation dashboard, choose **Django admin** (under "
+"**Organisation** in the sidebar). Say why you need it, for example \"fix a "
+"registration by hand\", enter your password and choose **Ask for access**. "
+"You can then use **Open the Django admin** until the time shown, with your "
+"role's permissions: an admin can change what the admin role may change, a "
+"board member only look."
+msgstr ""
+"Kies op het organisatiedashboard **Django-admin** (onder **Organisatie** in "
+"de zijbalk). Zeg waarom je hem nodig hebt, bijvoorbeeld \"een inschrijving "
+"met de hand rechtzetten\", vul je wachtwoord in en kies **Toegang vragen**. "
+"Daarna kan je **De Django-admin openen** tot het getoonde uur, met de "
+"rechten van je rol: een beheerder kan wijzigen wat de rol beheerder mag "
+"wijzigen, een bestuurslid alleen kijken."
+
+#: ../../source/organisation/django-admin.rst:19
+msgid ""
+"After 12 hours your access closes by itself. Done sooner? Choose **End "
+"access now**. To continue later, ask again, with a new reason."
+msgstr ""
+"Na 12 uur sluit je toegang vanzelf. Eerder klaar? Kies **Toegang nu "
+"beëindigen**. Wil je later verder, vraag dan opnieuw, met een nieuwe reden."
+
+#: ../../source/organisation/django-admin.rst:23
+msgid "Who sees it"
+msgstr "Wie het ziet"
+
+#: ../../source/organisation/django-admin.rst:25
+msgid ""
+"Every request is recorded, with its reason and when it ended, and the "
+"organisation's other admins get a notification (the bell at the top of the "
+"dashboard). They can see who has access on the People page and end it there "
+"(see :doc:`people`). Your own earlier requests are listed below the form."
+msgstr ""
+"Elke vraag wordt bijgehouden, met de reden en wanneer ze afliep, en de "
+"andere beheerders van de organisatie krijgen een melding (de bel bovenaan "
+"het dashboard). Zij zien op de pagina Mensen wie toegang heeft en kunnen die"
+" daar beëindigen (zie :doc:`people`). Je eigen vroegere vragen staan onder "
+"het formulier."

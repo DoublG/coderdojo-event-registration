@@ -1,0 +1,85 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-29 09:27+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: fr <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/django-admin.rst:2
+msgid "The Django admin"
+msgstr "L'admin Django"
+
+#: ../../source/organisation/django-admin.rst:4
+msgid ""
+"The Django admin is the site's technical tool, for fixing data by hand when "
+"something went wrong or has no page on the dashboard yet. It isn't open all "
+"the time: anyone with a role in the organisation asks for it, and gets it "
+"for 12 hours."
+msgstr ""
+"L'admin Django est l'outil technique du site, pour corriger des données à la"
+" main quand quelque chose s'est mal passé ou n'a pas encore de page dans le "
+"tableau de bord. Il n'est pas ouvert en permanence : toute personne avec un "
+"rôle dans l'organisation le demande, et l'obtient pour 12 heures."
+
+#: ../../source/organisation/django-admin.rst:10
+msgid "Asking for access"
+msgstr "Demander l'accès"
+
+#: ../../source/organisation/django-admin.rst:12
+msgid ""
+"On the organisation dashboard, choose **Django admin** (under "
+"**Organisation** in the sidebar). Say why you need it, for example \"fix a "
+"registration by hand\", enter your password and choose **Ask for access**. "
+"You can then use **Open the Django admin** until the time shown, with your "
+"role's permissions: an admin can change what the admin role may change, a "
+"board member only look."
+msgstr ""
+"Sur le tableau de bord de l'organisation, choisissez **Admin Django** (sous "
+"**Organisation** dans la barre latérale). Dites pourquoi vous en avez "
+"besoin, par exemple « corriger une inscription à la main », saisissez votre "
+"mot de passe et choisissez **Demander l'accès**. Vous pouvez ensuite "
+"utiliser **Ouvrir l'admin Django** jusqu'à l'heure affichée, avec les droits"
+" de votre rôle : un administrateur peut modifier ce que le rôle "
+"administrateur peut modifier, un membre du conseil d'administration "
+"seulement consulter."
+
+#: ../../source/organisation/django-admin.rst:19
+msgid ""
+"After 12 hours your access closes by itself. Done sooner? Choose **End "
+"access now**. To continue later, ask again, with a new reason."
+msgstr ""
+"Après 12 heures, votre accès se ferme tout seul. Fini plus tôt ? Choisissez "
+"**Terminer l'accès maintenant**. Pour continuer plus tard, redemandez, avec "
+"une nouvelle raison."
+
+#: ../../source/organisation/django-admin.rst:23
+msgid "Who sees it"
+msgstr "Qui le voit"
+
+#: ../../source/organisation/django-admin.rst:25
+msgid ""
+"Every request is recorded, with its reason and when it ended, and the "
+"organisation's other admins get a notification (the bell at the top of the "
+"dashboard). They can see who has access on the People page and end it there "
+"(see :doc:`people`). Your own earlier requests are listed below the form."
+msgstr ""
+"Chaque demande est enregistrée, avec sa raison et le moment où elle s'est "
+"terminée, et les autres administrateurs de l'organisation reçoivent une "
+"notification (la cloche en haut du tableau de bord). Ils voient sur la page "
+"Personnes qui a l'accès et peuvent y mettre fin (voir :doc:`people`). Vos "
+"propres demandes précédentes sont listées sous le formulaire."
