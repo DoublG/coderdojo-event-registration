@@ -49,7 +49,7 @@
             {# The management area (/manage/, core.manage_nav): the organisation's dashboard and the dojos' admin areas, one sidebar with a switcher. #}
             <a class="cd-nav__account-link body-sm" href="{% url 'manage_home' %}">{% translate "Manage" %}</a>
           {% endif %}
-          {% if user_has_organisation_role and not user_is_organisation_admin %}
+          {% if user_is_organisation_board and not user_is_organisation_admin %}
             {# The board still uses the Django admin for its read-only oversight until that has dashboard pages too. #}
             <a class="cd-nav__account-link body-sm" href="{% url 'admin:index' %}">{% translate "Organisation" %}</a>
           {% endif %}

@@ -1,5 +1,5 @@
 {% extends "core/_manage_shell.html" %}
-{% load i18n %}{% load retention %}{% load manage_nav %}
+{% load i18n %}{% load retention %}{% load manage_nav %}{% load reviewing %}
 {% comment %}
 The organisation's management dashboard (/manage/…), in the management
 area's shared shell (core/_manage_shell.html, DATA_MODEL.md §20) with the
@@ -7,7 +7,9 @@ organisation's sections in the sidebar instead of a dojo's. Pages fill
 manage_page_title / manage_heading / manage_content (and optionally
 manage_topbar_extra, manage_extra_style, manage_extra_script) and pass
 `active` for the sidebar link to highlight. Every view behind it checks
-accounts.organisation.require_organisation_admin. Non-technical
+accounts.organisation.require_organisation_admin, or require_reviewer for
+the Volunteers pages (DATA_MODEL.md §21); the sidebar shows each group only
+to the role that may open it (core.manage_nav). Non-technical
 organisation work lives here, not in the Django admin (CLAUDE.md).
 {% endcomment %}
 {% block shell_title %}CoderDojo Belgium · {% block manage_page_title %}{% endblock %}{% endblock %}
@@ -17,44 +19,49 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
 {% block shell_brand %}{% manage_switcher %}{% endblock %}
 
 {% block shell_create %}
+      {% manage_contexts as contexts %}
+      {% if contexts.organisation_admin %}
       <a href="{% url 'manage_campaign_create' %}" class="cd-btn cd-btn--primary cd-admin-nav__create label">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         {% translate "New campaign" %}
       </a>
+      {% endif %}
 {% endblock %}
 
 {% block shell_nav %}
-      <div class="cd-admin-nav__group">
-        <p class="cd-admin-nav__group-label caption">{% translate "Communication" %}</p>
-        <ul class="cd-admin-nav__list">
-          <li>
-            <a href="{% url 'manage_campaign_list' %}" class="cd-admin-nav__link label{% if active == 'campaigns' %} cd-admin-nav__link--active{% endif %}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M4 7l8 6 8-6"/></svg>
-              {% translate "Campaigns" %}
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'manage_journey_list' %}" class="cd-admin-nav__link label{% if active == 'journeys' %} cd-admin-nav__link--active{% endif %}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
-              {% translate "Journeys" %}
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'manage_segment_list' %}" class="cd-admin-nav__link label{% if active == 'segments' %} cd-admin-nav__link--active{% endif %}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M15 20c0-2 1.5-3.5 4-3.5"/></svg>
-              {% translate "Segments" %}
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'manage_template_list' %}" class="cd-admin-nav__link label{% if active == 'templates' %} cd-admin-nav__link--active{% endif %}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>
-              {% translate "Mail templates" %}
-            </a>
-          </li>
-        </ul>
-      </div>
-
       {% manage_contexts as contexts %}
+      {% if contexts.organisation_admin %}
+        <div class="cd-admin-nav__group">
+          <p class="cd-admin-nav__group-label caption">{% translate "Communication" %}</p>
+          <ul class="cd-admin-nav__list">
+            <li>
+              <a href="{% url 'manage_campaign_list' %}" class="cd-admin-nav__link label{% if active == 'campaigns' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M4 7l8 6 8-6"/></svg>
+                {% translate "Campaigns" %}
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'manage_journey_list' %}" class="cd-admin-nav__link label{% if active == 'journeys' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+                {% translate "Journeys" %}
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'manage_segment_list' %}" class="cd-admin-nav__link label{% if active == 'segments' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M15 20c0-2 1.5-3.5 4-3.5"/></svg>
+                {% translate "Segments" %}
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'manage_template_list' %}" class="cd-admin-nav__link label{% if active == 'templates' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+                {% translate "Mail templates" %}
+              </a>
+            </li>
+          </ul>
+        </div>
+      {% endif %}
+
       {% if contexts.organisation_dojos %}
         {# The organisation's own dojos (DATA_MODEL.md §12, §20), for those on their team with a valid background check. #}
         <div class="cd-admin-nav__group">
@@ -72,57 +79,82 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
         </div>
       {% endif %}
 
-      <div class="cd-admin-nav__group">
-        <p class="cd-admin-nav__group-label caption">{% translate "Public site" %}</p>
-        <ul class="cd-admin-nav__list">
-          <li>
-            <a href="{% url 'manage_promotion_list' %}" class="cd-admin-nav__link label{% if active == 'promotions' %} cd-admin-nav__link--active{% endif %}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6"/><path d="M18 6a8 8 0 0 1 0 12"/></svg>
-              {% translate "Promotions" %}
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'manage_sponsor_list' %}" class="cd-admin-nav__link label{% if active == 'sponsors' %} cd-admin-nav__link--active{% endif %}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-9.3-9A5 5 0 0 1 12 6a5 5 0 0 1 9.3 6c-2.3 4.6-9.3 9-9.3 9z"/></svg>
-              {% translate "Sponsors" %}
-            </a>
-          </li>
-        </ul>
-      </div>
+      {% if contexts.reviewer %}
+        {# Background checks and applications (DATA_MODEL.md §21): the reviewer role only. #}
+        <div class="cd-admin-nav__group">
+          <p class="cd-admin-nav__group-label caption">{% translate "Volunteers" %}</p>
+          <ul class="cd-admin-nav__list">
+            <li>
+              <a href="{% url 'manage_check_list' %}" class="cd-admin-nav__link label{% if active == 'checks' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M9 15l2 2 4-4"/></svg>
+                {% translate "Background checks" %}
+                {% checks_awaiting_review_count as awaiting %}{% if awaiting %}<span class="cd-admin-nav__count caption" title="{% translate 'Awaiting review' %}">{{ awaiting }}</span>{% endif %}
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'manage_application_list' %}" class="cd-admin-nav__link label{% if active == 'applications' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 19c0-3.4 2.9-6 6.5-6s6.5 2.6 6.5 6"/><path d="M17 8v6M14 11h6"/></svg>
+                {% translate "Applications" %}
+                {% applications_pending_count as pending %}{% if pending %}<span class="cd-admin-nav__count caption" title="{% translate 'Pending' %}">{{ pending }}</span>{% endif %}
+              </a>
+            </li>
+          </ul>
+        </div>
+      {% endif %}
 
-      <div class="cd-admin-nav__group">
-        <p class="cd-admin-nav__group-label caption">{% translate "Ninjas" %}</p>
-        <ul class="cd-admin-nav__list">
-          <li>
-            <a href="{% url 'manage_badge_list' %}" class="cd-admin-nav__link label{% if active == 'awards' %} cd-admin-nav__link--active{% endif %}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg>
-              {% translate "Awards" %}
-            </a>
-          </li>
-        </ul>
-      </div>
+      {% if contexts.organisation_admin %}
+        <div class="cd-admin-nav__group">
+          <p class="cd-admin-nav__group-label caption">{% translate "Public site" %}</p>
+          <ul class="cd-admin-nav__list">
+            <li>
+              <a href="{% url 'manage_promotion_list' %}" class="cd-admin-nav__link label{% if active == 'promotions' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6"/><path d="M18 6a8 8 0 0 1 0 12"/></svg>
+                {% translate "Promotions" %}
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'manage_sponsor_list' %}" class="cd-admin-nav__link label{% if active == 'sponsors' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.4-9.3-9A5 5 0 0 1 12 6a5 5 0 0 1 9.3 6c-2.3 4.6-9.3 9-9.3 9z"/></svg>
+                {% translate "Sponsors" %}
+              </a>
+            </li>
+          </ul>
+        </div>
 
-      <div class="cd-admin-nav__group">
-        <p class="cd-admin-nav__group-label caption">{% translate "Accounts" %}</p>
-        <ul class="cd-admin-nav__list">
-          <li>
-            <a href="{% url 'manage_privacy' %}" class="cd-admin-nav__link label{% if active == 'privacy' %} cd-admin-nav__link--active{% endif %}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>
-              {% translate "Privacy" %}
-              {% retention_attention_count as attention_count %}{% if attention_count %}<span class="cd-admin-nav__count caption" title="{% translate 'Needs attention' %}">{{ attention_count }}</span>{% endif %}
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'manage_security' %}" class="cd-admin-nav__link label{% if active == 'security' %} cd-admin-nav__link--active{% endif %}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-              {% translate "Sign-in security" %}
-            </a>
-          </li>
-        </ul>
-      </div>
+        <div class="cd-admin-nav__group">
+          <p class="cd-admin-nav__group-label caption">{% translate "Ninjas" %}</p>
+          <ul class="cd-admin-nav__list">
+            <li>
+              <a href="{% url 'manage_badge_list' %}" class="cd-admin-nav__link label{% if active == 'awards' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg>
+                {% translate "Awards" %}
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="cd-admin-nav__group">
+          <p class="cd-admin-nav__group-label caption">{% translate "Accounts" %}</p>
+          <ul class="cd-admin-nav__list">
+            <li>
+              <a href="{% url 'manage_privacy' %}" class="cd-admin-nav__link label{% if active == 'privacy' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>
+                {% translate "Privacy" %}
+                {% retention_attention_count as attention_count %}{% if attention_count %}<span class="cd-admin-nav__count caption" title="{% translate 'Needs attention' %}">{{ attention_count }}</span>{% endif %}
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'manage_security' %}" class="cd-admin-nav__link label{% if active == 'security' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                {% translate "Sign-in security" %}
+              </a>
+            </li>
+          </ul>
+        </div>
+      {% endif %}
 {% endblock %}
 
-{% block shell_role %}{% translate "Organisation admin" %}{% endblock %}
+{% block shell_role %}{% manage_contexts as contexts %}{% if contexts.organisation_admin %}{% translate "Organisation admin" %}{% else %}{% translate "Background-check reviewer" %}{% endif %}{% endblock %}
 {% block shell_heading %}{% block manage_heading %}{% endblock %}{% endblock %}
 {% block shell_topbar_actions %}{% block manage_topbar_extra %}{% endblock %}{% endblock %}
 {% block shell_content %}{% block manage_content %}{% endblock %}{% endblock %}

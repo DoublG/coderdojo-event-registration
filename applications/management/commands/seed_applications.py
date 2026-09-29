@@ -1,6 +1,7 @@
 import random
 from datetime import timedelta
 
+from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
@@ -11,6 +12,8 @@ from dojos.models import Dojo
 
 # (background check status on the account, application status) for a few
 # demo parents who applied to mentor — one per stage of the review queue.
+SEED_DOCUMENT = b"Seed data: this stands in for an extract from the criminal record (model 596.2).\n"
+
 STAGES = [
     (User.CHECK_NOT_REQUESTED, Application.PENDING),
     (User.CHECK_REQUESTED, Application.PENDING),
@@ -57,6 +60,9 @@ class Command(BaseCommand):
                 parent.background_check_requested_at = now - timedelta(days=10)
             if check_status in (User.CHECK_SUBMITTED, User.CHECK_REJECTED):
                 parent.background_check_submitted_at = now - timedelta(days=3)
+            if check_status == User.CHECK_SUBMITTED:
+                # Something for a reviewer to download (deleted with the decision).
+                parent.background_check_document.save("example-extract.txt", ContentFile(SEED_DOCUMENT), save=False)
             if check_status == User.CHECK_REJECTED:
                 parent.background_check_reviewed_at = now - timedelta(days=1)
                 BackgroundCheckHistory.objects.create(

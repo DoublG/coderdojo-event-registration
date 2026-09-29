@@ -1,9 +1,10 @@
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, render
 from django.utils.translation import gettext as _
 
 from accounts.models import User
+from accounts.organisation import require_reviewer
 from core.audit import log_access
 
 from . import services
@@ -81,18 +82,23 @@ def renew_background_check(request):
     return render(request, "applications/upload_background_check.html", _upload_context(request, request.user))
 
 
-@permission_required("applications.can_review_background_checks", raise_exception=True)
+@login_required
 def download_background_check(request, user_id):
     """The only way to read a background-check document. It's stored on
-    private storage (no public media URL at all), so this permission check is
-    the sole gate — not obscurity. The file is deleted as soon as a decision
-    is made (applications.services), so this 404s for anything decided."""
+    private storage (no public media URL at all), so this check is the sole
+    gate — not obscurity: a reviewer (accounts.organisation.require_reviewer,
+    which also applies the sign-in policy), else a 404. The file is deleted
+    as soon as a decision is made (applications.services), so this 404s for
+    anything decided. The browser is told not to keep a copy."""
+    require_reviewer(request)
     account = get_object_or_404(User, pk=user_id)
     if not account.background_check_document:
         raise Http404
     log_access(account)  # a criminal-record extract (GDPR art. 10): recorded in the audit log
-    return FileResponse(
+    response = FileResponse(
         account.background_check_document.open("rb"),
         as_attachment=True,
         filename=account.background_check_document.name.rsplit("/", 1)[-1],
     )
+    response["Cache-Control"] = "no-store"
+    return response

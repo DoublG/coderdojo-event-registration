@@ -1,0 +1,51 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Application" %}{% endblock %}
+{% block manage_heading %}{{ application.get_kind_display }}: {{ account.get_full_name|default:account.username }}{% endblock %}
+{% block manage_topbar_extra %}<a class="cd-btn cd-btn--ghost label" href="{% url 'manage_application_list' %}">{% translate "Back to applications" %}</a>{% endblock %}
+
+{% block manage_content %}
+  {% comment %}One application (applications.manage.application_detail, DATA_MODEL.md §21): what they wrote, their background check and the next step.{% endcomment %}
+  <section class="cd-card" style="padding: var(--space-5); margin-bottom: var(--space-5); max-width: 760px;">
+    <p class="body-sm" style="margin-top: 0;">{{ account.email|default:"—" }}{% if account.phone %} · {{ account.phone }}{% endif %}</p>
+    <dl class="body-sm">
+      <dt class="label">{% translate "Status" %}</dt>
+      <dd>{{ application.get_status_display }}{% if application.decided_at %} ({{ application.decided_at|date:"d/m/Y" }}){% endif %}</dd>
+      <dt class="label">{% translate "Applied" %}</dt><dd>{{ application.submitted_at|date:"d/m/Y H:i" }}</dd>
+      {% if application.kind == "mentor" %}
+        <dt class="label">{% translate "Dojo" %}</dt><dd>{{ application.dojo.name|default:_("Any dojo") }}</dd>
+        {% if application.mentor_role %}<dt class="label">{% translate "Role" %}</dt><dd>{{ application.get_mentor_role_display }}</dd>{% endif %}
+      {% else %}
+        <dt class="label">{% translate "Area" %}</dt><dd>{{ application.area|default:"—" }}</dd>
+        <dt class="label">{% translate "Preferred schedule" %}</dt><dd>{{ application.preferred_schedule|default:"—" }}</dd>
+        <dt class="label">{% translate "Proposed venue" %}</dt><dd>{{ application.proposed_venue|default:"—" }}</dd>
+      {% endif %}
+      <dt class="label">{% translate "Message" %}</dt><dd>{{ application.message|default:"—"|linebreaksbr }}</dd>
+    </dl>
+  </section>
+
+  <section class="cd-card" style="padding: var(--space-5); margin-bottom: var(--space-5); max-width: 760px;">
+    <h2 class="heading-md" style="margin-top: 0;">{% translate "Background check" %}</h2>
+    <p class="body-sm">{% include "applications/manage/_check_status.html" %} <a href="{% url 'manage_check_detail' user_id=account.id %}">{% translate "Open the background check" %}</a></p>
+    {% if can_request and not is_self and application.status == "pending" %}
+      <form method="post" action="{% url 'manage_check_request' user_id=account.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{% url 'manage_application_detail' application_id=application.id %}">
+        <button type="submit" class="cd-btn cd-btn--secondary label">{% if account.background_check_status == "requested" %}{% translate "Send the link again" %}{% else %}{% translate "Ask for a document" %}{% endif %}</button>
+      </form>
+    {% endif %}
+  </section>
+
+  {% if application.status == "pending" %}
+    {% if is_self %}
+      <p class="cd-form__note cd-form__note--error" style="max-width: 760px;">{% translate "This is your own application: another reviewer decides on it." %}</p>
+    {% else %}
+      <form method="post" action="{% url 'manage_application_decide' application_id=application.id %}" class="cd-form__actions" style="max-width: 760px;">
+        {% csrf_token %}
+        <button type="submit" name="action" value="reject" class="cd-btn cd-btn--ghost label">{% translate "Reject" %}</button>
+        <button type="submit" name="action" value="approve" class="cd-btn cd-btn--primary label"{% if not account.background_check_valid %} disabled title="{% translate 'Needs a valid background check' %}"{% endif %}>{% translate "Approve" %}</button>
+      </form>
+      {% if not account.background_check_valid %}<p class="caption">{% translate "Approving needs a valid background check." %}</p>{% endif %}
+    {% endif %}
+  {% endif %}
+{% endblock %}

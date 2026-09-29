@@ -97,7 +97,15 @@ def _record_decision(user, reviewer, decision, note=""):
     )
 
 
+def _not_yourself(account, reviewer):
+    """Nobody reviews their own background check or decides their own
+    application (DATA_MODEL.md §21)."""
+    if reviewer is not None and account.pk == reviewer.pk:
+        raise OnboardingError(_("You can't decide on your own background check or application."))
+
+
 def validate_background_check(user, reviewer, note=""):
+    _not_yourself(user, reviewer)
     if user.background_check_status != User.CHECK_SUBMITTED:
         raise OnboardingError(_("%(user)s has no uploaded document awaiting review.") % {"user": user})
     now = timezone.now()
@@ -117,6 +125,7 @@ def validate_background_check(user, reviewer, note=""):
 
 
 def reject_background_check(user, reviewer, note=""):
+    _not_yourself(user, reviewer)
     if user.background_check_status != User.CHECK_SUBMITTED:
         raise OnboardingError(_("%(user)s has no uploaded document awaiting review.") % {"user": user})
     user.background_check_status = User.CHECK_REJECTED
@@ -149,6 +158,7 @@ def submit_application(account, kind, **fields):
 
 
 def approve_application(application, reviewer):
+    _not_yourself(application.account, reviewer)
     if application.status != Application.PENDING:
         raise OnboardingError(
             _("Application %(application)s has already been decided.") % {"application": application.pk}
@@ -183,6 +193,7 @@ def approve_application(application, reviewer):
 
 
 def reject_application(application, reviewer):
+    _not_yourself(application.account, reviewer)
     if application.status != Application.PENDING:
         raise OnboardingError(
             _("Application %(application)s has already been decided.") % {"application": application.pk}

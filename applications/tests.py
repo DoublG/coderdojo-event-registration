@@ -412,8 +412,10 @@ class DownloadBackgroundCheckTests(_CleanupDocumentsMixin, TestCase):
         self.url = reverse("download_background_check", kwargs={"user_id": self.user.pk})
 
     def test_requires_the_reviewer_permission(self):
+        """A 404 like the rest of the dashboard (accounts.organisation.require_reviewer)."""
+        self.assertEqual(self.client.get(self.url).status_code, 302)  # to login
         self.client.force_login(User.objects.create(username="staff", is_staff=True))
-        self.assertEqual(self.client.get(self.url).status_code, 403)
+        self.assertEqual(self.client.get(self.url).status_code, 404)
 
     def test_a_download_is_recorded_in_the_audit_log(self):
         from auditlog.models import LogEntry
@@ -432,6 +434,7 @@ class DownloadBackgroundCheckTests(_CleanupDocumentsMixin, TestCase):
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Cache-Control"], "no-store")
         self.assertEqual(b"".join(response.streaming_content), b"pretend this is a pdf")
 
         self.user.refresh_from_db()
@@ -474,3 +477,262 @@ class DojoCreateTests(TestCase):
                 response = self.client.post(reverse("dojo_create"), {"name": "Nope"})
                 self.assertRedirects(response, reverse("account_home"))
         self.assertFalse(Dojo.objects.filter(name="Nope").exists())
+
+
+# --- the organisation dashboard's Volunteers pages (DATA_MODEL.md §21) -------------------
+
+
+def _reviewer(username="reviewer"):
+    from accounts.models import OrganisationRole
+
+    user = User.objects.create(username=username, email=f"{username}@example.com")
+    OrganisationRole.objects.create(account=user, role=OrganisationRole.REVIEWER)
+    return User.objects.get(pk=user.pk)  # as the role's signal left it (staff, groups)
+
+
+def _valid_check(user):
+    user.background_check_status = User.CHECK_VALIDATED
+    user.background_check_expires_at = timezone.now() + timedelta(days=200)
+    user.save(update_fields=["background_check_status", "background_check_expires_at"])
+    return user
+
+
+class ReviewerRoleTests(TestCase):
+    """The organisation's reviewer role (accounts.organisation): reviewing
+    background checks and deciding applications, nothing else."""
+
+    def test_the_role_grants_reviewing_and_deciding(self):
+        from accounts.organisation import is_organisation_admin, is_reviewer
+
+        reviewer = _reviewer()
+        self.assertTrue(is_reviewer(reviewer))
+        self.assertTrue(reviewer.has_perm("applications.change_application"))
+        self.assertTrue(reviewer.is_staff)
+        self.assertFalse(is_organisation_admin(reviewer))
+        self.assertFalse(reviewer.has_perm("mailing.change_campaign"))
+
+    def test_the_admin_and_board_roles_dont_review(self):
+        from accounts.models import OrganisationRole
+        from accounts.organisation import is_reviewer
+
+        for role in (OrganisationRole.ADMIN, OrganisationRole.BOARD):
+            with self.subTest(role=role):
+                user = User.objects.create(username=f"u-{role}")
+                OrganisationRole.objects.create(account=user, role=role)
+                self.assertFalse(is_reviewer(user))
+                self.assertFalse(user.has_perm("applications.change_application"))
+
+    def test_revoking_the_role_takes_it_away(self):
+        from accounts.organisation import is_reviewer
+
+        reviewer = _reviewer()
+        reviewer.organisation_roles.all().delete()
+        reviewer = User.objects.get(pk=reviewer.pk)  # a fresh permission cache
+        self.assertFalse(is_reviewer(reviewer))
+
+    def test_a_permission_granted_by_hand_still_counts(self):
+        from accounts.organisation import is_reviewer
+
+        user = User.objects.create(username="legacy")
+        user.user_permissions.add(Permission.objects.get(codename="can_review_background_checks"))
+        self.assertTrue(is_reviewer(user))
+
+    def test_nobody_decides_on_their_own_check_or_application(self):
+        reviewer = _submitted_account("self-reviewer")
+        with self.assertRaises(services.OnboardingError):
+            services.validate_background_check(reviewer, reviewer)
+        with self.assertRaises(services.OnboardingError):
+            services.reject_background_check(reviewer, reviewer)
+        application = Application.objects.create(account=_valid_check(reviewer), kind=Application.MENTOR)
+        with self.assertRaises(services.OnboardingError):
+            services.approve_application(application, reviewer)
+        with self.assertRaises(services.OnboardingError):
+            services.reject_application(application, reviewer)
+        reviewer.background_check_document.delete(save=False)
+
+
+class ReviewerDashboardTests(_CleanupDocumentsMixin, TestCase):
+    """/manage/checks/ and /manage/applications/ (applications.manage)."""
+
+    def setUp(self):
+        call_command("load_mail_templates", stdout=io.StringIO())
+        self.reviewer = _reviewer()
+        self.client.force_login(self.reviewer)
+
+    def _urls(self, account, application):
+        return [
+            reverse("manage_check_list"),
+            reverse("manage_check_detail", kwargs={"user_id": account.pk}),
+            reverse("manage_application_list"),
+            reverse("manage_application_detail", kwargs={"application_id": application.pk}),
+        ]
+
+    def test_only_reviewers_get_in(self):
+        from accounts.models import OrganisationRole
+
+        account = _submitted_account()
+        application = Application.objects.create(account=account, kind=Application.MENTOR)
+        urls = self._urls(account, application)
+        self.client.logout()
+        for url in urls:
+            self.assertEqual(self.client.get(url).status_code, 302)  # to login
+        admin = User.objects.create(username="orgadmin")
+        OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
+        for user in (admin, User.objects.create(username="parent")):
+            self.client.force_login(user)
+            for url in urls:
+                with self.subTest(user=user.username, url=url):
+                    self.assertEqual(self.client.get(url).status_code, 404)
+            decide = reverse("manage_check_decide", kwargs={"user_id": account.pk})
+            self.assertEqual(self.client.post(decide, {"decision": "validate"}).status_code, 404)
+        account.refresh_from_db()
+        self.assertEqual(account.background_check_status, User.CHECK_SUBMITTED)
+
+    def test_manage_opens_the_checks_and_the_sidebar_shows_only_volunteers(self):
+        self.assertRedirects(self.client.get(reverse("manage_home")), reverse("manage_check_list"))
+        response = self.client.get(reverse("manage_check_list"))
+        self.assertContains(response, f'href="{reverse("manage_application_list")}"')
+        self.assertNotContains(response, f'href="{reverse("manage_campaign_list")}"')
+        self.assertNotContains(response, "New campaign")
+        self.assertEqual(self.client.get(reverse("manage_campaign_list")).status_code, 404)
+
+    def test_an_organisation_admin_sees_no_volunteers_group(self):
+        from accounts.models import OrganisationRole
+
+        admin = User.objects.create(username="orgadmin")
+        OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
+        self.client.force_login(admin)
+        response = self.client.get(reverse("manage_campaign_list"))
+        self.assertNotContains(response, f'href="{reverse("manage_check_list")}"')
+
+    def test_the_queue_sorts_checks_into_their_sections(self):
+        awaiting = _submitted_account("awaiting")
+        waiting = User.objects.create(username="waiting", background_check_status=User.CHECK_REQUESTED)
+        expired = User.objects.create(
+            username="expired",
+            background_check_status=User.CHECK_VALIDATED,
+            background_check_expires_at=timezone.now() - timedelta(days=3),
+        )
+        expiring = User.objects.create(
+            username="expiring",
+            background_check_status=User.CHECK_VALIDATED,
+            background_check_expires_at=timezone.now() + timedelta(days=10),
+        )
+        _valid_check(User.objects.create(username="fine"))
+        response = self.client.get(reverse("manage_check_list"))
+        self.assertEqual(list(response.context["awaiting"]), [awaiting])
+        self.assertEqual(list(response.context["waiting"]), [waiting])
+        self.assertEqual(list(response.context["expired"]), [expired])
+        self.assertEqual(list(response.context["expiring"]), [expiring])
+        self.assertContains(response, 'title="Awaiting review">1</span>')
+
+    def test_search_finds_a_check(self):
+        _submitted_account("findme")
+        response = self.client.get(reverse("manage_check_list"), {"q": "findme"})
+        self.assertEqual([u.username for u in response.context["found"]], ["findme"])
+
+    def test_opening_a_check_is_recorded_in_the_audit_log(self):
+        from auditlog.models import LogEntry
+
+        account = _submitted_account()
+        response = self.client.get(reverse("manage_check_detail", kwargs={"user_id": account.pk}))
+        self.assertContains(response, reverse("download_background_check", kwargs={"user_id": account.pk}))
+        entry = LogEntry.objects.get_for_object(account).get(action=LogEntry.Action.ACCESS)
+        self.assertEqual(entry.actor, self.reviewer)
+
+    def test_validating_deletes_the_document_and_keeps_the_decision(self):
+        account = _submitted_account()
+        name = account.background_check_document.name
+        url = reverse("manage_check_decide", kwargs={"user_id": account.pk})
+        response = self.client.post(url, {"decision": "validate", "note": "All in order"})
+        self.assertRedirects(response, reverse("manage_check_list"))
+        account.refresh_from_db()
+        self.assertTrue(account.background_check_valid)
+        self.assertFalse(account.background_check_document)
+        self.assertFalse(account.background_check_document.storage.exists(name))
+        history = account.background_check_history.get()
+        self.assertEqual(
+            (history.decision, history.reviewed_by, history.note), ("validated", self.reviewer, "All in order")
+        )
+
+    def test_rejecting(self):
+        account = _submitted_account()
+        self.client.post(reverse("manage_check_decide", kwargs={"user_id": account.pk}), {"decision": "reject"})
+        account.refresh_from_db()
+        self.assertEqual(account.background_check_status, User.CHECK_REJECTED)
+        self.assertFalse(account.background_check_document)
+
+    def test_a_reviewer_cant_decide_their_own_check(self):
+        self.reviewer.background_check_status = User.CHECK_REQUESTED
+        self.reviewer.save(update_fields=["background_check_status"])
+        services.submit_background_check(self.reviewer, _uploaded())
+        url = reverse("manage_check_detail", kwargs={"user_id": self.reviewer.pk})
+        self.assertContains(self.client.get(url), "another reviewer decides on it")
+        self.client.post(
+            reverse("manage_check_decide", kwargs={"user_id": self.reviewer.pk}), {"decision": "validate"}
+        )
+        self.reviewer.refresh_from_db()
+        self.assertEqual(self.reviewer.background_check_status, User.CHECK_SUBMITTED)
+
+    def test_asking_for_a_document_mails_the_link(self):
+        account = User.objects.create(username="new", email="new@example.com")
+        response = self.client.post(
+            reverse("manage_check_request", kwargs={"user_id": account.pk}), {"next": reverse("manage_check_list")}
+        )
+        self.assertRedirects(response, reverse("manage_check_list"))
+        account.refresh_from_db()
+        self.assertEqual(account.background_check_status, User.CHECK_REQUESTED)
+        self.assertTrue(
+            EmailMessage.objects.filter(user=account, template_key="background_check_requested").exists()
+        )
+
+    def test_an_unsafe_next_goes_back_to_the_check(self):
+        account = User.objects.create(username="new", email="new@example.com")
+        response = self.client.post(
+            reverse("manage_check_request", kwargs={"user_id": account.pk}), {"next": "https://evil.example/"}
+        )
+        self.assertRedirects(response, reverse("manage_check_detail", kwargs={"user_id": account.pk}))
+
+    # applications
+
+    def test_the_list_shows_pending_applications_by_default(self):
+        pending = Application.objects.create(account=User.objects.create(username="a"), kind=Application.MENTOR)
+        Application.objects.create(
+            account=User.objects.create(username="b"), kind=Application.MENTOR, status=Application.APPROVED
+        )
+        response = self.client.get(reverse("manage_application_list"))
+        self.assertEqual(list(response.context["applications"]), [pending])
+        response = self.client.get(reverse("manage_application_list"), {"status": "all", "kind": Application.MENTOR})
+        self.assertEqual(len(response.context["applications"]), 2)
+
+    def test_approving_needs_a_valid_check(self):
+        account = User.objects.create(username="applicant", email="applicant@example.com")
+        application = Application.objects.create(account=account, kind=Application.MENTOR)
+        url = reverse("manage_application_decide", kwargs={"application_id": application.pk})
+        self.client.post(url, {"action": "approve"})
+        application.refresh_from_db()
+        self.assertEqual(application.status, Application.PENDING)
+
+        _valid_check(account)
+        self.client.post(url, {"action": "approve"})
+        application.refresh_from_db()
+        self.assertEqual((application.status, application.decided_by), (Application.APPROVED, self.reviewer))
+        self.assertTrue(EmailMessage.objects.filter(user=account, template_key="application_approved").exists())
+
+    def test_rejecting_an_application(self):
+        application = Application.objects.create(account=User.objects.create(username="x"), kind=Application.CHAMPION)
+        self.client.post(
+            reverse("manage_application_decide", kwargs={"application_id": application.pk}), {"action": "reject"}
+        )
+        application.refresh_from_db()
+        self.assertEqual(application.status, Application.REJECTED)
+
+    def test_a_reviewer_cant_decide_their_own_application(self):
+        application = Application.objects.create(account=_valid_check(self.reviewer), kind=Application.MENTOR)
+        url = reverse("manage_application_detail", kwargs={"application_id": application.pk})
+        self.assertContains(self.client.get(url), "another reviewer decides on it")
+        self.client.post(
+            reverse("manage_application_decide", kwargs={"application_id": application.pk}), {"action": "approve"}
+        )
+        application.refresh_from_db()
+        self.assertEqual(application.status, Application.PENDING)

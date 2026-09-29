@@ -130,12 +130,13 @@ def describe_account(user):
     parts = []
     if user.is_superuser:
         parts.append("Superuser (Django admin)")
+    role_descriptions = {
+        "admin": "Organisation admin: /manage/ dashboard and Django admin",
+        "board": "Organisation board: read-only Django admin",
+        "reviewer": "Background-check reviewer: /manage/checks/ and /manage/applications/",
+    }
     for role in user.organisation_roles.all():
-        parts.append(
-            "Organisation admin: /manage/ dashboard and Django admin"
-            if role.role == role.ADMIN
-            else "Organisation board: read-only Django admin"
-        )
+        parts.append(role_descriptions[role.role])
     listing = OrganisationTeamMember.objects.filter(account=user).first()
     if listing:
         parts.append(f"on the organisation's team page as {listing.position}")

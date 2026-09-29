@@ -114,3 +114,21 @@ class MentorApplicationForm(_ApplicationForm):
         self.fields["dojo"].empty_label = _("Not sure yet — any dojo")
         self.fields["mentor_role"].required = True
         self.fields["mentor_role"].choices = Application.MENTOR_ROLE_CHOICES
+
+
+class BackgroundCheckDecisionForm(forms.Form):
+    """A reviewer's decision on an uploaded document (applications.manage).
+    Which decision is the button pressed; services decides what's allowed."""
+
+    VALIDATE = "validate"
+    REJECT = "reject"
+
+    decision = forms.ChoiceField(choices=[(VALIDATE, _("Validate")), (REJECT, _("Reject"))], widget=forms.HiddenInput)
+    note = forms.CharField(
+        label=_("Note (optional)"),
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 3}),
+        help_text=_(
+            "Kept with the decision, for the other reviewers. Never copy anything from the extract itself into it."
+        ),
+    )

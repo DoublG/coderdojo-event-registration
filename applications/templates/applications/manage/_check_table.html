@@ -1,0 +1,45 @@
+{% load i18n %}{% comment %}
+One section of the background-check queue (check_list.html): `rows` are
+accounts, `date_label`/`date_field` the column that matters for the section,
+`request_label` an optional button that asks for a (new) document from here.
+{% endcomment %}
+<div class="cd-table-wrap">
+  <table class="cd-table cd-table--zebra">
+    <thead>
+      <tr>
+        <th class="label" scope="col">{% translate "Name" %}</th>
+        <th class="label" scope="col">{% translate "Applied for" %}</th>
+        <th class="label" scope="col">{{ date_label }}</th>
+        <th class="label" scope="col">{% translate "Status" %}</th>
+        <th class="label" scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for account in rows %}
+        <tr>
+          <td class="body-sm"><a href="{% url 'manage_check_detail' user_id=account.id %}">{{ account.get_full_name|default:account.username }}</a>{% if account.email %}<br><span class="caption">{{ account.email }}</span>{% endif %}</td>
+          <td class="body-sm">{% for application in account.applications.all %}{{ application.get_kind_display }} ({{ application.get_status_display|lower }}){% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
+          <td class="body-sm">
+            {% if date_field == "submitted" %}{{ account.background_check_submitted_at|date:"d/m/Y H:i"|default:"—" }}
+            {% elif date_field == "requested" %}{{ account.background_check_requested_at|date:"d/m/Y"|default:"—" }}
+            {% else %}{{ account.background_check_expires_at|date:"d/m/Y"|default:"—" }}{% endif %}
+          </td>
+          <td class="body-sm">{% include "applications/manage/_check_status.html" %}</td>
+          <td class="body-sm">
+            {% if request_label and account.pk != request.user.pk %}
+              <form method="post" action="{% url 'manage_check_request' user_id=account.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'manage_check_list' %}">
+                <button type="submit" class="cd-btn cd-btn--ghost label">{{ request_label }}</button>
+              </form>
+            {% else %}
+              <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_check_detail' user_id=account.id %}">{% translate "Open" %}</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td class="body-sm" colspan="5">{{ empty_text }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

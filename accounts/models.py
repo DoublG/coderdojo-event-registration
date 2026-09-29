@@ -334,7 +334,8 @@ class OrganisationRole(models.Model):
 
     BOARD = "board"
     ADMIN = "admin"
-    ROLE_CHOICES = [(BOARD, "Board (read-only)"), (ADMIN, "Admin")]
+    REVIEWER = "reviewer"
+    ROLE_CHOICES = [(BOARD, "Board (read-only)"), (ADMIN, "Admin"), (REVIEWER, "Background-check reviewer")]
 
     account = models.ForeignKey(
         settings.AUTH_USER_MODEL,

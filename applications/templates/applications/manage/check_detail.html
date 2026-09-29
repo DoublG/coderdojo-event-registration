@@ -1,0 +1,83 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Background check" %}{% endblock %}
+{% block manage_heading %}{{ account.get_full_name|default:account.username }}{% endblock %}
+{% block manage_topbar_extra %}<a class="cd-btn cd-btn--ghost label" href="{% url 'manage_check_list' %}">{% translate "Back to background checks" %}</a>{% endblock %}
+
+{% block manage_content %}
+  {% comment %}One account's background check (applications.manage.check_detail, DATA_MODEL.md §21). Viewing it is recorded in the audit log.{% endcomment %}
+  <section class="cd-card" style="padding: var(--space-5); margin-bottom: var(--space-5); max-width: 760px;">
+    <p class="body-sm" style="margin-top: 0;">{{ account.email|default:"—" }}{% if account.phone %} · {{ account.phone }}{% endif %}</p>
+    <p class="body-sm">{% include "applications/manage/_check_status.html" %}</p>
+    <dl class="body-sm">
+      <dt class="label">{% translate "Requested" %}</dt><dd>{{ account.background_check_requested_at|date:"d/m/Y H:i"|default:"—" }}</dd>
+      <dt class="label">{% translate "Uploaded" %}</dt><dd>{{ account.background_check_submitted_at|date:"d/m/Y H:i"|default:"—" }}</dd>
+      <dt class="label">{% translate "Last decision" %}</dt><dd>{{ account.background_check_reviewed_at|date:"d/m/Y H:i"|default:"—" }}</dd>
+    </dl>
+    <h2 class="heading-sm">{% translate "Applied for" %}</h2>
+    <ul class="body-sm">
+      {% for application in applications %}
+        <li><a href="{% url 'manage_application_detail' application_id=application.id %}">{{ application.get_kind_display }}</a>: {{ application.get_status_display }}, {{ application.submitted_at|date:"d/m/Y" }}</li>
+      {% empty %}
+        <li>{% translate "No applications." %}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {% if is_self %}
+    <p class="cd-form__note cd-form__note--error" style="max-width: 760px;">{% translate "This is your own background check: another reviewer decides on it." %}</p>
+  {% elif account.background_check_status == "submitted" %}
+    <section class="cd-card" style="padding: var(--space-5); margin-bottom: var(--space-5); max-width: 760px;">
+      <h2 class="heading-md" style="margin-top: 0;">{% translate "Decide" %}</h2>
+      {% if account.background_check_document %}
+        <p class="body-sm"><a class="cd-btn cd-btn--secondary label" href="{% url 'download_background_check' user_id=account.id %}">{% translate "Download the document" %}</a></p>
+        <p class="caption">{% translate "Every download is recorded. Don't keep a copy: delete the file once you've decided." %}</p>
+      {% endif %}
+      <form method="post" action="{% url 'manage_check_decide' user_id=account.id %}" class="cd-form">
+        {% csrf_token %}
+        {{ form.note.as_field_group }}
+        <p class="caption">{% translate "Validating makes the check valid for a year. Rejecting asks the person to upload a new document. Either way the document is deleted straight away." %}</p>
+        <div class="cd-form__actions">
+          <button type="submit" name="decision" value="reject" class="cd-btn cd-btn--ghost label">{% translate "Reject" %}</button>
+          <button type="submit" name="decision" value="validate" class="cd-btn cd-btn--primary label">{% translate "Validate" %}</button>
+        </div>
+      </form>
+    </section>
+  {% elif can_request %}
+    <section class="cd-card" style="padding: var(--space-5); margin-bottom: var(--space-5); max-width: 760px;">
+      <form method="post" action="{% url 'manage_check_request' user_id=account.id %}">
+        {% csrf_token %}
+        <p class="body-sm" style="margin-top: 0;">{% translate "Mails the person a link to upload their extract. It's also on their account page." %}</p>
+        <button type="submit" class="cd-btn cd-btn--primary label">{% if account.background_check_status == "requested" %}{% translate "Send the link again" %}{% else %}{% translate "Ask for a document" %}{% endif %}</button>
+      </form>
+    </section>
+  {% endif %}
+
+  <h2 class="heading-md">{% translate "Earlier decisions" %}</h2>
+  <div class="cd-table-wrap" style="max-width: 760px;">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label" scope="col">{% translate "Decision" %}</th>
+          <th class="label" scope="col">{% translate "By" %}</th>
+          <th class="label" scope="col">{% translate "On" %}</th>
+          <th class="label" scope="col">{% translate "Valid until" %}</th>
+          <th class="label" scope="col">{% translate "Note" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in history %}
+          <tr>
+            <td class="body-sm">{{ row.get_decision_display }}</td>
+            <td class="body-sm">{{ row.reviewed_by.get_full_name|default:row.reviewed_by.username|default:"—" }}</td>
+            <td class="body-sm">{{ row.reviewed_at|date:"d/m/Y" }}</td>
+            <td class="body-sm">{{ row.expires_at|date:"d/m/Y"|default:"—" }}</td>
+            <td class="body-sm">{{ row.note|default:"—" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td class="body-sm" colspan="5">{% translate "No decisions yet." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

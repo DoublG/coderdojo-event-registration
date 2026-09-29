@@ -3,24 +3,32 @@ manage, for the switcher at the top of the shared sidebar
 (core/_manage_shell.html) and for /manage/'s landing.
 
 Only the navigation is shared. Who may open what stays with the existing
-rules: the organisation's pages need the organisation `admin` role
-(accounts.organisation), a dojo, an organisation dojo included, an active
-champion/mentor membership and a valid background check (dojos.access). So
+rules: the organisation's pages need the organisation `admin` role, its
+Volunteers pages the `reviewer` role (accounts.organisation), and a dojo,
+an organisation dojo included, an active champion/mentor membership and a
+valid background check (dojos.access). So
 an organisation member without a background check gets the Organisation
 context only, and no dojos at all.
 """
 
 from dataclasses import dataclass, field
 
-from accounts.organisation import is_organisation_admin
+from accounts.organisation import is_organisation_admin, is_reviewer
 from dojos.access import accessible_dojos
 
 
 @dataclass
 class ManageContexts:
-    organisation: bool = False  # the organisation's dashboard (/manage/…)
+    organisation_admin: bool = False  # the organisation's dashboard (/manage/…): campaigns, content, ...
+    reviewer: bool = False  # its Volunteers pages: background checks and applications (§21)
     organisation_dojos: list = field(default_factory=list)  # organisation dojos on whose team the account is
     dojos: list = field(default_factory=list)  # regular dojos on whose team the account is
+
+    @property
+    def organisation(self):
+        """The Organisation context opens for either role; its sidebar shows
+        each group only to the role that may open it."""
+        return self.organisation_admin or self.reviewer
 
     @property
     def count(self):
@@ -43,7 +51,8 @@ def manage_contexts(user):
         return ManageContexts()
     dojos = list(accessible_dojos(user))
     return ManageContexts(
-        organisation=is_organisation_admin(user),
+        organisation_admin=is_organisation_admin(user),
+        reviewer=is_reviewer(user),
         organisation_dojos=[d for d in dojos if d.is_organisation],
         dojos=[d for d in dojos if not d.is_organisation],
     )

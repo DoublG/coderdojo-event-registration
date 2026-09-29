@@ -15,9 +15,14 @@ permissions below; holding any role makes the account staff.
   the board gets no mailing access, since segments and sent mail show
   families' personal data).
 
-Neither role can award belts (only a dojo's active champion/mentors can,
-events.awards) or review background checks (a separate, explicitly granted
-permission: applications.can_review_background_checks).
+- REVIEWER: reviews background checks and decides applications
+  (DATA_MODEL.md §21), on the organisation dashboard's Volunteers pages
+  (require_reviewer) and in the Django admin. Combinable with the others.
+
+No role can award belts (only a dojo's active champion/mentors can,
+events.awards). Only the reviewer role reviews background checks
+(applications.can_review_background_checks; a permission granted by hand
+before the role existed still counts, see is_reviewer).
 
 `sync_organisation_access` is called by signals whenever a role is granted
 or revoked; it's also safe to call by hand.
@@ -29,7 +34,11 @@ from django.dispatch import receiver
 
 from .models import OrganisationRole
 
-GROUP_NAMES = {OrganisationRole.BOARD: "Organisation: board", OrganisationRole.ADMIN: "Organisation: admin"}
+GROUP_NAMES = {
+    OrganisationRole.BOARD: "Organisation: board",
+    OrganisationRole.ADMIN: "Organisation: admin",
+    OrganisationRole.REVIEWER: "Organisation: background-check reviewer",
+}
 
 _VIEW = ["view"]
 _EDIT = ["add", "change", "delete", "view"]
@@ -76,7 +85,20 @@ ADMIN_PERMISSIONS = {
     # The audit log (DATA_MODEL.md §14): the admin role only, never the board.
     "auditlog.logentry": _VIEW,
 }
-ROLE_PERMISSIONS = {OrganisationRole.BOARD: BOARD_PERMISSIONS, OrganisationRole.ADMIN: ADMIN_PERMISSIONS}
+# Criminal-record extracts (GDPR art. 10): this role only, never the board or
+# the admin role by themselves. An action with an underscore is a whole
+# codename (a custom permission) rather than "<action>_<model>".
+REVIEWER_PERMISSIONS = {
+    "applications.application": ["view", "change", "can_review_background_checks"],
+    "applications.backgroundcheck": ["view", "change"],
+    "applications.backgroundcheckhistory": _VIEW,
+}
+ROLE_PERMISSIONS = {
+    OrganisationRole.BOARD: BOARD_PERMISSIONS,
+    OrganisationRole.ADMIN: ADMIN_PERMISSIONS,
+    OrganisationRole.REVIEWER: REVIEWER_PERMISSIONS,
+}
+REVIEW_PERMISSION = "applications.can_review_background_checks"
 
 
 def _permissions(spec):
@@ -85,7 +107,7 @@ def _permissions(spec):
         app_label, model_name = model.split(".")
         perms += Permission.objects.filter(
             content_type__app_label=app_label,
-            codename__in=[f"{a}_{model_name}" for a in actions],
+            codename__in=[a if "_" in a else f"{a}_{model_name}" for a in actions],
         )
     return perms
 
@@ -145,6 +167,25 @@ def require_organisation_admin(request):
     from .sign_in import meets_requirement
 
     if not is_organisation_admin(request.user) or not meets_requirement(request):
+        raise Http404
+
+
+def is_reviewer(user):
+    """May review background checks and decide applications (DATA_MODEL.md
+    §21): the reviewer role, or the permission granted some other way (by
+    hand, or a superuser)."""
+    return user.is_authenticated and user.has_perm(REVIEW_PERMISSION)
+
+
+def require_reviewer(request):
+    """For every Volunteers page of the organisation dashboard and the
+    background-check document: 404 unless the account may review, and its
+    login meets the organisation's sign-in policy (accounts.sign_in)."""
+    from django.http import Http404
+
+    from .sign_in import meets_requirement
+
+    if not is_reviewer(request.user) or not meets_requirement(request):
         raise Http404
 
 

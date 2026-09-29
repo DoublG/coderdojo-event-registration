@@ -1,0 +1,62 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Applications" %}{% endblock %}
+{% block manage_heading %}{% translate "Applications" %}{% endblock %}
+
+{% block manage_content %}
+  {% comment %}Volunteer applications (applications.manage.application_list, DATA_MODEL.md §21).{% endcomment %}
+  <p class="body-sm">{% translate "People who applied to become a mentor or to start a dojo. An application can only be approved once the person's background check is valid." %}</p>
+
+  <form method="get" class="cd-card cd-form" style="padding: var(--space-5); margin-bottom: var(--space-5);">
+    <div class="cd-form__row">
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="applications-status">{% translate "Status" %}</label>
+        <select class="cd-form__select body" id="applications-status" name="status">
+          {% for value, label in status_choices %}<option value="{{ value }}"{% if value == status %} selected{% endif %}>{{ label }}</option>{% endfor %}
+          <option value="all"{% if status == "all" %} selected{% endif %}>{% translate "All" %}</option>
+        </select>
+      </div>
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="applications-kind">{% translate "Kind" %}</label>
+        <select class="cd-form__select body" id="applications-kind" name="kind">
+          <option value="">{% translate "All" %}</option>
+          {% for value, label in kind_choices %}<option value="{{ value }}"{% if value == kind %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="cd-form__actions">
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Show" %}</button>
+    </div>
+  </form>
+
+  <div class="cd-table-wrap">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label" scope="col">{% translate "Name" %}</th>
+          <th class="label" scope="col">{% translate "Kind" %}</th>
+          <th class="label" scope="col">{% translate "Dojo or area" %}</th>
+          <th class="label" scope="col">{% translate "Applied" %}</th>
+          <th class="label" scope="col">{% translate "Status" %}</th>
+          <th class="label" scope="col">{% translate "Background check" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for application in applications %}
+          {% with account=application.account %}
+            <tr>
+              <td class="body-sm"><a href="{% url 'manage_application_detail' application_id=application.id %}">{{ account.get_full_name|default:account.username }}</a>{% if account.email %}<br><span class="caption">{{ account.email }}</span>{% endif %}</td>
+              <td class="body-sm">{{ application.get_kind_display }}</td>
+              <td class="body-sm">{% if application.dojo %}{{ application.dojo.name }}{% else %}{{ application.area|default:"—" }}{% endif %}</td>
+              <td class="body-sm">{{ application.submitted_at|date:"d/m/Y" }}</td>
+              <td class="body-sm">{{ application.get_status_display }}</td>
+              <td class="body-sm">{% include "applications/manage/_check_status.html" %}</td>
+            </tr>
+          {% endwith %}
+        {% empty %}
+          <tr><td class="body-sm" colspan="6">{% translate "No applications here." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

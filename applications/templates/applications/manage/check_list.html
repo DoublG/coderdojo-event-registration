@@ -1,0 +1,46 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Background checks" %}{% endblock %}
+{% block manage_heading %}{% translate "Background checks" %}{% endblock %}
+
+{% block manage_content %}
+  {% comment %}The reviewers' queue (applications.manage.check_list, DATA_MODEL.md §21).{% endcomment %}
+  <p class="body-sm">{% translate "Champions and mentors need a valid extract from the criminal record (model 596.2) before they can work with children. Open a person to download their document and decide on it: the document is deleted as soon as you do, only the decision is kept." %}</p>
+
+  <form method="get" class="cd-card cd-form" style="padding: var(--space-5); margin-bottom: var(--space-6);">
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="checks-q">{% translate "Find a person by name, email address or username" %}</label>
+      <input class="cd-form__input body" type="search" id="checks-q" name="q" value="{{ query }}">
+    </div>
+    <div class="cd-form__actions">
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Search" %}</button>
+    </div>
+  </form>
+
+  {% if query %}
+    <h2 class="heading-md">{% translate "Search results" %}</h2>
+    {% translate "Requested" as date_label %}{% translate "Nobody with a background check matches." as empty_text %}
+    {% include "applications/manage/_check_table.html" with rows=found date_field="requested" request_label="" %}
+    {% if found|length == search_limit %}<p class="caption">{% blocktranslate %}Showing the first {{ search_limit }}; search more precisely to find others.{% endblocktranslate %}</p>{% endif %}
+  {% endif %}
+
+  <h2 class="heading-md" style="margin-top: var(--space-6);">{% translate "Awaiting review" %}</h2>
+  <p class="body-sm">{% translate "Documents that were uploaded, oldest first." %}</p>
+  {% translate "Uploaded" as date_label %}{% translate "Nothing to review." as empty_text %}
+  {% include "applications/manage/_check_table.html" with rows=awaiting date_field="submitted" request_label="" %}
+
+  <h2 class="heading-md" style="margin-top: var(--space-6);">{% translate "Waiting for a document" %}</h2>
+  <p class="body-sm">{% translate "Asked for, or rejected and waiting for a new one. The person uploads it from the link in their mail or from their account page." %}</p>
+  {% translate "Requested" as date_label %}{% translate "Send the link again" as request_label %}{% translate "Nobody is waiting to upload." as empty_text %}
+  {% include "applications/manage/_check_table.html" with rows=waiting date_field="requested" %}
+
+  <h2 class="heading-md" style="margin-top: var(--space-6);">{% translate "Expired" %}</h2>
+  <p class="body-sm">{% translate "Until they upload a new one, these people can't manage a dojo. They can upload it from their account page; you can also send them the link." %}</p>
+  {% translate "Expired on" as date_label %}{% translate "Ask for a new one" as request_label %}{% translate "No expired checks." as empty_text %}
+  {% include "applications/manage/_check_table.html" with rows=expired date_field="expires" %}
+
+  <h2 class="heading-md" style="margin-top: var(--space-6);">{% translate "Expiring within 30 days" %}</h2>
+  <p class="body-sm">{% translate "They get a reminder by mail 30 days before, so they can ask their municipality for a new extract in time." %}</p>
+  {% translate "Expires on" as date_label %}{% translate "No checks expire soon." as empty_text %}
+  {% include "applications/manage/_check_table.html" with rows=expiring date_field="expires" request_label="" %}
+{% endblock %}

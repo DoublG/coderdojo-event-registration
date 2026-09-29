@@ -157,12 +157,14 @@ def assign_dojo_icon(dojo, rng):
 ORGANISATION_ACCOUNTS = [
     ("Priya Nair", OrganisationRole.ADMIN),
     ("Tom Vermeulen", OrganisationRole.BOARD),
+    # Reviews background checks and decides applications (DATA_MODEL.md §21).
+    ("Sofie Claes", OrganisationRole.REVIEWER),
 ]
 
 
 class Command(BaseCommand):
     help = (
-        "Seed the organisation's team listing (two of them with an organisation-role login), "
+        "Seed the organisation's team listing and three organisation-role logins (admin, board, reviewer), "
         "each dojo champion's team-page profile, "
         "and a few mentor accounts per dojo (adult logins approved as mentors, with active "
         "memberships; some help at two dojos). Also a pending join request and a former "
