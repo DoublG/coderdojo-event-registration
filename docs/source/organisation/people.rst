@@ -12,8 +12,8 @@ The roles are fixed. **What each role opens** on the People page shows what
 each one gives:
 
 - **Admin**: the whole organisation dashboard (campaigns, journeys,
-  segments, mail templates, promotions, sponsors, awards, privacy, sign-in
-  security and these People pages).
+  segments, mail templates, the mail queue, promotions, sponsors, awards,
+  privacy, sign-in security, these People pages and the audit log).
 - **Background-check reviewer**: background checks and applications (see
   :doc:`volunteers`). Reviewers read criminal-record extracts, so only give
   this role to the people who need it.

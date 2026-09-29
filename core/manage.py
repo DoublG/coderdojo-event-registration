@@ -21,6 +21,7 @@ AREA_LANDINGS = {
     Area.PRIVACY: "manage_privacy",
     Area.SECURITY: "manage_security",
     Area.PEOPLE: "manage_people",
+    Area.AUDIT_LOG: "manage_audit_log",
 }
 
 

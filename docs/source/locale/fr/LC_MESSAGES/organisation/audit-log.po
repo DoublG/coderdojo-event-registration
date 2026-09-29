@@ -1,0 +1,107 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-29 10:26+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: fr <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/audit-log.rst:2
+msgid "Audit log"
+msgstr "Journal d'audit"
+
+#: ../../source/organisation/audit-log.rst:4
+msgid ""
+"The audit log records who changed what on the site, and who viewed the most "
+"sensitive data: a child's health notes, or a volunteer's background check. "
+"**Audit log** (under **Organisation**) shows it to the organisation's "
+"**admin** role, newest first. It can only be read: nobody can change or "
+"delete an entry, which is what makes it trustworthy."
+msgstr ""
+"Le journal d'audit enregistre qui a modifié quoi sur le site, et qui a "
+"consulté les données les plus sensibles : les notes de santé d'un enfant, ou"
+" la vérification des antécédents d'un bénévole. **Journal d'audit** (sous "
+"**Organisation**) le montre au rôle **administrateur** de l'organisation, du"
+" plus récent au plus ancien. Il est en lecture seule : personne ne peut "
+"modifier ou supprimer une ligne, et c'est ce qui le rend fiable."
+
+#: ../../source/organisation/audit-log.rst:10
+msgid ""
+"Each line says when it happened, who did it, what they did (**Created**, "
+"**Changed**, **Deleted** or **Viewed**), which item it was about, and what "
+"changed. **The site itself** means nobody did it by hand: an automatic job, "
+"such as closing a Django admin access after 12 hours."
+msgstr ""
+"Chaque ligne indique quand c'est arrivé, qui l'a fait, ce qui a été fait "
+"(**Créé**, **Modifié**, **Supprimé** ou **Consulté**), de quel élément il "
+"s'agit et ce qui a changé. **Le site lui-même** signifie que personne ne l'a"
+" fait à la main : une tâche automatique, comme la fermeture d'un accès à "
+"l'admin Django après 12 heures."
+
+#: ../../source/organisation/audit-log.rst:16
+msgid "Hidden values"
+msgstr "Valeurs masquées"
+
+#: ../../source/organisation/audit-log.rst:18
+msgid ""
+"Some changes are recorded, but their values are never shown here: health "
+"notes, everything about criminal-record extracts and background checks, and "
+"security data such as passwords, sign-in codes and secret keys. They appear "
+"as ``****``, so you can see *that* they changed and who changed them, but "
+"not what they say."
+msgstr ""
+"Certaines modifications sont enregistrées, mais leurs valeurs ne sont jamais"
+" affichées ici : les notes de santé, tout ce qui concerne les extraits de "
+"casier judiciaire et les vérifications des antécédents, et les données de "
+"sécurité comme les mots de passe, les codes de connexion et les clés "
+"secrètes. Elles apparaissent comme ``****`` : vous voyez *qu*'elles ont "
+"changé et qui les a changées, mais pas ce qu'elles contiennent."
+
+#: ../../source/organisation/audit-log.rst:25
+msgid "Finding something"
+msgstr "Retrouver quelque chose"
+
+#: ../../source/organisation/audit-log.rst:27
+msgid ""
+"Type part of a name, username or email address under **Person or item** to "
+"find the changes to that item, or the changes someone made. **Kind of "
+"change** and **Kind of data** narrow the list further, for example to "
+"everything that was deleted, or to changes to dojos. The log shows 50 lines "
+"per page; use **Older** and **Newer** to go through it."
+msgstr ""
+"Tapez une partie d'un nom, d'un nom d'utilisateur ou d'une adresse e-mail "
+"sous **Personne ou élément** pour trouver les modifications de cet élément, "
+"ou celles qu'une personne a faites. **Type de modification** et **Type de "
+"données** réduisent encore la liste, par exemple à tout ce qui a été "
+"supprimé, ou aux modifications des dojos. Le journal affiche 50 lignes par "
+"page ; utilisez **Plus anciens** et **Plus récents** pour le parcourir."
+
+#: ../../source/organisation/audit-log.rst:34
+msgid "How long it's kept"
+msgstr "Durée de conservation"
+
+#: ../../source/organisation/audit-log.rst:36
+msgid ""
+"What's in the log about someone is removed with their account, when the "
+"account is deleted after two years without a login or on request (see "
+":doc:`privacy`). Entries that are no longer about any account are removed "
+"after a while too."
+msgstr ""
+"Ce que le journal contient sur une personne est supprimé avec son compte, "
+"quand le compte est supprimé après deux ans sans connexion ou sur demande "
+"(voir :doc:`privacy`). Les lignes qui ne concernent plus aucun compte sont "
+"aussi supprimées après un certain temps."

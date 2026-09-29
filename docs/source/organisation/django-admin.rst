@@ -22,8 +22,9 @@ access now**. To continue later, ask again, with a new reason.
 Who sees it
 -----------
 
-Every request is recorded, with its reason and when it ended, and the
-organisation's other admins get a notification (the bell at the top of the
+Every request is recorded, with its reason and when it ended (also in the
+audit log, see :doc:`audit-log`), and the organisation's other admins get a
+notification (the bell at the top of the
 dashboard). They can see who has access on the People page and end it
 there (see :doc:`people`). Your own earlier requests are listed below the
 form.

@@ -46,6 +46,8 @@ The sidebar has these sections:
   :doc:`sign-in-security`).
 - **People** (under **Organisation**): who has which role, giving and
   taking away roles, and inviting someone new (see :doc:`people`).
+- **Audit log** (under **Organisation**): who changed what on the site,
+  read-only, with sensitive values hidden (see :doc:`audit-log`).
 - **Django admin** (under **Organisation**): asking for the site's technical
   admin, for 12 hours, for every role (see :doc:`django-admin`).
 

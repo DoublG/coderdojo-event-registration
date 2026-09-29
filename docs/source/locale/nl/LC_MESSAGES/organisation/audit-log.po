@@ -1,0 +1,106 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-29 10:26+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: nl <LL@li.org>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/audit-log.rst:2
+msgid "Audit log"
+msgstr "Auditlog"
+
+#: ../../source/organisation/audit-log.rst:4
+msgid ""
+"The audit log records who changed what on the site, and who viewed the most "
+"sensitive data: a child's health notes, or a volunteer's background check. "
+"**Audit log** (under **Organisation**) shows it to the organisation's "
+"**admin** role, newest first. It can only be read: nobody can change or "
+"delete an entry, which is what makes it trustworthy."
+msgstr ""
+"De auditlog houdt bij wie wat wijzigde op de site, en wie de gevoeligste "
+"gegevens bekeek: de medische notities van een kind, of de "
+"achtergrondcontrole van een vrijwilliger. **Auditlog** (onder "
+"**Organisatie**) toont hem aan de rol **beheerder** van de organisatie, de "
+"nieuwste eerst. Je kunt hem alleen lezen: niemand kan een regel wijzigen of "
+"verwijderen, en net daardoor is hij betrouwbaar."
+
+#: ../../source/organisation/audit-log.rst:10
+msgid ""
+"Each line says when it happened, who did it, what they did (**Created**, "
+"**Changed**, **Deleted** or **Viewed**), which item it was about, and what "
+"changed. **The site itself** means nobody did it by hand: an automatic job, "
+"such as closing a Django admin access after 12 hours."
+msgstr ""
+"Elke regel zegt wanneer het gebeurde, wie het deed, wat die deed "
+"(**Aangemaakt**, **Gewijzigd**, **Verwijderd** of **Bekeken**), over welk "
+"item het ging en wat er veranderde. **De site zelf** betekent dat niemand "
+"het met de hand deed: een automatische taak, zoals het sluiten van een "
+"toegang tot de Django-admin na 12 uur."
+
+#: ../../source/organisation/audit-log.rst:16
+msgid "Hidden values"
+msgstr "Verborgen waarden"
+
+#: ../../source/organisation/audit-log.rst:18
+msgid ""
+"Some changes are recorded, but their values are never shown here: health "
+"notes, everything about criminal-record extracts and background checks, and "
+"security data such as passwords, sign-in codes and secret keys. They appear "
+"as ``****``, so you can see *that* they changed and who changed them, but "
+"not what they say."
+msgstr ""
+"Sommige wijzigingen worden bijgehouden, maar hun waarden worden hier nooit "
+"getoond: medische notities, alles over uittreksels uit het strafregister en "
+"achtergrondcontroles, en beveiligingsgegevens zoals wachtwoorden, "
+"aanmeldcodes en geheime sleutels. Ze verschijnen als ``****``: je ziet *dat*"
+" ze veranderden en wie ze veranderde, maar niet wat erin staat."
+
+#: ../../source/organisation/audit-log.rst:25
+msgid "Finding something"
+msgstr "Iets terugvinden"
+
+#: ../../source/organisation/audit-log.rst:27
+msgid ""
+"Type part of a name, username or email address under **Person or item** to "
+"find the changes to that item, or the changes someone made. **Kind of "
+"change** and **Kind of data** narrow the list further, for example to "
+"everything that was deleted, or to changes to dojos. The log shows 50 lines "
+"per page; use **Older** and **Newer** to go through it."
+msgstr ""
+"Typ een deel van een naam, gebruikersnaam of e-mailadres onder **Persoon of "
+"item** om de wijzigingen aan dat item te vinden, of de wijzigingen die "
+"iemand deed. **Soort wijziging** en **Soort gegevens** maken de lijst nog "
+"korter, bijvoorbeeld tot alles wat verwijderd werd, of tot wijzigingen aan "
+"dojo's. Het log toont 50 regels per pagina; met **Ouder** en **Nieuwer** "
+"blader je erdoor."
+
+#: ../../source/organisation/audit-log.rst:34
+msgid "How long it's kept"
+msgstr "Hoe lang het bewaard wordt"
+
+#: ../../source/organisation/audit-log.rst:36
+msgid ""
+"What's in the log about someone is removed with their account, when the "
+"account is deleted after two years without a login or on request (see "
+":doc:`privacy`). Entries that are no longer about any account are removed "
+"after a while too."
+msgstr ""
+"Wat er in het log over iemand staat, verdwijnt met hun account, wanneer het "
+"account verwijderd wordt na twee jaar zonder aanmelding of op vraag (zie "
+":doc:`privacy`). Regels die over geen enkel account meer gaan, verdwijnen na"
+" een tijd ook."

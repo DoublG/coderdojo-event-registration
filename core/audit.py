@@ -2,9 +2,11 @@
 who viewed the most sensitive data. The recorded models are `RECORDED`
 below (every other model is listed with its reason in
 core.tests.AuditLogCoverageTests); the actor comes from `AuditlogMiddleware`.
-It's shown only in the Django admin, read-only, to the organisation's admin
-role."""
+It's shown read-only to the organisation's admin role: on the organisation
+dashboard (/manage/audit-log/, core.audit_views), with health, criminal-record
+and security values hidden (`is_hidden`), and in the Django admin."""
 
+import datetime
 from functools import wraps
 
 from auditlog.context import disable_auditlog
@@ -174,3 +176,106 @@ class AuditHistoryAdminMixin(AuditlogHistoryAdminMixin):
         if not request.user.has_perm(AUDIT_LOG_PERMISSION):
             raise PermissionDenied
         return super().auditlog_history_view(request, object_id, extra_context)
+
+
+# --- showing the log on the organisation dashboard (/manage/audit-log/) -------------
+
+# What the dashboard shows instead of a value it hides.
+HIDDEN = "****"
+# Values longer than this are cut short on the dashboard.
+DISPLAY_LENGTH = 120
+
+
+def _hidden_categories():
+    from privacy.registry import Category
+
+    # Health, criminal records and secrets: the dashboard only says that
+    # they changed (the Django admin's log shows what auditlog stored).
+    return {Category.SPECIAL, Category.CRIMINAL, Category.SECURITY}
+
+
+def is_hidden(model, field_name):
+    """Whether the dashboard hides this field's values (as HIDDEN): a field
+    the privacy registry classifies as health, criminal-record or security
+    data, or one the log masks already. A model the registry doesn't know,
+    or a field it has no decision about, is hidden too: when in doubt, hide.
+    Not `export=False` as such: that also marks who did something (a
+    reviewer, whoever ended an access), which is what the log is for."""
+    from privacy.registry import site
+
+    if model is None:
+        return True
+    if field_name in RECORDED.get(model._meta.label, {}).get("mask_fields", ()):
+        return True
+    entry = site.get(model) or site.get(model._meta.concrete_model)
+    if entry is None:
+        return True
+    if field_name in entry.not_personal:
+        return False
+    privacy = entry.fields.get(field_name)
+    return privacy is None or privacy.category in _hidden_categories()
+
+
+def _shorten(value):
+    value = str(value)
+    return value if len(value) <= DISPLAY_LENGTH else value[:DISPLAY_LENGTH] + "…"
+
+
+def _display_value(field, value):
+    """One stored value (auditlog keeps them as strings) as a person reads it:
+    a choice's label, a linked row's name, a date in Belgian notation."""
+    from django.core.exceptions import ObjectDoesNotExist, ValidationError
+    from django.utils import timezone
+    from django.utils.dateparse import parse_datetime
+
+    if value in (None, "None", ""):
+        return "—"
+    if field is None:
+        return _shorten(value)
+    if getattr(field, "choices", None):
+        return _shorten(dict(field.flatchoices).get(value, value))
+    if field.many_to_one or field.one_to_one:
+        try:
+            return _shorten(field.related_model._base_manager.get(pk=field.related_model._meta.pk.to_python(value)))
+        except (ObjectDoesNotExist, ValidationError, ValueError):
+            return _shorten(value)
+    if field.get_internal_type() == "DateTimeField":
+        moment = parse_datetime(str(value))
+        if moment is not None:
+            if timezone.is_naive(moment):
+                moment = timezone.make_aware(moment, datetime.UTC)
+            return timezone.localtime(moment).strftime("%d/%m/%Y %H:%M")
+    if field.get_internal_type() == "BooleanField":
+        return {"True": "✓", "False": "✗"}.get(str(value), value)
+    return _shorten(value)
+
+
+def display_changes(entry):
+    """An audit log entry's changes for the organisation dashboard: a list of
+    {"field", "before", "after", "hidden"}, with every value `is_hidden`
+    hides replaced by HIDDEN. A many-to-many change has no "before"; its
+    "after" says what was added or removed."""
+    from django.core.exceptions import FieldDoesNotExist
+
+    model = entry.content_type.model_class() if entry.content_type_id else None
+    rows = []
+    for name, values in (entry.changes_dict or {}).items():
+        field = None
+        if model is not None:
+            try:
+                field = model._meta.get_field(name)
+            except FieldDoesNotExist:
+                pass
+        label = str(getattr(field, "verbose_name", name))
+        hidden = is_hidden(model, name)
+        if isinstance(values, dict):  # {"type": "m2m", "operation": "add", "objects": [...]}
+            after = HIDDEN if hidden else _shorten(", ".join(str(o) for o in values.get("objects", [])))
+            rows.append({"field": label, "operation": values.get("operation", ""), "after": after, "hidden": hidden})
+            continue
+        before, after = (list(values) + [None, None])[:2]
+        if hidden:
+            before = after = HIDDEN
+        else:
+            before, after = _display_value(field, before), _display_value(field, after)
+        rows.append({"field": label, "before": before, "after": after, "hidden": hidden})
+    return rows

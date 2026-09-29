@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 09:45+0000\n"
+"POT-Creation-Date: 2026-09-29 10:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -170,13 +170,21 @@ msgstr ""
 
 #: ../../source/organisation/dashboard.rst:49
 msgid ""
+"**Audit log** (under **Organisation**): who changed what on the site, read-"
+"only, with sensitive values hidden (see :doc:`audit-log`)."
+msgstr ""
+"**Auditlog** (onder **Organisatie**): wie wat wijzigde op de site, alleen "
+"lezen, met gevoelige waarden verborgen (zie :doc:`audit-log`)."
+
+#: ../../source/organisation/dashboard.rst:51
+msgid ""
 "**Django admin** (under **Organisation**): asking for the site's technical "
 "admin, for 12 hours, for every role (see :doc:`django-admin`)."
 msgstr ""
 "**Django-admin** (onder **Organisatie**): toegang tot het technische beheer "
 "van de site vragen, voor 12 uur, voor elke rol (zie :doc:`django-admin`)."
 
-#: ../../source/organisation/dashboard.rst:52
+#: ../../source/organisation/dashboard.rst:54
 msgid ""
 "People only get mail they want. Every account chooses which kinds of mail it"
 " gets on its **Mail preferences** page; the newsletter and campaigns only go"
@@ -189,7 +197,7 @@ msgstr ""
 "logins van kinderen krijgen nooit campagnes. Adressen waarvoor e-mails "
 "terugkwamen worden automatisch overgeslagen."
 
-#: ../../source/organisation/dashboard.rst:57
+#: ../../source/organisation/dashboard.rst:59
 msgid ""
 "Fixing things by hand when something goes wrong (sending a failed mail "
 "again, unblocking an address, the full mail log) stays in the site's "
@@ -201,7 +209,7 @@ msgstr ""
 "blijft in de technische admin van de site, de Django-admin. Je vraagt er "
 "toegang toe wanneer je hem nodig hebt (zie :doc:`django-admin`)."
 
-#: ../../source/organisation/dashboard.rst:62
+#: ../../source/organisation/dashboard.rst:64
 msgid ""
 "The bell at the top of the dashboard shows notifications for the "
 "organisation, for example when someone opens the Django admin or accepts an "

@@ -2887,11 +2887,18 @@ What we checked in its 3.4.1 source, and what the plan has to work around:
      calls the helper on GET).
    Every other page view stays unrecorded: this is about special-category
    data, not traffic.
-4. **The admin.** The log is shown **only in the Django admin**
-   (`/admin/`, decided): no page on the organisation dashboard
-   (`/manage/`) or in a dojo's admin area, and nothing in the family
-   pages. It's a technical tool for investigating, like the full mail log
-   (`CLAUDE.md`: the Django admin is for technical interventions).
+4. **The admin.** The log is shown in the Django admin (`/admin/`) and,
+   since 2026-09-29 (decided then, replacing "only in the Django admin"),
+   read-only on the organisation dashboard: *Audit log* under
+   *Organisation* (`/manage/audit-log/`, `core/audit_views.py`, the
+   `audit_log` area = `auditlog.view_logentry`, so the admin role and
+   superusers, never the board). The dashboard page hides the values of
+   health, criminal-record and security fields (the privacy registry's
+   `special`, `criminal` and `security` categories), the masked fields
+   and any field the registry has no decision about as `****`
+   (`core.audit.is_hidden`), so the admin role sees *that* they changed
+   and who changed them, never what they say. Nothing in a dojo's admin
+   area and nothing in the family pages.
    - **Read-only, the one exception to "the admin always stays fully
      usable"** (decided): auditlog's own `LogEntryAdmin` stays as it is
      (no add, no change, no delete from its pages), because a log anyone
@@ -2958,9 +2965,10 @@ What we checked in its 3.4.1 source, and what the plan has to work around:
   admin rule (phase 4). It still isn't tamper-proof against someone with
   database or shell access; that would need write-once storage outside
   the database, out of scope here.
-- ~~Who sees the audit log~~ Decided: only in the Django admin, and only
-  for the organisation's admin role (and superusers), not the board
-  (phase 4).
+- ~~Who sees the audit log~~ Decided: only the organisation's admin role
+  (and superusers), not the board (phase 4); in the Django admin and, since
+  2026-09-29, read-only on the organisation dashboard with sensitive values
+  hidden (phase 4).
 - ~~Telling families~~ Decided: the family forms and the help docs
   don't mention the log. If it's ever needed (a request under art. 15,
   or the board wants it), the person's data export (§16 phase 3) gets the

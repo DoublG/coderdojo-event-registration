@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 09:44+0000\n"
+"POT-Creation-Date: 2026-09-29 10:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -535,32 +535,32 @@ msgstr ""
 msgid "Two-step login with a passkey"
 msgstr "Connexion en deux étapes avec une clé d'accès"
 
-#: accounts/organisation.py:81
+#: accounts/organisation.py:85
 msgid ""
 "Communication: campaigns, journeys, segments, mail templates, mail queue"
 msgstr ""
 "Communication : campagnes, parcours, segments, modèles d'e-mail, file "
 "d'attente des e-mails"
 
-#: accounts/organisation.py:82
+#: accounts/organisation.py:86
 msgid "Volunteers: background checks, applications"
 msgstr "Bénévoles : extraits de casier, candidatures"
 
-#: accounts/organisation.py:83
+#: accounts/organisation.py:87
 msgid "Public site: promotions, sponsors"
 msgstr "Site public : promotions, sponsors"
 
-#: accounts/organisation.py:84
+#: accounts/organisation.py:88
 msgid "Ninjas: awards"
 msgstr "Ninjas : distinctions"
 
-#: accounts/organisation.py:85
+#: accounts/organisation.py:89
 msgid "Privacy: data export, account deletion, email changes"
 msgstr ""
 "Vie privée : export des données, suppression de comptes, changement d'adresse"
 " e-mail"
 
-#: accounts/organisation.py:86
+#: accounts/organisation.py:90
 #: accounts/templates/accounts/_security_base.html:8
 #: accounts/templates/accounts/guardian_detail.html:77
 #: accounts/templates/accounts/guardian_detail.html:80
@@ -572,9 +572,13 @@ msgid "Sign-in security"
 msgstr "Sécurité de connexion"
 
 # | msgid "Organisation"
-#: accounts/organisation.py:87
+#: accounts/organisation.py:91
 msgid "People: organisation roles"
 msgstr "Personnes : rôles dans l'organisation"
+
+#: accounts/organisation.py:92
+msgid "Audit log: who changed what (read-only)"
+msgstr "Journal d'audit : qui a modifié quoi (lecture seule)"
 
 #: accounts/organisation_people.py:30 mailing/models.py:363
 msgid "Admin"
@@ -1333,7 +1337,7 @@ msgstr "Créer un compte"
 
 #: accounts/templates/accounts/manage/admin_access.html:3
 #: accounts/templates/accounts/manage/admin_access.html:4
-#: core/templates/core/_manage_base.html:193
+#: core/templates/core/_manage_base.html:201
 msgid "Django admin"
 msgstr "Admin Django"
 
@@ -1563,6 +1567,7 @@ msgstr "Nom, adresse e-mail ou nom d'utilisateur"
 #: accounts/templates/accounts/manage/people_add.html:18
 #: accounts/templates/accounts/manage/security.html:61
 #: applications/templates/applications/manage/check_list.html:17
+#: core/templates/core/manage_audit_log.html:43
 #: dojos/templates/dojos/dojo_list.html:40
 #: dojos/templates/dojos/partials/_dojo_finder_widget.html:16
 #: events/templates/events/event_list.html:91
@@ -3191,6 +3196,8 @@ msgstr ""
 
 #: applications/templates/applications/manage/application_list.html:17
 #: applications/templates/applications/manage/application_list.html:23
+#: core/templates/core/manage_audit_log.html:30
+#: core/templates/core/manage_audit_log.html:37
 msgid "All"
 msgstr "Toutes"
 
@@ -3909,6 +3916,23 @@ msgstr "%(header)s · accès jusqu'à %(until)s"
 msgid "In %(language)s"
 msgstr "En %(language)s"
 
+# | msgid "Create login"
+#: core/audit_views.py:21 core/templates/core/manage_audit_log.html:64
+msgid "Created"
+msgstr "Créé"
+
+#: core/audit_views.py:22 core/templates/core/manage_audit_log.html:64
+msgid "Changed"
+msgstr "Modifié"
+
+#: core/audit_views.py:23 core/templates/core/manage_audit_log.html:64
+msgid "Deleted"
+msgstr "Supprimé"
+
+#: core/audit_views.py:24 core/templates/core/manage_audit_log.html:64
+msgid "Viewed"
+msgstr "Consulté"
+
 # | msgid "Organisation"
 #: core/manage_nav.py:49
 msgid "Organisation admin"
@@ -4009,6 +4033,12 @@ msgstr "Vie privée"
 #: privacy/templates/privacy/manage/privacy.html:11
 msgid "Needs attention"
 msgstr "À traiter"
+
+#: core/templates/core/_manage_base.html:193
+#: core/templates/core/manage_audit_log.html:3
+#: core/templates/core/manage_audit_log.html:4
+msgid "Audit log"
+msgstr "Journal d'audit"
 
 #: core/templates/core/_manage_shell.html:52
 msgid "Pin sidebar open"
@@ -4401,6 +4431,91 @@ msgid ""
 msgstr ""
 "Gratuit, de 7 à 18 ans. Aucune expérience requise. Les places sont limitées :"
 " inscrivez-vous avant samedi."
+
+#: core/templates/core/manage_audit_log.html:19
+msgid ""
+"Who changed what on the site, and who viewed the most sensitive data, newest "
+"first. Nothing can be changed here. Health notes, criminal-record details and"
+" security data such as passwords and codes are shown as ****: the log only "
+"says that they changed."
+msgstr ""
+"Qui a modifié quoi sur le site, et qui a consulté les données les plus "
+"sensibles, du plus récent au plus ancien. Rien ne peut être modifié ici. Les "
+"notes de santé, les données de l'extrait de casier judiciaire et les données "
+"de sécurité comme les mots de passe et les codes sont affichées comme **** : "
+"le journal indique seulement qu'elles ont changé."
+
+#: core/templates/core/manage_audit_log.html:24
+msgid "Person or item"
+msgstr "Personne ou élément"
+
+#: core/templates/core/manage_audit_log.html:28
+msgid "Kind of change"
+msgstr "Type de modification"
+
+#: core/templates/core/manage_audit_log.html:35
+msgid "Kind of data"
+msgstr "Type de données"
+
+#: core/templates/core/manage_audit_log.html:44
+#: mailing/templates/mailing/manage/mail_queue.html:45
+msgid "Show everything"
+msgstr "Tout afficher"
+
+#: core/templates/core/manage_audit_log.html:52
+#: mailing/templates/mailing/manage/campaign_list.html:17
+#: mailing/templates/mailing/manage/mail_queue.html:125
+msgid "When"
+msgstr "Quand"
+
+#: core/templates/core/manage_audit_log.html:53
+msgid "Who"
+msgstr "Qui"
+
+#: core/templates/core/manage_audit_log.html:54
+msgid "What"
+msgstr "Quoi"
+
+#: core/templates/core/manage_audit_log.html:55
+msgid "Item"
+msgstr "Élément"
+
+#: core/templates/core/manage_audit_log.html:56
+msgid "Changes"
+msgstr "Modifications"
+
+#: core/templates/core/manage_audit_log.html:63
+msgid "The site itself"
+msgstr "Le site lui-même"
+
+#: core/templates/core/manage_audit_log.html:71
+msgid "added"
+msgstr "ajouté"
+
+#: core/templates/core/manage_audit_log.html:71
+msgid "removed"
+msgstr "retiré"
+
+#: core/templates/core/manage_audit_log.html:81
+msgid "Nothing in the log matches."
+msgstr "Rien dans le journal ne correspond."
+
+#: core/templates/core/manage_audit_log.html:88
+msgid "Pages"
+msgstr "Pages"
+
+#: core/templates/core/manage_audit_log.html:89
+msgid "Newer"
+msgstr "Plus récents"
+
+#: core/templates/core/manage_audit_log.html:90
+#, python-format
+msgid "Page %(number)s of %(total)s"
+msgstr "Page %(number)s sur %(total)s"
+
+#: core/templates/core/manage_audit_log.html:91
+msgid "Older"
+msgstr "Plus anciens"
 
 #: core/templates/core/menu.html:14 dojos/templates/dojos/_admin_base.html:52
 #: dojos/templates/dojos/dojo_event_list.html:3
@@ -7526,11 +7641,6 @@ msgstr "Annuler la campagne"
 msgid "Save draft"
 msgstr "Enregistrer le brouillon"
 
-#: mailing/templates/mailing/manage/campaign_list.html:17
-#: mailing/templates/mailing/manage/mail_queue.html:125
-msgid "When"
-msgstr "Quand"
-
 #: mailing/templates/mailing/manage/campaign_list.html:31
 msgid "No campaigns yet. Create one to reach families, mentors or champions."
 msgstr ""
@@ -7681,10 +7791,6 @@ msgstr "adresses bloquées"
 #: mailing/templates/mailing/manage/mail_queue.html:40
 msgid "Only show mail for an email address"
 msgstr "N'afficher que les e-mails d'une adresse e-mail"
-
-#: mailing/templates/mailing/manage/mail_queue.html:45
-msgid "Show everything"
-msgstr "Tout afficher"
 
 #: mailing/templates/mailing/manage/mail_queue.html:50
 msgid "Waiting to be sent"

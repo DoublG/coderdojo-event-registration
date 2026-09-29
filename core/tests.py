@@ -1372,7 +1372,15 @@ class OrganisationAreaTests(TestCase):
         board = self._account("board", role=OrganisationRole.BOARD)
         self.assertEqual(
             areas_of(admin),
-            [Area.COMMUNICATION, Area.PUBLIC_SITE, Area.NINJAS, Area.PRIVACY, Area.SECURITY, Area.PEOPLE],
+            [
+                Area.COMMUNICATION,
+                Area.PUBLIC_SITE,
+                Area.NINJAS,
+                Area.PRIVACY,
+                Area.SECURITY,
+                Area.PEOPLE,
+                Area.AUDIT_LOG,
+            ],
         )
         self.assertEqual(areas_of(reviewer), [Area.VOLUNTEERS])
         self.assertEqual(areas_of(board), [])
@@ -1461,3 +1469,123 @@ class ProfilingTests(TestCase):
         from core.profiling import profile
 
         self.assertIsInstance(profile(name="home"), silk_profile)
+
+
+class AuditLogPageTests(TestCase):
+    """The audit log on the organisation dashboard (/manage/audit-log/,
+    core.audit_views, DATA_MODEL.md §14): read-only, for the organisation's
+    admin role, with health, criminal-record and security values hidden."""
+
+    def setUp(self):
+        from accounts.models import OrganisationRole, User
+
+        self.admin = User.objects.create(username="orgadmin", email="ann@example.com")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.url = reverse("manage_audit_log")
+        self.client.force_login(self.admin)
+
+    def _ninja(self, **fields):
+        from accounts.models import Ninja
+
+        return Ninja.objects.create(name="Lotte", family_name="Peeters", **fields)
+
+    def test_only_the_admin_role_gets_in(self):
+        from accounts.models import OrganisationRole, User
+
+        self.client.logout()
+        self.assertEqual(self.client.get(self.url).status_code, 302)  # to login
+        for role in (OrganisationRole.BOARD, OrganisationRole.REVIEWER):
+            other = User.objects.create(username=role, email=f"{role}@example.com")
+            OrganisationRole.objects.create(account=other, role=role)
+            self.client.force_login(other)
+            self.assertEqual(self.client.get(self.url).status_code, 404, role)
+        self.client.force_login(self.admin)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "core/manage_audit_log.html")
+        self.assertContains(response, f'href="{self.url}"')  # the sidebar link
+
+    def test_it_is_read_only(self):
+        self.assertEqual(self.client.post(self.url).status_code, 405)
+
+    def test_ordinary_changes_are_shown(self):
+        ninja = self._ninja()
+        ninja.name = "Lotte-Marie"
+        ninja.save()
+        response = self.client.get(self.url)
+        self.assertContains(response, "Lotte-Marie")
+        self.assertContains(response, "Lotte</span> → <span>Lotte-Marie")
+
+    def test_health_criminal_and_security_values_are_hidden(self):
+        from accounts.models import User
+
+        ninja = self._ninja(allergies_notes="Peanut allergy")
+        ninja.allergies_notes = "Peanut and egg allergy"
+        ninja.save()
+        volunteer = User.objects.create(username="vol", email="vol@example.com")
+        volunteer.background_check_status = User.CHECK_REJECTED
+        volunteer.set_password("s3cret-Password")
+        volunteer.save()
+
+        response = self.client.get(self.url)
+        content = response.content.decode()
+        for value in ("Peanut", "rejected", "Rejected", "pbkdf2", "s3cret"):
+            self.assertNotIn(value, content)
+        self.assertIn("****", content)
+        by_field = {
+            change["field"].lower(): change for _, _, changes in response.context["rows"] for change in changes
+        }
+        for field in ("allergies notes", "background check status", "password"):
+            self.assertTrue(by_field[field.lower()]["hidden"], field)
+        self.assertFalse(by_field["email address"]["hidden"])
+
+    def test_a_field_without_a_privacy_decision_is_hidden(self):
+        from accounts.models import Ninja
+
+        from .audit import is_hidden
+
+        self.assertTrue(is_hidden(Ninja, "no_such_field"))
+        self.assertTrue(is_hidden(None, "name"))
+        self.assertFalse(is_hidden(Ninja, "name"))
+        self.assertTrue(is_hidden(Ninja, "allergies_notes"))
+        # Who did something stays visible, though it's kept out of an export.
+        from accounts.models import AdminAccessGrant
+
+        self.assertFalse(is_hidden(AdminAccessGrant, "ended_by"))
+
+    def test_filters(self):
+        from auditlog.models import LogEntry
+        from django.contrib.contenttypes.models import ContentType
+
+        from accounts.models import Ninja
+
+        ninja = self._ninja()
+        make_dojo("Dojo Gent")
+        ninja.delete()
+
+        response = self.client.get(self.url, {"q": "Gent"})
+        found = [entry.object_repr for entry, _, _ in response.context["rows"]]
+        self.assertTrue(found)
+        self.assertTrue(all("Gent" in repr_ for repr_ in found), found)
+        response = self.client.get(self.url, {"action": LogEntry.Action.DELETE})
+        self.assertEqual([entry.action for entry, _, _ in response.context["rows"]], [LogEntry.Action.DELETE])
+        response = self.client.get(self.url, {"type": ContentType.objects.get_for_model(Ninja).pk})
+        self.assertTrue(response.context["rows"])
+        self.assertTrue(all(entry.content_type.model == "ninja" for entry, _, _ in response.context["rows"]))
+        # Nonsense filters are ignored, not errors.
+        self.assertEqual(self.client.get(self.url, {"action": "x", "type": "999999", "page": "abc"}).status_code, 200)
+
+    def test_pages(self):
+        from auditlog.models import LogEntry
+
+        from . import audit_views
+
+        for _number in range(audit_views.PAGE_SIZE + 5):
+            self._ninja()
+        response = self.client.get(self.url)
+        self.assertEqual(len(response.context["rows"]), audit_views.PAGE_SIZE)
+        self.assertContains(response, "page=2")
+        on_page_two = LogEntry.objects.count() - audit_views.PAGE_SIZE
+        self.assertEqual(
+            len(self.client.get(self.url, {"page": 2}).context["rows"]), min(on_page_two, audit_views.PAGE_SIZE)
+        )

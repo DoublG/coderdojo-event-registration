@@ -63,6 +63,7 @@ class Area:
     PRIVACY = "privacy"  # a person's data: export, deletion, email change
     SECURITY = "security"  # the sign-in policy
     PEOPLE = "people"  # who holds which organisation role (accounts.organisation_people)
+    AUDIT_LOG = "audit_log"  # the audit log, read-only (core.audit_views, DATA_MODEL.md §14)
 
 
 AREA_PERMISSIONS = {
@@ -74,6 +75,9 @@ AREA_PERMISSIONS = {
     Area.PRIVACY: "accounts.manage_privacy",
     Area.SECURITY: "accounts.manage_security",
     Area.PEOPLE: "accounts.manage_people",
+    # The audit log's own view permission (core.audit.AUDIT_LOG_PERMISSION),
+    # which the admin role already holds for the Django admin's log.
+    Area.AUDIT_LOG: "auditlog.view_logentry",
 }
 
 # The areas as the People pages name them (DATA_MODEL.md §23).
@@ -85,6 +89,7 @@ AREA_LABELS = {
     Area.PRIVACY: gettext_lazy("Privacy: data export, account deletion, email changes"),
     Area.SECURITY: gettext_lazy("Sign-in security"),
     Area.PEOPLE: gettext_lazy("People: organisation roles"),
+    Area.AUDIT_LOG: gettext_lazy("Audit log: who changed what (read-only)"),
 }
 
 _VIEW = ["view"]

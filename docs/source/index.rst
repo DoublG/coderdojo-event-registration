@@ -56,6 +56,7 @@ the people using the site, not for the people building it.
    organisation/privacy
    organisation/sign-in-security
    organisation/people
+   organisation/audit-log
    organisation/django-admin
 
 .. toctree::

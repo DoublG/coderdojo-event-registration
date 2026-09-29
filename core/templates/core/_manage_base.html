@@ -173,7 +173,7 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
         </div>
       {% endif %}
 
-      {% if contexts.can.people or contexts.admin_access %}
+      {% if contexts.can.people or contexts.can.audit_log or contexts.admin_access %}
         {# People and their roles (the People area), and time-boxed access to the Django admin (every organisation role), DATA_MODEL.md §23. #}
         <div class="cd-admin-nav__group">
           <p class="cd-admin-nav__group-label caption">{% translate "Organisation" %}</p>
@@ -183,6 +183,14 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
               <a href="{% url 'manage_people' %}" class="cd-admin-nav__link label{% if active == 'people' %} cd-admin-nav__link--active{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 19c0-3.4 2.9-6 6.5-6s6.5 2.6 6.5 6"/><circle cx="17" cy="7" r="2.4"/><path d="M16 13.2c3 .2 5.5 2.4 5.5 5.3"/></svg>
                 {% translate "People" %}
+              </a>
+            </li>
+            {% endif %}
+            {% if contexts.can.audit_log %}
+            <li>
+              <a href="{% url 'manage_audit_log' %}" class="cd-admin-nav__link label{% if active == 'audit_log' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v4l3 2"/><path d="M3.05 11a9 9 0 1 1 .5 4"/><path d="M3 4v7h7"/></svg>
+                {% translate "Audit log" %}
               </a>
             </li>
             {% endif %}
