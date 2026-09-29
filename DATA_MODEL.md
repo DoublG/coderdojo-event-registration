@@ -3940,9 +3940,9 @@ confirmed from the new address.
   being valid, and the confirming session is kept with
   `update_session_auth_hash`. That also holds when someone changes an
   address in the Django admin.
-- **Out of scope:** a child's own login's address (the guardian's *Own
-  login* card, `accounts/child_accounts.py`, would reuse the same service
-  later), and changing the username.
+- **Out of scope:** a child's own login's address (planned in §24: the
+  guardian changes it from the *Own login* card through this same
+  service), and changing the username.
 
 ### Screens
 
@@ -4368,6 +4368,31 @@ link" (*inloglink*, *lien de connexion*), never "magic link".
   itself on its own *Sign-in security* page. The security mails about a
   child's login (`login_method_changed`, `two_step_*`, `backup_code_used`)
   go to the child's login **and** its guardians (`family_of`).
+- **The guardian changes a child login's address (decided, 2026-09-29)**,
+  through the same confirmed procedure as §22 (`accounts/email_change.py`),
+  for every child they're a guardian of that has an active login (a
+  disabled one gets its new address from *Switch login back on*, as
+  today). A child on a login link depends on that mailbox, so this can't
+  wait for "remove the login and give it again". The rules:
+  - *Change email address* on the *Own login* card, confirmed with the
+    **guardian's** own password (or recent login, `ConfirmIdentityForm`);
+    any of the child's guardians may do it. The child's own login can't
+    change its address itself (the login is the guardian's, §17).
+  - The link goes to the **new** address, and the address only changes
+    when it's opened: the child's new mailbox is proven, as always. It
+    carries who started it *and as what*: the token gets a `started_as`
+    (`self` / `organisation` / `guardian`) instead of today's "started_by
+    set means the organisation". A guardian's link **works logged out**
+    (the child may not be able to log in with a lost mailbox, as with the
+    organisation's), and on confirming it's checked again that the
+    starter is still a guardian of that child.
+  - The same checks (taken address, blocked address, one request a
+    minute, per guardian), the `email_changed` notice to the old address
+    **and** to the guardians, the child's other sessions ended, the audit
+    log's actor the guardian (`set_actor`). Afterwards the page offers the
+    child a password-reset mail or a login link, depending on its method.
+  - The organisation's *Change email address* (§22) still refuses a
+    ninja's own login: the guardian is the one to ask.
 - **The sign-in policy still never requires anything of a ninja login**:
   it's something they may use, not something they must (open point 2).
 - **The link is a first step, never the whole login.** An account with
@@ -4502,8 +4527,9 @@ flowchart TD
 7. **The guardian's *Own login* card** (`_ninja_login_card.html`): *Give
    a login* with the password/link choice; with a login, "Logs in with a
    password / a login link", "Two-step login: on/off", *Turn off two-step
-   login* and *Switch to a password* (each confirmed as the guardian's
-   own confirmations are). The child's own page links to its *Sign-in
+   login*, *Switch to a password* and *Change email address* (each
+   confirmed as the guardian's own confirmations are; the last one then
+   says "A confirmation link was sent to *new*"). The child's own page links to its *Sign-in
    security*.
 8. **Organisation:** the method on an account's *Privacy* page; on
    *Sign-in security*, how many accounts per role use a link.
@@ -4538,12 +4564,20 @@ flowchart TD
    invitation sign-up logging in directly.
 6. **Ninja logins:** *Sign-in security* open to ninja logins (the
    adult-only check removed, the page's texts right for a child), the
-   *Own login* card's choice and its two guardian actions (in
+   *Own login* card's choice and its guardian actions (in
    `accounts/child_accounts.py`, guardians only), the security mails to
-   the family. Tests: a ninja login with each method and with two-step
-   login, the guardian turning it off and switching back, another
-   guardian's child 404, the child's login unable to use the guardian
-   actions, the policy still not applying, the mails' recipients.
+   the family, and the guardian's *Change email address* (`started_as` in
+   the email-change token, the guardian re-checked on confirming, the
+   `email_changed` notice to the guardians, the templates' wording for a
+   child's login in en/nl/fr). Tests: a ninja login with each method and
+   with two-step login, the guardian turning it off and switching back;
+   the address change started by a guardian (confirmed logged out, a
+   second guardian can start it, refused once the starter is no longer a
+   guardian, taken and blocked addresses, the audit actor, the old
+   address and the guardians told, the child's sessions ended, the
+   organisation's page still refusing a ninja login); another guardian's
+   child 404, the child's login unable to use the guardian actions, the
+   policy still not applying, the mails' recipients.
 7. **Finishing:** the policy label, the organisation's counts and Privacy
    line, `seed_two_step`'s sibling seeding one parent and one mentor on
    `link` (the `password` column in `seed_credentials.csv` says "login
@@ -4555,28 +4589,25 @@ flowchart TD
    longer saying children's logins never use it, and the child-login part
    of *managing-your-account*) and their fr/nl catalogs, §2
    (`User.login_method` in the diagram), §15's flow and "Ninja logins ...
-   are never asked" (now: never *required*), §17's *Creating*,
+   are never asked" (now: never *required*), §17's *Creating*, §22's
+   *Out of scope* (the child's address is now covered),
    CLAUDE.md ("Two-step login and the sign-in policy" becomes the place
    that names both first steps; "Account model" for the sign-up).
 
 ### Open points
 
-1. **Changing a child login's address** (out of scope in §22) matters
-   more for a child on a login link: today the guardian can only remove
-   the login and give it again. A later step for the *Own login* card,
-   reusing `accounts/email_change.py`.
-2. **Requiring two-step login of youth mentors:** the policy could get a
+1. **Requiring two-step login of youth mentors:** the policy could get a
    *youth mentor* role once the organisation wants it; the rest is in
    place after phase 6.
-3. **May the organisation restrict it?** E.g. organisation admins always
+2. **May the organisation restrict it?** E.g. organisation admins always
    on a password *and* two-step login. The policy could get a "no login
    link" flag per role; not needed while two-step login covers the risk.
-4. **Unconfirmed family sign-ups** that never open their first link:
+3. **Unconfirmed family sign-ups** that never open their first link:
    today's retention (two years without a login) removes them; a shorter
    clean-up (e.g. 7 days) would be a new `RETENTION_RULES` entry.
-5. **Passwordless with a passkey** (§15's open point) fits the same
+4. **Passwordless with a passkey** (§15's open point) fits the same
    `login_method` field later (`passkey`), without the mail.
-6. **Opening the link on another device** logs in *that* device (the
+5. **Opening the link on another device** logs in *that* device (the
    usual behaviour, and what the mail says). Tying it to the requesting
    browser (a cookie check, or "approve on your phone") is stricter but
    breaks "request on laptop, open on phone"; not planned.
