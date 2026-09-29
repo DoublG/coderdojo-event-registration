@@ -16,6 +16,7 @@ _two_factor = (
 urlpatterns = [
     path("login/", views.login, name="login"),
     path("login/link/", views.login_link_request, name="login_link_request"),
+    path("login/link/confirm/", views.login_link_reauth, name="login_link_reauth"),
     path("login/link/<uidb64>/<token>/", views.login_link, name="login_link"),
     path("logout/", views.logout, name="logout"),
     path("change-password/", views.change_password, name="change_password"),
@@ -45,6 +46,13 @@ urlpatterns = [
         security_views.security_forget_browser,
         name="account_security_forget_browser",
     ),
+    path("account/security/login-method/", security_views.security_login_method, name="account_login_method"),
+    path(
+        "account/security/login-method/confirm/<uidb64>/<token>/",
+        security_views.security_login_method_confirm,
+        name="account_login_method_confirm",
+    ),
+    path("account/security/password/", security_views.security_set_password, name="account_security_password"),
     path("", include(_two_factor)),
     path("manage/security/", manage.security_policy, name="manage_security"),
     path("manage/django-admin/", manage.manage_admin_access, name="manage_admin_access"),

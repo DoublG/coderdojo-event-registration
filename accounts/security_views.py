@@ -13,6 +13,7 @@ import qrcode.image.svg
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import redirect, render
@@ -26,8 +27,8 @@ from two_factor.plugins.webauthn.models import WebauthnDevice
 from two_factor.utils import get_otpauth_url
 from two_factor.views.core import REMEMBER_COOKIE_PREFIX
 
-from . import sign_in, two_step
-from .forms import ConfirmPasswordForm
+from . import login_links, sign_in, two_step
+from .forms import ConfirmIdentityForm, LinkToPasswordForm
 from .models import User
 from .two_step_forms import AppSetupForm, PasskeySetupForm
 
@@ -80,6 +81,7 @@ def security(request):
             "upcoming": upcoming,
             "status": sign_in.request_status(request),
             "remembered": any(key.startswith(REMEMBER_COOKIE_PREFIX) for key in request.COOKIES),
+            "uses_link": user.uses_login_link,
         },
     )
 
@@ -206,7 +208,7 @@ def security_remove(request, kind, device_id):
         raise Http404
     last = len(two_step.methods(request.user)) == 1
     blocked = two_step.requirement_blocks_removal(request.user, device)
-    form = ConfirmPasswordForm(request.user, request.POST or None)
+    form = ConfirmIdentityForm(request.user, request.POST if request.method == "POST" else None, request=request)
     if request.method == "POST" and not blocked and form.is_valid():
         try:
             two_step.remove(request.user, device)
@@ -239,7 +241,7 @@ def security_turn_off(request):
     if not two_step.is_on(request.user):
         return redirect("account_security")
     blocked = two_step.requirement_blocks_removal(request.user)
-    form = ConfirmPasswordForm(request.user, request.POST or None)
+    form = ConfirmIdentityForm(request.user, request.POST if request.method == "POST" else None, request=request)
     if request.method == "POST" and not blocked and form.is_valid():
         try:
             two_step.turn_off(request.user)
@@ -273,3 +275,77 @@ def security_forget_browser(request):
             response.delete_cookie(key, domain=settings.TWO_FACTOR_REMEMBER_COOKIE_DOMAIN)
     messages.success(request, _("This browser is no longer remembered."))
     return response
+
+
+# --- How the account logs in: a password or a login link (DATA_MODEL.md §24) ---
+
+
+@never_cache
+@login_required
+def security_login_method(request):
+    """Switch to logging in with a link: confirmed with the password, then
+    from the mailbox (login_links.request_switch_to_link). An account on a
+    link switches back by setting a password (security_set_password)."""
+    _own_account(request)
+    if response := _unverified(request):
+        return response
+    if request.user.uses_login_link:
+        return redirect("account_security_password")
+    form = ConfirmIdentityForm(request.user, request.POST if request.method == "POST" else None, request=request)
+    if request.method == "POST" and form.is_valid():
+        try:
+            login_links.request_switch_to_link(request.user)
+        except login_links.LoginLinkError as error:
+            form.add_error(None, error.message)
+        else:
+            return render(
+                request,
+                "accounts/security_login_method.html",
+                {"sent": True, "valid_hours": login_links.SWITCH_VALID_HOURS},
+            )
+    return render(request, "accounts/security_login_method.html", {"form": form})
+
+
+@never_cache
+@login_required
+def security_set_password(request):
+    """An account on a login link sets a password, and logs in with it from
+    then on. Needs a recent login (accounts.reauth), since there's no old
+    password to ask for."""
+    _own_account(request)
+    if response := _unverified(request):
+        return response
+    if not request.user.uses_login_link:
+        return redirect("change_password")
+    form = LinkToPasswordForm(request.user, request.POST if request.method == "POST" else None, request=request)
+    if request.method == "POST" and form.is_valid():
+        user = login_links.switch_to_password(request.user, form.cleaned_data["new_password1"])
+        update_session_auth_hash(request, user)  # the other sessions end, this one stays
+        messages.success(request, _("You now log in with your password."))
+        return redirect("account_security")
+    return render(request, "accounts/security_set_password.html", {"form": form})
+
+
+@never_cache
+def security_login_method_confirm(request, uidb64, token):
+    """The link from the `login_method_confirm` mail. GET asks, POST
+    switches (so a mail scanner that opens the link changes nothing). Works
+    logged out too: the mailbox is the proof. Logged in as another account:
+    404."""
+    template = "accounts/security_login_method_confirm.html"
+    user = login_links.user_from_switch_link(uidb64, token)
+    if user is None:
+        return render(request, template, {"invalid": True}, status=400)
+    if request.user.is_authenticated and request.user.pk != user.pk:
+        raise Http404
+    if request.method != "POST":
+        return render(request, template, {"account": user})
+    try:
+        user = login_links.switch_to_link(user)
+    except login_links.LoginLinkError as error:
+        return render(request, template, {"error": error.message}, status=400)
+    if request.user.is_authenticated:
+        update_session_auth_hash(request, user)  # the other sessions end, this one stays
+        messages.success(request, _("From now on you log in with a link we mail you."))
+        return redirect("account_security")
+    return render(request, template, {"done": user})

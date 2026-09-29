@@ -100,6 +100,28 @@ class StyledSetPasswordForm(NewPasswordLabelsMixin, SetPasswordForm):
     pass
 
 
+class LinkToPasswordForm(StyledSetPasswordForm):
+    """Switching from a login link back to a password
+    (accounts.security_views.security_set_password): a new password, from a
+    session that logged in in the last few minutes (accounts.reauth)."""
+
+    def __init__(self, user, *args, request=None, **kwargs):
+        from .reauth import recently_authenticated
+
+        super().__init__(user, *args, **kwargs)
+        self.uses_link = True
+        self.recent = request is not None and recently_authenticated(request)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not self.recent:
+            raise forms.ValidationError(
+                _("Confirm it's you first: we mail you a login link that brings you back here."),
+                code="not_recent",
+            )
+        return cleaned_data
+
+
 class LoginForm(AuthenticationForm):
     """The login's first step (accounts.views.LoginView): email or username
     (accounts.backends.EmailOrUsernameBackend) and password. A Django
@@ -318,10 +340,13 @@ class SignInPolicyForm(forms.Form):
         return changed
 
 
-class ConfirmPasswordForm(forms.Form):
-    """Asks for the account's password before a change that can't be taken
-    back or weakens the login (turning off two-step login, deleting the
-    account)."""
+class ConfirmIdentityForm(forms.Form):
+    """Asks the account to confirm it's them before a change that can't be
+    taken back or weakens the login (turning off two-step login, deleting
+    the account, a new email address, admin access): its password, or, for
+    an account that logs in with a link and so has none, a login in the last
+    few minutes (accounts.reauth, DATA_MODEL.md §24). Templates show it with
+    accounts/partials/_confirm_identity.html."""
 
     password = forms.CharField(
         label=_("Your password"),
@@ -329,10 +354,16 @@ class ConfirmPasswordForm(forms.Form):
         widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}),
     )
 
-    def __init__(self, user, *args, label=None, **kwargs):
+    def __init__(self, user, *args, request=None, label=None, **kwargs):
+        from .reauth import recently_authenticated
+
         super().__init__(*args, **kwargs)
         self.user = user
-        if label:
+        self.uses_link = user.uses_login_link
+        self.recent = self.uses_link and request is not None and recently_authenticated(request)
+        if self.uses_link:
+            del self.fields["password"]
+        elif label:
             self.fields["password"].label = label
 
     def clean_password(self):
@@ -341,8 +372,17 @@ class ConfirmPasswordForm(forms.Form):
             raise forms.ValidationError(_("That password isn't right."))
         return password
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.uses_link and not self.recent:
+            raise forms.ValidationError(
+                _("Confirm it's you first: we mail you a login link that brings you back here."),
+                code="not_recent",
+            )
+        return cleaned_data
 
-class AdminAccessForm(ConfirmPasswordForm):
+
+class AdminAccessForm(ConfirmIdentityForm):
     """Asking for the Django admin (accounts.admin_access, DATA_MODEL.md
     §23): why, and the password again."""
 
@@ -417,7 +457,7 @@ def _new_email_field():
     )
 
 
-class ChangeEmailForm(_NewEmailMixin, ConfirmPasswordForm):
+class ChangeEmailForm(_NewEmailMixin, ConfirmIdentityForm):
     """The family's own email change (accounts.views.change_email): the new
     address, and the password to show it's them."""
 

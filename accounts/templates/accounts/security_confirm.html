@@ -12,13 +12,13 @@
     </div>
   {% else %}
     {% if last %}
-      <p class="body">{% translate "Logging in will only take your password again. Your app, passkeys and backup codes are removed." %}</p>
+      <p class="body">{% if user.uses_login_link %}{% translate "Logging in will only take your login link again. Your app, passkeys and backup codes are removed." %}{% else %}{% translate "Logging in will only take your password again. Your app, passkeys and backup codes are removed." %}{% endif %}</p>
     {% else %}
       <p class="body">{% translate "Your other sign-in methods keep working." %}</p>
     {% endif %}
     <form method="post" action="{{ action }}" class="cd-form" novalidate>
       {% csrf_token %}
-      {{ form.password.as_field_group }}
+      {% include "accounts/partials/_confirm_identity.html" %}
       <div class="cd-form__actions" style="justify-content: flex-start;">
         <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security' %}">{% translate "Cancel" %}</a>
         <button type="submit" class="cd-btn cd-btn--primary label">{% if last %}{% translate "Turn off" %}{% else %}{% translate "Remove" %}{% endif %}</button>

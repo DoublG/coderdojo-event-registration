@@ -22,6 +22,7 @@
     <form method="post" class="cd-card cd-form" style="padding: var(--space-5);" novalidate>
       {% csrf_token %}
       {{ form }}
+      {% include "accounts/partials/_confirm_identity.html" with rendered=True %}
       <div class="cd-form__actions">
         <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Ask for access" %}</button>
       </div>

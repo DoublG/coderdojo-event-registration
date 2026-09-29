@@ -1,0 +1,30 @@
+{% extends "accounts/_security_base.html" %}
+{% load i18n %}
+{% block security_title %}{% translate "Log in with a link" %}{% endblock %}
+
+{% block security_content %}
+  {% comment %}accounts.security_views.security_login_method_confirm (DATA_MODEL.md §24): the link from the confirmation mail. GET asks, POST switches.{% endcomment %}
+  <h1 class="heading-lg">{% translate "Log in with a link" %}</h1>
+  {% if invalid or error %}
+    <p class="body">{% if error %}{{ error }}{% else %}{% translate "This link has expired or was already used." %}{% endif %}</p>
+    <div class="cd-form__actions" style="justify-content: flex-start;">
+      <a class="cd-btn cd-btn--primary label" href="{% url 'account_security' %}">{% translate "Sign-in security" %}</a>
+    </div>
+  {% elif done %}
+    <p class="body">{% translate "Done: from now on you log in with a link we mail you. Your password no longer works." %}</p>
+    <div class="cd-form__actions" style="justify-content: flex-start;">
+      <a class="cd-btn cd-btn--primary label" href="{% url 'login_link_request' %}">{% translate "Log in with a link" %}</a>
+    </div>
+  {% else %}
+    <p class="body">{% blocktranslate trimmed with email=account.email %}
+      Log in to <strong>{{ email }}</strong> with a link we mail you from now on, instead of your password?
+    {% endblocktranslate %}</p>
+    <p class="body-sm muted">{% translate "Your password stops working and you're logged out on your other devices." %}</p>
+    <form method="post" class="cd-form">
+      {% csrf_token %}
+      <div class="cd-form__actions" style="justify-content: flex-start;">
+        <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Yes, log in with a link" %}</button>
+      </div>
+    </form>
+  {% endif %}
+{% endblock %}

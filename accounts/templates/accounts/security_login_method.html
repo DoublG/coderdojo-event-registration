@@ -1,0 +1,28 @@
+{% extends "accounts/_security_base.html" %}
+{% load i18n %}
+{% block security_title %}{% translate "Log in with a link" %}{% endblock %}
+
+{% block security_content %}
+  {% comment %}accounts.security_views.security_login_method (DATA_MODEL.md §24): switching from a password to a login link, confirmed with the password and then from the mailbox.{% endcomment %}
+  <h1 class="heading-lg">{% translate "Log in with a link" %}</h1>
+  {% if sent %}
+    <p class="body">{% blocktranslate trimmed with email=user.email hours=valid_hours %}
+      We've mailed <strong>{{ email }}</strong> a link to confirm it. Open it within {{ hours }} hours. Nothing changes until you do, so if the mail never arrives, you keep your password.
+    {% endblocktranslate %}</p>
+    <div class="cd-form__actions" style="justify-content: flex-start;">
+      <a class="cd-btn cd-btn--primary label" href="{% url 'account_security' %}">{% translate "Back" %}</a>
+    </div>
+  {% else %}
+    <p class="body">{% translate "Instead of a password, you log in with a link we mail you each time: enter your email address on the login page, open the mail and you're in. There's no password to remember, guess or steal." %}</p>
+    <p class="body-sm muted">{% translate "Once you confirm from your mailbox, your password stops working and you're logged out on your other devices. Two-step login, if you use it, still follows the link. You can go back to a password at any time." %}</p>
+    <form method="post" class="cd-form" novalidate>
+      {% csrf_token %}
+      {% include "accounts/partials/_confirm_identity.html" %}
+      {% for error in form.non_field_errors %}{% if not form.uses_link %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endif %}{% endfor %}
+      <div class="cd-form__actions" style="justify-content: flex-start;">
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security' %}">{% translate "Cancel" %}</a>
+        <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Mail me the confirmation" %}</button>
+      </div>
+    </form>
+  {% endif %}
+{% endblock %}

@@ -52,7 +52,7 @@
 
         <form class="cd-form" method="post" style="margin-top: var(--space-5);">
           {% csrf_token %}
-          {{ form.password.as_field_group }}
+          {% include "accounts/partials/_confirm_identity.html" %}
           <div class="cd-form__actions">
             <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">{% translate "Cancel" %}</a>
             <button type="submit" class="cd-btn cd-btn--danger label">{% translate "Delete my account" %}</button>

@@ -18,6 +18,7 @@ class AccountsConfig(AppConfig):
     def ready(self):
         from . import (
             organisation,  # noqa: F401 — connects the role → staff/group signals
+            reauth,  # noqa: F401 — records each login's time in the session
             two_step,  # noqa: F401 — connects the "backup code used" mail
         )
 

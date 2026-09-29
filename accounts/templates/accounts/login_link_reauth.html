@@ -1,0 +1,18 @@
+{% extends "accounts/_security_base.html" %}
+{% load i18n %}
+{% block security_title %}{% translate "Confirm it's you" %}{% endblock %}
+
+{% block security_content %}
+  {% comment %}accounts.views.login_link_reauth (DATA_MODEL.md §24): a login link that brings an account without a password back to the page it was confirming something on.{% endcomment %}
+  <h1 class="heading-lg">{% translate "Confirm it's you" %}</h1>
+  {% if error %}
+    <p class="cd-form__note cd-form__note--error caption">{{ error }}</p>
+  {% else %}
+    <p class="body">{% blocktranslate trimmed with email=user.email minutes=valid_minutes %}
+      We've mailed a login link to <strong>{{ email }}</strong>. Open it on this device within {{ minutes }} minutes: it logs you in again and brings you back, and then you can go ahead.
+    {% endblocktranslate %}</p>
+  {% endif %}
+  <div class="cd-form__actions" style="justify-content: flex-start;">
+    <a class="cd-btn cd-btn--ghost label" href="{{ next }}">{% translate "Back" %}</a>
+  </div>
+{% endblock %}

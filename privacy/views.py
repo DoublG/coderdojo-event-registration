@@ -15,7 +15,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
 from accounts import email_change
-from accounts.forms import ConfirmPasswordForm, OrganisationEmailChangeForm
+from accounts.forms import ConfirmIdentityForm, OrganisationEmailChangeForm
 from accounts.models import User
 from accounts.organisation import Area, require_area
 from core.audit import log_access
@@ -99,7 +99,9 @@ def delete_my_account(request):
     if user.is_ninja:
         raise Http404
     result = preview(user)
-    form = ConfirmPasswordForm(user, request.POST or None, label=_("Your password, to confirm"))
+    form = ConfirmIdentityForm(
+        user, request.POST if request.method == "POST" else None, request=request, label=_("Your password, to confirm")
+    )
     if request.method == "POST" and result.possible and form.is_valid():
         delete_account(user)
         logout(request)

@@ -24,6 +24,7 @@
       <form class="cd-form" method="post">
         {% csrf_token %}
         {{ form }}
+        {% include "accounts/partials/_confirm_identity.html" with rendered=True %}
         <div class="cd-form__actions">
           <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">{% translate "Cancel" %}</a>
           <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Send the link" %}</button>

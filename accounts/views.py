@@ -18,6 +18,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
+from django.views.decorators.http import require_POST
 from two_factor.plugins.registry import registry
 from two_factor.views import LoginView as TwoFactorLoginView
 from two_factor.views.utils import IdempotentSessionWizardView
@@ -209,6 +210,27 @@ def login_link_request(request):
     return render(request, "accounts/login_link_request.html", {"form": form, "next": next_url})
 
 
+@login_required
+@require_POST
+def login_link_reauth(request):
+    """ "Mail me a confirmation link" on a page that asks to confirm it's you
+    (accounts.forms.ConfirmIdentityForm), for an account without a
+    password: a login link back to that page (accounts.reauth)."""
+    next_url = request.POST.get("next") or ""
+    if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        next_url = reverse("account_security")
+    error = None
+    try:
+        login_links.reauth_link(request.user, next_url)
+    except login_links.LoginLinkError as exc:
+        error = exc.message
+    return render(
+        request,
+        "accounts/login_link_reauth.html",
+        {"error": error, "next": next_url, "valid_minutes": login_links.VALID_MINUTES},
+    )
+
+
 def logout(request):
     auth_logout(request)
     return redirect("home")
@@ -219,6 +241,9 @@ def change_password(request):
     """Where ForcePasswordChangeMiddleware sends anyone still on a
     temporary, admin-issued password (see applications.admin) — and also
     reachable directly by anyone who just wants to change theirs."""
+    if request.user.uses_login_link:
+        # No password to change: setting one is switching back (DATA_MODEL.md §24).
+        return redirect("account_security_password")
     if request.method == "POST":
         form = ForcedPasswordChangeForm(request.user, request.POST)
         if form.is_valid():
@@ -415,7 +440,7 @@ def change_email(request):
     user = request.user
     if user.is_ninja:
         raise Http404
-    form = ChangeEmailForm(user, request.POST or None)
+    form = ChangeEmailForm(user, request.POST if request.method == "POST" else None, request=request)
     if request.method == "POST" and form.is_valid():
         try:
             email_change.request_change(user, form.cleaned_data["new_email"])

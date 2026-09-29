@@ -2,9 +2,9 @@
 {% load i18n %}
 
 {% block security_content %}
-  {% comment %}accounts.security_views.security: the account's sign-in methods (accounts/two_step.py) and what its role requires (accounts/sign_in.py).{% endcomment %}
+  {% comment %}accounts.security_views.security: how the account logs in (a password or a login link, accounts/login_links.py), its two-step login methods (accounts/two_step.py) and what its role requires (accounts/sign_in.py).{% endcomment %}
   <h1 class="heading-lg">{% translate "Sign-in security" %}</h1>
-  <p class="body muted">{% translate "With two-step login, logging in takes your password and a second step: a code from an app on your phone, or a passkey. Someone who finds out your password still can't get in." %}</p>
+  <p class="body muted">{% if uses_link %}{% translate "With two-step login, logging in takes your login link and a second step: a code from an app on your phone, or a passkey. Someone who gets into your mailbox still can't get in." %}{% else %}{% translate "With two-step login, logging in takes your password and a second step: a code from an app on your phone, or a passkey. Someone who finds out your password still can't get in." %}{% endif %}</p>
 
   {% if status == "needs_setup" and enforced %}
     <div class="security-notice">
@@ -19,6 +19,25 @@
   {% elif enforced %}
     <p class="body-sm muted">{% blocktranslate with level=enforced.level_label trimmed %}Your role needs: {{ level }}.{% endblocktranslate %}</p>
   {% endif %}
+
+  <div class="security-section">
+    <h2 class="heading-md">{% translate "How you log in" %}</h2>
+    {% if uses_link %}
+      <div class="security-row">
+        <p class="body-sm">{% translate "With a link we mail you each time: no password." %}</p>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'account_security_password' %}">{% translate "Use a password instead" %}</a>
+      </div>
+    {% else %}
+      <div class="security-row">
+        <p class="body-sm">{% translate "With your password." %}</p>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'change_password' %}">{% translate "Change password" %}</a>
+      </div>
+      <div class="security-row">
+        <p class="body-sm muted">{% translate "Rather not remember a password? Log in with a link we mail you each time." %}</p>
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'account_login_method' %}">{% translate "Switch to a login link" %}</a>
+      </div>
+    {% endif %}
+  </div>
 
   <div class="security-section">
     <div class="security-row">

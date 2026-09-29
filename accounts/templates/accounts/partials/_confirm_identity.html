@@ -1,0 +1,23 @@
+{% load i18n %}{% comment %}
+Confirming it's you (accounts.forms.ConfirmIdentityForm, DATA_MODEL.md §24),
+inside the page's own <form>: the password field, or, for an account that
+logs in with a link, either "you just logged in" or a button that mails a
+login link bringing them back here (accounts.views.login_link_reauth, through
+formaction, so no nested form). `rendered=True` when the page already
+printed {{ form }} (the password field and the errors are in it).
+{% endcomment %}
+{% if form.uses_link %}
+  {% if not rendered %}
+    {% for error in form.non_field_errors %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endfor %}
+  {% endif %}
+  <div class="cd-form__field">
+    {% if form.recent %}
+      <p class="body-sm">{% translate "You logged in a moment ago, so that's confirmation enough: no password needed." %}</p>
+    {% else %}
+      <p class="body-sm">{% translate "You log in with a link, so there's no password to ask for. To confirm it's you, we mail you a login link that brings you back to this page." %}</p>
+      <div><button type="submit" formaction="{% url 'login_link_reauth' %}" formnovalidate name="next" value="{{ request.get_full_path }}" class="cd-btn cd-btn--ghost label">{% translate "Mail me a confirmation link" %}</button></div>
+    {% endif %}
+  </div>
+{% elif not rendered %}
+  {{ form.password.as_field_group }}
+{% endif %}

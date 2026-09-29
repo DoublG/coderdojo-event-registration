@@ -26,6 +26,7 @@ class ForcePasswordChangeMiddleware:
             user is not None
             and user.is_authenticated
             and user.must_change_password
+            and not user.uses_login_link  # no password to change (DATA_MODEL.md §24)
             and not request.path.startswith(settings.STATIC_URL)
             and not request.path.startswith(settings.MEDIA_URL)
             and request.path not in self._exempt_paths()

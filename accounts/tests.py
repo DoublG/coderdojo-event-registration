@@ -3129,12 +3129,6 @@ class LoginLinkLoginTests(LoginLinkTestMixin, TwoStepTestMixin, TestCase):
     """/login/link/<uidb64>/<token>/: GET asks, POST logs in, then the second
     step as on /login/."""
 
-    def setUp(self):
-        super().setUp()
-        # TwoStepTestMixin's `self.user` is the password account here.
-        self.password_user = self.user
-        self.user = User.objects.get(username="lin")
-
     def link(self, next_url=None):
         from . import login_links
 
@@ -3197,6 +3191,179 @@ class LoginLinkLoginTests(LoginLinkTestMixin, TwoStepTestMixin, TestCase):
         self.client.post(self.link(), link_login_data())
         response = self.client.get(reverse("account_home"))
         self.assertRedirects(response, reverse("account_security"), fetch_redirect_response=False)
+
+
+class LoginMethodSwitchTests(LoginLinkTestMixin, TestCase):
+    """Choosing on Sign-in security: to a link (confirmed from the mailbox)
+    and back to a password (DATA_MODEL.md §24)."""
+
+    def test_the_security_page_shows_the_method(self):
+        self.client.force_login(self.password_user)
+        response = self.client.get(reverse("account_security"))
+        self.assertContains(response, "Switch to a login link")
+        self.client.force_login(self.user)
+        self.assertContains(self.client.get(reverse("account_security")), "Use a password instead")
+
+    def test_switching_to_a_link_needs_the_password_then_the_mailbox(self):
+        self.client.force_login(self.password_user)
+        response = self.client.post(reverse("account_login_method"), {"password": "wrong"})
+        self.assertFalse(self.mails("login_method_confirm").exists())
+        response = self.client.post(reverse("account_login_method"), {"password": PASSWORD})
+        self.assertContains(response, "pat@example.com")
+        self.password_user.refresh_from_db()
+        self.assertEqual(self.password_user.login_method, User.LOGIN_PASSWORD)
+        self.assertTrue(self.password_user.check_password(PASSWORD))
+
+        link = self.link_path("login_method_confirm", self.password_user)
+        self.assertContains(self.client.get(link), "Yes, log in with a link")
+        self.password_user.refresh_from_db()
+        self.assertEqual(self.password_user.login_method, User.LOGIN_PASSWORD)
+
+        response = self.client.post(link)
+        self.assertRedirects(response, reverse("account_security"))
+        self.password_user.refresh_from_db()
+        self.assertEqual(self.password_user.login_method, User.LOGIN_LINK)
+        self.assertFalse(self.password_user.has_usable_password())
+        # This session stays; the mail tells the account.
+        self.assertEqual(self.client.get(reverse("account_home")).status_code, 200)
+        self.assertEqual(self.mails("login_method_changed", self.password_user).count(), 1)
+        # Used once.
+        self.assertEqual(self.client.get(link).status_code, 400)
+
+    def test_the_switch_ends_the_other_sessions(self):
+        from django.test import Client
+
+        other = Client()
+        other.force_login(self.password_user)
+        self.client.force_login(self.password_user)
+        self.client.post(reverse("account_login_method"), {"password": PASSWORD})
+        self.client.post(self.link_path("login_method_confirm", self.password_user))
+        self.assertEqual(other.get(reverse("account_home")).status_code, 302)
+
+    def test_the_confirmation_works_logged_out_but_not_for_another_account(self):
+        self.client.force_login(self.password_user)
+        self.client.post(reverse("account_login_method"), {"password": PASSWORD})
+        link = self.link_path("login_method_confirm", self.password_user)
+        self.client.force_login(self.user)
+        self.assertEqual(self.client.get(link).status_code, 404)
+        self.client.logout()
+        response = self.client.post(link)
+        self.assertContains(response, "Log in with a link")
+        self.password_user.refresh_from_db()
+        self.assertTrue(self.password_user.uses_login_link)
+
+    def test_back_to_a_password_needs_a_recent_login(self):
+        from . import reauth
+
+        self.client.force_login(self.user)  # force_login sends user_logged_in: recent
+        response = self.client.post(
+            reverse("account_security_password"), {"new_password1": PASSWORD, "new_password2": PASSWORD}
+        )
+        self.assertRedirects(response, reverse("account_security"))
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.login_method, User.LOGIN_PASSWORD)
+        self.assertTrue(self.user.check_password(PASSWORD))
+        self.assertEqual(self.mails("login_method_changed", self.user).count(), 1)
+
+        self.user.login_method = User.LOGIN_LINK
+        self.user.set_unusable_password()
+        self.user.save()
+        self.client.force_login(self.user)
+        session = self.client.session
+        session[reauth.LOGIN_AT_SESSION] -= (reauth.RECENT_MINUTES + 1) * 60
+        session.save()
+        response = self.client.post(
+            reverse("account_security_password"), {"new_password1": PASSWORD, "new_password2": PASSWORD}
+        )
+        self.assertContains(response, "Mail me a confirmation link")
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.uses_login_link)
+
+    def test_change_password_sends_a_link_account_to_set_one(self):
+        self.client.force_login(self.user)
+        self.assertRedirects(
+            self.client.get(reverse("change_password")),
+            reverse("account_security_password"),
+            fetch_redirect_response=False,
+        )
+
+    def test_the_switch_is_in_the_audit_log(self):
+        from auditlog.models import LogEntry
+
+        self.client.force_login(self.password_user)
+        self.client.post(reverse("account_login_method"), {"password": PASSWORD})
+        self.client.post(self.link_path("login_method_confirm", self.password_user))
+        entry = LogEntry.objects.get_for_object(self.password_user).latest("timestamp")
+        self.assertIn("login_method", entry.changes_dict)
+        self.assertEqual(entry.actor, self.password_user)
+
+
+class ConfirmIdentityWithoutPasswordTests(LoginLinkTestMixin, TwoStepTestMixin, TestCase):
+    """The pages that ask for the password accept a recent login from an
+    account on a link, and otherwise offer a link back (accounts.reauth)."""
+
+    def make_old(self):
+        from . import reauth
+
+        session = self.client.session
+        session[reauth.LOGIN_AT_SESSION] -= (reauth.RECENT_MINUTES + 1) * 60
+        session.save()
+
+    def test_turning_off_two_step_login(self):
+        from core.testing import login_verified
+
+        login_verified(self.client, self.user)
+        self.make_old()
+        response = self.client.post(reverse("account_security_turn_off"), {})
+        self.assertContains(response, "Mail me a confirmation link")
+        self.assertTrue(self.user.totpdevice_set.exists())
+        login_verified(self.client, self.user)  # a fresh login
+        self.client.post(reverse("account_security_turn_off"), {})
+        self.assertFalse(self.user.totpdevice_set.exists())
+
+    def test_deleting_the_account(self):
+        self.client.force_login(self.user)
+        self.make_old()
+        response = self.client.post(reverse("delete_my_account"), {})
+        self.assertContains(response, "Mail me a confirmation link")
+        self.assertTrue(User.objects.filter(pk=self.user.pk, is_active=True).exists())
+        self.client.force_login(self.user)
+        self.client.post(reverse("delete_my_account"), {})
+        self.user.refresh_from_db()
+        self.assertNotEqual(self.user.email, "lin@example.com")
+
+    def test_changing_the_email_address(self):
+        self.client.force_login(self.user)
+        self.make_old()
+        self.client.post(reverse("change_email"), {"new_email": "lin.new@example.com"})
+        self.assertFalse(self.mails("email_change_confirm").exists())
+        self.client.force_login(self.user)
+        self.client.post(reverse("change_email"), {"new_email": "lin.new@example.com"})
+        self.assertTrue(self.mails("email_change_confirm").exists())
+
+    def test_a_password_account_still_needs_its_password(self):
+        self.client.force_login(self.password_user)
+        response = self.client.get(reverse("change_email"))
+        self.assertContains(response, 'name="password"')
+        self.assertNotContains(response, "Mail me a confirmation link")
+
+    def test_the_confirmation_link_brings_them_back(self):
+        from core.testing import link_login_data
+
+        self.client.force_login(self.user)
+        self.make_old()
+        response = self.client.post(reverse("login_link_reauth"), {"next": reverse("change_email")})
+        self.assertContains(response, "lin@example.com")
+        link = self.link_path()
+        response = self.client.post(link, link_login_data())
+        self.assertRedirects(response, reverse("change_email"), fetch_redirect_response=False)
+        form = self.client.get(reverse("change_email")).context["form"]
+        self.assertTrue(form.recent)
+
+    def test_the_confirmation_link_never_leaves_the_site(self):
+        self.client.force_login(self.user)
+        self.client.post(reverse("login_link_reauth"), {"next": "https://evil.example.com/"})
+        self.assertNotIn("evil", self.link_path())
 
 
 def settings_site_url():

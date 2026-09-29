@@ -110,7 +110,7 @@ def manage_admin_access(request):
     earlier grants (DATA_MODEL.md §23)."""
     _require_may_ask(request)
     grant = admin_access.open_grant(request.user)
-    form = AdminAccessForm(request.user, request.POST or None)
+    form = AdminAccessForm(request.user, request.POST if request.method == "POST" else None, request=request)
     if request.method == "POST" and grant is None and form.is_valid():
         try:
             grant = admin_access.request_access(request.user, form.cleaned_data["reason"])
