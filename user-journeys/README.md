@@ -11,6 +11,13 @@ One PDF per persona, walking through the site with screenshots, in English (`en/
 | 5 | Background-check reviewer / beoordelaar | [en/5-reviewer-journey.pdf](en/5-reviewer-journey.pdf) | [nl/5-beoordelaar.pdf](nl/5-beoordelaar.pdf) |
 | 6 | Organisation admin / beheerder | [en/6-organisation-journey.pdf](en/6-organisation-journey.pdf) | [nl/6-organisatie.pdf](nl/6-organisatie.pdf) |
 
+Alongside them, **[technical-foundation-and-data-model.pdf](technical-foundation-and-data-model.pdf)**
+explains how the site is built, how its data fits together and why: a summary of `DATA_MODEL.md` and
+`CLAUDE.md`, with the diagrams taken from `DATA_MODEL.md` as they are. Rebuild it with
+`python scripts/build_technical.py` (the same venv as below; the first run downloads Mermaid 11.4.1 from
+jsDelivr into `.shots/`, and the build fails if a diagram doesn't render). Its prose is in that script,
+so a change to the model or the conventions may need a sentence there too.
+
 The screenshots come from the devcontainer's site with the seeded demo data, logged in with the
 seeded accounts named on each cover. They are an overview for people, not the help centre:
 that's `docs/`.

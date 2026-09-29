@@ -1,0 +1,659 @@
+"""The technical foundation and data model PDF, built from DATA_MODEL.md and CLAUDE.md.
+
+The diagrams are taken from DATA_MODEL.md as they are (found by a marker text in each
+block), so the PDF follows the model when it changes; the prose here summarises both
+files. Run from anywhere: python build_technical.py
+"""
+
+import html
+import os
+import re
+import urllib.request
+
+from playwright.sync_api import sync_playwright
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+REPO = os.path.dirname(ROOT)
+OUT = os.path.join(ROOT, "technical-foundation-and-data-model.pdf")
+MERMAID = os.path.join(ROOT, ".shots", "mermaid-11.4.1.min.js")
+MERMAID_URL = "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"
+
+BLOCKS = re.findall(r"```mermaid\n(.*?)```", open(os.path.join(REPO, "DATA_MODEL.md")).read(), re.S)
+
+
+def mm(marker, caption=""):
+    """The first DATA_MODEL.md diagram containing `marker`."""
+    for b in BLOCKS:
+        if marker in b:
+            cap = f"<figcaption>{caption}</figcaption>" if caption else ""
+            return f"<figure><pre class='mermaid'>{html.escape(b)}</pre>{cap}</figure>"
+    raise LookupError(f"No diagram with {marker!r} in DATA_MODEL.md")
+
+
+def own(code, caption=""):
+    cap = f"<figcaption>{caption}</figcaption>" if caption else ""
+    return f"<figure><pre class='mermaid'>{html.escape(code)}</pre>{cap}</figure>"
+
+
+ARCHITECTURE = """flowchart TB
+    B[Browser<br/>server-rendered HTML + htmx] -->|HTTPS, WSS| X[nginx / Level27 proxy<br/>TLS, /static, /media]
+    X --> A[ASGI app<br/>gunicorn + uvicorn workers<br/>daphne in development]
+    A --> DB[(MySQL<br/>GIS, the data,<br/>the mail queue)]
+    A --> R0[(Redis db 0<br/>cache)]
+    A --> R1[(Redis db 1<br/>Channels layer)]
+    A -. enqueue .-> R2[(Redis db 2<br/>Celery broker)]
+    R2 --> P[Celery 'periodic'<br/>beat embedded]
+    R2 --> M[Celery 'mailing'<br/>default queue]
+    P --> DB
+    M --> DB
+    M --> SMTP[SMTP server]
+    P --> BOX[Bounce mailbox<br/>IMAP / POP3]
+    APP[A dojo's app] -->|OAuth 2.0<br/>client credentials| A
+"""
+
+LAYERS = """flowchart TD
+    V[Views, admin actions, API endpoints, Celery tasks] --> S
+    subgraph S ["Services: the only place a rule is decided"]
+        T[dojos.team] --- AC[dojos.access]
+        AP[applications.services] --- AW[events.awards]
+        MS[mailing.services.send] --- NT[notifications.services.notify]
+        TS[accounts.two_step] --- CA[accounts.child_accounts]
+        PR[privacy.erasure / export] --- EA[events.attendance]
+    end
+    S --> MO["Models and managers<br/>public(), visible(), of_guardian(), signable_by()"]
+    MO --> DB[(MySQL)]
+    S -. user-facing error .-> E["TeamError, OnboardingError, BeltError,<br/>CampaignError, TwoStepError, ..."]
+"""
+
+CSS = """
+@page { size: A4; margin: 16mm 16mm 18mm; }
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', 'Nunito', Arial, sans-serif; color: #1f2937; font-size: 10.2pt; line-height: 1.5; margin: 0; }
+.cover { height: 255mm; display: flex; flex-direction: column; page-break-after: always; }
+.brand { color: #c94a23; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; font-size: 9.5pt; }
+.cover h1 { font-size: 30pt; line-height: 1.08; margin: 10mm 0 4mm; }
+.cover .sub { font-size: 12.5pt; color: #4b5563; max-width: 150mm; }
+.cover .meta { margin-top: auto; font-size: 9pt; color: #6b7280; }
+h1 { font-size: 20pt; margin: 0 0 3mm; color: #111827; }
+h1.sec { page-break-before: always; }
+@page wide { size: A4 landscape; margin: 14mm 16mm 16mm; }
+figure.rot { page: wide; margin: 0; }
+figure.rot svg { max-height: 165mm !important; width: 100%; }
+h1 .n { color: #c94a23; margin-right: 2mm; }
+h2 { font-size: 13pt; margin: 6mm 0 2mm; color: #111827; page-break-after: avoid; }
+h3 { font-size: 11pt; margin: 4mm 0 1.5mm; page-break-after: avoid; }
+p { margin: 0 0 2.4mm; }
+ul { margin: 0 0 2.5mm; padding-left: 5mm; }
+li { margin-bottom: 1mm; }
+code { font-family: 'Cascadia Mono', Consolas, monospace; font-size: 8.6pt; background: #f3f4f6; padding: 0 1mm; border-radius: 1mm; }
+table { border-collapse: collapse; width: 100%; margin: 2mm 0 4mm; font-size: 9pt; page-break-inside: avoid; }
+th { text-align: left; background: #f3f4f6; font-weight: 700; }
+th, td { border-bottom: 0.3mm solid #e5e7eb; padding: 1.4mm 2mm; vertical-align: top; }
+figure { margin: 3mm 0 5mm; text-align: center; page-break-inside: avoid; }
+figure svg { max-width: 100% !important; max-height: 200mm; height: auto; }
+figcaption { font-size: 8.5pt; color: #6b7280; margin-top: 1.5mm; }
+pre.mermaid { background: none; margin: 0; }
+.why { background: #fff7ed; border-left: 1.2mm solid #c94a23; padding: 2.5mm 4mm; margin: 3mm 0 4mm; border-radius: 0 2mm 2mm 0; page-break-inside: avoid; }
+.why b:first-child { color: #9a3412; }
+.toc { columns: 2; column-gap: 10mm; font-size: 10pt; padding-left: 6mm; }
+.toc li { margin-bottom: 1.2mm; }
+.lede { font-size: 11pt; color: #374151; }
+"""
+
+SECTIONS = []
+
+
+def section(title, body):
+    SECTIONS.append((title, body))
+
+
+def why(text):
+    return f"<div class='why'><b>Why.</b> {text}</div>"
+
+
+# 1 -------------------------------------------------------------------------------------
+section(
+    "What the site is",
+    """
+<p class='lede'>A Django site for CoderDojo Belgium: free coding clubs for children aged 7–17, run by
+volunteers. It replaces spreadsheets and forms with one place where families find a dojo and sign
+their children up, volunteers are vetted once and help at any dojo, dojo teams run their sessions,
+and the organisation communicates, promotes and keeps the whole thing lawful.</p>
+<table>
+<tr><th>Who</th><th>What they do on the site</th></tr>
+<tr><td>Visitors and families</td><td>Discover dojos and sessions, create a family account, sign children up (with a
+waiting list), follow belts and badges, manage mail, security and their data.</td></tr>
+<tr><td>Ninjas</td><td>Optionally their own login, given by a guardian: see their progress, sign themselves up.</td></tr>
+<tr><td>Mentors</td><td>Apply once, pass a Belgian background check, then join any dojo's team: sessions,
+attendance, belts and badges, the team.</td></tr>
+<tr><td>Champions</td><td>Run a dojo: everything a mentor does plus its lifecycle, health notes, mail to the
+families and API clients.</td></tr>
+<tr><td>The organisation</td><td>Reviewers (background checks, applications), admins (campaigns, segments,
+content, awards, privacy, people, security), the board; the Django admin only for technical fixes.</td></tr>
+</table>
+<h2>Where the knowledge lives</h2>
+<ul>
+<li><code>DATA_MODEL.md</code>: the data model, one Mermaid diagram per area, plus the design rationale and plan
+of every larger change (sections 10–25). The diagrams in this document are taken from it unchanged.</li>
+<li><code>CLAUDE.md</code>: the conventions, the architecture and the gotchas: what a developer (human or AI)
+needs to change the code safely. Kept current in the same change as the code.</li>
+<li><code>docs/</code>: the end-user help centre (Sphinx, English, French and Dutch).</li>
+<li><code>user-journeys/</code>: one PDF per persona with screenshots, in English and Dutch.</li>
+</ul>
+<h2>In numbers</h2>
+<table>
+<tr><th>Django apps</th><td>12 of our own (plus <code>website</code> for settings)</td><th>Models</th><td>51 of our own</td></tr>
+<tr><th>Test functions</th><td>about 1,000 (Django test runner)</td><th>Languages</th><td>English, Dutch, French</td></tr>
+</table>
+""",
+)
+
+# 2 -------------------------------------------------------------------------------------
+section(
+    "Technical foundation",
+    f"""
+<h2>The stack</h2>
+<table>
+<tr><th>Layer</th><th>Choice</th><th>Why</th></tr>
+<tr><td>Language, framework</td><td>Python 3.14, Django 6.1</td><td>Batteries included (auth, admin, forms, i18n, migrations);
+the admin doubles as the always-working emergency tool.</td></tr>
+<tr><td>Database</td><td>MySQL 9 with <code>django.contrib.gis</code></td><td>What the hosting offers; spatial columns for dojo
+locations, postcodes and provinces.</td></tr>
+<tr><td>Front end</td><td>Server-rendered templates + htmx 2.0, one hand-kept <code>bundle.js</code>/<code>bundle.css</code></td>
+<td>No build step, no SPA: the server stays the single source of truth; htmx swaps fragments for the dynamic parts.</td></tr>
+<tr><td>Serving</td><td>ASGI: gunicorn with uvicorn workers in production, daphne behind <code>runserver</code> in development</td>
+<td>WebSockets for the live notification bell, in the same process as the pages.</td></tr>
+<tr><td>Real time</td><td>Django Channels over Redis (db 1)</td><td>The bell updates itself without polling.</td></tr>
+<tr><td>Background work</td><td>Celery 5.6, two workers, beat embedded in one; Redis db 2 as broker</td><td>Every mail, the nightly
+engagement rebuild, retention and reminders run off the request.</td></tr>
+<tr><td>Cache</td><td>Redis db 0 (<code>IGNORE_EXCEPTIONS</code>)</td><td>Public lists; the site keeps working if Redis hiccups.</td></tr>
+<tr><td>Auth</td><td>django-two-factor-auth on django-otp, WebAuthn passkeys; login links</td><td>Optional two-step login for
+everyone, enforceable per role by the organisation.</td></tr>
+<tr><td>API</td><td>django-ninja + django-oauth-toolkit (client credentials)</td><td>Typed endpoints with an OpenAPI spec; apps act
+for one dojo with scoped tokens.</td></tr>
+<tr><td>Audit</td><td>django-auditlog</td><td>Who changed what, and who viewed the most sensitive data.</td></tr>
+<tr><td>Hosting</td><td>Level27 Python hosting (SSH, systemd user units); a devcontainer for development</td><td>A small, affordable
+setup for a volunteer organisation, deployed with one script.</td></tr>
+</table>
+<h2>How the pieces connect</h2>
+{own(ARCHITECTURE, "Runtime architecture. Only nginx is exposed; in development it also serves the docs, Mailpit, phpMyAdmin and a test authenticator under their own paths.")}
+<h2>Environments</h2>
+<ul>
+<li><b>Development</b> is the <code>.devcontainer</code> stack: nginx with a local CA for <code>coolregistration.localhost</code>
+(only port 443 is published), MySQL, Redis, Mailpit catching every mail (and acting as the bounce mailbox), both
+Celery workers, and seeded demo data from about twenty rerun-safe seed commands. End-to-end checks go through nginx,
+never straight to Django, because TLS, the WebSocket upgrade and the tool paths live there.</li>
+<li><b>Production</b> is deployed by <code>scripts/deploy.sh</code>: bundle the tree, install requirements into the Python env
+gunicorn uses, run <code>manage.py check</code> on the new code <i>before</i> touching the live app, rsync, migrate, reload
+gunicorn, restart the Celery units and smoke-test. <code>--check</code> is a read-only preflight.</li>
+<li>No CI: tests and lint (<code>ruff</code>) run locally, inside the container.</li>
+</ul>
+""",
+)
+
+# 3 -------------------------------------------------------------------------------------
+section(
+    "Architectural principles and their rationale",
+    f"""
+<p class='lede'>A handful of rules shape almost every part of the code. Each one exists because the alternative
+went wrong, or would have, for a site that holds children's data and is maintained by volunteers.</p>
+<h2>Rules live in services, views only call them</h2>
+{
+        own(
+            LAYERS,
+            "Every change with a rule behind it goes through one module, which raises an error with a user-facing message.",
+        )
+    }
+{
+        why(
+            "One place decides each rule, so a view, an admin action, the API and a Celery job can never disagree. "
+            "The API's attendance endpoints call the same <code>events.attendance</code> functions as the dojo's attendance list."
+        )
+    }
+<h2>404, not 403, for what you may not see</h2>
+<p>A dojo you are not on the team of, a child you are not a guardian of, an organisation page your role
+doesn't open: all answer 404. A 403 is only for someone who <i>is</i> on the team but whose role lacks the capability.</p>
+{why("A 403 confirms the thing exists. Guessable ids must not reveal which dojos, children or accounts are there.")}
+<h2>Keep the history, never overwrite it</h2>
+<ul>
+<li>Team memberships go <code>dormant</code>, never deleted, so past sessions keep their team.</li>
+<li>Belts (<code>NinjaBelt</code>), background-check decisions, consent (<code>ConsentEvent</code>) and cancellations
+(<code>RegistrationCancellation</code>) are append-only logs.</li>
+<li>A campaign freezes its segment at launch; a mail row stores exactly what was sent.</li>
+</ul>
+{why("Insurance, disputes and GDPR accountability all need to know what was true <i>then</i>, not what is true now.")}
+<h2>Delete what you must not keep</h2>
+<p>A criminal-record extract is deleted the moment a reviewer decides; only the decision stays. Private files have no URL
+at all (<code>private_storage</code>, <code>base_url=None</code>), only a permission-checked download view.</p>
+<h2>The Django admin always works</h2>
+<p>Day-to-day work gets a page in a dashboard (the dojo area or the organisation area). The admin stays fully usable for
+every model, never read-only, never with hidden fields, so that direct database access is never needed; a test checks
+that a superuser can add, change and delete every registered model. The one exception is the audit log. Access to the
+admin itself is time-boxed: an organisation role asks for it, 12 hours at a time.</p>
+<h2>Server-driven UI</h2>
+<p>htmx for anything that needs the server, plain HTML/CSS for pure client behaviour, hand-written JavaScript only for what
+neither can do (passkeys, geolocation, scroll). Third-party browser code (htmx, OpenLayers, fonts) is served from our own
+static files, never a CDN, so visitors' IP addresses don't go to a third party.</p>
+<h2>Correctness traps turned into rules</h2>
+<ul>
+<li><b>Distances</b> always use <code>geo.functions.DistanceSphere</code> (MySQL <code>ST_Distance_Sphere</code>): Django's
+<code>Distance()</code> silently returns planar degrees on MySQL.</li>
+<li><b>A model's <code>__str__</code> never queries</b>: under ASGI a lazy lookup raises
+<code>SynchronousOnlyOperation</code>; managers preload what <code>__str__</code> needs.</li>
+<li><b>Public caches are cleared on save</b> by signals, so a published session shows at once.</li>
+<li><b>Tasks are safe to run twice</b> (<code>acks_late</code>, idempotency keys): a worker that dies mid-task is retried.</li>
+</ul>
+<h2>Enforced by tests</h2>
+<p>Many of these are guarded by tests that fail on a new model or field that forgets them: every field has a privacy
+classification, every model has an audit-log decision, every registered model is fully usable in the admin, every
+<code>__str__</code> that follows a relation is preloaded, every form text is translated, the API schema never exposes a
+sensitive field, and no page loads a script from another site.</p>
+""",
+)
+
+# 4 -------------------------------------------------------------------------------------
+section(
+    "The data model at a glance",
+    f"""
+<p class='lede'>Twelve apps own the data, each with its own <code>urls.py</code> mounted at the top level. The diagram shows
+the main entities and how they connect.</p>
+{mm("subgraph accounts", "The main entities, grouped by the app that owns them (DATA_MODEL.md §1).")}
+<table>
+<tr><th>App</th><th>Owns</th></tr>
+<tr><td><code>accounts</code></td><td><code>User</code> (every login), <code>Ninja</code>, <code>Guardianship</code>, organisation roles, admin-access grants, invitations, the sign-in policy</td></tr>
+<tr><td><code>dojos</code></td><td><code>Dojo</code> (with its lifecycle), <code>DojoMembership</code> (the team), access rules, geo-search</td></tr>
+<tr><td><code>events</code></td><td><code>Event</code>, <code>Registration</code>, cancellations, badges, belts, team attendance, the engagement snapshot</td></tr>
+<tr><td><code>applications</code></td><td><code>Application</code>, <code>BackgroundCheckHistory</code>, the background-check flow</td></tr>
+<tr><td><code>pathways</code></td><td>The learning-track catalogue: pathways, steps, projects, skills</td></tr>
+<tr><td><code>content</code></td><td>FAQs, testimonials, announcements, promotions, sponsors, the organisation's team listing</td></tr>
+<tr><td><code>notifications</code></td><td>Per-recipient <code>Notification</code> rows behind the bells</td></tr>
+<tr><td><code>mailing</code></td><td>Every mail: queue, templates, preferences and consent, bounces, campaigns, segments, journeys</td></tr>
+<tr><td><code>geo</code></td><td>Municipalities and administrative boundaries, geocoding, <code>DistanceSphere</code></td></tr>
+<tr><td><code>privacy</code></td><td>The GDPR registry, export, erasure, retention, erasure records</td></tr>
+<tr><td><code>api</code></td><td>A dojo's API clients and the <code>/api/v1/</code> endpoints</td></tr>
+<tr><td><code>core</code></td><td>The homepage, shared templates and static files, the management shell, audit-log wiring</td></tr>
+</table>
+<h2>Nomenclature</h2>
+<p>The code and the UI use CoderDojo's own vocabulary:</p>
+<table>
+<tr><th>Term</th><th>Meaning</th><th>In the model</th></tr>
+<tr><td><b>Champion</b></td><td>The dojo owner; exactly one per dojo</td><td>membership role <code>champion</code></td></tr>
+<tr><td><b>Mentor / Coach</b></td><td>An adult helper</td><td>membership role <code>mentor</code></td></tr>
+<tr><td><b>Ninja</b></td><td>A child aged 7–17 visiting a dojo</td><td><code>Ninja</code>, plus an optional ninja login (<code>User</code>)</td></tr>
+<tr><td><b>Youth mentor</b></td><td>A ninja helping run sessions</td><td>membership role <code>youth_mentor</code> on a ninja login</td></tr>
+<tr><td><b>Badge</b></td><td>An award: one-off, or a milestone reached by a count</td><td><code>Badge</code> (<code>one_off</code> / <code>milestone</code>), <code>NinjaBadge</code></td></tr>
+<tr><td><b>Belt</b></td><td>A ninja's proficiency level</td><td><code>Belt</code>, the append-only <code>NinjaBelt</code> history</td></tr>
+</table>
+""",
+)
+
+# 5 -------------------------------------------------------------------------------------
+section(
+    "Accounts, families and roles",
+    f"""
+<p>One <code>User</code> table is every login, told apart by <code>account_type</code>: <code>adult</code>, <code>ninja</code> (a
+child's own login) or <code>service</code> (an API client's technical account). There are no role subclasses.</p>
+<ul>
+<li><b>Parents</b> are plain adult accounts linked to children through <code>Guardianship</code> (a child can have several
+guardians). No check, no approval: a parent only ever manages their own children.</li>
+<li><b>A <code>Ninja</code> is not a user.</b> It gets a login only if a guardian gives it one; most never do. The guardian
+creates and removes it and keeps editing the child's details.</li>
+<li><b>Champions and mentors</b> are adult accounts with an approved <code>Application</code> and a valid background check;
+what they do at a dojo is a <code>DojoMembership</code>.</li>
+<li><b>Organisation roles</b> (<code>board</code>, <code>admin</code>, <code>reviewer</code>) map to permission groups kept in sync by
+signals, and open areas of the organisation dashboard. The Django admin needs a separate, 12-hour grant.</li>
+<li>Every login chooses a <b>password or an emailed login link</b>, with optional two-step login on top.</li>
+</ul>
+{mm("class Guardianship", "Accounts, guardianship and organisation access (DATA_MODEL.md §2).")}
+{
+        why(
+            "Being a parent, a mentor or a champion describes how a person relates to children or to a dojo, not what kind of "
+            "account they have, and one person can be all three. Modelling roles as subclasses spread one idea over several "
+            "tables and needed sync code; relations make each role a row that can be added, ended and audited."
+        )
+    }
+""",
+)
+
+# 6 -------------------------------------------------------------------------------------
+section(
+    "Dojos, teams and access",
+    f"""
+<p>A dojo's team is a set of <b>memberships</b>, one row per account and dojo, each with a role and a status.
+The team-page profile (name, title, bio, photo) lives on the account and is shared by every dojo.</p>
+{mm('DOJO ||--o{ DOJO_MEMBERSHIP : "memberships (team)"', "Dojos and their team memberships (DATA_MODEL.md §3).")}
+<h2>Lifecycles</h2>
+{
+        mm(
+            "created by an approved champion",
+            "A dojo's status. Only active dojos (and their sessions) are public. Going dormant or archived needs no open sessions and declines pending join requests.",
+        )
+    }
+{
+        mm(
+            "approved mentor asks to join",
+            "A team membership. Leaving makes it dormant, never deleted, so past sessions keep their team.",
+        )
+    }
+<h2>Who gets into a dojo's admin area</h2>
+{mm("Active champion or mentor", "Access is always resolved through dojos.access.require_dojo_access.")}
+<table>
+<tr><th>Capability</th><th>Champion</th><th>Mentor</th></tr>
+<tr><td>Dashboard, sessions list, the bell (any role)</td><td>✓</td><td>✓</td></tr>
+<tr><td><code>TAKE_ATTENDANCE</code>, <code>MANAGE_EVENTS</code>, <code>EDIT_SETTINGS</code>, <code>MANAGE_TEAM</code></td><td>✓</td><td>✓</td></tr>
+<tr><td><code>AWARD_BELTS</code>, <code>AWARD_BADGES</code>, <code>POST_UPDATES</code></td><td>✓</td><td>✓</td></tr>
+<tr><td><code>MANAGE_LIFECYCLE</code>, <code>VIEW_HEALTH_NOTES</code>, <code>MANAGE_API</code>, <code>SEND_MAIL</code></td><td>✓</td><td>—</td></tr>
+<tr><td>Hand over the champion role</td><td>✓</td><td>—</td></tr>
+</table>
+{
+        why(
+            "A lapsed background check never blocks login: the person can still use the site as a parent, but their memberships stop "
+            "granting access until a renewal is validated. The membership keeps its status, so nothing needs repairing afterwards."
+        )
+    }
+<p>Organisation-run events (CoderDojo Girlz, Coolest Projects) live on an <b>organisation dojo</b>
+(<code>Dojo.kind = organisation</code>): a normal dojo with a team and an admin area, never listed publicly, and the only kind
+whose events may link out to an external registration site.</p>
+""",
+)
+
+# 7 -------------------------------------------------------------------------------------
+section(
+    "Sessions, registrations and attendance",
+    f"""
+{mm('EVENT }o--o{ DOJO_MEMBERSHIP : "team (M2M)"', "Events, registrations, pathways and the session's team (DATA_MODEL.md §4).")}
+<ul>
+<li><b>Places and the waiting list.</b> Places left = places − confirmed registrations. Cancelling deletes the registration
+(after logging a <code>RegistrationCancellation</code>) and promotes the first child waiting; that family is mailed and the
+dojo's team notified.</li>
+<li><b>Attendance is tri-state</b> (<code>None</code> = not marked, present, absent), for children and for the session's team
+(<code>TeamAttendance</code>, the record the insurance needs).</li>
+<li><b>A girls' session</b> (<code>Event.audience</code>) is a label and a targeting signal, never a sign-up restriction.</li>
+<li><b>Home dojo:</b> set at a child's first sign-up, then only the guardian changes it.</li>
+</ul>
+{mm("hidden from the public site", "A session's status is set directly by the team; it isn't one-way, and registrations are always kept.")}
+<h2>Engagement</h2>
+<p>Every night <code>events.engagement.rebuild()</code> recomputes, per child and dojo, how they come to sessions: new, regular,
+occasional, at risk, lapsed, never came or aged out. Only sessions meant for the child count (age range, girls' sessions for
+girls). Stage changes are logged, which lets a <i>journey</i> send a "we miss you" mail the week a child becomes at risk.</p>
+{mm("NINJA_ENGAGEMENT_CHANGE", "Cancellations and the nightly engagement snapshot.")}
+""",
+)
+
+# 8 -------------------------------------------------------------------------------------
+section(
+    "Badges and belts",
+    f"""
+<ul>
+<li>A <b>badge</b> is an award. <i>One-off</i> badges are awarded by a dojo's team from the attendance list; <i>milestone</i>
+badges (the attendance wristbands) are recomputed whenever attendance is marked and stay earned. Only the organisation
+defines badges.</li>
+<li>A <b>belt</b> is a ninja's proficiency level on one track, the only record of their coding level. The history is
+append-only; the current belt is the highest. Only an active champion or mentor awards one, recording the account
+<i>and</i> the membership (“Jan, as mentor of Dojo Ghent”). A milestone badge can grant a belt.</li>
+</ul>
+{mm("BELT |o--o{ BADGE", "Badges and belts; all rules in events/awards.py (DATA_MODEL.md §5).")}
+{
+        why(
+            "Attendance and skill are different things: a child who comes every week isn't necessarily an advanced coder. "
+            "Keeping milestones as badges and belts as a separate level lets both be shown honestly."
+        )
+    }
+""",
+)
+
+# 9 -------------------------------------------------------------------------------------
+section(
+    "Volunteers: applications and background checks",
+    f"""
+<p>Belgian law (Art. 596.2) requires a criminal-record extract, model 2, for anyone working with minors. Onboarding is
+<b>per account, once</b>: an approved mentor can join any number of dojos, an approved champion can create one.</p>
+{
+        mm(
+            'USER ||--o{ APPLICATION : "applications"',
+            "Applications and the append-only decision history (DATA_MODEL.md §6).",
+        )
+    }
+{mm("reviewer requests it", "The background check lives on the account. Either decision deletes the document.")}
+{mm("Adult account applies", "From application to a dojo.")}
+{
+        why(
+            "A check is about a person, not about a dojo. Per-dojo applications made volunteers repeat the process and scattered "
+            "the check across rows. Keeping only the decision (who, when, until when) and deleting the extract itself keeps the most "
+            "sensitive document the site ever sees for the shortest possible time."
+        )
+    }
+<p>Reviewers work on the organisation dashboard's <i>Volunteers</i> pages; nobody decides on their own check or application.
+The account holder is reminded 30 days before expiry, and reviewers get a daily mail while documents wait.</p>
+""",
+)
+
+# 10 ------------------------------------------------------------------------------------
+section(
+    "Pathways, content, notifications and geography",
+    f"""
+<h2>Pathways and content</h2>
+<p>Pathways are a read-mostly catalogue, linked at three optional levels, each pre-filled from the one above but never
+restricted to it: what a dojo provides → what a session covers → what one ninja works on.</p>
+{mm('DOJO }o--o{ PATHWAY : "provides (M2M, optional)"', "Pathways and the content models; content is scoped to a dojo, event or pathway, or site-wide (DATA_MODEL.md §7).")}
+<h2>Notifications</h2>
+<p>One row per recipient, so read state is per person. <code>notify()</code> writes the row (the source of truth), then nudges
+the recipient's open pages over the Channels layer; a failure there is swallowed. Texts are stored as translatable messages
+and rendered in the <i>recipient's</i> language.</p>
+{mm("participant C as NotificationConsumer", "A live notification: the consumer re-renders the bell and htmx swaps it in.")}
+<h2>Geography</h2>
+<p>Municipalities (postcodes with a centre) and administrative boundaries are reference data. A dojo's province is derived
+from its geocoded location (point in polygon, nearest boundary as fallback). The dojo finder orders by
+<code>DistanceSphere</code> from a typed address, the browser's location, the family's postcode or a Ghent default; only
+the default list is cached, so one family's results never leak to another visitor.</p>
+""",
+)
+
+# 11 ------------------------------------------------------------------------------------
+section(
+    "The mail engine",
+    f"""
+<p>Every mail goes through one gateway, <code>mailing.services.send()</code>: it renders the template in the recipient's
+language, checks consent and blocks, and inserts an <code>EmailMessage</code> row. <b>The database is the queue</b>; the
+Celery workers only send.</p>
+{mm("participant P as periodic worker", "How a mail goes out (DATA_MODEL.md §11).")}
+{
+        why(
+            "A row per mail is the record of exactly what was sent, survives a broker restart, and makes retries and idempotency "
+            "simple: a row is marked sent right after its own send, so a retry never mails anyone twice."
+        )
+    }
+<table>
+<tr><th>Worker</th><th>Runs</th><th>Why separate</th></tr>
+<tr><td><code>periodic</code> (beat embedded)</td><td>The 10-second dispatcher, requeueing, bounces, the jobs beat triggers</td>
+<td>The dispatcher never waits behind a big campaign; exactly one beat.</td></tr>
+<tr><td><code>mailing</code> (default queue)</td><td>Batches of mail, campaign launches, everything else</td>
+<td>With one process, Celery's rate limit is the real limit towards SMTP.</td></tr>
+</table>
+{mm("USER ||--o{ MAIL_PREFERENCE", "Consent and preferences, the queue, blocks and bounces.")}
+<ul>
+<li><b>Categories</b> (service, registration, reminder, dojo news, volunteer, newsletter) each with a default and whether
+people may opt out; <code>ConsentEvent</code> logs every change with the privacy wording's version.</li>
+<li><b>Segments</b> describe an audience without code: nested groups of rules about accounts or about “the same child”;
+each rule is its own subquery. Child rules only reach guardians who consented.</li>
+<li><b>Campaigns</b> freeze their segment at launch; <b>journeys</b> are standing campaigns run daily with a cool-down.</li>
+<li><b>Bounces</b> are read from a mailbox (DSN, ARF): a hard bounce blocks the address, a complaint switches off optional mail.</li>
+<li><b>A dojo's own mail</b> is a campaign with a dojo, sent by its champion to prepared audiences, with Reply-To the dojo.</li>
+</ul>
+{mm("SEGMENT ||--o{ SEGMENT_GROUP", "Campaigns, journeys and segments.")}
+""",
+)
+
+# 12 ------------------------------------------------------------------------------------
+section(
+    "Security",
+    f"""
+<h2>Logging in</h2>
+<p>There is one login page. A login link is the same login view with a different first step, so the second step always
+follows. Passkeys are checked against the site's own URL, since TLS ends at the proxy.</p>
+{mm("|no app or passkey|", "Password (or login link), then the second step when the account has one (DATA_MODEL.md §15).")}
+<h2>The sign-in policy</h2>
+<p>The organisation sets, per role and from a chosen date, the minimum: password, two-step login or passkey. An account's
+requirement is the strongest among its roles. Today every role is on “password”; the enforcement is in place for when that
+changes.</p>
+{mm("Requirement today", "Enforcement: a middleware guides, and every door a role opens checks again.")}
+<h2>Access to the management side</h2>
+<ul>
+<li>The organisation dashboard is split into <b>areas</b> (communication, public site, ninjas, privacy, security,
+volunteers, audit log), each opened by a permission the roles grant.</li>
+<li>The <b>Django admin</b> needs a grant asked for with a reason and the password, for 12 hours; the other admins are notified.
+Superusers are only made on the server.</li>
+<li>The <b>API</b> gives an app one dojo's data with scoped OAuth 2.0 tokens, through its own technical account, and is
+tested never to expose a field classified as special, criminal or security data.</li>
+</ul>
+""",
+)
+
+# 13 ------------------------------------------------------------------------------------
+section(
+    "Privacy by design",
+    """
+<p>Most of the data is about <b>children</b>, one field is <b>health data</b> (allergies and notes, GDPR art. 9) and one flow
+handles <b>criminal-record extracts</b> (art. 10). Privacy is therefore built into the model rather than bolted on.</p>
+<h2>Every field is classified</h2>
+<p>Each app declares its models in a <code>privacy.py</code>: purpose, legal basis, retention, who sees it, and for every
+field whether it is personal (and in which category) and what happens to it on erasure: emptied, anonymised with a
+replacement, or kept with a reason. A test fails on any unclassified field, ours or third-party. From that one registry:</p>
+<ul>
+<li><b>The register of processing activities</b> (<code>manage.py privacy_register</code>).</li>
+<li><b>A person's export</b> (art. 15/20), for families from their account page and for the organisation on request.</li>
+<li><b>Erasure</b>: rows are found by the registry's subjects, fields emptied or anonymised, <code>User</code> and
+<code>Ninja</code> rows anonymised, never deleted, and an <code>ErasureRecord</code> without personal data allows replaying
+erasures after a backup restore.</li>
+<li><b>Retention</b>: an account is erased two years after its last login, after reminder mails; champions and mentors keep
+their public team profile.</li>
+</ul>
+<h2>The audit log</h2>
+<p>django-auditlog records changes to the models listed in <code>core.audit.RECORDED</code> (every other model has a written
+reason why not) and views of special-category data. Health notes and secrets are masked; IP addresses are never stored. It
+is read-only, for the organisation's admins, and its entries follow the same retention and erasure.</p>
+<h2>Who sees the most sensitive data</h2>
+<table>
+<tr><th>Data</th><th>Seen by</th><th>Safeguard</th></tr>
+<tr><td>A child's health notes</td><td>The dojo's champion, only for children with a confirmed place</td><td>Every view recorded in the audit log</td></tr>
+<tr><td>Criminal-record extract</td><td>Reviewers, until they decide</td><td>No URL; deleted on decision; downloads recorded</td></tr>
+<tr><td>Families' addresses</td><td>Never the dojo team</td><td>Dojo mail shows counts only</td></tr>
+</table>
+""",
+)
+
+# 14 ------------------------------------------------------------------------------------
+section(
+    "Languages, testing and operations",
+    """
+<h2>Three languages, two kinds of text</h2>
+<ul>
+<li><b>The site's own texts</b> (templates, forms, messages, <code>bundle.js</code>) are in gettext catalogs for Dutch and French;
+Dutch uses the informal “je”, French “vous”. The site language follows a cookie; an account's
+<code>preferred_language</code> is only its mail language.</li>
+<li><b>Content</b> written by people (a dojo's description, session names, updates, the organisation's pathways and
+badges) is stored per language on the row, in the languages the dojo (or the organisation) chose; visitors see the main
+language with an “Only in …” note when theirs is missing.</li>
+<li>Mail templates are rows per language, falling back to English.</li>
+</ul>
+<h2>Testing</h2>
+<ul>
+<li>About 1,000 tests with the plain Django runner, inside the devcontainer, on their own Redis cache database.</li>
+<li>Route tests check status codes, templates, permission gating (404 versus 403) and the database effect of a POST.</li>
+<li>Channels consumers are tested with <code>TransactionTestCase</code> and an in-memory layer; Celery tasks by calling the
+function, never <code>.delay()</code>.</li>
+<li>The guard tests of chapter 3 keep new code honest about privacy, auditing, the admin, translations and the API schema.</li>
+</ul>
+<h2>Operations</h2>
+<ul>
+<li>One deploy script, with a preflight and a <code>manage.py check</code> before the live app is touched.</li>
+<li>Mail waits safely in the database when the workers are down; the dashboard's mail queue warns when due mail has waited
+over 30 minutes.</li>
+<li>Seed commands build a realistic demo world (dojos, families, volunteers, histories, waiting lists) and a credentials file
+describing what each login can do; the user-journey PDFs are made from it.</li>
+</ul>
+<h2>Known gaps and open points</h2>
+<ul>
+<li>The full mail log, retrying a failed mail and lifting a block are only in the Django admin.</li>
+<li>The API covers dojo clients and attendance; external registrations and event management are planned (§13).</li>
+<li>Some privacy retention rules wait for their periods to be decided (§16).</li>
+<li>Production still lacks MySQL client headers and GDAL/GEOS on the host; the deploy script refuses to go live until then.</li>
+</ul>
+""",
+)
+
+
+def html_doc():
+    toc = "".join(f"<li>{t}</li>" for t, _ in SECTIONS)
+    body = [
+        "<div class='cover'><div class='brand'>CoderDojo Belgium · registration platform</div>"
+        "<h1>Technical foundation and data model</h1>"
+        "<div class='sub'>How the site is built, how its data fits together, and why it looks the way it does. "
+        "A summary of <code>DATA_MODEL.md</code> and <code>CLAUDE.md</code>, with the diagrams taken from the former.</div>"
+        f"<h2 style='margin-top:14mm'>Contents</h2><ol class='toc'>{toc}</ol>"
+        "<div class='meta'>Generated from the repository, 29 September 2026 · "
+        "user-journeys/scripts/build_technical.py</div></div>"
+    ]
+    for i, (title, content) in enumerate(SECTIONS, 1):
+        body.append(f"<h1 class='sec'><span class='n'>{i}</span>{title}</h1>{content}")
+    return (
+        "<!doctype html><html lang='en'><head><meta charset='utf-8'><title>Technical foundation and data model</title>"
+        f"<style>{CSS}</style></head><body>{''.join(body)}</body></html>"
+    )
+
+
+def main():
+    if not os.path.exists(MERMAID):
+        os.makedirs(os.path.dirname(MERMAID), exist_ok=True)
+        urllib.request.urlretrieve(MERMAID_URL, MERMAID)
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(channel="chrome")
+        page = browser.new_page(viewport={"width": 1000, "height": 1400})
+        page.set_content(html_doc(), wait_until="load")
+        page.add_script_tag(path=MERMAID)
+        page.evaluate(
+            """async () => {
+                mermaid.initialize({startOnLoad: false, theme: 'neutral', securityLevel: 'loose',
+                    fontFamily: 'Segoe UI, Arial, sans-serif', er: {useMaxWidth: true}, flowchart: {useMaxWidth: true}});
+                await mermaid.run({querySelector: 'pre.mermaid', suppressErrors: true});
+            }"""
+        )
+        rotated = page.evaluate(
+            """() => {
+                let n = 0;
+                for (const svg of document.querySelectorAll('pre.mermaid svg')) {
+                    const vb = svg.viewBox.baseVal;
+                    if (vb && vb.width / vb.height > 1.5 && vb.width > 1100) {
+                        svg.closest('figure').classList.add('rot');
+                        n++;
+                    }
+                }
+                return n;
+            }"""
+        )
+        print("on landscape pages:", rotated)
+        bad = page.evaluate(
+            "() => [...document.querySelectorAll('pre.mermaid')].filter(p => !p.querySelector('svg') "
+            "|| p.querySelector('.error-icon')).map(p => (p.parentElement.querySelector('figcaption') || {}).textContent)"
+        )
+        print("diagrams:", page.locator("pre.mermaid svg").count(), "failed:", bad)
+        if bad:
+            raise SystemExit("Some diagrams didn't render")
+        page.pdf(
+            path=OUT,
+            format="A4",
+            print_background=True,
+            display_header_footer=True,
+            header_template="<span></span>",
+            footer_template="<div style='font-size:7pt;color:#9ca3af;width:100%;padding:0 16mm;display:flex;"
+            "justify-content:space-between'><span>CoderDojo Belgium · technical foundation and data model</span>"
+            "<span><span class='pageNumber'></span> / <span class='totalPages'></span></span></div>",
+            margin={"top": "16mm", "bottom": "18mm", "left": "16mm", "right": "16mm"},
+        )
+        browser.close()
+    print(OUT)
+
+
+if __name__ == "__main__":
+    main()

@@ -1750,7 +1750,7 @@ sequenceDiagram
     participant R as Redis (broker, db 2)
     participant M as mailing worker
     participant SMTP as SMTP (Mailpit in dev)
-    participant BOX as Bounce mailbox (IMAP; Mailpit POP3 in dev)
+    participant MB as Bounce mailbox (IMAP, or Mailpit POP3 in dev)
 
     App->>DB: send(): render, check consent, INSERT EmailMessage (pending or suppressed)
     P->>DB: send_pending_emails, every 10 s: claim by priority (skip_locked), mark sending
@@ -1759,8 +1759,8 @@ sequenceDiagram
     M->>DB: re-check consent and blocks per row
     M->>SMTP: send (envelope sender = bounce address)
     M->>DB: sent / failed, row by row
-    P->>BOX: process_bounces, every 5 min
-    P->>DB: BounceRecord; bounced + EmailSuppression, or consent switched off
+    P->>MB: process_bounces, every 5 min
+    P->>DB: BounceRecord, then bounced + EmailSuppression, or consent switched off
 ```
 
 ### Plan: mail preferences, sending, and engagement segments
