@@ -1,5 +1,6 @@
 import base64
 import html
+import importlib
 import io
 import json
 import os
@@ -33,6 +34,14 @@ NAMES = {
         "champion": "champion",
         "reviewer": "beoordelaar",
         "organisation": "organisatie",
+    },
+    "fr": {
+        "parent": "parent",
+        "ninja": "ninja",
+        "volunteer": "benevole",
+        "champion": "champion",
+        "reviewer": "evaluateur",
+        "organisation": "organisation",
     },
 }
 INTRO = {
@@ -135,14 +144,13 @@ def build(key, page):
     ui = UI_EN
     title, sub, bullets = INTRO[key]
     who = d["who"]
-    if LANG == "nl":
-        import nl
-
-        ui = nl.UI
-        title, sub, bullets = nl.INTRO[key]
-        who = nl.WHO[key]
+    if LANG != "en":
+        texts = importlib.import_module(LANG)  # nl.py, fr.py: the captions in that language
+        ui = texts.UI
+        title, sub, bullets = texts.INTRO[key]
+        who = texts.WHO[key]
         for s in d["steps"]:
-            s["title"], s["text"] = nl.STEPS[key][s["key"]]
+            s["title"], s["text"] = texts.STEPS[key][s["key"]]
     for s in d["steps"]:
         s["image"] = os.path.join(SHOTS, key, os.path.basename(s["image"]))
     toc = "".join(f"<li>{html.escape(s['title'])}</li>" for s in d["steps"])

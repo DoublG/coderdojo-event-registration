@@ -27,7 +27,10 @@ class Journey:
         os.makedirs(self.dir, exist_ok=True)
         self.steps = []
         self.browser = pw.chromium.launch(channel="chrome", headless=True)
-        loc, acc = ("nl-BE", "nl-BE,nl;q=0.9") if LANG == "nl" else ("en-US", "en-US,en;q=0.9")
+        loc, acc = {
+            "nl": ("nl-BE", "nl-BE,nl;q=0.9"),
+            "fr": ("fr-BE", "fr-BE,fr;q=0.9"),
+        }.get(LANG, ("en-US", "en-US,en;q=0.9"))
         kw = dict(
             ignore_https_errors=True,
             locale=loc,
@@ -82,7 +85,7 @@ class Journey:
         print("logged in", username, p.url)
 
     def _lang_cookie(self):
-        code = "nl-be" if LANG == "nl" else "en-us"
+        code = {"nl": "nl-be", "fr": "fr-be"}.get(LANG, "en-us")
         self.ctx.add_cookies([{"name": "django_language", "value": code, "url": BASE}])
 
     def logout(self):

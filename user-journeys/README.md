@@ -1,16 +1,16 @@
 # User journeys
 
-One PDF per persona, walking through the site with screenshots, in English (`en/`) and Dutch (`nl/`):
+One PDF per persona, walking through the site with screenshots, in English (`en/`), Dutch (`nl/`) and French (`fr/`):
 
-| # | Persona | English | Nederlands |
-|---|---------|---------|------------|
-| 1 | Parent / ouder | [en/1-parent-journey.pdf](en/1-parent-journey.pdf) | [nl/1-ouder.pdf](nl/1-ouder.pdf) |
-| 2 | Ninja (child's own login) | [en/2-ninja-journey.pdf](en/2-ninja-journey.pdf) | [nl/2-ninja.pdf](nl/2-ninja.pdf) |
-| 3 | Volunteer (mentor) / vrijwilliger | [en/3-volunteer-journey.pdf](en/3-volunteer-journey.pdf) | [nl/3-vrijwilliger.pdf](nl/3-vrijwilliger.pdf) |
-| 4 | Champion | [en/4-champion-journey.pdf](en/4-champion-journey.pdf) | [nl/4-champion.pdf](nl/4-champion.pdf) |
-| 5 | Background-check reviewer / beoordelaar | [en/5-reviewer-journey.pdf](en/5-reviewer-journey.pdf) | [nl/5-beoordelaar.pdf](nl/5-beoordelaar.pdf) |
-| 6 | Organisation admin / beheerder | [en/6-organisation-journey.pdf](en/6-organisation-journey.pdf) | [nl/6-organisatie.pdf](nl/6-organisatie.pdf) |
-| | **Pitch deck**: the journeys plus facts and figures about the development | [en/pitch-deck.pdf](en/pitch-deck.pdf) | [nl/pitchdeck.pdf](nl/pitchdeck.pdf) |
+| # | Persona | English | Nederlands | Français |
+|---|---------|---------|------------|----------|
+| 1 | Parent / ouder / parent | [en/1-parent-journey.pdf](en/1-parent-journey.pdf) | [nl/1-ouder.pdf](nl/1-ouder.pdf) | [fr/1-parent.pdf](fr/1-parent.pdf) |
+| 2 | Ninja (child's own login) | [en/2-ninja-journey.pdf](en/2-ninja-journey.pdf) | [nl/2-ninja.pdf](nl/2-ninja.pdf) | [fr/2-ninja.pdf](fr/2-ninja.pdf) |
+| 3 | Volunteer (mentor) / vrijwilliger / bénévole | [en/3-volunteer-journey.pdf](en/3-volunteer-journey.pdf) | [nl/3-vrijwilliger.pdf](nl/3-vrijwilliger.pdf) | [fr/3-benevole.pdf](fr/3-benevole.pdf) |
+| 4 | Champion | [en/4-champion-journey.pdf](en/4-champion-journey.pdf) | [nl/4-champion.pdf](nl/4-champion.pdf) | [fr/4-champion.pdf](fr/4-champion.pdf) |
+| 5 | Background-check reviewer / beoordelaar / évaluateur | [en/5-reviewer-journey.pdf](en/5-reviewer-journey.pdf) | [nl/5-beoordelaar.pdf](nl/5-beoordelaar.pdf) | [fr/5-evaluateur.pdf](fr/5-evaluateur.pdf) |
+| 6 | Organisation admin / beheerder / administrateur | [en/6-organisation-journey.pdf](en/6-organisation-journey.pdf) | [nl/6-organisatie.pdf](nl/6-organisatie.pdf) | [fr/6-organisation.pdf](fr/6-organisation.pdf) |
+| | **Pitch deck**: the journeys plus facts and figures about the development | [en/pitch-deck.pdf](en/pitch-deck.pdf) | [nl/pitchdeck.pdf](nl/pitchdeck.pdf) | (not yet) |
 
 The pitch decks are Slides artifacts on claude.ai (private until shared from their Share menu, which
 also exports them to PowerPoint): [English](https://claude.ai/artifact/LDyAfN3vCf5RdS8oxhTDPt),
@@ -39,7 +39,7 @@ browser), with the devcontainer stack up and `seed_credentials.csv` in the repo 
 ```sh
 python3 -m venv /tmp/uj-venv && /tmp/uj-venv/bin/pip install playwright pillow pyotp
 cd user-journeys/scripts
-for lang in en nl; do
+for lang in en nl fr; do
   for j in parent ninja volunteer champion reviewer org; do JLANG=$lang /tmp/uj-venv/bin/python j_$j.py; done
   /tmp/uj-venv/bin/python build.py $lang
 done
@@ -48,8 +48,10 @@ done
 - `j_*.py` drive a headless Chrome (Playwright's `channel="chrome"`, so Google Chrome must be
   installed) through one persona each and save screenshots plus a `journey.json` with the English
   captions in `user-journeys/.shots/<lang>/` (gitignored). `JLANG=nl` sets the site's language cookie.
-- `build.py <lang>` lays them out into `<lang>/*.pdf`. The Dutch captions and cover texts are in
-  `nl.py`, keyed by the step keys the `j_*.py` scripts use, so a new step needs its Dutch text there too.
+- `build.py <lang>` lays them out into `<lang>/*.pdf`. The Dutch and French captions and cover texts are
+  in `nl.py` and `fr.py`, keyed by the step keys the `j_*.py` scripts use, so a new step needs its text
+  in both. `JLANG=fr` captures the site in French; a new language needs its locale in `lib.py`, its file
+  names in `build.py`'s `NAMES` and a captions module.
 - **They change the dev data:** the parent and ninja journeys book real places (sessions 71 and 72
   at Dojo Zonnebeke, removed again first on a rerun), the volunteer journey resets and then marks
   attendance on session 76 at Dojo Westerlo, and the booking mail goes through the Celery workers
