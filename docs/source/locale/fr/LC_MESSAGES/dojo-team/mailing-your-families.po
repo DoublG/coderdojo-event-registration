@@ -1,0 +1,180 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-29 15:51+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/dojo-team/mailing-your-families.rst:2
+msgid "Mailing your families"
+msgstr "Écrire à vos familles"
+
+#: ../../source/dojo-team/mailing-your-families.rst:4
+msgid ""
+"Your dojo can send its own mail to its families through the site: \"no "
+"session this Saturday\", \"bring a charger\", or \"our new sessions are "
+"open\" to the families who came this year. Only the dojo's **champion** "
+"writes and sends it; the rest of the team can read what was sent."
+msgstr ""
+"Votre dojo peut envoyer ses propres mails à ses familles via le site : « "
+"pas de session ce samedi », « apportez un chargeur » ou « nos nouvelles "
+"sessions sont ouvertes » aux familles venues cette année. Seul le "
+"**champion** du dojo les écrit et les envoie ; le reste de l'équipe peut "
+"lire ce qui a été envoyé."
+
+#: ../../source/dojo-team/mailing-your-families.rst:10
+msgid "Who gets it"
+msgstr "Qui le reçoit"
+
+#: ../../source/dojo-team/mailing-your-families.rst:12
+msgid ""
+"In the sidebar, under **Manage**, open **Mail** and choose **Write a "
+"mail**. First pick who gets it:"
+msgstr ""
+"Dans la barre latérale, sous **Gérer**, ouvrez **E-mail** et choisissez "
+"**Écrire un mail**. Choisissez d'abord qui le reçoit :"
+
+#: ../../source/dojo-team/mailing-your-families.rst:15
+msgid ""
+"**All families of the dojo**: families whose child has your dojo as home "
+"dojo, or came to one of its sessions in the last year."
+msgstr ""
+"**Toutes les familles du dojo** : les familles dont un enfant a votre "
+"dojo comme dojo d'attache, ou est venu à l'une de ses sessions au cours "
+"de l'année écoulée."
+
+#: ../../source/dojo-team/mailing-your-families.rst:17
+msgid ""
+"**Families booked for a session**: families with a place for one of your "
+"sessions, and if you like those on its waiting list too."
+msgstr ""
+"**Familles inscrites à une session** : les familles qui ont une place "
+"pour l'une de vos sessions et, si vous le souhaitez, aussi celles de la "
+"liste d'attente."
+
+#: ../../source/dojo-team/mailing-your-families.rst:19
+msgid ""
+"**Families on a session's waiting list**: for example to tell them about "
+"an extra session."
+msgstr ""
+"**Familles sur la liste d'attente d'une session** : par exemple pour leur"
+" annoncer une session supplémentaire."
+
+#: ../../source/dojo-team/mailing-your-families.rst:21
+msgid ""
+"**Families who came recently**: families whose child came in the last 90,"
+" 180 or 365 days."
+msgstr ""
+"**Familles venues récemment** : les familles dont un enfant est venu ces "
+"90, 180 ou 365 derniers jours."
+
+#: ../../source/dojo-team/mailing-your-families.rst:23
+msgid ""
+"**New families**, **We miss you** (children who missed several sessions "
+"in a row or stopped coming), **Children of an age** and **Children on a "
+"pathway** (one of your dojo's pathways). These choose by the children's "
+"details, so they only reach families who agreed to that."
+msgstr ""
+"**Nouvelles familles**, **Vous nous manquez** (les enfants qui ont manqué"
+" plusieurs sessions d'affilée ou ne viennent plus), **Enfants d'un "
+"certain âge** et **Enfants sur un parcours** (l'un des parcours de votre "
+"dojo). Ces choix se basent sur les données des enfants et n'atteignent "
+"donc que les familles qui l'ont accepté."
+
+#: ../../source/dojo-team/mailing-your-families.rst:28
+msgid ""
+"Under your choice you see how many families it reaches. You never see who"
+" they are. Only families who want news from your dojo count: a family can"
+" stop your dojo's mail, or all news from dojos, at any time."
+msgstr ""
+"Sous votre choix, vous voyez combien de familles il atteint. Vous ne "
+"voyez jamais qui elles sont. Seules les familles qui souhaitent les "
+"nouvelles de votre dojo comptent : une famille peut arrêter à tout moment"
+" les mails de votre dojo, ou toutes les nouvelles des dojos."
+
+#: ../../source/dojo-team/mailing-your-families.rst:33
+msgid "Writing it"
+msgstr "L'écrire"
+
+#: ../../source/dojo-team/mailing-your-families.rst:35
+msgid ""
+"Write a **subject** (your dojo's name goes in front of it) and a "
+"**message**, in plain text: links work, but there's no layout, no images "
+"and no attachments. If your dojo uses more than one language, you can "
+"write the mail in each of them too. A family then gets it in its own "
+"language, or else in your dojo's main language."
+msgstr ""
+"Écrivez un **objet** (le nom de votre dojo est ajouté devant) et un "
+"**message**, en texte simple : les liens fonctionnent, mais il n'y a pas "
+"de mise en page, pas d'images ni de pièces jointes. Si votre dojo utilise"
+" plusieurs langues, vous pouvez aussi écrire le mail dans chacune "
+"d'elles. Une famille le reçoit alors dans sa langue, sinon dans la langue"
+" principale de votre dojo."
+
+#: ../../source/dojo-team/mailing-your-families.rst:41
+msgid ""
+"**Save draft** keeps it. The page then shows the mail as the families get"
+" it. **Send me a test** sends it to your own address first."
+msgstr ""
+"**Enregistrer le brouillon** le garde. La page montre alors le mail tel "
+"que les familles le reçoivent. **M'envoyer un test** l'envoie d'abord à "
+"votre propre adresse."
+
+#: ../../source/dojo-team/mailing-your-families.rst:45
+msgid "Sending it"
+msgstr "L'envoyer"
+
+#: ../../source/dojo-team/mailing-your-families.rst:47
+msgid ""
+"**Send** sends it right away. The mail goes out over the next few "
+"minutes, from CoderDojo Belgium with your dojo's name, and **replies go "
+"to your dojo's email address**, so fill that in under **Settings** first."
+" You can send at most four mails in 30 days. While it's going out, **Stop"
+" sending** stops the mails that haven't gone out yet."
+msgstr ""
+"**Envoyer** l'envoie tout de suite. Le mail part dans les minutes qui "
+"suivent, de CoderDojo Belgium avec le nom de votre dojo, et **les "
+"réponses arrivent à l'adresse e-mail de votre dojo** : indiquez-la "
+"d'abord dans les **Paramètres**. Vous pouvez envoyer au maximum quatre "
+"mails en 30 jours. Pendant l'envoi, **Arrêter l'envoi** arrête les mails "
+"qui ne sont pas encore partis."
+
+#: ../../source/dojo-team/mailing-your-families.rst:53
+msgid ""
+"Afterwards the mail's page shows how many were sent, how many couldn't be"
+" delivered, and how many families stopped your dojo's news since."
+msgstr ""
+"Ensuite, la page du mail indique combien ont été envoyés, combien n'ont "
+"pas pu être distribués et combien de familles ont arrêté les nouvelles de"
+" votre dojo depuis."
+
+#: ../../source/dojo-team/mailing-your-families.rst:57
+msgid "The mail queue"
+msgstr "La file d'attente des mails"
+
+#: ../../source/dojo-team/mailing-your-families.rst:59
+msgid ""
+"**Mail queue**, on the **Mail** page, shows what happened to your dojo's "
+"mail: your own mails and the automatic mail about new sessions. Per mail "
+"you see how many are waiting to go out, were sent, couldn't be delivered,"
+" or were held back, and below that why mail was held back (for example "
+"because a family stopped your dojo's mail). It shows numbers, never "
+"addresses. Mail that couldn't be delivered usually went to a mistyped or "
+"closed address; if something looks wrong, ask the organisation."
+msgstr "**File d'attente des e-mails**, sur la page **E-mail**, montre ce qu'il est advenu des mails de votre dojo : vos propres mails et le mail automatique sur les nouvelles sessions. Pour chaque mail, vous voyez combien attendent encore de partir, ont été envoyés, n'ont pas pu être distribués ou ont été retenus, et en dessous pourquoi des mails ont été retenus (par exemple parce qu'une famille a arrêté les mails de votre dojo). Vous voyez des chiffres, jamais des adresses. Un mail non distribué est en général parti vers une adresse mal tapée ou fermée ; si quelque chose semble anormal, demandez à l'organisation."
+

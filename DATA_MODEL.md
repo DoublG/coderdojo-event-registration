@@ -33,7 +33,7 @@ update its diagram in the same change.
 11. [Mailing, segmentation and campaigns](#11-mailing-segmentation-and-campaigns)
 12. [Organisation events and promotion (later)](#12-organisation-events-and-promotion-later)
 
-Sections 13–25 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address, organisation people and roles, [logging in with an emailed link](#24-logging-in-with-an-emailed-link-built), and [mail from a dojo to its families](#25-mail-from-a-dojo-to-its-families-in-progress) (in progress).
+Sections 13–25 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address, organisation people and roles, [logging in with an emailed link](#24-logging-in-with-an-emailed-link-built), and [mail from a dojo to its families](#25-mail-from-a-dojo-to-its-families-built).
 
 ---
 
@@ -4296,7 +4296,7 @@ docstrings say an edit there skips the rules above).
 5. **Board on the dashboard (dropped for now, see the status above):** give `board` read-only
    areas once pages have a read-only mode, so it rarely needs technical
    access.
-6. **Finishing:** Dutch and French, the help docs (new
+6. **Finishing** (built): Dutch and French, the help docs (new
    *organisation/people.rst* and *organisation/technical-access.rst*;
    *dashboard.rst* and *volunteers.rst* no longer say roles are given in
    the technical admin; *sign-in-security.rst* linking to People),
@@ -4656,7 +4656,7 @@ flowchart TD
 
 ---
 
-## 25. Mail from a dojo to its families (in progress)
+## 25. Mail from a dojo to its families (built)
 
 **Phase 1 built** (muting one dojo): `mailing.DojoMailMute`,
 `ConsentEvent.dojo` and `EmailMessage.dojo`, `mailing.preferences.set_dojo_mute`,
@@ -4681,7 +4681,22 @@ dojo". **Phase 4 built** (the dojo's *Mail* pages, `mailing/dojo_views.py`,
 `SEND_MAIL`); a mailing is sent right away, there's no scheduling yet.
 **Phase 5 built**: the organisation's *Campaigns* list shows every dojo's
 mail (a *Sent by* column and filter), its page shows the dojo's text and
-audience, and the organisation can only stop one that's going out. The
+audience, and the organisation can only stop one that's going out.
+**Phase 6 built** (Dutch and French, help pages
+`dojo-team/mailing-your-families`, `organisation/campaigns`,
+`families/mail-preferences`; `seed_mailing` seeds a sent and a draft mail
+for the first public dojo with families, giving it its champion's address
+when it has none). **Added after the plan, on request: the dojo's own
+*Mail queue*** (`/dojos/<id>/manage/mail/queue/`,
+`mailing.dojo_views.dojo_mail_queue`, every role): the organisation's
+*Mail queue* narrowed to the dojo's `dojo_news` mail (its mailings, the
+automatic new-sessions mail, tests), per mail waiting / sent / not
+delivered / held back and why held back in words
+(`HELD_BACK_REASONS`, from the reason constants in `mailing.services`),
+plus the same "mail isn't going out" warning (`mailing/queue_status.py`,
+shared with the organisation's page). True to decision 10 it shows
+numbers, never addresses, and never a failure's own text (which can
+hold one). The
 decisions below were confirmed on 2026-09-29. This reverses §11's
 decision 3 ("Champions don't send campaigns; dojo-level mail stays
 automatic") in part: a dojo's team gets **a narrow slice** of the mail

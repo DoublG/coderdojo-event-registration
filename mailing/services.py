@@ -45,6 +45,16 @@ def is_suppressed_address(email):
     return EmailSuppression.objects.filter(email=email.strip().lower()).exists()
 
 
+# Why a mail wasn't sent (EmailMessage.status_reason); a dojo's mail queue
+# shows them in words (mailing.dojo_views).
+INACTIVE = "The account is inactive."
+WRONG_ACCOUNT_TYPE = "This kind of mail isn't sent to this kind of account."
+NOT_SUBSCRIBED = "The recipient hasn't subscribed to this kind of mail."
+MUTED_DOJO = "The recipient muted this dojo's news."
+NO_ADDRESS = "The account has no email address."
+BLOCKED = "The address is blocked (bounce, complaint or by hand)."
+
+
 def suppressed_reason(user, category, address, test=False, dojo=None):
     """Why `user` mustn't get mail in `category` at `address` right now, or
     "". Checked when a mail is queued and again right before it's sent (a
@@ -53,17 +63,17 @@ def suppressed_reason(user, category, address, test=False, dojo=None):
     Dojo or its id) is the dojo a `dojo_news` mail is from, which the
     account may have muted."""
     if not user.is_active:
-        return "The account is inactive."
+        return INACTIVE
     if category not in categories_for(user):
-        return "This kind of mail isn't sent to this kind of account."
+        return WRONG_ACCOUNT_TYPE
     if not test and not is_subscribed(user, category):
-        return "The recipient hasn't subscribed to this kind of mail."
+        return NOT_SUBSCRIBED
     if not test and dojo is not None and category == MailCategory.DOJO_NEWS and is_dojo_muted(user, dojo):
-        return "The recipient muted this dojo's news."
+        return MUTED_DOJO
     if not address:
-        return "The account has no email address."
+        return NO_ADDRESS
     if is_suppressed_address(address):
-        return "The address is blocked (bounce, complaint or by hand)."
+        return BLOCKED
     return ""
 
 

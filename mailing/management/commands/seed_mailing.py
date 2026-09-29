@@ -7,8 +7,43 @@ from django.urls import reverse
 
 from core.audit import without_audit_log
 from dojos.models import Dojo
+from mailing import campaigns as campaign_rules
+from mailing.categories import MailCategory
 from mailing.models import Campaign, Segment, SegmentGroup, SegmentRule
 from mailing.seed_templates import CAMPAIGNS, NEW_DOJO
+
+# A dojo's own mail (DATA_MODEL.md §25): one sent to all its families, one
+# still a draft. Found again by dojo and name, never by their texts.
+DOJO_MAILINGS = [
+    {
+        "name": "Seed: thanks for this season",
+        "send": True,
+        "subject": {
+            "en-us": "Thanks for a great season",
+            "nl-be": "Bedankt voor een fijn seizoen",
+            "fr-be": "Merci pour cette belle saison",
+        },
+        "message": {
+            "en-us": "Hi all,\n\nThanks for coming to our sessions this season. The new sessions are on our page.\n\nSee you soon!",
+            "nl-be": "Dag allemaal,\n\nBedankt om dit seizoen naar onze sessies te komen. De nieuwe sessies staan op onze pagina.\n\nTot snel!",
+            "fr-be": "Bonjour à tous,\n\nMerci d'être venus à nos sessions cette saison. Les nouvelles sessions sont sur notre page.\n\nÀ bientôt !",
+        },
+    },
+    {
+        "name": "Seed: bring a charger",
+        "send": False,
+        "subject": {
+            "en-us": "Bring your laptop charger",
+            "nl-be": "Neem je laptoplader mee",
+            "fr-be": "Apportez votre chargeur",
+        },
+        "message": {
+            "en-us": "Hi all,\n\nWe're short of sockets: please bring a charged laptop and its charger.",
+            "nl-be": "Dag allemaal,\n\nWe hebben te weinig stopcontacten: breng een opgeladen laptop en de lader mee.",
+            "fr-be": "Bonjour à tous,\n\nNous manquons de prises : apportez un ordinateur chargé et son chargeur.",
+        },
+    },
+]
 
 
 class Command(BaseCommand):
@@ -41,7 +76,57 @@ class Command(BaseCommand):
             )
             campaigns_created += 1
 
-        self.stdout.write(self.style.SUCCESS(f"Done. campaigns={campaigns_created} (new rows only)."))
+        dojo_mailings = self._seed_dojo_mailings()
+        self.stdout.write(
+            self.style.SUCCESS(f"Done. campaigns={campaigns_created} dojo_mailings={dojo_mailings} (new rows only).")
+        )
+
+    def _seed_dojo_mailings(self):
+        """A sent and a draft mail from the first public dojo with families
+        whose champion can use its admin area. Replies go to the dojo's email address, so a
+        dojo without one gets its champion's (seeded data only)."""
+        from dojos.access import managing_membership
+        from mailing.dojo_families import active_since, family_accounts
+
+        dojo = next(
+            (
+                d
+                for d in Dojo.objects.public().order_by("id")
+                if d.champion and managing_membership(d.champion, d) and family_accounts(d, active_since()).exists()
+            ),
+            None,
+        )
+        if dojo is None:
+            self.stdout.write("Skipped the dojo mailings: no public dojo with a champion and families.")
+            return 0
+        if not dojo.email:
+            dojo.email = dojo.champion.email
+            dojo.save(update_fields=["email"])
+        created = 0
+        for spec in DOJO_MAILINGS:
+            if Campaign.objects.filter(dojo=dojo, name=spec["name"]).exists():
+                continue
+            main, others = dojo.main_language(), dojo.content_languages()[1:]
+            campaign = Campaign(
+                name=spec["name"],
+                dojo=dojo,
+                category=MailCategory.DOJO_NEWS,
+                template_key=campaign_rules.DOJO_TEMPLATE,
+                audience="all_families",
+                subject=spec["subject"].get(main, spec["subject"]["en-us"]),
+                message=spec["message"].get(main, spec["message"]["en-us"]),
+                created_by=dojo.champion,
+            )
+            for language in others:
+                for field in ("subject", "message"):
+                    campaign.set_translation(language, field, spec[field].get(language, ""))
+            campaign.save()
+            created += 1
+            if spec["send"] and not campaign_rules.launch_problems(campaign):
+                campaign_rules.launch(campaign, dojo.champion)
+                campaign_rules.queue_mail(campaign.pk)
+        self.stdout.write(f"Dojo mailings: {dojo.name}.")
+        return created
 
     def _fill_in_new_dojo(self, spec):
         """Point the new-dojo campaign at a real dojo: the newest draft dojo

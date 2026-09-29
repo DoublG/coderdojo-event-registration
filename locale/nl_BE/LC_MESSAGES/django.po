@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 15:15+0000\n"
+"POT-Creation-Date: 2026-09-29 15:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -234,7 +234,7 @@ msgid "So we can tell you about dojos and sessions near you."
 msgstr ""
 "Zo kunnen we je laten weten welke dojo's en sessies er in je buurt zijn."
 
-#: accounts/forms.py:258 accounts/forms.py:469 mailing/forms.py:28
+#: accounts/forms.py:258 accounts/forms.py:469 mailing/forms.py:34
 msgid "Language for emails"
 msgstr "Taal van de e-mails"
 
@@ -666,7 +666,7 @@ msgstr "Mensen: rollen in de organisatie"
 msgid "Audit log: who changed what (read-only)"
 msgstr "Auditlog: wie wat wijzigde (alleen lezen)"
 
-#: accounts/organisation_people.py:30 mailing/models.py:367
+#: accounts/organisation_people.py:30 mailing/models.py:394
 msgid "Admin"
 msgstr "Beheer"
 
@@ -985,14 +985,14 @@ msgid "Date"
 msgstr "Datum"
 
 #: accounts/templates/accounts/child_detail.html:78
-#: accounts/templates/accounts/child_detail.html:175
+#: accounts/templates/accounts/child_detail.html:175 mailing/forms.py:312
 msgid "Session"
 msgstr "Sessie"
 
 #: accounts/templates/accounts/child_detail.html:79
 #: accounts/templates/accounts/child_detail.html:176
 #: applications/templates/applications/manage/application_detail.html:17
-#: dojos/models.py:58 dojos/templates/dojos/_admin_base.html:84
+#: dojos/models.py:58 dojos/templates/dojos/_admin_base.html:90
 #: events/templates/events/event_list.html:69
 #: mailing/templates/mailing/manage/_rule_fields.html:47
 #: mailing/templates/mailing/manage/_rule_fields.html:57
@@ -1003,7 +1003,7 @@ msgstr "Dojo"
 #: accounts/templates/accounts/child_detail.html:80
 #: accounts/templates/accounts/manage/people.html:52
 #: accounts/templates/accounts/manage/people.html:90
-#: mailing/templates/mailing/manage/campaign_detail.html:78
+#: mailing/templates/mailing/manage/campaign_detail.html:84
 #: mailing/templates/mailing/manage/journey_detail.html:62
 msgid "Actions"
 msgstr "Acties"
@@ -1669,9 +1669,9 @@ msgstr "Wat elke rol opent"
 #: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:170
 #: events/forms.py:245 events/forms.py:301 events/forms.py:334
 #: events/templates/events/manage/badge_list.html:18
-#: events/templates/events/manage/badge_list.html:44 mailing/forms.py:116
-#: mailing/forms.py:204 mailing/forms.py:248
-#: mailing/templates/mailing/manage/campaign_list.html:12
+#: events/templates/events/manage/badge_list.html:44 mailing/forms.py:122
+#: mailing/forms.py:210 mailing/forms.py:254
+#: mailing/templates/mailing/manage/campaign_list.html:22
 #: mailing/templates/mailing/manage/journey_list.html:13
 #: mailing/templates/mailing/manage/segment_list.html:12
 #: privacy/templates/privacy/manage/privacy.html:57
@@ -1920,7 +1920,7 @@ msgstr "Minimale aanmelding"
 
 # | msgid "My Account"
 #: accounts/templates/accounts/manage/security.html:28
-#: core/templates/core/_manage_base.html:153 mailing/models.py:44
+#: core/templates/core/_manage_base.html:153 mailing/models.py:46
 #: mailing/templates/mailing/manage/segment_list.html:14
 msgid "Accounts"
 msgstr "Accounts"
@@ -3242,7 +3242,7 @@ msgstr "Kies wat de client mag doen."
 #: api/templates/api/dojo_api_clients.html:3
 #: api/templates/api/dojo_api_clients.html:4
 #: api/templates/api/dojo_api_clients.html:112
-#: dojos/templates/dojos/_admin_base.html:96
+#: dojos/templates/dojos/_admin_base.html:102
 msgid "API"
 msgstr "API"
 
@@ -3518,7 +3518,7 @@ msgid "Champion (start a dojo)"
 msgstr "Champion (een dojo starten)"
 
 #: applications/models.py:45 core/templates/core/_manage_base.html:110
-#: mailing/models.py:270
+#: mailing/models.py:295
 msgid "Pending"
 msgstr "In behandeling"
 
@@ -3637,7 +3637,7 @@ msgstr "Aangevraagd als"
 #: content/templates/content/manage/sponsor_list.html:19
 #: dojos/templates/dojos/dojo_event_detail.html:37
 #: dojos/templates/dojos/dojo_event_list.html:25
-#: mailing/templates/mailing/manage/campaign_list.html:13
+#: mailing/templates/mailing/manage/campaign_list.html:23
 #: mailing/templates/mailing/manage/journey_list.html:14
 #: mailing/templates/mailing/manage/mail_queue.html:59
 msgid "Status"
@@ -3669,6 +3669,7 @@ msgid "Preferred schedule"
 msgstr "Voorkeursmoment"
 
 #: applications/templates/applications/manage/application_detail.html:24
+#: mailing/forms.py:324
 msgid "Message"
 msgstr "Bericht"
 
@@ -3738,6 +3739,7 @@ msgid "Kind"
 msgstr "Soort"
 
 #: applications/templates/applications/manage/application_list.html:29
+#: mailing/templates/mailing/manage/campaign_list.html:16
 msgid "Show"
 msgstr "Tonen"
 
@@ -4521,6 +4523,9 @@ msgid "Mail templates"
 msgstr "E-mailsjablonen"
 
 #: core/templates/core/_manage_base.html:70
+#: mailing/templates/mailing/dojo/mail_list.html:22
+#: mailing/templates/mailing/dojo/mail_queue.html:3
+#: mailing/templates/mailing/dojo/mail_queue.html:4
 #: mailing/templates/mailing/manage/mail_queue.html:3
 #: mailing/templates/mailing/manage/mail_queue.html:4
 msgid "Mail queue"
@@ -4630,6 +4635,7 @@ msgid "A warm, safe place where it's fine not to know something yet."
 msgstr "Een warme, veilige plek waar het oké is dat je iets nog niet weet."
 
 #: core/templates/core/code_of_conduct.html:42 events/models.py:68
+#: mailing/templates/mailing/manage/campaign_list.html:11
 msgid "Everyone"
 msgstr "Iedereen"
 
@@ -4986,7 +4992,7 @@ msgid "Show everything"
 msgstr "Alles tonen"
 
 #: core/templates/core/manage_audit_log.html:52
-#: mailing/templates/mailing/manage/campaign_list.html:17
+#: mailing/templates/mailing/manage/campaign_list.html:28
 #: mailing/templates/mailing/manage/mail_queue.html:125
 msgid "When"
 msgstr "Wanneer"
@@ -5132,8 +5138,8 @@ msgstr "Slogan"
 
 # | msgid "Questions"
 #: dojos/forms.py:65 dojos/forms.py:91 events/forms.py:175 events/forms.py:245
-#: events/forms.py:303 events/forms.py:334 mailing/forms.py:205
-#: mailing/forms.py:220 mailing/forms.py:255
+#: events/forms.py:303 events/forms.py:334 mailing/forms.py:211
+#: mailing/forms.py:226 mailing/forms.py:261
 #: mailing/templates/mailing/manage/segment_list.html:13
 msgid "Description"
 msgstr "Beschrijving"
@@ -5535,6 +5541,13 @@ msgid "Updates"
 msgstr "Nieuws"
 
 #: dojos/templates/dojos/_admin_base.html:70
+#: mailing/templates/mailing/dojo/mail_list.html:3
+#: mailing/templates/mailing/dojo/mail_queue.html:41
+#: mailing/templates/mailing/manage/mail_queue.html:124
+msgid "Mail"
+msgstr "E-mail"
+
+#: dojos/templates/dojos/_admin_base.html:76
 #: dojos/templates/dojos/dojo_dashboard.html:3
 #: dojos/templates/dojos/dojo_dashboard.html:4
 #: dojos/templates/dojos/dojo_event_attendance.html:3
@@ -5543,13 +5556,13 @@ msgstr "Nieuws"
 msgid "Attendance"
 msgstr "Aanwezigheden"
 
-#: dojos/templates/dojos/_admin_base.html:76
+#: dojos/templates/dojos/_admin_base.html:82
 #: dojos/templates/dojos/dojo_members.html:4
 #: dojos/templates/dojos/dojo_members.html:5
 msgid "Members"
 msgstr "Leden"
 
-#: dojos/templates/dojos/_admin_base.html:89
+#: dojos/templates/dojos/_admin_base.html:95
 #: dojos/templates/dojos/dojo_manage.html:4
 msgid "Settings"
 msgstr "Instellingen"
@@ -7204,21 +7217,64 @@ msgstr "Kies minstens één kind."
 msgid "The child(ren) you selected are already signed up for this session."
 msgstr "De gekozen kinderen zijn al ingeschreven voor deze sessie."
 
-#: mailing/campaigns.py:76 mailing/journeys.py:43
+#: mailing/campaigns.py:84
+msgid "Only a draft can be sent."
+msgstr "Alleen een ontwerp kan verstuurd worden."
+
+#: mailing/campaigns.py:86
+msgid "A dojo's mail is always news from the dojo."
+msgstr "Een mail van een dojo is altijd nieuws van de dojo."
+
+#: mailing/campaigns.py:93
+msgid ""
+"Nobody would get it: the audience has no families who want your dojo's news."
+msgstr ""
+"Niemand zou hem krijgen: bij deze ontvangers zijn geen gezinnen die nieuws "
+"van je dojo willen."
+
+#: mailing/campaigns.py:96
+#, python-format
+msgid ""
+"Write a subject and a message in %(language)s, your dojo's main language."
+msgstr ""
+"Schrijf een onderwerp en een bericht in het %(language)s, de hoofdtaal van "
+"je dojo."
+
+#: mailing/campaigns.py:100
+msgid ""
+"Add your dojo's email address in its settings first: families' replies go "
+"there."
+msgstr ""
+"Vul eerst het e-mailadres van je dojo in bij de instellingen: daar komen de "
+"antwoorden van de gezinnen terecht."
+
+#: mailing/campaigns.py:104
+#, python-format
+msgid ""
+"Your dojo already sent %(limit)s mails in the last 30 days, the most it can "
+"send."
+msgstr "Je dojo stuurde de afgelopen 30 dagen al %(limit)s mails, het maximum."
+
+#: mailing/campaigns.py:107
+msgid "The mail layout for dojos is missing. Please tell the organisation."
+msgstr ""
+"De opmaak voor mails van dojo's ontbreekt. Laat het de organisatie weten."
+
+#: mailing/campaigns.py:182 mailing/journeys.py:43
 msgid " "
 msgstr " "
 
-#: mailing/campaigns.py:88
+#: mailing/campaigns.py:199
 msgid "This campaign has already finished."
 msgstr "Deze campagne is al afgelopen."
 
-#: mailing/campaigns.py:101
+#: mailing/campaigns.py:213
 #, python-format
 msgid "There's no template “%(template_key)s”."
 msgstr "Er is geen sjabloon “%(template_key)s”."
 
 # | msgid "Your child's own email address is needed for a login."
-#: mailing/campaigns.py:103 mailing/journeys.py:56
+#: mailing/campaigns.py:215 mailing/journeys.py:56
 msgid "Your account has no email address to send the test to."
 msgstr "Je account heeft geen e-mailadres om de test naar te sturen."
 
@@ -7273,26 +7329,233 @@ msgstr ""
 "De nieuwsbrief van CoderDojo Belgium en evenementen zoals Coolest Projects "
 "en CoderDojo Girlz."
 
-#: mailing/forms.py:118 mailing/forms.py:253
+#: mailing/dojo_audiences.py:58
+msgid "All families of the dojo"
+msgstr "Alle gezinnen van de dojo"
+
+#: mailing/dojo_audiences.py:59
+msgid ""
+"Families whose child has the dojo as home dojo, or came to one of its "
+"sessions in the last year."
+msgstr ""
+"Gezinnen van wie een kind deze dojo als thuisdojo heeft, of het afgelopen "
+"jaar naar een van de sessies kwam."
+
+#: mailing/dojo_audiences.py:63
+msgid "Families booked for a session"
+msgstr "Gezinnen ingeschreven voor een sessie"
+
+#: mailing/dojo_audiences.py:64
+msgid ""
+"Families with a place for one of your sessions, and if you like those on its "
+"waiting list."
+msgstr ""
+"Gezinnen met een plaats voor een van je sessies, en als je wilt ook die op "
+"de wachtlijst."
+
+#: mailing/dojo_audiences.py:69
+msgid "Families on a session's waiting list"
+msgstr "Gezinnen op de wachtlijst van een sessie"
+
+#: mailing/dojo_audiences.py:70
+msgid "For example to tell them about an extra session."
+msgstr "Bijvoorbeeld om hun een extra sessie te melden."
+
+#: mailing/dojo_audiences.py:75
+msgid "Families who came recently"
+msgstr "Gezinnen die onlangs kwamen"
+
+#: mailing/dojo_audiences.py:76
+msgid "Families whose child came to one of your sessions in the chosen period."
+msgstr ""
+"Gezinnen van wie een kind in de gekozen periode naar een van je sessies kwam."
+
+#: mailing/dojo_audiences.py:81
+msgid "New families"
+msgstr "Nieuwe gezinnen"
+
+#: mailing/dojo_audiences.py:82
+msgid "Children who only just started coming to your dojo."
+msgstr "Kinderen die pas naar je dojo beginnen te komen."
+
+# | msgid "Which mails you get"
+#: mailing/dojo_audiences.py:87 mailing/forms.py:290
+msgid "We miss you"
+msgstr "We missen je"
+
+#: mailing/dojo_audiences.py:88
+msgid ""
+"Children who used to come to your dojo but missed several sessions in a row "
+"or stopped coming."
+msgstr ""
+"Kinderen die naar je dojo kwamen, maar een paar sessies na elkaar misten of "
+"niet meer komen."
+
+#: mailing/dojo_audiences.py:93
+msgid "Children of an age"
+msgstr "Kinderen van een leeftijd"
+
+#: mailing/dojo_audiences.py:94
+msgid "Children of your dojo within an age range."
+msgstr "Kinderen van je dojo binnen een leeftijdsgroep."
+
+#: mailing/dojo_audiences.py:100
+msgid "Children on a pathway"
+msgstr "Kinderen op een leertraject"
+
+#: mailing/dojo_audiences.py:101
+msgid "Children of your dojo who worked on one of your pathways at a session."
+msgstr ""
+"Kinderen van je dojo die tijdens een sessie aan een van je leertrajecten "
+"werkten."
+
+#: mailing/dojo_audiences.py:113
+msgid "Pick who should get the mail."
+msgstr "Kies wie de mail krijgt."
+
+#: mailing/dojo_audiences.py:149
+msgid "Pick one of your dojo's sessions."
+msgstr "Kies een van de sessies van je dojo."
+
+#: mailing/dojo_audiences.py:156
+msgid "Pick a period."
+msgstr "Kies een periode."
+
+#: mailing/dojo_audiences.py:162
+#, python-format
+msgid "Give an age range between %(min)s and %(max)s, the youngest age first."
+msgstr ""
+"Geef een leeftijdsgroep tussen %(min)s en %(max)s, de jongste leeftijd eerst."
+
+#: mailing/dojo_audiences.py:169
+msgid "Pick one of your dojo's pathways."
+msgstr "Kies een van de leertrajecten van je dojo."
+
+#: mailing/dojo_audiences.py:229
+msgid "a session"
+msgstr "een sessie"
+
+# | msgid "Join the waiting list"
+#: mailing/dojo_audiences.py:232
+#, python-format
+msgid "Families on the waiting list for %(session)s (%(date)s)"
+msgstr "Gezinnen op de wachtlijst voor %(session)s (%(date)s)"
+
+#: mailing/dojo_audiences.py:234
+#, python-format
+msgid "Families booked for %(session)s (%(date)s), waiting list included"
+msgstr ""
+"Gezinnen ingeschreven voor %(session)s (%(date)s), wachtlijst inbegrepen"
+
+#: mailing/dojo_audiences.py:238
+#, python-format
+msgid "Families booked for %(session)s (%(date)s)"
+msgstr "Gezinnen ingeschreven voor %(session)s (%(date)s)"
+
+#: mailing/dojo_audiences.py:240
+#, python-format
+msgid "Families whose child came in the last %(days)s days"
+msgstr "Gezinnen van wie een kind de afgelopen %(days)s dagen kwam"
+
+#: mailing/dojo_audiences.py:242
+#, python-format
+msgid "Children aged %(min)s to %(max)s"
+msgstr "Kinderen van %(min)s tot %(max)s jaar"
+
+#: mailing/dojo_audiences.py:248
+#, python-format
+msgid "Children on the pathway %(pathway)s"
+msgstr "Kinderen op het leertraject %(pathway)s"
+
+#: mailing/dojo_views.py:108
+msgid "Draft saved. Check the preview, send yourself a test, then send it."
+msgstr ""
+"Ontwerp opgeslagen. Bekijk het voorbeeld, stuur jezelf een test en verstuur "
+"hem dan."
+
+#: mailing/dojo_views.py:125
+msgid "Draft saved."
+msgstr "Ontwerp opgeslagen."
+
+#: mailing/dojo_views.py:165
+#, python-format
+msgid "A test is on its way to %(email)s."
+msgstr "Er is een test onderweg naar %(email)s."
+
+#: mailing/dojo_views.py:179
+msgid "Sent. The mails go out over the next few minutes."
+msgstr "Verstuurd. De mails vertrekken in de komende minuten."
+
+#: mailing/dojo_views.py:190
+msgid "Draft deleted."
+msgstr "Ontwerp verwijderd."
+
+#: mailing/dojo_views.py:197
+msgid "Stopped. Mails that hadn't gone out yet won't be sent."
+msgstr "Gestopt. Mails die nog niet vertrokken waren, worden niet verstuurd."
+
+#: mailing/dojo_views.py:207
+msgid "The family stopped your dojo's mail."
+msgstr "Het gezin stopte de mails van je dojo."
+
+#: mailing/dojo_views.py:208
+msgid "The family stopped all news from dojos."
+msgstr "Het gezin stopte al het nieuws van dojo's."
+
+#: mailing/dojo_views.py:209
+msgid ""
+"The address is blocked: earlier mail to it bounced, or it was marked as spam."
+msgstr "Het adres is geblokkeerd: eerdere mail kwam terug, of werd als spam gemeld."
+
+#: mailing/dojo_views.py:210
+msgid "The account was switched off."
+msgstr "Het account werd uitgeschakeld."
+
+# | msgid "Enter a valid email address."
+#: mailing/dojo_views.py:211
+msgid "The account has no email address."
+msgstr "Het account heeft geen e-mailadres."
+
+#: mailing/dojo_views.py:212
+msgid "This kind of mail doesn't go to this kind of account."
+msgstr "Dit soort mail gaat niet naar dit soort account."
+
+#: mailing/dojo_views.py:213
+msgid "You stopped the mail before it went out."
+msgstr "Je stopte de mail voor hij vertrok."
+
+#: mailing/dojo_views.py:255
+msgid "Another reason."
+msgstr "Een andere reden."
+
+#: mailing/dojo_views.py:283
+msgid "Tests sent to yourself"
+msgstr "Tests naar jezelf"
+
+#: mailing/dojo_views.py:287
+msgid "New sessions (the automatic mail)"
+msgstr "Nieuwe sessies (de automatische mail)"
+
+#: mailing/forms.py:124 mailing/forms.py:259
 #: mailing/templates/mailing/manage/mail_queue.html:58
 #: mailing/templates/mailing/manage/template_list.html:13
 msgid "Kind of mail"
 msgstr "Soort e-mail"
 
-#: mailing/forms.py:119
+#: mailing/forms.py:125
 msgid "Only people who want this kind of mail get it."
 msgstr "Alleen wie dit soort e-mails wil, krijgt ze."
 
-#: mailing/forms.py:122 mailing/templates/mailing/manage/template_list.html:12
+#: mailing/forms.py:128 mailing/templates/mailing/manage/template_list.html:12
 msgid "Template"
 msgstr "Sjabloon"
 
-#: mailing/forms.py:123 mailing/templates/mailing/manage/campaign_list.html:14
+#: mailing/forms.py:129 mailing/templates/mailing/manage/campaign_list.html:25
 #: mailing/templates/mailing/manage/journey_list.html:15
 msgid "Segment"
 msgstr "Segment"
 
-#: mailing/forms.py:138
+#: mailing/forms.py:144
 #, python-format
 msgid ""
 "Line %(number)s: write it as name: value (a name in lowercase letters and _)."
@@ -7301,99 +7564,95 @@ msgstr ""
 "en _)."
 
 # | msgid "Spot available"
-#: mailing/forms.py:151
+#: mailing/forms.py:157
 msgid "Template variables"
 msgstr "Sjabloonvariabelen"
 
-#: mailing/forms.py:153
+#: mailing/forms.py:159
 msgid "signup_url: https://coolestprojects.org"
 msgstr "signup_url: https://coolestprojects.org"
 
-#: mailing/forms.py:154
+#: mailing/forms.py:160
 msgid "One per line, as name: value. The template uses them as {{ name }}."
 msgstr ""
 "Eén per regel, als naam: waarde. Het sjabloon gebruikt ze als {{ name }}."
 
-#: mailing/forms.py:161
+#: mailing/forms.py:167
 #, python-format
 msgid "<a href=\"%(url)s\">Segments</a> describe who gets it."
 msgstr "<a href=\"%(url)s\">Segmenten</a> bepalen wie hem krijgt."
 
-#: mailing/forms.py:176
+#: mailing/forms.py:182
 msgid "Coolest Projects 2027"
 msgstr "Coolest Projects 2027"
 
 # | msgid "Aimed at"
-#: mailing/forms.py:183
+#: mailing/forms.py:189
 msgid "Send at"
 msgstr "Versturen op"
 
 # | msgid "Leave empty to use the event's name"
-#: mailing/forms.py:184
+#: mailing/forms.py:190
 msgid "Leave empty to send as soon as it's launched."
 msgstr "Leeg laten om meteen bij het lanceren te versturen."
 
-#: mailing/forms.py:190
+#: mailing/forms.py:196
 msgid "Pick a time in the future, or leave it empty to send when launched."
 msgstr ""
 "Kies een tijdstip in de toekomst, of laat het leeg om te versturen bij het "
 "lanceren."
 
-#: mailing/forms.py:200
+#: mailing/forms.py:206
 msgid "Families near Ghent"
 msgstr "Gezinnen in de buurt van Gent"
 
-#: mailing/forms.py:201
+#: mailing/forms.py:207
 msgid "Who this is, in a sentence."
 msgstr "Wie dit is, in één zin."
 
-#: mailing/forms.py:206
+#: mailing/forms.py:212
 msgid "Active (offered when creating a campaign)"
 msgstr "Actief (aangeboden bij het aanmaken van een campagne)"
 
-#: mailing/forms.py:220 mailing/templates/mailing/manage/mail_queue.html:57
+#: mailing/forms.py:226 mailing/forms.py:324
+#: mailing/templates/mailing/manage/mail_queue.html:57
 #: mailing/templates/mailing/manage/mail_queue.html:91
 msgid "Subject"
 msgstr "Onderwerp"
 
-#: mailing/forms.py:220
+#: mailing/forms.py:226
 msgid "Text"
 msgstr "Tekst"
 
-#: mailing/forms.py:221
+#: mailing/forms.py:227
 msgid "When it's sent and which variables it uses."
 msgstr "Wanneer het verstuurd wordt en welke variabelen het gebruikt."
 
-#: mailing/forms.py:250
+#: mailing/forms.py:256
 msgid "Lowercase, with _ between words, e.g. campaign_summer_camp."
 msgstr "Kleine letters, met _ tussen de woorden, bv. campaign_summer_camp."
 
-#: mailing/forms.py:251
+#: mailing/forms.py:257
 msgid "campaign_summer_camp"
 msgstr "campaign_summer_camp"
 
-#: mailing/forms.py:258
+#: mailing/forms.py:264
 msgid "When it's used and which variables it takes."
 msgstr "Wanneer het gebruikt wordt en welke variabelen het krijgt."
 
-#: mailing/forms.py:268
+#: mailing/forms.py:274
 msgid "A template with this name already exists."
 msgstr "Er bestaat al een sjabloon met die naam."
 
-#: mailing/forms.py:280
+#: mailing/forms.py:286
 msgid "Not again for (days)"
 msgstr "Niet opnieuw gedurende (dagen)"
 
-#: mailing/forms.py:281
+#: mailing/forms.py:287
 msgid "Someone who got it doesn't get it again for this many days."
 msgstr "Wie het kreeg, krijgt het zoveel dagen niet opnieuw."
 
-# | msgid "Which mails you get"
-#: mailing/forms.py:284
-msgid "We miss you"
-msgstr "We missen je"
-
-#: mailing/forms.py:291
+#: mailing/forms.py:297
 msgid ""
 "Tip: a rule like \"How the child comes to sessions changed: became At risk "
 "in the last 7 days\" makes it a triggered mail."
@@ -7402,28 +7661,85 @@ msgstr ""
 "Dreigt af te haken in de laatste 7 dagen\" maakt er een automatische e-mail "
 "van."
 
-#: mailing/manage.py:58
+#: mailing/forms.py:311 mailing/templates/mailing/dojo/mail_detail.html:24
+#: mailing/templates/mailing/dojo/mail_form.html:21
+msgid "Who gets it"
+msgstr "Wie krijgt hem"
+
+#: mailing/forms.py:313
+msgid "Also the families on its waiting list"
+msgstr "Ook de gezinnen op de wachtlijst"
+
+# | msgid "Join the waiting list"
+#: mailing/forms.py:314
+msgid "Came in the last"
+msgstr "Kwam in de afgelopen"
+
+#: mailing/forms.py:315
+msgid "From age"
+msgstr "Vanaf leeftijd"
+
+#: mailing/forms.py:316
+msgid "Up to age"
+msgstr "Tot leeftijd"
+
+#: mailing/forms.py:317
+msgid "Pathway"
+msgstr "Leertraject"
+
+#: mailing/forms.py:326
+msgid "Your dojo's name goes in front of it."
+msgstr "De naam van je dojo komt ervoor."
+
+#: mailing/forms.py:327
+msgid ""
+"Plain text. Links work; there's no layout, no images and no attachments."
+msgstr ""
+"Gewone tekst. Links werken; er is geen opmaak, geen afbeeldingen en geen "
+"bijlagen."
+
+#: mailing/forms.py:345
+msgid "Pick a session"
+msgstr "Kies een sessie"
+
+#: mailing/forms.py:349
+#, python-format
+msgid "%(days)s days"
+msgstr "%(days)s dagen"
+
+# | msgid "Next pathways"
+#: mailing/forms.py:350
+msgid "Pick a pathway"
+msgstr "Kies een leertraject"
+
+#: mailing/manage.py:81
 msgid "Campaign saved as a draft."
 msgstr "Campagne opgeslagen als ontwerp."
 
-#: mailing/manage.py:88
+#: mailing/manage.py:113
 msgid "Campaign saved."
 msgstr "Campagne opgeslagen."
 
-#: mailing/manage.py:188
+#: mailing/manage.py:138
+msgid "This is a dojo's own mail: only its champion tests and sends it."
+msgstr ""
+"Dit is een eigen mail van een dojo: alleen de champion ervan test en "
+"verstuurt hem."
+
+#: mailing/manage.py:221
 msgid "Segment created. Now add who's in it."
 msgstr "Segment aangemaakt. Voeg nu toe wie erin zit."
 
-#: mailing/manage.py:200
+#: mailing/manage.py:233
 msgid "Segment saved."
 msgstr "Segment opgeslagen."
 
-#: mailing/manage.py:342
+#: mailing/manage.py:375
 #, python-format
 msgid "Segment “%(segment)s” deleted."
 msgstr "Segment “%(segment)s” verwijderd."
 
-#: mailing/manage.py:395
+#: mailing/manage.py:428
 msgid ""
 "Template created. Write the English version first: it's used for every "
 "language that has no version of its own."
@@ -7431,119 +7747,120 @@ msgstr ""
 "Sjabloon aangemaakt. Schrijf eerst de Engelse versie: die wordt gebruikt "
 "voor elke taal zonder eigen versie."
 
-#: mailing/manage.py:424
+#: mailing/manage.py:457
 #, python-format
 msgid "%(language)s version saved."
 msgstr "Versie in het %(language)s opgeslagen."
 
-#: mailing/manage.py:462
+#: mailing/manage.py:495
 msgid ""
 "The English version is the fallback for every language: it can't be deleted."
 msgstr ""
 "De Engelse versie is de reserve voor elke taal: die kan niet verwijderd "
 "worden."
 
-#: mailing/manage.py:465
+#: mailing/manage.py:498
 msgid "That language version is deleted; English is used instead."
 msgstr "Die taalversie is verwijderd; de Engelse wordt gebruikt."
 
-#: mailing/manage.py:468
+#: mailing/manage.py:501
 msgid "The site sends this template itself: it can be edited, not deleted."
 msgstr ""
 "De site verstuurt dit sjabloon zelf: je kunt het bewerken, niet verwijderen."
 
-#: mailing/manage.py:470
+#: mailing/manage.py:503
 msgid "A campaign that hasn't gone out yet uses this template."
 msgstr "Een campagne die nog niet verstuurd is, gebruikt dit sjabloon."
 
-#: mailing/manage.py:473
+#: mailing/manage.py:506
 #, python-format
 msgid "Template “%(key)s” deleted."
 msgstr "Sjabloon “%(key)s” verwijderd."
 
-#: mailing/manage.py:494
+#: mailing/manage.py:527
 msgid "Journey saved. It's paused until you activate it."
 msgstr "Traject opgeslagen. Het staat op pauze tot je het activeert."
 
-#: mailing/manage.py:506
+#: mailing/manage.py:539
 msgid "Journey saved. Changes apply from the next daily run."
 msgstr ""
 "Traject opgeslagen. Wijzigingen gelden vanaf de volgende dagelijkse run."
 
-#: mailing/models.py:40
+#: mailing/models.py:42
 msgid "AND"
 msgstr "EN"
 
-#: mailing/models.py:41
+#: mailing/models.py:43
 msgid "OR"
 msgstr "OF"
 
-#: mailing/models.py:45
+#: mailing/models.py:47
 msgid "Parents of a child who …"
 msgstr "Ouders van een kind dat …"
 
 # | msgid "Pending"
-#: mailing/models.py:271 mailing/templates/mailing/manage/_status_badge.html:1
+#: mailing/models.py:296 mailing/templates/mailing/manage/_status_badge.html:1
 msgid "Sending"
 msgstr "Bezig met versturen"
 
-#: mailing/models.py:272 mailing/templates/mailing/manage/_status_badge.html:1
-#: mailing/templates/mailing/manage/campaign_list.html:16
+#: mailing/models.py:297 mailing/templates/mailing/dojo/mail_queue.html:44
+#: mailing/templates/mailing/manage/_status_badge.html:1
+#: mailing/templates/mailing/manage/campaign_list.html:27
 msgid "Sent"
 msgstr "Verstuurd"
 
-#: mailing/models.py:273 mailing/templates/mailing/manage/mail_queue.html:84
+#: mailing/models.py:298 mailing/templates/mailing/manage/mail_queue.html:84
 msgid "Failed"
 msgstr "Mislukt"
 
-#: mailing/models.py:274
+#: mailing/models.py:299
 msgid "Bounced"
 msgstr "Teruggestuurd"
 
-#: mailing/models.py:275
+#: mailing/models.py:300
 msgid "Not sent (no consent, no address or blocked)"
 msgstr "Niet verstuurd (geen toestemming, geen adres of geblokkeerd)"
 
 # | msgid "Sign up now"
-#: mailing/models.py:364
+#: mailing/models.py:391
 msgid "Sign-up form"
 msgstr "Inschrijfformulier"
 
 # | msgid "Mail preferences"
-#: mailing/models.py:365
+#: mailing/models.py:392
 msgid "Mail preferences page"
 msgstr "Pagina e-mailvoorkeuren"
 
 # | msgid "Unsubscribe"
-#: mailing/models.py:366
+#: mailing/models.py:393
 msgid "Unsubscribe link"
 msgstr "Uitschrijflink"
 
-#: mailing/models.py:368
+#: mailing/models.py:395
 msgid "Bounce or complaint"
 msgstr "Bounce of klacht"
 
-#: mailing/models.py:423
+#: mailing/models.py:450
 msgid "Hard bounce"
 msgstr "Harde bounce"
 
-#: mailing/models.py:424
+#: mailing/models.py:451
 msgid "Repeated soft bounces"
 msgstr "Herhaalde zachte bounces"
 
-#: mailing/models.py:425 mailing/models.py:453
+#: mailing/models.py:452 mailing/models.py:480
 msgid "Spam complaint"
 msgstr "Spamklacht"
 
-#: mailing/models.py:426
+#: mailing/models.py:453
 msgid "Blocked by hand"
 msgstr "Met de hand geblokkeerd"
 
-#: mailing/models.py:451
+#: mailing/models.py:478
 msgid "Hard bounce (5.x.x)"
 msgstr "Harde bounce (5.x.x)"
 
-#: mailing/models.py:452
+#: mailing/models.py:479
 msgid "Soft bounce (4.x.x)"
 msgstr "Zachte bounce (4.x.x)"
 
@@ -7574,6 +7891,7 @@ msgstr "Nee"
 #: mailing/segmentation/attributes/activity.py:64
 #: mailing/segmentation/attributes/changes.py:87
 #: mailing/segmentation/attributes/changes.py:106
+#: mailing/segmentation/attributes/dojo.py:30
 #: mailing/segmentation/attributes/engagement.py:139
 #: mailing/segmentation/attributes/engagement.py:154
 #: mailing/segmentation/attributes/event.py:31
@@ -7581,7 +7899,7 @@ msgstr "Nee"
 #: mailing/segmentation/attributes/profile.py:45
 #: mailing/segmentation/attributes/profile.py:141
 #: mailing/segmentation/attributes/profile.py:189
-#: mailing/segmentation/base.py:137 mailing/segmentation/base.py:148
+#: mailing/segmentation/base.py:140 mailing/segmentation/base.py:151
 #, python-format
 msgid "Unsupported operator: %(operator)s"
 msgstr "Niet-ondersteunde operator: %(operator)s"
@@ -7625,6 +7943,45 @@ msgstr "Geen nieuwe gordel in de laatste N dagen"
 msgid "Not on a session team in the last N days"
 msgstr "Niet in het team van een sessie in de laatste N dagen"
 
+# | msgid "Child's name"
+#: mailing/segmentation/attributes/dojo.py:50
+msgid "Child goes to dojo"
+msgstr "Kind gaat naar dojo"
+
+#: mailing/segmentation/attributes/dojo.py:67
+msgid "Family of dojo"
+msgstr "Gezin van dojo"
+
+#: mailing/segmentation/attributes/dojo.py:102
+msgid "Family has a place for event"
+msgstr "Gezin heeft een plaats voor evenement"
+
+# | msgid "Join the waiting list"
+#: mailing/segmentation/attributes/dojo.py:107
+msgid "Family is on the waiting list for event"
+msgstr "Gezin staat op de wachtlijst voor evenement"
+
+#: mailing/segmentation/attributes/dojo.py:116
+msgid "A child came to the dojo recently"
+msgstr "Een kind kwam onlangs naar de dojo"
+
+#: mailing/segmentation/attributes/dojo.py:134
+#, python-format
+msgid "“%(label)s” needs a dojo and a number of days."
+msgstr "“%(label)s” heeft een dojo en een aantal dagen nodig."
+
+# | msgid "Find a dojo"
+#: mailing/segmentation/attributes/dojo.py:151
+#: mailing/segmentation/attributes/engagement.py:84
+#: mailing/segmentation/attributes/locality.py:106
+msgid "a dojo"
+msgstr "een dojo"
+
+#: mailing/segmentation/attributes/dojo.py:152
+#, python-format
+msgid "A child came to %(dojo)s in the last %(days)s days"
+msgstr "Een kind kwam de afgelopen %(days)s dagen naar %(dojo)s"
+
 # | msgid "View this dojo's sessions"
 #: mailing/segmentation/attributes/engagement.py:36
 msgid "How the child comes to sessions"
@@ -7643,12 +8000,6 @@ msgstr "“%(label)s” ondersteunt in, niet “%(operator)s”."
 #, python-format
 msgid "“%(label)s” needs a dojo and at least one stage."
 msgstr "“%(label)s” heeft een dojo en minstens één fase nodig."
-
-# | msgid "Find a dojo"
-#: mailing/segmentation/attributes/engagement.py:84
-#: mailing/segmentation/attributes/locality.py:106
-msgid "a dojo"
-msgstr "een dojo"
 
 #: mailing/segmentation/attributes/engagement.py:85
 #, python-format
@@ -7716,7 +8067,7 @@ msgid "Lives near dojo"
 msgstr "Woont in de buurt van dojo"
 
 #: mailing/segmentation/attributes/locality.py:94
-#: mailing/segmentation/base.py:74
+#: mailing/segmentation/base.py:77
 #, python-format
 msgid "“%(label)s” supports %(join)s, not “%(operator)s”."
 msgstr "“%(label)s” ondersteunt %(join)s, niet “%(operator)s”."
@@ -7843,25 +8194,329 @@ msgstr "minstens"
 msgid "at most"
 msgstr "hoogstens"
 
-#: mailing/segmentation/base.py:79
+#: mailing/segmentation/base.py:82
 #, python-format
 msgid "“%(label)s” needs a whole number of days, e.g. 365."
 msgstr "“%(label)s” heeft een geheel aantal dagen nodig, bv. 365."
 
-#: mailing/segmentation/base.py:83
+#: mailing/segmentation/base.py:86
 #, python-format
 msgid "“%(label)s” needs a number, 0 or more."
 msgstr "“%(label)s” heeft een getal nodig, 0 of meer."
 
-#: mailing/segmentation/base.py:87
+#: mailing/segmentation/base.py:90
 #, python-format
 msgid "“%(operator)s” needs a non-empty list of values."
 msgstr "“%(operator)s” heeft een niet-lege lijst met waarden nodig."
 
-#: mailing/segmentation/base.py:95
+#: mailing/segmentation/base.py:98
 #, python-format
 msgid "Unknown value(s) for “%(label)s”: %(unknown)s."
 msgstr "Onbekende waarde(n) voor “%(label)s”: %(unknown)s."
+
+#: mailing/templates/mailing/dojo/_reach.html:8
+#, python-format
+msgid "Reaches %(counter)s family."
+msgid_plural "Reaches %(counter)s families."
+msgstr[0] "Bereikt %(counter)s gezin."
+msgstr[1] "Bereikt %(counter)s gezinnen."
+
+#: mailing/templates/mailing/dojo/_reach.html:9
+msgid ""
+"Only families who want news from your dojo count; the rest never get it."
+msgstr ""
+"Alleen gezinnen die nieuws van je dojo willen, tellen mee; de rest krijgt "
+"hem nooit."
+
+#: mailing/templates/mailing/dojo/_reach.html:11
+#, python-format
+msgid ""
+"%(counter)s more family isn't counted: they didn't agree to their child's "
+"details being used to choose their mail."
+msgid_plural ""
+"%(counter)s more families aren't counted: they didn't agree to their child's "
+"details being used to choose their mail."
+msgstr[0] ""
+"Nog %(counter)s gezin telt niet mee: het gaf geen toestemming om de gegevens "
+"van het kind te gebruiken om mails te kiezen."
+msgstr[1] ""
+"Nog %(counter)s gezinnen tellen niet mee: ze gaven geen toestemming om de "
+"gegevens van hun kind te gebruiken om mails te kiezen."
+
+#: mailing/templates/mailing/dojo/_results.html:3
+#: mailing/templates/mailing/manage/campaign_detail.html:68
+#: mailing/templates/mailing/manage/journey_detail.html:48
+msgid "sent"
+msgstr "verstuurd"
+
+# | msgid "Waiting list"
+#: mailing/templates/mailing/dojo/_results.html:4
+#: mailing/templates/mailing/manage/campaign_detail.html:69
+msgid "waiting"
+msgstr "wachtend"
+
+#: mailing/templates/mailing/dojo/_results.html:5
+msgid "not delivered"
+msgstr "niet afgeleverd"
+
+#: mailing/templates/mailing/dojo/_results.html:6
+msgid "stopped your news since"
+msgstr "stopten sindsdien je nieuws"
+
+#: mailing/templates/mailing/dojo/mail_detail.html:13
+#: mailing/templates/mailing/dojo/mail_form.html:14
+#: mailing/templates/mailing/dojo/mail_queue.html:17
+msgid "All mails"
+msgstr "Alle mails"
+
+#: mailing/templates/mailing/dojo/mail_detail.html:16
+#: mailing/templates/mailing/dojo/mail_form.html:76
+#: mailing/templates/mailing/manage/campaign_detail.html:51
+#: mailing/templates/mailing/manage/journey_detail.html:31
+#: mailing/templates/mailing/manage/template_edit.html:53
+msgid "Preview"
+msgstr "Voorbeeld"
+
+#: mailing/templates/mailing/dojo/mail_detail.html:27
+#: mailing/templates/mailing/manage/campaign_detail.html:35
+#, python-format
+msgid "Sent %(when)s"
+msgstr "Verstuurd op %(when)s"
+
+# | msgid "About %(name)s"
+#: mailing/templates/mailing/dojo/mail_detail.html:27
+#: mailing/templates/mailing/manage/campaign_detail.html:35
+#: mailing/templates/mailing/manage/campaign_detail.html:45
+#, python-format
+msgid "by %(name)s"
+msgstr "door %(name)s"
+
+#: mailing/templates/mailing/dojo/mail_detail.html:34
+msgid "How it went"
+msgstr "Hoe het ging"
+
+#: mailing/templates/mailing/dojo/mail_detail.html:38
+msgid "Stop this mail? Mails that haven't gone out yet won't be sent."
+msgstr ""
+"Deze mail stoppen? Mails die nog niet vertrokken zijn, worden niet verstuurd."
+
+# | msgid "Pending"
+#: mailing/templates/mailing/dojo/mail_detail.html:39
+#: mailing/templates/mailing/manage/campaign_detail.html:90
+msgid "Stop sending"
+msgstr "Versturen stoppen"
+
+#: mailing/templates/mailing/dojo/mail_form.html:3
+#: mailing/templates/mailing/dojo/mail_form.html:4
+#: mailing/templates/mailing/dojo/mail_list.html:20
+msgid "Write a mail"
+msgstr "Een mail schrijven"
+
+#: mailing/templates/mailing/dojo/mail_form.html:29
+msgid ""
+"Only families who agreed to their child's details being used to choose their "
+"mail."
+msgstr ""
+"Alleen gezinnen die toestemming gaven om de gegevens van hun kind te "
+"gebruiken om mails te kiezen."
+
+#: mailing/templates/mailing/dojo/mail_form.html:43
+msgid "Your mail"
+msgstr "Je mail"
+
+#: mailing/templates/mailing/dojo/mail_form.html:49
+#: mailing/templates/mailing/manage/campaign_form.html:12
+msgid "Save draft"
+msgstr "Ontwerp opslaan"
+
+# | msgid "Aimed at"
+#: mailing/templates/mailing/dojo/mail_form.html:57
+msgid "Send it"
+msgstr "Versturen"
+
+#: mailing/templates/mailing/dojo/mail_form.html:62
+msgid "Send me a test"
+msgstr "Stuur me een test"
+
+#: mailing/templates/mailing/dojo/mail_form.html:65
+#, python-format
+msgid "Send this mail to %(counter)s family now?"
+msgid_plural "Send this mail to %(counter)s families now?"
+msgstr[0] "Deze mail nu naar %(counter)s gezin sturen?"
+msgstr[1] "Deze mail nu naar %(counter)s gezinnen sturen?"
+
+# | msgid "Aimed at"
+#: mailing/templates/mailing/dojo/mail_form.html:66
+msgid "Send"
+msgstr "Versturen"
+
+#: mailing/templates/mailing/dojo/mail_form.html:69
+msgid "Delete this draft?"
+msgstr "Dit ontwerp verwijderen?"
+
+#: mailing/templates/mailing/dojo/mail_form.html:70
+msgid "Delete draft"
+msgstr "Ontwerp verwijderen"
+
+#: mailing/templates/mailing/dojo/mail_form.html:73
+#: mailing/templates/mailing/dojo/mail_list.html:17
+#, python-format
+msgid "%(counter)s of %(limit)s mails sent in the last 30 days."
+msgid_plural "%(counter)s of %(limit)s mails sent in the last 30 days."
+msgstr[0] "%(counter)s van %(limit)s mails verstuurd in de afgelopen 30 dagen."
+msgstr[1] "%(counter)s van %(limit)s mails verstuurd in de afgelopen 30 dagen."
+
+#: mailing/templates/mailing/dojo/mail_form.html:77
+msgid ""
+"As the families get it, as last saved. A family gets your text in its own "
+"language when you wrote one, otherwise in your main language."
+msgstr ""
+"Zoals de gezinnen hem krijgen, zoals laatst bewaard. Een gezin krijgt je "
+"tekst in zijn eigen taal als je die schreef, anders in je hoofdtaal."
+
+#: mailing/templates/mailing/dojo/mail_list.html:4
+msgid "Mail to your families"
+msgstr "Mail aan je gezinnen"
+
+#: mailing/templates/mailing/dojo/mail_list.html:15
+msgid "Write to the families of your dojo"
+msgstr "Schrijf naar de gezinnen van je dojo"
+
+#: mailing/templates/mailing/dojo/mail_list.html:16
+msgid ""
+"A mail from your dojo, through the site: to all your families, to those "
+"booked for a session, or to a group you pick. Only families who want news "
+"from your dojo get it, and every mail lets them stop. Replies go to your "
+"dojo's email address."
+msgstr ""
+"Een mail van je dojo, via de site: naar al je gezinnen, naar wie "
+"ingeschreven is voor een sessie, of naar een groep die je kiest. Alleen "
+"gezinnen die nieuws van je dojo willen, krijgen hem, en in elke mail kunnen "
+"ze stoppen. Antwoorden komen op het e-mailadres van je dojo."
+
+#: mailing/templates/mailing/dojo/mail_list.html:25
+msgid "Only the champion writes and sends the dojo's mail."
+msgstr "Alleen de champion schrijft en verstuurt de mail van de dojo."
+
+#: mailing/templates/mailing/dojo/mail_list.html:30
+msgid "Your mails"
+msgstr "Je mails"
+
+#: mailing/templates/mailing/dojo/mail_list.html:35
+#, python-format
+msgid "sent %(when)s"
+msgstr "verstuurd op %(when)s"
+
+# | msgid "Next session: %(when)s"
+#: mailing/templates/mailing/dojo/mail_list.html:35
+#, python-format
+msgid "written %(when)s"
+msgstr "geschreven op %(when)s"
+
+#: mailing/templates/mailing/dojo/mail_list.html:37
+#, python-format
+msgid "%(counter)s sent"
+msgid_plural "%(counter)s sent"
+msgstr[0] "%(counter)s verstuurd"
+msgstr[1] "%(counter)s verstuurd"
+
+#: mailing/templates/mailing/dojo/mail_list.html:40
+msgid "No mails yet."
+msgstr "Nog geen mails."
+
+#: mailing/templates/mailing/dojo/mail_queue.html:18
+msgid ""
+"Every mail from your dojo waits here first and goes out within a minute or "
+"so: your own mails and the automatic mail about new sessions. Use this page "
+"to check that they go out, and why some families didn't get them."
+msgstr "Elke mail van je dojo wacht hier eerst en vertrekt binnen een minuut of zo: je eigen mails en de automatische mail over nieuwe sessies. Kijk hier na of ze vertrekken, en waarom sommige gezinnen ze niet kregen."
+
+#: mailing/templates/mailing/dojo/mail_queue.html:22
+#: mailing/templates/mailing/manage/mail_queue.html:23
+msgid "Mail isn't going out."
+msgstr "De e-mail vertrekt niet."
+
+#: mailing/templates/mailing/dojo/mail_queue.html:23
+#, python-format
+msgid ""
+"The site's mail has been waiting since %(since)s. The organisation is "
+"looking into it; nothing is lost, the mail goes out once it's fixed."
+msgstr "De mail van de site wacht al sinds %(since)s. De organisatie kijkt ernaar; er gaat niets verloren, de mail vertrekt zodra het opgelost is."
+
+#: mailing/templates/mailing/dojo/mail_queue.html:28
+#: mailing/templates/mailing/manage/mail_queue.html:29
+msgid "waiting to be sent"
+msgstr "wachten om te vertrekken"
+
+#: mailing/templates/mailing/dojo/mail_queue.html:29
+#: mailing/templates/mailing/manage/mail_queue.html:32
+msgid "sent in the last 24 hours"
+msgstr "verstuurd in de laatste 24 uur"
+
+#: mailing/templates/mailing/dojo/mail_queue.html:30
+#, python-format
+msgid "not delivered in the last %(days)s days"
+msgstr "niet afgeleverd in de afgelopen %(days)s dagen"
+
+#: mailing/templates/mailing/dojo/mail_queue.html:31
+#, python-format
+msgid "held back in the last %(days)s days"
+msgstr "tegengehouden in de afgelopen %(days)s dagen"
+
+#: mailing/templates/mailing/dojo/mail_queue.html:35
+msgid "Per mail"
+msgstr "Per mail"
+
+#: mailing/templates/mailing/dojo/mail_queue.html:36
+#, python-format
+msgid "The last %(days)s days, and anything still waiting."
+msgstr "De afgelopen %(days)s dagen, en alles wat nog wacht."
+
+#: mailing/templates/mailing/dojo/mail_queue.html:42
+#: mailing/templates/mailing/manage/mail_queue.html:60
+#: mailing/templates/mailing/manage/mail_queue.html:93
+msgid "Queued"
+msgstr "In de wachtrij gezet"
+
+# | msgid "Waiting list"
+#: mailing/templates/mailing/dojo/mail_queue.html:43
+#: mailing/templates/mailing/manage/mail_queue.html:70
+msgid "Waiting"
+msgstr "Wacht"
+
+#: mailing/templates/mailing/dojo/mail_queue.html:45
+msgid "Not delivered"
+msgstr "Niet afgeleverd"
+
+# | msgid "Welcome back"
+#: mailing/templates/mailing/dojo/mail_queue.html:46
+msgid "Held back"
+msgstr "Tegengehouden"
+
+#: mailing/templates/mailing/dojo/mail_queue.html:60
+msgid "No mail from your dojo in this period."
+msgstr "Geen mail van je dojo in deze periode."
+
+#: mailing/templates/mailing/dojo/mail_queue.html:68
+msgid "Why mail was held back"
+msgstr "Waarom mail werd tegengehouden"
+
+#: mailing/templates/mailing/dojo/mail_queue.html:69
+#, python-format
+msgid "In the last %(days)s days. Held-back mail is never sent later."
+msgstr "In de afgelopen %(days)s dagen. Tegengehouden mail wordt nooit later nog verstuurd."
+
+#: mailing/templates/mailing/dojo/mail_queue.html:73
+msgid "Nothing was held back."
+msgstr "Er werd niets tegengehouden."
+
+#: mailing/templates/mailing/dojo/mail_queue.html:77
+msgid ""
+"Addresses aren't shown here, only numbers. Mail that wasn't delivered "
+"usually means a mistyped or closed address; after a bounce the address gets "
+"no more mail. If something looks wrong, ask the organisation: they can look "
+"into a single mail."
+msgstr "Adressen staan hier niet, alleen aantallen. Mail die niet afgeleverd werd, betekent meestal een verkeerd getypt of opgeheven adres; na een bounce krijgt het adres geen mail meer. Lijkt er iets mis, vraag het dan aan de organisatie: die kan één mail nakijken."
 
 #: mailing/templates/mailing/mail_preferences.html:31
 msgid "Which mails you get"
@@ -7880,7 +8535,9 @@ msgstr "Altijd aan"
 msgid ""
 "News from these dojos, as long as News from your dojo is on. Switch off a "
 "dojo to stop only its mails."
-msgstr "Nieuws van deze dojo's, zolang Nieuws van je dojo aan staat. Zet een dojo uit om alleen de mails van die dojo te stoppen."
+msgstr ""
+"Nieuws van deze dojo's, zolang Nieuws van je dojo aan staat. Zet een dojo "
+"uit om alleen de mails van die dojo te stoppen."
 
 #: mailing/templates/mailing/mail_preferences.html:61
 msgid "Your children's details"
@@ -8018,13 +8675,31 @@ msgid "Cancelled"
 msgstr "Geannuleerd"
 
 #: mailing/templates/mailing/manage/campaign_detail.html:33
+msgid "A dojo's own mail"
+msgstr "Een eigen mail van een dojo"
+
+#: mailing/templates/mailing/manage/campaign_detail.html:34
+#, python-format
+msgid ""
+"Written by the team of <strong>%(dojo)s</strong> for its families: "
+"%(audience)s."
+msgstr ""
+"Geschreven door het team van <strong>%(dojo)s</strong> voor zijn gezinnen: "
+"%(audience)s."
+
+#: mailing/templates/mailing/manage/campaign_detail.html:35
+msgid "Still a draft: only the dojo's champion edits and sends it."
+msgstr ""
+"Nog een ontwerp: alleen de champion van de dojo bewerkt en verstuurt het."
+
+#: mailing/templates/mailing/manage/campaign_detail.html:39
 msgid "Campaign"
 msgstr "Campagne"
 
 # | msgid ""
 # | "%(name)s logs in with <strong>%(email)s</strong> (username "
 # | "<strong>%(username)s</strong>)."
-#: mailing/templates/mailing/manage/campaign_detail.html:35
+#: mailing/templates/mailing/manage/campaign_detail.html:41
 #, python-format
 msgid ""
 "%(category)s · template <strong>%(key)s</strong> · segment "
@@ -8034,92 +8709,70 @@ msgstr ""
 "<strong>%(segment)s</strong> (zoals het was bij de lancering)"
 
 # | msgid "Earned %(date)s"
-#: mailing/templates/mailing/manage/campaign_detail.html:39
+#: mailing/templates/mailing/manage/campaign_detail.html:45
 #, python-format
 msgid "Launched %(when)s"
 msgstr "Gelanceerd op %(when)s"
 
-# | msgid "About %(name)s"
-#: mailing/templates/mailing/manage/campaign_detail.html:39
-#, python-format
-msgid "by %(name)s"
-msgstr "door %(name)s"
-
 # | msgid "Next session: %(when)s"
-#: mailing/templates/mailing/manage/campaign_detail.html:39
+#: mailing/templates/mailing/manage/campaign_detail.html:45
 #, python-format
 msgid "to go out %(when)s"
 msgstr "te versturen op %(when)s"
 
-#: mailing/templates/mailing/manage/campaign_detail.html:45
-#: mailing/templates/mailing/manage/journey_detail.html:31
-#: mailing/templates/mailing/manage/template_edit.html:53
-msgid "Preview"
-msgstr "Voorbeeld"
-
-#: mailing/templates/mailing/manage/campaign_detail.html:50
+#: mailing/templates/mailing/manage/campaign_detail.html:56
 #: mailing/templates/mailing/manage/journey_detail.html:36
 #, python-format
 msgid "No template “%(key)s” exists yet."
 msgstr "Er bestaat nog geen sjabloon “%(key)s”."
 
-#: mailing/templates/mailing/manage/campaign_detail.html:57
+#: mailing/templates/mailing/manage/campaign_detail.html:63
 #: mailing/templates/mailing/manage/journey_detail.html:43
 msgid "Results"
 msgstr "Resultaten"
 
-#: mailing/templates/mailing/manage/campaign_detail.html:57
-#: mailing/templates/mailing/manage/campaign_list.html:15
+#: mailing/templates/mailing/manage/campaign_detail.html:63
+#: mailing/templates/mailing/manage/campaign_list.html:26
 msgid "Audience"
 msgstr "Publiek"
 
-#: mailing/templates/mailing/manage/campaign_detail.html:59
+#: mailing/templates/mailing/manage/campaign_detail.html:65
 msgid "want this kind of mail"
 msgstr "willen dit soort e-mails"
 
-#: mailing/templates/mailing/manage/campaign_detail.html:61
+#: mailing/templates/mailing/manage/campaign_detail.html:67
 msgid "queued"
 msgstr "in de wachtrij"
 
-#: mailing/templates/mailing/manage/campaign_detail.html:62
-#: mailing/templates/mailing/manage/journey_detail.html:48
-msgid "sent"
-msgstr "verstuurd"
-
-# | msgid "Waiting list"
-#: mailing/templates/mailing/manage/campaign_detail.html:63
-msgid "waiting"
-msgstr "wachtend"
-
 # | msgid "Welcome back"
-#: mailing/templates/mailing/manage/campaign_detail.html:64
+#: mailing/templates/mailing/manage/campaign_detail.html:70
 #: mailing/templates/mailing/manage/journey_detail.html:49
 msgid "held back"
 msgstr "tegengehouden"
 
-#: mailing/templates/mailing/manage/campaign_detail.html:65
+#: mailing/templates/mailing/manage/campaign_detail.html:71
 msgid "bounced"
 msgstr "teruggestuurd"
 
-#: mailing/templates/mailing/manage/campaign_detail.html:66
+#: mailing/templates/mailing/manage/campaign_detail.html:72
 msgid "failed"
 msgstr "mislukt"
 
 # | msgid "Unsubscribed"
-#: mailing/templates/mailing/manage/campaign_detail.html:67
+#: mailing/templates/mailing/manage/campaign_detail.html:73
 msgid "unsubscribed since"
 msgstr "sindsdien uitgeschreven"
 
-#: mailing/templates/mailing/manage/campaign_detail.html:71
+#: mailing/templates/mailing/manage/campaign_detail.html:77
 msgid "For example:"
 msgstr "Bijvoorbeeld:"
 
 # | msgid "None yet"
-#: mailing/templates/mailing/manage/campaign_detail.html:72
+#: mailing/templates/mailing/manage/campaign_detail.html:78
 msgid "Nobody yet."
 msgstr "Nog niemand."
 
-#: mailing/templates/mailing/manage/campaign_detail.html:74
+#: mailing/templates/mailing/manage/campaign_detail.html:80
 #, python-format
 msgid ""
 "Goes out at up to %(rate)s batches a minute; held-back mail is for people "
@@ -8129,40 +8782,63 @@ msgstr ""
 "mails zijn voor mensen die zich uitschreven, geblokkeerde adressen of "
 "inactieve accounts."
 
-#: mailing/templates/mailing/manage/campaign_detail.html:82
+#: mailing/templates/mailing/manage/campaign_detail.html:89
+msgid "Stop this dojo's mail? Mail that hasn't gone out yet won't be sent."
+msgstr ""
+"De mail van deze dojo stoppen? Mail die nog niet vertrokken is, wordt niet "
+"verstuurd."
+
+#: mailing/templates/mailing/manage/campaign_detail.html:93
+msgid ""
+"Nothing to do: the organisation can stop a dojo's mail while it's going out."
+msgstr ""
+"Niets te doen: de organisatie kan de mail van een dojo stoppen terwijl hij "
+"vertrekt."
+
+#: mailing/templates/mailing/manage/campaign_detail.html:100
 #: mailing/templates/mailing/manage/journey_detail.html:66
 msgid "Send a test to me"
 msgstr "Stuur mij een test"
 
-#: mailing/templates/mailing/manage/campaign_detail.html:86
+#: mailing/templates/mailing/manage/campaign_detail.html:104
 #, python-format
 msgid "Send “%(name)s” to %(count)s people on %(when)s?"
 msgstr "“%(name)s” naar %(count)s mensen sturen op %(when)s?"
 
-#: mailing/templates/mailing/manage/campaign_detail.html:86
+#: mailing/templates/mailing/manage/campaign_detail.html:104
 #, python-format
 msgid "Send “%(name)s” to %(count)s people?"
 msgstr "“%(name)s” naar %(count)s mensen sturen?"
 
-#: mailing/templates/mailing/manage/campaign_detail.html:87
+#: mailing/templates/mailing/manage/campaign_detail.html:105
 msgid "Launch"
 msgstr "Lanceren"
 
-#: mailing/templates/mailing/manage/campaign_detail.html:92
+#: mailing/templates/mailing/manage/campaign_detail.html:110
 msgid "Cancel this campaign? Mail that hasn't gone out yet won't be sent."
 msgstr ""
 "Deze campagne annuleren? E-mails die nog niet verstuurd zijn, gaan niet meer "
 "weg."
 
-#: mailing/templates/mailing/manage/campaign_detail.html:93
+#: mailing/templates/mailing/manage/campaign_detail.html:111
 msgid "Cancel campaign"
 msgstr "Campagne annuleren"
 
-#: mailing/templates/mailing/manage/campaign_form.html:12
-msgid "Save draft"
-msgstr "Ontwerp opslaan"
+#: mailing/templates/mailing/manage/campaign_list.html:9
+#: mailing/templates/mailing/manage/campaign_list.html:24
+msgid "Sent by"
+msgstr "Verstuurd door"
 
-#: mailing/templates/mailing/manage/campaign_list.html:31
+#: mailing/templates/mailing/manage/campaign_list.html:12
+#: mailing/templates/mailing/manage/campaign_list.html:36
+msgid "The organisation"
+msgstr "De organisatie"
+
+#: mailing/templates/mailing/manage/campaign_list.html:13
+msgid "Every dojo"
+msgstr "Alle dojo's"
+
+#: mailing/templates/mailing/manage/campaign_list.html:43
 msgid "No campaigns yet. Create one to reach families, mentors or champions."
 msgstr ""
 "Nog geen campagnes. Maak er een aan om gezinnen, mentors of champions te "
@@ -8261,10 +8937,6 @@ msgstr ""
 "minuutje. Op deze pagina kijk je na of de e-mail vertrekt, en zie je welke e-"
 "mail mislukte of terugkwam en welke adressen niets meer krijgen."
 
-#: mailing/templates/mailing/manage/mail_queue.html:23
-msgid "Mail isn't going out."
-msgstr "De e-mail vertrekt niet."
-
 #: mailing/templates/mailing/manage/mail_queue.html:24
 #, python-format
 msgid ""
@@ -8276,10 +8948,6 @@ msgstr ""
 "waarschijnlijk niet: vraag wie de server beheert om ze na te kijken. Er gaat "
 "niets verloren; de e-mail vertrekt zodra ze weer draaien."
 
-#: mailing/templates/mailing/manage/mail_queue.html:29
-msgid "waiting to be sent"
-msgstr "wachten om te vertrekken"
-
 #: mailing/templates/mailing/manage/mail_queue.html:30
 msgid "being sent"
 msgstr "worden verstuurd"
@@ -8287,10 +8955,6 @@ msgstr "worden verstuurd"
 #: mailing/templates/mailing/manage/mail_queue.html:31
 msgid "scheduled for later"
 msgstr "gepland voor later"
-
-#: mailing/templates/mailing/manage/mail_queue.html:32
-msgid "sent in the last 24 hours"
-msgstr "verstuurd in de laatste 24 uur"
 
 #: mailing/templates/mailing/manage/mail_queue.html:33
 #, python-format
@@ -8325,11 +8989,6 @@ msgstr ""
 msgid "To"
 msgstr "Aan"
 
-#: mailing/templates/mailing/manage/mail_queue.html:60
-#: mailing/templates/mailing/manage/mail_queue.html:93
-msgid "Queued"
-msgstr "In de wachtrij gezet"
-
 #: mailing/templates/mailing/manage/mail_queue.html:61
 msgid "Not before"
 msgstr "Niet vóór"
@@ -8337,11 +8996,6 @@ msgstr "Niet vóór"
 #: mailing/templates/mailing/manage/mail_queue.html:70
 msgid "Being sent"
 msgstr "Wordt verstuurd"
-
-# | msgid "Waiting list"
-#: mailing/templates/mailing/manage/mail_queue.html:70
-msgid "Waiting"
-msgstr "Wacht"
 
 #: mailing/templates/mailing/manage/mail_queue.html:70
 #, python-format
@@ -8405,10 +9059,6 @@ msgstr ""
 #: mailing/templates/mailing/manage/mail_queue.html:123
 msgid "What the mail server said"
 msgstr "Wat de e-mailserver zei"
-
-#: mailing/templates/mailing/manage/mail_queue.html:124
-msgid "Mail"
-msgstr "E-mail"
 
 #: mailing/templates/mailing/manage/mail_queue.html:138
 msgid "No bounces."
@@ -8703,7 +9353,9 @@ msgstr "Je bent uitgeschreven"
 msgid ""
 "You won't get news from <strong>%(name)s</strong> any more. News from your "
 "other dojos still comes."
-msgstr "Je krijgt geen nieuws meer van <strong>%(name)s</strong>. Nieuws van je andere dojo's blijft komen."
+msgstr ""
+"Je krijgt geen nieuws meer van <strong>%(name)s</strong>. Nieuws van je "
+"andere dojo's blijft komen."
 
 #: mailing/templates/mailing/unsubscribed.html:10
 msgid "You won't get any optional mails from us any more."

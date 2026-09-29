@@ -39,6 +39,7 @@ the people using the site, not for the people building it.
    dojo-team/logging-in
    dojo-team/running-a-session
    dojo-team/api-clients
+   dojo-team/mailing-your-families
 
 .. toctree::
    :maxdepth: 2

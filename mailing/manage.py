@@ -9,8 +9,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db.models import Min, Q
-from django.db.models.functions import Coalesce
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -20,7 +19,7 @@ from django.views.decorators.http import require_POST
 from accounts.organisation import Area, require_area
 from dojos.models import Dojo
 
-from . import campaigns, dojo_audiences, journeys
+from . import campaigns, dojo_audiences, journeys, queue_status
 from .dojo_views import mail_previews
 from .forms import CampaignForm, JourneyForm, NewTemplateForm, SegmentForm, TemplateVersionForm
 from .models import (
@@ -596,9 +595,6 @@ def journey_test(request, journey_id):
 
 MAIL_QUEUE_LIMIT = 50  # rows per section
 MAIL_QUEUE_RECENT_DAYS = 30  # how far back failures and bounces are shown
-# Mail due longer than this and still waiting means the workers aren't sending
-# (the same threshold as requeue_stuck_emails' warning in the log).
-MAIL_QUEUE_STALLED_AFTER = timedelta(minutes=30)
 
 
 @login_required
@@ -621,12 +617,8 @@ def mail_queue(request):
         bounces = bounces.filter(email__icontains=query)
         blocked = blocked.filter(email__icontains=query)
 
-    due = Q(send_after__isnull=True) | Q(send_after__lte=now)
-    oldest_due = (
-        EmailMessage.objects.filter(due, status=Status.PENDING)
-        .annotate(due_at=Coalesce("send_after", "created_at"))
-        .aggregate(oldest=Min("due_at"))["oldest"]
-    )
+    due = queue_status.due_q(now)
+    oldest_due = queue_status.oldest_due(now)
     waiting = mail.filter(status__in=[Status.PENDING, Status.SENDING])
     failed = mail.filter(status=Status.FAILED, created_at__gte=since)
     recent_bounces = bounces.filter(created_at__gte=since)
@@ -649,7 +641,7 @@ def mail_queue(request):
             "recent_days": MAIL_QUEUE_RECENT_DAYS,
             "limit": MAIL_QUEUE_LIMIT,
             "oldest_due": oldest_due,
-            "stalled": bool(oldest_due and now - oldest_due > MAIL_QUEUE_STALLED_AFTER),
+            "stalled": queue_status.is_stalled(oldest_due, now),
             "bounce_mailbox_on": bool(settings.MAILING_BOUNCE_IMAP_HOST),
             "waiting": waiting.order_by("priority", "created_at")[:MAIL_QUEUE_LIMIT],
             "failed": failed.order_by("-created_at")[:MAIL_QUEUE_LIMIT],

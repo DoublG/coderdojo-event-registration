@@ -35,3 +35,13 @@ While it's going out, **Cancel campaign** stops the mail that hasn't been
 sent yet. Once everything is out, the campaign shows as **Sent**, with its
 results: how many were sent, held back (unsubscribed, blocked addresses),
 bounced or failed, and how many people unsubscribed since.
+
+Dojos' own mail
+---------------
+
+A dojo's champion can also mail the dojo's own families, to one of a few
+prepared groups (see :doc:`../dojo-team/mailing-your-families`). Those mails
+are in the same list: **Sent by** shows who sent each one, and lets you show
+only the organisation's or one dojo's. You can read a dojo's mail as the
+families get it, but only its champion edits, tests and sends it. While
+it's going out, you can stop it with **Stop sending**.

@@ -15,9 +15,13 @@ and sending need SEND_MAIL (the champion).
     <h2 class="heading-md">{% translate "Write to the families of your dojo" %}</h2>
     <p class="body-sm muted">{% translate "A mail from your dojo, through the site: to all your families, to those booked for a session, or to a group you pick. Only families who want news from your dojo get it, and every mail lets them stop. Replies go to your dojo's email address." %}</p>
     <p class="body-sm">{% blocktranslate count counter=launched with limit=limit %}{{ counter }} of {{ limit }} mails sent in the last 30 days.{% plural %}{{ counter }} of {{ limit }} mails sent in the last 30 days.{% endblocktranslate %}</p>
-    {% if dojo_access.can_send_mail %}
-      <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_mail_create' dojo_id=dojo.id %}">{% translate "Write a mail" %}</a>
-    {% else %}
+    <div class="mail-actions">
+      {% if dojo_access.can_send_mail %}
+        <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_mail_create' dojo_id=dojo.id %}">{% translate "Write a mail" %}</a>
+      {% endif %}
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_mail_queue' dojo_id=dojo.id %}">{% translate "Mail queue" %}</a>
+    </div>
+    {% if not dojo_access.can_send_mail %}
       <p class="caption muted">{% translate "Only the champion writes and sends the dojo's mail." %}</p>
     {% endif %}
   </section>

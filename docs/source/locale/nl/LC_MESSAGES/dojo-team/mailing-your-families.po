@@ -1,0 +1,177 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-29 15:51+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/dojo-team/mailing-your-families.rst:2
+msgid "Mailing your families"
+msgstr "Je gezinnen mailen"
+
+#: ../../source/dojo-team/mailing-your-families.rst:4
+msgid ""
+"Your dojo can send its own mail to its families through the site: \"no "
+"session this Saturday\", \"bring a charger\", or \"our new sessions are "
+"open\" to the families who came this year. Only the dojo's **champion** "
+"writes and sends it; the rest of the team can read what was sent."
+msgstr ""
+"Je dojo kan via de site zelf mails naar zijn gezinnen sturen: \"geen "
+"sessie deze zaterdag\", \"breng een lader mee\", of \"onze nieuwe sessies"
+" staan open\" aan de gezinnen die dit jaar kwamen. Alleen de **champion**"
+" van de dojo schrijft en verstuurt ze; de rest van het team kan lezen wat"
+" verstuurd werd."
+
+#: ../../source/dojo-team/mailing-your-families.rst:10
+msgid "Who gets it"
+msgstr "Wie krijgt hem"
+
+#: ../../source/dojo-team/mailing-your-families.rst:12
+msgid ""
+"In the sidebar, under **Manage**, open **Mail** and choose **Write a "
+"mail**. First pick who gets it:"
+msgstr ""
+"Open in de zijbalk, onder **Beheren**, **E-mail** en kies **Een mail "
+"schrijven**. Kies eerst wie hem krijgt:"
+
+#: ../../source/dojo-team/mailing-your-families.rst:15
+msgid ""
+"**All families of the dojo**: families whose child has your dojo as home "
+"dojo, or came to one of its sessions in the last year."
+msgstr ""
+"**Alle gezinnen van de dojo**: gezinnen van wie een kind je dojo als "
+"thuisdojo heeft, of het afgelopen jaar naar een van de sessies kwam."
+
+#: ../../source/dojo-team/mailing-your-families.rst:17
+msgid ""
+"**Families booked for a session**: families with a place for one of your "
+"sessions, and if you like those on its waiting list too."
+msgstr ""
+"**Gezinnen ingeschreven voor een sessie**: gezinnen met een plaats voor "
+"een van je sessies, en als je wilt ook die op de wachtlijst."
+
+#: ../../source/dojo-team/mailing-your-families.rst:19
+msgid ""
+"**Families on a session's waiting list**: for example to tell them about "
+"an extra session."
+msgstr ""
+"**Gezinnen op de wachtlijst van een sessie**: bijvoorbeeld om hun een "
+"extra sessie te melden."
+
+#: ../../source/dojo-team/mailing-your-families.rst:21
+msgid ""
+"**Families who came recently**: families whose child came in the last 90,"
+" 180 or 365 days."
+msgstr ""
+"**Gezinnen die onlangs kwamen**: gezinnen van wie een kind de afgelopen "
+"90, 180 of 365 dagen kwam."
+
+#: ../../source/dojo-team/mailing-your-families.rst:23
+msgid ""
+"**New families**, **We miss you** (children who missed several sessions "
+"in a row or stopped coming), **Children of an age** and **Children on a "
+"pathway** (one of your dojo's pathways). These choose by the children's "
+"details, so they only reach families who agreed to that."
+msgstr ""
+"**Nieuwe gezinnen**, **We missen je** (kinderen die een paar sessies na "
+"elkaar misten of niet meer komen), **Kinderen van een leeftijd** en "
+"**Kinderen op een leertraject** (een van de leertrajecten van je dojo). "
+"Die kiezen op basis van de gegevens van de kinderen en bereiken dus "
+"alleen gezinnen die daar toestemming voor gaven."
+
+#: ../../source/dojo-team/mailing-your-families.rst:28
+msgid ""
+"Under your choice you see how many families it reaches. You never see who"
+" they are. Only families who want news from your dojo count: a family can"
+" stop your dojo's mail, or all news from dojos, at any time."
+msgstr ""
+"Onder je keuze zie je hoeveel gezinnen hij bereikt. Wie dat zijn, zie je "
+"nooit. Alleen gezinnen die nieuws van je dojo willen, tellen mee: een "
+"gezin kan de mails van je dojo, of al het nieuws van dojo's, altijd "
+"stoppen."
+
+#: ../../source/dojo-team/mailing-your-families.rst:33
+msgid "Writing it"
+msgstr "Hem schrijven"
+
+#: ../../source/dojo-team/mailing-your-families.rst:35
+msgid ""
+"Write a **subject** (your dojo's name goes in front of it) and a "
+"**message**, in plain text: links work, but there's no layout, no images "
+"and no attachments. If your dojo uses more than one language, you can "
+"write the mail in each of them too. A family then gets it in its own "
+"language, or else in your dojo's main language."
+msgstr ""
+"Schrijf een **onderwerp** (de naam van je dojo komt ervoor) en een "
+"**bericht**, in gewone tekst: links werken, maar er is geen opmaak, geen "
+"afbeeldingen en geen bijlagen. Gebruikt je dojo meer dan één taal, dan "
+"kun je de mail ook in elk van die talen schrijven. Een gezin krijgt hem "
+"dan in zijn eigen taal, anders in de hoofdtaal van je dojo."
+
+#: ../../source/dojo-team/mailing-your-families.rst:41
+msgid ""
+"**Save draft** keeps it. The page then shows the mail as the families get"
+" it. **Send me a test** sends it to your own address first."
+msgstr ""
+"**Ontwerp opslaan** bewaart hem. De pagina toont de mail dan zoals de "
+"gezinnen hem krijgen. **Stuur me een test** stuurt hem eerst naar je "
+"eigen adres."
+
+#: ../../source/dojo-team/mailing-your-families.rst:45
+msgid "Sending it"
+msgstr "Hem versturen"
+
+#: ../../source/dojo-team/mailing-your-families.rst:47
+msgid ""
+"**Send** sends it right away. The mail goes out over the next few "
+"minutes, from CoderDojo Belgium with your dojo's name, and **replies go "
+"to your dojo's email address**, so fill that in under **Settings** first."
+" You can send at most four mails in 30 days. While it's going out, **Stop"
+" sending** stops the mails that haven't gone out yet."
+msgstr ""
+"**Versturen** verstuurt hem meteen. De mail vertrekt in de komende "
+"minuten, van CoderDojo Belgium met de naam van je dojo, en **antwoorden "
+"komen op het e-mailadres van je dojo**, dus vul dat eerst in bij "
+"**Instellingen**. Je kunt hoogstens vier mails in 30 dagen versturen. "
+"Terwijl hij vertrekt, stopt **Versturen stoppen** de mails die nog niet "
+"vertrokken zijn."
+
+#: ../../source/dojo-team/mailing-your-families.rst:53
+msgid ""
+"Afterwards the mail's page shows how many were sent, how many couldn't be"
+" delivered, and how many families stopped your dojo's news since."
+msgstr ""
+"Daarna toont de pagina van de mail hoeveel er verstuurd werden, hoeveel "
+"niet afgeleverd konden worden, en hoeveel gezinnen sindsdien het nieuws "
+"van je dojo stopten."
+
+#: ../../source/dojo-team/mailing-your-families.rst:57
+msgid "The mail queue"
+msgstr "De mailwachtrij"
+
+#: ../../source/dojo-team/mailing-your-families.rst:59
+msgid ""
+"**Mail queue**, on the **Mail** page, shows what happened to your dojo's "
+"mail: your own mails and the automatic mail about new sessions. Per mail "
+"you see how many are waiting to go out, were sent, couldn't be delivered,"
+" or were held back, and below that why mail was held back (for example "
+"because a family stopped your dojo's mail). It shows numbers, never "
+"addresses. Mail that couldn't be delivered usually went to a mistyped or "
+"closed address; if something looks wrong, ask the organisation."
+msgstr "**E-mailwachtrij**, op de pagina **E-mail**, toont wat er met de mail van je dojo gebeurde: je eigen mails en de automatische mail over nieuwe sessies. Per mail zie je hoeveel er nog wachten om te vertrekken, verstuurd werden, niet afgeleverd konden worden of tegengehouden werden, en daaronder waarom mail tegengehouden werd (bijvoorbeeld omdat een gezin de mails van je dojo stopte). Je ziet aantallen, nooit adressen. Mail die niet afgeleverd kon worden, ging meestal naar een verkeerd getypt of opgeheven adres; lijkt er iets mis, vraag het dan aan de organisatie."
+

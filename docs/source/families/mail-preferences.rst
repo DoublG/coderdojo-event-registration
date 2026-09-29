@@ -35,7 +35,8 @@ kind of mail:
   you switch it off.
 - **News from your dojo**: new sessions and news from the dojos your family
   goes to (your child's home dojo, or a dojo they came to in the last
-  year), at most once a day. On unless you switch it off.
+  year), and mails the dojo's team writes to its families themselves. On
+  unless you switch it off.
 - **Volunteering**: news for champions and mentors, and calls for
   volunteers. On unless you switch it off.
 - **Newsletter and campaigns**: the CoderDojo Belgium newsletter and events

@@ -6,20 +6,26 @@ it does goes through mailing.campaigns, and the audiences through
 mailing.dojo_audiences. The team sees how many families a mail reaches,
 never who they are."""
 
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Min, Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_POST
 
 from core.content_languages import language_name
 from dojos.access import SEND_MAIL, require_dojo_access
 from dojos.views import _admin_context
 
-from . import campaigns, dojo_audiences
+from . import campaigns, dojo_audiences, queue_status, services
+from .categories import MailCategory
 from .forms import DojoMailingForm
-from .models import Campaign
+from .models import Campaign, EmailMessage
 from .rendering import TemplateMissing
 from .rendering import render as render_mail
 
@@ -190,3 +196,104 @@ def dojo_mail_cancel(request, dojo_id, campaign_id):
     else:
         messages.success(request, _("Stopped. Mails that hadn't gone out yet won't be sent."))
     return redirect("dojo_mail_detail", dojo_id=access.dojo.id, campaign_id=campaign.pk)
+
+
+# --- the dojo's mail queue ------------------------------------------------------------
+
+QUEUE_RECENT_DAYS = 30
+
+# EmailMessage.status_reason of held-back mail, in words for the dojo's team.
+HELD_BACK_REASONS = {
+    services.MUTED_DOJO: gettext_lazy("The family stopped your dojo's mail."),
+    services.NOT_SUBSCRIBED: gettext_lazy("The family stopped all news from dojos."),
+    services.BLOCKED: gettext_lazy("The address is blocked: earlier mail to it bounced, or it was marked as spam."),
+    services.INACTIVE: gettext_lazy("The account was switched off."),
+    services.NO_ADDRESS: gettext_lazy("The account has no email address."),
+    services.WRONG_ACCOUNT_TYPE: gettext_lazy("This kind of mail doesn't go to this kind of account."),
+    campaigns.CANCELLED: gettext_lazy("You stopped the mail before it went out."),
+}
+
+
+@login_required
+def dojo_mail_queue(request, dojo_id):
+    """What happened to the dojo's mail (its own mailings and the automatic
+    "new sessions" mail): waiting, sent, not delivered and held back, per
+    mail and in counts. Read-only, and never the families' addresses
+    (DATA_MODEL.md §25, decision 10): a failure's own text can hold an
+    address, so it's shown as "not delivered" only."""
+    access = require_dojo_access(request, dojo_id)
+    now = timezone.now()
+    since = now - timedelta(days=QUEUE_RECENT_DAYS)
+    Status = EmailMessage.Status
+    mail = EmailMessage.objects.filter(dojo=access.dojo, category=MailCategory.DOJO_NEWS)
+    open_statuses = [Status.PENDING, Status.SENDING]
+    shown = mail.filter(Q(created_at__gte=since) | Q(status__in=open_statuses))
+
+    rows = {}
+    for entry in shown.values("campaign_id", "campaign__subject", "template_key", "is_test", "status").annotate(
+        n=Count("id"), first=Min("created_at")
+    ):
+        key = ("test",) if entry["is_test"] else (entry["campaign_id"] or entry["template_key"],)
+        row = rows.setdefault(
+            key,
+            {
+                "campaign_id": None if entry["is_test"] else entry["campaign_id"],
+                "label": _mail_label(entry),
+                "first": entry["first"],
+                "waiting": 0,
+                "sent": 0,
+                "not_delivered": 0,
+                "held_back": 0,
+            },
+        )
+        row["first"] = min(row["first"], entry["first"])
+        row[_column(entry["status"])] += entry["n"]
+
+    held_back = {}
+    recent_held = mail.filter(status=Status.SUPPRESSED, created_at__gte=since, is_test=False)
+    for entry in recent_held.values("status_reason").annotate(n=Count("id")):
+        label = str(HELD_BACK_REASONS.get(entry["status_reason"], _("Another reason.")))
+        held_back[label] = held_back.get(label, 0) + entry["n"]
+
+    oldest = queue_status.oldest_due(now)
+    counts = {
+        "waiting": mail.filter(status__in=open_statuses).count(),
+        "sent_today": mail.filter(status=Status.SENT, sent_at__gte=now - timedelta(days=1)).count(),
+        "not_delivered": mail.filter(status__in=[Status.FAILED, Status.BOUNCED], created_at__gte=since).count(),
+        "held_back": recent_held.count(),
+    }
+    return render(
+        request,
+        "mailing/dojo/mail_queue.html",
+        _context(
+            request,
+            access,
+            counts=counts,
+            rows=sorted(rows.values(), key=lambda r: r["first"], reverse=True),
+            held_back=sorted(held_back.items(), key=lambda item: -item[1]),
+            recent_days=QUEUE_RECENT_DAYS,
+            stalled=queue_status.is_stalled(oldest, now),
+            oldest_due=oldest,
+        ),
+    )
+
+
+def _mail_label(entry):
+    if entry["is_test"]:
+        return _("Tests sent to yourself")
+    if entry["campaign_id"]:
+        return entry["campaign__subject"]
+    if entry["template_key"] == "new_sessions_at_dojo":
+        return _("New sessions (the automatic mail)")
+    return entry["template_key"]
+
+
+def _column(status):
+    Status = EmailMessage.Status
+    if status in (Status.PENDING, Status.SENDING):
+        return "waiting"
+    if status == Status.SENT:
+        return "sent"
+    if status in (Status.FAILED, Status.BOUNCED):
+        return "not_delivered"
+    return "held_back"

@@ -9,6 +9,7 @@ urlpatterns = [
     path("dojos/<int:dojo_id>/manage/mail/", dojo_views.dojo_mail_list, name="dojo_mail_list"),
     path("dojos/<int:dojo_id>/manage/mail/new/", dojo_views.dojo_mail_create, name="dojo_mail_create"),
     path("dojos/<int:dojo_id>/manage/mail/reach/", dojo_views.dojo_mail_reach, name="dojo_mail_reach"),
+    path("dojos/<int:dojo_id>/manage/mail/queue/", dojo_views.dojo_mail_queue, name="dojo_mail_queue"),
     path("dojos/<int:dojo_id>/manage/mail/<int:campaign_id>/", dojo_views.dojo_mail_detail, name="dojo_mail_detail"),
     path("dojos/<int:dojo_id>/manage/mail/<int:campaign_id>/test/", dojo_views.dojo_mail_test, name="dojo_mail_test"),
     path(

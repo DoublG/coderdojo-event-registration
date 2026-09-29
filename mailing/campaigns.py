@@ -49,6 +49,10 @@ Status = Campaign.Status
 LAUNCH_LOCK_SECONDS = 30 * 60
 
 
+# EmailMessage.status_reason of the mail a cancel withdrew.
+CANCELLED = "The campaign was cancelled."
+
+
 class CampaignError(Exception):
     pass
 
@@ -198,7 +202,7 @@ def cancel(campaign):
         campaign.save(update_fields=["status"])
         EmailMessage.objects.filter(campaign=campaign, status=EmailMessage.Status.PENDING).update(
             status=EmailMessage.Status.SUPPRESSED,
-            status_reason="The campaign was cancelled.",
+            status_reason=CANCELLED,
         )
 
 

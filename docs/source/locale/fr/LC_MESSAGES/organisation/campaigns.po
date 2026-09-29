@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 13:17+0000\n"
+"POT-Creation-Date: 2026-09-29 15:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -117,4 +117,18 @@ msgstr ""
 "**Envoyée**, avec ses résultats : combien d'e-mails ont été envoyés, "
 "retenus (désabonnés, adresses bloquées), sont revenus ou ont échoué, et "
 "combien de personnes se sont désabonnées depuis."
+
+#: ../../source/organisation/campaigns.rst:40
+msgid "Dojos' own mail"
+msgstr "Mails propres aux dojos"
+
+#: ../../source/organisation/campaigns.rst:42
+msgid ""
+"A dojo's champion can also mail the dojo's own families, to one of a few "
+"prepared groups (see :doc:`../dojo-team/mailing-your-families`). Those "
+"mails are in the same list: **Sent by** shows who sent each one, and lets"
+" you show only the organisation's or one dojo's. You can read a dojo's "
+"mail as the families get it, but only its champion edits, tests and sends"
+" it. While it's going out, you can stop it with **Stop sending**."
+msgstr "Le champion d'un dojo peut aussi écrire aux familles du dojo, à l'un de quelques groupes préparés (voir :doc:`../dojo-team/mailing-your-families`). Ces mails figurent dans la même liste : **Envoyé par** indique qui a envoyé chacun d'eux et permet de n'afficher que ceux de l'organisation ou d'un dojo. Vous pouvez lire le mail d'un dojo tel que les familles le reçoivent, mais seul son champion le modifie, le teste et l'envoie. Pendant l'envoi, vous pouvez l'arrêter avec **Arrêter l'envoi**."
 

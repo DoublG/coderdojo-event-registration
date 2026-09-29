@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 13:17+0000\n"
+"POT-Creation-Date: 2026-09-29 15:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -117,4 +117,18 @@ msgstr ""
 "**Verstuurd**, met de resultaten: hoeveel e-mails verstuurd, "
 "tegengehouden (uitgeschreven, geblokkeerde adressen), teruggekomen of "
 "mislukt zijn, en hoeveel mensen zich sindsdien uitschreven."
+
+#: ../../source/organisation/campaigns.rst:40
+msgid "Dojos' own mail"
+msgstr "Eigen mails van dojo's"
+
+#: ../../source/organisation/campaigns.rst:42
+msgid ""
+"A dojo's champion can also mail the dojo's own families, to one of a few "
+"prepared groups (see :doc:`../dojo-team/mailing-your-families`). Those "
+"mails are in the same list: **Sent by** shows who sent each one, and lets"
+" you show only the organisation's or one dojo's. You can read a dojo's "
+"mail as the families get it, but only its champion edits, tests and sends"
+" it. While it's going out, you can stop it with **Stop sending**."
+msgstr "De champion van een dojo kan ook de eigen gezinnen van de dojo mailen, aan een van enkele vooraf klaargezette groepen (zie :doc:`../dojo-team/mailing-your-families`). Die mails staan in dezelfde lijst: **Verstuurd door** toont wie elke mail verstuurde, en laat je alleen die van de organisatie of van één dojo tonen. Je kunt de mail van een dojo lezen zoals de gezinnen hem krijgen, maar alleen de champion ervan bewerkt, test en verstuurt hem. Terwijl hij vertrekt, kun je hem stoppen met **Versturen stoppen**."
 

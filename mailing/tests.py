@@ -2655,3 +2655,112 @@ class OrganisationSeesDojoMailTests(TestCase):
         self.mailing.refresh_from_db()
         self.assertEqual(self.mailing.status, Campaign.Status.CANCELLED)
         self.assertEqual(EmailMessage.objects.get().status, Status.SUPPRESSED)
+
+
+class DojoMailQueueTests(TestCase):
+    """The dojo's own mail queue: counts per mail and reasons in words,
+    never the families' addresses."""
+
+    def setUp(self):
+        from dojos.testing import make_champion, make_mentor
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.champion = make_champion(username="champ", email="champ@example.com")
+        self.mentor = make_mentor(username="mentor", email="mentor@example.com")
+        self.dojo = make_dojo("Ghent", champion=self.champion, email="ghent@example.com")
+        add_member(self.dojo, self.mentor)
+        self.other = make_dojo("Antwerp")
+        self.families = []
+        for name in ("anna", "bert", "carl"):
+            parent = User.objects.create(username=name, email=f"{name}@families.example")
+            _kid(parent, self.dojo)
+            self.families.append(parent)
+        self.url = reverse("dojo_mail_queue", kwargs={"dojo_id": self.dojo.pk})
+
+    def _mailing(self):
+        campaign = Campaign.objects.create(
+            name="Hi",
+            dojo=self.dojo,
+            category=MailCategory.DOJO_NEWS,
+            template_key="dojo_message",
+            audience="all_families",
+            subject="Geen sessie",
+            message="Tot volgende week",
+        )
+        campaigns.launch(campaign, self.champion)
+        return campaign
+
+    def test_counts_per_mail_and_reasons_without_addresses(self):
+        from .preferences import set_dojo_mute
+
+        anna, bert, carl = self.families
+        set_dojo_mute(carl, self.dojo, True, ConsentEvent.PREFERENCES)
+        campaign = self._mailing()
+        # Carl muted the dojo, so the audience leaves him out; queue him by hand as a held-back row.
+        send(
+            carl,
+            MailCategory.DOJO_NEWS,
+            "dojo_message",
+            campaigns.dojo_context(campaign, carl),
+            dojo=self.dojo,
+            campaign=campaign,
+        )
+        campaigns.queue_mail(campaign.pk)
+        EmailMessage.objects.filter(user=anna).update(status=Status.SENT, sent_at=timezone.now())
+        EmailMessage.objects.filter(user=bert).update(
+            status=Status.BOUNCED, status_reason="Bounced 5.1.1 bert@families.example"
+        )
+        # Another dojo's mail and the organisation's never show.
+        EmailMessage.objects.create(
+            user=anna, category=MailCategory.DOJO_NEWS, subject="Antwerp news", body="", dojo=self.other
+        )
+        EmailMessage.objects.create(user=anna, category=MailCategory.NEWSLETTER, subject="Newsletter", body="")
+
+        self.client.force_login(self.mentor)  # any role can read it
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "mailing/dojo/mail_queue.html")
+        self.assertEqual(
+            response.context["counts"], {"waiting": 0, "sent_today": 1, "not_delivered": 1, "held_back": 1}
+        )
+        [row] = response.context["rows"]
+        self.assertEqual((row["label"], row["sent"], row["not_delivered"], row["held_back"]), ("Geen sessie", 1, 1, 1))
+        self.assertEqual(response.context["held_back"], [("The family stopped your dojo's mail.", 1)])
+        for family in self.families:
+            self.assertNotContains(response, family.email)
+        self.assertNotContains(response, "Antwerp news")
+        self.assertNotContains(response, "Newsletter")
+
+    def test_the_automatic_mail_and_tests_have_their_own_rows(self):
+        from .automated import announce_new_sessions
+
+        _session(self.dojo, days_ago=-10, status=Event.OPEN)
+        announce_new_sessions()
+        draft = Campaign.objects.create(
+            name="Draft",
+            dojo=self.dojo,
+            category=MailCategory.DOJO_NEWS,
+            template_key="dojo_message",
+            audience="all_families",
+            subject="Draft",
+            message="Hello",
+        )
+        campaigns.send_test(draft, self.champion)
+        self.client.force_login(self.champion)
+        labels = {row["label"]: row["waiting"] for row in self.client.get(self.url).context["rows"]}
+        self.assertEqual(labels, {"New sessions (the automatic mail)": 3, "Tests sent to yourself": 1})
+
+    def test_stalled_mail_shows_a_warning(self):
+        row = EmailMessage.objects.create(
+            user=self.families[0], category=MailCategory.DOJO_NEWS, subject="x", body="", dojo=self.dojo
+        )
+        EmailMessage.objects.filter(pk=row.pk).update(created_at=timezone.now() - timedelta(hours=2))
+        self.client.force_login(self.champion)
+        self.assertContains(self.client.get(self.url), "Mail isn't going out.")
+
+    def test_only_the_dojos_team(self):
+        self.client.force_login(self.families[0])
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+        self.client.force_login(self.champion)
+        other = reverse("dojo_mail_queue", kwargs={"dojo_id": self.other.pk})
+        self.assertEqual(self.client.get(other).status_code, 404)
+        self.assertContains(self.client.get(reverse("dojo_mail_list", kwargs={"dojo_id": self.dojo.pk})), self.url)
