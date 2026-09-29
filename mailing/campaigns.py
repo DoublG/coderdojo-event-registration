@@ -112,7 +112,9 @@ def dojo_context(campaign, user):
     language = user.preferred_language or FALLBACK_LANGUAGE
     return {
         "dojo_name": campaign.dojo.name,
-        "dojo_url": settings.SITE_URL + reverse("dojo_detail", kwargs={"dojo_id": campaign.dojo_id}),
+        # An organisation dojo, or one that isn't public, has no page of its own.
+        "dojo_url": settings.SITE_URL
+        + (reverse("dojo_detail", kwargs={"dojo_id": campaign.dojo_id}) if campaign.dojo.is_public else "/"),
         "subject": str(campaign.localized("subject", language)),
         "message": str(campaign.localized("message", language)),
     }

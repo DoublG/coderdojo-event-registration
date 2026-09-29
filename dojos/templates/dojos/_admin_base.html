@@ -65,6 +65,12 @@ for the sidebar link to highlight, and render with dojos.views._admin_context.
             </a>
           </li>
           <li>
+            <a href="{% url 'dojo_mail_list' dojo_id=dojo.id %}" class="cd-admin-nav__link label{% if active == 'mail' %} cd-admin-nav__link--active{% endif %}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+              {% translate "Mail" %}
+            </a>
+          </li>
+          <li>
             <a href="{% url 'dojo_dashboard' dojo_id=dojo.id %}" class="cd-admin-nav__link label{% if active == 'attendance' %} cd-admin-nav__link--active{% endif %}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11.5l2 2 4-4.5"/><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/></svg>
               {% translate "Attendance" %}

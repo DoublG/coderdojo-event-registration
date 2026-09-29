@@ -48,6 +48,9 @@ VIEW_HEALTH_NOTES = "view_health_notes"
 # Make, revoke and renew the dojo's API clients (api.models.DojoApiClient):
 # they act for the whole dojo, so only its champion.
 MANAGE_API = "manage_api"
+# Write and send the dojo's own mail to its families (mailing.dojo_views,
+# DATA_MODEL.md §25): it speaks for the whole dojo, so only its champion.
+SEND_MAIL = "send_mail"
 ALL_CAPABILITIES = frozenset(
     {
         TAKE_ATTENDANCE,
@@ -60,6 +63,7 @@ ALL_CAPABILITIES = frozenset(
         POST_UPDATES,
         VIEW_HEALTH_NOTES,
         MANAGE_API,
+        SEND_MAIL,
     }
 )
 
@@ -68,9 +72,9 @@ ROLE_CAPABILITIES = {
     # Mentors can do everything for day-to-day running and team management;
     # the dojo's lifecycle (launching it, making it dormant, archiving,
     # reopening) stays with its champion, and so do the children's health
-    # notes (the family forms tell parents only the champion sees them) and
-    # the dojo's API clients.
-    MENTOR: ALL_CAPABILITIES - {MANAGE_LIFECYCLE, VIEW_HEALTH_NOTES, MANAGE_API},
+    # notes (the family forms tell parents only the champion sees them), the
+    # dojo's API clients and its mail to the families.
+    MENTOR: ALL_CAPABILITIES - {MANAGE_LIFECYCLE, VIEW_HEALTH_NOTES, MANAGE_API, SEND_MAIL},
 }
 
 
@@ -131,6 +135,10 @@ class DojoAccess:
     @property
     def can_manage_api(self):
         return self.can(MANAGE_API)
+
+    @property
+    def can_send_mail(self):
+        return self.can(SEND_MAIL)
 
 
 def managing_membership(user, dojo):

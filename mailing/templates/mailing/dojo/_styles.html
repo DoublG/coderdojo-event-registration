@@ -1,0 +1,24 @@
+<style>
+  .dojo-mail { max-width: 1100px; }
+  .dojo-mail .cd-card { padding: var(--space-5); margin-bottom: var(--space-5); }
+  .dojo-mail h2 { color: var(--ink); margin: 0 0 var(--space-3); }
+  .dojo-mail .muted { color: var(--ink-muted); }
+  .dojo-mail-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-5); align-items: start; }
+  @media (max-width: 960px) { .dojo-mail-grid { grid-template-columns: minmax(0, 1fr); } }
+  .mail-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--border); }
+  .mail-row:last-child { border-bottom: none; }
+  .mail-row p { margin: 0; }
+  .audience-option { display: block; border: 1px solid var(--border); border-radius: var(--radius-md, 8px); padding: var(--space-3); margin-bottom: var(--space-2); }
+  .audience-option__head { display: flex; gap: var(--space-2); align-items: flex-start; cursor: pointer; }
+  .audience-option__head input { margin-top: 4px; }
+  .audience-option__head p { margin: 0; }
+  .audience-option__params { display: none; margin: var(--space-3) 0 0 var(--space-5); }
+  .audience-option:has(> .audience-option__head input:checked) { border-color: var(--brand, var(--ink)); }
+  .audience-option:has(> .audience-option__head input:checked) .audience-option__params { display: block; }
+  .mail-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: var(--space-3); }
+  .mail-stats div { border: 1px solid var(--border); border-radius: var(--radius-md, 8px); padding: var(--space-3); }
+  .mail-stats strong { display: block; font-size: 1.4rem; color: var(--ink); }
+  .mail-preview { white-space: pre-wrap; background: var(--surface-sunken); padding: var(--space-4); border-radius: var(--radius-md, 8px); font-family: inherit; margin: var(--space-2) 0 var(--space-4); }
+  .mail-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+  .mail-actions form { margin: 0; }
+</style>

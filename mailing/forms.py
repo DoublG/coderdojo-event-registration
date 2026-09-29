@@ -9,6 +9,12 @@ from django.utils.functional import lazy
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import gettext_lazy as _
 
+from core.content_languages import (
+    add_translation_fields,
+    bound_translation_groups,
+    optional_copy,
+    save_translation_fields,
+)
 from dojos.models import Dojo
 
 from .categories import CAN_OPT_OUT, DESCRIPTIONS, MailCategory, categories_for
@@ -291,3 +297,123 @@ class JourneyForm(MailingFormMixin, forms.ModelForm):
             'Tip: a rule like "How the child comes to sessions changed: became At risk in the last 7 days" '
             "makes it a triggered mail."
         )
+
+
+# --- a dojo's own mail to its families (mailing.dojo_views, DATA_MODEL.md §25) ----
+
+
+class DojoMailingForm(forms.ModelForm):
+    """A dojo mailing: who gets it (one of the prepared audiences, with its
+    parameters) and the dojo's text, in its main language plus optional
+    versions in its other languages. The audience's parameters are checked
+    by mailing.dojo_audiences, which decides what's valid."""
+
+    audience = forms.ChoiceField(label=_("Who gets it"), widget=forms.RadioSelect)
+    event = forms.ChoiceField(label=_("Session"), required=False)
+    include_waiting_list = forms.BooleanField(label=_("Also the families on its waiting list"), required=False)
+    days = forms.TypedChoiceField(label=_("Came in the last"), coerce=int, required=False)
+    min_age = forms.IntegerField(label=_("From age"), required=False)
+    max_age = forms.IntegerField(label=_("Up to age"), required=False)
+    pathway = forms.ChoiceField(label=_("Pathway"), required=False)
+
+    PARAM_FIELDS = ("event", "include_waiting_list", "days", "min_age", "max_age", "pathway")
+
+    class Meta:
+        model = Campaign
+        fields = ["subject", "message"]
+        labels = {"subject": _("Subject"), "message": _("Message")}
+        help_texts = {
+            "subject": _("Your dojo's name goes in front of it."),
+            "message": _("Plain text. Links work; there's no layout, no images and no attachments."),
+        }
+        widgets = {"message": forms.Textarea(attrs={"rows": 10})}
+
+    def __init__(self, *args, dojo, **kwargs):
+        from . import dojo_audiences
+
+        self.dojo = dojo
+        kwargs.setdefault("instance", Campaign(dojo=dojo))
+        instance = kwargs["instance"]
+        initial = kwargs.setdefault("initial", {})
+        initial.setdefault("audience", instance.audience or dojo_audiences.ALL_FAMILIES)
+        initial.setdefault("days", dojo_audiences.DEFAULT_RECENT_DAYS)
+        for name, value in (instance.audience_params or {}).items():
+            initial.setdefault(name, value)
+        super().__init__(*args, **kwargs)
+        self.audiences = dojo_audiences.available(dojo)
+        self.fields["audience"].choices = [(a.key, a.label) for a in self.audiences]
+        self.fields["event"].choices = [("", _("Pick a session"))] + [
+            (e.pk, f"{e.localized('name')} ({timezone.localtime(e.start_time):%d/%m/%Y %H:%M})")
+            for e in dojo_audiences.sessions_for(dojo)
+        ]
+        self.fields["days"].choices = [(d, _("%(days)s days") % {"days": d}) for d in dojo_audiences.RECENT_DAYS]
+        self.fields["pathway"].choices = [("", _("Pick a pathway"))] + [
+            (p.pk, p.localized("name")) for p in dojo_audiences.pathways_for(dojo)
+        ]
+        for name in ("min_age", "max_age"):
+            self.fields[name].min_value = dojo_audiences.MIN_AGE
+            self.fields[name].max_value = dojo_audiences.MAX_AGE
+        self.fields["subject"].required = True
+        self.fields["message"].required = True
+        self.fields["message"].max_length = settings.MAILING_DOJO_MESSAGE_MAX_LENGTH
+        self.fields["message"].widget.attrs["maxlength"] = settings.MAILING_DOJO_MESSAGE_MAX_LENGTH
+        self.translation_groups = bound_translation_groups(
+            self,
+            add_translation_fields(
+                self, self.instance, lambda field: optional_copy(self.fields[field], self.fields[field].label)
+            ),
+        )
+
+    def audience_options(self):
+        """Per audience: its radio value, label, description, whether it's
+        picked, whether it needs the child-data consent, and its fields."""
+        picked = str(self["audience"].value() or "")
+        return [
+            {
+                "key": a.key,
+                "label": a.label,
+                "description": a.description,
+                "checked": a.key == picked,
+                "needs_consent": a.needs_consent,
+                "fields": [self[name] for name in self.PARAM_FIELDS if name in _param_fields(a)],
+            }
+            for a in self.audiences
+        ]
+
+    def raw_params(self):
+        return {name: self.cleaned_data.get(name) for name in self.PARAM_FIELDS}
+
+    def clean(self):
+        from . import dojo_audiences
+
+        cleaned = super().clean()
+        if cleaned.get("audience"):
+            try:
+                self.params = dojo_audiences.clean_params(cleaned["audience"], self.dojo, self.raw_params())
+            except dojo_audiences.DojoAudienceError as error:
+                self.add_error("audience", str(error))
+        return cleaned
+
+    def save(self, commit=True):
+        from .campaigns import DOJO_TEMPLATE
+
+        campaign = super().save(commit=False)
+        campaign.dojo = self.dojo
+        campaign.category = MailCategory.DOJO_NEWS
+        campaign.template_key = DOJO_TEMPLATE
+        campaign.name = campaign.subject[:200]
+        campaign.audience = self.cleaned_data["audience"]
+        campaign.audience_params = self.params
+        save_translation_fields(self, campaign)
+        if commit:
+            campaign.save()
+        return campaign
+
+
+def _param_fields(audience):
+    """The form fields for an audience's parameters (event for a session,
+    min_age/max_age for an age range, ...)."""
+    names = set(audience.params)
+    if "min_age" in names:
+        names.add("max_age")
+    return names

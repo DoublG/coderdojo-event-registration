@@ -132,9 +132,7 @@ register(
     legal_basis=LegalBasis.LEGITIMATE_INTEREST,
     retention="account",
     seen_by="The organisation",
-    fields={
-        ("launched_by", "created_by"): keep(Category.IDENTITY, "points at the anonymised account", export=False)
-    },
+    fields={("launched_by", "created_by"): keep(Category.IDENTITY, "points at the anonymised account", export=False)},
     not_personal=[
         "id",
         "segment",

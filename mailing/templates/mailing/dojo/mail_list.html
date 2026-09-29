@@ -1,0 +1,40 @@
+{% extends "dojos/_admin_base.html" %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "Mail" %}{% endblock %}
+{% block admin_heading %}{% translate "Mail to your families" %}{% endblock %}
+{% block admin_extra_style %}{% include "mailing/dojo/_styles.html" %}{% endblock %}
+
+{% block admin_content %}
+{% comment %}
+The dojo's own mail to its families (mailing.dojo_views.dojo_mail_list,
+DATA_MODEL.md §25). Everyone on the managing team sees the list; writing
+and sending need SEND_MAIL (the champion).
+{% endcomment %}
+<div class="dojo-mail">
+  <section class="cd-card">
+    <h2 class="heading-md">{% translate "Write to the families of your dojo" %}</h2>
+    <p class="body-sm muted">{% translate "A mail from your dojo, through the site: to all your families, to those booked for a session, or to a group you pick. Only families who want news from your dojo get it, and every mail lets them stop. Replies go to your dojo's email address." %}</p>
+    <p class="body-sm">{% blocktranslate count counter=launched with limit=limit %}{{ counter }} of {{ limit }} mails sent in the last 30 days.{% plural %}{{ counter }} of {{ limit }} mails sent in the last 30 days.{% endblocktranslate %}</p>
+    {% if dojo_access.can_send_mail %}
+      <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_mail_create' dojo_id=dojo.id %}">{% translate "Write a mail" %}</a>
+    {% else %}
+      <p class="caption muted">{% translate "Only the champion writes and sends the dojo's mail." %}</p>
+    {% endif %}
+  </section>
+
+  <section class="cd-card">
+    <h2 class="heading-md">{% translate "Your mails" %}</h2>
+    {% for row in rows %}
+      <div class="mail-row">
+        <div>
+          <p class="body"><a href="{% url 'dojo_mail_detail' dojo_id=dojo.id campaign_id=row.campaign.id %}">{{ row.campaign.subject|default:row.campaign.name }}</a> {% include "mailing/manage/_status_badge.html" with campaign=row.campaign %}</p>
+          <p class="caption muted">{{ row.audience }} · {% if row.campaign.launched_at %}{% blocktranslate with when=row.campaign.launched_at|date:"d/m/Y H:i" %}sent {{ when }}{% endblocktranslate %}{% else %}{% blocktranslate with when=row.campaign.created_at|date:"d/m/Y" %}written {{ when }}{% endblocktranslate %}{% endif %}</p>
+        </div>
+        {% if row.stats %}<p class="caption">{% blocktranslate count counter=row.stats.sent %}{{ counter }} sent{% plural %}{{ counter }} sent{% endblocktranslate %}</p>{% endif %}
+      </div>
+    {% empty %}
+      <p class="body-sm">{% translate "No mails yet." %}</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

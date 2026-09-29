@@ -4677,7 +4677,9 @@ mailing reaches **adults only** (the resolver's rule), so a child's own
 login doesn't get it; and an audience about a session reaches the
 families with a place there even when the child isn't otherwise one of
 the dojo's (a visitor), instead of being ANDed with "family of this
-dojo". The decisions below were confirmed on 2026-09-29. This reverses §11's
+dojo". **Phase 4 built** (the dojo's *Mail* pages, `mailing/dojo_views.py`,
+`SEND_MAIL`); a mailing is sent right away, there's no scheduling yet. The
+decisions below were confirmed on 2026-09-29. This reverses §11's
 decision 3 ("Champions don't send campaigns; dojo-level mail stays
 automatic") in part: a dojo's team gets **a narrow slice** of the mail
 engine, enough to write to the families of *its own* dojo, with audiences
@@ -4900,7 +4902,7 @@ the dojo's content, not personal) and its place in `core.audit.RECORDED`.
    30-day limit, text in the main language), `queue_mail` picking the
    text per recipient language. Tests: the text never rendered as a
    template, snapshot frozen at launch, idempotency, the limit.
-4. **The dojo pages:** `SEND_MAIL` in `dojos/access.py`, the sidebar item,
+4. **The dojo pages** (built): `SEND_MAIL` in `dojos/access.py`, the sidebar item,
    list, new/edit, preview, test, launch, cancel. Tests in the route
    style: 404 without access, 403 without `SEND_MAIL`, another dojo's
    session or mailing refused, the DB effect of each POST.

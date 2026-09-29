@@ -1,0 +1,13 @@
+{% load i18n %}{% comment %}
+How many families the picked audience reaches (mailing.dojo_views.dojo_mail_reach,
+also rendered in the page). Counts only, never names.
+{% endcomment %}
+{% if reach.error %}
+  <p class="cd-form__note cd-form__note--error caption">{{ reach.error }}</p>
+{% else %}
+  <p class="body"><strong>{% blocktranslate count counter=reach.reached %}Reaches {{ counter }} family.{% plural %}Reaches {{ counter }} families.{% endblocktranslate %}</strong></p>
+  <p class="caption muted">{% translate "Only families who want news from your dojo count; the rest never get it." %}</p>
+  {% if reach.needs_consent and reach.left_out %}
+    <p class="caption muted">{% blocktranslate count counter=reach.left_out %}{{ counter }} more family isn't counted: they didn't agree to their child's details being used to choose their mail.{% plural %}{{ counter }} more families aren't counted: they didn't agree to their child's details being used to choose their mail.{% endblocktranslate %}</p>
+  {% endif %}
+{% endif %}

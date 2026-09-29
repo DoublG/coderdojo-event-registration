@@ -1,10 +1,26 @@
 from django.urls import path
 
-from . import manage, views
+from . import dojo_views, manage, views
 
 urlpatterns = [
     path("account/mail/", views.mail_preferences, name="mail_preferences"),
     path("mail/unsubscribe/<str:token>/", views.mail_unsubscribe, name="mail_unsubscribe"),
+    # A dojo's own mail to its families (the dojo's admin area, DATA_MODEL.md §25).
+    path("dojos/<int:dojo_id>/manage/mail/", dojo_views.dojo_mail_list, name="dojo_mail_list"),
+    path("dojos/<int:dojo_id>/manage/mail/new/", dojo_views.dojo_mail_create, name="dojo_mail_create"),
+    path("dojos/<int:dojo_id>/manage/mail/reach/", dojo_views.dojo_mail_reach, name="dojo_mail_reach"),
+    path("dojos/<int:dojo_id>/manage/mail/<int:campaign_id>/", dojo_views.dojo_mail_detail, name="dojo_mail_detail"),
+    path("dojos/<int:dojo_id>/manage/mail/<int:campaign_id>/test/", dojo_views.dojo_mail_test, name="dojo_mail_test"),
+    path(
+        "dojos/<int:dojo_id>/manage/mail/<int:campaign_id>/send/",
+        dojo_views.dojo_mail_launch,
+        name="dojo_mail_launch",
+    ),
+    path(
+        "dojos/<int:dojo_id>/manage/mail/<int:campaign_id>/cancel/",
+        dojo_views.dojo_mail_cancel,
+        name="dojo_mail_cancel",
+    ),
     # The organisation's management dashboard (organisation admin role only).
     path("manage/campaigns/", manage.campaign_list, name="manage_campaign_list"),
     path("manage/campaigns/new/", manage.campaign_create, name="manage_campaign_create"),

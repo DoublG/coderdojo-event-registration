@@ -1,0 +1,7 @@
+{% load i18n %}
+<div class="mail-stats">
+  <div><strong>{{ stats.sent }}</strong><span class="caption">{% translate "sent" %}</span></div>
+  <div><strong>{{ stats.pending|add:stats.sending }}</strong><span class="caption">{% translate "waiting" %}</span></div>
+  <div><strong>{{ stats.bounced|add:stats.failed }}</strong><span class="caption">{% translate "not delivered" %}</span></div>
+  <div><strong>{{ stats.unsubscribed }}</strong><span class="caption">{% translate "stopped your news since" %}</span></div>
+</div>

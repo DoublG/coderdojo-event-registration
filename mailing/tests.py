@@ -2472,3 +2472,124 @@ class DojoMailingTests(TestCase):
         self.assertEqual((row.recipient, row.is_test, row.template_key), ("champ@example.com", True, "dojo_message"))
         self.assertTrue(row.subject.startswith("[Test] Ghent:"))
         self.assertEqual(Campaign.objects.get().status, Campaign.Status.DRAFT)
+
+
+# --- §25 phase 4: the dojo's Mail pages ------------------------------------------
+
+
+class DojoMailPagesTests(TestCase):
+    def setUp(self):
+        from dojos.testing import make_champion, make_mentor
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.champion = make_champion(username="champ", email="champ@example.com")
+        self.mentor = make_mentor(username="mentor", email="mentor@example.com")
+        self.dojo = make_dojo("Ghent", champion=self.champion, email="ghent@example.com")
+        add_member(self.dojo, self.mentor)
+        self.other = make_dojo("Antwerp", champion=make_champion(username="other"), email="a@example.com")
+        self.parent = User.objects.create(username="parent", email="p@example.com")
+        _kid(self.parent, self.dojo)
+        self.session = _session(self.dojo, days_ago=-5, status=Event.OPEN)
+
+    def _url(self, name, dojo=None, **kwargs):
+        return reverse(name, kwargs={"dojo_id": (dojo or self.dojo).pk, **kwargs})
+
+    def _post_new(self, **data):
+        self.client.force_login(self.champion)
+        fields = {"audience": "all_families", "subject": "Geen sessie", "message": "Tot volgende week!", **data}
+        return self.client.post(self._url("dojo_mail_create"), fields)
+
+    def _draft(self, **fields):
+        return Campaign.objects.create(
+            name="Hi",
+            dojo=self.dojo,
+            category=MailCategory.DOJO_NEWS,
+            template_key="dojo_message",
+            audience="all_families",
+            subject="Hi",
+            message="Hello",
+            **fields,
+        )
+
+    def test_only_the_dojos_managing_team_gets_in(self):
+        self.client.force_login(self.parent)
+        self.assertEqual(self.client.get(self._url("dojo_mail_list")).status_code, 404)
+        self.client.force_login(self.mentor)
+        response = self.client.get(self._url("dojo_mail_list"))
+        self.assertTemplateUsed(response, "mailing/dojo/mail_list.html")
+        self.assertContains(response, self._url("dojo_mail_list"))  # the sidebar link
+        self.assertNotContains(response, self._url("dojo_mail_create"))
+        self.assertEqual(self.client.get(self._url("dojo_mail_create")).status_code, 403)
+        self.assertEqual(self.client.get(self._url("dojo_mail_list", dojo=self.other)).status_code, 404)
+
+    def test_mentors_can_read_but_not_write_or_send(self):
+        draft = self._draft()
+        self.client.force_login(self.mentor)
+        response = self.client.get(self._url("dojo_mail_detail", campaign_id=draft.pk))
+        self.assertTemplateUsed(response, "mailing/dojo/mail_detail.html")
+        for name in ("dojo_mail_test", "dojo_mail_launch", "dojo_mail_cancel"):
+            self.assertEqual(self.client.post(self._url(name, campaign_id=draft.pk)).status_code, 403)
+        self.assertEqual(Campaign.objects.get().status, Campaign.Status.DRAFT)
+
+    def test_the_champion_writes_a_draft(self):
+        response = self._post_new(audience="session", event=self.session.pk, include_waiting_list="on")
+        campaign = Campaign.objects.get()
+        self.assertRedirects(response, self._url("dojo_mail_detail", campaign_id=campaign.pk))
+        self.assertEqual(
+            (campaign.dojo, campaign.category, campaign.template_key, campaign.created_by),
+            (self.dojo, MailCategory.DOJO_NEWS, "dojo_message", self.champion),
+        )
+        self.assertEqual(campaign.audience_params, {"event": self.session.pk, "include_waiting_list": True})
+        page = self.client.get(response.url)
+        self.assertTemplateUsed(page, "mailing/dojo/mail_form.html")
+        self.assertContains(page, "Tot volgende week!")  # the preview
+
+    def test_another_dojos_session_is_refused(self):
+        theirs = _session(self.other, days_ago=-5, status=Event.OPEN)
+        response = self._post_new(audience="session", event=theirs.pk)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Campaign.objects.exists())
+        self.assertFalse(response.context["form"].is_valid())
+
+    def test_the_reach_shows_a_count_never_names(self):
+        self.client.force_login(self.champion)
+        response = self.client.get(self._url("dojo_mail_reach"), {"audience": "all_families"})
+        self.assertContains(response, "Reaches 1 family.")
+        self.assertNotContains(response, "parent")
+        response = self.client.get(self._url("dojo_mail_reach"), {"audience": "session"})
+        self.assertContains(response, "Pick one of your dojo")
+
+    def test_test_send_and_cancel(self):
+        draft = self._draft()
+        self.client.force_login(self.champion)
+        self.client.post(self._url("dojo_mail_test", campaign_id=draft.pk))
+        self.assertTrue(EmailMessage.objects.filter(campaign=draft, is_test=True, recipient="champ@example.com"))
+        response = self.client.post(self._url("dojo_mail_launch", campaign_id=draft.pk))
+        self.assertRedirects(response, self._url("dojo_mail_detail", campaign_id=draft.pk))
+        draft.refresh_from_db()
+        self.assertEqual((draft.status, draft.launched_by), (Campaign.Status.QUEUED, self.champion))
+        detail = self.client.get(self._url("dojo_mail_detail", campaign_id=draft.pk))
+        self.assertTemplateUsed(detail, "mailing/dojo/mail_detail.html")
+        self.client.post(self._url("dojo_mail_cancel", campaign_id=draft.pk))
+        self.assertEqual(Campaign.objects.get().status, Campaign.Status.CANCELLED)
+
+    def test_deleting_a_draft_and_another_dojos_mailing_is_404(self):
+        theirs = Campaign.objects.create(name="x", dojo=self.other, audience="all_families")
+        self.client.force_login(self.champion)
+        self.assertEqual(self.client.get(self._url("dojo_mail_detail", campaign_id=theirs.pk)).status_code, 404)
+        self.assertEqual(self.client.post(self._url("dojo_mail_cancel", campaign_id=theirs.pk)).status_code, 404)
+        draft = self._draft()
+        self.assertRedirects(
+            self.client.post(self._url("dojo_mail_cancel", campaign_id=draft.pk)), self._url("dojo_mail_list")
+        )
+        self.assertFalse(Campaign.objects.filter(pk=draft.pk).exists())
+
+    def test_a_launched_mailing_cant_be_edited(self):
+        draft = self._draft()
+        self.client.force_login(self.champion)
+        self.client.post(self._url("dojo_mail_launch", campaign_id=draft.pk))
+        self.client.post(
+            self._url("dojo_mail_detail", campaign_id=draft.pk),
+            {"audience": "all_families", "subject": "Changed", "message": "Changed"},
+        )
+        self.assertEqual(Campaign.objects.get().subject, "Hi")
