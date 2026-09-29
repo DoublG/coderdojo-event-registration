@@ -4,7 +4,9 @@ The organisation dashboard
 The organisation dashboard is where CoderDojo Belgium's own team runs mail to
 families and volunteers, chooses which events the public site features, and
 handles privacy requests. It's open to accounts with the organisation's
-**admin** role: they find it under **Manage** in the account menu.
+**admin** role: they find it under **Manage** in the account menu. People
+with the **background-check reviewer** role find their pages there too,
+and see only those (see :doc:`volunteers`).
 
 If you're also on a dojo's team, the dashboard and your dojos are in the
 same place: click **CoderDojo Belgium** at the top of the sidebar to switch
@@ -31,6 +33,10 @@ The sidebar has these sections:
   :doc:`sponsors`).
 - **Awards**: the badges ninjas can earn at their dojo (see
   :doc:`awards`).
+- **Background checks** and **Applications** (under **Volunteers**): the
+  criminal-record extracts and applications of new champions and mentors,
+  for people with the **background-check reviewer** role only (see
+  :doc:`volunteers`).
 - **Privacy**: a copy of someone's data, or deleting their account, when
   they ask by mail or post (see :doc:`privacy`).
 - **Sign-in security**: which roles must use two-step login (see

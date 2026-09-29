@@ -51,6 +51,7 @@ the people using the site, not for the people building it.
    organisation/promotions
    organisation/sponsors
    organisation/awards
+   organisation/volunteers
    organisation/privacy
    organisation/sign-in-security
 

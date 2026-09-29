@@ -1,0 +1,207 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-29 05:28+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/volunteers.rst:2
+msgid "Background checks and applications"
+msgstr "Extraits de casier judiciaire et candidatures"
+
+#: ../../source/organisation/volunteers.rst:4
+msgid ""
+"Champions and mentors work directly with children, so before they can run"
+" or help at a dojo they apply once, and their extract from the criminal "
+"record (model 2, Article 596.2) is checked. Both are handled under "
+"**Volunteers** in the organisation dashboard, by people with the "
+"organisation's **background-check reviewer** role. Only they see these "
+"pages; the other organisation roles don't."
+msgstr ""
+"Les champions et les mentors travaillent directement avec des enfants : "
+"avant de pouvoir diriger un dojo ou y aider, ils posent donc une fois "
+"leur candidature et leur extrait de casier judiciaire (modèle 2, article "
+"596.2) est vérifié. Les deux se font sous **Bénévoles** dans le tableau "
+"de bord de l'organisation, par les personnes qui ont le rôle **Évaluateur"
+" des extraits de casier** de l'organisation. Elles seules voient ces "
+"pages ; les autres rôles de l'organisation, non."
+
+#: ../../source/organisation/volunteers.rst:11
+msgid ""
+"Nobody decides on their own background check or application: another "
+"reviewer does."
+msgstr ""
+"Personne ne décide de son propre extrait ou de sa propre candidature : un"
+" autre évaluateur s'en charge."
+
+#: ../../source/organisation/volunteers.rst:15
+msgid "Background checks"
+msgstr "Extraits de casier judiciaire"
+
+#: ../../source/organisation/volunteers.rst:17
+msgid "**Background checks** is a work queue:"
+msgstr "**Extraits de casier** est une liste de travail :"
+
+#: ../../source/organisation/volunteers.rst:19
+msgid ""
+"**Awaiting review**: documents that were uploaded, oldest first. The "
+"number next to **Background checks** in the sidebar counts them."
+msgstr ""
+"**En attente de vérification** : les documents déposés, les plus anciens "
+"d'abord. Le nombre à côté de **Extraits de casier** dans la barre "
+"latérale les compte."
+
+#: ../../source/organisation/volunteers.rst:21
+msgid ""
+"**Waiting for a document**: checks that were asked for, or rejected and "
+"waiting for a new document. **Send the link again** mails the upload link"
+" once more."
+msgstr ""
+"**En attente d'un document** : les extraits demandés, ou refusés et en "
+"attente d'un nouveau document. **Renvoyer le lien** envoie encore une "
+"fois le lien de dépôt."
+
+#: ../../source/organisation/volunteers.rst:24
+msgid ""
+"**Expired**: these people can't open their dojos' dashboards until a new "
+"extract is validated. **Ask for a new one** mails them the upload link."
+msgstr ""
+"**Expirés** : ces personnes ne peuvent pas ouvrir les tableaux de bord de"
+" leurs dojos tant qu'un nouvel extrait n'a pas été validé. **En demander "
+"un nouveau** leur envoie le lien de dépôt."
+
+#: ../../source/organisation/volunteers.rst:26
+msgid ""
+"**Expiring within 30 days**: for your information. They get a reminder by"
+" mail 30 days before their check expires, so they can ask their "
+"municipality for a new extract in time."
+msgstr ""
+"**Expire dans les 30 jours** : pour information. Ces personnes reçoivent "
+"un rappel par e-mail 30 jours avant l'expiration de leur extrait, pour en"
+" demander à temps un nouveau à leur commune."
+
+#: ../../source/organisation/volunteers.rst:30
+msgid "Search by name or email address to find anyone else."
+msgstr "Cherchez par nom ou adresse e-mail pour trouver quelqu'un d'autre."
+
+#: ../../source/organisation/volunteers.rst:32
+msgid "Open a person to decide:"
+msgstr "Ouvrez une personne pour décider :"
+
+#: ../../source/organisation/volunteers.rst:34
+msgid ""
+"**Download the document** and check it. Every download is recorded. Don't"
+" keep a copy: delete the file once you've decided."
+msgstr ""
+"**Télécharger le document** et vérifiez-le. Chaque téléchargement est "
+"enregistré. Ne gardez pas de copie : supprimez le fichier dès que vous "
+"avez décidé."
+
+#: ../../source/organisation/volunteers.rst:36
+msgid ""
+"Choose **Validate** or **Reject**. You can add a note for the other "
+"reviewers, but never copy anything from the extract into it."
+msgstr ""
+"Choisissez **Valider** ou **Refuser**. Vous pouvez ajouter une note pour "
+"les autres évaluateurs, mais n'y recopiez jamais rien de l'extrait."
+
+#: ../../source/organisation/volunteers.rst:39
+msgid ""
+"Either way the document is deleted straight away; only the decision, who "
+"made it and when are kept, and the person gets a mail. A validated check "
+"is valid for a year. After a rejection they can upload a new document."
+msgstr ""
+"Dans les deux cas, le document est supprimé immédiatement ; seuls la "
+"décision, son auteur et sa date sont conservés, et la personne reçoit un "
+"e-mail. Un extrait validé est valable un an. Après un refus, la personne "
+"peut déposer un nouveau document."
+
+#: ../../source/organisation/volunteers.rst:43
+msgid ""
+"The page also lists what the person applied for and the earlier "
+"decisions. If they haven't been asked for a document yet, **Ask for a "
+"document** mails them the upload link."
+msgstr ""
+"La page indique aussi pour quoi la personne a posé sa candidature et les "
+"décisions précédentes. Si aucun document ne lui a encore été demandé, "
+"**Demander un document** lui envoie le lien de dépôt."
+
+#: ../../source/organisation/volunteers.rst:48
+msgid "Applications"
+msgstr "Candidatures"
+
+#: ../../source/organisation/volunteers.rst:50
+msgid ""
+"**Applications** lists the people who applied to become a mentor or to "
+"start a dojo, pending ones first; choose another status or kind to see "
+"the others. The number in the sidebar counts the pending ones."
+msgstr ""
+"**Candidatures** liste les personnes qui ont posé leur candidature comme "
+"mentor ou pour lancer un dojo, celles en attente d'abord ; choisissez un "
+"autre statut ou type pour voir les autres. Le nombre dans la barre "
+"latérale compte celles en attente."
+
+#: ../../source/organisation/volunteers.rst:54
+msgid ""
+"Open an application to see what they wrote and where their background "
+"check stands. From there:"
+msgstr ""
+"Ouvrez une candidature pour voir ce que la personne a écrit et où en est "
+"son extrait de casier. De là :"
+
+#: ../../source/organisation/volunteers.rst:57
+msgid ""
+"**Ask for a document** if their background check hasn't been asked for "
+"yet (or **Send the link again**)."
+msgstr ""
+"**Demander un document** si l'extrait n'a pas encore été demandé (ou "
+"**Renvoyer le lien**)."
+
+#: ../../source/organisation/volunteers.rst:59
+msgid ""
+"**Approve** once their background check is valid. A mentor who named a "
+"dojo gets a request to join its team, which the dojo's team accepts; a "
+"champion can create their dojo."
+msgstr ""
+"**Approuver** dès que l'extrait est valable. Un mentor qui a indiqué un "
+"dojo reçoit une demande pour rejoindre son équipe, que l'équipe du dojo "
+"accepte ; un champion peut créer son dojo."
+
+#: ../../source/organisation/volunteers.rst:62
+msgid "**Reject** if they won't be taken on."
+msgstr "**Refuser** si la personne n'est pas retenue."
+
+#: ../../source/organisation/volunteers.rst:64
+msgid "The person gets a mail with the outcome either way."
+msgstr "Dans les deux cas, la personne reçoit un e-mail avec le résultat."
+
+#: ../../source/organisation/volunteers.rst:67
+msgid "Who can review"
+msgstr "Qui peut vérifier"
+
+#: ../../source/organisation/volunteers.rst:69
+msgid ""
+"The reviewer role is given in the site's technical admin, like the other "
+"organisation roles, and can be combined with them. Reviewers read "
+"criminal-record extracts, so only give it to the people who need it."
+msgstr ""
+"Le rôle d'évaluateur est attribué dans l'administration technique du "
+"site, comme les autres rôles de l'organisation, et peut être combiné avec"
+" eux. Les évaluateurs lisent des extraits de casier judiciaire : ne le "
+"donnez qu'aux personnes qui en ont besoin."
+

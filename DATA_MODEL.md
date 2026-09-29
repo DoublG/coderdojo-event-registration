@@ -521,7 +521,12 @@ stateDiagram-v2
     rejected --> submitted : uploads a new document
     validated --> submitted : expired → uploads a renewal
     validated --> requested : renewal requested
+    validated --> validated : 30 days before expiry<br/>(reminder mail, §21)
 ```
+
+Reviewers work from the organisation dashboard's *Volunteers* pages (§21):
+the organisation's `reviewer` role reviews checks and decides applications,
+never their own.
 
 ### From application to a dojo
 
@@ -3749,9 +3754,11 @@ Someone with one context sees no switcher, as today. The notification bell
    CLAUDE.md, and the help docs (en/fr/nl) where they describe the *Manage*
    link.
 
-## 21. Background checks and applications on the organisation dashboard (planned)
+## 21. Background checks and applications on the organisation dashboard (built)
 
-**Planned.** Reviewing background checks and deciding applications (§6) was
+**Built** (all five phases, as planned below; the code is in
+`applications/manage.py`, `applications/reminders.py` and
+`accounts.organisation`). Before, reviewing background checks and deciding applications (§6) was
 Django-admin only: the review permission
 (`applications.can_review_background_checks`) was granted to each person by
 hand, neither organisation role could decide an application (both only view

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 04:49+0000\n"
+"POT-Creation-Date: 2026-09-29 05:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -272,46 +272,46 @@ msgstr "Autre"
 msgid "Prefer not to say"
 msgstr "Je préfère ne pas le dire"
 
-#: accounts/models.py:382
+#: accounts/models.py:383
 msgid "Superusers"
 msgstr "Superutilisateurs"
 
 # | msgid "Organisation"
-#: accounts/models.py:383
+#: accounts/models.py:384
 msgid "Organisation admins"
 msgstr "Administrateurs de l'organisation"
 
 # | msgid "No team members listed yet."
-#: accounts/models.py:384
+#: accounts/models.py:385
 msgid "Board members"
 msgstr "Membres du conseil d'administration"
 
-#: accounts/models.py:385
+#: accounts/models.py:386
 msgid "Background-check reviewers"
 msgstr "Évaluateurs des extraits de casier"
 
-#: accounts/models.py:386
+#: accounts/models.py:387
 msgid "Champions"
 msgstr "Champions"
 
-#: accounts/models.py:387 accounts/templates/accounts/child_detail.html:174
+#: accounts/models.py:388 accounts/templates/accounts/child_detail.html:174
 msgid "Mentors"
 msgstr "Mentors"
 
-#: accounts/models.py:388
+#: accounts/models.py:389
 msgid "Every adult account (parents too)"
 msgstr "Tout compte d'adulte (parents compris)"
 
-#: accounts/models.py:396
+#: accounts/models.py:397
 msgid "Password only (two-step login optional)"
 msgstr "Mot de passe seul (connexion en deux étapes facultative)"
 
-#: accounts/models.py:397
+#: accounts/models.py:398
 msgid "Two-step login (authenticator app or passkey)"
 msgstr ""
 "Connexion en deux étapes (application d'authentification ou clé d'accès)"
 
-#: accounts/models.py:398
+#: accounts/models.py:399
 msgid "Two-step login with a passkey"
 msgstr "Connexion en deux étapes avec une clé d'accès"
 
@@ -356,7 +356,7 @@ msgstr "Ce navigateur n'est plus mémorisé."
 #: accounts/templates/accounts/manage/security.html:3
 #: accounts/templates/accounts/manage/security.html:4
 #: accounts/templates/accounts/security.html:7
-#: core/templates/core/_manage_base.html:118
+#: core/templates/core/_manage_base.html:149
 msgid "Sign-in security"
 msgstr "Sécurité de connexion"
 
@@ -411,8 +411,9 @@ msgid "Session"
 msgstr "Session"
 
 #: accounts/templates/accounts/child_detail.html:75
-#: accounts/templates/accounts/child_detail.html:172 dojos/models.py:58
-#: dojos/templates/dojos/_admin_base.html:84
+#: accounts/templates/accounts/child_detail.html:172
+#: applications/templates/applications/manage/application_detail.html:17
+#: dojos/models.py:58 dojos/templates/dojos/_admin_base.html:84
 #: events/templates/events/event_list.html:69
 #: mailing/templates/mailing/manage/_rule_fields.html:47
 #: mailing/templates/mailing/manage/_rule_fields.html:57
@@ -493,6 +494,7 @@ msgid "Awarded by"
 msgstr "Décernée par"
 
 #: accounts/templates/accounts/child_detail.html:127
+#: applications/templates/applications/manage/check_detail.html:66
 msgid "Note"
 msgstr "Remarque"
 
@@ -783,6 +785,7 @@ msgstr ""
 "strict. Les comptes des enfants ne sont jamais concernés."
 
 #: accounts/templates/accounts/manage/security.html:25 applications/forms.py:90
+#: applications/templates/applications/manage/application_detail.html:18
 msgid "Role"
 msgstr "Rôle"
 
@@ -792,7 +795,7 @@ msgstr "Connexion minimale"
 
 # | msgid "My Account"
 #: accounts/templates/accounts/manage/security.html:28
-#: core/templates/core/_manage_base.html:106 mailing/models.py:44
+#: core/templates/core/_manage_base.html:137 mailing/models.py:44
 #: mailing/templates/mailing/manage/segment_list.html:14
 msgid "Accounts"
 msgstr "Comptes"
@@ -841,6 +844,7 @@ msgid "Name, email address or username"
 msgstr "Nom, adresse e-mail ou nom d'utilisateur"
 
 #: accounts/templates/accounts/manage/security.html:61
+#: applications/templates/applications/manage/check_list.html:17
 #: dojos/templates/dojos/dojo_list.html:40
 #: dojos/templates/dojos/partials/_dojo_finder_widget.html:16
 #: events/templates/events/event_list.html:91
@@ -849,11 +853,14 @@ msgid "Search"
 msgstr "Rechercher"
 
 #: accounts/templates/accounts/manage/security.html:70 api/forms.py:13
-#: api/templates/api/dojo_api_clients.html:76 content/forms.py:100
-#: content/templates/content/manage/sponsor_list.html:16 dojos/forms.py:88
-#: dojos/forms.py:232 dojos/templates/dojos/dojo_event_list.html:24
-#: events/forms.py:141 events/forms.py:216 events/forms.py:272
-#: events/forms.py:305 events/templates/events/manage/badge_list.html:18
+#: api/templates/api/dojo_api_clients.html:76
+#: applications/templates/applications/manage/_check_table.html:10
+#: applications/templates/applications/manage/application_list.html:37
+#: content/forms.py:100 content/templates/content/manage/sponsor_list.html:16
+#: dojos/forms.py:88 dojos/forms.py:232
+#: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:141
+#: events/forms.py:216 events/forms.py:272 events/forms.py:305
+#: events/templates/events/manage/badge_list.html:18
 #: events/templates/events/manage/badge_list.html:44 mailing/forms.py:110
 #: mailing/forms.py:198 mailing/forms.py:242
 #: mailing/templates/mailing/manage/campaign_list.html:12
@@ -870,6 +877,7 @@ msgstr "Connexion en deux étapes"
 
 #: accounts/templates/accounts/manage/security.html:83
 #: accounts/templates/accounts/security.html:27
+#: applications/templates/applications/manage/check_detail.html:64
 msgid "On"
 msgstr "Activée"
 
@@ -1903,6 +1911,7 @@ msgid "Preferred day & time"
 msgstr "Jour et heure souhaités"
 
 #: applications/forms.py:42
+#: applications/templates/applications/manage/application_detail.html:22
 msgid "Proposed venue"
 msgstr "Lieu proposé"
 
@@ -1973,6 +1982,60 @@ msgstr ""
 msgid "Not sure yet — any dojo"
 msgstr "Pas encore sûr, n'importe quel dojo"
 
+#: applications/forms.py:126
+#: applications/templates/applications/manage/check_detail.html:43
+msgid "Validate"
+msgstr "Valider"
+
+#: applications/forms.py:126
+#: applications/templates/applications/manage/application_detail.html:46
+#: applications/templates/applications/manage/check_detail.html:42
+msgid "Reject"
+msgstr "Refuser"
+
+# | msgid "Gender (optional)"
+#: applications/forms.py:128 dojos/forms.py:338
+msgid "Note (optional)"
+msgstr "Remarque (facultatif)"
+
+#: applications/forms.py:132
+msgid ""
+"Kept with the decision, for the other reviewers. Never copy anything from "
+"the extract itself into it."
+msgstr "Conservée avec la décision, pour les autres évaluateurs. N'y recopiez jamais rien de l'extrait lui-même."
+
+#: applications/manage.py:105
+msgid "Choose Validate or Reject."
+msgstr "Choisissez Valider ou Refuser."
+
+#: applications/manage.py:111
+msgid "Validated. The document has been deleted."
+msgstr "Validé. Le document a été supprimé."
+
+#: applications/manage.py:116
+#, python-format
+msgid "Rejected. The document has been deleted and %(name)s has been told."
+msgstr "Refusé. Le document a été supprimé et %(name)s a été prévenu·e."
+
+#: applications/manage.py:137
+#, python-format
+msgid "The upload link has been sent to %(email)s."
+msgstr "Le lien de dépôt a été envoyé à %(email)s."
+
+#: applications/manage.py:205
+#, python-format
+msgid "Approved. %(name)s has been told."
+msgstr "Approuvée. %(name)s a été prévenu·e."
+
+#: applications/manage.py:208
+#, python-format
+msgid "Rejected. %(name)s has been told."
+msgstr "Refusée. %(name)s a été prévenu·e."
+
+#: applications/manage.py:210
+msgid "Choose Approve or Reject."
+msgstr "Choisissez Approuver ou Refuser."
+
 #: applications/models.py:40 dojos/models.py:201
 msgid "Mentor"
 msgstr "Mentor"
@@ -1982,7 +2045,8 @@ msgstr "Mentor"
 msgid "Champion (start a dojo)"
 msgstr "Champion (lancer un dojo)"
 
-#: applications/models.py:45 mailing/models.py:270
+#: applications/models.py:45 core/templates/core/_manage_base.html:98
+#: mailing/models.py:270
 msgid "Pending"
 msgstr "En attente"
 
@@ -2023,35 +2087,365 @@ msgid "There's no background check waiting for a document right now."
 msgstr ""
 "Aucun extrait de casier judiciaire n'attend de document pour l'instant."
 
+#: applications/services.py:104
+msgid "You can't decide on your own background check or application."
+msgstr "Vous ne pouvez pas décider de votre propre extrait de casier ou candidature."
+
 # | msgid "<strong>uploaded</strong>, waiting for review."
-#: applications/services.py:102 applications/services.py:121
+#: applications/services.py:110 applications/services.py:130
 #, python-format
 msgid "%(user)s has no uploaded document awaiting review."
 msgstr "%(user)s n'a pas de document en attente de vérification."
 
-#: applications/services.py:135
+#: applications/services.py:144
 msgid "Only adult accounts can apply."
 msgstr "Seuls les comptes adultes peuvent postuler."
 
-#: applications/services.py:137 applications/views.py:24
+#: applications/services.py:146 applications/views.py:25
 msgid "You've already applied for this — see your account page for its status."
 msgstr "Vous avez déjà postulé. Consultez le statut sur votre page de compte."
 
 # | msgid "Youth mentor at %(dojo)s"
-#: applications/services.py:144
+#: applications/services.py:153
 #, python-format
 msgid "%(name)s applied to mentor at %(dojo)s."
 msgstr "%(name)s a postulé comme mentor à %(dojo)s."
 
-#: applications/services.py:154 applications/services.py:188
+#: applications/services.py:164 applications/services.py:199
 #, python-format
 msgid "Application %(application)s has already been decided."
 msgstr "La candidature %(application)s a déjà été traitée."
 
-#: applications/services.py:158
+#: applications/services.py:168
 #, python-format
 msgid "%(account)s doesn't have a valid background check yet."
 msgstr "%(account)s n'a pas encore d'extrait de casier judiciaire valable."
+
+#: applications/templates/applications/manage/_check_status.html:2
+#: applications/templates/applications/manage/check_list.html:28
+#: core/templates/core/_manage_base.html:91
+msgid "Awaiting review"
+msgstr "En attente de vérification"
+
+#: applications/templates/applications/manage/_check_status.html:2
+#: applications/templates/applications/manage/check_list.html:33
+msgid "Waiting for a document"
+msgstr "En attente d'un document"
+
+#: applications/templates/applications/manage/_check_status.html:2
+msgid "Rejected, waiting for a new document"
+msgstr "Refusé, en attente d'un nouveau document"
+
+#: applications/templates/applications/manage/_check_status.html:2
+#, python-format
+msgid "Valid until %(date)s"
+msgstr "Valable jusqu'au %(date)s"
+
+#: applications/templates/applications/manage/_check_status.html:2
+#, python-format
+msgid "Expired on %(date)s"
+msgstr "Expiré le %(date)s"
+
+#: applications/templates/applications/manage/_check_status.html:2
+msgid "Not requested yet"
+msgstr "Pas encore demandé"
+
+#: applications/templates/applications/manage/_check_table.html:11
+#: applications/templates/applications/manage/check_detail.html:18
+msgid "Applied for"
+msgstr "Candidature pour"
+
+#: applications/templates/applications/manage/_check_table.html:13
+#: applications/templates/applications/manage/application_detail.html:13
+#: applications/templates/applications/manage/application_list.html:14
+#: applications/templates/applications/manage/application_list.html:41
+#: content/templates/content/manage/promotion_list.html:23
+#: content/templates/content/manage/sponsor_list.html:19
+#: dojos/templates/dojos/dojo_event_detail.html:37
+#: dojos/templates/dojos/dojo_event_list.html:25
+#: mailing/templates/mailing/manage/campaign_list.html:13
+#: mailing/templates/mailing/manage/journey_list.html:14
+msgid "Status"
+msgstr "Statut"
+
+#: applications/templates/applications/manage/_check_table.html:36
+#: dojos/templates/dojos/dojo_detail.html:121
+#: dojos/templates/dojos/dojo_event_detail.html:41
+#: dojos/templates/dojos/dojo_event_list.html:39
+#: dojos/templates/dojos/partials/_dojo_result.html:33 events/models.py:33
+#: events/templates/events/event_signup.html:60
+#: events/templates/events/partials/_event_row.html:34
+msgid "Open"
+msgstr "Ouvert"
+
+#: applications/templates/applications/manage/application_detail.html:3
+msgid "Application"
+msgstr "Candidature"
+
+#: applications/templates/applications/manage/application_detail.html:5
+msgid "Back to applications"
+msgstr "Retour aux candidatures"
+
+#: applications/templates/applications/manage/application_detail.html:15
+#: applications/templates/applications/manage/application_list.html:40
+msgid "Applied"
+msgstr "Candidature le"
+
+#: applications/templates/applications/manage/application_detail.html:17
+msgid "Any dojo"
+msgstr "N'importe quel dojo"
+
+#: applications/templates/applications/manage/application_detail.html:20
+msgid "Area"
+msgstr "Région"
+
+#: applications/templates/applications/manage/application_detail.html:21
+msgid "Preferred schedule"
+msgstr "Horaire souhaité"
+
+#: applications/templates/applications/manage/application_detail.html:24
+msgid "Message"
+msgstr "Message"
+
+#: applications/templates/applications/manage/application_detail.html:29
+#: applications/templates/applications/manage/application_list.html:42
+#: applications/templates/applications/manage/check_detail.html:3
+msgid "Background check"
+msgstr "Extrait de casier judiciaire"
+
+#: applications/templates/applications/manage/application_detail.html:30
+msgid "Open the background check"
+msgstr "Ouvrir l'extrait de casier"
+
+#: applications/templates/applications/manage/application_detail.html:35
+#: applications/templates/applications/manage/check_detail.html:52
+#: applications/templates/applications/manage/check_list.html:35
+msgid "Send the link again"
+msgstr "Renvoyer le lien"
+
+#: applications/templates/applications/manage/application_detail.html:35
+#: applications/templates/applications/manage/check_detail.html:52
+msgid "Ask for a document"
+msgstr "Demander un document"
+
+#: applications/templates/applications/manage/application_detail.html:42
+msgid "This is your own application: another reviewer decides on it."
+msgstr "C'est votre propre candidature : un autre évaluateur en décide."
+
+#: applications/templates/applications/manage/application_detail.html:47
+msgid "Needs a valid background check"
+msgstr "Demande un extrait de casier judiciaire valable"
+
+#: applications/templates/applications/manage/application_detail.html:47
+msgid "Approve"
+msgstr "Approuver"
+
+#: applications/templates/applications/manage/application_detail.html:49
+msgid "Approving needs a valid background check."
+msgstr "L'approbation demande un extrait de casier judiciaire valable."
+
+#: applications/templates/applications/manage/application_list.html:3
+#: applications/templates/applications/manage/application_list.html:4
+#: core/templates/core/_manage_base.html:97
+msgid "Applications"
+msgstr "Candidatures"
+
+#: applications/templates/applications/manage/application_list.html:9
+msgid ""
+"People who applied to become a mentor or to start a dojo. An application can "
+"only be approved once the person's background check is valid."
+msgstr "Les personnes qui ont posé leur candidature comme mentor ou pour lancer un dojo. Une candidature ne peut être approuvée qu'une fois l'extrait de casier judiciaire de la personne valable."
+
+#: applications/templates/applications/manage/application_list.html:17
+#: applications/templates/applications/manage/application_list.html:23
+msgid "All"
+msgstr "Toutes"
+
+#: applications/templates/applications/manage/application_list.html:21
+#: applications/templates/applications/manage/application_list.html:38
+#: events/forms.py:273
+msgid "Kind"
+msgstr "Type"
+
+#: applications/templates/applications/manage/application_list.html:29
+msgid "Show"
+msgstr "Afficher"
+
+#: applications/templates/applications/manage/application_list.html:39
+msgid "Dojo or area"
+msgstr "Dojo ou région"
+
+#: applications/templates/applications/manage/application_list.html:58
+msgid "No applications here."
+msgstr "Aucune candidature ici."
+
+#: applications/templates/applications/manage/check_detail.html:5
+msgid "Back to background checks"
+msgstr "Retour aux extraits de casier"
+
+# | msgid "requested"
+#: applications/templates/applications/manage/check_detail.html:14
+#: applications/templates/applications/manage/check_list.html:23
+#: applications/templates/applications/manage/check_list.html:35
+#: dojos/models.py:207
+msgid "Requested"
+msgstr "Demandé"
+
+#: applications/templates/applications/manage/check_detail.html:15
+#: applications/templates/applications/manage/check_list.html:30
+msgid "Uploaded"
+msgstr "Déposé"
+
+#: applications/templates/applications/manage/check_detail.html:16
+msgid "Last decision"
+msgstr "Dernière décision"
+
+#: applications/templates/applications/manage/check_detail.html:23
+msgid "No applications."
+msgstr "Aucune candidature."
+
+#: applications/templates/applications/manage/check_detail.html:29
+msgid "This is your own background check: another reviewer decides on it."
+msgstr "C'est votre propre extrait de casier : un autre évaluateur en décide."
+
+#: applications/templates/applications/manage/check_detail.html:32
+msgid "Decide"
+msgstr "Décider"
+
+#: applications/templates/applications/manage/check_detail.html:34
+msgid "Download the document"
+msgstr "Télécharger le document"
+
+#: applications/templates/applications/manage/check_detail.html:35
+msgid ""
+"Every download is recorded. Don't keep a copy: delete the file once you've "
+"decided."
+msgstr "Chaque téléchargement est enregistré. Ne gardez pas de copie : supprimez le fichier dès que vous avez décidé."
+
+#: applications/templates/applications/manage/check_detail.html:40
+msgid ""
+"Validating makes the check valid for a year. Rejecting asks the person to "
+"upload a new document. Either way the document is deleted straight away."
+msgstr "Valider rend l'extrait valable un an. Refuser demande à la personne de déposer un nouveau document. Dans les deux cas, le document est supprimé immédiatement."
+
+#: applications/templates/applications/manage/check_detail.html:51
+msgid ""
+"Mails the person a link to upload their extract. It's also on their account "
+"page."
+msgstr "Envoie à la personne un lien pour déposer son extrait. Il se trouve aussi sur la page de son compte."
+
+#: applications/templates/applications/manage/check_detail.html:57
+msgid "Earlier decisions"
+msgstr "Décisions précédentes"
+
+#: applications/templates/applications/manage/check_detail.html:62
+msgid "Decision"
+msgstr "Décision"
+
+#: applications/templates/applications/manage/check_detail.html:63
+msgid "By"
+msgstr "Par"
+
+#: applications/templates/applications/manage/check_detail.html:65
+msgid "Valid until"
+msgstr "Valable jusqu'au"
+
+#: applications/templates/applications/manage/check_detail.html:79
+msgid "No decisions yet."
+msgstr "Pas encore de décision."
+
+#: applications/templates/applications/manage/check_list.html:3
+#: applications/templates/applications/manage/check_list.html:4
+#: core/templates/core/_manage_base.html:90
+msgid "Background checks"
+msgstr "Extraits de casier"
+
+#: applications/templates/applications/manage/check_list.html:9
+msgid ""
+"Champions and mentors need a valid extract from the criminal record (model "
+"2, Article 596.2) before they can work with children. Open a person to "
+"download their document and decide on it: the document is deleted as soon as "
+"you do, only the decision is kept."
+msgstr "Les champions et les mentors ont besoin d'un extrait de casier judiciaire valable (modèle 2, article 596.2) avant de pouvoir travailler avec des enfants. Ouvrez une personne pour télécharger son document et décider : le document est supprimé dès que vous le faites, seule la décision est conservée."
+
+#: applications/templates/applications/manage/check_list.html:13
+msgid "Find a person by name, email address or username"
+msgstr "Chercher une personne par nom, adresse e-mail ou nom d'utilisateur"
+
+#: applications/templates/applications/manage/check_list.html:22
+msgid "Search results"
+msgstr "Résultats de la recherche"
+
+#: applications/templates/applications/manage/check_list.html:23
+msgid "Nobody with a background check matches."
+msgstr "Aucune personne avec un extrait de casier ne correspond."
+
+#: applications/templates/applications/manage/check_list.html:25
+#: privacy/templates/privacy/manage/privacy.html:79
+#, python-format
+msgid ""
+"Showing the first %(search_limit)s; search more precisely to find others."
+msgstr ""
+"Seuls les %(search_limit)s premiers sont affichés ; affinez la recherche "
+"pour en trouver d'autres."
+
+#: applications/templates/applications/manage/check_list.html:29
+msgid "Documents that were uploaded, oldest first."
+msgstr "Les documents déposés, les plus anciens d'abord."
+
+#: applications/templates/applications/manage/check_list.html:30
+msgid "Nothing to review."
+msgstr "Rien à vérifier."
+
+#: applications/templates/applications/manage/check_list.html:34
+msgid ""
+"Asked for, or rejected and waiting for a new one. The person uploads it from "
+"the link in their mail or from their account page."
+msgstr "Demandés, ou refusés et en attente d'un nouveau. La personne le dépose via le lien de son e-mail ou depuis la page de son compte."
+
+#: applications/templates/applications/manage/check_list.html:35
+msgid "Nobody is waiting to upload."
+msgstr "Personne n'a de document à déposer."
+
+#: applications/templates/applications/manage/check_list.html:38
+msgid "Expired"
+msgstr "Expirés"
+
+#: applications/templates/applications/manage/check_list.html:39
+msgid ""
+"Until they upload a new one, these people can't manage a dojo. They can "
+"upload it from their account page; you can also send them the link."
+msgstr "Tant qu'elles n'en ont pas déposé un nouveau, ces personnes ne peuvent pas gérer de dojo. Elles peuvent le déposer depuis la page de leur compte ; vous pouvez aussi leur envoyer le lien."
+
+#: applications/templates/applications/manage/check_list.html:40
+msgid "Expired on"
+msgstr "Expiré le"
+
+#: applications/templates/applications/manage/check_list.html:40
+msgid "Ask for a new one"
+msgstr "En demander un nouveau"
+
+#: applications/templates/applications/manage/check_list.html:40
+msgid "No expired checks."
+msgstr "Aucun extrait expiré."
+
+#: applications/templates/applications/manage/check_list.html:43
+msgid "Expiring within 30 days"
+msgstr "Expire dans les 30 jours"
+
+#: applications/templates/applications/manage/check_list.html:44
+msgid ""
+"They get a reminder by mail 30 days before, so they can ask their "
+"municipality for a new extract in time."
+msgstr "Ces personnes reçoivent un rappel par e-mail 30 jours avant, pour demander à temps un nouvel extrait à leur commune."
+
+#: applications/templates/applications/manage/check_list.html:45
+msgid "Expires on"
+msgstr "Expire le"
+
+#: applications/templates/applications/manage/check_list.html:45
+msgid "No checks expire soon."
+msgstr "Aucun extrait n'expire bientôt."
 
 # | msgid "Already signed up"
 #: applications/templates/applications/register_dojo.html:24
@@ -2459,7 +2853,7 @@ msgstr "Supprimer la promotion"
 
 #: content/templates/content/manage/promotion_list.html:3
 #: content/templates/content/manage/promotion_list.html:4
-#: core/templates/core/_manage_base.html:81
+#: core/templates/core/_manage_base.html:112
 #: dojos/templates/dojos/partials/_event_promotions.html:9
 msgid "Promotions"
 msgstr "Promotions"
@@ -2479,21 +2873,15 @@ msgid ""
 "You can promote any upcoming event. To plan the organisation's own events "
 "yourself, you need a valid background check and a place on the team of the "
 "organisation's dojo."
-msgstr "Vous pouvez promouvoir n'importe quel événement à venir. Pour préparer vous-même les événements propres à l'organisation, il vous faut une vérification d'antécédents valide et une place dans l'équipe du dojo de l'organisation."
+msgstr ""
+"Vous pouvez promouvoir n'importe quel événement à venir. Pour préparer vous-"
+"même les événements propres à l'organisation, il vous faut une vérification "
+"d'antécédents valide et une place dans l'équipe du dojo de l'organisation."
 
 #: content/templates/content/manage/promotion_list.html:22
 #: content/templates/content/manage/sponsor_list.html:29
 msgid "Shown"
 msgstr "Affichée"
-
-#: content/templates/content/manage/promotion_list.html:23
-#: content/templates/content/manage/sponsor_list.html:19
-#: dojos/templates/dojos/dojo_event_detail.html:37
-#: dojos/templates/dojos/dojo_event_list.html:25
-#: mailing/templates/mailing/manage/campaign_list.html:13
-#: mailing/templates/mailing/manage/journey_list.html:14
-msgid "Status"
-msgstr "Statut"
 
 #: content/templates/content/manage/promotion_list.html:40
 #: dojos/templates/dojos/partials/_event_promotions.html:20
@@ -2541,7 +2929,7 @@ msgstr "Retirer le sponsor"
 
 #: content/templates/content/manage/sponsor_list.html:3
 #: content/templates/content/manage/sponsor_list.html:4
-#: core/templates/core/_manage_base.html:87
+#: core/templates/core/_manage_base.html:118
 msgid "Sponsors"
 msgstr "Sponsors"
 
@@ -2585,12 +2973,12 @@ msgid "In %(language)s"
 msgstr "En %(language)s"
 
 # | msgid "Organisation"
-#: core/templates/core/_manage_base.html:15
+#: core/templates/core/_manage_base.html:17
 msgid "Organisation dashboard"
 msgstr "Tableau de bord de l'organisation"
 
 # | msgid "Newsletter and campaigns"
-#: core/templates/core/_manage_base.html:22
+#: core/templates/core/_manage_base.html:26
 #: mailing/templates/mailing/manage/campaign_form.html:3
 #: mailing/templates/mailing/manage/campaign_form.html:4
 #: mailing/templates/mailing/manage/campaign_list.html:5
@@ -2598,70 +2986,78 @@ msgid "New campaign"
 msgstr "Nouvelle campagne"
 
 # | msgid "Location"
-#: core/templates/core/_manage_base.html:28
+#: core/templates/core/_manage_base.html:35
 msgid "Communication"
 msgstr "Communication"
 
-#: core/templates/core/_manage_base.html:33
+#: core/templates/core/_manage_base.html:40
 #: mailing/templates/mailing/manage/campaign_list.html:3
 #: mailing/templates/mailing/manage/campaign_list.html:4
 msgid "Campaigns"
 msgstr "Campagnes"
 
-#: core/templates/core/_manage_base.html:39
+#: core/templates/core/_manage_base.html:46
 #: mailing/templates/mailing/manage/journey_list.html:3
 #: mailing/templates/mailing/manage/journey_list.html:4
 msgid "Journeys"
 msgstr "Parcours automatiques"
 
-#: core/templates/core/_manage_base.html:45
+#: core/templates/core/_manage_base.html:52
 #: mailing/templates/mailing/manage/segment_list.html:3
 #: mailing/templates/mailing/manage/segment_list.html:4
 msgid "Segments"
 msgstr "Segments"
 
-#: core/templates/core/_manage_base.html:51
+#: core/templates/core/_manage_base.html:58
 #: mailing/templates/mailing/manage/template_list.html:3
 #: mailing/templates/mailing/manage/template_list.html:4
 msgid "Mail templates"
 msgstr "Modèles d'e-mail"
 
-#: core/templates/core/_manage_base.html:61
+#: core/templates/core/_manage_base.html:68
 #: core/templates/core/partials/_manage_switcher.html:26
 msgid "Organisation events"
 msgstr "Événements de l'organisation"
 
-#: core/templates/core/_manage_base.html:76
+#: core/templates/core/_manage_base.html:85
+msgid "Volunteers"
+msgstr "Bénévoles"
+
+#: core/templates/core/_manage_base.html:107
 msgid "Public site"
 msgstr "Site public"
 
-#: core/templates/core/_manage_base.html:94
+#: core/templates/core/_manage_base.html:125
 #: core/templates/core/code_of_conduct.html:50
 msgid "Ninjas"
 msgstr "Ninjas"
 
-#: core/templates/core/_manage_base.html:99
+#: core/templates/core/_manage_base.html:130
 #: events/templates/events/manage/badge_list.html:3
 #: events/templates/events/manage/badge_list.html:4
 msgid "Awards"
 msgstr "Distinctions"
 
-#: core/templates/core/_manage_base.html:111
+#: core/templates/core/_manage_base.html:142
 #: privacy/templates/privacy/manage/privacy.html:3
 #: privacy/templates/privacy/manage/privacy.html:4
 msgid "Privacy"
 msgstr "Vie privée"
 
 # | msgid "Has own login"
-#: core/templates/core/_manage_base.html:112
+#: core/templates/core/_manage_base.html:143
 #: privacy/templates/privacy/manage/privacy.html:11
 msgid "Needs attention"
 msgstr "À traiter"
 
 # | msgid "Organisation"
-#: core/templates/core/_manage_base.html:125
+#: core/templates/core/_manage_base.html:157
 msgid "Organisation admin"
 msgstr "Administrateur de l'organisation"
+
+#: core/templates/core/_manage_base.html:157
+msgid "Background-check reviewer"
+msgstr "Évaluateur des extraits de casier"
 
 #: core/templates/core/_manage_shell.html:52
 msgid "Pin sidebar open"
@@ -3334,11 +3730,6 @@ msgstr "Ninja"
 msgid "New champion"
 msgstr "Nouveau champion"
 
-# | msgid "Gender (optional)"
-#: dojos/forms.py:338
-msgid "Note (optional)"
-msgstr "Remarque (facultatif)"
-
 # | msgid "%(name)s pathway"
 #: dojos/forms.py:359
 #, python-format
@@ -3387,11 +3778,6 @@ msgstr "Archivé"
 #: dojos/models.py:201 privacy/templates/privacy/manage/privacy.html:18
 msgid "Champion"
 msgstr "Champion"
-
-# | msgid "requested"
-#: dojos/models.py:207
-msgid "Requested"
-msgstr "Demandé"
 
 #: dojos/models.py:252
 msgid "Only a ninja account can be a youth mentor."
@@ -3694,15 +4080,6 @@ msgstr "Voir les sessions de ce dojo"
 #: dojos/templates/dojos/dojo_detail.html:121
 msgid "Next session"
 msgstr "Prochaine session"
-
-#: dojos/templates/dojos/dojo_detail.html:121
-#: dojos/templates/dojos/dojo_event_detail.html:41
-#: dojos/templates/dojos/dojo_event_list.html:39
-#: dojos/templates/dojos/partials/_dojo_result.html:33 events/models.py:33
-#: events/templates/events/event_signup.html:60
-#: events/templates/events/partials/_event_row.html:34
-msgid "Open"
-msgstr "Ouvert"
 
 #: dojos/templates/dojos/dojo_detail.html:121
 #: dojos/templates/dojos/partials/_dojo_result.html:31
@@ -4848,10 +5225,6 @@ msgstr "Ce champ est obligatoire."
 #: events/forms.py:266
 msgid "Standard icon"
 msgstr "Icône standard"
-
-#: events/forms.py:273
-msgid "Kind"
-msgstr "Type"
 
 #: events/forms.py:275 events/forms.py:305
 #: events/templates/events/manage/badge_list.html:19
@@ -6933,14 +7306,6 @@ msgstr "Supprimer…"
 #: privacy/templates/privacy/manage/privacy.html:74
 msgid "No accounts match."
 msgstr "Aucun compte ne correspond."
-
-#: privacy/templates/privacy/manage/privacy.html:79
-#, python-format
-msgid ""
-"Showing the first %(search_limit)s; search more precisely to find others."
-msgstr ""
-"Seuls les %(search_limit)s premiers sont affichés ; affinez la recherche "
-"pour en trouver d'autres."
 
 #: privacy/views.py:44
 msgid ""

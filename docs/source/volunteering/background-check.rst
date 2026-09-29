@@ -28,10 +28,11 @@ A few things worth knowing:
   its expiry date, and who reviewed it and when are kept on file.
 - The check belongs to your account, not to a dojo: one check covers
   every dojo you help at or run.
-- A validated check is valid for one year from when it's reviewed. When
-  it expires, you can still log in and use the site as usual, but you
-  can't open your dojos' dashboards until a fresh extract has been
-  validated — upload it from your account page.
+- A validated check is valid for one year from when it's reviewed. You
+  get a reminder by mail 30 days before it expires, so you can ask for a
+  new extract in time. When it expires, you can still log in and use the
+  site as usual, but you can't open your dojos' dashboards until a fresh
+  extract has been validated — upload it from your account page.
 - You can only upload once a check has been requested (or a previous one
   was rejected or has expired) — if you haven't been asked for it yet,
   there's nothing to upload.
