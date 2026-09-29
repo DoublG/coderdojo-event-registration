@@ -10,6 +10,14 @@ regenerate them locally, never commit them.
 
 ## Regenerating
 
+`.devcontainer/start.sh` does this for you on every start (`ensure_dev_certs`): it
+creates the CA when `pki/ca.crt` or its key is missing (never otherwise, since your
+host trusts it), and the server certificate when it's missing, expires within 30
+days, or wasn't issued by the current CA. On a fresh checkout the `proxy`
+container restarts until the files exist, then serves them. To start over with a
+new CA, delete `pki/`, `fullchain.pem` and `server.key` and run `start.sh` again
+(then trust the new `pki/ca.crt` on your host, below). By hand, the same steps:
+
 ```sh
 cd .devcontainer/certs
 rm -rf pki fullchain.pem server.key

@@ -1,6 +1,72 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Local dev TLS for coolregistration.localhost (see .devcontainer/certs/README.md,
+# the same commands). Git keeps none of it, so a fresh checkout has to make it.
+# The CA is only made when missing: your host trusts it, and a new one would
+# need trusting again. The server certificate is made again when it's missing,
+# expires within 30 days, or wasn't issued by the current CA. The proxy
+# container keeps restarting until the files exist (restart: unless-stopped),
+# then serves them.
+ensure_dev_certs() {
+    local certs=/workspace/.devcontainer/certs
+    local pki="$certs/pki"
+    local host=coolregistration.localhost
+    local crt="$pki/issued/$host.crt"
+    local key="$pki/private/$host.key"
+
+    mkdir -p "$pki/private" "$pki/issued"
+
+    if [ ! -f "$pki/ca.crt" ] || [ ! -f "$pki/private/ca.key" ]; then
+        echo "Creating the local dev CA ($pki/ca.crt) - trust it on your host, see $certs/README.md"
+        openssl genrsa -out "$pki/private/ca.key" 4096
+        openssl req -x509 -new -nodes -key "$pki/private/ca.key" -sha256 -days 3650 \
+            -subj "/CN=$host Dev CA/O=CoderDojo Belgium Dev" \
+            -out "$pki/ca.crt"
+        rm -f "$crt"
+    fi
+
+    if [ -f "$crt" ] && [ -f "$key" ] && [ -f "$certs/fullchain.pem" ] && [ -f "$certs/server.key" ] \
+        && openssl x509 -in "$crt" -noout -checkend $((30 * 24 * 3600)) > /dev/null \
+        && openssl verify -CAfile "$pki/ca.crt" "$crt" > /dev/null 2>&1; then
+        return
+    fi
+
+    echo "Creating the TLS certificate for $host"
+    cat > "$pki/server-ext.cnf" <<EOF
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+prompt = no
+
+[req_distinguished_name]
+CN = $host
+
+[v3_req]
+subjectAltName = @alt_names
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+
+[alt_names]
+DNS.1 = $host
+EOF
+    openssl genrsa -out "$key" 2048
+    openssl req -new -key "$key" -out "$pki/$host.csr" -config "$pki/server-ext.cnf"
+    openssl x509 -req -in "$pki/$host.csr" -CA "$pki/ca.crt" -CAkey "$pki/private/ca.key" \
+        -CAcreateserial -out "$crt" -days 825 -sha256 \
+        -extfile "$pki/server-ext.cnf" -extensions v3_req
+    rm -f "$pki/$host.csr"
+    cat "$crt" "$pki/ca.crt" > "$certs/fullchain.pem"
+    cp "$key" "$certs/server.key"
+    chmod 600 "$certs/server.key" "$key" "$pki/private/ca.key"
+
+    # Hand the files to whoever owns the checkout, so the host can read ca.crt
+    # (to trust it) and delete them to start over.
+    chown -R --reference="$certs" "$pki" "$certs/fullchain.pem" "$certs/server.key"
+}
+ensure_dev_certs
+
 # Trust our local dev CA inside the container (see .devcontainer/certs/README.md).
 CA_SRC="/workspace/.devcontainer/certs/pki/ca.crt"
 if [ -f "$CA_SRC" ]; then
@@ -36,6 +102,12 @@ if [ "$debug" = 1 ]; then
 else
     python manage.py collectstatic --noinput --clear --verbosity 0
 fi
+
+# The help centre (docs/, Sphinx) in en/fr/nl, served by nginx at /docs/.
+# Incremental, so only changed pages are rebuilt. It writes into docs/build/
+# without deleting it, which keeps the proxy's bind mount on it working (see
+# docs/README.md). A broken docs page never stops the site from starting.
+make -C docs html-all -s || echo "warning: the docs build failed - see the output above" >&2
 
 python manage.py migrate
 

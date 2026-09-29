@@ -11,6 +11,9 @@ pip install -r requirements.txt
 make html-all       # builds build/html/ (en), build/html/fr/, build/html/nl/
 ```
 
+`.devcontainer/start.sh` runs `make html-all` on every start of the devcontainer,
+so the served docs are current after a (re)start; run it by hand after editing.
+
 `make html` alone only builds the English (default) source — use `html-all`
 to get all three languages. Served at `/docs/`, `/docs/fr/`, `/docs/nl/` via
 the `.devcontainer` nginx proxy (`../.devcontainer/nginx/nginx.conf`).
