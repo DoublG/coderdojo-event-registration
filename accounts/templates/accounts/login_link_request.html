@@ -1,0 +1,54 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Log in with a link" %} · CoderDojo Belgium{% endblock %}
+{% block root_class %}login-page-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .login-page-root { background: var(--surface-sunken); }
+  .login-page-root .login-stage { min-height: 480px; display: flex; align-items: center; justify-content: center; padding: var(--space-6) var(--space-4); }
+</style>
+{% endblock %}
+
+{% block content %}
+  {% comment %}
+    accounts.views.login_link_request (DATA_MODEL.md §24): ask for a login
+    link. After posting, the same text whatever the address, so the page
+    never tells who has an account.
+  {% endcomment %}
+  <div class="shell login-stage">
+    <div class="cd-card cd-login" style="padding: var(--space-6); width: 100%; max-width: 400px;">
+      <div class="cd-login__header">
+        {% if sent_to %}
+          <h2 class="cd-login__title heading-lg">{% translate "Check your inbox" %}</h2>
+          <p class="cd-login__subtitle body-sm">
+            {% blocktranslate trimmed with email=sent_to minutes=valid_minutes %}
+              If <strong>{{ email }}</strong> belongs to an account that logs in with a link, we've sent one. It works once, within {{ minutes }} minutes.
+            {% endblocktranslate %}
+          </p>
+        {% else %}
+          <h2 class="cd-login__title heading-lg">{% translate "Log in with a link" %}</h2>
+          <p class="cd-login__subtitle body-sm">{% translate "Enter your email address and we'll mail you a link to log in. No password needed." %}</p>
+        {% endif %}
+      </div>
+
+      {% if sent_to %}
+        <p class="body-sm">{% translate "Nothing arrived? Look in your spam folder, or ask again in a minute. Does your account log in with a password? Then we've mailed you how to reset it." %}</p>
+        <a class="cd-btn cd-btn--ghost cd-btn--block label" href="{% url 'login' %}">{% translate "Back to logging in" %}</a>
+      {% else %}
+        <form class="cd-login__fields" method="post" novalidate>
+          {% csrf_token %}
+          {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+          {% if form.non_field_errors %}
+            <div class="cd-form__notes">
+              {% for error in form.non_field_errors %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endfor %}
+            </div>
+          {% endif %}
+          {{ form.email.as_field_group }}
+          <button type="submit" class="cd-btn cd-btn--primary cd-btn--block label">{% translate "Email me a login link" %}</button>
+          <a class="cd-btn cd-btn--ghost cd-btn--block label" style="margin-top: var(--space-2);" href="{% url 'login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">{% translate "Log in with a password" %}</a>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

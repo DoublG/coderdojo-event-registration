@@ -2973,3 +2973,233 @@ class OrganisationInvitationTests(TestCase):
         OrganisationRole.objects.create(account=reviewer, role=OrganisationRole.REVIEWER)
         self.client.force_login(reviewer)
         self.assertEqual(self._invite().status_code, 404)
+
+
+class LoginLinkTestMixin:
+    """An account that logs in with an emailed link (accounts/login_links.py,
+    DATA_MODEL.md §24), one on a password, and the mail templates loaded."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.cache import cache
+        from django.core.management import call_command
+
+        super().setUp()
+        cache.clear()  # the test cache (db 3): the one-mail-a-minute throttles
+        call_command("load_mail_templates", stdout=StringIO())
+        self.user = User.objects.create(
+            username="lin", email="lin@example.com", first_name="Lin", login_method=User.LOGIN_LINK
+        )
+        self.user.set_unusable_password()
+        self.user.save()
+        self.password_user = User.objects.create(username="pat", email="pat@example.com", first_name="Pat")
+        self.password_user.set_password(PASSWORD)
+        self.password_user.save()
+
+    def mails(self, key, user=None):
+        from mailing.models import EmailMessage
+
+        return EmailMessage.objects.filter(template_key=key, **({"user": user} if user else {}))
+
+    def link_path(self, key="login_link", user=None):
+        import re
+        from urllib.parse import urlparse
+
+        body = self.mails(key, user).latest("pk").body
+        url = urlparse(
+            re.search(r"https?://\S+/(?:login/link|account/security/login-method/confirm)/\S+", body).group(0)
+        )
+        return url.path + (f"?{url.query}" if url.query else "")
+
+
+class LoginLinkTokenTests(LoginLinkTestMixin, TestCase):
+    def test_a_link_works_for_its_account_only_while_valid(self):
+        from datetime import datetime
+
+        from . import login_links
+
+        url = login_links.login_url(self.user)
+        uid, token = url.rstrip("/").split("/")[-2:]
+        self.assertEqual(login_links.user_from_link(uid, token), self.user)
+        self.assertIsNone(login_links.user_from_link(uid, token + "x"))
+        with patch.object(login_links.LoginLinkTokens, "_now", return_value=datetime.now() + timedelta(minutes=16)):
+            self.assertIsNone(login_links.user_from_link(uid, token))
+
+    def test_the_first_link_lasts_days_until_the_first_login(self):
+        from datetime import datetime
+
+        from . import login_links
+
+        uid, token = login_links.login_url(self.user, first=True).rstrip("/").split("/")[-2:]
+        with patch.object(login_links.FirstLoginLinkTokens, "_now", return_value=datetime.now() + timedelta(days=2)):
+            self.assertEqual(login_links.user_from_link(uid, token), self.user)
+        self.user.last_login = timezone.now()
+        self.user.save()
+        self.assertIsNone(login_links.user_from_link(uid, token))
+
+    def test_a_link_stops_working_when_the_address_or_method_changes(self):
+        from . import login_links
+
+        uid, token = login_links.login_url(self.user).rstrip("/").split("/")[-2:]
+        self.user.email = "lin.new@example.com"
+        self.user.save()
+        self.assertIsNone(login_links.user_from_link(uid, token))
+        uid, token = login_links.login_url(self.user).rstrip("/").split("/")[-2:]
+        self.user.login_method = User.LOGIN_PASSWORD
+        self.user.save()
+        self.assertIsNone(login_links.user_from_link(uid, token))
+
+    def test_never_for_a_password_account_a_switched_off_one_or_a_service_account(self):
+        from . import login_links
+
+        for user in (self.password_user,):
+            uid, token = login_links.login_url(user).rstrip("/").split("/")[-2:]
+            self.assertIsNone(login_links.user_from_link(uid, token))
+        uid, token = login_links.login_url(self.user).rstrip("/").split("/")[-2:]
+        User.objects.filter(pk=self.user.pk).update(is_active=False)
+        self.assertIsNone(login_links.user_from_link(uid, token))
+        service = User.objects.create(username="svc", account_type=User.SERVICE, login_method=User.LOGIN_LINK)
+        uid, token = login_links.login_url(service).rstrip("/").split("/")[-2:]
+        self.assertIsNone(login_links.user_from_link(uid, token))
+
+
+class LoginLinkRequestTests(LoginLinkTestMixin, TestCase):
+    """/login/link/: the same answer whatever the address."""
+
+    def ask(self, email):
+        return self.client.post(reverse("login_link_request"), {"email": email})
+
+    def test_the_login_page_offers_it(self):
+        self.assertContains(self.client.get(reverse("login")), reverse("login_link_request"))
+
+    def test_a_link_account_gets_a_link(self):
+        response = self.ask("LIN@example.com")
+        self.assertContains(response, "Check your inbox")
+        self.assertEqual(self.mails("login_link", self.user).count(), 1)
+
+    def test_the_same_answer_for_a_password_account_and_an_unknown_address(self):
+        answers = [self.ask(email) for email in ("lin@example.com", "pat@example.com", "nobody@example.com")]
+        self.assertEqual({response.status_code for response in answers}, {200})
+        import re
+
+        texts = {
+            # The page's card only: with --debug-mode the debug toolbar adds timings.
+            re.search(r'<div class="shell login-stage">.*?<a class', response.content.decode(), re.S)
+            .group(0)
+            .replace(email, "EMAIL")
+            for response, email in zip(
+                answers, ("lin@example.com", "pat@example.com", "nobody@example.com"), strict=True
+            )
+        }
+        self.assertEqual(len(texts), 1)
+        self.assertEqual(self.mails("login_link_not_available", self.password_user).count(), 1)
+        self.assertFalse(self.mails("login_link", self.password_user).exists())
+        self.assertEqual(self.mails("login_link").count(), 1)
+
+    def test_one_mail_a_minute_per_address(self):
+        self.ask("lin@example.com")
+        response = self.ask("lin@example.com")
+        self.assertContains(response, "Please wait a minute")
+        self.assertEqual(self.mails("login_link").count(), 1)
+        self.assertContains(self.ask("nobody@example.com"), "Check your inbox")
+        self.assertContains(self.ask("nobody@example.com"), "Please wait a minute")
+
+    def test_a_switched_off_account_gets_nothing(self):
+        User.objects.filter(pk=self.user.pk).update(is_active=False)
+        self.assertContains(self.ask("lin@example.com"), "Check your inbox")
+        self.assertFalse(self.mails("login_link").exists())
+
+    def test_a_blocked_address_is_suppressed_as_any_mail(self):
+        from mailing.models import EmailMessage, EmailSuppression
+
+        EmailSuppression.objects.create(email="lin@example.com", reason=EmailSuppression.MANUAL)
+        self.ask("lin@example.com")
+        self.assertEqual(self.mails("login_link").get().status, EmailMessage.Status.SUPPRESSED)
+
+    def test_forgot_password_sends_a_link_account_its_login_link(self):
+        self.client.post(reverse("password_reset"), {"email": "lin@example.com"})
+        self.assertEqual(self.mails("login_link", self.user).count(), 1)
+        self.assertFalse(self.mails("password_reset", self.user).exists())
+        self.client.post(reverse("password_reset"), {"email": "pat@example.com"})
+        self.assertEqual(self.mails("password_reset", self.password_user).count(), 1)
+
+
+class LoginLinkLoginTests(LoginLinkTestMixin, TwoStepTestMixin, TestCase):
+    """/login/link/<uidb64>/<token>/: GET asks, POST logs in, then the second
+    step as on /login/."""
+
+    def setUp(self):
+        super().setUp()
+        # TwoStepTestMixin's `self.user` is the password account here.
+        self.password_user = self.user
+        self.user = User.objects.get(username="lin")
+
+    def link(self, next_url=None):
+        from . import login_links
+
+        url = login_links.login_url(self.user, next_url)
+        return url.removeprefix(settings_site_url())
+
+    def test_get_asks_and_logs_nothing_in(self):
+        response = self.client.get(self.link())
+        self.assertContains(response, "Log in as")
+        self.assertContains(response, "lin@example.com")
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_post_logs_in_once(self):
+        from core.testing import link_login_data
+
+        link = self.link()
+        response = self.client.post(link, link_login_data())
+        self.assertRedirects(response, reverse("account_home"))
+        self.assertEqual(int(self.client.session["_auth_user_id"]), self.user.pk)
+        self.client.logout()
+        response = self.client.post(link, link_login_data())
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.assertContains(self.client.get(link), "Email me a new login link")
+
+    def test_the_link_from_the_request_page_works(self):
+        from core.testing import link_login_data
+
+        self.client.post(reverse("login_link_request"), {"email": "lin@example.com", "next": "/account/mail/"})
+        link = self.link_path()
+        self.assertIn("next=", link)
+        response = self.client.post(link, link_login_data())
+        self.assertRedirects(response, "/account/mail/", fetch_redirect_response=False)
+
+    def test_a_link_account_cannot_log_in_with_a_password(self):
+        response = self.client.post(reverse("login"), login_data("lin@example.com", PASSWORD))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_two_step_login_still_follows(self):
+        from django_otp import DEVICE_ID_SESSION_KEY
+
+        from core.testing import link_login_data, token_data, totp_code
+
+        device = self.add_app(self.user)
+        link = self.link()
+        response = self.client.post(link, link_login_data())
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["wizard"]["steps"].current, "token")
+        self.assertNotIn("_auth_user_id", self.client.session)
+        response = self.client.post(link, token_data(totp_code(device), view="login_link_view"))
+        self.assertRedirects(response, reverse("account_home"))
+        self.assertEqual(self.client.session[DEVICE_ID_SESSION_KEY], device.persistent_id)
+
+    def test_the_policy_still_applies_after_a_link_login(self):
+        from accounts.models import SignInRequirement
+        from core.testing import link_login_data
+
+        SignInRequirement.objects.create(role=SignInRequirement.ADULT, level=SignInRequirement.TWO_STEP)
+        self.client.post(self.link(), link_login_data())
+        response = self.client.get(reverse("account_home"))
+        self.assertRedirects(response, reverse("account_security"), fetch_redirect_response=False)
+
+
+def settings_site_url():
+    from django.conf import settings
+
+    return settings.SITE_URL

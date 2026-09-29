@@ -24,13 +24,25 @@
   {% comment %}
     accounts.views.LoginView: django-two-factor-auth's login in steps (auth →
     token or backup). Every step posts the wizard's management form; `next`
-    travels along on each step.
+    travels along on each step. accounts.views.LoginLinkView uses it too
+    (`link_login`): its first step is "Log in as ...?" from an emailed link.
   {% endcomment %}
   <div class="shell login-stage">
     <div class="cd-card cd-login" style="padding: var(--space-6); width: 100%; max-width: 400px;">
 
       <div class="cd-login__header">
-        {% if wizard.steps.current == "auth" %}
+        {% if wizard.steps.current == "auth" and link_login %}
+          <h2 class="cd-login__title heading-lg">{% if link_user %}{% translate "Log in" %}{% else %}{% translate "This link doesn't work any more" %}{% endif %}</h2>
+          <p class="cd-login__subtitle body-sm">
+            {% if link_user %}
+              {% blocktranslate trimmed with name=link_user.get_full_name|default:link_user.username email=link_user.email %}
+                Log in as <strong>{{ name }}</strong> ({{ email }}) on this device?
+              {% endblocktranslate %}
+            {% else %}
+              {% translate "A login link works once, for a short time. Ask for a new one below." %}
+            {% endif %}
+          </p>
+        {% elif wizard.steps.current == "auth" %}
           <h2 class="cd-login__title heading-lg">{% translate "Welcome back" %}</h2>
           <p class="cd-login__subtitle body-sm">{% translate "Log in to see your dojo's schedule and manage your account." %}</p>
         {% else %}
@@ -64,7 +76,13 @@
           </div>
         {% endif %}
 
-        {% if wizard.steps.current == "auth" %}
+        {% if wizard.steps.current == "auth" and link_login %}
+          {% if link_user %}
+            <button type="submit" class="cd-btn cd-btn--primary cd-btn--block label">{% translate "Log in" %}</button>
+          {% else %}
+            <a class="cd-btn cd-btn--primary cd-btn--block label" href="{% url 'login_link_request' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">{% translate "Email me a new login link" %}</a>
+          {% endif %}
+        {% elif wizard.steps.current == "auth" %}
           {{ form.username.as_field_group }}
           {{ form.password.as_field_group }}
 
@@ -77,6 +95,7 @@
           </div>
 
           <button type="submit" class="cd-btn cd-btn--primary cd-btn--block label">{% translate "Log in" %}</button>
+          <a class="cd-btn cd-btn--ghost cd-btn--block label" style="margin-top: var(--space-2);" href="{% url 'login_link_request' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">{% translate "Log in with an emailed link" %}</a>
         {% else %}
           {% if device_kind == "passkey" and wizard.steps.current == "token" %}
             {{ form.otp_token }}
@@ -123,11 +142,15 @@
               Lost your phone and your backup codes? Mail us at {{ email }}: we'll check it's you and turn off two-step login.
             {% endblocktranslate %}
           </p>
-          <form method="post">
-            {% csrf_token %}
-            {{ wizard.management_form }}
-            <button name="wizard_goto_step" value="auth" type="submit" class="cd-btn cd-btn--ghost label">{% translate "Log in as someone else" %}</button>
-          </form>
+          {% if link_login %}
+            <a class="cd-btn cd-btn--ghost label" href="{% url 'login' %}">{% translate "Log in as someone else" %}</a>
+          {% else %}
+            <form method="post">
+              {% csrf_token %}
+              {{ wizard.management_form }}
+              <button name="wizard_goto_step" value="auth" type="submit" class="cd-btn cd-btn--ghost label">{% translate "Log in as someone else" %}</button>
+            </form>
+          {% endif %}
         </div>
       {% else %}
         <p class="cd-login__footer body-sm">{% translate "New to CoderDojo?" %} <a href="{% url 'register' %}">{% translate "Create an account" %}</a></p>

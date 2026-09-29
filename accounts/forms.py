@@ -60,15 +60,33 @@ class StyledPasswordResetForm(PasswordResetForm):
         super().__init__(*args, **kwargs)
         self.fields["email"].label = _("Email")
 
+    def get_users(self, email):
+        """Django's accounts with a usable password, plus the accounts that
+        log in with a link (they have none): those get a login link
+        instead of a reset (send_mail)."""
+        active = User._default_manager.filter(email__iexact=email, is_active=True)
+        return (
+            user
+            for user in active
+            if (user.has_usable_password() or user.uses_login_link) and user.email.casefold() == email.casefold()
+        )
+
     def send_mail(
         self, subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name=None
     ):
         """Every mail goes through the mail engine (mailing.services.send):
         queued as account (`service`) mail, in the account's language, with
-        the reset link built from the request's own domain."""
+        the reset link built from the request's own domain. An account that
+        logs in with a link has no password to reset: it gets a login link
+        (accounts/login_links.py, DATA_MODEL.md §24)."""
         from mailing.categories import MailCategory
         from mailing.services import send_or_log
 
+        from .login_links import send_login_link
+
+        if context["user"].uses_login_link:
+            send_login_link(context["user"])
+            return
         path = reverse("password_reset_confirm", kwargs={"uidb64": context["uid"], "token": context["token"]})
         send_or_log(
             context["user"],
@@ -108,6 +126,34 @@ class LoginForm(AuthenticationForm):
         "invalid_login": _("That email/password combination doesn't match an account."),
         "inactive": _("That email/password combination doesn't match an account."),
     }
+
+
+class LoginLinkForm(forms.Form):
+    """The first step of a login from an emailed link (accounts.views.
+    LoginLinkView): no fields, the link is the proof. Like LoginForm, it
+    leaves the account in `user_cache` for django-two-factor-auth's login,
+    which then asks for the second step when the account has one."""
+
+    def __init__(self, *args, link_user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user_cache = link_user
+
+    def clean(self):
+        if self.user_cache is None:
+            raise ValidationError(_("This login link has expired or was already used. Ask for a new one."))
+        return super().clean()
+
+    def get_user(self):
+        return self.user_cache
+
+
+class LoginLinkRequestForm(forms.Form):
+    """Asking for a login link (accounts.views.login_link_request)."""
+
+    email = forms.EmailField(
+        label=_("Email"),
+        widget=forms.EmailInput(attrs={"placeholder": "you@example.com", "autofocus": True, "autocomplete": "email"}),
+    )
 
 
 def clean_belgian_postal_code(value):

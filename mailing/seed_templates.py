@@ -689,6 +689,249 @@ Ce n'était pas vous ? Contactez-nous immédiatement :
         },
     },
     {
+        "key": "login_link",
+        "category": MailCategory.SERVICE,
+        "description": "A login link for an account that logs in with one (accounts/login_links.py). Variables: "
+        "login_url, first (the first one, after sign-up), valid_minutes, valid_days (for the first one).",
+        "subject": {
+            "en-us": "{% if first %}Welcome: log in to CoderDojo{% else %}Your CoderDojo login link{% endif %}",
+            "nl-be": "{% if first %}Welkom: meld je aan bij CoderDojo{% else %}Je inloglink voor CoderDojo{% endif %}",
+            "fr-be": "{% if first %}Bienvenue : connectez-vous à CoderDojo{% else %}Votre lien de connexion CoderDojo{% endif %}",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{% if first %}Your CoderDojo account is ready. You log in with a link we mail you, so there's no password to remember. Open this link within {{ valid_days }} days to log in for the first time:{% else %}Here's your link to log in to CoderDojo. It works once, within {{ valid_minutes }} minutes:{% endif %}
+
+{{ login_url }}
+
+The link logs in the device you open it on. Next time, ask for a new link on the login page.
+
+Didn't ask for this? Then you can ignore this email: nobody can log in without it.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{% if first %}Je CoderDojo-account is klaar. Je meldt je aan met een link die we je mailen, dus je hoeft geen wachtwoord te onthouden. Open deze link binnen {{ valid_days }} dagen om je de eerste keer aan te melden:{% else %}Hier is je link om je aan te melden bij CoderDojo. Hij werkt één keer, binnen {{ valid_minutes }} minuten:{% endif %}
+
+{{ login_url }}
+
+De link meldt je aan op het toestel waarop je hem opent. Vraag de volgende keer een nieuwe link aan op de aanmeldpagina.
+
+Heb je dit niet gevraagd? Dan kan je deze e-mail negeren: zonder deze mail kan niemand zich aanmelden.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{% if first %}Votre compte CoderDojo est prêt. Vous vous connectez avec un lien que nous vous envoyons par e-mail : pas de mot de passe à retenir. Ouvrez ce lien dans les {{ valid_days }} jours pour vous connecter la première fois :{% else %}Voici votre lien pour vous connecter à CoderDojo. Il fonctionne une fois, dans les {{ valid_minutes }} minutes :{% endif %}
+
+{{ login_url }}
+
+Le lien connecte l'appareil sur lequel vous l'ouvrez. La prochaine fois, demandez un nouveau lien sur la page de connexion.
+
+Vous n'avez rien demandé ? Vous pouvez ignorer cet e-mail : personne ne peut se connecter sans lui.
+""",
+        },
+    },
+    {
+        "key": "login_link_not_available",
+        "category": MailCategory.SERVICE,
+        "description": "Someone asked for a login link for an account that logs in with a password "
+        "(accounts/login_links.py). Variables: reset_url, security_url.",
+        "subject": {
+            "en-us": "You asked for a CoderDojo login link",
+            "nl-be": "Je vroeg een inloglink voor CoderDojo",
+            "fr-be": "Vous avez demandé un lien de connexion CoderDojo",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+Someone (hopefully you) asked for a login link for your CoderDojo account. Your account logs in with a password, so we didn't send one.
+
+Forgot your password? Choose a new one here:
+
+{{ reset_url }}
+
+Would you rather log in with a link each time? Once you're logged in, you can switch on your Sign-in security page:
+
+{{ security_url }}
+
+Didn't ask for this? Then you can ignore this email: nothing has changed.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Iemand (hopelijk jij) vroeg een inloglink voor je CoderDojo-account. Je account meldt zich aan met een wachtwoord, dus we stuurden er geen.
+
+Wachtwoord vergeten? Kies hier een nieuw:
+
+{{ reset_url }}
+
+Meld je je liever telkens aan met een link? Eens je aangemeld bent, kan je dat wijzigen op je pagina Aanmeldbeveiliging:
+
+{{ security_url }}
+
+Heb je dit niet gevraagd? Dan kan je deze e-mail negeren: er is niets veranderd.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Quelqu'un (vous, espérons-le) a demandé un lien de connexion pour votre compte CoderDojo. Votre compte se connecte avec un mot de passe : nous n'en avons donc pas envoyé.
+
+Mot de passe oublié ? Choisissez-en un nouveau ici :
+
+{{ reset_url }}
+
+Vous préférez vous connecter chaque fois avec un lien ? Une fois connecté, vous pouvez changer cela sur votre page Sécurité de connexion :
+
+{{ security_url }}
+
+Vous n'avez rien demandé ? Vous pouvez ignorer cet e-mail : rien n'a changé.
+""",
+        },
+    },
+    {
+        "key": "login_method_confirm",
+        "category": MailCategory.SERVICE,
+        "description": "Confirms a switch to logging in with a link, from the account's mailbox "
+        "(accounts/login_links.py). Variables: confirm_url, valid_hours.",
+        "subject": {
+            "en-us": "Confirm: log in to CoderDojo with a link",
+            "nl-be": "Bevestig: aanmelden bij CoderDojo met een link",
+            "fr-be": "Confirmez : se connecter à CoderDojo avec un lien",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+You asked to log in to your CoderDojo account with a link we mail you, instead of a password. To confirm, open this link within {{ valid_hours }} hours:
+
+{{ confirm_url }}
+
+Then your password stops working, and you're logged out on your other devices. Nothing changes until you confirm. If you didn't ask for this, you can ignore this email.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Je vroeg om je bij je CoderDojo-account aan te melden met een link die we je mailen, in plaats van met een wachtwoord. Open deze link binnen {{ valid_hours }} uur om het te bevestigen:
+
+{{ confirm_url }}
+
+Daarna werkt je wachtwoord niet meer en word je afgemeld op je andere toestellen. Tot je bevestigt, verandert er niets. Heb je dit niet gevraagd? Dan kan je deze e-mail negeren.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Vous avez demandé à vous connecter à votre compte CoderDojo avec un lien envoyé par e-mail, au lieu d'un mot de passe. Pour confirmer, ouvrez ce lien dans les {{ valid_hours }} heures :
+
+{{ confirm_url }}
+
+Ensuite, votre mot de passe ne fonctionne plus et vous êtes déconnecté sur vos autres appareils. Rien ne change avant votre confirmation. Si vous n'avez rien demandé, vous pouvez ignorer cet e-mail.
+""",
+        },
+    },
+    {
+        "key": "login_method_changed",
+        "category": MailCategory.SERVICE,
+        "description": "The account's way of logging in changed (accounts/login_links.py). Variables: method "
+        "(link or password), by_guardian (the guardian's name when they switched a child's login back to a "
+        "password), security_url, contact_url.",
+        "subject": {
+            "en-us": "How you log in to CoderDojo changed",
+            "nl-be": "Hoe je je aanmeldt bij CoderDojo is gewijzigd",
+            "fr-be": "Votre façon de vous connecter à CoderDojo a changé",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{% if method == "link" %}From now on you log in to CoderDojo with a link we mail you. Your password no longer works.{% elif by_guardian %}{{ by_guardian }} switched your CoderDojo login back to a password. We've sent you a separate mail to choose one.{% else %}From now on you log in to CoderDojo with your new password. Login links no longer work.{% endif %}
+
+You can see and change it on your Sign-in security page:
+
+{{ security_url }}
+
+Wasn't this you? Contact us straight away:
+
+{{ contact_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{% if method == "link" %}Voortaan meld je je bij CoderDojo aan met een link die we je mailen. Je wachtwoord werkt niet meer.{% elif by_guardian %}{{ by_guardian }} zette je CoderDojo-login terug op een wachtwoord. We stuurden je een aparte mail om er een te kiezen.{% else %}Voortaan meld je je bij CoderDojo aan met je nieuwe wachtwoord. Inloglinks werken niet meer.{% endif %}
+
+Je kan het bekijken en wijzigen op je pagina Aanmeldbeveiliging:
+
+{{ security_url }}
+
+Was jij dit niet? Neem dan meteen contact met ons op:
+
+{{ contact_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{% if method == "link" %}Désormais, vous vous connectez à CoderDojo avec un lien que nous vous envoyons par e-mail. Votre mot de passe ne fonctionne plus.{% elif by_guardian %}{{ by_guardian }} a remis votre connexion CoderDojo sur un mot de passe. Nous vous avons envoyé un autre e-mail pour en choisir un.{% else %}Désormais, vous vous connectez à CoderDojo avec votre nouveau mot de passe. Les liens de connexion ne fonctionnent plus.{% endif %}
+
+Vous pouvez le voir et le changer sur votre page Sécurité de connexion :
+
+{{ security_url }}
+
+Ce n'était pas vous ? Contactez-nous immédiatement :
+
+{{ contact_url }}
+""",
+        },
+    },
+    {
+        "key": "child_login_changed",
+        "category": MailCategory.SERVICE,
+        "description": "To a child's guardians when the child's own login changed (accounts/security_mail.py). "
+        "Variables: child_name, child_url, change (what changed: see security_mail), method, new_email.",
+        "subject": {
+            "en-us": "{{ child_name }}'s CoderDojo login changed",
+            "nl-be": "De CoderDojo-login van {{ child_name }} is gewijzigd",
+            "fr-be": "La connexion CoderDojo de {{ child_name }} a changé",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{% if change == "two_step_turned_on" %}{{ child_name }} turned on two-step login.{% elif change == "two_step_method_added" %}{{ child_name }} added a sign-in method for two-step login.{% elif change == "two_step_method_removed" %}{{ child_name }} removed a sign-in method for two-step login.{% elif change == "two_step_turned_off" %}Two-step login was turned off for {{ child_name }}'s login.{% elif change == "backup_code_used" %}{{ child_name }} logged in with a backup code.{% elif change == "login_method_changed" %}{% if method == "link" %}{{ child_name }} now logs in with a link we mail them.{% else %}{{ child_name }} now logs in with a password.{% endif %}{% elif change == "email_changed" %}{{ child_name }}'s login now uses the address {{ new_email }}.{% endif %}
+
+You manage {{ child_name }}'s login on their page:
+
+{{ child_url }}
+
+Anything you don't recognise? Have a look together, or contact us.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{% if change == "two_step_turned_on" %}{{ child_name }} zette aanmelden in twee stappen aan.{% elif change == "two_step_method_added" %}{{ child_name }} voegde een aanmeldmethode toe voor aanmelden in twee stappen.{% elif change == "two_step_method_removed" %}{{ child_name }} verwijderde een aanmeldmethode voor aanmelden in twee stappen.{% elif change == "two_step_turned_off" %}Aanmelden in twee stappen is uitgezet voor de login van {{ child_name }}.{% elif change == "backup_code_used" %}{{ child_name }} meldde zich aan met een back-upcode.{% elif change == "login_method_changed" %}{% if method == "link" %}{{ child_name }} meldt zich nu aan met een link die we mailen.{% else %}{{ child_name }} meldt zich nu aan met een wachtwoord.{% endif %}{% elif change == "email_changed" %}De login van {{ child_name }} gebruikt nu het adres {{ new_email }}.{% endif %}
+
+Je beheert de login van {{ child_name }} op diens pagina:
+
+{{ child_url }}
+
+Iets wat je niet herkent? Bekijk het samen, of neem contact met ons op.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{% if change == "two_step_turned_on" %}{{ child_name }} a activé la connexion en deux étapes.{% elif change == "two_step_method_added" %}{{ child_name }} a ajouté une méthode de connexion en deux étapes.{% elif change == "two_step_method_removed" %}{{ child_name }} a supprimé une méthode de connexion en deux étapes.{% elif change == "two_step_turned_off" %}La connexion en deux étapes a été désactivée pour la connexion de {{ child_name }}.{% elif change == "backup_code_used" %}{{ child_name }} s'est connecté avec un code de secours.{% elif change == "login_method_changed" %}{% if method == "link" %}{{ child_name }} se connecte maintenant avec un lien envoyé par e-mail.{% else %}{{ child_name }} se connecte maintenant avec un mot de passe.{% endif %}{% elif change == "email_changed" %}La connexion de {{ child_name }} utilise maintenant l'adresse {{ new_email }}.{% endif %}
+
+Vous gérez la connexion de {{ child_name }} sur sa page :
+
+{{ child_url }}
+
+Quelque chose que vous ne reconnaissez pas ? Regardez-le ensemble, ou contactez-nous.
+""",
+        },
+    },
+    {
         "key": "organisation_role_changed",
         "category": MailCategory.SERVICE,
         "description": "An organisation admin gave or took away the account's organisation roles "
@@ -1494,6 +1737,39 @@ SAMPLE_CONTEXT = {
         "new_email": "ellen.new@example.com",
         "changed_at": datetime(2026, 10, 3, 14, 30),
         "contact_url": "https://coolregistration.localhost/contact/",
+    },
+    "login_link": {
+        **_common,
+        "login_url": "https://coolregistration.localhost/login/link/MQ/abc-123/",
+        "first": False,
+        "valid_minutes": 15,
+        "valid_days": 3,
+    },
+    "login_link_not_available": {
+        **_common,
+        "reset_url": "https://coolregistration.localhost/password-reset/confirm/MQ/abc-123/",
+        "security_url": "https://coolregistration.localhost/account/security/",
+    },
+    "login_method_confirm": {
+        **_common,
+        "confirm_url": "https://coolregistration.localhost/account/security/login-method/confirm/MQ/abc-123/",
+        "valid_hours": 24,
+    },
+    "login_method_changed": {
+        **_common,
+        "method": "link",
+        "by_guardian": "",
+        "security_url": "https://coolregistration.localhost/account/security/",
+        "contact_url": "https://coolregistration.localhost/contact/",
+    },
+    "child_login_changed": {
+        **_common,
+        "child_name": "Emma",
+        "child_url": "https://coolregistration.localhost/account/ninja/1/",
+        "change": "login_method_changed",
+        "method": "link",
+        "new_email": "emma@example.com",
+        "by_guardian": "",
     },
     "organisation_invitation": {
         **_common,

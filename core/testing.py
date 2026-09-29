@@ -22,10 +22,17 @@ def login_data(username, password):
     return {"login_view-current_step": "auth", "auth-username": username, "auth-password": password}
 
 
-def token_data(token, step="token"):
+def token_data(token, step="token", view="login_view"):
     """The POST of the login's second step: a code, a backup code
-    (step="backup") or a passkey's answer."""
-    return {"login_view-current_step": step, f"{step}-otp_token": token}
+    (step="backup") or a passkey's answer. `view="login_link_view"` for a
+    login from an emailed link."""
+    return {f"{view}-current_step": step, f"{step}-otp_token": token}
+
+
+def link_login_data():
+    """The POST of a login link's first step ("Log in as ...?",
+    accounts.views.LoginLinkView): no fields, the link is the proof."""
+    return {"login_link_view-current_step": "auth"}
 
 
 def totp_code(device):

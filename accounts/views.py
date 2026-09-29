@@ -31,7 +31,7 @@ from mailing.categories import MailCategory
 from mailing.models import ConsentEvent
 from mailing.preferences import set_preference
 
-from . import child_accounts, email_change, home_dojo, two_step
+from . import child_accounts, email_change, home_dojo, login_links, two_step
 from .consent import consent_fields
 from .forms import (
     AddChildForm,
@@ -43,6 +43,8 @@ from .forms import (
     EditChildForm,
     ForcedPasswordChangeForm,
     LoginForm,
+    LoginLinkForm,
+    LoginLinkRequestForm,
     RegisterGuardianForm,
     StyledPasswordResetForm,
     StyledSetPasswordForm,
@@ -143,6 +145,68 @@ class LoginView(TwoFactorLoginView):
 
 
 login = LoginView.as_view()
+
+
+class LoginLinkView(LoginView):
+    """A login from an emailed link (/login/link/<uidb64>/<token>/,
+    accounts/login_links.py, DATA_MODEL.md §24). The same login steps as
+    /login/ with another first step: GET asks "Log in as ...?" (so a mail
+    scanner that follows the link logs nothing in), POST logs in, or goes
+    on to the second step on this same URL when the account has two-step
+    login. Someone logged in can open a link too: that's how an account
+    without a password confirms it's them (accounts.reauth)."""
+
+    form_list = (
+        (TwoFactorLoginView.AUTH_STEP, LoginLinkForm),
+        (TwoFactorLoginView.TOKEN_STEP, CodeTokenForm),
+        (TwoFactorLoginView.BACKUP_STEP, BackupCodeForm),
+    )
+
+    def dispatch(self, request, *args, **kwargs):
+        self.link_user = login_links.user_from_link(kwargs["uidb64"], kwargs["token"])
+        if self.link_user is not None:
+            # login() needs the backend; the wizard stores it with the account.
+            self.link_user.backend = "accounts.backends.EmailOrUsernameBackend"
+        # Not LoginView.dispatch: a logged-in account may log in again.
+        return TwoFactorLoginView.dispatch(self, request, *args, **kwargs)
+
+    def get_form_kwargs(self, step=None):
+        if step == self.AUTH_STEP:
+            return {"link_user": self.link_user}
+        return super().get_form_kwargs(step)
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form, **kwargs)
+        context["link_login"] = True
+        context["link_user"] = self.link_user
+        return context
+
+
+login_link = LoginLinkView.as_view()
+
+
+def login_link_request(request):
+    """/login/link/: ask for a login link. The answer is the same whatever
+    the address, so it never tells who has an account
+    (login_links.request_link)."""
+    if request.user.is_authenticated:
+        return redirect(_post_login_redirect(request, request.user))
+    form = LoginLinkRequestForm(request.POST or None)
+    next_url = request.POST.get("next") or request.GET.get("next") or ""
+    if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        next_url = ""
+    if request.method == "POST" and form.is_valid():
+        try:
+            login_links.request_link(form.cleaned_data["email"], next_url or None)
+        except login_links.LoginLinkError as error:
+            form.add_error(None, error.message)
+        else:
+            return render(
+                request,
+                "accounts/login_link_request.html",
+                {"sent_to": form.cleaned_data["email"], "valid_minutes": login_links.VALID_MINUTES},
+            )
+    return render(request, "accounts/login_link_request.html", {"form": form, "next": next_url})
 
 
 def logout(request):

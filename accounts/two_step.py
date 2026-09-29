@@ -14,18 +14,15 @@ that name (`_ensure_default`), whichever was added first.
 """
 
 import django_otp
-from django.conf import settings
 from django.db import transaction
 from django.dispatch import receiver
-from django.urls import reverse
 from django.utils.translation import gettext as _
 from django_otp.plugins.otp_static.models import StaticDevice, StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from two_factor.plugins.webauthn.models import WebauthnDevice
 from two_factor.signals import user_verified
 
-from mailing.categories import MailCategory
-from mailing.services import send_or_log
+from .security_mail import send_security_mail
 
 APP = "app"
 PASSKEY = "passkey"
@@ -184,14 +181,9 @@ def turn_off(user, by_organisation=False):
 
 
 def _mail(user, key, **context):
-    if not user.email:
-        return
-    send_or_log(
-        user,
-        MailCategory.SERVICE,
-        key,
-        {"security_url": settings.SITE_URL + reverse("account_security"), **context},
-    )
+    """The security mail to the account (and, for a child's own login, a
+    notice to its guardians: accounts.security_mail)."""
+    send_security_mail(user, key, **context)
 
 
 @receiver(user_verified)

@@ -19,6 +19,21 @@ class User(AbstractUser):
     (applications.Application). There are no role subclasses
     (DATA_MODEL.md §10)."""
 
+    # How the account logs in (DATA_MODEL.md §24), the account holder's own
+    # choice: a password, or a login link mailed each time
+    # (accounts/login_links.py). An account on LINK has no usable password.
+    # Two-step login works the same on top of either.
+    LOGIN_PASSWORD = "password"
+    LOGIN_LINK = "link"
+    LOGIN_METHOD_CHOICES = [(LOGIN_PASSWORD, "Password"), (LOGIN_LINK, "Login link by email")]
+    login_method = models.CharField(
+        max_length=10,
+        choices=LOGIN_METHOD_CHOICES,
+        default=LOGIN_PASSWORD,
+        help_text="Password, or a login link mailed each time (then the account has no usable password). "
+        "Changed by the account holder on Sign-in security (accounts/login_links.py).",
+    )
+
     must_change_password = models.BooleanField(
         default=False,
         help_text="Forces a password change on next login (e.g. set by an admin who reset it). "
@@ -138,6 +153,10 @@ class User(AbstractUser):
     @property
     def is_service(self):
         return self.account_type == self.SERVICE
+
+    @property
+    def uses_login_link(self):
+        return self.login_method == self.LOGIN_LINK
 
     @property
     def team_name(self):

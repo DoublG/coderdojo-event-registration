@@ -39,7 +39,11 @@ class EveryFieldIsClassifiedTests(SimpleTestCase):
     def test_secrets_are_never_exported(self):
         for entry in registry.registered():
             for name, spec in entry.fields.items():
-                if spec.category == Category.SECURITY and name not in ("last_login", "must_change_password"):
+                if spec.category == Category.SECURITY and name not in (
+                    "last_login",
+                    "must_change_password",
+                    "login_method",
+                ):
                     self.assertFalse(spec.export, f"{entry.label}.{name}")
 
     def test_model_defaults_fill_the_fields(self):

@@ -15,6 +15,8 @@ _two_factor = (
 
 urlpatterns = [
     path("login/", views.login, name="login"),
+    path("login/link/", views.login_link_request, name="login_link_request"),
+    path("login/link/<uidb64>/<token>/", views.login_link, name="login_link"),
     path("logout/", views.logout, name="logout"),
     path("change-password/", views.change_password, name="change_password"),
     path("password-reset/", views.PasswordResetView.as_view(), name="password_reset"),

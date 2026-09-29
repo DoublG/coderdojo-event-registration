@@ -33,7 +33,7 @@ update its diagram in the same change.
 11. [Mailing, segmentation and campaigns](#11-mailing-segmentation-and-campaigns)
 12. [Organisation events and promotion (later)](#12-organisation-events-and-promotion-later)
 
-Sections 13–23 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address and organisation people and roles; [section 24](#24-logging-in-with-an-emailed-link-plan) plans logging in with an emailed link.
+Sections 13–23 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address and organisation people and roles; [section 24](#24-logging-in-with-an-emailed-link-in-progress) plans logging in with an emailed link.
 
 ---
 
@@ -3128,7 +3128,7 @@ flowchart TD
   *Required from* a few weeks out.
 - **Passwordless login** with a passkey (no password at all) isn't built:
   the passkey is always the second step. Logging in with an emailed link instead of a
-  password is planned in [§24](#24-logging-in-with-an-emailed-link-plan).
+  password is planned in [§24](#24-logging-in-with-an-emailed-link-in-progress).
 - **Forget every remembered browser** without changing the password isn't
   possible with the package's cookie; changing the password does it.
 - TOTP secrets are stored unencrypted in the database, as django-otp does.
@@ -4288,9 +4288,11 @@ docstrings say an edit there skips the rules above).
 1. **Listing on the team page** (`content.OrganisationTeamMember`) stays
    separate; a later *Also list on the team page* shortcut is possible.
 
-## 24. Logging in with an emailed link (plan)
+## 24. Logging in with an emailed link (in progress)
 
-**Planned, nothing built yet.** Today every account logs in with its
+**In progress: phases 1–2 built** (`accounts/login_links.py`,
+`accounts.views.LoginLinkView` / `login_link_request`,
+`accounts/security_mail.py`). Today every account logs in with its
 email (or username) and a password, and only adult accounts can add the
 second step (§15). This plan lets each account holder **choose** how they
 log in: with a **password**, as now, or with a **login link** we mail
@@ -4427,8 +4429,10 @@ link" (*inloglink*, *lien de connexion*), never "magic link".
   `login_link`; a `password` account gets `login_link_not_available`
   ("your account logs in with a password; forgot it? [reset]; you can
   switch on *Sign-in security*"); an unknown address gets nothing.
-  Throttled per address (one a minute) and per IP (`LINK_REQUESTS_PER_HOUR`
-  = 10) through the cache, as the export and email change do. Inactive
+  Throttled per address (one a minute, known or not) through the cache,
+  as the export and email change do. Not per IP: behind nginx and
+  Level27's proxy the request's address is the proxy's, and every mail
+  only ever goes to the account's own address anyway. Inactive
   accounts and blocked addresses are left to `send()` (suppressed as
   always).
 - **"Forgot password?" works for link accounts too:**

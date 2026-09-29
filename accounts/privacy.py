@@ -46,7 +46,7 @@ register(
         "password": anonymise(
             Category.SECURITY, Computed("an unusable password", lambda user: make_password(None)), export=False
         ),
-        ("last_login", "must_change_password"): personal(Category.SECURITY),
+        ("last_login", "must_change_password", "login_method"): personal(Category.SECURITY),
         ("display_name", "title", "bio", "photo", "show_on_team_pages"): personal(
             Category.PUBLIC_PROFILE,
             purpose="The profile on the team pages of the dojos they're on",
