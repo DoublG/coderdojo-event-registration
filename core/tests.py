@@ -1327,3 +1327,35 @@ class ManagementAreaTests(TestCase):
     def test_the_promotions_list_says_how_to_plan_organisation_events(self):
         self.client.force_login(self._admin_without_check())
         self.assertContains(self.client.get(reverse("manage_promotion_list")), "you need a valid background check")
+
+
+class ProfilingTests(TestCase):
+    """core.profiling.profile: django-silk's silk_profile while silk is on
+    (settings.SILK_ENABLED, development only), otherwise nothing at all, so
+    code can be annotated without importing silk (not installed in
+    production)."""
+
+    def test_without_silk_it_changes_nothing(self):
+        from django.test import override_settings
+
+        from core.profiling import profile
+
+        def view():
+            return "page"
+
+        with override_settings(SILK_ENABLED=False):
+            self.assertIs(profile()(view), view)
+            with profile(name="a block"):
+                result = view()
+        self.assertEqual(result, "page")
+
+    def test_with_silk_it_is_silks_profiler(self):
+        from django.apps import apps
+
+        if not apps.is_installed("silk"):
+            self.skipTest("django-silk isn't on in this run (settings.SILK_ENABLED)")
+        from silk.profiling.profiler import silk_profile
+
+        from core.profiling import profile
+
+        self.assertIsInstance(profile(name="home"), silk_profile)

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import importlib.util
 import sys
 from pathlib import Path
 
@@ -34,6 +35,13 @@ SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG", default=False)
+
+# django-silk: request and SQL profiling, a development tool only
+# (requirements-dev.txt, never installed in production). On while DEBUG is on
+# and the package is installed; SILK=false switches it off, SILK=true on with
+# DEBUG off too (the devcontainer's production-like run, to profile it there).
+# Profile a function with core.profiling.profile, never silk directly.
+SILK_ENABLED = env.bool("SILK", default=DEBUG) and importlib.util.find_spec("silk") is not None
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
@@ -316,6 +324,17 @@ MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
+if SILK_ENABLED:
+    INSTALLED_APPS.append("silk")
+    # First, so the time it measures covers the whole request.
+    MIDDLEWARE.insert(0, "silk.middleware.SilkyMiddleware")
+    # cProfile for the functions wrapped in core.profiling.profile.
+    SILKY_PYTHON_PROFILER = True
+    # /silk/ shows whole requests, other people's posted passwords included:
+    # staff logins only (privacy/privacy.py classifies what it stores).
+    SILKY_AUTHENTICATION = True
+    SILKY_AUTHORISATION = True
+
 ROOT_URLCONF = "website.urls"
 
 TEMPLATES = [
@@ -427,7 +446,6 @@ CHANNEL_LAYERS = {
         },
     },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

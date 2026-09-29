@@ -42,6 +42,9 @@ services:
       # speed: start.sh then collects the static files for nginx and serves the
       # site with gunicorn instead of runserver (CLAUDE.md, "Commands").
       DEBUG: ${DEBUG:-true}
+      # django-silk profiling (settings.SILK_ENABLED): follows DEBUG unless set;
+      # `SILK=true` with `DEBUG=false` profiles the production-like run.
+      SILK: ${SILK:-${DEBUG:-true}}
       STATIC_ROOT: /workspace/staticfiles
 
       # Test mailcient

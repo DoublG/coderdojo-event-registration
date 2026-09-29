@@ -73,6 +73,8 @@ The local dev TLS CA/cert for `coolregistration.localhost` is created by `start.
 
 **Requirements are split:** `requirements.txt` holds only the **production runtime** dependencies (what the running site imports, plus their pinned transitive deps; `scripts/deploy.sh` installs this on the server). `requirements-dev.txt` includes it via `-r` and adds ruff, the data-loading stack used only by the `import_*` commands (`geopandas`, `pandas`, `shapely`, `bs4`, ...; imported *inside* those commands, never at module level). The devcontainer image installs `requirements-dev.txt`. A new package the site imports at runtime goes in `requirements.txt`; anything only needed locally goes in `requirements-dev.txt`.
 
+**Profiling with django-silk (development only):** silk is in `requirements-dev.txt`, never installed in production. `settings.SILK_ENABLED` is on while `DEBUG` is and the package is installed (`SILK=false` switches it off, `SILK=true` on with DEBUG off, to profile the production-like run; set it like `DEBUG`, in the environment that runs `docker compose` or `.devcontainer/.env`, then recreate the `workspace` container); only then are its app, middleware and `/silk/` pages there (staff logins only: it stores whole requests, posted passwords included; `privacy/privacy.py` classifies its models). **Never import silk in the site's code**: annotate with `core.profiling.profile` (`@profile()` or `with profile(name=...)`), which is silk's `silk_profile` when silk is on and does nothing otherwise. Clear what it recorded with `manage.py silk_clear_request_log`.
+
 Lint/format — `ruff` (config in `pyproject.toml`; tool itself in `requirements-dev.txt`, not `requirements.txt`):
 
 ```sh

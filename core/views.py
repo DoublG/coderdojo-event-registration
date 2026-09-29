@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from content.models import FAQ, OrganisationTeamMember, Promotion, Sponsor, Testimonial
+from core.profiling import profile
 from dojos.forms import DojoSearchForm
 from dojos.search import attach_next_events, dojos_by_distance, resolve_search_origin
 from dojos.views import WIDGET_RESULTS_LIMIT
@@ -18,6 +19,7 @@ from pathways.models import Pathway
 HOME_CONTENT_CACHE_TIMEOUT = 300
 
 
+@profile()
 def home(request):
     pathways = cache.get_or_set("core:home:pathways", lambda: list(Pathway.objects.all()), HOME_CONTENT_CACHE_TIMEOUT)
 
