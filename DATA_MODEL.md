@@ -4058,6 +4058,9 @@ the sidebar (`core/_manage_base.html`) and the switcher
   `role_removed`) and sets `is_staff`. Inside the admin they have exactly
   their role's permissions, as today; asking changes nothing about
   *what* they may do, only *when*.
+  Only the Django admin (`/admin/`) is time-boxed: the organisation
+  dashboard (`/manage/…`) stays open to a role holder all the time, as
+  today.
   - **Closing is enforced twice.** `AdminSite.has_permission` also asks
     for an open grant (`started_at <= now < expires_at`, not ended) for
     everyone but a superuser, so access stops at the minute even if a job
