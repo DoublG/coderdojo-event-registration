@@ -13,6 +13,12 @@ dojo finder and has no public dojo page, and its events say **Organised by
 CoderDojo Belgium**. Families don't get the "new sessions at your dojo"
 mail for these events; tell them with a campaign (see :doc:`campaigns`).
 
+If you're on its team, you find its events in the organisation dashboard's
+sidebar under **Organisation events**, and you switch between the
+organisation and the dojo at the top of the sidebar. Planning these events
+needs a valid background check, since the dojo's pages show which children
+come; promoting them doesn't (see below).
+
 An event of this dojo can take registrations on another website: fill in
 **Registration on another website** when you create or edit it, and leave
 **Places** empty. Its page then links to that website instead of showing
@@ -51,6 +57,11 @@ For each promotion you choose:
 - **In Nederlands** and **In Français** (optional): the title and pitch in
   those languages. Visitors see the version in their own language, else
   the English one.
+
+You can also start from the event: on an event's page in its dojo's
+dashboard, the **Promotions** card lists where that event is promoted, and
+**Promote this event** opens a new promotion with the event filled in. Only
+people with the organisation's **admin** role see that card.
 
 The list shows each promotion's status: **Showing**, **Scheduled** (it
 starts later), **Event not public** (the event is still a draft, or its

@@ -1345,11 +1345,14 @@ class HelperDojoAccessTests(TestCase):
         self.assertContains(response, f'href="{reverse("dojo_list")}"')
 
     def test_nav_manage_link_and_login_redirect_go_to_helpers_dojo(self):
+        """Both go through the management area's landing (/manage/,
+        core.manage), which opens the helper's dojo."""
         dashboard_url = reverse("dojo_dashboard", kwargs=self._kw())
         self.client.force_login(self.helper)
 
-        self.assertContains(self.client.get(reverse("home")), dashboard_url)
-        self.assertRedirects(self.client.get(reverse("login")), dashboard_url)
+        self.assertContains(self.client.get(reverse("home")), f'href="{reverse("manage_home")}"')
+        self.assertRedirects(self.client.get(reverse("login")), reverse("manage_home"), target_status_code=302)
+        self.assertRedirects(self.client.get(reverse("manage_home")), dashboard_url)
 
 
 class NotificationBellTests(TestCase):

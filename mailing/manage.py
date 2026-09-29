@@ -28,12 +28,6 @@ AUDIENCE_SAMPLE = 10
 
 
 @login_required
-def manage_home(request):
-    require_organisation_admin(request)
-    return redirect("manage_campaign_list")
-
-
-@login_required
 def campaign_list(request):
     require_organisation_admin(request)
     rows = [(c, campaigns.stats(c)) for c in Campaign.objects.select_related("segment").order_by("-created_at")]

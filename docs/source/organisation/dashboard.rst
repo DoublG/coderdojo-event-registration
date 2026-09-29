@@ -4,7 +4,16 @@ The organisation dashboard
 The organisation dashboard is where CoderDojo Belgium's own team runs mail to
 families and volunteers, chooses which events the public site features, and
 handles privacy requests. It's open to accounts with the organisation's
-**admin** role: they find it under **Organisation** in the account menu.
+**admin** role: they find it under **Manage** in the account menu.
+
+If you're also on a dojo's team, the dashboard and your dojos are in the
+same place: click **CoderDojo Belgium** at the top of the sidebar to switch
+to one of your dojos, and back. The organisation's own events (CoderDojo
+Girlz, Coolest Projects, ...) are listed there under **Organisation
+events**, and under the same name in the sidebar. They're only there for
+people on the **CoderDojo Belgium** dojo's team, which needs a valid
+background check (see :doc:`promotions`). Without one you see the
+organisation's sections only.
 
 The sidebar has these sections:
 

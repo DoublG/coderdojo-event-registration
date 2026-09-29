@@ -12,6 +12,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from accounts.organisation import require_organisation_admin
+from core.manage_nav import request_manage_contexts
 from events.models import Event
 
 from .forms import PromotionForm, SponsorForm
@@ -48,7 +49,15 @@ def promotion_list(request):
         # Ended promotions go last, so what's live reads first.
         rows.sort(key=lambda row: row[1] == ENDED)
         groups.append({"label": label, "rows": rows})
-    return render(request, "content/manage/promotion_list.html", {"groups": groups, "active": "promotions"})
+    # An event whose dojo the account also manages links to its admin page
+    # (DATA_MODEL.md §20); the others are text only, since that page would 404.
+    contexts = request_manage_contexts(request)
+    manageable_dojo_ids = {dojo.id for dojo in [*contexts.organisation_dojos, *contexts.dojos]}
+    return render(
+        request,
+        "content/manage/promotion_list.html",
+        {"groups": groups, "contexts": contexts, "manageable_dojo_ids": manageable_dojo_ids, "active": "promotions"},
+    )
 
 
 @login_required

@@ -1,0 +1,30 @@
+{% load i18n %}{% comment %}
+The event page's Promotions card (dojos.views._event_promotions_context,
+DATA_MODEL.md §20): only for an organisation admin, since promoting is the
+organisation's work. Its promotions link to the organisation dashboard's
+Promotions pages (content.manage), which do the editing.
+{% endcomment %}
+<div class="cd-card event-promotions-card">
+  <div class="event-promotions-card__head">
+    <p class="cd-form__label label">{% translate "Promotions" %}</p>
+    {% if event_promotable %}
+      <a class="cd-btn cd-btn--secondary label" href="{% url 'manage_promotion_create' %}?event={{ event.id }}">{% translate "Promote this event" %}</a>
+    {% endif %}
+  </div>
+  {% if event_promotions %}
+    <ul class="event-promotions-card__list">
+      {% for promotion, state in event_promotions %}
+        <li class="body-sm">
+          <a href="{% url 'manage_promotion_detail' promotion_id=promotion.id %}">{{ promotion.get_placement_display }}</a>
+          · {{ promotion.starts_at|date:"d/m/Y H:i" }} – {{ promotion.effective_end|date:"d/m/Y H:i" }}
+          {% if state == "showing" %}<span class="cd-badge cd-badge--success caption">{% translate "Showing" %}</span>
+          {% elif state == "scheduled" %}<span class="cd-badge cd-badge--outline caption">{% translate "Scheduled" %}</span>
+          {% elif state == "hidden" %}<span class="cd-badge cd-badge--warning caption">{% translate "Event not public" %}</span>
+          {% else %}<span class="cd-badge cd-badge--outline caption">{% translate "Ended" %}</span>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="body-sm event-promotions-card__empty">{% translate "This event isn't promoted anywhere on the public site." %}</p>
+  {% endif %}
+</div>

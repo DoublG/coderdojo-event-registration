@@ -21,7 +21,7 @@ from two_factor.views import LoginView as TwoFactorLoginView
 from two_factor.views.utils import IdempotentSessionWizardView
 
 from core.image_library import use_library_image
-from dojos.access import accessible_dojos
+from core.manage_nav import manage_contexts
 from dojos.team import notify_managers
 from events.models import Registration, RegistrationCancellation
 from mailing.automated import waitlist_promoted_mail
@@ -72,11 +72,11 @@ def _post_login_redirect(request, user):
     if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
         return next_url
 
-    # Owners and helpers land on the admin area of the first dojo they can
-    # open — see dojos.access for who counts.
-    admin_dojo = accessible_dojos(user).first()
-    if admin_dojo is not None:
-        return reverse("dojo_dashboard", kwargs={"dojo_id": admin_dojo.id})
+    # Organisation admins, champions and mentors land in the management
+    # area (/manage/ picks the organisation or their first dojo; see
+    # core.manage_nav for who counts).
+    if manage_contexts(user).any:
+        return reverse("manage_home")
 
     if user.is_ninja:
         ninja = Ninja.objects.filter(account=user).first()

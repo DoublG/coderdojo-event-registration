@@ -1,0 +1,44 @@
+{% load i18n %}{% comment %}
+The management sidebar's brand area (core.templatetags.manage_nav.manage_switcher):
+the context being managed and, with more than one, the menu to switch
+(CoderDojo.initDojoSwitcher). Groups: the organisation, its own dojos
+(organisation events), the dojos on whose team the account is.
+{% endcomment %}
+{% if contexts.count > 1 %}
+  <div class="cd-admin-nav__switcher" data-cd-adminnav-switcher>
+    <button type="button" class="cd-admin-nav__switcher-toggle" data-cd-adminnav-switcher-toggle aria-haspopup="true" aria-expanded="false">
+      <span class="cd-admin-nav__brand-text">
+        <span class="cd-admin-nav__brand-name heading-sm">{% if dojo %}{{ dojo.name }}{% else %}CoderDojo Belgium{% endif %}</span>
+        <span class="cd-admin-nav__brand-role caption">{% if dojo %}{{ role_label }}{% else %}{% translate "Organisation" %}{% endif %}</span>
+      </span>
+      <svg class="cd-admin-nav__switcher-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="cd-admin-nav__switcher-menu cd-nav__account-menu" data-cd-adminnav-switcher-menu hidden role="menu" aria-label="{% translate "Switch between what you manage" %}">
+      {% if contexts.organisation %}
+        <p class="cd-admin-nav__switcher-group caption" role="presentation">{% translate "Organisation" %}</p>
+        <a
+          class="cd-nav__account-link body-sm{% if not dojo %} cd-admin-nav__switcher-link--current{% endif %}"
+          role="menuitem"
+          href="{% url 'manage_home' %}"
+        >CoderDojo Belgium{% if not dojo %} ✓{% endif %}</a>
+      {% endif %}
+      {% if contexts.organisation_dojos %}
+        <p class="cd-admin-nav__switcher-group caption" role="presentation">{% translate "Organisation events" %}</p>
+        {% for option in contexts.organisation_dojos %}
+          {% include "core/partials/_manage_switcher_dojo.html" %}
+        {% endfor %}
+      {% endif %}
+      {% if contexts.dojos %}
+        <p class="cd-admin-nav__switcher-group caption" role="presentation">{% translate "Your dojos" %}</p>
+        {% for option in contexts.dojos %}
+          {% include "core/partials/_manage_switcher_dojo.html" %}
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+{% else %}
+  <div class="cd-admin-nav__brand-text">
+    <p class="cd-admin-nav__brand-name heading-sm">{% if dojo %}{{ dojo.name }}{% else %}CoderDojo Belgium{% endif %}</p>
+    <p class="cd-admin-nav__brand-role caption">{% if dojo %}{{ role_label }}{% else %}{% translate "Organisation" %}{% endif %}</p>
+  </div>
+{% endif %}

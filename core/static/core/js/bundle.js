@@ -427,9 +427,10 @@ if (typeof window.gettext !== "function") {
     }
   }
 
-  // Wires the "which dojo am I managing" dropdown in the admin sidebar's
-  // brand area (dojos/templates/dojos/_admin_base.html) — only rendered at
-  // all when the signed-in owner has more than one dojo. Same toggle-panel
+  // Wires the "what am I managing" dropdown in the management sidebar's
+  // brand area (core/templates/core/partials/_manage_switcher.html: the
+  // organisation, its events, your dojos) — only rendered at all when the
+  // account can manage more than one of those. Same toggle-panel
   // shape as wireNotifications (button + panel, close on outside click or
   // Escape) rather than anything AdminNav-specific, since switching dojos
   // is a plain link list, not another collapsible sidebar state.

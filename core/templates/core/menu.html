@@ -45,13 +45,12 @@
           {% if not request.user.is_ninja %}
             <a class="cd-nav__account-link body-sm" href="{% url 'account_home' %}">{% translate "My Account" %}</a>
           {% endif %}
-          {% if user_admin_dojo %}
-            <a class="cd-nav__account-link body-sm" href="{% url 'dojo_dashboard' dojo_id=user_admin_dojo.id %}">{% translate "Manage" %}</a>
+          {% if user_can_manage %}
+            {# The management area (/manage/, core.manage_nav): the organisation's dashboard and the dojos' admin areas, one sidebar with a switcher. #}
+            <a class="cd-nav__account-link body-sm" href="{% url 'manage_home' %}">{% translate "Manage" %}</a>
           {% endif %}
-          {% if user_is_organisation_admin %}
-            {# The organisation's management dashboard (core/_manage_base.html); the board still uses the Django admin for its read-only oversight until that has dashboard pages too. #}
-            <a class="cd-nav__account-link body-sm" href="{% url 'manage_home' %}">{% translate "Organisation" %}</a>
-          {% elif user_has_organisation_role %}
+          {% if user_has_organisation_role and not user_is_organisation_admin %}
+            {# The board still uses the Django admin for its read-only oversight until that has dashboard pages too. #}
             <a class="cd-nav__account-link body-sm" href="{% url 'admin:index' %}">{% translate "Organisation" %}</a>
           {% endif %}
           {% if user_is_approved_champion %}

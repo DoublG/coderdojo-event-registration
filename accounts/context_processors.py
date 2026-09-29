@@ -3,9 +3,11 @@ def user_roles(request):
     account page, where the logged-in account stands as a volunteer —
     without every view recomputing it: whether it's an approved champion
     and/or mentor (applications.services), and the first dojo whose admin
-    area it can open (dojos.access), for the "Manage" link; and whether it
-    holds an organisation role (accounts.organisation), for the
-    "Organisation" link."""
+    area it can open (dojos.access); whether it holds an organisation role
+    (accounts.organisation); and whether the nav's one "Manage" link, to
+    the management area (/manage/, core.manage_nav), applies: an
+    organisation admin or a dojo's champion/mentor. The board's role only
+    gets its "Organisation" link to the Django admin."""
     from applications.services import is_approved_champion, is_approved_mentor
     from dojos.access import accessible_dojos
 
@@ -31,6 +33,7 @@ def user_roles(request):
         "user_admin_dojo": admin_dojo,
         "user_has_organisation_role": organisation_role,
         "user_is_organisation_admin": organisation_admin,
+        "user_can_manage": admin_dojo is not None or organisation_admin,
     }
 
 

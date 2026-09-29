@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-26 05:01+0000\n"
+"POT-Creation-Date: 2026-09-29 04:40+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -54,6 +54,21 @@ msgstr ""
 
 #: ../../source/organisation/promotions.rst:16
 msgid ""
+"If you're on its team, you find its events in the organisation "
+"dashboard's sidebar under **Organisation events**, and you switch between"
+" the organisation and the dojo at the top of the sidebar. Planning these "
+"events needs a valid background check, since the dojo's pages show which "
+"children come; promoting them doesn't (see below)."
+msgstr ""
+"Si vous faites partie de son équipe, vous trouvez ses événements dans la "
+"barre latérale du tableau de bord de l'organisation sous **Événements de "
+"l'organisation**, et vous passez de l'organisation au dojo en haut de la "
+"barre latérale. Préparer ces événements demande une vérification "
+"d'antécédents valide, car les pages du dojo montrent quels enfants "
+"viennent ; les promouvoir, non (voir ci-dessous)."
+
+#: ../../source/organisation/promotions.rst:22
+msgid ""
 "An event of this dojo can take registrations on another website: fill in "
 "**Registration on another website** when you create or edit it, and leave"
 " **Places** empty. Its page then links to that website instead of showing"
@@ -67,11 +82,11 @@ msgstr ""
 "d'inscription. Un tel événement n'a ni inscriptions ni présences sur ce "
 "site, et ne compte donc pas dans les chiffres de présence des enfants."
 
-#: ../../source/organisation/promotions.rst:23
+#: ../../source/organisation/promotions.rst:29
 msgid "Promotions"
 msgstr "Promotions"
 
-#: ../../source/organisation/promotions.rst:25
+#: ../../source/organisation/promotions.rst:31
 msgid ""
 "A promotion features one event in one place on the public site, for a "
 "while. Open **Promotions** in the organisation dashboard to see them, "
@@ -82,11 +97,11 @@ msgstr ""
 "l'organisation pour les voir, regroupées par endroit, et choisissez "
 "**Nouvelle promotion** pour en ajouter une."
 
-#: ../../source/organisation/promotions.rst:29
+#: ../../source/organisation/promotions.rst:35
 msgid "There are four places:"
 msgstr "Il y a quatre endroits :"
 
-#: ../../source/organisation/promotions.rst:31
+#: ../../source/organisation/promotions.rst:37
 msgid ""
 "**Homepage: large card under the introduction**, the first thing visitors"
 " see."
@@ -94,7 +109,7 @@ msgstr ""
 "**Page d'accueil : grande carte sous l'introduction**, la première chose "
 "que voient les visiteurs."
 
-#: ../../source/organisation/promotions.rst:33
+#: ../../source/organisation/promotions.rst:39
 msgid ""
 "**Homepage: first in Upcoming sessions**, before the sessions in date "
 "order, with a **Featured** label."
@@ -102,13 +117,13 @@ msgstr ""
 "**Page d'accueil : en tête des Prochaines séances**, avant les séances "
 "classées par date, avec l'étiquette **Mis en avant**."
 
-#: ../../source/organisation/promotions.rst:35
+#: ../../source/organisation/promotions.rst:41
 msgid "**Events page: pinned above the list**, shown when nobody has searched."
 msgstr ""
 "**Page Événements : épinglée au-dessus de la liste**, affichée quand "
 "personne n'a lancé de recherche."
 
-#: ../../source/organisation/promotions.rst:36
+#: ../../source/organisation/promotions.rst:42
 msgid ""
 "**Dojo finder: banner above the results**, on the dojo finder page "
 "(**Dojos**). Not on the homepage's small dojo finder: the homepage "
@@ -118,11 +133,11 @@ msgstr ""
 "recherche de dojos (**Dojos**). Pas dans la petite recherche de dojo de "
 "la page d'accueil : celle-ci met déjà des événements en avant plus haut."
 
-#: ../../source/organisation/promotions.rst:40
+#: ../../source/organisation/promotions.rst:46
 msgid "For each promotion you choose:"
 msgstr "Pour chaque promotion, vous choisissez :"
 
-#: ../../source/organisation/promotions.rst:42
+#: ../../source/organisation/promotions.rst:48
 msgid ""
 "**Event**: any upcoming event, of any dojo. A draft event can be picked; "
 "the promotion only shows once the event is published."
@@ -131,7 +146,7 @@ msgstr ""
 " Vous pouvez choisir un événement en brouillon ; la promotion n'apparaît "
 "qu'une fois l'événement publié."
 
-#: ../../source/organisation/promotions.rst:44
+#: ../../source/organisation/promotions.rst:50
 msgid ""
 "**Show from** and **Show until**: when it shows. Leave **Show until** "
 "empty to stop when the event starts. A promotion never shows after its "
@@ -142,7 +157,7 @@ msgstr ""
 "l'événement. Une promotion n'apparaît jamais après la fin de son "
 "événement."
 
-#: ../../source/organisation/promotions.rst:47
+#: ../../source/organisation/promotions.rst:53
 msgid ""
 "**Rank**: the order within a place, lowest first. To reorder, change the "
 "ranks."
@@ -150,7 +165,7 @@ msgstr ""
 "**Rang** : l'ordre au sein d'un endroit, le plus bas d'abord. Pour "
 "changer l'ordre, modifiez les rangs."
 
-#: ../../source/organisation/promotions.rst:49
+#: ../../source/organisation/promotions.rst:55
 msgid ""
 "**Title**, **Short pitch** and **Image** (all optional): replace the "
 "event's name and banner, and add a line of text."
@@ -158,7 +173,7 @@ msgstr ""
 "**Titre**, **Accroche** et **Image** (tous facultatifs) : remplacent le "
 "nom et la bannière de l'événement, et ajoutent une ligne de texte."
 
-#: ../../source/organisation/promotions.rst:51
+#: ../../source/organisation/promotions.rst:57
 msgid ""
 "**In Nederlands** and **In Français** (optional): the title and pitch in "
 "those languages. Visitors see the version in their own language, else the"
@@ -168,7 +183,20 @@ msgstr ""
 "l'accroche dans ces langues. Les visiteurs voient la version dans leur "
 "langue, sinon l'anglaise."
 
-#: ../../source/organisation/promotions.rst:55
+#: ../../source/organisation/promotions.rst:61
+msgid ""
+"You can also start from the event: on an event's page in its dojo's "
+"dashboard, the **Promotions** card lists where that event is promoted, "
+"and **Promote this event** opens a new promotion with the event filled "
+"in. Only people with the organisation's **admin** role see that card."
+msgstr ""
+"Vous pouvez aussi partir de l'événement : sur la page d'un événement dans"
+" le tableau de bord de son dojo, la carte **Promotions** indique où cet "
+"événement est mis en avant, et **Promouvoir cet événement** ouvre une "
+"nouvelle promotion avec l'événement déjà choisi. Seules les personnes "
+"ayant le rôle **administrateur** de l'organisation voient cette carte."
+
+#: ../../source/organisation/promotions.rst:66
 msgid ""
 "The list shows each promotion's status: **Showing**, **Scheduled** (it "
 "starts later), **Event not public** (the event is still a draft, or its "
@@ -180,7 +208,7 @@ msgstr ""
 "(l'événement est encore en brouillon, ou son dojo n'est pas actif) ou "
 "**Terminée**. Ouvrez une promotion pour la modifier ou la retirer."
 
-#: ../../source/organisation/promotions.rst:60
+#: ../../source/organisation/promotions.rst:71
 msgid ""
 "A promotion only changes where an event is shown, never who can sign up. "
 "To reach people by mail as well, send a campaign that links to the event."

@@ -1390,6 +1390,16 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
 }
 .cd-admin-nav__switcher-menu[hidden] { display: none; }
 .cd-admin-nav__switcher-link--current { color: var(--primary); font-weight: 600; }
+/* The switcher's groups (the organisation, organisation events, your
+   dojos: core/templates/core/partials/_manage_switcher.html). */
+.cd-admin-nav__switcher-group {
+  margin: 0;
+  padding: var(--space-3) var(--space-4) var(--space-1);
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.cd-admin-nav__switcher-group:not(:first-child) { border-top: 1px solid var(--border); }
 
 /* Only meaningful once there's a collapse to lock against, so it only
    shows at the same 901px+ width the collapse feature itself applies at. */

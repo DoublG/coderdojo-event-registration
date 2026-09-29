@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 10:50+0000\n"
+"POT-Creation-Date: 2026-09-29 04:40+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -29,21 +29,42 @@ msgid ""
 "The organisation dashboard is where CoderDojo Belgium's own team runs "
 "mail to families and volunteers, chooses which events the public site "
 "features, and handles privacy requests. It's open to accounts with the "
-"organisation's **admin** role: they find it under **Organisation** in the"
-" account menu."
+"organisation's **admin** role: they find it under **Manage** in the "
+"account menu."
 msgstr ""
 "Le tableau de bord de l'organisation permet à l'équipe de CoderDojo "
 "Belgium de gérer les e-mails envoyés aux familles et aux bénévoles, de "
 "choisir les événements que le site public met en avant et de traiter les "
-"demandes liées à la vie privée. Il est ouvert aux comptes qui ont le rôle"
-" **administrateur** de l'organisation : ils le trouvent sous "
-"**Organisation** dans le menu du compte."
+"demandes liées à la vie privée. Il est ouvert aux comptes ayant le rôle "
+"**administrateur** de l'organisation : ils le trouvent sous **Gérer** "
+"dans le menu du compte."
 
 #: ../../source/organisation/dashboard.rst:9
+msgid ""
+"If you're also on a dojo's team, the dashboard and your dojos are in the "
+"same place: click **CoderDojo Belgium** at the top of the sidebar to "
+"switch to one of your dojos, and back. The organisation's own events "
+"(CoderDojo Girlz, Coolest Projects, ...) are listed there under "
+"**Organisation events**, and under the same name in the sidebar. They're "
+"only there for people on the **CoderDojo Belgium** dojo's team, which "
+"needs a valid background check (see :doc:`promotions`). Without one you "
+"see the organisation's sections only."
+msgstr ""
+"Si vous faites aussi partie de l'équipe d'un dojo, le tableau de bord et "
+"vos dojos se trouvent au même endroit : cliquez sur **CoderDojo Belgium**"
+" en haut de la barre latérale pour passer à l'un de vos dojos, et "
+"revenir. Les propres événements de l'organisation (CoderDojo Girlz, "
+"Coolest Projects, ...) y figurent sous **Événements de l'organisation**, "
+"et sous le même nom dans la barre latérale. Ils n'y figurent que pour les"
+" membres de l'équipe du dojo **CoderDojo Belgium**, ce qui demande une "
+"vérification d'antécédents valide (voir :doc:`promotions`). Sans elle, "
+"vous ne voyez que les sections de l'organisation."
+
+#: ../../source/organisation/dashboard.rst:18
 msgid "The sidebar has these sections:"
 msgstr "La barre latérale comporte ces sections :"
 
-#: ../../source/organisation/dashboard.rst:11
+#: ../../source/organisation/dashboard.rst:20
 msgid ""
 "**Campaigns**: one mailing to a group of people, now or at a set time "
 "(see :doc:`campaigns`)."
@@ -51,7 +72,7 @@ msgstr ""
 "**Campagnes** : un envoi à un groupe de personnes, maintenant ou à un "
 "moment choisi (voir :doc:`campaigns`)."
 
-#: ../../source/organisation/dashboard.rst:13
+#: ../../source/organisation/dashboard.rst:22
 msgid ""
 "**Journeys**: mailings that run by themselves every day, for example to "
 "families whose child has stopped coming (see :doc:`journeys`)."
@@ -59,7 +80,7 @@ msgstr ""
 "**Parcours** : des envois qui tournent seuls chaque jour, par exemple "
 "vers les familles dont l'enfant ne vient plus (voir :doc:`journeys`)."
 
-#: ../../source/organisation/dashboard.rst:15
+#: ../../source/organisation/dashboard.rst:24
 msgid ""
 "**Segments**: who a campaign or journey is for, described with rules "
 "instead of a list (see :doc:`segments`)."
@@ -67,7 +88,7 @@ msgstr ""
 "**Segments** : à qui s'adresse une campagne ou un parcours, décrit par "
 "des règles plutôt que par une liste (voir :doc:`segments`)."
 
-#: ../../source/organisation/dashboard.rst:17
+#: ../../source/organisation/dashboard.rst:26
 msgid ""
 "**Mail templates**: the text of every mail the site sends, in each "
 "language (see :doc:`mail-templates`)."
@@ -75,7 +96,7 @@ msgstr ""
 "**Modèles d'e-mail** : le texte de chaque e-mail que le site envoie, dans"
 " chaque langue (voir :doc:`mail-templates`)."
 
-#: ../../source/organisation/dashboard.rst:19
+#: ../../source/organisation/dashboard.rst:28
 msgid ""
 "**Promotions**: which events are featured where on the public site (see "
 ":doc:`promotions`)."
@@ -83,7 +104,7 @@ msgstr ""
 "**Promotions** : quels événements sont mis en avant, et où, sur le site "
 "public (voir :doc:`promotions`)."
 
-#: ../../source/organisation/dashboard.rst:21
+#: ../../source/organisation/dashboard.rst:30
 msgid ""
 "**Sponsors**: the sponsors and partners on the homepage (see "
 ":doc:`sponsors`)."
@@ -91,13 +112,13 @@ msgstr ""
 "**Sponsors** : les sponsors et partenaires de la page d'accueil (voir "
 ":doc:`sponsors`)."
 
-#: ../../source/organisation/dashboard.rst:23
+#: ../../source/organisation/dashboard.rst:32
 msgid "**Awards**: the badges ninjas can earn at their dojo (see :doc:`awards`)."
 msgstr ""
 "**Distinctions** : les badges que les ninjas peuvent obtenir dans leur "
 "dojo (voir :doc:`awards`)."
 
-#: ../../source/organisation/dashboard.rst:25
+#: ../../source/organisation/dashboard.rst:34
 msgid ""
 "**Privacy**: a copy of someone's data, or deleting their account, when "
 "they ask by mail or post (see :doc:`privacy`)."
@@ -106,7 +127,7 @@ msgstr ""
 " son compte, quand la personne le demande par e-mail ou par courrier "
 "(voir :doc:`privacy`)."
 
-#: ../../source/organisation/dashboard.rst:27
+#: ../../source/organisation/dashboard.rst:36
 msgid ""
 "**Sign-in security**: which roles must use two-step login (see :doc"
 ":`sign-in-security`)."
@@ -114,7 +135,7 @@ msgstr ""
 "**Sécurité de connexion** : quels rôles doivent utiliser la connexion en "
 "deux étapes (voir :doc:`sign-in-security`)."
 
-#: ../../source/organisation/dashboard.rst:30
+#: ../../source/organisation/dashboard.rst:39
 msgid ""
 "People only get mail they want. Every account chooses which kinds of mail"
 " it gets on its **Mail preferences** page; the newsletter and campaigns "
@@ -128,7 +149,7 @@ msgstr ""
 "campagnes. Les adresses dont les e-mails sont revenus sont ignorées "
 "automatiquement."
 
-#: ../../source/organisation/dashboard.rst:35
+#: ../../source/organisation/dashboard.rst:44
 msgid ""
 "The technical side of the site (the full mail log, bounces, blocked "
 "addresses) stays in the site's technical admin, for fixing things when "

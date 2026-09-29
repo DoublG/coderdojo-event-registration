@@ -3665,14 +3665,16 @@ sees the **main language**, with an "Only in ..." note.
   content in all three (`core/seed_translations.py`). The organisation dojo
   is English-main, like the rest of the organisation's content.
 
-## 20. One management area for the organisation and its dojos (planned)
+## 20. One management area for the organisation and its dojos (built)
 
-**Planned.** Today the organisation dashboard (`/manage/…`,
+**Built** (all five phases, as planned below; the optional note for
+organisation admins without an organisation dojo is on the Promotions
+page). Before, the organisation dashboard (`/manage/…`,
 `core/_manage_base.html`) and a dojo's admin area (`/dojos/<id>/…`,
-`dojos/_admin_base.html`) are two copies of the same sidebar shell with
+`dojos/_admin_base.html`) were two copies of the same sidebar shell with
 different menus, reached through two nav links (*Organisation* and
 *Manage*). Preparing the organisation's own events (on an organisation dojo,
-§12) and promoting them means switching between the two. They become one
+§12) and promoting them meant switching between the two. They became one
 management area: one entry point, one sidebar, and a switcher between the
 contexts you can manage.
 
@@ -3702,7 +3704,7 @@ contexts you can manage.
 
 ### Contexts
 
-`manage_contexts(user)` (planned in `core/manage_nav.py`) builds the
+`manage_contexts(user)` (`core/manage_nav.py`) builds the
 switcher from the existing access helpers, in three groups:
 
 | Group | Shown when | Source |
@@ -3725,7 +3727,7 @@ Someone with one context sees no switcher, as today. The notification bell
    both bases (replacing the dojo-only one). Picking a dojo goes to its
    dashboard, picking Organisation to `/manage/`. The footer's role label
    follows the context.
-3. **One entry point.** `manage_home` (`/manage/`) becomes the landing: the
+3. **One entry point.** `manage_home` (`/manage/`, now `core/manage.py`) becomes the landing: the
    organisation for an organisation admin, else the first accessible dojo,
    else a 404. The nav gets one *Manage* link instead of *Manage* and
    *Organisation*, and the post-login redirect

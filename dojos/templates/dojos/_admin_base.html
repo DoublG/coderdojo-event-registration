@@ -1,5 +1,5 @@
 {% extends "core/_manage_shell.html" %}
-{% load i18n %}{% load static %}
+{% load i18n %}{% load static %}{% load manage_nav %}
 {% comment %}
 A dojo's admin area (/dojos/<id>/…), in the management area's shared shell
 (core/_manage_shell.html, DATA_MODEL.md §20) with the dojo's sections in the
@@ -19,33 +19,7 @@ for the sidebar link to highlight, and render with dojos.views._admin_context.
 {% endblock %}
 {% block shell_nav_label %}{% translate "Dojo admin" %}{% endblock %}
 
-{% block shell_brand %}
-        {% if admin_dojos|length > 1 %}
-          <div class="cd-admin-nav__switcher" data-cd-adminnav-switcher>
-            <button type="button" class="cd-admin-nav__switcher-toggle" data-cd-adminnav-switcher-toggle aria-haspopup="true" aria-expanded="false">
-              <span class="cd-admin-nav__brand-text">
-                <span class="cd-admin-nav__brand-name heading-sm">{{ dojo.name }}</span>
-                <span class="cd-admin-nav__brand-role caption">{{ dojo_access.role_label }}</span>
-              </span>
-              <svg class="cd-admin-nav__switcher-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="cd-admin-nav__switcher-menu cd-nav__account-menu" data-cd-adminnav-switcher-menu hidden role="menu" aria-label="{% translate "Switch dojo" %}">
-              {% for owned_dojo in admin_dojos %}
-                <a
-                  class="cd-nav__account-link body-sm{% if owned_dojo.pk == dojo.pk %} cd-admin-nav__switcher-link--current{% endif %}"
-                  role="menuitem"
-                  href="{% if active == 'settings' %}{% url 'dojo_manage' dojo_id=owned_dojo.id %}{% else %}{% url 'dojo_dashboard' dojo_id=owned_dojo.id %}{% endif %}"
-                >{{ owned_dojo.name }}{% if owned_dojo.pk == dojo.pk %} ✓{% endif %}</a>
-              {% endfor %}
-            </div>
-          </div>
-        {% else %}
-          <div class="cd-admin-nav__brand-text">
-            <p class="cd-admin-nav__brand-name heading-sm">{{ dojo.name }}</p>
-            <p class="cd-admin-nav__brand-role caption">{{ dojo_access.role_label }}</p>
-          </div>
-        {% endif %}
-{% endblock %}
+{% block shell_brand %}{% manage_switcher dojo=dojo role_label=dojo_access.role_label %}{% endblock %}
 
 {% block shell_create %}
       {% if dojo_access.can_manage_events %}

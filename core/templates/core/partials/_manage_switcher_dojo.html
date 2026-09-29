@@ -1,0 +1,5 @@
+<a
+  class="cd-nav__account-link body-sm{% if option.pk == dojo.pk %} cd-admin-nav__switcher-link--current{% endif %}"
+  role="menuitem"
+  href="{% if dojo and active == 'settings' %}{% url 'dojo_manage' dojo_id=option.id %}{% else %}{% url 'dojo_dashboard' dojo_id=option.id %}{% endif %}"
+>{{ option.name }}{% if option.pk == dojo.pk %} ✓{% endif %}</a>

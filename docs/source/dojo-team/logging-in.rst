@@ -10,7 +10,9 @@ After that, logging in takes you straight to your dojo's dashboard — as
 its **champion** (the person who runs the dojo), or as a **mentor** once
 a dojo's team has accepted you. Until then you'll land on your account
 page. You can always get back to the dashboard from **Manage** in your
-account menu.
+account menu. If you also work for the organisation (CoderDojo Belgium's
+own team), **Manage** opens the organisation's dashboard first, and you
+switch to your dojo at the top of the sidebar.
 
 The sidebar shows your role at that dojo under its name — **Champion** or
 **Mentor**. Mentors can do everything a champion can on the dashboard —

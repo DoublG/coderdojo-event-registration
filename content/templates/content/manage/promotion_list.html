@@ -6,6 +6,10 @@
 
 {% block manage_content %}
   <p class="body-sm">{% translate "A promotion features an event in one place on the public site for a while. Within a place, the lowest rank shows first. Without an end, a promotion stops when its event starts." %}</p>
+  {% if not contexts.organisation_dojos %}
+    {# DATA_MODEL.md §20: promoting needs no background check, planning the organisation's own events does. #}
+    <p class="body-sm">{% translate "You can promote any upcoming event. To plan the organisation's own events yourself, you need a valid background check and a place on the team of the organisation's dojo." %}</p>
+  {% endif %}
   {% for group in groups %}
     <h2 class="heading-md" style="margin: var(--space-6) 0 var(--space-3);">{{ group.label }}</h2>
     <div class="cd-table-wrap">
@@ -24,7 +28,13 @@
             <tr>
               <td class="body-sm cd-table__num">{{ promotion.rank }}</td>
               <td class="body-sm"><a href="{% url 'manage_promotion_detail' promotion_id=promotion.id %}">{{ promotion.display_title }}</a></td>
-              <td class="body-sm">{{ promotion.event.dojo.name }}, {{ promotion.event.start_time|date:"d/m/Y H:i" }}</td>
+              <td class="body-sm">
+                {% if promotion.event.dojo_id in manageable_dojo_ids %}
+                  <a href="{% url 'dojo_event_detail' dojo_id=promotion.event.dojo_id event_id=promotion.event_id %}">{{ promotion.event.dojo.name }}, {{ promotion.event.start_time|date:"d/m/Y H:i" }}</a>
+                {% else %}
+                  {{ promotion.event.dojo.name }}, {{ promotion.event.start_time|date:"d/m/Y H:i" }}
+                {% endif %}
+              </td>
               <td class="body-sm">{{ promotion.starts_at|date:"d/m/Y H:i" }} – {{ promotion.effective_end|date:"d/m/Y H:i" }}</td>
               <td class="body-sm">
                 {% if state == "showing" %}<span class="cd-badge cd-badge--success caption">{% translate "Showing" %}</span>

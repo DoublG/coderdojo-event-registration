@@ -1124,3 +1124,206 @@ class FontsTests(TestCase):
         OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
         self.client.force_login(admin)
         self.assert_page_loads_the_fonts(self.client.get(reverse("manage_home"), follow=True))
+
+
+class ManagementAreaTests(TestCase):
+    """One management area for the organisation and its dojos (DATA_MODEL.md
+    §20): one entry point (/manage/), one sidebar with a switcher between
+    what the account can manage, and the organisation's events next to their
+    promotions. Only the navigation is shared: the organisation's pages still
+    need the admin role, a dojo (an organisation dojo too) a membership and a
+    valid background check."""
+
+    def setUp(self):
+        from datetime import timedelta
+
+        from accounts.models import OrganisationRole
+        from dojos.testing import add_member, make_champion, make_mentor
+        from events.models import Event
+
+        self.OrganisationRole = OrganisationRole
+        self.org_dojo = make_dojo(
+            "CoderDojo Belgium", champion=make_champion(username="orgchamp"), kind=Dojo.ORGANISATION
+        )
+        self.ghent = make_dojo("Ghent", champion=make_champion(username="ghentchamp"))
+        # An organisation admin with a valid check, mentor on the organisation dojo's team and at Ghent.
+        self.staff = make_mentor(username="staff")
+        OrganisationRole.objects.create(account=self.staff, role=OrganisationRole.ADMIN)
+        add_member(self.org_dojo, self.staff)
+        add_member(self.ghent, self.staff)
+        start = timezone.now() + timedelta(days=14)
+        self.event = Event.objects.create(
+            name="CoderDojo Girlz",
+            dojo=self.org_dojo,
+            status=Event.OPEN,
+            places=10,
+            start_time=start,
+            end_time=start + timedelta(hours=4),
+        )
+
+    def _admin_without_check(self):
+        from accounts.models import User
+
+        user = User.objects.create(username="nocheck", email="nocheck@example.com")
+        self.OrganisationRole.objects.create(account=user, role=self.OrganisationRole.ADMIN)
+        return user
+
+    def _dashboard(self, dojo):
+        return reverse("dojo_dashboard", kwargs={"dojo_id": dojo.id})
+
+    # the switcher
+
+    def test_the_switcher_lists_the_organisation_its_events_and_the_dojos(self):
+        self.client.force_login(self.staff)
+        for url in (reverse("manage_campaign_list"), self._dashboard(self.ghent)):
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertContains(response, "data-cd-adminnav-switcher")
+                self.assertContains(response, f'href="{reverse("manage_home")}"')
+                self.assertContains(response, "Organisation events")
+                self.assertContains(response, "Your dojos")
+                self.assertContains(response, self._dashboard(self.org_dojo))
+                self.assertContains(response, self._dashboard(self.ghent))
+
+    def test_a_mentor_never_sees_the_organisation(self):
+        from dojos.testing import add_member, make_mentor
+
+        mentor = make_mentor(username="mentor")
+        add_member(self.ghent, mentor)
+        self.client.force_login(mentor)
+        response = self.client.get(self._dashboard(self.ghent))
+        self.assertNotContains(response, "data-cd-adminnav-switcher")  # one dojo: nothing to switch to
+        self.assertNotContains(response, f'href="{reverse("manage_home")}"')
+        self.assertEqual(self.client.get(reverse("manage_campaign_list")).status_code, 404)
+
+    def test_an_organisation_admin_without_a_background_check_sees_no_dojos(self):
+        """Not everyone in the organisation needs a check: without one, the
+        organisation's pages only, and a dojo is a 404, even on its team."""
+        from dojos.testing import add_member
+
+        admin = self._admin_without_check()
+        add_member(self.org_dojo, admin)
+        self.client.force_login(admin)
+        response = self.client.get(reverse("manage_campaign_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "data-cd-adminnav-switcher")
+        self.assertNotContains(response, "Organisation events")
+        self.assertNotContains(response, self._dashboard(self.org_dojo))
+        self.assertEqual(self.client.get(self._dashboard(self.org_dojo)).status_code, 404)
+
+    def test_a_lapsed_check_takes_the_dojos_away_but_not_the_organisation(self):
+        from datetime import timedelta
+
+        self.staff.background_check_expires_at = timezone.now() - timedelta(days=1)
+        self.staff.save(update_fields=["background_check_expires_at"])
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse("manage_campaign_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "data-cd-adminnav-switcher")
+        self.assertNotContains(response, self._dashboard(self.ghent))
+
+    def test_the_organisation_sidebar_links_its_events(self):
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse("manage_campaign_list"))
+        self.assertContains(response, f'href="{reverse("dojo_event_list", kwargs={"dojo_id": self.org_dojo.id})}"')
+
+    # one entry point
+
+    def test_manage_opens_the_organisation_else_the_first_dojo(self):
+        from accounts.models import User
+
+        self.client.force_login(self.staff)
+        self.assertRedirects(self.client.get(reverse("manage_home")), reverse("manage_campaign_list"))
+        self.client.force_login(User.objects.get(username="ghentchamp"))
+        self.assertRedirects(self.client.get(reverse("manage_home")), self._dashboard(self.ghent))
+
+    def test_manage_is_a_404_for_anyone_else(self):
+        from accounts.models import User
+
+        board = User.objects.create(username="board")
+        self.OrganisationRole.objects.create(account=board, role=self.OrganisationRole.BOARD)
+        for user in (board, User.objects.create(username="parent")):
+            with self.subTest(user=user.username):
+                self.client.force_login(user)
+                self.assertEqual(self.client.get(reverse("manage_home")).status_code, 404)
+        self.client.logout()
+        self.assertEqual(self.client.get(reverse("manage_home")).status_code, 302)  # to login
+
+    def test_one_manage_link_and_login_goes_there(self):
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, f'href="{reverse("manage_home")}"', count=1)
+        self.assertNotContains(response, 'href="/admin/"')
+        self.assertRedirects(self.client.get(reverse("login")), reverse("manage_home"), target_status_code=302)
+
+    def test_an_organisation_admin_without_a_dojo_lands_in_the_organisation(self):
+        self.client.force_login(self._admin_without_check())
+        self.assertRedirects(self.client.get(reverse("login")), reverse("manage_home"), target_status_code=302)
+
+    # promotions next to the event
+
+    def _event_page(self):
+        return reverse("dojo_event_detail", kwargs={"dojo_id": self.org_dojo.id, "event_id": self.event.id})
+
+    def test_the_event_page_shows_its_promotions_to_an_organisation_admin(self):
+        from content.models import Promotion
+
+        promotion = Promotion.objects.create(event=self.event, placement=Promotion.HOMEPAGE_HERO)
+        self.client.force_login(self.staff)
+        response = self.client.get(self._event_page())
+        self.assertContains(response, "Promote this event")
+        self.assertContains(response, f"{reverse('manage_promotion_create')}?event={self.event.id}")
+        self.assertContains(response, reverse("manage_promotion_detail", kwargs={"promotion_id": promotion.id}))
+        self.assertContains(response, "Showing")
+
+    def test_the_team_without_the_organisation_role_sees_no_promotions(self):
+        from accounts.models import User
+
+        self.client.force_login(User.objects.get(username="orgchamp"))
+        response = self.client.get(self._event_page())
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Promote this event")
+        self.assertNotContains(response, 'class="cd-card event-promotions-card"')
+
+    def test_an_ended_event_can_no_longer_be_promoted(self):
+        from datetime import timedelta
+
+        self.event.start_time = timezone.now() - timedelta(days=2)
+        self.event.end_time = self.event.start_time + timedelta(hours=4)
+        self.event.save()
+        self.client.force_login(self.staff)
+        response = self.client.get(self._event_page())
+        self.assertContains(response, 'class="cd-card event-promotions-card"')
+        self.assertNotContains(response, "Promote this event")
+
+    def test_promote_this_event_fills_in_the_event(self):
+        self.client.force_login(self.staff)
+        response = self.client.get(f"{reverse('manage_promotion_create')}?event={self.event.id}")
+        self.assertEqual(str(response.context["form"]["event"].value()), str(self.event.id))
+
+    def test_the_promotions_list_links_events_the_account_manages(self):
+        from content.models import Promotion
+        from events.models import Event
+
+        other = make_dojo("Antwerp")
+        other_event = Event.objects.create(
+            name="Other",
+            dojo=other,
+            status=Event.OPEN,
+            places=5,
+            start_time=self.event.start_time,
+            end_time=self.event.end_time,
+        )
+        Promotion.objects.create(event=self.event, placement=Promotion.HOMEPAGE_HERO)
+        Promotion.objects.create(event=other_event, placement=Promotion.EVENT_LIST_TOP)
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse("manage_promotion_list"))
+        self.assertContains(response, self._event_page())
+        self.assertNotContains(
+            response, reverse("dojo_event_detail", kwargs={"dojo_id": other.id, "event_id": other_event.id})
+        )
+        self.assertNotContains(response, "you need a valid background check")
+
+    def test_the_promotions_list_says_how_to_plan_organisation_events(self):
+        self.client.force_login(self._admin_without_check())
+        self.assertContains(self.client.get(reverse("manage_promotion_list")), "you need a valid background check")

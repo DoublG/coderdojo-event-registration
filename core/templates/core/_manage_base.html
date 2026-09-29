@@ -1,5 +1,5 @@
 {% extends "core/_manage_shell.html" %}
-{% load i18n %}{% load retention %}
+{% load i18n %}{% load retention %}{% load manage_nav %}
 {% comment %}
 The organisation's management dashboard (/manage/…), in the management
 area's shared shell (core/_manage_shell.html, DATA_MODEL.md §20) with the
@@ -14,12 +14,7 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
 {% block shell_extra_style %}{% block manage_extra_style %}{% endblock %}{% endblock %}
 {% block shell_nav_label %}{% translate "Organisation dashboard" %}{% endblock %}
 
-{% block shell_brand %}
-        <div class="cd-admin-nav__brand-text">
-          <p class="cd-admin-nav__brand-name heading-sm">CoderDojo Belgium</p>
-          <p class="cd-admin-nav__brand-role caption">{% translate "Organisation" %}</p>
-        </div>
-{% endblock %}
+{% block shell_brand %}{% manage_switcher %}{% endblock %}
 
 {% block shell_create %}
       <a href="{% url 'manage_campaign_create' %}" class="cd-btn cd-btn--primary cd-admin-nav__create label">
@@ -58,6 +53,24 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
           </li>
         </ul>
       </div>
+
+      {% manage_contexts as contexts %}
+      {% if contexts.organisation_dojos %}
+        {# The organisation's own dojos (DATA_MODEL.md §12, §20), for those on their team with a valid background check. #}
+        <div class="cd-admin-nav__group">
+          <p class="cd-admin-nav__group-label caption">{% translate "Organisation events" %}</p>
+          <ul class="cd-admin-nav__list">
+            {% for organisation_dojo in contexts.organisation_dojos %}
+              <li>
+                <a href="{% url 'dojo_event_list' dojo_id=organisation_dojo.id %}" class="cd-admin-nav__link label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>
+                  {{ organisation_dojo.name }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
 
       <div class="cd-admin-nav__group">
         <p class="cd-admin-nav__group-label caption">{% translate "Public site" %}</p>

@@ -16,7 +16,9 @@ from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 
 from accounts.models import Ninja, User
+from accounts.organisation import is_organisation_admin
 from applications.services import is_approved_champion
+from content.manage import promotion_state
 from content.models import FAQ, OrganisationTeamMember, Promotion
 from core.content_languages import normalize
 from events import attendance
@@ -36,7 +38,6 @@ from .access import (
     MANAGE_LIFECYCLE,
     POST_UPDATES,
     TAKE_ATTENDANCE,
-    accessible_dojos,
     is_approved_mentor,
     require_dojo_access,
 )
@@ -64,12 +65,11 @@ PUBLIC_UPDATES_LIMIT = 5
 def _admin_context(request, access):
     """What every page extending dojos/_admin_base.html needs besides its
     own content: the dojo, the viewer's role/capabilities (`dojo_access`,
-    see dojos.access), the dojos they can switch between, and the
-    notification bell."""
+    see dojos.access) and the notification bell. What they can switch
+    between comes from core.manage_nav (the manage_switcher tag)."""
     return {
         "dojo": access.dojo,
         "dojo_access": access,
-        "admin_dojos": accessible_dojos(request.user),
         **_notification_context(request.user, access.dojo),
     }
 
@@ -682,9 +682,28 @@ def dojo_event_detail(request, dojo_id, event_id):
             "form": form,
             "saved": saved,
             "active": "events",
+            **_event_promotions_context(request, event),
             **_admin_context(request, access),
         },
     )
+
+
+def _event_promotions_context(request, event):
+    """The event page's Promotions card (DATA_MODEL.md §20): for an
+    organisation admin only, since promoting is the organisation's work
+    (content.manage), the event's promotions with where each stands, and
+    whether it can still get one (the promotion form offers events that
+    haven't ended)."""
+    if not is_organisation_admin(request.user):
+        return {"can_promote": False}
+    promotions = list(event.promotions.order_by("placement", "rank", "starts_at", "id"))
+    visible = set(Event.objects.visible().filter(pk=event.pk).values_list("pk", flat=True))
+    now = timezone.now()
+    return {
+        "can_promote": True,
+        "event_promotions": [(p, promotion_state(p, visible, now)) for p in promotions],
+        "event_promotable": event.end_time > now,
+    }
 
 
 @login_required
