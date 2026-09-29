@@ -960,3 +960,107 @@ class DeleteAccountTests(TestCase):
         response = self.client.post(self.url("manage_privacy_delete", self.admin.pk), {"confirm": "orgadmin"})
         self.assertContains(response, "organisation role")
         self.assertFalse(self.erased(self.admin))
+
+
+class OrganisationEmailChangeTests(TestCase):
+    """The organisation starts an email change for a family that lost its
+    old mailbox (privacy.views.manage_privacy_email, DATA_MODEL.md §22): the
+    link then works without logging in, and offers a new password."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.cache import cache
+        from django.core.management import call_command
+
+        from accounts.models import OrganisationRole
+
+        cache.clear()
+        call_command("load_mail_templates", stdout=StringIO())
+        self.parent = User.objects.create(username="an", email="an@old.example", first_name="An")
+        self.admin = User.objects.create(username="orgadmin", email="admin@example.com")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+
+    def url(self, name, *args):
+        from django.urls import reverse
+
+        return reverse(name, args=args)
+
+    def start(self, **data):
+        self.client.force_login(self.admin)
+        return self.client.post(
+            self.url("manage_privacy_email", self.parent.pk),
+            {"new_email": "an@new.example", "identity_checked": "on", **data},
+        )
+
+    def confirm_path(self):
+        import re
+        from urllib.parse import urlparse
+
+        from mailing.models import EmailMessage
+
+        body = EmailMessage.objects.get(template_key="email_change_confirm").body
+        return urlparse(re.search(r"\S+/account/email/confirm/\S+", body).group(0)).path
+
+    def test_the_page_is_for_the_admin_role_only(self):
+        self.client.force_login(self.parent)
+        self.assertEqual(self.client.get(self.url("manage_privacy_email", self.parent.pk)).status_code, 404)
+
+    def test_the_privacy_page_links_to_it(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(self.url("manage_privacy"), {"q": "an@old"})
+        self.assertContains(response, self.url("manage_privacy_email", self.parent.pk))
+
+    def test_the_identity_check_is_required(self):
+        from mailing.models import EmailMessage
+
+        response = self.start(identity_checked="")
+        self.assertIn("identity_checked", response.context["form"].errors)
+        self.assertFalse(EmailMessage.objects.exists())
+
+    def test_not_for_organisation_roles_superusers_or_ninja_logins(self):
+        from mailing.models import EmailMessage
+
+        superuser = User.objects.create(username="root", email="root@example.com", is_superuser=True)
+        ninja_login = User.objects.create(username="kid", email="kid@example.com", account_type=User.NINJA)
+        self.client.force_login(self.admin)
+        for account in (self.admin, superuser, ninja_login):
+            response = self.client.post(
+                self.url("manage_privacy_email", account.pk), {"new_email": "x@new.example", "identity_checked": "on"}
+            )
+            self.assertTemplateUsed(response, "privacy/manage/email.html")
+            self.assertTrue(response.context["blocker"], account)
+        self.assertFalse(EmailMessage.objects.exists())
+
+    def test_the_family_confirms_without_logging_in(self):
+        from auditlog.models import LogEntry
+
+        from mailing.models import EmailMessage
+
+        self.assertRedirects(self.start(), self.url("manage_privacy"))
+        queued = EmailMessage.objects.get()
+        self.assertEqual((queued.recipient, queued.user), ("an@new.example", self.parent))
+        self.assertIn("At your request, CoderDojo Belgium", queued.body)
+
+        self.client.logout()
+        path = self.confirm_path()
+        self.assertContains(self.client.get(path), "an@new.example")
+        response = self.client.post(path)
+        self.assertTemplateUsed(response, "accounts/confirm_email_change.html")
+        self.assertContains(response, self.url("password_reset"))
+        self.parent.refresh_from_db()
+        self.assertEqual(self.parent.email, "an@new.example")
+        self.assertEqual(EmailMessage.objects.get(template_key="email_changed").recipient, "an@old.example")
+        entry = LogEntry.objects.get_for_object(self.parent).latest("pk")
+        self.assertEqual(entry.actor, self.admin)
+
+    def test_the_offered_password_reset_goes_to_the_new_address(self):
+        from mailing.models import EmailMessage
+
+        self.parent.set_password("an-old-password-77")
+        self.parent.save()
+        self.start()
+        self.client.logout()
+        self.client.post(self.confirm_path())
+        self.client.post(self.url("password_reset"), {"email": "an@new.example"})
+        self.assertEqual(EmailMessage.objects.get(template_key="password_reset").recipient, "an@new.example")

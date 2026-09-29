@@ -1,3 +1,4 @@
+from auditlog.context import set_actor
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
@@ -5,6 +6,7 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import redirect_to_login
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
@@ -29,10 +31,12 @@ from mailing.categories import MailCategory
 from mailing.models import ConsentEvent
 from mailing.preferences import set_preference
 
-from . import child_accounts, home_dojo, two_step
+from . import child_accounts, email_change, home_dojo, two_step
 from .consent import consent_fields
 from .forms import (
     AddChildForm,
+    ChangeEmailForm,
+    ChildAvatarForm,
     ChildLoginForm,
     ChildRowsFormSet,
     EditAccountForm,
@@ -339,6 +343,70 @@ def edit_account(request):
 
 
 @login_required
+def change_email(request):
+    """The family changes its own email address (DATA_MODEL.md §22): the
+    new address and the password; a link goes to the new address, and
+    nothing changes until it's opened (confirm_email_change). A ninja's own
+    login gets a 404: its address is the guardian's to manage."""
+    user = request.user
+    if user.is_ninja:
+        raise Http404
+    form = ChangeEmailForm(user, request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        try:
+            email_change.request_change(user, form.cleaned_data["new_email"])
+        except email_change.EmailChangeError as error:
+            form.add_error(None, error.message)
+        else:
+            messages.success(
+                request,
+                _(
+                    "We sent a link to %(email)s. Open it within %(hours)s hours to confirm; until then your "
+                    "address stays %(current)s."
+                )
+                % {"email": form.cleaned_data["new_email"], "hours": email_change.VALID_HOURS, "current": user.email},
+            )
+            return redirect("account_home")
+    return render(request, "accounts/change_email.html", {"form": form, "valid_hours": email_change.VALID_HOURS})
+
+
+def confirm_email_change(request, token):
+    """The link from the confirmation mail. GET asks, POST changes it (so a
+    mail scanner opening the link changes nothing). The family's own link
+    needs that account logged in; a link the organisation started works
+    logged out too, since the family may not be able to log in any more,
+    and then offers a password reset to the new address. Logged in as
+    another account: 404."""
+    template = "accounts/confirm_email_change.html"
+    try:
+        change = email_change.read_token(token)
+    except email_change.EmailChangeError as error:
+        return render(request, template, {"error": error.message}, status=400)
+    if request.user.is_authenticated:
+        if request.user.pk != change.user.pk:
+            raise Http404
+    elif change.started_by is None:
+        return redirect_to_login(request.get_full_path())
+
+    if request.method != "POST":
+        return render(request, template, {"change": change})
+    try:
+        if request.user.is_authenticated:
+            user = email_change.confirm_change(change)
+        else:
+            # Nobody is logged in: the audit log names the admin who started it.
+            with set_actor(change.started_by):
+                user = email_change.confirm_change(change)
+    except email_change.EmailChangeError as error:
+        return render(request, template, {"error": error.message}, status=400)
+    if request.user.is_authenticated:
+        update_session_auth_hash(request, user)  # the other sessions end, this one stays
+        messages.success(request, _("Your email address is now %(email)s.") % {"email": user.email})
+        return redirect("account_home")
+    return render(request, template, {"done": user})
+
+
+@login_required
 def add_ninja(request):
     """The "Register another child" form on the account page
     (accounts/partials/_add_child.html, AddChildForm) — posts here via htmx
@@ -413,6 +481,7 @@ def ninja_detail(request, ninja_id):
             "history": history,
             "upcoming": upcoming,
             "can_edit": child.guardianships.filter(guardian=request.user).exists(),
+            "can_pick_avatar": child.account_id == request.user.pk,
             "badges": badges_page.object_list,
             "badges_next_page_url": badges_next_page_url,
             # Current belt = the highest in the history (newest first).
@@ -453,6 +522,30 @@ def edit_ninja(request, ninja_id):
             },
         )
     return render(request, "accounts/partials/_child_header_edit.html", {"child": child, "form": form})
+
+
+@login_required
+def ninja_avatar(request, ninja_id):
+    """A child's own login picks its avatar on its own page, over htmx like
+    edit_ninja: GET swaps the header for the picker, POST saves and swaps
+    back. Only the standard avatars (ChildAvatarForm); uploading a photo is
+    the guardian's. The guardians may use it too, though their edit form
+    has the same choice."""
+    child = _get_own_ninja(request, ninja_id, allow_self=True)
+    form = ChildAvatarForm(child, request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        _set_icon(child, form.cleaned_data["icon"])
+        child.save(update_fields=["photo"])
+        return render(
+            request,
+            "accounts/partials/_child_header_display.html",
+            {
+                "child": child,
+                "can_edit": child.guardianships.filter(guardian=request.user).exists(),
+                "can_pick_avatar": child.account_id == request.user.pk,
+            },
+        )
+    return render(request, "accounts/partials/_child_avatar_picker.html", {"child": child, "form": form})
 
 
 def _login_card(request, child, error=None, notice=None, login_form=None):

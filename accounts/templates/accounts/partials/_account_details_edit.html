@@ -3,7 +3,7 @@ The account page's details as a form, swapped in over htmx (see
 _account_details_display.html). Saving swaps back to the display block;
 Cancel goes back to the account page, since nothing's been saved yet.
 The email address is shown, not edited: it's the login and where every
-mail goes, so it can't be changed here.
+mail goes, so it changes through its own confirmed flow (change_email).
 Expects `guardian` and `form` (accounts.forms.EditAccountForm).
 {% endcomment %}
 <form class="account-header account-header--editing col" id="account-header" method="post"
@@ -19,7 +19,7 @@ Expects `guardian` and `form` (accounts.forms.EditAccountForm).
     <div class="cd-form__field">
       <span class="cd-form__label label">{% translate "Email" %}</span>
       <p class="body account-details__email">{{ guardian.email }}</p>
-      <div class="cd-form__help caption">{% translate "You log in with this address and we send every mail to it, so it can't be changed here." %}</div>
+      <div class="cd-form__help caption">{% translate "You log in with this address and we send every mail to it, so changing it takes a confirmation from the new address." %} <a href="{% url 'change_email' %}">{% translate "Change email address" %}</a></div>
     </div>
   </div>
   <div class="cd-form__row">

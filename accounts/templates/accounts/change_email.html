@@ -1,0 +1,34 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Change email address" %} · CoderDojo Belgium{% endblock %}
+{% block root_class %}change-email-root{% endblock %}
+{% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
+
+{% block extra_style %}
+<style>
+  .change-email-root { background: var(--surface-sunken); }
+  .change-email-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+  .change-email-root .page-title { color: var(--ink); margin: 0 0 var(--space-4); }
+  .change-email-root .form-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
+</style>
+{% endblock %}
+
+{% block content %}
+  {% comment %}The family changes its own email address (accounts/views.py change_email, accounts.email_change).{% endcomment %}
+  <div class="page">
+    <h1 class="display-lg page-title">{% translate "Change email address" %}</h1>
+    <div class="form-card">
+      <p class="body">{% blocktranslate with email=user.email %}Your current email address is <strong>{{ email }}</strong>. You log in with it and we send every mail to it.{% endblocktranslate %}</p>
+      <p class="body-sm">{% blocktranslate with hours=valid_hours %}We send a link to the new address. Open it within {{ hours }} hours to confirm the change: nothing changes until then. Once it's changed, we let your old address know, and you're logged out on your other devices.{% endblocktranslate %}</p>
+
+      <form class="cd-form" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <div class="cd-form__actions">
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">{% translate "Cancel" %}</a>
+          <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Send the link" %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

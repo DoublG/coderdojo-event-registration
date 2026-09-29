@@ -2,7 +2,8 @@
 and deleting an account (phase 5, `privacy.deletion`): the family's
 "Download my data" and "Delete my account", and the organisation
 dashboard's Privacy page (/manage/privacy/, shell core/_manage_base.html),
-for requests that come in by mail or post."""
+for requests that come in by mail or post; there the organisation can also
+start an email change (accounts.email_change, DATA_MODEL.md §22)."""
 
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -13,7 +14,8 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
-from accounts.forms import ConfirmPasswordForm
+from accounts import email_change
+from accounts.forms import ConfirmPasswordForm, OrganisationEmailChangeForm
 from accounts.models import User
 from accounts.organisation import require_organisation_admin
 from core.audit import log_access
@@ -121,4 +123,36 @@ def manage_privacy_delete(request, user_id):
         request,
         "privacy/manage/delete.html",
         {"account": account, "preview": result, "form": form, "active": "privacy"},
+    )
+
+
+@login_required
+def manage_privacy_email(request, user_id):
+    """The organisation starts an email change for a family that lost its
+    old mailbox (DATA_MODEL.md §22): a link goes to the new address, which
+    they confirm without logging in. Not for ninja logins, superusers or
+    organisation roles (accounts.email_change.organisation_blocker)."""
+    require_organisation_admin(request)
+    account = get_object_or_404(User, pk=user_id)
+    blocker = email_change.organisation_blocker(account)
+    form = OrganisationEmailChangeForm(account, request.POST or None)
+    if request.method == "POST" and not blocker and form.is_valid():
+        try:
+            email_change.request_change(account, form.cleaned_data["new_email"], started_by=request.user)
+        except email_change.EmailChangeError as error:
+            form.add_error(None, error.message)
+        else:
+            messages.success(
+                request,
+                _(
+                    "A confirmation link was sent to %(email)s. The address changes once they open it (within "
+                    "%(hours)s hours)."
+                )
+                % {"email": form.cleaned_data["new_email"], "hours": email_change.VALID_HOURS},
+            )
+            return redirect("manage_privacy")
+    return render(
+        request,
+        "privacy/manage/email.html",
+        {"account": account, "blocker": blocker, "form": form, "active": "privacy"},
     )

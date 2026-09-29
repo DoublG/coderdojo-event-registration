@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 05:46+0000\n"
+"POT-Creation-Date: 2026-09-29 06:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -152,47 +152,57 @@ msgid ""
 "address, phone number and postcode. Use **Edit my details** (or click the"
 " greeting) to change them in place, then **Save**."
 msgstr ""
-"En haut de votre page famille se trouvent vos coordonnées : votre nom, votre"
-" adresse e-mail, votre numéro de téléphone et votre code postal. Utilisez "
-"**Modifier mes coordonnées** (ou cliquez sur le message d'accueil) pour les "
-"modifier sur place, puis **Enregistrer**."
+"En haut de votre page famille se trouvent vos coordonnées : votre nom, "
+"votre adresse e-mail, votre numéro de téléphone et votre code postal. "
+"Utilisez **Modifier mes coordonnées** (ou cliquez sur le message "
+"d'accueil) pour les modifier sur place, puis **Enregistrer**."
 
 #: ../../source/families/managing-your-account.rst:54
 msgid ""
 "**Phone** is optional and only used if a dojo needs to reach you during a"
 " session."
 msgstr ""
-"Le **téléphone** est facultatif et ne sert que si un dojo doit vous joindre "
-"pendant une séance."
+"Le **téléphone** est facultatif et ne sert que si un dojo doit vous "
+"joindre pendant une séance."
 
 #: ../../source/families/managing-your-account.rst:56
 msgid ""
 "**Postcode** is optional. It's used to tell you about dojos and sessions "
 "near you, and the dojo finder starts from it when you're signed in."
 msgstr ""
-"Le **code postal** est facultatif. Il sert à vous informer des dojos et des "
-"séances près de chez vous, et le moteur de recherche des dojos part de "
-"celui-ci lorsque vous êtes connecté·e."
+"Le **code postal** est facultatif. Il sert à vous informer des dojos et "
+"des séances près de chez vous, et le moteur de recherche des dojos part "
+"de celui-ci lorsque vous êtes connecté·e."
 
 #: ../../source/families/managing-your-account.rst:58
 msgid ""
-"**Email address** can't be changed here: you log in with it and every "
-"mail goes to it. If it needs to change, get in touch with us through the "
-"**Contact** page."
+"**Email address** isn't changed on this form: you log in with it and "
+"every mail goes to it. Use **Change email address** (next to it), enter "
+"the new address and your password, and open the link we mail to the new "
+"address within 24 hours. Nothing changes until you do. Then we tell your "
+"old address, and you're logged out on your other devices. Can't get into "
+"your old mailbox or remember your password any more? Get in touch with us"
+" through the **Contact** page."
 msgstr ""
-"Votre **adresse e-mail** ne peut pas être modifiée ici : vous vous connectez"
-" avec elle et tous nos e-mails y sont envoyés. Si elle doit changer, "
-"contactez-nous via la page **Contact**."
+"Votre **adresse e-mail** ne se modifie pas dans ce formulaire : vous vous"
+" connectez avec elle et tous nos e-mails y sont envoyés. Utilisez "
+"**Changer d'adresse e-mail** (juste à côté), indiquez la nouvelle adresse"
+" et votre mot de passe, puis ouvrez dans les 24 heures le lien que nous "
+"envoyons à la nouvelle adresse. Rien ne change avant cela. Ensuite, nous "
+"prévenons votre ancienne adresse et vous êtes déconnecté·e de vos autres "
+"appareils. Vous n'avez plus accès à votre ancienne boîte mail ou vous ne "
+"connaissez plus votre mot de passe ? Contactez-nous via la page "
+"**Contact**."
 
-#: ../../source/families/managing-your-account.rst:62
+#: ../../source/families/managing-your-account.rst:66
 msgid "The language your mails are in is set on :doc:`mail-preferences`."
 msgstr "La langue de vos e-mails se choisit dans :doc:`mail-preferences`."
 
-#: ../../source/families/managing-your-account.rst:65
+#: ../../source/families/managing-your-account.rst:69
 msgid "Giving your child their own login"
 msgstr "Donner à votre enfant son propre compte"
 
-#: ../../source/families/managing-your-account.rst:67
+#: ../../source/families/managing-your-account.rst:71
 msgid ""
 "A child can have their own login. Open the child's page from your family "
 "page and use the **Own login** card:"
@@ -200,7 +210,7 @@ msgstr ""
 "Un enfant peut avoir son propre compte. Ouvrez la page de l'enfant depuis"
 " votre page famille et utilisez la carte **Propre compte** :"
 
-#: ../../source/families/managing-your-account.rst:70
+#: ../../source/families/managing-your-account.rst:74
 msgid ""
 "**Create login** — enter your child's own email address (it can't be one "
 "that's already used by another account). Your child gets an email with a "
@@ -213,7 +223,7 @@ msgstr ""
 " cette adresse e-mail. Si l'e-mail s'est perdu, utilisez **Renvoyer "
 "l'e-mail du mot de passe**."
 
-#: ../../source/families/managing-your-account.rst:74
+#: ../../source/families/managing-your-account.rst:78
 msgid ""
 "**Remove login** — your child can't log in any more. Their sessions, belt"
 " and badges stay on your family page. If your child has helped run "
@@ -230,19 +240,17 @@ msgstr ""
 "le réactiver plus tard avec **Réactiver le compte** : votre enfant reçoit"
 " un nouvel e-mail pour choisir un nouveau mot de passe."
 
-#: ../../source/families/managing-your-account.rst:82
+#: ../../source/families/managing-your-account.rst:86
 msgid ""
 "With their own login, your child sees their own page (their belt, badges,"
 " upcoming sessions and session history) and can sign themselves up for "
 "sessions or cancel their own places. Their details stay yours to manage: "
-"they can't change them, you still can."
-msgstr ""
-"Avec son propre compte, votre enfant voit sa propre page (sa ceinture, "
-"ses badges, ses prochaines sessions et son historique) et peut s'inscrire"
-" lui-même à des sessions ou annuler ses propres places. Ses données "
-"restent gérées par vous : il ne peut pas les modifier, vous oui."
+"they can't change them, you still can. The one thing they can change "
+"themselves is their avatar: clicking it on their page shows the standard "
+"avatars to pick from."
+msgstr "Avec son propre compte, votre enfant voit sa propre page (sa ceinture, ses badges, ses prochaines sessions et son historique) et peut s'inscrire lui-même à des sessions ou annuler ses propres places. Ses données restent gérées par vous : il ne peut pas les modifier, vous oui. La seule chose qu'il peut changer lui-même, c'est son avatar : en cliquant dessus sur sa page, il choisit parmi les avatars standard."
 
-#: ../../source/families/managing-your-account.rst:87
+#: ../../source/families/managing-your-account.rst:93
 msgid ""
 "A dojo's team can make a child with their own login a **youth mentor**: "
 "they help other ninjas during sessions. You get an email when that "
@@ -256,11 +264,11 @@ msgstr ""
 " vous préférez que non, parlez-en à l'équipe du dojo, ou supprimez le "
 "compte de votre enfant : le rôle prend fin aussi."
 
-#: ../../source/families/managing-your-account.rst:94
+#: ../../source/families/managing-your-account.rst:100
 msgid "Getting a copy of your data"
 msgstr "Obtenir une copie de vos données"
 
-#: ../../source/families/managing-your-account.rst:96
+#: ../../source/families/managing-your-account.rst:102
 msgid ""
 "Your family page has a **Your data** card. **Download my data** gives you"
 " a file with everything we keep about you and your children: your account"
@@ -280,7 +288,7 @@ msgstr ""
 "un fichier JSON : du texte brut que vous pouvez ouvrir dans n'importe "
 "quel éditeur de texte ou emporter vers un autre service."
 
-#: ../../source/families/managing-your-account.rst:104
+#: ../../source/families/managing-your-account.rst:110
 msgid ""
 "A child with their own login finds the same button on their own page; "
 "their file holds only their own data."
@@ -288,7 +296,7 @@ msgstr ""
 "Un enfant qui a son propre compte trouve le même bouton sur sa propre "
 "page ; son fichier ne contient que ses propres données."
 
-#: ../../source/families/managing-your-account.rst:107
+#: ../../source/families/managing-your-account.rst:113
 msgid ""
 "You can download it once a minute. If you'd rather ask by email or post, "
 "contact us and we'll send it to your account's email address."
@@ -297,11 +305,11 @@ msgstr ""
 "demander par e-mail ou par courrier, contactez-nous et nous l'enverrons à"
 " l'adresse e-mail de votre compte."
 
-#: ../../source/families/managing-your-account.rst:111
+#: ../../source/families/managing-your-account.rst:117
 msgid "Deleting your account"
 msgstr "Supprimer votre compte"
 
-#: ../../source/families/managing-your-account.rst:113
+#: ../../source/families/managing-your-account.rst:119
 msgid ""
 "**Delete my account**, on the same **Your data** card, first shows what "
 "will happen: which of your children are deleted with your account (those "
@@ -320,7 +328,7 @@ msgstr ""
 "compte est supprimé immédiatement, et c'est irréversible. Téléchargez "
 "d'abord vos données si vous souhaitez en garder une copie."
 
-#: ../../source/families/managing-your-account.rst:121
+#: ../../source/families/managing-your-account.rst:127
 msgid ""
 "**Champions and mentors:** your name stays on the sessions you helped run"
 " and on the belts and badges you awarded, and so does your profile on the"
@@ -333,17 +341,17 @@ msgstr ""
 "l'afficher. Comme champion d'un dojo actif, passez d'abord le rôle à un "
 "de ses mentors."
 
-#: ../../source/families/managing-your-account.rst:126
+#: ../../source/families/managing-your-account.rst:132
 msgid "You can also ask us by email or post; we'll delete it for you."
 msgstr ""
 "Vous pouvez aussi nous le demander par e-mail ou par courrier ; nous le "
 "supprimerons pour vous."
 
-#: ../../source/families/managing-your-account.rst:129
+#: ../../source/families/managing-your-account.rst:135
 msgid "Accounts you no longer use"
 msgstr "Les comptes que vous n'utilisez plus"
 
-#: ../../source/families/managing-your-account.rst:131
+#: ../../source/families/managing-your-account.rst:137
 msgid ""
 "We don't keep data we no longer need. If you don't log in for **two "
 "years**, your account is deleted. A month before that date, and again a "
@@ -360,7 +368,7 @@ msgstr ""
 "personnels de vos enfants comptent aussi : tant que l'un d'eux se "
 "connecte, votre compte reste."
 
-#: ../../source/families/managing-your-account.rst:138
+#: ../../source/families/managing-your-account.rst:144
 msgid ""
 "Children only you are a guardian of are deleted with your account: their "
 "details, belts and badges. The sessions they came to keep counting, "
@@ -372,7 +380,7 @@ msgstr ""
 "auxquelles ils ont participé restent comptées, sans leur nom. Un enfant "
 "qui figure aussi sur le compte d'un autre parent reste sur ce compte."
 
-#: ../../source/families/managing-your-account.rst:143
+#: ../../source/families/managing-your-account.rst:149
 msgid ""
 "A child's own login has no date of its own: it goes when the child does, "
 "and the mails about it come to you."
@@ -380,7 +388,7 @@ msgstr ""
 "Le compte personnel d'un enfant n'a pas de date propre : il disparaît "
 "avec l'enfant, et les e-mails à ce sujet vous sont envoyés."
 
-#: ../../source/families/managing-your-account.rst:146
+#: ../../source/families/managing-your-account.rst:152
 msgid ""
 "**Champions and mentors:** your name stays on the sessions you helped run"
 " and on the belts and badges you awarded, and so does your profile on the"
@@ -395,11 +403,11 @@ msgstr ""
 "dojo actif, votre compte reste jusqu'à ce que vous passiez le rôle à un "
 "des mentors du dojo."
 
-#: ../../source/families/managing-your-account.rst:153
+#: ../../source/families/managing-your-account.rst:159
 msgid "Already a champion or mentor?"
 msgstr "Déjà champion ou mentor ?"
 
-#: ../../source/families/managing-your-account.rst:155
+#: ../../source/families/managing-your-account.rst:161
 msgid ""
 "Every account has a family page: open **My Account** from your account "
 "menu and use **Add a child** there. Your children are added to the same "
@@ -410,11 +418,11 @@ msgstr ""
 "au même identifiant que vous utilisez déjà, sans inscription séparée ni "
 "second compte."
 
-#: ../../source/families/managing-your-account.rst:160
+#: ../../source/families/managing-your-account.rst:166
 msgid "Changing your password"
 msgstr "Modifier votre mot de passe"
 
-#: ../../source/families/managing-your-account.rst:162
+#: ../../source/families/managing-your-account.rst:168
 msgid ""
 "Go to **Change password** (also linked from your account page). You'll "
 "need your current password to set a new one."
@@ -423,11 +431,11 @@ msgstr ""
 "page de votre compte). Vous aurez besoin de votre mot de passe actuel "
 "pour en définir un nouveau."
 
-#: ../../source/families/managing-your-account.rst:166
+#: ../../source/families/managing-your-account.rst:172
 msgid "Volunteering"
 msgstr "Bénévolat"
 
-#: ../../source/families/managing-your-account.rst:168
+#: ../../source/families/managing-your-account.rst:174
 msgid ""
 "The **Volunteering** section of your account page shows any application "
 "you've made to become a mentor or start a dojo, and where your background"
@@ -545,4 +553,18 @@ msgstr ""
 #~ " ceintures et badges, et vous pouvez"
 #~ " lui redonner un compte à tout "
 #~ "moment."
+
+#~ msgid ""
+#~ "**Email address** can't be changed here:"
+#~ " you log in with it and every"
+#~ " mail goes to it. If it needs"
+#~ " to change, get in touch with "
+#~ "us through the **Contact** page."
+#~ msgstr ""
+#~ "Votre **adresse e-mail** ne peut pas "
+#~ "être modifiée ici : vous vous "
+#~ "connectez avec elle et tous nos "
+#~ "e-mails y sont envoyés. Si elle "
+#~ "doit changer, contactez-nous via la "
+#~ "page **Contact**."
 

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 10:50+0000\n"
+"POT-Creation-Date: 2026-09-29 06:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -104,10 +104,34 @@ msgstr ""
 "part avec le compte de la famille)."
 
 #: ../../source/organisation/privacy.rst:40
+msgid "Changing someone's email address"
+msgstr "Changer l'adresse e-mail de quelqu'un"
+
+#: ../../source/organisation/privacy.rst:42
+msgid ""
+"Families change their own address from their family page. **Change "
+"email…** is for a family that can't get into its old mailbox any more "
+"(and so can't confirm anything from it, or reset its password). Check who"
+" you're dealing with by other means first, such as a phone call or their "
+"children's details: whoever has the new mailbox gets the account. Enter "
+"the new address and tick that you checked."
+msgstr "Les familles changent elles-mêmes leur adresse depuis leur page famille. **Changer l'e-mail…** est prévu pour une famille qui n'a plus accès à son ancienne boîte mail (et ne peut donc rien y confirmer, ni réinitialiser son mot de passe). Vérifiez d'abord par un autre moyen à qui vous avez affaire, par exemple par un appel ou avec les données de leurs enfants : la personne qui a la nouvelle boîte mail obtient le compte. Indiquez la nouvelle adresse et cochez que vous avez vérifié."
+
+#: ../../source/organisation/privacy.rst:49
+msgid ""
+"We mail a link to the new address, valid for 24 hours. The address only "
+"changes once they open it and confirm, and they don't need to log in for "
+"that. Then the old address is told, every session on the account ends, "
+"and the page offers them a link to set a new password. Accounts with an "
+"organisation role, technical administrators and a child's own login can't"
+" be changed here."
+msgstr "Nous envoyons un lien à la nouvelle adresse, valable 24 heures. L'adresse ne change qu'une fois le lien ouvert et confirmé, sans qu'il faille se connecter. Ensuite, l'ancienne adresse est prévenue, toutes les sessions du compte prennent fin et la page propose un lien pour choisir un nouveau mot de passe. Les comptes avec un rôle dans l'organisation, les administrateurs techniques et la connexion propre d'un enfant ne peuvent pas être modifiés ici."
+
+#: ../../source/organisation/privacy.rst:57
 msgid "Needs attention"
 msgstr "À traiter"
 
-#: ../../source/organisation/privacy.rst:42
+#: ../../source/organisation/privacy.rst:59
 msgid ""
 "Accounts that haven't logged in for two years are deleted automatically. "
 "A champion of an active dojo is held back until the role moves: they're "

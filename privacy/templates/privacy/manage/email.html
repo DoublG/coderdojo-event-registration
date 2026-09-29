@@ -1,0 +1,30 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Change an email address" %}{% endblock %}
+{% block manage_heading %}{% translate "Change an email address" %}{% endblock %}
+
+{% block manage_content %}
+  {% comment %}Starting an email change for a family that lost its old mailbox (privacy/views.py manage_privacy_email, accounts.email_change).{% endcomment %}
+  <div class="cd-card" style="padding: var(--space-5);">
+    <p class="body"><strong>{{ account.get_full_name|default:account.username }}</strong> · {{ account.username }}{% if account.email %} · {{ account.email }}{% endif %}</p>
+
+    {% if blocker %}
+      <div class="cd-form__notes"><p class="cd-form__note cd-form__note--error caption">{{ blocker }}</p></div>
+      <div class="cd-form__actions" style="justify-content: flex-start;">
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_privacy' %}">{% translate "Back" %}</a>
+      </div>
+    {% else %}
+      <p class="body-sm">{% translate "For a family that can't get into its old mailbox any more; families can change their address themselves from their account page. Check who's asking by other means first (a call, their children's details): whoever has the new mailbox gets the account." %}</p>
+      <p class="body-sm">{% translate "We send a link to the new address. Once they open it, the address changes, the old address is told, and every session on the account ends. The page then offers them a new password." %}</p>
+
+      <form class="cd-form" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <div class="cd-form__actions">
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_privacy' %}">{% translate "Cancel" %}</a>
+          <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Send the link" %}</button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+{% endblock %}

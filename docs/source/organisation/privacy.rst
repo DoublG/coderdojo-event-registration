@@ -36,6 +36,23 @@ role has to move to one of the dojo's mentors first), an account with an
 organisation role (take the role away first) and a child's own login (it's
 removed by their parent, or goes with the family's account).
 
+Changing someone's email address
+--------------------------------
+
+Families change their own address from their family page. **Change email…**
+is for a family that can't get into its old mailbox any more (and so can't
+confirm anything from it, or reset its password). Check who you're dealing
+with by other means first, such as a phone call or their children's
+details: whoever has the new mailbox gets the account. Enter the new
+address and tick that you checked.
+
+We mail a link to the new address, valid for 24 hours. The address only
+changes once they open it and confirm, and they don't need to log in for
+that. Then the old address is told, every session on the account ends, and
+the page offers them a link to set a new password. Accounts with an
+organisation role, technical administrators and a child's own login can't
+be changed here.
+
 Needs attention
 ---------------
 

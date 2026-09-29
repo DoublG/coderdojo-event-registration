@@ -515,6 +515,267 @@ class EditAccountViewTests(TestCase):
         self.assertEqual(entry.changes_dict["first_name"], ["Jane", "Janet"])
 
 
+class EmailChangeTests(TestCase):
+    """Changing the account's own email address (accounts.email_change,
+    DATA_MODEL.md §22): asked with the password, confirmed from a link sent
+    to the new address, the old address told, other sessions ended."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.cache import cache
+        from django.core.management import call_command
+
+        cache.clear()  # the test cache (db 3): the one-request-a-minute throttle
+        call_command("load_mail_templates", stdout=StringIO())
+        self.user = User.objects.create(username="jan", email="jan@example.com", first_name="Jan")
+        self.user.set_password(PASSWORD)
+        self.user.save()
+
+    def ask(self, new_email="jan.new@example.com", password=PASSWORD):
+        return self.client.post(reverse("change_email"), {"new_email": new_email, "password": password})
+
+    def confirm_path(self):
+        import re
+        from urllib.parse import urlparse
+
+        from mailing.models import EmailMessage
+
+        body = EmailMessage.objects.get(template_key="email_change_confirm").body
+        return urlparse(re.search(r"\S+/account/email/confirm/\S+", body).group(0)).path
+
+    def test_login_required_and_not_for_a_ninja_login(self):
+        self.assertEqual(self.client.get(reverse("change_email")).status_code, 302)
+        ninja_login = User.objects.create(username="kid", email="kid@example.com", account_type=User.NINJA)
+        make_ninja(self.user, "Kid", account=ninja_login)
+        self.client.force_login(ninja_login)
+        self.assertEqual(self.client.get(reverse("change_email")).status_code, 404)
+
+    def test_asking_mails_a_link_to_the_new_address_and_changes_nothing_yet(self):
+        from mailing.models import EmailMessage
+
+        self.client.force_login(self.user)
+        self.assertContains(self.client.get(reverse("change_email")), "jan@example.com")
+        response = self.ask()
+        self.assertRedirects(response, reverse("account_home"))
+        queued = EmailMessage.objects.get()
+        self.assertEqual(
+            (queued.template_key, queued.recipient, queued.category, queued.user),
+            ("email_change_confirm", "jan.new@example.com", "service", self.user),
+        )
+        self.assertIn("You asked to change", queued.body)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "jan@example.com")
+
+    def test_the_password_is_needed(self):
+        from mailing.models import EmailMessage
+
+        self.client.force_login(self.user)
+        response = self.ask(password="wrong")
+        self.assertIn("password", response.context["form"].errors)
+        self.assertFalse(EmailMessage.objects.exists())
+
+    def test_a_taken_or_blocked_or_same_address_is_refused(self):
+        from mailing.models import EmailMessage, EmailSuppression
+
+        User.objects.create(username="other", email="Taken@Example.com")
+        EmailSuppression.objects.create(email="bounced@example.com")
+        self.client.force_login(self.user)
+        for address in ("taken@example.com", "bounced@example.com", "JAN@example.com"):
+            self.assertIn("new_email", self.ask(address).context["form"].errors, address)
+        self.assertFalse(EmailMessage.objects.exists())
+
+    def test_one_request_a_minute(self):
+        self.client.force_login(self.user)
+        self.ask()
+        response = self.ask("jan.other@example.com")
+        self.assertContains(response, "Please wait a minute")
+
+    def test_confirming_changes_it_tells_the_old_address_and_ends_other_sessions(self):
+        from django.test import Client
+
+        from mailing.models import EmailMessage
+
+        elsewhere = Client()
+        elsewhere.force_login(self.user)
+        self.client.force_login(self.user)
+        self.ask()
+        path = self.confirm_path()
+
+        page = self.client.get(path)
+        self.assertContains(page, "jan.new@example.com")
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "jan@example.com")  # a GET (a mail scanner) changes nothing
+
+        response = self.client.post(path)
+        self.assertRedirects(response, reverse("account_home"))
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "jan.new@example.com")
+        notice = EmailMessage.objects.get(template_key="email_changed")
+        self.assertEqual(notice.recipient, "jan@example.com")
+        self.assertIn("jan.new@example.com", notice.body)
+        self.assertEqual(self.client.get(reverse("account_home")).status_code, 200)  # this session stays
+        self.assertEqual(elsewhere.get(reverse("account_home")).status_code, 302)  # the other one ended
+
+    def test_the_link_works_once(self):
+        self.client.force_login(self.user)
+        self.ask()
+        path = self.confirm_path()
+        self.client.post(path)
+        response = self.client.post(path)
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, "already been used", status_code=400)
+
+    def test_the_link_expires(self):
+        import time
+
+        self.client.force_login(self.user)
+        self.ask()
+        path = self.confirm_path()
+        with patch("django.core.signing.time.time", return_value=time.time() + 25 * 3600):
+            response = self.client.post(path)
+        self.assertContains(response, "expired", status_code=400)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "jan@example.com")
+
+    def test_logged_out_the_family_logs_in_first_and_another_account_gets_a_404(self):
+        self.client.force_login(self.user)
+        self.ask()
+        path = self.confirm_path()
+        self.client.logout()
+        response = self.client.get(path)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response.url)
+        self.assertIn("next=", response.url)
+
+        self.client.force_login(User.objects.create(username="someone", email="someone@example.com"))
+        self.assertEqual(self.client.post(path).status_code, 404)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "jan@example.com")
+
+    def test_an_address_taken_meanwhile_is_refused_at_confirmation(self):
+        self.client.force_login(self.user)
+        self.ask()
+        path = self.confirm_path()
+        User.objects.create(username="quick", email="jan.new@example.com")
+        self.assertContains(self.client.post(path), "already exists", status_code=400)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "jan@example.com")
+
+    def test_open_password_reset_links_stop_working(self):
+        from django.contrib.auth.tokens import default_token_generator
+
+        token = default_token_generator.make_token(self.user)
+        self.client.force_login(self.user)
+        self.ask()
+        self.client.post(self.confirm_path())
+        self.user.refresh_from_db()
+        self.assertFalse(default_token_generator.check_token(self.user, token))
+
+    def test_the_change_is_in_the_audit_log(self):
+        from auditlog.models import LogEntry
+
+        self.client.force_login(self.user)
+        self.ask()
+        self.client.post(self.confirm_path())
+        entry = LogEntry.objects.get_for_object(self.user).latest("pk")
+        self.assertEqual(entry.actor, self.user)
+        self.assertEqual(entry.changes_dict["email"], ["jan@example.com", "jan.new@example.com"])
+
+    def test_a_new_address_set_anywhere_ends_the_account_sessions(self):
+        """The session check covers the email (User._get_session_auth_hash),
+        also for a change made in the Django admin."""
+        self.client.force_login(self.user)
+        User.objects.filter(pk=self.user.pk).update(email="changed@example.com")
+        self.assertEqual(self.client.get(reverse("account_home")).status_code, 302)
+
+    def test_the_details_form_links_to_it(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("edit_account"), HTTP_HX_REQUEST="true")
+        self.assertContains(response, reverse("change_email"))
+
+
+class ChildAvatarTests(TempMediaMixin, TestCase):
+    """A child's own login picks its avatar (accounts.views.ninja_avatar):
+    only the standard avatars; uploading a photo stays the guardian's."""
+
+    def setUp(self):
+        super().setUp()
+        self.guardian = User.objects.create(username="g1", email="g1@example.com")
+        self.login = User.objects.create(username="kid", email="kid@example.com", account_type=User.NINJA)
+        self.child = make_ninja(self.guardian, "Emma", account=self.login)
+        self.url = reverse("ninja_avatar", kwargs={"ninja_id": self.child.id})
+
+    def test_the_child_page_offers_it_to_the_child_only(self):
+        detail = reverse("ninja_detail", kwargs={"ninja_id": self.child.id})
+        self.client.force_login(self.login)
+        self.assertContains(self.client.get(detail), f'hx-get="{self.url}"')
+        self.client.force_login(self.guardian)
+        self.assertNotContains(self.client.get(detail), f'hx-get="{self.url}"')
+
+    def test_the_picker_offers_the_standard_avatars_and_no_upload(self):
+        from .template_avatars import TEMPLATE_KID_AVATARS
+
+        self.client.force_login(self.login)
+        response = self.client.get(self.url, HTTP_HX_REQUEST="true")
+        self.assertTemplateUsed(response, "accounts/partials/_child_avatar_picker.html")
+        self.assertContains(response, 'type="radio"', count=len(TEMPLATE_KID_AVATARS))
+        self.assertNotContains(response, 'type="file"')
+
+    def test_picking_one_links_the_standard_avatar(self):
+        from .template_avatars import TEMPLATE_KID_AVATARS
+
+        filename = TEMPLATE_KID_AVATARS[1][0]
+        self.client.force_login(self.login)
+        response = self.client.post(self.url, {"icon": filename})
+        self.assertTemplateUsed(response, "accounts/partials/_child_header_display.html")
+        self.child.refresh_from_db()
+        self.assertEqual(self.child.photo.name, f"library/ninjas/{filename}")
+
+    def test_a_standard_avatar_is_linked_never_copied(self):
+        """Every child who picks the same avatar shares the one library file
+        (core.image_library); nothing lands in the per-child upload folder."""
+        from pathlib import Path
+
+        from django.conf import settings
+
+        from .template_avatars import TEMPLATE_KID_AVATARS
+
+        filename = TEMPLATE_KID_AVATARS[0][0]
+        other_login = User.objects.create(username="kid2", email="kid2@example.com", account_type=User.NINJA)
+        other = make_ninja(self.guardian, "Mats", account=other_login)
+        for login, child in ((self.login, self.child), (other_login, other)):
+            self.client.force_login(login)
+            self.client.post(reverse("ninja_avatar", kwargs={"ninja_id": child.id}), {"icon": filename})
+        self.child.refresh_from_db()
+        other.refresh_from_db()
+        self.assertEqual(self.child.photo.name, other.photo.name)
+        self.assertEqual(self.child.photo.name, f"library/ninjas/{filename}")
+        self.assertEqual(
+            list((Path(settings.MEDIA_ROOT) / "library" / "ninjas").iterdir()),
+            [Path(settings.MEDIA_ROOT) / "library" / "ninjas" / filename],
+        )
+        self.assertFalse((Path(settings.MEDIA_ROOT) / "participants").exists())
+
+    def test_an_upload_or_an_unknown_choice_changes_nothing(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        Ninja.objects.filter(pk=self.child.pk).update(photo="participants/from-the-guardian.jpg")
+        self.client.force_login(self.login)
+        upload = SimpleUploadedFile("me.png", b"\x89PNG\r\n\x1a\n", content_type="image/png")
+        response = self.client.post(self.url, {"icon": "../../etc/passwd", "photo": upload})
+        self.assertTrue(response.context["form"].errors)
+        self.client.post(self.url, {"photo": upload})
+        self.child.refresh_from_db()
+        self.assertEqual(self.child.photo.name, "participants/from-the-guardian.jpg")
+
+    def test_another_ninja_login_gets_a_404(self):
+        other_login = User.objects.create(username="kid2", email="kid2@example.com", account_type=User.NINJA)
+        make_ninja(User.objects.create(username="g2", email="g2@example.com"), "Mats", account=other_login)
+        self.client.force_login(other_login)
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+
 class BadgeWidgetViewTests(TestCase):
     def test_login_required(self):
         guardian = User.objects.create(username="g1", email="g1@example.com")

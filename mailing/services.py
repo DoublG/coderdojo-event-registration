@@ -10,7 +10,7 @@ from django.core import signing
 from django.db import IntegrityError, transaction
 from django.urls import reverse
 
-from .categories import CAN_OPT_OUT, PRIORITY, categories_for
+from .categories import CAN_OPT_OUT, PRIORITY, MailCategory, categories_for
 from .models import EmailMessage, EmailSuppression
 from .preferences import is_subscribed
 from .rendering import FALLBACK_LANGUAGE, TemplateMissing, render
@@ -58,7 +58,16 @@ def suppressed_reason(user, category, address, test=False):
 
 
 def send(
-    user, category, template_key, context=None, *, idempotency_key=None, campaign=None, send_after=None, test=False
+    user,
+    category,
+    template_key,
+    context=None,
+    *,
+    idempotency_key=None,
+    campaign=None,
+    send_after=None,
+    test=False,
+    address=None,
 ):
     """Queue one mail to `user`. Renders `template_key` in the account's
     language now (so the row records exactly what was sent) and returns
@@ -66,12 +75,17 @@ def send(
     account can't or doesn't want to get it. With `idempotency_key`, a
     second call with the same key returns the first row and queues nothing.
     `test` is for a campaign's test mail to its own author: marked
-    "[Test]", and the author's preferences don't apply (blocks still do)."""
+    "[Test]", and the author's preferences don't apply (blocks still do).
+    `address` sends account (`service`) mail somewhere other than
+    `user.email`: the confirmation of a new address before it's the
+    account's (accounts.email_change). Blocks apply to it as to any other."""
     if idempotency_key and (existing := EmailMessage.objects.filter(idempotency_key=idempotency_key).first()):
         return existing
 
+    if address is not None and category != MailCategory.SERVICE:
+        raise ValueError("Only service mail can go to an address other than the account's.")
     language = user.preferred_language or FALLBACK_LANGUAGE
-    address = user.email.strip()
+    address = (user.email if address is None else address).strip()
     context = {
         "recipient_name": user.first_name or user.get_username(),
         "site_url": settings.SITE_URL,

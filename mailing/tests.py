@@ -551,6 +551,15 @@ class SendGatewayTests(TestCase):
         self.assertNotIn("/mail/unsubscribe/", row.body)
         self.assertEqual(row.priority, 0)
 
+    def test_service_mail_can_go_to_another_address_and_is_still_checked_against_blocks(self):
+        row = send(self.user, MailCategory.SERVICE, "account", address=" ellen.new@example.com ")
+        self.assertEqual((row.status, row.recipient, row.user), (Status.PENDING, "ellen.new@example.com", self.user))
+        EmailSuppression.objects.create(email="blocked@example.com", reason=EmailSuppression.HARD_BOUNCE)
+        row = send(self.user, MailCategory.SERVICE, "account", address="blocked@example.com")
+        self.assertEqual(row.status, Status.SUPPRESSED)
+        with self.assertRaises(ValueError):
+            send(self.user, MailCategory.REMINDER, "note", address="ellen.new@example.com")
+
     def test_suppressed_with_a_reason(self):
         cases = {
             "unsubscribed": lambda: set_preference(self.user, MailCategory.REMINDER, False, ConsentEvent.PREFERENCES),

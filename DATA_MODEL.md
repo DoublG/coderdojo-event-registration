@@ -3830,16 +3830,18 @@ Everything keeps its full Django admin page.
 5. **Finishing:** tests, Dutch and French, the help docs (a new
    organisation page, the volunteer pages on the reminder), CLAUDE.md and §6.
 
-## 22. Changing an account's email address (planned)
+## 22. Changing an account's email address (built)
 
-**Planned, not built.** The account page's details (`accounts.views.edit_account`)
+**Built** (all five phases, as planned below; the code is in
+`accounts/email_change.py`, `accounts.views.change_email` /
+`confirm_email_change` and `privacy.views.manage_privacy_email`). The
+account page's details (`accounts.views.edit_account`)
 edit the name, phone and postcode in place; the email address is shown
 read-only there. It can't simply be another field: it's a login name
 (`accounts.backends.EmailOrUsernameBackend`), where every mail goes
 (`mailing.services.send` reads `user.email`), and a mistyped address would
 lock the family out of password resets. So changing it is its own flow,
-confirmed from the new address. Until then, the organisation changes it in
-the Django admin on request.
+confirmed from the new address.
 
 ### What the code does today, and what that means
 
@@ -3869,9 +3871,11 @@ the Django admin on request.
   already exists) and the new address; we mail a link there; the address
   only changes when that link is used. Nothing changes until then.
 - **No new model: a signed link.** `django.core.signing` of account id, new
-  address and the *current* address (salt `accounts.email_change`, valid
-  `EMAIL_CHANGE_MAX_AGE` = 24 hours). Including the current address makes
-  the link single-use: once the address has changed, it no longer matches.
+  address, who started it and a fingerprint (a salted HMAC) of the
+  *current* address, so the link, which ends up in server logs, doesn't
+  show it (salt `accounts.email_change`, valid `VALID_HOURS` = 24).
+  The fingerprint makes the link single-use: once the address has changed,
+  it no longer matches.
   No row with a pending address means nothing new to classify for privacy
   (§16), keep or erase.
 - **The family's own link needs the same account logged in.** Opening it

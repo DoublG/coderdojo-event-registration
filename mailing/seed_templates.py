@@ -602,6 +602,93 @@ Si vous n'avez rien demandé, vous pouvez ignorer cet e-mail : votre mot de pass
         },
     },
     {
+        "key": "email_change_confirm",
+        "category": MailCategory.SERVICE,
+        "description": "Sent to the NEW address when someone asks to change the account's email "
+        "(accounts/email_change.py). Variables: new_email, old_email, confirm_url, valid_hours, "
+        "by_organisation (true when the organisation started it).",
+        "subject": {
+            "en-us": "Confirm your new email address",
+            "nl-be": "Bevestig je nieuwe e-mailadres",
+            "fr-be": "Confirmez votre nouvelle adresse e-mail",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{% if by_organisation %}At your request, CoderDojo Belgium is changing the email address of your CoderDojo account from {{ old_email }} to {{ new_email }}.{% else %}You asked to change the email address of your CoderDojo account from {{ old_email }} to {{ new_email }}.{% endif %}
+
+To confirm, open this link within {{ valid_hours }} hours:
+
+{{ confirm_url }}
+
+Nothing changes until you do. If you didn't ask for this, you can ignore this email.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{% if by_organisation %}Op jouw vraag wijzigt CoderDojo Belgium het e-mailadres van je CoderDojo-account van {{ old_email }} naar {{ new_email }}.{% else %}Je vroeg om het e-mailadres van je CoderDojo-account te wijzigen van {{ old_email }} naar {{ new_email }}.{% endif %}
+
+Open deze link binnen {{ valid_hours }} uur om het te bevestigen:
+
+{{ confirm_url }}
+
+Tot dan verandert er niets. Heb je dit niet gevraagd? Dan kan je deze e-mail negeren.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{% if by_organisation %}À votre demande, CoderDojo Belgium change l'adresse e-mail de votre compte CoderDojo : {{ old_email }} devient {{ new_email }}.{% else %}Vous avez demandé à changer l'adresse e-mail de votre compte CoderDojo : {{ old_email }} devient {{ new_email }}.{% endif %}
+
+Pour confirmer, ouvrez ce lien dans les {{ valid_hours }} heures :
+
+{{ confirm_url }}
+
+Rien ne change avant cela. Si vous n'avez rien demandé, vous pouvez ignorer cet e-mail.
+""",
+        },
+    },
+    {
+        "key": "email_changed",
+        "category": MailCategory.SERVICE,
+        "description": "Sent to the OLD address once the account's email has changed "
+        "(accounts/email_change.py). Variables: new_email, changed_at, contact_url.",
+        "subject": {
+            "en-us": "Your CoderDojo email address was changed",
+            "nl-be": "Het e-mailadres van je CoderDojo-account is gewijzigd",
+            "fr-be": "L'adresse e-mail de votre compte CoderDojo a changé",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+On {{ changed_at|date:"j F Y" }} at {{ changed_at|date:"H:i" }}, the email address of your CoderDojo account was changed to {{ new_email }}. From now on, we send your mail there and you log in with it. This address won't get our mails any more.
+
+Wasn't this you? Contact us straight away:
+
+{{ contact_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Op {{ changed_at|date:"j F Y" }} om {{ changed_at|date:"H:i" }} is het e-mailadres van je CoderDojo-account gewijzigd naar {{ new_email }}. Voortaan sturen we je mails daarheen en meld je je daarmee aan. Dit adres krijgt geen mails van ons meer.
+
+Was jij dit niet? Neem dan meteen contact met ons op:
+
+{{ contact_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Le {{ changed_at|date:"j F Y" }} à {{ changed_at|date:"H:i" }}, l'adresse e-mail de votre compte CoderDojo a été remplacée par {{ new_email }}. Désormais, nous vous écrivons à cette adresse et vous vous connectez avec elle. Cette adresse-ci ne recevra plus nos e-mails.
+
+Ce n'était pas vous ? Contactez-nous immédiatement :
+
+{{ contact_url }}
+""",
+        },
+    },
+    {
         "key": "two_step_turned_on",
         "category": MailCategory.SERVICE,
         "description": "Two-step login was turned on for the account (accounts/two_step.py). "
@@ -1281,6 +1368,20 @@ SAMPLE_CONTEXT = {
     "password_reset": {
         **_common,
         "reset_url": "https://coolregistration.localhost/password-reset/confirm/MQ/abc-123/",
+    },
+    "email_change_confirm": {
+        **_common,
+        "new_email": "ellen.new@example.com",
+        "old_email": "ellen@example.com",
+        "confirm_url": "https://coolregistration.localhost/account/email/confirm/abc-123/",
+        "valid_hours": 24,
+        "by_organisation": False,
+    },
+    "email_changed": {
+        **_common,
+        "new_email": "ellen.new@example.com",
+        "changed_at": datetime(2026, 10, 3, 14, 30),
+        "contact_url": "https://coolregistration.localhost/contact/",
     },
     "two_step_turned_on": {
         **_common,

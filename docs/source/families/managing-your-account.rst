@@ -55,9 +55,13 @@ greeting) to change them in place, then **Save**.
   session.
 - **Postcode** is optional. It's used to tell you about dojos and sessions
   near you, and the dojo finder starts from it when you're signed in.
-- **Email address** can't be changed here: you log in with it and every
-  mail goes to it. If it needs to change, get in touch with us through the
-  **Contact** page.
+- **Email address** isn't changed on this form: you log in with it and
+  every mail goes to it. Use **Change email address** (next to it), enter
+  the new address and your password, and open the link we mail to the new
+  address within 24 hours. Nothing changes until you do. Then we tell your
+  old address, and you're logged out on your other devices. Can't get into
+  your old mailbox or remember your password any more? Get in touch with us
+  through the **Contact** page.
 
 The language your mails are in is set on :doc:`mail-preferences`.
 
@@ -82,7 +86,9 @@ and use the **Own login** card:
 With their own login, your child sees their own page (their belt, badges,
 upcoming sessions and session history) and can sign themselves up for
 sessions or cancel their own places. Their details stay yours to manage:
-they can't change them, you still can.
+they can't change them, you still can. The one thing they can change
+themselves is their avatar: clicking it on their page shows the standard
+avatars to pick from.
 
 A dojo's team can make a child with their own login a **youth mentor**:
 they help other ninjas during sessions. You get an email when that

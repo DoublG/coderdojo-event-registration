@@ -1,0 +1,58 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Confirm your new email address" %} · CoderDojo Belgium{% endblock %}
+{% block root_class %}change-email-root{% endblock %}
+{% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
+
+{% block extra_style %}
+<style>
+  .change-email-root { background: var(--surface-sunken); }
+  .change-email-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+  .change-email-root .page-title { color: var(--ink); margin: 0 0 var(--space-4); }
+  .change-email-root .form-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
+</style>
+{% endblock %}
+
+{% block content %}
+  {% comment %}
+  The link from the email_change_confirm mail (accounts/views.py
+  confirm_email_change): `error` (broken, expired or used link), `change`
+  (asks to confirm), or `done` (changed while logged out: a link the
+  organisation started; offers a password reset to the new address).
+  {% endcomment %}
+  <div class="page">
+    <h1 class="display-lg page-title">{% if done %}{% translate "Your email address is changed" %}{% else %}{% translate "Confirm your new email address" %}{% endif %}</h1>
+    <div class="form-card">
+      {% if error %}
+        <div class="cd-form__notes"><p class="cd-form__note cd-form__note--error caption">{{ error }}</p></div>
+        <div class="cd-form__actions" style="justify-content: flex-start;">
+          {% if user.is_authenticated %}
+            <a class="cd-btn cd-btn--primary label" href="{% url 'change_email' %}">{% translate "Change email address" %}</a>
+          {% else %}
+            <a class="cd-btn cd-btn--ghost label" href="{% url 'home' %}">{% translate "Home" %}</a>
+          {% endif %}
+        </div>
+      {% elif done %}
+        <p class="body">{% blocktranslate with email=done.email %}You now log in with <strong>{{ email }}</strong>, and we send your mail there.{% endblocktranslate %}</p>
+        <p class="body-sm">{% translate "Don't know your password any more? We can mail a link to your new address to set a new one." %}</p>
+        <form method="post" action="{% url 'password_reset' %}">
+          {% csrf_token %}
+          <input type="hidden" name="email" value="{{ done.email }}">
+          <div class="cd-form__actions" style="justify-content: flex-start;">
+            <a class="cd-btn cd-btn--ghost label" href="{% url 'login' %}">{% translate "Log in" %}</a>
+            <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Set a new password" %}</button>
+          </div>
+        </form>
+      {% else %}
+        <p class="body">{% blocktranslate with old=change.user.email new=change.new_email %}Change the email address of your CoderDojo account from <strong>{{ old }}</strong> to <strong>{{ new }}</strong>?{% endblocktranslate %}</p>
+        <p class="body-sm">{% translate "You'll log in with the new address, and we'll send your mail there. We let the old address know, and you're logged out on your other devices." %}</p>
+        <form method="post">
+          {% csrf_token %}
+          <div class="cd-form__actions" style="justify-content: flex-start;">
+            <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Change my email address" %}</button>
+          </div>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

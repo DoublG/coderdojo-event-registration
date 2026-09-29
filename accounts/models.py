@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.crypto import salted_hmac
 from django.utils.translation import gettext_lazy as _
 
 from applications.storage import get_private_storage
@@ -117,6 +118,18 @@ class User(AbstractUser):
         default=True,
         help_text="Uncheck to keep this person off the public team pages.",
     )
+
+    def _get_session_auth_hash(self, secret=None):
+        """Django's session check covers the password; this also covers the
+        email address, so changing either logs the account out everywhere
+        else (accounts.email_change, DATA_MODEL.md §22). The session that
+        makes the change keeps itself with update_session_auth_hash."""
+        return salted_hmac(
+            "accounts.User.get_session_auth_hash",
+            f"{self.password}\x00{(self.email or '').strip().lower()}",
+            secret=secret,
+            algorithm="sha256",
+        ).hexdigest()
 
     @property
     def is_ninja(self):

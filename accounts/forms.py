@@ -296,6 +296,59 @@ class ConfirmPasswordForm(forms.Form):
         return password
 
 
+class _NewEmailMixin:
+    """The new address of an email change, checked by the service that
+    makes it (accounts.email_change.check_new_address)."""
+
+    def clean_new_email(self):
+        from .email_change import EmailChangeError, check_new_address
+
+        new_email = self.cleaned_data["new_email"].strip()
+        try:
+            check_new_address(self.account, new_email)
+        except EmailChangeError as error:
+            raise forms.ValidationError(error.message) from None
+        return new_email
+
+
+def _new_email_field():
+    return forms.EmailField(
+        label=_("New email address"),
+        help_text=_("We send a link there. The address only changes once you open it."),
+        widget=forms.EmailInput(attrs={"autocomplete": "email"}),
+    )
+
+
+class ChangeEmailForm(_NewEmailMixin, ConfirmPasswordForm):
+    """The family's own email change (accounts.views.change_email): the new
+    address, and the password to show it's them."""
+
+    new_email = _new_email_field()
+    field_order = ["new_email", "password"]
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(user, *args, label=_("Your password"), **kwargs)
+        self.account = user
+
+
+class OrganisationEmailChangeForm(_NewEmailMixin, forms.Form):
+    """An organisation admin starts an email change for a family that lost
+    its old mailbox (privacy.views.manage_privacy_email)."""
+
+    new_email = _new_email_field()
+    identity_checked = forms.BooleanField(
+        label=_("I've checked that this request comes from the account holder."),
+        required=True,
+    )
+
+    def __init__(self, account, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.account = account
+        self.fields["new_email"].help_text = _(
+            "We send a link there. The address only changes once they open it; they don't need to log in for that."
+        )
+
+
 class ChildLoginForm(forms.Form):
     """The child page's "Own login" card: the child's own email address
     (accounts.views.ninja_login_create). The rules about which address may be
@@ -419,6 +472,19 @@ class EditChildForm(ChildForm):
                 if name not in data:
                     data[name] = self.get_initial_for_field(self.fields[name], name) or ""
             self.data = data
+
+
+class ChildAvatarForm(forms.Form):
+    """A child's own login picks its avatar (accounts.views.ninja_avatar):
+    one of the standard ones only. Uploading a photo stays the guardian's
+    to do, so there's no file field here."""
+
+    icon = forms.ChoiceField(label=_("Pick your avatar"), choices=TEMPLATE_KID_AVATARS, widget=forms.RadioSelect)
+
+    def __init__(self, child, *args, **kwargs):
+        kwargs.setdefault("auto_id", "av-%s")
+        super().__init__(*args, **kwargs)
+        self.fields["icon"].initial = library_filename(child.photo, "ninjas") or None
 
 
 class SignUpChildForm(ChildForm):

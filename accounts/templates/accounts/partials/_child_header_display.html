@@ -5,10 +5,19 @@ same click-to-edit approach used nowhere else in the app yet, but the
 request/response shape matches every other htmx widget here (GET renders
 the next state, POST saves and renders the state after that).
 Expects `child`, and `can_edit` (true for the ninja's guardians, false when
-the ninja views their own page — then the name isn't clickable).
+the ninja views their own page — then the name isn't clickable), and
+`can_pick_avatar` (the ninja's own login: the avatar is a button that swaps
+in _child_avatar_picker.html, the standard avatars only).
 {% endcomment %}
 <div class="child-header" id="child-header">
-  {% include "accounts/partials/_child_avatar.html" with child=child %}
+  {% if can_pick_avatar %}
+    <button type="button" class="child-header__avatar-button" title="{% translate "Pick your avatar" %}" aria-label="{% translate "Pick your avatar" %}"
+            hx-get="{% url 'ninja_avatar' ninja_id=child.id %}" hx-target="#child-header" hx-swap="outerHTML">
+      {% include "accounts/partials/_child_avatar.html" with child=child %}
+    </button>
+  {% else %}
+    {% include "accounts/partials/_child_avatar.html" with child=child %}
+  {% endif %}
   <div>
     <h1 class="display-lg child-header__name"
         {% if can_edit %}title="{% translate "Click to edit" %}"

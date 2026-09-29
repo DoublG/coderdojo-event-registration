@@ -1,0 +1,32 @@
+{% load i18n static %}{% comment %}
+The child page's header while a child's own login picks its avatar,
+swapped in over htmx from the avatar (see _child_header_display.html,
+accounts.views.ninja_avatar). Only the standard avatars: uploading a photo
+is the guardian's. Saving swaps back to the display header; Cancel reloads.
+Expects `child` and `form` (accounts.forms.ChildAvatarForm).
+{% endcomment %}
+<form class="child-header child-header--editing" id="child-header" method="post"
+      hx-post="{% url 'ninja_avatar' ninja_id=child.id %}"
+      hx-target="#child-header" hx-swap="outerHTML">
+  {% csrf_token %}
+  {% include "accounts/partials/_child_avatar.html" with child=child %}
+  <div class="child-header__fields">
+    <fieldset class="cd-form__field cd-form__fieldset">
+      <legend class="cd-form__label label">{{ form.icon.label }}</legend>
+      <div class="cd-template-picker cd-template-picker--round">
+        {% for radio in form.icon %}
+          <label class="cd-template-picker__option" for="{{ radio.id_for_label }}">
+            {{ radio.tag }}
+            <img class="cd-template-picker__option-img" src="{% static 'accounts/template_kid_avatars/'|add:radio.data.value %}" alt="">
+            <span class="caption">{{ radio.choice_label }}</span>
+          </label>
+        {% endfor %}
+      </div>
+      {% if form.icon.errors %}<ul class="cd-form__errors">{% for error in form.icon.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>{% endif %}
+    </fieldset>
+    <div class="cd-form__actions">
+      <button type="button" class="cd-btn cd-btn--ghost label" onclick="window.location.reload();">{% translate "Cancel" %}</button>
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button>
+    </div>
+  </div>
+</form>

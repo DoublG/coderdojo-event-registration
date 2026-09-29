@@ -49,9 +49,12 @@ urlpatterns = [
         "manage/security/accounts/<int:user_id>/turn-off/", manage.turn_off_two_step, name="manage_security_turn_off"
     ),
     path("account/edit/", views.edit_account, name="edit_account"),
+    path("account/email/", views.change_email, name="change_email"),
+    path("account/email/confirm/<str:token>/", views.confirm_email_change, name="confirm_email_change"),
     path("account/ninja/add/", views.add_ninja, name="add_ninja"),
     path("account/ninja/<int:ninja_id>/", views.ninja_detail, name="ninja_detail"),
     path("account/ninja/<int:ninja_id>/edit/", views.edit_ninja, name="edit_ninja"),
+    path("account/ninja/<int:ninja_id>/avatar/", views.ninja_avatar, name="ninja_avatar"),
     path("account/ninja/<int:ninja_id>/badges/", views.ninja_badges, name="ninja_badges"),
     path("account/ninja/<int:ninja_id>/login/", views.ninja_login_create, name="ninja_login_create"),
     path("account/ninja/<int:ninja_id>/login/resend/", views.ninja_login_resend, name="ninja_login_resend"),
