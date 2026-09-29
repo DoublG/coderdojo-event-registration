@@ -57,3 +57,26 @@ done
   attendance on session 76 at Dojo Westerlo, and the booking mail goes through the Celery workers
   to Mailpit. The seeded IDs used (dojo 51, events 71/72/76, ninja 9, users 352, application 348)
   change when the database is reseeded; adjust them in the scripts.
+
+## Keeping them current
+
+`python3 scripts/check_journeys.py` (from anywhere in the repo, plain Python) compares the code behind
+every captured page with `manifest.json`, which fingerprints each persona's views and templates (and the
+partials they include) when the PDFs were made. It marks a persona **REVISIT** when that code changed
+substantially (a template by 10+ lines, two or more views, or one is gone) and exits 1. Look at whether
+what the persona sees or does changed: if so, regenerate its PDFs in en, nl and fr; either way, rerun
+`python user-journeys/scripts/manifest.py` inside the workspace container to take the new baseline, and
+commit `manifest.json`.
+
+## Screenshot pitfalls
+
+- **Only whole pages.** An htmx endpoint opened on its own URL returns a fragment: no page shell, no
+  stylesheet, so the screenshot is unstyled (a child's `/account/ninja/<id>/badges/` and `/avatar/` are two).
+  Open the page that loads it and click to that part instead. `Journey.shot` refuses a page without the
+  site's stylesheet from `/static/` (Mailpit's pages excepted), so this fails loudly rather than landing in
+  a PDF.
+- **POST-only actions** (for example a dojo's `manage/lifecycle/`) redirect when opened, so the screenshot
+  shows the page they redirect to. Show the page that holds the action's button instead.
+- **The Celery workers must be running** for the parent's confirmation-mail step: it waits up to 90 seconds
+  for the mail to reach Mailpit. If they're stuck, restart them (CLAUDE.md, "Background jobs").
+

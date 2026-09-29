@@ -55,6 +55,16 @@ class Journey:
     def shot(self, key, title, text, max_h=1500, full=True, selector=None):
         p = self.page
         p.wait_for_timeout(400)
+        # An htmx endpoint opened on its own returns a fragment: no stylesheet, no page shell, so the
+        # screenshot is unstyled. Open the whole page and click to the part instead.
+        # (The site's own stylesheet, from /static/: the debug toolbar and our init script add <style>
+        # to fragments too. Mailpit's pages aren't the site's.)
+        site_css = "!!document.querySelector('link[rel=stylesheet][href*=\"/static/\"]')"
+        if "/mails/" not in p.url and not p.evaluate(site_css):
+            raise RuntimeError(
+                f"{self.persona}/{key}: {p.url} has no stylesheet: an htmx fragment, not a page. "
+                "Screenshot the page that loads it (and click to open that part) instead."
+            )
         path = os.path.join(self.dir, f"{len(self.steps) + 1:02d}-{key}.png")
         if selector:
             p.locator(selector).first.screenshot(path=path)
