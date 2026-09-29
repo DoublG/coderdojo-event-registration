@@ -141,6 +141,9 @@ if python manage.py shell -c "import sys; from events.models import Event; sys.e
     python manage.py seed_guardians
     python manage.py seed_applications
     python manage.py seed_ninja_history
+    # Children signed up at several dojos, and three sessions filled to test
+    # the waiting list (full with children waiting, exactly full, one place left).
+    python manage.py seed_upcoming_registrations
     python manage.py seed_faqs
     python manage.py seed_testimonials
     python manage.py seed_announcements

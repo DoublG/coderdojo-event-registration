@@ -831,3 +831,57 @@ class ManageAwardsTests(TempMediaMixin, TestCase):
             self.client.post(reverse("manage_badge_create"), {"name": "Sneaky", "kind": Badge.ONE_OFF})
             self.client.post(reverse("manage_badge_delete", kwargs={"badge_id": badge.id}))
         self.assertEqual(list(Badge.objects.values_list("name", flat=True)), ["Game Maker"])
+
+
+class SeedUpcomingRegistrationsTests(TestCase):
+    """The seeder behind the waiting-list demo data: three filled sessions
+    and children signed up at several dojos, rerun-safe."""
+
+    def setUp(self):
+        from django.contrib.gis.geos import Point
+
+        places = [(3.72, 51.05), (3.75, 51.06), (3.78, 51.07), (3.81, 51.08)]
+        self.dojos = [make_dojo(f"Dojo {i}", location=Point(x, y, srid=4326)) for i, (x, y) in enumerate(places)]
+        self.events = [_future_event(dojo, places=p) for dojo, p in zip(self.dojos, [3, 3, 3, 30], strict=True)]
+        guardian = User.objects.create(username="parent")
+        # Most children at the first dojos, so those are the ones filled.
+        for i in range(24):
+            ninja = Ninja.objects.create(name=f"Kid {i}", home_dojo=self.dojos[min(i // 6, 3)])
+            Guardianship.objects.create(guardian=guardian, ninja=ninja)
+
+    def _seed(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        call_command("seed_upcoming_registrations", stdout=StringIO())
+
+    def test_fills_sessions_for_the_waiting_list_and_signs_up_at_several_dojos(self):
+        from unittest import mock
+
+        # Every child also picks every nearby dojo, so the draw can't leave
+        # nobody at a second one.
+        command = "events.management.commands.seed_upcoming_registrations"
+        with mock.patch(f"{command}.OTHER_DOJOS_MIN", 3), mock.patch(f"{command}.OTHER_DOJOS_MAX", 3):
+            self._seed()
+        full, exactly_full, one_left, other = self.events
+        self.assertEqual(full.registration_set.filter(waiting_list=False).count(), 3)
+        self.assertEqual(full.registration_set.filter(waiting_list=True).count(), 4)
+        self.assertEqual(list(full.registration_set.values_list("position", flat=True)), list(range(1, 8)))
+        self.assertEqual(exactly_full.places_left, 0)
+        self.assertFalse(exactly_full.registration_set.filter(waiting_list=True).exists())
+        self.assertEqual(one_left.places_left, 1)
+        # The others are never filled up.
+        self.assertFalse(other.registration_set.filter(waiting_list=True).exists())
+        several = [
+            n
+            for n in Ninja.objects.all()
+            if Registration.objects.filter(ninja=n).values("event__dojo").distinct().count() > 1
+        ]
+        self.assertTrue(several)
+
+    def test_a_rerun_adds_nothing(self):
+        self._seed()
+        count = Registration.objects.count()
+        self._seed()
+        self.assertEqual(Registration.objects.count(), count)

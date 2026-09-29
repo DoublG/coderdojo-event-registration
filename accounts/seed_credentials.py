@@ -20,6 +20,7 @@ from datetime import date
 from pathlib import Path
 
 from django.conf import settings
+from django.utils import timezone
 
 CREDENTIALS_FILE = Path(settings.BASE_DIR) / "seed_credentials.csv"
 _REAL_CREDENTIALS_FILE = CREDENTIALS_FILE
@@ -215,6 +216,14 @@ def describe_account(user):
             parts.append(
                 f"Parent of {len(children)} child{'ren' if len(children) > 1 else ''}: {_names(described, 4)}"
             )
+            # seed_upcoming_registrations: a child waiting for a place.
+            from events.models import Registration
+
+            waiting = Registration.objects.filter(
+                ninja__in=children, waiting_list=True, event__start_time__gte=timezone.now()
+            ).select_related("ninja", "event__dojo")
+            if waiting := [f"{r.ninja.name} at {r.event.dojo.name}" for r in waiting]:
+                parts.append(f"on a waiting list: {_names(waiting)}")
         if not parts:
             parts.append("Plain adult account (no children, no roles)")
 
