@@ -35,7 +35,7 @@ and how it went (mailing.dojo_views.dojo_mail_detail).
           {% include "mailing/dojo/_results.html" %}
           {% if dojo_access.can_send_mail %}{% if campaign.status == 'queued' or campaign.status == 'sending' %}
             <form method="post" action="{% url 'dojo_mail_cancel' dojo_id=dojo.id campaign_id=campaign.id %}" style="margin-top: var(--space-3);"
-                  onsubmit="{% translate "Stop this mail? Mails that haven't gone out yet won't be sent." as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
+                  data-confirm="{% translate "Stop this mail? Mails that haven't gone out yet won't be sent." as confirm_msg %}{{ confirm_msg }}">
               {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Stop sending" %}</button>
             </form>
           {% endif %}{% endif %}

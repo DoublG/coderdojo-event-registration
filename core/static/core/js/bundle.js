@@ -235,11 +235,13 @@ if (typeof window.gettext !== "function") {
   // ws-connect) and updated in place by "Mark all as read"'s own htmx
   // request — both replace this element outright via an out-of-band swap
   // matching its id, so this function is called again afterwards
-  // (hx-on::oob-after-swap="CoderDojo.initNotifications(this)" on the
-  // element itself) to re-wire the fresh DOM. Clicking an item is a plain
+  // (the htmx:oobAfterSwap listener at the bottom of this file) to re-wire
+  // the fresh DOM. Clicking an item is a plain
   // navigating link (marks it read server-side, then redirects), not
   // something this function handles.
   function wireNotifications(container) {
+    if (container.hasAttribute("data-cd-notif-wired")) return;
+    container.setAttribute("data-cd-notif-wired", "");
     var toggle = container.querySelector("[data-cd-notif-toggle]");
     var panel = container.querySelector("[data-cd-notif-panel]");
     if (!toggle || !panel) return;
@@ -657,6 +659,47 @@ if (typeof window.gettext !== "function") {
       });
     });
   }
+
+  // What inline handlers (onclick=, onsubmit=, hx-on) used to do: the
+  // Content-Security-Policy blocks those (settings.CONTENT_SECURITY_POLICY),
+  // so pages mark the element and these document-wide listeners act on it.
+  //  - data-confirm="Question?" on a form, or on the submit button that
+  //    needs it: asks before submitting, and cancels on "No".
+  //  - data-autosubmit on a select: submits its form when it changes.
+  //  - data-action="reload" | "print" | "close-details" on a button.
+  document.addEventListener("submit", function (e) {
+    var button = e.submitter;
+    var message = (button && button.getAttribute("data-confirm")) || e.target.getAttribute("data-confirm");
+    if (message && !window.confirm(message)) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+  }, true);
+
+  document.addEventListener("change", function (e) {
+    var field = e.target;
+    if (field.hasAttribute && field.hasAttribute("data-autosubmit") && field.form) field.form.submit();
+  });
+
+  document.addEventListener("click", function (e) {
+    var button = e.target.closest ? e.target.closest("[data-action]") : null;
+    if (!button) return;
+    var action = button.getAttribute("data-action");
+    if (action === "reload") {
+      window.location.reload();
+    } else if (action === "print") {
+      window.print();
+    } else if (action === "close-details") {
+      var details = button.closest("details");
+      if (details) details.open = false;
+    }
+  });
+
+  // The notification bell arrives as a fresh element on every out-of-band
+  // swap (a WebSocket push, "Mark all as read"): wire the new one.
+  document.addEventListener("htmx:oobAfterSwap", function (e) {
+    if (e.target && e.target.classList && e.target.classList.contains("cd-notif")) initNotifications(e.target);
+  });
 
   window.CoderDojo = {
     version: 1,

@@ -116,7 +116,7 @@ for the sidebar link to highlight, and render with dojos.views._admin_context.
 {% endblock %}
 {% block shell_content %}{% block admin_content %}{% endblock %}{% endblock %}
 {% block shell_scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   CoderDojo.initNotifications(document.getElementById("notif-admin-page"));
 </script>
 {% block admin_extra_script %}{% endblock %}

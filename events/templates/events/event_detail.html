@@ -155,7 +155,7 @@
 {% endblock %}
 
 {% block extra_script %}
-<script>
+<script nonce="{{ csp_nonce }}">
   CoderDojo.initFaq(document.getElementById("faq-event-detail-page"));
 </script>
 {% endblock %}

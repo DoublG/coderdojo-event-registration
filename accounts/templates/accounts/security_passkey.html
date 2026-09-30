@@ -21,7 +21,7 @@
 
 {% block extra_script %}
   {{ passkey_options|json_script:"passkey-options" }}
-  <script>
+  <script nonce="{{ csp_nonce }}">
     CoderDojo.initPasskey(document.getElementById("passkey-form"), "passkey-options", "create");
   </script>
 {% endblock %}

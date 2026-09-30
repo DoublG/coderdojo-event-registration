@@ -54,6 +54,7 @@ calendar: stay on the latest release. Watch these:
 | django-oauth-toolkit | 3.4.1 | Officially lists Django up to 6.0; tested here on 6.1. Its `oauthlib` has an open advisory (see [Security log](#security-log)). |
 | celery, kombu, channels, channels-redis | 5.6.3, 5.6.2, 4.3.2, (see file) | Upgrade together with Redis. |
 | mysqlclient | 2.3.0 | Needs the MySQL client headers on the server (missing on Level27 today, see CLAUDE.md). |
+| nh3, django-permissions-policy | 0.3.7, 4.34.0 | Security: the Markdown allowlist and the Permissions-Policy header. Keep them current. |
 
 ### Still to confirm
 
@@ -214,7 +215,7 @@ DEBUG=false python manage.py check --deploy            # Django's production sec
 ```
 
 The Code audit workflow runs these on every change; once a quarter, look through its latest summary (the
-`check --deploy` warnings are listed there, not failed on) and the ignored advisories, fix what's real, and
+`check --deploy` job now fails on any warning) and the ignored advisories, fix what's real, and
 note the rest.
 
 ### Every year
@@ -238,6 +239,6 @@ A deeper review, by a person with Claude Code's help:
 |---|---|---|---|
 | 30 Sep 2026 | **oauthlib 3.3.1**, CVE-2026-49265 / GHSA-xpv3-w29h-x7cv: timing side channel in PKCE (authorization-code flow). Fixed in 4.0.0. | **Not reachable here:** our API offers only the client-credentials grant (`api/services.py`), which doesn't use PKCE. Low. django-oauth-toolkit 3.4.1 requires `oauthlib>=3.3.0` and doesn't list 4.0 yet. | Open: try oauthlib 4.0.0 with the API tests in the devcontainer; upgrade when django-oauth-toolkit supports it. |
 | 30 Sep 2026 | **Markdown links** (`core/templatetags/markdown_extras.py`, `markdownify`): the text is HTML-escaped, but Python-Markdown keeps any link scheme, so `[x](javascript:...)` in a dojo's or event's description becomes a working `javascript:` link on the public page. Found by the Code audit workflow's security rules (S308). | **High** (stored cross-site scripting): any active champion or mentor can put it on a public page, and a logged-in visitor who clicks it runs the script as themselves. No Content-Security-Policy limits it. | **Fixed 30 Sep 2026:** `markdownify` now cleans its HTML with nh3 against an allowlist (headings from `<h2>`, paragraphs, bold, italic, lists, links; links only `http`, `https`, `mailto` or relative, with `rel="nofollow noopener noreferrer"`). Images, code and anything else are dropped. Tests: `core.tests.MarkdownifyTests`. |
-| 30 Sep 2026 | **`check --deploy` warnings**: no HSTS, no HTTPS redirect, session and CSRF cookies not `Secure` (`settings.py` doesn't set them, so production doesn't either); django-oauth-toolkit's RFC 9700 defaults (implicit and password grants, tokens in the query string, tokens stored in plain text). | Medium: TLS ends at Level27's proxy, so the cookies' `Secure` flag and HSTS are cheap to add; the OAuth grants we don't offer aren't reachable, as our clients are client-credentials only, but tokens stored in plain text are. | Open: set them in `settings.py` (from the environment, so the devcontainer can keep its own), and the RFC 9700 options in `OAUTH2_PROVIDER` after running the API tests. |
+| 30 Sep 2026 | **`check --deploy` warnings**: no HSTS, no HTTPS redirect, session and CSRF cookies not `Secure`; django-oauth-toolkit's RFC 9700 defaults (implicit and password grants, tokens in the query string, tokens stored in plain text). Also no Content-Security-Policy or Permissions-Policy. | Medium: TLS ends at Level27's proxy, so the cookies' `Secure` flag and HSTS are cheap to add; the OAuth grants we don't offer weren't reachable, tokens stored in plain text were. A CSP limits what any future cross-site scripting bug can do. | **Fixed in the code 30 Sep 2026** (CLAUDE.md, "Security headers"): `Secure` cookies, the proxy header, all RFC 9700 options (tokens now stored hashed), a strict script CSP with nonces (inline handlers moved to `bundle.js`, htmx without eval), Permissions-Policy. Tested with `core.tests.SecurityHeadersTests`, the API tests and a browser crawl of about 480 pages as six roles. **Open on production:** confirm Level27's proxy sets `X-Forwarded-Proto` itself, then set `SECURE_SSL_REDIRECT=true` and raise `SECURE_HSTS_SECONDS` (1 hour, 1 day, 1 year) in `~/app/.env`; `deploy.sh` reports what's still missing. |
 | 30 Sep 2026 | **MySQL 8.0** (the production client, possibly the server) reached end of life on 30 Apr 2026: no more security fixes. | Depends on the server version (to confirm). | Open: confirm with Level27, move to 8.4 LTS. |
 | 30 Sep 2026 | **Devcontainer images** past end of life: MySQL 9.1 (`latest` gone stale), nginx 1.27. | Development only, not reachable from outside. | Open: pin `mysql:8.4` and `nginx:1.30-alpine`. |

@@ -10,7 +10,7 @@
     <p class="body-sm muted">{% translate "Print them or keep them in your password manager. If you lose your phone or passkey, each code lets you log in once." %}</p>
     <ul class="backup-codes">{% for code in codes %}<li>{{ code }}</li>{% endfor %}</ul>
     <div class="cd-form__actions no-print" style="justify-content: flex-start;">
-      <button type="button" class="cd-btn cd-btn--ghost label" onclick="window.print()">{% translate "Print" %}</button>
+      <button type="button" class="cd-btn cd-btn--ghost label" data-action="print">{% translate "Print" %}</button>
       <a class="cd-btn cd-btn--primary label" href="{% url 'account_security' %}">{% translate "I've saved them" %}</a>
     </div>
   {% else %}

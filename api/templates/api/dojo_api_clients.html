@@ -90,9 +90,9 @@ shown here once and only its hash is kept.
                 <td class="body-sm">
                   <div class="actions">
                     {% blocktranslate asvar renew_msg with name=client.name %}Give {{ name }} a new secret? The old one stops working at once.{% endblocktranslate %}
-                    <form method="post" action="{% url 'dojo_api_client_renew' dojo_id=dojo.id client_id=client.id %}" onsubmit="return confirm('{{ renew_msg|escapejs }}');">{% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "New secret" %}</button></form>
+                    <form method="post" action="{% url 'dojo_api_client_renew' dojo_id=dojo.id client_id=client.id %}" data-confirm="{{ renew_msg }}">{% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "New secret" %}</button></form>
                     {% blocktranslate asvar delete_msg with name=client.name %}Delete {{ name }}? It stops working at once and leaves this list.{% endblocktranslate %}
-                    <form method="post" action="{% url 'dojo_api_client_delete' dojo_id=dojo.id client_id=client.id %}" onsubmit="return confirm('{{ delete_msg|escapejs }}');">{% csrf_token %}<button type="submit" class="cd-btn cd-btn--danger label">{% translate "Delete" %}</button></form>
+                    <form method="post" action="{% url 'dojo_api_client_delete' dojo_id=dojo.id client_id=client.id %}" data-confirm="{{ delete_msg }}">{% csrf_token %}<button type="submit" class="cd-btn cd-btn--danger label">{% translate "Delete" %}</button></form>
                   </div>
                 </td>
               </tr>

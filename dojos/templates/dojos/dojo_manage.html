@@ -31,11 +31,11 @@
         {% elif dojo.status == 'active' %}
           <button type="submit" name="action" value="go_dormant" class="cd-btn cd-btn--ghost label"{% if active_event_count %} disabled{% endif %}>{% translate "Mark dormant" %}</button>
           <button type="submit" name="action" value="archive" class="cd-btn cd-btn--ghost label"{% if active_event_count %} disabled{% endif %}
-                  onclick="{% blocktranslate asvar confirm_msg with name=dojo.name %}Archive {{ name }}? It disappears from the public site until you reopen it.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">{% translate "Archive" %}</button>
+                  data-confirm="{% blocktranslate asvar confirm_msg with name=dojo.name %}Archive {{ name }}? It disappears from the public site until you reopen it.{% endblocktranslate %}{{ confirm_msg }}">{% translate "Archive" %}</button>
         {% elif dojo.status == 'dormant' %}
           <button type="submit" name="action" value="restart" class="cd-btn cd-btn--primary label">{% translate "Restart dojo" %}</button>
           <button type="submit" name="action" value="archive" class="cd-btn cd-btn--ghost label"{% if active_event_count %} disabled{% endif %}
-                  onclick="{% blocktranslate asvar confirm_msg with name=dojo.name %}Archive {{ name }}? It disappears from the public site until you reopen it.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">{% translate "Archive" %}</button>
+                  data-confirm="{% blocktranslate asvar confirm_msg with name=dojo.name %}Archive {{ name }}? It disappears from the public site until you reopen it.{% endblocktranslate %}{{ confirm_msg }}">{% translate "Archive" %}</button>
         {% else %}
           <button type="submit" name="action" value="reopen" class="cd-btn cd-btn--secondary label">{% translate "Reopen as draft" %}</button>
         {% endif %}

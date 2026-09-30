@@ -25,7 +25,7 @@ Expects `child` and `form` (accounts.forms.ChildAvatarForm).
       {% if form.icon.errors %}<ul class="cd-form__errors">{% for error in form.icon.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>{% endif %}
     </fieldset>
     <div class="cd-form__actions">
-      <button type="button" class="cd-btn cd-btn--ghost label" onclick="window.location.reload();">{% translate "Cancel" %}</button>
+      <button type="button" class="cd-btn cd-btn--ghost label" data-action="reload">{% translate "Cancel" %}</button>
       <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button>
     </div>
   </div>

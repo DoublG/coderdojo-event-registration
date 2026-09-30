@@ -16,6 +16,7 @@ from pathlib import Path
 
 import environ
 from celery.schedules import crontab
+from django.utils.csp import CSP
 
 env = environ.Env(
     DEBUG=(bool, False),
@@ -53,6 +54,79 @@ CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
 COOKIE_DOMAIN = env("COOKIE_DOMAIN")
 SESSION_COOKIE_DOMAIN = COOKIE_DOMAIN
 CSRF_COOKIE_DOMAIN = COOKIE_DOMAIN
+
+# HTTPS (MAINTENANCE.md, security log). TLS ends at the proxy in front of
+# Django (Level27's in production, nginx in the devcontainer), which says so in
+# X-Forwarded-Proto; that proxy must set the header itself and never pass on a
+# client's. The rest comes from the environment, so production can turn on the
+# redirect and raise HSTS step by step (1 hour, 1 day, then 1 year) in its .env:
+# HSTS can't be taken back from a browser that has seen it. `manage.py check
+# --deploy` warns while any of them is off.
+SECURE_PROXY_SSL_HEADER = (
+    ("HTTP_X_FORWARDED_PROTO", "https") if env.bool("TRUST_X_FORWARDED_PROTO", default=True) else None
+)
+# Off only for a plain-http run on the host (SECURE_COOKIES=false).
+SESSION_COOKIE_SECURE = env.bool("SECURE_COOKIES", default=True)
+CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=False)
+SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=0)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False)
+SECURE_HSTS_PRELOAD = False
+# Not on the browsers' HSTS preload list, on purpose: leaving it takes months.
+SILENCED_SYSTEM_CHECKS = ["security.W021"]
+
+# Content-Security-Policy (Django's own ContentSecurityPolicyMiddleware): scripts
+# only from our own static files, or an inline <script nonce="{{ csp_nonce }}">;
+# never inline event handlers (onclick=...: use data-confirm, data-autosubmit or
+# data-action, handled in bundle.js) and never eval (htmx's allowEval is off, so
+# no hx-on). Inline styles stay allowed: there are hundreds of style="..."
+# attributes, and styles can't run code. Images also from OpenStreetMap's tiles
+# (the admin's map widget). CSP_REPORT_ONLY=true sends it as report-only, to see
+# what would break without blocking it.
+CONTENT_SECURITY_POLICY = {
+    "default-src": [CSP.SELF],
+    "script-src": [CSP.SELF, CSP.NONCE],
+    "style-src": [CSP.SELF, CSP.UNSAFE_INLINE],
+    "img-src": [CSP.SELF, "data:", "blob:", "https://tile.openstreetmap.org"],
+    "font-src": [CSP.SELF],
+    "connect-src": [CSP.SELF],
+    "object-src": [CSP.NONE],
+    "base-uri": [CSP.SELF],
+    "form-action": [CSP.SELF],
+    "frame-ancestors": [CSP.NONE],
+}
+if env.bool("CSP_REPORT_ONLY", default=False):
+    SECURE_CSP_REPORT_ONLY = CONTENT_SECURITY_POLICY
+else:
+    SECURE_CSP = CONTENT_SECURITY_POLICY
+
+# Permissions-Policy (django-permissions-policy): switches off the browser
+# features the site never uses. Kept for our own pages only: geolocation (the
+# dojo finder's "Use my location"), passkeys (Sign-in security and the login),
+# fullscreen.
+PERMISSIONS_POLICY = {
+    "accelerometer": [],
+    "autoplay": [],
+    "browsing-topics": [],
+    "camera": [],
+    "display-capture": [],
+    "encrypted-media": [],
+    "fullscreen": ["self"],
+    "geolocation": ["self"],
+    "gyroscope": [],
+    "hid": [],
+    "idle-detection": [],
+    "magnetometer": [],
+    "microphone": [],
+    "midi": [],
+    "payment": [],
+    "publickey-credentials-create": ["self"],
+    "publickey-credentials-get": ["self"],
+    "screen-wake-lock": [],
+    "serial": [],
+    "usb": [],
+    "xr-spatial-tracking": [],
+}
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -330,6 +404,8 @@ FORM_RENDERER = "core.forms.SiteFormRenderer"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "django.middleware.csp.ContentSecurityPolicyMiddleware",
+    "django_permissions_policy.PermissionsPolicyMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     # Must come after SessionMiddleware, before CommonMiddleware, per
     # https://docs.djangoproject.com/en/6.1/topics/i18n/translation/#how-django-discovers-language-preference
@@ -374,6 +450,8 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
+                # csp_nonce, for <script nonce="{{ csp_nonce }}"> (SECURE_CSP above).
+                "django.template.context_processors.csp",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "accounts.context_processors.user_roles",
@@ -589,6 +667,22 @@ OAUTH2_PROVIDER = {
     },
     "SCOPES_BACKEND_CLASS": "api.scopes.ClientScopes",
     "ACCESS_TOKEN_EXPIRE_SECONDS": 3600,
+    # RFC 9700 (OAuth 2.0 Security Best Current Practice), ahead of the
+    # toolkit's 4.0, where these become the defaults. Our clients only use the
+    # client credentials grant, so most of these guard flows we don't offer;
+    # TOKEN_STORAGE keeps only a hash of each token in the database.
+    "COMPLIANT_BCP_RFC9700_IMPLICIT_GRANT": True,
+    "COMPLIANT_BCP_RFC9700_PASSWORD_GRANT": True,
+    "COMPLIANT_BCP_RFC9700_PKCE_METHOD": True,
+    "COMPLIANT_BCP_RFC9700_ACCESS_TOKEN_TRANSPORT": True,
+    "COMPLIANT_BCP_RFC9700_AUTHZ_RESPONSE_ISS": True,
+    "COMPLIANT_BCP_RFC9700_TOKEN_STORAGE": True,
+    "COMPLIANT_BCP_RFC9700_REFRESH_TOKEN": True,
+    "COMPLIANT_BCP_RFC9700_REDIRECT_URI_SCHEME": True,
+    "COMPLIANT_BCP_RFC9700_REDIRECT_URI_MATCHING": True,
+    "COMPLIANT_BCP_RFC9700_PKCE_REQUIRED": True,
+    "REFRESH_TOKEN_REUSE_PROTECTION": True,
+    "ALLOWED_REDIRECT_URI_SCHEMES": ["https"],
 }
 # The toolkit's own models, named so migrations can point at them (they're
 # "swappable"; we don't swap them).

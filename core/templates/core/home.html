@@ -205,7 +205,7 @@
 {% endblock %}
 
 {% block extra_script %}
-<script>
+<script nonce="{{ csp_nonce }}">
   CoderDojo.initFaq(document.getElementById("faq-home-page"));
 
   CoderDojo.initCarousel(

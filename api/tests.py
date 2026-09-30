@@ -174,6 +174,32 @@ class TokenTests(ApiTestCase):
         _client, client_id, _secret = self.make_client()
         self.assertEqual(self.token(client_id, "nope").status_code, 401)
 
+    def test_only_a_hash_of_the_token_is_stored(self):
+        """RFC 9700 token storage (settings.OAUTH2_PROVIDER): the database never holds a usable token."""
+        from oauth2_provider.models import AccessToken
+
+        _client, headers = self.bearer()
+        stored = AccessToken.objects.get()
+        self.assertEqual(stored.token, "")
+        self.assertTrue(stored.token_checksum)
+        self.assertEqual(self.client.get("/api/v1/events", **headers).status_code, 200)
+
+    def test_no_password_grant(self):
+        _client, client_id, secret = self.make_client()
+        response = self.token(client_id, secret, username=self.champion.username, password="whatever")
+        self.assertEqual(response.status_code, 200)  # still client credentials: the grant_type decides
+        response = self.client.post(
+            reverse("oauth2_token"),
+            {"grant_type": "password", "username": self.champion.username, "password": "whatever"},
+            HTTP_AUTHORIZATION=_basic(client_id, secret),
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_a_token_in_the_url_is_not_accepted(self):
+        _client, headers = self.bearer()
+        token = headers["HTTP_AUTHORIZATION"].removeprefix("Bearer ")
+        self.assertEqual(self.client.get(f"/api/v1/events?access_token={token}").status_code, 401)
+
 
 class AttendanceApiTests(ApiTestCase):
     def test_no_token(self):

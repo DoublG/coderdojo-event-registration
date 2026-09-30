@@ -212,7 +212,7 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
 {% block shell_topbar_actions %}{% organisation_bell %}{% block manage_topbar_extra %}{% endblock %}{% endblock %}
 {% block shell_content %}{% block manage_content %}{% endblock %}{% endblock %}
 {% block shell_scripts %}
-<script>
+<script nonce="{{ csp_nonce }}">
   CoderDojo.initNotifications(document.getElementById("notif-admin-page"));
 </script>
 {% block manage_extra_script %}{% endblock %}

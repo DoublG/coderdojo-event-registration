@@ -71,7 +71,7 @@
           </form>
         {% else %}
           <form method="post" action="{% url 'manage_journey_activate' journey_id=journey.id %}"
-                onsubmit="{% blocktranslate asvar confirm_msg with due=stats.due %}Activate? The next run (18:00) sends it to the {{ due }} people who match now.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
+                data-confirm="{% blocktranslate asvar confirm_msg with due=stats.due %}Activate? The next run (18:00) sends it to the {{ due }} people who match now.{% endblocktranslate %}{{ confirm_msg }}">
             {% csrf_token %}<button type="submit" class="cd-btn cd-btn--primary label"{% if problems %} disabled{% endif %}>{% translate "Activate" %}</button>
           </form>
         {% endif %}

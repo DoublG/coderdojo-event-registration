@@ -48,7 +48,7 @@ POST_UPDATES; anyone with admin access can read the list.
         </div>
         {% if dojo_access.can_post_updates %}
           <form method="post" action="{% url 'dojo_update_delete' dojo_id=dojo.id announcement_id=announcement.id %}"
-                onsubmit="{% translate "Remove this update from the dojo's page?" as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
+                data-confirm="{% translate "Remove this update from the dojo's page?" as confirm_msg %}{{ confirm_msg }}">
             {% csrf_token %}
             <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Remove" %}</button>
           </form>

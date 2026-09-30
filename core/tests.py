@@ -14,7 +14,7 @@ from content.models import Testimonial
 from core import image_library
 from core.testing import TempMediaMixin
 from dojos.models import Dojo
-from dojos.testing import make_dojo
+from dojos.testing import make_champion, make_dojo
 from pathways.models import Pathway
 
 
@@ -1660,3 +1660,104 @@ class MarkdownifyTests(TestCase):
     def test_empty_text_is_empty(self):
         self.assertEqual(self.render(""), "")
         self.assertEqual(self.render(None), "")
+
+
+class SecurityHeadersTests(TestCase):
+    """HTTPS, Content-Security-Policy and Permissions-Policy (settings.py, MAINTENANCE.md's security log)."""
+
+    INLINE_SCRIPT = re.compile(r"<script(?![^>]*\bsrc=)(?![^>]*type=\"application/json\")([^>]*)>")
+
+    def get(self, url):
+        return self.client.get(url, secure=True, HTTP_HOST="coolregistration.localhost")
+
+    def nonce(self, response):
+        match = re.search(r"'nonce-([^']+)'", response.headers.get("Content-Security-Policy", ""))
+        self.assertIsNotNone(match, "no nonce in the Content-Security-Policy")
+        return match.group(1)
+
+    def test_every_page_gets_a_strict_script_policy(self):
+        policy = self.get(reverse("home")).headers["Content-Security-Policy"]
+        directives = dict(part.strip().split(" ", 1) for part in policy.split(";") if part.strip())
+        self.assertIn("'nonce-", directives["script-src"])
+        self.assertNotIn("unsafe-inline", directives["script-src"])
+        self.assertNotIn("unsafe-eval", directives["script-src"])
+        self.assertEqual(directives["object-src"], "'none'")
+        self.assertEqual(directives["frame-ancestors"], "'none'")
+        self.assertEqual(directives["form-action"], "'self'")
+
+    def test_inline_scripts_carry_the_pages_nonce(self):
+        champion = make_champion(username="csp-champion")
+        dojo = make_dojo("CSP Dojo", champion=champion)
+        public = [reverse("home"), reverse("dojo_list"), reverse("dojo_detail", args=[dojo.id]), reverse("login")]
+        for url in public:
+            self.assert_scripts_have_nonce(url)
+        self.client.force_login(champion)
+        for url in (
+            reverse("account_home"),
+            reverse("dojo_dashboard", args=[dojo.id]),
+            reverse("dojo_manage", args=[dojo.id]),
+        ):
+            self.assert_scripts_have_nonce(url)
+
+    def assert_scripts_have_nonce(self, url):
+        response = self.get(url)
+        self.assertEqual(response.status_code, 200, url)
+        nonce = self.nonce(response)
+        scripts = self.INLINE_SCRIPT.findall(response.content.decode())
+        for attributes in scripts:
+            self.assertIn(f'nonce="{nonce}"', attributes, f"an inline script without the nonce on {url}")
+
+    def test_no_template_uses_inline_handlers_or_hx_on(self):
+        """The policy blocks them: use data-confirm, data-autosubmit or data-action (bundle.js)."""
+        from pathlib import Path
+
+        handler = re.compile(r"\son[a-z]+\s*=\s*[\"']|\shx-on[:-]")
+        found = []
+        for path in Path(settings.BASE_DIR).glob("*/templates/**/*.html"):
+            text = re.sub(r"\{%\s*comment\s*%\}.*?\{%\s*endcomment\s*%\}|\{#.*?#\}", "", path.read_text(), flags=re.S)
+            if handler.search(text):
+                found.append(str(path.relative_to(settings.BASE_DIR)))
+        self.assertEqual(found, [])
+
+    def test_permissions_policy_switches_off_unused_features(self):
+        header = self.get(reverse("home")).headers["Permissions-Policy"]
+        for feature in ("camera=()", "microphone=()", "payment=()", "usb=()"):
+            self.assertIn(feature, header)
+        for feature in (
+            "geolocation=(self)",
+            "publickey-credentials-get=(self)",
+            "publickey-credentials-create=(self)",
+        ):
+            self.assertIn(feature, header)
+
+    def test_https_settings(self):
+        self.assertTrue(settings.SESSION_COOKIE_SECURE)
+        self.assertTrue(settings.CSRF_COOKIE_SECURE)
+        self.assertEqual(settings.SECURE_PROXY_SSL_HEADER, ("HTTP_X_FORWARDED_PROTO", "https"))
+
+    def test_the_proxy_header_makes_a_request_secure(self):
+        from django.test import RequestFactory
+
+        request = RequestFactory().get("/", HTTP_X_FORWARDED_PROTO="https")
+        self.assertTrue(request.is_secure())
+        self.assertFalse(RequestFactory().get("/").is_secure())
+
+    def test_oauth_follows_rfc_9700(self):
+        oauth = settings.OAUTH2_PROVIDER
+        for flag in (
+            "COMPLIANT_BCP_RFC9700_IMPLICIT_GRANT",
+            "COMPLIANT_BCP_RFC9700_PASSWORD_GRANT",
+            "COMPLIANT_BCP_RFC9700_ACCESS_TOKEN_TRANSPORT",
+            "COMPLIANT_BCP_RFC9700_TOKEN_STORAGE",
+            "REFRESH_TOKEN_REUSE_PROTECTION",
+        ):
+            self.assertIs(oauth[flag], True, flag)
+        self.assertEqual(oauth["ALLOWED_REDIRECT_URI_SCHEMES"], ["https"])
+
+    def test_htmx_requests_in_the_management_area_send_the_csrf_token(self):
+        """The bell's "Mark all as read" can arrive over the WebSocket, rendered without a token of its own."""
+        champion = make_champion(username="csp-bell")
+        dojo = make_dojo("Bell Dojo", champion=champion)
+        self.client.force_login(champion)
+        html = self.get(reverse("dojo_dashboard", args=[dojo.id])).content.decode()
+        self.assertRegex(html, r"<body hx-headers='\{\"X-CSRFToken\": \"[^\"]+\"\}'>")

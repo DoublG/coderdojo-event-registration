@@ -1,4 +1,4 @@
-{% load i18n %}<script>
+{% load i18n %}<script nonce="{{ csp_nonce }}">
   // "Add another child" / "Remove" on family sign-up (accounts.forms.ChildRowsFormSet).
   // A new row is the formset's empty_form (the <template>), numbered one past
   // the highest row; removing one leaves a gap in the field names, which the

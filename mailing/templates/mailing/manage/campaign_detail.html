@@ -86,7 +86,7 @@
       <div class="campaign-actions">
         {% if campaign.status == 'queued' or campaign.status == 'sending' %}
           <form method="post" action="{% url 'manage_campaign_cancel' campaign_id=campaign.id %}"
-                onsubmit="{% translate "Stop this dojo's mail? Mail that hasn't gone out yet won't be sent." as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
+                data-confirm="{% translate "Stop this dojo's mail? Mail that hasn't gone out yet won't be sent." as confirm_msg %}{{ confirm_msg }}">
             {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Stop sending" %}</button>
           </form>
         {% else %}
@@ -101,13 +101,13 @@
         </form>
         {% if campaign.is_editable %}
           <form method="post" action="{% url 'manage_campaign_launch' campaign_id=campaign.id %}"
-                onsubmit="{% if campaign.scheduled_at %}{% blocktranslate asvar confirm_msg with name=campaign.name count=stats.audience when=campaign.scheduled_at|date:"d/m/Y H:i" %}Send “{{ name }}” to {{ count }} people on {{ when }}?{% endblocktranslate %}{% else %}{% blocktranslate asvar confirm_msg with name=campaign.name count=stats.audience %}Send “{{ name }}” to {{ count }} people?{% endblocktranslate %}{% endif %}return confirm('{{ confirm_msg|escapejs }}');">
+                data-confirm="{% if campaign.scheduled_at %}{% blocktranslate asvar confirm_msg with name=campaign.name count=stats.audience when=campaign.scheduled_at|date:"d/m/Y H:i" %}Send “{{ name }}” to {{ count }} people on {{ when }}?{% endblocktranslate %}{% else %}{% blocktranslate asvar confirm_msg with name=campaign.name count=stats.audience %}Send “{{ name }}” to {{ count }} people?{% endblocktranslate %}{% endif %}{{ confirm_msg }}">
             {% csrf_token %}<button type="submit" class="cd-btn cd-btn--primary label"{% if problems %} disabled{% endif %}>{% translate "Launch" %}</button>
           </form>
         {% endif %}
         {% if campaign.status == 'draft' or campaign.status == 'queued' or campaign.status == 'sending' %}
           <form method="post" action="{% url 'manage_campaign_cancel' campaign_id=campaign.id %}"
-                onsubmit="{% translate "Cancel this campaign? Mail that hasn't gone out yet won't be sent." as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
+                data-confirm="{% translate "Cancel this campaign? Mail that hasn't gone out yet won't be sent." as confirm_msg %}{{ confirm_msg }}">
             {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Cancel campaign" %}</button>
           </form>
         {% endif %}

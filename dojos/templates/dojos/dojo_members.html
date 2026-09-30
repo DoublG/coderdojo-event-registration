@@ -70,7 +70,7 @@ session's attendance list instead. "Promote" posts to dojo_team_action
                 <span class="cd-badge cd-badge--accent caption">{% translate "Youth mentor" %}</span>
               {% elif row.can_promote %}
                 <form method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}"
-                      onsubmit="{% blocktranslate asvar confirm_msg with ninja=ninja.full_name dojo=dojo.name %}Make {{ ninja }} a youth mentor at {{ dojo }}? Their family gets a mail about it.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
+                      data-confirm="{% blocktranslate asvar confirm_msg with ninja=ninja.full_name dojo=dojo.name %}Make {{ ninja }} a youth mentor at {{ dojo }}? Their family gets a mail about it.{% endblocktranslate %}{{ confirm_msg }}">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="promote">
                   <input type="hidden" name="ninja_id" value="{{ ninja.id }}">

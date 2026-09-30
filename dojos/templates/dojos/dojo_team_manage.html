@@ -71,13 +71,13 @@ transferring the champion role (the champion only).
         <div class="team-row__actions">
           {% if membership.user_id == request.user.id and membership.role != 'champion' %}
             <form method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}"
-                  onsubmit="{% blocktranslate asvar confirm_msg with name=dojo.name %}Leave the {{ name }} team? You lose access to this dashboard.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
+                  data-confirm="{% blocktranslate asvar confirm_msg with name=dojo.name %}Leave the {{ name }} team? You lose access to this dashboard.{% endblocktranslate %}{{ confirm_msg }}">
               {% csrf_token %}
               <button type="submit" name="action" value="leave" class="cd-btn cd-btn--ghost label">{% translate "Leave team" %}</button>
             </form>
           {% elif dojo_access.can_manage_team and membership.role != 'champion' %}
             <form method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}"
-                  onsubmit="{% blocktranslate asvar confirm_msg with name=membership.name %}Remove {{ name }} from the team?{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
+                  data-confirm="{% blocktranslate asvar confirm_msg with name=membership.name %}Remove {{ name }} from the team?{% endblocktranslate %}{{ confirm_msg }}">
               {% csrf_token %}
               <input type="hidden" name="membership_id" value="{{ membership.id }}">
               <button type="submit" name="action" value="remove" class="cd-btn cd-btn--ghost label">{% translate "Remove" %}</button>
@@ -124,7 +124,7 @@ transferring the champion role (the champion only).
       {% if transfer_candidates %}
         <p class="body-sm" style="color: var(--ink-muted);">{% translate "Make one of your mentors this dojo's champion. You stay on the team as a mentor." %}</p>
         <form class="cd-form inline-form" method="post" action="{% url 'dojo_team_action' dojo_id=dojo.id %}"
-              onsubmit="{% translate "Hand over the champion role? You become a mentor." as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
+              data-confirm="{% translate "Hand over the champion role? You become a mentor." as confirm_msg %}{{ confirm_msg }}">
           {% csrf_token %}
           <input type="hidden" name="action" value="transfer">
           {{ transfer_form.membership_id.as_field_group }}

@@ -181,7 +181,7 @@
 
 {% block extra_script %}
 {% translate "Spot available" as js_spot %}{% translate "Waiting list" as js_waiting %}{% translate "All {waiting} selected will join the waiting list." as js_all_waiting %}{% translate "{confirmed} will get a spot · {waiting} will join the waiting list." as js_some_waiting %}
-<script>
+<script nonce="{{ csp_nonce }}">
   (function () {
     var form = document.getElementById("event-signup-form");
     if (!form) return;

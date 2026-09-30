@@ -14,7 +14,7 @@
   </form>
   {% if sponsor %}
     <form method="post" action="{% url 'manage_sponsor_delete' sponsor_id=sponsor.id %}" style="margin-top: var(--space-4);"
-          onsubmit="{% blocktranslate asvar confirm_msg with name=sponsor.name %}Remove {{ name }} from the sponsors?{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
+          data-confirm="{% blocktranslate asvar confirm_msg with name=sponsor.name %}Remove {{ name }} from the sponsors?{% endblocktranslate %}{{ confirm_msg }}">
       {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Remove sponsor" %}</button>
     </form>
   {% endif %}

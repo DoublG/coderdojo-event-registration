@@ -62,7 +62,7 @@
       {% if not system %}
         <div class="cd-card tpl-card">
           <h2 class="heading-md">{% translate "Delete the template" %}</h2>
-          <form method="post" action="{% url 'manage_template_delete' key=key %}" onsubmit="{% translate "Delete this template in every language?" as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
+          <form method="post" action="{% url 'manage_template_delete' key=key %}" data-confirm="{% translate "Delete this template in every language?" as confirm_msg %}{{ confirm_msg }}">
             {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Delete template" %}</button>
           </form>
         </div>
@@ -70,5 +70,5 @@
     </div>
   </div>
   <form id="delete-language" method="post" action="{% url 'manage_template_delete_language' key=key language=language %}"
-        onsubmit="{% blocktranslate asvar confirm_msg with language_name=language_name %}Delete the {{ language_name }} version? English is used instead.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">{% csrf_token %}</form>
+        data-confirm="{% blocktranslate asvar confirm_msg with language_name=language_name %}Delete the {{ language_name }} version? English is used instead.{% endblocktranslate %}{{ confirm_msg }}">{% csrf_token %}</form>
 {% endblock %}

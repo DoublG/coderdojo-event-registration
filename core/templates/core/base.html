@@ -23,6 +23,8 @@
 {% block extra_style %}{% endblock %}
 </head>
 <body>
+{# No eval (hx-on, js: values): the Content-Security-Policy forbids it (settings.CONTENT_SECURITY_POLICY). #}
+<meta name="htmx-config" content='{"allowEval": false}'>
 <script src="{% static 'core/vendor/htmx/htmx-2.0.4.min.js' %}"></script>
 <script src="{% javascript_catalog_url %}"></script>
 <script src="{% static 'core/js/bundle.js' %}"></script>

@@ -7,7 +7,7 @@
 {% block manage_content %}
   <form method="get" class="cd-form" style="margin-bottom: var(--space-4); max-width: 360px;">
     <label class="label" for="campaign-source">{% translate "Sent by" %}</label>
-    <select id="campaign-source" name="from" class="cd-form__select body" onchange="this.form.submit()">
+    <select id="campaign-source" name="from" class="cd-form__select body" data-autosubmit>
       <option value="">{% translate "Everyone" %}</option>
       <option value="organisation"{% if source == "organisation" %} selected{% endif %}>{% translate "The organisation" %}</option>
       <option value="dojos"{% if source == "dojos" %} selected{% endif %}>{% translate "Every dojo" %}</option>

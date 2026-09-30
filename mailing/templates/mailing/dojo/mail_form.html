@@ -62,11 +62,11 @@ audience with CSS alone (:has); the reach under it comes from htmx.
               {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Send me a test" %}</button>
             </form>
             <form method="post" action="{% url 'dojo_mail_launch' dojo_id=dojo.id campaign_id=campaign.id %}"
-                  onsubmit="{% if reach.team %}{% blocktranslate asvar confirm_msg count counter=reach.reached %}Send this mail to {{ counter }} team member now?{% plural %}Send this mail to {{ counter }} team members now?{% endblocktranslate %}{% else %}{% blocktranslate asvar confirm_msg count counter=reach.reached %}Send this mail to {{ counter }} family now?{% plural %}Send this mail to {{ counter }} families now?{% endblocktranslate %}{% endif %}return confirm('{{ confirm_msg|escapejs }}');">
+                  data-confirm="{% if reach.team %}{% blocktranslate asvar confirm_msg count counter=reach.reached %}Send this mail to {{ counter }} team member now?{% plural %}Send this mail to {{ counter }} team members now?{% endblocktranslate %}{% else %}{% blocktranslate asvar confirm_msg count counter=reach.reached %}Send this mail to {{ counter }} family now?{% plural %}Send this mail to {{ counter }} families now?{% endblocktranslate %}{% endif %}{{ confirm_msg }}">
               {% csrf_token %}<button type="submit" class="cd-btn cd-btn--primary label"{% if problems %} disabled{% endif %}>{% translate "Send" %}</button>
             </form>
             <form method="post" action="{% url 'dojo_mail_cancel' dojo_id=dojo.id campaign_id=campaign.id %}"
-                  onsubmit="{% translate "Delete this draft?" as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
+                  data-confirm="{% translate "Delete this draft?" as confirm_msg %}{{ confirm_msg }}">
               {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Delete draft" %}</button>
             </form>
           </div>

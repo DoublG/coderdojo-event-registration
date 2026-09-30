@@ -35,7 +35,11 @@ shell_content, shell_extra_style and shell_scripts.
 </style>
 {% block shell_extra_style %}{% endblock %}
 </head>
-<body>
+{# Every htmx request sends the page's CSRF token: the notification bell's "Mark all as read" form can come
+   over the WebSocket, rendered without a request and so without a token of its own. #}
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+{# No eval (hx-on, js: values): the Content-Security-Policy forbids it (settings.CONTENT_SECURITY_POLICY). #}
+<meta name="htmx-config" content='{"allowEval": false}'>
 <script src="{% static 'core/vendor/htmx/htmx-2.0.4.min.js' %}"></script>
 {% block shell_head_scripts %}{% endblock %}
 <script src="{% javascript_catalog_url %}"></script>
@@ -93,7 +97,7 @@ shell_content, shell_extra_style and shell_scripts.
     </div>
   </div>
 </div>
-<script>
+<script nonce="{{ csp_nonce }}">
   CoderDojo.initAdminNav(document.getElementById("adminnav-page"));
   CoderDojo.initDojoSwitcher(document.getElementById("adminnav-page"));
 </script>

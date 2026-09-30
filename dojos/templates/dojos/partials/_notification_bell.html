@@ -9,13 +9,13 @@
   WebSocket push). hx-swap-oob="true" on the root makes all three land the
   same way — htmx matches by id regardless of what triggered the update, so
   a single markup shape covers "just rendered", "htmx swapped me in", and
-  "pushed over the socket" alike. hx-on::oob-after-swap re-wires the bell's
-  open/close JS on the fresh DOM after every such replacement (initial
+  "pushed over the socket" alike. bundle.js's htmx:oobAfterSwap listener re-wires
+  the bell's open/close JS on the fresh DOM after every such replacement (initial
   render isn't a swap, so dojos/templates/dojos/_admin_base.html's own
   script block calls CoderDojo.initNotifications once directly for that
   case).
 {% endcomment %}
-<div class="cd-notif" id="notif-admin-page" hx-swap-oob="true" hx-on::oob-after-swap="CoderDojo.initNotifications(this)">
+<div class="cd-notif" id="notif-admin-page" hx-swap-oob="true">
   <button type="button" class="cd-notif__bell" data-cd-notif-toggle aria-haspopup="true" aria-label="{% translate "Notifications" %}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>

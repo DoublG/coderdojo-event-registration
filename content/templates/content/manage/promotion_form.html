@@ -31,7 +31,7 @@
   </form>
 
   {% if promotion %}
-    <form method="post" action="{% url 'manage_promotion_delete' promotion_id=promotion.id %}" style="margin-top: var(--space-5);" onsubmit="{% translate 'Remove this promotion?' as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
+    <form method="post" action="{% url 'manage_promotion_delete' promotion_id=promotion.id %}" style="margin-top: var(--space-5);" data-confirm="{% translate 'Remove this promotion?' as confirm_msg %}{{ confirm_msg }}">
       {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Remove promotion" %}</button>
     </form>
   {% endif %}

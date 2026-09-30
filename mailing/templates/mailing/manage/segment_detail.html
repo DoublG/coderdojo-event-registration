@@ -58,7 +58,7 @@
       <h2 class="heading-md">{% translate "Delete" %}</h2>
       {% if draft_campaigns %}<p class="caption">{% translate "Used by draft campaigns:" %} {% for c in draft_campaigns %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% endfor %}. {% translate "They'd need a new segment." %}</p>{% endif %}
       <p class="caption">{% translate "Launched campaigns keep their own copy of who they went to." %}</p>
-      <form method="post" action="{% url 'manage_segment_delete' segment_id=segment.id %}" onsubmit="{% translate "Delete this segment?" as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
+      <form method="post" action="{% url 'manage_segment_delete' segment_id=segment.id %}" data-confirm="{% translate "Delete this segment?" as confirm_msg %}{{ confirm_msg }}">
         {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Delete segment" %}</button>
       </form>
     </div>

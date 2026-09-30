@@ -92,7 +92,7 @@
               <td class="body-sm">
                 {% if account.two_step_methods and account != request.user %}
                   <form method="post" action="{% url 'manage_security_turn_off' user_id=account.id %}"
-                        onsubmit="{% blocktranslate asvar confirm_msg with name=account.get_full_name|default:account.username %}Turn off two-step login for {{ name }}? Only do this once you're sure it's them.{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
+                        data-confirm="{% blocktranslate asvar confirm_msg with name=account.get_full_name|default:account.username %}Turn off two-step login for {{ name }}? Only do this once you're sure it's them.{% endblocktranslate %}{{ confirm_msg }}">
                     {% csrf_token %}<input type="hidden" name="q" value="{{ query }}">
                     <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Turn off two-step login" %}</button>
                   </form>

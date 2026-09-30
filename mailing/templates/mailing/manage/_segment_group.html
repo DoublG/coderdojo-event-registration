@@ -9,13 +9,13 @@ Expects `node` ({group, rules, children}), `segment`, `user_attributes`,
     <form method="post" action="{% url 'manage_segment_update_group' segment_id=segment.id group_id=node.group.id %}" class="segment-inline">
       {% csrf_token %}
       <label class="caption">{% translate "match" %}
-        <select class="cd-form__select body" name="operator" onchange="this.form.submit()">
+        <select class="cd-form__select body" name="operator" data-autosubmit>
           {% for value, label in operators %}<option value="{{ value }}"{% if value == node.group.operator %} selected{% endif %}>{% if value == "and" %}{% translate "all of these" %}{% else %}{% translate "any of these" %}{% endif %}</option>{% endfor %}
         </select>
       </label>
     </form>
     <form method="post" action="{% url 'manage_segment_delete_group' segment_id=segment.id group_id=node.group.id %}" class="segment-inline"
-          onsubmit="{% translate "Remove this group and everything in it?" as confirm_msg %}return confirm('{{ confirm_msg|escapejs }}');">
+          data-confirm="{% translate "Remove this group and everything in it?" as confirm_msg %}{{ confirm_msg }}">
       {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Remove group" %}</button>
     </form>
   </div>

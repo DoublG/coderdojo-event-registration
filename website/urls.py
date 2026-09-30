@@ -62,4 +62,11 @@ if settings.DEBUG:
 
 # django-silk's pages (development only, settings.SILK_ENABLED); staff logins.
 if settings.SILK_ENABLED:
+    import silk.urls
+    from django.views.decorators.csp import csp_override
+
+    # silk's own pages use inline handlers and eval, which the site's
+    # Content-Security-Policy blocks; a development tool, so they go without it.
+    for pattern in silk.urls.urlpatterns:
+        pattern.callback = csp_override({})(pattern.callback)
     urlpatterns = [path("silk/", include("silk.urls", namespace="silk")), *urlpatterns]

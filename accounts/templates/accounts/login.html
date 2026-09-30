@@ -163,7 +163,7 @@
 {% block extra_script %}
   {% if device_kind == "passkey" and wizard.steps.current == "token" and passkey_options %}
     {{ passkey_options|json_script:"passkey-options" }}
-    <script>
+    <script nonce="{{ csp_nonce }}">
       CoderDojo.initPasskey(document.getElementById("login-form"), "passkey-options", "get");
     </script>
   {% endif %}

@@ -19,7 +19,7 @@
   </form>
   {% if badge and not badge.ninja_count %}
     <form method="post" action="{% url 'manage_badge_delete' badge_id=badge.id %}" style="margin-top: var(--space-4);"
-          onsubmit="{% blocktranslate asvar confirm_msg with name=badge.name %}Remove the {{ name }} award?{% endblocktranslate %}return confirm('{{ confirm_msg|escapejs }}');">
+          data-confirm="{% blocktranslate asvar confirm_msg with name=badge.name %}Remove the {{ name }} award?{% endblocktranslate %}{{ confirm_msg }}">
       {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Remove award" %}</button>
     </form>
   {% endif %}

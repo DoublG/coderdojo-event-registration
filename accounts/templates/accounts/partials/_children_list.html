@@ -50,7 +50,7 @@ a full page reload, with the add form after it, out of band).
           <div class="action">
             <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=registration.event.id %}">{% translate "View event" %}</a>
             <form method="post" action="{% url 'cancel_registration' registration_id=registration.id %}"
-                  onsubmit="return confirm('{{ remove_msg|escapejs }}');">
+                  data-confirm="{{ remove_msg }}">
               {% csrf_token %}
               <button type="submit" class="cd-btn cd-btn--danger label">{% if registration.waiting_list %}{% translate "Leave waiting list" %}{% else %}{% translate "Cancel" %}{% endif %}</button>
             </form>

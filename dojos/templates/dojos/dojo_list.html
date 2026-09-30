@@ -75,7 +75,7 @@
 {% endblock %}
 
 {% block extra_script %}
-<script>
+<script nonce="{{ csp_nonce }}">
   CoderDojo.initDojoLocationSearch(document.getElementById("dojo-search-form"));
 </script>
 {% endblock %}

@@ -3,7 +3,7 @@
 #   lint           ruff check + ruff format --check (pyproject.toml)
 #   security-lint  ruff's flake8-bandit rules (S): security-sensitive patterns
 #   dependencies   pip-audit: known vulnerabilities in the pinned packages
-#   django-deploy  manage.py check --deploy with DEBUG off: production security settings
+#   django-deploy  manage.py check --deploy with DEBUG off: production security settings (no warnings)
 #   codeql         GitHub's static analysis (security-extended queries) into Code scanning
 # Also runs every Monday, since new advisories appear without any change here.
 name: Code audit
@@ -95,6 +95,11 @@ jobs:
       CSRF_TRUSTED_ORIGINS: https://coolregistration.localhost
       COOKIE_DOMAIN: coolregistration.localhost
       EMAIL_HOST: ""
+      # What production's .env should hold once the https steps are done (MAINTENANCE.md,
+      # security log): the redirect on and a year of HSTS for the domain and its subdomains.
+      SECURE_SSL_REDIRECT: "true"
+      SECURE_HSTS_SECONDS: "31536000"
+      SECURE_HSTS_INCLUDE_SUBDOMAINS: "true"
     steps:
       - uses: actions/checkout@v7
       - name: Install system libraries
@@ -110,12 +115,11 @@ jobs:
           cache-dependency-path: requirements.txt
       # Only the production set: also proves requirements.txt installs on its own.
       - run: pip install -r requirements.txt
-      # Fails on errors; warnings (HSTS, secure cookies, the OAuth BCP defaults) are
-      # printed and listed in the run's summary, to go through as MAINTENANCE.md says.
+      # Fails on any warning: a new one is a security setting to fix, not to note.
       - name: manage.py check --deploy
         run: |
           set -o pipefail
-          python manage.py check --deploy --fail-level ERROR 2>&1 | tee check.txt
+          python manage.py check --deploy --fail-level WARNING 2>&1 | tee check.txt
           { echo "### manage.py check --deploy"; echo '```'; cat check.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
   codeql:

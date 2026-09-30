@@ -173,6 +173,8 @@ step "Checking the new code before going live"
 ln -sfn "\$APP/.env" "\$REL/.env"
 ( cd "\$REL" && "\$PY" manage.py check ) || die "manage.py check failed — the live site was NOT changed"
 ( cd "\$REL" && "\$PY" -c "import main" ) || die "main:app does not import — the live site was NOT changed"
+# Production's security settings (https, HSTS, cookies): reported, never blocking.
+( cd "\$REL" && "\$PY" manage.py check --deploy --fail-level ERROR 2>&1 | grep -E "^\\?: \\(security|identified" ) || true
 rm -f "\$REL/.env"
 
 step "Syncing into \$APP"
