@@ -1,0 +1,23 @@
+{
+  "tables": {
+    "accounts_guardianship": 194,
+    "accounts_ninja": 242,
+    "accounts_user": 519,
+    "auditlog_logentry": 525,
+    "django_session": 981,
+    "events_event": 281,
+    "events_event_pathways": 140,
+    "events_event_team": 146,
+    "events_ninjabadge": 366,
+    "events_ninjabelt": 235,
+    "events_ninjaengagement": 281,
+    "events_registration": 232,
+    "events_registration_pathways": 163,
+    "events_registrationcancellation": 184,
+    "events_teamattendance": 174,
+    "mailing_consentevent": 191,
+    "mailing_emailmessage": 1303,
+    "mailing_mailpreference": 219
+  },
+  "mail_content_bytes": 557
+}

@@ -194,6 +194,13 @@ EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=30)
 
 # The site's own address, for links in mails (which are rendered in a
 # worker, with no request to build absolute URLs from).
+# Monitoring (monitoring, CAPACITY.md): /metrics/ answers only with this token
+# as a bearer token, and doesn't exist while it's empty. Slow requests are
+# logged from METRICS_SLOW_REQUEST_MS on.
+METRICS_TOKEN = env("METRICS_TOKEN", default="")
+METRICS_ENABLED = env.bool("METRICS_ENABLED", default=True)
+METRICS_SLOW_REQUEST_MS = env.int("METRICS_SLOW_REQUEST_MS", default=1000)
+
 SITE_URL = env("SITE_URL", default="https://coolregistration.localhost").rstrip("/")
 
 # The testers' authenticator in the devcontainer (2FAuth, the `otp` service),
@@ -344,6 +351,13 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=9, minute=0),
         "options": {"queue": "celery", "expires": 6 * 3600},
     },
+    # The day's capacity sample (monitoring, CAPACITY.md): a few quick
+    # reads of table sizes and counters, so on `periodic`.
+    "capacity-sample": {
+        "task": "monitoring.tasks.record_capacity_sample",
+        "schedule": crontab(hour=2, minute=30),
+        "options": {"expires": 6 * 3600},
+    },
 }
 CELERY_TASK_ROUTES = {
     entry["task"]: {"queue": PERIODIC_QUEUE}
@@ -384,6 +398,7 @@ INSTALLED_APPS = [
     "ninja",
     "oauth2_provider",
     "privacy",
+    "monitoring",
     "api",
     "auditlog",
     # Two-step login (DATA_MODEL.md §15). No phone, email or YubiKey plugins.
@@ -403,6 +418,8 @@ INSTALLED_APPS = [
 FORM_RENDERER = "core.forms.SiteFormRenderer"
 
 MIDDLEWARE = [
+    # First, so its timing covers the whole stack (monitoring, CAPACITY.md).
+    "monitoring.middleware.RequestMetricsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "django_permissions_policy.PermissionsPolicyMiddleware",
@@ -498,9 +515,12 @@ DATABASES = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://{host}:{port}/0".format(
+        # REDIS_CACHE_DB (and REDIS_CHANNELS_DB, CELERY_BROKER_DB) only move for
+        # a separate run on the same Redis, e.g. a load test (CAPACITY.md).
+        "LOCATION": "redis://{host}:{port}/{db}".format(
             host=env("REDIS_HOST", default="127.0.0.1"),
             port=env("REDIS_PORT", default="6379"),
+            db=env("REDIS_CACHE_DB", default="0"),
         ),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
@@ -537,9 +557,10 @@ CHANNEL_LAYERS = {
         "CONFIG": {
             "hosts": [
                 {
-                    "address": "redis://{host}:{port}/1".format(
+                    "address": "redis://{host}:{port}/{db}".format(
                         host=env("REDIS_HOST", default="127.0.0.1"),
                         port=env("REDIS_PORT", default="6379"),
+                        db=env("REDIS_CHANNELS_DB", default="1"),
                     ),
                     # Longer than channels_redis's 5-second blocking wait for
                     # the next message (RedisChannelLayer.brpop_timeout).

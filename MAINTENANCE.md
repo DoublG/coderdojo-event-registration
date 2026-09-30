@@ -3,7 +3,8 @@
 How the platform stays supported and secure: which versions run where and until when, how to update,
 how to react to a vulnerability, and how the code is audited. For developers and whoever runs the
 platform. Conventions for changing the code are in [`CLAUDE.md`](CLAUDE.md); deploying is in its
-"Deploying (Level27)" section.
+"Deploying (Level27)" section. How big the database gets and how much memory each component needs is in
+[`CAPACITY.md`](CAPACITY.md).
 
 **Last checked: 30 September 2026.** Dates from [endoflife.date](https://endoflife.date), the
 [Django roadmap](https://www.djangoproject.com/download/) and [PEP 790](https://peps.python.org/pep-0790/).
@@ -61,6 +62,7 @@ calendar: stay on the latest release. Watch these:
 | celery, kombu, channels, channels-redis | 5.6.3, 5.6.2, 4.3.2, (see file) | Upgrade together with Redis. |
 | mysqlclient | 2.3.0 | Needs the MySQL client headers on the server (missing on Level27 today, see CLAUDE.md). |
 | nh3, django-permissions-policy | 0.3.7, 4.34.0 | Security: the Markdown allowlist and the Permissions-Policy header. Keep them current. |
+| locust | 2.46.6 | The load test's tool ([`loadtest/requirements.txt`](loadtest/requirements.txt), [`CAPACITY.md`](CAPACITY.md)), in a venv of its own: never in the image or on production. `pip-audit -r loadtest/requirements.txt`: no known vulnerabilities (30 Sep 2026). |
 
 ### Still to confirm
 
@@ -81,7 +83,9 @@ calendar: stay on the latest release. Watch these:
 | Every week (5 minutes) | Read the security announcements (see [Sources](#sources-to-watch)) and the GitHub Dependabot alerts. |
 | Every month | Run the [update check](#routine-updates): `pip-audit`, outdated packages, Django patch release. Deploy what's safe. |
 | Every quarter | Review the tables on this page against endoflife.date; bump the *Last checked* date. Run the [code audit](#code-audits) checks. |
+| Every quarter | Compare the database's growth (the daily capacity samples, `manage.py capacity_report`) with the projection in [`CAPACITY.md`](CAPACITY.md). |
 | Every year | A deeper [security review](#code-audits) of the code and of access to production. |
+| Every year | Measure capacity again ([`CAPACITY.md`](CAPACITY.md), "Measuring again") and update its figures. |
 | **Now (Sep 2026)** | Confirm the production database and Redis versions; move MySQL off 8.0; pin the devcontainer images. |
 | **Oct 2026** | Python 3.15 is released (1 Oct): no action, 3.14 is supported to 2030. |
 | **Apr–Dec 2027** | Django 6.2 LTS is out in April: upgrade before 6.1's security support ends (31 Dec 2027). |

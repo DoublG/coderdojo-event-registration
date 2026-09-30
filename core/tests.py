@@ -605,6 +605,7 @@ class AuditLogCoverageTests(TestCase):
         "auth.Permission": "Django's permission list, from migrations",
         "contenttypes.ContentType": "Django's list of models, from migrations",
         "sessions.Session": "logins, changed on every request",
+        "monitoring.CapacitySample": "table sizes and counters, nothing about a person",
         "django_celery_beat.ClockedSchedule": "the background jobs' schedule, a technical setting",
         "django_celery_beat.CrontabSchedule": "the background jobs' schedule, a technical setting",
         "django_celery_beat.IntervalSchedule": "the background jobs' schedule, a technical setting",

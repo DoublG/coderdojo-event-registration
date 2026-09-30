@@ -41,6 +41,7 @@ urlpatterns = [
     path("", include("mailing.urls")),
     path("", include("content.urls")),
     path("", include("privacy.urls")),
+    path("", include("monitoring.urls")),
     path("", include("notifications.urls")),
     # The API (DATA_MODEL.md §13): OAuth 2.0 client credentials, then /api/v1/.
     path("api/oauth/token/", oauth2_views.TokenView.as_view(), name="oauth2_token"),

@@ -29,6 +29,7 @@ ignore = [
 "applications/seeding.py" = ["S"]
 "accounts/seed_credentials.py" = ["S"]
 "user-journeys/**" = ["S"]                   # developers' screenshot tooling
+"loadtest/**" = ["S"]                        # developers' load test: random visitors, a known test password
 
 [tool.ruff.lint.isort]
 known-first-party = [

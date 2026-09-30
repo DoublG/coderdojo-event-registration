@@ -2101,8 +2101,9 @@ running inside the first one.
   Redis all run on the same Level27 system and share its memory, so the
   website must win:
   - Concurrency 1 with the prefork pool: per worker, one parent process
-    plus one child that runs the tasks. That's about four small Python
-    processes in total. The `solo` pool would halve that, but it can't
+    plus one child that runs the tasks, and embedded beat is a process of
+    its own on the periodic worker: five Python processes in total (about
+    420 MB PSS together when idle, measured in `CAPACITY.md`). The `solo` pool would halve that, but it can't
     enforce `CELERY_TASK_TIME_LIMIT`, and a hung SMTP or IMAP connection
     would then block the queue for good. Prefork is worth the extra
     process.
@@ -4952,3 +4953,28 @@ Both earlier open points were settled on 2026-09-29 and are built:
    child's dojo can also write through the site without seeing the
    address, and that a reply goes to the dojo; `PRIVACY_WORDING_VERSION`
    is `2026-09-29`.
+
+## 26. Capacity and monitoring (built)
+
+The site measures itself (app `monitoring`; the measurements, findings and
+method are in `CAPACITY.md`). One model, standalone, nothing about a person:
+
+```mermaid
+erDiagram
+    CAPACITY_SAMPLE {
+        date taken_on UK "one per day"
+        datetime taken_at
+        json data "tables, mysql, redis, queues, mail, websockets, processes, requests, tasks"
+    }
+```
+
+- **Live counters** (request and task timings, each process's memory) live
+  in the cache's Redis, not the database: they change on every request.
+  `/metrics/` reads them together with the database's, Redis's and the
+  queues' own figures.
+- **The daily sample** (beat job `capacity-sample`, 02:30) copies all of it
+  into a `CapacitySample`, so the database's growth shows as a trend.
+  Taking it again the same day replaces that day's row.
+- **The capacity model** (`monitoring/capacity.py`) is code, not data: the
+  scenarios, the rows each growing table gains per year, and the measured
+  bytes per row in `monitoring/row_sizes.json`.

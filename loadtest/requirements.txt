@@ -1,0 +1,3 @@
+# The load test's own tool (CAPACITY.md, "Load tests"), in a venv of its own:
+# never installed in the devcontainer image or on production.
+locust==2.46.6
