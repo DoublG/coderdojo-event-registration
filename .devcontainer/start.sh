@@ -79,9 +79,9 @@ fi
 cd /workspace
 
 # STATICFILES_DIRS (website/settings.py) lists the project-level static/ folder
-# for files that belong to no app. Git doesn't keep empty folders, so on a
-# fresh checkout it's missing and every manage.py command warns
-# (staticfiles.W004). The app's own files are in each app's static/ folder.
+# for files that belong to no app; static/.gitkeep keeps it in git, since a
+# missing one makes every manage.py command warn (staticfiles.W004). mkdir for
+# a checkout from before that. The apps' own files are in each app's static/ folder.
 mkdir -p static
 
 # DEBUG=false (docker-compose.yml) runs the site like production, to check its
