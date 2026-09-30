@@ -127,6 +127,9 @@ in the devcontainer first by changing the image tags in `.devcontainer/docker-co
 
 ### Sources to watch
 
+- **Reports from outside:** [`SECURITY.md`](SECURITY.md) asks people to report through GitHub's private
+  vulnerability reporting or by mail to erik@woidt.be (for now, until an organisation address takes over), and promises an acknowledgement within
+  3 working days and the fix times below. Keep the two in step.
 - **Django:** the security announcements on the [Django weblog](https://www.djangoproject.com/weblog/)
   and the `django-announce` mailing list. Django pre-announces security releases a week ahead.
 - **Python:** [python.org security](https://www.python.org/dev/security/) and the release announcements.
