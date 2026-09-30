@@ -139,3 +139,6 @@ seed_credentials.csv
 
 # User-journey screenshots (intermediate; the PDFs in user-journeys/en and nl are kept)
 user-journeys/.shots/
+
+# Claude Code personal settings
+.claude/settings.local.json
