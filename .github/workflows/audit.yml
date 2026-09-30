@@ -1,0 +1,138 @@
+# Code audit and vulnerability detection: the checks MAINTENANCE.md ("Code audits")
+# lists, on every change instead of once a quarter.
+#   lint           ruff check + ruff format --check (pyproject.toml)
+#   security-lint  ruff's flake8-bandit rules (S): security-sensitive patterns
+#   dependencies   pip-audit: known vulnerabilities in the pinned packages
+#   django-deploy  manage.py check --deploy with DEBUG off: production security settings
+#   codeql         GitHub's static analysis (security-extended queries) into Code scanning
+# Also runs every Monday, since new advisories appear without any change here.
+name: Code audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      # The ruff version pinned in requirements-dev.txt.
+      - run: pip install "$(grep -E '^ruff==' requirements-dev.txt)"
+      - run: ruff check --output-format github .
+      - run: ruff format --check .
+
+  security-lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - run: pip install "$(grep -E '^ruff==' requirements-dev.txt)"
+      # Tests, seeders and local tooling are left out in pyproject.toml; a reviewed
+      # line on the site carries `# noqa: Sxxx` with its reason.
+      - run: ruff check --extend-select S --output-format github .
+
+  dependencies:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - run: pip install pip-audit
+      # Both files are fully pinned, so pip-audit checks them as written, without
+      # installing anything (--no-deps --disable-pip). The django-celery-beat URL pin
+      # is skipped (it has no version to look up).
+      # An ignored advisory must be in MAINTENANCE.md's security log with its assessment:
+      #   CVE-2026-49265 (oauthlib, PKCE): not reachable, the API only offers client credentials.
+      - name: pip-audit
+        run: >-
+          pip-audit --no-deps --disable-pip --progress-spinner off
+          -r requirements.txt -r requirements-dev.txt
+          --ignore-vuln CVE-2026-49265
+          --desc on
+
+  django-deploy:
+    runs-on: ubuntu-24.04
+    services:
+      # MySQL's own model checks ask the server for its version; nothing is migrated.
+      db:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci-only
+          MYSQL_DATABASE: coolregistration
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci-only"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+    env:
+      # Production-like: DEBUG off, no silk.
+      DEBUG: "false"
+      SILK: "false"
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: coolregistration
+      DB_USER: root
+      DB_PASSWORD: ci-only
+      SECRET_KEY: ci-only-not-a-secret-${{ github.run_id }}-with-enough-length-and-variety-0123456789
+      ALLOWED_HOSTS: coolregistration.localhost
+      CSRF_TRUSTED_ORIGINS: https://coolregistration.localhost
+      COOKIE_DOMAIN: coolregistration.localhost
+      EMAIL_HOST: ""
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config default-libmysqlclient-dev \
+            gdal-bin libgdal-dev libgeos-dev libproj-dev
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      # Only the production set: also proves requirements.txt installs on its own.
+      - run: pip install -r requirements.txt
+      # Fails on errors; warnings (HSTS, secure cookies, the OAuth BCP defaults) are
+      # printed and listed in the run's summary, to go through as MAINTENANCE.md says.
+      - name: manage.py check --deploy
+        run: |
+          set -o pipefail
+          python manage.py check --deploy --fail-level ERROR 2>&1 | tee check.txt
+          { echo "### manage.py check --deploy"; echo '```'; cat check.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  codeql:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: python, javascript-typescript
+          queries: security-extended
+          # Third-party browser libraries (htmx, OpenLayers) are vendored as-is.
+          config: |
+            paths-ignore:
+              - "**/vendor/**"
+              - "staticfiles/**"
+              - "docs/**"
+      - uses: github/codeql-action/analyze@v4

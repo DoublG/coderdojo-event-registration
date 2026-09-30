@@ -956,7 +956,10 @@ I'm away until Monday.
         self.assertEqual(message.from_email, f"bounces+{self.row.pk}@example.org")
         self.assertEqual(message.message()["From"], "CoderDojo <noreply@example.org>")
 
-    @override_settings(MAILING_BOUNCE_IMAP_HOST="mailpit", MAILING_BOUNCE_PROTOCOL="pop3")
+    # SSL off, like the devcontainer's Mailpit: the patch below replaces plain POP3.
+    @override_settings(
+        MAILING_BOUNCE_IMAP_HOST="mailpit", MAILING_BOUNCE_PROTOCOL="pop3", MAILING_BOUNCE_IMAP_SSL=False
+    )
     def test_an_unreachable_mailbox_is_a_warning_not_a_crash(self):
         from .tasks import process_bounces
 

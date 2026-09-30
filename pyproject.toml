@@ -17,6 +17,19 @@ ignore = [
     "E501",  # line length is enforced by the formatter, not worth erroring twice
 ]
 
+# Security rules (flake8-bandit, "S") are not in `select`: they run with
+# `ruff check --extend-select S .`, in the audit workflow (.github/workflows/audit.yml)
+# and the quarterly checks in MAINTENANCE.md. Code that never runs on the site
+# is left out; a reviewed line on the site has `# noqa: Sxxx` with its reason.
+[tool.ruff.lint.per-file-ignores]
+"**/tests.py" = ["S"]
+"**/tests/**" = ["S"]
+"**/testing.py" = ["S"]
+"**/management/commands/seed_*.py" = ["S"]   # demo data: random choices, known passwords
+"applications/seeding.py" = ["S"]
+"accounts/seed_credentials.py" = ["S"]
+"user-journeys/**" = ["S"]                   # developers' screenshot tooling
+
 [tool.ruff.lint.isort]
 known-first-party = [
     "accounts", "applications", "content", "core", "dojos",

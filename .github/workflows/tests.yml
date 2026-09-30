@@ -1,0 +1,103 @@
+# The unit tests: the whole Django test suite (`manage.py test`, about 1,000 tests)
+# against MySQL and Redis, the way the devcontainer runs it, plus a check that no
+# model change is missing its migration.
+# Runs on every push and pull request that changes code, and by hand from the Actions tab.
+name: Tests
+
+on:
+  push:
+    paths-ignore:
+      - "docs/**"
+      - "user-journeys/**"
+      - "**/*.md"
+      - ".github/workflows/docs.yml"
+      - ".github/workflows/audit.yml"
+  pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "user-journeys/**"
+      - "**/*.md"
+      - ".github/workflows/docs.yml"
+      - ".github/workflows/audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch replaces a run still going.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    services:
+      # MySQL 8.4 LTS, the version production should run (MAINTENANCE.md). The root
+      # account lets Django create and drop test_<DB_NAME>.
+      db:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci-only
+          MYSQL_DATABASE: coolregistration
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci-only"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+      # The cache (tests use db 3), the Channels layer and the Celery broker.
+      redis:
+        image: redis:7.2
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s --health-timeout=5s --health-retries=10
+
+    # The devcontainer's workspace settings (.devcontainer/docker-compose.yml), with
+    # the services on localhost. Throwaway values: nothing here is a real secret.
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: coolregistration
+      DB_USER: root
+      DB_PASSWORD: ci-only
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      SECRET_KEY: ci-only-not-a-secret
+      ALLOWED_HOSTS: localhost,127.0.0.1,coolregistration.localhost
+      CSRF_TRUSTED_ORIGINS: https://coolregistration.localhost
+      COOKIE_DOMAIN: coolregistration.localhost
+      EMAIL_HOST: ""
+      DEBUG: "true"
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # The same system libraries as .devcontainer/dockerfile_workspace/Dockerfile:
+      # mysqlclient builds against libmysqlclient, django.contrib.gis loads GDAL/GEOS/PROJ.
+      - name: Install system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config default-libmysqlclient-dev \
+            gdal-bin libgdal-dev libgeos-dev libproj-dev gettext
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      # requirements-dev.txt, like the devcontainer: the tests cover the import_* commands too.
+      - name: Install Python packages
+        run: pip install -r requirements-dev.txt
+
+      - name: No missing migrations
+        run: python manage.py makemigrations --check --dry-run
+
+      # --debug-mode: the debug toolbar refuses to run under tests otherwise (CLAUDE.md, "Commands").
+      - name: Run the test suite
+        run: python manage.py test --noinput --debug-mode

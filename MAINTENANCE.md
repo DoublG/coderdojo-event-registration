@@ -177,10 +177,27 @@ which our API doesn't offer). Then:
 
 ### On every change (already in place)
 
-- **The test suite** (about 1,000 tests), including guard tests that fail when new code forgets a rule:
+Two GitHub Actions workflows run these on every push (the *Actions* tab; a failed run is also mailed to
+whoever pushed):
+
+- **Tests** (`.github/workflows/tests.yml`): the test suite (about 1,000 tests), against MySQL 8.4 and
+  Redis 7.2, and `makemigrations --check`. It includes guard tests that fail when new code forgets a rule:
   every field has a privacy classification, every model an audit-log decision, every model is fully usable
   in the admin, the API's schema never exposes sensitive fields, no page loads scripts from another site.
-- **`ruff check .`** for lint.
+- **Code audit** (`.github/workflows/audit.yml`, on pushes to main and pull requests, and **every Monday**,
+  since new advisories appear without any change here):
+  - `ruff check .` and `ruff format --check .` (lint and formatting);
+  - `ruff check --extend-select S .`, the flake8-bandit security rules. Tests, seed commands and
+    `user-journeys/` are left out (`pyproject.toml`); a reviewed line on the site carries
+    `# noqa: Sxxx` with its reason;
+  - `pip-audit` over `requirements.txt` and `requirements-dev.txt`. An advisory that isn't reachable here
+    is ignored there (`--ignore-vuln`) only together with its row in the [Security log](#security-log);
+  - `manage.py check --deploy` with DEBUG off: errors fail the run, warnings are listed in the run's
+    summary;
+  - **CodeQL** (Python and JavaScript, the `security-extended` queries): its findings are in the
+    repository's *Security → Code scanning*, where a false positive is dismissed with its reason.
+- Turn on **Dependabot alerts** too (Settings → Code security): they warn about a new advisory the day it
+  is published, between the Monday runs.
 - **Access goes through helpers** (`dojos.access`, `accounts.organisation.require_area`), never ad hoc
   checks: a review looks for views that skip them.
 - **Claude Code's `/security-review`** on a change before it's committed, and `/code-review` on a branch.
@@ -193,8 +210,9 @@ ruff check --select S .                                # flake8-bandit: security
 DEBUG=false python manage.py check --deploy            # Django's production security settings
 ```
 
-Look at every finding (many of the `S` rules are false positives in tests and seed commands), fix what's
-real, and note the rest.
+The Code audit workflow runs these on every change; once a quarter, look through its latest summary (the
+`check --deploy` warnings are listed there, not failed on) and the ignored advisories, fix what's real, and
+note the rest.
 
 ### Every year
 
@@ -216,5 +234,7 @@ A deeper review, by a person with Claude Code's help:
 | Found | What | Assessment | Status |
 |---|---|---|---|
 | 30 Sep 2026 | **oauthlib 3.3.1**, CVE-2026-49265 / GHSA-xpv3-w29h-x7cv: timing side channel in PKCE (authorization-code flow). Fixed in 4.0.0. | **Not reachable here:** our API offers only the client-credentials grant (`api/services.py`), which doesn't use PKCE. Low. django-oauth-toolkit 3.4.1 requires `oauthlib>=3.3.0` and doesn't list 4.0 yet. | Open: try oauthlib 4.0.0 with the API tests in the devcontainer; upgrade when django-oauth-toolkit supports it. |
+| 30 Sep 2026 | **Markdown links** (`core/templatetags/markdown_extras.py`, `markdownify`): the text is HTML-escaped, but Python-Markdown keeps any link scheme, so `[x](javascript:...)` in a dojo's or event's description becomes a working `javascript:` link on the public page. Found by the Code audit workflow's security rules (S308). | **High** (stored cross-site scripting): any active champion or mentor can put it on a public page, and a logged-in visitor who clicks it runs the script as themselves. No Content-Security-Policy limits it. | Open: allow only `http`, `https` and `mailto` links. The audit's security-lint job fails until it's fixed. |
+| 30 Sep 2026 | **`check --deploy` warnings**: no HSTS, no HTTPS redirect, session and CSRF cookies not `Secure` (`settings.py` doesn't set them, so production doesn't either); django-oauth-toolkit's RFC 9700 defaults (implicit and password grants, tokens in the query string, tokens stored in plain text). | Medium: TLS ends at Level27's proxy, so the cookies' `Secure` flag and HSTS are cheap to add; the OAuth grants we don't offer aren't reachable, as our clients are client-credentials only, but tokens stored in plain text are. | Open: set them in `settings.py` (from the environment, so the devcontainer can keep its own), and the RFC 9700 options in `OAUTH2_PROVIDER` after running the API tests. |
 | 30 Sep 2026 | **MySQL 8.0** (the production client, possibly the server) reached end of life on 30 Apr 2026: no more security fixes. | Depends on the server version (to confirm). | Open: confirm with Level27, move to 8.4 LTS. |
 | 30 Sep 2026 | **Devcontainer images** past end of life: MySQL 9.1 (`latest` gone stale), nginx 1.27. | Development only, not reachable from outside. | Open: pin `mysql:8.4` and `nginx:1.30-alpine`. |

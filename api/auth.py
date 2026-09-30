@@ -19,7 +19,7 @@ from oauth2_provider.oauth2_backends import get_oauthlib_core
 
 from .models import DojoApiClient
 
-TOKEN_URL = "/api/oauth/token/"
+TOKEN_URL = "/api/oauth/token/"  # noqa: S105 (a URL, not a token)
 
 
 class OAuth2(AuthBase):

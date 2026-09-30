@@ -23,7 +23,7 @@ class User(AbstractUser):
     # choice: a password, or a login link mailed each time
     # (accounts/login_links.py). An account on LINK has no usable password.
     # Two-step login works the same on top of either.
-    LOGIN_PASSWORD = "password"
+    LOGIN_PASSWORD = "password"  # noqa: S105 (a login method's name, not a password)
     LOGIN_LINK = "link"
     LOGIN_METHOD_CHOICES = [(LOGIN_PASSWORD, "Password"), (LOGIN_LINK, "Login link by email")]
     login_method = models.CharField(
@@ -551,7 +551,7 @@ class SignInRequirement(models.Model):
     ]
 
     # In order of strength: a stronger level also meets a weaker one.
-    PASSWORD = "password"
+    PASSWORD = "password"  # noqa: S105 (a sign-in level's name, not a password)
     TWO_STEP = "two_step"
     PASSKEY = "passkey"
     LEVEL_CHOICES = [

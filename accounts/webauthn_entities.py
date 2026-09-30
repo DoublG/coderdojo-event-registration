@@ -18,7 +18,8 @@ class SiteWebauthnEntitiesMixin:
         user = self.request.user
         return PublicKeyCredentialUserEntity(
             # Same id as the package's default: a hash of the pk, never the pk itself.
-            id=sha1(str(user.pk).encode("utf-8")).hexdigest().encode("utf-8"),
+            # sha1 only makes an opaque id here, it protects nothing.
+            id=sha1(str(user.pk).encode("utf-8")).hexdigest().encode("utf-8"),  # noqa: S324
             name=user.email or user.get_username(),
             display_name=user.get_full_name() or user.get_username(),
         )

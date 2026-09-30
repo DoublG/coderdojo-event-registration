@@ -43,7 +43,7 @@ def notify(recipient, text, url="", dojo=None, params=None, organisation=False):
                 _group_name(recipient.id),
                 {"type": "notification.push"},
             )
-        except Exception:
+        except Exception:  # noqa: S110 (fail-open: the row is saved, the live nudge is best-effort)
             pass
 
     return notification

@@ -163,7 +163,8 @@ def _variables_field():
 
 def _segments_help():
     """The Segment field's help, with a link to the Segments page."""
-    return mark_safe(
+    # Our own translated text and a reverse()d URL, no user input.
+    return mark_safe(  # noqa: S308
         _('<a href="%(url)s">Segments</a> describe who gets it.') % {"url": reverse("manage_segment_list")}
     )
 

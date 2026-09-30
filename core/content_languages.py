@@ -97,7 +97,7 @@ class TranslatableModel(models.Model):
         self.translations = translations
 
     def localized(self, field, language=None):
-        assert field in self.TRANSLATABLE_FIELDS, field
+        assert field in self.TRANSLATABLE_FIELDS, field  # noqa: S101 (a programming error, never user input)
         base = getattr(self, field) or ""
         main = self.main_language()
         wanted = normalize(language or translation.get_language()) or main
