@@ -21,6 +21,22 @@ class AdminSite(admin.AdminSite):
 
         return super().has_permission(request) and may_use_admin(request.user) and meets_requirement(request)
 
+    def login(self, request, extra_context=None):
+        """Someone not logged in goes to the site's own login (the patch, through
+        super()). Someone logged in without access would loop between that login
+        (which sends a logged-in account on to `next`) and here, so they go to
+        where they can ask for access (an organisation role), or get a 403."""
+        if request.user.is_authenticated and not self.has_permission(request):
+            from django.core.exceptions import PermissionDenied
+            from django.shortcuts import redirect
+
+            from accounts.admin_access import may_ask
+
+            if may_ask(request.user):
+                return redirect("manage_admin_access")
+            raise PermissionDenied
+        return super().login(request, extra_context)
+
     def each_context(self, request):
         from django.utils.translation import gettext as _
 

@@ -1761,3 +1761,43 @@ class SecurityHeadersTests(TestCase):
         self.client.force_login(champion)
         html = self.get(reverse("dojo_dashboard", args=[dojo.id])).content.decode()
         self.assertRegex(html, r"<body hx-headers='\{\"X-CSRFToken\": \"[^\"]+\"\}'>")
+
+
+class AdminLoginWithoutAccessTests(TestCase):
+    """A logged-in account without an open admin grant used to loop between the
+    admin's login and the site's (which sends a logged-in account on to `next`)."""
+
+    def setUp(self):
+        from accounts.models import OrganisationRole, User
+
+        self.admin = User.objects.create(username="orgadmin-noaccess")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.parent = User.objects.create(username="parent-noaccess")
+
+    def admin_login(self):
+        url = reverse("admin:index")
+        return self.client.get(reverse("admin:login") + f"?next={url}")
+
+    def test_an_organisation_role_is_sent_to_ask_for_access(self):
+        self.client.force_login(self.admin)
+        self.assertRedirects(
+            self.client.get(reverse("admin:index")),
+            reverse("admin:login") + "?next=/admin/",
+            fetch_redirect_response=False,
+        )
+        self.assertRedirects(self.admin_login(), reverse("manage_admin_access"), fetch_redirect_response=False)
+
+    def test_an_account_without_a_role_is_refused(self):
+        self.client.force_login(self.parent)
+        self.assertEqual(self.admin_login().status_code, 403)
+
+    def test_someone_not_logged_in_goes_to_the_sites_login(self):
+        response = self.admin_login()
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response["Location"].startswith(reverse("login")))
+
+    def test_with_an_open_grant_the_admin_opens(self):
+        from core.testing import with_admin_access
+
+        self.client.force_login(with_admin_access(self.admin))
+        self.assertEqual(self.client.get(reverse("admin:index")).status_code, 200)
