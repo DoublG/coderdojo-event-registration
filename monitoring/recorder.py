@@ -8,11 +8,13 @@ difference between two reads, and a reset (a cache.clear()) is just a
 counter starting over. Recording never fails the request or the task it
 measures: a Redis that's down only loses the numbers."""
 
+import atexit
 import json
 import logging
 import os
 import resource
 import socket
+import threading
 import time
 
 from django.conf import settings
@@ -25,12 +27,14 @@ TASKS_KEY = "metrics:tasks"
 PROCESS_KEY_PREFIX = "metrics:process:"
 # Upper bounds (milliseconds) of the request-duration histogram.
 DURATION_BUCKETS_MS = (50, 100, 250, 500, 1000, 2500, 5000)
-# A process reports its memory at most this often, and the report expires
-# when the process has been quiet (or gone) for PROCESS_TTL.
+# Each process reports its memory every PROCESS_REPORT_EVERY seconds from a
+# small thread of its own, and the report expires after PROCESS_TTL: a
+# process that's gone (a restart, a recycled Celery child) drops out of the
+# totals within that time, and one that exits cleanly removes its report.
 PROCESS_REPORT_EVERY = 60
-PROCESS_TTL = 15 * 60
+PROCESS_TTL = 150
 
-_last_process_report = 0.0
+_reporting_pid = None
 
 
 def _redis():
@@ -60,20 +64,44 @@ def process_memory():
     return memory
 
 
-def report_process(role, force=False, ttl=PROCESS_TTL):
-    """Store this process's memory under its role (`web`, `celery`, and
-    `celery-parent`/`beat` once at startup), at most once a minute unless
-    forced."""
-    global _last_process_report
-    now = time.time()
-    if not enabled() or (not force and now - _last_process_report < PROCESS_REPORT_EVERY):
+def _process_key(role):
+    return f"{PROCESS_KEY_PREFIX}{role}:{socket.gethostname()}:{os.getpid()}"
+
+
+def report_process(role):
+    """Store this process's memory under its role (`web`, `celery`,
+    `celery-parent`, `beat`) for PROCESS_TTL seconds."""
+    if not enabled():
         return
-    _last_process_report = now
-    key = f"{PROCESS_KEY_PREFIX}{role}:{socket.gethostname()}:{os.getpid()}"
     try:
-        _redis().set(key, json.dumps({**process_memory(), "at": int(now)}), ex=ttl)
+        _redis().set(_process_key(role), json.dumps({**process_memory(), "at": int(time.time())}), ex=PROCESS_TTL)
     except Exception:
         logger.debug("Couldn't report process memory", exc_info=True)
+
+
+def _forget(role):
+    try:
+        _redis().delete(_process_key(role))
+    except Exception:
+        logger.debug("Couldn't remove the process report", exc_info=True)
+
+
+def _keep_reporting(role):
+    while True:
+        time.sleep(PROCESS_REPORT_EVERY)
+        report_process(role)
+
+
+def start_reporting(role):
+    """Report this process's memory now and then every minute, once per
+    process (a forked child starts its own). Cheap to call on every request."""
+    global _reporting_pid
+    if _reporting_pid == os.getpid() or not enabled():
+        return
+    _reporting_pid = os.getpid()
+    report_process(role)
+    threading.Thread(target=_keep_reporting, args=(role,), daemon=True, name="metrics-memory").start()
+    atexit.register(_forget, role)
 
 
 def processes():

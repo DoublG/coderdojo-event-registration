@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 class RequestMetricsMiddleware:
     """Times every request per view (monitoring.recorder), logs the slow
-    ones and lets the process report its memory once a minute. First in
-    MIDDLEWARE, so the time covers the whole stack."""
+    ones and has the process report its memory (once a minute, from its own
+    thread). First in MIDDLEWARE, so the time covers the whole stack."""
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -25,5 +25,5 @@ class RequestMetricsMiddleware:
         recorder.record_request(view, milliseconds, response.status_code)
         if milliseconds >= settings.METRICS_SLOW_REQUEST_MS:
             logger.warning("Slow request: %s %s (%s) took %d ms", request.method, request.path, view, milliseconds)
-        recorder.report_process("web")
+        recorder.start_reporting("web")
         return response

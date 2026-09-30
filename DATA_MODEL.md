@@ -2698,10 +2698,11 @@ django-ninja stays the framework (`/api/v1/`, OpenAPI reference at
    clients (for the organisation dojo's events, on the organisation
    dashboard).
 2. **Shared services** — *built for attendance* (`events/attendance.py`,
-   used by the dojo views and the API). *Still to do:* signing up and
-   cancelling (`events/registrations.py`, out of `event_signup` and
-   `cancel_registration`) and event create/edit/status
-   (`events/services.py`) before phases 3 and 5.
+   used by the dojo views and the API) and *for signing up and cancelling*
+   (`events/registrations.py`, used by `event_signup` and
+   `cancel_registration`; it locks the session's row, so the API's
+   bookings will queue behind the site's). *Still to do:* event
+   create/edit/status (`events/services.py`) before phases 3 and 5.
 3. **Event management** (`events:write`): list, create, edit, open /
    close / back to draft, like the dojo's event screens.
 4. **Attendance** — *built:* `GET /api/v1/events?when=upcoming|past`,

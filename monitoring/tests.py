@@ -1,3 +1,4 @@
+import json
 from io import StringIO
 from unittest import mock
 
@@ -14,7 +15,7 @@ from monitoring.tasks import take_sample
 
 
 def clear_counters():
-    recorder._last_process_report = 0.0
+    recorder._reporting_pid = None
     get_redis_connection("default").delete(
         recorder.REQUESTS_KEY,
         recorder.TASKS_KEY,
@@ -40,7 +41,7 @@ class RecorderTests(TestCase):
         recorder.record_request("some_view", 12, 503)
         self.assertEqual(recorder.requests()["some_view"]["5xx"], 1)
 
-    def test_a_request_reports_the_process_memory_once_a_minute(self):
+    def test_a_request_starts_the_process_reporting_its_memory(self):
         self.client.get(reverse("home"))
         self.client.get(reverse("home"))
         processes = recorder.processes()
@@ -48,6 +49,17 @@ class RecorderTests(TestCase):
         self.assertEqual(processes[0]["role"], "web")
         self.assertGreater(processes[0]["rss"], 0)
         self.assertGreaterEqual(processes[0]["max_rss"], processes[0]["rss"] // 2)
+        # Once per process: later requests don't start another reporter.
+        with mock.patch("monitoring.recorder.threading.Thread") as thread:
+            self.client.get(reverse("home"))
+        thread.assert_not_called()
+
+    def test_a_report_expires_and_a_clean_exit_removes_it(self):
+        recorder.report_process("web")
+        key = recorder._process_key("web")
+        self.assertLessEqual(get_redis_connection("default").ttl(key), recorder.PROCESS_TTL)
+        recorder._forget("web")
+        self.assertEqual(recorder.processes(), [])
 
     def test_a_redis_that_is_down_never_fails_the_request(self):
         with mock.patch("monitoring.recorder.get_redis_connection", side_effect=ConnectionError("down")):
@@ -215,6 +227,16 @@ class CapacityModelTests(TestCase):
             self.assertIn(f"## Scenario `{name}`", text)
         self.assertIn("Total, mail content cleared after 12 months", text)
 
+    def test_the_json_gives_every_year_of_every_scenario(self):
+        out = StringIO()
+        call_command("capacity_report", "--json", "--years", "3", stdout=out)
+        result = json.loads(out.getvalue())
+        growth = result["scenarios"]["growth"]
+        self.assertEqual(growth["years"], [0, 1, 2, 3])
+        self.assertEqual(len(growth["bytes"]), 4)
+        self.assertLess(growth["bytes"][0], growth["bytes"][3])
+        self.assertLess(growth["bytes_mail_cleared"][3], growth["bytes"][3])
+
     def test_measuring_needs_a_scaled_database(self):
         small = {"accounts_user": {"rows": 3, "data_bytes": 16384, "index_bytes": 0}}
         with (
@@ -258,3 +280,37 @@ class SeedScaleTests(TestCase):
 
         with self.assertRaisesMessage(CommandError, "already has dojos"):
             call_command("seed_scale", "--scenario", "tiny", stdout=StringIO())
+
+
+class GunicornConfigTests(TestCase):
+    """gunicorn.conf.py caps the requests each web worker takes at once
+    (CAPACITY.md, "Capping requests per web worker")."""
+
+    def load(self, **env):
+        import runpy
+
+        from django.conf import settings as django_settings
+        from uvicorn.workers import UvicornWorker
+
+        original = UvicornWorker.CONFIG_KWARGS
+        self.addCleanup(setattr, UvicornWorker, "CONFIG_KWARGS", original)
+        with mock.patch.dict("os.environ", env):
+            runpy.run_path(str(django_settings.BASE_DIR / "gunicorn.conf.py"))
+        return UvicornWorker.CONFIG_KWARGS
+
+    def test_each_worker_takes_at_most_25_at_once(self):
+        with mock.patch.dict("os.environ"):
+            import os
+
+            os.environ.pop("UVICORN_LIMIT_CONCURRENCY", None)
+            config = self.load()
+        self.assertEqual(config["limit_concurrency"], 25)
+        # uvicorn's own choices stay.
+        self.assertEqual(config["loop"], "auto")
+
+    def test_the_environment_can_change_it(self):
+        self.assertEqual(self.load(UVICORN_LIMIT_CONCURRENCY="40")["limit_concurrency"], 40)
+
+    def test_reading_it_again_on_a_reload_changes_nothing(self):
+        first = dict(self.load())
+        self.assertEqual(self.load(), first)

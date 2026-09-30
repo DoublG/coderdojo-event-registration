@@ -1,3 +1,4 @@
-# The load test's own tool (CAPACITY.md, "Load tests"), in a venv of its own:
-# never installed in the devcontainer image or on production.
+# The load test's tools (CAPACITY.md, "Measuring again"), in a venv of their
+# own: never installed in the devcontainer image or on production.
 locust==2.46.6
+matplotlib==3.11.2

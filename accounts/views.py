@@ -26,8 +26,8 @@ from two_factor.views.utils import IdempotentSessionWizardView
 from core.image_library import use_library_image
 from core.manage_nav import manage_contexts
 from dojos.team import notify_managers
-from events.models import Registration, RegistrationCancellation
-from mailing.automated import waitlist_promoted_mail
+from events import registrations
+from events.models import Registration
 from mailing.categories import MailCategory
 from mailing.models import ConsentEvent
 from mailing.preferences import set_preference
@@ -846,30 +846,15 @@ def cancel_registration(request, registration_id):
 
     if request.method == "POST":
         event = registration.event
-        was_confirmed = not registration.waiting_list
-        RegistrationCancellation.objects.create(
-            ninja=registration.ninja,
-            event=event,
-            was_waitlisted=registration.waiting_list,
-            signed_up_at=registration.created_at,
-            cancelled_by=request.user,
-        )
-        registration.delete()
-
-        if was_confirmed:
-            # Cancelling a confirmed spot opens one up — promote whoever's
-            # been waiting longest for *this* event (see Registration.position,
-            # the FCFS queue events.views.event_signup assigns on signup).
-            next_in_line = Registration.objects.filter(event=event, waiting_list=True).order_by("position").first()
-            if next_in_line:
-                next_in_line.waiting_list = False
-                next_in_line.save(update_fields=["waiting_list"])
-                waitlist_promoted_mail(next_in_line)
-                notify_managers(
-                    event.dojo,
-                    gettext_lazy("A spot opened up in %(event)s — a waitlisted family is now confirmed."),
-                    url=reverse("dojo_dashboard", kwargs={"dojo_id": event.dojo_id}),
-                    params={"event": event.name},
-                )
+        # A freed confirmed place goes to whoever's been waiting longest for
+        # *this* session (Registration.position), under the session's lock
+        # (events.registrations).
+        if registrations.cancel(registration, cancelled_by=request.user):
+            notify_managers(
+                event.dojo,
+                gettext_lazy("A spot opened up in %(event)s — a waitlisted family is now confirmed."),
+                url=reverse("dojo_dashboard", kwargs={"dojo_id": event.dojo_id}),
+                params={"event": event.name},
+            )
 
     return redirect("account_home")

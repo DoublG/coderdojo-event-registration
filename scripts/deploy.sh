@@ -48,7 +48,7 @@ REMOTE_SOCKET="/var/run/socket/py10102.socket"
 CELERY_UNITS="coolregistration-celery-periodic coolregistration-celery-mailing"
 
 # Never shipped: dev tooling and local-only material.
-EXCLUDES_RE='^(\.devcontainer/|\.claude/|\.vscode/|docs/|scripts/|AGENTS\.md$|CLAUDE\.md$|DATA_MODEL\.md$|requirements-dev\.txt$|pyproject\.toml$|\.env\.example$)'
+EXCLUDES_RE='^(\.devcontainer/|\.claude/|\.vscode/|docs/|scripts/|user-journeys/|loadtest/|AGENTS\.md$|CLAUDE\.md$|DATA_MODEL\.md$|CAPACITY\.md$|requirements-dev\.txt$|pyproject\.toml$|\.env\.example$)'
 
 MODE="deploy"
 ASSUME_YES=0
@@ -128,6 +128,24 @@ missing_env_keys() {
     echo "\$missing"
 }
 
+# gunicorn.conf.py (the concurrency cap per web worker, CAPACITY.md) only
+# counts when gunicorn starts in \$APP without a -c of its own: say whether it does.
+gunicorn_config() {
+    local master args cwd
+    master="\$(pgrep -u "\$USER" -o -f "gunicorn.*\$SOCKET" || true)"
+    [ -n "\$master" ] || { echo "gunicorn: not running"; return; }
+    args="\$(tr '\\0' ' ' < "/proc/\$master/cmdline")"
+    cwd="\$(readlink "/proc/\$master/cwd")"
+    echo "gunicorn: \$args (in \$cwd)"
+    if echo "\$args" | grep -qE -- ' (-c|--config)[ =]'; then
+        echo "gunicorn.conf.py: IGNORED, gunicorn is started with a config of its own: the concurrency cap is off"
+    elif [ "\$cwd" = "\$APP" ] && [ -f "\$APP/gunicorn.conf.py" ]; then
+        echo "gunicorn.conf.py: read (concurrency cap \${UVICORN_LIMIT_CONCURRENCY:-25} per worker, from gunicorn's next start or reload)"
+    else
+        echo "gunicorn.conf.py: NOT read, gunicorn doesn't start in \$APP: the concurrency cap is off"
+    fi
+}
+
 step "Checking server layout"
 [ -x "\$PY" ] || die "python env not found: \$PY"
 [ -d "\$APP" ] || die "app folder not found: \$APP"
@@ -139,6 +157,8 @@ if [ "\$MODE" = check ]; then
     else
         echo ".env: MISSING"
     fi
+    step "gunicorn"
+    gunicorn_config
     step "Celery workers"
     if ! user_systemd; then
         echo "celery: systemd --user isn't reachable for \$USER, so a deploy can't start the workers (ask Level27 to enable lingering)"
@@ -202,6 +222,7 @@ kill -HUP "\$MASTER"
 sleep 5
 kill -0 "\$MASTER" 2>/dev/null || die "gunicorn master \$MASTER died after reload"
 echo "gunicorn master \$MASTER reloaded, \$(pgrep -u "\$USER" -P "\$MASTER" | wc -l) worker(s) up"
+gunicorn_config
 
 step "Smoke test"
 HOST="\$(grep -E '^ALLOWED_HOSTS=' "\$APP/.env" | cut -d= -f2 | tr ',' '\n' | grep -vE '^(localhost|127\.0\.0\.1|)\$' | head -1)"

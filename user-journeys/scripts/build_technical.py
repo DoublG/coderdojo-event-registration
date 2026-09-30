@@ -5,6 +5,7 @@ block), so the PDF follows the model when it changes; the prose here summarises 
 files. Run from anywhere: python build_technical.py
 """
 
+import base64
 import html
 import os
 import re
@@ -29,6 +30,17 @@ def mm(marker, caption=""):
             cap = f"<figcaption>{caption}</figcaption>" if caption else ""
             return f"<figure><pre class='mermaid'>{html.escape(b)}</pre>{cap}</figure>"
     raise LookupError(f"No diagram with {marker!r} in DATA_MODEL.md")
+
+
+CHARTS = os.path.join(REPO, "loadtest", "charts")
+
+
+def chart(name, caption=""):
+    """A chart from loadtest/charts.py (CAPACITY.md), embedded in the PDF."""
+    with open(os.path.join(CHARTS, f"{name}.png"), "rb") as png:
+        data = base64.b64encode(png.read()).decode()
+    cap = f"<figcaption>{caption}</figcaption>" if caption else ""
+    return f"<figure class='chart'><img src='data:image/png;base64,{data}' alt='{html.escape(caption)}'>{cap}</figure>"
 
 
 def own(code, caption=""):
@@ -93,6 +105,7 @@ th, td { border-bottom: 0.3mm solid #e5e7eb; padding: 1.4mm 2mm; vertical-align:
 figure { margin: 3mm 0 5mm; text-align: center; page-break-inside: avoid; }
 figure svg { max-width: 100% !important; max-height: 200mm; height: auto; }
 figcaption { font-size: 8.5pt; color: #6b7280; margin-top: 1.5mm; }
+figure.chart img { width: 100%; max-height: 95mm; object-fit: contain; }
 pre.mermaid { background: none; margin: 0; }
 .why { background: #fff7ed; border-left: 1.2mm solid #c94a23; padding: 2.5mm 4mm; margin: 3mm 0 4mm; border-radius: 0 2mm 2mm 0; page-break-inside: avoid; }
 .why b:first-child { color: #9a3412; }
@@ -579,6 +592,128 @@ describing what each login can do; the user-journey PDFs are made from it.</li>
 <li>The API covers dojo clients and attendance; external registrations and event management are planned (§13).</li>
 <li>Some privacy retention rules wait for their periods to be decided (§16).</li>
 <li>Production still lacks MySQL client headers and GDAL/GEOS on the host; the deploy script refuses to go live until then.</li>
+<li>Uploads have no size or type limit of their own, aren't resized and leave replaced files behind (chapter 15).</li>
+</ul>
+""",
+)
+
+# 15 ------------------------------------------------------------------------------------
+section(
+    "Capacity, load and disk",
+    f"""
+<p class='lede'>How big the database and the files get, what the site does under load, and how much memory each
+component needs: measured on 30 September 2026 in the devcontainer, on a database filled with a year of the
+<i>growth</i> scenario (100 dojos, 6,000 families, 1,200 sessions, 24,000 bookings and 189,000 mails a year). The
+full report, with the method and how to measure again, is <code>CAPACITY.md</code>; the charts come from
+<code>loadtest/charts.py</code>.</p>
+<h2>How it was measured</h2>
+<ul>
+<li><code>manage.py seed_scale</code> fills a separate <code>test_</code> database with a scenario's data, from rendered
+mail to the engagement snapshot; <code>capacity_report --measure</code> stores the bytes each row takes.</li>
+<li>A production-like run on it: <code>DEBUG</code> off, gunicorn with uvicorn workers and <code>gunicorn.conf.py</code>,
+the two Celery workers with production's options, on Redis databases of their own.</li>
+<li>Load from Locust (<code>loadtest/</code>): visitors, families that log in and book, dojo teams taking attendance,
+and a registration rush; the site's own <code>/metrics/</code> sampled every 2 seconds.</li>
+<li>Memory as PSS (each process's fair share of the memory forked processes share), never summed RSS.</li>
+</ul>
+{
+        why(
+            "The devcontainer isn't Level27's machine, so absolute response times will differ there. The memory figures and "
+            "the comparisons between runs carry over; the public part of the test can be repeated on production itself."
+        )
+    }
+
+<h2>Web workers set the response times</h2>
+{chart("web-workers", "Mixed load; response times in ms.")}
+<p>At the same load (300 users, about 63 requests a second) 4 web workers keep the 95th percentile at 110 ms where 2
+let it climb to 610 ms. Logging in takes 250–350 ms: the password hash is slow on purpose.</p>
+
+<h2>A registration rush</h2>
+<p>Two problems showed up when 500 families signed up for the same five sessions at once. Both were fixed on
+30 September 2026.</p>
+<ul>
+<li><b>Sessions overbooked</b> (up to 25 confirmed places on a session of 22, with duplicate waiting-list positions):
+the sign-up read the places taken, then inserted, without a lock. Signing up and cancelling now go through
+<code>events.registrations</code>, which locks the session's row first; real threads in
+<code>BookingConcurrencyTests</code> fail without the lock.</li>
+<li><b>MySQL ran out of connections</b>: under ASGI every request in progress holds its own connection, and uvicorn
+starts any number of requests at once. <code>gunicorn.conf.py</code> now caps each worker at 25 connections
+(uvicorn's <code>limit_concurrency</code>); beyond it the request gets an immediate 503.</li>
+</ul>
+{chart("rush-connections", "500 families, 4 web workers; MySQL connections sampled every 2 s.")}
+{
+        chart(
+            "rush-outcomes",
+            "Share of all requests. The same work gets done in each run (about 220 answered requests a second); what changes is how the rest fails.",
+        )
+    }
+{chart("rush-latency", "95th-percentile response time of the answered requests.")}
+{
+        why(
+            "A refused request costs nothing and can be retried; a request that waits for a database connection and then "
+            "fails holds a worker, a thread and a connection while it waits, which slows everyone down."
+        )
+    }
+
+<h2>Choosing the cap</h2>
+{chart("cap-normal-load", "300 users, mixed load, 4 web workers.")}
+<ul>
+<li><b>25 refuses nothing under normal heavy load</b> and keeps a rush far from MySQL's limit; 10 already turns normal
+traffic away. With 4 workers, at most about 100 connections plus Celery's.</li>
+<li>uvicorn counts <b>open connections</b>, not requests: connections a proxy keeps open between requests, and open
+notification WebSockets, take places too. How Level27's proxy connects to gunicorn is still to confirm.</li>
+<li><code>scripts/deploy.sh --check</code> says whether gunicorn reads the file (it doesn't when it starts outside
+<code>~/app</code> or with a <code>-c</code> of its own).</li>
+</ul>
+
+<h2>Memory</h2>
+{chart("memory-under-load", "4 web workers, 300 users; PSS of all processes of each kind.")}
+<table>
+<tr><th>Component</th><th>Idle</th><th>Peak</th></tr>
+<tr><td>Web: gunicorn master and 4 uvicorn workers</td><td>460 MB</td><td>750 MB (855 in an uncapped rush)</td></tr>
+<tr><td>Celery periodic worker (parent, pool child, beat)</td><td>255 MB</td><td>255 MB</td></tr>
+<tr><td>Celery mailing worker (parent, pool child)</td><td>160 MB</td><td>385 MB, nightly engagement rebuild</td></tr>
+<tr><td>Redis (cache, Channels, broker)</td><td>3 MB</td><td>5 MB</td></tr>
+<tr><td><b>Total</b></td><td><b>0.9 GB</b></td><td><b>about 1.45 GB: plan 2 GB</b></td></tr>
+</table>
+<p>The mailing worker's child reaches 300 MB during the nightly rebuild and is then replaced
+(<code>--max-memory-per-child</code>, 200 MB); a campaign launch stays at 160 MB because audiences are queued in chunks.
+Mail goes out at 120 a minute by design: a campaign to 6,600 families takes about 55 minutes, with booking mail
+ahead of it.</p>
+
+<h2>Database growth</h2>
+{chart("database-growth", "Projected size per scenario; dashed: mail text cleared after 12 months.")}
+<ul>
+<li>About 350 MB a year in the growth scenario, 1.6 GB after five years. 70% is the mail log: every mail keeps its
+rendered text. Clearing it after 12 months, as the privacy register already says, saves about a quarter.</li>
+<li>Accounts, children and bookings are anonymised, never deleted, so those tables only grow; the audit log is the
+second-largest (525 bytes an entry).</li>
+</ul>
+
+<h2>Disk and uploads</h2>
+<table>
+<tr><th>On disk</th><th>Size</th></tr>
+<tr><td>Database, binary logs, backups</td><td>1.6 GB after five years, plus tens of MB of logs and a copy per backup</td></tr>
+<tr><td>Uploaded images (<code>media/</code>)</td><td>0.1 to 0.8 GB a year, depending on how many teams upload their own banners</td></tr>
+<tr><td>Standard images</td><td>a few MB: copied once, shared by every row that uses one</td></tr>
+<tr><td>Code releases (5 kept), Python packages</td><td>7 MB a release, 236 MB</td></tr>
+<tr><td>Celery's logs (journal)</td><td>about 6 MB a day, mostly the 10-second mail dispatcher</td></tr>
+</table>
+<p>Teams upload dojo icons and session banners, the organisation promotion images, sponsor logos and badge icons,
+volunteers their background-check document. What guards them today: image fields only take real raster images
+(Pillow opens them; never an SVG), Pillow refuses images over 179 megapixels, and the background-check document is
+private and deleted at the decision. What's missing: any size limit (a 14 MB photo and a 144-megapixel image went
+through; the proxy's body limit is the only cap), any type check on the document (a 30 MB <code>.exe</code> went
+through), resizing (photos keep their EXIF data, GPS included), and cleaning up replaced files.
+<code>CAPACITY.md</code> lists the guardrails to add, a proxy limit first.</p>
+
+<h2>Running it again, on production too</h2>
+<ul>
+<li>Read-only and safe on production: <code>manage.py capacity_report</code>, <code>/metrics/</code> with its token, the
+daily <code>CapacitySample</code>, and <code>deploy.sh --check</code>.</li>
+<li>A public load test (<code>loadtest/run.sh ... public</code>: visitors only, nothing written) at a quiet moment,
+starting at 50 users; it goes through Level27's proxy, so it's also the end-to-end check.</li>
+<li>The modes that log in and book refuse any host that isn't local: they'd book real sessions and mail real families.</li>
 </ul>
 """,
 )
@@ -592,7 +727,7 @@ def html_doc():
         "<div class='sub'>How the site is built, how its data fits together, and why it looks the way it does. "
         "A summary of <code>DATA_MODEL.md</code> and <code>CLAUDE.md</code>, with the diagrams taken from the former.</div>"
         f"<h2 style='margin-top:14mm'>Contents</h2><ol class='toc'>{toc}</ol>"
-        "<div class='meta'>Generated from the repository, 29 September 2026 · "
+        "<div class='meta'>Generated from the repository, 30 September 2026 · "
         "user-journeys/scripts/build_technical.py</div></div>"
     ]
     for i, (title, content) in enumerate(SECTIONS, 1):

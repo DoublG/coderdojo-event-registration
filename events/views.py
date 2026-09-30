@@ -2,19 +2,17 @@ from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db import transaction
-from django.db.models import Max, Q
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from accounts.home_dojo import assign_on_signup
 from accounts.models import Ninja
 from content.models import FAQ, Promotion
 from dojos.models import Dojo
-from mailing.automated import booking_mail
 
+from . import registrations
 from .forms import AGE_RANGES, DOJO_ORGANISATION, EventSearchForm
 from .models import Event, Registration
 from .search import WIDGET_PAGE_SIZE, upcoming_available_events
@@ -151,9 +149,7 @@ def event_signup(request, event_id):
             for r in Registration.objects.filter(event=event, ninja__in=Ninja.objects.signable_by(guardian))
         }
 
-    if request.method == "POST" and guardian and not event.registration_open:
-        error = _("Registrations for this session are closed.")
-    elif request.method == "POST" and guardian:
+    if request.method == "POST" and guardian:
         submitted_ids = request.POST.getlist("child")
         # The order children were *checked* in (tracked client-side, since
         # checkbox form submission is always DOM order regardless of click
@@ -165,39 +161,18 @@ def event_signup(request, event_id):
 
         children_by_id = {str(c.id): c for c in Ninja.objects.signable_by(guardian).filter(id__in=submitted_ids)}
         selected = [children_by_id[cid] for cid in dict.fromkeys(ordered_ids) if cid in children_by_id]
-        new_children = [c for c in selected if c.id not in existing_registrations]
 
-        if not selected:
+        if not event.registration_open:
+            error = _("Registrations for this session are closed.")
+        elif not selected:
             error = _("Please select at least one child.")
-        elif not new_children:
-            error = _("The child(ren) you selected are already signed up for this session.")
         else:
-            with transaction.atomic():
-                next_position = (
-                    Registration.objects.filter(event=event).aggregate(Max("position"))["position__max"] or 0
-                )
-                confirmed_count = Registration.objects.filter(event=event, waiting_list=False).count()
-                results = []
-                for child in new_children:
-                    next_position += 1
-                    waiting_list = confirmed_count >= event.places
-                    registration = Registration.objects.create(
-                        event=event,
-                        ninja=child,
-                        waiting_list=waiting_list,
-                        position=next_position,
-                    )
-                    # What the ninja works on starts as everything the session
-                    # covers; the dojo team narrows it on the attendance list.
-                    registration.pathways.set(event.pathways.all())
-                    # A child's first sign-up gives them their home dojo.
-                    assign_on_signup(child, event.dojo)
-                    if not waiting_list:
-                        confirmed_count += 1
-                    results.append({"child": child, "waiting_list": waiting_list})
-                    # Queued in the same transaction: no mail for a sign-up
-                    # that didn't happen, and none lost for one that did.
-                    booking_mail(registration)
+            # Places, positions and "already signed up" are decided under the
+            # session's lock (events.registrations), not from what this page read.
+            try:
+                results = registrations.sign_up(event, selected)
+            except registrations.RegistrationError as problem:
+                error = str(problem)
             # Re-fetch: the children just registered above should now show
             # as greyed-out/already-registered if the guardian lands back
             # on this form (e.g. via the browser back button).

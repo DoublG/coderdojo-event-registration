@@ -1,0 +1,131 @@
+{
+  "now_bytes": 11304960,
+  "scenarios": {
+    "today": {
+      "name": "today",
+      "dojos": 60,
+      "families": 3000,
+      "sessions_per_dojo": 10,
+      "bookings_per_session": 15,
+      "children_per_family": 1.5,
+      "guardians_per_child": 1.3,
+      "team_per_session": 4,
+      "new_family_share": 0.35,
+      "digests_per_family": 6,
+      "campaigns_per_family": 6,
+      "dojo_mailings_per_family": 6,
+      "journeys_per_family": 1,
+      "sessions": 600,
+      "bookings": 9000,
+      "mail": 86220,
+      "years": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "bytes": [
+        14740384.0,
+        172938184.0,
+        331135984.0,
+        489333784.0,
+        647531584.0,
+        805729384.0
+      ],
+      "bytes_mail_cleared": [
+        14740384.0,
+        172938184.0,
+        283111444.0,
+        393284704.0,
+        503457964.0,
+        613631224.0
+      ]
+    },
+    "growth": {
+      "name": "growth",
+      "dojos": 100,
+      "families": 6000,
+      "sessions_per_dojo": 12,
+      "bookings_per_session": 20,
+      "children_per_family": 1.5,
+      "guardians_per_child": 1.3,
+      "team_per_session": 4,
+      "new_family_share": 0.35,
+      "digests_per_family": 6,
+      "campaigns_per_family": 6,
+      "dojo_mailings_per_family": 6,
+      "journeys_per_family": 1,
+      "sessions": 1200,
+      "bookings": 24000,
+      "mail": 188820,
+      "years": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "bytes": [
+        18405184.0,
+        366665224.0,
+        714925264.0,
+        1063185304.0,
+        1411445344.0,
+        1759705384.0
+      ],
+      "bytes_mail_cleared": [
+        18405184.0,
+        366665224.0,
+        609752524.0,
+        852839824.0,
+        1095927124.0,
+        1339014424.0
+      ]
+    },
+    "stretch": {
+      "name": "stretch",
+      "dojos": 150,
+      "families": 12000,
+      "sessions_per_dojo": 20,
+      "bookings_per_session": 25,
+      "children_per_family": 1.5,
+      "guardians_per_child": 1.3,
+      "team_per_session": 4,
+      "new_family_share": 0.35,
+      "digests_per_family": 6,
+      "campaigns_per_family": 6,
+      "dojo_mailings_per_family": 6,
+      "journeys_per_family": 1,
+      "sessions": 3000,
+      "bookings": 75000,
+      "mail": 451350,
+      "years": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "bytes": [
+        25734784.0,
+        869434444.0,
+        1713134104.0,
+        2556833764.0,
+        3400533424.0,
+        4244233084.0
+      ],
+      "bytes_mail_cleared": [
+        25734784.0,
+        869434444.0,
+        1461732154.0,
+        2054029864.0,
+        2646327574.0,
+        3238625284.0
+      ]
+    }
+  }
+}

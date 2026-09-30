@@ -1,27 +1,53 @@
-"""Load test (CAPACITY.md, "Load tests"): visitors, families and dojo teams
-against a production-like run of the site on a `seed_scale` database.
+"""Load test (CAPACITY.md, "Load tests"): visitors, families and dojo teams.
+Usually started through loadtest/run.sh, which also samples /metrics/.
 
-    LOADTEST_DATA=/tmp/loadtest.json locust -f loadtest/locustfile.py --host http://127.0.0.1:8001 \
-        --headless -u 200 -r 20 -t 5m --csv /tmp/lt/mixed
-    LOADTEST_MODE=rush ...   # only families signing up for the same five sessions at once
+    LOADTEST_DATA=/tmp/loadtest.json locust -f loadtest/locustfile.py \
+        --host http://coolregistration.localhost:8001 --headless -u 300 -r 20 -t 3m --csv /tmp/lt/mixed
+    LOADTEST_MODE=rush ...     # only families signing up for the same five sessions at once
+    LOADTEST_MODE=public ...   # visitors only: no login, no writes (production)
+    LOADTEST_CLOSE=1 ...       # a new connection per request, as behind a proxy
 
-The data file comes from loadtest/prepare.py. Every synthetic login's
-password is seed_scale's (`LOADTEST_PASSWORD`, default "scale-test")."""
+`mixed` and `rush` log in and book: they need a `seed_scale` database (the
+data file comes from loadtest/prepare.py, every synthetic login's password
+is seed_scale's, `LOADTEST_PASSWORD`) and refuse any host that isn't local,
+so they can never book real sessions or mail real families. `public` only
+reads public pages, finding the sessions on /events/ itself, and is the mode
+for production (CAPACITY.md, "Load testing production")."""
 
 import json
 import os
 import random
+import re
+from urllib.parse import urlparse
 
-from locust import HttpUser, between, task
+from locust import HttpUser, between, events, task
 
-DATA = json.load(open(os.environ["LOADTEST_DATA"]))
-PASSWORD = os.environ.get("LOADTEST_PASSWORD", "scale-test")
 MODE = os.environ.get("LOADTEST_MODE", "mixed")
+if MODE not in ("mixed", "rush", "public"):
+    raise SystemExit(f"Unknown LOADTEST_MODE {MODE!r}: mixed, rush or public.")
+DATA = json.load(open(os.environ["LOADTEST_DATA"])) if MODE != "public" else {"events": []}
+PASSWORD = os.environ.get("LOADTEST_PASSWORD", "scale-test")
+LOCAL_HOSTS = ("localhost", "127.0.0.1", "::1", "coolregistration.localhost")
+
+
+@events.test_start.add_listener
+def only_public_beyond_local(environment, **kwargs):
+    """The modes that log in and book only run against a local test site."""
+    host = urlparse(environment.host or "").hostname or ""
+    if MODE != "public" and host not in LOCAL_HOSTS:
+        raise SystemExit(f"LOADTEST_MODE={MODE} logs in and books sessions: only against a local site, not {host}.")
 
 
 class SiteUser(HttpUser):
     abstract = True
     wait_time = between(2, 8)
+
+    def on_start(self):
+        # LOADTEST_CLOSE=1: a new connection per request, as a proxy that
+        # doesn't keep connections to gunicorn open (uvicorn's
+        # limit_concurrency counts open connections, not requests).
+        if os.environ.get("LOADTEST_CLOSE"):
+            self.client.headers["Connection"] = "close"
 
     def login(self, username):
         self.client.get("/login/", name="/login/")
@@ -58,6 +84,13 @@ class Visitor(SiteUser):
     def events(self):
         self.client.get("/events/", name="/events/")
 
+    def on_start(self):
+        super().on_start()
+        if not DATA["events"]:
+            # public mode: the sessions the site itself lists.
+            page = self.client.get("/events/", name="/events/").text
+            DATA["events"] = sorted({int(n) for n in re.findall(r'href="/events/(\d+)/"', page)}) or [0]
+
     @task(3)
     def event(self):
         self.client.get(f"/events/{random.choice(DATA['events'])}/", name="/events/<id>/")
@@ -74,9 +107,10 @@ class Visitor(SiteUser):
 class Family(SiteUser):
     """A parent who logs in, looks at their page and books sessions."""
 
-    weight = 0 if MODE == "rush" else 3
+    weight = 3 if MODE == "mixed" else 0
 
     def on_start(self):
+        super().on_start()
         self.family = random.choice(DATA["families"])
         self.login(self.family["username"])
 
@@ -109,6 +143,7 @@ class RushFamily(SiteUser):
     wait_time = between(0.5, 2)
 
     def on_start(self):
+        super().on_start()
         self.family = random.choice(DATA["families"])
         self.login(self.family["username"])
         self.event = random.choice(DATA["rush"])
@@ -127,9 +162,10 @@ class RushFamily(SiteUser):
 class DojoTeam(SiteUser):
     """A champion taking attendance during a session."""
 
-    weight = 0 if MODE == "rush" else 1
+    weight = 1 if MODE == "mixed" else 0
 
     def on_start(self):
+        super().on_start()
         self.member = random.choice(DATA["team"])
         self.login(self.member["username"])
         self.base = f"/dojos/{self.member['dojo']}/events/{self.member['event']}/attendance/"

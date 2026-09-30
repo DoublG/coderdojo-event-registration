@@ -4,6 +4,7 @@ as Markdown. Read-only, safe on production:
     manage.py capacity_report                    # now + every scenario at 1, 3 and 5 years
     manage.py capacity_report --scenario growth --years 1 2 3 4 5
     manage.py capacity_report --measure          # on a seed_scale database: store the bytes per row
+    manage.py capacity_report --json             # the same figures as JSON, year by year (loadtest/charts.py)
 """
 
 import json
@@ -27,6 +28,7 @@ class Command(BaseCommand):
         parser.add_argument("--scenario", choices=sorted(capacity.SCENARIOS), action="append")
         parser.add_argument("--years", type=int, nargs="+", default=[1, 3, 5])
         parser.add_argument("--top", type=int, default=15, help="How many of the largest tables to list.")
+        parser.add_argument("--json", action="store_true", help="The projection as JSON, year by year.")
         parser.add_argument(
             "--measure",
             action="store_true",
@@ -38,9 +40,26 @@ class Command(BaseCommand):
         if options["measure"]:
             return self.measure(tables)
         sizes = capacity.load_row_sizes()
+        if options["json"]:
+            return self.as_json(tables, sizes, options)
         self.current(tables, options["top"])
         for name in options["scenario"] or capacity.SCENARIOS:
             self.projection(capacity.SCENARIOS[name], options["years"], tables, sizes)
+
+    def as_json(self, tables, sizes, options):
+        years = range(0, max(options["years"]) + 1)
+        result = {"now_bytes": sum(t["data_bytes"] + t["index_bytes"] for t in tables.values()), "scenarios": {}}
+        for name in options["scenario"] or capacity.SCENARIOS:
+            scenario = capacity.SCENARIOS[name]
+            result["scenarios"][name] = {
+                **capacity.scenario_dict(scenario),
+                "years": list(years),
+                "bytes": [sum(capacity.project(scenario, n, tables, sizes).values()) for n in years],
+                "bytes_mail_cleared": [
+                    sum(capacity.project(scenario, n, tables, sizes, clear_mail_content=True).values()) for n in years
+                ],
+            }
+        self.stdout.write(json.dumps(result, indent=2))
 
     def measure(self, tables):
         with connection.cursor() as cursor:

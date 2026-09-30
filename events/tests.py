@@ -1,9 +1,11 @@
+import threading
 from datetime import timedelta
 from io import BytesIO
 
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.db import connection
+from django.test import TestCase, TransactionTestCase
 from django.urls import reverse
 from django.utils import timezone
 from PIL import Image
@@ -14,8 +16,9 @@ from dojos.models import Dojo
 from dojos.search import DEFAULT_SEARCH_ORIGIN, dojos_by_distance
 from dojos.testing import make_dojo
 
+from . import registrations
 from .engagement import is_aimed_at
-from .models import Badge, Belt, Event, NinjaBadge, Registration
+from .models import Badge, Belt, Event, NinjaBadge, Registration, RegistrationCancellation
 from .search import CACHE_KEY, upcoming_available_events
 
 
@@ -207,6 +210,139 @@ class GirlsSessionLabelTests(TestCase):
         )
 
         self.assertTrue(Registration.objects.filter(event=self.girls, ninja=boy, waiting_list=False).exists())
+
+
+class BookingTests(TestCase):
+    """events.registrations: the rules, one family at a time."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.dojo = make_dojo("Ghent")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
+        cls.children = [Ninja.objects.create(name=f"Kid {n}") for n in range(3)]
+        for child in cls.children:
+            Guardianship.objects.create(guardian=cls.guardian, ninja=child)
+
+    def test_a_session_closed_after_the_page_was_read_takes_nobody(self):
+        event = _future_event(self.dojo)
+        Event.objects.filter(pk=event.pk).update(status=Event.CLOSED)
+        with self.assertRaisesMessage(registrations.RegistrationError, "Registrations for this session are closed."):
+            registrations.sign_up(event, self.children[:1])
+        self.assertFalse(Registration.objects.exists())
+
+    def test_children_already_signed_up_are_skipped(self):
+        event = _future_event(self.dojo)
+        registrations.sign_up(event, self.children[:1])
+        results = registrations.sign_up(event, self.children[:2])
+        self.assertEqual([r["child"] for r in results], [self.children[1]])
+        with self.assertRaisesMessage(registrations.RegistrationError, "already signed up"):
+            registrations.sign_up(event, self.children[:2])
+
+    def test_cancelling_twice_cancels_once(self):
+        event = _future_event(self.dojo, places=1)
+        registration = registrations.sign_up(event, self.children[:1])[0]["registration"]
+        registrations.sign_up(event, self.children[1:2])
+        self.assertIsNotNone(registrations.cancel(registration, cancelled_by=self.guardian))
+        self.assertIsNone(registrations.cancel(registration, cancelled_by=self.guardian))
+        self.assertEqual(RegistrationCancellation.objects.count(), 1)
+
+    def test_a_waiting_child_is_only_promoted_into_a_free_place(self):
+        event = _future_event(self.dojo, places=2)
+        first, _second, waiting = (r["registration"] for r in registrations.sign_up(event, self.children))
+        self.assertTrue(waiting.waiting_list)
+        # The team lowered the places after the session filled up.
+        Event.objects.filter(pk=event.pk).update(places=1)
+        self.assertIsNone(registrations.cancel(first, cancelled_by=self.guardian))
+        waiting.refresh_from_db()
+        self.assertTrue(waiting.waiting_list)
+
+    def test_cancelling_a_waiting_place_promotes_nobody(self):
+        event = _future_event(self.dojo, places=1)
+        results = registrations.sign_up(event, self.children)
+        self.assertIsNone(registrations.cancel(results[1]["registration"], cancelled_by=self.guardian))
+        self.assertTrue(Registration.objects.get(pk=results[2]["registration"].pk).waiting_list)
+
+
+class BookingConcurrencyTests(TransactionTestCase):
+    """Families clicking at the same moment (CAPACITY.md, finding 1): real
+    threads, each with its own database connection, released together.
+    Without the session's lock these overbooked and repeated positions."""
+
+    def setUp(self):
+        self.dojo = make_dojo("Ghent")
+        self.families = []
+        for n in range(10):
+            guardian = User.objects.create(username=f"g{n}", email=f"g{n}@example.com")
+            child = Ninja.objects.create(name=f"Kid {n}")
+            Guardianship.objects.create(guardian=guardian, ninja=child)
+            self.families.append((guardian, child))
+
+    def run_together(self, *calls):
+        barrier = threading.Barrier(len(calls))
+        results = [None] * len(calls)
+
+        def run(index, call):
+            try:
+                barrier.wait()
+                results[index] = call()
+            except Exception as problem:
+                results[index] = problem
+            finally:
+                connection.close()
+
+        threads = [threading.Thread(target=run, args=(i, call)) for i, call in enumerate(calls)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        return results
+
+    def test_simultaneous_sign_ups_never_overbook(self):
+        event = _future_event(self.dojo, places=3)
+        results = self.run_together(
+            *(lambda child=child: registrations.sign_up(event, [child]) for _, child in self.families)
+        )
+        self.assertEqual([r for r in results if isinstance(r, Exception)], [])
+        booked = Registration.objects.filter(event=event)
+        self.assertEqual(booked.filter(waiting_list=False).count(), 3)
+        self.assertEqual(booked.filter(waiting_list=True).count(), 7)
+        self.assertEqual(sorted(booked.values_list("position", flat=True)), list(range(1, 11)))
+        # The confirmed places went to the first three in the queue.
+        self.assertEqual(sorted(booked.filter(waiting_list=False).values_list("position", flat=True)), [1, 2, 3])
+
+    def test_a_double_click_signs_up_once(self):
+        event = _future_event(self.dojo)
+        _, child = self.families[0]
+        results = self.run_together(
+            lambda: registrations.sign_up(event, [child]), lambda: registrations.sign_up(event, [child])
+        )
+        self.assertEqual(Registration.objects.filter(event=event, ninja=child).count(), 1)
+        self.assertEqual(sum(isinstance(r, registrations.RegistrationError) for r in results), 1)
+
+    def test_simultaneous_cancellations_each_promote_a_different_child(self):
+        event = _future_event(self.dojo, places=2)
+        for _, child in self.families[:4]:
+            registrations.sign_up(event, [child])
+        confirmed = list(Registration.objects.filter(event=event, waiting_list=False))
+        results = self.run_together(
+            *(lambda r=r: registrations.cancel(r, cancelled_by=self.families[0][0]) for r in confirmed)
+        )
+        self.assertEqual(len({r.pk for r in results}), 2)
+        self.assertEqual(Registration.objects.filter(event=event, waiting_list=False).count(), 2)
+        self.assertFalse(Registration.objects.filter(event=event, waiting_list=True).exists())
+
+    def test_a_cancellation_and_a_sign_up_at_once_keep_the_places(self):
+        event = _future_event(self.dojo, places=1)
+        _, first = self.families[0]
+        registration = registrations.sign_up(event, [first])[0]["registration"]
+        _, second = self.families[1]
+        self.run_together(
+            lambda: registrations.cancel(registration, cancelled_by=self.families[0][0]),
+            lambda: registrations.sign_up(event, [second]),
+        )
+        remaining = Registration.objects.get(event=event)
+        self.assertEqual(remaining.ninja, second)
+        self.assertFalse(remaining.waiting_list)
 
 
 class EventSignupViewTests(TestCase):

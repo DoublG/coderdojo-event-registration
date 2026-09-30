@@ -21,16 +21,16 @@ def _task_finished(task_id=None, task=None, state=None, **kwargs):
     if started is None or task is None:
         return
     recorder.record_task(task.name, time.perf_counter() - started, failed=state == "FAILURE")
-    recorder.report_process("celery")
+    recorder.start_reporting("celery")
 
 
 # The worker's parent process and the embedded beat never run a task: they
-# report once when they start (they barely grow afterwards).
+# start reporting when they're up.
 @worker_ready.connect
 def _worker_started(**kwargs):
-    recorder.report_process("celery-parent", force=True, ttl=24 * 3600)
+    recorder.start_reporting("celery-parent")
 
 
 @beat_init.connect
 def _beat_started(**kwargs):
-    recorder.report_process("beat", force=True, ttl=24 * 3600)
+    recorder.start_reporting("beat")
