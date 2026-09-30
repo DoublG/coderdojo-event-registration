@@ -158,6 +158,11 @@ services:
       PMA_HOST: db
       # Served under https://coolregistration.localhost/phpmyadmin/ (nginx.conf).
       PMA_ABSOLUTE_URI: https://coolregistration.localhost/phpmyadmin/
+      # Logs straight in as the app's own database user (auth_type = config),
+      # no login screen: development data only, reachable only through the
+      # local proxy. Same credentials as DB_USER/DB_PASSWORD on the workspace.
+      PMA_USER: coolregistration
+      PMA_PASSWORD: Se84KCCCJlnfkdfv
 
   mailpit:
     image: axllent/mailpit:latest
