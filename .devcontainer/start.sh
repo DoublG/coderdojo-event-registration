@@ -126,7 +126,7 @@ python manage.py seed_dojos
 # seed_events needs pathways and the dojo teams (event teams), seed_ninja_history
 # needs ninjas (seed_guardians), teams and pathways, and seed_faqs needs events.
 #
-# Only on a fresh DB (no Event rows yet): the db-data volume survives a
+# Only on a fresh DB (no Event rows yet): the db-data-8.4 volume survives a
 # container rebuild, and seed_events/seed_ninja_history generate dates
 # relative to *today*, so re-running them on a later day would keep piling
 # extra events onto the existing demo data. Wipe the DB (`docker compose

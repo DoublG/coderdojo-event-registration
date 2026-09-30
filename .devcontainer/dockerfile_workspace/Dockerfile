@@ -1,4 +1,5 @@
-FROM python:3.14-bookworm
+# Debian 13 (trixie): security support to June 2030 (MAINTENANCE.md).
+FROM python:3.14-trixie
 
 # git/curl/ca-certificates: general tooling (ca-certificates also needed so
 # start.sh can add our local dev CA to the trust store).

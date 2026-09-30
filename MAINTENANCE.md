@@ -31,10 +31,10 @@ Review this page every quarter (see [Calendar](#calendar)) and whenever a versio
 
 | Component | Version | Security until | Status and action |
 |---|---|---|---|
-| Workspace image | `python:3.14-bookworm` (Debian 12) | Debian 12: regular support ended 11 Jul 2026, LTS to **30 Jun 2028** | Move to `python:3.14-trixie` (Debian 13, to Jun 2030). |
-| MySQL | `mysql:latest`, running **9.1.0** | **ended 21 Jan 2025** (an innovation release, supported only until the next one) | `latest` is only pulled once, so it went stale. Pin **`mysql:8.4`** (the LTS production should run too). |
-| Redis | `redis:latest`, running 7.2.5 | 7.2: 1 Dec 2029 | Pin the version production runs. |
-| nginx | `nginx:1.27-alpine` (1.27.5) | **ended 24 Jun 2025** | Pin the current stable, `nginx:1.30-alpine`. Development only. |
+| Workspace image | `python:3.14-trixie` (Debian 13), Python 3.14.7 | Debian 13: to **Jun 2030** (LTS) | Current. Rebuild the image for new Python patch releases. |
+| MySQL | `mysql:8.4` (8.4.11), on volume `db-data-8.4` | 8.4 LTS: **30 Apr 2032** | Current; the version production should move to. The same image as the CI. |
+| Redis | `redis:7.2` (7.2.16) | 7.2: 1 Dec 2029 | Current. Match production's version once it's confirmed (see [below](#still-to-confirm)). The same image as the CI. |
+| nginx | `nginx:1.30-alpine` (1.30.5) | 1.30 stable: until the next stable (about April 2027) | Current. Move to the next stable when it's out. Development only. |
 | Mailpit, phpMyAdmin, 2FAuth | `latest` | | Development only; fine on `latest`. |
 
 Development should run the versions production runs (or will run next), so upgrades are tried there
@@ -121,6 +121,20 @@ one gunicorn runs from, see CLAUDE.md), the devcontainer's base image, and the C
 
 **Operating system, MySQL and Redis** upgrades on production go through Level27. Try the new versions
 in the devcontainer first by changing the image tags in `.devcontainer/docker-compose.yml`.
+
+**Changing the devcontainer's MySQL version.** A MySQL can't open data written by a newer version, so
+the database volume is named after the version (`db-data-8.4`): a new version gets a new volume, and
+`start.sh` seeds it. To keep your data instead, dump it before switching and load it into the new one:
+
+```sh
+docker exec coolregistration-dev-db mysqldump -uroot -pcoolregistration --single-transaction \
+    --routines --triggers --no-tablespaces --set-gtid-purged=OFF --databases coolregistration > dev-db.sql
+# change the image and the volume name in docker-compose.yml, `up -d`, wait until MySQL is up, then:
+docker exec -i coolregistration-dev-db mysql -uroot -pcoolregistration < dev-db.sql
+```
+
+Load it before `start.sh` runs, or it seeds the empty database first. The old volume stays until you
+remove it (`docker volume ls`, `docker volume rm <project>_db-data`).
 
 ---
 
@@ -241,4 +255,4 @@ A deeper review, by a person with Claude Code's help:
 | 30 Sep 2026 | **Markdown links** (`core/templatetags/markdown_extras.py`, `markdownify`): the text is HTML-escaped, but Python-Markdown keeps any link scheme, so `[x](javascript:...)` in a dojo's or event's description becomes a working `javascript:` link on the public page. Found by the Code audit workflow's security rules (S308). | **High** (stored cross-site scripting): any active champion or mentor can put it on a public page, and a logged-in visitor who clicks it runs the script as themselves. No Content-Security-Policy limits it. | **Fixed 30 Sep 2026:** `markdownify` now cleans its HTML with nh3 against an allowlist (headings from `<h2>`, paragraphs, bold, italic, lists, links; links only `http`, `https`, `mailto` or relative, with `rel="nofollow noopener noreferrer"`). Images, code and anything else are dropped. Tests: `core.tests.MarkdownifyTests`. |
 | 30 Sep 2026 | **`check --deploy` warnings**: no HSTS, no HTTPS redirect, session and CSRF cookies not `Secure`; django-oauth-toolkit's RFC 9700 defaults (implicit and password grants, tokens in the query string, tokens stored in plain text). Also no Content-Security-Policy or Permissions-Policy. | Medium: TLS ends at Level27's proxy, so the cookies' `Secure` flag and HSTS are cheap to add; the OAuth grants we don't offer weren't reachable, tokens stored in plain text were. A CSP limits what any future cross-site scripting bug can do. | **Fixed in the code 30 Sep 2026** (CLAUDE.md, "Security headers"): `Secure` cookies, the proxy header, all RFC 9700 options (tokens now stored hashed), a strict script CSP with nonces (inline handlers moved to `bundle.js`, htmx without eval), Permissions-Policy. Tested with `core.tests.SecurityHeadersTests`, the API tests and a browser crawl of about 480 pages as six roles. **Open on production:** confirm Level27's proxy sets `X-Forwarded-Proto` itself, then set `SECURE_SSL_REDIRECT=true` and raise `SECURE_HSTS_SECONDS` (1 hour, 1 day, 1 year) in `~/app/.env`; `deploy.sh` reports what's still missing. |
 | 30 Sep 2026 | **MySQL 8.0** (the production client, possibly the server) reached end of life on 30 Apr 2026: no more security fixes. | Depends on the server version (to confirm). | Open: confirm with Level27, move to 8.4 LTS. |
-| 30 Sep 2026 | **Devcontainer images** past end of life: MySQL 9.1 (`latest` gone stale), nginx 1.27. | Development only, not reachable from outside. | Open: pin `mysql:8.4` and `nginx:1.30-alpine`. |
+| 30 Sep 2026 | **Devcontainer images** past end of life: MySQL 9.1 (`latest` gone stale), nginx 1.27; the workspace on Debian 12. | Development only, not reachable from outside. | **Fixed 30 Sep 2026:** pinned `mysql:8.4`, `redis:7.2`, `nginx:1.30-alpine`, workspace on `python:3.14-trixie`. The dev data was carried from 9.1 to 8.4 with a dump; the old `db-data` volume is left as a fallback. |

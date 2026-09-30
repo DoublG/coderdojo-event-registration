@@ -96,8 +96,11 @@ services:
       - db
       - redis
 
+  # Pinned versions, never `latest` (a `latest` image is pulled once and then
+  # silently ages): the versions production runs or will run next, see
+  # MAINTENANCE.md, "Development". MySQL 8.4 is the LTS (security fixes to April 2032).
   db:
-    image: mysql:latest
+    image: mysql:8.4
     container_name: ${PROJECT_NAME:-coolregistration-dev}-db
     restart: unless-stopped
     environment:
@@ -106,13 +109,16 @@ services:
       MYSQL_USER: coolregistration
       MYSQL_PASSWORD: Se84KCCCJlnfkdfv
     volumes:
-      - db-data:/var/lib/mysql
+      # Named after the MySQL version: a MySQL can't open the data of a newer one
+      # (this used to be 9.1 on `db-data`), so a version change starts a new volume,
+      # which start.sh seeds. To keep your data instead, dump it first (MAINTENANCE.md).
+      - db-data-8.4:/var/lib/mysql
       # Runs once against a fresh volume — grants the app user rights on
       # Django's test database too (see db-init/01-grant-test-db.sql).
       - ./db-init:/docker-entrypoint-initdb.d:ro
 
   redis:
-    image: redis:latest
+    image: redis:7.2
     container_name: ${PROJECT_NAME:-coolregistration-dev}-redis
     restart: unless-stopped
 
@@ -120,7 +126,7 @@ services:
   # (443). Everything else is a path behind it (nginx/nginx.conf): the site,
   # /docs/, /mails/ (Mailpit), /phpmyadmin/ and /otp/ (the testers' authenticator).
   proxy:
-    image: nginx:1.27-alpine
+    image: nginx:1.30-alpine
     container_name: ${PROJECT_NAME:-coolregistration-dev}-proxy
     restart: unless-stopped
     depends_on:
@@ -194,7 +200,7 @@ services:
 
 
 volumes:
-  db-data:
+  db-data-8.4:
   claude-config:
   mailpit-data:
   otp-data:

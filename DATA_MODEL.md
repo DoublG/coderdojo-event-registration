@@ -1409,7 +1409,7 @@ Instead:
   followed by a fresh `up` (`start.sh` reseeds on an empty database).
   Note that `-v` also wipes the `claude-config` volume (Claude Code's
   login and sessions); to reset only the database, remove just the
-  `db-data` volume (`docker volume ls` shows its project-prefixed name), or
+  `db-data-8.4` volume (`docker volume ls` shows its project-prefixed name), or
   drop and recreate the `coolregistration` database from inside the
   workspace and rerun `start.sh`'s seed sequence.
 
