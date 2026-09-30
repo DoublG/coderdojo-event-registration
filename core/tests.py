@@ -543,6 +543,57 @@ class ContactAndCodeOfConductTests(TestCase):
         self.assertContains(self.client.get(reverse("code_of_conduct"), HTTP_ACCEPT_LANGUAGE="nl-be"), "Gedragscode")
 
 
+class HealthCheckTests(TestCase):
+    """/health/ for uptime monitoring (core/health.py): 200 while the
+    database, Redis and the mail workers are fine, 503 naming the failed check."""
+
+    def test_healthy_site_answers_ok_to_anyone(self):
+        response = self.client.get(reverse("health"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(), {"status": "ok", "checks": {"database": "ok", "redis": "ok", "mail_workers": "ok"}}
+        )
+        self.assertIn("no-cache", response["Cache-Control"])
+
+    def test_redis_down_is_503(self):
+        from unittest import mock
+
+        with (
+            mock.patch("core.health.get_redis_connection", side_effect=ConnectionError("down")),
+            self.assertLogs("core.health", "ERROR"),
+        ):
+            response = self.client.get(reverse("health"))
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["status"], "error")
+        self.assertEqual(response.json()["checks"]["redis"], "error")
+        self.assertEqual(response.json()["checks"]["database"], "ok")
+
+    def test_mail_waiting_too_long_means_the_workers_are_down(self):
+        from datetime import timedelta
+
+        from mailing.categories import MailCategory
+        from mailing.models import EmailMessage
+
+        mail = EmailMessage.objects.create(
+            category=MailCategory.SERVICE,
+            recipient="a@example.com",
+            subject="Hi",
+            body="…",
+            send_after=timezone.now() - timedelta(minutes=10),
+        )
+        self.assertEqual(self.client.get(reverse("health")).status_code, 200)
+
+        mail.send_after = timezone.now() - timedelta(hours=1)
+        mail.save()
+        with self.assertLogs("core.health", "ERROR"):
+            response = self.client.get(reverse("health"))
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["checks"]["mail_workers"], "error")
+
+    def test_only_get(self):
+        self.assertEqual(self.client.post(reverse("health")).status_code, 405)
+
+
 class AuditLogCoverageTests(TestCase):
     """Every model is either recorded in the audit log
     (AUDITLOG_INCLUDE_TRACKING_MODELS, DATA_MODEL.md §14) or listed here with
