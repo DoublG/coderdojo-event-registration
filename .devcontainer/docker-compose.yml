@@ -99,6 +99,8 @@ services:
   # Pinned versions, never `latest` (a `latest` image is pulled once and then
   # silently ages): the versions production runs or will run next, see
   # MAINTENANCE.md, "Development". MySQL 8.4 is the LTS (security fixes to April 2032).
+  # Changing any image version in this file? Update its row in that table in the
+  # same change (and the CI's MySQL/Redis services in .github/workflows/).
   db:
     image: mysql:8.4
     container_name: ${PROJECT_NAME:-coolregistration-dev}-db

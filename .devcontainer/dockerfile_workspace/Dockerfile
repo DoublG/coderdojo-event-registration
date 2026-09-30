@@ -1,4 +1,5 @@
-# Debian 13 (trixie): security support to June 2030 (MAINTENANCE.md).
+# Debian 13 (trixie): security support to June 2030. Changing this version? Update its row in
+# MAINTENANCE.md ("Development") in the same change.
 FROM python:3.14-trixie
 
 # git/curl/ca-certificates: general tooling (ca-certificates also needed so

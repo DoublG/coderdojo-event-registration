@@ -38,7 +38,7 @@ jobs:
       # MySQL 8.4 LTS, the version production should run (MAINTENANCE.md). The root
       # account lets Django create and drop test_<DB_NAME>.
       db:
-        image: mysql:8.4
+        image: mysql:8.4  # the devcontainer's version; a change goes in MAINTENANCE.md too
         env:
           MYSQL_ROOT_PASSWORD: ci-only
           MYSQL_DATABASE: coolregistration
@@ -48,7 +48,7 @@ jobs:
           --health-interval=5s --health-timeout=5s --health-retries=30
       # The cache (tests use db 3), the Channels layer and the Celery broker.
       redis:
-        image: redis:7.2
+        image: redis:7.2  # the devcontainer's version; a change goes in MAINTENANCE.md too
         ports: ["6379:6379"]
         options: >-
           --health-cmd="redis-cli ping"

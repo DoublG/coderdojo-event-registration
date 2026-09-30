@@ -73,7 +73,7 @@ jobs:
     services:
       # MySQL's own model checks ask the server for its version; nothing is migrated.
       db:
-        image: mysql:8.4
+        image: mysql:8.4  # the devcontainer's version; a change goes in MAINTENANCE.md too
         env:
           MYSQL_ROOT_PASSWORD: ci-only
           MYSQL_DATABASE: coolregistration

@@ -41,6 +41,12 @@ Development should run the versions production runs (or will run next), so upgra
 first. Prefer a pinned tag (`mysql:8.4`) over `latest`: a `latest` image is pulled once and then never
 moves, so it silently ages.
 
+**When an image version changes, update this table in the same change**: an `image:` tag in
+`.devcontainer/docker-compose.yml`, the `FROM` line of `.devcontainer/dockerfile_workspace/Dockerfile`, or the
+MySQL and Redis services in `.github/workflows/tests.yml` and `audit.yml` (which stay on the devcontainer's
+versions). Fill in the new version, its security-until date and the status, and set *Last checked* when you
+looked the dates up.
+
 ### Python packages
 
 Everything the site imports is pinned in [`requirements.txt`](requirements.txt) (production) and
