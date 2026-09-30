@@ -23,19 +23,19 @@
   .dojo-page-root .markdown-content a { color: var(--secondary); }
   .dojo-page-root .markdown-content ul,
   .dojo-page-root .markdown-content ol { padding-left: 1.25em; }
-  .dojo-page-root .markdown-content code {
-    background: var(--surface-sunken); border-radius: var(--radius-sm, 4px); padding: 0 4px;
-  }
-  .dojo-page-root .markdown-content h1,
+  /* markdownify: `#` is an h2 (the page's title is the h1), down to h6. */
   .dojo-page-root .markdown-content h2,
   .dojo-page-root .markdown-content h3,
-  .dojo-page-root .markdown-content h4 {
+  .dojo-page-root .markdown-content h4,
+  .dojo-page-root .markdown-content h5,
+  .dojo-page-root .markdown-content h6 {
     font-family: var(--font-sans); color: var(--ink); margin: var(--space-4) 0 var(--space-2);
   }
-  .dojo-page-root .markdown-content h1 { font-size: 20px; }
-  .dojo-page-root .markdown-content h2 { font-size: 18px; }
-  .dojo-page-root .markdown-content h3,
-  .dojo-page-root .markdown-content h4 { font-size: 16px; }
+  .dojo-page-root .markdown-content h2 { font-size: 20px; }
+  .dojo-page-root .markdown-content h3 { font-size: 18px; }
+  .dojo-page-root .markdown-content h4,
+  .dojo-page-root .markdown-content h5,
+  .dojo-page-root .markdown-content h6 { font-size: 16px; }
   .dojo-page-root .section { margin: var(--space-7) 0; }
   .dojo-page-root h2.section-title { color: var(--ink); margin: 0 0 var(--space-4); }
   .dojo-page-root .row { display: flex; gap: var(--space-5); flex-wrap: wrap; }

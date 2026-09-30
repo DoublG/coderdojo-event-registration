@@ -1606,3 +1606,57 @@ class AuditLogPageTests(TestCase):
         self.assertEqual(
             len(self.client.get(self.url, {"page": 2}).context["rows"]), min(on_page_two, audit_views.PAGE_SIZE)
         )
+
+
+class MarkdownifyTests(TestCase):
+    """A team's Markdown (dojo and session pages) only becomes basic formatting."""
+
+    def render(self, text):
+        from core.templatetags.markdown_extras import markdownify
+
+        return markdownify(text)
+
+    def test_headings_start_at_h2(self):
+        html = self.render("# Title\n\n## Part\n\n### Detail")
+        self.assertIn("<h2>Title</h2>", html)
+        self.assertIn("<h3>Part</h3>", html)
+        self.assertIn("<h4>Detail</h4>", html)
+        self.assertNotIn("<h1", html)
+
+    def test_basic_formatting_stays(self):
+        html = self.render("**bold** and *italic*\n\n- one\n- two\n\nSteps:\n\n1. first\n2. second")
+        self.assertIn("<strong>bold</strong>", html)
+        self.assertIn("<em>italic</em>", html)
+        self.assertIn("<ul>", html)
+        self.assertIn("<li>one</li>", html)
+        self.assertIn("<ol>", html)
+
+    def test_web_mail_and_relative_links_stay(self):
+        html = self.render("[site](https://coderdojobelgium.be) [mail](mailto:info@example.org) [dojo](/dojos/1/)")
+        self.assertIn('href="https://coderdojobelgium.be"', html)
+        self.assertIn('href="mailto:info@example.org"', html)
+        self.assertIn('href="/dojos/1/"', html)
+        self.assertIn('rel="nofollow noopener noreferrer"', html)
+
+    def test_script_links_lose_their_target(self):
+        html = self.render("[a](javascript:alert(1)) [b](JaVaScRiPt:alert(1)) [c](data:text/html,x) [d](vbscript:x)")
+        self.assertNotIn("href", html)
+        self.assertNotIn("javascript", html.lower())
+        self.assertNotIn("data:", html)
+
+    def test_typed_html_shows_as_text(self):
+        html = self.render('<div onclick="x()">hi</div><script>alert(1)</script>')
+        self.assertNotIn("<div", html)
+        self.assertNotIn("<script", html)
+        self.assertIn("&lt;script&gt;", html)
+
+    def test_images_code_and_quotes_are_not_allowed(self):
+        html = self.render("![pixel](https://tracker.example/p.png)\n\n`code`\n\n    indented\n\n---")
+        for tag in ("<img", "<code", "<pre", "<hr"):
+            self.assertNotIn(tag, html)
+        self.assertNotIn("tracker.example", html)
+        self.assertIn("code", html)
+
+    def test_empty_text_is_empty(self):
+        self.assertEqual(self.render(""), "")
+        self.assertEqual(self.render(None), "")

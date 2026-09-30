@@ -1,6 +1,6 @@
 {
- "generated_from": "ad1227b",
- "generated_on": "2026-09-29",
+ "generated_from": "15e1973",
+ "generated_on": "2026-09-30",
  "personas": {
   "parent": {
    "pages": [
@@ -51,14 +51,14 @@
     "content/templates/content/partials/_promotion_hero.html": "fe3e33ad8f5fd7ef",
     "core/templates/core/home.html": "56829b46eeb073a8",
     "core/templates/core/menu.html": "3e231891d87fe854",
-    "dojos/templates/dojos/dojo_detail.html": "12a9d872be282e75",
+    "dojos/templates/dojos/dojo_detail.html": "6241b91ef459e179",
     "dojos/templates/dojos/dojo_list.html": "a36c9d809cb54ceb",
     "dojos/templates/dojos/partials/_dojo_finder_widget.html": "18f727dcbd0df957",
     "dojos/templates/dojos/partials/_dojo_finder_widget_results.html": "79b5b32749140431",
     "dojos/templates/dojos/partials/_dojo_result.html": "a16be3459181b492",
     "dojos/templates/dojos/partials/_dojo_results_page.html": "e3c9d37b335529fc",
     "dojos/templates/dojos/partials/_mentor_avatar.html": "f4bcbd2505baf894",
-    "events/templates/events/event_detail.html": "59a0f3c78b286968",
+    "events/templates/events/event_detail.html": "92f16e984817e19c",
     "events/templates/events/event_list.html": "10f60c131f993f26",
     "events/templates/events/event_signup.html": "d5660b03155f6279",
     "events/templates/events/partials/_audience_badge.html": "70a7a01c39560f2e",
@@ -100,7 +100,7 @@
     "accounts/templates/accounts/partials/_child_header_display.html": "f89a4683b94f27a0",
     "accounts/templates/accounts/partials/_ninja_login_card.html": "58a52d981a3751d4",
     "accounts/templates/accounts/security.html": "93f8070b8156b3c2",
-    "events/templates/events/event_detail.html": "59a0f3c78b286968",
+    "events/templates/events/event_detail.html": "92f16e984817e19c",
     "events/templates/events/event_signup.html": "d5660b03155f6279",
     "events/templates/events/partials/_audience_badge.html": "70a7a01c39560f2e",
     "events/templates/events/partials/_organiser.html": "2d7af6f1eb27d438",
@@ -141,7 +141,7 @@
     "applications/templates/applications/upload_background_check.html": "a83cfbc9ab8451c0",
     "core/templates/core/menu.html": "3e231891d87fe854",
     "dojos/templates/dojos/dojo_dashboard.html": "3db7228d1d6b8360",
-    "dojos/templates/dojos/dojo_detail.html": "12a9d872be282e75",
+    "dojos/templates/dojos/dojo_detail.html": "6241b91ef459e179",
     "dojos/templates/dojos/dojo_event_attendance.html": "ec9f89abf8150a29",
     "dojos/templates/dojos/dojo_event_detail.html": "f87e289ed143ce32",
     "dojos/templates/dojos/dojo_event_list.html": "8d8679c2bbc326bc",

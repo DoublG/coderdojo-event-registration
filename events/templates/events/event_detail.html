@@ -27,19 +27,19 @@
   .eventdetail-root .markdown-content a { color: var(--secondary); }
   .eventdetail-root .markdown-content ul,
   .eventdetail-root .markdown-content ol { padding-left: 1.25em; }
-  .eventdetail-root .markdown-content code {
-    background: var(--surface-sunken); border-radius: var(--radius-sm, 4px); padding: 0 4px;
-  }
-  .eventdetail-root .markdown-content h1,
+  /* markdownify: `#` is an h2 (the page's title is the h1), down to h6. */
   .eventdetail-root .markdown-content h2,
   .eventdetail-root .markdown-content h3,
-  .eventdetail-root .markdown-content h4 {
+  .eventdetail-root .markdown-content h4,
+  .eventdetail-root .markdown-content h5,
+  .eventdetail-root .markdown-content h6 {
     font-family: var(--font-sans); color: var(--ink); margin: var(--space-4) 0 var(--space-2);
   }
-  .eventdetail-root .markdown-content h1 { font-size: 20px; }
-  .eventdetail-root .markdown-content h2 { font-size: 18px; }
-  .eventdetail-root .markdown-content h3,
-  .eventdetail-root .markdown-content h4 { font-size: 16px; }
+  .eventdetail-root .markdown-content h2 { font-size: 20px; }
+  .eventdetail-root .markdown-content h3 { font-size: 18px; }
+  .eventdetail-root .markdown-content h4,
+  .eventdetail-root .markdown-content h5,
+  .eventdetail-root .markdown-content h6 { font-size: 16px; }
   @media (max-width: 800px) {
     .eventdetail-root .event-layout { flex-direction: column; }
     .eventdetail-root .event-side { position: static; width: 100%; flex-basis: auto; }
