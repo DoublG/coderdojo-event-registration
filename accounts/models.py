@@ -9,6 +9,7 @@ from django.utils.crypto import salted_hmac
 from django.utils.translation import gettext_lazy as _
 
 from applications.storage import get_private_storage
+from core.uploads import ICON_SIDE, UploadedImageField, validate_document_upload
 
 
 class User(AbstractUser):
@@ -75,6 +76,7 @@ class User(AbstractUser):
     background_check_document = models.FileField(
         upload_to="background_checks/",
         storage=get_private_storage,
+        validators=[validate_document_upload],
         null=True,
         blank=True,
         help_text="The uploaded uittreksel uit het strafregister, model 2 (Artikel 596.2). Only "
@@ -128,7 +130,7 @@ class User(AbstractUser):
     )
     title = models.CharField(max_length=200, blank=True, default="", help_text='e.g. "Software engineer"')
     bio = models.TextField(blank=True, default="")
-    photo = models.ImageField(upload_to="profiles/", null=True, blank=True)
+    photo = UploadedImageField(upload_to="profiles/", max_side=ICON_SIDE, null=True, blank=True)
     show_on_team_pages = models.BooleanField(
         default=True,
         help_text="Uncheck to keep this person off the public team pages.",
@@ -267,7 +269,7 @@ class Ninja(models.Model):
         help_text="Allergies or other notes from the family (health data). Shown to the champion only, on the "
         "attendance list of a session the child has a confirmed place at.",
     )
-    photo = models.ImageField(upload_to="participants/", null=True, blank=True)
+    photo = UploadedImageField(upload_to="participants/", max_side=ICON_SIDE, null=True, blank=True)
 
     objects = NinjaQuerySet.as_manager()
 

@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.content_languages import OrganisationContent, ScopedContent, TranslatableModel
+from core.uploads import BANNER_SIDE, ICON_SIDE, LOGO_SIDE, UploadedImageField
 
 
 class FAQQuerySet(models.QuerySet):
@@ -114,7 +115,7 @@ class OrganisationTeamMember(OrganisationContent):
     position = models.CharField(max_length=200, help_text='e.g. "Member of the board", "Volunteer coordinator"')
     email = models.EmailField(blank=True, default="", help_text="Shown on their detail page, if set.")
     bio = models.TextField(blank=True, default="")
-    photo = models.ImageField(upload_to="team/", null=True, blank=True)
+    photo = UploadedImageField(upload_to="team/", max_side=ICON_SIDE, null=True, blank=True)
     focus_areas = models.CharField(
         max_length=300,
         blank=True,
@@ -206,8 +207,9 @@ class Promotion(OrganisationContent):
         help_text="Empty: the promotion ends when the event starts.",
     )
     title = models.CharField(max_length=200, blank=True, default="", help_text="Optional: replaces the event's name.")
-    image = models.ImageField(
+    image = UploadedImageField(
         upload_to="promotions/",
+        max_side=BANNER_SIDE,
         null=True,
         blank=True,
         help_text="Optional: replaces the event's banner.",
@@ -263,8 +265,9 @@ class Sponsor(models.Model):
 
     name = models.CharField(max_length=200)
     url = models.URLField("website", blank=True, default="")
-    logo = models.ImageField(
+    logo = UploadedImageField(
         upload_to="sponsors/",
+        max_side=LOGO_SIDE,
         null=True,
         blank=True,
         help_text="Optional. Without a logo, the sponsor's name is shown.",

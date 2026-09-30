@@ -1853,3 +1853,212 @@ class AdminLoginWithoutAccessTests(TestCase):
 
         self.client.force_login(with_admin_access(self.admin))
         self.assertEqual(self.client.get(reverse("admin:index")).status_code, 200)
+
+
+class UploadGuardrailTests(TempMediaMixin, TestCase):
+    """core.uploads: uploaded images are checked, shrunk and re-encoded
+    without their metadata, and deleted when nothing uses them any more;
+    the background-check document is checked (CAPACITY.md, "Disk")."""
+
+    @staticmethod
+    def jpeg(size=(3000, 2000), orientation=None, gps=False):
+        import io
+
+        from PIL import Image
+
+        image = Image.new("RGB", size, (200, 30, 30))
+        exif = Image.Exif()
+        exif[0x010F] = "PhoneMaker"  # Make
+        if orientation:
+            exif[0x0112] = orientation
+        if gps:
+            exif[0x8825] = {1: "N", 2: (50.0, 51.0, 0.0)}
+        out = io.BytesIO()
+        image.save(out, "JPEG", exif=exif)
+        return out.getvalue()
+
+    @staticmethod
+    def png(size=(300, 300), alpha=True):
+        import io
+
+        from PIL import Image
+
+        out = io.BytesIO()
+        Image.new("RGBA" if alpha else "RGB", size, (0, 0, 255, 128) if alpha else (0, 0, 255)).save(out, "PNG")
+        return out.getvalue()
+
+    def upload(self, name, data, content_type="image/jpeg"):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        return SimpleUploadedFile(name, data, content_type=content_type)
+
+    def stored(self, fieldfile):
+        from PIL import Image
+
+        fieldfile.open("rb")
+        try:
+            with Image.open(fieldfile) as image:
+                image.load()
+                return image.format, image.size, image.mode, image.getexif()
+        finally:
+            fieldfile.close()
+
+    def test_an_uploaded_photo_is_shrunk_turned_upright_and_loses_its_metadata(self):
+        dojo = make_dojo("Ghent")
+        dojo.icon = self.upload("phone.JPEG", self.jpeg(orientation=6, gps=True))
+        dojo.save()
+        dojo.refresh_from_db()
+        self.assertTrue(dojo.icon.name.startswith("dojos/phone") and dojo.icon.name.endswith(".jpg"))
+        image_format, size, _, exif = self.stored(dojo.icon)
+        self.assertEqual(image_format, "JPEG")
+        # Orientation 6 is a quarter turn: the landscape photo becomes portrait, at most 512 px.
+        self.assertEqual(size, (341, 512))
+        self.assertEqual(dict(exif), {})
+
+    def test_no_metadata_of_any_kind_survives(self):
+        """Not only EXIF: XMP, comments, text chunks and colour profiles are
+        left out too, in a JPEG and in a PNG with transparency."""
+        import io
+
+        from PIL import Image, ImageCms, PngImagePlugin
+
+        profile = ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes()
+        exif = Image.Exif()
+        exif[0x010F] = "SecretPhoneMaker"
+        jpeg = io.BytesIO()
+        Image.new("RGB", (800, 600), (10, 120, 200)).save(
+            jpeg,
+            "JPEG",
+            exif=exif,
+            icc_profile=profile,
+            comment=b"secret-comment",
+            xmp=b"<x:xmpmeta>secret-xmp-author</x:xmpmeta>",
+        )
+        chunks = PngImagePlugin.PngInfo()
+        chunks.add_text("Author", "secret-png-author")
+        chunks.add_itxt("XML:com.adobe.xmp", "<x:xmpmeta>secret-png-xmp</x:xmpmeta>")
+        png = io.BytesIO()
+        Image.new("RGBA", (300, 300), (0, 0, 255, 128)).save(
+            png, "PNG", pnginfo=chunks, icc_profile=profile, exif=exif
+        )
+
+        for name, data in (("photo.jpg", jpeg.getvalue()), ("logo.png", png.getvalue())):
+            dojo = make_dojo(f"Dojo {name}")
+            dojo.icon = self.upload(name, data)
+            dojo.save()
+            with dojo.icon.open("rb") as stored:
+                raw = stored.read()
+            for secret in (b"secret", b"xmpmeta", b"Author"):
+                self.assertNotIn(secret, raw, name)
+            with Image.open(io.BytesIO(raw)) as image:
+                self.assertEqual(dict(image.getexif()), {}, name)
+                left = set(image.info) & {"icc_profile", "exif", "xmp", "comment", "Author", "XML:com.adobe.xmp"}
+                self.assertEqual(left, set(), name)
+
+    def test_a_banner_keeps_more_pixels_and_transparency_stays_png(self):
+        from events.models import Event
+
+        event = Event(
+            dojo=make_dojo("Ghent"), name="Session", start_time=timezone.now(), end_time=timezone.now(), places=5
+        )
+        event.image = self.upload("banner.jpg", self.jpeg(size=(4000, 1000)))
+        event.save()
+        self.assertEqual(self.stored(event.image)[1], (1600, 400))
+        dojo = make_dojo("Antwerp")
+        dojo.icon = self.upload("logo.png", self.png(), "image/png")
+        dojo.save()
+        image_format, size, mode, _ = self.stored(dojo.icon)
+        self.assertEqual((image_format, size, mode), ("PNG", (300, 300), "RGBA"))
+
+    def test_a_standard_image_is_linked_as_it_is(self):
+        dojo = make_dojo("Ghent")
+        name = sorted(p.name for p in image_library.LIBRARY_DIRS["dojos"].iterdir() if p.is_file())[0]
+        image_library.use_library_image(dojo, "icon", "dojos", name, save=True)
+        dojo.refresh_from_db()
+        self.assertEqual(dojo.icon.name, f"library/dojos/{name}")
+
+    def test_a_replaced_upload_is_deleted_once_committed(self):
+        dojo = make_dojo("Ghent")
+        dojo.icon = self.upload("first.jpg", self.jpeg())
+        dojo.save()
+        first = dojo.icon.name
+        dojo.icon = self.upload("second.jpg", self.jpeg())
+        with self.captureOnCommitCallbacks(execute=True):
+            dojo.save()
+        self.assertFalse(dojo.icon.storage.exists(first))
+        self.assertTrue(dojo.icon.storage.exists(dojo.icon.name))
+        # A save that doesn't touch the icon deletes nothing.
+        with self.captureOnCommitCallbacks(execute=True):
+            dojo.save(update_fields=["name"])
+            dojo.save()
+        self.assertTrue(dojo.icon.storage.exists(dojo.icon.name))
+
+    def test_a_deleted_row_takes_its_upload_along_unless_another_row_uses_it(self):
+        first, second = make_dojo("Ghent"), make_dojo("Antwerp")
+        first.icon = self.upload("shared.jpg", self.jpeg())
+        first.save()
+        Dojo.objects.filter(pk=second.pk).update(icon=first.icon.name)
+        name = first.icon.name
+        with self.captureOnCommitCallbacks(execute=True):
+            first.delete()
+        self.assertTrue(default_storage_exists(name))
+        with self.captureOnCommitCallbacks(execute=True):
+            Dojo.objects.get(pk=second.pk).delete()
+        self.assertFalse(default_storage_exists(name))
+
+    def test_a_standard_image_is_never_deleted(self):
+        dojo = make_dojo("Ghent")
+        name = sorted(p.name for p in image_library.LIBRARY_DIRS["dojos"].iterdir() if p.is_file())[0]
+        image_library.use_library_image(dojo, "icon", "dojos", name, save=True)
+        library_name = dojo.icon.name
+        self.assertTrue(default_storage_exists(library_name))
+        dojo.icon = self.upload("own.jpg", self.jpeg())
+        with self.captureOnCommitCallbacks(execute=True):
+            dojo.save()
+            dojo.delete()
+        self.assertTrue(default_storage_exists(library_name))
+
+    def test_too_big_or_too_many_pixels_is_refused_with_a_reason(self):
+        from django.core.exceptions import ValidationError
+
+        from core import uploads
+
+        with self.assertRaisesMessage(ValidationError, "it can be at most 10 MB"):
+            uploads.validate_image_upload(self.upload("big.jpg", b"\xff\xd8\xff" + b"0" * (11 * 1024 * 1024)))
+        with self.assertRaisesMessage(ValidationError, "it can be at most 40."):
+            uploads.validate_image_upload(self.upload("huge.png", self.png(size=(8000, 6000), alpha=False)))
+        uploads.validate_image_upload(self.upload("fine.jpg", self.jpeg()))
+
+    def test_the_admin_can_save_a_row_whose_existing_file_breaks_the_rules(self):
+        dojo = make_dojo("Ghent")
+        Dojo.objects.filter(pk=dojo.pk).update(icon="dojos/old-and-huge.jpg")
+        dojo.refresh_from_db()
+        dojo.full_clean()  # an existing file isn't checked again
+
+    def test_the_forms_show_the_limits(self):
+        from dojos.forms import DojoProfileForm
+
+        self.assertIn("at most 10 MB", str(DojoProfileForm().fields["icon"].help_text))
+
+    def test_the_background_check_document_must_be_a_pdf_jpeg_or_png(self):
+        from applications.forms import BackgroundCheckUploadForm
+
+        def form(name, data):
+            return BackgroundCheckUploadForm(
+                data={}, files={"document": self.upload(name, data, "application/octet-stream")}
+            )
+
+        self.assertTrue(form("extract.pdf", b"%PDF-1.7\n...").is_valid())
+        self.assertTrue(form("scan.jpg", self.jpeg(size=(100, 100))).is_valid())
+        self.assertTrue(form("scan.png", self.png(size=(10, 10))).is_valid())
+        refused = form("extract.pdf", b"MZ\x90\x00 an executable")
+        self.assertFalse(refused.is_valid())
+        self.assertEqual(refused.errors["document"], ["Upload a PDF, JPEG or PNG file."])
+        too_big = form("extract.pdf", b"%PDF-" + b"0" * (11 * 1024 * 1024))
+        self.assertIn("at most 10 MB", too_big.errors["document"][0])
+
+
+def default_storage_exists(name):
+    from django.core.files.storage import default_storage
+
+    return default_storage.exists(name)

@@ -7,5 +7,8 @@ class CoreConfig(AppConfig):
 
     def ready(self):
         from core.audit import register_models
+        from core.uploads import connect_cleanup
 
         register_models()
+        # Deletes replaced and orphaned uploads (CAPACITY.md, "Disk").
+        connect_cleanup()

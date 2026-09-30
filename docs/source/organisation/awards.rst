@@ -20,8 +20,9 @@ For each award you also fill in:
 - **Name** and **Description**, with optional versions in the other
   languages. A text left empty in a language shows the English version.
 - **Icon**: pick one of the **standard icons**, or upload your own image
-  (PNG, JPG or WebP; a square image works best). An uploaded image wins over
-  a standard icon.
+  (JPEG, PNG, GIF or WebP, at most 10 MB; a square image works best). An
+  uploaded image wins over a standard icon. It's made smaller, and everything
+  stored in the file besides the picture itself is removed.
 
 The list shows how many ninjas have earned each award. Open an award to
 change it. An award that no ninja has yet can be removed; one that ninjas

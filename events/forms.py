@@ -13,6 +13,7 @@ from core.content_languages import (
     save_translation_fields,
 )
 from core.image_library import LIBRARY_DIRS, library_filename, use_library_image
+from core.uploads import with_upload_help
 from dojos.models import Dojo
 from pathways.models import Pathway
 
@@ -186,7 +187,7 @@ class EventForm(forms.ModelForm):
                 "Optional. When set, the event page links there instead of showing the sign-up form, and Places isn't needed."
             ),
             "venue_name": _("Leave blank to use the dojo's own address."),
-            "image": _("Uploading a file here overrides the template chosen above."),
+            "image": with_upload_help(_("Uploading a file here overrides the template chosen above.")),
             "description": _("Supports basic Markdown."),
             "audience": _("A girls' session gets a label on the site. Anyone can still sign up."),
             "name": "",
@@ -313,7 +314,7 @@ class BadgeForm(forms.ModelForm):
             "criteria": _("One-off only."),
             "threshold": _("Milestone only: how many sessions a ninja must attend."),
             "grants_belt": _("Milestone only, optional: reaching it also awards this belt."),
-            "icon": _("Optional: upload your own icon instead (PNG, JPG or WebP, square works best)."),
+            "icon": with_upload_help(_("Optional: upload your own icon instead (square works best).")),
         }
         # The input classes come from core.forms.SiteBoundField.
         widgets = {

@@ -37,13 +37,13 @@ def _request_as(user):
 
 
 def _document():
-    document = io.BytesIO(b"pretend this is a pdf")
+    document = io.BytesIO(b"%PDF-1.7 pretend this is a pdf")
     document.name = "extract.pdf"
     return document
 
 
 def _uploaded():
-    return SimpleUploadedFile("extract.pdf", b"pretend this is a pdf", content_type="application/pdf")
+    return SimpleUploadedFile("extract.pdf", b"%PDF-1.7 pretend this is a pdf", content_type="application/pdf")
 
 
 def _submitted_account(username="applicant", **fields):
@@ -192,6 +192,22 @@ class BackgroundCheckFlowTests(_CleanupDocumentsMixin, TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.background_check_status, User.CHECK_SUBMITTED)
         self.assertTrue(self.user.background_check_document)
+
+    def test_a_file_that_isnt_a_pdf_jpeg_or_png_is_refused(self):
+        """core.uploads.validate_document_upload: by its first bytes, whatever its name."""
+        services.request_background_check(self.user, _request_as(self.reviewer))
+        self.user.refresh_from_db()
+        url = reverse("upload_background_check", kwargs={"token": self.user.background_check_token})
+        document = io.BytesIO(b"MZ\x90\x00 an executable")
+        document.name = "extract.pdf"
+
+        response = self.client.post(url, {"document": document})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Upload a PDF, JPEG or PNG file.")
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.background_check_status, User.CHECK_REQUESTED)
+        self.assertFalse(self.user.background_check_document)
 
     def test_unknown_token_is_404(self):
         url = reverse("upload_background_check", kwargs={"token": "00000000-0000-0000-0000-000000000000"})
@@ -435,7 +451,7 @@ class DownloadBackgroundCheckTests(_CleanupDocumentsMixin, TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Cache-Control"], "no-store")
-        self.assertEqual(b"".join(response.streaming_content), b"pretend this is a pdf")
+        self.assertEqual(b"".join(response.streaming_content), b"%PDF-1.7 pretend this is a pdf")
 
         self.user.refresh_from_db()
         services.validate_background_check(self.user, reviewer)

@@ -14,7 +14,10 @@ WorkingDirectory=%h/app
 # %%h is Celery's own hostname placeholder (a literal %h after systemd's
 # specifier expansion). Concurrency 1, children recycled at 100 tasks or
 # ~200 MB: the workers share the machine's memory with gunicorn.
-ExecStart=%h/.pyenv/versions/py10102-3.14.7/bin/python -m celery -A website worker -n periodic@%%h -Q periodic -c 1 -B --scheduler django_celery_beat.schedulers:DatabaseScheduler --max-tasks-per-child 100 --max-memory-per-child 200000 -l INFO
+# Log level WARNING: at INFO, the 10-second mail dispatcher alone writes
+# about 6 MB a day to the journal (CAPACITY.md, "Disk"); failures and
+# warnings still show. The mailing worker stays at INFO (what it sends).
+ExecStart=%h/.pyenv/versions/py10102-3.14.7/bin/python -m celery -A website worker -n periodic@%%h -Q periodic -c 1 -B --scheduler django_celery_beat.schedulers:DatabaseScheduler --max-tasks-per-child 100 --max-memory-per-child 200000 -l WARNING
 Restart=always
 RestartSec=5
 # SIGTERM is Celery's warm shutdown: finish the task in hand, take no new

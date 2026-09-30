@@ -263,7 +263,7 @@ celery -A website inspect active_queues   # which worker listens to which queue
 celery -A website inspect registered      # what the running workers actually know
 ```
 
-**Production:** the same two workers run as systemd *user* services, installed and restarted by every `scripts/deploy.sh` run (see "Deploying"); dev starts them from `start.sh`. Level27's Redis is the broker. They share the machine's memory with gunicorn, so they recycle their child processes and run at lower priority. **Every mail the site sends goes through them**: if they're down, mail waits in the queue (nothing is lost).
+**Production:** the same two workers run as systemd *user* services (the periodic one logs at WARNING: at INFO its 10-second dispatcher fills the journal; dev keeps INFO), installed and restarted by every `scripts/deploy.sh` run (see "Deploying"); dev starts them from `start.sh`. Level27's Redis is the broker. They share the machine's memory with gunicorn, so they recycle their child processes and run at lower priority. **Every mail the site sends goes through them**: if they're down, mail waits in the queue (nothing is lost).
 
 **Tests:** no `CELERY_TASK_ALWAYS_EAGER` override exists. Test a task by calling the function directly (`send_pending_emails()`), not `.delay()`, which would need a broker.
 
@@ -317,6 +317,8 @@ Who changed what, and who viewed the most sensitive data, in `auditlog.LogEntry`
 ### Sensitive vs. public media
 
 `MEDIA_ROOT`/`MEDIA_URL` (photos, icons, event images) are public and served directly under `DEBUG` (`website/urls.py`); in the devcontainer nginx serves them from disk either way (`.devcontainer/nginx/nginx.conf`, which mounts `media/`, never `private_media/`). `PRIVATE_MEDIA_ROOT` (background-check documents only) has no corresponding `url()` pattern anywhere — don't add one. If a new feature needs to store a sensitive file, use `applications.storage.private_storage` (or the same `base_url=None` pattern) and gate reads through a permission-checked view, not a media URL.
+
+**Uploads go through `core/uploads.py`** (`CAPACITY.md`, "Disk: files and uploads"). An image people upload is a `core.uploads.UploadedImageField` (never a plain `ImageField`), with a `max_side` (`BANNER_SIDE` 1600, `LOGO_SIDE` 800, `ICON_SIDE` 512): `validate_image_upload` refuses more than 10 MB or 40 megapixels (also in the Django admin; a row's existing file isn't checked again), and on save the image is made smaller and rebuilt from its pixels alone (JPEG, or PNG with transparency), so no metadata survives: EXIF with a photo's GPS position, XMP, comments, text chunks, colour profiles (the orientation and colour profile are applied first). A replaced image, or one whose row is deleted, is deleted from storage on commit, unless it's a standard image or another row uses it (`connect_cleanup`, receivers only on the models with such a field, so bulk deletes elsewhere stay fast; `QuerySet.update()` bypasses it). A form shows the limits with `with_upload_help(...)`. A document upload gets `validate_document_upload` (PDF, JPEG or PNG by its first bytes, 10 MB). The proxy caps request bodies at 12 MB (`client_max_body_size` in `.devcontainer/nginx/nginx.conf`; production's proxy is Level27's), a little above the site's 10 MB so the site's own message shows in between. Tests: `core.tests.UploadGuardrailTests`.
 
 ### Standard images: link, don't copy
 

@@ -1,6 +1,7 @@
 from django.db import models
 
 from core.content_languages import OrganisationContent
+from core.uploads import BANNER_SIDE, UploadedImageField
 
 
 class Skill(OrganisationContent):
@@ -23,7 +24,7 @@ class Pathway(OrganisationContent):
     name = models.CharField(max_length=200)
     subtitle = models.CharField(max_length=300, blank=True, default="")
     description = models.TextField(blank=True, default="")
-    image = models.ImageField(upload_to="pathways/", null=True, blank=True)
+    image = UploadedImageField(upload_to="pathways/", max_side=BANNER_SIDE, null=True, blank=True)
 
     min_age = models.PositiveSmallIntegerField(null=True, blank=True)
     max_age = models.PositiveSmallIntegerField(null=True, blank=True)

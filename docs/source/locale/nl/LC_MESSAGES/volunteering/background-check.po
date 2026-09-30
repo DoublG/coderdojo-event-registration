@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 05:28+0000\n"
+"POT-Creation-Date: 2026-09-30 22:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -67,10 +67,12 @@ msgstr ""
 "596.2)."
 
 #: ../../source/volunteering/background-check.rst:20
-msgid "Upload it at the link you were emailed, or from your account page."
-msgstr "Upload het via de link die u per e-mail kreeg, of via uw accountpagina."
+msgid ""
+"Upload it at the link you were emailed, or from your account page: a PDF,"
+" JPEG or PNG file of at most 10 MB."
+msgstr "Upload het via de link die u per e-mail kreeg, of via uw accountpagina: een PDF-, JPEG- of PNG-bestand van hoogstens 10 MB."
 
-#: ../../source/volunteering/background-check.rst:21
+#: ../../source/volunteering/background-check.rst:22
 msgid ""
 "An admin reviews it and you're emailed the outcome. If it can't be "
 "accepted, you can upload a new one."
@@ -78,11 +80,11 @@ msgstr ""
 "Een beheerder bekijkt het en u krijgt het resultaat per e-mail. Kan het "
 "niet aanvaard worden, dan kunt u een nieuw document uploaden."
 
-#: ../../source/volunteering/background-check.rst:24
+#: ../../source/volunteering/background-check.rst:25
 msgid "A few things worth knowing:"
 msgstr "Enkele nuttige weetjes:"
 
-#: ../../source/volunteering/background-check.rst:26
+#: ../../source/volunteering/background-check.rst:27
 msgid ""
 "The document itself is only kept long enough to make this decision — as "
 "soon as it's validated or rejected, it's deleted. Only the outcome, its "
@@ -93,7 +95,7 @@ msgstr ""
 "Alleen het resultaat, de vervaldatum en wie het wanneer heeft beoordeeld,"
 " worden bijgehouden."
 
-#: ../../source/volunteering/background-check.rst:29
+#: ../../source/volunteering/background-check.rst:30
 msgid ""
 "The check belongs to your account, not to a dojo: one check covers every "
 "dojo you help at or run."
@@ -101,7 +103,7 @@ msgstr ""
 "Het uittreksel hoort bij uw account, niet bij een dojo: één uittreksel "
 "geldt voor elke dojo waar u helpt of die u leidt."
 
-#: ../../source/volunteering/background-check.rst:31
+#: ../../source/volunteering/background-check.rst:32
 msgid ""
 "A validated check is valid for one year from when it's reviewed. You get "
 "a reminder by mail 30 days before it expires, so you can ask for a new "
@@ -116,7 +118,7 @@ msgstr ""
 "dashboards van uw dojo's niet openen tot een nieuw uittreksel is "
 "goedgekeurd — upload het via uw accountpagina."
 
-#: ../../source/volunteering/background-check.rst:36
+#: ../../source/volunteering/background-check.rst:37
 msgid ""
 "You can only upload once a check has been requested (or a previous one "
 "was rejected or has expired) — if you haven't been asked for it yet, "
@@ -126,7 +128,7 @@ msgstr ""
 "vorige werd geweigerd of verlopen is) — als het u nog niet gevraagd werd,"
 " is er niets te uploaden."
 
-#: ../../source/volunteering/background-check.rst:39
+#: ../../source/volunteering/background-check.rst:40
 msgid ""
 "Parents never need a background check just to use the site for their own "
 "children."

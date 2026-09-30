@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 05:28+0000\n"
+"POT-Creation-Date: 2026-09-30 22:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -66,12 +66,12 @@ msgstr ""
 "que c'est pour du bénévolat avec des mineurs (modèle 2 / article 596.2)."
 
 #: ../../source/volunteering/background-check.rst:20
-msgid "Upload it at the link you were emailed, or from your account page."
-msgstr ""
-"Téléversez-le via le lien reçu par e-mail, ou depuis la page de votre "
-"compte."
+msgid ""
+"Upload it at the link you were emailed, or from your account page: a PDF,"
+" JPEG or PNG file of at most 10 MB."
+msgstr "Téléversez-le via le lien reçu par e-mail, ou depuis la page de votre compte : un fichier PDF, JPEG ou PNG de 10 Mo au maximum."
 
-#: ../../source/volunteering/background-check.rst:21
+#: ../../source/volunteering/background-check.rst:22
 msgid ""
 "An admin reviews it and you're emailed the outcome. If it can't be "
 "accepted, you can upload a new one."
@@ -79,11 +79,11 @@ msgstr ""
 "Un administrateur l'examine et vous recevez le résultat par e-mail. S'il "
 "ne peut pas être accepté, vous pouvez en téléverser un nouveau."
 
-#: ../../source/volunteering/background-check.rst:24
+#: ../../source/volunteering/background-check.rst:25
 msgid "A few things worth knowing:"
 msgstr "Quelques informations utiles :"
 
-#: ../../source/volunteering/background-check.rst:26
+#: ../../source/volunteering/background-check.rst:27
 msgid ""
 "The document itself is only kept long enough to make this decision — as "
 "soon as it's validated or rejected, it's deleted. Only the outcome, its "
@@ -94,7 +94,7 @@ msgstr ""
 "résultat, sa date d'expiration, ainsi que la personne qui l'a examiné et "
 "quand, sont conservés."
 
-#: ../../source/volunteering/background-check.rst:29
+#: ../../source/volunteering/background-check.rst:30
 msgid ""
 "The check belongs to your account, not to a dojo: one check covers every "
 "dojo you help at or run."
@@ -102,7 +102,7 @@ msgstr ""
 "La vérification est liée à votre compte, pas à un dojo : une seule "
 "vérification couvre tous les dojos où vous aidez ou que vous dirigez."
 
-#: ../../source/volunteering/background-check.rst:31
+#: ../../source/volunteering/background-check.rst:32
 msgid ""
 "A validated check is valid for one year from when it's reviewed. You get "
 "a reminder by mail 30 days before it expires, so you can ask for a new "
@@ -117,7 +117,7 @@ msgstr ""
 "ouvrir les tableaux de bord de vos dojos tant qu'un nouvel extrait n'a "
 "pas été validé — téléversez-le depuis la page de votre compte."
 
-#: ../../source/volunteering/background-check.rst:36
+#: ../../source/volunteering/background-check.rst:37
 msgid ""
 "You can only upload once a check has been requested (or a previous one "
 "was rejected or has expired) — if you haven't been asked for it yet, "
@@ -127,7 +127,7 @@ msgstr ""
 "demandée (ou si la précédente a été refusée ou a expiré) — si on ne vous "
 "l'a pas encore demandé, il n'y a rien à téléverser."
 
-#: ../../source/volunteering/background-check.rst:39
+#: ../../source/volunteering/background-check.rst:40
 msgid ""
 "Parents never need a background check just to use the site for their own "
 "children."

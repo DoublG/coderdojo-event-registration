@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.content_languages import OrganisationContent, TranslatableModel
+from core.uploads import BANNER_SIDE, ICON_SIDE, UploadedImageField
 
 MARKDOWN_HELP_TEXT = "Supports basic Markdown — # headings, **bold**, *italic*, links, lists."
 
@@ -53,8 +54,9 @@ class Event(TranslatableModel):
 
     location = models.PointField(srid=4326, null=True, blank=True, spatial_index=False)
     venue_name = models.CharField(max_length=200, blank=True, default="", help_text='e.g. "Ghent Public Library"')
-    image = models.ImageField(
+    image = UploadedImageField(
         upload_to="events/",
+        max_side=BANNER_SIDE,
         null=True,
         blank=True,
         help_text="Banner shown on the homepage's Upcoming sessions card.",
@@ -209,7 +211,7 @@ class Belt(OrganisationContent):
     requirements = models.TextField(
         blank=True, default="", help_text="What a ninja must be able to do to get this belt."
     )
-    icon = models.ImageField(upload_to="belts/", null=True, blank=True)
+    icon = UploadedImageField(upload_to="belts/", max_side=ICON_SIDE, null=True, blank=True)
 
     class Meta:
         ordering = ["level"]
@@ -251,7 +253,7 @@ class Badge(OrganisationContent):
         related_name="granted_by_badges",
         help_text="Milestone (optional): reaching it also grants this belt.",
     )
-    icon = models.ImageField(upload_to="awards/", null=True, blank=True)
+    icon = UploadedImageField(upload_to="awards/", max_side=ICON_SIDE, null=True, blank=True)
 
     class Meta:
         ordering = ["kind", "threshold", "name"]

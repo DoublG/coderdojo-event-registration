@@ -17,7 +17,8 @@ How it works
 #. Request the extract for free from your local gemeente/commune, or
    online via `mijndossier.rrn.fgov.be <https://mijndossier.rrn.fgov.be>`_
    — mention it's for volunteering with minors (model 2 / Artikel 596.2).
-#. Upload it at the link you were emailed, or from your account page.
+#. Upload it at the link you were emailed, or from your account page: a
+   PDF, JPEG or PNG file of at most 10 MB.
 #. An admin reviews it and you're emailed the outcome. If it can't be
    accepted, you can upload a new one.
 

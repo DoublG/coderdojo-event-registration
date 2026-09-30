@@ -1,13 +1,19 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from core.uploads import DOCUMENT_UPLOAD_HELP, validate_document_upload
 from dojos.models import Dojo
 
 from .models import Application
 
 
 class BackgroundCheckUploadForm(forms.Form):
-    document = forms.FileField(label=_("Document"))
+    document = forms.FileField(
+        label=_("Document"),
+        help_text=DOCUMENT_UPLOAD_HELP,
+        validators=[validate_document_upload],
+        widget=forms.ClearableFileInput(attrs={"accept": ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"}),
+    )
 
 
 class _ApplicationForm(forms.ModelForm):

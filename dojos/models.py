@@ -4,6 +4,7 @@ from django.db.models import Case, When
 from django.utils.translation import gettext_lazy as _
 
 from core.content_languages import LANGUAGE_CODES, TranslatableModel, clean_languages, language_name
+from core.uploads import ICON_SIDE, UploadedImageField
 from geo.models import AdministrativeBoundary, Municipality
 
 MARKDOWN_HELP_TEXT = "Supports basic Markdown — # headings, **bold**, *italic*, links, lists."
@@ -77,8 +78,9 @@ class Dojo(TranslatableModel):
         related_name="dojos",
         help_text="The pathways this dojo provides (optional). New events pre-select these.",
     )
-    icon = models.ImageField(
+    icon = UploadedImageField(
         upload_to="dojos/",
+        max_side=ICON_SIDE,
         null=True,
         blank=True,
         help_text="Round icon shown at the top of the dojo page, next to its name.",

@@ -12,6 +12,7 @@ from core.content_languages import (
     save_translation_fields,
 )
 from core.image_library import library_filename, use_library_image
+from core.uploads import with_upload_help
 from events.models import Badge, Belt
 
 from .models import Dojo
@@ -101,7 +102,7 @@ class DojoProfileForm(forms.ModelForm):
         }
         # Every shown help text translated; the model's own are English notes for the admin.
         help_texts = {
-            "icon": _("Uploading a file here overrides the template chosen above."),
+            "icon": with_upload_help(_("Uploading a file here overrides the template chosen above.")),
             "tagline": _("Shown right under the dojo's name. Supports basic Markdown."),
             "description": _("Shown further down the page, above the team. Supports basic Markdown."),
             "address": _(

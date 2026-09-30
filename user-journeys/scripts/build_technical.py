@@ -592,7 +592,7 @@ describing what each login can do; the user-journey PDFs are made from it.</li>
 <li>The API covers dojo clients and attendance; external registrations and event management are planned (§13).</li>
 <li>Some privacy retention rules wait for their periods to be decided (§16).</li>
 <li>Production still lacks MySQL client headers and GDAL/GEOS on the host; the deploy script refuses to go live until then.</li>
-<li>Uploads have no size or type limit of their own, aren't resized and leave replaced files behind (chapter 15).</li>
+<li>Production's proxy still needs the 12 MB request-body limit the devcontainer's nginx has (chapter 15).</li>
 </ul>
 """,
 )
@@ -694,18 +694,29 @@ second-largest (525 bytes an entry).</li>
 <table>
 <tr><th>On disk</th><th>Size</th></tr>
 <tr><td>Database, binary logs, backups</td><td>1.6 GB after five years, plus tens of MB of logs and a copy per backup</td></tr>
-<tr><td>Uploaded images (<code>media/</code>)</td><td>0.1 to 0.8 GB a year, depending on how many teams upload their own banners</td></tr>
+<tr><td>Uploaded images (<code>media/</code>)</td><td>about 70 MB a year, made smaller when saved (0.8 GB as uploaded)</td></tr>
 <tr><td>Standard images</td><td>a few MB: copied once, shared by every row that uses one</td></tr>
 <tr><td>Code releases (5 kept), Python packages</td><td>7 MB a release, 236 MB</td></tr>
-<tr><td>Celery's logs (journal)</td><td>about 6 MB a day, mostly the 10-second mail dispatcher</td></tr>
+<tr><td>Celery's logs (journal)</td><td>small: the periodic worker logs at WARNING (at INFO it wrote about 6 MB a day)</td></tr>
 </table>
 <p>Teams upload dojo icons and session banners, the organisation promotion images, sponsor logos and badge icons,
-volunteers their background-check document. What guards them today: image fields only take real raster images
-(Pillow opens them; never an SVG), Pillow refuses images over 179 megapixels, and the background-check document is
-private and deleted at the decision. What's missing: any size limit (a 14 MB photo and a 144-megapixel image went
-through; the proxy's body limit is the only cap), any type check on the document (a 30 MB <code>.exe</code> went
-through), resizing (photos keep their EXIF data, GPS included), and cleaning up replaced files.
-<code>CAPACITY.md</code> lists the guardrails to add, a proxy limit first.</p>
+volunteers their background-check document. Every upload goes through <code>core/uploads.py</code>:</p>
+<ul>
+<li><b>Limits</b>: an image at most 10 MB and 40 megapixels, a real raster image (never an SVG); the background-check
+document at most 10 MB and a PDF, JPEG or PNG by its first bytes. The proxy refuses bodies over 12 MB.</li>
+<li><b>Made smaller</b>: at most 1600 px (banners), 800 px (logos) or 512 px (icons, photos), re-encoded as JPEG, or PNG
+with transparency.</li>
+<li><b>No metadata survives</b>: the file is rebuilt from its pixels, so EXIF (a phone photo's GPS position), XMP,
+comments, text chunks and colour profiles are left out, after the orientation and colour profile are applied.</li>
+<li><b>Nothing left behind</b>: a replaced image, or one whose row is deleted, is deleted on commit, unless it's a
+standard image or another row uses it.</li>
+</ul>
+{
+        why(
+            "Uploaded photos are public files: without this a banner kept the phone's GPS position of where it was taken, "
+            "and a single photo could weigh more than a year of bookings."
+        )
+    }
 
 <h2>Running it again, on production too</h2>
 <ul>

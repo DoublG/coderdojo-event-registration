@@ -19,7 +19,10 @@ site, but anyone can still sign up.
 
 For the banner image, pick one of the ready-made templates shown on the
 form, or upload your own further down — uploading a file always takes
-priority if you do both.
+priority if you do both. An uploaded image can be a JPEG, PNG, GIF or WebP
+file of at most 10 MB. It's made smaller to fit the page, and everything
+stored in the file besides the picture itself (such as where and with which
+phone a photo was taken) is removed.
 
 Editing a session
 ------------------

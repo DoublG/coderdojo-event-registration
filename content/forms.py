@@ -8,6 +8,7 @@ from core.content_languages import (
     optional_copy,
     save_translation_fields,
 )
+from core.uploads import with_upload_help
 from events.models import Event
 
 from .models import Promotion, Sponsor
@@ -59,7 +60,7 @@ class PromotionForm(forms.ModelForm):
         self.fields["ends_at"].label = _("Show until")
         self.fields["ends_at"].help_text = _("Empty: the promotion ends when the event starts.")
         self.fields["rank"].help_text = _("Lower shows first within a placement.")
-        self.fields["image"].help_text = _("Optional: replaces the event's banner.")
+        self.fields["image"].help_text = with_upload_help(_("Optional: replaces the event's banner."))
         # The title and pitch in the organisation's other languages.
         labels = {"title": _("Title"), "text": _("Short pitch")}
         self.translation_groups = bound_translation_groups(
@@ -104,7 +105,7 @@ class SponsorForm(forms.ModelForm):
             "is_public": _("Shown on the homepage"),
         }
         help_texts = {
-            "logo": _("Optional. Without a logo, the sponsor's name is shown."),
+            "logo": with_upload_help(_("Optional. Without a logo, the sponsor's name is shown.")),
             "order": _("Lower comes first."),
             "is_public": _("Uncheck to hide it from the homepage."),
         }

@@ -25,6 +25,7 @@ workers for all mail, and Django Channels for live notifications.
 | Developers | [`DATA_MODEL.md`](DATA_MODEL.md) | The data model, one Mermaid diagram per area, and the design decisions behind every larger change |
 | Developers and AI agents | [`CLAUDE.md`](CLAUDE.md) | Conventions, architecture and workflow rules for changing the code safely ([`AGENTS.md`](AGENTS.md) is the same file) |
 | Developers and whoever runs the platform | [`MAINTENANCE.md`](MAINTENANCE.md) | Versions and support dates (development and production), updates, responding to vulnerabilities, code audits, the security log |
+| Developers and whoever runs the platform | [`CAPACITY.md`](CAPACITY.md) | Database growth, disk and uploads, memory per component, load test results with charts, and how to measure again (on production too) |
 
 ### User journeys (PDF)
 
@@ -181,10 +182,13 @@ website/          settings, URLs, ASGI, Celery
 locale/           Dutch and French translations of the site
 docs/             the help centre (Sphinx, en/fr/nl)
 user-journeys/    persona PDFs (en/nl/fr), pitch deck, technical PDF, and the scripts that make them
+loadtest/         load test, its results and charts (CAPACITY.md)
+monitoring/       the site's measurements of itself: /metrics/, capacity samples and projections
 scripts/          deploy script and the Celery systemd units
 .devcontainer/    the development environment
 DATA_MODEL.md     the data model and design decisions
 MAINTENANCE.md    versions and support dates, updates, vulnerabilities, audits
+CAPACITY.md       database growth, disk, memory and load: measurements and findings
 CLAUDE.md         conventions and architecture for developers (AGENTS.md links to it)
 requirements.txt  production dependencies (requirements-dev.txt adds the development tools)
 ```

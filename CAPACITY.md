@@ -13,9 +13,10 @@ charts come from `loadtest/charts.py`, the figures behind them from `loadtest/re
 - **The database grows by about 350 MB a year** at 100 dojos and 6,000 families (1.6 GB after five
   years). Two thirds of that is the mail log: each mail keeps its full text. Clearing mail text after
   12 months, as the privacy register already promises, saves about a quarter of it.
-- **Uploaded images can outgrow the database.** Nothing limits an upload's size, nothing is resized, and a
-  replaced image stays on disk. The site's own guardrail is Pillow refusing absurd images (over 179
-  megapixels); the only size limit is the proxy's.
+- **Uploads are guarded since 30 September 2026:** at most 10 MB (and 40 megapixels for an image),
+  images made smaller and stripped of every piece of metadata (a phone photo's GPS position, for one),
+  replaced files deleted, and the background-check document only as PDF, JPEG or PNG. Production's proxy
+  still needs the same 12 MB body limit as the devcontainer.
 - **The whole application needs about 1.5 GB of memory at its peak** with 4 web workers: 750 MB web,
   650 MB Celery (during the nightly rebuild) and under 50 MB Redis. Plan **2 GB** for the account.
 - **Two problems showed up under load, both fixed on 30 September 2026:**
@@ -128,61 +129,68 @@ Worth knowing:
 | Database | MySQL (Level27) | 350 MB after a year, 1.6 GB after five | mail, the audit log, bookings ([above](#database-growth)) |
 | MySQL binary logs | MySQL (Level27) | tens of MB | 30 days of changes by default; more while a campaign is queued |
 | Database backups | Level27 | the database × the backups kept | to confirm ([Questions](#questions-for-level27)) |
-| Uploaded images | `media/` | **0.1 to 0.8 GB a year** (below) | banners and icons teams upload; nothing limits or shrinks them |
+| Uploaded images | `media/` | **about 70 MB a year** | banners and icons teams upload, made smaller when saved (below) |
 | Standard images | `media/library/` | a few MB | copied once, the first time a row uses one; shared by every row after that |
-| Background-check documents | `private_media/` | only the ones awaiting review | deleted at the reviewer's decision; no size limit today |
+| Background-check documents | `private_media/` | only the ones awaiting review, 10 MB each at most | deleted at the reviewer's decision |
 | The code | `~/app` and `~/deploy/releases/` (5 kept) | 7 MB per release | each deploy; the user-journey PDFs and the load test aren't shipped (they were 46 MB a release) |
 | Python packages | `~/.pyenv/versions/py10102-3.14.7` | 236 MB | a dependency upgrade |
-| Celery's logs | the systemd journal | **about 6 MB a day** | every task at INFO level: the 10-second mail dispatcher alone writes two lines per run |
+| Celery's logs | the systemd journal | small | the periodic worker logs at WARNING; at INFO its 10-second mail dispatcher alone wrote about 6 MB a day |
 
-**Where people can upload files, and what's checked:**
+**Where people can upload files:**
 
-| Upload | Who | Stored | What's checked |
+| Upload | Who | Stored | Kept at most |
 |---|---|---|---|
-| Dojo icon | the dojo's champion and mentors (Settings) | `media/dojos/`, public | a real raster image (Pillow opens it); or a standard icon, linked, not copied |
-| Session banner | the dojo's team (Events) | `media/events/`, public | a real raster image; or a standard banner |
-| Promotion image, sponsor logo | the organisation (dashboard) | `media/`, public | a real raster image |
-| Badge icon | the organisation (Awards) | `media/awards/`, public | a real raster image, never an SVG (it could carry script); or a standard icon |
-| Background-check document | the volunteer (emailed link, no login) | `private_media/`, never public | **nothing**: any file type, any size; one at a time (a second waits until the review) |
-| Child and team photos, pathway images, belt icons | only in the Django admin | `media/`, public | a real raster image |
+| Dojo icon | the dojo's champion and mentors (Settings) | `media/dojos/`, public | 512 px; or a standard icon, linked, not copied |
+| Session banner | the dojo's team (Events) | `media/events/`, public | 1600 px; or a standard banner |
+| Promotion image, sponsor logo | the organisation (dashboard) | `media/`, public | 1600 px, 800 px |
+| Badge icon | the organisation (Awards) | `media/awards/`, public | 512 px; never an SVG (it could carry script); or a standard icon |
+| Background-check document | the volunteer (emailed link, no login) | `private_media/`, never public | PDF, JPEG or PNG, 10 MB; deleted at the decision |
+| Child and team photos, pathway images, belt icons | only in the Django admin | `media/`, public | 512 px (photos, icons), 1600 px (pathways) |
 
 Families never upload anything: a child's picture is one of the standard avatars.
 
-**Tried on 30 September 2026** (the upload fields, without a proxy in front):
+**The guardrails** (`core/uploads.py`, since 30 September 2026):
 
-| Upload | Result |
-|---|---|
-| A 14 MB photo (4000 × 3000) | accepted and stored as it is |
-| A 144-megapixel image (a 0.4 MB file) | accepted: every visitor's browser would decode 144 megapixels |
-| A 400-megapixel image | refused ("not a valid image"): Pillow's decompression-bomb check, from 179 megapixels |
-| A 30 MB `.exe` as background-check document | accepted |
+1. **A size limit on the proxy:** `client_max_body_size 12m` in the devcontainer's nginx
+   (`.devcontainer/nginx/nginx.conf`), a little above the site's own limit, so a file between the two gets
+   the site's message and anything bigger never reaches Django. **Production's proxy needs the same**
+   (Level27's, [Questions](#questions-for-level27)).
+2. **A size and type check in the site**, also in the Django admin: an image at most 10 MB and 40
+   megapixels, and a real raster image (Pillow opens it; an SVG is refused); the background-check document
+   at most 10 MB, and a PDF, JPEG or PNG by its first bytes, whatever its name says. The forms say so under
+   the field, in the visitor's language.
+3. **Every uploaded image is made smaller and re-encoded when it's saved** (`UploadedImageField`): at most
+   the size in the table above, as JPEG (quality 85), or PNG when it has transparency. A JPEG is decoded
+   straight at a reduced scale, so even a 40-megapixel photo never takes its full size in memory.
+4. **No metadata survives:** the file is rebuilt from its pixels alone, so EXIF (camera, date, GPS
+   position), XMP, comments, PNG text chunks and colour profiles are all left out. The photo's orientation
+   and colour profile are applied to the pixels first, so it doesn't turn sideways or change colour.
+   (The background-check document is kept as it was uploaded: it's a legal document, private, and deleted
+   at the decision.)
+5. **A replaced or orphaned image is deleted:** replacing an icon or banner, or deleting its dojo, session,
+   badge, ..., deletes the old file once the change is committed, unless it's a standard image or another
+   row still uses it. An erased person's photo was already deleted by the erasure (`privacy.erasure`).
+6. **Quieter logs:** the periodic Celery worker logs at WARNING in production
+   (`scripts/systemd/coolregistration-celery-periodic.service`); failures and the mail queue's warnings still
+   show. The devcontainer keeps INFO.
 
-So **the only size limit is the proxy in front of the site**: the devcontainer's nginx allows nginx's
-default 1 MB (larger uploads get nginx's "413 Request Entity Too Large" page, before Django sees them);
-production's limit is Level27's and unknown. Also:
+**Tried on 30 September 2026**, before and after:
 
-- **Nothing is resized or re-encoded:** a phone photo of 3 to 5 MB stays 3 to 5 MB, served as it is on
-  every page that shows it, **with its EXIF data**, which can include where it was taken (GPS).
-- **A replaced image stays on disk:** uploading a new icon or banner, or deleting the dojo or session,
-  leaves the old file in `media/`. Nothing ever cleans them up.
-- **Estimate** for session banners (growth scenario, 1,200 sessions a year): if one in five gets its own
-  photo instead of a standard banner, that's 240 photos of about 3.5 MB, **0.8 GB a year**; resized to
-  1600 pixels wide, about 70 MB a year. Dojo icons, promotions, sponsors and badges add tens of MB.
+| Upload | Before | Now |
+|---|---|---|
+| A 14 MB photo (4000 × 3000) | stored as it was, 14 MB, with its EXIF | refused: over 10 MB |
+| A 5 MB phone photo with GPS in its EXIF | stored as it was | 512 px (a dojo icon) or 1600 px (a banner), a few hundred KB, no metadata |
+| A 144-megapixel image (a 0.4 MB file) | accepted: every visitor's browser decodes 144 megapixels | refused: over 40 megapixels |
+| A 400-megapixel image | refused by Pillow's decompression-bomb check | refused |
+| A 30 MB `.exe` as background-check document | accepted | refused: not a PDF, JPEG or PNG |
 
-**Recommended guardrails**, in order (none of them is built yet):
+**Estimate** for session banners (growth scenario, 1,200 sessions a year): if one in five gets its own
+photo instead of a standard banner, 240 photos a year. At a few hundred KB each once made smaller, that's
+**about 70 MB a year**; stored as uploaded, it would have been 0.8 GB. Dojo icons, promotions, sponsors and
+badges add a few MB.
 
-1. **A body-size limit on the proxy**, the same in the devcontainer and on production, e.g. 10 MB
-   (`client_max_body_size 10m;` in `.devcontainer/nginx/nginx.conf`, and ask Level27 for theirs). Today's
-   1 MB in dev turns away most phone photos with nginx's own error page.
-2. **A size and type check in the forms:** images at most 5 MB and 25 megapixels, the background-check
-   document at most 10 MB and only PDF, JPEG or PNG. One validator shared by the image fields; the
-   document's belongs in `applications.forms.BackgroundCheckUploadForm`.
-3. **Resize and re-encode on upload** (e.g. at most 1600 px, JPEG or WebP): about a tenth of the disk and
-   bandwidth, and it drops the EXIF data (a privacy win for photos of people).
-4. **Delete the old file** when an image is replaced or its row deleted (never a standard image: they're
-   shared, `core.image_library.is_library_image`).
-5. **Logs:** keep Celery at INFO for the mailing worker but WARNING for the periodic one (its every-10-seconds
-   runs say nothing new), or cap the journal (`SystemMaxUse=` in journald, Level27's).
+Files uploaded before 30 September 2026 stay as they were until they're replaced; the site only holds
+seeded demo data so far, so there's nothing to convert.
 
 ## Memory per component
 
@@ -354,15 +362,16 @@ In order of urgency.
    requests per web worker (`gunicorn.conf.py`, [above](#capping-requests-per-web-worker)). *Still to
    confirm on production:* that gunicorn reads the file (`scripts/deploy.sh --check`), how Level27's proxy
    connects to gunicorn, and MySQL's `max_user_connections`.
-3. **Uploads have no limits** (disk, privacy): no size or type check, no resizing, EXIF kept, replaced
-   files never deleted, and the background-check document takes any file
-   ([guardrails](#disk-files-and-uploads)).
+3. **Uploads had no limits** (disk, privacy). **Guarded on 30 September 2026** ([the
+   guardrails](#disk-files-and-uploads)): size and type checks, images made smaller and stripped of their
+   metadata, replaced files deleted. *Still to do on production:* the proxy's body limit (Level27).
 4. **Mail text is kept forever** (growth). Build the `mail_content` retention (clear subject, body and
    address after 12 months) in the daily retention job: about a quarter less database after five years.
 5. **Four web workers** (`WEB_CONCURRENCY`) if the account's memory allows: much better response times under
    load for about 200 MB more.
 6. **Redis limits:** set `maxmemory` and `volatile-lru` on production (or confirm what it has).
-7. **Celery's logs** grow about 6 MB a day, mostly the periodic worker's routine runs.
+7. **Celery's logs** grew about 6 MB a day, mostly the periodic worker's routine runs. **Fixed on 30
+   September 2026:** that worker logs at WARNING in production.
 8. **Campaign queueing blocks the mailing worker** for a few minutes (see above): acceptable now, chunk it
    when campaigns get bigger.
 9. *Development only:* two copies of both Celery workers were running in the devcontainer (one pair from an
@@ -465,8 +474,8 @@ To fill in the budget above (the versions are already asked in `MAINTENANCE.md`,
    our memory), and the disk quota for the database, its binary logs and backups.
 3. **How the proxy connects to gunicorn's socket:** a new connection per request, or a pool kept open
    (keep-alive)? The latter needs a higher cap. And whether it can show its own page for a 503.
-4. **The proxy's maximum request body** (`client_max_body_size` or equivalent): the only limit on uploads
-   today.
+4. **The proxy's maximum request body** (`client_max_body_size` or equivalent): it should be 12 MB, like the
+   devcontainer's, so a file just over the site's 10 MB gets the site's own message.
 5. Redis's `maxmemory` and `maxmemory-policy`, and whether this Redis is ours alone.
 6. Whether systemd user units may use the memory controller (`MemoryMax=`), for a hard cap per worker, and
    the journal's size limit.

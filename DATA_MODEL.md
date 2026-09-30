@@ -2096,7 +2096,9 @@ running inside the first one.
     on the periodic one, and `--max-tasks-per-child` to cap slow memory
     growth.
   - `Restart=always`, `RestartSec=5`.
-  - Logs go to the journal (`journalctl --user -u …`), not to files.
+  - Logs go to the journal (`journalctl --user -u …`), not to files. The
+    periodic worker logs at WARNING: at INFO its 10-second dispatcher
+    alone wrote about 6 MB a day (`CAPACITY.md`, "Disk").
 - **Sharing the machine with the website.** Gunicorn, both workers and
   Redis all run on the same Level27 system and share its memory, so the
   website must win:
@@ -2141,8 +2143,10 @@ running inside the first one.
   worker plus separate beat. A routing mistake then shows up in dev as a
   task nobody picks up, not first in production.
 - **Monitoring.** `requeue_stuck_emails` logs the queue length and the
-  age of the oldest `pending` mail. Watching that is enough to notice a
-  stopped worker.
+  age of the oldest `pending` mail, as a warning when mail has been
+  requeued or has waited over 30 minutes (so it still shows at the
+  periodic worker's WARNING level). Watching that is enough to notice a
+  stopped worker; `/health/` and `/metrics/` show it too (§26).
 
 #### Segmentation engine
 
