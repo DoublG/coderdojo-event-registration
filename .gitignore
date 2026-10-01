@@ -144,3 +144,9 @@ user-journeys/.shots/
 .claude/settings.local.json
 loadtest-out/
 test-results/
+
+# coverage.py's data and reports (CODING_STANDARDS.md, "Measuring again")
+.coverage
+.coverage.*
+htmlcov/
+coverage.json

@@ -17,10 +17,21 @@
     "vscode": {
       "extensions": [
         "ms-python.python",
+        "charliermarsh.ruff",
         "batisteo.vscode-django",
         "mechatroner.rainbow-csv",
         "Anthropic.claude-code"
-      ]
+      ],
+      // Ruff (CODING_STANDARDS.md, "Linting and formatting"): lint as you type, and
+      // format and sort imports on save, with the Ruff pinned in requirements-dev.txt.
+      "settings": {
+        "ruff.importStrategy": "fromEnvironment",
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": { "source.organizeImports.ruff": "explicit" }
+        }
+      }
     }
   }
 }

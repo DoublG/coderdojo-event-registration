@@ -11,6 +11,13 @@ ruff==0.16.8
 unittest-xml-reporting==4.0.0
 lxml==6.1.3
 
+# Code quality measurements (CODING_STANDARDS.md): test coverage, and
+# cyclomatic complexity and maintainability (radon, with its mando and colorama).
+coverage==7.16.2
+radon==6.0.1
+mando==0.7.1
+colorama==0.4.6
+
 # The server production runs (Level27 provides its own there): start.sh uses
 # it when DEBUG is off, to measure the site the way it's served in production.
 gunicorn==26.2.0

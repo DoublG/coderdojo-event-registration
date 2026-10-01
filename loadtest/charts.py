@@ -68,12 +68,12 @@ def figure(title, subtitle, width=8, height=4.2):
     return fig, ax
 
 
-def save(fig, name):
-    OUT.mkdir(exist_ok=True)
+def save(fig, name, out=OUT):
+    out.mkdir(exist_ok=True)
     fig.tight_layout(rect=(0, 0, 1, 0.87))
-    fig.savefig(OUT / f"{name}.png", dpi=180)
+    fig.savefig(out / f"{name}.png", dpi=180)
     plt.close(fig)
-    print(OUT / f"{name}.png")
+    print(out / f"{name}.png")
 
 
 def workers(runs):

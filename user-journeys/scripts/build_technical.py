@@ -33,11 +33,13 @@ def mm(marker, caption=""):
 
 
 CHARTS = os.path.join(REPO, "loadtest", "charts")
+QUALITY_CHARTS = os.path.join(REPO, "quality", "charts")
 
 
-def chart(name, caption=""):
-    """A chart from loadtest/charts.py (CAPACITY.md), embedded in the PDF."""
-    with open(os.path.join(CHARTS, f"{name}.png"), "rb") as png:
+def chart(name, caption="", folder=CHARTS):
+    """A chart from loadtest/charts.py (CAPACITY.md) or quality/charts.py
+    (CODING_STANDARDS.md), embedded in the PDF."""
+    with open(os.path.join(folder, f"{name}.png"), "rb") as png:
         data = base64.b64encode(png.read()).decode()
     cap = f"<figcaption>{caption}</figcaption>" if caption else ""
     return f"<figure class='chart'><img src='data:image/png;base64,{data}' alt='{html.escape(caption)}'>{cap}</figure>"
@@ -105,7 +107,7 @@ th, td { border-bottom: 0.3mm solid #e5e7eb; padding: 1.4mm 2mm; vertical-align:
 figure { margin: 3mm 0 5mm; text-align: center; page-break-inside: avoid; }
 figure svg { max-width: 100% !important; max-height: 200mm; height: auto; }
 figcaption { font-size: 8.5pt; color: #6b7280; margin-top: 1.5mm; }
-figure.chart img { width: 100%; max-height: 95mm; object-fit: contain; }
+figure.chart img { width: 100%; max-height: 125mm; object-fit: contain; }
 pre.mermaid { background: none; margin: 0; }
 .why { background: #fff7ed; border-left: 1.2mm solid #c94a23; padding: 2.5mm 4mm; margin: 3mm 0 4mm; border-radius: 0 2mm 2mm 0; page-break-inside: avoid; }
 .why b:first-child { color: #9a3412; }
@@ -726,6 +728,75 @@ daily <code>CapacitySample</code>, and <code>deploy.sh --check</code>.</li>
 starting at 50 users; it goes through Level27's proxy, so it's also the end-to-end check.</li>
 <li>The modes that log in and book refuse any host that isn't local: they'd book real sessions and mail real families.</li>
 </ul>
+""",
+)
+
+
+# 16 ------------------------------------------------------------------------------------
+section(
+    "Coding standards and quality",
+    f"""
+<p class='lede'>How code is written, checked and measured: the standards, the linting setup, the tests and what they
+cover, and how complex the code is. Measured on 1 October 2026; the full version, with how to measure again, is
+<code>CODING_STANDARDS.md</code>, and the conventions themselves are in <code>CLAUDE.md</code>.</p>
+
+<h2>Production code and development-only code</h2>
+<table>
+<tr><th>Ships to production</th><th>Stays with developers</th></tr>
+<tr><td>The apps and <code>website/</code>, <code>locale/</code>, <code>main.py</code>, <code>manage.py</code>,
+<code>requirements.txt</code>, <code>gunicorn.conf.py</code>, the Celery systemd units</td>
+<td><code>.devcontainer/</code>, <code>requirements-dev.txt</code>, <code>pyproject.toml</code>, <code>loadtest/</code>,
+<code>quality/</code>, <code>user-journeys/</code>, <code>scripts/deploy.sh</code>, <code>.github/</code> (CI), <code>docs/</code>
+(published to GitHub Pages)</td></tr>
+<tr><td colspan='2'>In between: tests, seeders and import commands sit inside the apps and ship, but never run there
+(the import commands' libraries aren't installed; <code>totp_code</code> and <code>simulate_bounce</code> need
+<code>DEBUG</code>); the debug toolbar and django-silk only exist while <code>DEBUG</code> is on.</td></tr>
+</table>
+
+<h2>Standards and linting</h2>
+<ul>
+<li><b>Ruff</b>, pinned and configured in <code>pyproject.toml</code>: pycodestyle, pyflakes, import order, bugbear,
+flake8-django and pyupgrade; the formatter decides the style (119 characters, double quotes). Security rules
+(bandit) run separately; a reviewed line gets <code>noqa</code> with its reason.</li>
+<li>The devcontainer's editor lints as you type and formats on save with the same Ruff.</li>
+<li>CI: Ruff, the security rules, <code>pip-audit</code>, <code>manage.py check --deploy</code> and CodeQL in
+<b>Code audit</b>; missing migrations and the whole suite in <b>Tests</b>.</li>
+<li>Not gated, on purpose: types (no type checker), a minimum coverage, complexity limits. They're measured.</li>
+</ul>
+
+<h2>Tests</h2>
+<p>1,092 tests (12,400 lines of test code for 24,000 lines of code). Routes are tested for status, template,
+gating and the database effect of a POST; services with their refusals; concurrency with real threads. About
+twenty <b>guard tests</b> fail on new code that forgets a rule: privacy classification, export coverage, an
+audit-log decision, a usable admin, <code>__str__</code> without queries, translated form texts, security headers
+and inline handlers, vendored scripts and fonts, the API schema. Every run shows a summary on GitHub and marks
+failures on the failing line.</p>
+
+<h2>Test coverage</h2>
+{chart("coverage-per-app", "Statements and branches the tests run (coverage.py, branch coverage).", QUALITY_CHARTS)}
+<table>
+<tr><th>Covered well</th><th>Not covered</th></tr>
+<tr><td>The business rules and their services (registrations, teams, awards, onboarding, mail, privacy, sign-in),
+every page's gating, the API, monitoring, every guard rule: most apps' own code at 91–99%.</td>
+<td>Seeders and import commands (51%, development only); refusals of some rules (<code>dojos/team.py</code>,
+<code>accounts/invitations.py</code>); two segment attributes; admin actions; outside-service failures; the ASGI
+routing glue; one-line task wrappers.</td></tr>
+</table>
+{
+        why(
+            "Coverage is a map, not a target: it shows what no test runs, not whether a test checks the right thing. "
+            "So it isn't gated in CI; the refusals of business rules are the gaps worth closing first."
+        )
+    }
+
+<h2>Complexity</h2>
+<p>An average complexity of 3.3; every module ranks A for maintainability. The site's six functions over 20 are the
+privacy registry's validation, the engagement rebuild and its metrics, the erasure's collection,
+<code>event_signup</code> and <code>dojo_team_action</code>: each has a concrete split in
+<code>CODING_STANDARDS.md</code>.</p>
+{chart("complexity-ranks", "Cyclomatic complexity of every function (radon).", QUALITY_CHARTS)}
+{chart("most-complex", "The most complex functions; over 20, split them at the next change.", QUALITY_CHARTS)}
+
 """,
 )
 

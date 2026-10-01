@@ -1,0 +1,4332 @@
+{
+ "coverage": {
+  "percent": 86.2,
+  "statements": 12492,
+  "missing": 1428,
+  "branches": 2812,
+  "missing_branches": 682,
+  "apps": {
+   "accounts": {
+    "statements": 3065,
+    "covered": 2763,
+    "branches": 744,
+    "covered_branches": 561,
+    "percent": 87.3,
+    "site_percent": 92.7
+   },
+   "api": {
+    "statements": 259,
+    "covered": 254,
+    "branches": 34,
+    "covered_branches": 26,
+    "percent": 95.6,
+    "site_percent": 95.6
+   },
+   "applications": {
+    "statements": 497,
+    "covered": 432,
+    "branches": 84,
+    "covered_branches": 56,
+    "percent": 84.0,
+    "site_percent": 91.4
+   },
+   "content": {
+    "statements": 296,
+    "covered": 256,
+    "branches": 26,
+    "covered_branches": 13,
+    "percent": 83.5,
+    "site_percent": 98.7
+   },
+   "core": {
+    "statements": 946,
+    "covered": 912,
+    "branches": 244,
+    "covered_branches": 216,
+    "percent": 94.8,
+    "site_percent": 96.0
+   },
+   "dojos": {
+    "statements": 1445,
+    "covered": 1103,
+    "branches": 358,
+    "covered_branches": 216,
+    "percent": 73.2,
+    "site_percent": 93.4
+   },
+   "events": {
+    "statements": 1177,
+    "covered": 936,
+    "branches": 284,
+    "covered_branches": 181,
+    "percent": 76.5,
+    "site_percent": 96.6
+   },
+   "geo": {
+    "statements": 157,
+    "covered": 80,
+    "branches": 20,
+    "covered_branches": 4,
+    "percent": 47.5,
+    "site_percent": 92.3
+   },
+   "mailing": {
+    "statements": 2636,
+    "covered": 2407,
+    "branches": 550,
+    "covered_branches": 431,
+    "percent": 89.1,
+    "site_percent": 91.0
+   },
+   "monitoring": {
+    "statements": 740,
+    "covered": 713,
+    "branches": 172,
+    "covered_branches": 160,
+    "percent": 95.7,
+    "site_percent": 95.4
+   },
+   "notifications": {
+    "statements": 131,
+    "covered": 128,
+    "branches": 14,
+    "covered_branches": 10,
+    "percent": 95.2,
+    "site_percent": 95.2
+   },
+   "pathways": {
+    "statements": 105,
+    "covered": 102,
+    "branches": 16,
+    "covered_branches": 15,
+    "percent": 96.7,
+    "site_percent": 98.6
+   },
+   "privacy": {
+    "statements": 853,
+    "covered": 809,
+    "branches": 252,
+    "covered_branches": 233,
+    "percent": 94.3,
+    "site_percent": 95.8
+   },
+   "website": {
+    "statements": 182,
+    "covered": 166,
+    "branches": 14,
+    "covered_branches": 8,
+    "percent": 88.8,
+    "site_percent": 88.8
+   }
+  },
+  "site_percent": 93.4,
+  "modules": [
+   {
+    "path": "accounts/management/commands/seed_guardians.py",
+    "kind": "seed or import (development only)",
+    "statements": 141,
+    "missing": 141,
+    "branches": 54,
+    "missing_branches": 54,
+    "percent": 0.0
+   },
+   {
+    "path": "applications/management/commands/seed_applications.py",
+    "kind": "seed or import (development only)",
+    "statements": 37,
+    "missing": 37,
+    "branches": 12,
+    "missing_branches": 12,
+    "percent": 0.0
+   },
+   {
+    "path": "content/management/commands/seed_faqs.py",
+    "kind": "seed or import (development only)",
+    "statements": 25,
+    "missing": 25,
+    "branches": 10,
+    "missing_branches": 10,
+    "percent": 0.0
+   },
+   {
+    "path": "content/management/commands/seed_testimonials.py",
+    "kind": "seed or import (development only)",
+    "statements": 13,
+    "missing": 13,
+    "branches": 2,
+    "missing_branches": 2,
+    "percent": 0.0
+   },
+   {
+    "path": "dojos/management/commands/import_dojos.py",
+    "kind": "seed or import (development only)",
+    "statements": 88,
+    "missing": 88,
+    "branches": 22,
+    "missing_branches": 22,
+    "percent": 0.0
+   },
+   {
+    "path": "dojos/management/commands/map_dojo_provinces.py",
+    "kind": "management command",
+    "statements": 18,
+    "missing": 18,
+    "branches": 4,
+    "missing_branches": 4,
+    "percent": 0.0
+   },
+   {
+    "path": "dojos/management/commands/seed_champions.py",
+    "kind": "seed or import (development only)",
+    "statements": 43,
+    "missing": 43,
+    "branches": 10,
+    "missing_branches": 10,
+    "percent": 0.0
+   },
+   {
+    "path": "dojos/management/commands/seed_dojos.py",
+    "kind": "seed or import (development only)",
+    "statements": 28,
+    "missing": 28,
+    "branches": 8,
+    "missing_branches": 8,
+    "percent": 0.0
+   },
+   {
+    "path": "dojos/management/commands/seed_mentors.py",
+    "kind": "seed or import (development only)",
+    "statements": 124,
+    "missing": 124,
+    "branches": 50,
+    "missing_branches": 50,
+    "percent": 0.0
+   },
+   {
+    "path": "events/management/commands/rebuild_engagement.py",
+    "kind": "management command",
+    "statements": 6,
+    "missing": 6,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 0.0
+   },
+   {
+    "path": "events/management/commands/seed_ninja_history.py",
+    "kind": "seed or import (development only)",
+    "statements": 145,
+    "missing": 145,
+    "branches": 54,
+    "missing_branches": 54,
+    "percent": 0.0
+   },
+   {
+    "path": "geo/management/commands/import_boundaries.py",
+    "kind": "seed or import (development only)",
+    "statements": 37,
+    "missing": 37,
+    "branches": 10,
+    "missing_branches": 10,
+    "percent": 0.0
+   },
+   {
+    "path": "geo/management/commands/import_municipalities.py",
+    "kind": "seed or import (development only)",
+    "statements": 17,
+    "missing": 17,
+    "branches": 2,
+    "missing_branches": 2,
+    "percent": 0.0
+   },
+   {
+    "path": "geo/management/commands/seed_geo.py",
+    "kind": "seed or import (development only)",
+    "statements": 18,
+    "missing": 18,
+    "branches": 2,
+    "missing_branches": 2,
+    "percent": 0.0
+   },
+   {
+    "path": "mailing/management/commands/simulate_bounce.py",
+    "kind": "management command",
+    "statements": 34,
+    "missing": 34,
+    "branches": 12,
+    "missing_branches": 12,
+    "percent": 0.0
+   },
+   {
+    "path": "notifications/routing.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 3,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 0.0
+   },
+   {
+    "path": "privacy/management/commands/apply_retention.py",
+    "kind": "management command",
+    "statements": 7,
+    "missing": 7,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 0.0
+   },
+   {
+    "path": "privacy/management/commands/privacy_replay_erasures.py",
+    "kind": "management command",
+    "statements": 7,
+    "missing": 7,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 0.0
+   },
+   {
+    "path": "website/asgi.py",
+    "kind": "site",
+    "statements": 10,
+    "missing": 10,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 0.0
+   },
+   {
+    "path": "website/wsgi.py",
+    "kind": "site",
+    "statements": 4,
+    "missing": 4,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 0.0
+   },
+   {
+    "path": "events/management/commands/seed_events.py",
+    "kind": "seed or import (development only)",
+    "statements": 103,
+    "missing": 69,
+    "branches": 28,
+    "missing_branches": 28,
+    "percent": 26.0
+   },
+   {
+    "path": "events/tasks.py",
+    "kind": "site",
+    "statements": 5,
+    "missing": 2,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 60.0
+   },
+   {
+    "path": "mailing/segmentation/attributes/changes.py",
+    "kind": "site",
+    "statements": 61,
+    "missing": 18,
+    "branches": 10,
+    "missing_branches": 6,
+    "percent": 66.2
+   },
+   {
+    "path": "mailing/segmentation/attributes/event.py",
+    "kind": "site",
+    "statements": 20,
+    "missing": 4,
+    "branches": 4,
+    "missing_branches": 3,
+    "percent": 70.8
+   },
+   {
+    "path": "mailing/management/commands/seed_mailing.py",
+    "kind": "seed or import (development only)",
+    "statements": 82,
+    "missing": 19,
+    "branches": 32,
+    "missing_branches": 14,
+    "percent": 71.1
+   },
+   {
+    "path": "core/seed_translations.py",
+    "kind": "seed or import (development only)",
+    "statements": 25,
+    "missing": 5,
+    "branches": 16,
+    "missing_branches": 6,
+    "percent": 73.2
+   },
+   {
+    "path": "applications/tasks.py",
+    "kind": "site",
+    "statements": 8,
+    "missing": 2,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 75.0
+   },
+   {
+    "path": "privacy/management/commands/privacy_register.py",
+    "kind": "management command",
+    "statements": 14,
+    "missing": 3,
+    "branches": 2,
+    "missing_branches": 1,
+    "percent": 75.0
+   },
+   {
+    "path": "accounts/backends.py",
+    "kind": "site",
+    "statements": 15,
+    "missing": 3,
+    "branches": 4,
+    "missing_branches": 1,
+    "percent": 78.9
+   },
+   {
+    "path": "accounts/management/commands/describe_seed_accounts.py",
+    "kind": "management command",
+    "statements": 38,
+    "missing": 5,
+    "branches": 16,
+    "missing_branches": 6,
+    "percent": 79.6
+   },
+   {
+    "path": "applications/admin.py",
+    "kind": "site",
+    "statements": 94,
+    "missing": 15,
+    "branches": 14,
+    "missing_branches": 7,
+    "percent": 79.6
+   },
+   {
+    "path": "accounts/management/commands/totp_code.py",
+    "kind": "management command",
+    "statements": 16,
+    "missing": 2,
+    "branches": 4,
+    "missing_branches": 2,
+    "percent": 80.0
+   },
+   {
+    "path": "accounts/tasks.py",
+    "kind": "site",
+    "statements": 5,
+    "missing": 1,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 80.0
+   },
+   {
+    "path": "privacy/tasks.py",
+    "kind": "site",
+    "statements": 5,
+    "missing": 1,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 80.0
+   },
+   {
+    "path": "accounts/seed_credentials.py",
+    "kind": "seed or import (development only)",
+    "statements": 135,
+    "missing": 17,
+    "branches": 64,
+    "missing_branches": 20,
+    "percent": 81.4
+   },
+   {
+    "path": "monitoring/celery_signals.py",
+    "kind": "site",
+    "statements": 20,
+    "missing": 3,
+    "branches": 2,
+    "missing_branches": 1,
+    "percent": 81.8
+   },
+   {
+    "path": "mailing/segmentation/attributes/dojo.py",
+    "kind": "site",
+    "statements": 94,
+    "missing": 13,
+    "branches": 8,
+    "missing_branches": 5,
+    "percent": 82.4
+   },
+   {
+    "path": "geo/geocoding.py",
+    "kind": "site",
+    "statements": 30,
+    "missing": 4,
+    "branches": 6,
+    "missing_branches": 2,
+    "percent": 83.3
+   },
+   {
+    "path": "accounts/invitations.py",
+    "kind": "site",
+    "statements": 100,
+    "missing": 10,
+    "branches": 26,
+    "missing_branches": 10,
+    "percent": 84.1
+   },
+   {
+    "path": "api/scopes.py",
+    "kind": "site",
+    "statements": 11,
+    "missing": 1,
+    "branches": 2,
+    "missing_branches": 1,
+    "percent": 84.6
+   },
+   {
+    "path": "mailing/segmentation/attributes/locality.py",
+    "kind": "site",
+    "statements": 66,
+    "missing": 9,
+    "branches": 12,
+    "missing_branches": 3,
+    "percent": 84.6
+   },
+   {
+    "path": "accounts/two_step.py",
+    "kind": "site",
+    "statements": 112,
+    "missing": 10,
+    "branches": 28,
+    "missing_branches": 11,
+    "percent": 85.0
+   },
+   {
+    "path": "mailing/segmentation/attributes/profile.py",
+    "kind": "site",
+    "statements": 127,
+    "missing": 17,
+    "branches": 18,
+    "missing_branches": 4,
+    "percent": 85.5
+   },
+   {
+    "path": "mailing/segmentation/base.py",
+    "kind": "site",
+    "statements": 86,
+    "missing": 10,
+    "branches": 38,
+    "missing_branches": 8,
+    "percent": 85.5
+   },
+   {
+    "path": "privacy/deletion.py",
+    "kind": "site",
+    "statements": 41,
+    "missing": 4,
+    "branches": 14,
+    "missing_branches": 4,
+    "percent": 85.5
+   },
+   {
+    "path": "dojos/team.py",
+    "kind": "site",
+    "statements": 149,
+    "missing": 14,
+    "branches": 64,
+    "missing_branches": 16,
+    "percent": 85.9
+   },
+   {
+    "path": "accounts/security_views.py",
+    "kind": "site",
+    "statements": 212,
+    "missing": 24,
+    "branches": 60,
+    "missing_branches": 12,
+    "percent": 86.8
+   },
+   {
+    "path": "applications/services.py",
+    "kind": "site",
+    "statements": 107,
+    "missing": 9,
+    "branches": 30,
+    "missing_branches": 9,
+    "percent": 86.9
+   },
+   {
+    "path": "events/views.py",
+    "kind": "site",
+    "statements": 101,
+    "missing": 10,
+    "branches": 38,
+    "missing_branches": 8,
+    "percent": 87.1
+   },
+   {
+    "path": "accounts/security_mail.py",
+    "kind": "site",
+    "statements": 29,
+    "missing": 2,
+    "branches": 10,
+    "missing_branches": 3,
+    "percent": 87.2
+   },
+   {
+    "path": "mailing/segmentation/resolver.py",
+    "kind": "site",
+    "statements": 59,
+    "missing": 5,
+    "branches": 20,
+    "missing_branches": 5,
+    "percent": 87.3
+   },
+   {
+    "path": "mailing/journeys.py",
+    "kind": "site",
+    "statements": 48,
+    "missing": 4,
+    "branches": 8,
+    "missing_branches": 3,
+    "percent": 87.5
+   },
+   {
+    "path": "mailing/segmentation/attributes/activity.py",
+    "kind": "site",
+    "statements": 36,
+    "missing": 3,
+    "branches": 4,
+    "missing_branches": 2,
+    "percent": 87.5
+   },
+   {
+    "path": "mailing/tasks.py",
+    "kind": "site",
+    "statements": 133,
+    "missing": 14,
+    "branches": 26,
+    "missing_branches": 5,
+    "percent": 88.1
+   },
+   {
+    "path": "accounts/child_accounts.py",
+    "kind": "site",
+    "statements": 114,
+    "missing": 11,
+    "branches": 30,
+    "missing_branches": 6,
+    "percent": 88.2
+   },
+   {
+    "path": "dojos/languages.py",
+    "kind": "site",
+    "statements": 11,
+    "missing": 1,
+    "branches": 6,
+    "missing_branches": 1,
+    "percent": 88.2
+   },
+   {
+    "path": "mailing/admin.py",
+    "kind": "site",
+    "statements": 99,
+    "missing": 8,
+    "branches": 6,
+    "missing_branches": 4,
+    "percent": 88.6
+   },
+   {
+    "path": "mailing/services.py",
+    "kind": "site",
+    "statements": 80,
+    "missing": 7,
+    "branches": 26,
+    "missing_branches": 5,
+    "percent": 88.7
+   },
+   {
+    "path": "monitoring/management/commands/capacity_report.py",
+    "kind": "management command",
+    "statements": 64,
+    "missing": 6,
+    "branches": 16,
+    "missing_branches": 3,
+    "percent": 88.8
+   },
+   {
+    "path": "accounts/email_change.py",
+    "kind": "site",
+    "statements": 107,
+    "missing": 10,
+    "branches": 34,
+    "missing_branches": 5,
+    "percent": 89.4
+   },
+   {
+    "path": "mailing/bounce.py",
+    "kind": "site",
+    "statements": 188,
+    "missing": 14,
+    "branches": 66,
+    "missing_branches": 12,
+    "percent": 89.8
+   },
+   {
+    "path": "mailing/campaigns.py",
+    "kind": "site",
+    "statements": 169,
+    "missing": 12,
+    "branches": 68,
+    "missing_branches": 11,
+    "percent": 90.3
+   },
+   {
+    "path": "mailing/segmentation/attributes/engagement.py",
+    "kind": "site",
+    "statements": 105,
+    "missing": 8,
+    "branches": 8,
+    "missing_branches": 3,
+    "percent": 90.3
+   },
+   {
+    "path": "monitoring/recorder.py",
+    "kind": "site",
+    "statements": 110,
+    "missing": 9,
+    "branches": 30,
+    "missing_branches": 4,
+    "percent": 90.7
+   },
+   {
+    "path": "accounts/admin_access.py",
+    "kind": "site",
+    "statements": 69,
+    "missing": 4,
+    "branches": 20,
+    "missing_branches": 4,
+    "percent": 91.0
+   },
+   {
+    "path": "accounts/people.py",
+    "kind": "site",
+    "statements": 140,
+    "missing": 10,
+    "branches": 30,
+    "missing_branches": 5,
+    "percent": 91.2
+   },
+   {
+    "path": "accounts/two_step_forms.py",
+    "kind": "site",
+    "statements": 55,
+    "missing": 4,
+    "branches": 2,
+    "missing_branches": 1,
+    "percent": 91.2
+   },
+   {
+    "path": "accounts/login_links.py",
+    "kind": "site",
+    "statements": 148,
+    "missing": 9,
+    "branches": 26,
+    "missing_branches": 6,
+    "percent": 91.4
+   },
+   {
+    "path": "api/auth.py",
+    "kind": "site",
+    "statements": 38,
+    "missing": 2,
+    "branches": 10,
+    "missing_branches": 2,
+    "percent": 91.7
+   },
+   {
+    "path": "notifications/views.py",
+    "kind": "site",
+    "statements": 20,
+    "missing": 0,
+    "branches": 4,
+    "missing_branches": 2,
+    "percent": 91.7
+   },
+   {
+    "path": "website/urls.py",
+    "kind": "site",
+    "statements": 18,
+    "missing": 0,
+    "branches": 6,
+    "missing_branches": 2,
+    "percent": 91.7
+   },
+   {
+    "path": "core/management/commands/seed_content_languages.py",
+    "kind": "seed or import (development only)",
+    "statements": 92,
+    "missing": 6,
+    "branches": 30,
+    "missing_branches": 4,
+    "percent": 91.8
+   },
+   {
+    "path": "core/audit.py",
+    "kind": "site",
+    "statements": 119,
+    "missing": 6,
+    "branches": 42,
+    "missing_branches": 7,
+    "percent": 91.9
+   },
+   {
+    "path": "mailing/segmentation/attributes/account.py",
+    "kind": "site",
+    "statements": 24,
+    "missing": 1,
+    "branches": 2,
+    "missing_branches": 1,
+    "percent": 92.3
+   },
+   {
+    "path": "privacy/models.py",
+    "kind": "site",
+    "statements": 26,
+    "missing": 2,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 92.3
+   },
+   {
+    "path": "dojos/views.py",
+    "kind": "site",
+    "statements": 446,
+    "missing": 18,
+    "branches": 122,
+    "missing_branches": 25,
+    "percent": 92.4
+   },
+   {
+    "path": "privacy/erasure.py",
+    "kind": "site",
+    "statements": 195,
+    "missing": 11,
+    "branches": 100,
+    "missing_branches": 11,
+    "percent": 92.5
+   },
+   {
+    "path": "accounts/sign_in.py",
+    "kind": "site",
+    "statements": 122,
+    "missing": 6,
+    "branches": 54,
+    "missing_branches": 7,
+    "percent": 92.6
+   },
+   {
+    "path": "accounts/views.py",
+    "kind": "site",
+    "statements": 428,
+    "missing": 22,
+    "branches": 124,
+    "missing_branches": 17,
+    "percent": 92.9
+   },
+   {
+    "path": "events/management/commands/seed_upcoming_registrations.py",
+    "kind": "seed or import (development only)",
+    "statements": 88,
+    "missing": 3,
+    "branches": 30,
+    "missing_branches": 5,
+    "percent": 93.2
+   },
+   {
+    "path": "core/uploads.py",
+    "kind": "site",
+    "statements": 150,
+    "missing": 10,
+    "branches": 44,
+    "missing_branches": 3,
+    "percent": 93.3
+   },
+   {
+    "path": "mailing/dojo_audiences.py",
+    "kind": "site",
+    "statements": 142,
+    "missing": 7,
+    "branches": 52,
+    "missing_branches": 6,
+    "percent": 93.3
+   },
+   {
+    "path": "mailing/dojo_views.py",
+    "kind": "site",
+    "statements": 161,
+    "missing": 11,
+    "branches": 28,
+    "missing_branches": 1,
+    "percent": 93.7
+   },
+   {
+    "path": "accounts/reauth.py",
+    "kind": "site",
+    "statements": 14,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 1,
+    "percent": 93.8
+   },
+   {
+    "path": "core/views.py",
+    "kind": "site",
+    "statements": 30,
+    "missing": 1,
+    "branches": 2,
+    "missing_branches": 1,
+    "percent": 93.8
+   },
+   {
+    "path": "geo/models.py",
+    "kind": "site",
+    "statements": 16,
+    "missing": 1,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 93.8
+   },
+   {
+    "path": "pathways/management/commands/seed_pathways.py",
+    "kind": "seed or import (development only)",
+    "statements": 35,
+    "missing": 2,
+    "branches": 14,
+    "missing_branches": 1,
+    "percent": 93.9
+   },
+   {
+    "path": "api/views.py",
+    "kind": "site",
+    "statements": 43,
+    "missing": 1,
+    "branches": 8,
+    "missing_branches": 2,
+    "percent": 94.1
+   },
+   {
+    "path": "accounts/organisation_people.py",
+    "kind": "site",
+    "statements": 66,
+    "missing": 2,
+    "branches": 20,
+    "missing_branches": 3,
+    "percent": 94.2
+   },
+   {
+    "path": "mailing/automated.py",
+    "kind": "site",
+    "statements": 77,
+    "missing": 4,
+    "branches": 14,
+    "missing_branches": 1,
+    "percent": 94.5
+   },
+   {
+    "path": "dojos/search.py",
+    "kind": "site",
+    "statements": 70,
+    "missing": 4,
+    "branches": 26,
+    "missing_branches": 1,
+    "percent": 94.8
+   },
+   {
+    "path": "api/services.py",
+    "kind": "site",
+    "statements": 53,
+    "missing": 1,
+    "branches": 6,
+    "missing_branches": 2,
+    "percent": 94.9
+   },
+   {
+    "path": "core/jsi18n.py",
+    "kind": "site",
+    "statements": 46,
+    "missing": 1,
+    "branches": 16,
+    "missing_branches": 2,
+    "percent": 95.2
+   },
+   {
+    "path": "monitoring/capacity.py",
+    "kind": "site",
+    "statements": 72,
+    "missing": 3,
+    "branches": 14,
+    "missing_branches": 1,
+    "percent": 95.3
+   },
+   {
+    "path": "accounts/home_dojo.py",
+    "kind": "site",
+    "statements": 36,
+    "missing": 1,
+    "branches": 8,
+    "missing_branches": 1,
+    "percent": 95.5
+   },
+   {
+    "path": "core/image_library.py",
+    "kind": "site",
+    "statements": 34,
+    "missing": 1,
+    "branches": 10,
+    "missing_branches": 1,
+    "percent": 95.5
+   },
+   {
+    "path": "events/engagement.py",
+    "kind": "site",
+    "statements": 110,
+    "missing": 3,
+    "branches": 46,
+    "missing_branches": 4,
+    "percent": 95.5
+   },
+   {
+    "path": "monitoring/tasks.py",
+    "kind": "site",
+    "statements": 20,
+    "missing": 1,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 95.5
+   },
+   {
+    "path": "core/content_languages.py",
+    "kind": "site",
+    "statements": 108,
+    "missing": 3,
+    "branches": 30,
+    "missing_branches": 3,
+    "percent": 95.7
+   },
+   {
+    "path": "website/settings.py",
+    "kind": "site",
+    "statements": 142,
+    "missing": 2,
+    "branches": 8,
+    "missing_branches": 4,
+    "percent": 96.0
+   },
+   {
+    "path": "accounts/management/commands/seed_otp_vault.py",
+    "kind": "seed or import (development only)",
+    "statements": 40,
+    "missing": 2,
+    "branches": 12,
+    "missing_branches": 0,
+    "percent": 96.2
+   },
+   {
+    "path": "accounts/middleware.py",
+    "kind": "site",
+    "statements": 42,
+    "missing": 1,
+    "branches": 10,
+    "missing_branches": 1,
+    "percent": 96.2
+   },
+   {
+    "path": "dojos/models.py",
+    "kind": "site",
+    "statements": 134,
+    "missing": 2,
+    "branches": 14,
+    "missing_branches": 3,
+    "percent": 96.6
+   },
+   {
+    "path": "core/manage_nav.py",
+    "kind": "site",
+    "statements": 51,
+    "missing": 1,
+    "branches": 12,
+    "missing_branches": 1,
+    "percent": 96.8
+   },
+   {
+    "path": "mailing/forms.py",
+    "kind": "site",
+    "statements": 223,
+    "missing": 4,
+    "branches": 34,
+    "missing_branches": 4,
+    "percent": 96.9
+   },
+   {
+    "path": "privacy/retention.py",
+    "kind": "site",
+    "statements": 137,
+    "missing": 4,
+    "branches": 32,
+    "missing_branches": 1,
+    "percent": 97.0
+   },
+   {
+    "path": "events/attendance.py",
+    "kind": "site",
+    "statements": 27,
+    "missing": 0,
+    "branches": 8,
+    "missing_branches": 1,
+    "percent": 97.1
+   },
+   {
+    "path": "notifications/consumers.py",
+    "kind": "site",
+    "statements": 60,
+    "missing": 0,
+    "branches": 8,
+    "missing_branches": 2,
+    "percent": 97.1
+   },
+   {
+    "path": "dojos/forms.py",
+    "kind": "site",
+    "statements": 135,
+    "missing": 2,
+    "branches": 14,
+    "missing_branches": 2,
+    "percent": 97.3
+   },
+   {
+    "path": "applications/views.py",
+    "kind": "site",
+    "statements": 62,
+    "missing": 2,
+    "branches": 16,
+    "missing_branches": 0,
+    "percent": 97.4
+   },
+   {
+    "path": "events/awards.py",
+    "kind": "site",
+    "statements": 63,
+    "missing": 2,
+    "branches": 22,
+    "missing_branches": 0,
+    "percent": 97.6
+   },
+   {
+    "path": "monitoring/management/commands/seed_scale.py",
+    "kind": "seed or import (development only)",
+    "statements": 269,
+    "missing": 5,
+    "branches": 88,
+    "missing_branches": 3,
+    "percent": 97.8
+   },
+   {
+    "path": "privacy/export.py",
+    "kind": "site",
+    "statements": 63,
+    "missing": 2,
+    "branches": 28,
+    "missing_branches": 0,
+    "percent": 97.8
+   },
+   {
+    "path": "privacy/views.py",
+    "kind": "site",
+    "statements": 80,
+    "missing": 2,
+    "branches": 12,
+    "missing_branches": 0,
+    "percent": 97.8
+   },
+   {
+    "path": "pathways/models.py",
+    "kind": "site",
+    "statements": 49,
+    "missing": 1,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 98.0
+   },
+   {
+    "path": "privacy/privacy.py",
+    "kind": "site",
+    "statements": 46,
+    "missing": 0,
+    "branches": 6,
+    "missing_branches": 1,
+    "percent": 98.1
+   },
+   {
+    "path": "accounts/admin.py",
+    "kind": "site",
+    "statements": 56,
+    "missing": 1,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 98.2
+   },
+   {
+    "path": "accounts/forms.py",
+    "kind": "site",
+    "statements": 333,
+    "missing": 3,
+    "branches": 48,
+    "missing_branches": 4,
+    "percent": 98.2
+   },
+   {
+    "path": "content/forms.py",
+    "kind": "site",
+    "statements": 50,
+    "missing": 0,
+    "branches": 6,
+    "missing_branches": 1,
+    "percent": 98.2
+   },
+   {
+    "path": "mailing/models.py",
+    "kind": "site",
+    "statements": 251,
+    "missing": 3,
+    "branches": 6,
+    "missing_branches": 1,
+    "percent": 98.4
+   },
+   {
+    "path": "content/models.py",
+    "kind": "site",
+    "statements": 137,
+    "missing": 2,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 98.6
+   },
+   {
+    "path": "events/forms.py",
+    "kind": "site",
+    "statements": 131,
+    "missing": 0,
+    "branches": 26,
+    "missing_branches": 2,
+    "percent": 98.7
+   },
+   {
+    "path": "api/v1.py",
+    "kind": "site",
+    "statements": 73,
+    "missing": 0,
+    "branches": 8,
+    "missing_branches": 1,
+    "percent": 98.8
+   },
+   {
+    "path": "accounts/models.py",
+    "kind": "site",
+    "statements": 249,
+    "missing": 1,
+    "branches": 18,
+    "missing_branches": 2,
+    "percent": 98.9
+   },
+   {
+    "path": "accounts/organisation.py",
+    "kind": "site",
+    "statements": 75,
+    "missing": 0,
+    "branches": 16,
+    "missing_branches": 1,
+    "percent": 98.9
+   },
+   {
+    "path": "privacy/registry.py",
+    "kind": "site",
+    "statements": 140,
+    "missing": 1,
+    "branches": 40,
+    "missing_branches": 1,
+    "percent": 98.9
+   },
+   {
+    "path": "events/models.py",
+    "kind": "site",
+    "statements": 227,
+    "missing": 1,
+    "branches": 10,
+    "missing_branches": 1,
+    "percent": 99.2
+   },
+   {
+    "path": "accounts/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "accounts/apps.py",
+    "kind": "site",
+    "statements": 10,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "accounts/consent.py",
+    "kind": "site",
+    "statements": 18,
+    "missing": 0,
+    "branches": 6,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "accounts/context_processors.py",
+    "kind": "site",
+    "statements": 32,
+    "missing": 0,
+    "branches": 6,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "accounts/management/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "accounts/management/commands/__init__.py",
+    "kind": "management command",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "accounts/management/commands/assign_home_dojos.py",
+    "kind": "management command",
+    "statements": 6,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "accounts/management/commands/seed_login_links.py",
+    "kind": "seed or import (development only)",
+    "statements": 24,
+    "missing": 0,
+    "branches": 4,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "accounts/management/commands/seed_two_step.py",
+    "kind": "seed or import (development only)",
+    "statements": 30,
+    "missing": 0,
+    "branches": 6,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "accounts/privacy.py",
+    "kind": "site",
+    "statements": 11,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "accounts/provisioning.py",
+    "kind": "site",
+    "statements": 9,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "accounts/template_avatars.py",
+    "kind": "site",
+    "statements": 7,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "accounts/urls.py",
+    "kind": "site",
+    "statements": 5,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "accounts/webauthn_entities.py",
+    "kind": "site",
+    "statements": 16,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "api/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "api/admin.py",
+    "kind": "site",
+    "statements": 7,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "api/apps.py",
+    "kind": "site",
+    "statements": 4,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "api/forms.py",
+    "kind": "site",
+    "statements": 6,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "api/models.py",
+    "kind": "site",
+    "statements": 18,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "api/privacy.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "api/urls.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "applications/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "applications/apps.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "applications/forms.py",
+    "kind": "site",
+    "statements": 44,
+    "missing": 0,
+    "branches": 4,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "applications/management/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "applications/management/commands/__init__.py",
+    "kind": "management command",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "applications/models.py",
+    "kind": "site",
+    "statements": 67,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "applications/privacy.py",
+    "kind": "site",
+    "statements": 4,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "applications/reminders.py",
+    "kind": "site",
+    "statements": 35,
+    "missing": 0,
+    "branches": 6,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "applications/seeding.py",
+    "kind": "seed or import (development only)",
+    "statements": 18,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "applications/storage.py",
+    "kind": "site",
+    "statements": 5,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "applications/templatetags/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "applications/templatetags/reviewing.py",
+    "kind": "site",
+    "statements": 10,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "applications/urls.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "content/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "content/admin.py",
+    "kind": "site",
+    "statements": 24,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "content/apps.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "content/management/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "content/management/commands/__init__.py",
+    "kind": "management command",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "content/management/commands/seed_announcements.py",
+    "kind": "seed or import (development only)",
+    "statements": 20,
+    "missing": 0,
+    "branches": 4,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "content/management/commands/seed_sponsors.py",
+    "kind": "seed or import (development only)",
+    "statements": 13,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "content/privacy.py",
+    "kind": "site",
+    "statements": 8,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "content/urls.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "content/views.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/admin_apps.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/admin_site.py",
+    "kind": "site",
+    "statements": 23,
+    "missing": 0,
+    "branches": 6,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/admin_translations.py",
+    "kind": "site",
+    "statements": 39,
+    "missing": 0,
+    "branches": 8,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/apps.py",
+    "kind": "site",
+    "statements": 9,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/audit_views.py",
+    "kind": "site",
+    "statements": 40,
+    "missing": 0,
+    "branches": 6,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/context_processors.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/forms.py",
+    "kind": "site",
+    "statements": 28,
+    "missing": 0,
+    "branches": 10,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/health.py",
+    "kind": "site",
+    "statements": 32,
+    "missing": 0,
+    "branches": 4,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/management/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/management/commands/__init__.py",
+    "kind": "management command",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/models.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/profiling.py",
+    "kind": "site",
+    "statements": 13,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/templatetags/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/templatetags/audit.py",
+    "kind": "site",
+    "statements": 7,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/templatetags/content_i18n.py",
+    "kind": "site",
+    "statements": 16,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/templatetags/js_catalog.py",
+    "kind": "site",
+    "statements": 6,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/templatetags/lookup.py",
+    "kind": "site",
+    "statements": 5,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/templatetags/manage_nav.py",
+    "kind": "site",
+    "statements": 13,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/templatetags/markdown_extras.py",
+    "kind": "site",
+    "statements": 16,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/testing.py",
+    "kind": "site",
+    "statements": 35,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "core/urls.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "dojos/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "dojos/access.py",
+    "kind": "site",
+    "statements": 88,
+    "missing": 0,
+    "branches": 8,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "dojos/admin.py",
+    "kind": "site",
+    "statements": 23,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "dojos/apps.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "dojos/management/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "dojos/management/commands/__init__.py",
+    "kind": "management command",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "dojos/management/commands/seed_organisation.py",
+    "kind": "seed or import (development only)",
+    "statements": 52,
+    "missing": 0,
+    "branches": 8,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "dojos/privacy.py",
+    "kind": "site",
+    "statements": 4,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "dojos/template_icons.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "dojos/testing.py",
+    "kind": "site",
+    "statements": 23,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "dojos/urls.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "events/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "events/admin.py",
+    "kind": "site",
+    "statements": 47,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "events/apps.py",
+    "kind": "site",
+    "statements": 5,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "events/management/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "events/management/commands/__init__.py",
+    "kind": "management command",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "events/privacy.py",
+    "kind": "site",
+    "statements": 16,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "events/registrations.py",
+    "kind": "site",
+    "statements": 53,
+    "missing": 0,
+    "branches": 16,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "events/search.py",
+    "kind": "site",
+    "statements": 27,
+    "missing": 0,
+    "branches": 6,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "events/signals.py",
+    "kind": "site",
+    "statements": 17,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "events/template_images.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "events/urls.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "geo/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "geo/admin.py",
+    "kind": "site",
+    "statements": 5,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "geo/apps.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "geo/functions.py",
+    "kind": "site",
+    "statements": 6,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "geo/management/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "geo/management/commands/__init__.py",
+    "kind": "management command",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "geo/privacy.py",
+    "kind": "site",
+    "statements": 4,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "geo/views.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "geo/widgets.py",
+    "kind": "site",
+    "statements": 21,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "gunicorn.conf.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/apps.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/categories.py",
+    "kind": "site",
+    "statements": 19,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/dojo_families.py",
+    "kind": "site",
+    "statements": 19,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/management/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/management/commands/__init__.py",
+    "kind": "management command",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/management/commands/load_mail_templates.py",
+    "kind": "management command",
+    "statements": 12,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/preferences.py",
+    "kind": "site",
+    "statements": 43,
+    "missing": 0,
+    "branches": 16,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/privacy.py",
+    "kind": "site",
+    "statements": 14,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/queue_status.py",
+    "kind": "site",
+    "statements": 13,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/rendering.py",
+    "kind": "site",
+    "statements": 21,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/seed_templates.py",
+    "kind": "seed or import (development only)",
+    "statements": 25,
+    "missing": 0,
+    "branches": 8,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/segmentation/attributes/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/segmentation/attributes/ninja.py",
+    "kind": "site",
+    "statements": 12,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/segmentation/attributes/registration.py",
+    "kind": "site",
+    "statements": 7,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/segmentation/registry.py",
+    "kind": "site",
+    "statements": 19,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/testing.py",
+    "kind": "site",
+    "statements": 8,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/urls.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "mailing/views.py",
+    "kind": "site",
+    "statements": 53,
+    "missing": 0,
+    "branches": 16,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "monitoring/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "monitoring/admin.py",
+    "kind": "site",
+    "statements": 6,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "monitoring/apps.py",
+    "kind": "site",
+    "statements": 6,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "monitoring/collect.py",
+    "kind": "site",
+    "statements": 48,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "monitoring/management/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "monitoring/management/commands/__init__.py",
+    "kind": "management command",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "monitoring/middleware.py",
+    "kind": "site",
+    "statements": 19,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "monitoring/models.py",
+    "kind": "site",
+    "statements": 12,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "monitoring/privacy.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "monitoring/urls.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "monitoring/views.py",
+    "kind": "site",
+    "statements": 88,
+    "missing": 0,
+    "branches": 18,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "notifications/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "notifications/admin.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "notifications/apps.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "notifications/models.py",
+    "kind": "site",
+    "statements": 18,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "notifications/privacy.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "notifications/services.py",
+    "kind": "site",
+    "statements": 18,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "notifications/urls.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "pathways/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "pathways/admin.py",
+    "kind": "site",
+    "statements": 5,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "pathways/apps.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "pathways/management/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "pathways/management/commands/__init__.py",
+    "kind": "management command",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "pathways/privacy.py",
+    "kind": "site",
+    "statements": 4,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "pathways/urls.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "pathways/views.py",
+    "kind": "site",
+    "statements": 6,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "privacy/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "privacy/admin.py",
+    "kind": "site",
+    "statements": 13,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "privacy/apps.py",
+    "kind": "site",
+    "statements": 6,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "privacy/forms.py",
+    "kind": "site",
+    "statements": 13,
+    "missing": 0,
+    "branches": 2,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "privacy/management/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "privacy/management/commands/__init__.py",
+    "kind": "management command",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "privacy/register.py",
+    "kind": "site",
+    "statements": 51,
+    "missing": 0,
+    "branches": 16,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "privacy/templatetags/__init__.py",
+    "kind": "site",
+    "statements": 0,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "privacy/templatetags/retention.py",
+    "kind": "site",
+    "statements": 6,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "privacy/urls.py",
+    "kind": "site",
+    "statements": 3,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "website/__init__.py",
+    "kind": "site",
+    "statements": 2,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   },
+   {
+    "path": "website/celery.py",
+    "kind": "site",
+    "statements": 6,
+    "missing": 0,
+    "branches": 0,
+    "missing_branches": 0,
+    "percent": 100.0
+   }
+  ]
+ },
+ "complexity": {
+  "functions": 1320,
+  "average": 3.27,
+  "ranks": {
+   "A": 1119,
+   "B": 151,
+   "C": 39,
+   "D": 8,
+   "E": 1,
+   "F": 2
+  },
+  "most_complex": [
+   {
+    "path": "events/management/commands/seed_ninja_history.py",
+    "line": 115,
+    "name": "Command.handle",
+    "complexity": 56,
+    "rank": "F",
+    "kind": "seed or import (development only)"
+   },
+   {
+    "path": "accounts/seed_credentials.py",
+    "line": 128,
+    "name": "describe_account",
+    "complexity": 46,
+    "rank": "F",
+    "kind": "seed or import (development only)"
+   },
+   {
+    "path": "dojos/management/commands/seed_mentors.py",
+    "line": 175,
+    "name": "Command.handle",
+    "complexity": 34,
+    "rank": "E",
+    "kind": "seed or import (development only)"
+   },
+   {
+    "path": "privacy/registry.py",
+    "line": 196,
+    "name": "Registry.register",
+    "complexity": 28,
+    "rank": "D",
+    "kind": "site"
+   },
+   {
+    "path": "events/engagement.py",
+    "line": 145,
+    "name": "rebuild",
+    "complexity": 27,
+    "rank": "D",
+    "kind": "site"
+   },
+   {
+    "path": "events/management/commands/seed_upcoming_registrations.py",
+    "line": 98,
+    "name": "Command.handle",
+    "complexity": 24,
+    "rank": "D",
+    "kind": "seed or import (development only)"
+   },
+   {
+    "path": "privacy/erasure.py",
+    "line": 156,
+    "name": "_Erasure._collect",
+    "complexity": 23,
+    "rank": "D",
+    "kind": "site"
+   },
+   {
+    "path": "events/engagement.py",
+    "line": 75,
+    "name": "_metrics",
+    "complexity": 23,
+    "rank": "D",
+    "kind": "site"
+   },
+   {
+    "path": "events/views.py",
+    "line": 134,
+    "name": "event_signup",
+    "complexity": 22,
+    "rank": "D",
+    "kind": "site"
+   },
+   {
+    "path": "accounts/management/commands/seed_guardians.py",
+    "line": 122,
+    "name": "Command.handle",
+    "complexity": 22,
+    "rank": "D",
+    "kind": "seed or import (development only)"
+   },
+   {
+    "path": "dojos/views.py",
+    "line": 536,
+    "name": "dojo_team_action",
+    "complexity": 21,
+    "rank": "D",
+    "kind": "site"
+   },
+   {
+    "path": "monitoring/management/commands/seed_scale.py",
+    "line": 192,
+    "name": "Command.make_families",
+    "complexity": 20,
+    "rank": "C",
+    "kind": "seed or import (development only)"
+   },
+   {
+    "path": "accounts/sign_in.py",
+    "line": 87,
+    "name": "requirements_for",
+    "complexity": 18,
+    "rank": "C",
+    "kind": "site"
+   },
+   {
+    "path": "mailing/segmentation/base.py",
+    "line": 73,
+    "name": "SegmentAttribute.validate",
+    "complexity": 17,
+    "rank": "C",
+    "kind": "site"
+   },
+   {
+    "path": "accounts/sign_in.py",
+    "line": 54,
+    "name": "roles_of",
+    "complexity": 17,
+    "rank": "C",
+    "kind": "site"
+   },
+   {
+    "path": "monitoring/management/commands/seed_scale.py",
+    "line": 294,
+    "name": "Command.make_bookings",
+    "complexity": 17,
+    "rank": "C",
+    "kind": "seed or import (development only)"
+   },
+   {
+    "path": "dojos/management/commands/import_dojos.py",
+    "line": 78,
+    "name": "Command.handle",
+    "complexity": 16,
+    "rank": "C",
+    "kind": "seed or import (development only)"
+   },
+   {
+    "path": "mailing/views.py",
+    "line": 45,
+    "name": "mail_unsubscribe",
+    "complexity": 16,
+    "rank": "C",
+    "kind": "site"
+   },
+   {
+    "path": "events/management/commands/seed_events.py",
+    "line": 118,
+    "name": "Command.handle",
+    "complexity": 16,
+    "rank": "C",
+    "kind": "seed or import (development only)"
+   },
+   {
+    "path": "mailing/dojo_audiences.py",
+    "line": 165,
+    "name": "clean_params",
+    "complexity": 15,
+    "rank": "C",
+    "kind": "site"
+   },
+   {
+    "path": "mailing/services.py",
+    "line": 80,
+    "name": "send",
+    "complexity": 14,
+    "rank": "C",
+    "kind": "site"
+   },
+   {
+    "path": "mailing/campaigns.py",
+    "line": 85,
+    "name": "_dojo_launch_problems",
+    "complexity": 14,
+    "rank": "C",
+    "kind": "site"
+   },
+   {
+    "path": "monitoring/management/commands/seed_scale.py",
+    "line": 244,
+    "name": "Command.make_sessions",
+    "complexity": 14,
+    "rank": "C",
+    "kind": "seed or import (development only)"
+   },
+   {
+    "path": "privacy/erasure.py",
+    "line": 187,
+    "name": "_Erasure._erase_row",
+    "complexity": 13,
+    "rank": "C",
+    "kind": "site"
+   },
+   {
+    "path": "mailing/management/commands/seed_mailing.py",
+    "line": 84,
+    "name": "Command._seed_dojo_mailings",
+    "complexity": 13,
+    "rank": "C",
+    "kind": "seed or import (development only)"
+   }
+  ],
+  "maintainability": [
+   {
+    "path": "monitoring/management/commands/seed_scale.py",
+    "mi": 19.8,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/manage.py",
+    "mi": 24.6,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/views.py",
+    "mi": 24.9,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/views.py",
+    "mi": 26.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/forms.py",
+    "mi": 34.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/forms.py",
+    "mi": 36.5,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/bounce.py",
+    "mi": 37.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/security_views.py",
+    "mi": 37.2,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/attributes/profile.py",
+    "mi": 39.8,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/erasure.py",
+    "mi": 41.1,
+    "rank": "A"
+   },
+   {
+    "path": "events/management/commands/seed_ninja_history.py",
+    "mi": 41.2,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/people.py",
+    "mi": 41.2,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/dojo_views.py",
+    "mi": 42.8,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/seed_credentials.py",
+    "mi": 43.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/models.py",
+    "mi": 43.5,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/dojo_audiences.py",
+    "mi": 43.7,
+    "rank": "A"
+   },
+   {
+    "path": "events/engagement.py",
+    "mi": 44.1,
+    "rank": "A"
+   },
+   {
+    "path": "events/models.py",
+    "mi": 45.8,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/views.py",
+    "mi": 46.4,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/campaigns.py",
+    "mi": 46.6,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/management/commands/seed_guardians.py",
+    "mi": 46.9,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/team.py",
+    "mi": 47.1,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/base.py",
+    "mi": 48.1,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/management/commands/seed_mentors.py",
+    "mi": 48.2,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/attributes/engagement.py",
+    "mi": 48.4,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/models.py",
+    "mi": 48.8,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/sign_in.py",
+    "mi": 49.0,
+    "rank": "A"
+   },
+   {
+    "path": "events/forms.py",
+    "mi": 50.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/manage.py",
+    "mi": 50.3,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/management/commands/import_dojos.py",
+    "mi": 50.5,
+    "rank": "A"
+   },
+   {
+    "path": "core/uploads.py",
+    "mi": 50.5,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/management/commands/seed_mailing.py",
+    "mi": 50.6,
+    "rank": "A"
+   },
+   {
+    "path": "content/manage.py",
+    "mi": 50.8,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/management/commands/describe_seed_accounts.py",
+    "mi": 51.6,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/registry.py",
+    "mi": 52.0,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/forms.py",
+    "mi": 52.4,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/models.py",
+    "mi": 52.9,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/management/commands/simulate_bounce.py",
+    "mi": 53.5,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/invitations.py",
+    "mi": 53.6,
+    "rank": "A"
+   },
+   {
+    "path": "events/views.py",
+    "mi": 53.8,
+    "rank": "A"
+   },
+   {
+    "path": "core/management/commands/seed_content_languages.py",
+    "mi": 54.1,
+    "rank": "A"
+   },
+   {
+    "path": "events/management/commands/seed_upcoming_registrations.py",
+    "mi": 54.1,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/attributes/dojo.py",
+    "mi": 54.5,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/login_links.py",
+    "mi": 54.5,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/register.py",
+    "mi": 54.7,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/email_change.py",
+    "mi": 54.8,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/management/commands/capacity_report.py",
+    "mi": 54.9,
+    "rank": "A"
+   },
+   {
+    "path": "content/models.py",
+    "mi": 55.4,
+    "rank": "A"
+   },
+   {
+    "path": "applications/services.py",
+    "mi": 55.6,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/manage.py",
+    "mi": 55.8,
+    "rank": "A"
+   },
+   {
+    "path": "core/content_languages.py",
+    "mi": 55.9,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/attributes/locality.py",
+    "mi": 56.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/tasks.py",
+    "mi": 56.2,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/retention.py",
+    "mi": 56.3,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/management/commands/seed_organisation.py",
+    "mi": 56.4,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/attributes/changes.py",
+    "mi": 56.5,
+    "rank": "A"
+   },
+   {
+    "path": "core/audit.py",
+    "mi": 56.8,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/capacity.py",
+    "mi": 56.8,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/two_step.py",
+    "mi": 57.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/child_accounts.py",
+    "mi": 57.4,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/attributes/event.py",
+    "mi": 58.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/seed_translations.py",
+    "mi": 58.1,
+    "rank": "A"
+   },
+   {
+    "path": "events/management/commands/seed_events.py",
+    "mi": 58.2,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/recorder.py",
+    "mi": 59.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/admin.py",
+    "mi": 59.7,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/management/commands/seed_champions.py",
+    "mi": 59.8,
+    "rank": "A"
+   },
+   {
+    "path": "pathways/management/commands/seed_pathways.py",
+    "mi": 59.8,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/admin.py",
+    "mi": 60.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/seed_templates.py",
+    "mi": 60.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/organisation_people.py",
+    "mi": 60.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/views.py",
+    "mi": 60.5,
+    "rank": "A"
+   },
+   {
+    "path": "geo/management/commands/seed_geo.py",
+    "mi": 61.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/services.py",
+    "mi": 61.0,
+    "rank": "A"
+   },
+   {
+    "path": "api/v1.py",
+    "mi": 61.0,
+    "rank": "A"
+   },
+   {
+    "path": "website/settings.py",
+    "mi": 61.3,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/automated.py",
+    "mi": 61.8,
+    "rank": "A"
+   },
+   {
+    "path": "applications/management/commands/seed_applications.py",
+    "mi": 62.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/export.py",
+    "mi": 62.2,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/management/commands/map_dojo_provinces.py",
+    "mi": 62.9,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/journeys.py",
+    "mi": 63.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/admin_access.py",
+    "mi": 64.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/audit_views.py",
+    "mi": 64.5,
+    "rank": "A"
+   },
+   {
+    "path": "events/awards.py",
+    "mi": 64.5,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/access.py",
+    "mi": 65.5,
+    "rank": "A"
+   },
+   {
+    "path": "events/manage.py",
+    "mi": 65.6,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/management/commands/totp_code.py",
+    "mi": 65.6,
+    "rank": "A"
+   },
+   {
+    "path": "api/views.py",
+    "mi": 66.1,
+    "rank": "A"
+   },
+   {
+    "path": "content/forms.py",
+    "mi": 66.2,
+    "rank": "A"
+   },
+   {
+    "path": "applications/views.py",
+    "mi": 66.2,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/organisation.py",
+    "mi": 67.1,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/search.py",
+    "mi": 68.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/views.py",
+    "mi": 68.1,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/resolver.py",
+    "mi": 68.8,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/management/commands/privacy_register.py",
+    "mi": 68.9,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/provisioning.py",
+    "mi": 69.4,
+    "rank": "A"
+   },
+   {
+    "path": "api/services.py",
+    "mi": 69.4,
+    "rank": "A"
+   },
+   {
+    "path": "core/admin_translations.py",
+    "mi": 70.4,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/preferences.py",
+    "mi": 70.5,
+    "rank": "A"
+   },
+   {
+    "path": "notifications/consumers.py",
+    "mi": 70.7,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/management/commands/seed_two_step.py",
+    "mi": 71.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/manage_nav.py",
+    "mi": 71.2,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/management/commands/load_mail_templates.py",
+    "mi": 71.3,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/collect.py",
+    "mi": 71.3,
+    "rank": "A"
+   },
+   {
+    "path": "core/jsi18n.py",
+    "mi": 71.4,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/middleware.py",
+    "mi": 72.6,
+    "rank": "A"
+   },
+   {
+    "path": "events/registrations.py",
+    "mi": 73.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/management/commands/seed_otp_vault.py",
+    "mi": 73.3,
+    "rank": "A"
+   },
+   {
+    "path": "applications/forms.py",
+    "mi": 73.5,
+    "rank": "A"
+   },
+   {
+    "path": "applications/reminders.py",
+    "mi": 74.5,
+    "rank": "A"
+   },
+   {
+    "path": "api/auth.py",
+    "mi": 74.7,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/attributes/account.py",
+    "mi": 75.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/seeding.py",
+    "mi": 75.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/deletion.py",
+    "mi": 75.4,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/attributes/activity.py",
+    "mi": 75.4,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/management/commands/seed_dojos.py",
+    "mi": 75.9,
+    "rank": "A"
+   },
+   {
+    "path": "geo/management/commands/import_boundaries.py",
+    "mi": 76.5,
+    "rank": "A"
+   },
+   {
+    "path": "content/management/commands/seed_faqs.py",
+    "mi": 76.5,
+    "rank": "A"
+   },
+   {
+    "path": "core/image_library.py",
+    "mi": 76.6,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/two_step_forms.py",
+    "mi": 76.6,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/admin.py",
+    "mi": 77.9,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/context_processors.py",
+    "mi": 78.4,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/home_dojo.py",
+    "mi": 79.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/security_mail.py",
+    "mi": 79.2,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/rendering.py",
+    "mi": 79.4,
+    "rank": "A"
+   },
+   {
+    "path": "content/management/commands/seed_testimonials.py",
+    "mi": 80.4,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/management/commands/seed_login_links.py",
+    "mi": 80.4,
+    "rank": "A"
+   },
+   {
+    "path": "content/management/commands/seed_announcements.py",
+    "mi": 80.8,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/middleware.py",
+    "mi": 80.8,
+    "rank": "A"
+   },
+   {
+    "path": "notifications/views.py",
+    "mi": 81.1,
+    "rank": "A"
+   },
+   {
+    "path": "geo/geocoding.py",
+    "mi": 81.4,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/celery_signals.py",
+    "mi": 82.0,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/testing.py",
+    "mi": 83.3,
+    "rank": "A"
+   },
+   {
+    "path": "core/forms.py",
+    "mi": 83.5,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/backends.py",
+    "mi": 84.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/admin_site.py",
+    "mi": 84.1,
+    "rank": "A"
+   },
+   {
+    "path": "core/health.py",
+    "mi": 84.6,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/dojo_families.py",
+    "mi": 84.7,
+    "rank": "A"
+   },
+   {
+    "path": "events/search.py",
+    "mi": 84.7,
+    "rank": "A"
+   },
+   {
+    "path": "manage.py",
+    "mi": 85.5,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/queue_status.py",
+    "mi": 85.5,
+    "rank": "A"
+   },
+   {
+    "path": "core/templatetags/content_i18n.py",
+    "mi": 86.9,
+    "rank": "A"
+   },
+   {
+    "path": "core/testing.py",
+    "mi": 87.4,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/forms.py",
+    "mi": 87.7,
+    "rank": "A"
+   },
+   {
+    "path": "api/scopes.py",
+    "mi": 88.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/testing.py",
+    "mi": 88.3,
+    "rank": "A"
+   },
+   {
+    "path": "content/management/commands/seed_sponsors.py",
+    "mi": 88.8,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/consent.py",
+    "mi": 89.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/webauthn_entities.py",
+    "mi": 89.3,
+    "rank": "A"
+   },
+   {
+    "path": "notifications/services.py",
+    "mi": 89.4,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/reauth.py",
+    "mi": 89.4,
+    "rank": "A"
+   },
+   {
+    "path": "core/manage.py",
+    "mi": 90.7,
+    "rank": "A"
+   },
+   {
+    "path": "events/attendance.py",
+    "mi": 91.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/categories.py",
+    "mi": 91.6,
+    "rank": "A"
+   },
+   {
+    "path": "website/urls.py",
+    "mi": 92.2,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/languages.py",
+    "mi": 94.9,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/template_avatars.py",
+    "mi": 97.0,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/models.py",
+    "mi": 97.6,
+    "rank": "A"
+   },
+   {
+    "path": "core/templatetags/markdown_extras.py",
+    "mi": 97.8,
+    "rank": "A"
+   },
+   {
+    "path": "main.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "gunicorn.conf.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/privacy.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/admin.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/template_icons.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/urls.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/management/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "dojos/management/commands/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/admin_apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/context_processors.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/profiling.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/urls.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/models.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/views.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/management/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/management/commands/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/templatetags/manage_nav.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/templatetags/audit.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/templatetags/lookup.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/templatetags/js_catalog.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "core/templatetags/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "pathways/privacy.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "pathways/admin.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "pathways/apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "pathways/urls.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "pathways/models.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "pathways/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "pathways/views.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "pathways/management/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "pathways/management/commands/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "geo/privacy.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "geo/widgets.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "geo/admin.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "geo/apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "geo/models.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "geo/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "geo/functions.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "geo/views.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "geo/management/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "geo/management/commands/import_municipalities.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "geo/management/commands/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/privacy.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/tasks.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/admin.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/urls.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/models.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/management/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/management/commands/apply_retention.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/management/commands/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/management/commands/privacy_replay_erasures.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/templatetags/retention.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "privacy/templatetags/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/privacy.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/urls.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/management/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/management/commands/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/registry.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/attributes/registration.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/attributes/ninja.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "mailing/segmentation/attributes/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "content/privacy.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "content/admin.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "content/apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "content/urls.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "content/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "content/views.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "content/management/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "content/management/commands/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "events/privacy.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "events/tasks.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "events/signals.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "events/admin.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "events/apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "events/urls.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "events/template_images.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "events/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "events/management/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "events/management/commands/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "events/management/commands/rebuild_engagement.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "notifications/privacy.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "notifications/admin.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "notifications/apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "notifications/urls.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "notifications/models.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "notifications/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "notifications/routing.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "website/wsgi.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "website/celery.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "website/asgi.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "website/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/privacy.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/tasks.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/urls.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/management/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/management/commands/assign_home_dojos.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "accounts/management/commands/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/privacy.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/tasks.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/admin.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/urls.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/management/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "monitoring/management/commands/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/privacy.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/tasks.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/storage.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/urls.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/models.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/management/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/management/commands/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/templatetags/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "applications/templatetags/reviewing.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "api/privacy.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "api/forms.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "api/admin.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "api/apps.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "api/urls.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "api/models.py",
+    "mi": 100.0,
+    "rank": "A"
+   },
+   {
+    "path": "api/__init__.py",
+    "mi": 100.0,
+    "rank": "A"
+   }
+  ],
+  "sloc": 23940,
+  "files": 290
+ }
+}

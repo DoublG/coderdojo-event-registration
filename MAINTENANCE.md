@@ -62,6 +62,7 @@ calendar: stay on the latest release. Watch these:
 | celery, kombu, channels, channels-redis | 5.6.3, 5.6.2, 4.3.2, (see file) | Upgrade together with Redis. |
 | mysqlclient | 2.3.0 | Needs the MySQL client headers on the server (missing on Level27 today, see CLAUDE.md). |
 | nh3, django-permissions-policy | 0.3.7, 4.34.0 | Security: the Markdown allowlist and the Permissions-Policy header. Keep them current. |
+| coverage, radon (mando, colorama) | 7.16.2, 6.0.1 (0.7.1, 0.4.6) | Development only (`requirements-dev.txt`): test coverage and complexity ([`CODING_STANDARDS.md`](CODING_STANDARDS.md)). `pip-audit`: no known vulnerabilities (1 Oct 2026). |
 | unittest-xml-reporting, lxml | 4.0.0, 6.1.3 | Development only (`requirements-dev.txt`): the test results as JUnit XML for the Tests workflow's summary. `pip-audit`: no known vulnerabilities (1 Oct 2026). |
 | locust, matplotlib | 2.46.6, 3.11.2 | The load test and its charts ([`loadtest/requirements.txt`](loadtest/requirements.txt), [`CAPACITY.md`](CAPACITY.md)), in a venv of their own: never in the image or on production. `pip-audit -r loadtest/requirements.txt`: no known vulnerabilities (30 Sep 2026). |
 
@@ -84,6 +85,7 @@ calendar: stay on the latest release. Watch these:
 | Every week (5 minutes) | Read the security announcements (see [Sources](#sources-to-watch)) and the GitHub Dependabot alerts. |
 | Every month | Run the [update check](#routine-updates): `pip-audit`, outdated packages, Django patch release. Deploy what's safe. |
 | Every quarter | Review the tables on this page against endoflife.date; bump the *Last checked* date. Run the [code audit](#code-audits) checks. |
+| Every quarter | Measure test coverage and complexity again ([`CODING_STANDARDS.md`](CODING_STANDARDS.md), "Measuring again") and look at what dropped. |
 | Every quarter | Compare the database's growth (the daily capacity samples, `manage.py capacity_report`) with the projection in [`CAPACITY.md`](CAPACITY.md). |
 | Every year | A deeper [security review](#code-audits) of the code and of access to production. |
 | Every year | Measure capacity again ([`CAPACITY.md`](CAPACITY.md), "Measuring again") and update its figures. |

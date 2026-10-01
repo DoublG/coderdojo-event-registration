@@ -39,3 +39,32 @@ known-first-party = [
 
 [tool.ruff.format]
 quote-style = "double"
+
+# Test coverage (CODING_STANDARDS.md, "Test coverage"): coverage.py over the whole
+# suite, branches included. `coverage run manage.py test ...`, then `coverage report`.
+[tool.coverage.run]
+branch = true
+concurrency = ["thread"]
+source = ["."]
+omit = [
+    "*/migrations/*",
+    "*/tests.py",
+    "*/tests/*",
+    "manage.py",
+    "main.py",
+    "docs/*",
+    "loadtest/*",
+    "user-journeys/*",
+    ".github/*",
+    ".devcontainer/*",
+    "staticfiles/*",
+    "media/*",
+]
+
+[tool.coverage.report]
+skip_empty = true
+exclude_also = [
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]

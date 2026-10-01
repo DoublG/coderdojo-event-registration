@@ -25,8 +25,9 @@ explains how the site is built, how its data fits together and why: a summary of
 `CLAUDE.md`, with the diagrams taken from `DATA_MODEL.md` as they are. Rebuild it with
 `python scripts/build_technical.py` (the same venv as below; the first run downloads Mermaid 11.4.1 from
 jsDelivr into `.shots/`, and the build fails if a diagram doesn't render). Its prose is in that script,
-so a change to the model or the conventions may need a sentence there too. Its last chapter, *Capacity,
-load and disk*, summarises [`CAPACITY.md`](../CAPACITY.md) with the charts from `loadtest/charts/`
+so a change to the model or the conventions may need a sentence there too. Its last two chapters,
+*Capacity, load and disk* and *Coding standards and quality*, summarise [`CAPACITY.md`](../CAPACITY.md) and
+[`CODING_STANDARDS.md`](../CODING_STANDARDS.md) with the charts from `loadtest/charts/` and `quality/charts/`
 (embedded when the PDF is built): rebuild it after a new round of measurements.
 
 The screenshots come from the devcontainer's site with the seeded demo data, logged in with the
