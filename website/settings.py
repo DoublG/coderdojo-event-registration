@@ -544,6 +544,13 @@ CACHES = {
 if len(sys.argv) > 1 and sys.argv[1] == "test":
     CACHES["default"]["LOCATION"] = CACHES["default"]["LOCATION"].rsplit("/", 1)[0] + "/3"
 
+# The test results as JUnit XML when the tests run with
+# `--testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner` (unittest-xml-reporting,
+# requirements-dev.txt): the Tests workflow does, for its summary and the failed
+# tests marked on the code (.github/scripts/test_report.py). Plain runs ignore these.
+TEST_OUTPUT_DIR = env("TEST_OUTPUT_DIR", default="test-results")
+TEST_OUTPUT_FILE_NAME = "junit.xml"
+
 # Channels' backing store for notifications/consumers.py — same Redis
 # instance as CACHES above (same REDIS_HOST/REDIS_PORT), but db 1 rather
 # than 0 so channel-layer keys never collide with cache keys. Unlike the

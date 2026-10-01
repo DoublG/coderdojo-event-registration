@@ -2062,3 +2062,96 @@ def default_storage_exists(name):
     from django.core.files.storage import default_storage
 
     return default_storage.exists(name)
+
+
+class CiTestReportTests(TestCase):
+    """.github/scripts/test_report.py: the Tests workflow's summary and the
+    failed tests marked on the code, from the suite's JUnit XML."""
+
+    XML = """<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="events.tests.BookingTests" tests="3" file="events/tests.py">
+    <testcase classname="events.tests.BookingTests" name="test_fine" time="0.250" file="events/tests.py" line="10"/>
+    <testcase classname="events.tests.BookingTests" name="test_broken" time="1.500" file="events/tests.py" line="20">
+      <failure type="AssertionError" message="23 != 22 : overbooked, 50%"><![CDATA[Traceback (most recent call last):
+  File "{root}/events/tests.py", line 24, in test_broken
+    self.assertEqual(confirmed, 22)
+  File "/usr/local/lib/python3.14/site-packages/django/test/testcases.py", line 1, in x
+AssertionError: 23 != 22 : overbooked, 50%]]></failure>
+    </testcase>
+    <testcase classname="events.tests.BookingTests" name="test_later" time="0" file="events/tests.py" line="30">
+      <skipped message="not yet"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="core.tests.HomeTests" tests="1" file="core/tests.py">
+    <testcase classname="core.tests.HomeTests" name="test_home" time="0.100" file="core/tests.py" line="5">
+      <error type="ValueError" message="&lt;b&gt;bad&lt;/b&gt;"><![CDATA[Traceback (most recent call last):
+ValueError: <b>bad</b>]]></error>
+    </testcase>
+  </testsuite>
+</testsuites>
+"""
+
+    def setUp(self):
+        import importlib.util
+        import tempfile
+        from pathlib import Path
+
+        spec = importlib.util.spec_from_file_location(
+            "test_report", Path(settings.BASE_DIR) / ".github" / "scripts" / "test_report.py"
+        )
+        self.report = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.report)
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        self.root = folder.name
+        self.xml = Path(folder.name) / "junit.xml"
+        self.xml.write_text(self.XML.replace("{root}", self.root))
+
+    def test_a_failure_is_marked_on_the_line_where_it_failed(self):
+        cases = self.report.read([self.xml])
+        lines = self.report.annotations(cases, self.root)
+        self.assertEqual(len(lines), 2)
+        # The last frame inside the repository, not Django's own; the title's : and the message's % escaped.
+        self.assertEqual(
+            lines[0],
+            "::error file=events/tests.py,line=24,title=Failed%3A events.tests.BookingTests.test_broken"
+            "::23 != 22 : overbooked, 50%25",
+        )
+        # Without a frame in the repository: the test's own line.
+        self.assertTrue(lines[1].startswith("::error file=core/tests.py,line=5,title=Error%3A core.tests.HomeTests"))
+
+    def test_the_summary_has_the_totals_the_apps_the_failures_and_the_slowest(self):
+        text = self.report.summary(self.report.read([self.xml]))
+        self.assertIn("❌ **1 failed, 1 error** of 4 tests (2 s of test time), 1 skipped", text)
+        self.assertIn("| `events` | 3 | ❌ 1 | 1 | 2 s |", text)
+        self.assertIn("| `core` | 1 | ❌ 1 | 0 | 0 s |", text)
+        self.assertIn("<code>events.tests.BookingTests.test_broken</code>: 23 != 22 : overbooked, 50%", text)
+        self.assertIn("&lt;b&gt;bad&lt;/b&gt;", text)  # a message can't add HTML to the page
+        self.assertIn("| `events.tests.BookingTests.test_broken` | 1.5 s |", text)
+
+    def test_all_passing_and_nothing_found(self):
+        passing = self.xml.parent / "passing.xml"
+        passing.write_text(
+            '<testsuites><testsuite><testcase classname="a.tests.T" name="test_x" time="61" file="a/tests.py" line="1"/>'
+            "</testsuite></testsuites>"
+        )
+        self.assertIn(
+            "✅ **All 1 test passed** (1 min 1 s of test time)", self.report.summary(self.report.read([passing]))
+        )
+        self.assertIn("No test results were found", self.report.summary([]))
+
+    def test_it_writes_to_the_runs_summary_and_never_fails(self):
+        from io import StringIO
+        from unittest import mock
+
+        target = self.xml.parent / "summary.md"
+        with (
+            mock.patch.dict("os.environ", {"GITHUB_STEP_SUMMARY": str(target), "GITHUB_WORKSPACE": self.root}),
+            mock.patch("sys.stdout", new_callable=StringIO) as out,
+        ):
+            self.assertEqual(
+                self.report.main(["test_report.py", str(self.xml), str(self.xml.parent / "missing.xml")]), 0
+            )
+        self.assertIn("## Test results", target.read_text())
+        self.assertIn("::error file=events/tests.py,line=24", out.getvalue())

@@ -62,6 +62,7 @@ calendar: stay on the latest release. Watch these:
 | celery, kombu, channels, channels-redis | 5.6.3, 5.6.2, 4.3.2, (see file) | Upgrade together with Redis. |
 | mysqlclient | 2.3.0 | Needs the MySQL client headers on the server (missing on Level27 today, see CLAUDE.md). |
 | nh3, django-permissions-policy | 0.3.7, 4.34.0 | Security: the Markdown allowlist and the Permissions-Policy header. Keep them current. |
+| unittest-xml-reporting, lxml | 4.0.0, 6.1.3 | Development only (`requirements-dev.txt`): the test results as JUnit XML for the Tests workflow's summary. `pip-audit`: no known vulnerabilities (1 Oct 2026). |
 | locust, matplotlib | 2.46.6, 3.11.2 | The load test and its charts ([`loadtest/requirements.txt`](loadtest/requirements.txt), [`CAPACITY.md`](CAPACITY.md)), in a venv of their own: never in the image or on production. `pip-audit -r loadtest/requirements.txt`: no known vulnerabilities (30 Sep 2026). |
 
 ### Still to confirm
@@ -212,6 +213,9 @@ whoever pushed):
   Redis 7.2, and `makemigrations --check`. It includes guard tests that fail when new code forgets a rule:
   every field has a privacy classification, every model an audit-log decision, every model is fully usable
   in the admin, the API's schema never exposes sensitive fields, no page loads scripts from another site.
+  Its results show on the run's page (a summary per app, the failed tests with their traceback, the slowest
+  tests), each failed test is marked on the line where it failed, the JUnit XML is kept 30 days as the
+  run's `test-results` artifact, and the README's badge shows main's latest result.
 - **Code audit** (`.github/workflows/audit.yml`, on pushes to main and pull requests, and **every Monday**,
   since new advisories appear without any change here):
   - `ruff check .` and `ruff format --check .` (lint and formatting);

@@ -6,6 +6,11 @@
 # Lint/format (config in pyproject.toml)
 ruff==0.16.8
 
+# The test results as JUnit XML for the Tests workflow's summary
+# (manage.py test --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner).
+unittest-xml-reporting==4.0.0
+lxml==6.1.3
+
 # The server production runs (Level27 provides its own there): start.sh uses
 # it when DEBUG is off, to measure the site the way it's served in production.
 gunicorn==26.2.0

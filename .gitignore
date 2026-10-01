@@ -143,3 +143,4 @@ user-journeys/.shots/
 # Claude Code personal settings
 .claude/settings.local.json
 loadtest-out/
+test-results/

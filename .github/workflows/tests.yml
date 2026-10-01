@@ -2,6 +2,10 @@
 # against MySQL and Redis, the way the devcontainer runs it, plus a check that no
 # model change is missing its migration.
 # Runs on every push and pull request that changes code, and by hand from the Actions tab.
+# The results: a summary on the run's page (totals, a table per app, the failed tests
+# with their traceback, the slowest tests), each failed test marked on the line where it
+# failed, and the JUnit XML kept 30 days as the run's "test-results" artifact
+# (.github/scripts/test_report.py; the README's badge shows main's latest result).
 name: Tests
 
 on:
@@ -99,5 +103,21 @@ jobs:
         run: python manage.py makemigrations --check --dry-run
 
       # --debug-mode: the debug toolbar refuses to run under tests otherwise (CLAUDE.md, "Commands").
+      # The XML runner (unittest-xml-reporting) writes test-results/junit.xml as well
+      # (TEST_OUTPUT_DIR in the settings); the test output in the log stays the same.
       - name: Run the test suite
-        run: python manage.py test --noinput --debug-mode
+        run: python manage.py test --noinput --debug-mode --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner
+
+      # Also when the tests failed: that's when the summary matters most.
+      - name: Test results
+        if: ${{ !cancelled() }}
+        run: python .github/scripts/test_report.py test-results/junit.xml
+
+      - name: Keep the test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 30
+          if-no-files-found: ignore
