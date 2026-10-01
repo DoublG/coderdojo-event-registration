@@ -48,7 +48,8 @@ class Case:
 def read(paths):
     cases = []
     for path in paths:
-        for element in ET.parse(path).getroot().iter("testcase"):
+        # The suite's own output from the same job, not outside input.
+        for element in ET.parse(path).getroot().iter("testcase"):  # noqa: S314
             case = Case(
                 classname=element.get("classname", ""),
                 name=element.get("name", ""),
