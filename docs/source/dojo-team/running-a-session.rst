@@ -136,7 +136,8 @@ each one pre-filled from the level above. All of them are optional:
   provides. They're shown on your dojo's public page.
 - **A session** — a new session starts with your dojo's pathways ticked.
   You can add or remove any pathway for that particular session; they're
-  shown on the session's public page.
+  shown on the session's public page, and families can search the events
+  list by pathway.
 - **Each child at a session** — when a family signs up, their child's
   pathways start as the session's. You can narrow them down while taking
   attendance (see above).

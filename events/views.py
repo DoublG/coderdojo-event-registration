@@ -62,6 +62,10 @@ def event_list(request):
                 Q(max_age__isnull=True) | Q(max_age__gte=lo)
             )
 
+        pathway = form.cleaned_data.get("pathway")
+        if pathway:
+            events = events.filter(pathways=pathway)
+
     events = events.order_by("start_time")
 
     def fetch_page(page_number):

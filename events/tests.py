@@ -15,6 +15,7 @@ from core.testing import TempMediaMixin
 from dojos.models import Dojo
 from dojos.search import DEFAULT_SEARCH_ORIGIN, dojos_by_distance
 from dojos.testing import make_dojo
+from pathways.models import Pathway
 
 from . import registrations
 from .engagement import is_aimed_at
@@ -63,6 +64,31 @@ class EventListViewTests(TestCase):
 
         self.assertEqual(list(response.context["events"]), [ghent_event])
 
+    def test_filters_by_pathway(self):
+        scratch = Pathway.objects.create(name="Scratch")
+        python = Pathway.objects.create(name="Python")
+        dojo = make_dojo("Ghent")
+        scratch_event = _future_event(dojo, name="Scratch session")
+        scratch_event.pathways.set([scratch, python])
+        python_event = _future_event(dojo, name="Python session")
+        python_event.pathways.set([python])
+        _future_event(dojo, name="No pathway")
+
+        response = self.client.get(reverse("event_list"), {"pathway": scratch.id})
+
+        self.assertEqual(list(response.context["events"]), [scratch_event])
+        self.assertContains(response, f'<option value="{scratch.id}" selected>Scratch</option>', html=True)
+
+    def test_pathway_filter_lists_each_session_once(self):
+        python = Pathway.objects.create(name="Python")
+        event = _future_event(make_dojo("Ghent"))
+        event.pathways.set([python, Pathway.objects.create(name="Scratch")])
+
+        response = self.client.get(reverse("event_list"), {"pathway": python.id})
+
+        self.assertEqual(list(response.context["events"]), [event])
+        self.assertEqual(response.context["total_count"], 1)
+
     def test_draft_event_is_hidden(self):
         dojo = make_dojo("Ghent")
         _future_event(dojo, status=Event.DRAFT)
@@ -109,6 +135,7 @@ class EventListCacheTests(TestCase):
             return len(captured)
 
         _future_event(self.dojo)
+        queries()  # fills the cached pathway list behind the filter (content.cache)
         one = queries()
         for _n in range(5):
             _future_event(self.dojo)

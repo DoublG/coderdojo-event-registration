@@ -6,6 +6,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from content import cache as content_cache
 from core.content_languages import (
     add_translation_fields,
     bound_translation_groups,
@@ -66,9 +67,21 @@ class EventSearchForm(forms.Form):
         choices=[(AGE_ANY, _("All ages"))] + [(key, key.replace("-", "–")) for key in AGE_RANGES],
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-age"}),
     )
+    # Only sessions that cover this pathway (Event.pathways). Choices come
+    # from the cached pathway list (content.cache), so the page stays at one
+    # query; cleaned to a Pathway or None.
+    pathway = forms.ChoiceField(
+        required=False,
+        widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-pathway"}),
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.pathways = {str(pathway.pk): pathway for pathway in content_cache.pathways()}
+        self.fields["pathway"].choices = [("", _("All pathways"))] + sorted(
+            ((pk, pathway.localized("name")) for pk, pathway in self.pathways.items()),
+            key=lambda choice: choice[1].lower(),
+        )
         self.fields["dojo"].choices = [
             ("", _("All dojos")),
             (DOJO_ORGANISATION, self.organisation_label()),
@@ -84,6 +97,9 @@ class EventSearchForm(forms.Form):
             return value
         # The choices already limit it to a public dojo.
         return Dojo.objects.public().filter(pk=value).first() if value else None
+
+    def clean_pathway(self):
+        return self.pathways.get(self.cleaned_data["pathway"])
 
     def dojo_filter_label(self):
         """What the "Filtered by" chip says, or "" without a dojo filter."""

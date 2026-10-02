@@ -60,7 +60,7 @@
 
     <div class="event-header">
       <h1 class="display-xl">{% translate "Upcoming events" %}</h1>
-      <p class="body-lg">{% translate "Every free session run by a CoderDojo across Belgium — filter by dojo, location, date or age." %}</p>
+      <p class="body-lg">{% translate "Every free session run by a CoderDojo across Belgium — filter by dojo, location, date, age or pathway." %}</p>
     </div>
 
     <form method="get" class="cd-card filter-card">
@@ -84,6 +84,10 @@
         <div class="filter-field">
           <label class="label" for="ep-language">{% translate "Language" %}</label>
           {{ form.language }}
+        </div>
+        <div class="filter-field">
+          <label class="label" for="ep-pathway">{% translate "Pathway" %}</label>
+          {{ form.pathway }}
         </div>
         <div class="filter-field" style="flex: 0 0 auto;">
           <button type="submit" class="cd-btn cd-btn--secondary label">
