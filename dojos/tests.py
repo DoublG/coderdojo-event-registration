@@ -457,7 +457,7 @@ class DojoManageViewTests(TempMediaMixin, TestCase):
         self.dojo.refresh_from_db()
         self.assertEqual(self.dojo.tagline, "Updated tagline")
 
-    @patch("dojos.views.geocode")
+    @patch("dojos.views.profile.geocode")
     def test_address_change_geocodes_and_updates_province(self, mock_geocode):
         mock_geocode.return_value = (51.2194, 4.4025)  # Antwerp
         province = AdministrativeBoundary.objects.create(
@@ -479,7 +479,7 @@ class DojoManageViewTests(TempMediaMixin, TestCase):
         self.assertAlmostEqual(self.dojo.location.x, 4.4025)
         self.assertEqual(self.dojo.province, province)
 
-    @patch("dojos.views.geocode")
+    @patch("dojos.views.profile.geocode")
     def test_failed_geocode_still_saves_other_fields(self, mock_geocode):
         mock_geocode.return_value = None
         self.client.force_login(self.owner)
@@ -497,7 +497,7 @@ class DojoManageViewTests(TempMediaMixin, TestCase):
 
     def test_unchanged_address_does_not_geocode(self):
         self.client.force_login(self.owner)
-        with patch("dojos.views.geocode") as mock_geocode:
+        with patch("dojos.views.profile.geocode") as mock_geocode:
             self.client.post(
                 reverse("dojo_manage", kwargs={"dojo_id": self.dojo.id}),
                 self._valid_post_data(),  # address unchanged from setUp

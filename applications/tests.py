@@ -461,8 +461,8 @@ class DownloadBackgroundCheckTests(_CleanupDocumentsMixin, TestCase):
 # --- creating a dojo -----------------------------------------------------------------------
 
 
-@patch("dojos.views.geocode", return_value=(51.05, 3.72))
-@patch("dojos.views.find_province", return_value=None)
+@patch("dojos.views.profile.geocode", return_value=(51.05, 3.72))
+@patch("dojos.views.profile.find_province", return_value=None)
 class DojoCreateTests(TestCase):
     def test_approved_champion_creates_a_draft_dojo_they_run(self, _province, _geocode):
         champion = make_champion(username="c1")
