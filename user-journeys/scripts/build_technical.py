@@ -34,6 +34,7 @@ def mm(marker, caption=""):
 
 CHARTS = os.path.join(REPO, "loadtest", "charts")
 QUALITY_CHARTS = os.path.join(REPO, "quality", "charts")
+IMAGES = os.path.join(ROOT, "images")  # screenshots for the documents (shot_error_page.py)
 
 
 def chart(name, caption="", folder=CHARTS):
@@ -703,6 +704,13 @@ notification WebSockets, take places too. How Level27's proxy connects to gunico
 for a 502, 503 or 504 from the site, keeping the status and adding <code>Retry-After</code>; <code>/health/</code> and the
 API keep their own answers. It's the example for Level27's proxy.</li>
 </ul>
+{
+        chart(
+            "proxy-busy-page",
+            "The proxy's busy page (errors/busy.html): desktop in light mode, a phone in dark mode.",
+            IMAGES,
+        )
+    }
 
 <h2>Caching: less work for the database</h2>
 <p>The pages used to redo work the database had already done: a count query per session card, the account's roles and

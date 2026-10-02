@@ -29,6 +29,9 @@ so a change to the model or the conventions may need a sentence there too. Its l
 *Capacity, load and disk* and *Coding standards and quality*, summarise [`CAPACITY.md`](../CAPACITY.md) and
 [`CODING_STANDARDS.md`](../CODING_STANDARDS.md) with the charts from `loadtest/charts/` and `quality/charts/`
 (embedded when the PDF is built): rebuild it after a new round of measurements.
+The screenshot of the proxy's busy page in `CAPACITY.md` and the PDF, `images/proxy-busy-page.png`, comes from
+`python scripts/shot_error_page.py` (the same venv; it opens `.devcontainer/nginx/errors/busy.html` itself):
+take it again after a change to that page, then rebuild the PDF.
 
 The screenshots come from the devcontainer's site with the seeded demo data, logged in with the
 seeded accounts named on each cover. They are an overview for people, not the help centre:

@@ -301,6 +301,10 @@ each clicking again every 0.5 to 2 seconds: about 350 requests a second, far bey
   answers, and so do Django's own 404 and 500 pages. It's the example for production: ask Level27 to serve
   that page the same way ([Questions](#questions-for-level27)).
 
+  ![The proxy's busy page: desktop in light mode, a phone in dark mode](user-journeys/images/proxy-busy-page.png)
+
+  (`user-journeys/scripts/shot_error_page.py` takes the picture again after a change to the page.)
+
 **Under normal heavy load** the cap must refuse nothing (300 users, mixed load):
 
 ![What the cap does under normal heavy load](loadtest/charts/cap-normal-load.png)
