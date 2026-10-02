@@ -119,10 +119,19 @@ services:
       # Django's test database too (see db-init/01-grant-test-db.sql).
       - ./db-init:/docker-entrypoint-initdb.d:ro
 
+  # Bounded memory (CAPACITY.md, "Redis"): at most 128 MB of data, and when
+  # that's full only keys with a timeout are evicted, least recently used
+  # first (volatile-lru): the cache, the sessions' copies, Channels' messages.
+  # The Celery broker's queues and the /metrics/ counters have no timeout, so
+  # they're never evicted. Production should run the same two settings.
+  # mem_limit caps the whole container above that: Redis's own overhead, and
+  # the copy-on-write of a background save (fork).
   redis:
     image: redis:7.2
     container_name: ${PROJECT_NAME:-coolregistration-dev}-redis
     restart: unless-stopped
+    command: ["redis-server", "--maxmemory", "128mb", "--maxmemory-policy", "volatile-lru"]
+    mem_limit: 256m
 
   # The only container with a port on the host: https://coolregistration.localhost
   # (443). Everything else is a path behind it (nginx/nginx.conf): the site,

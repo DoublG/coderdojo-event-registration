@@ -421,10 +421,15 @@ One Redis holds the cache (db 0), the Channels layer (db 1) and the Celery broke
   included. The cache holds the public site's lists and pages, each account's nav (5 minutes) and, since
   1 October 2026, a copy of every login session ([Caching](#caching): about 1 KB each, expiring with the
   session); the broker holds only waiting tasks (mail itself waits in MySQL, not Redis).
-- **Its configuration is the risk, not its size.** The devcontainer's Redis has no `maxmemory` and
-  `noeviction`: should it ever fill up, it refuses writes, including the broker's, and then no task gets
-  queued. Production's settings are unknown. Recommended: `maxmemory 128mb` with `volatile-lru`, so only
-  keys with a timeout (the cache, Channels) can be evicted and the broker's queues never are.
+- **Its configuration is the risk, not its size.** Without a `maxmemory`, and with Redis's default
+  `noeviction`, a Redis that fills up refuses writes, including the broker's, and then no task gets queued.
+  **The devcontainer is bounded since 2 October 2026** (`.devcontainer/docker-compose.yml`): `maxmemory
+  128mb` with `volatile-lru`, so only keys with a timeout (the cache, the sessions' copies, Channels) can be
+  evicted, least recently used first, and the broker's queues and the `/metrics/` counters (no timeout)
+  never are; the container itself is capped at 256 MB (`mem_limit`), for Redis's overhead and the fork of
+  a background save. 128 MB is about 30 times the peak of the load tests. **Every cache key must have a
+  timeout** (`core.caching` and `cache.set` always pass one): a key without one could never be evicted.
+  Production's settings are still unknown ([Questions](#questions-for-level27)).
 
 ## Findings and what to do
 
@@ -452,7 +457,8 @@ In order of urgency.
    address after 12 months) in the daily retention job: about a quarter less database after five years.
 5. **Four web workers** (`WEB_CONCURRENCY`) if the account's memory allows: much better response times under
    load for about 200 MB more.
-6. **Redis limits:** set `maxmemory` and `volatile-lru` on production (or confirm what it has).
+6. **Redis limits:** set `maxmemory` and `volatile-lru` on production (or confirm what it has). The
+   devcontainer runs with them since 2 October 2026 (128 MB, the container capped at 256 MB).
 7. **Celery's logs** grew about 6 MB a day, mostly the periodic worker's routine runs. **Fixed on 30
    September 2026:** that worker logs at WARNING in production.
 8. **Campaign queueing blocks the mailing worker** for a few minutes (see above): acceptable now, chunk it
