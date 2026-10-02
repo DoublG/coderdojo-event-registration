@@ -54,6 +54,10 @@ CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
 COOKIE_DOMAIN = env("COOKIE_DOMAIN")
 SESSION_COOKIE_DOMAIN = COOKIE_DOMAIN
 CSRF_COOKIE_DOMAIN = COOKIE_DOMAIN
+# Sessions are read from the cache's Redis and written through to MySQL
+# (CAPACITY.md, "Caching"): no session query on a logged-in request, and an
+# emptied cache or an evicted key logs nobody out.
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 # HTTPS (MAINTENANCE.md, security log). TLS ends at the proxy in front of
 # Django (Level27's in production, nginx in the devcontainer), which says so in

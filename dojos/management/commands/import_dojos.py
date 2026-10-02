@@ -1,6 +1,5 @@
 import json
 import re
-import time
 
 import requests
 from django.contrib.gis.db.models.functions import Distance
@@ -13,7 +12,6 @@ from geo.geocoding import USER_AGENT, geocode
 from geo.models import Municipality
 
 DOJOS_URL = "https://coderdojobelgium.be/nl/dojos"
-NOMINATIM_DELAY_SECONDS = 5  # Nominatim usage policy: max 1 request/second
 
 
 def scrape_dojos(html):
@@ -97,9 +95,10 @@ class Command(BaseCommand):
             municipality, location = None, None
 
             if address:
-                time.sleep(NOMINATIM_DELAY_SECONDS)
                 try:
-                    coords = geocode(address, session=session)
+                    # geo.geocoding keeps to Nominatim's one request a second
+                    # for the whole site; a command may wait for its turn.
+                    coords = geocode(address, session=session, wait=None)
                 except requests.RequestException as exc:
                     self.stderr.write(self.style.WARNING(f"Skipping '{name}': geocoding request failed ({exc})"))
                     skipped += 1

@@ -9,13 +9,20 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from accounts.models import Ninja
+from content.cache import promotions_showing
 from content.models import FAQ, Promotion
+from core.caching import cached
 from dojos.models import Dojo
 
 from . import registrations
 from .forms import AGE_RANGES, DOJO_ORGANISATION, EventSearchForm
 from .models import Event, Registration
-from .search import WIDGET_PAGE_SIZE, upcoming_available_events
+from .search import (
+    EVENT_LIST_CACHE_TIMEOUT,
+    EVENT_LIST_FIRST_PAGE_KEY,
+    WIDGET_PAGE_SIZE,
+    upcoming_available_events,
+)
 
 RESULTS_PER_PAGE = 20
 
@@ -24,7 +31,7 @@ def event_list(request):
     form = EventSearchForm(request.GET)
     now = timezone.now()
 
-    events = Event.objects.visible().filter(start_time__gte=now).select_related("dojo")
+    events = Event.objects.visible().filter(start_time__gte=now).select_related("dojo").with_confirmed_count()
     if form.is_valid():
         dojo = form.cleaned_data.get("dojo")
         if dojo == DOJO_ORGANISATION:
@@ -57,23 +64,35 @@ def event_list(request):
 
     events = events.order_by("start_time")
 
-    paginator = Paginator(events, RESULTS_PER_PAGE)
-    page = paginator.get_page(request.GET.get("page"))
+    def fetch_page(page_number):
+        paginator = Paginator(events, RESULTS_PER_PAGE)
+        page = paginator.get_page(page_number)
+        return {
+            "events": list(page.object_list),
+            "total_count": paginator.count,
+            "next_page": page.next_page_number() if page.has_next() else None,
+        }
+
+    if not form.has_changed() and request.GET.get("page") in (None, "", "1"):
+        # What most visitors see, the same for all of them (events.search).
+        page = cached(EVENT_LIST_FIRST_PAGE_KEY, lambda: fetch_page(1), EVENT_LIST_CACHE_TIMEOUT)
+    else:
+        page = fetch_page(request.GET.get("page"))
 
     next_page_url = None
-    if page.has_next():
+    if page["next_page"]:
         next_params = request.GET.copy()
-        next_params["page"] = page.next_page_number()
+        next_params["page"] = page["next_page"]
         next_page_url = f"{request.path}?{next_params.urlencode()}"
 
     context = {
         "form": form,
-        "events": page.object_list,
-        "total_count": paginator.count,
+        "events": page["events"],
+        "total_count": page["total_count"],
         "next_page_url": next_page_url,
         # Pinned above the date-ordered list (content.Promotion), on the
         # unfiltered list only: a search shows just what was asked for.
-        "promotions": [] if form.has_changed() else Promotion.objects.showing(Promotion.EVENT_LIST_TOP),
+        "promotions": [] if form.has_changed() else promotions_showing(Promotion.EVENT_LIST_TOP),
     }
     # Infinite scroll (htmx "revealed" trigger, see _event_results_page.html):
     # subsequent pages return just the new date-group fragment, not the full page.
@@ -109,7 +128,7 @@ def upcoming_sessions_widget(request):
 
 
 def event_detail(request, event_id):
-    event = get_object_or_404(Event.objects.visible(), id=event_id)
+    event = get_object_or_404(Event.objects.visible().with_confirmed_count(), id=event_id)
     faqs = FAQ.objects.for_event(event)
 
     all_registered = False

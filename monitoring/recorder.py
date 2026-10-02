@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 REQUESTS_KEY = "metrics:requests"
 TASKS_KEY = "metrics:tasks"
+CACHE_KEY = "metrics:cache"
 PROCESS_KEY_PREFIX = "metrics:process:"
 # Upper bounds (milliseconds) of the request-duration histogram.
 DURATION_BUCKETS_MS = (50, 100, 250, 500, 1000, 2500, 5000)
@@ -35,6 +36,10 @@ PROCESS_REPORT_EVERY = 60
 PROCESS_TTL = 150
 
 _reporting_pid = None
+# What the request being handled in this thread did, for record_request():
+# the middleware starts it (begin_request) and reads it back (end_request).
+# Django runs a request's synchronous middleware and view in one thread.
+_current = threading.local()
 
 
 def _redis():
@@ -118,10 +123,34 @@ def processes():
     return found
 
 
-def record_request(view, milliseconds, status):
+def begin_request():
+    _current.cache = {}
+
+
+def note_cache(name, hit):
+    """Count a read of the data cache `name` (core.caching) for the request
+    in progress; outside a request (a task, a command) it isn't counted."""
+    counts = getattr(_current, "cache", None)
+    if counts is not None:
+        field = f"{name}|{'hits' if hit else 'misses'}"
+        counts[field] = counts.get(field, 0) + 1
+
+
+def end_request():
+    """The request's cache reads, {"name|hits": n, "name|misses": n}."""
+    counts = getattr(_current, "cache", None) or {}
+    _current.cache = None
+    return counts
+
+
+def record_request(view, milliseconds, status, queries=None, cache_reads=None):
+    """One request to `view`: its time, status, database queries and the
+    data cache reads it made (end_request())."""
     if not enabled():
         return
     fields = {f"{view}|count": 1, f"{view}|ms": int(milliseconds)}
+    if queries is not None:
+        fields[f"{view}|queries"] = queries
     for bound in DURATION_BUCKETS_MS:
         if milliseconds <= bound:
             fields[f"{view}|le_{bound}"] = 1
@@ -131,6 +160,8 @@ def record_request(view, milliseconds, status):
         pipe = _redis().pipeline(transaction=False)
         for field, amount in fields.items():
             pipe.hincrby(REQUESTS_KEY, field, amount)
+        for field, amount in (cache_reads or {}).items():
+            pipe.hincrby(CACHE_KEY, field, amount)
         pipe.execute()
     except Exception:
         logger.debug("Couldn't record a request", exc_info=True)
@@ -169,3 +200,7 @@ def requests():
 
 def tasks():
     return _read_hash(TASKS_KEY)
+
+
+def cache_reads():
+    return _read_hash(CACHE_KEY)

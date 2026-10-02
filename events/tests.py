@@ -37,6 +37,9 @@ def _future_event(dojo, **kwargs):
 
 
 class EventListViewTests(TestCase):
+    def setUp(self):
+        cache.clear()  # the unfiltered first page is cached (events.search)
+
     def test_renders_upcoming_events(self):
         dojo = make_dojo("Ghent")
         _future_event(dojo)
@@ -71,6 +74,59 @@ class EventListViewTests(TestCase):
         event = _future_event(dojo, status=Event.CLOSED)
         response = self.client.get(reverse("event_list"))
         self.assertEqual(list(response.context["events"]), [event])
+
+
+class EventListCacheTests(TestCase):
+    """The places left on a list come from one annotated query, and the
+    unfiltered first page is cached until a session or a booking changes."""
+
+    def setUp(self):
+        cache.clear()
+        self.dojo = make_dojo("Ghent")
+
+    def _book(self, event, waiting_list=False):
+        position = event.registration_set.count() + 1
+        return Registration.objects.create(
+            event=event, ninja=Ninja.objects.create(name="Kid"), waiting_list=waiting_list, position=position
+        )
+
+    def test_places_left_reads_the_annotation_on_a_list(self):
+        event = _future_event(self.dojo, places=2)
+        self._book(event)
+        self._book(event, waiting_list=True)
+        annotated = Event.objects.with_confirmed_count().get(pk=event.pk)
+        with self.assertNumQueries(0):
+            self.assertEqual(annotated.places_left, 1)
+        # Without it, a single event counts its own.
+        self.assertEqual(Event.objects.get(pk=event.pk).places_left, 1)
+
+    def test_more_sessions_add_no_queries(self):
+        from django.test.utils import CaptureQueriesContext
+
+        def queries():
+            with CaptureQueriesContext(connection) as captured:
+                self.client.get(reverse("event_list"), {"date": "month"})  # filtered: not cached
+            return len(captured)
+
+        _future_event(self.dojo)
+        one = queries()
+        for _n in range(5):
+            _future_event(self.dojo)
+        self.assertEqual(queries(), one)
+
+    def test_a_booking_shows_on_the_cached_first_page_at_once(self):
+        event = _future_event(self.dojo, places=1)
+        self.assertEqual(self.client.get(reverse("event_list")).context["events"][0].places_left, 1)
+        self._book(event)
+        response = self.client.get(reverse("event_list"))
+        self.assertEqual(response.context["events"][0].places_left, 0)
+
+    def test_a_published_session_shows_on_the_cached_first_page_at_once(self):
+        event = _future_event(self.dojo, status=Event.DRAFT)
+        self.assertEqual(list(self.client.get(reverse("event_list")).context["events"]), [])
+        event.status = Event.OPEN
+        event.save()
+        self.assertEqual(list(self.client.get(reverse("event_list")).context["events"]), [event])
 
 
 class UpcomingSessionsWidgetViewTests(TestCase):

@@ -21,6 +21,10 @@ Where it's applied:
 from dataclasses import dataclass, field
 from datetime import date
 
+from django.core.cache import cache
+from django.db import transaction
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 from django.utils import timezone
 from django_otp import DEVICE_ID_SESSION_KEY
 
@@ -84,12 +88,36 @@ def roles_of(user, among=None):
     return held
 
 
+# The policy is the same for everyone and changes a few times a year, but every
+# logged-in request reads it (CAPACITY.md, "Caching"): kept in the cache,
+# cleared when a row changes.
+POLICY_CACHE_KEY = "accounts:sign-in-policy"
+POLICY_CACHE_TIMEOUT = 3600
+
+
+def policy():
+    """[(role, level, required_from)] of every requirement above PASSWORD."""
+    rows = cache.get(POLICY_CACHE_KEY)
+    if rows is None:
+        rows = list(SignInRequirement.objects.exclude(level=PASSWORD).values_list("role", "level", "required_from"))
+        cache.set(POLICY_CACHE_KEY, rows, POLICY_CACHE_TIMEOUT)
+    return rows
+
+
+@receiver(post_save, sender=SignInRequirement)
+@receiver(post_delete, sender=SignInRequirement)
+def clear_policy_cache(**kwargs):
+    """Forget the cached policy: now, and again once the transaction commits."""
+    cache.delete(POLICY_CACHE_KEY)
+    transaction.on_commit(lambda: cache.delete(POLICY_CACHE_KEY))
+
+
 def requirements_for(user, today=None):
     """(enforced, upcoming) Requirements for `user`: the strongest level that
     applies today (PASSWORD when none does), and a stronger one set for a
     later day, or None."""
     today = today or timezone.localdate()
-    rows = list(SignInRequirement.objects.exclude(level=PASSWORD).values_list("role", "level", "required_from"))
+    rows = policy()
     enforced, upcoming = Requirement(), None
     if not rows:
         return enforced, upcoming

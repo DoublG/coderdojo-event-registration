@@ -3,6 +3,8 @@ from django.db import transaction
 from django.db.models import Count, F, Q
 from django.utils import timezone
 
+from monitoring import recorder
+
 from .models import Event
 
 WIDGET_PAGE_SIZE = 10
@@ -17,6 +19,19 @@ WIDGET_PAGE_SIZE = 10
 CACHE_KEY = "events:upcoming_available"
 CACHE_TIMEOUT = 60
 CACHE_LIMIT = 200  # bound the cached list's size regardless of how far out events are scheduled
+
+
+# The events list's first page without filters (events.views.event_list),
+# cleared by the same signals.
+EVENT_LIST_FIRST_PAGE_KEY = "events:list:first-page"
+EVENT_LIST_CACHE_TIMEOUT = 60
+
+
+def clear_event_list_cache():
+    """Forget the events list's cached first page (now and on commit)."""
+    from core.caching import clear
+
+    clear(EVENT_LIST_FIRST_PAGE_KEY)
 
 
 def clear_upcoming_cache():
@@ -41,6 +56,7 @@ def upcoming_available_events():
     further, so the eager list is a drop-in replacement.
     """
     cached = cache.get(CACHE_KEY)
+    recorder.note_cache(CACHE_KEY, hit=cached is not None)
     if cached is not None:
         return cached
 

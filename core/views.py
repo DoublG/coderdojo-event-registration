@@ -1,43 +1,31 @@
-from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.urls import reverse
 
-from content.models import FAQ, OrganisationTeamMember, Promotion, Sponsor, Testimonial
+from content import cache as content_cache
+from content.models import Promotion
 from core.profiling import profile
 from dojos.forms import DojoSearchForm
 from dojos.search import attach_next_events, dojos_by_distance, resolve_search_origin
 from dojos.views import WIDGET_RESULTS_LIMIT
 from events.search import WIDGET_PAGE_SIZE, upcoming_available_events
-from pathways.models import Pathway
-
-# Site-wide content that barely ever changes and is identical for every
-# visitor (unlike, say, the dojo-finder widget's results, which vary by
-# origin) — cached here rather than via cache_page on the whole view, since
-# the page also renders per-user chrome (see core/templates/core/menu.html:
-# login state, account links) that must never be cached.
-HOME_CONTENT_CACHE_TIMEOUT = 300
 
 
 @profile()
 def home(request):
-    pathways = cache.get_or_set("core:home:pathways", lambda: list(Pathway.objects.all()), HOME_CONTENT_CACHE_TIMEOUT)
-
+    # Site-wide content that's the same for every visitor (pathways, the
+    # organisation's team, FAQs, testimonials, promotions, sponsors) comes
+    # from content.cache: cached, cleared whenever a row changes. The whole
+    # page isn't cached: it carries per-request parts (the nav, the CSP
+    # nonce, the dojo finder's origin).
+    pathways = content_cache.pathways()
     # The organisation's own team — the homepage isn't tied to one dojo, so
     # "Meet the team" lists content.OrganisationTeamMember (display only,
     # each with a position, e.g. "Member of the board").
-    team = cache.get_or_set(
-        "core:home:team",
-        lambda: list(OrganisationTeamMember.objects.filter(is_public=True)),
-        HOME_CONTENT_CACHE_TIMEOUT,
-    )
-
-    # A different quote on every load — order_by("?") is fine at this size
-    # (a handful of site-wide testimonials, dojo=None). Deliberately *not*
-    # cached: that's the whole point of this query.
-    testimonial = Testimonial.objects.filter(dojo=None).order_by("?").first()
-
-    faqs = cache.get_or_set("core:home:faqs", lambda: list(FAQ.objects.global_faqs()), HOME_CONTENT_CACHE_TIMEOUT)
+    team = content_cache.organisation_team()
+    # A different quote on every load, picked from the cached few.
+    testimonial = content_cache.random_testimonial()
+    faqs = content_cache.global_faqs()
 
     # Initial state for the "Find a dojo near you" widget (dojos app) — its
     # own searches happen via htmx against dojos.views.dojo_finder_widget,
@@ -70,10 +58,10 @@ def home(request):
             "geocode_failed": dojo_widget_geocode_failed,
             "events": events_page.object_list,
             "events_next_page_url": events_next_page_url,
-            # Featured events (content.Promotion, DATA_MODEL.md §12). Not cached:
-            # a promotion starts and ends on its own schedule.
-            "hero_promotions": Promotion.objects.showing(Promotion.HOMEPAGE_HERO),
-            "sponsors": Sponsor.objects.filter(is_public=True),
+            # Featured events (content.Promotion, DATA_MODEL.md §12), cached
+            # until the next one starts or ends.
+            "hero_promotions": content_cache.promotions_showing(Promotion.HOMEPAGE_HERO),
+            "sponsors": content_cache.public_sponsors(),
         },
     )
 

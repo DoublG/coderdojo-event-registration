@@ -19,6 +19,14 @@ class EventQuerySet(models.QuerySet):
         governs the public-facing side."""
         return self.exclude(status=Event.DRAFT).filter(dojo__status="active")
 
+    def with_confirmed_count(self):
+        """Adds `confirmed_count` (confirmed, non-waitlisted places), which
+        Event.places_left then reads instead of running a query per event:
+        for any list that shows the places left."""
+        return self.annotate(
+            confirmed_count=models.Count("registration", filter=models.Q(registration__waiting_list=False))
+        )
+
 
 class EventManager(models.Manager.from_queryset(EventQuerySet)):
     def get_queryset(self):
@@ -121,7 +129,11 @@ class Event(TranslatableModel):
 
     @property
     def places_left(self):
-        confirmed = self.registration_set.filter(waiting_list=False).count()
+        # Annotated by EventQuerySet.with_confirmed_count() on lists; a single
+        # event counts its own (never remembered: a sign-up changes it).
+        confirmed = self.__dict__.get("confirmed_count")
+        if confirmed is None:
+            confirmed = self.registration_set.filter(waiting_list=False).count()
         return self.places - confirmed
 
     @property

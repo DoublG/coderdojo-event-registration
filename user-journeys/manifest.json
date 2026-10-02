@@ -1,6 +1,6 @@
 {
- "generated_from": "530d23a",
- "generated_on": "2026-09-30",
+ "generated_from": "2aa2dd1",
+ "generated_on": "2026-10-01",
  "personas": {
   "parent": {
    "pages": [
@@ -23,12 +23,12 @@
     "accounts/views.py:account_home": "9c4245e27f2df4b5",
     "accounts/views.py:ninja_detail": "1b7418ab00e7c71c",
     "accounts/views.py:register_guardian": "a08851a775ddd771",
-    "core/views.py:home": "961cf21b8af737e9",
-    "dojos/views.py:dojo_detail": "adfdfd8998946863",
-    "dojos/views.py:dojo_list": "f5128ffe5fd74d5a",
-    "events/views.py:event_detail": "155afc22c761160f",
-    "events/views.py:event_list": "95a77aed2be11ff6",
-    "events/views.py:event_signup": "fd18a8f13404029b",
+    "core/views.py:home": "b1c2e381d79ab496",
+    "dojos/views.py:dojo_detail": "b85a46c12b05c3ff",
+    "dojos/views.py:dojo_list": "9abc2bbd53e8952f",
+    "events/views.py:event_detail": "508021bd288e2ac9",
+    "events/views.py:event_list": "0891d981c444761c",
+    "events/views.py:event_signup": "2fb54f0a88ee0918",
     "mailing/views.py:mail_preferences": "8467f97655ff4f35",
     "privacy/views.py:delete_my_account": "4475f4654efb476c"
    },
@@ -87,8 +87,8 @@
     "accounts/security_views.py:security": "13eb72c780afbbd5",
     "accounts/views.py:LoginView": "c09d432776362105",
     "accounts/views.py:ninja_detail": "1b7418ab00e7c71c",
-    "events/views.py:event_detail": "155afc22c761160f",
-    "events/views.py:event_signup": "fd18a8f13404029b",
+    "events/views.py:event_detail": "508021bd288e2ac9",
+    "events/views.py:event_signup": "2fb54f0a88ee0918",
     "pathways/views.py:pathway_detail": "b33fb4640ddff05c"
    },
    "templates": {
@@ -128,10 +128,10 @@
     "applications/views.py:register_helper": "bab5afaaff0164e2",
     "applications/views.py:renew_background_check": "395a29a648e8668a",
     "dojos/views.py:dojo_dashboard": "2960bf106eea0e28",
-    "dojos/views.py:dojo_detail": "adfdfd8998946863",
+    "dojos/views.py:dojo_detail": "b85a46c12b05c3ff",
     "dojos/views.py:dojo_event_attendance": "fa9728236748547a",
     "dojos/views.py:dojo_event_detail": "fff80c0aa8fa8e57",
-    "dojos/views.py:dojo_event_list": "81e24857a8afada2",
+    "dojos/views.py:dojo_event_list": "b08426c380c8f4c8",
     "dojos/views.py:dojo_team_manage": "35a550c2ee0198e4"
    },
    "templates": {
@@ -178,7 +178,7 @@
     "dojos/views.py:dojo_event_attendance": "fa9728236748547a",
     "dojos/views.py:dojo_event_create": "5c83736ecee19705",
     "dojos/views.py:dojo_event_detail": "fff80c0aa8fa8e57",
-    "dojos/views.py:dojo_event_list": "81e24857a8afada2",
+    "dojos/views.py:dojo_event_list": "b08426c380c8f4c8",
     "dojos/views.py:dojo_manage": "2108d6a7127fcce8",
     "dojos/views.py:dojo_members": "a71a600696c51325",
     "dojos/views.py:dojo_team_manage": "35a550c2ee0198e4",

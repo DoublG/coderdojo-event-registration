@@ -143,6 +143,64 @@ class DojoDetailViewTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+class DojoDetailCacheTests(TestCase):
+    """dojos.public_cache: a dojo's page is cached, and shows a change to
+    what it lists at once."""
+
+    def setUp(self):
+        cache.clear()
+        self.champion = make_champion(username="champ", display_name="Champ")
+        self.dojo = make_dojo("Ghent", champion=self.champion)
+        self.url = reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id})
+
+    def _key(self):
+        from .public_cache import KEY
+
+        return KEY.format(dojo_id=self.dojo.id)
+
+    def test_a_second_visit_reads_the_dojo_from_the_cache(self):
+        self.client.get(self.url)
+        self.assertIsNotNone(cache.get(self._key()))
+        with self.assertNumQueries(1):  # the next session, always live
+            self.client.get(self.url)
+
+    def test_a_new_update_and_a_new_team_member_show_at_once(self):
+        from content.models import Announcement
+
+        self.client.get(self.url)
+        Announcement.objects.create(dojo=self.dojo, text="Laptops wanted", date=timezone.localdate())
+        add_member(self.dojo, make_mentor(username="ment", display_name="Mentor Mo"))
+        response = self.client.get(self.url)
+        self.assertContains(response, "Laptops wanted")
+        self.assertContains(response, "Mentor Mo")
+
+    def test_a_team_members_profile_change_shows_but_a_login_keeps_the_cache(self):
+        self.client.get(self.url)
+        self.champion.last_login = timezone.now()
+        self.champion.save(update_fields=["last_login"])
+        self.assertIsNotNone(cache.get(self._key()))
+        self.champion.title = "Robot whisperer"
+        self.champion.save()
+        self.assertContains(self.client.get(self.url), "Robot whisperer")
+
+    def test_the_next_sessions_places_stay_live(self):
+        start = timezone.now() + timedelta(days=2)
+        event = Event.objects.create(
+            name="Session", dojo=self.dojo, status=Event.OPEN, places=2, start_time=start, end_time=start
+        )
+        self.assertEqual(self.client.get(self.url).context["next_event"].places_left, 2)
+        Registration.objects.create(
+            event=event, ninja=Ninja.objects.create(name="Kid"), position=1, waiting_list=False
+        )
+        self.assertEqual(self.client.get(self.url).context["next_event"].places_left, 1)
+
+    def test_a_dojo_going_dormant_is_gone_at_once(self):
+        self.client.get(self.url)
+        self.dojo.status = Dojo.DORMANT
+        self.dojo.save()
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+
 class DojoTeamViewTests(TestCase):
     def test_lists_champion_first_then_mentors_and_youth_mentors(self):
         owner = make_champion(username="owner1", first_name="Zoe")
@@ -1547,7 +1605,9 @@ class NotificationConsumerTests(TransactionTestCase):
         from django_otp.plugins.otp_totp.models import TOTPDevice
 
         from accounts.models import SignInRequirement
+        from accounts.sign_in import clear_policy_cache
 
+        self.addCleanup(clear_policy_cache)  # cached; the test's flush sends no signal
         await sync_to_async(SignInRequirement.objects.create)(
             role=SignInRequirement.CHAMPION,
             level=SignInRequirement.TWO_STEP,

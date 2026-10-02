@@ -10,26 +10,24 @@ def user_roles(request):
     e.g. an organisation admin or a background-check reviewer) or a dojo's
     champion/mentor, or any organisation role (the board too: its page to
     ask for the Django admin, DATA_MODEL.md §23)."""
-    from applications.services import is_approved_champion, is_approved_mentor
-    from dojos.access import accessible_dojos
-
-    from .organisation import areas_of
+    from .navigation import for_request
 
     approved_champion = approved_mentor = False
-    applied_kinds = set()
+    applied_kinds = frozenset()
     admin_dojo = None
     organisation_role = organisation_admin = has_areas = False
     if request.user.is_authenticated and not request.user.is_ninja:
-        approved_champion = is_approved_champion(request.user)
-        approved_mentor = is_approved_mentor(request.user)
+        # Cached per account (accounts.navigation): only for showing links.
+        navigation = for_request(request)
+        approved_champion = navigation.approved_champion
+        approved_mentor = navigation.approved_mentor
         # Kinds with a pending or approved application — no point offering
         # "Apply ..." for those again.
-        applied_kinds = set(request.user.applications.exclude(status="rejected").values_list("kind", flat=True))
-        admin_dojo = accessible_dojos(request.user).first()
-        roles = set(request.user.organisation_roles.values_list("role", flat=True))
-        organisation_role = bool(roles)
-        organisation_admin = "admin" in roles
-        has_areas = bool(areas_of(request.user))
+        applied_kinds = navigation.applied_kinds
+        admin_dojo = navigation.admin_dojo
+        organisation_role = bool(navigation.organisation_roles)
+        organisation_admin = "admin" in navigation.organisation_roles
+        has_areas = bool(navigation.areas)
     return {
         "user_is_approved_champion": approved_champion,
         "user_is_approved_mentor": approved_mentor,

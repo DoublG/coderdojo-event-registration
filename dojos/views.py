@@ -18,8 +18,9 @@ from django.utils.translation import gettext as _
 from accounts.models import Ninja, User
 from accounts.organisation import Area, has_area
 from applications.services import is_approved_champion
+from content.cache import promotions_showing
 from content.manage import promotion_state
-from content.models import FAQ, OrganisationTeamMember, Promotion
+from content.models import OrganisationTeamMember, Promotion
 from core.content_languages import normalize
 from events import attendance
 from events.awards import BadgeError, BeltError, award_badge, award_belt
@@ -29,7 +30,7 @@ from geo.geocoding import find_province, geocode
 from notifications.models import Notification
 from pathways.models import Pathway
 
-from . import team
+from . import public_cache, team
 from .access import (
     AWARD_BADGES,
     AWARD_BELTS,
@@ -109,7 +110,7 @@ def dojo_list(request):
         "geocode_failed": geocode_failed,
         "total_count": paginator.count,
         "next_page_url": next_page_url,
-        "promotions": Promotion.objects.showing(Promotion.DOJO_FINDER_BANNER),
+        "promotions": promotions_showing(Promotion.DOJO_FINDER_BANNER),
     }
     # Infinite scroll (htmx "revealed" trigger, see _dojo_result.html):
     # subsequent pages return just the new <li> fragment, not the full page.
@@ -153,18 +154,24 @@ def _join_state(user, dojo):
 
 
 def dojo_detail(request, dojo_id):
-    dojo = get_object_or_404(Dojo.objects.public(), id=dojo_id)
-    next_event = dojo.event_set.visible().filter(start_time__gte=timezone.now()).order_by("start_time").first()
-    faqs = FAQ.objects.for_dojo(dojo)
+    # The dojo, its FAQs, updates and team are cached per dojo
+    # (dojos.public_cache); the next session's places and the join button
+    # are worked out per request.
+    page = public_cache.detail(dojo_id)
+    dojo = page["dojo"]
+    next_event = (
+        dojo.event_set.visible()
+        .filter(start_time__gte=timezone.now())
+        .with_confirmed_count()
+        .order_by("start_time")
+        .first()
+    )
     return render(
         request,
         "dojos/dojo_detail.html",
         {
-            "dojo": dojo,
+            **page,
             "next_event": next_event,
-            "faqs": faqs,
-            "announcements": dojo.announcements.all()[:PUBLIC_UPDATES_LIMIT],
-            "mentors": dojo.memberships.for_team_page(),
             "join_state": _join_state(request.user, dojo),
         },
     )
@@ -611,7 +618,7 @@ def dojo_team_action(request, dojo_id):
 def dojo_event_list(request, dojo_id):
     access = require_dojo_access(request, dojo_id)
     dojo = access.dojo
-    events = dojo.event_set.order_by("-start_time")
+    events = dojo.event_set.with_confirmed_count().order_by("-start_time")
     return render(
         request,
         "dojos/dojo_event_list.html",

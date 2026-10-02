@@ -2,6 +2,7 @@
 loadtest/summarize.py and the projection of `manage.py capacity_report --json`:
 
     python3 loadtest/charts.py loadtest/results/2026-09-30.json loadtest/results/capacity-2026-09-30.json
+    python3 loadtest/charts.py --caching loadtest/results/2026-10-01-caching.json
 
 Writes PNGs to loadtest/charts/. Needs matplotlib (loadtest/requirements.txt).
 The run names below are the ones of 30 September 2026; a new round of runs
@@ -248,7 +249,55 @@ def growth(projection):
     save(fig, "database-growth")
 
 
+# The caching comparison (CAPACITY.md, "Caching"): the same runs on the code
+# before and after, named before-<run> and after-<run> (loadtest/compare.sh).
+CACHING_RUNS = ["W4-300", "W2-300", "rush-500"]
+
+
+def caching(runs):
+    """Before and after the caching work: what each request costs MySQL,
+    and the response times."""
+    names = [n for n in CACHING_RUNS if f"before-{n}" in runs and f"after-{n}" in runs]
+    labels = [runs[f"after-{n}"]["label"].replace(" (after)", "") for n in names]
+    width = 0.36
+
+    fig, ax = figure(
+        "A third fewer MySQL statements per request",
+        "MySQL statements per answered request over the whole run (Celery's and /metrics/'s own included).",
+    )
+    for i, (side, colour) in enumerate((("before", OTHER), ("after", SERIES[0]))):
+        xs = [x + (i - 0.5) * (width + 0.02) for x in range(len(names))]
+        values = [runs[f"{side}-{n}"]["database"]["mysql_statements_per_request"] for n in names]
+        bars = ax.bar(xs, values, width, color=colour, label=side.capitalize())
+        ax.bar_label(bars, labels=[f"{v:.1f}" for v in values], padding=3, color=INK, fontsize=9)
+    ax.set_xticks(range(len(names)), labels)
+    ax.set_ylabel("statements per request")
+    ax.grid(axis="x", visible=False)
+    ax.legend(loc="upper right")
+    save(fig, "caching-statements")
+
+    fig, ax = figure(
+        "Pages answer faster with less work for the database",
+        "Median and 95th percentile response times in ms, before (grey) and after (blue) the caching work.",
+    )
+    for i, (side, colour) in enumerate((("before", OTHER), ("after", SERIES[0]))):
+        xs = [x + (i - 0.5) * (width + 0.02) for x in range(len(names))]
+        p95 = [runs[f"{side}-{n}"]["p95_ms"] for n in names]
+        p50 = [runs[f"{side}-{n}"]["p50_ms"] for n in names]
+        bars = ax.bar(xs, p95, width, color=colour, alpha=0.45, label=f"{side.capitalize()}: 95th percentile")
+        ax.bar(xs, p50, width, color=colour, label=f"{side.capitalize()}: median")
+        ax.bar_label(bars, labels=[f"{v:.0f}" for v in p95], padding=3, color=INK, fontsize=9)
+    ax.set_xticks(range(len(names)), labels)
+    ax.set_ylabel("ms")
+    ax.grid(axis="x", visible=False)
+    ax.legend(loc="upper left", fontsize=8.5)
+    save(fig, "caching-latency")
+
+
 def main():
+    if sys.argv[1] == "--caching":
+        caching(json.load(open(sys.argv[2]))["runs"])
+        return
     runs = json.load(open(sys.argv[1]))["runs"]
     workers(runs)
     rush_connections(runs)

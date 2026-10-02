@@ -158,6 +158,12 @@ def _requests(out):
         [({"view": view}, int(c.get("ms", 0))) for view, c in sorted(views.items())],
     )
     out.metric(
+        "coderdojo_http_db_queries_total",
+        "counter",
+        "Database queries per view (divide by the requests for queries per request).",
+        [({"view": view}, int(c.get("queries", 0))) for view, c in sorted(views.items())],
+    )
+    out.metric(
         "coderdojo_http_server_errors_total",
         "counter",
         "5xx responses per view.",
@@ -185,6 +191,17 @@ def _tasks(out):
         out.metric(name, kind, help_text, [({"task": task}, t.get(field, 0)) for task, t in sorted(tasks.items())])
 
 
+def _cache(out):
+    reads = recorder.cache_reads()
+    for field, name, help_text in (
+        ("hits", "coderdojo_cache_hits_total", "Reads of each data cache (core.caching) that found it."),
+        ("misses", "coderdojo_cache_misses_total", "Reads of each data cache that had to build it."),
+    ):
+        out.metric(
+            name, "counter", help_text, [({"cache": n}, int(c.get(field, 0))) for n, c in sorted(reads.items())]
+        )
+
+
 SECTIONS = {
     "database": _database,
     "redis": _redis,
@@ -192,6 +209,7 @@ SECTIONS = {
     "processes": _processes,
     "requests": _requests,
     "tasks": _tasks,
+    "cache": _cache,
 }
 
 

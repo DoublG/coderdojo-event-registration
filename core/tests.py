@@ -44,6 +44,85 @@ class HomeViewTests(TestCase):
         self.assertIsNotNone(response.context["testimonial"])
 
 
+class DataCacheTests(TestCase):
+    """core.caching and the public pages' query counts (CAPACITY.md,
+    "Caching"). The counts are guards: a change that adds queries to these
+    pages should be a decision, so update them only on purpose."""
+
+    def setUp(self):
+        cache.clear()
+
+    def test_a_value_is_built_once_and_cleared_when_a_row_changes(self):
+        from content.models import Sponsor
+        from core.caching import cached, clear_on_change
+
+        built = []
+
+        def build():
+            built.append(1)
+            return list(Sponsor.objects.values_list("name", flat=True))
+
+        clear_on_change(["test:sponsors"], Sponsor)
+        self.assertEqual(cached("test:sponsors", build, 60), [])
+        self.assertEqual(cached("test:sponsors", build, 60), [])
+        self.assertEqual(len(built), 1)
+        Sponsor.objects.create(name="Acme")
+        self.assertEqual(cached("test:sponsors", build, 60), ["Acme"])
+        self.assertEqual(len(built), 2)
+
+    def test_a_cached_none_is_a_hit(self):
+        from core.caching import cached
+
+        built = []
+        cached("test:none", lambda: built.append(1), 60)
+        cached("test:none", lambda: built.append(1), 60)
+        self.assertEqual(len(built), 1)
+
+    def test_the_home_page_shows_a_new_sponsor_and_testimonial_at_once(self):
+        from content.models import Sponsor
+
+        self.client.get(reverse("home"))
+        Sponsor.objects.create(name="Acme")
+        Testimonial.objects.create(quote="Great!", author="A parent")
+        response = self.client.get(reverse("home"))
+        self.assertEqual([s.name for s in response.context["sponsors"]], ["Acme"])
+        self.assertEqual(response.context["testimonial"].quote, "Great!")
+
+    def _warm_queries(self, url):
+        """Queries of the second visit, once the caches are filled."""
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        self.client.get(url)
+        with CaptureQueriesContext(connection) as queries:
+            self.assertEqual(self.client.get(url).status_code, 200)
+        return len(queries)
+
+    def test_the_public_pages_read_their_content_from_the_cache(self):
+        from datetime import timedelta
+
+        from events.models import Event
+
+        dojo = make_dojo("Ghent", champion=make_champion())
+        start = timezone.now() + timedelta(days=3)
+        for n in range(5):
+            Event.objects.create(
+                name=f"Session {n}",
+                dojo=dojo,
+                status=Event.OPEN,
+                places=10,
+                start_time=start,
+                end_time=start + timedelta(hours=2),
+            )
+        # The home page's one query is the dojo finder widget's next sessions;
+        # the dojo page's is its next session (its places change with every
+        # booking).
+        self.assertEqual(self._warm_queries(reverse("home")), 1)
+        self.assertEqual(self._warm_queries(reverse("event_list")), 1)
+        self.assertEqual(self._warm_queries(reverse("dojo_list")), 1)
+        self.assertEqual(self._warm_queries(reverse("dojo_detail", args=[dojo.id])), 1)
+
+
 class ImageLibraryTests(TempMediaMixin, TestCase):
     def test_every_kind_has_images(self):
         for kind in image_library.LIBRARY_DIRS:

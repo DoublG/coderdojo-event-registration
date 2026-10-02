@@ -67,6 +67,41 @@ def metrics(path, start):
     return series
 
 
+def database_load(path, requests):
+    """What the run cost the database, from the first and last /metrics/
+    samples: MySQL statements per answered request (every statement the server ran,
+    Celery's and /metrics/'s own included), and per view its requests and
+    queries per request, and per data cache its hit rate, where the site
+    reports them (since 1 October 2026)."""
+    samples = [json.loads(line) for line in path.open()] if path.exists() else []
+    samples = [s for s in samples if s.get("mysql_questions") is not None]
+    if len(samples) < 2:
+        return None
+    first, last = samples[0], samples[-1]
+    load = {"mysql_statements_per_request": round((last["mysql_questions"] - first["mysql_questions"]) / requests, 2)}
+    views = {}
+    for view, now in (last.get("views") or {}).items():
+        before = (first.get("views") or {}).get(view, {})
+        count = now.get("requests", 0) - before.get("requests", 0)
+        if count > 0 and "queries" in now:
+            views[view] = {
+                "requests": count,
+                "queries_per_request": round((now["queries"] - before.get("queries", 0)) / count, 2),
+            }
+    if views:
+        load["views"] = views
+    caches = {}
+    for name, now in (last.get("cache") or {}).items():
+        before = (first.get("cache") or {}).get(name, {})
+        hits = now.get("hits", 0) - before.get("hits", 0)
+        misses = now.get("misses", 0) - before.get("misses", 0)
+        if hits + misses:
+            caches[name] = {"reads": hits + misses, "hit_rate": round(hits / (hits + misses), 3)}
+    if caches:
+        load["caches"] = caches
+    return load
+
+
 def summarize(folder):
     runs = {}
     for meta_path in sorted(Path(folder).glob("*.meta.json")):
@@ -93,6 +128,8 @@ def summarize(folder):
             "history": history(hist, start) if hist.exists() else None,
             "metrics": metrics(Path(folder, f"{name}.metrics.jsonl"), start),
         }
+        answered = runs[name]["requests"] - runs[name]["failed"]  # a refused request never reaches Django
+        runs[name]["database"] = database_load(Path(folder, f"{name}.metrics.jsonl"), answered or 1)
         sampled = [n for n in runs[name]["metrics"]["db_connections"] if n is not None]
         runs[name]["db_peak"] = max(sampled + [meta.get("db_peak") or 0]) or None
     return runs

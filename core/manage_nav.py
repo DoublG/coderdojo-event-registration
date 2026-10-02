@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from django.utils.translation import gettext_lazy as _
 
 from accounts.admin_access import may_ask
-from accounts.models import OrganisationRole
+from accounts.models import OrganisationRole, User
 from accounts.organisation import areas_of
 from dojos.access import accessible_dojos
 
@@ -83,10 +83,25 @@ def manage_contexts(user):
 
 
 def request_manage_contexts(request):
-    """manage_contexts for the request's account, worked out once per
-    request (the switcher and the Organisation sidebar both read it)."""
+    """manage_contexts for the request's account, for the navigation only
+    (the switcher, the Organisation sidebar, /manage/'s landing): built from
+    accounts.navigation, which is cached per account, once per request.
+    Never decide access with it: require_organisation_context and the
+    pages' own checks ask the database."""
+    from accounts.navigation import for_request
+
     if not hasattr(request, "_manage_contexts"):
-        request._manage_contexts = manage_contexts(request.user)
+        user = request.user
+        navigation = for_request(request)
+        request._manage_contexts = ManageContexts(
+            areas=list(navigation.areas),
+            organisation_roles=set(navigation.organisation_roles),
+            admin_access=user.is_authenticated
+            and user.account_type == User.ADULT
+            and bool(navigation.organisation_roles),
+            organisation_dojos=[d for d in navigation.dojos if d.is_organisation],
+            dojos=[d for d in navigation.dojos if not d.is_organisation],
+        )
     return request._manage_contexts
 
 
@@ -98,5 +113,6 @@ def require_organisation_context(request):
 
     from accounts.sign_in import meets_requirement
 
-    if not request_manage_contexts(request).organisation or not meets_requirement(request):
+    user = request.user
+    if not (areas_of(user) or may_ask(user)) or not meets_requirement(request):
         raise Http404

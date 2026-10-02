@@ -26,6 +26,11 @@ charts come from `loadtest/charts.py`, the figures behind them from `loadtest/re
      connections and a fifth of the requests failed. Each web worker now takes at most 25 requests at once
      (`gunicorn.conf.py`); the overflow gets a quick "busy" answer instead of an error, and MySQL stays
      far below its limit.
+- **Caching since 1 October 2026:** the public pages read their content from Redis and a logged-in page
+  no longer looks up the account's roles and dojos on every request. A request now costs MySQL **a third
+  fewer statements** (24.6 to 16.2), the public pages 1 query instead of 8 to 24, and with 2 web workers
+  under 300 users the 95th percentile halved (410 to 210 ms) and the errors went away
+  ([Caching](#caching)).
 
 ---
 
@@ -37,13 +42,14 @@ charts come from `loadtest/charts.py`, the figures behind them from `loadtest/re
 4. [Memory per component](#memory-per-component)
 5. [Load: web requests](#load-web-requests)
 6. [Capping requests per web worker](#capping-requests-per-web-worker)
-7. [Load: Celery workers and mail](#load-celery-workers-and-mail)
-8. [Redis](#redis)
-9. [Findings and what to do](#findings-and-what-to-do)
-10. [Watching production](#watching-production)
-11. [Load testing production](#load-testing-production)
-12. [Questions for Level27](#questions-for-level27)
-13. [Measuring again](#measuring-again)
+7. [Caching](#caching)
+8. [Load: Celery workers and mail](#load-celery-workers-and-mail)
+9. [Redis](#redis)
+10. [Findings and what to do](#findings-and-what-to-do)
+11. [Watching production](#watching-production)
+12. [Load testing production](#load-testing-production)
+13. [Questions for Level27](#questions-for-level27)
+14. [Measuring again](#measuring-again)
 
 ---
 
@@ -315,6 +321,82 @@ each clicking again every 0.5 to 2 seconds: about 350 requests a second, far bey
 - To size the cap for another MySQL limit: *workers × (cap − 1) + 5 < max_user_connections*, leaving room
   for the Django admin and maintenance commands.
 
+## Caching
+
+Measured on **1 October 2026**. Before, the database did work for every page that it had already done
+for the last one: the places left on each session card (one count query per card), the account's
+roles, applications and dojos (several times per request), the organisation's sign-in policy (twice per
+request), the session row, and site-wide content that is the same for every visitor.
+
+**What changed** (the rules are in `CLAUDE.md`, "Caching"):
+
+| Step | Where | What it saves |
+|---|---|---|
+| Lists count their places in the same query | `Event.objects.with_confirmed_count()` | the per-card count query on the events list, the dojo finder, a dojo's page and the dojo's events list |
+| Sessions read from Redis, written to MySQL too | `SESSION_ENGINE = cached_db` | the session query on every logged-in request; an emptied cache logs nobody out |
+| The account's nav, once per request and cached per account | `accounts/navigation.py` | the roles, applications, permissions and dojos the nav and the management switcher show |
+| The sign-in policy cached | `accounts.sign_in.policy` | two queries on every logged-in request |
+| Site-wide content cached | `content/cache.py` | pathways, the organisation's team, FAQs, testimonials, sponsors, promotions (until the next one starts or ends) |
+| The events list's first page and a dojo's page cached | `events.search`, `dojos/public_cache.py` | what most visitors see; the next session's places and the join button stay live |
+| Address lookups kept to Nominatim's 1 request a second (2 October 2026) | `geo/geocoding.py` | postcodes and town names answered from `geo.Municipality`; everything else cached 90 days (a no-match a day); one Nominatim request a second for all processes together, with a back-off when Nominatim asks for it |
+| Hits, misses and queries measured | `monitoring` | `coderdojo_cache_hits_total`, `coderdojo_cache_misses_total` and `coderdojo_http_db_queries_total` per view on `/metrics/` |
+
+Every cache is cleared, at once and again when the transaction commits, whenever a row it's built from is
+saved or deleted, so a change shows straight away; the timeouts only cover `QuerySet.update()`. **The nav
+cache never decides access**: the pages behind its links still ask the database, so a stale nav can show a
+link for a few minutes but never open a page. Whole pages are never cached: each carries its own CSP nonce,
+CSRF token and the visitor's nav.
+
+**Queries per page** (the seeded development data, the second visit, so with the caches filled;
+`core.tests.DataCacheTests` keeps the public pages' numbers as guards):
+
+| Page | Visitor | | Parent | | Champion | |
+|---|---:|---:|---:|---:|---:|---:|
+| | before | after | before | after | before | after |
+| Home | 9 | **1** | 19 | **4** | | |
+| Events list | 24 | **1** | 32 | **2** | | |
+| Dojo finder | 22 | **1** | | | | |
+| A dojo's page | 8 | **1** | | | | |
+| A session's page | 5 | 3 | 15 | 6 | | |
+| Account page | | | 19 | 12 | | |
+| Dojo dashboard / events / team | | | | | 22 / 19 / 25 | **9 / 6 / 12** |
+
+**Under load** (`loadtest/compare.sh`: the same runs on the old and the new code, on the scaled database,
+each starting on an empty cache and the seeded bookings, a new connection per request and the cap of 25):
+
+![MySQL statements per request, before and after](loadtest/charts/caching-statements.png)
+
+![Response times before and after](loadtest/charts/caching-latency.png)
+
+| Run | | Requests/s | Median | p95 | p99 | Failed | Peak MySQL connections | Statements per request |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| 4 workers, 300 users | before | 64.3 | 33 | 100 | 240 | 0 | 15 | 24.6 |
+| | after | 64.5 | 28 | 95 | 230 | 0 | 13 | **16.2** |
+| 2 workers, 300 users | before | 60.2 | 72 | 410 | 710 | 121 (0.8%) | 34 | 24.6 |
+| | after | 63.8 | **48** | **210** | **350** | **0** | 22 | **16.1** |
+| Rush of 500 families, 4 workers | before | 222 answered | 260 | 420 | 520 | 37% refused | 87 | 22.8 |
+| | after | **260 answered** | 230 | 360 | 460 | 37% refused | 89 | **15.9** |
+
+- **A third fewer statements per request** in every run. That's less than the page counts above suggest:
+  the mixed load is mostly logged-in families (their account page and signing up, about 13 queries each),
+  dojo teams marking attendance (writes, about 25) and logins, and every request opens its own MySQL
+  connection, which costs 2 statements of its own (`SELECT VERSION()` and the isolation level) that no
+  cache saves.
+- **It shows where the site was short of capacity:** with 2 web workers, the 95th percentile halved and
+  the errors went away. With 4 workers there was room to spare before, so little changes there.
+- **In the rush, 17% more requests were answered** in the same time (the overflow is still refused by the
+  cap, as designed). Booking itself is writes under a lock, which no cache shortens.
+- **Hit rates** (from `/metrics/`): 99.9% for the site-wide content and the dojo finder's default list;
+  70% for the events list's first page and 77–79% for the upcoming-sessions carousel, because every
+  booking clears them (the places left change). That's the price of showing the right number of places.
+- **Memory:** no change for the web workers (690 MB for 4); Redis peaked at 4.1 MB instead of 3.9 MB.
+  The sessions add about 1 KB per logged-in visitor.
+- **Not done, and why:** the account page, the sign-up page and the dojo team's pages read data that
+  changes with every booking or attendance mark, and their queries are already per-page, not per-row.
+  Keeping MySQL connections open between requests (`CONN_MAX_AGE`) would save the 2 setup statements per
+  request, but Django advises against it under ASGI (each request runs in its own thread, so connections
+  would pile up past the cap's arithmetic).
+
 ## Load: Celery workers and mail
 
 | Job | On the scaled data | Memory |
@@ -336,8 +418,9 @@ each clicking again every 0.5 to 2 seconds: about 350 requests a second, far bey
 One Redis holds the cache (db 0), the Channels layer (db 1) and the Celery broker (db 2).
 
 - **It needs very little:** 2.5 MB in use, a peak of 4.4 MB during the load tests, 400 open WebSockets
-  included. The cache holds a few lists with a 60-second timeout; the broker holds only waiting tasks
-  (mail itself waits in MySQL, not Redis).
+  included. The cache holds the public site's lists and pages, each account's nav (5 minutes) and, since
+  1 October 2026, a copy of every login session ([Caching](#caching): about 1 KB each, expiring with the
+  session); the broker holds only waiting tasks (mail itself waits in MySQL, not Redis).
 - **Its configuration is the risk, not its size.** The devcontainer's Redis has no `maxmemory` and
   `noeviction`: should it ever fill up, it refuses writes, including the broker's, and then no task gets
   queued. Production's settings are unknown. Recommended: `maxmemory 128mb` with `volatile-lru`, so only
@@ -374,7 +457,13 @@ In order of urgency.
    September 2026:** that worker logs at WARNING in production.
 8. **Campaign queueing blocks the mailing worker** for a few minutes (see above): acceptable now, chunk it
    when campaigns get bigger.
-9. *Development only:* two copies of both Celery workers were running in the devcontainer (one pair from an
+9. **Pages repeated work the database had already done** (load). **Fixed on 1 October 2026**
+   ([Caching](#caching)): a count query per session card, the account's roles and dojos several times per
+   request, the session row and the sign-in policy on every request, site-wide content on every visit. A
+   third fewer statements per request; with 2 web workers the 95th percentile halved. *Watch on
+   production:* `coderdojo_cache_hits_total` against `coderdojo_cache_misses_total`, and
+   `coderdojo_http_db_queries_total` per view divided by its requests.
+10. *Development only:* two copies of both Celery workers were running in the devcontainer (one pair from an
    earlier `start.sh`), so every scheduled job ran twice. Stopped on 30 September;
    `pgrep -af "celery -A website worker"` should show five processes.
 
@@ -417,6 +506,7 @@ The `monitoring` app measures the site from the inside; nothing needs installing
 | `coderdojo_mail_oldest_due_seconds` | over 1,800 (also in `/health/`) | workers down |
 | database size (daily sample) | growing faster than the scenario's projection | more mail than planned |
 | `media/` size | growing by more than 100 MB a month | large uploads (finding 3) |
+| hits ÷ (hits + misses) per cache | under 90% for `content:*` or `dojos:detail` | something saving those rows over and over (finding 9) |
 
 ## Load testing production
 
@@ -523,6 +613,21 @@ python3 loadtest/summarize.py loadtest-out > loadtest/results/$(date +%F).json
 #    drop test_capacity, and empty Redis dbs 4-6.
 ```
 
+- **Comparing two versions of the code** (as for [Caching](#caching)): with the scaled database and the
+  data file of step 4, and no gunicorn or load-test Celery workers running, check out the old commit with
+  `git worktree add --detach <dir> <commit>`, note the highest `events_registration` id `seed_scale` left,
+  and run the same runs against each:
+
+  ```sh
+  export LOCUST=<venv>/bin/locust LOADTEST_DATA=/tmp/loadtest.json SEEDED_MAX_REGISTRATION=<id>
+  loadtest/compare.sh <dir> loadtest-out before
+  loadtest/compare.sh "$PWD" loadtest-out after
+  python3 loadtest/summarize.py loadtest-out > loadtest/results/$(date +%F)-<name>.json
+  <venv>/bin/python loadtest/charts.py --caching loadtest/results/$(date +%F)-<name>.json
+  ```
+
+  The summary's `database` block has the MySQL statements per answered request, and (from code of
+  1 October 2026 on) the queries per request of each view and each cache's hit rate.
 - Use `http://coolregistration.localhost:8001`, not `127.0.0.1`: the session and CSRF cookies are set
   for that domain (`COOKIE_DOMAIN`).
 - Memory comes from `/metrics/` (`coderdojo_process_pss_bytes`); a finer view per process is

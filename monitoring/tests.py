@@ -19,6 +19,7 @@ def clear_counters():
     get_redis_connection("default").delete(
         recorder.REQUESTS_KEY,
         recorder.TASKS_KEY,
+        recorder.CACHE_KEY,
         *get_redis_connection("default").keys(f"{recorder.PROCESS_KEY_PREFIX}*"),
     )
 
@@ -36,6 +37,20 @@ class RecorderTests(TestCase):
         # Each bucket counts the requests that took at most its bound.
         buckets = [counts.get(f"le_{bound}", 0) for bound in recorder.DURATION_BUCKETS_MS]
         self.assertEqual(buckets, sorted(buckets))
+
+    def test_a_request_counts_its_database_queries_and_data_cache_reads(self):
+        from django.core.cache import cache
+
+        cache.clear()
+        self.client.get(reverse("home"))  # builds the home page's caches
+        self.client.get(reverse("home"))  # reads them
+        self.assertGreater(recorder.requests()["home"]["queries"], 0)
+        sponsors = recorder.cache_reads()["content:sponsors"]
+        self.assertEqual((sponsors["misses"], sponsors["hits"]), (1, 1))
+
+    def test_a_cache_read_outside_a_request_is_not_counted(self):
+        recorder.note_cache("anything", hit=True)
+        self.assertNotIn("anything", recorder.cache_reads())
 
     def test_a_server_error_is_counted(self):
         recorder.record_request("some_view", 12, 503)
@@ -122,6 +137,9 @@ class MetricsViewTests(TestCase):
             "coderdojo_websocket_connections",
             'coderdojo_http_requests_total{view="home"} 1',
             'coderdojo_http_request_duration_ms_bucket{view="home",le="+Inf"} 1',
+            'coderdojo_http_db_queries_total{view="home"}',
+            'coderdojo_cache_hits_total{cache="content:sponsors"}',
+            'coderdojo_cache_misses_total{cache="content:sponsors"}',
             'coderdojo_process_rss_bytes{role="web"',
         ):
             self.assertIn(metric, text)

@@ -26,7 +26,8 @@ from privacy.registry import Category, LegalBasis, Subject, keep, personal, regi
 
 register(
     Session,
-    purpose="Keeping someone logged in, and their language choice",
+    purpose="Keeping someone logged in, and their language choice (in the database, with a copy in the "
+    "cache's Redis that expires with the session)",
     legal_basis=LegalBasis.CONTRACT,
     retention="login_session",
     seen_by="Nobody reads it; the site itself",

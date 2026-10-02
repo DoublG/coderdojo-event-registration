@@ -1832,7 +1832,12 @@ class TwoStepTestMixin:
 
         from django.core.management import call_command
 
+        from . import sign_in
+
         super().setUp()
+        # The sign-in policy is cached (accounts.sign_in.policy) and a test's
+        # rollback sends no signal: forget any policy a test set.
+        self.addCleanup(sign_in.clear_policy_cache)
         call_command("load_mail_templates", stdout=StringIO())
         self.user = User.objects.create(username="ann", email="ann@example.com", first_name="Ann")
         self.user.set_password(PASSWORD)
@@ -3753,3 +3758,105 @@ def settings_site_url():
     from django.conf import settings
 
     return settings.SITE_URL
+
+
+class AccountNavigationCacheTests(TestCase):
+    """accounts.navigation: what the nav shows about an account is cached
+    per account and follows every change to it, and never opens anything."""
+
+    def setUp(self):
+        from dojos.testing import make_champion
+
+        self.user = make_champion(username="nav", email="nav@example.com")
+        self.client.force_login(self.user)
+
+    def _nav(self):
+        return self.client.get(reverse("contact")).context
+
+    def test_a_second_page_reads_it_from_the_cache(self):
+        from . import navigation
+
+        navigation.clear(self.user.pk)
+        self._nav()
+        with patch.object(navigation, "build", side_effect=AssertionError("built again")):
+            self.assertTrue(self._nav()["user_is_approved_champion"])
+
+    def test_a_new_dojo_shows_in_the_nav_and_the_switcher_at_once(self):
+        from dojos.testing import make_dojo
+
+        self.assertFalse(self._nav()["user_can_manage"])
+        dojo = make_dojo("Ghent", champion=self.user)
+        context = self._nav()
+        self.assertEqual(context["user_admin_dojo"], dojo)
+        self.assertTrue(context["user_can_manage"])
+        dojo.name = "Gent"
+        dojo.save()
+        self.assertEqual(self._nav()["user_admin_dojo"].name, "Gent")
+
+    def test_an_organisation_role_shows_at_once(self):
+        from .models import OrganisationRole
+
+        self.assertFalse(self._nav()["user_is_organisation_admin"])
+        OrganisationRole.objects.create(account=self.user, role=OrganisationRole.ADMIN)
+        self.assertTrue(self._nav()["user_is_organisation_admin"])
+
+    def test_a_lapsed_check_changes_it_without_any_save(self):
+        from dojos.testing import make_dojo
+
+        make_dojo("Ghent", champion=self.user)
+        self.assertIsNotNone(self._nav()["user_admin_dojo"])
+        User.objects.filter(pk=self.user.pk).update(background_check_expires_at=timezone.now() - timedelta(days=1))
+        context = self._nav()
+        self.assertIsNone(context["user_admin_dojo"])
+        self.assertFalse(context["user_is_approved_champion"])
+
+    def test_a_stale_nav_never_opens_a_page(self):
+        """Access checks ask the database: a membership ended behind the
+        cache's back (QuerySet.update sends no signal) still closes the dojo."""
+        from dojos.models import DojoMembership
+        from dojos.testing import make_dojo
+
+        dojo = make_dojo("Ghent", champion=self.user)
+        self.assertIsNotNone(self._nav()["user_admin_dojo"])
+        DojoMembership.objects.filter(dojo=dojo).update(status=DojoMembership.DORMANT)
+        self.assertIsNotNone(self._nav()["user_admin_dojo"])  # the nav is stale for a while
+        self.assertEqual(self.client.get(reverse("dojo_dashboard", args=[dojo.id])).status_code, 404)
+
+
+class SignInPolicyCacheTests(TestCase):
+    """accounts.sign_in.policy: cached, and a change applies at once."""
+
+    def setUp(self):
+        from . import sign_in
+
+        sign_in.clear_policy_cache()
+        self.addCleanup(sign_in.clear_policy_cache)
+        self.user = User.objects.create(username="pol", email="pol@example.com")
+
+    def test_it_is_read_once_and_a_new_requirement_applies_at_once(self):
+        from . import sign_in
+        from .models import SignInRequirement
+
+        sign_in.requirements_for(self.user)
+        with self.assertNumQueries(0):
+            enforced, _upcoming = sign_in.requirements_for(self.user)
+        self.assertEqual(enforced.level, sign_in.PASSWORD)
+        requirement = SignInRequirement.objects.create(role=SignInRequirement.ADULT, level=SignInRequirement.TWO_STEP)
+        self.assertEqual(sign_in.requirements_for(self.user)[0].level, sign_in.TWO_STEP)
+        requirement.delete()
+        self.assertEqual(sign_in.requirements_for(self.user)[0].level, sign_in.PASSWORD)
+
+
+class CachedSessionTests(TestCase):
+    """Sessions are read from the cache and kept in the database too
+    (settings.SESSION_ENGINE): an emptied cache logs nobody out."""
+
+    def test_a_session_survives_an_emptied_cache(self):
+        from django.contrib.sessions.models import Session
+        from django.core.cache import cache
+
+        user = User.objects.create(username="sess", email="sess@example.com")
+        self.client.force_login(user)
+        self.assertTrue(Session.objects.filter(session_key=self.client.session.session_key).exists())
+        cache.clear()
+        self.assertEqual(self.client.get(reverse("account_home")).status_code, 200)

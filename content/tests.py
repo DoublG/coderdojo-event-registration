@@ -170,6 +170,52 @@ class PromotionPlacementTests(TestCase):
         self.assertContains(self.client.get(reverse("home")), "Featured</span>")
 
 
+class PromotionCacheTests(TestCase):
+    """content.cache.promotions_showing: cached until the next promotion
+    starts or ends, and cleared when a promotion or its event changes."""
+
+    def setUp(self):
+        cache.clear()
+        self.org = make_dojo("CoderDojo Belgium", kind=Dojo.ORGANISATION)
+        self.event = _event(self.org, days=40)
+
+    def _key(self):
+        from content.cache import PROMOTIONS_KEY
+
+        return PROMOTIONS_KEY.format(placement=Promotion.HOMEPAGE_HERO)
+
+    def test_a_new_promotion_shows_at_once(self):
+        from content.cache import promotions_showing
+
+        self.assertEqual(promotions_showing(Promotion.HOMEPAGE_HERO), [])
+        promotion = Promotion.objects.create(
+            event=self.event, placement=Promotion.HOMEPAGE_HERO, starts_at=timezone.now() - timedelta(hours=1)
+        )
+        self.assertEqual(promotions_showing(Promotion.HOMEPAGE_HERO), [promotion])
+
+    def test_it_is_kept_only_until_a_promotion_starts(self):
+        from content.cache import PROMOTION_TIMEOUT, promotions_showing
+
+        promotions_showing(Promotion.HOMEPAGE_HERO)
+        self.assertGreater(cache.ttl(self._key()), PROMOTION_TIMEOUT - 5)
+        Promotion.objects.create(
+            event=self.event, placement=Promotion.HOMEPAGE_HERO, starts_at=timezone.now() + timedelta(seconds=30)
+        )
+        self.assertEqual(promotions_showing(Promotion.HOMEPAGE_HERO), [])
+        self.assertLessEqual(cache.ttl(self._key()), 31)
+
+    def test_a_promoted_event_pulled_back_to_draft_disappears(self):
+        from content.cache import promotions_showing
+
+        Promotion.objects.create(
+            event=self.event, placement=Promotion.HOMEPAGE_HERO, starts_at=timezone.now() - timedelta(hours=1)
+        )
+        self.assertEqual(len(promotions_showing(Promotion.HOMEPAGE_HERO)), 1)
+        self.event.status = Event.DRAFT
+        self.event.save()
+        self.assertEqual(promotions_showing(Promotion.HOMEPAGE_HERO), [])
+
+
 class PromotionDashboardTests(TestCase):
     def setUp(self):
         self.admin = User.objects.create(username="orgadmin", email="ann@example.com")
@@ -301,6 +347,7 @@ class SponsorTests(TestCase):
     organisation dashboard's Sponsors page (organisation admins only)."""
 
     def setUp(self):
+        cache.clear()  # the homepage's sponsors are cached (content.cache)
         self.admin = User.objects.create(username="admin")
         OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
 

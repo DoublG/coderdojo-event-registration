@@ -256,14 +256,19 @@ static files, never a CDN, so visitors' IP addresses don't go to a third party.<
 <code>Distance()</code> silently returns planar degrees on MySQL.</li>
 <li><b>A model's <code>__str__</code> never queries</b>: under ASGI a lazy lookup raises
 <code>SynchronousOnlyOperation</code>; managers preload what <code>__str__</code> needs.</li>
-<li><b>Public caches are cleared on save</b> by signals, so a published session shows at once.</li>
+<li><b>Cache data, never whole pages, and clear it on save</b>: every page carries its own CSP nonce, CSRF token and
+nav, so the public content, the account's nav and the sessions are cached instead (<code>core/caching.py</code>), and
+signals clear them whenever a row they're built from changes, so a published session shows at once. The account's nav
+never decides access: the pages behind its links still ask the database.</li>
+<li><b>A list counts in the same query</b>: <code>Event.objects.with_confirmed_count()</code> wherever the places left
+show, instead of a query per row.</li>
 <li><b>Tasks are safe to run twice</b> (<code>acks_late</code>, idempotency keys): a worker that dies mid-task is retried.</li>
 </ul>
 <h2>Enforced by tests</h2>
 <p>Many of these are guarded by tests that fail on a new model or field that forgets them: every field has a privacy
 classification, every model has an audit-log decision, every registered model is fully usable in the admin, every
 <code>__str__</code> that follows a relation is preloaded, every form text is translated, the API schema never exposes a
-sensitive field, and no page loads a script from another site.</p>
+sensitive field, no page loads a script from another site, and the public pages keep their query counts.</p>
 """,
 )
 
@@ -462,6 +467,11 @@ and rendered in the <i>recipient's</i> language.</p>
 from its geocoded location (point in polygon, nearest boundary as fallback). The dojo finder orders by
 <code>DistanceSphere</code> from a typed address, the browser's location, the family's postcode or a Ghent default; only
 the default list is cached, so one family's results never leak to another visitor.</p>
+<p>A typed address becomes coordinates through <code>geo.geocoding.geocode</code>, the only way to call OpenStreetMap's
+Nominatim, which allows one request a second for the whole site. It answers from the cache first (90 days for a match;
+the key is a hash, so what someone typed isn't stored), then from our own municipalities for a postcode or a town's
+name, and only then asks Nominatim, after taking a site-wide slot in Redis. When Nominatim asks us to slow down,
+every call stops for a while; without Redis there's no call at all.</p>
 """,
 )
 
@@ -607,7 +617,8 @@ section(
 component needs: measured on 30 September 2026 in the devcontainer, on a database filled with a year of the
 <i>growth</i> scenario (100 dojos, 6,000 families, 1,200 sessions, 24,000 bookings and 189,000 mails a year). The
 full report, with the method and how to measure again, is <code>CAPACITY.md</code>; the charts come from
-<code>loadtest/charts.py</code>.</p>
+<code>loadtest/charts.py</code>. The caching work was measured on 1 October 2026, the old and the new code with the same
+runs.</p>
 <h2>How it was measured</h2>
 <ul>
 <li><code>manage.py seed_scale</code> fills a separate <code>test_</code> database with a scenario's data, from rendered
@@ -667,6 +678,29 @@ notification WebSockets, take places too. How Level27's proxy connects to gunico
 <li><code>scripts/deploy.sh --check</code> says whether gunicorn reads the file (it doesn't when it starts outside
 <code>~/app</code> or with a <code>-c</code> of its own).</li>
 </ul>
+
+<h2>Caching: less work for the database</h2>
+<p>The pages used to redo work the database had already done: a count query per session card, the account's roles and
+dojos several times per request, the session row and the sign-in policy on every request, and site-wide content on every
+visit. Since 1 October 2026 the lists count in the same query, sessions are read from Redis (and still written to
+MySQL), the account's nav and the policy are cached, and so are the site-wide content, the events list's first page and
+each dojo's page. A public page now makes 1 query instead of 8 to 24.</p>
+{chart("caching-statements", "The same runs on the old and the new code: MySQL statements per answered request.")}
+{chart("caching-latency", "Median and 95th percentile, before (grey) and after (blue).")}
+<ul>
+<li><b>A third fewer statements per request</b> (24.6 to 16.2). The rest is logged-in families booking, attendance marks
+(writes) and 2 statements to open each request's own MySQL connection, which no cache saves.</li>
+<li><b>Where the site was short of capacity, it shows</b>: with 2 web workers the 95th percentile halved (410 to 210 ms)
+and the 0.8% of failed requests went away; in a rush, 17% more requests were answered in the same time.</li>
+<li>Site-wide content is found in the cache 99.9% of the time; the events list's first page about 70%, because every
+booking clears it so the places left stay right. Redis grew by 0.2 MB.</li>
+</ul>
+{
+        why(
+            "A cache that's cleared on every save shows a change at once; one that only expires would show a session "
+            "as open for minutes after it filled up."
+        )
+    }
 
 <h2>Memory</h2>
 {chart("memory-under-load", "4 web workers, 300 users; PSS of all processes of each kind.")}

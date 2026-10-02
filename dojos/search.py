@@ -9,6 +9,7 @@ from events.models import Event
 from geo.functions import DistanceSphere
 from geo.geocoding import geocode
 from geo.models import Municipality
+from monitoring import recorder
 
 from .models import Dojo
 
@@ -103,6 +104,7 @@ def dojos_by_distance(origin, language=None):
     is_default = origin is DEFAULT_SEARCH_ORIGIN and not language
     if is_default:
         cached = cache.get(DEFAULT_SEARCH_CACHE_KEY)
+        recorder.note_cache(DEFAULT_SEARCH_CACHE_KEY, hit=cached is not None)
         if cached is not None:
             return cached
 
@@ -129,6 +131,7 @@ def attach_next_events(dojos):
     upcoming = (
         Event.objects.visible()
         .filter(dojo_id__in=[dojo.id for dojo in dojos], start_time__gte=timezone.now())
+        .with_confirmed_count()
         .order_by("start_time")
     )
     next_event_by_dojo_id = {}
