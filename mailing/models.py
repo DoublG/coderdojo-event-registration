@@ -195,6 +195,13 @@ class Campaign(TranslatableModel):
         editable=False,
         help_text="When every recipient's mail was queued.",
     )
+    # mailing.campaigns.queue_chunk: the mail is queued in chunks, in account
+    # id order, and this is the last account id done (0 = none yet).
+    queued_up_to = models.PositiveBigIntegerField(
+        default=0,
+        editable=False,
+        help_text="The last account id whose mail is queued (the mail is queued in chunks, in id order).",
+    )
 
     def __str__(self):
         return self.name

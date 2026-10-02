@@ -41,9 +41,10 @@ class TransientSendError(Exception):
 def _claim_pending():
     """Claim the next pending rows (priority first) and mark them `sending`.
     Never claims more than MAILING_CLAIM_LIMIT rows in flight, so the
-    broker holds only a few batches' worth and priority stays in the
+    broker holds only a couple of batches (the broker is first in, first
+    out, and sends at MAILING_BATCH_RATE_LIMIT) and priority stays in the
     database: a password reset queued behind a big campaign is claimed on
-    the next run. skip_locked keeps overlapping runs from claiming the same
+    the next run and waits seconds, not the whole backlog. skip_locked keeps overlapping runs from claiming the same
     rows. Returns the claimed ids."""
     now = timezone.now()
     with transaction.atomic():
@@ -250,11 +251,17 @@ def announce_new_sessions():
 
 
 @shared_task
-def launch_campaign(campaign_id):
-    """Queue a launched campaign's mail (default queue: it can be long)."""
-    from .campaigns import queue_mail
+def launch_campaign(campaign_id, cursor=0):
+    """Queue one chunk of a launched campaign's mail, then the next chunk as
+    a new task at the back of the queue (default queue): the mailing worker
+    sends what's waiting in between, so booking mail never waits for a whole
+    campaign (CAPACITY.md, finding 8)."""
+    from .campaigns import queue_chunk
 
-    return queue_mail(campaign_id)
+    queued, next_cursor = queue_chunk(campaign_id, cursor)
+    if next_cursor is not None:
+        launch_campaign.delay(campaign_id, next_cursor)
+    return queued
 
 
 @shared_task

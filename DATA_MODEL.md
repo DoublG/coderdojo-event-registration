@@ -1723,6 +1723,7 @@ erDiagram
         datetime launched_at
         bigint launched_by FK
         datetime queued_at "every recipient's mail queued"
+        bigint queued_up_to "last account id queued (chunks, in id order)"
     }
     JOURNEY {
         string name
@@ -1986,7 +1987,10 @@ retries and scheduled sends are all just rows.
      `MAILING_CLAIM_LIMIT` rows in priority order, so the broker never
      holds more than a few runs' worth of a campaign. A password reset
      queued behind a 50 000-mail campaign is claimed on the next tick,
-     not after the campaign.
+     not after the campaign. The broker itself is first in, first out and
+     sends at the rate limit, so what's in flight is what the next claimed
+     mail waits behind: `MAILING_CLAIM_LIMIT` is two batches (20 seconds of
+     sending; it was 200 rows, 100 seconds, until 2 October 2026).
 3. **`send_email_batch(ids)`** sends one chunk over **one reused SMTP
    connection** (`django.core.mail.get_connection()`). **Celery handles
    rate limiting and retries**, so there's no hand-written backoff or
@@ -2425,8 +2429,13 @@ the side.
    `board`, never champions) writes a campaign
    (category, template, segment), previews it, test-sends it, then
    launches. Launch is itself a Celery task (`launch_campaign`): it
-   freezes `segment_snapshot`, resolves the audience and bulk-inserts the
-   `pending` rows in chunks at campaign priority. The same queue then sends
+   freezes `segment_snapshot`, resolves the audience and inserts the
+   `pending` rows at campaign priority, one chunk of
+   `MAILING_CAMPAIGN_CHUNK_SIZE` accounts per task (since 2 October 2026):
+   each task queues the next behind whatever waits by then, so booking mail
+   waits for one chunk, never for the whole campaign, and
+   `Campaign.queued_up_to` is where it got (a resume carries on from there;
+   a task whose cursor is out of date stops, so only one chain runs). The same queue then sends
    them within the Celery rate limit. Scheduling a campaign sets `send_after`. Per campaign, report sent, suppressed, bounced
    and unsubscribed.
 9. **Tier 3**: stage-change history, triggered journeys, and volunteer

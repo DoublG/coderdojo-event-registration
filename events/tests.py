@@ -101,10 +101,10 @@ class EventListCacheTests(TestCase):
         self.assertEqual(Event.objects.get(pk=event.pk).places_left, 1)
 
     def test_more_sessions_add_no_queries(self):
-        from django.test.utils import CaptureQueriesContext
+        from core.testing import site_queries
 
         def queries():
-            with CaptureQueriesContext(connection) as captured:
+            with site_queries() as captured:
                 self.client.get(reverse("event_list"), {"date": "month"})  # filtered: not cached
             return len(captured)
 

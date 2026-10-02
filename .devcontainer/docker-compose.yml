@@ -158,6 +158,10 @@ services:
       # Never private_media/.
       - ../staticfiles:/srv/static:ro
       - ../media:/srv/media:ro
+      # The proxy's own page when the site can't answer (502/503/504,
+      # nginx.conf): a folder, not a single file, so an editor that replaces
+      # the file doesn't leave nginx on the old copy.
+      - ./nginx/errors:/usr/share/nginx/html/_errors:ro
 
   phpmyadmin:
     container_name: ${PROJECT_NAME:-coolregistration-dev}-phpmyadmin

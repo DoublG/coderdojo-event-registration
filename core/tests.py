@@ -90,11 +90,10 @@ class DataCacheTests(TestCase):
 
     def _warm_queries(self, url):
         """Queries of the second visit, once the caches are filled."""
-        from django.db import connection
-        from django.test.utils import CaptureQueriesContext
+        from core.testing import site_queries
 
         self.client.get(url)
-        with CaptureQueriesContext(connection) as queries:
+        with site_queries() as queries:
             self.assertEqual(self.client.get(url).status_code, 200)
         return len(queries)
 
@@ -121,6 +120,37 @@ class DataCacheTests(TestCase):
         self.assertEqual(self._warm_queries(reverse("event_list")), 1)
         self.assertEqual(self._warm_queries(reverse("dojo_list")), 1)
         self.assertEqual(self._warm_queries(reverse("dojo_detail", args=[dojo.id])), 1)
+
+
+class ProxyErrorPageTests(TestCase):
+    """The proxy's own page when the site can't answer (.devcontainer/nginx/
+    errors/busy.html, nginx.conf's error_page): it's served while Django is
+    down or refusing requests, so it must stand on its own."""
+
+    def setUp(self):
+        root = settings.BASE_DIR / ".devcontainer" / "nginx"
+        self.page = (root / "errors" / "busy.html").read_text()
+        self.conf = (root / "nginx.conf").read_text()
+
+    def test_it_needs_nothing_but_itself(self):
+        self.assertNotIn("<script", self.page.lower())
+        self.assertNotIn("<link", self.page.lower())
+        # Nothing from another site; only the site's own fonts, from /static/.
+        self.assertEqual(re.findall(r"https?://", self.page), [])
+        for url in re.findall(r'url\("([^"]+)"\)', self.page):
+            self.assertTrue(url.startswith("/static/core/fonts/"), url)
+
+    def test_it_speaks_the_sites_three_languages(self):
+        for language in ("nl", "fr", "en"):
+            self.assertIn(f'<section lang="{language}">', self.page)
+
+    def test_nginx_serves_it_for_the_sites_own_failures_only(self):
+        self.assertIn("error_page 502 503 504 /_errors/busy.html;", self.conf)
+        self.assertIn("proxy_intercept_errors on;", self.conf)
+        # The uptime check and the API keep their own answers.
+        for location in ("location = /health/ {", "location /api/ {"):
+            block = self.conf.split(location, 1)[1].split("}", 1)[0]
+            self.assertNotIn("proxy_intercept_errors", block)
 
 
 class ImageLibraryTests(TempMediaMixin, TestCase):

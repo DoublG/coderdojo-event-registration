@@ -1389,7 +1389,7 @@ class CampaignDashboardTests(TestCase):
         SegmentRule.objects.filter(group__segment=self.segment).update(value=[Ninja.BOY])
         with patch("mailing.tasks.launch_campaign.delay") as delay:
             campaigns.launch_due()
-        delay.assert_called_once_with(campaign.pk)
+        delay.assert_called_once_with(campaign.pk, 0)
         self.assertEqual(campaigns.queue_mail(campaign.pk), 1)
         self.assertEqual(list(EmailMessage.objects.values_list("recipient", flat=True)), ["g@example.com"])
         self.assertNotEqual(extra_girl_family.email, "")
@@ -1417,7 +1417,7 @@ class CampaignDashboardTests(TestCase):
             campaigns.launch_due()
             delay.assert_not_called()
             campaigns.launch_due(now=later + timedelta(minutes=1))
-            delay.assert_called_once_with(campaign.pk)
+            delay.assert_called_once_with(campaign.pk, 0)
 
     def test_cancel_withdraws_mail_that_has_not_gone_out(self):
         campaign = self._campaign()
@@ -2864,3 +2864,107 @@ class PrivacyExplanationTests(TestCase):
         response = self.client.get(reverse("mail_preferences"))
         self.assertContains(response, "The team of the dojo your child goes to can also write to you")
         self.assertEqual(PRIVACY_WORDING_VERSION, "2026-09-29")
+
+
+@override_settings(MAILING_CAMPAIGN_CHUNK_SIZE=2)
+class CampaignChunkTests(TestCase):
+    """mailing.campaigns.queue_chunk and the launch_campaign task: a campaign
+    is queued a chunk at a time, each chunk queueing the next behind what's
+    waiting, so mail queued meanwhile never waits for the whole campaign
+    (CAPACITY.md, finding 8)."""
+
+    def setUp(self):
+        call_command("load_mail_templates", stdout=StringIO())
+        self.admin = User.objects.create(username="orgadmin", email="ann@example.com")
+        self.families = [_family(f"fam{n}", Ninja.GIRL) for n in range(5)]
+        for family in self.families:
+            set_preference(family, MailCategory.NEWSLETTER, True, ConsentEvent.SIGNUP)
+        self.campaign = Campaign.objects.create(
+            name="Girlz",
+            segment=_segment(("ninja", "and", [("ninja_gender", "in", [Ninja.GIRL])])),
+            template_key="campaign_girlz",
+            context={"signup_url": "https://example.org"},
+        )
+        campaigns.launch(self.campaign, self.admin)
+
+    def _run(self, *args):
+        """Run one launch_campaign task; returns (queued, the next task's args or None)."""
+        from .tasks import launch_campaign
+
+        with patch("mailing.tasks.launch_campaign.delay") as delay:
+            queued = launch_campaign(*args)
+        return queued, (delay.call_args.args if delay.called else None)
+
+    def test_each_task_queues_one_chunk_and_queues_the_next(self):
+        queued, following = self._run(self.campaign.pk)
+        self.assertEqual(queued, 2)
+        tasks = 1
+        while following:
+            more, following = self._run(*following)
+            queued += more
+            tasks += 1
+        self.assertEqual((queued, tasks), (5, 3))
+        self.assertEqual(EmailMessage.objects.filter(campaign=self.campaign).count(), 5)
+        self.campaign.refresh_from_db()
+        self.assertIsNotNone(self.campaign.queued_at)
+        self.assertEqual(self.campaign.queued_up_to, max(family.pk for family in self.families))
+
+    def test_a_second_chain_stops_and_a_stalled_one_is_resumed_where_it_got(self):
+        _queued, following = self._run(self.campaign.pk)
+        # The same task again (a duplicate): the cursor moved, so it stops.
+        self.assertEqual(self._run(self.campaign.pk, 0), (0, None))
+        # The worker died before the next chunk: the beat resumes from the cursor.
+        with patch("mailing.tasks.launch_campaign.delay") as delay:
+            campaigns.launch_due()
+        delay.assert_called_once_with(*following)
+        self.assertEqual(campaigns.queue_mail(self.campaign.pk), 3)
+        self.assertEqual(EmailMessage.objects.filter(campaign=self.campaign).count(), 5)
+
+    def test_cancelling_between_chunks_queues_nothing_more(self):
+        _queued, following = self._run(self.campaign.pk)
+        campaigns.cancel(Campaign.objects.get(pk=self.campaign.pk))
+        self.assertEqual(self._run(*following), (0, None))
+        rows = EmailMessage.objects.filter(campaign=self.campaign)
+        self.assertEqual((rows.count(), set(rows.values_list("status", flat=True))), (2, {Status.SUPPRESSED}))
+
+    def test_booking_mail_goes_out_between_two_chunks(self):
+        """The mailing worker takes tasks first in, first out: a booking
+        confirmation queued during a launch waits for one chunk, not for
+        the whole campaign."""
+        from unittest.mock import Mock
+
+        from .tasks import launch_campaign
+
+        queue = [("chunk", (self.campaign.pk,))]
+
+        def dispatch(signatures):
+            return Mock(apply_async=lambda: queue.extend(("batch", s.args) for s in signatures))
+
+        parent = User.objects.create(username="booker", email="booker@example.com")
+        with (
+            patch("mailing.tasks.launch_campaign.delay", side_effect=lambda *a: queue.append(("chunk", a))),
+            patch("mailing.tasks.group", side_effect=dispatch),
+            patch("mailing.tasks.mail.get_connection", return_value=_FakeConnection()),
+        ):
+            launch_campaign(*queue.pop(0)[1])  # the first chunk
+            booking = send(
+                parent,
+                MailCategory.REGISTRATION,
+                "registration_confirmed",
+                SAMPLE_CONTEXT["registration_confirmed"],
+            )
+            send_pending_emails()  # the dispatcher, every 10 seconds
+            order = []
+            while queue:
+                kind, args = queue.pop(0)
+                if kind == "chunk":
+                    launch_campaign(*args)
+                else:
+                    send_email_batch(*args)
+                    if EmailMessage.objects.get(pk=booking.pk).status == Status.SENT and "booking" not in order:
+                        order.append("booking")
+                order.append(kind)
+        # One chunk ran before the booking's batch, the last one after it.
+        self.assertEqual(order[:3], ["chunk", "booking", "batch"])
+        self.assertIn("chunk", order[3:])
+        self.assertIsNotNone(Campaign.objects.get(pk=self.campaign.pk).queued_at)

@@ -1,0 +1,119 @@
+<!doctype html>
+<!--
+  The proxy's own page when the site can't answer (CAPACITY.md, "Capping
+  requests per web worker"): uvicorn's concurrency cap refusing a request
+  (503), the site down or restarting during a deploy (502), or too slow (504).
+  Served by nginx itself (nginx.conf, error_page), so it must work while
+  Django doesn't: everything is inline, no script, nothing from another site
+  (only the site's own fonts from /static/, when the proxy has them). The
+  colours are the design tokens (core/static/core/css/tokens.css), the logo
+  the nav's (core/templates/core/menu.html).
+  In Dutch, French and English, since nginx doesn't know the visitor's
+  language; Dutch uses "je", French "vous", like the site.
+  An example for production's proxy too (Level27): the same page and rules.
+-->
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="30">
+<meta name="robots" content="noindex">
+<title>Even geduld · Un instant · One moment — CoderDojo Belgium</title>
+<style>
+  /* The site's fonts when the proxy serves /static/ from disk (production, and
+     the devcontainer with DEBUG off); otherwise the system font, quietly. */
+  @font-face { font-family: "Nunito"; font-display: swap; font-weight: 200 1000;
+    src: url("/static/core/fonts/nunito-5.3.0/nunito-latin.woff2") format("woff2"); }
+  @font-face { font-family: "Fredoka"; font-display: swap; font-weight: 300 700;
+    src: url("/static/core/fonts/fredoka-5.3.0/fredoka-latin.woff2") format("woff2"); }
+  :root {
+    --surface: #ffffff; --surface-raised: #f7f8fa; --border: #e2e6eb;
+    --ink: #1c2733; --ink-muted: #56606c; --primary: #c94823; --primary-hover: #a83a1a;
+    --on-primary: #ffffff; --primary-bright: #da532c; --accent-bright: #edc043; --ink-bright: #1e323c;
+    --focus-ring: #1d4ed8; --logo-ink: #1a1a1a; --logo-bg: #ffffff;
+    --shadow-lg: 0 12px 32px rgba(28,39,51,0.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface: #12181f; --surface-raised: #1b222b; --border: #2a323c;
+      --ink: #f3f5f7; --ink-muted: #a9b1bc; --primary: #ff7a45; --primary-hover: #ff9568;
+      --on-primary: #12181f; --focus-ring: #7db2ff; --logo-ink: #ffffff; --logo-bg: #1a1a1a;
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.5);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 24px 16px; background: var(--surface); color: var(--ink);
+    font-family: "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.55;
+  }
+  .card {
+    width: 100%; max-width: 560px; background: var(--surface-raised); border: 1px solid var(--border);
+    border-radius: 20px; box-shadow: var(--shadow-lg); overflow: hidden;
+  }
+  .ribbon {
+    display: flex; align-items: center; gap: 12px; padding: 18px 24px; background: var(--ink-bright); color: #ffffff;
+  }
+  .ribbon svg { width: 40px; height: 40px; flex: none; }
+  .ribbon .bg { fill: var(--logo-bg); }
+  .ribbon .ink { fill: var(--logo-ink); }
+  .ribbon strong { font-family: "Fredoka", "Nunito", system-ui, sans-serif; font-size: 1.15rem; font-weight: 600; letter-spacing: 0.01em; }
+  .ribbon .spark { margin-left: auto; color: var(--accent-bright); font-size: 1.6rem; line-height: 1; }
+  main { padding: 8px 24px 24px; }
+  section { padding: 18px 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: 0; }
+  .lang {
+    display: inline-block; margin-bottom: 4px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-muted);
+  }
+  h1, h2 {
+    margin: 0 0 6px; font-family: "Fredoka", "Nunito", system-ui, sans-serif; font-weight: 600; line-height: 1.2;
+  }
+  h1 { font-size: 1.6rem; }
+  h1::after { content: ""; display: block; width: 56px; height: 4px; margin-top: 10px; border-radius: 2px; background: var(--primary-bright); }
+  h2 { font-size: 1.2rem; }
+  p { margin: 0; color: var(--ink-muted); }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding-top: 20px; }
+  .button {
+    display: inline-block; padding: 12px 22px; border-radius: 999px; background: var(--primary); color: var(--on-primary);
+    font-weight: 700; text-decoration: none;
+  }
+  .button:hover { background: var(--primary-hover); }
+  .button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+  .note { font-size: 0.85rem; color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="ribbon">
+    <svg viewBox="0 0 180 180" aria-hidden="true"><circle class="bg" cx="90" cy="90" r="89"/><path class="ink" d="M77.00,179.31 C39.04,173.01 9.44,145.10 1.88,108.50 C-7.81,61.52 20.57,15.46 66.98,2.87 C77.82,-0.07 95.07,-0.69 106.50,1.46 C142.22,8.17 170.82,36.13 178.12,71.50 C189.74,127.81 146.60,180.55 89.50,179.85 C84.00,179.78 78.38,179.54 77.00,179.31 Z M76.57,173.35 C51.70,165.71 39.68,137.22 51.36,113.59 C58.47,99.20 73.28,90.03 89.46,89.99 C109.97,89.94 127.76,74.37 131.23,53.43 C134.16,35.75 124.11,17.05 107.26,8.80 C100.56,5.53 100.38,5.50 86.50,5.57 C74.04,5.63 71.57,5.95 64.00,8.41 C33.82,18.23 11.90,42.39 5.42,72.98 C3.64,81.35 3.64,98.65 5.42,107.02 C12.51,140.47 37.83,165.94 71.50,173.49 C79.59,175.31 82.67,175.22 76.57,173.35 Z M107.50,148.00 C107.50,141.17 107.32,140.50 105.50,140.50 C103.79,140.50 103.46,141.27 103.20,145.75 C102.94,150.18 102.59,151.00 100.95,151.00 C99.10,151.00 99.00,150.19 99.00,135.50 L99.00,120.00 L91.97,120.00 C86.44,120.00 84.81,120.34 84.32,121.60 C83.51,123.73 85.67,124.97 90.25,124.98 L94.00,125.00 L94.00,138.00 L94.00,151.00 L90.25,151.02 C85.64,151.03 83.50,152.27 84.34,154.43 C84.87,155.83 86.56,156.03 96.23,155.78 L107.50,155.50 L107.50,148.00 Z M74.22,58.44 C72.10,56.95 72.00,56.25 72.00,42.00 C72.00,23.12 71.12,24.00 90.00,24.00 C108.88,24.00 108.00,23.12 108.00,42.00 C108.00,60.88 108.88,60.00 90.00,60.00 C79.35,60.00 75.97,59.67 74.22,58.44 Z M100.78,42.25 L101.06,29.00 L90.03,29.00 L79.00,29.00 L79.00,41.83 C79.00,48.89 79.31,54.98 79.70,55.37 C80.08,55.75 84.92,55.94 90.45,55.78 L100.50,55.50 L100.78,42.25 Z" fill-rule="evenodd"/></svg>
+    <strong>CoderDojo Belgium</strong>
+    <span class="spark" aria-hidden="true">&#10022;</span>
+  </div>
+  <main>
+    <section lang="nl">
+      <span class="lang">Nederlands</span>
+      <h1>Het is even heel druk</h1>
+      <p>Veel mensen gebruiken de site tegelijk, of we zetten net een nieuwe versie online. Je vraag is niet
+        verwerkt: als je iemand aan het inschrijven was, is er nog niets bewaard. Probeer het over een minuutje opnieuw.</p>
+    </section>
+    <section lang="fr">
+      <span class="lang">Français</span>
+      <h2>Le site est très sollicité</h2>
+      <p>Beaucoup de personnes utilisent le site en même temps, ou nous mettons en ligne une nouvelle version. Votre
+        demande n'a pas été traitée : si vous inscriviez quelqu'un, rien n'est encore enregistré. Réessayez dans une minute.</p>
+    </section>
+    <section lang="en">
+      <span class="lang">English</span>
+      <h2>We're a little busy right now</h2>
+      <p>Lots of people are using the site at once, or we're putting a new version live. Your request wasn't
+        handled: if you were signing someone up, nothing has been saved yet. Please try again in a minute.</p>
+    </section>
+    <div class="actions">
+      <a class="button" href="">Opnieuw proberen · Réessayer · Try again</a>
+      <span class="note">Deze pagina probeert het na 30 seconden zelf opnieuw. · Cette page réessaie d'elle-même après 30 secondes. · This page tries again by itself after 30 seconds.</span>
+    </div>
+  </main>
+</div>
+</body>
+</html>

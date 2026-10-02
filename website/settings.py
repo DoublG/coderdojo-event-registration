@@ -213,8 +213,16 @@ SITE_URL = env("SITE_URL", default="https://coolregistration.localhost").rstrip(
 OTP_VAULT_URL = env("OTP_VAULT_URL", default="").rstrip("/")
 
 # The mail engine (mailing app, DATA_MODEL.md §11 "Sending pipeline").
-MAILING_CLAIM_LIMIT = env.int("MAILING_CLAIM_LIMIT", default=200)  # rows the dispatcher claims per run
 MAILING_BATCH_SIZE = env.int("MAILING_BATCH_SIZE", default=20)  # rows per send_email_batch subtask
+# Rows in flight (claimed, not yet sent): what the broker holds, first in,
+# first out. Two batches is 20 seconds of sending at 6 batches a minute, so mail
+# claimed next (a booking confirmation, claimed first by priority) waits that
+# long at most; the dispatcher refills every 10 seconds, so sending never
+# runs dry. 200 held 100 seconds of batches (CAPACITY.md, finding 8).
+MAILING_CLAIM_LIMIT = env.int("MAILING_CLAIM_LIMIT", default=2 * MAILING_BATCH_SIZE)
+# Accounts per launch_campaign task: a campaign is queued a chunk at a time, so
+# mail queued meanwhile waits for one chunk (a few seconds), not the campaign.
+MAILING_CAMPAIGN_CHUNK_SIZE = env.int("MAILING_CAMPAIGN_CHUNK_SIZE", default=200)
 # Celery rate limit for send_email_batch (per worker; there is one mailing
 # worker). Throughput is at most this many batches times MAILING_BATCH_SIZE.
 MAILING_BATCH_RATE_LIMIT = env("MAILING_BATCH_RATE_LIMIT", default="6/m")

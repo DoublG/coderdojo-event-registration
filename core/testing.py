@@ -67,3 +67,41 @@ def with_admin_access(user, reason="Fixing a registration"):
 
     request_access(user, reason)
     return type(user).objects.get(pk=user.pk)
+
+
+class site_queries:  # noqa: N801 — used like CaptureQueriesContext
+    """Captures the queries the site runs, leaving out django-silk's own
+    (its `silk_*` rows, the EXPLAIN it runs of each query, the savepoints
+    around its writes): with DEBUG on (`--debug-mode`, the Tests workflow)
+    silk records every request in the database, which a query count must not
+    see. `len(captured)` and `captured.queries` after the block.
+
+        with site_queries() as captured:
+            self.client.get(url)
+        self.assertEqual(len(captured), 1)"""
+
+    def __enter__(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        self._context = CaptureQueriesContext(connection)
+        self._context.__enter__()
+        return self
+
+    def __exit__(self, *exc):
+        return self._context.__exit__(*exc)
+
+    # What silk adds around a request: its own rows, an EXPLAIN of each
+    # query, and the savepoints its writes open.
+    SILK_STATEMENTS = ("EXPLAIN ", "SAVEPOINT ", "RELEASE SAVEPOINT ", "ROLLBACK TO SAVEPOINT ")
+
+    @property
+    def queries(self):
+        return [
+            query
+            for query in self._context.captured_queries
+            if "silk_" not in query["sql"] and not query["sql"].startswith(self.SILK_STATEMENTS)
+        ]
+
+    def __len__(self):
+        return len(self.queries)

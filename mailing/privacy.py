@@ -146,6 +146,9 @@ register(
         "scheduled_at",
         "launched_at",
         "queued_at",
+        # How far the queuing got, as a position in account id order: a
+        # cursor, not a link to anyone (no foreign key, never shown).
+        "queued_up_to",
         # A dojo mailing (DATA_MODEL.md §25): the dojo's own text and which
         # prepared audience it went to, never a list of people.
         "dojo",

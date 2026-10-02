@@ -293,8 +293,13 @@ each clicking again every 0.5 to 2 seconds: about 350 requests a second, far bey
   requests that get in are answered two to five times faster.
 - **The sessions filled exactly** (22 confirmed of 22, no duplicate waiting-list positions) in the rushes
   checked afterwards, with and without the cap: the lock of finding 1 and the cap work together.
-- A refused visitor sees uvicorn's plain "Service Unavailable" page; a friendlier page is the proxy's to
-  show (ask Level27 whether it can serve its own page for a 503).
+- **What a refused visitor sees is the proxy's page.** uvicorn's own answer is a bare "Service Unavailable";
+  since 2 October 2026 the devcontainer's nginx shows our own page instead
+  (`.devcontainer/nginx/errors/busy.html`: the site's design, in Dutch, French and English, no script,
+  trying again by itself after 30 seconds), for a 503 from the cap, a 502 while the site is down or
+  restarting and a 504, with the status kept and `Retry-After: 30`. `/health/` and `/api/` keep their own
+  answers, and so do Django's own 404 and 500 pages. It's the example for production: ask Level27 to serve
+  that page the same way ([Questions](#questions-for-level27)).
 
 **Under normal heavy load** the cap must refuse nothing (300 users, mixed load):
 
@@ -406,11 +411,28 @@ each starting on an empty cache and the seeded bookings, a new connection per re
 | Sending | 120 mails a minute (`MAILING_BATCH_RATE_LIMIT` 6/m × `MAILING_BATCH_SIZE` 20) | flat |
 
 - **Sending is paced on purpose:** 7,200 mails an hour, so a campaign to 6,600 families takes about 55
-  minutes and one to 12,000 about 1 hour 40. Booking and account mail still go first (lower `PRIORITY`),
-  so a family's confirmation doesn't wait behind a campaign's queue.
-- **But queueing a campaign blocks the single mailing worker** for as long as it takes (2 minutes here,
-  about 4 minutes for 12,000 families): booking confirmations queued in that time are sent afterwards.
-  Acceptable today; if it isn't, split `queue_mail` into chunks that each run as a task of their own.
+  minutes and one to 12,000 about 1 hour 40. Booking and account mail are claimed first (lower `PRIORITY`).
+
+**Booking mail during a campaign** (measured on 2 October 2026, `test_capacity`: a campaign to all 7,145
+adult accounts, and a booking confirmation queued every 3 seconds while it was being queued; the time from
+queued to sent):
+
+| Code | Queuing the campaign | Booking confirmation waited (median / longest) |
+|---|---|---|
+| Before: one task for the whole audience, 200 mails in flight | 271 s, one task | **121 s / 212 s** |
+| Chunks of 200 only | slower (each chunk waits behind the batches) | 107 s / 113 s |
+| **Chunks of 200 and 2 batches in flight (now)** | 5,848 in the first 5 minutes, far ahead of sending | **16 s / 22 s** |
+
+- **The queueing wasn't the main delay; what's in flight was.** The dispatcher claimed up to 200 mails
+  ahead (`MAILING_CLAIM_LIMIT`), 10 batches waiting in the broker, which sends first in, first out at 6
+  batches a minute: whatever was claimed next waited 100 seconds behind them, for as long as any campaign
+  was sending, not just while it was queued. Priority only decides what's claimed, not the broker's order.
+  Now 2 batches are in flight (20 seconds of sending, refilled every 10 seconds, so sending never runs
+  dry), and booking mail waits about one dispatcher tick plus those 20 seconds.
+- **A campaign is queued a chunk at a time** (`MAILING_CAMPAIGN_CHUNK_SIZE`, 200 accounts per
+  `launch_campaign` task, each queueing the next behind what waits), so the single mailing worker is never
+  busy with one campaign for minutes. `Campaign.queued_up_to` is how far it got: a chain broken by a dying
+  worker is resumed by the beat, and a duplicate chain stops at once.
 - The periodic worker's jobs all take well under a second, so the 10-second mail dispatcher never waits.
 
 ## Redis
@@ -461,8 +483,10 @@ In order of urgency.
    devcontainer runs with them since 2 October 2026 (128 MB, the container capped at 256 MB).
 7. **Celery's logs** grew about 6 MB a day, mostly the periodic worker's routine runs. **Fixed on 30
    September 2026:** that worker logs at WARNING in production.
-8. **Campaign queueing blocks the mailing worker** for a few minutes (see above): acceptable now, chunk it
-   when campaigns get bigger.
+8. **Booking mail waited behind a campaign** (mail). **Fixed on 2 October 2026**
+   ([above](#load-celery-workers-and-mail)): a booking confirmation sent while a campaign went out waited
+   about 2 minutes, mostly behind the 200 mails the dispatcher claimed ahead, partly behind the campaign's
+   queuing. Now 2 batches in flight and campaigns queued in chunks: 16 seconds (median), 22 at most.
 9. **Pages repeated work the database had already done** (load). **Fixed on 1 October 2026**
    ([Caching](#caching)): a count query per session card, the account's roles and dojos several times per
    request, the session row and the sign-in policy on every request, site-wide content on every visit. A
@@ -569,7 +593,9 @@ To fill in the budget above (the versions are already asked in `MAINTENANCE.md`,
 2. MySQL's `max_connections` and `max_user_connections`, whether MySQL runs on the same machine (and so in
    our memory), and the disk quota for the database, its binary logs and backups.
 3. **How the proxy connects to gunicorn's socket:** a new connection per request, or a pool kept open
-   (keep-alive)? The latter needs a higher cap. And whether it can show its own page for a 503.
+   (keep-alive)? The latter needs a higher cap. And whether it can show our own page for a 502, 503 and 504
+   from the site, as the devcontainer's nginx does (`.devcontainer/nginx/errors/busy.html`, `nginx.conf`'s
+   `error_page`): with the status kept, `Retry-After`, and not for `/health/` and `/api/`.
 4. **The proxy's maximum request body** (`client_max_body_size` or equivalent): it should be 12 MB, like the
    devcontainer's, so a file just over the site's 10 MB gets the site's own message.
 5. Redis's `maxmemory` and `maxmemory-policy`, and whether this Redis is ours alone.

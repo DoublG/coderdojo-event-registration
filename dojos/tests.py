@@ -161,8 +161,11 @@ class DojoDetailCacheTests(TestCase):
     def test_a_second_visit_reads_the_dojo_from_the_cache(self):
         self.client.get(self.url)
         self.assertIsNotNone(cache.get(self._key()))
-        with self.assertNumQueries(1):  # the next session, always live
+        from core.testing import site_queries
+
+        with site_queries() as captured:
             self.client.get(self.url)
+        self.assertEqual(len(captured), 1, captured.queries)  # the next session, always live
 
     def test_a_new_update_and_a_new_team_member_show_at_once(self):
         from content.models import Announcement

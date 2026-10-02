@@ -13,10 +13,12 @@ person using the dashboard).
   `scheduled_at` has come (or that has none) with the launch_campaign task,
   resumes one whose queuing was interrupted, and completes those whose
   mail is all out.
-- queue_mail() (the launch_campaign task) resolves the frozen audience,
+- queue_chunk() (the launch_campaign task) resolves the frozen audience,
   only the accounts who want this kind of mail, and queues one mail each
-  through mailing.services.send(). Idempotency keys make it safe to run
-  again after a crash.
+  through mailing.services.send(), MAILING_CAMPAIGN_CHUNK_SIZE accounts at
+  a time: the task then queues the next chunk behind whatever waits by then,
+  so a campaign never holds up booking mail for long. `queued_up_to` is
+  where it got; idempotency keys make it safe to run again after a crash.
 
 A dojo mailing (DATA_MODEL.md §25, `campaign.dojo` set) takes the same
 path, with its own checks: always `dojo_news`, one of the prepared
@@ -46,7 +48,9 @@ from .segmentation.resolver import SegmentResolver, serialize_segment
 from .services import send
 
 Status = Campaign.Status
-LAUNCH_LOCK_SECONDS = 30 * 60
+# One chunk takes seconds; a lock left by a worker that died mid-chunk only
+# holds up the resume (launch_due) this long.
+LAUNCH_LOCK_SECONDS = 5 * 60
 
 
 # EmailMessage.status_reason of the mail a cancel withdrew.
@@ -207,10 +211,15 @@ def cancel(campaign):
     with transaction.atomic():
         campaign.status = Status.CANCELLED
         campaign.save(update_fields=["status"])
-        EmailMessage.objects.filter(campaign=campaign, status=EmailMessage.Status.PENDING).update(
-            status=EmailMessage.Status.SUPPRESSED,
-            status_reason=CANCELLED,
-        )
+        _withdraw(campaign.pk)
+
+
+def _withdraw(campaign_id):
+    """A cancelled campaign's mail that hasn't gone out yet stays in."""
+    EmailMessage.objects.filter(campaign_id=campaign_id, status=EmailMessage.Status.PENDING).update(
+        status=EmailMessage.Status.SUPPRESSED,
+        status_reason=CANCELLED,
+    )
 
 
 def send_test(campaign, user):
@@ -223,26 +232,39 @@ def send_test(campaign, user):
     return send(user, campaign.category, template_key, context, campaign=campaign, test=True, **_send_kwargs(campaign))
 
 
-def queue_mail(campaign_id):
-    """Queue the campaign's mail: the launch_campaign task. Returns how many
-    new mails were queued."""
+def queue_chunk(campaign_id, cursor):
+    """Queue the next chunk of the campaign's mail: up to
+    MAILING_CAMPAIGN_CHUNK_SIZE accounts of the frozen audience after the
+    account id `cursor`, in id order. The launch_campaign task runs one
+    chunk and queues the next behind whatever is waiting by then, so mail
+    sent meanwhile (a booking confirmation) never waits for a whole
+    campaign (CAPACITY.md, finding 8).
+
+    Returns (queued, next_cursor): next_cursor is None when there's nothing
+    more to do, either because every mail is queued or because `cursor` is
+    no longer where the campaign stands (another run moved on, so this one
+    stops: at most one chain of chunks goes on)."""
     lock = f"mailing:campaign-launch:{campaign_id}"
     if not cache.add(lock, 1, LAUNCH_LOCK_SECONDS):
-        return 0  # another run is busy with it
+        return 0, None  # another run is busy with this campaign
     try:
-        claimed = Campaign.objects.filter(pk=campaign_id, status=Status.QUEUED).update(status=Status.SENDING)
+        Campaign.objects.filter(pk=campaign_id, status=Status.QUEUED).update(status=Status.SENDING)
         campaign = Campaign.objects.get(pk=campaign_id)
-        if not claimed and campaign.status != Status.SENDING:
-            return 0
-        queued = 0
+        if campaign.status != Status.SENDING or campaign.queued_at or campaign.queued_up_to != cursor:
+            return 0, None
         send_after = (
             campaign.scheduled_at if campaign.scheduled_at and campaign.scheduled_at > timezone.now() else None
         )
-        for user in audience(campaign).order_by("pk").iterator(chunk_size=500):
-            if Campaign.objects.filter(pk=campaign_id, status=Status.CANCELLED).exists():
-                return queued
-            key = f"campaign:{campaign.pk}:{user.pk}"
-            if EmailMessage.objects.filter(idempotency_key=key).exists():
+        accounts = list(
+            audience(campaign).filter(pk__gt=cursor).order_by("pk")[: settings.MAILING_CAMPAIGN_CHUNK_SIZE]
+        )
+        keys = {user.pk: f"campaign:{campaign.pk}:{user.pk}" for user in accounts}
+        done = set(
+            EmailMessage.objects.filter(idempotency_key__in=keys.values()).values_list("idempotency_key", flat=True)
+        )
+        queued = 0
+        for user in accounts:
+            if keys[user.pk] in done:
                 continue
             template_key, context = _mail(campaign, user)
             send(
@@ -251,30 +273,55 @@ def queue_mail(campaign_id):
                 template_key,
                 context,
                 campaign=campaign,
-                idempotency_key=key,
+                idempotency_key=keys[user.pk],
                 send_after=send_after,
                 **_send_kwargs(campaign),
             )
             queued += 1
-        Campaign.objects.filter(pk=campaign_id, status=Status.SENDING).update(queued_at=timezone.now())
-        return queued
+        finished = len(accounts) < settings.MAILING_CAMPAIGN_CHUNK_SIZE
+        next_cursor = accounts[-1].pk if accounts else cursor
+        updated = Campaign.objects.filter(pk=campaign_id, status=Status.SENDING).update(
+            queued_up_to=next_cursor, **({"queued_at": timezone.now()} if finished else {})
+        )
+        if not updated:
+            # Cancelled while this chunk was being queued: withdraw what it added.
+            _withdraw(campaign_id)
+            return queued, None
+        return queued, None if finished else next_cursor
     finally:
         cache.delete(lock)
 
 
+def queue_mail(campaign_id):
+    """Queue all the campaign's mail at once, chunk after chunk (for tests
+    and commands; the site uses the launch_campaign task, which queues one
+    chunk at a time). Returns how many new mails were queued."""
+    campaign = Campaign.objects.get(pk=campaign_id)
+    total, cursor = 0, campaign.queued_up_to
+    while cursor is not None:
+        queued, cursor = queue_chunk(campaign_id, cursor)
+        total += queued
+    return total
+
+
 def launch_due(now=None):
     """Beat, every minute: start what's due, resume what was interrupted,
-    complete what's done. Returns the ids handed to launch_campaign."""
+    complete what's done. Returns the (id, cursor) pairs handed to
+    launch_campaign."""
     from .tasks import launch_campaign
 
     now = now or timezone.now()
+    fields = ("pk", "queued_up_to")
     due = (
-        list(Campaign.objects.filter(status=Status.QUEUED, scheduled_at__isnull=True).values_list("pk", flat=True))
-        + list(Campaign.objects.filter(status=Status.QUEUED, scheduled_at__lte=now).values_list("pk", flat=True))
-        + list(Campaign.objects.filter(status=Status.SENDING, queued_at__isnull=True).values_list("pk", flat=True))
+        list(Campaign.objects.filter(status=Status.QUEUED, scheduled_at__isnull=True).values_list(*fields))
+        + list(Campaign.objects.filter(status=Status.QUEUED, scheduled_at__lte=now).values_list(*fields))
+        # Queuing that stopped halfway (a worker died between two chunks) goes
+        # on from where it got. If the chain is still alive, one of the two
+        # finds the cursor moved and stops.
+        + list(Campaign.objects.filter(status=Status.SENDING, queued_at__isnull=True).values_list(*fields))
     )
-    for campaign_id in due:
-        launch_campaign.delay(campaign_id)
+    for campaign_id, cursor in due:
+        launch_campaign.delay(campaign_id, cursor)
 
     open_statuses = [EmailMessage.Status.PENDING, EmailMessage.Status.SENDING]
     for campaign in Campaign.objects.filter(status=Status.SENDING, queued_at__isnull=False):

@@ -677,6 +677,10 @@ traffic away. With 4 workers, at most about 100 connections plus Celery's.</li>
 notification WebSockets, take places too. How Level27's proxy connects to gunicorn is still to confirm.</li>
 <li><code>scripts/deploy.sh --check</code> says whether gunicorn reads the file (it doesn't when it starts outside
 <code>~/app</code> or with a <code>-c</code> of its own).</li>
+<li><b>A refused visitor sees our own page</b>, not uvicorn's bare "Service Unavailable": the devcontainer's nginx serves
+<code>errors/busy.html</code> (the site's design, Dutch, French and English, no script, trying again after 30 seconds)
+for a 502, 503 or 504 from the site, keeping the status and adding <code>Retry-After</code>; <code>/health/</code> and the
+API keep their own answers. It's the example for Level27's proxy.</li>
 </ul>
 
 <h2>Caching: less work for the database</h2>
@@ -715,7 +719,9 @@ booking clears it so the places left stay right. Redis grew by 0.2 MB.</li>
 <p>The mailing worker's child reaches 300 MB during the nightly rebuild and is then replaced
 (<code>--max-memory-per-child</code>, 200 MB); a campaign launch stays at 160 MB because audiences are queued in chunks.
 Mail goes out at 120 a minute by design: a campaign to 6,600 families takes about 55 minutes, with booking mail
-ahead of it.</p>
+ahead of it. Since 2 October 2026 a booking confirmation sent during a campaign waits about 16 seconds instead of two
+minutes: the dispatcher keeps only two batches in flight (the broker sends first in, first out, so everything claimed
+ahead was a wait), and a campaign is queued 200 accounts per task, each queueing the next behind what's waiting.</p>
 
 <h2>Database growth</h2>
 {chart("database-growth", "Projected size per scenario; dashed: mail text cleared after 12 months.")}
