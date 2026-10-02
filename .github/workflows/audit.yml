@@ -46,7 +46,10 @@ jobs:
           python-version: "3.14"
       # import-linter and its dependencies, as pinned in requirements-dev.txt; it
       # reads the code without importing it, so nothing else is needed.
-      - run: pip install $(grep -E '^(import-linter|grimp|rich|markdown-it-py|mdurl|Pygments|click|typing_extensions)==' requirements-dev.txt requirements.txt | cut -d: -f2)
+      - name: Install import-linter
+        run: >-
+          pip install $(grep -hE '^(import-linter|grimp|rich|markdown-it-py|mdurl|Pygments|click|typing_extensions)=='
+          requirements-dev.txt requirements.txt)
       - run: lint-imports
 
   security-lint:
