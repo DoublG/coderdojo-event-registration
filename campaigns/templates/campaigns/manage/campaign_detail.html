@@ -1,0 +1,119 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{{ campaign.name }}{% endblock %}
+{% block manage_heading %}{{ campaign.name }} {% include "campaigns/manage/_status_badge.html" %}{% endblock %}
+
+{% block manage_extra_style %}
+<style>
+  .campaign-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-5); align-items: start; }
+  @media (max-width: 960px) { .campaign-grid { grid-template-columns: minmax(0, 1fr); } }
+  .campaign-card { padding: var(--space-5); margin-bottom: var(--space-5); }
+  .campaign-card h2 { margin-top: 0; }
+  .campaign-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: var(--space-3); }
+  .campaign-stats div { border: 1px solid var(--border); border-radius: var(--radius-md, 8px); padding: var(--space-3); }
+  .campaign-stats strong { display: block; font-size: 1.4rem; color: var(--ink); }
+  .campaign-preview { white-space: pre-wrap; background: var(--surface-sunken); padding: var(--space-4); border-radius: var(--radius-md, 8px); font-family: inherit; margin: var(--space-2) 0 var(--space-4); }
+  .campaign-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+  .campaign-actions form { margin: 0; }
+</style>
+{% endblock %}
+
+{% block manage_content %}
+<div class="campaign-grid">
+  <div>
+    {% if form %}
+      <form method="post" class="cd-card cd-form campaign-card" novalidate>
+        {% csrf_token %}
+        <h2 class="heading-md">{% translate "Draft" %}</h2>
+        {% include "campaigns/manage/_campaign_fields.html" %}
+        <div class="cd-form__actions"><button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button></div>
+      </form>
+    {% elif campaign.dojo %}
+      <div class="cd-card campaign-card">
+        <h2 class="heading-md">{% translate "A dojo's own mail" %}</h2>
+        <p class="body-sm">{% blocktranslate with dojo=campaign.dojo.name audience=dojo_audience %}Written by the team of <strong>{{ dojo }}</strong> for its families: {{ audience }}.{% endblocktranslate %}</p>
+        <p class="body-sm">{% if campaign.launched_at %}{% blocktranslate with when=campaign.launched_at|date:"d/m/Y H:i" %}Sent {{ when }}{% endblocktranslate %}{% if campaign.launched_by %} {% blocktranslate with name=campaign.launched_by.get_full_name|default:campaign.launched_by.get_username %}by {{ name }}{% endblocktranslate %}{% endif %}.{% else %}{% translate "Still a draft: only the dojo's champion edits and sends it." %}{% endif %}</p>
+      </div>
+    {% else %}
+      <div class="cd-card campaign-card">
+        <h2 class="heading-md">{% translate "Campaign" %}</h2>
+        <p class="body-sm">
+          {% blocktranslate trimmed with category=campaign.get_category_display key=campaign.template_key segment=campaign.segment_snapshot.name|default:campaign.segment.name %}{{ category }} · template <strong>{{ key }}</strong> ·
+          segment <strong>{{ segment }}</strong> (as it was at launch){% endblocktranslate %}
+        </p>
+        <p class="body-sm">
+          {% blocktranslate with when=campaign.launched_at|date:"d/m/Y H:i" %}Launched {{ when }}{% endblocktranslate %}{% if campaign.launched_by %} {% blocktranslate with name=campaign.launched_by.get_full_name|default:campaign.launched_by.get_username %}by {{ name }}{% endblocktranslate %}{% endif %}{% if campaign.scheduled_at %}, {% blocktranslate with when=campaign.scheduled_at|date:"d/m/Y H:i" %}to go out {{ when }}{% endblocktranslate %}{% endif %}.
+        </p>
+      </div>
+    {% endif %}
+
+    <div class="cd-card campaign-card">
+      <h2 class="heading-md">{% translate "Preview" %}</h2>
+      {% for preview in previews %}
+        <p class="label">{{ preview.language }}: {{ preview.subject }}</p>
+        <pre class="campaign-preview body-sm">{{ preview.body }}</pre>
+      {% empty %}
+        <p class="body-sm">{% blocktranslate with key=campaign.template_key %}No template “{{ key }}” exists yet.{% endblocktranslate %}</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div>
+    <div class="cd-card campaign-card">
+      <h2 class="heading-md">{% if campaign.launched_at %}{% translate "Results" %}{% else %}{% translate "Audience" %}{% endif %}</h2>
+      <div class="campaign-stats">
+        <div><strong>{{ stats.audience }}</strong><span class="caption">{% translate "want this kind of mail" %}</span></div>
+        {% if campaign.launched_at %}
+          <div><strong>{{ stats.queued }}</strong><span class="caption">{% translate "queued" %}</span></div>
+          <div><strong>{{ stats.sent }}</strong><span class="caption">{% translate "sent" %}</span></div>
+          <div><strong>{{ stats.pending|add:stats.sending }}</strong><span class="caption">{% translate "waiting" %}</span></div>
+          <div><strong>{{ stats.suppressed }}</strong><span class="caption">{% translate "held back" %}</span></div>
+          <div><strong>{{ stats.bounced }}</strong><span class="caption">{% translate "bounced" %}</span></div>
+          <div><strong>{{ stats.failed }}</strong><span class="caption">{% translate "failed" %}</span></div>
+          <div><strong>{{ stats.unsubscribed }}</strong><span class="caption">{% translate "unsubscribed since" %}</span></div>
+        {% endif %}
+      </div>
+      {% if not campaign.launched_at %}
+        <p class="caption" style="margin-top: var(--space-3);">{% translate "For example:" %}</p>
+        <ul class="body-sm">{% for account in audience_sample %}<li>{{ account.get_full_name|default:account.get_username }} · {{ account.email }}</li>{% empty %}<li>{% translate "Nobody yet." %}</li>{% endfor %}</ul>
+      {% endif %}
+      <p class="caption">{% blocktranslate with rate=stats.rate_limit %}Goes out at up to {{ rate }} batches a minute; held-back mail is for people who unsubscribed, blocked addresses or inactive accounts.{% endblocktranslate %}</p>
+    </div>
+
+    <div class="cd-card campaign-card">
+      <h2 class="heading-md">{% translate "Actions" %}</h2>
+      {% if campaign.dojo %}
+      <div class="campaign-actions">
+        {% if campaign.status == 'queued' or campaign.status == 'sending' %}
+          <form method="post" action="{% url 'manage_campaign_cancel' campaign_id=campaign.id %}"
+                data-confirm="{% translate "Stop this dojo's mail? Mail that hasn't gone out yet won't be sent." as confirm_msg %}{{ confirm_msg }}">
+            {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Stop sending" %}</button>
+          </form>
+        {% else %}
+          <p class="body-sm">{% translate "Nothing to do: the organisation can stop a dojo's mail while it's going out." %}</p>
+        {% endif %}
+      </div>
+      {% else %}
+      {% for problem in problems %}<p class="cd-form__note cd-form__note--error caption">{{ problem }}</p>{% endfor %}
+      <div class="campaign-actions">
+        <form method="post" action="{% url 'manage_campaign_test' campaign_id=campaign.id %}">
+          {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Send a test to me" %}</button>
+        </form>
+        {% if campaign.is_editable %}
+          <form method="post" action="{% url 'manage_campaign_launch' campaign_id=campaign.id %}"
+                data-confirm="{% if campaign.scheduled_at %}{% blocktranslate asvar confirm_msg with name=campaign.name count=stats.audience when=campaign.scheduled_at|date:"d/m/Y H:i" %}Send “{{ name }}” to {{ count }} people on {{ when }}?{% endblocktranslate %}{% else %}{% blocktranslate asvar confirm_msg with name=campaign.name count=stats.audience %}Send “{{ name }}” to {{ count }} people?{% endblocktranslate %}{% endif %}{{ confirm_msg }}">
+            {% csrf_token %}<button type="submit" class="cd-btn cd-btn--primary label"{% if problems %} disabled{% endif %}>{% translate "Launch" %}</button>
+          </form>
+        {% endif %}
+        {% if campaign.status == 'draft' or campaign.status == 'queued' or campaign.status == 'sending' %}
+          <form method="post" action="{% url 'manage_campaign_cancel' campaign_id=campaign.id %}"
+                data-confirm="{% translate "Cancel this campaign? Mail that hasn't gone out yet won't be sent." as confirm_msg %}{{ confirm_msg }}">
+            {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Cancel campaign" %}</button>
+          </form>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

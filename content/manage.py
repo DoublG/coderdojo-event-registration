@@ -11,8 +11,8 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
+from accounts.manage_nav import request_manage_contexts
 from accounts.organisation import Area, require_area
-from core.manage_nav import request_manage_contexts
 from events.models import Event
 
 from .forms import PromotionForm, SponsorForm

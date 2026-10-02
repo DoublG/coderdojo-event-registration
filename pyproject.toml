@@ -40,8 +40,43 @@ max-complexity = 20
 
 [tool.ruff.lint.isort]
 known-first-party = [
-    "accounts", "applications", "content", "core", "dojos",
-    "events", "geo", "notifications", "pathways", "privacy", "website",
+    "accounts", "api", "applications", "campaigns", "content", "core", "dojos", "events", "geo",
+    "mailing", "monitoring", "notifications", "pages", "pathways", "privacy", "website",
+]
+
+# The layers between the apps (CODING_STANDARDS.md, "Layers"): `lint-imports`
+# (import-linter, requirements-dev.txt), also in the Code audit workflow. An app
+# may import its own layer and the layers below it, never one above. Within a
+# layer the apps may use each other (`:`), which is what dojos and events, or
+# the mail engine and the apps it mails for, need. What the site's code runs
+# must keep to it; tests, test helpers and management commands (entry points
+# run from outside, like the top layer) may reach anywhere.
+[tool.importlinter]
+root_packages = [
+    "accounts", "api", "applications", "campaigns", "content", "core", "dojos", "events",
+    "geo", "mailing", "monitoring", "notifications", "pages", "pathways", "privacy",
+]
+include_external_packages = false
+
+[[tool.importlinter.contracts]]
+name = "Layers"
+type = "layers"
+layers = [
+    # The site as visitors and the organisation meet it, assembled from the rest.
+    "pages",
+    # What reads across the domain: campaigns and segments, the API, the GDPR
+    # operations (export, erasure, retention).
+    "api : campaigns : privacy",
+    # The domain, with the mail engine and the notifications it sends through.
+    "accounts : applications : content : dojos : events : mailing : notifications : pathways",
+    # The foundation: knows no app. Apps register with it from their
+    # AppConfig.ready() (image library, /metrics/ sources, the privacy registry).
+    "core : geo : monitoring",
+]
+ignore_imports = [
+    "**.tests -> **",
+    "**.testing -> **",
+    "**.management.commands.** -> **",
 ]
 
 [tool.ruff.format]

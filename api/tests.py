@@ -308,8 +308,8 @@ class AttendanceApiTests(ApiTestCase):
     def test_the_schema_never_holds_sensitive_fields(self):
         """No field classified special (health), criminal or security, and
         nothing kept out of a person's export, is part of the API."""
-        from privacy import registry
-        from privacy.registry import Category
+        from core import privacy_registry as registry
+        from core.privacy_registry import Category
 
         from .v1 import api
 

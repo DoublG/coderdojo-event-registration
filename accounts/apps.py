@@ -16,6 +16,8 @@ class AccountsConfig(AppConfig):
     name = "accounts"
 
     def ready(self):
+        from core.image_library import register_library
+
         from . import (
             navigation,
             organisation,  # noqa: F401 — connects the role → staff/group signals
@@ -23,6 +25,9 @@ class AccountsConfig(AppConfig):
             sign_in,  # noqa: F401 — clears the cached sign-in policy when it changes
             two_step,  # noqa: F401 — connects the "backup code used" mail
         )
+        from .template_avatars import TEMPLATE_AVATARS_DIR, TEMPLATE_KID_AVATARS_DIR
 
+        register_library("mentors", TEMPLATE_AVATARS_DIR)
+        register_library("ninjas", TEMPLATE_KID_AVATARS_DIR)
         navigation._connect()
         post_migrate.connect(_refresh_organisation_groups, dispatch_uid="accounts.refresh_organisation_groups")

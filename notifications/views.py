@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
-from core.manage_nav import require_organisation_context
+from accounts.manage_nav import require_organisation_context
 
 from .consumers import organisation_notification_context
 from .models import Notification

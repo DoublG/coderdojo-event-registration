@@ -14,7 +14,7 @@ from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from core.manage_nav import require_organisation_context
+from accounts.manage_nav import require_organisation_context
 
 from . import admin_access, sign_in, two_step
 from .forms import AdminAccessForm, SignInPolicyForm

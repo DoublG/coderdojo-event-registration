@@ -17,7 +17,7 @@ def _notification_context(user, dojo_id):
 def organisation_notification_context(user):
     """The organisation dashboard's bell (DATA_MODEL.md §23): the account's
     organisation notifications. Shared by the page render
-    (core.templatetags.manage_nav.organisation_bell), mark-all-read and the
+    (notifications.templatetags.notification_bells.organisation_bell), mark-all-read and the
     consumer below."""
     from .models import Notification
 

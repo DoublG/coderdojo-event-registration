@@ -1,6 +1,6 @@
-"""geo holds reference data only (DATA_MODEL.md §16, `privacy.registry`)."""
+"""geo holds reference data only (DATA_MODEL.md §16, `core.privacy_registry`)."""
 
-from privacy.registry import register_not_personal
+from core.privacy_registry import register_not_personal
 
 from .models import AdministrativeBoundary, Municipality
 

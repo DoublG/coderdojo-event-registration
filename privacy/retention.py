@@ -37,7 +37,7 @@ account) are removed `AUDIT_LOG_RETENTION_DAYS` after they were written.
 
 **Login sessions** are removed once they've expired.
 
-The other rules in `privacy.registry.RETENTION_RULES` still wait for their
+The other rules in `core.privacy_registry.RETENTION_RULES` still wait for their
 periods (DATA_MODEL.md §16, open points).
 """
 

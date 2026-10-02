@@ -7,8 +7,9 @@ and every row that uses it just links to that same path: picking a template
 never makes a new copy. Only a file someone uploads themselves goes through
 the field's own `upload_to` (and gets its own copy, as before).
 
-The library files are copied from the app's bundled source directories
-(LIBRARY_DIRS) into media storage the first time each one is used, so
+The library files are copied from the apps' bundled source directories
+(LIBRARY_DIRS, which each app fills from its AppConfig.ready() with
+register_library) into media storage the first time each one is used, so
 nothing has to run at deploy time. A library file is shared, so never
 `.delete()` it through a model field — `is_library_image()` tells the two
 apart.
@@ -19,23 +20,17 @@ from pathlib import Path
 from django.core.files import File
 from django.core.files.storage import default_storage
 
-from accounts.template_avatars import TEMPLATE_AVATARS_DIR, TEMPLATE_KID_AVATARS_DIR
-from dojos.template_icons import TEMPLATE_ICONS_DIR
-from events.template_images import TEMPLATE_IMAGES_DIR
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 LIBRARY_PREFIX = "library"
 
-# kind → the bundled directory its standard images come from.
-LIBRARY_DIRS = {
-    "events": TEMPLATE_IMAGES_DIR,
-    "dojos": TEMPLATE_ICONS_DIR,
-    "awards": BASE_DIR / "events" / "seed_data" / "awards",
-    "mentors": TEMPLATE_AVATARS_DIR,
-    "ninjas": TEMPLATE_KID_AVATARS_DIR,
-    "pathways": BASE_DIR / "pathways" / "seed_data" / "images",
-}
+# kind → the bundled directory its standard images come from. Filled by the
+# apps that own them (register_library, from their AppConfig.ready()): core
+# knows no app (CODING_STANDARDS.md, "Layers").
+LIBRARY_DIRS = {}
+
+
+def register_library(kind, directory):
+    """Make `directory`'s images the standard images of `kind`."""
+    LIBRARY_DIRS[kind] = Path(directory)
 
 
 def _source(kind, filename):

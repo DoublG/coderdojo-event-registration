@@ -2,13 +2,13 @@
 "Caching"): whether it's an approved champion or mentor, what it applied
 for, its organisation roles, the organisation dashboard's areas it may open
 and the dojos it manages. The nav (`accounts.context_processors.user_roles`)
-and the management area's switcher (`core.manage_nav`) read it on every page,
+and the management area's switcher (`accounts.manage_nav`) read it on every page,
 so it's worked out once per request and kept in the cache per account.
 
 **Only the navigation reads it, never an access check.** A stale value can
 show or hide a link for a few minutes at most; the pages behind the links
 still check with the database (`dojos.access`, `accounts.organisation.require_area`,
-`core.manage_nav.require_organisation_context`), so it can never open
+`accounts.manage_nav.require_organisation_context`), so it can never open
 anything.
 
 It's cleared, now and again on commit, whenever what it's built from

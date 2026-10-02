@@ -1,7 +1,7 @@
 """Erasing a person: the right to erasure (GDPR art. 17) and the retention
 job's deletions (DATA_MODEL.md §16 phases 4 and 5).
 
-Built from the classification only (`privacy.registry`), like the export: a
+Built from the classification only (`core.privacy_registry`), like the export: a
 row is the person's when a model's `subjects` lookup points at the account,
 at a child erased with it, or at the account's email address, and each of
 its fields is treated as classified:
@@ -45,10 +45,10 @@ from django.db import models, transaction
 from django.db.models import Q
 
 from accounts.models import Ninja, User
+from core import privacy_registry as registry
 from core.image_library import is_library_image
-from privacy import registry
+from core.privacy_registry import Category, Computed, Erasure, Subject
 from privacy.models import ErasureRecord
-from privacy.registry import Category, Computed, Erasure, Subject
 
 # Handled here rather than row by row: the logs of changes (by the content
 # type and id of what they're about) and login sessions (they end with the

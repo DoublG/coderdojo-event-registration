@@ -3,7 +3,7 @@ who viewed the most sensitive data. The recorded models are `RECORDED`
 below (every other model is listed with its reason in
 core.tests.AuditLogCoverageTests); the actor comes from `AuditlogMiddleware`.
 It's shown read-only to the organisation's admin role: on the organisation
-dashboard (/manage/audit-log/, core.audit_views), with health, criminal-record
+dashboard (/manage/audit-log/, pages.audit_views), with health, criminal-record
 and security values hidden (`is_hidden`), and in the Django admin."""
 
 import datetime
@@ -55,11 +55,11 @@ RECORDED = {
     "mailing.MailPreference": {},
     "mailing.ConsentEvent": {},
     "mailing.EmailSuppression": {},
-    "mailing.Campaign": {},
-    "mailing.Journey": {},
-    "mailing.Segment": {},
-    "mailing.SegmentGroup": {},
-    "mailing.SegmentRule": {},
+    "campaigns.Campaign": {},
+    "campaigns.Journey": {},
+    "campaigns.Segment": {},
+    "campaigns.SegmentGroup": {},
+    "campaigns.SegmentRule": {},
     "mailing.EmailTemplate": {},
     "content.FAQ": {},
     "content.Testimonial": {},
@@ -187,7 +187,7 @@ DISPLAY_LENGTH = 120
 
 
 def _hidden_categories():
-    from privacy.registry import Category
+    from core.privacy_registry import Category
 
     # Health, criminal records and secrets: the dashboard only says that
     # they changed (the Django admin's log shows what auditlog stored).
@@ -201,7 +201,7 @@ def is_hidden(model, field_name):
     or a field it has no decision about, is hidden too: when in doubt, hide.
     Not `export=False` as such: that also marks who did something (a
     reviewer, whoever ended an access), which is what the log is for."""
-    from privacy.registry import site
+    from core.privacy_registry import site
 
     if model is None:
         return True

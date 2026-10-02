@@ -53,7 +53,7 @@ def dojo_list(request):
 
 def dojo_finder_widget(request):
     """The compact "Find a dojo near you" widget embedded on the homepage
-    (core/templates/core/home.html). Always returns just the meta line +
+    (pages/templates/pages/home.html). Always returns just the meta line +
     result list fragment — this view has no full-page mode of its own, it's
     only ever reached via the widget's initial render or its htmx search."""
     form = DojoSearchForm(request.GET)

@@ -1,5 +1,5 @@
 """The register of processing activities (GDPR art. 30, DATA_MODEL.md §16
-phase 2), built from the classification in `privacy.registry` only."""
+phase 2), built from the classification in `core.privacy_registry` only."""
 
 import csv
 import io
@@ -7,8 +7,8 @@ from itertools import groupby
 
 from django.utils import timezone
 
-from privacy import registry
-from privacy.registry import RETENTION_RULES, Category, Erasure, LegalBasis
+from core import privacy_registry as registry
+from core.privacy_registry import RETENTION_RULES, Category, Erasure, LegalBasis
 
 CSV_COLUMNS = [
     "category",

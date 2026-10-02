@@ -1263,7 +1263,7 @@ class OrganisationRoleTests(TestCase):
         self.assertFalse(user.has_perm("events.add_ninjabelt"))
         self.assertFalse(user.has_perm("accounts.view_ninja"))
         self.assertFalse(user.has_perm("applications.can_review_background_checks"))
-        self.assertFalse(user.has_perm("mailing.view_campaign"))
+        self.assertFalse(user.has_perm("campaigns.view_campaign"))
         self.assertFalse(user.has_perm("mailing.view_emailmessage"))
 
     def test_admin_role_edits_the_catalogue(self):
@@ -1299,8 +1299,8 @@ class OrganisationRoleTests(TestCase):
 
         self._grant(OrganisationRole.ADMIN)
         user = self._fresh()
-        self.assertTrue(user.has_perm("mailing.add_campaign"))
-        self.assertTrue(user.has_perm("mailing.change_segmentrule"))
+        self.assertTrue(user.has_perm("campaigns.add_campaign"))
+        self.assertTrue(user.has_perm("campaigns.change_segmentrule"))
         self.assertTrue(user.has_perm("mailing.change_emailtemplate"))
         self.assertTrue(user.has_perm("mailing.view_emailmessage"))
         self.assertFalse(user.has_perm("mailing.change_emailmessage"))
@@ -1318,7 +1318,7 @@ class OrganisationRoleTests(TestCase):
         self.assertFalse(user.groups.exists())
 
     def test_revoking_the_last_role_ends_access_to_the_django_admin(self):
-        from core.testing import with_admin_access
+        from accounts.testing import with_admin_access
 
         from .models import AdminAccessGrant, OrganisationRole
 
@@ -1350,7 +1350,7 @@ class OrganisationRoleTests(TestCase):
         self.assertNotContains(response, f'href="{reverse("admin:index")}"')
 
     def test_board_sees_applications_but_cannot_run_the_review_actions(self):
-        from core.testing import with_admin_access
+        from accounts.testing import with_admin_access
 
         from .models import OrganisationRole
 
@@ -2805,7 +2805,7 @@ class OrganisationPeopleTests(TestCase):
         self.assertContains(response, "Background-check reviewer")
 
     def test_taking_the_last_role_away_ends_django_admin_access(self):
-        from core.testing import with_admin_access
+        from accounts.testing import with_admin_access
 
         from .models import AdminAccessGrant, OrganisationRole
 
@@ -2845,7 +2845,7 @@ class OrganisationPeopleTests(TestCase):
                 set_roles(account, ["board"], by=self.admin)
 
     def test_ending_someone_elses_django_admin_access(self):
-        from core.testing import with_admin_access
+        from accounts.testing import with_admin_access
 
         from .models import AdminAccessGrant, OrganisationRole
 

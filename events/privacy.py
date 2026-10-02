@@ -1,6 +1,6 @@
-"""Personal data in events' models (DATA_MODEL.md §16, `privacy.registry`)."""
+"""Personal data in events' models (DATA_MODEL.md §16, `core.privacy_registry`)."""
 
-from privacy.registry import Category, LegalBasis, Subject, keep, personal, register, register_not_personal
+from core.privacy_registry import Category, LegalBasis, Subject, keep, personal, register, register_not_personal
 
 from .models import (
     Badge,

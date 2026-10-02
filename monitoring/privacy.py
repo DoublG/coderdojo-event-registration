@@ -1,6 +1,6 @@
-"""Personal data in monitoring's models (DATA_MODEL.md §16, `privacy.registry`)."""
+"""Personal data in monitoring's models (DATA_MODEL.md §16, `core.privacy_registry`)."""
 
-from privacy.registry import register_not_personal
+from core.privacy_registry import register_not_personal
 
 from .models import CapacitySample
 

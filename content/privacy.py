@@ -1,6 +1,6 @@
-"""Personal data in content's models (DATA_MODEL.md §16, `privacy.registry`)."""
+"""Personal data in content's models (DATA_MODEL.md §16, `core.privacy_registry`)."""
 
-from privacy.registry import Category, LegalBasis, Subject, personal, register, register_not_personal
+from core.privacy_registry import Category, LegalBasis, Subject, personal, register, register_not_personal
 
 from .models import FAQ, Announcement, OrganisationTeamMember, Promotion, Sponsor, Testimonial
 

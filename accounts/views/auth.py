@@ -14,7 +14,7 @@ from two_factor.plugins.registry import registry
 from two_factor.views import LoginView as TwoFactorLoginView
 from two_factor.views.utils import IdempotentSessionWizardView
 
-from core.manage_nav import manage_contexts
+from accounts.manage_nav import manage_contexts
 
 from .. import login_links, two_step
 from ..forms import (
@@ -36,7 +36,7 @@ def _post_login_redirect(request, user):
 
     # Organisation admins, champions and mentors land in the management
     # area (/manage/ picks the organisation or their first dojo; see
-    # core.manage_nav for who counts).
+    # accounts.manage_nav for who counts).
     if manage_contexts(user).any:
         return reverse("manage_home")
 

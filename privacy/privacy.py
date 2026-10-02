@@ -21,8 +21,8 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 from oauth2_provider.models import AccessToken, Application, DeviceGrant, Grant, IDToken, RefreshToken
 from two_factor.plugins.webauthn.models import WebauthnDevice
 
+from core.privacy_registry import Category, LegalBasis, Subject, keep, personal, register, register_not_personal
 from privacy.models import ErasureRecord, RetentionNotice
-from privacy.registry import Category, LegalBasis, Subject, keep, personal, register, register_not_personal
 
 register(
     Session,

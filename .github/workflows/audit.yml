@@ -1,6 +1,7 @@
 # Code audit and vulnerability detection: the checks MAINTENANCE.md ("Code audits")
 # lists, on every change instead of once a quarter.
 #   lint           ruff check + ruff format --check (pyproject.toml)
+#   layers         lint-imports: no app imports a layer above its own (pyproject.toml)
 #   security-lint  ruff's flake8-bandit rules (S): security-sensitive patterns
 #   dependencies   pip-audit: known vulnerabilities in the pinned packages
 #   django-deploy  manage.py check --deploy with DEBUG off: production security settings (no warnings)
@@ -35,6 +36,18 @@ jobs:
       - run: pip install "$(grep -E '^ruff==' requirements-dev.txt)"
       - run: ruff check --output-format github .
       - run: ruff format --check .
+
+  layers:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      # import-linter and its dependencies, as pinned in requirements-dev.txt; it
+      # reads the code without importing it, so nothing else is needed.
+      - run: pip install $(grep -E '^(import-linter|grimp|rich|markdown-it-py|mdurl|Pygments|click|typing_extensions)==' requirements-dev.txt requirements.txt | cut -d: -f2)
+      - run: lint-imports
 
   security-lint:
     runs-on: ubuntu-24.04

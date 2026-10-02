@@ -1407,7 +1407,7 @@ class HelperDojoAccessTests(TestCase):
 
     def test_nav_manage_link_and_login_redirect_go_to_helpers_dojo(self):
         """Both go through the management area's landing (/manage/,
-        core.manage), which opens the helper's dojo."""
+        pages.manage), which opens the helper's dojo."""
         dashboard_url = reverse("dojo_dashboard", kwargs=self._kw())
         self.client.force_login(self.helper)
 

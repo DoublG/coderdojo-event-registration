@@ -3,8 +3,8 @@ from django.test import SimpleTestCase, TestCase
 
 from accounts.models import Guardianship, Ninja, User
 from applications.models import BackgroundCheckHistory
-from privacy import registry
-from privacy.registry import (
+from core import privacy_registry as registry
+from core.privacy_registry import (
     Category,
     Erasure,
     FieldPrivacy,

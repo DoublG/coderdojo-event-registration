@@ -6,7 +6,7 @@ from dojos.models import Dojo
 from events.models import Event
 
 # Site-wide questions (FAQ.dojo/event/pathway all None) — these were
-# previously hardcoded straight into core/templates/core/home.html; moving
+# previously hardcoded straight into pages/templates/pages/home.html; moving
 # them into the DB is what lets the homepage (and FAQ.objects.for_dojo())
 # show them alongside any dojo-specific ones. See content.models.FAQQuerySet.
 GLOBAL_FAQS = [

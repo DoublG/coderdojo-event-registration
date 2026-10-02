@@ -2920,7 +2920,7 @@ What we checked in its 3.4.1 source, and what the plan has to work around:
 4. **The admin.** The log is shown in the Django admin (`/admin/`) and,
    since 2026-09-29 (decided then, replacing "only in the Django admin"),
    read-only on the organisation dashboard: *Audit log* under
-   *Organisation* (`/manage/audit-log/`, `core/audit_views.py`, the
+   *Organisation* (`/manage/audit-log/`, `pages/audit_views.py`, the
    `audit_log` area = `auditlog.view_logentry`, so the admin role and
    superusers, never the board). The dashboard page hides the values of
    health, criminal-record and security fields (the privacy registry's
@@ -3129,8 +3129,8 @@ flowchart TD
 - **The lock**: what the roles open refuses a request that doesn't meet it,
   middleware or not: `dojos.access.require_dojo_access` and
   `accounts.organisation.require_organisation_admin` (404),
-  `core.admin_site.AdminSite.has_permission` (the Django admin; `admin.site`
-  is ours through `core.admin_apps.AdminConfig`), and the notification
+  `pages.admin_site.AdminSite.has_permission` (the Django admin; `admin.site`
+  is ours through `pages.admin_apps.AdminConfig`), and the notification
   WebSocket (`NotificationConsumer.connect`, which reads the session's
   device itself: `OTPMiddleware` doesn't run in Channels).
 - The person can't turn two-step login off, or remove their last (passkey)
@@ -3255,7 +3255,7 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
 ### Phases
 
 1. **Classification: a `privacy` app with a registry.** *Built.*
-   `privacy/registry.py` (`register`, `register_not_personal`, and the
+   `core/privacy_registry.py` (`register`, `register_not_personal`, and the
    `personal`/`anonymise`/`keep` field specs); every app has its
    `privacy.py`, Django's and third-party models (sessions, `LogEntry`,
    celery results and beat, auth, content types) are in
@@ -3510,7 +3510,7 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
      or an empty text; a file is deleted, a standard library image only
      unlinked. A `personal` required link to the person deletes the row.
      `anonymise` takes a literal ("{pk}" is the row's id) or a
-     `privacy.registry.Computed` (the unusable password).
+     `core.privacy_registry.Computed` (the unusable password).
    - **`keep_visible`** keeps the `public_profile` fields where the model's
      `visible_when` flag is on (`User.show_on_team_pages`,
      `OrganisationTeamMember.is_public`); the visible name is frozen into
@@ -3730,7 +3730,7 @@ sees the **main language**, with an "Only in ..." note.
   English; Brussels and within 15 km of it all three; Flanders mostly Dutch,
   some Dutch and English, a few Dutch and French), each dojo's seeded texts
   in its main language with versions in its others, and the organisation's
-  content in all three (`core/seed_translations.py`). The organisation dojo
+  content in all three (`pages/seed_translations.py`). The organisation dojo
   is English-main, like the rest of the organisation's content.
 
 ## 20. One management area for the organisation and its dojos (built)
@@ -3772,7 +3772,7 @@ contexts you can manage.
 
 ### Contexts
 
-`manage_contexts(user)` (`core/manage_nav.py`) builds the
+`manage_contexts(user)` (`accounts/manage_nav.py`) builds the
 switcher from the existing access helpers, in three groups:
 
 | Group | Shown when | Source |
@@ -3795,7 +3795,7 @@ Someone with one context sees no switcher, as today. The notification bell
    both bases (replacing the dojo-only one). Picking a dojo goes to its
    dashboard, picking Organisation to `/manage/`. The footer's role label
    follows the context.
-3. **One entry point.** `manage_home` (`/manage/`, now `core/manage.py`) becomes the landing: the
+3. **One entry point.** `manage_home` (`/manage/`, now `pages/manage.py`) becomes the landing: the
    organisation for an organisation admin, else the first accessible dojo,
    else a 404. The nav gets one *Manage* link instead of *Manage* and
    *Organisation*, and the post-login redirect
@@ -4034,7 +4034,7 @@ for the board) is dropped for now (decided, 2026-09-29): the board doesn't
 need dashboard access; it asks for the Django admin like every role. The code: areas in `accounts.organisation`
 (`Area`, `AREA_PERMISSIONS`, `require_area`), time-boxed Django admin
 access in `accounts/admin_access.py` (`AdminAccessGrant`, the page
-`/manage/django-admin/`, `core.admin_site.AdminSite`, the beat job
+`/manage/django-admin/`, `pages.admin_site.AdminSite`, the beat job
 `accounts.tasks.close_admin_access`), the People pages in
 `accounts/people.py` with the rules in `accounts/organisation_people.py`,
 invitations in `accounts/invitations.py` (`OrganisationInvitation`,
@@ -4059,7 +4059,7 @@ the account staff for good, so it opens the Django admin at any time. And
 which management page each role opens is spread over the views as
 `require_organisation_admin` / `require_reviewer` calls, and repeated in
 the sidebar (`core/_manage_base.html`) and the switcher
-(`core.manage_nav`). This plan:
+(`accounts.manage_nav`). This plan:
 
 - moves granting roles to the organisation dashboard;
 - adds inviting someone new;
@@ -4080,7 +4080,7 @@ the sidebar (`core/_manage_base.html`) and the switcher
   permission granted by hand counts too). `is_organisation_admin` asks for
   the role row, so a superuser without the role doesn't get the dashboard.
 - **The Django admin's door is `is_staff`.** `sync_organisation_access`
-  sets it whenever an account holds any role, and `core.admin_site.AdminSite.has_permission`
+  sets it whenever an account holds any role, and `pages.admin_site.AdminSite.has_permission`
   only adds the sign-in policy on top. Nothing ends that access except
   taking the role away. (django-silk's `/silk/`, development only, also
   lets in staff.)

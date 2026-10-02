@@ -385,9 +385,9 @@ INSTALLED_APPS = [
     # which is what lets notifications/consumers.py's WebSocket route work
     # with zero changes to how the devcontainer/docs already invoke runserver.
     "daphne",
-    # Django's admin with core.admin_site.AdminSite as admin.site: it applies
+    # Django's admin with pages.admin_site.AdminSite as admin.site: it applies
     # the organisation's sign-in policy (accounts.sign_in) to /admin/.
-    "core.admin_apps.AdminConfig",
+    "pages.admin_apps.AdminConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -406,12 +406,18 @@ INSTALLED_APPS = [
     "notifications",
     "django_celery_results",
     "mailing",
+    # Campaigns, segments, journeys and a dojo's own mail, on top of the mail
+    # engine above (CODING_STANDARDS.md, "Layers").
+    "campaigns",
     "django_celery_beat",
     "ninja",
     "oauth2_provider",
     "privacy",
     "monitoring",
     "api",
+    # The homepage, /manage/'s landing, the audit log page and the health
+    # check, assembled from the apps above (CODING_STANDARDS.md, "Layers").
+    "pages",
     "auditlog",
     # Two-step login (DATA_MODEL.md §15). No phone, email or YubiKey plugins.
     "django_otp",

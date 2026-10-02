@@ -1,6 +1,6 @@
-"""pathways holds the learning-track catalogue only (DATA_MODEL.md §16, `privacy.registry`)."""
+"""pathways holds the learning-track catalogue only (DATA_MODEL.md §16, `core.privacy_registry`)."""
 
-from privacy.registry import register_not_personal
+from core.privacy_registry import register_not_personal
 
 from .models import Pathway, PathwayProject, PathwayStep, Skill
 

@@ -52,7 +52,7 @@ for developers. Where the line runs:
 | The web server's config | `gunicorn.conf.py` (the cap of requests per worker) | **yes**, read by gunicorn from `~/app` |
 | The Celery workers' units | `scripts/systemd/*.service` | **yes**, installed by `deploy.sh` into systemd (the rest of `scripts/` stays local) |
 | Tests | `*/tests.py`, `*/testing.py` | shipped inside the apps, never run there |
-| Seeders | `*/management/commands/seed_*.py`, `applications/seeding.py`, `accounts/seed_credentials.py`, `core/seed_translations.py` | shipped inside the apps; demo data, run only in the devcontainer (`.devcontainer/start.sh`). The ones that matter in production are idempotent and safe: `load_mail_templates` (create-only, run by `deploy.sh`) |
+| Seeders | `*/management/commands/seed_*.py`, `applications/seeding.py`, `accounts/seed_credentials.py`, `pages/seed_translations.py` | shipped inside the apps; demo data, run only in the devcontainer (`.devcontainer/start.sh`). The ones that matter in production are idempotent and safe: `load_mail_templates` (create-only, run by `deploy.sh`) |
 | Import commands | `*/management/commands/import_*.py` | shipped, but their libraries (`geopandas`, `pandas`, ...) are only in `requirements-dev.txt`, so they only work in development |
 | Development-only commands | `totp_code`, `simulate_bounce` | refuse to run without `DEBUG` |
 | Development-only switches | django-debug-toolbar, django-silk | only while `DEBUG` (or `SILK`) is on; neither is installed on production |
@@ -253,7 +253,7 @@ Average: **3.3**.
 
 | Function | Complexity | Why it's complex, and what would help |
 |---|---:|---|
-| `privacy.registry.Registry.register` | 28 | validates every way a model's privacy declaration can be wrong; split the checks into small functions per rule |
+| `core.privacy_registry.Registry.register` | 28 | validates every way a model's privacy declaration can be wrong; split the checks into small functions per rule |
 | `events.engagement.rebuild` | 27 | one pass computing every child's stages per dojo; extract the per-child step |
 | `privacy.erasure._Erasure._collect` | 23 | finds every row about a person through the registry; one function per kind of link |
 | `events.engagement._metrics` | 23 | the attendance figures behind a stage; small helpers per figure |

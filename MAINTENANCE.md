@@ -63,6 +63,7 @@ calendar: stay on the latest release. Watch these:
 | mysqlclient | 2.3.0 | Needs the MySQL client headers on the server (missing on Level27 today, see CLAUDE.md). |
 | nh3, django-permissions-policy | 0.3.7, 4.34.0 | Security: the Markdown allowlist and the Permissions-Policy header. Keep them current. |
 | coverage, radon (mando, colorama) | 7.16.2, 6.0.1 (0.7.1, 0.4.6) | Development only (`requirements-dev.txt`): test coverage and complexity ([`CODING_STANDARDS.md`](CODING_STANDARDS.md)). `pip-audit`: no known vulnerabilities (1 Oct 2026). |
+| import-linter, grimp (rich, markdown-it-py, mdurl) | 2.15, 3.17 (15.0.0, 4.2.0, 0.1.2) | Development only (`requirements-dev.txt`): the layers between the apps (`lint-imports`, [`CODING_STANDARDS.md`](CODING_STANDARDS.md), "Layers"), also in the Code audit workflow. `pip-audit`: no known vulnerabilities (2 Oct 2026). |
 | unittest-xml-reporting, lxml | 4.0.0, 6.1.3 | Development only (`requirements-dev.txt`): the test results as JUnit XML for the Tests workflow's summary. `pip-audit`: no known vulnerabilities (1 Oct 2026). |
 | locust, matplotlib | 2.46.6, 3.11.2 | The load test and its charts ([`loadtest/requirements.txt`](loadtest/requirements.txt), [`CAPACITY.md`](CAPACITY.md)), in a venv of their own: never in the image or on production. `pip-audit -r loadtest/requirements.txt`: no known vulnerabilities (30 Sep 2026). |
 
@@ -221,6 +222,7 @@ whoever pushed):
 - **Code audit** (`.github/workflows/audit.yml`, on pushes to main and pull requests, and **every Monday**,
   since new advisories appear without any change here):
   - `ruff check .` and `ruff format --check .` (lint and formatting);
+  - `lint-imports`, the layers between the apps (`pyproject.toml`, [`CODING_STANDARDS.md`](CODING_STANDARDS.md));
   - `ruff check --extend-select S .`, the flake8-bandit security rules. Tests, seed commands and
     `user-journeys/` are left out (`pyproject.toml`); a reviewed line on the site carries
     `# noqa: Sxxx` with its reason;

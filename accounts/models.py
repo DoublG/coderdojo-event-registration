@@ -425,7 +425,7 @@ class AdminAccessGrant(models.Model):
     it, with a reason, for `ADMIN_ACCESS_HOURS`. Made and ended only through
     accounts.admin_access, which also keeps `User.is_staff` in step; the
     admin site checks for an open grant on every request
-    (core.admin_site.AdminSite), so access stops at `expires_at` whatever
+    (pages.admin_site.AdminSite), so access stops at `expires_at` whatever
     the job that closes grants does. Recorded in the audit log. Superusers
     don't need one."""
 

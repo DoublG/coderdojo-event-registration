@@ -1,0 +1,87 @@
+{% extends "dojos/_admin_base.html" %}
+{% load i18n %}
+{% block admin_page_title %}{% if campaign %}{{ campaign.subject }}{% else %}{% translate "Write a mail" %}{% endif %}{% endblock %}
+{% block admin_heading %}{% if campaign %}{{ campaign.subject }} {% include "campaigns/manage/_status_badge.html" %}{% else %}{% translate "Write a mail" %}{% endif %}{% endblock %}
+{% block admin_extra_style %}{% include "campaigns/dojo/_styles.html" %}{% endblock %}
+
+{% block admin_content %}
+{% comment %}
+Writing a dojo mailing (mailing.dojo_views.dojo_mail_create / dojo_mail_detail
+for a draft, SEND_MAIL). The audience's parameters show under the picked
+audience with CSS alone (:has); the reach under it comes from htmx.
+{% endcomment %}
+<div class="dojo-mail">
+  <p class="body-sm"><a href="{% url 'dojo_mail_list' dojo_id=dojo.id %}">← {% translate "All mails" %}</a></p>
+  <div class="dojo-mail-grid">
+    <div>
+      <form method="post" class="cd-card cd-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}{{ form.non_field_errors }}{% endif %}
+        <fieldset id="audience-fields" class="cd-form__group" style="border: 0; padding: 0; margin: 0;">
+          <legend class="cd-form__group-title heading-md">{% translate "Who gets it" %}</legend>
+          {% for error in form.audience.errors %}<p class="cd-form__error caption">{{ error }}</p>{% endfor %}
+          {% for option in form.audience_options %}
+            <div class="audience-option">
+              <label class="audience-option__head">
+                <input type="radio" name="audience" value="{{ option.key }}"{% if option.checked %} checked{% endif %}>
+                <span>
+                  <p class="body">{{ option.label }}</p>
+                  <p class="caption muted">{{ option.description }}{% if option.needs_consent %} {% translate "Only families who agreed to their child's details being used to choose their mail." %}{% endif %}</p>
+                </span>
+              </label>
+              {% if option.fields %}
+                <div class="audience-option__params">
+                  <div class="cd-form__row">{% for field in option.fields %}{{ field.as_field_group }}{% endfor %}</div>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+          <div id="mail-reach" hx-get="{% url 'dojo_mail_reach' dojo_id=dojo.id %}" hx-trigger="load, change from:#audience-fields" hx-include="#audience-fields" aria-live="polite"></div>
+        </fieldset>
+
+        <div class="cd-form__group">
+          <h2 class="cd-form__group-title heading-md">{% translate "Your mail" %}</h2>
+          {{ form.subject.as_field_group }}
+          {{ form.message.as_field_group }}
+          {% include "dojos/partials/_translation_fields.html" %}
+        </div>
+        <div class="cd-form__actions">
+          <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save draft" %}</button>
+        </div>
+      </form>
+    </div>
+
+    {% if campaign %}
+      <div>
+        <section class="cd-card">
+          <h2 class="heading-md">{% translate "Send it" %}</h2>
+          {% include "campaigns/dojo/_reach.html" %}
+          {% for problem in problems %}<p class="cd-form__note cd-form__note--error caption">{{ problem }}</p>{% endfor %}
+          <div class="mail-actions">
+            <form method="post" action="{% url 'dojo_mail_test' dojo_id=dojo.id campaign_id=campaign.id %}">
+              {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Send me a test" %}</button>
+            </form>
+            <form method="post" action="{% url 'dojo_mail_launch' dojo_id=dojo.id campaign_id=campaign.id %}"
+                  data-confirm="{% if reach.team %}{% blocktranslate asvar confirm_msg count counter=reach.reached %}Send this mail to {{ counter }} team member now?{% plural %}Send this mail to {{ counter }} team members now?{% endblocktranslate %}{% else %}{% blocktranslate asvar confirm_msg count counter=reach.reached %}Send this mail to {{ counter }} family now?{% plural %}Send this mail to {{ counter }} families now?{% endblocktranslate %}{% endif %}{{ confirm_msg }}">
+              {% csrf_token %}<button type="submit" class="cd-btn cd-btn--primary label"{% if problems %} disabled{% endif %}>{% translate "Send" %}</button>
+            </form>
+            <form method="post" action="{% url 'dojo_mail_cancel' dojo_id=dojo.id campaign_id=campaign.id %}"
+                  data-confirm="{% translate "Delete this draft?" as confirm_msg %}{{ confirm_msg }}">
+              {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Delete draft" %}</button>
+            </form>
+          </div>
+          <p class="caption muted">{% blocktranslate count counter=launched with limit=limit %}{{ counter }} of {{ limit }} mails sent in the last 30 days.{% plural %}{{ counter }} of {{ limit }} mails sent in the last 30 days.{% endblocktranslate %}</p>
+        </section>
+        <section class="cd-card">
+          <h2 class="heading-md">{% translate "Preview" %}</h2>
+          <p class="caption muted">{% translate "As the families get it, as last saved. A family gets your text in its own language when you wrote one, otherwise in your main language." %}</p>
+          {% for preview in previews %}
+            <p class="label">{{ preview.language }}: {{ preview.subject }}</p>
+            <pre class="mail-preview body-sm" lang="{{ preview.code }}">{{ preview.body }}</pre>
+          {% endfor %}
+        </section>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -525,7 +525,7 @@ class ReviewerRoleTests(TestCase):
         self.assertTrue(reviewer.has_perm("applications.change_application"))
         self.assertFalse(reviewer.is_staff)  # the Django admin is asked for (DATA_MODEL.md §23)
         self.assertFalse(is_organisation_admin(reviewer))
-        self.assertFalse(reviewer.has_perm("mailing.change_campaign"))
+        self.assertFalse(reviewer.has_perm("campaigns.change_campaign"))
 
     def test_the_admin_and_board_roles_dont_review(self):
         from accounts.models import OrganisationRole

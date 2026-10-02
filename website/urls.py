@@ -31,7 +31,7 @@ urlpatterns = [
     path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),  # the texts bundle.js's gettext() uses
     # The same catalog at a URL browsers cache for a year; what the pages load.
     path("jsi18n/<str:language>/<str:version>/", jsi18n.javascript_catalog, name="javascript-catalog-versioned"),
-    path("", include("core.urls")),
+    path("", include("pages.urls")),
     path("", include("accounts.urls")),
     path("", include("api.urls")),
     path("", include("applications.urls")),
@@ -39,6 +39,7 @@ urlpatterns = [
     path("", include("events.urls")),
     path("", include("pathways.urls")),
     path("", include("mailing.urls")),
+    path("", include("campaigns.urls")),
     path("", include("content.urls")),
     path("", include("privacy.urls")),
     path("", include("monitoring.urls")),

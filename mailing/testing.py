@@ -1,7 +1,11 @@
-"""Realistic bounce reports, for the tests and `manage.py simulate_bounce`.
-Not imported by the site itself."""
+"""Test helpers for mail: realistic bounce reports (also for `manage.py
+simulate_bounce`), a family with children and a stand-in SMTP connection.
+Used by the mailing and campaigns tests; not imported by the site itself."""
 
 from django.conf import settings
+
+from accounts.consent import consent_fields
+from accounts.models import Guardianship, Ninja, User
 
 
 def _bounce_address():
@@ -73,3 +77,37 @@ Message-ID: {message_id}
 
 --F--
 """.encode()
+
+
+def make_family(username, *genders, consent=True, **fields):
+    """An adult account with one child per gender given; by default the
+    parent agreed to the children's details choosing their mail
+    (accounts.consent), as child groups in segments need."""
+    fields.setdefault("email", f"{username}@example.com")
+    guardian = User.objects.create(username=username, **fields)
+    for index, gender in enumerate(genders):
+        ninja = Ninja.objects.create(name=f"{username}-kid-{index}", gender=gender)
+        Guardianship.objects.create(guardian=guardian, ninja=ninja, **consent_fields(consent))
+    return guardian
+
+
+class FakeConnection:
+    """Stands in for the SMTP connection: `fail` maps a recipient to the
+    exception its send raises."""
+
+    def __init__(self, fail=None):
+        self.fail = fail or {}
+        self.sent = []
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def send_messages(self, messages):
+        for message in messages:
+            if (error := self.fail.get(message.to[0])) is not None:
+                raise error
+            self.sent.append(message)
+        return len(messages)

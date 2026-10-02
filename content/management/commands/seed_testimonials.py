@@ -4,7 +4,7 @@ from content.models import Testimonial
 from core.audit import without_audit_log
 
 # Site-wide quotes (Testimonial.dojo=None) — the homepage picks one of
-# these at random on every load (see core.views.home).
+# these at random on every load (see pages.views.home).
 TESTIMONIALS = [
     {
         "quote": "My daughter built her first game in one Saturday morning and hasn't stopped talking about it since.",

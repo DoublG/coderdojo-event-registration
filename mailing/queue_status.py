@@ -28,5 +28,17 @@ def oldest_due(now=None):
     )
 
 
+def snapshot(now=None):
+    """Mail waiting to be sent, and how long the oldest due one has waited:
+    what /metrics/ shows (registered with monitoring.collect)."""
+    now = now or timezone.now()
+    oldest = oldest_due(now)
+    return {
+        "pending": EmailMessage.objects.filter(status=EmailMessage.Status.PENDING).count(),
+        "sending": EmailMessage.objects.filter(status=EmailMessage.Status.SENDING).count(),
+        "oldest_due_seconds": int((now - oldest).total_seconds()) if oldest else 0,
+    }
+
+
 def is_stalled(oldest, now=None):
     return bool(oldest and (now or timezone.now()) - oldest > STALLED_AFTER)

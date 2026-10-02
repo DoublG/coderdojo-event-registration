@@ -59,16 +59,6 @@ def login_verified(client, user):
     return device
 
 
-def with_admin_access(user, reason="Fixing a registration"):
-    """Open `user`'s time-boxed access to the Django admin (accounts.admin_access,
-    DATA_MODEL.md §23), as asked for on the dashboard; returns the account
-    fresh (staff status and permission cache). It needs an organisation role."""
-    from accounts.admin_access import request_access
-
-    request_access(user, reason)
-    return type(user).objects.get(pk=user.pk)
-
-
 class site_queries:  # noqa: N801 — used like CaptureQueriesContext
     """Captures the queries the site runs, leaving out django-silk's own
     (its `silk_*` rows, the EXPLAIN it runs of each query, the savepoints

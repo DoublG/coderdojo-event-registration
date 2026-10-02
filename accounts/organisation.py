@@ -63,7 +63,7 @@ class Area:
     PRIVACY = "privacy"  # a person's data: export, deletion, email change
     SECURITY = "security"  # the sign-in policy
     PEOPLE = "people"  # who holds which organisation role (accounts.organisation_people)
-    AUDIT_LOG = "audit_log"  # the audit log, read-only (core.audit_views, DATA_MODEL.md §14)
+    AUDIT_LOG = "audit_log"  # the audit log, read-only (pages.audit_views, DATA_MODEL.md §14)
 
 
 AREA_PERMISSIONS = {
@@ -123,12 +123,12 @@ ADMIN_PERMISSIONS = {
     "mailing.emailtemplate": _EDIT,
     # Day to day these are run from the organisation dashboard (/manage/);
     # the admin keeps full access for fixing things by hand.
-    "mailing.segment": _EDIT,
-    "mailing.segmentgroup": _EDIT,
-    "mailing.segmentrule": _EDIT,
-    "mailing.campaign": _EDIT,
-    "mailing.journey": _EDIT,
-    "mailing.journeydelivery": _VIEW,
+    "campaigns.segment": _EDIT,
+    "campaigns.segmentgroup": _EDIT,
+    "campaigns.segmentrule": _EDIT,
+    "campaigns.campaign": _EDIT,
+    "campaigns.journey": _EDIT,
+    "campaigns.journeydelivery": _VIEW,
     "mailing.emailmessage": _VIEW,
     "mailing.mailpreference": _VIEW,
     "mailing.consentevent": _VIEW,

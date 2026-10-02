@@ -20,7 +20,7 @@ def _admin_context(request, access):
     """What every page extending dojos/_admin_base.html needs besides its
     own content: the dojo, the viewer's role/capabilities (`dojo_access`,
     see dojos.access) and the notification bell. What they can switch
-    between comes from core.manage_nav (the manage_switcher tag)."""
+    between comes from accounts.manage_nav (the manage_switcher tag)."""
     return {
         "dojo": access.dojo,
         "dojo_access": access,

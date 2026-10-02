@@ -166,7 +166,7 @@ def project(scenario, years, current_tables, sizes, clear_mail_content=False):
     """{table: bytes} after `years` more years of `scenario`, on top of what
     every table holds now. With `clear_mail_content`, mail older than a year
     keeps its row but not its subject and body (the `mail_content`
-    retention rule in privacy.registry, not yet applied by the retention
+    retention rule in core.privacy_registry, not yet applied by the retention
     job)."""
     result = {}
     for table, (kind, rows_per_year) in GROWTH.items():

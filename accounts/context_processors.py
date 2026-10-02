@@ -5,7 +5,7 @@ def user_roles(request):
     and/or mentor (applications.services), and the first dojo whose admin
     area it can open (dojos.access); whether it holds an organisation role
     (accounts.organisation); and whether the nav's one "Manage" link, to
-    the management area (/manage/, core.manage_nav), applies: an account
+    the management area (/manage/, accounts.manage_nav), applies: an account
     that may open an organisation dashboard area (accounts.organisation,
     e.g. an organisation admin or a background-check reviewer) or a dojo's
     champion/mentor, or any organisation role (the board too: its page to

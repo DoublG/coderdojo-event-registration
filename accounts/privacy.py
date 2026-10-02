@@ -1,8 +1,8 @@
-"""Personal data in accounts' models (DATA_MODEL.md §16, `privacy.registry`)."""
+"""Personal data in accounts' models (DATA_MODEL.md §16, `core.privacy_registry`)."""
 
 from django.contrib.auth.hashers import make_password
 
-from privacy.registry import Category, Computed, LegalBasis, Subject, anonymise, keep, personal, register
+from core.privacy_registry import Category, Computed, LegalBasis, Subject, anonymise, keep, personal, register
 
 from .models import (
     AdminAccessGrant,

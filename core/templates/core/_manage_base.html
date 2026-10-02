@@ -1,5 +1,5 @@
 {% extends "core/_manage_shell.html" %}
-{% load i18n %}{% load static %}{% load retention %}{% load manage_nav %}{% load reviewing %}
+{% load i18n %}{% load static %}{% load retention %}{% load manage_nav %}{% load notification_bells %}{% load reviewing %}
 {% comment %}
 The organisation's management dashboard (/manage/…), in the management
 area's shared shell (core/_manage_shell.html, DATA_MODEL.md §20) with the
@@ -9,7 +9,7 @@ manage_topbar_extra, manage_extra_style, manage_extra_script) and pass
 `active` for the sidebar link to highlight. Every view behind it checks
 its area with accounts.organisation.require_area (DATA_MODEL.md §23), and
 the sidebar shows each group only to an account that may open its area
-(core.manage_nav). Non-technical
+(accounts.manage_nav). Non-technical
 organisation work lives here, not in the Django admin (CLAUDE.md).
 {% endcomment %}
 {% block shell_title %}CoderDojo Belgium · {% block manage_page_title %}{% endblock %}{% endblock %}

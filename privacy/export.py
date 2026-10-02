@@ -1,7 +1,7 @@
 """A person's data export: right of access and portability (GDPR art. 15/20,
 DATA_MODEL.md §16 phase 3).
 
-Built from the classification only (`privacy.registry`): every model that
+Built from the classification only (`core.privacy_registry`): every model that
 declares `subjects` contributes its rows that belong to the account, to the
 children it's a guardian of, or to its email address. A row is exported
 with all its fields except its id and the fields marked `export=False`
@@ -19,8 +19,8 @@ from django.db.models import FileField, Q
 from django.utils import timezone
 
 from accounts.models import Ninja
-from privacy import registry
-from privacy.registry import Subject, classifiable_fields
+from core import privacy_registry as registry
+from core.privacy_registry import Subject, classifiable_fields
 
 
 class _Encoder(DjangoJSONEncoder):

@@ -12,11 +12,7 @@ from django.utils import timezone
 from accounts.organisation import Area, require_area
 
 from .. import queue_status
-from ..models import (
-    BounceRecord,
-    EmailMessage,
-    EmailSuppression,
-)
+from ..models import BounceRecord, EmailMessage, EmailSuppression
 
 # --- the mail queue: what's waiting, what failed, bounces and blocked addresses ---
 

@@ -6,7 +6,6 @@ the others being read (monitoring.views, monitoring.tasks)."""
 
 from django.conf import settings
 from django.db import connection
-from django.utils import timezone
 from django_redis import get_redis_connection
 
 # django-silk's tables (development only) are profiling data, not the site's.
@@ -73,18 +72,21 @@ def queue_lengths():
         return {queue: client.llen(queue) for queue in QUEUES}
 
 
-def mail_queue():
-    """Mail waiting to be sent, and how long the oldest due one has waited."""
-    from mailing import queue_status
-    from mailing.models import EmailMessage
+# Figures other apps report to /metrics/, registered from their
+# AppConfig.ready() (register_source), so monitoring imports none of them
+# (CODING_STANDARDS.md, "Layers"): "mail_queue" from mailing.
+_SOURCES = {}
 
-    now = timezone.now()
-    oldest = queue_status.oldest_due(now)
-    return {
-        "pending": EmailMessage.objects.filter(status=EmailMessage.Status.PENDING).count(),
-        "sending": EmailMessage.objects.filter(status=EmailMessage.Status.SENDING).count(),
-        "oldest_due_seconds": int((now - oldest).total_seconds()) if oldest else 0,
-    }
+
+def register_source(name, function):
+    _SOURCES[name] = function
+
+
+def mail_queue():
+    """Mail waiting to be sent, and how long the oldest due one has waited
+    (mailing.queue_status.snapshot)."""
+    source = _SOURCES.get("mail_queue")
+    return source() if source else {"pending": 0, "sending": 0, "oldest_due_seconds": 0}
 
 
 def websocket_connections():

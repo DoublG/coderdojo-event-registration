@@ -46,7 +46,7 @@
             <a class="cd-nav__account-link body-sm" href="{% url 'account_home' %}">{% translate "My Account" %}</a>
           {% endif %}
           {% if user_can_manage %}
-            {# The management area (/manage/, core.manage_nav): the organisation's dashboard and the dojos' admin areas, one sidebar with a switcher. #}
+            {# The management area (/manage/, accounts.manage_nav): the organisation's dashboard and the dojos' admin areas, one sidebar with a switcher. #}
             <a class="cd-nav__account-link body-sm" href="{% url 'manage_home' %}">{% translate "Manage" %}</a>
           {% endif %}
           {% if user_is_approved_champion %}

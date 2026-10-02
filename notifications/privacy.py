@@ -1,6 +1,6 @@
-"""Personal data in notifications' models (DATA_MODEL.md §16, `privacy.registry`)."""
+"""Personal data in notifications' models (DATA_MODEL.md §16, `core.privacy_registry`)."""
 
-from privacy.registry import Category, LegalBasis, Subject, personal, register
+from core.privacy_registry import Category, LegalBasis, Subject, personal, register
 
 from .models import Notification
 

@@ -12,11 +12,9 @@ from django.views.decorators.http import require_POST
 
 from accounts.organisation import Area, require_area
 
+from .. import template_users
 from ..forms import NewTemplateForm, TemplateVersionForm
-from ..models import (
-    Campaign,
-    EmailTemplate,
-)
+from ..models import EmailTemplate
 from ..rendering import FALLBACK_LANGUAGE
 from ..rendering import render as render_template
 from ..seed_templates import GENERIC_SAMPLE_CONTEXT, SAMPLE_CONTEXT, SYSTEM_TEMPLATE_KEYS
@@ -44,9 +42,7 @@ def template_list(request):
             },
         )
         row["languages"].append(languages.get(template.language, template.language))
-    used_by = {}
-    for campaign in Campaign.objects.exclude(status=Campaign.Status.CANCELLED).only("name", "template_key"):
-        used_by.setdefault(campaign.template_key, []).append(campaign.name)
+    used_by = template_users.names_by_key()
     for key, row in rows.items():
         row["system"] = key in SYSTEM_TEMPLATE_KEYS
         row["campaigns"] = used_by.get(key, [])
@@ -134,7 +130,6 @@ def template_delete(request, key, language=None):
     versions = EmailTemplate.objects.filter(key=key)
     if not versions.exists():
         raise Http404
-    in_use = Campaign.objects.filter(template_key=key, status__in=[Campaign.Status.DRAFT, Campaign.Status.QUEUED])
     if language:
         if language == FALLBACK_LANGUAGE:
             messages.error(request, _("The English version is the fallback for every language: it can't be deleted."))
@@ -144,7 +139,7 @@ def template_delete(request, key, language=None):
         return redirect("manage_template_edit", key=key, language=FALLBACK_LANGUAGE)
     if key in SYSTEM_TEMPLATE_KEYS:
         messages.error(request, _("The site sends this template itself: it can be edited, not deleted."))
-    elif in_use.exists():
+    elif template_users.still_needed(key):
         messages.error(request, _("A campaign that hasn't gone out yet uses this template."))
     else:
         versions.delete()

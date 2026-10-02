@@ -1,0 +1,47 @@
+{% extends "dojos/_admin_base.html" %}
+{% load i18n %}
+{% block admin_page_title %}{{ campaign.subject }}{% endblock %}
+{% block admin_heading %}{{ campaign.subject }} {% include "campaigns/manage/_status_badge.html" %}{% endblock %}
+{% block admin_extra_style %}{% include "campaigns/dojo/_styles.html" %}{% endblock %}
+
+{% block admin_content %}
+{% comment %}
+A sent mail (or a draft, for a mentor, who can't edit it): who it went to
+and how it went (mailing.dojo_views.dojo_mail_detail).
+{% endcomment %}
+<div class="dojo-mail">
+  <p class="body-sm"><a href="{% url 'dojo_mail_list' dojo_id=dojo.id %}">← {% translate "All mails" %}</a></p>
+  <div class="dojo-mail-grid">
+    <section class="cd-card">
+      <h2 class="heading-md">{% translate "Preview" %}</h2>
+      {% for preview in previews %}
+        <p class="label">{{ preview.language }}: {{ preview.subject }}</p>
+        <pre class="mail-preview body-sm" lang="{{ preview.code }}">{{ preview.body }}</pre>
+      {% endfor %}
+    </section>
+    <div>
+      <section class="cd-card">
+        <h2 class="heading-md">{% translate "Who gets it" %}</h2>
+        <p class="body">{{ audience }}</p>
+        {% if campaign.launched_at %}
+          <p class="caption muted">{% blocktranslate with when=campaign.launched_at|date:"d/m/Y H:i" %}Sent {{ when }}{% endblocktranslate %}{% if campaign.launched_by %} {% blocktranslate with name=campaign.launched_by.team_name %}by {{ name }}{% endblocktranslate %}{% endif %}</p>
+        {% else %}
+          {% include "campaigns/dojo/_reach.html" %}
+        {% endif %}
+      </section>
+      {% if stats %}
+        <section class="cd-card">
+          <h2 class="heading-md">{% translate "How it went" %}</h2>
+          {% include "campaigns/dojo/_results.html" %}
+          {% if dojo_access.can_send_mail %}{% if campaign.status == 'queued' or campaign.status == 'sending' %}
+            <form method="post" action="{% url 'dojo_mail_cancel' dojo_id=dojo.id campaign_id=campaign.id %}" style="margin-top: var(--space-3);"
+                  data-confirm="{% translate "Stop this mail? Mails that haven't gone out yet won't be sent." as confirm_msg %}{{ confirm_msg }}">
+              {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Stop sending" %}</button>
+            </form>
+          {% endif %}{% endif %}
+        </section>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

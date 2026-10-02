@@ -6,6 +6,15 @@
 # Lint/format (config in pyproject.toml)
 ruff==0.16.8
 
+# The layers between the apps (CODING_STANDARDS.md, "Layers"): `lint-imports`
+# checks the contract in pyproject.toml (with grimp, rich and rich's
+# markdown-it-py and mdurl; click is in requirements.txt, Pygments below).
+import-linter==2.15
+grimp==3.17
+rich==15.0.0
+markdown-it-py==4.2.0
+mdurl==0.1.2
+
 # The test results as JUnit XML for the Tests workflow's summary
 # (manage.py test --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner).
 unittest-xml-reporting==4.0.0
