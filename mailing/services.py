@@ -46,7 +46,7 @@ def is_suppressed_address(email):
 
 
 # Why a mail wasn't sent (EmailMessage.status_reason); a dojo's mail queue
-# shows them in words (mailing.dojo_views).
+# shows them in words (campaigns.dojo_views).
 INACTIVE = "The account is inactive."
 WRONG_ACCOUNT_TYPE = "This kind of mail isn't sent to this kind of account."
 NOT_SUBSCRIBED = "The recipient hasn't subscribed to this kind of mail."

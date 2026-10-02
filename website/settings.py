@@ -558,7 +558,7 @@ CACHES = {
 # their own rows (the homepage's Upcoming sessions, the dojo finder's
 # default list) and clear it, which would otherwise show up in, or wipe,
 # the running dev server's cache. Still Redis, not LocMemCache, because
-# code under test uses Redis-only features (cache.lock in mailing.campaigns).
+# code under test uses Redis-only features (cache.lock in campaigns.services).
 if len(sys.argv) > 1 and sys.argv[1] == "test":
     CACHES["default"]["LOCATION"] = CACHES["default"]["LOCATION"].rsplit("/", 1)[0] + "/3"
 

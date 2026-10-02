@@ -1,7 +1,7 @@
 """The audiences a dojo's team can mail (DATA_MODEL.md §25): a fixed list,
 prepared in code, never the organisation's segment builder. Each one turns
 (dojo, params) into a segment definition in the resolver's format
-(mailing.segmentation.resolver), which a dojo mailing freezes in
+(campaigns.segmentation.resolver), which a dojo mailing freezes in
 `Campaign.segment_snapshot` at launch like any campaign.
 
 Every audience only reaches families linked to that dojo: a child who goes

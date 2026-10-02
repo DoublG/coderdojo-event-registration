@@ -48,7 +48,7 @@ VIEW_HEALTH_NOTES = "view_health_notes"
 # Make, revoke and renew the dojo's API clients (api.models.DojoApiClient):
 # they act for the whole dojo, so only its champion.
 MANAGE_API = "manage_api"
-# Write and send the dojo's own mail to its families (mailing.dojo_views,
+# Write and send the dojo's own mail to its families (campaigns.dojo_views,
 # DATA_MODEL.md §25): it speaks for the whole dojo, so only its champion.
 SEND_MAIL = "send_mail"
 ALL_CAPABILITIES = frozenset(

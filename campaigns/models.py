@@ -14,7 +14,7 @@ from mailing.categories import MailCategory
 
 class Segment(models.Model):
     """A campaign audience, described as rules rather than a list: resolved
-    to accounts by mailing.segmentation.resolver.SegmentResolver when used.
+    to accounts by campaigns.segmentation.resolver.SegmentResolver when used.
     Its root groups (parent empty) are ANDed."""
 
     name = models.CharField(max_length=200)
@@ -90,7 +90,7 @@ class SegmentGroup(models.Model):
 
 
 class SegmentRule(models.Model):
-    """One condition: an attribute from mailing.segmentation.registry, an
+    """One condition: an attribute from campaigns.segmentation.registry, an
     operator it supports and a JSON value."""
 
     group = models.ForeignKey(
@@ -134,7 +134,7 @@ class Campaign(TranslatableModel):
     """One mailing to a segment's audience. The organisation's admin role
     creates campaigns (DATA_MODEL.md §11, decisions); a dojo's champion
     writes a dojo mailing (`dojo` set, DATA_MODEL.md §25): always
-    `dojo_news`, to one of the prepared audiences (mailing.dojo_audiences),
+    `dojo_news`, to one of the prepared audiences (campaigns.dojo_audiences),
     with the dojo's own text in its languages, sent with the `dojo_message`
     template."""
 
@@ -161,7 +161,7 @@ class Campaign(TranslatableModel):
     # A dojo mailing (DATA_MODEL.md §25); empty for the organisation's campaigns.
     dojo = models.ForeignKey("dojos.Dojo", null=True, blank=True, on_delete=models.CASCADE, related_name="mailings")
     audience = models.CharField(
-        max_length=30, blank=True, help_text="A dojo mailing's audience (mailing.dojo_audiences)."
+        max_length=30, blank=True, help_text="A dojo mailing's audience (campaigns.dojo_audiences)."
     )
     audience_params = models.JSONField(default=dict, blank=True)
     subject = models.CharField(max_length=150, blank=True, help_text="A dojo mailing's subject, main language.")
@@ -192,7 +192,7 @@ class Campaign(TranslatableModel):
         blank=True,
         help_text="Leave empty to send as soon as it's launched.",
     )
-    # Set by mailing.campaigns.launch / the launch_campaign task.
+    # Set by campaigns.services.launch / the launch_campaign task.
     launched_at = models.DateTimeField(null=True, blank=True, editable=False)
     launched_by = models.ForeignKey(
         "accounts.User",
@@ -208,7 +208,7 @@ class Campaign(TranslatableModel):
         editable=False,
         help_text="When every recipient's mail was queued.",
     )
-    # mailing.campaigns.queue_chunk: the mail is queued in chunks, in account
+    # campaigns.services.queue_chunk: the mail is queued in chunks, in account
     # id order, and this is the last account id done (0 = none yet).
     queued_up_to = models.PositiveBigIntegerField(
         default=0,
@@ -238,7 +238,7 @@ class Journey(models.Model):
     """A standing campaign (DATA_MODEL.md §11, Tier 3): every day, everyone
     who newly matches its segment gets its mail, at most once per
     `cooldown_days`. E.g. "we miss you" when a child becomes at risk. Run by
-    mailing.journeys.run (beat, daily); managed in the organisation
+    campaigns.journeys.run (beat, daily); managed in the organisation
     dashboard."""
 
     name = models.CharField(max_length=200)

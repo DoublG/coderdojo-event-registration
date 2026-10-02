@@ -157,7 +157,7 @@ class DojoMailingForm(forms.ModelForm):
     """A dojo mailing: who gets it (one of the prepared audiences, with its
     parameters) and the dojo's text, in its main language plus optional
     versions in its other languages. The audience's parameters are checked
-    by mailing.dojo_audiences, which decides what's valid."""
+    by campaigns.dojo_audiences, which decides what's valid."""
 
     audience = forms.ChoiceField(label=_("Who gets it"), widget=forms.RadioSelect)
     event = forms.ChoiceField(label=_("Session"), required=False)

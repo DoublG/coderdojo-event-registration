@@ -22,7 +22,7 @@ person using the dashboard).
 
 A dojo mailing (DATA_MODEL.md §25, `campaign.dojo` set) takes the same
 path, with its own checks: always `dojo_news`, one of the prepared
-audiences (mailing.dojo_audiences) instead of a segment, the dojo's text in
+audiences (campaigns.dojo_audiences) instead of a segment, the dojo's text in
 the `dojo_message` template (in each recipient's language when the dojo
 wrote it), replies to the dojo, never to a family that muted the dojo, and
 at most MAILING_DOJO_MAILINGS_PER_30_DAYS launched per dojo.

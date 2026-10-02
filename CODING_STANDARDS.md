@@ -2,7 +2,7 @@
 
 How code is written, checked and measured here: the standards, the linting and formatting setup, the
 tests and what they cover, and how complex the code is. For developers (and AI agents) changing the code.
-Measured on **1 October 2026**; rerun the measurements ([Measuring again](#measuring-again)) every quarter.
+Measured on **2 October 2026**; rerun the measurements ([Measuring again](#measuring-again)) every quarter.
 
 The conventions themselves, with their reasons, live in [`CLAUDE.md`](CLAUDE.md): that file is the
 authority, and this one gathers the standards, the tools that enforce them and the figures. The data model
@@ -14,16 +14,19 @@ and capacity in [`CAPACITY.md`](CAPACITY.md).
 - **Lint, format and security rules are enforced** on every push and pull request by Ruff (`ruff check`,
   `ruff format --check`, `ruff check --extend-select S`), with `pip-audit`, `manage.py check --deploy` and
   CodeQL alongside. The editor in the devcontainer formats and sorts imports on save with the same Ruff.
-- **1,092 tests** (12,400 lines of test code for 24,000 lines of code) run on every change, with a summary on
+- **1,132 tests** (12,900 lines of test code for 25,000 lines of code) run on every change, with a summary on
   each run's page and failures marked on the line where they failed. About twenty **guard tests** fail when
   new code forgets a project rule (privacy, audit log, admin, translations, security headers, ...).
-- **Coverage: 93% of the site's code** (statements and branches); 86% counting the seeders and import
+- **Coverage: 94% of the site's code** (statements and branches); 87% counting the seeders and import
   commands that only run on a developer's machine. What isn't covered is mostly error paths of business
   rules, the ASGI routing glue and a few segment attributes.
-- **Complexity is low:** an average cyclomatic complexity of 3.3, 85% of the 1,320 functions rank A. Six
-  functions of the site itself are over 20, the threshold to split them at the next change.
-- **Not checked:** types (no type checker), a minimum coverage, and complexity limits; the measurements
-  here are a map, run by hand.
+- **Complexity is low and kept low:** an average cyclomatic complexity of 3.2, 85% of the 1,413 functions
+  rank A, and **no function of the site is over 20** (the six that were were split on 2 October 2026); Ruff's
+  `C901` fails any new one, seed code excepted.
+- **The apps are layered:** `lint-imports` (import-linter) fails an app that imports a layer above its own,
+  locally and in CI ([Layers between the apps](#layers-between-the-apps)).
+- **Not checked:** types (no type checker) and a minimum coverage; the coverage and complexity figures here
+  are a map, run by hand.
 
 ---
 
@@ -35,8 +38,9 @@ and capacity in [`CAPACITY.md`](CAPACITY.md).
 4. [Tests](#tests)
 5. [Test coverage](#test-coverage)
 6. [Complexity and maintainability](#complexity-and-maintainability)
-7. [Commits, reviews and keeping documents current](#commits-reviews-and-keeping-documents-current)
-8. [Measuring again](#measuring-again)
+7. [Layers between the apps](#layers-between-the-apps)
+8. [Commits, reviews and keeping documents current](#commits-reviews-and-keeping-documents-current)
+9. [Measuring again](#measuring-again)
 
 ---
 
@@ -195,10 +199,10 @@ tests, migrations and tooling left out).
 
 | | Statements | Branches | Covered (statements and branches) | Lines only |
 |---|---:|---:|---:|---:|
-| The site's own code | 10,503 | 2,172 | **93%** | 95% |
-| Seeders and import commands (development only) | 1,767 | 584 | 51% | 52% |
+| The site's own code | 11,555 | 2,298 | **94%** | 95% |
+| Seeders and import commands (development only) | 1,764 | 584 | 51% | 52% |
 | Other management commands | 222 | 56 | 58% | 60% |
-| **Everything** | 12,492 | 2,812 | **86%** (1,428 lines and 682 branches not run) | 89% |
+| **Everything** | 13,541 | 2,938 | **87%** (1,455 lines and 697 branches not run) | 89% |
 
 **What's covered well:** the business rules and their services (registrations, teams, awards, onboarding,
 mail, privacy, sign-in), every page's gating, the API, monitoring, and every guard rule above. Most apps' own
@@ -210,7 +214,7 @@ code is at 91–99%.
 |---|---|---|
 | Seeders and import commands | `seed_*`, `import_*` (51%) | development-only; they run whenever the devcontainer seeds its database, which is their real test. Leave. |
 | Rule-violation branches of services | e.g. `dojos/team.py` (86%): "already handled", "the champion can't be removed", "only active members"; `accounts/invitations.py` (84%) | the refusals of a rule nobody tests yet. **Close these**: a refusal that silently stopped working is a real bug. |
-| Segment attributes | `mailing/segmentation/attributes/changes.py` (66%), `event.py` (71%) | the validation and sentence of "stage changed" and event rules. Close when touching segments. |
+| Segment attributes | `campaigns/segmentation/attributes/changes.py` (66%), `event.py` (71%) | the validation and sentence of "stage changed" and event rules. Close when touching segments. |
 | Admin actions | `applications/admin.py` (80%), `mailing/admin.py` (89%) | the technical fallback; the dashboard pages are covered. Low priority. |
 | Error paths of outside services | `mailing/bounce.py` (90%), `geo/geocoding.py` (83%) | mailbox and Nominatim failures; partly covered with mocks. |
 | Routing glue | `website/asgi.py`, `notifications/routing.py` (0%) | loaded by the server, not by tests (consumers are tested directly). A smoke test could import them. |
@@ -233,45 +237,74 @@ code is at 91–99%.
 
 Measured with **radon**: cyclomatic complexity per function (the number of independent paths through it) and
 the maintainability index per module, over the same code as coverage (tests and migrations left out):
-23,900 lines in 290 files.
+25,000 lines in 335 files.
 
 ![Complexity ranks](quality/charts/complexity-ranks.png)
 
 | Rank | Complexity | Functions | Meaning |
 |---|---|---:|---|
-| A | 1–5 | 1,119 (85%) | simple |
-| B | 6–10 | 151 | fine |
-| C | 11–20 | 39 | review when you change it |
-| D | 21–30 | 8 | split it when you touch it |
-| E, F | over 30 | 3 | all three are seeders |
+| A | 1–5 | 1,200 (85%) | simple |
+| B | 6–10 | 161 | fine |
+| C | 11–20 | 47 | review when you change it |
+| D | 21–30 | 2 | seeders |
+| E, F | over 30 | 3 | seeders |
 
-Average: **3.3**.
+Average: **3.2**. Every function over 20 is seed code; the highest of the site itself is 18
+(`accounts.sign_in.requirements_for`).
 
 ![The most complex functions](quality/charts/most-complex.png)
 
-**The site's hotspots** (complexity over 20):
+**The six hotspots, split on 2 October 2026** (the behaviour unchanged, the whole suite as the check):
 
-| Function | Complexity | Why it's complex, and what would help |
-|---|---:|---|
-| `core.privacy_registry.Registry.register` | 28 | validates every way a model's privacy declaration can be wrong; split the checks into small functions per rule |
-| `events.engagement.rebuild` | 27 | one pass computing every child's stages per dojo; extract the per-child step |
-| `privacy.erasure._Erasure._collect` | 23 | finds every row about a person through the registry; one function per kind of link |
-| `events.engagement._metrics` | 23 | the attendance figures behind a stage; small helpers per figure |
-| `events.views.event_signup` | 22 | the child-ordering and page state around `events.registrations.sign_up`; move the form handling into a `Form` |
-| `dojos.views.dojo_team_action` | 21 | one view for every Team-page action; a dispatch table of small handlers |
+| Function | Before | After | How |
+|---|---:|---:|---|
+| `core.privacy_registry.Registry.register` | 28 | 6 | one check per rule in `FIELD_RULES`, run from a list; the field-name and subject checks apart |
+| `events.engagement.rebuild` | 27 | 5 | a step per phase: sessions, registrations, the main dojo, the stage changes |
+| `events.engagement._metrics` | 23 | 14 | a helper per figure (`_aimed_sessions`, `_missed_in_a_row`) |
+| `privacy.erasure._Erasure._collect` | 23 | 11 | one way to find a person's rows per kind of subject; own rows and others' links apart |
+| `events.views.event_signup` | 22 | 11 | `events.forms.SignUpForm` reads and checks the ticked children |
+| `dojos.views.dojo_team_action` | 21 | 12 | `TEAM_ACTIONS`: a small handler per action, with what it needs |
 
-**Maintainability index** (radon, 0–100, A above 19): every module ranks A. The lowest, all large modules
-with many views: `mailing/manage.py` (24.6), `accounts/views.py` (24.9), `dojos/views.py` (26.0). Splitting
-a large views module by area (as `accounts/security_views.py` already is) raises it.
+**Maintainability index** (radon, 0–100, A above 19): every module ranks A. The three large views modules
+that were lowest (`mailing/manage.py` 24.6, `accounts/views.py` 24.9, `dojos/views.py` 26.0) are packages by
+area now (`dojos/views/`, `accounts/views/`, `mailing/manage/` and `campaigns/manage/`), each module 46 or
+more; the lowest of the site is `accounts/forms.py` (34.0).
 
 **Guidelines:**
 
-- Keep functions at A or B. **Over 20, split at the next change** to that function, not in a separate
-  "refactoring" change that nobody reviews properly.
-- Seeders may stay long (they're scripts), but `seed_ninja_history` (56) and `describe_account` (46) are hard
-  to change safely: split them when they next need work.
-- Complexity limits aren't enforced in CI yet. When the six hotspots are split, Ruff's `C901` with
-  `max-complexity = 20` (seeders excluded) can keep it that way.
+- Keep functions at A or B. **Over 20 fails the lint** (Ruff `C901`, `max-complexity = 20` in
+  `pyproject.toml`): split it in the change that makes it grow.
+- A views module that gathers several pages grows into a package by area, re-exporting its views from
+  `__init__.py` so `urls.py` and other imports don't change (as `dojos/views/` does).
+- Seeders may stay long (they're scripts, exempt from `C901`), but `seed_ninja_history` (56) and
+  `describe_account` (46) are hard to change safely: split them when they next need work.
+
+## Layers between the apps
+
+The apps form four layers; an app may import its own layer and the ones below, never one above. Within a
+layer the apps may use each other (dojos and events need each other; the mail engine and the apps it mails
+for too). `lint-imports` checks it (import-linter, the contract `[tool.importlinter]` in `pyproject.toml`),
+also in the Code audit workflow.
+
+| Layer | Apps | What it is |
+|---|---|---|
+| Top | `pages` | the site as visitors and the organisation meet it: the homepage, `/manage/`'s landing, the audit log page, `/health/`, the Django admin site |
+| Across the domain | `api`, `campaigns`, `privacy` | what reads every app: the API, campaigns and segments, the GDPR operations (export, erasure, retention) |
+| Domain | `accounts`, `applications`, `content`, `dojos`, `events`, `mailing`, `notifications`, `pathways` | the data and its rules, with the mail engine and the notifications they send through |
+| Foundation | `core`, `geo`, `monitoring` | what every app builds on; knows no app |
+
+- **When a lower layer needs something from a higher one, the higher one registers it** from its
+  `AppConfig.ready()`, instead of the lower one importing it: the standard-image folders
+  (`core.image_library.register_library`), `/metrics/`' mail queue (`monitoring.collect.register_source`),
+  which campaigns use a mail template (`mailing.template_users`). Every app declares its personal data into
+  the privacy registry, so it's foundation (`core/privacy_registry.py`).
+- **Tests, test helpers (`testing.py`) and management commands may reach anywhere**: they're entry points
+  run from outside, like the top layer.
+- **A new app** picks its layer and gets its line in the contract.
+- **Split on 2 October 2026:** `core` held the homepage and the management landing, which import most apps;
+  they're the `pages` app now, and `core` imports none. Campaigns, segments and journeys left the mail
+  engine for a `campaigns` app with their models (their tables kept their names, the content types moved,
+  so permissions and the audit log follow), so the engine never depends on them.
 
 ## Commits, reviews and keeping documents current
 
@@ -301,6 +334,7 @@ radon cc -j -e "$EXCLUDE" . > /tmp/cc.json
 radon mi -j -e "$EXCLUDE" . > /tmp/mi.json
 radon raw -j -e "$EXCLUDE" . > /tmp/raw.json
 radon cc -nc -e "$EXCLUDE" .                               # every function ranked C or worse
+lint-imports                                               # the layers between the apps
 python3 quality/summarize.py /tmp/coverage.json /tmp/cc.json /tmp/mi.json /tmp/raw.json \
     > quality/results/$(date +%F).json
 <venv>/bin/python quality/charts.py quality/results/$(date +%F).json

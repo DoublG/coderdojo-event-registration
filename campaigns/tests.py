@@ -999,7 +999,7 @@ class Tier3Tests(TestCase):
 
 
 class DojoAudienceTests(TestCase):
-    """mailing.dojo_audiences: each prepared audience reaches the right
+    """campaigns.dojo_audiences: each prepared audience reaches the right
     families of that one dojo, and the child-based ones only with consent."""
 
     def setUp(self):
@@ -1567,7 +1567,7 @@ class DojoTeamMailTests(TestCase):
 
 @override_settings(MAILING_CAMPAIGN_CHUNK_SIZE=2)
 class CampaignChunkTests(TestCase):
-    """mailing.campaigns.queue_chunk and the launch_campaign task: a campaign
+    """campaigns.services.queue_chunk and the launch_campaign task: a campaign
     is queued a chunk at a time, each chunk queueing the next behind what's
     waiting, so mail queued meanwhile never waits for the whole campaign
     (CAPACITY.md, finding 8)."""

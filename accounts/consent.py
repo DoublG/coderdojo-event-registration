@@ -1,7 +1,7 @@
 """A guardian's consent to their child's details being used to choose which
 mail the family gets (DATA_MODEL.md §16). It matters only there: the
 organisation dashboard's segments (so campaigns and journeys) only count a
-child whose guardian gave it (`mailing.segmentation.resolver`). Signing a
+child whose guardian gave it (`campaigns.segmentation.resolver`). Signing a
 child up, their sessions, belts and badges never depend on it.
 
 It's recorded per guardian and child, on the `Guardianship`: an optional

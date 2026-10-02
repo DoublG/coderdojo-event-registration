@@ -1,5 +1,5 @@
 """Tier 3 attributes (DATA_MODEL.md §11): change over time, for journeys
-(mailing.journeys) and "time for something new" campaigns."""
+(campaigns.journeys) and "time for something new" campaigns."""
 
 from datetime import timedelta
 

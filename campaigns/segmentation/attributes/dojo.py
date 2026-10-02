@@ -1,6 +1,6 @@
 """Attributes about a family's link with one dojo (DATA_MODEL.md §25), the
 building blocks of the audiences a dojo's team can mail
-(mailing.dojo_audiences). The account-level ones select a family without
+(campaigns.dojo_audiences). The account-level ones select a family without
 using the children's details beyond that link (like the automated "new
 sessions" mail), so no child-data consent is needed for them.
 

@@ -1,6 +1,6 @@
 """Campaigns on the organisation's dashboard: the list with results, a draft's
 page with its previews and audience, sending a test, launching and cancelling
-(mailing.campaigns). Dojo mailings show here too, read-only."""
+(campaigns.services). Dojo mailings show here too, read-only."""
 
 from django.conf import settings
 from django.contrib import messages

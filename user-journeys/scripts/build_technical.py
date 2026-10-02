@@ -276,8 +276,8 @@ sensitive field, no page loads a script from another site, and the public pages 
 section(
     "The data model at a glance",
     f"""
-<p class='lede'>Twelve apps own the data, each with its own <code>urls.py</code> mounted at the top level. The diagram shows
-the main entities and how they connect.</p>
+<p class='lede'>Fifteen apps, in four layers, each with its own <code>urls.py</code> mounted at the top level. The diagram
+shows the main entities and how they connect; the layers are below.</p>
 {mm("subgraph accounts", "The main entities, grouped by the app that owns them (DATA_MODEL.md §1).")}
 <table>
 <tr><th>App</th><th>Owns</th></tr>
@@ -288,12 +288,33 @@ the main entities and how they connect.</p>
 <tr><td><code>pathways</code></td><td>The learning-track catalogue: pathways, steps, projects, skills</td></tr>
 <tr><td><code>content</code></td><td>FAQs, testimonials, announcements, promotions, sponsors, the organisation's team listing</td></tr>
 <tr><td><code>notifications</code></td><td>Per-recipient <code>Notification</code> rows behind the bells</td></tr>
-<tr><td><code>mailing</code></td><td>Every mail: queue, templates, preferences and consent, bounces, campaigns, segments, journeys</td></tr>
+<tr><td><code>mailing</code></td><td>The mail engine: every mail's queue, templates, preferences and consent, mutes, bounces, the automated mail</td></tr>
+<tr><td><code>campaigns</code></td><td>Campaigns, segments, journeys and a dojo's own mail, on top of the engine</td></tr>
 <tr><td><code>geo</code></td><td>Municipalities and administrative boundaries, geocoding, <code>DistanceSphere</code></td></tr>
-<tr><td><code>privacy</code></td><td>The GDPR registry, export, erasure, retention, erasure records</td></tr>
+<tr><td><code>privacy</code></td><td>The GDPR operations: the register, export, erasure, retention, erasure records</td></tr>
 <tr><td><code>api</code></td><td>A dojo's API clients and the <code>/api/v1/</code> endpoints</td></tr>
-<tr><td><code>core</code></td><td>The homepage, shared templates and static files, the management shell, audit-log wiring</td></tr>
+<tr><td><code>core</code></td><td>The foundation: caching, uploads, the image library, the privacy registry, audit-log wiring, shared templates and static files</td></tr>
+<tr><td><code>pages</code></td><td>The homepage, contact, <code>/manage/</code>'s landing, the audit log page, <code>/health/</code>, the Django admin site</td></tr>
+<tr><td><code>monitoring</code></td><td>The site's measurements of itself: <code>/metrics/</code>, the daily capacity sample</td></tr>
 </table>
+<h2>Four layers</h2>
+<table>
+<tr><th>Layer</th><th>Apps</th></tr>
+<tr><td>Top: the site as people meet it</td><td><code>pages</code></td></tr>
+<tr><td>Across the domain</td><td><code>api</code>, <code>campaigns</code>, <code>privacy</code></td></tr>
+<tr><td>The domain, with the mail engine and notifications</td><td><code>accounts</code>, <code>applications</code>, <code>content</code>, <code>dojos</code>, <code>events</code>, <code>mailing</code>, <code>notifications</code>, <code>pathways</code></td></tr>
+<tr><td>Foundation: knows no app</td><td><code>core</code>, <code>geo</code>, <code>monitoring</code></td></tr>
+</table>
+<p>An app imports its own layer and the ones below, never one above; <code>lint-imports</code> (import-linter) checks it in
+CI. When a lower layer needs something from a higher one, the higher one registers it at startup: the standard-image
+folders, <code>/metrics/</code>' mail queue, which campaigns use a mail template.</p>
+{
+        why(
+            "Before the split, core imported most apps and 24 pairs of apps imported each other, so any change could "
+            "ripple anywhere. With the layers, the foundation and the mail engine can be changed without reading the "
+            "apps on top, and the contract stops a new shortcut the day it's written."
+        )
+    }
 <h2>Nomenclature</h2>
 <p>The code and the UI use CoderDojo's own vocabulary:</p>
 <table>
@@ -777,7 +798,7 @@ section(
     "Coding standards and quality",
     f"""
 <p class='lede'>How code is written, checked and measured: the standards, the linting setup, the tests and what they
-cover, and how complex the code is. Measured on 1 October 2026; the full version, with how to measure again, is
+cover, and how complex the code is. Measured on 2 October 2026; the full version, with how to measure again, is
 <code>CODING_STANDARDS.md</code>, and the conventions themselves are in <code>CLAUDE.md</code>.</p>
 
 <h2>Production code and development-only code</h2>
@@ -801,11 +822,13 @@ flake8-django and pyupgrade; the formatter decides the style (119 characters, do
 <li>The devcontainer's editor lints as you type and formats on save with the same Ruff.</li>
 <li>CI: Ruff, the security rules, <code>pip-audit</code>, <code>manage.py check --deploy</code> and CodeQL in
 <b>Code audit</b>; missing migrations and the whole suite in <b>Tests</b>.</li>
-<li>Not gated, on purpose: types (no type checker), a minimum coverage, complexity limits. They're measured.</li>
+<li>Gated since 2 October 2026: no function over complexity 20 (Ruff <code>C901</code>, seed code excepted) and the
+layers between the apps (<code>lint-imports</code>). Not gated, on purpose: types (no type checker) and a minimum
+coverage. They're measured.</li>
 </ul>
 
 <h2>Tests</h2>
-<p>1,092 tests (12,400 lines of test code for 24,000 lines of code). Routes are tested for status, template,
+<p>1,132 tests (12,900 lines of test code for 25,000 lines of code). Routes are tested for status, template,
 gating and the database effect of a POST; services with their refusals; concurrency with real threads. About
 twenty <b>guard tests</b> fail on new code that forgets a rule: privacy classification, export coverage, an
 audit-log decision, a usable admin, <code>__str__</code> without queries, translated form texts, security headers
@@ -817,7 +840,7 @@ failures on the failing line.</p>
 <table>
 <tr><th>Covered well</th><th>Not covered</th></tr>
 <tr><td>The business rules and their services (registrations, teams, awards, onboarding, mail, privacy, sign-in),
-every page's gating, the API, monitoring, every guard rule: most apps' own code at 91–99%.</td>
+every page's gating, the API, monitoring, every guard rule: the site's own code at 94%, most apps at 91–99%.</td>
 <td>Seeders and import commands (51%, development only); refusals of some rules (<code>dojos/team.py</code>,
 <code>accounts/invitations.py</code>); two segment attributes; admin actions; outside-service failures; the ASGI
 routing glue; one-line task wrappers.</td></tr>
@@ -830,12 +853,12 @@ routing glue; one-line task wrappers.</td></tr>
     }
 
 <h2>Complexity</h2>
-<p>An average complexity of 3.3; every module ranks A for maintainability. The site's six functions over 20 are the
-privacy registry's validation, the engagement rebuild and its metrics, the erasure's collection,
-<code>event_signup</code> and <code>dojo_team_action</code>: each has a concrete split in
-<code>CODING_STANDARDS.md</code>.</p>
+<p>An average complexity of 3.2; every module ranks A for maintainability. The site's six functions over 20 were
+split on 2 October 2026 (the privacy registry's validation, the engagement rebuild and its metrics, the erasure's
+collection, <code>event_signup</code>, <code>dojo_team_action</code>): only seed code is over 20 now, and Ruff fails any
+new function that is. The three large views modules became packages by area.</p>
 {chart("complexity-ranks", "Cyclomatic complexity of every function (radon).", QUALITY_CHARTS)}
-{chart("most-complex", "The most complex functions; over 20, split them at the next change.", QUALITY_CHARTS)}
+{chart("most-complex", "The most complex functions; over 20 fails the lint, seed code excepted.", QUALITY_CHARTS)}
 
 """,
 )
@@ -849,7 +872,7 @@ def html_doc():
         "<div class='sub'>How the site is built, how its data fits together, and why it looks the way it does. "
         "A summary of <code>DATA_MODEL.md</code> and <code>CLAUDE.md</code>, with the diagrams taken from the former.</div>"
         f"<h2 style='margin-top:14mm'>Contents</h2><ol class='toc'>{toc}</ol>"
-        "<div class='meta'>Generated from the repository, 30 September 2026 · "
+        "<div class='meta'>Generated from the repository, 2 October 2026 · "
         "user-journeys/scripts/build_technical.py</div></div>"
     ]
     for i, (title, content) in enumerate(SECTIONS, 1):

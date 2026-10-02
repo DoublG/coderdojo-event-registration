@@ -2,8 +2,8 @@
 of the dojo's admin area. Anyone on the dojo's managing team sees the list
 and what was sent; writing, testing, sending and cancelling need SEND_MAIL
 (the champion). A mailing is a `Campaign` with the dojo set, so everything
-it does goes through mailing.campaigns, and the audiences through
-mailing.dojo_audiences. The team sees how many families a mail reaches,
+it does goes through campaigns.services, and the audiences through
+campaigns.dojo_audiences. The team sees how many families a mail reaches,
 never who they are."""
 
 from datetime import timedelta

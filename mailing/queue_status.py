@@ -1,5 +1,5 @@
 """Whether mail is going out: shared by the organisation's Mail queue
-(mailing.manage.mail_queue) and a dojo's (mailing.dojo_views.dojo_mail_queue)."""
+(mailing.manage.mail_queue) and a dojo's (campaigns.dojo_views.dojo_mail_queue)."""
 
 from datetime import timedelta
 

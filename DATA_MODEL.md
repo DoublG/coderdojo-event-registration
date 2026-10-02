@@ -1604,6 +1604,17 @@ at every step:
 
 ## 11. Mailing, segmentation and campaigns
 
+> **Two apps since 2 October 2026.** The mail engine stays `mailing`
+> (`EmailMessage`, templates, preferences and consent, mutes, bounces, the
+> queue and the automated mail); `Campaign`, `Segment`, `SegmentGroup`,
+> `SegmentRule`, `Journey` and `JourneyDelivery` moved to the `campaigns`
+> app with the code that uses them, on top of the engine, which never
+> imports it (`CODING_STANDARDS.md`, "Layers between the apps"). Only
+> Django's state moved: the tables kept their names (`Meta.db_table`,
+> `mailing_*`), and the content types were renamed, so permissions and
+> audit-log entries follow. Below, `mailing.X` for one of those models or
+> its code means `campaigns.X`.
+
 Every mail the site sends goes through the `mailing` app: one gateway,
 `mailing.services.send()`, queues it as an `EmailMessage` row, and two
 Celery workers send it (see `CLAUDE.md`, "Background jobs" and "Mailing,
@@ -1939,7 +1950,7 @@ Changes to existing models:
   against `geo.Municipality`): where the family lives, for the locality
   attributes and as the dojo finder's default origin for a logged-in
   account (instead of Ghent). *Done: on the family sign-up form.*
-- **`mailing.SegmentRule.segment` → `group`**. *Done.* Root groups are
+- **`campaigns.SegmentRule.segment` → `group`**. *Done.* Root groups are
   ANDed, so a segment doesn't need exactly one root.
 
 #### Sending pipeline: the database is the queue, Celery sends
@@ -2221,7 +2232,7 @@ days.
 #### Segmentation attributes to build
 
 In priority order. Each one is a `SegmentAttribute` in
-`mailing/segmentation/attributes/` plus a registry entry.
+`campaigns/segmentation/attributes/` plus a registry entry.
 
 **Tier 1 — direct data, build first**
 
@@ -2819,7 +2830,7 @@ What we checked in its 3.4.1 source, and what the plan has to work around:
   (`post_save`/`pre_save`/`post_delete`/`m2m_changed`), never
   `QuerySet.update()`, `bulk_create()` or raw SQL. Of our code that
   changes data worth recording, only *Mark all present*
-  (`dojos/views.py`, `confirmed.update(attended=True)`) does that. The
+  (`dojos/views/`, `confirmed.update(attended=True)`) does that. The
   mail queue, campaign status and the nightly engagement rebuild use
   `update()`/`bulk_create()` too, but those models aren't recorded (below).
 - **Signals are per class:** a save through the *Background checks* admin
@@ -3216,7 +3227,7 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
   gets. It matters only to the organisation dashboard's segments (so
   campaigns and journeys): a "Parents of a child who…" group only reaches
   the guardians who consented for that child
-  (`mailing.segmentation.resolver`). Signing a child up, their sessions,
+  (`campaigns.segmentation.resolver`). Signing a child up, their sessions,
   belts and badges, and the automated mail never depend on it. An optional
   checkbox on family sign-up (next to the required "I am the parent or
   legal guardian") and on Add a child, and a switch per child on the Mail
@@ -4681,20 +4692,20 @@ flowchart TD
 dojo in the unsubscribe token, *Your dojos* on Mail preferences and
 `mailing/dojo_families.py` (the one definition of a dojo's families,
 used by `announce_new_sessions` too). **Phases 2 and 3 built** (the
-audiences and dojo mailings on `Campaign`): `mailing/dojo_audiences.py`
+audiences and dojo mailings on `Campaign`): `campaigns/dojo_audiences.py`
 (`AUDIENCES`, `clean_params`, `definition`, `describe`, `reach`), the
-attributes in `mailing/segmentation/attributes/dojo.py` (`dojo_family`,
+attributes in `campaigns/segmentation/attributes/dojo.py` (`dojo_family`,
 `ninja_of_dojo`, `family_booked_for_event`, `family_waitlisted_for_event`,
 and `family_visited_dojo`, which `in_builder = False` keeps out of the
 organisation's builder), `SegmentResolver(require_consent=False)` for the
 "left out" count, the `Campaign` fields, the `dojo_message` template, the
-dojo branch in `mailing/campaigns.py` and `EmailMessage.reply_to`. Where
+dojo branch in `campaigns/services.py` and `EmailMessage.reply_to`. Where
 the build differs from the text below: like every campaign, a dojo
 mailing reaches **adults only** (the resolver's rule), so a child's own
 login doesn't get it; and an audience about a session reaches the
 families with a place there even when the child isn't otherwise one of
 the dojo's (a visitor), instead of being ANDed with "family of this
-dojo". **Phase 4 built** (the dojo's *Mail* pages, `mailing/dojo_views.py`,
+dojo". **Phase 4 built** (the dojo's *Mail* pages, `campaigns/dojo_views.py`,
 `SEND_MAIL`); a mailing is sent right away, there's no scheduling yet.
 **Phase 5 built**: the organisation's *Campaigns* list shows every dojo's
 mail (a *Sent by* column and filter), its page shows the dojo's text and
@@ -4705,7 +4716,7 @@ audience, and the organisation can only stop one that's going out.
 for the first public dojo with families, giving it its champion's address
 when it has none). **Added after the plan, on request: the dojo's own
 *Mail queue*** (`/dojos/<id>/manage/mail/queue/`,
-`mailing.dojo_views.dojo_mail_queue`, every role): the organisation's
+`campaigns.dojo_views.dojo_mail_queue`, every role): the organisation's
 *Mail queue* narrowed to the dojo's `dojo_news` mail (its mailings, the
 automatic new-sessions mail, tests), per mail waiting / sent / not
 delivered / held back and why held back in words
@@ -4783,7 +4794,7 @@ list outside the site, or asking the organisation.
    (decision 5), never get it. Newsletter, volunteer and campaign mail
    stay the organisation's.
 2. **Prepared audiences, no segment builder.** A dojo picks one audience
-   from a fixed list in code (`mailing/dojo_audiences.py`), each a
+   from a fixed list in code (`campaigns/dojo_audiences.py`), each a
    function `(dojo, params) -> segment definition` in the resolver's
    format, always starting from "families of this dojo". Proposed list:
 
@@ -4903,7 +4914,7 @@ the dojo's content, not personal) and its place in `core.audit.RECORDED`.
 ### Screens
 
 - **Dojo area, *Mail* in the sidebar** (`/dojos/<id>/manage/mail/`,
-  `mailing/dojo_views.py`, `require_dojo_access(..., SEND_MAIL)` for
+  `campaigns/dojo_views.py`, `require_dojo_access(..., SEND_MAIL)` for
   writing, any role for the list): past and draft mailings with their
   results (sent, not delivered, unsubscribed from this dojo).
 - **New mailing** (`/dojos/<id>/manage/mail/new/`): pick an audience (a
@@ -4926,7 +4937,7 @@ the dojo's content, not personal) and its place in `core.audit.RECORDED`.
    automated mail. Tests: muted dojo suppressed, other dojo still sent,
    consent log, token for a dojo mail.
 2. **The audiences** (built): the `dojo_family` helper and attribute (shared with
-   `announce_new_sessions`), `mailing/dojo_audiences.py` with the list
+   `announce_new_sessions`), `campaigns/dojo_audiences.py` with the list
    above, each audience limited to its dojo. Tests per audience: the right
    families, never another dojo's, consent-needing ones only with the
    child-data consent, ninja logins only where `dojo_news` allows them.

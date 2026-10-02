@@ -62,7 +62,7 @@ def complexity_ranks(summary):
 def most_complex(summary, count=12):
     functions = summary["complexity"]["most_complex"][:count]
     fig, ax = figure(
-        "The most complex functions: mostly seeders, a few real hotspots",
+        "Only seed code is over 20: every function of the site stays under it",
         "Cyclomatic complexity per function; seeders and import commands only run on a developer's machine.",
         height=0.34 * count + 1.8,
     )

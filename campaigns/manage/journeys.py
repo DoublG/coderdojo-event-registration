@@ -1,4 +1,4 @@
-"""Journeys, standing campaigns (mailing.journeys): the list, creating one, its
+"""Journeys, standing campaigns (campaigns.journeys): the list, creating one, its
 page with who gets it next, activating, pausing and sending a test."""
 
 from django.contrib import messages

@@ -56,7 +56,7 @@ class SegmentResolver:
 
     `require_consent=False` also counts guardians who didn't give the
     child-data consent: only to tell a dojo's team how many families an
-    audience leaves out (mailing.dojo_audiences), never to send."""
+    audience leaves out (campaigns.dojo_audiences), never to send."""
 
     def __init__(self, require_consent=True):
         self.require_consent = require_consent
