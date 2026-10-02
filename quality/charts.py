@@ -71,7 +71,7 @@ def most_complex(summary, count=12):
     bars = ax.barh(labels, [f["complexity"] for f in reversed(functions)], color=colours, height=0.6)
     ax.bar_label(bars, padding=3, fontsize=9, color=INK)
     ax.axvline(20, color=INK_2, linestyle=(0, (4, 3)), linewidth=1.2)
-    ax.text(20.5, count - 0.45, "20: split it when you touch it", color=INK_2, fontsize=8.5)
+    ax.text(20.5, count - 0.45, "over 20 fails the lint (seed code excepted)", color=INK_2, fontsize=8.5)
     ax.set_xlabel("cyclomatic complexity")
     ax.grid(axis="y", visible=False)
     from matplotlib.patches import Patch
