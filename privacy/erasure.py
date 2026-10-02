@@ -157,30 +157,42 @@ class _Erasure:
         account_ids = [account.pk for account in self.accounts]
         child_ids = [child.pk for child in self.children]
         emails = [account.email for account in self.accounts if account.email]
+        # One way to find a person's rows per kind of subject (registry.Subject).
+        found_by = {
+            Subject.ACCOUNT: lambda lookup: Q(**{f"{lookup}__in": account_ids}) if account_ids else None,
+            Subject.CHILD: lambda lookup: Q(**{f"{lookup}__in": child_ids}) if child_ids else None,
+            Subject.EMAIL: lambda lookup: (
+                reduce(or_, (Q(**{f"{lookup}__iexact": email}) for email in emails)) if emails else None
+            ),
+        }
         targets = {User: account_ids, Ninja: child_ids}
         for entry in registry.registered():
             if entry.model in _HANDLED_SEPARATELY:
                 continue
-            conditions = []
-            for subject, lookup in entry.subjects.items():
-                if subject == Subject.ACCOUNT and account_ids:
-                    conditions.append(Q(**{f"{lookup}__in": account_ids}))
-                elif subject == Subject.CHILD and child_ids:
-                    conditions.append(Q(**{f"{lookup}__in": child_ids}))
-                elif subject == Subject.EMAIL and emails:
-                    conditions.append(reduce(or_, (Q(**{f"{lookup}__iexact": email}) for email in emails)))
-            own = set()
-            if conditions:
-                for obj in entry.model._base_manager.filter(reduce(or_, conditions)).distinct().order_by("pk"):
-                    own.add(obj.pk)
-                    self.rows.append((entry, obj))
-            for name, spec in entry.fields.items():
-                model_field = entry.model._meta.get_field(name)
-                ids = targets.get(model_field.related_model) if model_field.is_relation else None
-                if not ids or model_field.many_to_many or spec.on_erasure == Erasure.KEEP:
-                    continue
-                for obj in entry.model._base_manager.filter(**{f"{name}__in": ids}).exclude(pk__in=own):
-                    self.links.append((entry, obj, name))
+            own = self._collect_own_rows(entry, found_by)
+            self._collect_links(entry, targets, own)
+
+    def _collect_own_rows(self, entry, found_by):
+        """The rows of `entry`'s model that are about the person (its
+        `subjects`); returns their ids."""
+        conditions = [q for subject, lookup in entry.subjects.items() if (q := found_by[subject](lookup)) is not None]
+        own = set()
+        if conditions:
+            for obj in entry.model._base_manager.filter(reduce(or_, conditions)).distinct().order_by("pk"):
+                own.add(obj.pk)
+                self.rows.append((entry, obj))
+        return own
+
+    def _collect_links(self, entry, targets, own):
+        """Others' rows of `entry`'s model whose personal link points at the
+        person's account or child (not `own` rows, not kept links)."""
+        for name, spec in entry.fields.items():
+            model_field = entry.model._meta.get_field(name)
+            ids = targets.get(model_field.related_model) if model_field.is_relation else None
+            if not ids or model_field.many_to_many or spec.on_erasure == Erasure.KEEP:
+                continue
+            for obj in entry.model._base_manager.filter(**{f"{name}__in": ids}).exclude(pk__in=own):
+                self.links.append((entry, obj, name))
 
     # --- erasing them --------------------------------------------------------
 

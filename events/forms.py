@@ -363,3 +363,40 @@ class BadgeForm(forms.ModelForm):
         if commit:
             badge.save()
         return badge
+
+
+class _AnyOfMultipleChoiceField(forms.MultipleChoiceField):
+    """Accepts any submitted value; SignUpForm keeps only its own children,
+    so a stale or foreign id is left out instead of failing the whole form."""
+
+    def valid_value(self, value):
+        return True
+
+
+class SignUpForm(forms.Form):
+    """Which of `children` (Ninja.objects.signable_by) to sign up, in the
+    order they were ticked. The page renders its own checkboxes (CLAUDE.md,
+    "Forms": the event sign-up's children stay hand-written); this form only
+    reads and checks them. `cleaned_data["selected"]` is the children, in
+    order."""
+
+    child = _AnyOfMultipleChoiceField(required=False)
+    # The order the boxes were ticked in, tracked by bundle.js: a checkbox
+    # list is always submitted in page order, whatever the click order.
+    child_order = forms.CharField(required=False)
+
+    def __init__(self, *args, children, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.children = {str(child.id): child for child in children}
+
+    def clean(self):
+        data = super().clean()
+        submitted = data.get("child") or []
+        ordered = [cid for cid in (data.get("child_order") or "").split(",") if cid]
+        if set(ordered) != set(submitted):
+            ordered = submitted  # no script, or a stale order: the page's order
+        selected = [self.children[cid] for cid in dict.fromkeys(ordered) if cid in self.children]
+        if not selected:
+            raise forms.ValidationError(_("Please select at least one child."))
+        data["selected"] = selected
+        return data

@@ -187,6 +187,61 @@ class ModelPrivacy:
         return bool(self.fields)
 
 
+# The rules a field's classification must meet, each a (problem, message)
+# pair: Registry.register reports the first one that applies.
+FIELD_RULES = (
+    (lambda spec: spec.category not in Category.values, lambda spec: f"unknown category {spec.category!r}"),
+    (lambda spec: not spec.purpose, lambda spec: "no purpose"),
+    (lambda spec: not spec.seen_by, lambda spec: "no seen_by"),
+    (lambda spec: spec.legal_basis not in LegalBasis.values, lambda spec: f"unknown legal basis {spec.legal_basis!r}"),
+    (lambda spec: spec.retention not in RETENTION_RULES, lambda spec: f"unknown retention rule {spec.retention!r}"),
+    (
+        lambda spec: spec.on_erasure == Erasure.ANONYMISE and spec.replacement is _UNSET,
+        lambda spec: "anonymised without a replacement",
+    ),
+    (
+        lambda spec: spec.on_erasure == Erasure.KEEP and not spec.reason,
+        lambda spec: "kept on erasure without a reason",
+    ),
+)
+
+
+def _resolve_fields(fields, defaults, fail):
+    """{name: FieldPrivacy} from a declaration's `fields` (tuple keys
+    classify several fields alike), with the model's purpose, legal basis,
+    retention and seen_by filled in where a field doesn't set its own, each
+    checked against FIELD_RULES."""
+    resolved = {}
+    for names, spec in fields.items():
+        for name in (names,) if isinstance(names, str) else names:
+            if name in resolved:
+                fail(f"{name} is classified twice")
+            spec = replace(spec, **{key: getattr(spec, key) or value for key, value in defaults.items()})
+            for problem, message in FIELD_RULES:
+                if problem(spec):
+                    fail(f"{name}: {message(spec)}")
+            resolved[name] = spec
+    return resolved
+
+
+def _check_field_names(model, names, fail):
+    for name in names:
+        try:
+            model._meta.get_field(name)
+        except FieldDoesNotExist:
+            fail(f"no field {name!r}")
+
+
+def _check_subjects(model, subjects, fail):
+    for subject, lookup in subjects.items():
+        if subject not in Subject.values:
+            fail(f"unknown subject {subject!r}")
+        try:
+            model._base_manager.filter(**{f"{lookup}__isnull": True})
+        except FieldError:
+            fail(f"subject {subject}: no lookup {lookup!r}")
+
+
 class Registry:
     """The declarations; `site` below is the one every privacy.py fills."""
 
@@ -216,50 +271,14 @@ class Registry:
 
         if model in self._entries:
             fail("registered twice")
-        resolved = {}
-        for names, spec in (fields or {}).items():
-            for name in (names,) if isinstance(names, str) else names:
-                if name in resolved:
-                    fail(f"{name} is classified twice")
-                spec = replace(
-                    spec,
-                    purpose=spec.purpose or purpose,
-                    legal_basis=spec.legal_basis or legal_basis,
-                    retention=spec.retention or retention,
-                    seen_by=spec.seen_by or seen_by,
-                )
-                if spec.category not in Category.values:
-                    fail(f"{name}: unknown category {spec.category!r}")
-                if not spec.purpose:
-                    fail(f"{name}: no purpose")
-                if not spec.seen_by:
-                    fail(f"{name}: no seen_by")
-                if spec.legal_basis not in LegalBasis.values:
-                    fail(f"{name}: unknown legal basis {spec.legal_basis!r}")
-                if spec.retention not in RETENTION_RULES:
-                    fail(f"{name}: unknown retention rule {spec.retention!r}")
-                if spec.on_erasure == Erasure.ANONYMISE and spec.replacement is _UNSET:
-                    fail(f"{name}: anonymised without a replacement")
-                if spec.on_erasure == Erasure.KEEP and not spec.reason:
-                    fail(f"{name}: kept on erasure without a reason")
-                resolved[name] = spec
-
+        defaults = {"purpose": purpose, "legal_basis": legal_basis, "retention": retention, "seen_by": seen_by}
+        resolved = _resolve_fields(fields or {}, defaults, fail)
         not_personal = frozenset(not_personal)
-        for name in [*resolved, *not_personal, *([visible_when] if visible_when else [])]:
-            try:
-                model._meta.get_field(name)
-            except FieldDoesNotExist:
-                fail(f"no field {name!r}")
+        _check_field_names(model, [*resolved, *not_personal, *([visible_when] if visible_when else [])], fail)
         if both := not_personal & resolved.keys():
             fail(f"{', '.join(sorted(both))} both personal and not personal")
         subjects = dict(subjects or {})
-        for subject, lookup in subjects.items():
-            if subject not in Subject.values:
-                fail(f"unknown subject {subject!r}")
-            try:
-                model._base_manager.filter(**{f"{lookup}__isnull": True})
-            except FieldError:
-                fail(f"subject {subject}: no lookup {lookup!r}")
+        _check_subjects(model, subjects, fail)
 
         self._entries[model] = ModelPrivacy(
             model,

@@ -15,7 +15,7 @@ from core.caching import cached
 from dojos.models import Dojo
 
 from . import registrations
-from .forms import AGE_RANGES, DOJO_ORGANISATION, EventSearchForm
+from .forms import AGE_RANGES, DOJO_ORGANISATION, EventSearchForm, SignUpForm
 from .models import Event, Registration
 from .search import (
     EVENT_LIST_CACHE_TIMEOUT,
@@ -149,6 +149,13 @@ def event_detail(request, event_id):
     )
 
 
+def _registrations_of(event, account):
+    """{ninja_id: Registration} for the children `account` may sign up."""
+    return {
+        r.ninja_id: r for r in Registration.objects.filter(event=event, ninja__in=Ninja.objects.signable_by(account))
+    }
+
+
 @login_required
 def event_signup(request, event_id):
     event = get_object_or_404(Event.objects.visible(), id=event_id)
@@ -158,56 +165,29 @@ def event_signup(request, event_id):
     # An adult account signs up its own ninjas; a ninja's own login signs up
     # itself (Ninja.objects.signable_by).
     guardian = request.user
-    results = None
-    error = None
+    results = error = None
 
-    existing_registrations = {}
-    if guardian:
-        existing_registrations = {
-            r.ninja_id: r
-            for r in Registration.objects.filter(event=event, ninja__in=Ninja.objects.signable_by(guardian))
-        }
-
-    if request.method == "POST" and guardian:
-        submitted_ids = request.POST.getlist("child")
-        # The order children were *checked* in (tracked client-side, since
-        # checkbox form submission is always DOM order regardless of click
-        # order) — falls back to submission order if JS didn't populate it
-        # (or a mismatched/stale value slipped through).
-        ordered_ids = [cid for cid in request.POST.get("child_order", "").split(",") if cid]
-        if set(ordered_ids) != set(submitted_ids):
-            ordered_ids = submitted_ids
-
-        children_by_id = {str(c.id): c for c in Ninja.objects.signable_by(guardian).filter(id__in=submitted_ids)}
-        selected = [children_by_id[cid] for cid in dict.fromkeys(ordered_ids) if cid in children_by_id]
-
+    if request.method == "POST":
+        form = SignUpForm(request.POST, children=Ninja.objects.signable_by(guardian))
         if not event.registration_open:
             error = _("Registrations for this session are closed.")
-        elif not selected:
-            error = _("Please select at least one child.")
+        elif not form.is_valid():
+            error = form.non_field_errors()[0]
         else:
             # Places, positions and "already signed up" are decided under the
             # session's lock (events.registrations), not from what this page read.
             try:
-                results = registrations.sign_up(event, selected)
+                results = registrations.sign_up(event, form.cleaned_data["selected"])
             except registrations.RegistrationError as problem:
                 error = str(problem)
-            # Re-fetch: the children just registered above should now show
-            # as greyed-out/already-registered if the guardian lands back
-            # on this form (e.g. via the browser back button).
-            existing_registrations = {
-                r.ninja_id: r
-                for r in Registration.objects.filter(event=event, ninja__in=Ninja.objects.signable_by(guardian))
-            }
 
-    children = (
-        [
-            {"child": child, "registration": existing_registrations.get(child.id)}
-            for child in Ninja.objects.signable_by(guardian)
-        ]
-        if guardian
-        else []
-    )
+    # Read after a sign-up, so the children just signed up show as such
+    # (e.g. back on this form through the browser's back button).
+    existing_registrations = _registrations_of(event, guardian)
+    children = [
+        {"child": child, "registration": existing_registrations.get(child.id)}
+        for child in Ninja.objects.signable_by(guardian)
+    ]
     all_registered = bool(children) and all(entry["registration"] for entry in children)
 
     any_waitlisted = bool(results) and any(r["waiting_list"] for r in results)

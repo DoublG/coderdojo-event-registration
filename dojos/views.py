@@ -539,72 +539,98 @@ def dojo_team_manage(request, dojo_id):
     )
 
 
+def _team_leave(request, access, membership):
+    team.leave(access.membership)
+    messages.success(request, _("You've left the %(dojo)s team.") % {"dojo": access.dojo.name})
+    return redirect("account_home")
+
+
+def _team_transfer(request, access, membership):
+    if not access.is_champion or membership is None:
+        raise PermissionDenied
+    team.transfer_champion(access.dojo, access.membership, membership)
+    messages.success(
+        request,
+        _("%(membership)s is now the champion of %(dojo)s.")
+        % {"membership": membership.name, "dojo": access.dojo.name},
+    )
+    return redirect("dojo_team_manage", dojo_id=access.dojo.id)
+
+
+def _team_accept(request, access, membership):
+    team.accept_request(membership, by=request.user)
+    messages.success(request, _("%(membership)s is now on the team.") % {"membership": membership.name})
+
+
+def _team_decline(request, access, membership):
+    team.decline_request(membership, by=request.user)
+    messages.success(request, _("Request declined."))
+
+
+def _team_remove(request, access, membership):
+    team.remove_member(membership)
+    messages.success(request, _("%(membership)s has been removed from the team.") % {"membership": membership.name})
+
+
+def _team_add_mentor(request, access, membership):
+    form = AddMentorForm(request.POST)
+    user = None
+    if form.is_valid():
+        user = User.objects.filter(email__iexact=form.cleaned_data["email"]).first()
+    if user is None:
+        raise team.TeamError(_("No account uses that email address."))
+    team.add_mentor(access.dojo, user, by=request.user)
+    messages.success(request, _("%(name)s has been added to the team.") % {"name": user.team_name})
+
+
+def _team_promote(request, access, membership):
+    form = PromoteYouthMentorForm(request.POST, candidates=_youth_mentor_candidates(access.dojo))
+    if not form.is_valid():
+        raise Http404
+    ninja = form.cleaned_data["ninja_id"]
+    team.promote_youth_mentor(access.dojo, ninja.account, by_membership=access.membership)
+    messages.success(request, _("%(name)s is now a youth mentor.") % {"name": ninja.account.team_name})
+
+
+# The Team page's actions: handler, whether it needs MANAGE_TEAM, whether it
+# needs the posted membership. A handler returns a response, or None to go
+# back to the page it came from. Leaving is open to any team manager, the
+# transfer is the champion's (checked in its handler).
+TEAM_ACTIONS = {
+    "leave": (_team_leave, False, False),
+    "transfer": (_team_transfer, False, False),
+    "accept": (_team_accept, True, True),
+    "decline": (_team_decline, True, True),
+    "remove": (_team_remove, True, True),
+    "add_mentor": (_team_add_mentor, True, False),
+    "promote": (_team_promote, True, False),
+}
+
+
 @login_required
 def dojo_team_action(request, dojo_id):
-    """Every change posted from the Team page (POST only; `action` says which):
-    accept / decline a request, add a mentor (by email), promote a ninja to
-    youth mentor, remove a member, leave, and transfer the champion role.
-    Leaving is open to any team manager; transfer is champion-only; the rest
-    need MANAGE_TEAM."""
+    """Every change posted from the Team page (POST only; `action` says which,
+    TEAM_ACTIONS): accept / decline a request, add a mentor (by email),
+    promote a ninja to youth mentor, remove a member, leave, and transfer
+    the champion role."""
     access = require_dojo_access(request, dojo_id)
     dojo = access.dojo
     if request.method != "POST":
         return redirect("dojo_team_manage", dojo_id=dojo.id)
 
-    action = request.POST.get("action", "")
     membership = None
     if request.POST.get("membership_id"):
         membership = get_object_or_404(DojoMembership, id=request.POST["membership_id"], dojo=dojo)
-
+    handler, needs_team_right, needs_membership = TEAM_ACTIONS.get(request.POST.get("action", ""), (None, True, False))
     try:
-        if action == "leave":
-            team.leave(access.membership)
-            messages.success(request, _("You've left the %(dojo)s team.") % {"dojo": dojo.name})
-            return redirect("account_home")
-        if action == "transfer":
-            if not access.is_champion or membership is None:
-                raise PermissionDenied
-            team.transfer_champion(dojo, access.membership, membership)
-            messages.success(
-                request,
-                _("%(membership)s is now the champion of %(dojo)s.")
-                % {"membership": membership.name, "dojo": dojo.name},
-            )
-            return redirect("dojo_team_manage", dojo_id=dojo.id)
-
-        if not access.can_manage_team:
+        if needs_team_right and not access.can_manage_team:
             raise PermissionDenied
-        if action in ("accept", "decline", "remove") and membership is None:
+        if needs_membership and membership is None:
             raise Http404
-        if action == "accept":
-            team.accept_request(membership, by=request.user)
-            messages.success(request, _("%(membership)s is now on the team.") % {"membership": membership.name})
-        elif action == "decline":
-            team.decline_request(membership, by=request.user)
-            messages.success(request, _("Request declined."))
-        elif action == "remove":
-            team.remove_member(membership)
-            messages.success(
-                request, _("%(membership)s has been removed from the team.") % {"membership": membership.name}
-            )
-        elif action == "add_mentor":
-            form = AddMentorForm(request.POST)
-            user = None
-            if form.is_valid():
-                user = User.objects.filter(email__iexact=form.cleaned_data["email"]).first()
-            if user is None:
-                raise team.TeamError(_("No account uses that email address."))
-            team.add_mentor(dojo, user, by=request.user)
-            messages.success(request, _("%(name)s has been added to the team.") % {"name": user.team_name})
-        elif action == "promote":
-            form = PromoteYouthMentorForm(request.POST, candidates=_youth_mentor_candidates(dojo))
-            if not form.is_valid():
-                raise Http404
-            ninja = form.cleaned_data["ninja_id"]
-            team.promote_youth_mentor(dojo, ninja.account, by_membership=access.membership)
-            messages.success(request, _("%(name)s is now a youth mentor.") % {"name": ninja.account.team_name})
-        else:
+        if handler is None:
             messages.error(request, _("Unknown action."))
+        elif (response := handler(request, access, membership)) is not None:
+            return response
     except team.TeamError as error:
         messages.error(request, str(error))
     # The Members page posts its "Promote" here too, and comes back to itself.
