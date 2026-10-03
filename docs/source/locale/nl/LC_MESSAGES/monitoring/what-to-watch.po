@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-03 06:20+0000\n"
+"POT-Creation-Date: 2026-10-03 06:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: nl\n"
@@ -143,13 +143,16 @@ msgstr ""
 #: ../../source/monitoring/what-to-watch.rst:45
 msgid ""
 "**Database size** growing faster than planned (the daily sample): usually"
-" more mail than expected, since the full text of every mail is kept."
+" more mail than expected. The text of a mail is kept for a year, so a "
+"busy year of campaigns shows up here before the nightly clean-up catches "
+"up."
 msgstr ""
 "**Databasegrootte** die sneller groeit dan gepland (de dagelijkse "
-"meting): meestal meer e-mails dan verwacht, want de volledige tekst van "
-"elke e-mail wordt bewaard."
+"meting): meestal meer e-mails dan verwacht. De tekst van een e-mail "
+"blijft een jaar bewaard, dus een druk campagnejaar zie je hier, tot de "
+"nachtelijke opruiming het inhaalt."
 
-#: ../../source/monitoring/what-to-watch.rst:47
+#: ../../source/monitoring/what-to-watch.rst:48
 msgid ""
 "**Uploaded files** growing by more than 100 MB a month: unusually large "
 "uploads."
@@ -157,11 +160,11 @@ msgstr ""
 "**Geüploade bestanden** die met meer dan 100 MB per maand groeien: "
 "ongewoon grote uploads."
 
-#: ../../source/monitoring/what-to-watch.rst:51
+#: ../../source/monitoring/what-to-watch.rst:52
 msgid "Is the mail going out?"
 msgstr "Vertrekken de e-mails?"
 
-#: ../../source/monitoring/what-to-watch.rst:53
+#: ../../source/monitoring/what-to-watch.rst:54
 msgid ""
 "**Oldest mail waiting** for more than 30 minutes: the background workers "
 "have stopped. Restart them; the waiting mail then goes out by itself."
@@ -170,7 +173,7 @@ msgstr ""
 "achtergrondworkers zijn gestopt. Herstart ze; de wachtende e-mails "
 "vertrekken dan vanzelf."
 
-#: ../../source/monitoring/what-to-watch.rst:55
+#: ../../source/monitoring/what-to-watch.rst:56
 msgid ""
 "**Waiting tasks** (*Celery queue length*) above 500 for half an hour: the"
 " mail worker is stuck or far too slow. Right after a campaign is "
@@ -181,7 +184,7 @@ msgstr ""
 "campagne gestart is, is een lange wachtrij normaal en die slinkt binnen "
 "enkele minuten."
 
-#: ../../source/monitoring/what-to-watch.rst:58
+#: ../../source/monitoring/what-to-watch.rst:59
 msgid ""
 "**Failed mail and bounces** on the Mail queue page: a sudden rise usually"
 " means a problem with the mail server rather than with the addresses."

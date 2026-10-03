@@ -11,8 +11,8 @@ charts come from `loadtest/charts.py`, the figures behind them from `loadtest/re
 **In short:**
 
 - **The database grows by about 350 MB a year** at 100 dojos and 6,000 families (1.6 GB after five
-  years). Two thirds of that is the mail log: each mail keeps its full text. Clearing mail text after
-  12 months, as the privacy register already promises, saves about a quarter of it.
+  years). Two thirds of that is the mail log. Since 3 October 2026 a mail's text is cleared 12 months after
+  it was sent, as the privacy register promises: about a quarter less after five years (the last column below).
 - **Uploads are guarded since 30 September 2026:** at most 10 MB (and 40 megapixels for an image),
   images made smaller and stripped of every piece of metadata (a phone photo's GPS position, for one),
   replaced files deleted, and the background-check document only as PDF, JPEG or PNG. Production's proxy
@@ -120,9 +120,14 @@ Worth knowing:
 
 - **Mail text is the lever.** The growth scenario's 36,000 campaign mails a year, at 3 KB of text instead
   of the seeded templates' 0.5 KB, add about 90 MB a year. The privacy register's `mail_content` rule
-  ("subject, body and address cleared after 12 months") isn't applied by the retention job yet; building
-  it is the single biggest saving. InnoDB only gives the space back to the disk after `OPTIMIZE TABLE` on
-  that table (it reuses it for new rows either way).
+  ("subject, body and address cleared after 12 months") is applied by the nightly retention job since 3
+  October 2026 (`privacy.retention.clear_old_mail_content`), the single biggest saving. InnoDB only gives
+  the space back to the disk after `OPTIMIZE TABLE` on that table (it reuses it for new rows either way).
+- **Compressing the mail table instead** was measured too (3 October 2026, 63,800 mails cloned from the
+  seeded ones): `ROW_FORMAT=COMPRESSED` with 8 KB pages halves it (45.6 to 21.8 MB; 4 KB pages: 11.7 MB),
+  because mails from one template compress well together, but updates got about 12 times slower (this
+  table is also the mail queue), it costs buffer-pool memory, and MySQL discourages the format. Not worth
+  it at these sizes; if it ever is, move the body to a write-once table of its own and compress only that.
 - **Nothing is deleted when accounts age out:** accounts, children and bookings are anonymised, not
   removed, so those tables only grow. The audit log is the exception: an erased account's entries go.
 
@@ -486,8 +491,10 @@ In order of urgency.
 3. **Uploads had no limits** (disk, privacy). **Guarded on 30 September 2026** ([the
    guardrails](#disk-files-and-uploads)): size and type checks, images made smaller and stripped of their
    metadata, replaced files deleted. *Still to do on production:* the proxy's body limit (Level27).
-4. **Mail text is kept forever** (growth). Build the `mail_content` retention (clear subject, body and
-   address after 12 months) in the daily retention job: about a quarter less database after five years.
+4. **Mail text was kept forever** (growth). **Built on 3 October 2026:** the daily retention job clears a
+   mail's subject, body, address and account link 12 months after it was created (`mail_content`): about a
+   quarter less database after five years. Run `OPTIMIZE TABLE mailing_emailmessage` once after the first
+   large clean-up on production if the disk space itself is needed back.
 5. **Four web workers** (`WEB_CONCURRENCY`) if the account's memory allows: much better response times under
    load for about 200 MB more.
 6. **Redis limits:** set `maxmemory` and `volatile-lru` on production (or confirm what it has). The

@@ -37,6 +37,13 @@ account) are removed `AUDIT_LOG_RETENTION_DAYS` after they were written.
 
 **Login sessions** are removed once they've expired.
 
+**Mail content: 12 months** (`MAIL_CONTENT_RETENTION_DAYS`, the `mail_content`
+rule). A mail older than that keeps its row, with its category, template,
+status and dates, for the statistics, but loses what was personal about it:
+the fields its privacy classification marks `personal` (`mailing/privacy.py`:
+the account, the address, the subject and body, the idempotency key and the
+Message-ID) are emptied. Mail still waiting to be sent is left alone.
+
 The other rules in `core.privacy_registry.RETENTION_RULES` still wait for their
 periods (DATA_MODEL.md §16, open points).
 """
@@ -44,6 +51,8 @@ periods (DATA_MODEL.md §16, open points).
 import logging
 from dataclasses import dataclass
 from datetime import timedelta
+from functools import reduce
+from operator import or_
 
 from auditlog.models import LogEntry as AuditLogEntry
 from django.conf import settings
@@ -56,6 +65,8 @@ from django.utils import formats, timezone
 from django.utils.translation import gettext_lazy
 
 from accounts.models import OrganisationRole, User
+from core import privacy_registry
+from core.privacy_registry import Erasure
 from dojos.models import Dojo, DojoMembership
 from privacy.erasure import erase_person, sole_children
 from privacy.models import ErasureRecord, RetentionNotice
@@ -67,6 +78,7 @@ TEMPLATE_KEY = "account_deletion_reminder"
 # still the champion of an active dojo (no mail, the mentors are notified).
 DATE_PASSED = 0
 AUDIT_LOG_BATCH = 1000
+MAIL_CONTENT_BATCH = 1000
 
 
 def _first_reminder():
@@ -171,6 +183,7 @@ def apply_retention(today=None):
             done[outcome] += 1
     done["audit_log_entries"] = remove_old_audit_log_entries()
     done["organisation_invitations"] = remove_old_invitations()
+    done["mail_content"] = clear_old_mail_content()
     done["sessions"] = Session.objects.filter(expire_date__lt=timezone.now()).delete()[0]
     logger.info("retention: %s", done)
     return done
@@ -323,3 +336,53 @@ def remove_old_audit_log_entries():
     while ids := list(old.values_list("pk", flat=True)[:AUDIT_LOG_BATCH]):
         removed += AuditLogEntry.objects.filter(pk__in=ids).delete()[0]
     return removed
+
+
+# --- mail content --------------------------------------------------------------
+
+
+def mail_content_values():
+    """{column: empty value} for the mail fields the privacy registry marks
+    `personal`: what the `mail_content` rule clears. Read from the
+    classification, so a personal field added later is cleared too."""
+    from mailing.models import EmailMessage
+
+    values = {}
+    for name, spec in privacy_registry.get(EmailMessage).fields.items():
+        if spec.on_erasure != Erasure.DELETE:
+            continue
+        model_field = EmailMessage._meta.get_field(name)
+        values[model_field.attname] = None if model_field.null else ""
+    return values
+
+
+def clear_old_mail_content(now=None):
+    """Empty the personal fields of mail older than MAIL_CONTENT_RETENTION_DAYS,
+    in primary-key ranges of MAIL_CONTENT_BATCH (the table only grows, and its
+    ids follow `created_at`). With `QuerySet.update()`, so a batch is one
+    statement: the mail log isn't in the audit log, and nothing listens to its
+    saves. Returns how many mails were cleared."""
+    from mailing.models import EmailMessage
+
+    cutoff = (now or timezone.now()) - timedelta(days=settings.MAIL_CONTENT_RETENTION_DAYS)
+    values = mail_content_values()
+    has_content = reduce(
+        or_,
+        (
+            Q(**{f"{column}__isnull": False}) if empty is None else ~Q(**{column: empty})
+            for column, empty in values.items()
+        ),
+    )
+    old = EmailMessage.objects.filter(created_at__lt=cutoff).exclude(
+        status__in=[EmailMessage.Status.PENDING, EmailMessage.Status.SENDING]
+    )
+    # From the newest end: stops at the first mail past the cutoff.
+    last = old.order_by("-pk").values_list("pk", flat=True).first()
+    first = old.filter(has_content).order_by("pk").values_list("pk", flat=True).first()
+    if last is None or first is None:
+        return 0
+    cleared = 0
+    for start in range(first, last + 1, MAIL_CONTENT_BATCH):
+        batch = old.filter(has_content, pk__gte=start, pk__lt=start + MAIL_CONTENT_BATCH)
+        cleared += batch.update(**values)
+    return cleared

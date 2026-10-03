@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-03 06:20+0000\n"
+"POT-Creation-Date: 2026-10-03 06:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -165,8 +165,12 @@ msgid "10:00"
 msgstr "10:00"
 
 #: ../../source/monitoring/workers.rst:51
-msgid "Delete accounts that haven't been used for two years"
-msgstr "Supprimer les comptes inutilisés depuis deux ans"
+msgid ""
+"Delete accounts that haven't been used for two years; clear the text of "
+"mail older than a year"
+msgstr ""
+"Supprimer les comptes inutilisés depuis deux ans ; effacer le texte des "
+"e-mails de plus d'un an"
 
 #: ../../source/monitoring/workers.rst:52
 msgid "10:30"

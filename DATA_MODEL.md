@@ -3393,12 +3393,21 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
    The plan:
    - Rules in one module (`privacy/retention.py`), with periods in settings.
      Proposals to decide (see open points): a child's data N years after
-     their last session or after turning 18; `EmailMessage` bodies after 12
-     months (keep the row, status and category for statistics); bounces and
+     their last session or after turning 18; bounces and
      processed-mailbox rows after 12 months; closed sessions' registrations
      anonymised after N years (counts stay for statistics);
      background-check history as long as the legal rules say; `TeamAttendance`
      as long as the insurance needs it.
+   - **Mail content (decided, built 3 October 2026): cleared 12 months
+     after the mail was created** (`MAIL_CONTENT_RETENTION_DAYS = 365`,
+     `privacy.retention.clear_old_mail_content`, in the same nightly job).
+     The `EmailMessage` fields `mailing/privacy.py` classifies `personal`
+     (account link, address, subject, body, idempotency key, Message-ID)
+     are emptied; the row keeps its category, template, campaign, dojo,
+     status and dates for the statistics (campaign and journey results
+     still count it). Mail still `pending` or `sending` is left alone.
+     `JourneyDelivery` (also under `mail_content`) isn't cleared: it's the
+     journeys' cool-down record, and a cool-down can be longer than a year.
    - **Accounts (decided): erased two years after the last login**
      (`ACCOUNT_RETENTION_DAYS = 730`; `User.last_login`, or `date_joined`
      for an account that never logged in), with reminder mails first:

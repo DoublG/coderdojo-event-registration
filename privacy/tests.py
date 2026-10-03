@@ -851,6 +851,112 @@ class RetentionTests(TestCase):
                 self.assertNotIn("{%", body)
 
 
+class MailContentRetentionTests(TestCase):
+    """privacy.retention.clear_old_mail_content: a mail's personal fields are
+    emptied 12 months after it was created (the `mail_content` rule); the row
+    stays for the statistics."""
+
+    def setUp(self):
+        from itertools import count
+
+        self.user = User.objects.create(username="an", email="an@example.com")
+        self.keys = count()
+
+    def mail(self, days_ago, status="sent", **fields):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from mailing.models import EmailMessage
+
+        mail = EmailMessage.objects.create(
+            user=self.user,
+            category="registration",
+            template_key="registration_confirmed",
+            recipient="an@example.com",
+            subject="Your place",
+            body="Hi An, see you on Saturday.",
+            status=status,
+            idempotency_key=f"booking:{next(self.keys)}",
+            message_id="<abc@coderdojo.be>",
+            sent_at=timezone.now() - timedelta(days=days_ago),
+            **fields,
+        )
+        # created_at is auto_now_add: set it afterwards.
+        EmailMessage.objects.filter(pk=mail.pk).update(created_at=timezone.now() - timedelta(days=days_ago))
+        mail.refresh_from_db()
+        return mail
+
+    def test_old_mail_loses_what_is_personal_and_keeps_the_statistics(self):
+        from privacy.retention import clear_old_mail_content
+
+        old = self.mail(days_ago=400)
+        self.assertEqual(clear_old_mail_content(), 1)
+        old.refresh_from_db()
+        self.assertIsNone(old.user_id)
+        self.assertEqual((old.recipient, old.subject, old.body, old.message_id), ("", "", "", ""))
+        self.assertIsNone(old.idempotency_key)
+        self.assertEqual(
+            (old.category, old.template_key, old.status),
+            ("registration", "registration_confirmed", "sent"),
+        )
+        self.assertIsNotNone(old.sent_at)
+
+    def test_recent_mail_and_mail_still_waiting_are_left_alone(self):
+        from privacy.retention import clear_old_mail_content
+
+        recent = self.mail(days_ago=300)
+        pending = self.mail(days_ago=400, status="pending")
+        sending = self.mail(days_ago=400, status="sending")
+        self.assertEqual(clear_old_mail_content(), 0)
+        for mail in (recent, pending, sending):
+            mail.refresh_from_db()
+            self.assertEqual((mail.user_id, mail.body), (self.user.pk, "Hi An, see you on Saturday."))
+
+    def test_every_status_that_is_done_is_cleared(self):
+        from mailing.models import EmailMessage
+        from privacy.retention import clear_old_mail_content
+
+        for status in ("sent", "failed", "bounced", "suppressed"):
+            self.mail(days_ago=400, status=status)
+        self.assertEqual(clear_old_mail_content(), 4)
+        self.assertFalse(EmailMessage.objects.exclude(body="").exists())
+
+    def test_safe_to_run_twice(self):
+        from privacy.retention import clear_old_mail_content
+
+        self.mail(days_ago=400)
+        self.assertEqual(clear_old_mail_content(), 1)
+        self.assertEqual(clear_old_mail_content(), 0)
+
+    def test_batches_cover_every_row_across_gaps_in_the_ids(self):
+        from unittest import mock
+
+        from mailing.models import EmailMessage
+        from privacy.retention import clear_old_mail_content
+
+        mails = [self.mail(days_ago=400) for _ in range(7)]
+        EmailMessage.objects.filter(pk__in=[mails[2].pk, mails[3].pk]).delete()
+        self.mail(days_ago=10)
+        with mock.patch("privacy.retention.MAIL_CONTENT_BATCH", 2):
+            self.assertEqual(clear_old_mail_content(), 5)
+        self.assertEqual(EmailMessage.objects.exclude(body="").count(), 1)
+
+    def test_the_fields_cleared_come_from_the_privacy_classification(self):
+        from privacy.retention import mail_content_values
+
+        self.assertEqual(
+            mail_content_values(),
+            {"user_id": None, "recipient": "", "subject": "", "body": "", "idempotency_key": None, "message_id": ""},
+        )
+
+    def test_the_nightly_job_runs_it(self):
+        from privacy.retention import apply_retention
+
+        self.mail(days_ago=400)
+        self.assertEqual(apply_retention()["mail_content"], 1)
+
+
 class DeleteAccountTests(TestCase):
     """privacy.deletion: the family's Delete my account and the
     organisation's Delete… on the Privacy page."""

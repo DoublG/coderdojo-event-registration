@@ -164,6 +164,10 @@ takes to keep your account, and every login starts the two years again.
 Your children's own logins count too: while one of them logs in, your
 account stays.
 
+The mail we send you is kept for a year: after that we only keep that a
+mail of a certain kind went out on a certain day, not what it said or the
+address it went to.
+
 Children only you are a guardian of are deleted with your account: their
 details, belts and badges. The sessions they came to keep counting, without
 their name. A child who also has another parent's account stays with that

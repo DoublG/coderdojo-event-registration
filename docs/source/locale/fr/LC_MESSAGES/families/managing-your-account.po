@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 11:54+0000\n"
+"POT-Creation-Date: 2026-10-03 06:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -438,6 +438,16 @@ msgstr ""
 
 #: ../../source/families/managing-your-account.rst:167
 msgid ""
+"The mail we send you is kept for a year: after that we only keep that a "
+"mail of a certain kind went out on a certain day, not what it said or the"
+" address it went to."
+msgstr ""
+"Les e-mails que nous vous envoyons sont conservés un an : ensuite, nous "
+"gardons seulement qu'un e-mail d'un certain type est parti un certain "
+"jour, pas ce qu'il disait ni l'adresse à laquelle il a été envoyé."
+
+#: ../../source/families/managing-your-account.rst:171
+msgid ""
 "Children only you are a guardian of are deleted with your account: their "
 "details, belts and badges. The sessions they came to keep counting, "
 "without their name. A child who also has another parent's account stays "
@@ -448,7 +458,7 @@ msgstr ""
 "auxquelles ils ont participé restent comptées, sans leur nom. Un enfant "
 "qui figure aussi sur le compte d'un autre parent reste sur ce compte."
 
-#: ../../source/families/managing-your-account.rst:172
+#: ../../source/families/managing-your-account.rst:176
 msgid ""
 "A child's own login has no date of its own: it goes when the child does, "
 "and the mails about it come to you."
@@ -456,7 +466,7 @@ msgstr ""
 "Le compte personnel d'un enfant n'a pas de date propre : il disparaît "
 "avec l'enfant, et les e-mails à ce sujet vous sont envoyés."
 
-#: ../../source/families/managing-your-account.rst:175
+#: ../../source/families/managing-your-account.rst:179
 msgid ""
 "**Champions and mentors:** your name stays on the sessions you helped run"
 " and on the belts and badges you awarded, and so does your profile on the"
@@ -471,11 +481,11 @@ msgstr ""
 "dojo actif, votre compte reste jusqu'à ce que vous passiez le rôle à un "
 "des mentors du dojo."
 
-#: ../../source/families/managing-your-account.rst:182
+#: ../../source/families/managing-your-account.rst:186
 msgid "Already a champion or mentor?"
 msgstr "Déjà champion ou mentor ?"
 
-#: ../../source/families/managing-your-account.rst:184
+#: ../../source/families/managing-your-account.rst:188
 msgid ""
 "Every account has a family page: open **My Account** from your account "
 "menu and use **Add a child** there. Your children are added to the same "
@@ -486,11 +496,11 @@ msgstr ""
 "au même identifiant que vous utilisez déjà, sans inscription séparée ni "
 "second compte."
 
-#: ../../source/families/managing-your-account.rst:189
+#: ../../source/families/managing-your-account.rst:193
 msgid "Changing your password"
 msgstr "Modifier votre mot de passe"
 
-#: ../../source/families/managing-your-account.rst:191
+#: ../../source/families/managing-your-account.rst:195
 msgid ""
 "Go to **Change password** (also linked from your account page). You'll "
 "need your current password to set a new one."
@@ -499,11 +509,11 @@ msgstr ""
 "page de votre compte). Vous aurez besoin de votre mot de passe actuel "
 "pour en définir un nouveau."
 
-#: ../../source/families/managing-your-account.rst:195
+#: ../../source/families/managing-your-account.rst:199
 msgid "Volunteering"
 msgstr "Bénévolat"
 
-#: ../../source/families/managing-your-account.rst:197
+#: ../../source/families/managing-your-account.rst:201
 msgid ""
 "The **Volunteering** section of your account page shows any application "
 "you've made to become a mentor or start a dojo, and where your background"

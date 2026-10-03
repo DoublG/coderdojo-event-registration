@@ -42,17 +42,17 @@ Everything that doesn't have to happen while a visitor waits is done by two
   passes waiting mail on to the mail worker; every few minutes it checks for
   bounced mail and campaigns that are due. Every day it runs:
 
-  ========  ==========================================================
+  ========  ==============================================================================================
   Time      Job
-  ========  ==========================================================
+  ========  ==============================================================================================
   02:30     Store the daily sample of the site's size and figures
   03:00     Rebuild how often each child comes to sessions
   09:00     Session reminders; mail reviewers about waiting background checks
-  10:00     Delete accounts that haven't been used for two years
+  10:00     Delete accounts that haven't been used for two years; clear the text of mail older than a year
   10:30     Remind volunteers whose background check is about to expire
   17:00     Tell families about new sessions at their dojo
   18:00     Send the journeys' mail
-  ========  ==========================================================
+  ========  ==============================================================================================
 
 If the background workers stop, the website itself keeps working, but no
 mail goes out. Nothing is lost: the mail waits in the queue and goes out as

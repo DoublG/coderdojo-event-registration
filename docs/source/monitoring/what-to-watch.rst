@@ -43,7 +43,8 @@ Is there room enough?
 - **Cache memory** over half of its limit (128 MB), or keys being thrown out
   (*evicted*): the cache is too small.
 - **Database size** growing faster than planned (the daily sample): usually
-  more mail than expected, since the full text of every mail is kept.
+  more mail than expected. The text of a mail is kept for a year, so a busy
+  year of campaigns shows up here before the nightly clean-up catches up.
 - **Uploaded files** growing by more than 100 MB a month: unusually large
   uploads.
 

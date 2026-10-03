@@ -136,7 +136,7 @@ Read from MySQL on every scrape (`monitoring/collect.py`).
 | `mysql_questions_total` | counter | | Statements MySQL received | Statements per second; per request when divided by the request rate |
 | `mysql_slow_queries_total` | counter | | Queries slower than MySQL's `long_query_time` | Any rise |
 | `db_table_rows` | gauge | `table` | Rows per table, InnoDB's estimate (fine for sizing, not for counting) | Growth over weeks, against `CAPACITY.md`'s projections |
-| `db_table_bytes` | gauge | `table` | Data plus index size per table | The mail log (`mailing_emailmessage`) grows fastest |
+| `db_table_bytes` | gauge | `table` | Data plus index size per table | The mail log (`mailing_emailmessage`) grows fastest; its text is cleared a year after each mail (the retention job), but the rows stay, so it keeps growing slowly |
 
 ### Redis
 

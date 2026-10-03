@@ -740,8 +740,11 @@ API_RATE_LIMIT = "600/m"
 # deleted (a champion's or mentor's cleaned) this long after its last login,
 # with reminder mails this many days before, and never sooner than
 # ACCOUNT_DELETION_NOTICE_DAYS after the first reminder. Audit log entries
-# with no account behind them go this long after they were written.
+# with no account behind them go this long after they were written. A
+# mail's subject, body, address and account link are cleared this long
+# after it was created (the `mail_content` rule); the row stays.
 ACCOUNT_RETENTION_DAYS = 730
 ACCOUNT_DELETION_REMINDER_DAYS = (30, 7)
 ACCOUNT_DELETION_NOTICE_DAYS = 30
 AUDIT_LOG_RETENTION_DAYS = 730
+MAIL_CONTENT_RETENTION_DAYS = 365
