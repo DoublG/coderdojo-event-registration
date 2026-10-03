@@ -205,8 +205,18 @@ cat <<'EOF'
     Login codes (2FA)  https://coolregistration.localhost/otp/
     Help docs          https://coolregistration.localhost/docs/
     Seeded logins      seed_credentials.csv
-
 EOF
+# Prometheus and Grafana only run with the `monitoring` profile
+# (docker-compose.yml); their names only resolve when they're there.
+if getent hosts grafana > /dev/null 2>&1; then
+    cat <<'EOF'
+    Grafana            https://coolregistration.localhost/grafana/
+    Prometheus         https://coolregistration.localhost/prometheus/
+EOF
+else
+    echo "    (Grafana and Prometheus: off, COMPOSE_PROFILES=monitoring turns them on)"
+fi
+echo
 
 # start server: runserver while developing (reloads on every change, serves the
 # static files); with DEBUG off the command production runs (gunicorn with

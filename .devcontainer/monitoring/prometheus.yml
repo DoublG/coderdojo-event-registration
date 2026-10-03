@@ -1,0 +1,21 @@
+# Prometheus for the devcontainer's `monitoring` profile (docker-compose.yml).
+# It scrapes the site's /metrics/ (monitoring/views.py) straight from the
+# workspace container, with the dev-only METRICS_TOKEN set on that service.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: coderdojo
+    metrics_path: /metrics/
+    scheme: http
+    authorization:
+      type: Bearer
+      credentials: dev-metrics-token
+    static_configs:
+      - targets: ["workspace:8000"]
+
+  - job_name: prometheus
+    metrics_path: /prometheus/metrics
+    static_configs:
+      - targets: ["localhost:9090"]

@@ -1,0 +1,9 @@
+# Loads every dashboard JSON in /etc/grafana/dashboards (../../dashboards).
+apiVersion: 1
+providers:
+  - name: coderdojo
+    folder: CoderDojo
+    type: file
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards

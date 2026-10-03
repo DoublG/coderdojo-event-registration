@@ -37,6 +37,8 @@ Review this page every quarter (see [Calendar](#calendar)) and whenever a versio
 | Redis | `redis:7.2` (7.2.16) | 7.2: 1 Dec 2029 | Current. Match production's version once it's confirmed (see [below](#still-to-confirm)). The same image as the CI. |
 | nginx | `nginx:1.30-alpine` (1.30.5) | 1.30 stable: until the next stable (about April 2027) | Current. Move to the next stable when it's out. Development only. |
 | Mailpit, phpMyAdmin, 2FAuth | `latest` | | Development only; fine on `latest`. |
+| Prometheus | `prom/prometheus:v3.13.2` | 3.13 LTS: **31 Jul 2027** | Current LTS. Development only, in the `monitoring` profile (off unless `COMPOSE_PROFILES=monitoring`). Take its patch releases; move to the next LTS before July 2027. |
+| Grafana | `grafana/grafana:13.2.0` | 13.2: until the minor after next is out (no date published yet) | Current. Development only, in the `monitoring` profile. Move to the newest minor every few months. |
 
 Development should run the versions production runs (or will run next), so upgrades are tried there
 first. Prefer a pinned tag (`mysql:8.4`) over `latest`: a `latest` image is pulled once and then never

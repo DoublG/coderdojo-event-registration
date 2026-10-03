@@ -525,6 +525,7 @@ The `monitoring` app measures the site from the inside; nothing needs installing
     still include the old processes for up to that long;
   - per view: requests, time, 5xx and a duration histogram; per Celery task: runs, time, failures and the
     longest run.
+- **In the devcontainer**, Prometheus and Grafana can read it for you: start the stack with the `monitoring` profile (`COMPOSE_PROFILES=monitoring`, CLAUDE.md, "Commands") and open `https://coolregistration.localhost/grafana/` (no login) for the *CoderDojo site* dashboard: requests, response times, queries per request, the queues, tasks, memory, MySQL and Redis. Handy during a load test (`loadtest/`).
 - **Slow requests** (over `METRICS_SLOW_REQUEST_MS`, 1 second) are logged as warnings with the view name.
 - **A daily sample** (`monitoring.CapacitySample`, beat job `capacity-sample` at 02:30) stores the same
   figures in the database, so growth shows as a trend without any outside service. Read them in the Django

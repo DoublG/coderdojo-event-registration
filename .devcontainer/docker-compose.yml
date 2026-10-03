@@ -28,7 +28,9 @@ services:
       DB_PASSWORD: Se84KCCCJlnfkdfv
 
       SECRET_KEY: c8%og)f*3&xi&6l_s#ol%ctm7t9%ti&lko6x@^b&t8ow0d3-7m
-      ALLOWED_HOSTS: localhost,127.0.0.1,coolregistration.localhost
+      # `workspace`: the Host Prometheus scrapes /metrics/ with (the
+      # `monitoring` profile below), straight from the container, not via nginx.
+      ALLOWED_HOSTS: localhost,127.0.0.1,coolregistration.localhost,workspace
 
       COOKIE_DOMAIN: coolregistration.localhost
       CSRF_TRUSTED_ORIGINS: https://coolregistration.localhost
@@ -79,6 +81,11 @@ services:
       # seed_otp_vault` (end of start.sh) puts every seeded account's
       # authenticator-app key in it. Unset (production) = the command does nothing.
       OTP_VAULT_URL: http://otp:8000
+
+      # /metrics/ (monitoring/views.py) answers only with this bearer token.
+      # A fixed dev-only value, the same one Prometheus sends
+      # (monitoring/prometheus.yml); production sets its own in ~/app/.env.
+      METRICS_TOKEN: dev-metrics-token
 
     volumes:
       - ..:/workspace:cached
@@ -135,7 +142,9 @@ services:
 
   # The only container with a port on the host: https://coolregistration.localhost
   # (443). Everything else is a path behind it (nginx/nginx.conf): the site,
-  # /docs/, /mails/ (Mailpit), /phpmyadmin/ and /otp/ (the testers' authenticator).
+  # /docs/, /mails/ (Mailpit), /phpmyadmin/, /otp/ (the testers' authenticator)
+  # and, with the `monitoring` profile, /grafana/ and /prometheus/. No
+  # depends_on for those two: a profile that's off would make it fail.
   proxy:
     image: nginx:1.30-alpine
     container_name: ${PROJECT_NAME:-coolregistration-dev}-proxy
@@ -218,9 +227,63 @@ services:
       TRUSTED_PROXIES: "*"
       THROTTLE_API: 1000
 
+  # Prometheus and Grafana on /metrics/ (CAPACITY.md, "Watching production"),
+  # only when asked for: they're in the `monitoring` profile, so a plain
+  # `up` leaves them out. Turn them on with COMPOSE_PROFILES=monitoring in the
+  # environment that runs docker compose or in .devcontainer/.env (VS Code's
+  # rebuild reads it too), or once with `docker compose --profile monitoring
+  # up -d`. Then https://coolregistration.localhost/grafana/ (no login: every
+  # visitor is an anonymous Grafana admin, development only) and /prometheus/.
+  # nginx answers 503 on those paths while they're off.
+  prometheus:
+    image: prom/prometheus:v3.13.2
+    container_name: ${PROJECT_NAME:-coolregistration-dev}-prometheus
+    profiles: [monitoring]
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      # Served under /prometheus/ (nginx.conf); the route prefix follows this path.
+      - --web.external-url=https://coolregistration.localhost/prometheus/
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+
+  grafana:
+    image: grafana/grafana:13.2.0
+    container_name: ${PROJECT_NAME:-coolregistration-dev}-grafana
+    profiles: [monitoring]
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    environment:
+      GF_SERVER_ROOT_URL: https://coolregistration.localhost/grafana/
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      # No login: everyone who reaches it through the local proxy is an admin.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+      # The provisioned dashboard is the home page.
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/dashboards/coderdojo.json
+    volumes:
+      # The Prometheus data source and the CoderDojo dashboard, provisioned
+      # (monitoring/grafana/). Edit the dashboard's JSON here to keep a change;
+      # one saved in Grafana's UI only lives on the grafana-data volume.
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+
 
 volumes:
   db-data-8.4:
   claude-config:
   mailpit-data:
   otp-data:
+  prometheus-data:
+  grafana-data:

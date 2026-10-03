@@ -3,7 +3,7 @@ import re
 from django.conf import settings
 from django.contrib.gis.geos import MultiPolygon, Polygon
 from django.core.cache import cache
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
@@ -146,6 +146,34 @@ class ProxyErrorPageTests(TestCase):
         for location in ("location = /health/ {", "location /api/ {"):
             block = self.conf.split(location, 1)[1].split("}", 1)[0]
             self.assertNotIn("proxy_intercept_errors", block)
+
+
+class DevMonitoringTests(SimpleTestCase):
+    """Prometheus and Grafana in the devcontainer (the `monitoring` profile):
+    off unless asked for, scraping /metrics/ with the workspace's own token,
+    and reachable through nginx."""
+
+    def setUp(self):
+        root = settings.BASE_DIR / ".devcontainer"
+        self.compose = (root / "docker-compose.yml").read_text()
+        self.prometheus = (root / "monitoring" / "prometheus.yml").read_text()
+        self.conf = (root / "nginx" / "nginx.conf").read_text()
+
+    def test_both_are_behind_the_profile(self):
+        for service in ("prometheus", "grafana"):
+            block = re.split(r"\n  \S", self.compose.split(f"\n  {service}:\n", 1)[1], maxsplit=1)[0]
+            self.assertIn("profiles: [monitoring]", block, service)
+
+    def test_prometheus_sends_the_workspaces_token(self):
+        token = re.search(r"METRICS_TOKEN: (\S+)", self.compose).group(1)
+        self.assertIn(f"credentials: {token}", self.prometheus)
+        self.assertIn('targets: ["workspace:8000"]', self.prometheus)
+        self.assertRegex(self.compose, r"ALLOWED_HOSTS: .*\bworkspace\b")
+
+    def test_nginx_proxies_both_and_explains_when_they_are_off(self):
+        for path in ("/prometheus/", "/grafana/"):
+            block = self.conf.split(f"location {path} {{", 1)[1].split("}", 1)[0]
+            self.assertIn("@monitoring_off", block)
 
 
 class SeedContentLanguagesTests(TestCase):
