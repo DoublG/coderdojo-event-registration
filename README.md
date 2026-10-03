@@ -11,7 +11,7 @@ Django 6.1 on Python 3.14, MySQL with GIS, server-rendered pages with [htmx](htt
 workers for all mail, and Django Channels for live notifications.
 
 **Contents:** [Documentation](#documentation) · [Components](#components) · [Architecture](#architecture) ·
-[Getting started](#getting-started) · [Tests and linting](#tests-and-linting) · [Deploying](#deploying) ·
+[Getting started](#getting-started) · [Monitoring](#monitoring) · [Tests and linting](#tests-and-linting) · [Deploying](#deploying) ·
 [Repository layout](#repository-layout)
 
 ---
@@ -30,6 +30,8 @@ workers for all mail, and Django Channels for live notifications.
 | Developers | [`CODING_STANDARDS.md`](CODING_STANDARDS.md) | Coding standards, linting and formatting, tests and guard tests, test coverage (what is and isn't covered), complexity, production versus development-only code |
 | Developers and whoever runs the platform | [`CAPACITY.md`](CAPACITY.md) | Database growth, disk and uploads, memory per component, load test results with charts, and how to measure again (on production too) |
 | Developers and whoever runs the platform | [`MONITORING.md`](MONITORING.md) | Every metric on `/metrics/` and every panel of the Grafana dashboard explained, with screenshots under load |
+| Developers | [`MEMORY_PROFILE.md`](MEMORY_PROFILE.md) | The memory each of the site's functions uses per call, over every page and background job, and which are worth refactoring |
+| Security researchers | [`SECURITY.md`](SECURITY.md) | How to report a vulnerability, and what's supported |
 
 ### User journeys (PDF)
 
@@ -68,6 +70,7 @@ and served by the dev environment at `https://coolregistration.localhost/docs/`.
 | Volunteers | [Become a mentor or volunteer](docs/source/volunteering/become-a-mentor-or-volunteer.rst) · [Background check](docs/source/volunteering/background-check.rst) · [Start a new dojo](docs/source/volunteering/start-a-new-dojo.rst) |
 | Dojo teams | [Logging in](docs/source/dojo-team/logging-in.rst) · [Running a session](docs/source/dojo-team/running-a-session.rst) · [Mailing your families](docs/source/dojo-team/mailing-your-families.rst) · [API clients](docs/source/dojo-team/api-clients.rst) |
 | The organisation | [Dashboard](docs/source/organisation/dashboard.rst) · [Volunteers](docs/source/organisation/volunteers.rst) · [Campaigns](docs/source/organisation/campaigns.rst) · [Segments](docs/source/organisation/segments.rst) · [Journeys](docs/source/organisation/journeys.rst) · [Mail templates](docs/source/organisation/mail-templates.rst) · [Mail queue](docs/source/organisation/mail-queue.rst) · [Promotions](docs/source/organisation/promotions.rst) · [Sponsors](docs/source/organisation/sponsors.rst) · [Awards](docs/source/organisation/awards.rst) · [Privacy](docs/source/organisation/privacy.rst) · [People](docs/source/organisation/people.rst) · [Sign-in security](docs/source/organisation/sign-in-security.rst) · [Audit log](docs/source/organisation/audit-log.rst) · [Django admin](docs/source/organisation/django-admin.rst) |
+| Whoever runs the site | [Monitoring the site](docs/source/monitoring/overview.rst) · [The workers](docs/source/monitoring/workers.rst) · [CPU, memory and disk](docs/source/monitoring/server-resources.rst) · [What to watch for](docs/source/monitoring/what-to-watch.rst) |
 | Everyone | [FAQ](docs/source/faq.rst) |
 
 ### Other READMEs
@@ -89,14 +92,20 @@ service modules that views, the admin, the API and Celery jobs all call.
 | [`events`](events/) | Sessions, registrations and the waiting list, attendance, badges and belts, the nightly engagement snapshot | `awards.py`, `attendance.py`, `engagement.py` |
 | [`applications`](applications/) | Mentor and champion applications and the Belgian background check (the document is deleted on decision) | `services.py` |
 | [`pathways`](pathways/) | The learning-pathway catalogue (Scratch, Python, web, ...) | |
-| [`content`](content/) | FAQs, testimonials, dojo updates, promotions, sponsors, the organisation's team page | `manage.py` |
-| [`mailing`](mailing/) | Every mail the site sends: the queue, templates, consent and preferences, bounces, campaigns, segments and journeys | `services.py`, `campaigns.py`, `segmentation/` |
+| [`content`](content/) | FAQs, testimonials, dojo updates, promotions, sponsors, the organisation's team page | `manage.py`, `cache.py` |
+| [`mailing`](mailing/) | The mail engine: every mail the site sends goes through its queue; templates, consent and preferences, automated mail, bounces | `services.py`, `automated.py`, `bounce.py` |
+| [`campaigns`](campaigns/) | Who mail goes to and what it says: campaigns, segments, journeys, and a dojo's own mail to its families | `services.py`, `segmentation/`, `journeys.py` |
 | [`notifications`](notifications/) | The notification bells, live over WebSockets | `services.py`, `consumers.py` |
-| [`privacy`](privacy/) | GDPR: every field classified, a person's export, erasure and retention | `registry.py`, `export.py`, `erasure.py`, `retention.py` |
+| [`privacy`](privacy/) | GDPR: every field classified (each app's `privacy.py`), the register, a person's export, erasure and retention | `export.py`, `erasure.py`, `retention.py` |
 | [`api`](api/) | The API for a dojo's apps (`/api/v1/`, OAuth 2.0 client credentials) | `services.py`, `v1.py` |
+| [`pages`](pages/) | The site as visitors and the organisation meet it: the homepage, contact, `/manage/`, the audit log page, `/health/`, the Django admin site | `views.py`, `health.py` |
 | [`geo`](geo/) | Municipalities and provinces, geocoding, real distances on MySQL | `functions.py`, `geocoding.py` |
-| [`core`](core/) | Homepage, shared templates and static files, the management area's shell, the audit log | `audit.py`, `manage_nav.py` |
+| [`monitoring`](monitoring/) | The site's measurements of itself: `/metrics/`, the daily capacity sample, the capacity model | `views.py`, `recorder.py`, `capacity.py` |
+| [`core`](core/) | The foundation every app builds on: caching, uploads, the image library, the audit log, the privacy registry, forms, the shared templates and static files | `caching.py`, `audit.py`, `privacy_registry.py` |
 | [`website`](website/) | Settings, URLs, ASGI and the Celery app | |
+
+The apps are layered (`pages` > `api`, `campaigns`, `privacy` > the domain apps > `core`, `geo`,
+`monitoring`), checked by `lint-imports`; see [`CODING_STANDARDS.md`](CODING_STANDARDS.md).
 
 What each model holds and how they relate: [`DATA_MODEL.md`](DATA_MODEL.md).
 
@@ -116,6 +125,8 @@ flowchart LR
     M --> DB
     M --> S[SMTP]
     APP[A dojo's app] -->|OAuth 2.0| A
+    PR[Prometheus + Grafana] -->|/metrics/| A
+    UP[Uptime monitor] -->|/health/| A
 ```
 
 - **No frontend build.** Server-rendered Django templates with htmx for the dynamic parts, one hand-kept
@@ -153,20 +164,49 @@ port 443 is published:
 | `https://coolregistration.localhost/mails/` | Mailpit: every mail the site sends in development |
 | `https://coolregistration.localhost/phpmyadmin/` | The database |
 | `https://coolregistration.localhost/otp/` | Current two-step codes for the seeded test accounts |
+| `https://coolregistration.localhost/admin/` | The Django admin (superusers, or an organisation role after asking on `/manage/django-admin/`) |
+| `https://coolregistration.localhost/api/v1/docs` | The API reference |
+| `https://coolregistration.localhost/silk/` | django-silk's request profiles (staff logins; while `DEBUG` is on) |
+| `https://coolregistration.localhost/grafana/` | Grafana with the *CoderDojo site* dashboard (needs the `monitoring` profile, see [Monitoring](#monitoring)) |
+| `https://coolregistration.localhost/prometheus/` | Prometheus, which scrapes `/metrics/` (needs the `monitoring` profile) |
+| `https://coolregistration.localhost/health/` | The health check |
 
 The seeded logins, with what each can do, are written to `seed_credentials.csv` in the repo root
 (gitignored). The certificate authority for `coolregistration.localhost` is created on first start; to
 trust it, see [`.devcontainer/certs/README.md`](.devcontainer/certs/README.md).
+
+## Monitoring
+
+| Address | What | Who can see it |
+|---|---|---|
+| `/health/` | `200 {"status": "ok"}` when the database, Redis and the mail workers are fine, `503` naming the failed check otherwise. Point an uptime monitor at it | Anyone (no data in it) |
+| `/metrics/` | Prometheus text format: table sizes, MySQL and Redis counters, the Celery and mail queues, open WebSockets, memory per process, timings per page and per task | Only with `METRICS_TOKEN` as a bearer token; a 404 while it's empty |
+| `/grafana/`, `/prometheus/` | The dashboard and the time series behind it (development) | Anyone on the dev site |
+
+In the devcontainer Prometheus and Grafana are off by default. Turn them on with
+`COMPOSE_PROFILES=monitoring` in `.devcontainer/.env` (then rebuild), or once with
+`docker compose -f .devcontainer/docker-compose.yml --profile monitoring up -d`. The dashboard and data
+source are provisioned from [`.devcontainer/monitoring/`](.devcontainer/monitoring/); edit the dashboard's
+JSON there to keep a change. Every metric and panel is explained in [`MONITORING.md`](MONITORING.md), what
+the figures mean for the server in [`CAPACITY.md`](CAPACITY.md), and for whoever runs the site in plain
+words in the help centre's [*Running the site*](https://doublg.github.io/coderdojo-event-registration/monitoring/overview.html) pages.
 
 ## Tests and linting
 
 Inside the workspace container:
 
 ```sh
-python manage.py test               # all apps (plain Django test runner, about 1,000 tests)
+python manage.py test --debug-mode  # all apps (plain Django test runner, about 1,150 tests)
 python manage.py test accounts      # one app
 ruff check . && ruff format .       # lint and format
+lint-imports                        # the apps' layers
 ```
+
+GitHub Actions runs the checks on every push, never a deploy:
+[**Tests**](.github/workflows/tests.yml) (missing migrations and the whole suite, with a summary per app),
+[**Code audit**](.github/workflows/audit.yml) (ruff, its security rules, `pip-audit`, `check --deploy`
+and CodeQL) and the [help centre](.github/workflows/docs.yml)'s build and publication. Coverage and
+complexity: [`CODING_STANDARDS.md`](CODING_STANDARDS.md).
 
 ## Deploying
 
@@ -180,22 +220,24 @@ Details in [`CLAUDE.md`](CLAUDE.md#deploying-level27).
 ## Repository layout
 
 ```text
-accounts/ api/ applications/ content/ core/ dojos/ events/
-geo/ mailing/ notifications/ pathways/ privacy/   Django apps (see Components)
+accounts/ api/ applications/ campaigns/ content/ core/ dojos/ events/ geo/
+mailing/ monitoring/ notifications/ pages/ pathways/ privacy/   Django apps (see Components)
 website/          settings, URLs, ASGI, Celery
 locale/           Dutch and French translations of the site
 docs/             the help centre (Sphinx, en/fr/nl)
 user-journeys/    persona PDFs (en/nl/fr), pitch deck, technical PDF, and the scripts that make them
 loadtest/         load test, its results and charts (CAPACITY.md), Grafana screenshots (MONITORING.md)
-monitoring/       the site's measurements of itself: /metrics/, capacity samples and projections
 quality/          code-quality measurements (coverage, complexity), their results and charts
 scripts/          deploy script and the Celery systemd units
-.devcontainer/    the development environment
+.devcontainer/    the development environment (monitoring/: Prometheus and Grafana's provisioning)
+.github/          the CI workflows (tests, code audit, help centre)
 DATA_MODEL.md     the data model and design decisions
 MAINTENANCE.md    versions and support dates, updates, vulnerabilities, audits
 CAPACITY.md       database growth, disk, memory and load: measurements and findings
 MONITORING.md     the metrics and the Grafana dashboard explained, with screenshots
 CODING_STANDARDS.md  coding standards, linting, tests, coverage and complexity
+MEMORY_PROFILE.md memory per function, and what's worth refactoring
+SECURITY.md       reporting a vulnerability
 CLAUDE.md         conventions and architecture for developers (AGENTS.md links to it)
 requirements.txt  production dependencies (requirements-dev.txt adds the development tools)
 ```
