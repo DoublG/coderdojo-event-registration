@@ -65,4 +65,5 @@ Memory
 All workers share the server's memory. Measured under load, the whole site
 needs about 1.5 GB at its busiest moment (the web workers about 750 MB, the
 background workers about 650 MB during the nightly rebuild at 03:00), so the
-plan is an account with 2 GB.
+plan is an account with 2 GB. How the workers relate to the server's CPU,
+memory and disk is on :doc:`server-resources`.

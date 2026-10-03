@@ -179,6 +179,11 @@ the tests' cache).
 | `metrics_section_up` | gauge | `section` | 1 when a section (database, redis, queues, processes, requests, tasks, cache) could be read | A 0 names the component that's down |
 | `up` | gauge | `job` | Prometheus's own: 1 when the scrape answered with metrics | 0 means the site is down, or the host or token is wrong |
 
+**CPU isn't on `/metrics/`.** Memory and disk are; CPU comes from the hosting provider's panel (or a
+host agent). Measured on 3 October 2026: a page costs about 27 ms of CPU in the web workers and 2 ms in
+MySQL, and a worker uses one core at most, whatever its threads (`CAPACITY.md`, "Load: web requests";
+the help centre's *CPU, memory and disk* page explains it for the people running the site).
+
 A process's `role` is `web` (a gunicorn or runserver worker), `celery` (a worker's child that runs tasks),
 `celery-parent` or `beat`. Each process reports its memory every 60 s with a 150 s timeout, so one that has gone
 (a restart, a recycled Celery child) drops out of the totals within 2.5 minutes; right after a restart, the totals

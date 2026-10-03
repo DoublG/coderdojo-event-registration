@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-03 06:54+0000\n"
+"POT-Creation-Date: 2026-10-03 07:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -113,6 +113,29 @@ msgid "Is there room enough?"
 msgstr "Y a-t-il assez de place ?"
 
 #: ../../source/monitoring/what-to-watch.rst:38
+msgid ""
+"The server's three limits are its CPU, memory and disk; how the workers "
+"use each is on :doc:`server-resources`."
+msgstr ""
+"Les trois limites du serveur sont son CPU, sa mémoire et son disque ; la "
+"façon dont les workers utilisent chacun est expliquée sur :doc:`server-"
+"resources`."
+
+#: ../../source/monitoring/what-to-watch.rst:41
+#, python-format
+msgid ""
+"**CPU** busy above 80% for ten minutes or more outside a registration "
+"rush (on the hosting provider's panel: the site doesn't measure its own "
+"CPU): the web workers have more pages to make than the cores can keep up "
+"with. Add cores first, then web workers to match."
+msgstr ""
+"**CPU** occupé à plus de 80 % pendant dix minutes ou plus en dehors d'une"
+" ruée sur les inscriptions (sur le panneau de l'hébergeur : le site ne "
+"mesure pas son propre CPU) : les workers web ont plus de pages à produire"
+" que les cœurs ne peuvent en suivre. Ajoutez d'abord des cœurs, puis des "
+"workers web en conséquence."
+
+#: ../../source/monitoring/what-to-watch.rst:45
 #, python-format
 msgid ""
 "**Database connections** over 70% of the limit: more web workers than the"
@@ -124,17 +147,19 @@ msgstr ""
 " cours de production occupe une connexion : le nombre de workers "
 "multiplié par 25 doit donc rester sous la limite de la base de données."
 
-#: ../../source/monitoring/what-to-watch.rst:41
+#: ../../source/monitoring/what-to-watch.rst:48
 #, python-format
 msgid ""
 "**Memory**: the memory of all workers together over 80% of what the "
-"server has. Running out can make the server stop workers abruptly."
+"server has. Running out can make the server stop workers abruptly. Run "
+"fewer web workers, or add memory."
 msgstr ""
 "**Mémoire** : la mémoire de tous les workers ensemble au-delà de 80 % de "
 "celle du serveur. Une pénurie peut amener le serveur à arrêter des "
-"workers brutalement."
+"workers brutalement. Faites tourner moins de workers web, ou ajoutez de "
+"la mémoire."
 
-#: ../../source/monitoring/what-to-watch.rst:43
+#: ../../source/monitoring/what-to-watch.rst:51
 msgid ""
 "**Cache memory** over half of its limit (128 MB), or keys being thrown "
 "out (*evicted*): the cache is too small."
@@ -142,7 +167,7 @@ msgstr ""
 "**Mémoire du cache** au-delà de la moitié de sa limite (128 Mo), ou des "
 "clés supprimées (*evicted*) : le cache est trop petit."
 
-#: ../../source/monitoring/what-to-watch.rst:45
+#: ../../source/monitoring/what-to-watch.rst:53
 msgid ""
 "**Database size** growing faster than planned (the daily sample): usually"
 " more mail than expected. The text of a mail is kept for a year, so a "
@@ -154,7 +179,7 @@ msgstr ""
 " est conservé un an : une année chargée en campagnes se voit donc ici, "
 "avant que le nettoyage nocturne ne la rattrape."
 
-#: ../../source/monitoring/what-to-watch.rst:48
+#: ../../source/monitoring/what-to-watch.rst:56
 msgid ""
 "**Uploaded files** growing by more than 100 MB a month: unusually large "
 "uploads."
@@ -162,11 +187,23 @@ msgstr ""
 "**Fichiers téléversés** qui augmentent de plus de 100 Mo par mois : des "
 "envois anormalement volumineux."
 
-#: ../../source/monitoring/what-to-watch.rst:52
+#: ../../source/monitoring/what-to-watch.rst:58
+#, python-format
+msgid ""
+"**Disk** more than 80% full (on the hosting provider's panel): the "
+"database, uploads, logs and backups together. Ask for more room before it"
+" fills: a full disk stops the database."
+msgstr ""
+"**Disque** rempli à plus de 80 % (sur le panneau de l'hébergeur) : la "
+"base de données, les fichiers téléversés, les journaux et les sauvegardes"
+" ensemble. Demandez plus de place avant qu'il soit plein : un disque "
+"plein arrête la base de données."
+
+#: ../../source/monitoring/what-to-watch.rst:63
 msgid "Is the mail going out?"
 msgstr "Les e-mails partent-ils ?"
 
-#: ../../source/monitoring/what-to-watch.rst:54
+#: ../../source/monitoring/what-to-watch.rst:65
 msgid ""
 "**Oldest mail waiting** for more than 30 minutes: the background workers "
 "have stopped. Restart them; the waiting mail then goes out by itself."
@@ -175,7 +212,7 @@ msgstr ""
 "les workers d'arrière-plan se sont arrêtés. Redémarrez-les ; les e-mails "
 "en attente partent alors d'eux-mêmes."
 
-#: ../../source/monitoring/what-to-watch.rst:56
+#: ../../source/monitoring/what-to-watch.rst:67
 msgid ""
 "**Waiting tasks** (*Celery queue length*) above 500 for half an hour: the"
 " mail worker is stuck or far too slow. Right after a campaign is "
@@ -186,7 +223,7 @@ msgstr ""
 "Juste après le lancement d'une campagne, une longue file est normale et "
 "se résorbe en quelques minutes."
 
-#: ../../source/monitoring/what-to-watch.rst:59
+#: ../../source/monitoring/what-to-watch.rst:70
 msgid ""
 "**Failed mail and bounces** on the Mail queue page: a sudden rise usually"
 " means a problem with the mail server rather than with the addresses."

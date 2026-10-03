@@ -67,6 +67,7 @@ the people using the site, not for the people building it.
 
    monitoring/overview
    monitoring/workers
+   monitoring/server-resources
    monitoring/what-to-watch
 
 .. toctree::

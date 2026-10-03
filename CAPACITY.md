@@ -258,6 +258,11 @@ clicks. Times in milliseconds.
 - **The number of web workers is what matters.** At the same load, 4 workers keep the 95th percentile at
   110 ms where 2 workers let it climb to 610 ms (the home page's p99 to 2.4 s). The slowest pages under
   load are the home page (two widgets), the events list and a dojo's dashboard.
+- **CPU per page** (3 October 2026, 4 workers, the public pages at 57 requests/s, measured from
+  `/proc/<pid>/stat`): about **27 ms of CPU in the web workers and 2 ms in MySQL per request**, so 1.6 cores
+  busy and roughly 35 pages a second per core on this machine. A worker uses one core at most (Python),
+  whatever its thread count, so `WEB_CONCURRENCY` above the account's cores only costs memory. `/metrics/`
+  doesn't measure CPU: on production it's the hosting panel's figure (help centre, *CPU, memory and disk*).
 - **Logging in takes 250–350 ms**: the password hash is deliberately slow and uses the CPU for that time.
 - The few errors in runs B and D are connections that uvicorn closed (after gunicorn's 2-second keep-alive)
   just as the load tool reused them. A browser behind a proxy retries those, so they're an artefact of the test.

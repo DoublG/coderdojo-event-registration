@@ -1,0 +1,304 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-03 07:11+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/monitoring/server-resources.rst:2
+msgid "CPU, memory and disk"
+msgstr "CPU, geheugen en schijf"
+
+#: ../../source/monitoring/server-resources.rst:4
+msgid ""
+"Three things limit what the server can do: its **CPU** (how much work it "
+"can do per second), its **memory** (how many workers fit at once) and its"
+" **disk** (how much it can keep). Every worker uses some of each. This "
+"page explains how the workers (see :doc:`workers`) relate to them, so you"
+" know which of the three to look at, and what to change when one runs "
+"short."
+msgstr ""
+"Drie dingen bepalen wat de server aankan: zijn **CPU** (hoeveel werk hij "
+"per seconde kan doen), zijn **geheugen** (hoeveel workers er tegelijk in "
+"passen) en zijn **schijf** (hoeveel hij kan bewaren). Elke worker "
+"gebruikt van alle drie een deel. Deze pagina legt uit hoe de workers (zie"
+" :doc:`workers`) zich daartoe verhouden, zodat je weet naar welke van de "
+"drie je kijkt en wat je verandert als er een tekortschiet."
+
+#: ../../source/monitoring/server-resources.rst:11
+msgid "At a glance"
+msgstr "In één oogopslag"
+
+#: ../../source/monitoring/server-resources.rst:17
+msgid "Resource"
+msgstr "Middel"
+
+#: ../../source/monitoring/server-resources.rst:18
+msgid "What uses it"
+msgstr "Wat het gebruikt"
+
+#: ../../source/monitoring/server-resources.rst:19
+msgid "Where to see it"
+msgstr "Waar je het ziet"
+
+#: ../../source/monitoring/server-resources.rst:20
+msgid "When to act"
+msgstr "Wanneer ingrijpen"
+
+#: ../../source/monitoring/server-resources.rst:21
+msgid "CPU"
+msgstr "CPU"
+
+#: ../../source/monitoring/server-resources.rst:22
+msgid "The web workers, making pages; the nightly rebuild at 03:00"
+msgstr "De webworkers, die pagina's maken; de nachtelijke herberekening om 03:00"
+
+#: ../../source/monitoring/server-resources.rst:23
+msgid ""
+"The hosting provider's control panel (the site's own dashboard doesn't "
+"measure it)"
+msgstr ""
+"Het controlepaneel van de hostingprovider (het dashboard van de site meet"
+" het niet)"
+
+#: ../../source/monitoring/server-resources.rst:25
+#, python-format
+msgid ""
+"Busy above 80% for ten minutes outside a registration rush, or pages "
+"getting slower while memory is fine"
+msgstr ""
+"Meer dan 80% bezet gedurende tien minuten buiten een inschrijvingsrush, "
+"of pagina's die trager worden terwijl het geheugen in orde is"
+
+#: ../../source/monitoring/server-resources.rst:27
+msgid "Memory"
+msgstr "Geheugen"
+
+#: ../../source/monitoring/server-resources.rst:28
+msgid ""
+"Every worker holds its own copy of the site; the background workers most "
+"during the nightly rebuild"
+msgstr ""
+"Elke worker houdt zijn eigen kopie van de site bij; de achtergrondworkers"
+" het meest tijdens de nachtelijke herberekening"
+
+#: ../../source/monitoring/server-resources.rst:30
+msgid "The dashboard (*PSS per role*), and the hosting provider's panel"
+msgstr "Het dashboard (*PSS per role*) en het paneel van de hostingprovider"
+
+#: ../../source/monitoring/server-resources.rst:31
+#, python-format
+msgid "All workers together above 80% of the server's memory"
+msgstr "Alle workers samen boven 80% van het geheugen van de server"
+
+#: ../../source/monitoring/server-resources.rst:32
+msgid "Disk"
+msgstr "Schijf"
+
+#: ../../source/monitoring/server-resources.rst:33
+msgid "The database (mostly the mail log), uploaded images, logs and backups"
+msgstr ""
+"De database (vooral het e-maillogboek), geüploade afbeeldingen, "
+"logbestanden en back-ups"
+
+#: ../../source/monitoring/server-resources.rst:34
+msgid ""
+"*Largest tables* on the dashboard and the daily sample; the hosting "
+"provider's panel for the whole disk"
+msgstr ""
+"*Largest tables* op het dashboard en de dagelijkse meting; het paneel van"
+" de hostingprovider voor de hele schijf"
+
+#: ../../source/monitoring/server-resources.rst:36
+#, python-format
+msgid "Growing faster than planned, or more than 80% full"
+msgstr "Groeit sneller dan gepland, of is meer dan 80% vol"
+
+#: ../../source/monitoring/server-resources.rst:39
+msgid "CPU: cores, workers and threads"
+msgstr "CPU: kernen, workers en threads"
+
+#: ../../source/monitoring/server-resources.rst:41
+msgid ""
+"A server's CPU has a number of **cores**, and each core does one thing at"
+" a time. A **worker** is one program, and the site's code (Python) runs a"
+" worker's work on one core at a time. So each worker can keep at most one"
+" core busy, and four web workers can use at most four cores at once."
+msgstr ""
+"De CPU van een server heeft een aantal **kernen** (cores), en elke kern "
+"doet één ding tegelijk. Een **worker** is één programma, en de code van "
+"de site (Python) voert het werk van een worker uit op één kern tegelijk. "
+"Elke worker kan dus hooguit één kern bezighouden, en vier webworkers "
+"kunnen samen hooguit vier kernen tegelijk gebruiken."
+
+#: ../../source/monitoring/server-resources.rst:46
+msgid ""
+"Inside each web worker are **threads**: a couple of dozen of them. They "
+"don't let a worker compute more at once; they let it *wait* for many "
+"things at once: the database's answer, a visitor on a slow connection. "
+"Waiting costs no CPU. That's why one web worker can take 25 visitors at "
+"the same moment, while it only works on one of them at any instant."
+msgstr ""
+"In elke webworker zitten **threads**: een paar dozijn. Daarmee rekent een"
+" worker niet meer tegelijk; ze laten hem op veel dingen tegelijk "
+"*wachten*: het antwoord van de database, een bezoeker met een trage "
+"verbinding. Wachten kost geen CPU. Daarom kan één webworker 25 bezoekers "
+"tegelijk aannemen, terwijl hij op elk moment maar aan één van hen werkt."
+
+#: ../../source/monitoring/server-resources.rst:52
+msgid ""
+"What a page costs, measured on a test machine in October 2026: about 27 "
+"thousandths of a second (ms) of CPU in the web worker, and about 2 ms in "
+"the database. So one core makes about 35 pages a second, and 57 pages a "
+"second kept 1.6 cores busy. The live server's cores are slower, so expect"
+" fewer pages per core there; the ratio between the workers and the "
+"database carries over."
+msgstr ""
+"Wat een pagina kost, gemeten op een testmachine in oktober 2026: ongeveer"
+" 27 duizendsten van een seconde (ms) CPU in de webworker, en ongeveer 2 "
+"ms in de database. Eén kern maakt dus ongeveer 35 pagina's per seconde, "
+"en 57 pagina's per seconde hielden 1,6 kernen bezig. De kernen van de "
+"live server zijn trager, dus reken daar op minder pagina's per kern; de "
+"verhouding tussen de workers en de database blijft gelden."
+
+#: ../../source/monitoring/server-resources.rst:58
+msgid "What follows from that:"
+msgstr "Wat daaruit volgt:"
+
+#: ../../source/monitoring/server-resources.rst:60
+msgid ""
+"**No more web workers than cores.** A worker more than the server has "
+"cores doesn't make pages faster: the workers take turns on the same "
+"cores, and the extra one only uses memory. Leave some room for the "
+"database and the background workers if they run on the same server."
+msgstr ""
+"**Niet meer webworkers dan kernen.** Een worker meer dan de server kernen"
+" heeft, maakt pagina's niet sneller: de workers wisselen elkaar af op "
+"dezelfde kernen, en de extra worker gebruikt alleen geheugen. Laat wat "
+"ruimte voor de database en de achtergrondworkers als die op dezelfde "
+"server draaien."
+
+#: ../../source/monitoring/server-resources.rst:64
+msgid ""
+"**The background workers use at most one core each**, since each does one"
+" job at a time. Sending mail barely uses CPU; the nightly rebuild at "
+"03:00 keeps one core busy while it runs."
+msgstr ""
+"**De achtergrondworkers gebruiken elk hooguit één kern**, want elk doet "
+"één taak tegelijk. E-mails versturen gebruikt nauwelijks CPU; de "
+"nachtelijke herberekening om 03:00 houdt één kern bezig zolang ze loopt."
+
+#: ../../source/monitoring/server-resources.rst:67
+msgid ""
+"**The database uses little CPU** for the site's pages: about a tenth of "
+"what the web workers use."
+msgstr ""
+"**De database gebruikt weinig CPU** voor de pagina's van de site: "
+"ongeveer een tiende van wat de webworkers gebruiken."
+
+#: ../../source/monitoring/server-resources.rst:69
+msgid ""
+"**Slow pages with idle CPU** are not a CPU problem: then the workers are "
+"waiting, on the database or on a full set of 25 visitors each (see :doc"
+":`what-to-watch`)."
+msgstr ""
+"**Trage pagina's met een rustige CPU** zijn geen CPU-probleem: dan "
+"wachten de workers, op de database of omdat ze elk al 25 bezoekers hebben"
+" (zie :doc:`what-to-watch`)."
+
+#: ../../source/monitoring/server-resources.rst:74
+msgid "Memory: one copy of the site per worker"
+msgstr "Geheugen: één kopie van de site per worker"
+
+#: ../../source/monitoring/server-resources.rst:76
+msgid ""
+"Every worker loads the whole site into memory, so memory grows with the "
+"number of workers, not with the number of visitors. Measured under load: "
+"the four web workers together about 750 MB (each extra web worker adds "
+"about 100 to 200 MB), the background workers up to about 650 MB during "
+"the nightly rebuild, and the cache under 50 MB. The whole site needs "
+"about 1.5 GB at its busiest moment, so the plan is a server with 2 GB. "
+"The database comes on top of that if it runs on the same server."
+msgstr ""
+"Elke worker laadt de hele site in het geheugen, dus het geheugen groeit "
+"met het aantal workers, niet met het aantal bezoekers. Gemeten onder "
+"belasting: de vier webworkers samen ongeveer 750 MB (elke extra webworker"
+" komt er ongeveer 100 tot 200 MB bij), de achtergrondworkers tot ongeveer"
+" 650 MB tijdens de nachtelijke herberekening, en de cache onder 50 MB. De"
+" hele site heeft op zijn drukste moment ongeveer 1,5 GB nodig, dus het "
+"plan is een server met 2 GB. De database komt daar nog bij als die op "
+"dezelfde server draait."
+
+#: ../../source/monitoring/server-resources.rst:84
+msgid ""
+"When memory runs out, the server stops a worker abruptly. So the number "
+"of web workers is limited by both: the cores (for speed) and the memory "
+"(for room). Add cores and memory together."
+msgstr ""
+"Als het geheugen op is, stopt de server een worker abrupt. Het aantal "
+"webworkers wordt dus door beide begrensd: de kernen (voor de snelheid) en"
+" het geheugen (voor de ruimte). Breid kernen en geheugen samen uit."
+
+#: ../../source/monitoring/server-resources.rst:89
+msgid "Disk: what grows"
+msgstr "Schijf: wat er groeit"
+
+#: ../../source/monitoring/server-resources.rst:91
+msgid ""
+"The disk is about space, not speed: the site reads little from it, since "
+"what it reads often is in memory or in the cache."
+msgstr ""
+"Bij de schijf gaat het om ruimte, niet om snelheid: de site leest er "
+"weinig van, want wat hij vaak leest, zit in het geheugen of in de cache."
+
+#: ../../source/monitoring/server-resources.rst:94
+msgid ""
+"**The database** grows by about 350 MB a year at 100 dojos and 6,000 "
+"families, two thirds of it the mail log. A mail's text is cleared a year "
+"after it was sent, which keeps that growth in check."
+msgstr ""
+"**De database** groeit met ongeveer 350 MB per jaar bij 100 dojo's en "
+"6.000 gezinnen, voor twee derde het e-maillogboek. De tekst van een "
+"e-mail wordt een jaar na het versturen gewist, wat die groei binnen de "
+"perken houdt."
+
+#: ../../source/monitoring/server-resources.rst:97
+msgid ""
+"**Uploaded images** (event banners, dojo logos, photos): at most 10 MB "
+"each, and made smaller when they're stored."
+msgstr ""
+"**Geüploade afbeeldingen** (banners van sessies, logo's van dojo's, "
+"foto's): elk hooguit 10 MB, en verkleind wanneer ze bewaard worden."
+
+#: ../../source/monitoring/server-resources.rst:99
+msgid "**Logs and backups**: these depend on how the hosting provider keeps them."
+msgstr ""
+"**Logbestanden en back-ups**: die hangen af van hoe de hostingprovider ze"
+" bijhoudt."
+
+#: ../../source/monitoring/server-resources.rst:101
+msgid ""
+"The dashboard shows each table's size now; the daily sample (every night "
+"at 02:30) stores the database's size in the site itself, so its growth "
+"over months can be followed even without a monitoring service."
+msgstr ""
+"Het dashboard toont de huidige grootte van elke tabel; de dagelijkse "
+"meting (elke nacht om 02:30) bewaart de grootte van de database in de "
+"site zelf, zodat je de groei over maanden kunt volgen, ook zonder "
+"monitoringdienst."
+

@@ -35,11 +35,19 @@ Is it fast enough?
 Is there room enough?
 ---------------------
 
+The server's three limits are its CPU, memory and disk; how the workers use
+each is on :doc:`server-resources`.
+
+- **CPU** busy above 80% for ten minutes or more outside a registration
+  rush (on the hosting provider's panel: the site doesn't measure its own
+  CPU): the web workers have more pages to make than the cores can keep up
+  with. Add cores first, then web workers to match.
 - **Database connections** over 70% of the limit: more web workers than the
   database can take. Every page being made holds one connection, so the
   number of workers times 25 has to stay below the database's limit.
 - **Memory**: the memory of all workers together over 80% of what the
-  server has. Running out can make the server stop workers abruptly.
+  server has. Running out can make the server stop workers abruptly. Run
+  fewer web workers, or add memory.
 - **Cache memory** over half of its limit (128 MB), or keys being thrown out
   (*evicted*): the cache is too small.
 - **Database size** growing faster than planned (the daily sample): usually
@@ -47,6 +55,9 @@ Is there room enough?
   year of campaigns shows up here before the nightly clean-up catches up.
 - **Uploaded files** growing by more than 100 MB a month: unusually large
   uploads.
+- **Disk** more than 80% full (on the hosting provider's panel): the
+  database, uploads, logs and backups together. Ask for more room before it
+  fills: a full disk stops the database.
 
 Is the mail going out?
 ----------------------
