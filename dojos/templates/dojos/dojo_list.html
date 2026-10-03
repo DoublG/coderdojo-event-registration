@@ -11,9 +11,13 @@
   .finder-root .finder-header h1 { color: var(--ink); margin: 0 0 var(--space-2); }
   .finder-root .finder-header p { color: var(--ink-muted); margin: 0; }
 
-  /* The search form is the shared .cd-search (bundle.css), like Events'. */
-  .finder-root .cd-dojo-finder { max-width: none; width: 100%; }
-  .finder-root .cd-dojo-finder__meta { margin-bottom: var(--space-2); }
+  /* The search form is the shared .cd-search (bundle.css), like Events'.
+     No flex gap here (the homepage widget keeps it): the blocks are spaced by
+     their own margins, as on the events list, so the form, its filter chips and
+     the featured block sit at the same distances on both pages. */
+  .finder-root .cd-dojo-finder { max-width: none; width: 100%; gap: 0; }
+  .finder-root .cd-promo-list { margin-bottom: var(--space-6); }
+  .finder-root .cd-dojo-finder__meta { margin-bottom: var(--space-6); }
 
   .finder-root .find-cta { text-align: center; margin-top: var(--space-7); padding: var(--space-6); }
   .finder-root .find-cta p { color: var(--ink-muted); margin: 0 0 var(--space-4); }
