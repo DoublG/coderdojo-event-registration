@@ -200,6 +200,11 @@ seeded demo data so far, so there's nothing to convert.
 
 ## Memory per component
 
+Which functions the memory goes to, and which are worth refactoring, is in
+[`MEMORY_PROFILE.md`](MEMORY_PROFILE.md). The nightly engagement rebuild below is the largest by far; its
+reading of the bookings was refactored on 3 October 2026, after these figures (the rebuild's own peak went
+from 132 to 35 MB), so the mailing worker's peak should now be lower: measure again.
+
 PSS in MB, production-like (`DEBUG` off). *Idle* is after start-up and a few requests; *peak* is the
 highest seen in any test.
 
@@ -224,7 +229,9 @@ MySQL isn't in this budget: on Level27 it runs separately (to confirm, see
 **Celery's per-child limit.** Both workers recycle their child at `--max-memory-per-child 200000`
 (200 MB, compared with the child's peak RSS after each task). An idle child sits at 143–148 MB RSS, so
 there are about 50 MB of room. The nightly engagement rebuild takes the mailing child to 300 MB (4.9
-seconds for 9,000 children), after which Celery replaces it, as intended: the memory goes back. A
+seconds for 9,000 children), after which Celery replaces it, as intended: the memory goes back. (Measured
+before 3 October 2026, when the rebuild stopped making a copy of each session and dojo per booking: about
+100 MB less at its peak, [`MEMORY_PROFILE.md`](MEMORY_PROFILE.md).) A
 campaign launch stays at 160 MB (the audience is queued in chunks). The periodic worker's child never came
 near the limit. The limit is right as it is; watch for "exceeded memory limit" in the worker log after
 every task, which would mean the baseline has grown.

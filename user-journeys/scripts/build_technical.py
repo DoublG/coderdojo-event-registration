@@ -746,7 +746,8 @@ booking clears it so the places left stay right. Redis grew by 0.2 MB.</li>
 <tr><td><b>Total</b></td><td><b>0.9 GB</b></td><td><b>about 1.45 GB: plan 2 GB</b></td></tr>
 </table>
 <p>The mailing worker's child reaches 300 MB during the nightly rebuild and is then replaced
-(<code>--max-memory-per-child</code>, 200 MB); a campaign launch stays at 160 MB because audiences are queued in chunks.
+(<code>--max-memory-per-child</code>, 200 MB); measured before 3 October 2026, when the rebuild's own peak went from
+132 to 35 MB (section 16, "Memory per function"), so that peak should now be lower; a campaign launch stays at 160 MB because audiences are queued in chunks.
 Mail goes out at 120 a minute by design: a campaign to 6,600 families takes about 55 minutes, with booking mail
 ahead of it. Since 2 October 2026 a booking confirmation sent during a campaign waits about 16 seconds instead of two
 minutes: the dispatcher keeps only two batches in flight (the broker sends first in, first out, so everything claimed
@@ -806,8 +807,9 @@ section(
     "Coding standards and quality",
     f"""
 <p class='lede'>How code is written, checked and measured: the standards, the linting setup, the tests and what they
-cover, and how complex the code is. Measured on 2 October 2026; the full version, with how to measure again, is
-<code>CODING_STANDARDS.md</code>, and the conventions themselves are in <code>CLAUDE.md</code>.</p>
+cover, how complex the code is and how much memory each function uses. Measured on 2 and 3 October 2026; the full
+versions, with how to measure again, are <code>CODING_STANDARDS.md</code> and <code>MEMORY_PROFILE.md</code>, and the
+conventions themselves are in <code>CLAUDE.md</code>.</p>
 
 <h2>Production code and development-only code</h2>
 <table>
@@ -868,6 +870,46 @@ new function that is. The three large views modules became packages by area.</p>
 {chart("complexity-ranks", "Cyclomatic complexity of every function (radon).", QUALITY_CHARTS)}
 {chart("most-complex", "The most complex functions; over 20 fails the lint, seed code excepted.", QUALITY_CHARTS)}
 
+<h2>Memory per function</h2>
+<p>Measured on 3 October 2026 by <code>quality/memory_profile.py</code>: every page (as the account that would open
+it) and every background job, run once on a <code>seed_scale</code> database of a year's growth (8,962 children,
+29,400 bookings, 188,926 mails) with production's settings. Python's <code>tracemalloc</code> counts the allocations
+and <code>sys.monitoring</code> reports when each of the site's own functions starts and returns, so every function
+gets its <b>peak</b> (the most memory a call needs, with what it calls), its <b>own peak</b> (without the site's
+functions it calls: where to change it) and what it <b>keeps</b> after returning. Only Python's allocations count, so
+processes are bigger (section 15); the figures show where memory goes and how it grows.</p>
+<table>
+<tr><th>Peak per call</th><th>Functions</th></tr>
+<tr><td>up to 100 KB</td><td>643 of 747 (86%)</td></tr>
+<tr><td>100 KB to 1 MB</td><td>82</td></tr>
+<tr><td>1 to 10 MB</td><td>19</td></tr>
+<tr><td>over 10 MB</td><td>3, all the nightly engagement rebuild</td></tr>
+</table>
+{chart("memory-steps", "Peak memory of the pages, writes and jobs that need the most (log scale).", QUALITY_CHARTS)}
+<table>
+<tr><th>Function</th><th>Peak</th><th>Verdict</th></tr>
+<tr><td><code>events.engagement._registrations_by_ninja</code></td><td>128 MB, now 10.8 MB</td><td><b>Refactored
+on 3 October 2026.</b> Each of the 29,400 bookings got its own copy of its session and dojo (<code>select_related</code>
+over the whole table), so it grew with every booking. It now loads every session and dojo once and reads the
+bookings as plain values, and the children's home dojos share the same dojos: the whole nightly rebuild went from
+132 MB to 35 MB and from 12.6 to 7.4 seconds, writing the same 22,792 rows.</td></tr>
+<tr><td>The attendance list's award forms (<code>dojos/forms.py</code>)</td><td>30 KB per form, now none</td><td><b>Fixed
+on 3 October 2026.</b> A <code>lazy()</code> call per form built a new class each time, kept until the garbage
+collector ran: 1.6 MB per page for 22 children, now 0.25 MB. <code>lazy()</code> is now called once at module
+level (four other forms too), and a guard test fails on a <code>lazy()</code> call inside a function.</td></tr>
+<tr><td>Pages</td><td>93 KB median, 2.7 MB at most</td><td>Fine: bounded by one session or one page of rows.</td></tr>
+<tr><td>Mail jobs, campaign queuing, segments, export, retention</td><td>0.2–1.4 MB</td><td>Fine: they work in
+chunks or let the database count, whatever the number of mails or accounts.</td></tr>
+</table>
+{
+        why(
+            "A job that reads a whole table should read values and share the small tables it refers to, never "
+            "select_related across it: memory then grows with the small table, not the large one. Found on the way: "
+            "the Mail queue page spent 6.6 seconds on one count over the mail log; an index on (status, sent_at) "
+            "brought that count to a millisecond and the page to 0.3 seconds."
+        )
+    }
+
 """,
 )
 
@@ -880,7 +922,7 @@ def html_doc():
         "<div class='sub'>How the site is built, how its data fits together, and why it looks the way it does. "
         "A summary of <code>DATA_MODEL.md</code> and <code>CLAUDE.md</code>, with the diagrams taken from the former.</div>"
         f"<h2 style='margin-top:14mm'>Contents</h2><ol class='toc'>{toc}</ol>"
-        "<div class='meta'>Generated from the repository, 2 October 2026 · "
+        "<div class='meta'>Generated from the repository, 3 October 2026 · "
         "user-journeys/scripts/build_technical.py</div></div>"
     ]
     for i, (title, content) in enumerate(SECTIONS, 1):

@@ -2,6 +2,7 @@
 made by quality/summarize.py, in the load-test charts' style (loadtest/charts.py):
 
     <venv>/bin/python quality/charts.py quality/results/2026-10-01.json
+    <venv>/bin/python quality/charts.py --memory quality/results/memory-2026-10-03.json   # MEMORY.md
 
 Writes PNGs to quality/charts/. Needs matplotlib (loadtest/requirements.txt)."""
 
@@ -86,7 +87,89 @@ def most_complex(summary, count=12):
     save(fig, "most-complex", OUT)
 
 
+def plain_log_axis(ax):
+    from matplotlib.ticker import FuncFormatter
+
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+
+
+def megabytes(n):
+    return f"{n / 1e6:.1f} MB" if n >= 1e5 else f"{n / 1e3:.0f} KB"
+
+
+def memory_functions(profile, count=15):
+    """The functions with the highest peak per call (quality/memory_profile.py).
+    Callers repeat their callee's peak, so only the deepest function of each
+    chain of tasks and middleware is shown."""
+    skip = ("Middleware.__call__", "tasks.py")
+    functions = [f for f in profile["functions"] if not f["name"].endswith(skip) and not f["path"].endswith(skip)]
+    functions = functions[:count]
+    top, next_top = functions[0], next(f for f in functions if not f["path"].endswith("engagement.py"))
+    fig, ax = figure(
+        f"The engagement rebuild needs the most: {megabytes(top['peak'])}, "
+        f"{top['peak'] / next_top['peak']:.0f}× the heaviest page",
+        f"Highest peak per call of the site's functions (Python allocations, tracemalloc), on "
+        f"{profile['database']['children']:,} children and {profile['database']['registrations']:,} bookings. "
+        "Log scale.",
+        height=0.34 * count + 1.8,
+    )
+    labels = [f"{f['path'].rsplit('/', 1)[-1]}: {f['name']}" for f in reversed(functions)]
+    peaks = [f["peak"] / 1e6 for f in reversed(functions)]
+    bars = ax.barh(labels, peaks, color=SITE, height=0.6)
+    ax.bar_label(bars, labels=[megabytes(f["peak"]) for f in reversed(functions)], padding=3, fontsize=8.5, color=INK)
+    ax.set_xscale("log")
+    ax.set_xlim(0.1, max(peaks) * 4)
+    plain_log_axis(ax)
+    ax.set_xlabel("peak per call, MB (log scale)")
+    ax.grid(axis="y", visible=False)
+    save(fig, "memory-functions", OUT)
+
+
+def memory_steps(profile, count=15):
+    """The pages, writes and jobs with the highest peak."""
+    steps = [s for s in profile["steps"] if s["kind"] != "page" or s.get("status") in (200, 302)]
+    highest = {}
+    for step in sorted(steps, key=lambda s: -s["peak"]):  # the highest of each page or job run twice
+        highest.setdefault(step["label"], step)
+    steps = list(highest.values())[:count]
+    colour = {"page": SERIES[0], "job": SERIES[1]}
+    pages = max(s["peak"] for s in steps if s["kind"] == "page")
+    fig, ax = figure(
+        f"Pages need at most {megabytes(pages)}; the heaviest nightly job takes {megabytes(steps[0]['peak'])}",
+        "Highest memory above the start of each page, write or job, served once on the scale database. Log scale.",
+        height=0.34 * count + 2.0,
+    )
+    labels = [s["label"].replace("mailing.tasks.", "").replace("events.tasks.", "")[:58] for s in reversed(steps)]
+    bars = ax.barh(
+        labels,
+        [s["peak"] / 1e6 for s in reversed(steps)],
+        color=[colour.get(s["kind"], SERIES[2]) for s in reversed(steps)],
+        height=0.6,
+    )
+    ax.bar_label(bars, labels=[megabytes(s["peak"]) for s in reversed(steps)], padding=3, fontsize=8.5, color=INK)
+    ax.set_xscale("log")
+    ax.set_xlim(0.1, max(s["peak"] for s in steps) / 1e6 * 4)
+    plain_log_axis(ax)
+    ax.set_xlabel("peak, MB (log scale)")
+    ax.grid(axis="y", visible=False)
+    from matplotlib.patches import Patch
+
+    ax.legend(
+        [Patch(color=SERIES[0]), Patch(color=SERIES[1]), Patch(color=SERIES[2])],
+        ["page", "background job", "write, campaign or other"],
+        loc="upper center",
+        bbox_to_anchor=(0.3, -0.1),
+        ncol=3,
+    )
+    save(fig, "memory-steps", OUT)
+
+
 def main():
+    if sys.argv[1] == "--memory":
+        profile = json.load(open(sys.argv[2]))
+        memory_functions(profile)
+        memory_steps(profile)
+        return
     summary = json.load(open(sys.argv[1]))
     coverage_per_app(summary)
     complexity_ranks(summary)

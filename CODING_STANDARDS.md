@@ -7,7 +7,7 @@ Measured on **2 October 2026**; rerun the measurements ([Measuring again](#measu
 The conventions themselves, with their reasons, live in [`CLAUDE.md`](CLAUDE.md): that file is the
 authority, and this one gathers the standards, the tools that enforce them and the figures. The data model
 is in [`DATA_MODEL.md`](DATA_MODEL.md), versions and audits in [`MAINTENANCE.md`](MAINTENANCE.md), load
-and capacity in [`CAPACITY.md`](CAPACITY.md).
+and capacity in [`CAPACITY.md`](CAPACITY.md), memory per function in [`MEMORY_PROFILE.md`](MEMORY_PROFILE.md).
 
 **In short:**
 
@@ -65,7 +65,7 @@ for developers. Where the line runs:
 | Deploying | `scripts/deploy.sh` | **no**: runs from a developer's machine |
 | CI | `.github/` (workflows, `scripts/test_report.py`) | **no**: runs on GitHub |
 | The help centre | `docs/` | **no**: published to GitHub Pages by its own workflow |
-| Documents | `README.md`, `MAINTENANCE.md`, `SECURITY.md`; `CLAUDE.md`, `DATA_MODEL.md`, `CAPACITY.md`, this file | the first three ship (harmless); the others don't |
+| Documents | `README.md`, `MAINTENANCE.md`, `SECURITY.md`; `CLAUDE.md`, `DATA_MODEL.md`, `CAPACITY.md`, `MEMORY_PROFILE.md`, this file | the first three ship (harmless); the others don't |
 
 So **a change to production code** is anything in the apps (other than tests and seeders), `website/`,
 `locale/`, `requirements.txt`, `gunicorn.conf.py` or the systemd units: it needs its tests, goes through CI,
@@ -181,6 +181,8 @@ python manage.py test events.tests.BookingTests         # one class
 | `core.tests.AdminStaysFullyUsableTests` | a superuser can't add, change or delete a registered model |
 | `core.tests.StrNeverQueriesTests` | a model's `__str__` runs a query |
 | `core.tests.SiteFormTextsAreTranslatedTests` | a form shows an untranslated label or help text |
+| `core.tests.LazyOnlyAtModuleLevelTests` | the site calls `lazy()` inside a function (a new class each call, [`MEMORY_PROFILE.md`](MEMORY_PROFILE.md)) |
+| `events.tests.EngagementTests.test_registrations_share_one_object_per_session_and_dojo` | the nightly engagement rebuild copies a session or dojo per booking again |
 | `core.tests.SecurityHeadersTests` | a header is missing, or a template has an inline event handler |
 | `core.tests.VendoredHtmxTests`, `FontsTests`, `geo.tests.MapWidgetAssetsTests` | a page loads a script or font from another site |
 | `api.tests...test_the_schema_never_holds_sensitive_fields` | the API's schema exposes health, criminal or security data |
@@ -338,6 +340,7 @@ lint-imports                                               # the layers between 
 python3 quality/summarize.py /tmp/coverage.json /tmp/cc.json /tmp/mi.json /tmp/raw.json \
     > quality/results/$(date +%F).json
 <venv>/bin/python quality/charts.py quality/results/$(date +%F).json
+# Memory per function: on a seed_scale database of its own, see MEMORY_PROFILE.md, "Measuring again"
 ```
 
 Commit `quality/results/` and `quality/charts/`, update the figures here and rebuild the technical PDF
