@@ -25,6 +25,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from accounts.models import Ninja, age_on
+from dojos.models import Dojo
 
 from .models import Event, NinjaEngagement, NinjaEngagementChange, Registration
 
@@ -157,23 +158,42 @@ def _sessions_by_dojo(now, history_start):
     return sessions
 
 
-def _registrations_by_ninja(now):
+def _sessions_by_id(dojos):
+    """{event_id: event} for every session that isn't a draft, each with its
+    dojo from `dojos` attached. Every session is loaded once and shared by
+    its registrations: a select_related on the registrations would build a
+    new Event and Dojo for each one."""
+    events = Event.objects.select_related(None).exclude(status=Event.DRAFT).in_bulk()
+    for event in events.values():
+        event.dojo = dojos[event.dojo_id]
+    return events
+
+
+def _registrations_by_ninja(now, dojos):
     """Each child's registrations, sorted into what came of them:
     came {ninja_id: {event_id: (event, marked)}}, no_shows {ninja_id: [event]}
-    and upcoming {ninja_id: {dojo_id}}."""
+    and upcoming {ninja_id: {dojo_id}}. The registrations are read as plain
+    values, a chunk at a time, and point at shared event objects, so the
+    memory follows the number of sessions rather than of registrations."""
+    events = _sessions_by_id(dojos)
     marked_events = set(Registration.objects.filter(attended__isnull=False).values_list("event_id", flat=True))
     came, no_shows, upcoming = defaultdict(dict), defaultdict(list), defaultdict(set)
-    for registration in Registration.objects.select_related("event__dojo").exclude(event__status=Event.DRAFT):
-        event = registration.event
+    rows = (
+        Registration.objects.exclude(event__status=Event.DRAFT)
+        .values_list("ninja_id", "event_id", "attended", "waiting_list")
+        .iterator(chunk_size=2000)
+    )
+    for ninja_id, event_id, attended, waiting_list in rows:
+        event = events[event_id]
         if event.start_time > now:
-            if not registration.waiting_list:
-                upcoming[registration.ninja_id].add(event.dojo_id)
-        elif registration.attended is True:
-            came[registration.ninja_id][event.pk] = (event, True)
-        elif registration.attended is None and not registration.waiting_list and event.pk not in marked_events:
-            came[registration.ninja_id][event.pk] = (event, False)
-        elif registration.attended is False:
-            no_shows[registration.ninja_id].append(event)
+            if not waiting_list:
+                upcoming[ninja_id].add(event.dojo_id)
+        elif attended is True:
+            came[ninja_id][event_id] = (event, True)
+        elif attended is None and not waiting_list and event_id not in marked_events:
+            came[ninja_id][event_id] = (event, False)
+        elif attended is False:
+            no_shows[ninja_id].append(event)
     return came, no_shows, upcoming
 
 
@@ -207,10 +227,15 @@ def rebuild(today=None):
     today = today or timezone.localdate()
     history_start = now - timedelta(days=HISTORY_DAYS)
     sessions = _sessions_by_dojo(now, history_start)
-    came, no_shows, upcoming = _registrations_by_ninja(now)
+    # Every dojo once, shared by the sessions and the children's home dojos
+    # (a select_related would give each row its own copy).
+    every_dojo = Dojo.objects.in_bulk()
+    came, no_shows, upcoming = _registrations_by_ninja(now, every_dojo)
 
     rows = []
-    for ninja in Ninja.objects.select_related("home_dojo"):
+    for ninja in Ninja.objects.select_related(None):
+        if ninja.home_dojo_id is not None:
+            ninja.home_dojo = every_dojo[ninja.home_dojo_id]
         visits = came.get(ninja.pk, {})
         main, dojos = _main_dojo(ninja, visits, history_start)
         shared = {

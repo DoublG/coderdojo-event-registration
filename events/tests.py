@@ -786,6 +786,29 @@ class EngagementTests(TestCase):
             stages, {"Old visitor": "lapsed", "Never": "never_attended", "New": "new", "Adult": "aged_out"}
         )
 
+    def test_registrations_share_one_object_per_session_and_dojo(self):
+        """The rebuild reads every registration: each points at one shared
+        session and dojo object (MEMORY_PROFILE.md), never a copy per row,
+        and the children's home dojos are those same objects."""
+        from core.testing import site_queries
+        from dojos.models import Dojo
+
+        from .engagement import _registrations_by_ninja
+
+        other = Ninja.objects.create(name="Noor", home_dojo=self.dojo)
+        session, later = self._session(30), self._session(10)
+        for ninja in (self.ninja, other):
+            self._came(session, ninja=ninja)
+            self._came(later, ninja=ninja, attended=False)
+        dojos = Dojo.objects.in_bulk()
+        with site_queries() as captured:
+            came, no_shows, _upcoming = _registrations_by_ninja(timezone.now(), dojos)
+        self.assertEqual(len(captured), 3)  # sessions, the marked sessions, the registrations
+        self.assertIs(came[self.ninja.pk][session.pk][0], came[other.pk][session.pk][0])
+        self.assertIs(no_shows[self.ninja.pk][0], no_shows[other.pk][0])
+        self.assertIs(came[self.ninja.pk][session.pk][0].dojo, dojos[self.dojo.pk])
+        self.assertEqual(self._overall(other).main_dojo, self.dojo)
+
     def test_a_session_nobody_marked_counts_a_confirmed_place(self):
         unmarked = self._session(30)
         Registration.objects.create(event=unmarked, ninja=self.ninja, waiting_list=False, position=1)
