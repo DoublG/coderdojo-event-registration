@@ -31,6 +31,18 @@ def _password_rules():
     return password_validation.password_validators_help_text_html()
 
 
+# lazy() once at module level, never per form: each call defines a new class
+# (MEMORY_PROFILE.md). Calling the result per form is cheap.
+password_rules_lazy = lazy(_password_rules, SafeString)
+
+
+def _child_email_label(name):
+    return _("%(name)s's email address") % {"name": name}
+
+
+child_email_label_lazy = lazy(_child_email_label, str)
+
+
 class NewPasswordLabelsMixin:
     """The site's wording for a new password and its confirmation, and the
     rules as the new password's help text."""
@@ -38,7 +50,7 @@ class NewPasswordLabelsMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["new_password1"].label = _("New password")
-        self.fields["new_password1"].help_text = lazy(_password_rules, SafeString)()
+        self.fields["new_password1"].help_text = password_rules_lazy()
         self.fields["new_password2"].label = _("Confirm new password")
         self.fields["new_password2"].help_text = ""
 
@@ -549,7 +561,7 @@ class ChildLoginForm(forms.Form):
 
     def __init__(self, child, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["email"].label = lazy(lambda: _("%(name)s's email address") % {"name": child.name}, str)()
+        self.fields["email"].label = child_email_label_lazy(child.name)
         if child.account is not None:
             self.fields["email"].initial = child.account.email
             self.fields["login_method"].initial = child.account.login_method

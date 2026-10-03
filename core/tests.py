@@ -1206,6 +1206,61 @@ class SecurityHeadersTests(TestCase):
         self.assertRegex(html, r"<body hx-headers='\{\"X-CSRFToken\": \"[^\"]+\"\}'>")
 
 
+class LazyOnlyAtModuleLevelTests(TestCase):
+    """django.utils.functional.lazy() defines a new class every time it's
+    called: about 30 KB, freed only by a full garbage collection. So it's
+    called once at module level and the function it returns is called per
+    form or per row (MEMORY_PROFILE.md, "Guidelines for memory"); the award
+    forms called it twice per child on the attendance list."""
+
+    def test_the_site_never_calls_lazy_inside_a_function(self):
+        import ast
+        from pathlib import Path
+
+        base, skip = Path(settings.BASE_DIR), ("tests.py", "testing.py")
+        found = []
+        paths = sorted(path for app in self._site_apps() for path in (base / app).rglob("*.py"))
+        for path in paths:
+            relative = path.relative_to(base)
+            if "migrations" in relative.parts or path.name in skip:
+                continue
+            tree = ast.parse(path.read_text())
+            for function in ast.walk(tree):
+                if not isinstance(function, ast.FunctionDef | ast.AsyncFunctionDef | ast.Lambda):
+                    continue
+                for node in ast.walk(function):
+                    if (
+                        isinstance(node, ast.Call)
+                        and getattr(node.func, "id", getattr(node.func, "attr", "")) == "lazy"
+                    ):
+                        found.append(f"{relative}:{node.lineno}")
+        self.assertEqual(sorted(set(found)), [], "call lazy() at module level and its result per object")
+
+    @staticmethod
+    def _site_apps():
+        from pathlib import Path
+
+        from django.apps import apps
+
+        base = Path(settings.BASE_DIR)
+        return {
+            Path(config.path).relative_to(base).parts[0]
+            for config in apps.get_app_configs()
+            if Path(config.path).is_relative_to(base)
+        }
+
+    def test_a_text_made_once_still_follows_the_language_it_is_shown_in(self):
+        from django.utils import translation
+
+        from dojos.forms import AwardBeltForm, note_placeholder_lazy
+
+        with translation.override("en-us"):
+            placeholder = note_placeholder_lazy(AwardBeltForm.note_placeholder, "Emma")
+            self.assertEqual(str(placeholder), "What Emma showed")
+        with translation.override("nl-be"):
+            self.assertEqual(str(placeholder), "Wat Emma liet zien")
+
+
 class UploadGuardrailTests(TempMediaMixin, TestCase):
     """core.uploads: uploaded images are checked, shrunk and re-encoded
     without their metadata, and deleted when nothing uses them any more;

@@ -79,6 +79,11 @@ def _segments_help():
     )
 
 
+# lazy() once at module level, never per form: each call defines a new class
+# (MEMORY_PROFILE.md).
+segments_help_lazy = lazy(_segments_help, SafeString)
+
+
 class CampaignForm(MailingFormMixin, forms.ModelForm):
     """A draft campaign: what (template + variables), to whom (segment),
     which kind of mail (only ones people can switch off) and when."""
@@ -99,7 +104,7 @@ class CampaignForm(MailingFormMixin, forms.ModelForm):
         self.fields["scheduled_at"].input_formats = ["%Y-%m-%dT%H:%M"]
         self.fields["scheduled_at"].label = _("Send at")
         self.fields["scheduled_at"].help_text = _("Leave empty to send as soon as it's launched.")
-        self.fields["segment"].help_text = lazy(_segments_help, SafeString)()
+        self.fields["segment"].help_text = segments_help_lazy()
 
     def clean_scheduled_at(self):
         when = self.cleaned_data["scheduled_at"]

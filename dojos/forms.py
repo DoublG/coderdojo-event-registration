@@ -328,6 +328,16 @@ class TitledSelect(forms.Select):
         return option
 
 
+def _note_placeholder(placeholder, name):
+    return placeholder % {"name": name}
+
+
+# lazy() once here, never per form: each lazy() call defines a new class (about
+# 30 KB, freed only by a full garbage collection), and there are two of these
+# forms per child on the attendance list (MEMORY_PROFILE.md).
+note_placeholder_lazy = lazy(_note_placeholder, str)
+
+
 class AwardForm(forms.Form):
     """An attendance row's "Award belt" / "Award badge" form. The select
     offers what the ninja can still get, but any belt or badge is accepted
@@ -346,8 +356,9 @@ class AwardForm(forms.Form):
         field.queryset = field.queryset.model.objects.all()
         field.label_from_instance = lambda award: award.localized("name")
         self.offer(offered)
-        name, placeholder = registration.ninja.name, self.note_placeholder
-        self.fields["note"].widget.attrs["placeholder"] = lazy(lambda: placeholder % {"name": name}, str)()
+        self.fields["note"].widget.attrs["placeholder"] = note_placeholder_lazy(
+            self.note_placeholder, registration.ninja.name
+        )
 
     def offer(self, offered):
         """What the select shows (the queryset still accepts any)."""
