@@ -144,12 +144,13 @@ class PromotionPlacementTests(TestCase):
 
     def test_nothing_promoted_shows_nothing(self):
         for url in (reverse("home"), reverse("event_list"), reverse("dojo_list")):
-            self.assertNotContains(self.client.get(url), "cd-promo")
+            # The markup, not the bare name: a page's own CSS may style .cd-promo-list.
+            self.assertNotContains(self.client.get(url), 'class="cd-promo')
 
     def test_event_list_top_only_on_the_unfiltered_list(self):
         self._promote(Promotion.EVENT_LIST_TOP)
         self.assertContains(self.client.get(reverse("event_list")), "cd-promo--banner")
-        self.assertNotContains(self.client.get(reverse("event_list"), {"date": "week"}), "cd-promo")
+        self.assertNotContains(self.client.get(reverse("event_list"), {"date": "week"}), 'class="cd-promo')
 
     def test_dojo_finder_banner(self):
         """On the dojo finder page only: the homepage's finder widget doesn't
