@@ -1128,7 +1128,9 @@ class DojoMailMuteTests(TestCase):
         with patch("mailing.tasks.mail.get_connection", return_value=connection):
             send_email_batch([row.pk])
         header = connection.sent[0].extra_headers["List-Unsubscribe"]
-        self.assertIn(token, header)
+        # The token carries a timestamp, so the header's (made when sending) can differ from the body's.
+        header_token = re.search(r"/mail/unsubscribe/([^/]+)/", header).group(1)
+        self.assertEqual(read_unsubscribe_token(header_token), read_unsubscribe_token(token))
 
     def test_the_new_sessions_mail_skips_a_family_that_muted_the_dojo(self):
         from .automated import announce_new_sessions
