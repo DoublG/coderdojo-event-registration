@@ -1,0 +1,163 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-03 06:20+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/monitoring/overview.rst:2
+msgid "Monitoring the site"
+msgstr "De site opvolgen"
+
+#: ../../source/monitoring/overview.rst:4
+msgid ""
+"The site keeps an eye on itself: it counts its visitors, times its pages,"
+" and checks that its database, its cache and the programs that send mail "
+"are working. This section is for whoever looks after the running site "
+"(the organisation's admins and whoever runs the server). It explains "
+"where to look, what the figures mean and when to act. You don't need any "
+"of it to use the site."
+msgstr ""
+"De site houdt zichzelf in de gaten: hij telt zijn bezoekers, meet hoe "
+"snel zijn pagina's zijn en controleert of zijn database, zijn cache en de"
+" programma's die de e-mails versturen werken. Dit deel is voor wie de "
+"draaiende site opvolgt (de beheerders van de organisatie en wie de server"
+" beheert). Het legt uit waar je kijkt, wat de cijfers betekenen en "
+"wanneer je ingrijpt. Om de site te gebruiken heb je er niets van nodig."
+
+#: ../../source/monitoring/overview.rst:10
+msgid ""
+"Nothing the site measures about itself is about a person: the figures are"
+" counts, sizes and times, never names or addresses."
+msgstr ""
+"Niets van wat de site over zichzelf meet, gaat over een persoon: de "
+"cijfers zijn aantallen, groottes en tijden, nooit namen of adressen."
+
+#: ../../source/monitoring/overview.rst:14
+msgid "Where to look"
+msgstr "Waar je kijkt"
+
+#: ../../source/monitoring/overview.rst:16
+msgid ""
+"**The health check** (``/health/``) answers one question: is everything "
+"working? It checks the database, the cache and the mail workers, and "
+"answers *ok*, or names the part that isn't working. Point an uptime "
+"service at it, so someone gets a message when the site is down."
+msgstr ""
+"**De gezondheidscontrole** (``/health/``) beantwoordt één vraag: werkt "
+"alles? Ze controleert de database, de cache en de e-mailworkers, en "
+"antwoordt *ok* of noemt het onderdeel dat niet werkt. Laat een "
+"uptimedienst ze opvragen, zodat iemand een bericht krijgt als de site "
+"plat ligt."
+
+#: ../../source/monitoring/overview.rst:20
+msgid ""
+"**The metrics page** (``/metrics/``) lists every figure the site "
+"measures, in the format monitoring tools read. It's protected by a secret"
+" key: only a monitoring tool that has it can read the page."
+msgstr ""
+"**De metriekenpagina** (``/metrics/``) toont elk cijfer dat de site meet,"
+" in het formaat dat monitoringtools lezen. Ze is beveiligd met een "
+"geheime sleutel: alleen een monitoringtool die die sleutel heeft, kan de "
+"pagina lezen."
+
+#: ../../source/monitoring/overview.rst:23
+msgid ""
+"**The dashboard** (Grafana) draws those figures as charts over time: "
+"visitors, how fast the pages are, the database, the mail and the memory "
+"the site uses. On the development site it's at ``/grafana/``; for the "
+"live site it has to be connected to a monitoring service first."
+msgstr ""
+"**Het dashboard** (Grafana) tekent die cijfers als grafieken in de tijd: "
+"bezoekers, hoe snel de pagina's zijn, de database, de e-mails en het "
+"geheugen dat de site gebruikt. Op de ontwikkelsite staat het op "
+"``/grafana/``; voor de live site moet het eerst aan een monitoringdienst "
+"gekoppeld worden."
+
+#: ../../source/monitoring/overview.rst:27
+msgid ""
+"**The Mail queue page** on the organisation dashboard shows whether mail "
+"is going out (see :doc:`../organisation/mail-queue`)."
+msgstr ""
+"**De pagina E-mailwachtrij** op het organisatiedashboard toont of de "
+"e-mails vertrekken (zie :doc:`../organisation/mail-queue`)."
+
+#: ../../source/monitoring/overview.rst:29
+msgid ""
+"**A daily sample**: every night at 02:30 the site stores the size of its "
+"database and its other figures, so growth over months shows up even "
+"without a monitoring service."
+msgstr ""
+"**Een dagelijkse meting**: elke nacht om 02:30 bewaart de site de grootte"
+" van zijn database en zijn andere cijfers, zodat de groei over maanden "
+"zichtbaar is, ook zonder monitoringdienst."
+
+#: ../../source/monitoring/overview.rst:34
+msgid "What it measures"
+msgstr "Wat er gemeten wordt"
+
+#: ../../source/monitoring/overview.rst:36
+msgid ""
+"**Visitors and pages**: how many requests come in per page, how long they"
+" take, how many database lookups each one needs, and how often a page "
+"failed with a server error."
+msgstr ""
+"**Bezoekers en pagina's**: hoeveel verzoeken er per pagina binnenkomen, "
+"hoe lang ze duren, hoeveel databaseopzoekingen elk verzoek nodig heeft en"
+" hoe vaak een pagina mislukte met een serverfout."
+
+#: ../../source/monitoring/overview.rst:39
+msgid ""
+"**The workers**: the programs that serve the pages and send the mail, how"
+" much memory each one uses, and how much work is waiting for them (see "
+":doc:`workers`)."
+msgstr ""
+"**De workers**: de programma's die de pagina's maken en de e-mails "
+"versturen, hoeveel geheugen elk gebruikt en hoeveel werk er op hen wacht "
+"(zie :doc:`workers`)."
+
+#: ../../source/monitoring/overview.rst:42
+msgid ""
+"**The database**: how many connections are open, how many lookups it does"
+" per second, slow lookups, and the size of every table."
+msgstr ""
+"**De database**: hoeveel verbindingen er open zijn, hoeveel opzoekingen "
+"ze per seconde doet, trage opzoekingen en de grootte van elke tabel."
+
+#: ../../source/monitoring/overview.rst:44
+msgid ""
+"**The cache** (Redis): how much memory it uses against its limit, and how"
+" often a page found what it needed in the cache."
+msgstr ""
+"**De cache** (Redis): hoeveel geheugen hij gebruikt tegenover zijn "
+"limiet, en hoe vaak een pagina in de cache vond wat ze nodig had."
+
+#: ../../source/monitoring/overview.rst:46
+msgid ""
+"**Mail**: how much mail is waiting, and how long the oldest mail has been"
+" waiting."
+msgstr "**E-mail**: hoeveel e-mails er wachten, en hoe lang de oudste al wacht."
+
+#: ../../source/monitoring/overview.rst:49
+msgid ""
+"Which of these figures need your attention, and when, is on :doc:`what-"
+"to-watch`."
+msgstr ""
+"Welke van deze cijfers je aandacht vragen, en wanneer, staat op :doc"
+":`what-to-watch`."
+

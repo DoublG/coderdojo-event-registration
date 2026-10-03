@@ -1,0 +1,173 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-03 06:20+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/monitoring/overview.rst:2
+msgid "Monitoring the site"
+msgstr "Surveiller le site"
+
+#: ../../source/monitoring/overview.rst:4
+msgid ""
+"The site keeps an eye on itself: it counts its visitors, times its pages,"
+" and checks that its database, its cache and the programs that send mail "
+"are working. This section is for whoever looks after the running site "
+"(the organisation's admins and whoever runs the server). It explains "
+"where to look, what the figures mean and when to act. You don't need any "
+"of it to use the site."
+msgstr ""
+"Le site se surveille lui-même : il compte ses visiteurs, mesure la "
+"vitesse de ses pages et vérifie que sa base de données, son cache et les "
+"programmes qui envoient les e-mails fonctionnent. Cette section s'adresse"
+" à ceux qui suivent le site en production (les administrateurs de "
+"l'organisation et la personne qui gère le serveur). Elle explique où "
+"regarder, ce que signifient les chiffres et quand agir. Vous n'en avez "
+"pas besoin pour utiliser le site."
+
+#: ../../source/monitoring/overview.rst:10
+msgid ""
+"Nothing the site measures about itself is about a person: the figures are"
+" counts, sizes and times, never names or addresses."
+msgstr ""
+"Rien de ce que le site mesure sur lui-même ne concerne une personne : les"
+" chiffres sont des nombres, des tailles et des durées, jamais des noms ou"
+" des adresses."
+
+#: ../../source/monitoring/overview.rst:14
+msgid "Where to look"
+msgstr "Où regarder"
+
+#: ../../source/monitoring/overview.rst:16
+msgid ""
+"**The health check** (``/health/``) answers one question: is everything "
+"working? It checks the database, the cache and the mail workers, and "
+"answers *ok*, or names the part that isn't working. Point an uptime "
+"service at it, so someone gets a message when the site is down."
+msgstr ""
+"**Le contrôle de santé** (``/health/``) répond à une seule question : "
+"est-ce que tout fonctionne ? Il vérifie la base de données, le cache et "
+"les workers d'e-mail, et répond *ok* ou nomme la partie qui ne fonctionne"
+" pas. Faites-le interroger par un service de surveillance de "
+"disponibilité, pour que quelqu'un soit prévenu quand le site est en "
+"panne."
+
+#: ../../source/monitoring/overview.rst:20
+msgid ""
+"**The metrics page** (``/metrics/``) lists every figure the site "
+"measures, in the format monitoring tools read. It's protected by a secret"
+" key: only a monitoring tool that has it can read the page."
+msgstr ""
+"**La page des métriques** (``/metrics/``) liste chaque chiffre que le "
+"site mesure, dans le format que lisent les outils de surveillance. Elle "
+"est protégée par une clé secrète : seul un outil de surveillance qui la "
+"possède peut lire la page."
+
+#: ../../source/monitoring/overview.rst:23
+msgid ""
+"**The dashboard** (Grafana) draws those figures as charts over time: "
+"visitors, how fast the pages are, the database, the mail and the memory "
+"the site uses. On the development site it's at ``/grafana/``; for the "
+"live site it has to be connected to a monitoring service first."
+msgstr ""
+"**Le tableau de bord** (Grafana) dessine ces chiffres sous forme de "
+"graphiques dans le temps : les visiteurs, la vitesse des pages, la base "
+"de données, les e-mails et la mémoire utilisée par le site. Sur le site "
+"de développement, il se trouve à ``/grafana/`` ; pour le site en "
+"production, il faut d'abord le relier à un service de surveillance."
+
+#: ../../source/monitoring/overview.rst:27
+msgid ""
+"**The Mail queue page** on the organisation dashboard shows whether mail "
+"is going out (see :doc:`../organisation/mail-queue`)."
+msgstr ""
+"**La page File d'attente des e-mails** du tableau de bord de "
+"l'organisation montre si les e-mails partent (voir :doc:`../organisation"
+"/mail-queue`)."
+
+#: ../../source/monitoring/overview.rst:29
+msgid ""
+"**A daily sample**: every night at 02:30 the site stores the size of its "
+"database and its other figures, so growth over months shows up even "
+"without a monitoring service."
+msgstr ""
+"**Un relevé quotidien** : chaque nuit à 02:30, le site enregistre la "
+"taille de sa base de données et ses autres chiffres, pour que la "
+"croissance sur plusieurs mois soit visible, même sans service de "
+"surveillance."
+
+#: ../../source/monitoring/overview.rst:34
+msgid "What it measures"
+msgstr "Ce qui est mesuré"
+
+#: ../../source/monitoring/overview.rst:36
+msgid ""
+"**Visitors and pages**: how many requests come in per page, how long they"
+" take, how many database lookups each one needs, and how often a page "
+"failed with a server error."
+msgstr ""
+"**Visiteurs et pages** : combien de requêtes arrivent par page, combien "
+"de temps elles prennent, combien de recherches dans la base de données "
+"chacune demande, et combien de fois une page a échoué avec une erreur "
+"serveur."
+
+#: ../../source/monitoring/overview.rst:39
+msgid ""
+"**The workers**: the programs that serve the pages and send the mail, how"
+" much memory each one uses, and how much work is waiting for them (see "
+":doc:`workers`)."
+msgstr ""
+"**Les workers** : les programmes qui servent les pages et envoient les "
+"e-mails, la mémoire que chacun utilise et la quantité de travail qui les "
+"attend (voir :doc:`workers`)."
+
+#: ../../source/monitoring/overview.rst:42
+msgid ""
+"**The database**: how many connections are open, how many lookups it does"
+" per second, slow lookups, and the size of every table."
+msgstr ""
+"**La base de données** : le nombre de connexions ouvertes, le nombre de "
+"recherches par seconde, les recherches lentes et la taille de chaque "
+"table."
+
+#: ../../source/monitoring/overview.rst:44
+msgid ""
+"**The cache** (Redis): how much memory it uses against its limit, and how"
+" often a page found what it needed in the cache."
+msgstr ""
+"**Le cache** (Redis) : la mémoire qu'il utilise par rapport à sa limite, "
+"et la fréquence à laquelle une page a trouvé dans le cache ce dont elle "
+"avait besoin."
+
+#: ../../source/monitoring/overview.rst:46
+msgid ""
+"**Mail**: how much mail is waiting, and how long the oldest mail has been"
+" waiting."
+msgstr ""
+"**E-mails** : combien d'e-mails attendent, et depuis combien de temps le "
+"plus ancien attend."
+
+#: ../../source/monitoring/overview.rst:49
+msgid ""
+"Which of these figures need your attention, and when, is on :doc:`what-"
+"to-watch`."
+msgstr ""
+"Les chiffres qui demandent votre attention, et à quel moment, sont sur "
+":doc:`what-to-watch`."
+

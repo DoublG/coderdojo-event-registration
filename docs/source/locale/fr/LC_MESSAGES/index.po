@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 13:19+0000\n"
+"POT-Creation-Date: 2026-10-03 06:20+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -24,19 +24,23 @@ msgstr ""
 msgid "For families"
 msgstr "Pour les familles"
 
-#: ../../source/index.rst:25
+#: ../../source/index.rst:27
 msgid "Volunteering & new dojos"
 msgstr "Bénévolat et nouveaux dojos"
 
-#: ../../source/index.rst:33
+#: ../../source/index.rst:35
 msgid "For dojo teams"
 msgstr "Pour les équipes de dojo"
 
-#: ../../source/index.rst:40
+#: ../../source/index.rst:44
 msgid "For the organisation"
 msgstr "Pour l'organisation"
 
-#: ../../source/index.rst:50
+#: ../../source/index.rst:64
+msgid "Running the site"
+msgstr "Faire tourner le site"
+
+#: ../../source/index.rst:72
 msgid "More"
 msgstr "Plus"
 

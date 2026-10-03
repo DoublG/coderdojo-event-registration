@@ -1,0 +1,223 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-03 06:20+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/monitoring/workers.rst:2
+msgid "The workers"
+msgstr "De workers"
+
+#: ../../source/monitoring/workers.rst:4
+msgid ""
+"The site runs as a handful of programs, called *workers*, that share the "
+"work between them. When the site feels slow, or mail doesn't go out, one "
+"of them is usually the reason."
+msgstr ""
+"De site draait als een handvol programma's, *workers* genoemd, die het "
+"werk onder elkaar verdelen. Als de site traag aanvoelt of de e-mails niet"
+" vertrekken, ligt het meestal aan een van hen."
+
+#: ../../source/monitoring/workers.rst:9
+msgid "Web workers: the pages"
+msgstr "Webworkers: de pagina's"
+
+#: ../../source/monitoring/workers.rst:11
+msgid ""
+"Every page a visitor opens is made by a **web worker**. The site runs "
+"several side by side (four is the plan for the live site), and each one "
+"handles up to 25 visitors at the same moment. That limit is on purpose: "
+"every page being made needs a connection to the database, and the "
+"database only accepts a limited number of them."
+msgstr ""
+"Elke pagina die een bezoeker opent, wordt gemaakt door een **webworker**."
+" De site draait er meerdere naast elkaar (vier is het plan voor de live "
+"site), en elk behandelt tot 25 bezoekers tegelijk. Die limiet is bewust: "
+"elke pagina die gemaakt wordt, heeft een verbinding met de database "
+"nodig, en de database aanvaardt er maar een beperkt aantal."
+
+#: ../../source/monitoring/workers.rst:17
+msgid ""
+"When all web workers are full, a new visitor gets a short \"busy\" answer"
+" straight away, instead of a page that keeps loading. On the development "
+"site that answer is a page in the site's own style, **\"One moment\"**, "
+"which tries again by itself after 30 seconds; the live server still shows"
+" its hosting provider's plain error page until the provider has set ours "
+"up. Getting that answer now and then during a registration rush (a "
+"popular session opening for sign-up) is normal. Getting it on an ordinary"
+" day means the site needs more web workers."
+msgstr ""
+"Als alle webworkers vol zitten, krijgt een nieuwe bezoeker meteen een "
+"kort \"druk\"-antwoord, in plaats van een pagina die blijft laden. Op de "
+"ontwikkelsite is dat antwoord een pagina in de stijl van de site, **\"Het"
+" is even heel druk\"**, die het na 30 seconden zelf opnieuw probeert; de "
+"live server toont nog de gewone foutpagina van de hostingprovider, tot "
+"die de onze heeft ingesteld. Dat antwoord af en toe krijgen tijdens een "
+"inschrijvingsrush (een populaire sessie die opengaat voor inschrijving) "
+"is normaal. Het op een gewone dag krijgen betekent dat de site meer "
+"webworkers nodig heeft."
+
+#: ../../source/monitoring/workers.rst:26
+msgid ""
+"What the web workers can handle, as measured on a test machine in October"
+" 2026: 600 visitors browsing at once, about 110 pages a second, with no "
+"errors and 95 out of 100 pages ready within 0.2 seconds. The live server "
+"is slower than that test machine, so take this as an indication, not a "
+"promise."
+msgstr ""
+"Wat de webworkers aankunnen, gemeten op een testmachine in oktober 2026: "
+"600 bezoekers die tegelijk rondklikken, ongeveer 110 pagina's per "
+"seconde, zonder fouten en met 95 op 100 pagina's klaar binnen 0,2 "
+"seconden. De live server is trager dan die testmachine, dus zie dit als "
+"een richtwaarde, niet als een belofte."
+
+#: ../../source/monitoring/workers.rst:32
+msgid "Background workers: mail and scheduled jobs"
+msgstr "Achtergrondworkers: e-mail en geplande taken"
+
+#: ../../source/monitoring/workers.rst:34
+msgid ""
+"Everything that doesn't have to happen while a visitor waits is done by "
+"two **background workers**:"
+msgstr ""
+"Alles wat niet hoeft te gebeuren terwijl een bezoeker wacht, doen twee "
+"**achtergrondworkers**:"
+
+#: ../../source/monitoring/workers.rst:37
+msgid ""
+"**The mail worker** sends every mail (booking confirmations, reminders, "
+"campaigns) and does other work handed to it, one piece at a time. A "
+"campaign is handed over in small portions, so a booking confirmation "
+"never waits behind a whole campaign."
+msgstr ""
+"**De e-mailworker** verstuurt elke e-mail (inschrijvingsbevestigingen, "
+"herinneringen, campagnes) en doet ander werk dat hij doorgegeven krijgt, "
+"één stuk tegelijk. Een campagne wordt in kleine porties doorgegeven, "
+"zodat een inschrijvingsbevestiging nooit achter een hele campagne moet "
+"wachten."
+
+#: ../../source/monitoring/workers.rst:41
+msgid ""
+"**The scheduler** starts the jobs that run on a clock. Every 10 seconds "
+"it passes waiting mail on to the mail worker; every few minutes it checks"
+" for bounced mail and campaigns that are due. Every day it runs:"
+msgstr ""
+"**De planner** start de taken die op een vast uur lopen. Elke 10 seconden"
+" geeft hij wachtende e-mails door aan de e-mailworker; om de paar minuten"
+" kijkt hij of er e-mails teruggekomen zijn en of er campagnes klaarstaan."
+" Elke dag voert hij uit:"
+
+#: ../../source/monitoring/workers.rst:46
+msgid "Time"
+msgstr "Uur"
+
+#: ../../source/monitoring/workers.rst:46
+msgid "Job"
+msgstr "Taak"
+
+#: ../../source/monitoring/workers.rst:48
+msgid "02:30"
+msgstr "02:30"
+
+#: ../../source/monitoring/workers.rst:48
+msgid "Store the daily sample of the site's size and figures"
+msgstr "De dagelijkse meting van de grootte en cijfers van de site bewaren"
+
+#: ../../source/monitoring/workers.rst:49
+msgid "03:00"
+msgstr "03:00"
+
+#: ../../source/monitoring/workers.rst:49
+msgid "Rebuild how often each child comes to sessions"
+msgstr "Opnieuw berekenen hoe vaak elk kind naar sessies komt"
+
+#: ../../source/monitoring/workers.rst:50
+msgid "09:00"
+msgstr "09:00"
+
+#: ../../source/monitoring/workers.rst:50
+msgid "Session reminders; mail reviewers about waiting background checks"
+msgstr ""
+"Sessieherinneringen; reviewers mailen over wachtende uittreksels uit het "
+"strafregister"
+
+#: ../../source/monitoring/workers.rst:51
+msgid "10:00"
+msgstr "10:00"
+
+#: ../../source/monitoring/workers.rst:51
+msgid "Delete accounts that haven't been used for two years"
+msgstr "Accounts verwijderen die twee jaar niet gebruikt zijn"
+
+#: ../../source/monitoring/workers.rst:52
+msgid "10:30"
+msgstr "10:30"
+
+#: ../../source/monitoring/workers.rst:52
+msgid "Remind volunteers whose background check is about to expire"
+msgstr ""
+"Vrijwilligers herinneren van wie het uittreksel uit het strafregister "
+"bijna verloopt"
+
+#: ../../source/monitoring/workers.rst:53
+msgid "17:00"
+msgstr "17:00"
+
+#: ../../source/monitoring/workers.rst:53
+msgid "Tell families about new sessions at their dojo"
+msgstr "Gezinnen laten weten dat er nieuwe sessies zijn in hun dojo"
+
+#: ../../source/monitoring/workers.rst:54
+msgid "18:00"
+msgstr "18:00"
+
+#: ../../source/monitoring/workers.rst:54
+msgid "Send the journeys' mail"
+msgstr "De e-mails van de trajecten versturen"
+
+#: ../../source/monitoring/workers.rst:57
+msgid ""
+"If the background workers stop, the website itself keeps working, but no "
+"mail goes out. Nothing is lost: the mail waits in the queue and goes out "
+"as soon as they run again. The health check and the Mail queue page both "
+"say so when mail has been waiting for more than half an hour."
+msgstr ""
+"Als de achtergrondworkers stoppen, blijft de website zelf werken, maar "
+"vertrekken er geen e-mails. Er gaat niets verloren: de e-mails wachten in"
+" de wachtrij en vertrekken zodra ze weer draaien. De gezondheidscontrole "
+"en de pagina E-mailwachtrij melden het allebei als e-mails langer dan een"
+" halfuur wachten."
+
+#: ../../source/monitoring/workers.rst:63
+msgid "Memory"
+msgstr "Geheugen"
+
+#: ../../source/monitoring/workers.rst:65
+msgid ""
+"All workers share the server's memory. Measured under load, the whole "
+"site needs about 1.5 GB at its busiest moment (the web workers about 750 "
+"MB, the background workers about 650 MB during the nightly rebuild at "
+"03:00), so the plan is an account with 2 GB."
+msgstr ""
+"Alle workers delen het geheugen van de server. Gemeten onder belasting "
+"heeft de hele site op zijn drukste moment ongeveer 1,5 GB nodig (de "
+"webworkers ongeveer 750 MB, de achtergrondworkers ongeveer 650 MB tijdens"
+" de nachtelijke herberekening om 03:00), dus het plan is een account met "
+"2 GB."
+

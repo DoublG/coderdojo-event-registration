@@ -1,0 +1,194 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-03 06:20+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/monitoring/what-to-watch.rst:2
+msgid "What to watch for"
+msgstr "Ce qu'il faut surveiller"
+
+#: ../../source/monitoring/what-to-watch.rst:4
+msgid ""
+"Most figures move up and down with the number of visitors, and that's "
+"fine. The ones below are the warning signs: each one with when it needs "
+"attention and what is most likely behind it. Ask whoever runs the server "
+"to act on them."
+msgstr ""
+"La plupart des chiffres montent et descendent avec le nombre de "
+"visiteurs, et c'est normal. Ceux ci-dessous sont les signaux d'alerte : "
+"pour chacun, quand il demande de l'attention et ce qui se cache le plus "
+"probablement derrière. Demandez à la personne qui gère le serveur d'agir."
+
+#: ../../source/monitoring/what-to-watch.rst:10
+msgid "Is the site up?"
+msgstr "Le site est-il en ligne ?"
+
+#: ../../source/monitoring/what-to-watch.rst:12
+msgid ""
+"**The health check isn't ok.** It names the part that isn't working: the "
+"database, the cache, or the mail workers. Restarting that part is the "
+"first step."
+msgstr ""
+"**Le contrôle de santé n'est pas ok.** Il nomme la partie qui ne "
+"fonctionne pas : la base de données, le cache ou les workers d'e-mail. "
+"Redémarrer cette partie est la première étape."
+
+#: ../../source/monitoring/what-to-watch.rst:15
+msgid ""
+"**Server errors** (on the dashboard: *5xx/s*). Should be zero. A few in a"
+" row on one page usually mean a bug on that page; many on every page mean"
+" the database or the cache is down."
+msgstr ""
+"**Erreurs serveur** (sur le tableau de bord : *5xx/s*). Elles doivent "
+"rester à zéro. Quelques-unes d'affilée sur une seule page signalent "
+"généralement un bug dans cette page ; beaucoup sur toutes les pages "
+"signifient que la base de données ou le cache est en panne."
+
+#: ../../source/monitoring/what-to-watch.rst:20
+msgid "Is it fast enough?"
+msgstr "Le site est-il assez rapide ?"
+
+#: ../../source/monitoring/what-to-watch.rst:22
+msgid ""
+"**Response time**: the dashboard shows how long the slowest 5 in 100 "
+"pages take (*p95*). Under 0.5 seconds is good. Over 1 second for ten "
+"minutes or more means there are too few web workers for the visitors."
+msgstr ""
+"**Temps de réponse** : le tableau de bord montre combien de temps "
+"prennent les 5 pages sur 100 les plus lentes (*p95*). Moins de 0,5 "
+"seconde, c'est bien. Plus d'une seconde pendant dix minutes ou plus "
+"signifie qu'il y a trop peu de workers web pour les visiteurs."
+
+#: ../../source/monitoring/what-to-watch.rst:25
+msgid ""
+"**\"Busy\" answers outside a registration rush**: the web workers are "
+"full on an ordinary day; the site needs more of them (see "
+":doc:`workers`)."
+msgstr ""
+"**Réponses « occupé » en dehors d'une ruée sur les inscriptions** : les "
+"workers web sont pleins un jour ordinaire ; le site en a besoin de plus "
+"(voir :doc:`workers`)."
+
+#: ../../source/monitoring/what-to-watch.rst:28
+msgid ""
+"**Database lookups per page**: stays about the same however busy the site"
+" is (5 to 7 for most pages). If it climbs after an update, a page has "
+"started doing far more work than it should: tell the developers."
+msgstr ""
+"**Recherches dans la base de données par page** : reste à peu près "
+"stable, quelle que soit l'affluence (5 à 7 pour la plupart des pages). Si"
+" ce nombre augmente après une mise à jour, une page s'est mise à faire "
+"beaucoup plus de travail que nécessaire : prévenez les développeurs."
+
+#: ../../source/monitoring/what-to-watch.rst:31
+msgid ""
+"**Cache hit ratio**: the share of reads that found their data in the "
+"cache. It should stay above 90%. Lower means something is clearing the "
+"cache over and over, and every page then does the slow work again."
+msgstr ""
+"**Taux de succès du cache** : la part des lectures qui ont trouvé leurs "
+"données dans le cache. Il doit rester au-dessus de 90 %. Plus bas, "
+"quelque chose vide le cache encore et encore, et chaque page refait alors"
+" le travail lent."
+
+#: ../../source/monitoring/what-to-watch.rst:36
+msgid "Is there room enough?"
+msgstr "Y a-t-il assez de place ?"
+
+#: ../../source/monitoring/what-to-watch.rst:38
+#, python-format
+msgid ""
+"**Database connections** over 70% of the limit: more web workers than the"
+" database can take. Every page being made holds one connection, so the "
+"number of workers times 25 has to stay below the database's limit."
+msgstr ""
+"**Connexions à la base de données** au-delà de 70 % de la limite : plus "
+"de workers web que la base de données ne peut en accepter. Chaque page en"
+" cours de production occupe une connexion : le nombre de workers "
+"multiplié par 25 doit donc rester sous la limite de la base de données."
+
+#: ../../source/monitoring/what-to-watch.rst:41
+#, python-format
+msgid ""
+"**Memory**: the memory of all workers together over 80% of what the "
+"server has. Running out can make the server stop workers abruptly."
+msgstr ""
+"**Mémoire** : la mémoire de tous les workers ensemble au-delà de 80 % de "
+"celle du serveur. Une pénurie peut amener le serveur à arrêter des "
+"workers brutalement."
+
+#: ../../source/monitoring/what-to-watch.rst:43
+msgid ""
+"**Cache memory** over half of its limit (128 MB), or keys being thrown "
+"out (*evicted*): the cache is too small."
+msgstr ""
+"**Mémoire du cache** au-delà de la moitié de sa limite (128 Mo), ou des "
+"clés supprimées (*evicted*) : le cache est trop petit."
+
+#: ../../source/monitoring/what-to-watch.rst:45
+msgid ""
+"**Database size** growing faster than planned (the daily sample): usually"
+" more mail than expected, since the full text of every mail is kept."
+msgstr ""
+"**Taille de la base de données** qui croît plus vite que prévu (le relevé"
+" quotidien) : généralement plus d'e-mails que prévu, car le texte complet"
+" de chaque e-mail est conservé."
+
+#: ../../source/monitoring/what-to-watch.rst:47
+msgid ""
+"**Uploaded files** growing by more than 100 MB a month: unusually large "
+"uploads."
+msgstr ""
+"**Fichiers téléversés** qui augmentent de plus de 100 Mo par mois : des "
+"envois anormalement volumineux."
+
+#: ../../source/monitoring/what-to-watch.rst:51
+msgid "Is the mail going out?"
+msgstr "Les e-mails partent-ils ?"
+
+#: ../../source/monitoring/what-to-watch.rst:53
+msgid ""
+"**Oldest mail waiting** for more than 30 minutes: the background workers "
+"have stopped. Restart them; the waiting mail then goes out by itself."
+msgstr ""
+"**Le plus ancien e-mail en attente** attend depuis plus de 30 minutes : "
+"les workers d'arrière-plan se sont arrêtés. Redémarrez-les ; les e-mails "
+"en attente partent alors d'eux-mêmes."
+
+#: ../../source/monitoring/what-to-watch.rst:55
+msgid ""
+"**Waiting tasks** (*Celery queue length*) above 500 for half an hour: the"
+" mail worker is stuck or far too slow. Right after a campaign is "
+"launched, a long queue is normal and shrinks within minutes."
+msgstr ""
+"**Tâches en attente** (*Celery queue length*) au-dessus de 500 pendant "
+"une demi-heure : le worker d'e-mail est bloqué ou beaucoup trop lent. "
+"Juste après le lancement d'une campagne, une longue file est normale et "
+"se résorbe en quelques minutes."
+
+#: ../../source/monitoring/what-to-watch.rst:58
+msgid ""
+"**Failed mail and bounces** on the Mail queue page: a sudden rise usually"
+" means a problem with the mail server rather than with the addresses."
+msgstr ""
+"**E-mails en échec et retours** sur la page File d'attente des e-mails : "
+"une hausse soudaine signale généralement un problème du serveur de "
+"messagerie plutôt que des adresses."
+

@@ -1,0 +1,226 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-03 06:20+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/monitoring/workers.rst:2
+msgid "The workers"
+msgstr "Les workers"
+
+#: ../../source/monitoring/workers.rst:4
+msgid ""
+"The site runs as a handful of programs, called *workers*, that share the "
+"work between them. When the site feels slow, or mail doesn't go out, one "
+"of them is usually the reason."
+msgstr ""
+"Le site tourne sous la forme de quelques programmes, appelés *workers*, "
+"qui se partagent le travail. Quand le site semble lent ou que les e-mails"
+" ne partent pas, l'un d'eux en est généralement la cause."
+
+#: ../../source/monitoring/workers.rst:9
+msgid "Web workers: the pages"
+msgstr "Workers web : les pages"
+
+#: ../../source/monitoring/workers.rst:11
+msgid ""
+"Every page a visitor opens is made by a **web worker**. The site runs "
+"several side by side (four is the plan for the live site), and each one "
+"handles up to 25 visitors at the same moment. That limit is on purpose: "
+"every page being made needs a connection to the database, and the "
+"database only accepts a limited number of them."
+msgstr ""
+"Chaque page qu'ouvre un visiteur est produite par un **worker web**. Le "
+"site en fait tourner plusieurs côte à côte (quatre sont prévus pour le "
+"site en production), et chacun traite jusqu'à 25 visiteurs en même temps."
+" Cette limite est voulue : chaque page en cours de production a besoin "
+"d'une connexion à la base de données, et la base de données n'en accepte "
+"qu'un nombre limité."
+
+#: ../../source/monitoring/workers.rst:17
+msgid ""
+"When all web workers are full, a new visitor gets a short \"busy\" answer"
+" straight away, instead of a page that keeps loading. On the development "
+"site that answer is a page in the site's own style, **\"One moment\"**, "
+"which tries again by itself after 30 seconds; the live server still shows"
+" its hosting provider's plain error page until the provider has set ours "
+"up. Getting that answer now and then during a registration rush (a "
+"popular session opening for sign-up) is normal. Getting it on an ordinary"
+" day means the site needs more web workers."
+msgstr ""
+"Quand tous les workers web sont pleins, un nouveau visiteur reçoit tout "
+"de suite une courte réponse « occupé », au lieu d'une page qui continue "
+"de charger. Sur le site de développement, cette réponse est une page dans"
+" le style du site, **« Un instant »**, qui réessaie d'elle-même après 30 "
+"secondes ; le serveur de production affiche encore la page d'erreur "
+"standard de l'hébergeur, tant que celui-ci n'a pas installé la nôtre. "
+"Recevoir cette réponse de temps en temps pendant une ruée sur les "
+"inscriptions (une session populaire qui ouvre ses inscriptions) est "
+"normal. La recevoir un jour ordinaire signifie que le site a besoin de "
+"plus de workers web."
+
+#: ../../source/monitoring/workers.rst:26
+msgid ""
+"What the web workers can handle, as measured on a test machine in October"
+" 2026: 600 visitors browsing at once, about 110 pages a second, with no "
+"errors and 95 out of 100 pages ready within 0.2 seconds. The live server "
+"is slower than that test machine, so take this as an indication, not a "
+"promise."
+msgstr ""
+"Ce que les workers web supportent, mesuré sur une machine de test en "
+"octobre 2026 : 600 visiteurs qui naviguent en même temps, environ 110 "
+"pages par seconde, sans erreur et avec 95 pages sur 100 prêtes en moins "
+"de 0,2 seconde. Le serveur de production est plus lent que cette machine "
+"de test : prenez ces chiffres comme une indication, pas comme une "
+"promesse."
+
+#: ../../source/monitoring/workers.rst:32
+msgid "Background workers: mail and scheduled jobs"
+msgstr "Workers d'arrière-plan : e-mails et tâches planifiées"
+
+#: ../../source/monitoring/workers.rst:34
+msgid ""
+"Everything that doesn't have to happen while a visitor waits is done by "
+"two **background workers**:"
+msgstr ""
+"Tout ce qui ne doit pas se faire pendant qu'un visiteur attend est pris "
+"en charge par deux **workers d'arrière-plan** :"
+
+#: ../../source/monitoring/workers.rst:37
+msgid ""
+"**The mail worker** sends every mail (booking confirmations, reminders, "
+"campaigns) and does other work handed to it, one piece at a time. A "
+"campaign is handed over in small portions, so a booking confirmation "
+"never waits behind a whole campaign."
+msgstr ""
+"**Le worker d'e-mail** envoie chaque e-mail (confirmations d'inscription,"
+" rappels, campagnes) et effectue les autres travaux qui lui sont confiés,"
+" un à la fois. Une campagne lui est confiée par petites portions, pour "
+"qu'une confirmation d'inscription n'attende jamais derrière une campagne "
+"entière."
+
+#: ../../source/monitoring/workers.rst:41
+msgid ""
+"**The scheduler** starts the jobs that run on a clock. Every 10 seconds "
+"it passes waiting mail on to the mail worker; every few minutes it checks"
+" for bounced mail and campaigns that are due. Every day it runs:"
+msgstr ""
+"**Le planificateur** lance les tâches qui tournent à heure fixe. Toutes "
+"les 10 secondes, il transmet les e-mails en attente au worker d'e-mail ; "
+"toutes les quelques minutes, il vérifie les e-mails revenus et les "
+"campagnes à lancer. Chaque jour, il exécute :"
+
+#: ../../source/monitoring/workers.rst:46
+msgid "Time"
+msgstr "Heure"
+
+#: ../../source/monitoring/workers.rst:46
+msgid "Job"
+msgstr "Tâche"
+
+#: ../../source/monitoring/workers.rst:48
+msgid "02:30"
+msgstr "02:30"
+
+#: ../../source/monitoring/workers.rst:48
+msgid "Store the daily sample of the site's size and figures"
+msgstr "Enregistrer le relevé quotidien de la taille et des chiffres du site"
+
+#: ../../source/monitoring/workers.rst:49
+msgid "03:00"
+msgstr "03:00"
+
+#: ../../source/monitoring/workers.rst:49
+msgid "Rebuild how often each child comes to sessions"
+msgstr "Recalculer la fréquence à laquelle chaque enfant vient aux sessions"
+
+#: ../../source/monitoring/workers.rst:50
+msgid "09:00"
+msgstr "09:00"
+
+#: ../../source/monitoring/workers.rst:50
+msgid "Session reminders; mail reviewers about waiting background checks"
+msgstr ""
+"Rappels de session ; e-mail aux vérificateurs sur les extraits de casier "
+"judiciaire en attente"
+
+#: ../../source/monitoring/workers.rst:51
+msgid "10:00"
+msgstr "10:00"
+
+#: ../../source/monitoring/workers.rst:51
+msgid "Delete accounts that haven't been used for two years"
+msgstr "Supprimer les comptes inutilisés depuis deux ans"
+
+#: ../../source/monitoring/workers.rst:52
+msgid "10:30"
+msgstr "10:30"
+
+#: ../../source/monitoring/workers.rst:52
+msgid "Remind volunteers whose background check is about to expire"
+msgstr ""
+"Rappeler aux bénévoles que leur extrait de casier judiciaire va bientôt "
+"expirer"
+
+#: ../../source/monitoring/workers.rst:53
+msgid "17:00"
+msgstr "17:00"
+
+#: ../../source/monitoring/workers.rst:53
+msgid "Tell families about new sessions at their dojo"
+msgstr "Informer les familles des nouvelles sessions de leur dojo"
+
+#: ../../source/monitoring/workers.rst:54
+msgid "18:00"
+msgstr "18:00"
+
+#: ../../source/monitoring/workers.rst:54
+msgid "Send the journeys' mail"
+msgstr "Envoyer les e-mails des parcours"
+
+#: ../../source/monitoring/workers.rst:57
+msgid ""
+"If the background workers stop, the website itself keeps working, but no "
+"mail goes out. Nothing is lost: the mail waits in the queue and goes out "
+"as soon as they run again. The health check and the Mail queue page both "
+"say so when mail has been waiting for more than half an hour."
+msgstr ""
+"Si les workers d'arrière-plan s'arrêtent, le site lui-même continue de "
+"fonctionner, mais aucun e-mail ne part. Rien n'est perdu : les e-mails "
+"attendent dans la file et partent dès qu'ils tournent à nouveau. Le "
+"contrôle de santé et la page File d'attente des e-mails le signalent tous"
+" deux quand des e-mails attendent depuis plus d'une demi-heure."
+
+#: ../../source/monitoring/workers.rst:63
+msgid "Memory"
+msgstr "Mémoire"
+
+#: ../../source/monitoring/workers.rst:65
+msgid ""
+"All workers share the server's memory. Measured under load, the whole "
+"site needs about 1.5 GB at its busiest moment (the web workers about 750 "
+"MB, the background workers about 650 MB during the nightly rebuild at "
+"03:00), so the plan is an account with 2 GB."
+msgstr ""
+"Tous les workers partagent la mémoire du serveur. Mesuré sous charge, le "
+"site entier a besoin d'environ 1,5 Go à son moment le plus chargé (les "
+"workers web environ 750 Mo, les workers d'arrière-plan environ 650 Mo "
+"pendant le recalcul nocturne de 03:00) : le plan prévoit donc un compte "
+"de 2 Go."
+

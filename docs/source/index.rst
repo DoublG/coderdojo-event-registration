@@ -62,6 +62,14 @@ the people using the site, not for the people building it.
    organisation/django-admin
 
 .. toctree::
+   :maxdepth: 2
+   :caption: Running the site
+
+   monitoring/overview
+   monitoring/workers
+   monitoring/what-to-watch
+
+.. toctree::
    :maxdepth: 1
    :caption: More
 
