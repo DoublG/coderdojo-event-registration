@@ -89,7 +89,12 @@ class EmailMessage(models.Model):
     objects = EmailMessageManager()
 
     class Meta:
-        indexes = [models.Index(fields=["status", "priority", "created_at"], name="mailing_queue_idx")]
+        indexes = [
+            models.Index(fields=["status", "priority", "created_at"], name="mailing_queue_idx"),
+            # "Sent in the last 24 hours" on the Mail queue pages: a range in
+            # the index instead of reading every sent mail (MEMORY_PROFILE.md).
+            models.Index(fields=["status", "sent_at"], name="mailing_sent_idx"),
+        ]
 
     def __str__(self):
         return f"{self.recipient or self.user} — {self.subject}"
