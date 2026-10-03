@@ -18,6 +18,7 @@ from events.models import Event, Registration
 from geo.models import AdministrativeBoundary, Municipality
 from notifications.consumers import NotificationConsumer
 from notifications.services import notify
+from pathways.models import Pathway
 
 from . import access, team
 from .models import Dojo, DojoMembership
@@ -50,6 +51,34 @@ class DojoListViewTests(TestCase):
         response = self.client.get(reverse("dojo_list"), HTTP_HX_REQUEST="true")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "dojos/partials/_dojo_results_page.html")
+
+    def test_filters_by_pathway(self):
+        scratch = Pathway.objects.create(name="Scratch")
+        python = Pathway.objects.create(name="Python")
+        Dojo.objects.get(name="Ghent").pathways.set([python])
+        Dojo.objects.get(name="Antwerp").pathways.set([scratch, python])
+        self.client.get(reverse("dojo_list"))  # fills the cached unfiltered list
+
+        response = self.client.get(reverse("dojo_list"), {"pathway": scratch.id})
+
+        self.assertEqual([dojo.name for dojo in response.context["dojos"]], ["Antwerp"])
+        self.assertEqual(response.context["total_count"], 1)
+        self.assertContains(response, f'<option value="{scratch.id}" selected>Scratch</option>', html=True)
+
+    def test_pathway_filter_lists_each_dojo_once_nearest_first(self):
+        python = Pathway.objects.create(name="Python")
+        scratch = Pathway.objects.create(name="Scratch")
+        for dojo in Dojo.objects.all():
+            dojo.pathways.set([python, scratch])
+
+        response = self.client.get(reverse("dojo_list"), {"pathway": python.id})
+
+        self.assertEqual([dojo.name for dojo in response.context["dojos"]], ["Ghent", "Antwerp"])
+
+    def test_unknown_pathway_shows_every_dojo(self):
+        response = self.client.get(reverse("dojo_list"), {"pathway": "999999"})
+
+        self.assertEqual([dojo.name for dojo in response.context["dojos"]], ["Ghent", "Antwerp"])
 
     @patch("dojos.search.geocode")
     def test_typed_location_uses_geocoded_origin(self, mock_geocode):

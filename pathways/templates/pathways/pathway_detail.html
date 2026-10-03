@@ -140,8 +140,8 @@
       <div class="cd-card find-cta">
         <p class="body">{% translate "Ready to try it in person?" %}</p>
         <div class="actions">
-          <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_list' %}">{% translate "Find a dojo near you" %}</a>
-          <a class="cd-btn cd-btn--ghost label" href="{% url 'event_list' %}">{% translate "Browse upcoming events" %}</a>
+          <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_list' %}?pathway={{ pathway.id }}">{% translate "Find a dojo near you" %}</a>
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'event_list' %}?pathway={{ pathway.id }}">{% translate "Browse upcoming events" %}</a>
         </div>
       </div>
     </section>

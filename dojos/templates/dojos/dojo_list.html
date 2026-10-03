@@ -29,7 +29,7 @@
 
     <div class="finder-header">
       <h1 class="display-xl">{% translate "Find a dojo near you" %}</h1>
-      <p class="body-lg">{% translate "Every CoderDojo in Belgium is free, run by local volunteers, and open to kids aged 7–18 — enter a postcode or city to see what's nearby." %}</p>
+      <p class="body-lg">{% translate "Every CoderDojo in Belgium is free, run by local volunteers, and open to kids aged 7–18 — enter a postcode or city to see what's nearby, or filter on language or pathway." %}</p>
     </div>
 
     <div class="cd-dojo-finder">
@@ -49,6 +49,7 @@
             <span>{% translate "Use my location" %}</span>
           </button>
           {{ form.language }}
+          {{ form.pathway }}
         </div>
       </form>
 

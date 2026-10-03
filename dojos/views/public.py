@@ -23,7 +23,8 @@ def dojo_list(request):
     form = DojoSearchForm(request.GET)
     origin, search_label, geocode_failed = resolve_search_origin(form, request.user)
     language = form.cleaned_data.get("language") if form.is_valid() else None
-    dojos_qs = dojos_by_distance(origin, language=language)
+    pathway = form.cleaned_data.get("pathway") if form.is_valid() else None
+    dojos_qs = dojos_by_distance(origin, language=language, pathway=pathway)
 
     paginator = Paginator(dojos_qs, RESULTS_PER_PAGE)
     page = paginator.get_page(request.GET.get("page"))

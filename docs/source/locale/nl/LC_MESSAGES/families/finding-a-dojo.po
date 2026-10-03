@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 19:06+0000\n"
+"POT-Creation-Date: 2026-10-03 02:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -83,6 +83,17 @@ msgstr ""
 
 #: ../../source/families/finding-a-dojo.rst:29
 msgid ""
+"To only see dojos that work on a certain pathway (Scratch, Python, "
+"micro:bit, ...), pick it in the pathway menu. A pathway's own page links "
+"to the dojo finder and the **Events** list already filtered on it."
+msgstr ""
+"Wil je alleen dojo's zien die met een bepaald leerpad werken (Scratch, "
+"Python, micro:bit, ...)? Kies het in het menu met leerpaden. De pagina "
+"van een leerpad linkt naar de dojozoeker en de lijst **Evenementen**, "
+"al gefilterd op dat leerpad."
+
+#: ../../source/families/finding-a-dojo.rst:33
+msgid ""
 "If a location doesn't match anything, the search falls back to showing "
 "dojos unsorted rather than an empty page — try a nearby town or the "
 "postcode instead of a street address."
@@ -92,15 +103,15 @@ msgstr ""
 "probeer een gemeente in de buurt of de postcode in plaats van een "
 "straatadres."
 
-#: ../../source/families/finding-a-dojo.rst:34
+#: ../../source/families/finding-a-dojo.rst:38
 msgid "A dojo's page"
 msgstr "De pagina van een dojo"
 
-#: ../../source/families/finding-a-dojo.rst:36
+#: ../../source/families/finding-a-dojo.rst:40
 msgid "Click through to a dojo to see:"
 msgstr "Klik door naar een dojo om het volgende te zien:"
 
-#: ../../source/families/finding-a-dojo.rst:38
+#: ../../source/families/finding-a-dojo.rst:42
 msgid ""
 "Its address, schedule (e.g. \"every 2nd Saturday\"), age range and the "
 "languages its sessions are given in. Its texts are shown in your language"
@@ -112,7 +123,7 @@ msgstr ""
 " de dojo ze in die taal schreef; anders zie je ze in de hoofdtaal van de "
 "dojo, met de vermelding \"Alleen in het ...\"."
 
-#: ../../source/families/finding-a-dojo.rst:42
+#: ../../source/families/finding-a-dojo.rst:46
 msgid ""
 "A description of the dojo and any visit notes (parking, entrance, "
 "accessibility)."
@@ -120,11 +131,11 @@ msgstr ""
 "Een beschrijving van de dojo en eventuele praktische informatie "
 "(parkeren, ingang, toegankelijkheid)."
 
-#: ../../source/families/finding-a-dojo.rst:44
+#: ../../source/families/finding-a-dojo.rst:48
 msgid "Its next upcoming session, if one is scheduled."
 msgstr "De eerstvolgende sessie, indien gepland."
 
-#: ../../source/families/finding-a-dojo.rst:45
+#: ../../source/families/finding-a-dojo.rst:49
 msgid ""
 "Its team — the champion (who runs the dojo) is always shown first, "
 "followed by its mentors and youth mentors."
@@ -132,13 +143,13 @@ msgstr ""
 "Het team — de champion (die de dojo leidt) staat altijd eerst, gevolgd "
 "door de mentoren en jeugdmentoren."
 
-#: ../../source/families/finding-a-dojo.rst:47
+#: ../../source/families/finding-a-dojo.rst:51
 msgid "Any FAQs specific to that dojo, alongside the site-wide ones."
 msgstr ""
 "Eventuele veelgestelde vragen specifiek voor die dojo, naast de vragen "
 "die voor de hele site gelden."
 
-#: ../../source/families/finding-a-dojo.rst:49
+#: ../../source/families/finding-a-dojo.rst:53
 msgid ""
 "From there, click through to a session to see full details and sign your "
 "children up — see :doc:`signing-up-for-a-session`."

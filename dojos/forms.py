@@ -3,6 +3,7 @@ from django.conf import settings
 from django.utils.functional import lazy
 from django.utils.translation import gettext_lazy as _
 
+from content import cache as content_cache
 from content.models import Announcement
 from core.content_languages import (
     add_translation_fields,
@@ -220,6 +221,23 @@ class DojoSearchForm(forms.Form):
             attrs={"class": "cd-form__select body", "id": "dojo-language", "aria-label": _("Language")}
         ),
     )
+    # Only dojos that provide this pathway (Dojo.pathways). Choices come
+    # from the cached pathway list (content.cache); cleaned to a Pathway or None.
+    pathway = forms.ChoiceField(
+        required=False,
+        widget=forms.Select(attrs={"class": "cd-form__select body", "id": "dojo-pathway", "aria-label": _("Pathway")}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pathways = {str(pathway.pk): pathway for pathway in content_cache.pathways()}
+        self.fields["pathway"].choices = [("", _("All pathways"))] + sorted(
+            ((pk, pathway.localized("name")) for pk, pathway in self.pathways.items()),
+            key=lambda choice: choice[1].lower(),
+        )
+
+    def clean_pathway(self):
+        return self.pathways.get(self.cleaned_data["pathway"])
 
 
 class DojoCreateForm(forms.ModelForm):

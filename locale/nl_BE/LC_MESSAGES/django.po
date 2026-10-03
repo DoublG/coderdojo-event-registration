@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-02 19:41+0000\n"
+"POT-Creation-Date: 2026-10-03 02:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -165,7 +165,7 @@ msgstr "Huidig wachtwoord"
 #: accounts/templates/accounts/manage/people.html:49
 #: accounts/templates/accounts/manage/security.html:73
 #: accounts/templates/accounts/partials/_account_details_edit.html:20
-#: dojos/forms.py:96 dojos/forms.py:233
+#: dojos/forms.py:97 dojos/forms.py:253
 #: dojos/templates/dojos/dojo_detail.html:238
 #: pages/templates/pages/contact.html:34
 #: privacy/templates/privacy/manage/privacy.html:58
@@ -217,7 +217,7 @@ msgid "Full name"
 msgstr "Volledige naam"
 
 #: accounts/forms.py:244 accounts/forms.py:300 accounts/forms.py:467
-#: applications/forms.py:25 dojos/forms.py:97
+#: applications/forms.py:25 dojos/forms.py:98
 #: dojos/templates/dojos/dojo_detail.html:244
 msgid "Phone"
 msgstr "Telefoon"
@@ -1058,7 +1058,7 @@ msgid "Find a session"
 msgstr "Zoek een sessie"
 
 #: accounts/templates/accounts/child_detail.html:116
-#: accounts/templates/accounts/child_detail.html:128 dojos/forms.py:362
+#: accounts/templates/accounts/child_detail.html:128 dojos/forms.py:382
 #: dojos/templates/dojos/dojo_members.html:37
 msgid "Belt"
 msgstr "Gordel"
@@ -1687,7 +1687,7 @@ msgstr "Wat elke rol opent"
 #: campaigns/templates/campaigns/manage/journey_list.html:13
 #: campaigns/templates/campaigns/manage/segment_list.html:12
 #: content/forms.py:101 content/templates/content/manage/sponsor_list.html:16
-#: dojos/forms.py:89 dojos/forms.py:233
+#: dojos/forms.py:90 dojos/forms.py:253
 #: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:187
 #: events/forms.py:262 events/forms.py:318 events/forms.py:351
 #: events/templates/events/manage/badge_list.html:18
@@ -3386,7 +3386,7 @@ msgstr "%(name)s is verwijderd: hij kan de API niet meer gebruiken."
 msgid "Document"
 msgstr "Document"
 
-#: applications/forms.py:28 dojos/forms.py:142
+#: applications/forms.py:28 dojos/forms.py:143
 msgid "+32 4xx xx xx xx"
 msgstr "+32 4xx xx xx xx"
 
@@ -3481,7 +3481,7 @@ msgid "Reject"
 msgstr "Afwijzen"
 
 # | msgid "Gender (optional)"
-#: applications/forms.py:134 dojos/forms.py:339
+#: applications/forms.py:134 dojos/forms.py:359
 msgid "Note (optional)"
 msgstr "Opmerking (optioneel)"
 
@@ -4479,8 +4479,8 @@ msgstr "Wie dit is, in één zin."
 
 # | msgid "Questions"
 #: campaigns/forms.py:122
-#: campaigns/templates/campaigns/manage/segment_list.html:13 dojos/forms.py:66
-#: dojos/forms.py:92 events/forms.py:192 events/forms.py:262
+#: campaigns/templates/campaigns/manage/segment_list.html:13 dojos/forms.py:67
+#: dojos/forms.py:93 events/forms.py:192 events/forms.py:262
 #: events/forms.py:320 events/forms.py:351 mailing/forms.py:109
 #: mailing/forms.py:144
 msgid "Description"
@@ -4530,7 +4530,8 @@ msgstr "Vanaf leeftijd"
 msgid "Up to age"
 msgstr "Tot leeftijd"
 
-#: campaigns/forms.py:168 events/templates/events/event_list.html:89
+#: campaigns/forms.py:168 dojos/forms.py:229
+#: events/templates/events/event_list.html:89
 msgid "Pathway"
 msgstr "Leertraject"
 
@@ -4824,7 +4825,7 @@ msgstr "Brussels Hoofdstedelijk Gewest"
 msgid "Mail language"
 msgstr "Taal van de e-mails"
 
-#: campaigns/segmentation/attributes/locality.py:70 dojos/forms.py:155
+#: campaigns/segmentation/attributes/locality.py:70 dojos/forms.py:156
 msgid "Not set"
 msgstr "Niet ingesteld"
 
@@ -6324,7 +6325,7 @@ msgstr "Evenementen"
 msgid "Dojos"
 msgstr "Dojo's"
 
-#: core/templates/core/menu.html:23 dojos/forms.py:220
+#: core/templates/core/menu.html:23 dojos/forms.py:221
 #: events/templates/events/event_detail.html:131
 #: events/templates/events/event_list.html:85
 msgid "Language"
@@ -6407,12 +6408,12 @@ msgstr "Het bestand is %(size)s MB; het mag hoogstens %(max)s MB zijn."
 msgid "Upload a PDF, JPEG or PNG file."
 msgstr "Upload een PDF-, JPEG- of PNG-bestand."
 
-#: dojos/forms.py:43 events/forms.py:167
+#: dojos/forms.py:44 events/forms.py:167
 msgid "No template — I'll upload my own below"
 msgstr "Geen sjabloon, ik laad hieronder mijn eigen op"
 
 # | msgid "Language"
-#: dojos/forms.py:50 dojos/templates/dojos/dojo_manage.html:82
+#: dojos/forms.py:51 dojos/templates/dojos/dojo_manage.html:82
 #: mailing/templates/mailing/manage/template_edit.html:21
 #: mailing/templates/mailing/manage/template_list.html:14
 msgid "Languages"
@@ -6420,11 +6421,11 @@ msgstr "Talen"
 
 # | msgid "Language"
 # | msgid "Mail language"
-#: dojos/forms.py:56
+#: dojos/forms.py:57
 msgid "Main language"
 msgstr "Hoofdtaal"
 
-#: dojos/forms.py:60
+#: dojos/forms.py:61
 msgid ""
 "The fields below are in this language. Other languages get their own section "
 "at the bottom once saved."
@@ -6432,60 +6433,60 @@ msgstr ""
 "De velden hieronder zijn in deze taal. Andere talen krijgen onderaan een "
 "eigen deel zodra je opslaat."
 
-#: dojos/forms.py:65 dojos/forms.py:91
+#: dojos/forms.py:66 dojos/forms.py:92
 msgid "Tagline"
 msgstr "Slogan"
 
-#: dojos/forms.py:67 dojos/forms.py:93
+#: dojos/forms.py:68 dojos/forms.py:94
 #: dojos/templates/dojos/dojo_detail.html:223
 msgid "Meets"
 msgstr "Wanneer"
 
-#: dojos/forms.py:68 dojos/forms.py:100
+#: dojos/forms.py:69 dojos/forms.py:101
 msgid "Extra info"
 msgstr "Extra info"
 
 # | msgid "upload your document"
-#: dojos/forms.py:90 events/forms.py:191
+#: dojos/forms.py:91 events/forms.py:191
 msgid "…or upload your own"
 msgstr "…of laad je eigen op"
 
-#: dojos/forms.py:94 events/forms.py:193
+#: dojos/forms.py:95 events/forms.py:193
 msgid "Minimum age"
 msgstr "Minimumleeftijd"
 
-#: dojos/forms.py:95 events/forms.py:194
+#: dojos/forms.py:96 events/forms.py:194
 msgid "Maximum age"
 msgstr "Maximumleeftijd"
 
-#: dojos/forms.py:98
+#: dojos/forms.py:99
 msgid "Municipality"
 msgstr "Gemeente"
 
-#: dojos/forms.py:99 dojos/forms.py:233
+#: dojos/forms.py:100 dojos/forms.py:253
 #: dojos/templates/dojos/dojo_detail.html:233
 #: mailing/templates/mailing/manage/mail_queue.html:121
 #: mailing/templates/mailing/manage/mail_queue.html:153
 msgid "Address"
 msgstr "Adres"
 
-#: dojos/forms.py:101
+#: dojos/forms.py:102
 msgid "Pathways your dojo provides"
 msgstr "Leertrajecten die je dojo aanbiedt"
 
-#: dojos/forms.py:105 events/forms.py:206
+#: dojos/forms.py:106 events/forms.py:206
 msgid "Uploading a file here overrides the template chosen above."
 msgstr "Een bestand dat je hier oplaadt, vervangt het sjabloon hierboven."
 
-#: dojos/forms.py:106
+#: dojos/forms.py:107
 msgid "Shown right under the dojo's name. Supports basic Markdown."
 msgstr "Net onder de naam van de dojo. Eenvoudige Markdown kan."
 
-#: dojos/forms.py:107
+#: dojos/forms.py:108
 msgid "Shown further down the page, above the team. Supports basic Markdown."
 msgstr "Verder op de pagina, boven het team. Eenvoudige Markdown kan."
 
-#: dojos/forms.py:109
+#: dojos/forms.py:110
 msgid ""
 "Used for the \"Visit us\" map link and for distance search — changing it "
 "updates the map location automatically."
@@ -6493,7 +6494,7 @@ msgstr ""
 "Gebruikt voor de kaartlink bij \"Bezoek ons\" en voor zoeken op afstand. Als "
 "je het wijzigt, wordt de locatie op de kaart automatisch bijgewerkt."
 
-#: dojos/forms.py:112
+#: dojos/forms.py:113
 msgid ""
 "Parking, entrance, accessibility — anything extra for the Visit us section. "
 "Supports basic Markdown."
@@ -6501,129 +6502,133 @@ msgstr ""
 "Parking, ingang, toegankelijkheid: alles wat extra is voor het deel Bezoek "
 "ons. Eenvoudige Markdown kan."
 
-#: dojos/forms.py:126
+#: dojos/forms.py:127
 msgid "CoderDojo Ghent"
 msgstr "CoderDojo Gent"
 
-#: dojos/forms.py:128
+#: dojos/forms.py:129
 msgid "A short line shown right under the dojo's name."
 msgstr "Een korte zin, net onder de naam van de dojo."
 
-#: dojos/forms.py:134
+#: dojos/forms.py:135
 msgid ""
 "Shown further down the page, above the team — what makes this dojo worth "
 "joining."
 msgstr ""
 "Verder op de pagina, boven het team: wat deze dojo de moeite waard maakt."
 
-#: dojos/forms.py:138
+#: dojos/forms.py:139
 msgid "e.g. Every 2nd Saturday"
 msgstr "bv. elke 2e zaterdag"
 
-#: dojos/forms.py:139 events/forms.py:229
+#: dojos/forms.py:140 events/forms.py:229
 msgid "7"
 msgstr "7"
 
-#: dojos/forms.py:140 events/forms.py:230
+#: dojos/forms.py:141 events/forms.py:230
 msgid "18"
 msgstr "18"
 
-#: dojos/forms.py:141
+#: dojos/forms.py:142
 msgid "hello@example.org"
 msgstr "hallo@voorbeeld.be"
 
 # | msgid "Enter your postcode or city"
-#: dojos/forms.py:143
+#: dojos/forms.py:144
 msgid "Street, number, postcode, city"
 msgstr "Straat, nummer, postcode, gemeente"
 
-#: dojos/forms.py:147
+#: dojos/forms.py:148
 msgid ""
 "Parking, entrance, accessibility — anything extra for the Visit us section."
 msgstr ""
 "Parking, ingang, toegankelijkheid: alles wat extra is voor het deel Bezoek "
 "ons."
 
-#: dojos/forms.py:206
+#: dojos/forms.py:207
 msgid "Enter your postcode or city"
 msgstr "Vul je postcode of gemeente in"
 
 # | msgid "Language"
 # | msgid "Mail language"
-#: dojos/forms.py:218 events/forms.py:62
+#: dojos/forms.py:219 events/forms.py:62
 msgid "Any language"
 msgstr "Elke taal"
 
-#: dojos/forms.py:235
+#: dojos/forms.py:236 events/forms.py:81
+msgid "All pathways"
+msgstr "Alle leertrajecten"
+
+#: dojos/forms.py:255
 msgid "e.g. CoderDojo Leuven"
 msgstr "bv. CoderDojo Leuven"
 
 # | msgid "Enter your postcode or city"
-#: dojos/forms.py:236
+#: dojos/forms.py:256
 msgid "Street and number, postcode, city"
 msgstr "Straat en nummer, postcode, gemeente"
 
-#: dojos/forms.py:237
+#: dojos/forms.py:257
 msgid "hello@yourdojo.example"
 msgstr "hallo@jouwdojo.voorbeeld"
 
 # | msgid "Updates"
-#: dojos/forms.py:254
+#: dojos/forms.py:274
 msgid "Update"
 msgstr "Bericht"
 
-#: dojos/forms.py:274
+#: dojos/forms.py:294
 msgid ""
 "e.g. We've moved to the bigger room from October, same time, same entrance."
 msgstr ""
 "bv. Vanaf oktober zitten we in de grotere zaal, zelfde uur, zelfde ingang."
 
 # | msgid "New template"
-#: dojos/forms.py:278
+#: dojos/forms.py:298
 msgid "New update"
 msgstr "Nieuw bericht"
 
-#: dojos/forms.py:283
+#: dojos/forms.py:303
 msgid "Keep it short: 500 characters at most."
 msgstr "Hou het kort: maximaal 500 tekens."
 
-#: dojos/forms.py:294
+#: dojos/forms.py:314
 msgid "Their account's email"
 msgstr "E-mailadres van hun account"
 
-#: dojos/forms.py:295
+#: dojos/forms.py:315
 msgid "mentor@example.com"
 msgstr "mentor@voorbeeld.be"
 
-#: dojos/forms.py:300 dojos/templates/dojos/dojo_members.html:36
+#: dojos/forms.py:320 dojos/templates/dojos/dojo_members.html:36
 msgid "Ninja"
 msgstr "Ninja"
 
 # | msgid "Champion"
-#: dojos/forms.py:309
+#: dojos/forms.py:329
 msgid "New champion"
 msgstr "Nieuwe champion"
 
 # | msgid "%(name)s pathway"
-#: dojos/forms.py:360
+#: dojos/forms.py:380
 #, python-format
 msgid "What %(name)s showed"
 msgstr "Wat %(name)s liet zien"
 
-#: dojos/forms.py:365
+#: dojos/forms.py:385
 msgid "Pick a belt to award."
 msgstr "Kies een gordel om toe te kennen."
 
-#: dojos/forms.py:371
+#: dojos/forms.py:391
 #, python-format
 msgid "What %(name)s did"
 msgstr "Wat %(name)s gedaan heeft"
 
-#: dojos/forms.py:373
+#: dojos/forms.py:393
 msgid "Badge"
 msgstr "Badge"
 
-#: dojos/forms.py:377
+#: dojos/forms.py:397
 msgid "Pick a badge to award."
 msgstr "Kies een badge om toe te kennen."
 
@@ -7143,23 +7148,25 @@ msgstr "Vind een dojo in je buurt"
 #: dojos/templates/dojos/dojo_list.html:32
 msgid ""
 "Every CoderDojo in Belgium is free, run by local volunteers, and open to "
-"kids aged 7–18 — enter a postcode or city to see what's nearby."
+"kids aged 7–18 — enter a postcode or city to see what's nearby, or filter on "
+"language or pathway."
 msgstr ""
 "Elke CoderDojo in België is gratis, wordt begeleid door vrijwilligers uit de "
 "buurt en staat open voor kinderen van 7 tot 18 jaar. Vul een postcode of "
-"gemeente in om te zien wat er in de buurt is."
+"gemeente in om te zien wat er in de buurt is, of filter op taal of "
+"leertraject."
 
 #: dojos/templates/dojos/dojo_list.html:49
 #: dojos/templates/dojos/partials/_dojo_finder_widget.html:25
 msgid "Use my location"
 msgstr "Gebruik mijn locatie"
 
-#: dojos/templates/dojos/dojo_list.html:58
+#: dojos/templates/dojos/dojo_list.html:59
 #, python-format
 msgid "Couldn't find \"%(search_label)s\" — showing every dojo instead."
 msgstr "\"%(search_label)s\" niet gevonden: we tonen alle dojo's."
 
-#: dojos/templates/dojos/dojo_list.html:60
+#: dojos/templates/dojos/dojo_list.html:61
 #, python-format
 msgid "Showing %(counter)s dojo near %(search_label)s, nearest first"
 msgid_plural "Showing %(counter)s dojos near %(search_label)s, nearest first"
@@ -7168,11 +7175,11 @@ msgstr[0] ""
 msgstr[1] ""
 "%(counter)s dojo's in de buurt van %(search_label)s, dichtstbijzijnde eerst"
 
-#: dojos/templates/dojos/dojo_list.html:70
+#: dojos/templates/dojos/dojo_list.html:71
 msgid "Already know when you'd like to come?"
 msgstr "Weet je al wanneer je wilt komen?"
 
-#: dojos/templates/dojos/dojo_list.html:71
+#: dojos/templates/dojos/dojo_list.html:72
 #: pathways/templates/pathways/pathway_detail.html:144
 msgid "Browse upcoming events"
 msgstr "Bekijk de komende evenementen"
@@ -7901,7 +7908,7 @@ msgid "Update removed."
 msgstr "Bericht verwijderd."
 
 # | msgid "Your request to join this team is waiting for an answer."
-#: dojos/views/public.py:126
+#: dojos/views/public.py:127
 #, python-format
 msgid "Your request to join %(dojo)s has been sent to its team."
 msgstr "Je aanvraag om bij %(dojo)s te komen is naar het team gestuurd."
@@ -7997,10 +8004,6 @@ msgstr "Deze maand"
 #: events/forms.py:67
 msgid "All ages"
 msgstr "Alle leeftijden"
-
-#: events/forms.py:81
-msgid "All pathways"
-msgstr "Alle leertrajecten"
 
 #: events/forms.py:86
 msgid "All dojos"

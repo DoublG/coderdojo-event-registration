@@ -90,7 +90,7 @@ def resolve_search_origin(form, user=None):
     return origin, search_label, geocode_failed
 
 
-def dojos_by_distance(origin, language=None):
+def dojos_by_distance(origin, language=None, pathway=None):
     """Dojo list annotated with distance_km from `origin` and ordered
     nearest-first — or the plain unordered queryset if origin is None (a
     failed geocode).
@@ -101,7 +101,7 @@ def dojos_by_distance(origin, language=None):
     have an unbounded key space for little benefit.
     """
     # Only the unfiltered default list is cached.
-    is_default = origin is DEFAULT_SEARCH_ORIGIN and not language
+    is_default = origin is DEFAULT_SEARCH_ORIGIN and not language and not pathway
     if is_default:
         cached = cache.get(DEFAULT_SEARCH_CACHE_KEY)
         recorder.note_cache(DEFAULT_SEARCH_CACHE_KEY, hit=cached is not None)
@@ -111,6 +111,9 @@ def dojos_by_distance(origin, language=None):
     qs = Dojo.objects.public()
     if language:
         qs = qs.filter(languages__contains=[language])
+    if pathway:
+        # One pathway, so the join gives each dojo at most once.
+        qs = qs.filter(pathways=pathway)
     if origin is not None:
         qs = qs.annotate(
             distance_km=ExpressionWrapper(

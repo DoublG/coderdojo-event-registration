@@ -133,7 +133,8 @@ Pathways (Scratch, Python, micro:bit, ...) can be set at three levels,
 each one pre-filled from the level above. All of them are optional:
 
 - **Your dojo** — on the **Settings** page, tick the pathways your dojo
-  provides. They're shown on your dojo's public page.
+  provides. They're shown on your dojo's public page, and families can
+  search the dojo finder by pathway.
 - **A session** — a new session starts with your dojo's pathways ticked.
   You can add or remove any pathway for that particular session; they're
   shown on the session's public page, and families can search the events

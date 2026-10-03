@@ -26,6 +26,10 @@ To only see dojos that give their sessions in a certain language, pick it
 in the language menu next to the search. The **Events** list has the same
 filter.
 
+To only see dojos that work on a certain pathway (Scratch, Python,
+micro:bit, ...), pick it in the pathway menu. A pathway's own page links
+to the dojo finder and the **Events** list already filtered on it.
+
 If a location doesn't match anything, the search falls back to showing
 dojos unsorted rather than an empty page — try a nearby town or the
 postcode instead of a street address.
