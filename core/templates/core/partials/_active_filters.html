@@ -1,0 +1,22 @@
+{% load i18n %}
+{% comment %}
+  The filters a search applies, one chip each with a link that drops only
+  that one (core.forms.SearchFiltersMixin.active_filters), and "Clear all"
+  when there's more than one. The dojo finder and the events list.
+{% endcomment %}
+{% if active_filters %}
+  <div class="cd-active-filters">
+    <span class="cd-active-filters__intro body-sm">{% translate "Filtered by:" %}</span>
+    <ul class="cd-active-filters__list">
+      {% for filter in active_filters %}
+        <li class="cd-filter-chip body-sm">
+          <span>{{ filter.label }}: <strong>{{ filter.value }}</strong></span>
+          <a href="{{ filter.remove_url }}" aria-label="{% blocktranslate with label=filter.label %}Remove filter: {{ label }}{% endblocktranslate %}">×</a>
+        </li>
+      {% endfor %}
+    </ul>
+    {% if active_filters|length > 1 %}
+      <a class="cd-active-filters__clear body-sm" href="{{ request.path }}">{% translate "Clear all" %}</a>
+    {% endif %}
+  </div>
+{% endif %}

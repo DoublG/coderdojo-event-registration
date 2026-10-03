@@ -922,6 +922,38 @@ class OrganisationAndExternalEventTests(TestCase):
         self.assertEqual(len(response.context["events"]), 2)
 
 
+class EventListFilterChipsTests(TestCase):
+    """Every filter the events list applies shows as its own chip (core/partials/_active_filters.html)."""
+
+    def test_no_chips_on_the_unfiltered_list(self):
+        response = self.client.get(reverse("event_list"))
+        self.assertEqual(response.context["active_filters"], [])
+        self.assertNotContains(response, "Filtered by:")
+
+    def test_each_filter_has_a_chip_that_removes_only_it(self):
+        dojo = make_dojo("Ghent")
+        path = reverse("event_list")
+        response = self.client.get(
+            path, {"location": "Gent", "dojo": dojo.pk, "date": "week", "age": "7-9", "language": "", "page": "2"}
+        )
+        chips = response.context["active_filters"]
+        self.assertEqual(
+            [(chip.label, chip.value) for chip in chips],
+            [("Location", "Gent"), ("Dojo", "Ghent"), ("Date", "This week"), ("Age", "7–9")],
+        )
+        by_label = {chip.label: chip.remove_url for chip in chips}
+        # Empty fields and the page are left out of every link.
+        self.assertEqual(by_label["Dojo"], f"{path}?location=Gent&date=week&age=7-9")
+        self.assertEqual(by_label["Age"], f"{path}?location=Gent&dojo={dojo.pk}&date=week")
+        self.assertContains(
+            response, f'<a class="cd-active-filters__clear body-sm" href="{path}">Clear all</a>', html=True
+        )
+
+    def test_an_invalid_search_applies_and_shows_no_filter(self):
+        response = self.client.get(reverse("event_list"), {"date": "someday", "location": "Gent"})
+        self.assertEqual(response.context["active_filters"], [])
+
+
 class EventLanguageTests(TestCase):
     """Sessions are given in their dojo's languages; their name and
     description can have a version per language."""

@@ -1033,6 +1033,30 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
   .cd-search__actions .cd-btn { flex: 1 1 auto; justify-content: center; }
 }
 
+/* The filters a search applies, under its form (core/partials/_active_filters.html):
+   one removable chip each, and "Clear all" when there's more than one. */
+.cd-active-filters {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2);
+  margin: calc(var(--space-6) * -1 + var(--space-4)) 0 var(--space-5);
+}
+.cd-active-filters__intro { color: var(--ink-muted); }
+.cd-active-filters__list { display: contents; list-style: none; }
+.cd-filter-chip {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  background: var(--surface-sunken); border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+  color: var(--ink);
+}
+.cd-filter-chip a {
+  color: var(--ink-muted); text-decoration: none;
+  width: 24px; height: 24px; border-radius: 50%; font-size: 16px; line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.cd-filter-chip a:hover { background: var(--border); color: var(--ink); }
+.cd-filter-chip a:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+.cd-active-filters__clear { color: var(--ink-muted); margin-left: var(--space-1); }
+.cd-active-filters__clear:hover { color: var(--ink); }
+
 /* The location field's pin: inside the input, on the left (also the
    homepage's compact dojo finder, .cd-dojo-finder__field). */
 .cd-search__location { position: relative; }

@@ -30,6 +30,10 @@ To only see dojos that work on a certain pathway (Scratch, Python,
 micro:bit, ...), pick it in the **Pathway** menu and press **Search**. A pathway's own page links
 to the dojo finder and the **Events** list already filtered on it.
 
+The filters you've applied are shown under the form, each with a **×**:
+click it to drop only that filter, or click **Clear all** to drop them all.
+The **Events** list shows its filters the same way.
+
 If a location doesn't match anything, the search falls back to showing
 dojos unsorted rather than an empty page — try a nearby town or the
 postcode instead of a street address.

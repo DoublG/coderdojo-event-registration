@@ -43,6 +43,7 @@ def dojo_list(request):
         "geocode_failed": geocode_failed,
         "total_count": paginator.count,
         "next_page_url": next_page_url,
+        "active_filters": form.active_filters(request.path),
         "promotions": promotions_showing(Promotion.DOJO_FINDER_BANNER),
     }
     # Infinite scroll (htmx "revealed" trigger, see _dojo_result.html):

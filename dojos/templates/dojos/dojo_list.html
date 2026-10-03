@@ -62,6 +62,8 @@
         {{ form.lon }}
       </form>
 
+      {% include "core/partials/_active_filters.html" %}
+
       {% include "content/partials/_promotion_banner.html" %}
 
       {% if geocode_failed %}

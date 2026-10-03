@@ -94,6 +94,7 @@ def event_list(request):
         "events": page["events"],
         "total_count": page["total_count"],
         "next_page_url": next_page_url,
+        "active_filters": form.active_filters(request.path),
         # Pinned above the date-ordered list (content.Promotion), on the
         # unfiltered list only: a search shows just what was asked for.
         "promotions": [] if form.has_changed() else promotions_showing(Promotion.EVENT_LIST_TOP),

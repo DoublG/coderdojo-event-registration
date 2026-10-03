@@ -13,9 +13,12 @@ still wins. The Django admin renders with the same renderer but keeps its
 own field layout; the classes it gets there do nothing (no bundle.css).
 """
 
+from typing import NamedTuple
+
 from django import forms
 from django.forms.renderers import TemplatesSetting
 from django.forms.widgets import Input
+from django.http import QueryDict
 
 INPUT_CLASS = "cd-form__input body"
 SELECT_CLASS = "cd-form__select body"
@@ -60,3 +63,55 @@ class SiteFormRenderer(TemplatesSetting):
     form_template_name = "core/forms/form.html"
     field_template_name = "core/forms/field.html"
     bound_field_class = SiteBoundField
+
+
+class ActiveFilter(NamedTuple):
+    label: str
+    value: str
+    remove_url: str
+
+
+class SearchFiltersMixin:
+    """A GET search form whose applied filters show as chips above the
+    results (core/partials/_active_filters.html), each with a link that
+    drops only that filter. `filter_fields` are the fields shown as chips,
+    in order; `filter_also_removes` names other query keys a field's link
+    drops too. An invalid form applies no filter, so it shows none."""
+
+    filter_fields = ()
+    filter_also_removes = {}
+
+    def active_filters(self, path):
+        if not self.is_valid():
+            return []
+        filters = []
+        for name in self.filter_fields:
+            raw = str(self.data.get(name, "")).strip()
+            if raw:
+                keys = (name, *self.filter_also_removes.get(name, ()))
+                filters.append(
+                    ActiveFilter(self.fields[name].label, self.filter_value(name, raw), self.url_without(path, keys))
+                )
+        return filters
+
+    def filter_value(self, name, raw):
+        """What a chip shows: a choice's label, or the text as typed."""
+        choices = getattr(self.fields[name], "choices", None)
+        if choices is None:
+            return raw
+        return {str(key): label for key, label in choices}.get(raw, raw)
+
+    def url_without(self, path, keys):
+        """The same search without `keys` (and back on the first page)."""
+        dropped = {*keys, "page"}
+        params = QueryDict(mutable=True)
+        for key in self.data:
+            if key not in dropped:
+                params.setlist(key, [value for value in self._values(key) if value != ""])
+        query = params.urlencode()
+        return f"{path}?{query}" if query else path
+
+    def _values(self, key):
+        if isinstance(self.data, QueryDict):
+            return self.data.getlist(key)
+        return [str(self.data[key])]

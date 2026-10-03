@@ -12,6 +12,7 @@ from core.content_languages import (
     optional_copy,
     save_translation_fields,
 )
+from core.forms import ActiveFilter, SearchFiltersMixin
 from core.image_library import library_filename, use_library_image
 from core.uploads import with_upload_help
 from events.models import Badge, Belt
@@ -197,9 +198,15 @@ class DojoProfileForm(forms.ModelForm):
         return dojo
 
 
-class DojoSearchForm(forms.Form):
+class DojoSearchForm(SearchFiltersMixin, forms.Form):
+    filter_fields = ("location", "language", "pathway")
+    # The location replaces "Use my location" (dojos.search.resolve_search_origin),
+    # so dropping it drops the coordinates too.
+    filter_also_removes = {"location": ("lat", "lon")}
+
     location = forms.CharField(
         required=False,
+        label=_("Location"),
         max_length=200,
         widget=forms.TextInput(
             attrs={
@@ -217,6 +224,7 @@ class DojoSearchForm(forms.Form):
     # Only dojos (or sessions) given in this language (Dojo.languages).
     language = forms.ChoiceField(
         required=False,
+        label=_("Language"),
         choices=[("", _("Any language"))] + list(settings.LANGUAGES),
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "dojo-language"}),
     )
@@ -224,6 +232,7 @@ class DojoSearchForm(forms.Form):
     # from the cached pathway list (content.cache); cleaned to a Pathway or None.
     pathway = forms.ChoiceField(
         required=False,
+        label=_("Pathway"),
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "dojo-pathway"}),
     )
 
@@ -237,6 +246,13 @@ class DojoSearchForm(forms.Form):
 
     def clean_pathway(self):
         return self.pathways.get(self.cleaned_data["pathway"])
+
+    def active_filters(self, path):
+        filters = super().active_filters(path)
+        data = self.cleaned_data if self.is_valid() else {}
+        if not data.get("location") and data.get("lat") is not None and data.get("lon") is not None:
+            filters.insert(0, ActiveFilter(_("Location"), _("Your location"), self.url_without(path, ("lat", "lon"))))
+        return filters
 
 
 class DojoCreateForm(forms.ModelForm):

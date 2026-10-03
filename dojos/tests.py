@@ -106,6 +106,47 @@ class DojoListViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["geocode_failed"])
 
+    def test_no_filter_chips_without_a_search(self):
+        response = self.client.get(reverse("dojo_list"))
+        self.assertEqual(response.context["active_filters"], [])
+        self.assertNotContains(response, "Filtered by:")
+
+    @patch("dojos.search.geocode", return_value=(51.2194, 4.4025))
+    def test_every_applied_filter_gets_a_chip_that_removes_only_it(self, _geocode):
+        python = Pathway.objects.create(name="Python")
+        response = self.client.get(
+            reverse("dojo_list"),
+            {
+                "location": "Antwerp",
+                "lat": "51.0",
+                "lon": "3.7",
+                "language": "nl-be",
+                "pathway": python.id,
+                "page": "2",
+            },
+        )
+        chips = {chip.label: chip for chip in response.context["active_filters"]}
+        self.assertEqual(list(chips), ["Location", "Language", "Pathway"])
+        self.assertEqual(chips["Location"].value, "Antwerp")
+        self.assertEqual(chips["Pathway"].value, "Python")
+        path = reverse("dojo_list")
+        # Dropping the location drops the "Use my location" coordinates too; every link starts on page 1.
+        self.assertEqual(chips["Location"].remove_url, f"{path}?language=nl-be&pathway={python.id}")
+        self.assertEqual(chips["Language"].remove_url, f"{path}?location=Antwerp&lat=51.0&lon=3.7&pathway={python.id}")
+        self.assertContains(response, "<strong>Python</strong>", html=True)
+        self.assertContains(
+            response, f'<a class="cd-active-filters__clear body-sm" href="{path}">Clear all</a>', html=True
+        )
+
+    def test_use_my_location_shows_as_a_location_chip(self):
+        response = self.client.get(reverse("dojo_list"), {"lat": "51.0", "lon": "3.7"})
+        [chip] = response.context["active_filters"]
+        self.assertEqual(
+            (chip.label, chip.value, chip.remove_url), ("Location", "Your location", reverse("dojo_list"))
+        )
+        # One filter: nothing else to clear.
+        self.assertNotContains(response, "Clear all")
+
 
 class PostcodeSearchOriginTests(TestCase):
     """A logged-in account with a postcode (User.postal_code) starts the dojo

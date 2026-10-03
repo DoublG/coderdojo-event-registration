@@ -13,6 +13,7 @@ from core.content_languages import (
     optional_copy,
     save_translation_fields,
 )
+from core.forms import SearchFiltersMixin
 from core.image_library import LIBRARY_DIRS, library_filename, use_library_image
 from core.uploads import with_upload_help
 from dojos.models import Dojo
@@ -36,16 +37,20 @@ AGE_RANGES = {
 DOJO_ORGANISATION = "organisation"
 
 
-class EventSearchForm(forms.Form):
+class EventSearchForm(SearchFiltersMixin, forms.Form):
+    filter_fields = ("location", "dojo", "date", "age", "language", "pathway")
+
     # A public dojo's id, or DOJO_ORGANISATION for the events of every
     # organisation dojo (Dojo.kind, DATA_MODEL.md §12), which are never
     # listed one by one. Cleaned to a Dojo, DOJO_ORGANISATION or None.
     dojo = forms.ChoiceField(
         required=False,
+        label=_("Dojo"),
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-dojo"}),
     )
     location = forms.CharField(
         required=False,
+        label=_("Location"),
         max_length=200,
         widget=forms.TextInput(
             attrs={"class": "cd-form__input body", "id": "ep-location", "placeholder": _("Postcode or city")}
@@ -53,17 +58,20 @@ class EventSearchForm(forms.Form):
     )
     date = forms.ChoiceField(
         required=False,
+        label=_("Date"),
         choices=[(DATE_ANY, _("Any date")), (DATE_WEEK, _("This week")), (DATE_MONTH, _("This month"))],
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-date"}),
     )
     # Only dojos (or sessions) given in this language (Dojo.languages).
     language = forms.ChoiceField(
         required=False,
+        label=_("Language"),
         choices=[("", _("Any language"))] + list(settings.LANGUAGES),
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-language"}),
     )
     age = forms.ChoiceField(
         required=False,
+        label=_("Age"),
         choices=[(AGE_ANY, _("All ages"))] + [(key, key.replace("-", "–")) for key in AGE_RANGES],
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-age"}),
     )
@@ -72,6 +80,7 @@ class EventSearchForm(forms.Form):
     # query; cleaned to a Pathway or None.
     pathway = forms.ChoiceField(
         required=False,
+        label=_("Pathway"),
         widget=forms.Select(attrs={"class": "cd-form__select body", "id": "ep-pathway"}),
     )
 
@@ -101,12 +110,12 @@ class EventSearchForm(forms.Form):
     def clean_pathway(self):
         return self.pathways.get(self.cleaned_data["pathway"])
 
-    def dojo_filter_label(self):
-        """What the "Filtered by" chip says, or "" without a dojo filter."""
-        dojo = getattr(self, "cleaned_data", {}).get("dojo")
-        if dojo == DOJO_ORGANISATION:
-            return self.organisation_label()
-        return dojo.name if dojo else ""
+    def filter_value(self, name, raw):
+        if name == "dojo":
+            # The dojo's name alone (the select also names its municipality).
+            dojo = self.cleaned_data["dojo"]
+            return self.organisation_label() if dojo == DOJO_ORGANISATION else dojo.name
+        return super().filter_value(name, raw)
 
 
 # Belgium's own date/time notation — day before month, 24-hour clock — used

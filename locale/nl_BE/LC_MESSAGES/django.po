@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-03 02:12+0000\n"
+"POT-Creation-Date: 2026-10-03 08:42+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -49,7 +49,7 @@ msgid "Enter a valid email address."
 msgstr "Vul een geldig e-mailadres in."
 
 #: accounts/child_accounts.py:55 accounts/email_change.py:76
-#: accounts/forms.py:277
+#: accounts/forms.py:289
 msgid "An account already exists with this email."
 msgstr "Er bestaat al een account met dit e-mailadres."
 
@@ -145,105 +145,110 @@ msgstr ""
 "voogd."
 
 #: accounts/forms.py:40
+#, python-format
+msgid "%(name)s's email address"
+msgstr "E-mailadres van %(name)s"
+
+#: accounts/forms.py:52
 msgid "New password"
 msgstr "Nieuw wachtwoord"
 
-#: accounts/forms.py:42
+#: accounts/forms.py:54
 msgid "Confirm new password"
 msgstr "Bevestig het nieuwe wachtwoord"
 
-#: accounts/forms.py:54
+#: accounts/forms.py:66
 msgid "Temporary password"
 msgstr "Tijdelijk wachtwoord"
 
-#: accounts/forms.py:54
+#: accounts/forms.py:66
 msgid "Current password"
 msgstr "Huidig wachtwoord"
 
-#: accounts/forms.py:61 accounts/forms.py:132 accounts/forms.py:176
-#: accounts/forms.py:242 accounts/templates/accounts/manage/people.html:20
+#: accounts/forms.py:73 accounts/forms.py:144 accounts/forms.py:188
+#: accounts/forms.py:254 accounts/templates/accounts/manage/people.html:20
 #: accounts/templates/accounts/manage/people.html:49
 #: accounts/templates/accounts/manage/security.html:73
 #: accounts/templates/accounts/partials/_account_details_edit.html:20
-#: dojos/forms.py:97 dojos/forms.py:253
+#: dojos/forms.py:98 dojos/forms.py:266
 #: dojos/templates/dojos/dojo_detail.html:238
 #: pages/templates/pages/contact.html:34
 #: privacy/templates/privacy/manage/privacy.html:58
 msgid "Email"
 msgstr "E-mail"
 
-#: accounts/forms.py:119 accounts/forms.py:419
+#: accounts/forms.py:131 accounts/forms.py:431
 msgid ""
 "Confirm it's you first: we mail you a login link that brings you back here."
 msgstr ""
 "Bevestig eerst dat jij het bent: we mailen je een inloglink die je hierheen "
 "terugbrengt."
 
-#: accounts/forms.py:143 accounts/forms.py:250 accounts/forms.py:468
+#: accounts/forms.py:155 accounts/forms.py:262 accounts/forms.py:480
 msgid "Password"
 msgstr "Wachtwoord"
 
-#: accounts/forms.py:148 accounts/forms.py:149
+#: accounts/forms.py:160 accounts/forms.py:161
 msgid "That email/password combination doesn't match an account."
 msgstr "Die combinatie van e-mail en wachtwoord hoort bij geen enkele account."
 
-#: accounts/forms.py:165
+#: accounts/forms.py:177
 msgid "This login link has expired or was already used. Ask for a new one."
 msgstr "Deze inloglink is verlopen of al gebruikt. Vraag een nieuwe aan."
 
-#: accounts/forms.py:186
+#: accounts/forms.py:198
 msgid "That isn't a Belgian postcode we know."
 msgstr "Dat is geen Belgische postcode die we kennen."
 
-#: accounts/forms.py:198
+#: accounts/forms.py:210
 msgid "How do you want to log in?"
 msgstr "Hoe wil je je aanmelden?"
 
-#: accounts/forms.py:200
+#: accounts/forms.py:212
 msgid "With a password"
 msgstr "Met een wachtwoord"
 
-#: accounts/forms.py:201
+#: accounts/forms.py:213
 msgid "With a link we mail you each time (no password to remember)"
 msgstr ""
 "Met een link die we je telkens mailen (geen wachtwoord om te onthouden)"
 
-#: accounts/forms.py:226
+#: accounts/forms.py:238
 msgid "Choose a password."
 msgstr "Kies een wachtwoord."
 
-#: accounts/forms.py:240 accounts/forms.py:466
+#: accounts/forms.py:252 accounts/forms.py:478
 msgid "Full name"
 msgstr "Volledige naam"
 
-#: accounts/forms.py:244 accounts/forms.py:300 accounts/forms.py:467
-#: applications/forms.py:25 dojos/forms.py:98
+#: accounts/forms.py:256 accounts/forms.py:312 accounts/forms.py:479
+#: applications/forms.py:25 dojos/forms.py:99
 #: dojos/templates/dojos/dojo_detail.html:244
 msgid "Phone"
 msgstr "Telefoon"
 
-#: accounts/forms.py:247 accounts/forms.py:307
+#: accounts/forms.py:259 accounts/forms.py:319
 msgid "Only used if we need to reach you during a session."
 msgstr "Alleen gebruikt als we je tijdens een sessie moeten bereiken."
 
-#: accounts/forms.py:252 accounts/forms.py:301
+#: accounts/forms.py:264 accounts/forms.py:313
 msgid "Postcode"
 msgstr "Postcode"
 
-#: accounts/forms.py:255 accounts/forms.py:308
+#: accounts/forms.py:267 accounts/forms.py:320
 msgid "So we can tell you about dojos and sessions near you."
 msgstr ""
 "Zo kunnen we je laten weten welke dojo's en sessies er in je buurt zijn."
 
-#: accounts/forms.py:258 accounts/forms.py:469 mailing/forms.py:22
+#: accounts/forms.py:270 accounts/forms.py:481 mailing/forms.py:22
 msgid "Language for emails"
 msgstr "Taal van de e-mails"
 
-#: accounts/forms.py:260
+#: accounts/forms.py:272
 msgid "I am the parent or legal guardian of the children listed below."
 msgstr "Ik ben de ouder of wettelijke voogd van de kinderen hieronder."
 
-#: accounts/forms.py:269
+#: accounts/forms.py:281
 msgid ""
 "Send me the CoderDojo Belgium newsletter and news about events like Coolest "
 "Projects and CoderDojo Girlz."
@@ -251,32 +256,32 @@ msgstr ""
 "Stuur me de nieuwsbrief van CoderDojo Belgium en nieuws over evenementen "
 "zoals Coolest Projects en CoderDojo Girlz."
 
-#: accounts/forms.py:298 accounts/forms.py:607
+#: accounts/forms.py:310 accounts/forms.py:619
 msgid "First name"
 msgstr "Voornaam"
 
-#: accounts/forms.py:299
+#: accounts/forms.py:311
 msgid "Last name"
 msgstr "Achternaam"
 
-#: accounts/forms.py:345 accounts/forms.py:352
+#: accounts/forms.py:357 accounts/forms.py:364
 #: accounts/templates/accounts/manage/security.html:27
 msgid "Required from"
 msgstr "Verplicht vanaf"
 
-#: accounts/forms.py:392 accounts/forms.py:508 accounts/forms.py:570
+#: accounts/forms.py:404 accounts/forms.py:520 accounts/forms.py:582
 msgid "Your password"
 msgstr "Je wachtwoord"
 
-#: accounts/forms.py:412
+#: accounts/forms.py:424
 msgid "That password isn't right."
 msgstr "Dat wachtwoord klopt niet."
 
-#: accounts/forms.py:430
+#: accounts/forms.py:442
 msgid "Why do you need it?"
 msgstr "Waarom heb je die nodig?"
 
-#: accounts/forms.py:432
+#: accounts/forms.py:444
 msgid ""
 "For example: fix a registration by hand. The other organisation admins see "
 "this."
@@ -284,32 +289,32 @@ msgstr ""
 "Bijvoorbeeld: een inschrijving met de hand rechtzetten. De andere beheerders "
 "van de organisatie zien dit."
 
-#: accounts/forms.py:456
+#: accounts/forms.py:468
 msgid "Their name"
 msgstr "Naam"
 
-#: accounts/forms.py:457
+#: accounts/forms.py:469
 msgid "Their email address"
 msgstr "E-mailadres"
 
-#: accounts/forms.py:458
+#: accounts/forms.py:470
 msgid "Language of the invitation"
 msgstr "Taal van de uitnodiging"
 
-#: accounts/forms.py:494
+#: accounts/forms.py:506
 msgid "New email address"
 msgstr "Nieuw e-mailadres"
 
-#: accounts/forms.py:495
+#: accounts/forms.py:507
 msgid "We send a link there. The address only changes once you open it."
 msgstr ""
 "We sturen daar een link naartoe. Het adres verandert pas als je die opent."
 
-#: accounts/forms.py:518
+#: accounts/forms.py:530
 msgid "I've checked that this request comes from the account holder."
 msgstr "Ik heb nagekeken dat deze vraag van de accounthouder komt."
 
-#: accounts/forms.py:526
+#: accounts/forms.py:538
 msgid ""
 "We send a link there. The address only changes once they open it; they don't "
 "need to log in for that."
@@ -317,24 +322,19 @@ msgstr ""
 "We sturen daar een link naartoe. Het adres verandert pas als die geopend "
 "wordt; aanmelden is daarvoor niet nodig."
 
-#: accounts/forms.py:540
+#: accounts/forms.py:552
 msgid "How will they log in?"
 msgstr "Hoe meldt je kind zich aan?"
 
-#: accounts/forms.py:542
+#: accounts/forms.py:554
 msgid "With a password they choose"
 msgstr "Met een wachtwoord dat je kind zelf kiest"
 
-#: accounts/forms.py:543
+#: accounts/forms.py:555
 msgid "With a link we mail them each time (no password)"
 msgstr "Met een link die we telkens mailen (geen wachtwoord)"
 
-#: accounts/forms.py:552
-#, python-format
-msgid "%(name)s's email address"
-msgstr "E-mailadres van %(name)s"
-
-#: accounts/forms.py:573
+#: accounts/forms.py:585
 msgid ""
 "We send a link there. The address only changes once it's opened; your child "
 "doesn't need to log in for that."
@@ -342,23 +342,23 @@ msgstr ""
 "We sturen daar een link naartoe. Het adres verandert pas als die geopend "
 "wordt; je kind hoeft zich daarvoor niet aan te melden."
 
-#: accounts/forms.py:598
+#: accounts/forms.py:610
 msgid "Gender (optional)"
 msgstr "Gender (optioneel)"
 
-#: accounts/forms.py:601
+#: accounts/forms.py:613
 msgid "Avatar"
 msgstr "Avatar"
 
-#: accounts/forms.py:608
+#: accounts/forms.py:620
 msgid "Family name"
 msgstr "Familienaam"
 
-#: accounts/forms.py:609
+#: accounts/forms.py:621
 msgid "Allergies or notes (optional)"
 msgstr "Allergieën of opmerkingen (optioneel)"
 
-#: accounts/forms.py:613
+#: accounts/forms.py:625
 msgid ""
 "Only the champion (the person running the dojo) sees this, on the list of a "
 "session your child is signed up for."
@@ -366,76 +366,76 @@ msgstr ""
 "Alleen de champion (wie de dojo leidt) ziet dit, op de lijst van een sessie "
 "waarvoor je kind is ingeschreven."
 
-#: accounts/forms.py:617
+#: accounts/forms.py:629
 msgid "First name is required."
 msgstr "Voornaam is verplicht."
 
-#: accounts/forms.py:618
+#: accounts/forms.py:630
 msgid "Family name is required."
 msgstr "Familienaam is verplicht."
 
-#: accounts/forms.py:622 accounts/forms.py:720
+#: accounts/forms.py:634 accounts/forms.py:732
 msgid "None"
 msgstr "Geen"
 
-#: accounts/forms.py:640
+#: accounts/forms.py:652
 msgid "Date of birth (optional)"
 msgstr "Geboortedatum (optioneel)"
 
-#: accounts/forms.py:650
+#: accounts/forms.py:662
 msgid "Home dojo"
 msgstr "Thuisdojo"
 
-#: accounts/forms.py:650
+#: accounts/forms.py:662
 msgid "None yet"
 msgstr "Nog geen"
 
-#: accounts/forms.py:665 accounts/forms.py:708
+#: accounts/forms.py:677 accounts/forms.py:720
 msgid "Date of birth"
 msgstr "Geboortedatum"
 
-#: accounts/forms.py:676
+#: accounts/forms.py:688
 msgid "Keep the current photo"
 msgstr "De huidige foto houden"
 
-#: accounts/forms.py:676
+#: accounts/forms.py:688
 msgid "No avatar"
 msgstr "Geen avatar"
 
-#: accounts/forms.py:692
+#: accounts/forms.py:704
 #: accounts/templates/accounts/partials/_child_header_display.html:14
 msgid "Pick your avatar"
 msgstr "Kies je avatar"
 
-#: accounts/forms.py:709
+#: accounts/forms.py:721
 #: accounts/templates/accounts/partials/_child_header_display.html:34
 #: dojos/templates/dojos/partials/_attendance_row.html:25
 msgid "Allergies or notes"
 msgstr "Allergieën of opmerkingen"
 
-#: accounts/forms.py:714
+#: accounts/forms.py:726
 msgid "Date of birth is required."
 msgstr "Geboortedatum is verplicht."
 
-#: accounts/forms.py:718
+#: accounts/forms.py:730
 msgid "Sam"
 msgstr "Sam"
 
-#: accounts/forms.py:719
+#: accounts/forms.py:731
 msgid "Peeters"
 msgstr "Peeters"
 
-#: accounts/forms.py:727
+#: accounts/forms.py:739
 msgid "Gender"
 msgstr "Gender"
 
-#: accounts/forms.py:728
+#: accounts/forms.py:740
 msgid "Optional, never shown publicly. Lets us tell you about girls' sessions."
 msgstr ""
 "Optioneel, nooit openbaar. Zo kunnen we je laten weten wanneer er "
 "meisjessessies zijn."
 
-#: accounts/forms.py:752
+#: accounts/forms.py:764
 msgid "Add at least one child."
 msgstr "Voeg minstens één kind toe."
 
@@ -688,7 +688,7 @@ msgstr "Mensen: rollen in de organisatie"
 msgid "Audit log: who changed what (read-only)"
 msgstr "Auditlog: wie wat wijzigde (alleen lezen)"
 
-#: accounts/organisation_people.py:30 mailing/models.py:142
+#: accounts/organisation_people.py:30 mailing/models.py:147
 msgid "Admin"
 msgstr "Beheer"
 
@@ -996,14 +996,14 @@ msgstr "Komende sessies"
 #: accounts/templates/accounts/child_detail.html:77
 #: accounts/templates/accounts/child_detail.html:129
 #: accounts/templates/accounts/child_detail.html:174
-#: dojos/templates/dojos/dojo_event_list.html:23 events/forms.py:138
-#: events/templates/events/event_detail.html:119
-#: events/templates/events/event_list.html:77
+#: dojos/templates/dojos/dojo_event_list.html:23 events/forms.py:61
+#: events/forms.py:147 events/templates/events/event_detail.html:119
+#: events/templates/events/event_list.html:62
 msgid "Date"
 msgstr "Datum"
 
 #: accounts/templates/accounts/child_detail.html:78
-#: accounts/templates/accounts/child_detail.html:175 campaigns/forms.py:163
+#: accounts/templates/accounts/child_detail.html:175 campaigns/forms.py:168
 msgid "Session"
 msgstr "Sessie"
 
@@ -1012,8 +1012,8 @@ msgstr "Sessie"
 #: applications/templates/applications/manage/application_detail.html:17
 #: campaigns/templates/campaigns/manage/_rule_fields.html:47
 #: campaigns/templates/campaigns/manage/_rule_fields.html:57 dojos/models.py:59
-#: dojos/templates/dojos/_admin_base.html:90
-#: events/templates/events/event_list.html:69
+#: dojos/templates/dojos/_admin_base.html:90 events/forms.py:48
+#: events/templates/events/event_list.html:58
 #: privacy/templates/privacy/manage/privacy.html:17
 msgid "Dojo"
 msgstr "Dojo"
@@ -1058,7 +1058,7 @@ msgid "Find a session"
 msgstr "Zoek een sessie"
 
 #: accounts/templates/accounts/child_detail.html:116
-#: accounts/templates/accounts/child_detail.html:128 dojos/forms.py:382
+#: accounts/templates/accounts/child_detail.html:128 dojos/forms.py:406
 #: dojos/templates/dojos/dojo_members.html:37
 msgid "Belt"
 msgstr "Gordel"
@@ -1682,14 +1682,14 @@ msgstr "Wat elke rol opent"
 #: api/templates/api/dojo_api_clients.html:76
 #: applications/templates/applications/manage/_check_table.html:10
 #: applications/templates/applications/manage/application_list.html:37
-#: campaigns/forms.py:32 campaigns/forms.py:121
+#: campaigns/forms.py:32 campaigns/forms.py:126
 #: campaigns/templates/campaigns/manage/campaign_list.html:22
 #: campaigns/templates/campaigns/manage/journey_list.html:13
 #: campaigns/templates/campaigns/manage/segment_list.html:12
 #: content/forms.py:101 content/templates/content/manage/sponsor_list.html:16
-#: dojos/forms.py:90 dojos/forms.py:253
-#: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:187
-#: events/forms.py:262 events/forms.py:318 events/forms.py:351
+#: dojos/forms.py:91 dojos/forms.py:266
+#: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:196
+#: events/forms.py:271 events/forms.py:327 events/forms.py:360
 #: events/templates/events/manage/badge_list.html:18
 #: events/templates/events/manage/badge_list.html:44 mailing/forms.py:137
 #: privacy/templates/privacy/manage/privacy.html:57
@@ -1797,9 +1797,9 @@ msgstr "Naam, e-mailadres of gebruikersnaam"
 #: accounts/templates/accounts/manage/people_add.html:18
 #: accounts/templates/accounts/manage/security.html:63
 #: applications/templates/applications/manage/check_list.html:17
-#: dojos/templates/dojos/dojo_list.html:40
+#: dojos/templates/dojos/dojo_list.html:57
 #: dojos/templates/dojos/partials/_dojo_finder_widget.html:16
-#: events/templates/events/event_list.html:95
+#: events/templates/events/event_list.html:80
 #: mailing/templates/mailing/manage/mail_queue.html:44
 #: pages/templates/pages/manage_audit_log.html:43
 #: privacy/templates/privacy/manage/privacy.html:48
@@ -3386,7 +3386,7 @@ msgstr "%(name)s is verwijderd: hij kan de API niet meer gebruiken."
 msgid "Document"
 msgstr "Document"
 
-#: applications/forms.py:28 dojos/forms.py:143
+#: applications/forms.py:28 dojos/forms.py:144
 msgid "+32 4xx xx xx xx"
 msgstr "+32 4xx xx xx xx"
 
@@ -3481,7 +3481,7 @@ msgid "Reject"
 msgstr "Afwijzen"
 
 # | msgid "Gender (optional)"
-#: applications/forms.py:134 dojos/forms.py:359
+#: applications/forms.py:134 dojos/forms.py:382
 msgid "Note (optional)"
 msgstr "Opmerking (optioneel)"
 
@@ -3687,7 +3687,7 @@ msgid "Preferred schedule"
 msgstr "Voorkeursmoment"
 
 #: applications/templates/applications/manage/application_detail.html:24
-#: campaigns/forms.py:175
+#: campaigns/forms.py:180
 msgid "Message"
 msgstr "Bericht"
 
@@ -3752,7 +3752,7 @@ msgstr "Alle"
 
 #: applications/templates/applications/manage/application_list.html:21
 #: applications/templates/applications/manage/application_list.html:38
-#: events/forms.py:319 mailing/templates/mailing/manage/mail_queue.html:122
+#: events/forms.py:328 mailing/templates/mailing/manage/mail_queue.html:122
 msgid "Kind"
 msgstr "Soort"
 
@@ -4229,7 +4229,7 @@ msgid "Children who only just started coming to your dojo."
 msgstr "Kinderen die pas naar je dojo beginnen te komen."
 
 # | msgid "Which mails you get"
-#: campaigns/dojo_audiences.py:102 campaigns/forms.py:141
+#: campaigns/dojo_audiences.py:102 campaigns/forms.py:146
 msgid "We miss you"
 msgstr "We missen je"
 
@@ -4449,56 +4449,56 @@ msgstr ""
 msgid "<a href=\"%(url)s\">Segments</a> describe who gets it."
 msgstr "<a href=\"%(url)s\">Segmenten</a> bepalen wie hem krijgt."
 
-#: campaigns/forms.py:93
+#: campaigns/forms.py:98
 msgid "Coolest Projects 2027"
 msgstr "Coolest Projects 2027"
 
 # | msgid "Aimed at"
-#: campaigns/forms.py:100
+#: campaigns/forms.py:105
 msgid "Send at"
 msgstr "Versturen op"
 
 # | msgid "Leave empty to use the event's name"
-#: campaigns/forms.py:101
+#: campaigns/forms.py:106
 msgid "Leave empty to send as soon as it's launched."
 msgstr "Leeg laten om meteen bij het lanceren te versturen."
 
-#: campaigns/forms.py:107
+#: campaigns/forms.py:112
 msgid "Pick a time in the future, or leave it empty to send when launched."
 msgstr ""
 "Kies een tijdstip in de toekomst, of laat het leeg om te versturen bij het "
 "lanceren."
 
-#: campaigns/forms.py:117
+#: campaigns/forms.py:122
 msgid "Families near Ghent"
 msgstr "Gezinnen in de buurt van Gent"
 
-#: campaigns/forms.py:118
+#: campaigns/forms.py:123
 msgid "Who this is, in a sentence."
 msgstr "Wie dit is, in één zin."
 
 # | msgid "Questions"
-#: campaigns/forms.py:122
-#: campaigns/templates/campaigns/manage/segment_list.html:13 dojos/forms.py:67
-#: dojos/forms.py:93 events/forms.py:192 events/forms.py:262
-#: events/forms.py:320 events/forms.py:351 mailing/forms.py:109
+#: campaigns/forms.py:127
+#: campaigns/templates/campaigns/manage/segment_list.html:13 dojos/forms.py:68
+#: dojos/forms.py:94 events/forms.py:201 events/forms.py:271
+#: events/forms.py:329 events/forms.py:360 mailing/forms.py:109
 #: mailing/forms.py:144
 msgid "Description"
 msgstr "Beschrijving"
 
-#: campaigns/forms.py:123
+#: campaigns/forms.py:128
 msgid "Active (offered when creating a campaign)"
 msgstr "Actief (aangeboden bij het aanmaken van een campagne)"
 
-#: campaigns/forms.py:137
+#: campaigns/forms.py:142
 msgid "Not again for (days)"
 msgstr "Niet opnieuw gedurende (dagen)"
 
-#: campaigns/forms.py:138
+#: campaigns/forms.py:143
 msgid "Someone who got it doesn't get it again for this many days."
 msgstr "Wie het kreeg, krijgt het zoveel dagen niet opnieuw."
 
-#: campaigns/forms.py:148
+#: campaigns/forms.py:153
 msgid ""
 "Tip: a rule like \"How the child comes to sessions changed: became At risk "
 "in the last 7 days\" makes it a triggered mail."
@@ -4507,62 +4507,63 @@ msgstr ""
 "Dreigt af te haken in de laatste 7 dagen\" maakt er een automatische e-mail "
 "van."
 
-#: campaigns/forms.py:162
+#: campaigns/forms.py:167
 #: campaigns/templates/campaigns/dojo/mail_detail.html:24
 #: campaigns/templates/campaigns/dojo/mail_form.html:21
 msgid "Who gets it"
 msgstr "Wie krijgt hem"
 
-#: campaigns/forms.py:164
+#: campaigns/forms.py:169
 msgid "Also the families on its waiting list"
 msgstr "Ook de gezinnen op de wachtlijst"
 
 # | msgid "Join the waiting list"
-#: campaigns/forms.py:165
+#: campaigns/forms.py:170
 msgid "Came in the last"
 msgstr "Kwam in de afgelopen"
 
-#: campaigns/forms.py:166
+#: campaigns/forms.py:171
 msgid "From age"
 msgstr "Vanaf leeftijd"
 
-#: campaigns/forms.py:167
+#: campaigns/forms.py:172
 msgid "Up to age"
 msgstr "Tot leeftijd"
 
-#: campaigns/forms.py:168 dojos/forms.py:229
-#: events/templates/events/event_list.html:89
+#: campaigns/forms.py:173 dojos/forms.py:235
+#: dojos/templates/dojos/dojo_list.html:47 events/forms.py:83
+#: events/templates/events/event_list.html:74
 msgid "Pathway"
 msgstr "Leertraject"
 
-#: campaigns/forms.py:175 mailing/forms.py:109
+#: campaigns/forms.py:180 mailing/forms.py:109
 #: mailing/templates/mailing/manage/mail_queue.html:57
 #: mailing/templates/mailing/manage/mail_queue.html:91
 msgid "Subject"
 msgstr "Onderwerp"
 
-#: campaigns/forms.py:177
+#: campaigns/forms.py:182
 msgid "Your dojo's name goes in front of it."
 msgstr "De naam van je dojo komt ervoor."
 
-#: campaigns/forms.py:178
+#: campaigns/forms.py:183
 msgid ""
 "Plain text. Links work; there's no layout, no images and no attachments."
 msgstr ""
 "Gewone tekst. Links werken; er is geen opmaak, geen afbeeldingen en geen "
 "bijlagen."
 
-#: campaigns/forms.py:196
+#: campaigns/forms.py:201
 msgid "Pick a session"
 msgstr "Kies een sessie"
 
-#: campaigns/forms.py:200
+#: campaigns/forms.py:205
 #, python-format
 msgid "%(days)s days"
 msgstr "%(days)s dagen"
 
 # | msgid "Next pathways"
-#: campaigns/forms.py:201
+#: campaigns/forms.py:206
 msgid "Pick a pathway"
 msgstr "Kies een leertraject"
 
@@ -4825,7 +4826,7 @@ msgstr "Brussels Hoofdstedelijk Gewest"
 msgid "Mail language"
 msgstr "Taal van de e-mails"
 
-#: campaigns/segmentation/attributes/locality.py:70 dojos/forms.py:156
+#: campaigns/segmentation/attributes/locality.py:70 dojos/forms.py:157
 msgid "Not set"
 msgstr "Niet ingesteld"
 
@@ -6325,9 +6326,10 @@ msgstr "Evenementen"
 msgid "Dojos"
 msgstr "Dojo's"
 
-#: core/templates/core/menu.html:23 dojos/forms.py:221
+#: core/templates/core/menu.html:23 dojos/forms.py:227
+#: dojos/templates/dojos/dojo_list.html:43 events/forms.py:68
 #: events/templates/events/event_detail.html:131
-#: events/templates/events/event_list.html:85
+#: events/templates/events/event_list.html:70
 msgid "Language"
 msgstr "Taal"
 
@@ -6359,6 +6361,19 @@ msgstr "Inschrijven"
 #: core/templates/core/menu.html:76
 msgid "Switch to light mode"
 msgstr "Lichte modus"
+
+#: core/templates/core/partials/_active_filters.html:9
+msgid "Filtered by:"
+msgstr "Gefilterd op:"
+
+#: core/templates/core/partials/_active_filters.html:14
+#, python-format
+msgid "Remove filter: %(label)s"
+msgstr "Filter verwijderen: %(label)s"
+
+#: core/templates/core/partials/_active_filters.html:19
+msgid "Clear all"
+msgstr "Alles wissen"
 
 #: core/templates/core/partials/_manage_switcher.html:16
 msgid "Switch between what you manage"
@@ -6408,12 +6423,12 @@ msgstr "Het bestand is %(size)s MB; het mag hoogstens %(max)s MB zijn."
 msgid "Upload a PDF, JPEG or PNG file."
 msgstr "Upload een PDF-, JPEG- of PNG-bestand."
 
-#: dojos/forms.py:44 events/forms.py:167
+#: dojos/forms.py:45 events/forms.py:176
 msgid "No template — I'll upload my own below"
 msgstr "Geen sjabloon, ik laad hieronder mijn eigen op"
 
 # | msgid "Language"
-#: dojos/forms.py:51 dojos/templates/dojos/dojo_manage.html:82
+#: dojos/forms.py:52 dojos/templates/dojos/dojo_manage.html:82
 #: mailing/templates/mailing/manage/template_edit.html:21
 #: mailing/templates/mailing/manage/template_list.html:14
 msgid "Languages"
@@ -6421,11 +6436,11 @@ msgstr "Talen"
 
 # | msgid "Language"
 # | msgid "Mail language"
-#: dojos/forms.py:57
+#: dojos/forms.py:58
 msgid "Main language"
 msgstr "Hoofdtaal"
 
-#: dojos/forms.py:61
+#: dojos/forms.py:62
 msgid ""
 "The fields below are in this language. Other languages get their own section "
 "at the bottom once saved."
@@ -6433,60 +6448,60 @@ msgstr ""
 "De velden hieronder zijn in deze taal. Andere talen krijgen onderaan een "
 "eigen deel zodra je opslaat."
 
-#: dojos/forms.py:66 dojos/forms.py:92
+#: dojos/forms.py:67 dojos/forms.py:93
 msgid "Tagline"
 msgstr "Slogan"
 
-#: dojos/forms.py:68 dojos/forms.py:94
+#: dojos/forms.py:69 dojos/forms.py:95
 #: dojos/templates/dojos/dojo_detail.html:223
 msgid "Meets"
 msgstr "Wanneer"
 
-#: dojos/forms.py:69 dojos/forms.py:101
+#: dojos/forms.py:70 dojos/forms.py:102
 msgid "Extra info"
 msgstr "Extra info"
 
 # | msgid "upload your document"
-#: dojos/forms.py:91 events/forms.py:191
+#: dojos/forms.py:92 events/forms.py:200
 msgid "…or upload your own"
 msgstr "…of laad je eigen op"
 
-#: dojos/forms.py:95 events/forms.py:193
+#: dojos/forms.py:96 events/forms.py:202
 msgid "Minimum age"
 msgstr "Minimumleeftijd"
 
-#: dojos/forms.py:96 events/forms.py:194
+#: dojos/forms.py:97 events/forms.py:203
 msgid "Maximum age"
 msgstr "Maximumleeftijd"
 
-#: dojos/forms.py:99
+#: dojos/forms.py:100
 msgid "Municipality"
 msgstr "Gemeente"
 
-#: dojos/forms.py:100 dojos/forms.py:253
+#: dojos/forms.py:101 dojos/forms.py:266
 #: dojos/templates/dojos/dojo_detail.html:233
 #: mailing/templates/mailing/manage/mail_queue.html:121
 #: mailing/templates/mailing/manage/mail_queue.html:153
 msgid "Address"
 msgstr "Adres"
 
-#: dojos/forms.py:102
+#: dojos/forms.py:103
 msgid "Pathways your dojo provides"
 msgstr "Leertrajecten die je dojo aanbiedt"
 
-#: dojos/forms.py:106 events/forms.py:206
+#: dojos/forms.py:107 events/forms.py:215
 msgid "Uploading a file here overrides the template chosen above."
 msgstr "Een bestand dat je hier oplaadt, vervangt het sjabloon hierboven."
 
-#: dojos/forms.py:107
+#: dojos/forms.py:108
 msgid "Shown right under the dojo's name. Supports basic Markdown."
 msgstr "Net onder de naam van de dojo. Eenvoudige Markdown kan."
 
-#: dojos/forms.py:108
+#: dojos/forms.py:109
 msgid "Shown further down the page, above the team. Supports basic Markdown."
 msgstr "Verder op de pagina, boven het team. Eenvoudige Markdown kan."
 
-#: dojos/forms.py:110
+#: dojos/forms.py:111
 msgid ""
 "Used for the \"Visit us\" map link and for distance search — changing it "
 "updates the map location automatically."
@@ -6494,7 +6509,7 @@ msgstr ""
 "Gebruikt voor de kaartlink bij \"Bezoek ons\" en voor zoeken op afstand. Als "
 "je het wijzigt, wordt de locatie op de kaart automatisch bijgewerkt."
 
-#: dojos/forms.py:113
+#: dojos/forms.py:114
 msgid ""
 "Parking, entrance, accessibility — anything extra for the Visit us section. "
 "Supports basic Markdown."
@@ -6502,133 +6517,145 @@ msgstr ""
 "Parking, ingang, toegankelijkheid: alles wat extra is voor het deel Bezoek "
 "ons. Eenvoudige Markdown kan."
 
-#: dojos/forms.py:127
+#: dojos/forms.py:128
 msgid "CoderDojo Ghent"
 msgstr "CoderDojo Gent"
 
-#: dojos/forms.py:129
+#: dojos/forms.py:130
 msgid "A short line shown right under the dojo's name."
 msgstr "Een korte zin, net onder de naam van de dojo."
 
-#: dojos/forms.py:135
+#: dojos/forms.py:136
 msgid ""
 "Shown further down the page, above the team — what makes this dojo worth "
 "joining."
 msgstr ""
 "Verder op de pagina, boven het team: wat deze dojo de moeite waard maakt."
 
-#: dojos/forms.py:139
+#: dojos/forms.py:140
 msgid "e.g. Every 2nd Saturday"
 msgstr "bv. elke 2e zaterdag"
 
-#: dojos/forms.py:140 events/forms.py:229
+#: dojos/forms.py:141 events/forms.py:238
 msgid "7"
 msgstr "7"
 
-#: dojos/forms.py:141 events/forms.py:230
+#: dojos/forms.py:142 events/forms.py:239
 msgid "18"
 msgstr "18"
 
-#: dojos/forms.py:142
+#: dojos/forms.py:143
 msgid "hello@example.org"
 msgstr "hallo@voorbeeld.be"
 
 # | msgid "Enter your postcode or city"
-#: dojos/forms.py:144
+#: dojos/forms.py:145
 msgid "Street, number, postcode, city"
 msgstr "Straat, nummer, postcode, gemeente"
 
-#: dojos/forms.py:148
+#: dojos/forms.py:149
 msgid ""
 "Parking, entrance, accessibility — anything extra for the Visit us section."
 msgstr ""
 "Parking, ingang, toegankelijkheid: alles wat extra is voor het deel Bezoek "
 "ons."
 
-#: dojos/forms.py:207
-msgid "Enter your postcode or city"
-msgstr "Vul je postcode of gemeente in"
+#: dojos/forms.py:209 dojos/forms.py:254
+#: dojos/templates/dojos/dojo_list.html:36
+#: dojos/templates/dojos/partials/_event_form_fields.html:31 events/forms.py:53
+#: events/templates/events/event_detail.html:123
+#: events/templates/events/event_list.html:51
+msgid "Location"
+msgstr "Locatie"
+
+#: dojos/forms.py:215 events/forms.py:56
+msgid "Postcode or city"
+msgstr "Postcode of gemeente"
 
 # | msgid "Language"
 # | msgid "Mail language"
-#: dojos/forms.py:219 events/forms.py:62
+#: dojos/forms.py:228 events/forms.py:69
 msgid "Any language"
 msgstr "Elke taal"
 
-#: dojos/forms.py:236 events/forms.py:81
+#: dojos/forms.py:242 events/forms.py:90
 msgid "All pathways"
 msgstr "Alle leertrajecten"
 
-#: dojos/forms.py:255
+#: dojos/forms.py:254
+msgid "Your location"
+msgstr "Je locatie"
+
+#: dojos/forms.py:268
 msgid "e.g. CoderDojo Leuven"
 msgstr "bv. CoderDojo Leuven"
 
 # | msgid "Enter your postcode or city"
-#: dojos/forms.py:256
+#: dojos/forms.py:269
 msgid "Street and number, postcode, city"
 msgstr "Straat en nummer, postcode, gemeente"
 
-#: dojos/forms.py:257
+#: dojos/forms.py:270
 msgid "hello@yourdojo.example"
 msgstr "hallo@jouwdojo.voorbeeld"
 
 # | msgid "Updates"
-#: dojos/forms.py:274
+#: dojos/forms.py:287
 msgid "Update"
 msgstr "Bericht"
 
-#: dojos/forms.py:294
+#: dojos/forms.py:307
 msgid ""
 "e.g. We've moved to the bigger room from October, same time, same entrance."
 msgstr ""
 "bv. Vanaf oktober zitten we in de grotere zaal, zelfde uur, zelfde ingang."
 
 # | msgid "New template"
-#: dojos/forms.py:298
+#: dojos/forms.py:311
 msgid "New update"
 msgstr "Nieuw bericht"
 
-#: dojos/forms.py:303
+#: dojos/forms.py:316
 msgid "Keep it short: 500 characters at most."
 msgstr "Hou het kort: maximaal 500 tekens."
 
-#: dojos/forms.py:314
+#: dojos/forms.py:327
 msgid "Their account's email"
 msgstr "E-mailadres van hun account"
 
-#: dojos/forms.py:315
+#: dojos/forms.py:328
 msgid "mentor@example.com"
 msgstr "mentor@voorbeeld.be"
 
-#: dojos/forms.py:320 dojos/templates/dojos/dojo_members.html:36
+#: dojos/forms.py:333 dojos/templates/dojos/dojo_members.html:36
 msgid "Ninja"
 msgstr "Ninja"
 
 # | msgid "Champion"
-#: dojos/forms.py:329
+#: dojos/forms.py:342
 msgid "New champion"
 msgstr "Nieuwe champion"
 
 # | msgid "%(name)s pathway"
-#: dojos/forms.py:380
+#: dojos/forms.py:404
 #, python-format
 msgid "What %(name)s showed"
 msgstr "Wat %(name)s liet zien"
 
-#: dojos/forms.py:385
+#: dojos/forms.py:409
 msgid "Pick a belt to award."
 msgstr "Kies een gordel om toe te kennen."
 
-#: dojos/forms.py:391
+#: dojos/forms.py:415
 #, python-format
 msgid "What %(name)s did"
 msgstr "Wat %(name)s gedaan heeft"
 
-#: dojos/forms.py:393
+#: dojos/forms.py:417
 msgid "Badge"
 msgstr "Badge"
 
-#: dojos/forms.py:397
+#: dojos/forms.py:421
 msgid "Pick a badge to award."
 msgstr "Kies een badge om toe te kennen."
 
@@ -7118,7 +7145,7 @@ msgstr "Opgeslagen."
 msgid "Save changes"
 msgstr "Wijzigingen opslaan"
 
-#: dojos/templates/dojos/dojo_event_list.html:26 events/forms.py:188
+#: dojos/templates/dojos/dojo_event_list.html:26 events/forms.py:197
 msgid "Places"
 msgstr "Plaatsen"
 
@@ -7138,14 +7165,14 @@ msgstr "Nog geen sessies. Maak er een aan om te beginnen."
 msgid "Find a dojo"
 msgstr "Vind een dojo"
 
-#: dojos/templates/dojos/dojo_list.html:31
-#: events/templates/events/event_list.html:114
+#: dojos/templates/dojos/dojo_list.html:27
+#: events/templates/events/event_list.html:94
 #: pages/templates/pages/home.html:99
 #: pathways/templates/pathways/pathway_detail.html:143
 msgid "Find a dojo near you"
 msgstr "Vind een dojo in je buurt"
 
-#: dojos/templates/dojos/dojo_list.html:32
+#: dojos/templates/dojos/dojo_list.html:28
 msgid ""
 "Every CoderDojo in Belgium is free, run by local volunteers, and open to "
 "kids aged 7–18 — enter a postcode or city to see what's nearby, or filter on "
@@ -7156,17 +7183,17 @@ msgstr ""
 "gemeente in om te zien wat er in de buurt is, of filter op taal of "
 "leertraject."
 
-#: dojos/templates/dojos/dojo_list.html:49
+#: dojos/templates/dojos/dojo_list.html:53
 #: dojos/templates/dojos/partials/_dojo_finder_widget.html:25
 msgid "Use my location"
 msgstr "Gebruik mijn locatie"
 
-#: dojos/templates/dojos/dojo_list.html:59
+#: dojos/templates/dojos/dojo_list.html:70
 #, python-format
 msgid "Couldn't find \"%(search_label)s\" — showing every dojo instead."
 msgstr "\"%(search_label)s\" niet gevonden: we tonen alle dojo's."
 
-#: dojos/templates/dojos/dojo_list.html:61
+#: dojos/templates/dojos/dojo_list.html:72
 #, python-format
 msgid "Showing %(counter)s dojo near %(search_label)s, nearest first"
 msgid_plural "Showing %(counter)s dojos near %(search_label)s, nearest first"
@@ -7175,11 +7202,11 @@ msgstr[0] ""
 msgstr[1] ""
 "%(counter)s dojo's in de buurt van %(search_label)s, dichtstbijzijnde eerst"
 
-#: dojos/templates/dojos/dojo_list.html:71
+#: dojos/templates/dojos/dojo_list.html:82
 msgid "Already know when you'd like to come?"
 msgstr "Weet je al wanneer je wilt komen?"
 
-#: dojos/templates/dojos/dojo_list.html:72
+#: dojos/templates/dojos/dojo_list.html:83
 #: pathways/templates/pathways/pathway_detail.html:144
 msgid "Browse upcoming events"
 msgstr "Bekijk de komende evenementen"
@@ -7305,7 +7332,7 @@ msgid ""
 "The name, icon, and one-line tagline shown at the top of your dojo's page."
 msgstr "De naam, het icoon en de korte slogan bovenaan de pagina van je dojo."
 
-#: dojos/templates/dojos/dojo_manage.html:103 events/forms.py:324
+#: dojos/templates/dojos/dojo_manage.html:103 events/forms.py:333
 #: events/templates/events/manage/badge_list.html:17
 #: events/templates/events/manage/badge_list.html:43
 msgid "Icon"
@@ -7783,12 +7810,6 @@ msgstr ""
 msgid "A session always runs within a single day."
 msgstr "Een sessie valt altijd binnen één dag."
 
-#: dojos/templates/dojos/partials/_event_form_fields.html:31
-#: events/templates/events/event_detail.html:123
-#: events/templates/events/event_list.html:73
-msgid "Location"
-msgstr "Locatie"
-
 #: dojos/templates/dojos/partials/_event_form_fields.html:36
 msgid "Banner image"
 msgstr "Bannerafbeelding"
@@ -7908,7 +7929,7 @@ msgid "Update removed."
 msgstr "Bericht verwijderd."
 
 # | msgid "Your request to join this team is waiting for an answer."
-#: dojos/views/public.py:127
+#: dojos/views/public.py:128
 #, python-format
 msgid "Your request to join %(dojo)s has been sent to its team."
 msgstr "Je aanvraag om bij %(dojo)s te komen is naar het team gestuurd."
@@ -7985,81 +8006,81 @@ msgstr ""
 msgid "%(ninja)s already has the %(badge)s badge."
 msgstr "%(ninja)s heeft de badge %(badge)s al."
 
-#: events/forms.py:51
-msgid "Postcode or city"
-msgstr "Postcode of gemeente"
-
-#: events/forms.py:56
+#: events/forms.py:62
 msgid "Any date"
 msgstr "Elke datum"
 
-#: events/forms.py:56
+#: events/forms.py:62
 msgid "This week"
 msgstr "Deze week"
 
-#: events/forms.py:56
+#: events/forms.py:62
 msgid "This month"
 msgstr "Deze maand"
 
-#: events/forms.py:67
+#: events/forms.py:74 events/templates/events/event_list.html:66
+msgid "Age"
+msgstr "Leeftijd"
+
+#: events/forms.py:75
 msgid "All ages"
 msgstr "Alle leeftijden"
 
-#: events/forms.py:86
+#: events/forms.py:95
 msgid "All dojos"
 msgstr "Alle dojo's"
 
-#: events/forms.py:92
+#: events/forms.py:101
 #, python-format
 msgid "%(name)s (organisation)"
 msgstr "%(name)s (organisatie)"
 
-#: events/forms.py:141
+#: events/forms.py:150
 msgid "dd/mm/yyyy"
 msgstr "dd/mm/jjjj"
 
-#: events/forms.py:146
+#: events/forms.py:155
 msgid "Starts"
 msgstr "Begint"
 
-#: events/forms.py:149 events/forms.py:157
+#: events/forms.py:158 events/forms.py:166
 msgid "HH:MM"
 msgstr "UU:MM"
 
-#: events/forms.py:154
+#: events/forms.py:163
 msgid "Ends"
 msgstr "Eindigt"
 
 # | msgid "Registering another child?"
-#: events/forms.py:189
+#: events/forms.py:198
 msgid "Registration on another website"
 msgstr "Inschrijven op een andere website"
 
-#: events/forms.py:190
+#: events/forms.py:199
 msgid "Venue"
 msgstr "Locatie"
 
-#: events/forms.py:195
+#: events/forms.py:204
 msgid "Aimed at"
 msgstr "Voor"
 
 # | msgid "About this session"
-#: events/forms.py:196
+#: events/forms.py:205
 msgid "Team for this session"
 msgstr "Team voor deze sessie"
 
-#: events/forms.py:197 events/templates/events/event_detail.html:87
+#: events/forms.py:206 events/templates/events/event_detail.html:87
 msgid "Pathways this session covers"
 msgstr "Leertrajecten in deze sessie"
 
-#: events/forms.py:201
+#: events/forms.py:210
 msgid ""
 "How many children can register before new sign-ups go on the waiting list."
 msgstr ""
 "Hoeveel kinderen zich kunnen inschrijven voor nieuwe inschrijvingen op de "
 "wachtlijst komen."
 
-#: events/forms.py:203
+#: events/forms.py:212
 msgid ""
 "Optional. When set, the event page links there instead of showing the sign-"
 "up form, and Places isn't needed."
@@ -8067,38 +8088,38 @@ msgstr ""
 "Optioneel. Als dit ingevuld is, linkt de evenementpagina daarheen in plaats "
 "van het inschrijfformulier te tonen, en is Plaatsen niet nodig."
 
-#: events/forms.py:205
+#: events/forms.py:214
 msgid "Leave blank to use the dojo's own address."
 msgstr "Leeg laten om het adres van de dojo te gebruiken."
 
-#: events/forms.py:207
+#: events/forms.py:216
 msgid "Supports basic Markdown."
 msgstr "Eenvoudige Markdown kan."
 
-#: events/forms.py:208
+#: events/forms.py:217
 msgid "A girls' session gets a label on the site. Anyone can still sign up."
 msgstr ""
 "Een meisjessessie krijgt een label op de site. Iedereen kan zich nog altijd "
 "inschrijven."
 
 # | msgid "Free coding club · Saturdays"
-#: events/forms.py:217
+#: events/forms.py:226
 msgid "Coding Saturday"
 msgstr "Codeerzaterdag"
 
-#: events/forms.py:218
+#: events/forms.py:227
 msgid "20"
 msgstr "20"
 
-#: events/forms.py:219
+#: events/forms.py:228
 msgid "https://www.coolestprojects.org/…"
 msgstr "https://www.coolestprojects.org/…"
 
-#: events/forms.py:220
+#: events/forms.py:229
 msgid "e.g. \"Ghent Public Library\""
 msgstr "bv. \"Bibliotheek Gent\""
 
-#: events/forms.py:225
+#: events/forms.py:234
 msgid ""
 "What this session is about, what to bring — shown on the session's public "
 "page."
@@ -8106,33 +8127,33 @@ msgstr ""
 "Waar deze sessie over gaat, wat je meebrengt: getoond op de publieke pagina "
 "van de sessie."
 
-#: events/forms.py:280
+#: events/forms.py:289
 msgid "End time must be after the start time."
 msgstr "Het einduur moet na het beginuur liggen."
 
 # | msgid "First name is required."
-#: events/forms.py:285
+#: events/forms.py:294
 msgid "This field is required."
 msgstr "Dit veld is verplicht."
 
-#: events/forms.py:312
+#: events/forms.py:321
 msgid "Standard icon"
 msgstr "Standaardicoon"
 
-#: events/forms.py:321 events/forms.py:351
+#: events/forms.py:330 events/forms.py:360
 #: events/templates/events/manage/badge_list.html:19
 msgid "How to earn it"
 msgstr "Hoe je ze verdient"
 
-#: events/forms.py:322 events/templates/events/manage/badge_list.html:45
+#: events/forms.py:331 events/templates/events/manage/badge_list.html:45
 msgid "Sessions needed"
 msgstr "Nodige sessies"
 
-#: events/forms.py:323 events/templates/events/manage/badge_list.html:46
+#: events/forms.py:332 events/templates/events/manage/badge_list.html:46
 msgid "Also grants belt"
 msgstr "Geeft ook gordel"
 
-#: events/forms.py:328
+#: events/forms.py:337
 msgid ""
 "A one-off is earned by doing something once; a milestone is reached by "
 "attending a number of sessions."
@@ -8140,37 +8161,37 @@ msgstr ""
 "Een eenmalige onderscheiding verdien je door iets één keer te doen; een "
 "mijlpaal bereik je door een aantal sessies bij te wonen."
 
-#: events/forms.py:330
+#: events/forms.py:339
 msgid "One-off only."
 msgstr "Alleen voor eenmalige onderscheidingen."
 
-#: events/forms.py:331
+#: events/forms.py:340
 msgid "Milestone only: how many sessions a ninja must attend."
 msgstr "Alleen voor mijlpalen: hoeveel sessies een ninja moet bijwonen."
 
-#: events/forms.py:332
+#: events/forms.py:341
 msgid "Milestone only, optional: reaching it also awards this belt."
 msgstr ""
 "Alleen voor mijlpalen, optioneel: wie ze bereikt, krijgt ook deze gordel."
 
-#: events/forms.py:333
+#: events/forms.py:342
 msgid "Optional: upload your own icon instead (square works best)."
 msgstr ""
 "Optioneel: upload in de plaats je eigen icoon (vierkant werkt het best)."
 
-#: events/forms.py:337
+#: events/forms.py:346
 msgid "e.g. Game Maker"
 msgstr "bv. Gamemaker"
 
-#: events/forms.py:339
+#: events/forms.py:348
 msgid "e.g. Build and share a playable game."
 msgstr "bv. Bouw en deel een speelbare game."
 
-#: events/forms.py:347
+#: events/forms.py:356
 msgid "None, or my own upload"
 msgstr "Geen, of mijn eigen upload"
 
-#: events/forms.py:416
+#: events/forms.py:425
 msgid "Please select at least one child."
 msgstr "Kies minstens één kind."
 
@@ -8238,7 +8259,7 @@ msgid "Aged out"
 msgstr "Te oud"
 
 #: events/registrations.py:41 events/templates/events/event_signup.html:70
-#: events/views.py:177
+#: events/views.py:178
 msgid "Registrations for this session are closed."
 msgstr "De inschrijvingen voor deze sessie zijn gesloten."
 
@@ -8293,11 +8314,11 @@ msgid "Full — join the waitlist"
 msgstr "Volzet: zet je op de wachtlijst"
 
 #: events/templates/events/event_list.html:3
-#: events/templates/events/event_list.html:62
+#: events/templates/events/event_list.html:44
 msgid "Upcoming events"
 msgstr "Komende evenementen"
 
-#: events/templates/events/event_list.html:63
+#: events/templates/events/event_list.html:45
 msgid ""
 "Every free session run by a CoderDojo across Belgium — filter by dojo, "
 "location, date, age or pathway."
@@ -8305,19 +8326,7 @@ msgstr ""
 "Alle gratis sessies van de CoderDojo's in heel België. Filter op dojo, "
 "locatie, datum, leeftijd of leertraject."
 
-#: events/templates/events/event_list.html:81
-msgid "Age"
-msgstr "Leeftijd"
-
-#: events/templates/events/event_list.html:103
-msgid "Filtered by:"
-msgstr "Gefilterd op:"
-
-#: events/templates/events/event_list.html:104
-msgid "Clear dojo filter"
-msgstr "Dojofilter wissen"
-
-#: events/templates/events/event_list.html:113
+#: events/templates/events/event_list.html:93
 msgid "Would rather browse by place than by date?"
 msgstr "Zoek je liever op plaats dan op datum?"
 
@@ -8639,45 +8648,45 @@ msgid "Not sent (no consent, no address or blocked)"
 msgstr "Niet verstuurd (geen toestemming, geen adres of geblokkeerd)"
 
 # | msgid "Sign up now"
-#: mailing/models.py:139
+#: mailing/models.py:144
 msgid "Sign-up form"
 msgstr "Inschrijfformulier"
 
 # | msgid "Mail preferences"
-#: mailing/models.py:140
+#: mailing/models.py:145
 msgid "Mail preferences page"
 msgstr "Pagina e-mailvoorkeuren"
 
 # | msgid "Unsubscribe"
-#: mailing/models.py:141
+#: mailing/models.py:146
 msgid "Unsubscribe link"
 msgstr "Uitschrijflink"
 
-#: mailing/models.py:143
+#: mailing/models.py:148
 msgid "Bounce or complaint"
 msgstr "Bounce of klacht"
 
-#: mailing/models.py:198
+#: mailing/models.py:203
 msgid "Hard bounce"
 msgstr "Harde bounce"
 
-#: mailing/models.py:199
+#: mailing/models.py:204
 msgid "Repeated soft bounces"
 msgstr "Herhaalde zachte bounces"
 
-#: mailing/models.py:200 mailing/models.py:228
+#: mailing/models.py:205 mailing/models.py:233
 msgid "Spam complaint"
 msgstr "Spamklacht"
 
-#: mailing/models.py:201
+#: mailing/models.py:206
 msgid "Blocked by hand"
 msgstr "Met de hand geblokkeerd"
 
-#: mailing/models.py:226
+#: mailing/models.py:231
 msgid "Hard bounce (5.x.x)"
 msgstr "Harde bounce (5.x.x)"
 
-#: mailing/models.py:227
+#: mailing/models.py:232
 msgid "Soft bounce (4.x.x)"
 msgstr "Zachte bounce (4.x.x)"
 
@@ -9617,16 +9626,16 @@ msgstr ""
 "Dit is het account van een technisch beheerder (superuser); het kan hier "
 "niet verwijderd worden."
 
-#: privacy/forms.py:17
+#: privacy/forms.py:7
 #, python-format
 msgid "Type the username, %(username)s, to confirm"
 msgstr "Typ de gebruikersnaam, %(username)s, om te bevestigen"
 
-#: privacy/forms.py:23
+#: privacy/forms.py:29
 msgid "Type the account's username to confirm."
 msgstr "Typ de gebruikersnaam van het account om te bevestigen."
 
-#: privacy/retention.py:252
+#: privacy/retention.py:265
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
@@ -9638,7 +9647,7 @@ msgstr ""
 "zolang die persoon champion is. Vraag om de rol door te geven aan een "
 "mentor, of neem contact op met de organisatie."
 
-#: privacy/retention.py:258
+#: privacy/retention.py:271
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
@@ -9930,6 +9939,12 @@ msgid ""
 msgstr ""
 "Er is een bevestigingslink naar %(email)s gestuurd. Het adres verandert "
 "zodra die geopend wordt (binnen %(hours)s uur)."
+
+#~ msgid "Enter your postcode or city"
+#~ msgstr "Vul je postcode of gemeente in"
+
+#~ msgid "Clear dojo filter"
+#~ msgstr "Dojofilter wissen"
 
 #~ msgid "A dojo's mail is always news from the dojo."
 #~ msgstr "Een mail van een dojo is altijd nieuws van de dojo."
