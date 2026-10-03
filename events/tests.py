@@ -969,14 +969,14 @@ class EventLanguageTests(TestCase):
         self.assertContains(self.client.get(url, HTTP_ACCEPT_LANGUAGE="fr-be"), "Samedi code")
         dutch = self.client.get(url, HTTP_ACCEPT_LANGUAGE="nl-be")
         self.assertContains(dutch, "Codeerzaterdag")
-        self.assertContains(dutch, "Nederlands (België), Français (Belgique)")
+        self.assertContains(dutch, "Nederlands, Français")
 
     def test_description_falls_back_to_the_main_language_with_a_note(self):
         response = self.client.get(
             reverse("event_detail", kwargs={"event_id": self.event.id}), HTTP_ACCEPT_LANGUAGE="fr-be"
         )
         self.assertContains(response, "Leer programmeren.")
-        self.assertContains(response, "Uniquement en Nederlands (België)")
+        self.assertContains(response, "Uniquement en Nederlands")
 
     def test_events_list_filters_on_language(self):
         other = _future_event(make_dojo("Ghent", languages=["nl-be"]), name="Gent")

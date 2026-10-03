@@ -877,7 +877,7 @@ class TemplateDashboardTests(TestCase):
     def test_write_a_missing_language_starting_from_english(self):
         EmailTemplate.objects.filter(key="campaign_girlz", language="fr-be").delete()
         response = self.client.get(self._edit("campaign_girlz", "fr-be"))
-        self.assertContains(response, "no Français (Belgique) version yet")
+        self.assertContains(response, "no Français version yet")
         self.assertEqual(
             response.context["form"]["subject"].value(),
             EmailTemplate.objects.get(key="campaign_girlz", language="en-us").subject,

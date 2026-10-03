@@ -627,10 +627,12 @@ LANGUAGE_CODE = "en-us"
 # see website/urls.py) and as the mail language. The site's texts are
 # translated in locale/<nl_BE|fr_BE>/LC_MESSAGES/django.po (see CLAUDE.md,
 # "i18n"); German was dropped until German texts can be checked.
+# Each language by its own name, without "(België)"/"(Belgique)": the site is
+# only for Belgium, so the country says nothing.
 LANGUAGES = [
     ("en-us", "English"),
-    ("nl-be", "Nederlands (België)"),
-    ("fr-be", "Français (Belgique)"),
+    ("nl-be", "Nederlands"),
+    ("fr-be", "Français"),
 ]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 # The languages the organisation writes its own content in (pathways, FAQs,
