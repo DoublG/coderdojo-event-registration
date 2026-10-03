@@ -11,11 +11,7 @@
   .finder-root .finder-header h1 { color: var(--ink); margin: 0 0 var(--space-2); }
   .finder-root .finder-header p { color: var(--ink-muted); margin: 0; }
 
-  /* Match Events' own filter-card treatment exactly, so the two search pages
-     read as siblings rather than one being a narrower, floatier version of
-     the other. DojoFinder's own bar/field/button markup is untouched — only
-     the card wrapper and the width around it change on this page. */
-  .finder-root .filter-card { padding: var(--space-5); margin-bottom: var(--space-6); }
+  /* The search form is the shared .cd-search (bundle.css), like Events'. */
   .finder-root .cd-dojo-finder { max-width: none; width: 100%; }
   .finder-root .cd-dojo-finder__meta { margin-bottom: var(--space-2); }
 
@@ -34,23 +30,36 @@
 
     <div class="cd-dojo-finder">
 
-      <form method="get" class="cd-card filter-card" id="dojo-search-form">
-        <div class="cd-dojo-finder__bar">
-          <div class="cd-dojo-finder__field">
-            <button type="submit" class="cd-dojo-finder__icon" aria-label="{% translate "Search" %}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
-            </button>
-            {{ form.location }}
+      <form method="get" class="cd-card cd-search" id="dojo-search-form">
+        <div class="cd-search__fields">
+          <div class="cd-search__field cd-search__field--wide">
+            <label class="cd-search__label label" for="dojo-location">{% translate "Location" %}</label>
+            <div class="cd-search__location">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              {{ form.location }}
+            </div>
           </div>
-          {{ form.lat }}
-          {{ form.lon }}
-          <button type="button" class="cd-btn cd-btn--secondary label" data-cd-use-my-location>
+          <div class="cd-search__field">
+            <label class="cd-search__label label" for="dojo-language">{% translate "Language" %}</label>
+            {{ form.language }}
+          </div>
+          <div class="cd-search__field">
+            <label class="cd-search__label label" for="dojo-pathway">{% translate "Pathway" %}</label>
+            {{ form.pathway }}
+          </div>
+          <div class="cd-search__actions">
+          <button type="button" class="cd-btn cd-btn--ghost label" data-cd-use-my-location>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
             <span>{% translate "Use my location" %}</span>
           </button>
-          {{ form.language }}
-          {{ form.pathway }}
+          <button type="submit" class="cd-btn cd-btn--secondary label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              {% translate "Search" %}
+            </button>
+          </div>
         </div>
+        {{ form.lat }}
+        {{ form.lon }}
       </form>
 
       {% include "content/partials/_promotion_banner.html" %}

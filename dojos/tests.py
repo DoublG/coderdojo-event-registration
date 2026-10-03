@@ -47,6 +47,16 @@ class DojoListViewTests(TestCase):
         names = [dojo.name for dojo in response.context["dojos"]]
         self.assertEqual(names, ["Ghent", "Antwerp"])
 
+    def test_the_search_form_has_labels_and_a_search_button(self):
+        """The shared search form (.cd-search, like Events'): every field has a
+        visible label, and the filters can be applied with a Search button,
+        not only by pressing Enter in the location field."""
+        response = self.client.get(reverse("dojo_list"))
+        for field in ("dojo-location", "dojo-language", "dojo-pathway"):
+            self.assertContains(response, f'for="{field}"')
+        self.assertContains(response, 'class="cd-card cd-search"')
+        self.assertContains(response, '<button type="submit" class="cd-btn cd-btn--secondary label">')
+
     def test_htmx_request_returns_partial_template(self):
         response = self.client.get(reverse("dojo_list"), HTTP_HX_REQUEST="true")
         self.assertEqual(response.status_code, 200)

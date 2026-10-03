@@ -203,8 +203,9 @@ class DojoSearchForm(forms.Form):
         max_length=200,
         widget=forms.TextInput(
             attrs={
-                "class": "cd-dojo-finder__input body",
-                "placeholder": _("Enter your postcode or city"),
+                "class": "cd-form__input body",
+                "id": "dojo-location",
+                "placeholder": _("Postcode or city"),
             }
         ),
     )
@@ -217,15 +218,13 @@ class DojoSearchForm(forms.Form):
     language = forms.ChoiceField(
         required=False,
         choices=[("", _("Any language"))] + list(settings.LANGUAGES),
-        widget=forms.Select(
-            attrs={"class": "cd-form__select body", "id": "dojo-language", "aria-label": _("Language")}
-        ),
+        widget=forms.Select(attrs={"class": "cd-form__select body", "id": "dojo-language"}),
     )
     # Only dojos that provide this pathway (Dojo.pathways). Choices come
     # from the cached pathway list (content.cache); cleaned to a Pathway or None.
     pathway = forms.ChoiceField(
         required=False,
-        widget=forms.Select(attrs={"class": "cd-form__select body", "id": "dojo-pathway", "aria-label": _("Pathway")}),
+        widget=forms.Select(attrs={"class": "cd-form__select body", "id": "dojo-pathway"}),
     )
 
     def __init__(self, *args, **kwargs):

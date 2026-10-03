@@ -1017,6 +1017,38 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
   color: var(--ink-muted);
 }
 
+/* ---------- Search forms of the finder pages (dojos, events): one look ---------- */
+/* A card of labelled fields that wrap to fill each line (the location first
+   and wider, with a pin), the buttons at the end of the last line. Used by
+   dojos/dojo_list.html and events/event_list.html, so the two pages read as
+   one design. */
+.cd-search { padding: var(--space-5); margin-bottom: var(--space-6); }
+.cd-search__fields { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-end; }
+.cd-search__field { flex: 1 1 170px; display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.cd-search__field--wide { flex: 2 1 260px; }
+.cd-search__label { color: var(--ink-muted); }
+.cd-search__actions { flex: 0 0 auto; margin-left: auto; display: flex; flex-wrap: wrap; gap: var(--space-3); }
+@media (max-width: 560px) {
+  .cd-search__actions { flex: 1 1 100%; }
+  .cd-search__actions .cd-btn { flex: 1 1 auto; justify-content: center; }
+}
+
+/* The location field's pin: inside the input, on the left (also the
+   homepage's compact dojo finder, .cd-dojo-finder__field). */
+.cd-search__location { position: relative; }
+.cd-search__location > svg {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+.cd-search__location .cd-form__input,
+.cd-dojo-finder__field .cd-form__input { padding-left: calc(var(--space-3) * 2 + 16px); }
+
 /* ---------- DojoFinder ("find a dojo near you", sorted by distance) ---------- */
 .cd-dojo-finder {
   display: flex;
@@ -1045,21 +1077,6 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
   cursor: pointer;
 }
 .cd-dojo-finder__icon svg { width: 16px; height: 16px; }
-.cd-dojo-finder__input {
-  width: 100%;
-  padding: var(--space-2) var(--space-3) var(--space-2) calc(var(--space-3) * 2 + 16px);
-  background: var(--surface);
-  color: var(--ink);
-  border: 1.5px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-sans);
-}
-.cd-dojo-finder__input::placeholder { color: var(--ink-muted); }
-.cd-dojo-finder__input:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-  border-color: var(--focus-ring);
-}
 
 .cd-dojo-finder__meta { color: var(--ink-muted); margin: 0; }
 
