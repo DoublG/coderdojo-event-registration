@@ -1174,3 +1174,234 @@ class OrganisationEmailChangeTests(TestCase):
         self.client.post(self.confirm_path())
         self.client.post(self.url("password_reset"), {"email": "an@new.example"})
         self.assertEqual(EmailMessage.objects.get(template_key="password_reset").recipient, "an@new.example")
+
+
+class WaitingRetentionRulesTests(TestCase):
+    """The removals built for the rules whose period isn't decided yet
+    (privacy.retention, the end of the module): off while their setting is
+    None, and once it's set, only what's past the period goes."""
+
+    def setUp(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from dojos.testing import make_dojo
+
+        self.now = timezone.now()
+        self.days_ago = lambda n: self.now - timedelta(days=n)
+        self.parent = User.objects.create(username="an", email="an@example.com", last_login=self.now)
+        self.dojo = make_dojo("Ghent")
+        self.reviewer = User.objects.create(username="rita")
+
+    def child(self, name, session_days_ago=None, **fields):
+        from datetime import timedelta
+
+        from events.models import Event, Registration
+
+        ninja = Ninja.objects.create(name=name, **fields)
+        Guardianship.objects.create(guardian=self.parent, ninja=ninja)
+        Guardianship.objects.filter(ninja=ninja).update(created_at=self.days_ago(2000))
+        if session_days_ago is not None:
+            start = self.days_ago(session_days_ago)
+            event = Event.objects.create(
+                name="Session", dojo=self.dojo, places=10, start_time=start, end_time=start + timedelta(hours=2)
+            )
+            Registration.objects.create(event=event, ninja=ninja, waiting_list=False, position=1)
+        return ninja
+
+    def run_job(self):
+        from privacy.retention import apply_retention
+
+        return apply_retention()
+
+    def make_everything_old(self):
+        """One row past every period, for the off-by-default test."""
+        from django.contrib.admin.models import ADDITION, LogEntry
+        from django.contrib.contenttypes.models import ContentType
+
+        from applications.models import Application
+        from events.models import NinjaEngagementChange
+        from mailing.models import BounceRecord
+        from notifications.models import Notification
+
+        old = self.child("Old", session_days_ago=4000, date_of_birth=self.days_ago(30 * 365).date())
+        Application.objects.create(
+            account=self.parent, kind=Application.MENTOR, status=Application.REJECTED, decided_at=self.days_ago(4000)
+        )
+        BackgroundCheckHistory.objects.create(
+            account=self.parent, decision="rejected", reviewed_at=self.days_ago(4000)
+        )
+        NinjaEngagementChange.objects.create(
+            ninja=old, from_stage="regular", to_stage="lapsed", changed_on=self.days_ago(4000).date()
+        )
+        BounceRecord.objects.filter(pk=BounceRecord.objects.create(email="x@example.com", kind="hard").pk).update(
+            created_at=self.days_ago(4000)
+        )
+        note = Notification.objects.create(recipient=self.parent, text="Old news", read=True)
+        Notification.objects.filter(pk=note.pk).update(created_at=self.days_ago(4000))
+        entry = LogEntry.objects.create(
+            user=self.reviewer,
+            content_type=ContentType.objects.get_for_model(User),
+            object_id=str(self.parent.pk),
+            object_repr="an",
+            action_flag=ADDITION,
+        )
+        LogEntry.objects.filter(pk=entry.pk).update(action_time=self.days_ago(4000))
+        return old
+
+    def test_every_waiting_rule_is_off_by_default(self):
+        from django.contrib.admin.models import LogEntry
+
+        from applications.models import Application
+        from events.models import NinjaEngagementChange
+        from mailing.models import BounceRecord
+        from notifications.models import Notification
+
+        old = self.make_everything_old()
+        done = self.run_job()
+        for key in (
+            "children",
+            "applications",
+            "background_check_decisions",
+            "engagement_changes",
+            "bounce_records",
+            "notifications",
+            "admin_log_entries",
+        ):
+            self.assertEqual(done[key], 0, key)
+        old.refresh_from_db()
+        self.assertEqual(old.name, "Old")
+        for model in (
+            Application,
+            BackgroundCheckHistory,
+            NinjaEngagementChange,
+            BounceRecord,
+            Notification,
+            LogEntry,
+        ):
+            self.assertEqual(model.objects.count(), 1, model.__name__)
+
+    def test_a_child_is_erased_after_the_period_since_their_last_activity(self):
+        from django.test import override_settings
+        from django.utils import timezone
+
+        from privacy.models import ErasureRecord
+
+        gone = self.child("Gone", session_days_ago=800)
+        recent = self.child("Recent", session_days_ago=100)
+        upcoming = self.child("Upcoming", session_days_ago=-7)  # an old guardianship, a session next week
+        own_login = self.child("Own login", session_days_ago=800)
+        own_login.account = User.objects.create(username="own", account_type=User.NINJA, last_login=timezone.now())
+        own_login.save()
+        never = self.child("Never came")  # only the guardianship, 2000 days ago
+        with override_settings(CHILD_RETENTION_DAYS=730):
+            self.assertEqual(self.run_job()["children"], 2)
+            self.assertEqual(self.run_job()["children"], 0)  # never twice
+        names = dict(Ninja.objects.values_list("pk", "name"))
+        for kept in (recent, upcoming, own_login):
+            self.assertEqual(names[kept.pk], kept.name)
+        for erased in (gone, never):
+            self.assertNotEqual(names[erased.pk], erased.name)
+            self.assertTrue(
+                ErasureRecord.objects.filter(
+                    model="accounts.Ninja", object_id=erased.pk, reason=ErasureRecord.RETENTION
+                ).exists()
+            )
+        self.parent.refresh_from_db()
+        self.assertEqual(self.parent.username, "an")  # the guardian's account stays
+
+    def test_a_child_is_erased_at_the_age_when_one_is_set(self):
+        from datetime import date
+
+        from django.test import override_settings
+
+        today = self.now.date()
+        adult = self.child("Eighteen", session_days_ago=10, date_of_birth=date(today.year - 18, 1, 1))
+        young = self.child("Twelve", session_days_ago=10, date_of_birth=date(today.year - 12, 1, 1))
+        with override_settings(CHILD_RETENTION_AGE=18):
+            self.assertEqual(self.run_job()["children"], 1)
+        self.assertNotEqual(Ninja.objects.get(pk=adult.pk).name, "Eighteen")
+        self.assertEqual(Ninja.objects.get(pk=young.pk).name, "Twelve")
+
+    def test_only_rejected_applications_go_and_without_an_audit_log_entry(self):
+        from auditlog.models import LogEntry as AuditLogEntry
+        from django.test import override_settings
+
+        from applications.models import Application
+
+        rejected = Application.objects.create(
+            account=self.parent, kind=Application.MENTOR, status=Application.REJECTED, decided_at=self.days_ago(800)
+        )
+        Application.objects.create(
+            account=self.parent, kind=Application.CHAMPION, status=Application.APPROVED, decided_at=self.days_ago(800)
+        )
+        Application.objects.create(
+            account=self.reviewer, kind=Application.MENTOR, status=Application.REJECTED, decided_at=self.days_ago(10)
+        )
+        before = AuditLogEntry.objects.count()
+        with override_settings(APPLICATION_RETENTION_DAYS=730):
+            self.assertEqual(self.run_job()["applications"], 1)
+        self.assertFalse(Application.objects.filter(pk=rejected.pk).exists())
+        self.assertEqual(Application.objects.count(), 2)
+        self.assertEqual(AuditLogEntry.objects.count(), before)
+
+    def test_background_check_decisions_go_after_their_period(self):
+        from django.test import override_settings
+
+        old = BackgroundCheckHistory.objects.create(
+            account=self.parent, decision="validated", reviewed_at=self.days_ago(800)
+        )
+        BackgroundCheckHistory.objects.create(account=self.parent, decision="validated", reviewed_at=self.days_ago(10))
+        with override_settings(BACKGROUND_CHECK_HISTORY_RETENTION_DAYS=730):
+            self.assertEqual(self.run_job()["background_check_decisions"], 1)
+        self.assertFalse(BackgroundCheckHistory.objects.filter(pk=old.pk).exists())
+
+    def test_engagement_changes_notifications_and_the_admin_log_go_after_their_period(self):
+        from django.contrib.admin.models import ADDITION, LogEntry
+        from django.contrib.contenttypes.models import ContentType
+        from django.test import override_settings
+
+        from events.models import NinjaEngagementChange
+        from notifications.models import Notification
+
+        ninja = self.child("Lotte", session_days_ago=5)
+        for days in (400, 10):
+            NinjaEngagementChange.objects.create(
+                ninja=ninja, from_stage="regular", to_stage="at_risk", changed_on=self.days_ago(days).date()
+            )
+        old_read = Notification.objects.create(recipient=self.parent, text="Read long ago", read=True)
+        old_unread = Notification.objects.create(recipient=self.parent, text="Never read", read=False)
+        Notification.objects.filter(pk__in=[old_read.pk, old_unread.pk]).update(created_at=self.days_ago(400))
+        Notification.objects.create(recipient=self.parent, text="Read today", read=True)
+        content_type = ContentType.objects.get_for_model(User)
+        for days in (400, 10):
+            entry = LogEntry.objects.create(
+                user=self.reviewer,
+                content_type=content_type,
+                object_id=str(self.parent.pk),
+                object_repr="an",
+                action_flag=ADDITION,
+            )
+            LogEntry.objects.filter(pk=entry.pk).update(action_time=self.days_ago(days))
+        with override_settings(
+            ENGAGEMENT_CHANGE_RETENTION_DAYS=365, NOTIFICATION_RETENTION_DAYS=365, ADMIN_LOG_RETENTION_DAYS=365
+        ):
+            done = self.run_job()
+        self.assertEqual((done["engagement_changes"], done["notifications"], done["admin_log_entries"]), (1, 1, 1))
+        self.assertEqual(NinjaEngagementChange.objects.count(), 1)
+        self.assertEqual(set(Notification.objects.values_list("text", flat=True)), {"Never read", "Read today"})
+        self.assertEqual(LogEntry.objects.count(), 1)
+
+    def test_bounce_records_never_go_inside_the_soft_bounce_window(self):
+        from django.test import override_settings
+
+        from mailing.models import BounceRecord
+
+        for days in (40, 20):
+            record = BounceRecord.objects.create(email=f"b{days}@example.com", kind="soft")
+            BounceRecord.objects.filter(pk=record.pk).update(created_at=self.days_ago(days))
+        # A period shorter than the 30-day soft-bounce window is stretched to it.
+        with override_settings(BOUNCE_RECORD_RETENTION_DAYS=7, MAILING_SOFT_BOUNCE_WINDOW_DAYS=30):
+            self.assertEqual(self.run_job()["bounce_records"], 1)
+        self.assertEqual(list(BounceRecord.objects.values_list("email", flat=True)), ["b20@example.com"])

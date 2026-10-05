@@ -750,3 +750,14 @@ ACCOUNT_DELETION_REMINDER_DAYS = (30, 7)
 ACCOUNT_DELETION_NOTICE_DAYS = 30
 AUDIT_LOG_RETENTION_DAYS = 730
 MAIL_CONTENT_RETENTION_DAYS = 365
+# The rules whose period isn't decided yet (DATA_MODEL.md §16, "Retention
+# periods, as the code has them"): each removal is built and runs in the same
+# nightly job, but only once its period is set here. None = off.
+CHILD_RETENTION_DAYS = None  # a child is erased this long after their last session or own login
+CHILD_RETENTION_AGE = None  # ... or once they're this old (e.g. 18)
+APPLICATION_RETENTION_DAYS = None  # a rejected application, after its decision
+BACKGROUND_CHECK_HISTORY_RETENTION_DAYS = None  # a background-check decision, after it was made
+ENGAGEMENT_CHANGE_RETENTION_DAYS = None  # a child's engagement stage change
+BOUNCE_RECORD_RETENTION_DAYS = None  # never shorter than MAILING_SOFT_BOUNCE_WINDOW_DAYS
+NOTIFICATION_RETENTION_DAYS = None  # a notification that was read
+ADMIN_LOG_RETENTION_DAYS = None  # the Django admin's own log of changes made by hand

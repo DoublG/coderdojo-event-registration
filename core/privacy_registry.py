@@ -90,28 +90,32 @@ RETENTION_RULES = {
     "organisation_invitation": "Deleted 30 days after it was accepted, withdrawn or expired.",
     "admin_access": "With the audit log: until the account is erased (two years after its last login, or on request).",
     "child": "Until N years after the child's last session, or after they turn 18."
-    " Not decided yet: nothing is removed automatically until it is.",
-    "registration": "The link to the child is anonymised N years after the session; the numbers stay."
-    " Not decided yet: nothing is removed automatically until it is.",
+    " Not decided yet: the removal is built but stays off until it is.",
+    "registration": "Once the child is erased, their registrations point at the anonymised child; the numbers "
+    "stay. A separate period for a child who still comes is not decided yet (it would need the link to become "
+    "optional).",
     "engagement": "Rebuilt every night over the last year (365 days); stage changes kept N months, not decided "
-    "yet: they aren't removed automatically until it is.",
-    "team": "While on the team; a membership that went dormant is kept for past sessions' teams for N years."
-    " Not decided yet: nothing is removed automatically until it is.",
-    "team_attendance": "As long as the insurance needs the record of who was there.",
-    "application": "N years after the decision. Not decided yet: nothing is removed automatically until it is.",
-    "background_check": "The document is deleted at the decision; the decisions as long as the legal rules say.",
+    "yet: the removal is built but stays off until it is.",
+    "team": "While on the team; a membership that went dormant stays with past sessions' teams and is anonymised "
+    "with the account. Whether a fixed period is needed is not decided yet.",
+    "team_attendance": "As long as the insurance needs the record of who was there; anonymised with the account. "
+    "Whether the insurer needs a fixed period is not decided yet.",
+    "application": "A rejected application N years after the decision; an approved one while the account exists. "
+    "Not decided yet: the removal is built but stays off until it is.",
+    "background_check": "The document is deleted at the decision; the decisions as long as the legal rules say. "
+    "Not decided yet: the removal is built but stays off until it is.",
     "mail_content": "Subject, body and address of a mail cleared after 12 months; the row stays for statistics.",
-    "mail_log": "Bounce records and handled bounce-mailbox messages: 12 months proposed, not decided yet; "
-    "nothing is removed automatically until it is.",
+    "mail_log": "Bounce records: 12 months proposed, not decided yet; the removal is built but stays off until it "
+    "is. The handled bounce-mailbox messages hold nothing personal and stay.",
     "consent_proof": "As long as the account exists, then as long as the consent may have to be proven.",
     "suppression": "As long as the address must not be mailed again.",
     "notification": "Read notifications removed after N months."
-    " Not decided yet: nothing is removed automatically until it is.",
+    " Not decided yet: the removal is built but stays off until it is.",
     "published": "While shown on the site; removed on request.",
     "login_session": "Until the login session expires (two weeks after it last changed, e.g. at login); expired sessions are "
     "removed every night.",
     "admin_log": "N years, for tracing changes made by hand."
-    " Not decided yet: nothing is removed automatically until it is.",
+    " Not decided yet: the removal is built but stays off until it is.",
     "audit_log": "Until two years after the last login of the account it's about or was made by; "
     "two years after the entry when no account is behind it.",
     "task_result": "Until the task result expires (a day); Celery's clean-up removes them every night at 04:00.",

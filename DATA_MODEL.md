@@ -3338,20 +3338,61 @@ nightly job is `privacy.tasks.apply_retention` (10:00, default queue).
 the site), `suppression` (as long as the address must not be mailed),
 `consent_proof` (as long as the consent may have to be proven),
 `erasure_log` (as long as backups from before the erasure exist),
-`sign_in_policy` (while the policy applies), `team_attendance` (as long as
-the insurance needs it).
+`sign_in_policy` (while the policy applies). (`team_attendance` is under
+the decisions below.)
 
-**Not decided yet, so nothing removes them** (each says "N" in
-`RETENTION_RULES`; see the open points): `child` (`Ninja`, `Guardianship`,
-belts and badges: N years after the last session or turning 18),
-`registration` (anonymised N years after the session), `engagement` stage
-changes (`NinjaEngagementChange`, N months), `team` (dormant memberships,
-N years), `application` (N years after the decision), `background_check`
-decisions (`BackgroundCheckHistory`, as long as the legal rules say),
-`mail_log` (`BounceRecord`, and the handled-mailbox rows: 12 months
-proposed), `notification` (read ones, N months) and `admin_log` (Django
-admin's own log, N years). Until a period is decided, these rows only go
-when their account or child is erased.
+**Built, but off until their period is decided.** Each rule below has its
+removal in `privacy/retention.py`, run by the same nightly job, and a
+setting that is `None` (off) until a period is chosen; setting it is all
+that's needed (and updating this table, the register text and the help
+centre's Privacy page):
+
+| Rule | What goes | Setting (default `None`) | Notes |
+|---|---|---|---|
+| `child` | the child is erased (`erase_child`: anonymised `Ninja`, belts and badges, guardianships, their own login; registrations keep pointing at the anonymised child) | `CHILD_RETENTION_DAYS` after their last activity (latest session, upcoming ones included; their own login; else when they were added), and/or `CHILD_RETENTION_AGE` | each child in its own transaction, an `ErasureRecord` with reason `retention`; the guardian's account stays; no mail to the family first |
+| `application` | rejected applications | `APPLICATION_RETENTION_DAYS` after `decided_at` | an approved application stays while the account does: it's what makes them a mentor or champion |
+| `background_check` (decisions) | `BackgroundCheckHistory` rows | `BACKGROUND_CHECK_HISTORY_RETENTION_DAYS` after `reviewed_at` | access never depends on them (the check's validity is on the account) |
+| `engagement` (stage changes) | `NinjaEngagementChange` rows | `ENGAGEMENT_CHANGE_RETENTION_DAYS` after `changed_on` | a segment's `stage_changed` rule can't look back further: keep it longer than any journey's "in the last N days" |
+| `mail_log` | `BounceRecord`s | `BOUNCE_RECORD_RETENTION_DAYS` after they were read | never shorter than the soft-bounce window (`MAILING_SOFT_BOUNCE_WINDOW_DAYS`, 30); the handled-mailbox rows (`ProcessedImapMessage`) stay: nothing personal, and they stop a message still in the mailbox being read twice |
+| `notification` | notifications that were read | `NOTIFICATION_RETENTION_DAYS` after they were made | unread ones stay |
+| `admin_log` | the Django admin's `LogEntry` | `ADMIN_LOG_RETENTION_DAYS` after the change | the audit log has its own rule |
+
+Applications and background-check decisions are in the audit log; their
+removal runs with it off, so it doesn't keep what was removed in "deleted"
+entries.
+
+**No removal on purpose** (each goes with the person instead):
+`team` and `team_attendance` (a dormant membership and the session team's
+attendance are what past sessions' teams, awarded belts and the insurance's
+record point at; erasing the person anonymises them), and `registration`
+(once a child is erased their registrations point at the anonymised child,
+so the numbers stay; anonymising the registrations of a child who still
+comes would need the link to the child to become optional, a schema
+change).
+
+**Decisions still to make** (with the setting each one fills):
+
+1. **A child's data**: how long after their last session or own login
+   (`CHILD_RETENTION_DAYS`; proposal: N years), and whether turning 18 ends
+   it too (`CHILD_RETENTION_AGE`; today a ninja who turns 18 stays
+   editable). Also whether the family gets a mail first, as accounts do
+   (not built: it would need a template in three languages).
+2. **Rejected applications** (`APPLICATION_RETENTION_DAYS`).
+3. **Background-check decisions** (`BACKGROUND_CHECK_HISTORY_RETENTION_DAYS`):
+   what the Belgian rules for criminal-record extracts in work with minors
+   require.
+4. **Engagement stage changes** (`ENGAGEMENT_CHANGE_RETENTION_DAYS`):
+   longer than any journey looks back.
+5. **Bounce records** (`BOUNCE_RECORD_RETENTION_DAYS`; proposal: 12
+   months).
+6. **Read notifications** (`NOTIFICATION_RETENTION_DAYS`).
+7. **The Django admin's log** (`ADMIN_LOG_RETENTION_DAYS`).
+8. **Team history and the insurance record** (`team`, `team_attendance`):
+   whether "as long as the account exists, then anonymised" is enough, or
+   the insurer needs a fixed period (and then whether the record may be
+   deleted after it).
+9. **Registrations of a child who still comes** (`registration`): whether
+   a period is wanted at all (it needs the schema change above).
 
 **How long links and codes work** (not stored data, but asked about):
 
@@ -3768,8 +3809,10 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
 - **Retention periods** for each rule in phase 4: needs legal input
   (Belgian law, the insurer for `TeamAttendance`, the rules for
   criminal-record extracts). Decided so far: accounts two years after the
-  last login, with reminder mails (phase 4), and the audit log with them
-  (§14).
+  last login, with reminder mails (phase 4), the audit log with them
+  (§14), invitations and mail content. Every other removal is built and
+  waits for its period: the numbered list under "Retention periods, as the
+  code has them" says what's left to decide.
 - **Who handles requests** in the organisation (a privacy contact or DPO),
   and within how many days (the GDPR's one month).
 - **Health data**: decided: the champion sees `allergies_notes` on the

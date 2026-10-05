@@ -44,13 +44,21 @@ the fields its privacy classification marks `personal` (`mailing/privacy.py`:
 the account, the address, the subject and body, the idempotency key and the
 Message-ID) are emptied. Mail still waiting to be sent is left alone.
 
-The other rules in `core.privacy_registry.RETENTION_RULES` still wait for their
-periods (DATA_MODEL.md §16, open points).
+**The rules whose period isn't decided yet** are built too, at the end of
+this module, and run in the same job once their setting holds a period (None,
+the default, is off): a child (`CHILD_RETENTION_DAYS` after their last session
+or own login, or at `CHILD_RETENTION_AGE`), rejected applications,
+background-check decisions, engagement stage changes, bounce records, read
+notifications and the Django admin's log. Two rules have no removal on
+purpose: `team` and `team_attendance` (past sessions' teams and the
+insurance's record point at them; erasing the person anonymises them), and
+`registration` (a registration already points at the anonymised child once the
+child is erased). DATA_MODEL.md §16 lists what is still to decide.
 """
 
 import logging
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 from functools import reduce
 from operator import or_
 
@@ -185,6 +193,14 @@ def apply_retention(today=None):
     done["organisation_invitations"] = remove_old_invitations()
     done["mail_content"] = clear_old_mail_content()
     done["sessions"] = Session.objects.filter(expire_date__lt=timezone.now()).delete()[0]
+    # The rules waiting for their period: each does nothing while its setting is None.
+    done["children"] = erase_old_children(today)
+    done["applications"] = remove_old_applications()
+    done["background_check_decisions"] = remove_old_background_check_decisions()
+    done["engagement_changes"] = remove_old_engagement_changes(today)
+    done["bounce_records"] = remove_old_bounce_records()
+    done["notifications"] = remove_old_notifications()
+    done["admin_log_entries"] = remove_old_admin_log_entries()
     logger.info("retention: %s", done)
     return done
 
@@ -386,3 +402,153 @@ def clear_old_mail_content(now=None):
         batch = old.filter(has_content, pk__gte=start, pk__lt=start + MAIL_CONTENT_BATCH)
         cleared += batch.update(**values)
     return cleared
+
+
+# --- the rules whose period isn't decided yet -----------------------------------------
+#
+# Each removal is built and runs in the nightly job, but only once its setting
+# holds a period; None (the default) leaves the rows alone. DATA_MODEL.md §16,
+# "Retention periods, as the code has them", lists the decisions they wait for.
+# Applications and background-check decisions are in the audit log: their
+# removal runs with it off, or its "deleted" entries would keep what was removed.
+
+_LONG_AGO = timezone.make_aware(datetime(1970, 1, 1))
+
+
+def _cutoff(days, now=None):
+    return (now or timezone.now()) - timedelta(days=days)
+
+
+def children_to_erase(today=None):
+    """Children past `CHILD_RETENTION_DAYS` since their last activity (their
+    latest session, upcoming ones included; their own login; or, never having
+    done either, since they were added), or aged `CHILD_RETENTION_AGE` or
+    more. Never one that's already erased."""
+    from django.db.models import Value
+
+    from accounts.models import Guardianship, Ninja
+    from events.models import Registration
+
+    days, age = settings.CHILD_RETENTION_DAYS, settings.CHILD_RETENTION_AGE
+    if days is None and age is None:
+        return Ninja.objects.none()
+    today = today or timezone.localdate()
+    due = Q()
+    if days is not None:
+        # Subqueries, not aggregates: one row per child, filtered in WHERE.
+        last_session = Registration.objects.filter(ninja=OuterRef("pk")).order_by("-event__start_time")
+        first_guardian = Guardianship.objects.filter(ninja=OuterRef("pk")).order_by("created_at")
+        own_login = User.objects.filter(pk=OuterRef("account"))
+        last_activity = Greatest(
+            Coalesce(Subquery(last_session.values("event__start_time")[:1]), Value(_LONG_AGO)),
+            Coalesce(Subquery(own_login.values("last_login")[:1]), Value(_LONG_AGO)),
+            Coalesce(Subquery(first_guardian.values("created_at")[:1]), Value(_LONG_AGO)),
+        )
+        due |= Q(last_activity__lt=_cutoff(days))
+    if age is not None:
+        try:
+            born_by = today.replace(year=today.year - age)
+        except ValueError:  # 29 February
+            born_by = today.replace(year=today.year - age, day=28)
+        due |= Q(date_of_birth__lte=born_by)
+    erased = ErasureRecord.objects.filter(model=Ninja._meta.label, object_id=OuterRef("pk"))
+    children = Ninja.objects.alias(erased=Exists(erased))
+    if days is not None:
+        children = children.alias(last_activity=last_activity)
+    return children.filter(due, erased=False)
+
+
+def erase_old_children(today=None):
+    """The `child` rule: erase each child it's due for, with their own login
+    (privacy.erasure.erase_child), one transaction each. Returns how many."""
+    from privacy.erasure import erase_child
+
+    erased = 0
+    for ninja in list(children_to_erase(today)):
+        try:
+            erase_child(ninja, reason=ErasureRecord.RETENTION)
+        except Exception:
+            logger.exception("retention: child %s failed", ninja.pk)
+            continue
+        erased += 1
+    return erased
+
+
+def remove_old_applications():
+    """The `application` rule: rejected applications `APPLICATION_RETENTION_DAYS`
+    after the decision. An approved one stays while the account does: it's what
+    makes them a mentor or champion."""
+    from auditlog.context import disable_auditlog
+
+    from applications.models import Application
+
+    if settings.APPLICATION_RETENTION_DAYS is None:
+        return 0
+    with disable_auditlog():
+        return Application.objects.filter(
+            status=Application.REJECTED, decided_at__lt=_cutoff(settings.APPLICATION_RETENTION_DAYS)
+        ).delete()[0]
+
+
+def remove_old_background_check_decisions():
+    """The `background_check` rule for the decisions (the document itself is
+    gone at the decision): `BackgroundCheckHistory` rows
+    `BACKGROUND_CHECK_HISTORY_RETENTION_DAYS` after they were made. Access never
+    depends on them: a check's validity is on the account."""
+    from auditlog.context import disable_auditlog
+
+    from applications.models import BackgroundCheckHistory
+
+    if settings.BACKGROUND_CHECK_HISTORY_RETENTION_DAYS is None:
+        return 0
+    with disable_auditlog():
+        return BackgroundCheckHistory.objects.filter(
+            reviewed_at__lt=_cutoff(settings.BACKGROUND_CHECK_HISTORY_RETENTION_DAYS)
+        ).delete()[0]
+
+
+def remove_old_engagement_changes(today=None):
+    """The `engagement` rule for stage changes: `NinjaEngagementChange` rows
+    `ENGAGEMENT_CHANGE_RETENTION_DAYS` after the day they happened. A segment's
+    `stage_changed` rule can't look back further than that."""
+    from events.models import NinjaEngagementChange
+
+    if settings.ENGAGEMENT_CHANGE_RETENTION_DAYS is None:
+        return 0
+    since = (today or timezone.localdate()) - timedelta(days=settings.ENGAGEMENT_CHANGE_RETENTION_DAYS)
+    return NinjaEngagementChange.objects.filter(changed_on__lt=since).delete()[0]
+
+
+def remove_old_bounce_records():
+    """The `mail_log` rule: `BounceRecord`s `BOUNCE_RECORD_RETENTION_DAYS` after
+    they were read, never sooner than the soft-bounce window they're counted in.
+    The handled-mailbox rows (`ProcessedImapMessage`) stay: they hold nothing
+    personal, and they stop a message still in the mailbox being read twice."""
+    from mailing.models import BounceRecord
+
+    if settings.BOUNCE_RECORD_RETENTION_DAYS is None:
+        return 0
+    days = max(settings.BOUNCE_RECORD_RETENTION_DAYS, settings.MAILING_SOFT_BOUNCE_WINDOW_DAYS)
+    return BounceRecord.objects.filter(created_at__lt=_cutoff(days)).delete()[0]
+
+
+def remove_old_notifications():
+    """The `notification` rule: notifications that were read,
+    `NOTIFICATION_RETENTION_DAYS` after they were made. Unread ones stay."""
+    from notifications.models import Notification
+
+    if settings.NOTIFICATION_RETENTION_DAYS is None:
+        return 0
+    return Notification.objects.filter(
+        read=True, created_at__lt=_cutoff(settings.NOTIFICATION_RETENTION_DAYS)
+    ).delete()[0]
+
+
+def remove_old_admin_log_entries():
+    """The `admin_log` rule: the Django admin's own log of changes made by hand,
+    `ADMIN_LOG_RETENTION_DAYS` after the change. The audit log has its own rule."""
+    from django.contrib.admin.models import LogEntry
+
+    if settings.ADMIN_LOG_RETENTION_DAYS is None:
+        return 0
+    return LogEntry.objects.filter(action_time__lt=_cutoff(settings.ADMIN_LOG_RETENTION_DAYS)).delete()[0]
