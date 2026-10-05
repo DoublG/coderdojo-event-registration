@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 06:05+0000\n"
+"POT-Creation-Date: 2026-10-05 20:04+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -20,11 +20,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../source/organisation/privacy.rst:2
+#: ../../workspace/docs/source/organisation/privacy.rst:2
 msgid "Privacy requests"
 msgstr "Demandes liées à la vie privée"
 
-#: ../../source/organisation/privacy.rst:4
+#: ../../workspace/docs/source/organisation/privacy.rst:4
 msgid ""
 "Families download their own data and delete their own account from their "
 "family page (see :doc:`../families/managing-your-account`). When someone "
@@ -37,11 +37,11 @@ msgstr ""
 "vous vous en occupez sur la page **Vie privée**, sous **Comptes** dans le"
 " tableau de bord de l'organisation."
 
-#: ../../source/organisation/privacy.rst:10
+#: ../../workspace/docs/source/organisation/privacy.rst:10
 msgid "Finding the account"
 msgstr "Trouver le compte"
 
-#: ../../source/organisation/privacy.rst:12
+#: ../../workspace/docs/source/organisation/privacy.rst:12
 msgid ""
 "Search by name, email address or username; a child's name finds the "
 "child's parents too. Each account in the list shows whether it's an adult"
@@ -52,11 +52,11 @@ msgstr ""
 "s'agit d'un adulte ou de la connexion propre d'un enfant, et de combien "
 "d'enfants il est le parent ou tuteur."
 
-#: ../../source/organisation/privacy.rst:17
+#: ../../workspace/docs/source/organisation/privacy.rst:17
 msgid "A copy of someone's data"
 msgstr "Une copie des données de quelqu'un"
 
-#: ../../source/organisation/privacy.rst:19
+#: ../../workspace/docs/source/organisation/privacy.rst:19
 msgid ""
 "**Download data** gives you the same file the family gets with **Download"
 " my data**: everything the site keeps about the account and the children "
@@ -69,11 +69,11 @@ msgstr ""
 "uniquement à l'adresse e-mail du compte lui-même. Chaque téléchargement "
 "est enregistré."
 
-#: ../../source/organisation/privacy.rst:25
+#: ../../workspace/docs/source/organisation/privacy.rst:25
 msgid "Deleting an account"
 msgstr "Supprimer un compte"
 
-#: ../../source/organisation/privacy.rst:27
+#: ../../workspace/docs/source/organisation/privacy.rst:27
 msgid ""
 "**Delete…** first shows what will happen: whether the account is erased "
 "or, for a champion or mentor, cleaned (their name stays on past sessions "
@@ -90,7 +90,7 @@ msgstr ""
 "suppression est immédiate et définitive : téléchargez donc d'abord les "
 "données si la personne a aussi demandé une copie."
 
-#: ../../source/organisation/privacy.rst:34
+#: ../../workspace/docs/source/organisation/privacy.rst:34
 msgid ""
 "Some accounts can't be deleted here: the champion of an active dojo (the "
 "role has to move to one of the dojo's mentors first), an account with an "
@@ -103,11 +103,11 @@ msgstr ""
 "connexion propre d'un enfant (c'est son parent qui la supprime, ou elle "
 "part avec le compte de la famille)."
 
-#: ../../source/organisation/privacy.rst:40
+#: ../../workspace/docs/source/organisation/privacy.rst:40
 msgid "Changing someone's email address"
 msgstr "Changer l'adresse e-mail de quelqu'un"
 
-#: ../../source/organisation/privacy.rst:42
+#: ../../workspace/docs/source/organisation/privacy.rst:42
 msgid ""
 "Families change their own address from their family page. **Change "
 "email…** is for a family that can't get into its old mailbox any more "
@@ -115,9 +115,16 @@ msgid ""
 " you're dealing with by other means first, such as a phone call or their "
 "children's details: whoever has the new mailbox gets the account. Enter "
 "the new address and tick that you checked."
-msgstr "Les familles changent elles-mêmes leur adresse depuis leur page famille. **Changer l'e-mail…** est prévu pour une famille qui n'a plus accès à son ancienne boîte mail (et ne peut donc rien y confirmer, ni réinitialiser son mot de passe). Vérifiez d'abord par un autre moyen à qui vous avez affaire, par exemple par un appel ou avec les données de leurs enfants : la personne qui a la nouvelle boîte mail obtient le compte. Indiquez la nouvelle adresse et cochez que vous avez vérifié."
+msgstr ""
+"Les familles changent elles-mêmes leur adresse depuis leur page famille. "
+"**Changer l'e-mail…** est prévu pour une famille qui n'a plus accès à son"
+" ancienne boîte mail (et ne peut donc rien y confirmer, ni réinitialiser "
+"son mot de passe). Vérifiez d'abord par un autre moyen à qui vous avez "
+"affaire, par exemple par un appel ou avec les données de leurs enfants : "
+"la personne qui a la nouvelle boîte mail obtient le compte. Indiquez la "
+"nouvelle adresse et cochez que vous avez vérifié."
 
-#: ../../source/organisation/privacy.rst:49
+#: ../../workspace/docs/source/organisation/privacy.rst:49
 msgid ""
 "We mail a link to the new address, valid for 24 hours. The address only "
 "changes once they open it and confirm, and they don't need to log in for "
@@ -125,13 +132,20 @@ msgid ""
 "and the page offers them a link to set a new password. Accounts with an "
 "organisation role, technical administrators and a child's own login can't"
 " be changed here."
-msgstr "Nous envoyons un lien à la nouvelle adresse, valable 24 heures. L'adresse ne change qu'une fois le lien ouvert et confirmé, sans qu'il faille se connecter. Ensuite, l'ancienne adresse est prévenue, toutes les sessions du compte prennent fin et la page propose un lien pour choisir un nouveau mot de passe. Les comptes avec un rôle dans l'organisation, les administrateurs techniques et la connexion propre d'un enfant ne peuvent pas être modifiés ici."
+msgstr ""
+"Nous envoyons un lien à la nouvelle adresse, valable 24 heures. L'adresse"
+" ne change qu'une fois le lien ouvert et confirmé, sans qu'il faille se "
+"connecter. Ensuite, l'ancienne adresse est prévenue, toutes les sessions "
+"du compte prennent fin et la page propose un lien pour choisir un nouveau"
+" mot de passe. Les comptes avec un rôle dans l'organisation, les "
+"administrateurs techniques et la connexion propre d'un enfant ne peuvent "
+"pas être modifiés ici."
 
-#: ../../source/organisation/privacy.rst:57
+#: ../../workspace/docs/source/organisation/privacy.rst:57
 msgid "Needs attention"
 msgstr "À traiter"
 
-#: ../../source/organisation/privacy.rst:59
+#: ../../workspace/docs/source/organisation/privacy.rst:59
 msgid ""
 "Accounts that haven't logged in for two years are deleted automatically. "
 "A champion of an active dojo is held back until the role moves: they're "
@@ -147,4 +161,80 @@ msgstr ""
 "informés sur leur tableau de bord. Dès que le rôle est passé à un mentor,"
 " ou que le dojo est mis en sommeil, le champion quitte la liste. Le "
 "nombre à côté de **Vie privée** dans la barre latérale les compte."
+
+#: ../../workspace/docs/source/organisation/privacy.rst:67
+msgid "How long data is kept"
+msgstr "Combien de temps les données sont conservées"
+
+#: ../../workspace/docs/source/organisation/privacy.rst:69
+msgid "The site removes these by itself, every night:"
+msgstr "Le site supprime ceci lui-même, chaque nuit :"
+
+#: ../../workspace/docs/source/organisation/privacy.rst:71
+msgid ""
+"**Accounts** are deleted two years after their last login. A parent's "
+"account stays as long as one of their children uses their own login. The "
+"account holder gets a reminder 30 days and 7 days before, and an account "
+"is never deleted sooner than 30 days after the first reminder. A "
+"champion's or mentor's name stays on past sessions and on the belts and "
+"badges they awarded."
+msgstr "**Les comptes** sont supprimés deux ans après la dernière connexion. Le compte d'un parent reste tant qu'un de ses enfants utilise sa propre connexion. Le titulaire du compte reçoit un rappel 30 jours et 7 jours avant, et un compte n'est jamais supprimé moins de 30 jours après le premier rappel. Le nom d'un champion ou d'un mentor reste sur les sessions passées et sur les ceintures et badges qu'il a attribués."
+
+#: ../../workspace/docs/source/organisation/privacy.rst:77
+msgid ""
+"**The audit log** keeps an entry as long as the account it's about, or "
+"that made it; an entry with no account behind it goes after two years."
+msgstr "**Le journal d'audit** conserve une entrée tant que le compte qu'elle concerne, ou qui l'a créée, existe ; une entrée sans compte derrière elle disparaît après deux ans."
+
+#: ../../workspace/docs/source/organisation/privacy.rst:79
+msgid ""
+"**Mail**: a year after a mail was queued, its address, subject and text "
+"are cleared. What kind of mail it was and whether it went out stay, for "
+"the figures."
+msgstr "**E-mails** : un an après la mise en file d'un e-mail, son adresse, son objet et son texte sont effacés. Le type d'e-mail et le fait qu'il soit parti restent, pour les statistiques."
+
+#: ../../workspace/docs/source/organisation/privacy.rst:82
+msgid ""
+"**Invitations** to the organisation are removed 30 days after they were "
+"accepted, withdrawn or ran out (an invitation is valid for 14 days)."
+msgstr "**Les invitations** à l'organisation sont supprimées 30 jours après avoir été acceptées, retirées ou expirées (une invitation est valable 14 jours)."
+
+#: ../../workspace/docs/source/organisation/privacy.rst:84
+msgid ""
+"**Login sessions** end two weeks after they last changed, and are then "
+"removed."
+msgstr "**Les sessions de connexion** expirent deux semaines après leur dernière modification, puis sont supprimées."
+
+#: ../../workspace/docs/source/organisation/privacy.rst:87
+msgid "Some data is removed at once, not after a period:"
+msgstr "Certaines données sont supprimées immédiatement, pas après un délai :"
+
+#: ../../workspace/docs/source/organisation/privacy.rst:89
+msgid ""
+"**A criminal-record extract** is deleted the moment a reviewer decides on"
+" it. Only the decision is kept."
+msgstr "**Un extrait de casier judiciaire** est supprimé dès qu'un évaluateur a pris sa décision. Seule la décision est conservée."
+
+#: ../../workspace/docs/source/organisation/privacy.rst:91
+msgid ""
+"**Two-step login** methods (an authenticator app, passkeys, backup codes)"
+" are removed when someone turns two-step login off."
+msgstr "Les méthodes de **connexion en deux étapes** (une application d'authentification, des passkeys, des codes de secours) sont supprimées quand quelqu'un désactive la connexion en deux étapes."
+
+#: ../../workspace/docs/source/organisation/privacy.rst:94
+msgid ""
+"For some data, how long to keep it hasn't been decided yet, so the site "
+"doesn't remove it by itself: a child's details and their sessions, belts "
+"and badges, past team memberships, applications, background-check "
+"decisions, read notifications and bounce reports. These go only when the "
+"account (or the child) they belong to is deleted."
+msgstr "Pour certaines données, la durée de conservation n'a pas encore été décidée, donc le site ne les supprime pas lui-même : les données d'un enfant et ses sessions, ceintures et badges, les anciennes appartenances à une équipe, les candidatures, les décisions sur les extraits, les notifications lues et les rapports de retour. Elles ne disparaissent que lorsque le compte (ou l'enfant) auquel elles appartiennent est supprimé."
+
+#~ msgid ""
+#~ "**Mail**: a year after a mail was"
+#~ " sent, its address, subject and text"
+#~ " are cleared. What kind of mail "
+#~ "it was and whether it went out "
+#~ "stay, for the figures."
+#~ msgstr ""
 

@@ -62,3 +62,37 @@ listed under **Needs attention**, with the date their account is due to be
 cleaned. The dojo's mentors are told on their dashboard. Once the role has
 moved to a mentor, or the dojo has gone dormant, the champion leaves the
 list. The number next to **Privacy** in the sidebar counts them.
+
+How long data is kept
+---------------------
+
+The site removes these by itself, every night:
+
+- **Accounts** are deleted two years after their last login. A parent's
+  account stays as long as one of their children uses their own login. The
+  account holder gets a reminder 30 days and 7 days before, and an account
+  is never deleted sooner than 30 days after the first reminder. A
+  champion's or mentor's name stays on past sessions and on the belts and
+  badges they awarded.
+- **The audit log** keeps an entry as long as the account it's about, or
+  that made it; an entry with no account behind it goes after two years.
+- **Mail**: a year after a mail was queued, its address, subject and text are
+  cleared. What kind of mail it was and whether it went out stay, for the
+  figures.
+- **Invitations** to the organisation are removed 30 days after they were
+  accepted, withdrawn or ran out (an invitation is valid for 14 days).
+- **Login sessions** end two weeks after they last changed, and are then
+  removed.
+
+Some data is removed at once, not after a period:
+
+- **A criminal-record extract** is deleted the moment a reviewer decides on
+  it. Only the decision is kept.
+- **Two-step login** methods (an authenticator app, passkeys, backup codes)
+  are removed when someone turns two-step login off.
+
+For some data, how long to keep it hasn't been decided yet, so the site
+doesn't remove it by itself: a child's details and their sessions, belts
+and badges, past team memberships, applications, background-check
+decisions, read notifications and bounce reports. These go only when the
+account (or the child) they belong to is deleted.

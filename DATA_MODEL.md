@@ -3311,6 +3311,62 @@ erDiagram
     }
 ```
 
+### Retention periods, as the code has them (5 October 2026)
+
+Every model's retention rule is a key of `RETENTION_RULES`
+(`core/privacy_registry.py`, whose texts go into the register). This table
+is what the code actually does today; the plan below explains why. The
+nightly job is `privacy.tasks.apply_retention` (10:00, default queue).
+
+**Applied automatically:**
+
+| Rule | What | Period | In the code | Applied by |
+|---|---|---|---|---|
+| `account` | accounts (`User`), their mail preferences and dojo mutes, `RetentionNotice` | erased two years after the last login (a guardian's counts its children's own logins); reminders 30 and 7 days before; never sooner than 30 days after the first reminder; champions and mentors cleaned, not erased; a champion of an active dojo held back | `ACCOUNT_RETENTION_DAYS = 730`, `ACCOUNT_DELETION_REMINDER_DAYS = (30, 7)`, `ACCOUNT_DELETION_NOTICE_DAYS = 30` | nightly job |
+| `audit_log` | `auditlog.LogEntry` | with the account it's about or was made by; two years after the entry when no account is behind it | `AUDIT_LOG_RETENTION_DAYS = 730` | nightly job |
+| `admin_access` | `AdminAccessGrant` | with the audit log (a grant itself lasts 12 hours) | `accounts.admin_access.ADMIN_ACCESS_HOURS = 12` | nightly job, with the account |
+| `organisation_invitation` | `OrganisationInvitation` | removed 30 days after it was accepted, withdrawn or expired (it expires after 14 days) | `accounts.invitations.KEEP_DAYS = 30`, `VALID_DAYS = 14` | nightly job |
+| `mail_content` | `EmailMessage` (not `JourneyDelivery`) | account link, address, subject, body, idempotency key and Message-ID cleared 12 months after the mail was created; mail still pending or sending is left alone; the row stays for the figures | `MAIL_CONTENT_RETENTION_DAYS = 365` | nightly job |
+| `login_session` | `Session` | two weeks after the session last changed (Django's default, not set here); expired rows deleted | `SESSION_COOKIE_AGE` (default 1,209,600 s) | nightly job |
+| `task_result` | `django_celery_results` | a day (Celery's default); with `CELERY_TASK_IGNORE_RESULT` almost nothing is stored | `result_expires` (default) | `celery.backend_cleanup`, 04:00 (django-celery-beat's default entry) |
+| `engagement` | `NinjaEngagement` | rebuilt every night from the last year of sessions | `events.engagement.HISTORY_DAYS = 365` | nightly rebuild, 03:00 |
+| `background_check` (document) | the uploaded extract on `User` | deleted the moment a reviewer decides | `applications.services._record_decision` | at the decision |
+| `sign_in_methods` | authenticator app, passkeys, backup codes | while two-step login is on; removed when it's turned off, and with the account | `accounts/two_step.py` | at the change |
+
+**No period by design** (they last as long as what they belong to):
+`organisation_role` (while the role is held), `published` (while shown on
+the site), `suppression` (as long as the address must not be mailed),
+`consent_proof` (as long as the consent may have to be proven),
+`erasure_log` (as long as backups from before the erasure exist),
+`sign_in_policy` (while the policy applies), `team_attendance` (as long as
+the insurance needs it).
+
+**Not decided yet, so nothing removes them** (each says "N" in
+`RETENTION_RULES`; see the open points): `child` (`Ninja`, `Guardianship`,
+belts and badges: N years after the last session or turning 18),
+`registration` (anonymised N years after the session), `engagement` stage
+changes (`NinjaEngagementChange`, N months), `team` (dormant memberships,
+N years), `application` (N years after the decision), `background_check`
+decisions (`BackgroundCheckHistory`, as long as the legal rules say),
+`mail_log` (`BounceRecord`, and the handled-mailbox rows: 12 months
+proposed), `notification` (read ones, N months) and `admin_log` (Django
+admin's own log, N years). Until a period is decided, these rows only go
+when their account or child is erased.
+
+**How long links and codes work** (not stored data, but asked about):
+
+| What | Valid for | In the code |
+|---|---|---|
+| a login link / the first one after sign-up | 15 minutes / 3 days | `accounts.login_links.VALID_MINUTES`, `FIRST_LINK_VALID_DAYS` |
+| confirming a switch to login links | 24 hours | `accounts.login_links.SWITCH_VALID_HOURS` |
+| confirming a new email address | 24 hours | `accounts.email_change.VALID_HOURS` |
+| an organisation invitation | 14 days | `accounts.invitations.VALID_DAYS` |
+| a login counting as "recent" for a confirmation | 10 minutes | `accounts.reauth.RECENT_MINUTES` |
+| "don't ask again in this browser" (two-step login) | 30 days | `TWO_FACTOR_REMEMBER_COOKIE_AGE` |
+| Django admin access once granted | 12 hours | `accounts.admin_access.ADMIN_ACCESS_HOURS` |
+| an API access token | 1 hour | `OAUTH2_PROVIDER["ACCESS_TOKEN_EXPIRE_SECONDS"]` |
+| a validated background check | 365 days | `applications.models.BACKGROUND_CHECK_VALIDITY` |
+
 ### Existing Django apps
 
 | Package | Latest | Verdict |
@@ -3466,9 +3522,10 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
    decided rules* (`privacy/retention.py`, the nightly
    `privacy.tasks.apply_retention` at 10:00 on the default queue, also
    `manage.py apply_retention`): accounts two years after the last login
-   with their reminders, the audit log (§14) and expired login sessions.
-   The other rules wait for their periods (open points). Implementation
-   decisions:
+   with their reminders, the audit log (§14), organisation invitations,
+   mail content after 12 months and expired login sessions (every value in
+   "Retention periods, as the code has them" above). The other rules wait
+   for their periods (open points). Implementation decisions:
    - **Settings:** `ACCOUNT_RETENTION_DAYS = 730`,
      `ACCOUNT_DELETION_REMINDER_DAYS = (30, 7)`,
      `ACCOUNT_DELETION_NOTICE_DAYS = 30`, `AUDIT_LOG_RETENTION_DAYS = 730`.

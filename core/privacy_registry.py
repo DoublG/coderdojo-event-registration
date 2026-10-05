@@ -89,24 +89,32 @@ RETENTION_RULES = {
     "organisation_role": "While the organisation role is held.",
     "organisation_invitation": "Deleted 30 days after it was accepted, withdrawn or expired.",
     "admin_access": "With the audit log: until the account is erased (two years after its last login, or on request).",
-    "child": "Until N years after the child's last session, or after they turn 18.",
-    "registration": "The link to the child is anonymised N years after the session; the numbers stay.",
-    "engagement": "Rebuilt every night over the last year; stage changes kept N months.",
-    "team": "While on the team; a membership that went dormant is kept for past sessions' teams for N years.",
+    "child": "Until N years after the child's last session, or after they turn 18."
+    " Not decided yet: nothing is removed automatically until it is.",
+    "registration": "The link to the child is anonymised N years after the session; the numbers stay."
+    " Not decided yet: nothing is removed automatically until it is.",
+    "engagement": "Rebuilt every night over the last year (365 days); stage changes kept N months, not decided "
+    "yet: they aren't removed automatically until it is.",
+    "team": "While on the team; a membership that went dormant is kept for past sessions' teams for N years."
+    " Not decided yet: nothing is removed automatically until it is.",
     "team_attendance": "As long as the insurance needs the record of who was there.",
-    "application": "N years after the decision.",
+    "application": "N years after the decision. Not decided yet: nothing is removed automatically until it is.",
     "background_check": "The document is deleted at the decision; the decisions as long as the legal rules say.",
     "mail_content": "Subject, body and address of a mail cleared after 12 months; the row stays for statistics.",
-    "mail_log": "Bounce records and handled bounce-mailbox messages removed after 12 months.",
+    "mail_log": "Bounce records and handled bounce-mailbox messages: 12 months proposed, not decided yet; "
+    "nothing is removed automatically until it is.",
     "consent_proof": "As long as the account exists, then as long as the consent may have to be proven.",
     "suppression": "As long as the address must not be mailed again.",
-    "notification": "Read notifications removed after N months.",
+    "notification": "Read notifications removed after N months."
+    " Not decided yet: nothing is removed automatically until it is.",
     "published": "While shown on the site; removed on request.",
-    "login_session": "Until the login session expires.",
-    "admin_log": "N years, for tracing changes made by hand.",
+    "login_session": "Until the login session expires (two weeks after it last changed, e.g. at login); expired sessions are "
+    "removed every night.",
+    "admin_log": "N years, for tracing changes made by hand."
+    " Not decided yet: nothing is removed automatically until it is.",
     "audit_log": "Until two years after the last login of the account it's about or was made by; "
     "two years after the entry when no account is behind it.",
-    "task_result": "Until the task result expires.",
+    "task_result": "Until the task result expires (a day); Celery's clean-up removes them every night at 04:00.",
     "erasure_log": "As long as backups made before the erasure exist.",
     "sign_in_methods": "While two-step login is on: removed when it's turned off, and with the account.",
     "sign_in_policy": "While the policy applies; who last changed a role's row points at an anonymised account after "
