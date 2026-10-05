@@ -11,11 +11,11 @@ with sync_playwright() as pw:
         "A parent lands on the homepage. The dojo finder and the upcoming-sessions carousel are right there, no account needed.",
         max_h=1700,
     )
-    p = j.go("/dojos/?q=Westerlo")
+    p = j.go("/dojos/?location=Westerlo&pathway=2")
     j.shot(
         "finder",
         "Find a dojo nearby",
-        "The dojo finder sorts dojos by distance from a typed address, the browser's location or (logged in) the family's postcode.",
+        "The dojo finder sorts dojos by distance from a typed address, the browser's location or (logged in) the family's postcode, and filters them by language and pathway; each applied filter shows as a chip that removes it.",
     )
     p = j.go("/dojos/51/")
     j.shot(
@@ -25,7 +25,7 @@ with sync_playwright() as pw:
         max_h=1800,
     )
     p = j.go("/events/")
-    j.shot("events", "Browse sessions", "All upcoming sessions, filterable by region, language, age and pathway.")
+    j.shot("events", "Browse sessions", "All upcoming sessions, near a place or not, filterable by dojo, date, age, language and pathway.")
     p = j.go("/events/76/")
     j.shot(
         "event-full",

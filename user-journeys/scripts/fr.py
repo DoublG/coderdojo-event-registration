@@ -95,7 +95,7 @@ STEPS = {
         ),
         "finder": (
             "Trouver un dojo près de chez vous",
-            "La recherche classe les dojos selon la distance depuis une adresse tapée, la position du navigateur ou (connecté) le code postal de la famille.",
+            "La recherche classe les dojos selon la distance depuis une adresse tapée, la position du navigateur ou (connecté) le code postal de la famille, et les filtre par langue et parcours d'apprentissage ; chaque filtre appliqué s'affiche en étiquette qui le retire.",
         ),
         "dojo": (
             "La page d'un dojo",
@@ -103,7 +103,7 @@ STEPS = {
         ),
         "events": (
             "Parcourir les sessions",
-            "Toutes les prochaines sessions, filtrables par région, langue, âge et parcours d'apprentissage.",
+            "Toutes les prochaines sessions, près d'un lieu ou non, filtrables par dojo, date, âge, langue et parcours d'apprentissage.",
         ),
         "event-full": (
             "Une session complète",

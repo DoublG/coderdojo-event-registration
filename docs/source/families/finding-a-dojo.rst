@@ -24,7 +24,8 @@ dojos, paged as you scroll, and no limit on how many results you see.
 
 To only see dojos that give their sessions in a certain language, pick it
 in the **Language** menu and press **Search**. The **Events** list has the
-same search form, with the same filters.
+same search form and filters, plus a **Dojo**, a **Date** and the child's
+**Age**.
 
 To only see dojos that work on a certain pathway (Scratch, Python,
 micro:bit, ...), pick it in the **Pathway** menu and press **Search**. A pathway's own page links

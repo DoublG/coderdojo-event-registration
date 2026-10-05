@@ -1,6 +1,6 @@
 {
- "generated_from": "6a137d6",
- "generated_on": "2026-10-02",
+ "generated_from": "10414ed",
+ "generated_on": "2026-10-05",
  "personas": {
   "parent": {
    "pages": [
@@ -24,9 +24,9 @@
     "accounts/views/family.py:account_home": "9c4245e27f2df4b5",
     "accounts/views/signup.py:register_guardian": "a08851a775ddd771",
     "dojos/views/public.py:dojo_detail": "b85a46c12b05c3ff",
-    "dojos/views/public.py:dojo_list": "9abc2bbd53e8952f",
+    "dojos/views/public.py:dojo_list": "25ead37f977b5163",
     "events/views.py:event_detail": "508021bd288e2ac9",
-    "events/views.py:event_list": "0891d981c444761c",
+    "events/views.py:event_list": "65442378fb181e8a",
     "events/views.py:event_signup": "14298e097ec60fc0",
     "mailing/views.py:mail_preferences": "8467f97655ff4f35",
     "pages/views.py:home": "0de5ef2bac6106e2",
@@ -50,15 +50,16 @@
     "content/templates/content/partials/_promotion_banner.html": "45401988c697c848",
     "content/templates/content/partials/_promotion_hero.html": "fe3e33ad8f5fd7ef",
     "core/templates/core/menu.html": "fc0ae6dd632f1501",
+    "core/templates/core/partials/_active_filters.html": "1cbfed7bdc3914e6",
     "dojos/templates/dojos/dojo_detail.html": "46443b3926616732",
-    "dojos/templates/dojos/dojo_list.html": "888926ac174aef65",
+    "dojos/templates/dojos/dojo_list.html": "1c4969ad67afc9e2",
     "dojos/templates/dojos/partials/_dojo_finder_widget.html": "c9c61eb468cdce6b",
     "dojos/templates/dojos/partials/_dojo_finder_widget_results.html": "79b5b32749140431",
     "dojos/templates/dojos/partials/_dojo_result.html": "a16be3459181b492",
     "dojos/templates/dojos/partials/_dojo_results_page.html": "e3c9d37b335529fc",
     "dojos/templates/dojos/partials/_mentor_avatar.html": "f4bcbd2505baf894",
     "events/templates/events/event_detail.html": "ade7abceab1cd4df",
-    "events/templates/events/event_list.html": "10f60c131f993f26",
+    "events/templates/events/event_list.html": "a7c06383d93d6fc9",
     "events/templates/events/event_signup.html": "7381d67434e2ce40",
     "events/templates/events/partials/_audience_badge.html": "70a7a01c39560f2e",
     "events/templates/events/partials/_event_results_page.html": "7b5694c3896fb11e",
@@ -104,7 +105,7 @@
     "events/templates/events/event_signup.html": "7381d67434e2ce40",
     "events/templates/events/partials/_audience_badge.html": "70a7a01c39560f2e",
     "events/templates/events/partials/_organiser.html": "2d7af6f1eb27d438",
-    "pathways/templates/pathways/pathway_detail.html": "e1e3b1dd081e5652"
+    "pathways/templates/pathways/pathway_detail.html": "515e5f1827b1a7f6"
    }
   },
   "volunteer": {

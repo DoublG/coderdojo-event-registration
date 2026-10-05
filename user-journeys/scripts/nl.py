@@ -95,13 +95,13 @@ STEPS = {
         ),
         "finder": (
             "Een dojo in de buurt vinden",
-            "De dojozoeker sorteert dojo's op afstand van een ingetypt adres, de locatie van de browser of (ingelogd) de postcode van het gezin.",
+            "De dojozoeker sorteert dojo's op afstand van een ingetypt adres, de locatie van de browser of (ingelogd) de postcode van het gezin, en filtert ze op taal en leertraject; elke actieve filter staat er als een label dat hem weer weghaalt.",
         ),
         "dojo": (
             "De pagina van een dojo",
             "Elke dojo heeft een pagina met zijn talen, volgende sessies, team, nieuws en de leertrajecten die hij aanbiedt.",
         ),
-        "events": ("Sessies bekijken", "Alle komende sessies, te filteren op regio, taal, leeftijd en leertraject."),
+        "events": ("Sessies bekijken", "Alle komende sessies, in de buurt van een plaats of niet, te filteren op dojo, datum, leeftijd, taal en leertraject."),
         "event-full": (
             "Een volle sessie",
             "Als een sessie vol is, kunnen gezinnen nog op de wachtlijst; ze schuiven automatisch door als er een plaats vrijkomt.",

@@ -61,7 +61,7 @@ done
 - **They change the dev data:** the parent and ninja journeys book real places (sessions 71 and 72
   at Dojo Zonnebeke, removed again first on a rerun), the volunteer journey resets and then marks
   attendance on session 76 at Dojo Westerlo, and the booking mail goes through the Celery workers
-  to Mailpit. The seeded IDs used (dojo 51, events 71/72/76, ninja 9, users 352, application 348)
+  to Mailpit. The seeded IDs used (dojo 51, events 71/72/76, ninja 9, pathway 2, users 352, application 348)
   change when the database is reseeded; adjust them in the scripts.
 
 ## Keeping them current
