@@ -1162,6 +1162,18 @@ class SecurityHeadersTests(TestCase):
                 found.append(str(path.relative_to(settings.BASE_DIR)))
         self.assertEqual(found, [])
 
+    def test_no_template_has_a_hash_comment_over_several_lines(self):
+        """Django's {# #} only works on one line: over several it's printed on the page as text
+        (the management shell showed one on every page). Use {% comment %} for longer ones."""
+        from pathlib import Path
+
+        found = []
+        for path in Path(settings.BASE_DIR).glob("*/templates/**/*.html"):
+            for match in re.finditer(r"\{#((?!#\}).)*?\n", path.read_text(), flags=re.S):
+                line = path.read_text()[: match.start()].count("\n") + 1
+                found.append(f"{path.relative_to(settings.BASE_DIR)}:{line}")
+        self.assertEqual(found, [])
+
     def test_permissions_policy_switches_off_unused_features(self):
         header = self.get(reverse("home")).headers["Permissions-Policy"]
         for feature in ("camera=()", "microphone=()", "payment=()", "usb=()"):

@@ -35,8 +35,8 @@ shell_content, shell_extra_style and shell_scripts.
 </style>
 {% block shell_extra_style %}{% endblock %}
 </head>
-{# Every htmx request sends the page's CSRF token: the notification bell's "Mark all as read" form can come
-   over the WebSocket, rendered without a request and so without a token of its own. #}
+{% comment %}Every htmx request sends the page's CSRF token: the notification bell's "Mark all as read" form can come
+   over the WebSocket, rendered without a request and so without a token of its own.{% endcomment %}
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 {# No eval (hx-on, js: values): the Content-Security-Policy forbids it (settings.CONTENT_SECURITY_POLICY). #}
 <meta name="htmx-config" content='{"allowEval": false}'>
