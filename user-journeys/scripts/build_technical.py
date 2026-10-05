@@ -155,12 +155,15 @@ of every larger change (sections 10–25). The diagrams in this document are tak
 <li><code>CLAUDE.md</code>: the conventions, the architecture and the gotchas: what a developer (human or AI)
 needs to change the code safely. Kept current in the same change as the code.</li>
 <li><code>docs/</code>: the end-user help centre (Sphinx, English, French and Dutch).</li>
-<li><code>user-journeys/</code>: one PDF per persona with screenshots, in English and Dutch.</li>
+<li><code>user-journeys/</code>: one PDF per persona with screenshots, in English, Dutch and French.</li>
+<li><code>CAPACITY.md</code>, <code>MONITORING.md</code>, <code>CODING_STANDARDS.md</code>, <code>MEMORY_PROFILE.md</code> and
+<code>MAINTENANCE.md</code>: what was measured (load, growth, memory, every metric and dashboard panel), the standards
+and their tooling, and the versions in use with their end-of-life dates and the security log.</li>
 </ul>
 <h2>In numbers</h2>
 <table>
-<tr><th>Django apps</th><td>12 of our own (plus <code>website</code> for settings)</td><th>Models</th><td>51 of our own</td></tr>
-<tr><th>Test functions</th><td>about 1,000 (Django test runner)</td><th>Languages</th><td>English, Dutch, French</td></tr>
+<tr><th>Django apps</th><td>15 of our own (plus <code>website</code> for settings)</td><th>Models</th><td>52 of our own</td></tr>
+<tr><th>Test functions</th><td>about 1,150 (Django test runner)</td><th>Languages</th><td>English, Dutch, French</td></tr>
 </table>
 """,
 )
@@ -174,9 +177,9 @@ section(
 <tr><th>Layer</th><th>Choice</th><th>Why</th></tr>
 <tr><td>Language, framework</td><td>Python 3.14, Django 6.1</td><td>Batteries included (auth, admin, forms, i18n, migrations);
 the admin doubles as the always-working emergency tool.</td></tr>
-<tr><td>Database</td><td>MySQL 9 with <code>django.contrib.gis</code></td><td>What the hosting offers; spatial columns for dojo
+<tr><td>Database</td><td>MySQL 8.4 LTS with <code>django.contrib.gis</code></td><td>What the hosting offers; spatial columns for dojo
 locations, postcodes and provinces.</td></tr>
-<tr><td>Front end</td><td>Server-rendered templates + htmx 2.0, one hand-kept <code>bundle.js</code>/<code>bundle.css</code></td>
+<tr><td>Front end</td><td>Server-rendered templates + htmx 2.0 (served from our own static files), one hand-kept <code>bundle.js</code>/<code>bundle.css</code></td>
 <td>No build step, no SPA: the server stays the single source of truth; htmx swaps fragments for the dynamic parts.</td></tr>
 <tr><td>Serving</td><td>ASGI: gunicorn with uvicorn workers in production, daphne behind <code>runserver</code> in development</td>
 <td>WebSockets for the live notification bell, in the same process as the pages.</td></tr>
@@ -198,12 +201,15 @@ setup for a volunteer organisation, deployed with one script.</td></tr>
 <ul>
 <li><b>Development</b> is the <code>.devcontainer</code> stack: nginx with a local CA for <code>coolregistration.localhost</code>
 (only port 443 is published), MySQL, Redis, Mailpit catching every mail (and acting as the bounce mailbox), both
-Celery workers, and seeded demo data from about twenty rerun-safe seed commands. End-to-end checks go through nginx,
+Celery workers, and seeded demo data from about twenty rerun-safe seed commands. Prometheus and Grafana (scraping
+<code>/metrics/</code>, with a provisioned dashboard) come up behind a Compose profile when wanted. End-to-end checks go through nginx,
 never straight to Django, because TLS, the WebSocket upgrade and the tool paths live there.</li>
 <li><b>Production</b> is deployed by <code>scripts/deploy.sh</code>: bundle the tree, install requirements into the Python env
 gunicorn uses, run <code>manage.py check</code> on the new code <i>before</i> touching the live app, rsync, migrate, reload
 gunicorn, restart the Celery units and smoke-test. <code>--check</code> is a read-only preflight.</li>
-<li>No CI: tests and lint (<code>ruff</code>) run locally, inside the container.</li>
+<li><b>CI</b> (GitHub Actions) runs the checks, never a deploy: the whole test suite on every push and pull request
+against MySQL 8.4 and Redis 7.2, a weekly and per-push code audit (<code>ruff</code> with its security rules, the import
+layers, <code>pip-audit</code>, <code>check --deploy</code>, CodeQL), and the help centre published to GitHub Pages.</li>
 </ul>
 """,
 )
@@ -574,7 +580,8 @@ replacement, or kept with a reason. A test fails on any unclassified field, ours
 <code>Ninja</code> rows anonymised, never deleted, and an <code>ErasureRecord</code> without personal data allows replaying
 erasures after a backup restore.</li>
 <li><b>Retention</b>: an account is erased two years after its last login, after reminder mails; champions and mentors keep
-their public team profile.</li>
+their public team profile. A mail's subject, body and address are cleared 12 months after it was queued; the row stays
+for the statistics.</li>
 </ul>
 <h2>The audit log</h2>
 <p>django-auditlog records changes to the models listed in <code>core.audit.RECORDED</code> (every other model has a written
@@ -606,7 +613,7 @@ language with an “Only in …” note when theirs is missing.</li>
 </ul>
 <h2>Testing</h2>
 <ul>
-<li>About 1,000 tests with the plain Django runner, inside the devcontainer, on their own Redis cache database.</li>
+<li>About 1,150 tests with the plain Django runner, inside the devcontainer, on their own Redis cache database.</li>
 <li>Route tests check status codes, templates, permission gating (404 versus 403) and the database effect of a POST.</li>
 <li>Channels consumers are tested with <code>TransactionTestCase</code> and an in-memory layer; Celery tasks by calling the
 function, never <code>.delay()</code>.</li>
@@ -615,6 +622,8 @@ function, never <code>.delay()</code>.</li>
 <h2>Operations</h2>
 <ul>
 <li>One deploy script, with a preflight and a <code>manage.py check</code> before the live app is touched.</li>
+<li><code>/health/</code> for an external uptime monitor (database, Redis, the mail workers), and <code>/metrics/</code>
+(behind a token) for Prometheus: request and task timings, queues, table sizes and memory, never anyone's data.</li>
 <li>Mail waits safely in the database when the workers are down; the dashboard's mail queue warns when due mail has waited
 over 30 minutes.</li>
 <li>Seed commands build a realistic demo world (dojos, families, volunteers, histories, waiting lists) and a credentials file
