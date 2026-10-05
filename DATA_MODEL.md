@@ -132,7 +132,7 @@ classDiagram
         +username
         +email
         +phone
-        +account_type  adult | ninja
+        +account_type  adult | ninja | service (an API client's technical account, §13)
         +login_method  password | link (then no usable password)
         +preferred_language  mail language, empty = English
         +postal_code  optional, Belgian postcode
@@ -145,6 +145,7 @@ classDiagram
     }
     class Guardianship {
         +relation  parent | legal_guardian | other
+        +consent_given_at  the child's details may choose its mail
     }
     class Ninja {
         +name  first name; a child aged 7–17
@@ -173,6 +174,11 @@ classDiagram
         +email, name, roles
         +token_hash  14 days
         +accepted_at, withdrawn_at
+    }
+    class SignInRequirement {
+        +role  superuser | organisation_admin | ... | adult
+        +level  password | two_step | passkey
+        +required_from
     }
     User "1" --> "*" OrganisationRole : organisation_roles
     User "1" --> "*" AdminAccessGrant : admin_access_grants
@@ -216,6 +222,8 @@ erDiagram
     DOJO_MEMBERSHIP |o--o{ DOJO_MEMBERSHIP : "promoted_by (youth mentors)"
     MUNICIPALITY |o--o{ DOJO : "municipality"
     ADMINISTRATIVE_BOUNDARY |o--o{ DOJO : "province"
+    DOJO ||--o{ DOJO_API_CLIENT : "api_clients (section 13)"
+    DOJO_API_CLIENT ||--|| USER : "account (service, technical)"
 
     DOJO {
         bigint id PK
@@ -229,6 +237,7 @@ erDiagram
         bigint province_id FK "set from location"
         int min_age
         int max_age
+        json languages "ordered, first = main language (section 19)"
     }
     DOJO_MEMBERSHIP {
         bigint id PK
@@ -241,6 +250,13 @@ erDiagram
         bigint promoted_by_id FK "youth mentors only"
         datetime joined_at
         datetime left_at
+    }
+    DOJO_API_CLIENT {
+        bigint dojo_id FK
+        string name
+        json scopes "attendance:read, attendance:write"
+        bigint application_id FK "OAuth client, client credentials only"
+        bigint account_id FK "service account, the actor in the audit log"
     }
 ```
 
@@ -261,7 +277,9 @@ flowchart TD
     M -- no --> N404[404 Not Found]
     M -- yes --> V{Background check valid?}
     V -- no --> N404
-    V -- yes --> C{"Capability in<br/>ROLE_CAPABILITIES[role]?"}
+    V -- yes --> SI{"Meets the sign-in policy?<br/>(accounts.sign_in, section 15)"}
+    SI -- no --> N404
+    SI -- yes --> C{"Capability in<br/>ROLE_CAPABILITIES[role]?"}
     C -- yes --> OK[Render the page]
     C -- no --> N403[403 Forbidden]
 ```
@@ -274,7 +292,12 @@ flowchart TD
 | `EDIT_SETTINGS` | dojo profile settings | ✓ | ✓ |
 | `MANAGE_TEAM` | accept/decline join requests, add/remove mentors, promote youth mentors | ✓ | ✓ |
 | `AWARD_BELTS` | award a ninja a belt (from the attendance list) | ✓ | ✓ |
+| `AWARD_BADGES` | award a one-off badge (from the attendance list) | ✓ | ✓ |
+| `POST_UPDATES` | the Updates page ("From this dojo") | ✓ | ✓ |
 | `MANAGE_LIFECYCLE` | launch / dormant / archive / reopen the dojo | ✓ | — |
+| `VIEW_HEALTH_NOTES` | a child's allergies and notes on the attendance list | ✓ | — |
+| `MANAGE_API` | the dojo's API clients (section 13) | ✓ | — |
+| `SEND_MAIL` | write and send the dojo's mail to its families (section 25) | ✓ | — |
 | *(champion only)* | hand over the champion role | ✓ | — |
 
 To restrict mentors, remove entries from `ROLE_CAPABILITIES[MENTOR]`.
@@ -540,7 +563,8 @@ stateDiagram-v2
     submitted --> rejected : reviewer rejects<br/>(document deleted, history row)
     rejected --> submitted : uploads a new document
     validated --> submitted : expired → uploads a renewal
-    validated --> requested : renewal requested
+    rejected --> requested : reviewer asks again
+    validated --> requested : expired → renewal requested
     validated --> validated : 30 days before expiry<br/>(reminder mail, §21)
 ```
 
@@ -600,6 +624,13 @@ erDiagram
     EVENT ||--o{ PROMOTION : "featured by (section 12)"
     USER |o--o{ ORGANISATION_TEAM_MEMBER : "account (optional)"
 
+    SPONSOR {
+        string name "the homepage's Made possible by"
+        string url
+        file logo
+        int order
+        bool is_public
+    }
     PATHWAY {
         bigint id PK
         string name
@@ -664,6 +695,7 @@ erDiagram
         bigint id PK
         bigint recipient_id FK
         bigint dojo_id FK "nullable"
+        bool organisation "the organisation dashboard's bell (section 23)"
         string text
         string url
         datetime created_at
@@ -677,7 +709,7 @@ sequenceDiagram
     participant S as notify()
     participant DB as MySQL
     participant CL as Channel layer (Redis)
-    participant C as NotificationConsumer
+    participant C as NotificationConsumer (or the organisation's)
     participant B as Browser (admin page)
 
     V->>S: notify(recipient, text, url, dojo)
@@ -685,7 +717,7 @@ sequenceDiagram
     S-)CL: group_send("notifications_user_{id}")
     Note over S,CL: failures are swallowed (fail-open)
     CL-)C: notification.push
-    C->>DB: re-query this dojo's bell
+    C->>DB: re-query this dojo's (or the organisation's) bell
     C-)B: _notification_bell.html (hx-swap-oob)
 ```
 
@@ -871,7 +903,7 @@ dojo's own team, with no admin involved.
 flowchart TD
     A[Normal account] --> B["Applies: mentor / champion<br/>(APPLICATION)"]
     B --> C[Background check on the account]
-    C --> D{Admin approves?}
+    C --> D{Reviewer approves?}
     D -- no --> X[Rejected]
     D -- yes --> E{Kind}
     E -- mentor --> H[Approved mentor]
@@ -1704,6 +1736,7 @@ erDiagram
     SEGMENT_GROUP ||--o{ SEGMENT_RULE : "rules"
     SEGMENT |o--o{ CAMPAIGN : "segment (SET_NULL)"
     SEGMENT |o--o{ JOURNEY : "segment (SET_NULL)"
+    DOJO |o--o{ CAMPAIGN : "a dojo's own mail (section 25)"
     CAMPAIGN |o--o{ EMAIL_MESSAGE : "its mail"
     JOURNEY ||--o{ JOURNEY_DELIVERY : "who got it when"
     JOURNEY_DELIVERY |o--|| EMAIL_MESSAGE : "the mail"
@@ -1735,6 +1768,9 @@ erDiagram
         bigint launched_by FK
         datetime queued_at "every recipient's mail queued"
         bigint queued_up_to "last account id queued (chunks, in id order)"
+        bigint dojo_id FK "nullable: set for a dojo's own mail"
+        string audience "a dojo mail's prepared audience"
+        string subject "a dojo mail's own subject and message"
     }
     JOURNEY {
         string name
