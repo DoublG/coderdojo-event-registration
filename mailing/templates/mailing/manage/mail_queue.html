@@ -10,12 +10,14 @@
   .queue-stats strong { display: block; font-size: 1.4rem; color: var(--ink); }
   .queue-alert { padding: var(--space-4) var(--space-5); margin-bottom: var(--space-5); border-left: 4px solid var(--warning, #d97706); }
   .queue-section { margin-top: var(--space-6); }
+  .queue-section__head { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: baseline; justify-content: space-between; }
+  .queue-inline-form { display: inline; margin: 0; }
 </style>
 {% endblock %}
 
 {% block manage_content %}
-  {% comment %}The mail queue (mailing.manage.mail_queue): read-only; fixing things stays in the Django admin.{% endcomment %}
-  <p class="body-sm">{% translate "Every mail the site sends waits here first and goes out within a minute or so. Use this page to check that mail is going out, and to see which mail failed or bounced and which addresses get nothing any more." %}</p>
+  {% comment %}The mail queue (mailing.manage.mail_queue). Send again and Unblock go through mailing.queue_actions.{% endcomment %}
+  <p class="body-sm">{% translate "Every mail the site sends waits here first and goes out within a minute or so. Use this page to check that mail is going out, to send failed mail again and to unblock an address." %} <a href="{% url 'manage_mail_log' %}">{% translate "Every mail sent is in the mail log." %}</a></p>
 
   {% if stalled %}
     <div class="cd-card queue-alert" role="alert">
@@ -80,8 +82,18 @@
   </section>
 
   <section class="queue-section">
-    <h2 class="heading-md">{% translate "Failed" %}</h2>
-    <p class="body-sm">{% blocktranslate with days=recent_days %}Mail the mail server refused, or that still couldn't be sent after several tries, in the last {{ days }} days.{% endblocktranslate %}</p>
+    <div class="queue-section__head">
+      <h2 class="heading-md">{% translate "Failed" %}</h2>
+      {% if failed %}
+        <form method="post" action="{% url 'manage_mail_retry_failed' %}" class="queue-inline-form" data-confirm="{% translate 'Send all the failed mail shown here again?' %}">
+          {% csrf_token %}
+          <input type="hidden" name="q" value="{{ query }}">
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Send all again" %}</button>
+        </form>
+      {% endif %}
+    </div>
+    <p class="body-sm">{% blocktranslate with days=recent_days %}Mail the mail server refused, or that still couldn't be sent after several tries, in the last {{ days }} days. Once the problem is fixed (the mail server is back, a typo in an address is corrected), send it again: it goes back in the queue, and the person's mail choices and blocks are checked again before it goes out.{% endblocktranslate %}</p>
     <div class="cd-table-wrap">
       <table class="cd-table cd-table--zebra">
         <thead>
@@ -90,6 +102,7 @@
             <th class="label" scope="col">{% translate "Subject" %}</th>
             <th class="label" scope="col">{% translate "Why" %}</th>
             <th class="label" scope="col">{% translate "Queued" %}</th>
+            <th class="label" scope="col"></th>
           </tr>
         </thead>
         <tbody>
@@ -99,9 +112,10 @@
               <td class="body-sm">{{ message.subject }}</td>
               <td class="body-sm">{{ message.status_reason|default:"—" }}</td>
               <td class="body-sm">{{ message.created_at|date:"d/m/Y H:i" }}</td>
+              <td class="body-sm">{% include "mailing/manage/partials/_retry_button.html" %}</td>
             </tr>
           {% empty %}
-            <tr><td class="body-sm" colspan="4">{% translate "No failed mail." %}</td></tr>
+            <tr><td class="body-sm" colspan="5">{% translate "No failed mail." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -144,7 +158,7 @@
 
   <section class="queue-section">
     <h2 class="heading-md">{% translate "Blocked addresses" %}</h2>
-    <p class="body-sm">{% translate "Nothing is sent to these addresses any more, whatever the person chose." %}</p>
+    <p class="body-sm">{% translate "Nothing is sent to these addresses any more, whatever the person chose. Unblock an address once it works again (the person fixed their mailbox, or a typo was corrected); their own mail choices stay as they are." %}</p>
     <div class="cd-table-wrap">
       <table class="cd-table cd-table--zebra">
         <thead>
@@ -153,6 +167,7 @@
             <th class="label" scope="col">{% translate "Why" %}</th>
             <th class="label" scope="col">{% translate "Note" %}</th>
             <th class="label" scope="col">{% translate "Since" %}</th>
+            <th class="label" scope="col"></th>
           </tr>
         </thead>
         <tbody>
@@ -162,9 +177,17 @@
               <td class="body-sm">{{ suppression.get_reason_display }}</td>
               <td class="body-sm">{{ suppression.note|default:"—" }}</td>
               <td class="body-sm">{{ suppression.created_at|date:"d/m/Y H:i" }}</td>
+              <td class="body-sm">
+                {% if suppression.reason == "complaint" %}{% translate "This person marked our mail as spam. Unblock only if they asked for it." as confirm %}{% else %}{% blocktranslate with email=suppression.email asvar confirm %}Unblock {{ email }}?{% endblocktranslate %}{% endif %}
+                <form method="post" action="{% url 'manage_mail_unblock' suppression.pk %}" class="queue-inline-form" data-confirm="{{ confirm }}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Unblock" %}</button>
+                </form>
+              </td>
             </tr>
           {% empty %}
-            <tr><td class="body-sm" colspan="4">{% translate "No blocked addresses." %}</td></tr>
+            <tr><td class="body-sm" colspan="5">{% translate "No blocked addresses." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -172,5 +195,4 @@
     {% if blocked|length == limit %}<p class="caption">{% blocktranslate %}Showing the first {{ limit }}.{% endblocktranslate %}</p>{% endif %}
   </section>
 
-  <p class="caption queue-section">{% translate "To send a failed mail again or unblock an address, ask for the Django admin (Organisation → Django admin)." %}</p>
 {% endblock %}

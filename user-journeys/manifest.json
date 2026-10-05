@@ -1,5 +1,5 @@
 {
- "generated_from": "10414ed",
+ "generated_from": "77717cf",
  "generated_on": "2026-10-05",
  "personas": {
   "parent": {
@@ -247,6 +247,7 @@
     "/manage/django-admin/",
     "/manage/journeys/",
     "/manage/mail/",
+    "/manage/mail/log/",
     "/manage/people/",
     "/manage/privacy/",
     "/manage/promotions/",
@@ -268,7 +269,8 @@
     "content/manage.py:promotion_list": "9529dd7986264e4d",
     "content/manage.py:sponsor_list": "a02a2e822456e709",
     "events/manage.py:badge_list": "a2880d0097022467",
-    "mailing/manage/queue.py:mail_queue": "9673addcd9c3bab1",
+    "mailing/manage/queue.py:mail_log": "d0519eda277157d9",
+    "mailing/manage/queue.py:mail_queue": "304a3c5934098804",
     "mailing/manage/templates.py:template_list": "27c417806d2f34f7",
     "pages/audit_views.py:manage_audit_log": "e1099b228f05cf26",
     "privacy/views.py:manage_privacy": "c18f04b7cf09f2f9"
@@ -290,7 +292,9 @@
     "content/templates/content/manage/promotion_list.html": "1b4063235fc75c35",
     "content/templates/content/manage/sponsor_list.html": "0ed1d7e44ed39b48",
     "events/templates/events/manage/badge_list.html": "765e0ca178cb1fc4",
-    "mailing/templates/mailing/manage/mail_queue.html": "37fbce96f11b0b1f",
+    "mailing/templates/mailing/manage/mail_log.html": "5891eb75a99dd9f0",
+    "mailing/templates/mailing/manage/mail_queue.html": "9f6594e8e0d46c3f",
+    "mailing/templates/mailing/manage/partials/_retry_button.html": "480c97b745436415",
     "mailing/templates/mailing/manage/template_list.html": "f4bd2a9a9c70a1fa",
     "pages/templates/pages/manage_audit_log.html": "d19a6d607bf3dfce",
     "privacy/templates/privacy/manage/privacy.html": "ababb8162789efb3"

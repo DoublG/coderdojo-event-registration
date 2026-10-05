@@ -1052,6 +1052,218 @@ class MailQueueDashboardTests(TestCase):
         self.assertNotContains(response, "bob-old@example.com")
 
 
+class MailFixingTests(TestCase):
+    """Send again and Unblock on the Mail queue and Mail log pages
+    (mailing.queue_actions), and the Mail log itself."""
+
+    def setUp(self):
+        from accounts.models import OrganisationRole
+
+        self.admin = User.objects.create(username="orgadmin", email="ann@example.com")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.client.force_login(self.admin)
+        self.family = User.objects.create(username="fam", email="fam@example.com")
+
+    def _mail(self, subject, status=EmailMessage.Status.FAILED, recipient="fam@example.com", **fields):
+        return EmailMessage.objects.create(
+            user=self.family if recipient == "fam@example.com" else None,
+            category=MailCategory.SERVICE,
+            recipient=recipient,
+            subject=subject,
+            body="The text.",
+            status=status,
+            status_reason="550 no such user" if status == EmailMessage.Status.FAILED else "",
+            attempts=3,
+            **fields,
+        )
+
+    def _retry(self, mail, **data):
+        return self.client.post(reverse("manage_mail_retry", args=[mail.pk]), data, follow=True)
+
+    # --- send again ---
+
+    def test_send_again_puts_a_failed_mail_back_and_it_goes_out(self):
+        mail = self._mail("Your booking")
+        response = self._retry(mail)
+        self.assertRedirects(response, reverse("manage_mail_queue"))
+        self.assertContains(response, "is back in the queue")
+        mail.refresh_from_db()
+        self.assertEqual((mail.status, mail.status_reason, mail.attempts), (EmailMessage.Status.PENDING, "", 0))
+
+        EmailMessage.objects.filter(pk=mail.pk).update(status=EmailMessage.Status.SENDING)
+        connection = FakeConnection()
+        with patch("mailing.tasks.mail.get_connection", return_value=connection):
+            self.assertEqual(send_email_batch([mail.pk]), 1)
+        self.assertEqual([m.to[0] for m in connection.sent], ["fam@example.com"])
+        mail.refresh_from_db()
+        self.assertEqual(mail.status, EmailMessage.Status.SENT)
+
+    def test_send_again_refuses_mail_that_did_not_fail_was_cleared_or_is_blocked(self):
+        sent = self._mail("Went fine", status=EmailMessage.Status.SENT)
+        cleared = self._mail("")
+        EmailMessage.objects.filter(pk=cleared.pk).update(recipient="", body="", user=None)
+        blocked = self._mail("To a blocked address", recipient="gone@example.com")
+        EmailSuppression.objects.create(email="gone@example.com", reason=EmailSuppression.HARD_BOUNCE)
+        for mail, says in (
+            (sent, "Only a mail that failed can be sent again."),
+            (cleared, "content was cleared after a year"),
+            (blocked, "gone@example.com is blocked. Unblock the address first"),
+        ):
+            before = EmailMessage.objects.get(pk=mail.pk).status
+            self.assertContains(self._retry(mail), says)
+            self.assertEqual(EmailMessage.objects.get(pk=mail.pk).status, before)
+
+    def test_send_all_again_takes_the_pages_failed_mail_and_skips_what_cant_go(self):
+        ok = self._mail("Fixable")
+        blocked = self._mail("Blocked", recipient="gone@example.com")
+        EmailSuppression.objects.create(email="gone@example.com", reason=EmailSuppression.HARD_BOUNCE)
+        old = self._mail("Too old for the page")
+        EmailMessage.objects.filter(pk=old.pk).update(created_at=timezone.now() - timedelta(days=40))
+        response = self.client.post(reverse("manage_mail_retry_failed"), follow=True)
+        self.assertContains(response, "1 mail is back in the queue.")
+        self.assertContains(response, "1 mail wasn&#x27;t sent again")
+        statuses = dict(EmailMessage.objects.values_list("pk", "status"))
+        self.assertEqual(statuses[ok.pk], EmailMessage.Status.PENDING)
+        self.assertEqual(statuses[blocked.pk], EmailMessage.Status.FAILED)
+        self.assertEqual(statuses[old.pk], EmailMessage.Status.FAILED)
+
+    def test_send_all_again_follows_the_search(self):
+        mine = self._mail("Mine")
+        other = self._mail("Other", recipient="other@example.com")
+        self.client.post(reverse("manage_mail_retry_failed"), {"q": "fam@"})
+        self.assertEqual(EmailMessage.objects.get(pk=mine.pk).status, EmailMessage.Status.PENDING)
+        self.assertEqual(EmailMessage.objects.get(pk=other.pk).status, EmailMessage.Status.FAILED)
+
+    # --- unblock ---
+
+    def test_unblock_lifts_the_block_is_recorded_and_keeps_the_persons_choices(self):
+        from auditlog.models import LogEntry
+
+        block = EmailSuppression.objects.create(email="fam@example.com", reason=EmailSuppression.COMPLAINT)
+        set_preference(self.family, MailCategory.NEWSLETTER, False, source="bounce")
+        response = self.client.post(reverse("manage_mail_unblock", args=[block.pk]), follow=True)
+        self.assertContains(response, "fam@example.com is unblocked")
+        self.assertFalse(EmailSuppression.objects.exists())
+        entry = LogEntry.objects.get(object_pk=str(block.pk), action=LogEntry.Action.DELETE)
+        self.assertEqual(entry.actor, self.admin)
+        self.assertFalse(is_subscribed(self.family, MailCategory.NEWSLETTER))
+
+    # --- who may, and how ---
+
+    def test_the_actions_are_post_only_and_need_the_communication_area(self):
+        from accounts.models import OrganisationRole
+
+        mail = self._mail("Failed")
+        block = EmailSuppression.objects.create(email="x@example.com", reason=EmailSuppression.MANUAL)
+        urls = [
+            reverse("manage_mail_retry", args=[mail.pk]),
+            reverse("manage_mail_retry_failed"),
+            reverse("manage_mail_unblock", args=[block.pk]),
+        ]
+        for url in urls:
+            self.assertEqual(self.client.get(url).status_code, 405)
+        board = User.objects.create(username="board", email="bo@example.com")
+        OrganisationRole.objects.create(account=board, role=OrganisationRole.BOARD)
+        self.client.force_login(board)
+        for url in urls:
+            self.assertEqual(self.client.post(url).status_code, 404)
+        self.assertEqual(EmailMessage.objects.get(pk=mail.pk).status, EmailMessage.Status.FAILED)
+        self.assertTrue(EmailSuppression.objects.filter(pk=block.pk).exists())
+
+    def test_back_to_the_page_the_button_was_on_but_never_another_site(self):
+        log = reverse("manage_mail_log") + "?status=failed"
+        response = self.client.post(reverse("manage_mail_retry", args=[self._mail("A").pk]), {"next": log})
+        self.assertRedirects(response, log)
+        response = self.client.post(
+            reverse("manage_mail_retry", args=[self._mail("B").pk]), {"next": "https://evil.example/"}
+        )
+        self.assertRedirects(response, reverse("manage_mail_queue"))
+
+    # --- the pages ---
+
+    def test_the_mail_queue_offers_send_again_and_unblock(self):
+        mail = self._mail("Failed one")
+        block = EmailSuppression.objects.create(email="x@example.com", reason=EmailSuppression.MANUAL)
+        response = self.client.get(reverse("manage_mail_queue"))
+        self.assertContains(response, reverse("manage_mail_retry", args=[mail.pk]))
+        self.assertContains(response, reverse("manage_mail_retry_failed"))
+        self.assertContains(response, reverse("manage_mail_unblock", args=[block.pk]))
+        self.assertNotContains(response, "ask for the Django admin")
+
+    def test_mail_log_lists_every_mail_newest_first_without_its_text(self):
+        self._mail("Older", status=EmailMessage.Status.SENT, sent_at=timezone.now())
+        self._mail("Newer")
+        response = self.client.get(reverse("manage_mail_log"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "mailing/manage/mail_log.html")
+        self.assertEqual([m.subject for m in response.context["page"].object_list], ["Newer", "Older"])
+        self.assertNotContains(response, "The text.")
+        self.assertContains(response, f'href="{reverse("manage_mail_log")}"')  # the sidebar link
+
+    def test_mail_log_filters_by_address_or_subject_status_and_kind(self):
+        self._mail("Booking confirmed", status=EmailMessage.Status.SENT)
+        self._mail("Refused")
+        EmailMessage.objects.create(
+            category=MailCategory.NEWSLETTER, recipient="news@example.com", subject="Newsletter", body="…"
+        )
+        url = reverse("manage_mail_log")
+
+        def subjects(**params):
+            return {m.subject for m in self.client.get(url, params).context["page"].object_list}
+
+        self.assertEqual(subjects(status="failed"), {"Refused"})
+        self.assertEqual(subjects(category="newsletter"), {"Newsletter"})
+        self.assertEqual(subjects(q="booking"), {"Booking confirmed"})
+        self.assertEqual(subjects(q="news@"), {"Newsletter"})
+        self.assertEqual(len(subjects(status="nonsense", category="nonsense")), 3)
+
+    def test_mail_log_says_why_a_mail_was_not_sent_in_words(self):
+        from campaigns.services import CANCELLED
+
+        from .manage.queue import NOT_SENT_REASONS
+        from .services import NOT_SUBSCRIBED
+
+        self.assertIn(CANCELLED, NOT_SENT_REASONS)
+        held = self._mail("Held back", status=EmailMessage.Status.SUPPRESSED)
+        EmailMessage.objects.filter(pk=held.pk).update(status_reason=NOT_SUBSCRIBED)
+        self._mail("Refused")  # a mail server's answer is shown as it is
+        response = self.client.get(reverse("manage_mail_log"))
+        self.assertContains(response, "The person switched off this kind of mail.")
+        self.assertNotContains(response, NOT_SUBSCRIBED)
+        self.assertContains(response, "550 no such user")
+        self.assertContains(response, "Not sent")
+
+    def test_mail_log_pages(self):
+        from .manage import MAIL_LOG_PAGE_SIZE
+
+        for n in range(MAIL_LOG_PAGE_SIZE + 1):
+            self._mail(f"Mail {n}", status=EmailMessage.Status.SENT)
+        response = self.client.get(reverse("manage_mail_log"), {"page": 2, "status": "sent"})
+        self.assertEqual(len(response.context["page"].object_list), 1)
+        self.assertContains(response, "status=sent&amp;page=1")
+
+    def test_mail_log_offers_send_again_only_where_it_can_work(self):
+        fixable = self._mail("Fixable")
+        blocked = self._mail("Blocked", recipient="gone@example.com")
+        EmailSuppression.objects.create(email="gone@example.com", reason=EmailSuppression.HARD_BOUNCE)
+        sent = self._mail("Sent", status=EmailMessage.Status.SENT)
+        response = self.client.get(reverse("manage_mail_log"))
+        self.assertContains(response, reverse("manage_mail_retry", args=[fixable.pk]))
+        self.assertNotContains(response, reverse("manage_mail_retry", args=[blocked.pk]))
+        self.assertNotContains(response, reverse("manage_mail_retry", args=[sent.pk]))
+        self.assertContains(response, "Address blocked")
+
+    def test_mail_log_needs_the_communication_area(self):
+        from accounts.models import OrganisationRole
+
+        board = User.objects.create(username="board", email="bo@example.com")
+        OrganisationRole.objects.create(account=board, role=OrganisationRole.BOARD)
+        self.client.force_login(board)
+        self.assertEqual(self.client.get(reverse("manage_mail_log")).status_code, 404)
+        self.client.logout()
+        self.assertEqual(self.client.get(reverse("manage_mail_log")).status_code, 302)
+
+
 # --- §25 phase 1: muting one dojo's news ----------------------------------------
 
 

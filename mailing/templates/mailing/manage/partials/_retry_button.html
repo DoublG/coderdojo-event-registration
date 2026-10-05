@@ -1,0 +1,6 @@
+{% load i18n %}{% comment %}"Send again" for one failed mail (mailing.manage.mail_retry); `message` is an EmailMessage, back to this page after.{% endcomment %}
+<form method="post" action="{% url 'manage_mail_retry' message.pk %}" class="queue-inline-form">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Send again" %}</button>
+</form>

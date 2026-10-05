@@ -36,7 +36,13 @@ PAGES = [
         "/manage/mail/",
         "queue",
         "Mail queue",
-        "Waiting and failed mail, bounces and blocked addresses, with a warning when the workers seem down.",
+        "Waiting and failed mail, bounces and blocked addresses, with a warning when the workers seem down. Failed mail is sent again with one click (one by one or all at once), and a blocked address is unblocked once it works again.",
+    ),
+    (
+        "/manage/mail/log/",
+        "mail-log",
+        "Mail log",
+        "Every mail the site sent, newest first, searchable by address or subject and filtered by status or kind: to answer 'did they get our mail?'. A mail's text isn't shown, since some hold a personal login link.",
     ),
     (
         "/manage/promotions/",

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-03 08:42+0000\n"
+"POT-Creation-Date: 2026-10-05 19:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -549,7 +549,7 @@ msgstr "Évaluateur des extraits de casier"
 msgid "Board member"
 msgstr "Membre du conseil d'administration"
 
-#: accounts/manage_nav.py:55 core/templates/core/_manage_base.html:179
+#: accounts/manage_nav.py:55 core/templates/core/_manage_base.html:185
 #: core/templates/core/partials/_manage_switcher.html:12
 #: core/templates/core/partials/_manage_switcher.html:18
 #: core/templates/core/partials/_manage_switcher.html:42 dojos/models.py:59
@@ -683,7 +683,7 @@ msgstr ""
 #: accounts/templates/accounts/manage/security.html:4
 #: accounts/templates/accounts/security.html:7
 #: accounts/templates/accounts/security_login_method_confirm.html:12
-#: core/templates/core/_manage_base.html:168
+#: core/templates/core/_manage_base.html:174
 msgid "Sign-in security"
 msgstr "Sécurité de connexion"
 
@@ -1077,7 +1077,7 @@ msgstr "Décernée par"
 
 #: accounts/templates/accounts/child_detail.html:131
 #: applications/templates/applications/manage/check_detail.html:66
-#: mailing/templates/mailing/manage/mail_queue.html:155
+#: mailing/templates/mailing/manage/mail_queue.html:169
 msgid "Note"
 msgstr "Remarque"
 
@@ -1585,7 +1585,7 @@ msgstr "Se connecter avec un mot de passe"
 
 #: accounts/templates/accounts/manage/admin_access.html:3
 #: accounts/templates/accounts/manage/admin_access.html:4
-#: core/templates/core/_manage_base.html:201
+#: core/templates/core/_manage_base.html:207
 msgid "Django admin"
 msgstr "Admin Django"
 
@@ -1668,7 +1668,7 @@ msgstr "Ouvert"
 
 #: accounts/templates/accounts/manage/people.html:3
 #: accounts/templates/accounts/manage/people.html:4
-#: core/templates/core/_manage_base.html:185
+#: core/templates/core/_manage_base.html:191
 msgid "People"
 msgstr "Personnes"
 
@@ -1720,7 +1720,7 @@ msgid "Roles"
 msgstr "Rôles"
 
 #: accounts/templates/accounts/manage/people.html:22
-#: mailing/templates/mailing/manage/mail_queue.html:156
+#: mailing/templates/mailing/manage/mail_queue.html:170
 msgid "Since"
 msgstr "Depuis"
 
@@ -1751,6 +1751,7 @@ msgstr "Valable jusqu'au"
 
 # | msgid "Aimed at"
 #: accounts/templates/accounts/manage/people.html:65
+#: mailing/templates/mailing/manage/partials/_retry_button.html:6
 msgid "Send again"
 msgstr "Renvoyer"
 
@@ -1815,10 +1816,11 @@ msgstr "Nom, adresse e-mail ou nom d'utilisateur"
 #: accounts/templates/accounts/manage/people_add.html:18
 #: accounts/templates/accounts/manage/security.html:63
 #: applications/templates/applications/manage/check_list.html:17
-#: dojos/templates/dojos/dojo_list.html:57
+#: dojos/templates/dojos/dojo_list.html:61
 #: dojos/templates/dojos/partials/_dojo_finder_widget.html:16
 #: events/templates/events/event_list.html:80
-#: mailing/templates/mailing/manage/mail_queue.html:44
+#: mailing/templates/mailing/manage/mail_log.html:44
+#: mailing/templates/mailing/manage/mail_queue.html:46
 #: pages/templates/pages/manage_audit_log.html:43
 #: privacy/templates/privacy/manage/privacy.html:48
 msgid "Search"
@@ -1960,7 +1962,7 @@ msgstr "Connexion minimale"
 # | msgid "My Account"
 #: accounts/templates/accounts/manage/security.html:28 campaigns/models.py:53
 #: campaigns/templates/campaigns/manage/segment_list.html:14
-#: core/templates/core/_manage_base.html:153
+#: core/templates/core/_manage_base.html:159
 msgid "Accounts"
 msgstr "Comptes"
 
@@ -3576,7 +3578,7 @@ msgstr "Mentor"
 msgid "Champion (start a dojo)"
 msgstr "Champion (lancer un dojo)"
 
-#: applications/models.py:45 core/templates/core/_manage_base.html:110
+#: applications/models.py:45 core/templates/core/_manage_base.html:116
 #: mailing/models.py:43
 msgid "Pending"
 msgstr "En attente"
@@ -3655,7 +3657,7 @@ msgstr "%(account)s n'a pas encore d'extrait de casier judiciaire valable."
 
 #: applications/templates/applications/manage/_check_status.html:2
 #: applications/templates/applications/manage/check_list.html:28
-#: core/templates/core/_manage_base.html:103
+#: core/templates/core/_manage_base.html:109
 msgid "Awaiting review"
 msgstr "En attente de vérification"
 
@@ -3697,7 +3699,9 @@ msgstr "Candidature pour"
 #: content/templates/content/manage/sponsor_list.html:19
 #: dojos/templates/dojos/dojo_event_detail.html:37
 #: dojos/templates/dojos/dojo_event_list.html:25
-#: mailing/templates/mailing/manage/mail_queue.html:59
+#: mailing/templates/mailing/manage/mail_log.html:29
+#: mailing/templates/mailing/manage/mail_log.html:57
+#: mailing/templates/mailing/manage/mail_queue.html:61
 msgid "Status"
 msgstr "Statut"
 
@@ -3770,7 +3774,7 @@ msgstr "L'approbation demande un extrait de casier judiciaire valable."
 
 #: applications/templates/applications/manage/application_list.html:3
 #: applications/templates/applications/manage/application_list.html:4
-#: core/templates/core/_manage_base.html:109
+#: core/templates/core/_manage_base.html:115
 msgid "Applications"
 msgstr "Candidatures"
 
@@ -3785,6 +3789,8 @@ msgstr ""
 
 #: applications/templates/applications/manage/application_list.html:17
 #: applications/templates/applications/manage/application_list.html:23
+#: mailing/templates/mailing/manage/mail_log.html:31
+#: mailing/templates/mailing/manage/mail_log.html:38
 #: pages/templates/pages/manage_audit_log.html:30
 #: pages/templates/pages/manage_audit_log.html:37
 msgid "All"
@@ -3792,7 +3798,7 @@ msgstr "Toutes"
 
 #: applications/templates/applications/manage/application_list.html:21
 #: applications/templates/applications/manage/application_list.html:38
-#: events/forms.py:328 mailing/templates/mailing/manage/mail_queue.html:122
+#: events/forms.py:328 mailing/templates/mailing/manage/mail_queue.html:136
 msgid "Kind"
 msgstr "Type"
 
@@ -3889,7 +3895,7 @@ msgstr "Pas encore de décision."
 
 #: applications/templates/applications/manage/check_list.html:3
 #: applications/templates/applications/manage/check_list.html:4
-#: core/templates/core/_manage_base.html:102
+#: core/templates/core/_manage_base.html:108
 msgid "Background checks"
 msgstr "Extraits de casier"
 
@@ -4424,11 +4430,11 @@ msgid "The account was switched off."
 msgstr "Le compte a été désactivé."
 
 # | msgid "Enter a valid email address."
-#: campaigns/dojo_views.py:218
+#: campaigns/dojo_views.py:218 mailing/manage/queue.py:100
 msgid "The account has no email address."
 msgstr "Le compte n'a pas d'adresse e-mail."
 
-#: campaigns/dojo_views.py:219
+#: campaigns/dojo_views.py:219 mailing/manage/queue.py:97
 msgid "This kind of mail doesn't go to this kind of account."
 msgstr "Ce type de mail n'est pas envoyé à ce type de compte."
 
@@ -4449,7 +4455,9 @@ msgid "New sessions (the automatic mail)"
 msgstr "Nouvelles sessions (le mail automatique)"
 
 #: campaigns/forms.py:34 mailing/forms.py:142
-#: mailing/templates/mailing/manage/mail_queue.html:58
+#: mailing/templates/mailing/manage/mail_log.html:36
+#: mailing/templates/mailing/manage/mail_log.html:56
+#: mailing/templates/mailing/manage/mail_queue.html:60
 #: mailing/templates/mailing/manage/template_list.html:13
 msgid "Kind of mail"
 msgstr "Type d'e-mail"
@@ -4578,14 +4586,15 @@ msgid "Up to age"
 msgstr "Jusqu'à l'âge de"
 
 #: campaigns/forms.py:173 dojos/forms.py:235
-#: dojos/templates/dojos/dojo_list.html:47 events/forms.py:83
+#: dojos/templates/dojos/dojo_list.html:51 events/forms.py:83
 #: events/templates/events/event_list.html:74
 msgid "Pathway"
 msgstr "Parcours"
 
 #: campaigns/forms.py:180 mailing/forms.py:109
-#: mailing/templates/mailing/manage/mail_queue.html:57
-#: mailing/templates/mailing/manage/mail_queue.html:91
+#: mailing/templates/mailing/manage/mail_log.html:55
+#: mailing/templates/mailing/manage/mail_queue.html:59
+#: mailing/templates/mailing/manage/mail_queue.html:103
 msgid "Subject"
 msgstr "Objet"
 
@@ -5281,7 +5290,7 @@ msgstr ""
 #: campaigns/templates/campaigns/dojo/mail_list.html:3
 #: campaigns/templates/campaigns/dojo/mail_queue.html:42
 #: dojos/templates/dojos/_admin_base.html:70
-#: mailing/templates/mailing/manage/mail_queue.html:124
+#: mailing/templates/mailing/manage/mail_queue.html:138
 msgid "Mail"
 msgstr "E-mail"
 
@@ -5363,7 +5372,7 @@ msgstr ""
 "reçus."
 
 #: campaigns/templates/campaigns/dojo/mail_queue.html:23
-#: mailing/templates/mailing/manage/mail_queue.html:23
+#: mailing/templates/mailing/manage/mail_queue.html:25
 msgid "Mail isn't going out."
 msgstr "Les e-mails ne partent pas."
 
@@ -5377,12 +5386,12 @@ msgstr ""
 "occupe ; rien n'est perdu, les mails partent dès que c'est réglé."
 
 #: campaigns/templates/campaigns/dojo/mail_queue.html:29
-#: mailing/templates/mailing/manage/mail_queue.html:29
+#: mailing/templates/mailing/manage/mail_queue.html:31
 msgid "waiting to be sent"
 msgstr "en attente d'envoi"
 
 #: campaigns/templates/campaigns/dojo/mail_queue.html:30
-#: mailing/templates/mailing/manage/mail_queue.html:32
+#: mailing/templates/mailing/manage/mail_queue.html:34
 msgid "sent in the last 24 hours"
 msgstr "envoyés ces dernières 24 heures"
 
@@ -5406,21 +5415,22 @@ msgid "The last %(days)s days, and anything still waiting."
 msgstr "Les %(days)s derniers jours, et tout ce qui attend encore."
 
 #: campaigns/templates/campaigns/dojo/mail_queue.html:43
-#: mailing/templates/mailing/manage/mail_queue.html:60
-#: mailing/templates/mailing/manage/mail_queue.html:93
+#: mailing/templates/mailing/manage/mail_log.html:58
+#: mailing/templates/mailing/manage/mail_queue.html:62
+#: mailing/templates/mailing/manage/mail_queue.html:105
 msgid "Queued"
 msgstr "Mis en file"
 
 # | msgid "Waiting list"
 #: campaigns/templates/campaigns/dojo/mail_queue.html:44
-#: mailing/templates/mailing/manage/mail_queue.html:70
+#: mailing/templates/mailing/manage/mail_queue.html:72
 msgid "Waiting"
 msgstr "En attente"
 
 #: campaigns/templates/campaigns/dojo/mail_queue.html:45
 #: campaigns/templates/campaigns/manage/_status_badge.html:1
 #: campaigns/templates/campaigns/manage/campaign_list.html:27
-#: mailing/models.py:45
+#: mailing/models.py:45 mailing/templates/mailing/manage/mail_log.html:59
 msgid "Sent"
 msgstr "Envoyé"
 
@@ -5787,7 +5797,7 @@ msgid "Every dojo"
 msgstr "Tous les dojos"
 
 #: campaigns/templates/campaigns/manage/campaign_list.html:28
-#: mailing/templates/mailing/manage/mail_queue.html:125
+#: mailing/templates/mailing/manage/mail_queue.html:139
 #: pages/templates/pages/manage_audit_log.html:52
 msgid "When"
 msgstr "Quand"
@@ -6180,7 +6190,7 @@ msgstr "Supprimer la promotion"
 
 #: content/templates/content/manage/promotion_list.html:3
 #: content/templates/content/manage/promotion_list.html:4
-#: core/templates/core/_manage_base.html:124
+#: core/templates/core/_manage_base.html:130
 #: dojos/templates/dojos/partials/_event_promotions.html:9
 msgid "Promotions"
 msgstr "Promotions"
@@ -6245,7 +6255,7 @@ msgstr "Retirer le sponsor"
 
 #: content/templates/content/manage/sponsor_list.html:3
 #: content/templates/content/manage/sponsor_list.html:4
-#: core/templates/core/_manage_base.html:130
+#: core/templates/core/_manage_base.html:136
 msgid "Sponsors"
 msgstr "Sponsors"
 
@@ -6304,58 +6314,64 @@ msgstr "Communication"
 msgid "Mail templates"
 msgstr "Modèles d'e-mail"
 
-#: core/templates/core/_manage_base.html:80
+#: core/templates/core/_manage_base.html:76
+#: mailing/templates/mailing/manage/mail_log.html:3
+#: mailing/templates/mailing/manage/mail_log.html:4
+msgid "Mail log"
+msgstr "Journal des e-mails"
+
+#: core/templates/core/_manage_base.html:86
 #: core/templates/core/partials/_manage_switcher.html:26
 msgid "Organisation events"
 msgstr "Événements de l'organisation"
 
-#: core/templates/core/_manage_base.html:97
+#: core/templates/core/_manage_base.html:103
 msgid "Volunteers"
 msgstr "Bénévoles"
 
-#: core/templates/core/_manage_base.html:119
+#: core/templates/core/_manage_base.html:125
 msgid "Public site"
 msgstr "Site public"
 
-#: core/templates/core/_manage_base.html:139
+#: core/templates/core/_manage_base.html:145
 #: pages/templates/pages/code_of_conduct.html:50
 msgid "Ninjas"
 msgstr "Ninjas"
 
-#: core/templates/core/_manage_base.html:144
+#: core/templates/core/_manage_base.html:150
 #: events/templates/events/manage/badge_list.html:3
 #: events/templates/events/manage/badge_list.html:4
 msgid "Awards"
 msgstr "Distinctions"
 
-#: core/templates/core/_manage_base.html:159
+#: core/templates/core/_manage_base.html:165
 #: privacy/templates/privacy/manage/privacy.html:3
 #: privacy/templates/privacy/manage/privacy.html:4
 msgid "Privacy"
 msgstr "Vie privée"
 
 # | msgid "Has own login"
-#: core/templates/core/_manage_base.html:160
+#: core/templates/core/_manage_base.html:166
 #: privacy/templates/privacy/manage/privacy.html:11
 msgid "Needs attention"
 msgstr "À traiter"
 
-#: core/templates/core/_manage_base.html:193
+#: core/templates/core/_manage_base.html:199
 #: pages/templates/pages/manage_audit_log.html:3
 #: pages/templates/pages/manage_audit_log.html:4
 msgid "Audit log"
 msgstr "Journal d'audit"
 
-#: core/templates/core/_manage_shell.html:56
+#: core/templates/core/_manage_shell.html:57
 msgid "Pin sidebar open"
 msgstr "Épingler la barre latérale"
 
 # | msgid "Sign up"
-#: core/templates/core/_manage_shell.html:71
+#: core/templates/core/_manage_shell.html:72
 msgid "Sign out"
 msgstr "Se déconnecter"
 
-#: core/templates/core/_manage_shell.html:80 core/templates/core/menu.html:8
+#: core/templates/core/_manage_shell.html:81 core/templates/core/menu.html:8
 msgid "Menu"
 msgstr "Menu"
 
@@ -6381,7 +6397,7 @@ msgid "Dojos"
 msgstr "Dojos"
 
 #: core/templates/core/menu.html:23 dojos/forms.py:227
-#: dojos/templates/dojos/dojo_list.html:43 events/forms.py:68
+#: dojos/templates/dojos/dojo_list.html:47 events/forms.py:68
 #: events/templates/events/event_detail.html:131
 #: events/templates/events/event_list.html:70
 msgid "Language"
@@ -6535,8 +6551,8 @@ msgstr "Commune"
 
 #: dojos/forms.py:101 dojos/forms.py:266
 #: dojos/templates/dojos/dojo_detail.html:233
-#: mailing/templates/mailing/manage/mail_queue.html:121
-#: mailing/templates/mailing/manage/mail_queue.html:153
+#: mailing/templates/mailing/manage/mail_queue.html:135
+#: mailing/templates/mailing/manage/mail_queue.html:167
 msgid "Address"
 msgstr "Adresse"
 
@@ -6617,7 +6633,7 @@ msgstr ""
 "visite."
 
 #: dojos/forms.py:209 dojos/forms.py:254
-#: dojos/templates/dojos/dojo_list.html:36
+#: dojos/templates/dojos/dojo_list.html:40
 #: dojos/templates/dojos/partials/_event_form_fields.html:31 events/forms.py:53
 #: events/templates/events/event_detail.html:123
 #: events/templates/events/event_list.html:51
@@ -7217,14 +7233,14 @@ msgstr "Pas encore de sessions. Créez-en une pour commencer."
 msgid "Find a dojo"
 msgstr "Trouver un dojo"
 
-#: dojos/templates/dojos/dojo_list.html:27
+#: dojos/templates/dojos/dojo_list.html:31
 #: events/templates/events/event_list.html:94
 #: pages/templates/pages/home.html:99
 #: pathways/templates/pathways/pathway_detail.html:143
 msgid "Find a dojo near you"
 msgstr "Trouvez un dojo près de chez vous"
 
-#: dojos/templates/dojos/dojo_list.html:28
+#: dojos/templates/dojos/dojo_list.html:32
 msgid ""
 "Every CoderDojo in Belgium is free, run by local volunteers, and open to "
 "kids aged 7–18 — enter a postcode or city to see what's nearby, or filter on "
@@ -7235,17 +7251,17 @@ msgstr ""
 "pour voir ce qui existe près de chez vous, ou filtrez par langue ou par "
 "parcours."
 
-#: dojos/templates/dojos/dojo_list.html:53
+#: dojos/templates/dojos/dojo_list.html:57
 #: dojos/templates/dojos/partials/_dojo_finder_widget.html:25
 msgid "Use my location"
 msgstr "Utiliser ma position"
 
-#: dojos/templates/dojos/dojo_list.html:70
+#: dojos/templates/dojos/dojo_list.html:74
 #, python-format
 msgid "Couldn't find \"%(search_label)s\" — showing every dojo instead."
 msgstr "« %(search_label)s » introuvable : voici tous les dojos."
 
-#: dojos/templates/dojos/dojo_list.html:72
+#: dojos/templates/dojos/dojo_list.html:76
 #, python-format
 msgid "Showing %(counter)s dojo near %(search_label)s, nearest first"
 msgid_plural "Showing %(counter)s dojos near %(search_label)s, nearest first"
@@ -7253,11 +7269,11 @@ msgstr[0] "%(counter)s dojo près de %(search_label)s, le plus proche d'abord"
 msgstr[1] ""
 "%(counter)s dojos près de %(search_label)s, les plus proches d'abord"
 
-#: dojos/templates/dojos/dojo_list.html:82
+#: dojos/templates/dojos/dojo_list.html:86
 msgid "Already know when you'd like to come?"
 msgstr "Vous savez déjà quand vous voulez venir ?"
 
-#: dojos/templates/dojos/dojo_list.html:83
+#: dojos/templates/dojos/dojo_list.html:87
 #: pathways/templates/pathways/pathway_detail.html:144
 msgid "Browse upcoming events"
 msgstr "Voir les prochains événements"
@@ -8659,6 +8675,70 @@ msgstr "Quand il est utilisé et quelles variables il reçoit."
 msgid "A template with this name already exists."
 msgstr "Un modèle avec ce nom existe déjà."
 
+#: mailing/manage/queue.py:96
+msgid "The account is switched off."
+msgstr "Le compte est désactivé."
+
+#: mailing/manage/queue.py:98
+msgid "The person switched off this kind of mail."
+msgstr "La personne a désactivé ce type d'e-mail."
+
+#: mailing/manage/queue.py:99
+msgid "The family stopped this dojo's news."
+msgstr "La famille a arrêté les nouvelles de ce dojo."
+
+#: mailing/manage/queue.py:101
+msgid "The address is blocked (a bounce, a spam complaint or by hand)."
+msgstr "L'adresse est bloquée (un retour, une plainte pour spam ou manuellement)."
+
+#: mailing/manage/queue.py:103
+msgid "The campaign was cancelled before it went out."
+msgstr "La campagne a été annulée avant son départ."
+
+#: mailing/manage/queue.py:180
+#, python-format
+msgid ""
+"The mail to %(email)s is back in the queue and goes out within a minute or "
+"so."
+msgstr ""
+"L'e-mail à %(email)s est de retour dans la file d'attente et part dans la "
+"minute environ."
+
+#: mailing/manage/queue.py:199
+#, python-format
+msgid "%(count)d mail is back in the queue."
+msgid_plural "%(count)d mails are back in the queue."
+msgstr[0] "%(count)d e-mail est de retour dans la file d'attente."
+msgstr[1] "%(count)d e-mails sont de retour dans la file d'attente."
+
+#: mailing/manage/queue.py:206
+#, python-format
+msgid ""
+"%(count)d mail wasn't sent again: its address is blocked, or its content was "
+"cleared."
+msgid_plural ""
+"%(count)d mails weren't sent again: their address is blocked, or their "
+"content was cleared."
+msgstr[0] ""
+"%(count)d e-mail n'a pas été renvoyé : son adresse est bloquée, ou son "
+"contenu a été effacé."
+msgstr[1] ""
+"%(count)d e-mails n'ont pas été renvoyés : leur adresse est bloquée, ou leur "
+"contenu a été effacé."
+
+#: mailing/manage/queue.py:213
+msgid "There's no failed mail to send again."
+msgstr "Il n'y a aucun e-mail en échec à renvoyer."
+
+#: mailing/manage/queue.py:224
+#, python-format
+msgid ""
+"%(email)s is unblocked: mail goes there again. The person's own mail choices "
+"haven't changed."
+msgstr ""
+"%(email)s est débloquée : les e-mails y partent à nouveau. Les choix d'e-"
+"mails de la personne n'ont pas changé."
+
 #: mailing/manage/templates.py:69
 msgid ""
 "Template created. Write the English version first: it's used for every "
@@ -8699,7 +8779,7 @@ msgstr "Une campagne pas encore envoyée utilise ce modèle."
 msgid "Template “%(key)s” deleted."
 msgstr "Modèle « %(key)s » supprimé."
 
-#: mailing/models.py:46 mailing/templates/mailing/manage/mail_queue.html:84
+#: mailing/models.py:46 mailing/templates/mailing/manage/mail_queue.html:87
 msgid "Failed"
 msgstr "Échec"
 
@@ -8754,6 +8834,24 @@ msgstr "Rejet définitif (5.x.x)"
 msgid "Soft bounce (4.x.x)"
 msgstr "Rejet temporaire (4.x.x)"
 
+#: mailing/queue_actions.py:26 mailing/queue_actions.py:50
+msgid "Only a mail that failed can be sent again."
+msgstr "Seul un e-mail en échec peut être renvoyé."
+
+#: mailing/queue_actions.py:29
+msgid ""
+"This mail's content was cleared after a year, so it can't be sent again."
+msgstr ""
+"Le contenu de cet e-mail a été effacé après un an : il ne peut plus être "
+"renvoyé."
+
+#: mailing/queue_actions.py:31
+#, python-format
+msgid ""
+"%(email)s is blocked. Unblock the address first if the mail should go there."
+msgstr ""
+"%(email)s est bloquée. Débloquez d'abord l'adresse si l'e-mail doit y partir."
+
 #: mailing/templates/mailing/mail_preferences.html:31
 msgid "Which mails you get"
 msgstr "Les e-mails que vous recevez"
@@ -8787,18 +8885,103 @@ msgstr "Par enfant ; l'inscription aux sessions n'en dépend jamais."
 msgid "Back to your account"
 msgstr "Retour à votre compte"
 
-#: mailing/templates/mailing/manage/mail_queue.html:19
+#: mailing/templates/mailing/manage/mail_log.html:19
+msgid ""
+"Every mail the site queued, newest first: who it went to, what it was about, "
+"and whether it went out. Use it to answer “did they get our mail?”, and to "
+"send a failed mail again. The text of a mail isn't shown here, because some "
+"hold a personal login link."
+msgstr ""
+"Chaque e-mail mis en file par le site, du plus récent au plus ancien : à "
+"qui, à quel sujet, et s'il est parti. Utilisez-le pour répondre à « ont-ils "
+"reçu notre e-mail ? » et pour renvoyer un e-mail en échec. Le texte d'un e-"
+"mail n'est pas affiché ici, car certains contiennent un lien de connexion "
+"personnel."
+
+#: mailing/templates/mailing/manage/mail_log.html:20
+msgid ""
+"A year after a mail was queued, its address, subject and text are cleared; "
+"what kind of mail it was and whether it went out stay, for the figures."
+msgstr ""
+"Un an après la mise en file d'un e-mail, son adresse, son objet et son texte "
+"sont effacés ; le type d'e-mail et le fait qu'il soit parti restent, pour "
+"les statistiques."
+
+#: mailing/templates/mailing/manage/mail_log.html:25
+msgid "Email address or subject"
+msgstr "Adresse e-mail ou objet"
+
+#: mailing/templates/mailing/manage/mail_log.html:45
+#: mailing/templates/mailing/manage/mail_queue.html:47
+#: pages/templates/pages/manage_audit_log.html:44
+msgid "Show everything"
+msgstr "Tout afficher"
+
+#: mailing/templates/mailing/manage/mail_log.html:49
+#, python-format
+msgid "%(counter)s mail"
+msgid_plural "%(counter)s mails"
+msgstr[0] "%(counter)s e-mail"
+msgstr[1] "%(counter)s e-mails"
+
+#: mailing/templates/mailing/manage/mail_log.html:54
+#: mailing/templates/mailing/manage/mail_queue.html:58
+#: mailing/templates/mailing/manage/mail_queue.html:102
+msgid "To"
+msgstr "À"
+
+#: mailing/templates/mailing/manage/mail_log.html:66
+msgid "Test mail"
+msgstr "E-mail de test"
+
+#: mailing/templates/mailing/manage/mail_log.html:73
+msgid "Not sent"
+msgstr "Non envoyé"
+
+#: mailing/templates/mailing/manage/mail_log.html:80
+msgid "Address blocked"
+msgstr "Adresse bloquée"
+
+#: mailing/templates/mailing/manage/mail_log.html:86
+msgid "No mail matches."
+msgstr "Aucun e-mail ne correspond."
+
+#: mailing/templates/mailing/manage/mail_log.html:93
+#: pages/templates/pages/manage_audit_log.html:88
+msgid "Pages"
+msgstr "Pages"
+
+#: mailing/templates/mailing/manage/mail_log.html:94
+#: pages/templates/pages/manage_audit_log.html:89
+msgid "Newer"
+msgstr "Plus récents"
+
+#: mailing/templates/mailing/manage/mail_log.html:95
+#: pages/templates/pages/manage_audit_log.html:90
+#, python-format
+msgid "Page %(number)s of %(total)s"
+msgstr "Page %(number)s sur %(total)s"
+
+#: mailing/templates/mailing/manage/mail_log.html:96
+#: pages/templates/pages/manage_audit_log.html:91
+msgid "Older"
+msgstr "Plus anciens"
+
+#: mailing/templates/mailing/manage/mail_queue.html:21
 msgid ""
 "Every mail the site sends waits here first and goes out within a minute or "
-"so. Use this page to check that mail is going out, and to see which mail "
-"failed or bounced and which addresses get nothing any more."
+"so. Use this page to check that mail is going out, to send failed mail again "
+"and to unblock an address."
 msgstr ""
-"Chaque e-mail envoyé par le site attend d'abord ici et part en une minute "
-"environ. Cette page vous permet de vérifier que les e-mails partent, et de "
-"voir quels e-mails ont échoué ou sont revenus et quelles adresses ne "
-"reçoivent plus rien."
+"Chaque e-mail envoyé par le site attend d'abord ici et part dans la minute "
+"environ. Utilisez cette page pour vérifier que les e-mails partent, renvoyer "
+"les e-mails en échec et débloquer une adresse."
 
-#: mailing/templates/mailing/manage/mail_queue.html:24
+#: mailing/templates/mailing/manage/mail_queue.html:21
+msgid "Every mail sent is in the mail log."
+msgstr "Chaque e-mail envoyé figure dans le journal des e-mails."
+
+#: mailing/templates/mailing/manage/mail_queue.html:26
 #, python-format
 msgid ""
 "The oldest mail has been waiting since %(since)s. The mail workers are "
@@ -8810,102 +8993,107 @@ msgstr ""
 "les vérifier. Rien n'est perdu ; les e-mails partiront dès qu'ils tourneront "
 "à nouveau."
 
-#: mailing/templates/mailing/manage/mail_queue.html:30
+#: mailing/templates/mailing/manage/mail_queue.html:32
 msgid "being sent"
 msgstr "en cours d'envoi"
 
-#: mailing/templates/mailing/manage/mail_queue.html:31
+#: mailing/templates/mailing/manage/mail_queue.html:33
 msgid "scheduled for later"
 msgstr "prévus pour plus tard"
 
-#: mailing/templates/mailing/manage/mail_queue.html:33
+#: mailing/templates/mailing/manage/mail_queue.html:35
 #, python-format
 msgid "failed in the last %(days)s days"
 msgstr "échoués ces %(days)s derniers jours"
 
-#: mailing/templates/mailing/manage/mail_queue.html:34
+#: mailing/templates/mailing/manage/mail_queue.html:36
 #, python-format
 msgid "bounces in the last %(days)s days"
 msgstr "revenus ces %(days)s derniers jours"
 
-#: mailing/templates/mailing/manage/mail_queue.html:35
+#: mailing/templates/mailing/manage/mail_queue.html:37
 msgid "blocked addresses"
 msgstr "adresses bloquées"
 
-#: mailing/templates/mailing/manage/mail_queue.html:40
+#: mailing/templates/mailing/manage/mail_queue.html:42
 msgid "Only show mail for an email address"
 msgstr "N'afficher que les e-mails d'une adresse e-mail"
 
-#: mailing/templates/mailing/manage/mail_queue.html:45
-#: pages/templates/pages/manage_audit_log.html:44
-msgid "Show everything"
-msgstr "Tout afficher"
-
-#: mailing/templates/mailing/manage/mail_queue.html:50
+#: mailing/templates/mailing/manage/mail_queue.html:52
 msgid "Waiting to be sent"
 msgstr "En attente d'envoi"
 
-#: mailing/templates/mailing/manage/mail_queue.html:51
+#: mailing/templates/mailing/manage/mail_queue.html:53
 msgid "In the order they go out: account and booking mail before campaigns."
 msgstr ""
 "Dans l'ordre d'envoi : les e-mails de compte et d'inscription avant les "
 "campagnes."
 
-#: mailing/templates/mailing/manage/mail_queue.html:56
-#: mailing/templates/mailing/manage/mail_queue.html:90
-msgid "To"
-msgstr "À"
-
-#: mailing/templates/mailing/manage/mail_queue.html:61
+#: mailing/templates/mailing/manage/mail_queue.html:63
 msgid "Not before"
 msgstr "Pas avant"
 
-#: mailing/templates/mailing/manage/mail_queue.html:70
+#: mailing/templates/mailing/manage/mail_queue.html:72
 msgid "Being sent"
 msgstr "En cours d'envoi"
 
-#: mailing/templates/mailing/manage/mail_queue.html:70
+#: mailing/templates/mailing/manage/mail_queue.html:72
 #, python-format
 msgid "%(counter)s attempt"
 msgid_plural "%(counter)s attempts"
 msgstr[0] "%(counter)s essai"
 msgstr[1] "%(counter)s essais"
 
-#: mailing/templates/mailing/manage/mail_queue.html:75
+#: mailing/templates/mailing/manage/mail_queue.html:77
 msgid "Nothing is waiting: all mail has gone out."
 msgstr "Rien n'attend : tous les e-mails sont partis."
 
-#: mailing/templates/mailing/manage/mail_queue.html:80
-#: mailing/templates/mailing/manage/mail_queue.html:110
-#: mailing/templates/mailing/manage/mail_queue.html:143
-#: mailing/templates/mailing/manage/mail_queue.html:173
+#: mailing/templates/mailing/manage/mail_queue.html:82
+#: mailing/templates/mailing/manage/mail_queue.html:124
+#: mailing/templates/mailing/manage/mail_queue.html:157
+#: mailing/templates/mailing/manage/mail_queue.html:196
 #, python-format
 msgid "Showing the first %(limit)s."
 msgstr "Seuls les %(limit)s premiers sont affichés."
 
-#: mailing/templates/mailing/manage/mail_queue.html:85
+#: mailing/templates/mailing/manage/mail_queue.html:89
+msgid "Send all the failed mail shown here again?"
+msgstr "Renvoyer tous les e-mails en échec affichés ici ?"
+
+#: mailing/templates/mailing/manage/mail_queue.html:93
+msgid "Send all again"
+msgstr "Tout renvoyer"
+
+#: mailing/templates/mailing/manage/mail_queue.html:97
 #, python-format
 msgid ""
 "Mail the mail server refused, or that still couldn't be sent after several "
-"tries, in the last %(days)s days."
+"tries, in the last %(days)s days. Once the problem is fixed (the mail server "
+"is back, a typo in an address is corrected), send it again: it goes back in "
+"the queue, and the person's mail choices and blocks are checked again before "
+"it goes out."
 msgstr ""
-"Les e-mails que le serveur de messagerie a refusés, ou qui n'ont toujours "
-"pas pu être envoyés après plusieurs essais, ces %(days)s derniers jours."
+"Les e-mails refusés par le serveur de messagerie, ou qui n'ont toujours pas "
+"pu être envoyés après plusieurs tentatives, ces %(days)s derniers jours. Une "
+"fois le problème réglé (le serveur fonctionne à nouveau, une faute de frappe "
+"dans une adresse est corrigée), renvoyez-les : ils retournent dans la file "
+"d'attente, et les choix d'e-mails et les blocages de la personne sont "
+"vérifiés à nouveau avant le départ."
 
-#: mailing/templates/mailing/manage/mail_queue.html:92
-#: mailing/templates/mailing/manage/mail_queue.html:154
+#: mailing/templates/mailing/manage/mail_queue.html:104
+#: mailing/templates/mailing/manage/mail_queue.html:168
 msgid "Why"
 msgstr "Pourquoi"
 
-#: mailing/templates/mailing/manage/mail_queue.html:105
+#: mailing/templates/mailing/manage/mail_queue.html:119
 msgid "No failed mail."
 msgstr "Aucun e-mail échoué."
 
-#: mailing/templates/mailing/manage/mail_queue.html:114
+#: mailing/templates/mailing/manage/mail_queue.html:128
 msgid "Bounces and complaints"
 msgstr "Retours et plaintes"
 
-#: mailing/templates/mailing/manage/mail_queue.html:115
+#: mailing/templates/mailing/manage/mail_queue.html:129
 #, python-format
 msgid ""
 "Mail that came back from the recipient's mail server, or that the recipient "
@@ -8917,41 +9105,53 @@ msgstr ""
 "définitif ou une plainte arrête immédiatement les e-mails vers cette "
 "adresse ; des rejets temporaires répétés aussi."
 
-#: mailing/templates/mailing/manage/mail_queue.html:116
+#: mailing/templates/mailing/manage/mail_queue.html:130
 msgid "The bounce mailbox isn't set up on this site, so no bounces are read."
 msgstr ""
 "La boîte des retours n'est pas configurée sur ce site : aucun retour n'est "
 "lu."
 
-#: mailing/templates/mailing/manage/mail_queue.html:123
+#: mailing/templates/mailing/manage/mail_queue.html:137
 msgid "What the mail server said"
 msgstr "Ce qu'a répondu le serveur de messagerie"
 
-#: mailing/templates/mailing/manage/mail_queue.html:138
+#: mailing/templates/mailing/manage/mail_queue.html:152
 msgid "No bounces."
 msgstr "Aucun retour."
 
-#: mailing/templates/mailing/manage/mail_queue.html:147
+#: mailing/templates/mailing/manage/mail_queue.html:161
 msgid "Blocked addresses"
 msgstr "Adresses bloquées"
 
-#: mailing/templates/mailing/manage/mail_queue.html:148
-msgid "Nothing is sent to these addresses any more, whatever the person chose."
+#: mailing/templates/mailing/manage/mail_queue.html:162
+msgid ""
+"Nothing is sent to these addresses any more, whatever the person chose. "
+"Unblock an address once it works again (the person fixed their mailbox, or a "
+"typo was corrected); their own mail choices stay as they are."
 msgstr ""
 "Plus rien n'est envoyé à ces adresses, quels que soient les choix de la "
-"personne."
+"personne. Débloquez une adresse dès qu'elle fonctionne à nouveau (la "
+"personne a réparé sa boîte mail, ou une faute de frappe a été corrigée) ; "
+"ses propres choix d'e-mails restent tels quels."
 
-#: mailing/templates/mailing/manage/mail_queue.html:168
+#: mailing/templates/mailing/manage/mail_queue.html:182
+msgid "This person marked our mail as spam. Unblock only if they asked for it."
+msgstr ""
+"Cette personne a signalé nos e-mails comme spam. Ne débloquez que si elle "
+"l'a demandé."
+
+#: mailing/templates/mailing/manage/mail_queue.html:182
+#, python-format
+msgid "Unblock %(email)s?"
+msgstr "Débloquer %(email)s ?"
+
+#: mailing/templates/mailing/manage/mail_queue.html:186
+msgid "Unblock"
+msgstr "Débloquer"
+
+#: mailing/templates/mailing/manage/mail_queue.html:191
 msgid "No blocked addresses."
 msgstr "Aucune adresse bloquée."
-
-#: mailing/templates/mailing/manage/mail_queue.html:176
-msgid ""
-"To send a failed mail again or unblock an address, ask for the Django admin "
-"(Organisation → Django admin)."
-msgstr ""
-"Pour renvoyer un e-mail échoué ou débloquer une adresse, demandez l'accès à "
-"l'admin Django (Organisation → Admin Django)."
 
 # | msgid "Meet the team"
 #: mailing/templates/mailing/manage/template_edit.html:20
@@ -9578,23 +9778,6 @@ msgstr "retiré"
 msgid "Nothing in the log matches."
 msgstr "Rien dans le journal ne correspond."
 
-#: pages/templates/pages/manage_audit_log.html:88
-msgid "Pages"
-msgstr "Pages"
-
-#: pages/templates/pages/manage_audit_log.html:89
-msgid "Newer"
-msgstr "Plus récents"
-
-#: pages/templates/pages/manage_audit_log.html:90
-#, python-format
-msgid "Page %(number)s of %(total)s"
-msgstr "Page %(number)s sur %(total)s"
-
-#: pages/templates/pages/manage_audit_log.html:91
-msgid "Older"
-msgstr "Plus anciens"
-
 #: pathways/templates/pathways/partials/_pathway_card.html:17
 #: pathways/templates/pathways/pathway_detail.html:158
 #, python-format
@@ -10011,6 +10194,27 @@ msgid ""
 msgstr ""
 "Un lien de confirmation a été envoyé à %(email)s. L'adresse change dès qu'il "
 "est ouvert (dans les %(hours)s heures)."
+
+#, python-format
+#~ msgid ""
+#~ "Mail the mail server refused, or that still couldn't be sent after "
+#~ "several tries, in the last %(days)s days."
+#~ msgstr ""
+#~ "Les e-mails que le serveur de messagerie a refusés, ou qui n'ont toujours "
+#~ "pas pu être envoyés après plusieurs essais, ces %(days)s derniers jours."
+
+#~ msgid ""
+#~ "Nothing is sent to these addresses any more, whatever the person chose."
+#~ msgstr ""
+#~ "Plus rien n'est envoyé à ces adresses, quels que soient les choix de la "
+#~ "personne."
+
+#~ msgid ""
+#~ "To send a failed mail again or unblock an address, ask for the Django "
+#~ "admin (Organisation → Django admin)."
+#~ msgstr ""
+#~ "Pour renvoyer un e-mail échoué ou débloquer une adresse, demandez l'accès "
+#~ "à l'admin Django (Organisation → Admin Django)."
 
 #~ msgid "Enter your postcode or city"
 #~ msgstr "Indiquez votre code postal ou commune"

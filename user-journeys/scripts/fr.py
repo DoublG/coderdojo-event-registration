@@ -326,7 +326,11 @@ STEPS = {
         ),
         "queue": (
             "File d'attente des e-mails",
-            "E-mails en attente et en échec, retours et adresses bloquées, avec un avertissement quand les workers semblent arrêtés.",
+            "E-mails en attente et en échec, retours et adresses bloquées, avec un avertissement quand les workers semblent arrêtés. Les e-mails en échec se renvoient en un clic (un par un ou tous ensemble), et une adresse bloquée se débloque dès qu'elle fonctionne à nouveau.",
+        ),
+        "mail-log": (
+            "Journal des e-mails",
+            "Chaque e-mail envoyé par le site, du plus récent au plus ancien, à rechercher par adresse ou objet et à filtrer par statut ou type : pour répondre à « ont-ils reçu notre e-mail ? ». Le texte d'un e-mail n'est pas affiché, car certains contiennent un lien de connexion personnel.",
         ),
         "promotions": (
             "Promotions",

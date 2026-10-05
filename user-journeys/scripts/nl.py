@@ -101,7 +101,10 @@ STEPS = {
             "De pagina van een dojo",
             "Elke dojo heeft een pagina met zijn talen, volgende sessies, team, nieuws en de leertrajecten die hij aanbiedt.",
         ),
-        "events": ("Sessies bekijken", "Alle komende sessies, in de buurt van een plaats of niet, te filteren op dojo, datum, leeftijd, taal en leertraject."),
+        "events": (
+            "Sessies bekijken",
+            "Alle komende sessies, in de buurt van een plaats of niet, te filteren op dojo, datum, leeftijd, taal en leertraject.",
+        ),
         "event-full": (
             "Een volle sessie",
             "Als een sessie vol is, kunnen gezinnen nog op de wachtlijst; ze schuiven automatisch door als er een plaats vrijkomt.",
@@ -323,7 +326,11 @@ STEPS = {
         ),
         "queue": (
             "E-mailwachtrij",
-            "Wachtende en mislukte mail, teruggekomen mail en geblokkeerde adressen, met een waarschuwing als de workers stil lijken te liggen.",
+            "Wachtende en mislukte mail, teruggekomen mail en geblokkeerde adressen, met een waarschuwing als de workers stil lijken te liggen. Mislukte mail stuur je met één klik opnieuw (één voor één of alles samen), en een geblokkeerd adres deblokkeer je zodra het weer werkt.",
+        ),
+        "mail-log": (
+            "E-maillogboek",
+            "Elke e-mail die de site verstuurde, de nieuwste eerst, te doorzoeken op adres of onderwerp en te filteren op status of soort: om te antwoorden op 'hebben ze onze mail gekregen?'. De tekst van een e-mail staat er niet, want sommige bevatten een persoonlijke aanmeldlink.",
         ),
         "promotions": (
             "Uitgelicht",

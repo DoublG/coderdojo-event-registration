@@ -28,8 +28,10 @@ The sidebar has these sections:
   instead of a list (see :doc:`segments`).
 - **Mail templates**: the text of every mail the site sends, in each
   language (see :doc:`mail-templates`).
-- **Mail queue**: the mail waiting to go out, failed mail, bounces and
-  blocked addresses (see :doc:`mail-queue`).
+- **Mail queue**: the mail waiting to go out, failed mail (to send again),
+  bounces and blocked addresses (to unblock) (see :doc:`mail-queue`).
+- **Mail log**: every mail the site sent, to look one up (see
+  :doc:`mail-queue`).
 - **Promotions**: which events are featured where on the public site (see
   :doc:`promotions`).
 - **Sponsors**: the sponsors and partners on the homepage (see

@@ -15,4 +15,8 @@ urlpatterns = [
         name="manage_template_delete_language",
     ),
     path("manage/mail/", manage.mail_queue, name="manage_mail_queue"),
+    path("manage/mail/log/", manage.mail_log, name="manage_mail_log"),
+    path("manage/mail/retry-failed/", manage.mail_retry_failed, name="manage_mail_retry_failed"),
+    path("manage/mail/<int:message_id>/retry/", manage.mail_retry, name="manage_mail_retry"),
+    path("manage/mail/blocked/<int:suppression_id>/unblock/", manage.mail_unblock, name="manage_mail_unblock"),
 ]

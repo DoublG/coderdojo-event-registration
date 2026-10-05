@@ -25,7 +25,11 @@ with sync_playwright() as pw:
         max_h=1800,
     )
     p = j.go("/events/")
-    j.shot("events", "Browse sessions", "All upcoming sessions, near a place or not, filterable by dojo, date, age, language and pathway.")
+    j.shot(
+        "events",
+        "Browse sessions",
+        "All upcoming sessions, near a place or not, filterable by dojo, date, age, language and pathway.",
+    )
     p = j.go("/events/76/")
     j.shot(
         "event-full",

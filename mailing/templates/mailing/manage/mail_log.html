@@ -1,0 +1,99 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Mail log" %}{% endblock %}
+{% block manage_heading %}{% translate "Mail log" %}{% endblock %}
+
+{% block manage_extra_style %}
+<style>
+  .log-filters .cd-form__row { align-items: end; }
+  .log-pager { display: flex; gap: var(--space-3); align-items: center; margin-top: var(--space-4); }
+  .queue-inline-form { display: inline; margin: 0; }
+  .log-to { min-width: 11rem; max-width: 14rem; overflow-wrap: anywhere; }
+  .log-subject { min-width: 12rem; }
+  .log-reason { display: block; max-width: 18rem; overflow-wrap: anywhere; }
+</style>
+{% endblock %}
+
+{% block manage_content %}
+  {% comment %}Every mail, newest first (mailing.manage.mail_log). Never a mail's text: a login or password-reset mail holds a working link. Send again goes through mailing.queue_actions.{% endcomment %}
+  <p class="body-sm">{% translate "Every mail the site queued, newest first: who it went to, what it was about, and whether it went out. Use it to answer “did they get our mail?”, and to send a failed mail again. The text of a mail isn't shown here, because some hold a personal login link." %}</p>
+  <p class="body-sm">{% translate "A year after a mail was queued, its address, subject and text are cleared; what kind of mail it was and whether it went out stay, for the figures." %}</p>
+
+  <form method="get" class="cd-card cd-form log-filters" style="padding: var(--space-5); margin-bottom: var(--space-5);">
+    <div class="cd-form__row">
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="log-q">{% translate "Email address or subject" %}</label>
+        <input class="cd-form__input body" type="search" id="log-q" name="q" value="{{ query }}">
+      </div>
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="log-status">{% translate "Status" %}</label>
+        <select class="cd-form__select body" id="log-status" name="status">
+          <option value="">{% translate "All" %}</option>
+          {% for value, label in statuses %}<option value="{{ value }}"{% if status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="cd-form__field">
+        <label class="cd-form__label label" for="log-category">{% translate "Kind of mail" %}</label>
+        <select class="cd-form__select body" id="log-category" name="category">
+          <option value="">{% translate "All" %}</option>
+          {% for value, label in categories %}<option value="{{ value }}"{% if category == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="cd-form__actions">
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Search" %}</button>
+      {% if filter_query %}<a class="cd-btn cd-btn--ghost label" href="{% url 'manage_mail_log' %}">{% translate "Show everything" %}</a>{% endif %}
+    </div>
+  </form>
+
+  <p class="caption">{% blocktranslate count counter=page.paginator.count %}{{ counter }} mail{% plural %}{{ counter }} mails{% endblocktranslate %}</p>
+  <div class="cd-table-wrap">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label" scope="col">{% translate "To" %}</th>
+          <th class="label" scope="col">{% translate "Subject" %}</th>
+          <th class="label" scope="col">{% translate "Kind of mail" %}</th>
+          <th class="label" scope="col">{% translate "Status" %}</th>
+          <th class="label" scope="col">{% translate "Queued" %}</th>
+          <th class="label" scope="col">{% translate "Sent" %}</th>
+          <th class="label" scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for message in page.object_list %}
+          <tr>
+            <td class="body-sm log-to">{{ message.recipient|default:"—" }}{% if message.is_test %}<br><span class="caption">{% translate "Test mail" %}</span>{% endif %}</td>
+            <td class="body-sm log-subject">{{ message.subject|default:"—" }}{% if message.campaign %}<br><span class="caption">{{ message.campaign.name }}</span>{% endif %}</td>
+            <td class="body-sm">{{ message.get_category_display }}</td>
+            <td class="body-sm">
+              {% if message.status == "sent" %}<span class="cd-badge cd-badge--success caption">
+              {% elif message.status == "failed" or message.status == "bounced" %}<span class="cd-badge cd-badge--danger caption">
+              {% elif message.status == "suppressed" %}<span class="cd-badge cd-badge--outline caption">
+              {% else %}<span class="cd-badge cd-badge--warning caption">{% endif %}{% if message.status == "suppressed" %}{% translate "Not sent" %}{% else %}{{ message.get_status_display }}{% endif %}</span>
+              {% if message.reason_text %}<span class="caption log-reason">{{ message.reason_text }}</span>{% endif %}
+            </td>
+            <td class="body-sm">{{ message.created_at|date:"d/m/Y H:i" }}</td>
+            <td class="body-sm">{{ message.sent_at|date:"d/m/Y H:i"|default:"—" }}</td>
+            <td class="body-sm">
+              {% if message.status == "failed" %}
+                {% if message.recipient|lower in blocked %}<span class="caption">{% translate "Address blocked" %}</span>
+                {% elif message.body %}{% include "mailing/manage/partials/_retry_button.html" %}{% endif %}
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td class="body-sm" colspan="7">{% translate "No mail matches." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page.paginator.num_pages > 1 %}
+    <nav class="log-pager body-sm" aria-label="{% translate 'Pages' %}">
+      {% if page.has_previous %}<a class="cd-btn cd-btn--secondary label" href="?{% if filter_query %}{{ filter_query }}&amp;{% endif %}page={{ page.previous_page_number }}">{% translate "Newer" %}</a>{% endif %}
+      <span>{% blocktranslate with number=page.number total=page.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}</span>
+      {% if page.has_next %}<a class="cd-btn cd-btn--secondary label" href="?{% if filter_query %}{{ filter_query }}&amp;{% endif %}page={{ page.next_page_number }}">{% translate "Older" %}</a>{% endif %}
+    </nav>
+  {% endif %}
+{% endblock %}
