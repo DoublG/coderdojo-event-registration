@@ -40,6 +40,9 @@ Sections 13–25 cover the API, the audit log, two-step login, GDPR, child accou
 ## 1. Overview
 
 The main entities and how they connect, grouped by the Django app that owns them.
+The diagrams in this document show each table's key fields and relations, not every
+column: longer texts, the per-language `translations` and most timestamps are left out.
+The models themselves are the full reference.
 
 ```mermaid
 flowchart LR
@@ -87,6 +90,49 @@ flowchart LR
     User -- "check decisions" --> BackgroundCheckHistory
     Application -. "mentor: preferred dojo" .-> Dojo
     Dojo -. located in .-> Municipality & AdministrativeBoundary
+```
+
+Around that core, the apps that reach people and keep the record. Each hangs off
+an account, a dojo or a session:
+
+```mermaid
+flowchart LR
+    U([User])
+    D([Dojo])
+    E([Event])
+    subgraph content
+        Announcement
+        Promotion
+    end
+    subgraph notifications
+        Notification
+    end
+    subgraph mailing
+        MailPreference
+        EmailMessage
+    end
+    subgraph campaigns
+        Segment
+        Campaign
+    end
+    subgraph api
+        DojoApiClient
+    end
+    subgraph privacy
+        RetentionNotice
+        ErasureRecord
+    end
+
+    D -- posts --> Announcement
+    Promotion -- features --> E
+    Notification -- for --> U
+    U -- "chooses mail" --> MailPreference
+    Segment -- "audience of" --> Campaign
+    Campaign -- queues --> EmailMessage
+    EmailMessage -- to --> U
+    DojoApiClient -- "works for" --> D
+    RetentionNotice -- reminds --> U
+    ErasureRecord -. "which row was erased" .-> U
 ```
 
 ---
@@ -828,6 +874,10 @@ account and dojo (below called `DojoMembership`; the name isn't decided).
 One account can be linked to any number of dojos, with the role that fits
 each relationship.
 
+> **Historical.** This is the design as it was planned, kept as the record of why the
+> model looks the way it does. It still uses the plan's names (`ACCOUNT` and `NINJA_ACCOUNT`,
+> which became one `User` table with an `account_type`). The model as built is in sections 2–9.
+
 ```mermaid
 erDiagram
     ACCOUNT ||--o{ DOJO_MEMBERSHIP : "champion / mentor at"
@@ -1155,9 +1205,11 @@ future work that needs its own design.
 
 ### Provisional full diagram
 
-> **Provisional.** This is a working draft of the whole redesigned model.
-> **(A)**–**(F)** below are all decided. The diagram is still provisional
-> in its details (names, exact fields), not in its structure.
+> **Historical.** This is the design as it was planned, kept as the record of why the
+> model looks the way it does. It still uses the plan's names (`ACCOUNT` and `NINJA_ACCOUNT`,
+> which became one `User` table with an `account_type`). The model as built is in sections 2–9.
+> Its structure was built as drawn; names and some fields differ
+> (e.g. `Application.motivation` became `message`).
 
 ```mermaid
 erDiagram
@@ -1867,6 +1919,10 @@ being on by default is decided (see Decisions below). The newsletter always
 needs an explicit opt-in.
 
 #### Target model
+
+> **Historical.** The plan's diagram, with the plan's field names (e.g. `audience_count`,
+> `last_error`). The built tables are in "Consent, the queue and bounces" and "Campaigns,
+> journeys and segments" above.
 
 ```mermaid
 erDiagram
@@ -3230,6 +3286,30 @@ data, anonymising or removing it, and archiving or deleting it once it's no
 longer needed. Most of our data is about **children**, one field is
 **health data** and one flow handles **criminal-record extracts**, so this
 matters more here than on an average site.
+
+What the privacy app stores itself (the classification lives in code, in each app's
+`privacy.py`, not in tables):
+
+```mermaid
+erDiagram
+    USER ||--o{ RETENTION_NOTICE : "reminders before deletion"
+    USER |o--o{ ERASURE_RECORD : "requested_by (nullable)"
+
+    ERASURE_RECORD {
+        string model "accounts.User or accounts.Ninja"
+        bigint object_id "the erased row, never who it was"
+        bool keep_visible "a champion's or mentor's public profile kept"
+        string reason "self | request | retention"
+        bigint requested_by_id FK "nullable"
+        datetime erased_at "replayed after a backup restore"
+    }
+    RETENTION_NOTICE {
+        bigint account_id FK
+        datetime inactive_since "the last login it was about"
+        int days_before "30 or 7; 0 = date passed, still a champion"
+        datetime created_at
+    }
+```
 
 ### Existing Django apps
 

@@ -283,9 +283,10 @@ sensitive field, no page loads a script from another site, and the public pages 
 section(
     "The data model at a glance",
     f"""
-<p class='lede'>Fifteen apps, in four layers, each with its own <code>urls.py</code> mounted at the top level. The diagram
-shows the main entities and how they connect; the layers are below.</p>
+<p class='lede'>Fifteen apps, in four layers, each with its own <code>urls.py</code> mounted at the top level. The diagrams
+show the main entities and how they connect; the layers are below.</p>
 {mm("subgraph accounts", "The main entities, grouped by the app that owns them (DATA_MODEL.md §1).")}
+{mm("subgraph privacy", "Around the core: the apps that reach people and keep the record (DATA_MODEL.md §1).")}
 <table>
 <tr><th>App</th><th>Owns</th></tr>
 <tr><td><code>accounts</code></td><td><code>User</code> (every login), <code>Ninja</code>, <code>Guardianship</code>, organisation roles, admin-access grants, invitations, the sign-in policy</td></tr>
