@@ -125,6 +125,28 @@ die() { printf '\033[31m[server] error:\033[0m %s\n' "\$*" >&2; exit 1; }
 [ -n "\${XDG_RUNTIME_DIR:-}" ] || [ ! -d "/run/user/\$(id -u)" ] || export XDG_RUNTIME_DIR="/run/user/\$(id -u)"
 user_systemd() { systemctl --user show-environment >/dev/null 2>&1; }
 
+# Without lingering, systemd --user (and so the Celery workers) doesn't start
+# at boot: after a server restart the workers stay down until someone logs in.
+linger_note() {
+    if [ "\$(loginctl show-user "\$USER" -p Linger --value 2>/dev/null)" = yes ]; then
+        echo "lingering: on (the workers start at boot)"
+    else
+        echo "lingering: OFF, so the workers won't start after a server reboot (ask Level27: loginctl enable-linger \$USER)"
+    fi
+}
+
+# Both workers answer a ping. Right after a (re)start Celery still has to reach
+# the broker, so ask a few times before giving up.
+celery_ping() {
+    local n
+    for _ in 1 2 3 4 5 6; do
+        n="\$( cd "\$APP" && "\$PY" -m celery -A website inspect ping --timeout 10 2>/dev/null | grep -c ': OK' || true)"
+        [ "\$n" -ge 2 ] && return 0
+        sleep 5
+    done
+    return 1
+}
+
 missing_env_keys() {
     local k missing=""
     for k in \$EXAMPLE_KEYS; do grep -qE "^\$k=" "\$APP/.env" 2>/dev/null || missing="\$missing \$k"; done
@@ -179,6 +201,7 @@ if [ "\$MODE" = check ]; then
         echo "celery: systemd --user isn't reachable for \$USER, so a deploy can't start the workers (ask Level27 to enable lingering)"
     else
         for unit in \$CELERY_UNITS; do echo "\$unit: \$(systemctl --user is-active "\$unit" 2>/dev/null || true)"; done
+        linger_note
     fi
     step "Would-be requirements install (dry run)"
     "\$PY" -m pip install --dry-run --quiet -r /dev/stdin < "\$HOME/deploy/check-requirements.txt" \
@@ -278,7 +301,8 @@ else
     # A restart, not a reload: a worker keeps running the code it started with.
     systemctl --user restart \$CELERY_UNITS
     for unit in \$CELERY_UNITS; do echo "\$unit: \$(systemctl --user is-active "\$unit" || true)"; done
-    if ( cd "\$APP" && "\$PY" -m celery -A website inspect ping --timeout 20 ) >/dev/null 2>&1; then
+    linger_note
+    if celery_ping; then
         echo "celery: both workers answer"
     else
         die "the site is live, but the Celery workers don't answer a ping — check: journalctl --user -u coolregistration-celery-mailing"
