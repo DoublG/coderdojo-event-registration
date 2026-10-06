@@ -651,6 +651,19 @@ class BeltAndBadgeTests(TestCase):
         self.assertIsNotNone(self.ninja.badges.get(badge=first).earned_date)
         self.assertEqual(self.ninja.belts.count(), 1)
 
+    def test_a_milestone_without_a_threshold_never_breaks_marking_attendance(self):
+        """Badge.clean() requires a milestone's threshold, but a row saved
+        without it (an import, a fix by hand) is skipped, not a TypeError."""
+        from .awards import sync_milestones
+
+        broken = self.Badge.objects.create(name="No threshold", kind=self.Badge.MILESTONE, threshold=None)
+        band = self.Badge.objects.create(name="Band", kind=self.Badge.MILESTONE, threshold=1)
+        self.registration.attended = True
+        self.registration.save()
+        sync_milestones(self.ninja, self.mentor)
+        self.assertIsNotNone(self.ninja.badges.get(badge=band).earned_date)
+        self.assertFalse(self.ninja.badges.filter(badge=broken).exists())
+
     def test_a_mentor_awards_a_one_off_badge_once(self):
         from .awards import BadgeError, award_badge
 

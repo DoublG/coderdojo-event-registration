@@ -12,11 +12,18 @@ flow call these; nothing else creates NinjaBelt rows (seeders aside).
   belt awards it, as the membership that marked the attendance.
 """
 
+from datetime import date
+from typing import TYPE_CHECKING
+
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from .models import Badge, NinjaBadge, NinjaBelt, Registration
+from .models import Badge, Belt, NinjaBadge, NinjaBelt, Registration
+
+if TYPE_CHECKING:  # types only: keep the import graph one-way (see _may_award)
+    from accounts.models import Ninja
+    from dojos.models import DojoMembership
 
 
 class BeltError(Exception):
@@ -27,7 +34,7 @@ class BadgeError(Exception):
     """A badge can't be awarded; the message is shown to the user."""
 
 
-def _may_award(membership, capability):
+def _may_award(membership: "DojoMembership | None", capability: str) -> bool:
     # Imported here: dojos.access imports dojos.models, which the events
     # models reference by string only — keep the import graph one-way.
     from dojos.access import ROLE_CAPABILITIES
@@ -41,14 +48,16 @@ def _may_award(membership, capability):
     )
 
 
-def _check_can_award(membership):
+def _check_can_award(membership: "DojoMembership | None") -> None:
     from dojos.access import AWARD_BELTS
 
     if not _may_award(membership, AWARD_BELTS):
         raise BeltError(_("Only a dojo's active champion or mentors can award belts."))
 
 
-def award_belt(ninja, belt, membership, note="", awarded_on=None):
+def award_belt(
+    ninja: "Ninja", belt: Belt, membership: "DojoMembership", note: str = "", awarded_on: date | None = None
+) -> NinjaBelt:
     """Append `belt` to `ninja`'s belt history, awarded by `membership` (an
     active champion/mentor membership). The ninja must have a registration
     at one of that dojo's sessions, and the belt must be above their
@@ -76,7 +85,9 @@ def award_belt(ninja, belt, membership, note="", awarded_on=None):
     )
 
 
-def award_badge(ninja, badge, membership, note="", awarded_on=None):
+def award_badge(
+    ninja: "Ninja", badge: Badge, membership: "DojoMembership", note: str = "", awarded_on: date | None = None
+) -> NinjaBadge:
     """Award `ninja` the one-off `badge`, as `membership` (an active
     champion/mentor membership). The ninja must have a registration at one
     of that dojo's sessions and not have the badge yet."""
@@ -105,7 +116,7 @@ def award_badge(ninja, badge, membership, note="", awarded_on=None):
 
 
 @transaction.atomic
-def sync_milestones(ninja, membership=None):
+def sync_milestones(ninja: "Ninja", membership: "DojoMembership | None" = None) -> None:
     """Bring `ninja`'s milestone badges in line with the sessions they've
     attended: every milestone reached is earned (and stays earned if
     attendance is later unmarked), and the next one up shows progress.
@@ -118,6 +129,8 @@ def sync_milestones(ninja, membership=None):
     for badge in Badge.objects.filter(kind=Badge.MILESTONE).select_related("grants_belt").order_by("threshold"):
         ninja_badge = existing.get(badge.id)
         if ninja_badge and ninja_badge.earned_date:
+            continue
+        if badge.threshold is None:  # a milestone saved without one (clean() requires it): never reached
             continue
         if attended >= badge.threshold:
             ninja_badge = ninja_badge or NinjaBadge(ninja=ninja, badge=badge)

@@ -10,6 +10,9 @@ registrations are still open) is read after taking the lock. Django runs
 MySQL at READ COMMITTED, so those reads see what the transaction before
 committed. Sessions don't wait on each other: the lock is per session."""
 
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any
+
 from django.db import transaction
 from django.db.models import Max
 from django.utils.translation import gettext as _
@@ -19,16 +22,19 @@ from mailing.automated import booking_mail, waitlist_promoted_mail
 
 from .models import Event, Registration, RegistrationCancellation
 
+if TYPE_CHECKING:  # types only
+    from accounts.models import Ninja, User
+
 
 class RegistrationError(Exception):
     """A sign-up that can't happen, with a message for the family."""
 
 
-def _lock(event_id):
+def _lock(event_id: int) -> Event:
     return Event.objects.select_for_update().get(pk=event_id)
 
 
-def sign_up(event, children):
+def sign_up(event: Event, children: "Sequence[Ninja]") -> list[dict[str, Any]]:
     """Sign `children` up for `event`, in order: a confirmed place while
     there are places, the waiting list after that. Children already signed
     up are skipped. Returns [{"child", "waiting_list", "registration"}] for
@@ -49,7 +55,7 @@ def sign_up(event, children):
         position = Registration.objects.filter(event=event).aggregate(Max("position"))["position__max"] or 0
         confirmed = Registration.objects.filter(event=event, waiting_list=False).count()
         pathways = list(event.pathways.all())
-        results = []
+        results: list[dict[str, Any]] = []
         for child in new_children:
             position += 1
             waiting_list = confirmed >= event.places
@@ -68,7 +74,7 @@ def sign_up(event, children):
         return results
 
 
-def cancel(registration, cancelled_by):
+def cancel(registration: Registration, cancelled_by: "User | None") -> Registration | None:
     """Cancel `registration` (logged as a RegistrationCancellation). When it
     held a confirmed place and the session now has a place free, the child
     waiting longest gets it and their family is mailed. Returns the promoted
@@ -76,9 +82,10 @@ def cancel(registration, cancelled_by):
     does nothing."""
     with transaction.atomic():
         event = _lock(registration.event_id)
-        registration = Registration.objects.filter(pk=registration.pk).select_related("ninja").first()
-        if registration is None:
+        current = Registration.objects.filter(pk=registration.pk).select_related("ninja").first()
+        if current is None:
             return None
+        registration = current
         RegistrationCancellation.objects.create(
             ninja=registration.ninja,
             event=event,

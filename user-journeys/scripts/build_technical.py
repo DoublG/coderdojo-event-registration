@@ -839,11 +839,18 @@ conventions themselves are in <code>CLAUDE.md</code>.</p>
 flake8-django and pyupgrade; the formatter decides the style (119 characters, double quotes). Security rules
 (bandit) run separately; a reviewed line gets <code>noqa</code> with its reason.</li>
 <li>The devcontainer's editor lints as you type and formats on save with the same Ruff.</li>
-<li>CI: Ruff, the security rules, <code>pip-audit</code>, <code>manage.py check --deploy</code> and CodeQL in
-<b>Code audit</b>; missing migrations and the whole suite in <b>Tests</b>.</li>
+<li>CI: Ruff, the security rules, <code>pip-audit</code>, <code>manage.py check --deploy</code>, <code>mypy</code> and
+CodeQL in <b>Code audit</b>; missing migrations and the whole suite in <b>Tests</b>.</li>
 <li>Gated since 2 October 2026: no function over complexity 20 (Ruff <code>C901</code>, seed code excepted) and the
-layers between the apps (<code>lint-imports</code>). Not gated, on purpose: types (no type checker) and a minimum
-coverage. They're measured.</li>
+layers between the apps (<code>lint-imports</code>). Not gated, on purpose: a minimum coverage. It's measured.</li>
+<li><b>Type checking, gradually</b> (since 6 October 2026): mypy with django-stubs' Django plugin checks the service
+modules every view calls (seven to start: onboarding, the team rules, awards, sign-ups, the mail engine and its queue
+actions, retention), fully annotated; views, forms and tests stay unannotated. Its first run found a timestamp compared
+with a plain date in the retention job and a milestone badge that could make marking attendance fail.</li>
+<li><b>Accessibility: WCAG 2.2 AA</b> (since 6 October 2026): a skip link and one main landmark on every page,
+headings that never skip a level, form errors linked to their fields, contrast through the design tokens in both
+themes, 24px targets, and other-language text marked with its language. Guard tests run in CI; an axe-core scan of
+every journey page, in both themes and at 320px wide, runs from the host (<code>check_a11y.py</code>).</li>
 </ul>
 
 <h2>Tests</h2>

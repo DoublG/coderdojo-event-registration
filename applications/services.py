@@ -19,8 +19,11 @@ document is validated.
 """
 
 import uuid
+from typing import Any
 
 from django.conf import settings
+from django.core.files import File
+from django.http import HttpRequest
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -37,20 +40,20 @@ class OnboardingError(Exception):
     pass
 
 
-def _send(user, template_key, context=None):
+def _send(user: User, template_key: str, context: dict[str, Any] | None = None) -> None:
     """Every onboarding mail is account (`service`) mail through the mail
     engine (mailing.services.send): queued, in the account's language."""
     send_or_log(user, MailCategory.SERVICE, template_key, context or {})
 
 
-def _account_url():
+def _account_url() -> str:
     return settings.SITE_URL + reverse("account_home")
 
 
 # --- background check -----------------------------------------------------------
 
 
-def request_background_check(user, request):
+def request_background_check(user: User, request: HttpRequest) -> None:
     """Ask the account holder for a (new) document. Not limited to first
     requests: re-running it on an account whose check isn't currently valid
     (never done, rejected, or expired) is how a renewal is requested."""
@@ -70,7 +73,7 @@ def request_background_check(user, request):
     _send(user, "background_check_requested", {"upload_url": upload_url})
 
 
-def submit_background_check(user, document):
+def submit_background_check(user: User, document: File) -> None:
     if not user.background_check_can_upload:
         raise OnboardingError(_("There's no background check waiting for a document right now."))
     user.background_check_document = document
@@ -79,7 +82,7 @@ def submit_background_check(user, document):
     user.save(update_fields=["background_check_document", "background_check_status", "background_check_submitted_at"])
 
 
-def _record_decision(user, reviewer, decision, note=""):
+def _record_decision(user: User, reviewer: User | None, decision: str, note: str = "") -> None:
     # The document (a criminal record extract) is only needed for the
     # decision itself: delete it straight away, keep only the outcome.
     if user.background_check_document:
@@ -89,7 +92,8 @@ def _record_decision(user, reviewer, decision, note=""):
         account=user,
         decision=decision,
         reviewed_by=reviewer,
-        reviewed_at=user.background_check_reviewed_at,
+        # Set by validate/reject just before; now otherwise, never empty.
+        reviewed_at=user.background_check_reviewed_at or timezone.now(),
         requested_at=user.background_check_requested_at,
         submitted_at=user.background_check_submitted_at,
         expires_at=user.background_check_expires_at if decision == BackgroundCheckHistory.VALIDATED else None,
@@ -97,14 +101,14 @@ def _record_decision(user, reviewer, decision, note=""):
     )
 
 
-def _not_yourself(account, reviewer):
+def _not_yourself(account: User, reviewer: User | None) -> None:
     """Nobody reviews their own background check or decides their own
     application (DATA_MODEL.md §21)."""
     if reviewer is not None and account.pk == reviewer.pk:
         raise OnboardingError(_("You can't decide on your own background check or application."))
 
 
-def validate_background_check(user, reviewer, note=""):
+def validate_background_check(user: User, reviewer: User | None, note: str = "") -> None:
     _not_yourself(user, reviewer)
     if user.background_check_status != User.CHECK_SUBMITTED:
         raise OnboardingError(_("%(user)s has no uploaded document awaiting review.") % {"user": user})
@@ -124,7 +128,7 @@ def validate_background_check(user, reviewer, note=""):
     _send(user, "background_check_validated", {"expires_at": timezone.localtime(user.background_check_expires_at)})
 
 
-def reject_background_check(user, reviewer, note=""):
+def reject_background_check(user: User, reviewer: User | None, note: str = "") -> None:
     _not_yourself(user, reviewer)
     if user.background_check_status != User.CHECK_SUBMITTED:
         raise OnboardingError(_("%(user)s has no uploaded document awaiting review.") % {"user": user})
@@ -138,26 +142,27 @@ def reject_background_check(user, reviewer, note=""):
 # --- applications ----------------------------------------------------------------
 
 
-def submit_application(account, kind, **fields):
+def submit_application(account: User, kind: str, **fields: Any) -> Application:
     """One pending (or approved) application per account and kind."""
     if account.is_ninja:
         raise OnboardingError(_("Only adult accounts can apply."))
     if account.applications.filter(kind=kind, status__in=[Application.PENDING, Application.APPROVED]).exists():
         raise OnboardingError(_("You've already applied for this — see your account page for its status."))
     application = Application.objects.create(account=account, kind=kind, **fields)
-    if kind == Application.MENTOR and application.dojo_id:
+    dojo = application.dojo
+    if kind == Application.MENTOR and dojo is not None:
         from dojos.team import notify_managers
 
         notify_managers(
-            application.dojo,
+            dojo,
             gettext_lazy("%(name)s applied to mentor at %(dojo)s."),
             url=reverse("dojo_team_manage", kwargs={"dojo_id": application.dojo_id}),
-            params={"name": account.team_name, "dojo": application.dojo.name},
+            params={"name": account.team_name, "dojo": dojo.name},
         )
     return application
 
 
-def approve_application(application, reviewer):
+def approve_application(application: Application, reviewer: User | None) -> None:
     _not_yourself(application.account, reviewer)
     if application.status != Application.PENDING:
         raise OnboardingError(
@@ -173,12 +178,13 @@ def approve_application(application, reviewer):
     application.save(update_fields=["status", "decided_by", "decided_at"])
 
     join_dojo_name = ""
-    if application.kind == Application.MENTOR and application.dojo_id:
+    dojo = application.dojo
+    if application.kind == Application.MENTOR and dojo is not None:
         from dojos.team import TeamError, request_to_join
 
         try:
-            request_to_join(application.dojo, application.account)
-            join_dojo_name = application.dojo.name
+            request_to_join(dojo, application.account)
+            join_dojo_name = dojo.name
         except TeamError:
             pass
     _send(
@@ -192,7 +198,7 @@ def approve_application(application, reviewer):
     )
 
 
-def reject_application(application, reviewer):
+def reject_application(application: Application, reviewer: User | None) -> None:
     _not_yourself(application.account, reviewer)
     if application.status != Application.PENDING:
         raise OnboardingError(
@@ -208,7 +214,7 @@ def reject_application(application, reviewer):
 # --- who is approved --------------------------------------------------------------
 
 
-def is_approved(user, kinds):
+def is_approved(user: User, kinds: list[str]) -> bool:
     return (
         user.is_authenticated
         and not user.is_ninja
@@ -217,12 +223,12 @@ def is_approved(user, kinds):
     )
 
 
-def is_approved_mentor(user):
+def is_approved_mentor(user: User) -> bool:
     """May ask to join, or be added to, a dojo's team. An approved champion
     was vetted the same way, so they count too."""
     return is_approved(user, [Application.MENTOR, Application.CHAMPION])
 
 
-def is_approved_champion(user):
+def is_approved_champion(user: User) -> bool:
     """May create a dojo (as its champion)."""
     return is_approved(user, [Application.CHAMPION])

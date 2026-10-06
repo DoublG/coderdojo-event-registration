@@ -317,8 +317,9 @@ without type annotations; checking all of it at once gave hundreds of findings, 
 forms. So only the modules listed in `pyproject.toml`'s `[tool.mypy] files` are checked, and those are
 fully annotated:
 
-- **What's checked:** the service modules first, the rule modules every view calls (`dojos/team.py`,
-  `mailing/queue_actions.py`, `privacy/retention.py` to start). Every function there has annotations
+- **What's checked:** the service modules first, the rule modules every view calls: `applications/services.py`,
+  `dojos/team.py`, `events/awards.py`, `events/registrations.py`, `mailing/queue_actions.py`,
+  `mailing/services.py` and `privacy/retention.py` (6 October 2026). Every function there has annotations
   (`disallow_untyped_defs`); what they import is read for its types, but its own errors aren't reported
   (`follow_imports = "silent"`). Libraries without type information are ignored.
 - **Growing it:** a service module joins the list once it's annotated, and new service code is written
@@ -331,9 +332,14 @@ fully annotated:
   `class X(models.Manager.from_queryset(...))`, which the plugin can't type, so a result taken from one is
   annotated where it's assigned (`membership: DojoMembership | None = ...first()`). An import needed only for
   a type goes under `TYPE_CHECKING`, to avoid import cycles between the apps.
-- **What it found on day one:** a lookup comparing a timestamp with a plain date in the retention job
-  (Django made it a naive midnight and warned on every run), and a field lookup that could in principle
-  return a relation without a column.
+- **What it found in the first seven modules:** a lookup comparing a timestamp with a plain date in the
+  retention job (Django made it a naive midnight and warned on every run); a milestone badge without a
+  threshold (possible outside the form) that would have made marking attendance fail with a `TypeError`;
+  a background-check decision whose required `reviewed_at` relied on the caller having set it; a field
+  lookup that could in principle return a relation without a column; and `send()`'s documentation
+  promising it took a dojo's id, which its foreign key wouldn't have accepted (no caller did). All fixed.
+- **The layers hold for types too:** a type-only import goes under `TYPE_CHECKING`, and never upwards
+  (`mailing.services.send` types its `campaign` as `Any`, since the mail engine may not import `campaigns`).
 - **Running it:** `mypy` (no arguments: the configuration says what to check). It's a job in the Code audit
   workflow too (`types`), which installs the site's requirements and system libraries, since the plugin
   starts Django.
