@@ -25,8 +25,9 @@ and capacity in [`CAPACITY.md`](CAPACITY.md), memory per function in [`MEMORY_PR
   `C901` fails any new one, seed code excepted.
 - **The apps are layered:** `lint-imports` (import-linter) fails an app that imports a layer above its own,
   locally and in CI ([Layers between the apps](#layers-between-the-apps)).
-- **Not checked:** types (no type checker) and a minimum coverage; the coverage and complexity figures here
-  are a map, run by hand.
+- **Types are checked gradually:** mypy checks the service modules listed in `pyproject.toml` (fully
+  annotated), on every push too; the rest of the code isn't type-checked yet (see "Type checking").
+- **Not checked:** a minimum coverage; the coverage and complexity figures here are a map, run by hand.
 
 ---
 
