@@ -1686,3 +1686,94 @@ class AccessibilityTests(TestCase):
             ).render(Context({"dojo": self.dojo}))
         self.assertIn('<span lang="nl-be">Welkom</span>', html)
         self.assertIn('content-lang-note" lang="en-us"', html)
+
+
+class CiQualityReportTests(TestCase):
+    """.github/scripts/quality_report.py: the weekly Code quality workflow's
+    summary, from quality/summarize.py's measurement and the previous one."""
+
+    def setUp(self):
+        import importlib.util
+        from pathlib import Path
+
+        spec = importlib.util.spec_from_file_location(
+            "quality_report", Path(settings.BASE_DIR) / ".github" / "scripts" / "quality_report.py"
+        )
+        self.report = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.report)
+
+    def measurement(self, percent=94.0, complexity=18, seeder=40, ranks_c=10):
+        return {
+            "coverage": {
+                "percent": percent - 7,
+                "site_percent": percent,
+                "statements": 13541,
+                "apps": {"events": {"percent": 80.0, "site_percent": percent}},
+            },
+            "complexity": {
+                "functions": 1400,
+                "average": 3.2,
+                "sloc": 26164,
+                "ranks": {"A": 1200, "B": 160, "C": ranks_c, "D": 0, "E": 0, "F": 0},
+                "most_complex": [
+                    {
+                        "path": "events/management/commands/seed_x.py",
+                        "line": 1,
+                        "name": "Command.handle",
+                        "complexity": seeder,
+                        "rank": "F",
+                        "kind": "seed or import (development only)",
+                    },
+                    {
+                        "path": "accounts/sign_in.py",
+                        "line": 115,
+                        "name": "requirements_for",
+                        "complexity": complexity,
+                        "rank": "C",
+                        "kind": "site",
+                    },
+                ],
+                "maintainability": [
+                    {"path": "events/management/commands/seed_x.py", "mi": 10.0, "rank": "B"},
+                    {"path": "accounts/forms.py", "mi": 34.0, "rank": "A"},
+                ],
+            },
+        }
+
+    def test_change_is_signed_and_quiet_when_nothing_changed(self):
+        self.assertEqual(self.report.change(94.3, 93.9), " (+0.4)")
+        self.assertEqual(self.report.change(10, 12, 0), " (−2)")
+        self.assertEqual(self.report.change(26164, 25040, 0), " (+1,124)")
+        self.assertEqual(self.report.change(5.0, 5.0), "")
+        self.assertEqual(self.report.change(5.0, None), "")
+
+    def test_the_report_shows_the_change_since_the_previous_run_and_leaves_seeders_out(self):
+        text = self.report.report(self.measurement(percent=94.0, ranks_c=11), self.measurement(percent=93.5))
+        self.assertIn("compared with the previous run", text)
+        self.assertIn("**94.0%** of the site's own code (+0.5)", text)
+        self.assertIn("| `events` | 94.0% (+0.5) | 80.0% |", text)
+        self.assertIn("C 11 (+1)", text)
+        self.assertIn("`accounts/sign_in.py:115` requirements_for | 18 | C", text)
+        self.assertIn("| `accounts/forms.py` | 34.0 |", text)
+        self.assertNotIn("seed_x", text)
+
+    def test_a_function_new_in_the_list_is_marked(self):
+        before = self.measurement()
+        before["complexity"]["most_complex"] = []
+        self.assertIn("(new in the list)", self.report.report(self.measurement(), before))
+
+    def test_it_writes_to_the_runs_summary_and_never_fails(self):
+        import json
+        import tempfile
+        from pathlib import Path
+        from unittest import mock
+
+        with tempfile.TemporaryDirectory() as folder:
+            now = Path(folder) / "now.json"
+            now.write_text(json.dumps(self.measurement()))
+            summary = Path(folder) / "summary.md"
+            with mock.patch.dict("os.environ", {"GITHUB_STEP_SUMMARY": str(summary)}):
+                # The previous run's file is missing (its first week, or the artifact expired).
+                self.assertEqual(self.report.main(["x", str(now), str(Path(folder) / "missing.json")]), 0)
+            self.assertIn("no previous run to compare with", summary.read_text())
+            self.assertEqual(self.report.main(["x", str(Path(folder) / "missing.json")]), 0)

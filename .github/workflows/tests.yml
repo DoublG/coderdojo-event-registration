@@ -1,4 +1,4 @@
-# The unit tests: the whole Django test suite (`manage.py test`, about 1,000 tests)
+# The unit tests: the whole Django test suite (`manage.py test`, about 1,190 tests)
 # against MySQL and Redis, the way the devcontainer runs it, plus a check that no
 # model change is missing its migration.
 # Runs on every push and pull request that changes code, and by hand from the Actions tab.
@@ -16,6 +16,7 @@ on:
       - "**/*.md"
       - ".github/workflows/docs.yml"
       - ".github/workflows/audit.yml"
+      - ".github/workflows/quality.yml"
   pull_request:
     paths-ignore:
       - "docs/**"
@@ -23,6 +24,7 @@ on:
       - "**/*.md"
       - ".github/workflows/docs.yml"
       - ".github/workflows/audit.yml"
+      - ".github/workflows/quality.yml"
   workflow_dispatch:
 
 permissions:

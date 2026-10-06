@@ -3,6 +3,7 @@
 #   lint           ruff check + ruff format --check (pyproject.toml)
 #   layers         lint-imports: no app imports a layer above its own (pyproject.toml)
 #   security-lint  ruff's flake8-bandit rules (S): security-sensitive patterns
+#   types          mypy with django-stubs over the modules in pyproject.toml's [tool.mypy] files
 #   dependencies   pip-audit: known vulnerabilities in the pinned packages
 #   django-deploy  manage.py check --deploy with DEBUG off: production security settings (no warnings)
 #   codeql         GitHub's static analysis (security-extended queries) into Code scanning

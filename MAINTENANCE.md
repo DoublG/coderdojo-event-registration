@@ -46,7 +46,7 @@ moves, so it silently ages.
 
 **When an image version changes, update this table in the same change**: an `image:` tag in
 `.devcontainer/docker-compose.yml`, the `FROM` line of `.devcontainer/dockerfile_workspace/Dockerfile`, or the
-MySQL and Redis services in `.github/workflows/tests.yml` and `audit.yml` (which stay on the devcontainer's
+MySQL and Redis services in `.github/workflows/tests.yml`, `quality.yml` and `audit.yml` (which stay on the devcontainer's
 versions). Fill in the new version, its security-until date and the status, and set *Last checked* when you
 looked the dates up.
 

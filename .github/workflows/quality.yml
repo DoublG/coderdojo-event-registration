@@ -1,0 +1,123 @@
+# Code quality, measured every week: the whole test suite under coverage, and radon's
+# complexity and maintainability, condensed by quality/summarize.py into one JSON file
+# (the same measurement CODING_STANDARDS.md's figures come from, "Measuring again").
+# The results: a summary on the run's page with the change since the previous run
+# (.github/scripts/quality_report.py), and the JSON plus coverage's HTML report kept 90
+# days as the run's "quality" artifact (the next run compares itself with it).
+# A map, not a gate: it fails only when the tests themselves fail. Complexity is gated on
+# every push by Ruff (C901, in the Code audit workflow).
+# Runs on Mondays and by hand (Actions tab, "Code quality", Run workflow).
+name: Code quality
+
+on:
+  schedule:
+    - cron: "17 4 * * 1"  # Mondays 04:17 UTC, off the busy full hour
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read  # to fetch the previous run's measurement
+
+concurrency:
+  group: quality
+  cancel-in-progress: false
+
+jobs:
+  measure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    # The same services and settings as the Tests workflow.
+    services:
+      db:
+        image: mysql:8.4  # the devcontainer's version; a change goes in MAINTENANCE.md too
+        env:
+          MYSQL_ROOT_PASSWORD: ci-only
+          MYSQL_DATABASE: coolregistration
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci-only"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+      redis:
+        image: redis:7.2  # the devcontainer's version; a change goes in MAINTENANCE.md too
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s --health-timeout=5s --health-retries=10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: coolregistration
+      DB_USER: root
+      DB_PASSWORD: ci-only
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      SECRET_KEY: ci-only-not-a-secret
+      ALLOWED_HOSTS: localhost,127.0.0.1,coolregistration.localhost
+      CSRF_TRUSTED_ORIGINS: https://coolregistration.localhost
+      COOKIE_DOMAIN: coolregistration.localhost
+      EMAIL_HOST: ""
+      DEBUG: "true"
+      # What the measurement leaves out (pyproject.toml's [tool.coverage.run] does the same for coverage).
+      EXCLUDE: "*/migrations/*,*/tests.py,*/tests/*,docs/*,loadtest/*,user-journeys/*,staticfiles/*,media/*"
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config default-libmysqlclient-dev \
+            gdal-bin libgdal-dev libgeos-dev libproj-dev gettext
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      # coverage and radon are in requirements-dev.txt, with what the tests need.
+      - name: Install Python packages
+        run: pip install -r requirements-dev.txt
+
+      - name: Run the test suite under coverage
+        run: coverage run manage.py test --noinput --debug-mode
+
+      - name: Measure
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p quality-results
+          coverage json -o coverage.json
+          coverage html -d quality-results/htmlcov
+          radon cc -j -e "$EXCLUDE" . > cc.json
+          radon mi -j -e "$EXCLUDE" . > mi.json
+          radon raw -j -e "$EXCLUDE" . > raw.json
+          python quality/summarize.py coverage.json cc.json mi.json raw.json > quality-results/quality.json
+
+      # The latest successful run before this one, if its artifact is still there.
+      - name: Fetch the previous measurement
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          previous=$(gh run list --workflow quality.yml --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          if [ -n "$previous" ]; then
+            gh run download "$previous" --name quality --dir previous || echo "No artifact left on run $previous."
+          fi
+
+      - name: Report
+        if: ${{ !cancelled() }}
+        run: python .github/scripts/quality_report.py quality-results/quality.json previous/quality.json
+
+      - name: Keep the measurement
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: quality
+          path: quality-results/
+          retention-days: 90
+          if-no-files-found: ignore

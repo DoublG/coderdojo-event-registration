@@ -210,7 +210,8 @@ accessibility scan of every journey page in both themes, plus a 320px reflow che
 GitHub Actions runs the checks on every push, never a deploy:
 [**Tests**](.github/workflows/tests.yml) (missing migrations and the whole suite, with a summary per app),
 [**Code audit**](.github/workflows/audit.yml) (ruff, its security rules, `mypy`, the layers, `pip-audit`,
-`check --deploy` and CodeQL) and the [help centre](.github/workflows/docs.yml)'s build and publication. Coverage and
+`check --deploy` and CodeQL), [**Code quality**](.github/workflows/quality.yml) (every Monday: coverage and
+complexity with the change since the previous week) and the [help centre](.github/workflows/docs.yml)'s build and publication. Coverage and
 complexity: [`CODING_STANDARDS.md`](CODING_STANDARDS.md).
 
 ## Deploying

@@ -27,7 +27,9 @@ and capacity in [`CAPACITY.md`](CAPACITY.md), memory per function in [`MEMORY_PR
   locally and in CI ([Layers between the apps](#layers-between-the-apps)).
 - **Types are checked gradually:** mypy checks the service modules listed in `pyproject.toml` (fully
   annotated), on every push too; the rest of the code isn't type-checked yet (see "Type checking").
-- **Not checked:** a minimum coverage; the coverage and complexity figures here are a map, run by hand.
+- **Not checked:** a minimum coverage. The coverage and complexity figures are a map, not a gate: measured
+  every Monday by the **Code quality** workflow (its summary shows the change since the previous week),
+  and by hand for the dated figures in this file.
 
 ---
 
@@ -413,5 +415,11 @@ python3 quality/summarize.py /tmp/coverage.json /tmp/cc.json /tmp/mi.json /tmp/r
 # Memory per function: on a seed_scale database of its own, see MEMORY_PROFILE.md, "Measuring again"
 ```
 
-Commit `quality/results/` and `quality/charts/`, update the figures here and rebuild the technical PDF
+**Every Monday the Code quality workflow** (`.github/workflows/quality.yml`, also by hand from the Actions
+tab) runs the same measurement in CI: the suite under coverage, radon, `quality/summarize.py`. Its run page
+shows coverage per app, the complexity ranks, the most complex functions and the least maintainable modules
+with the change since the previous run (`.github/scripts/quality_report.py`), and keeps the JSON and
+coverage's HTML report 90 days as the `quality` artifact: download it to read every missed line. For the
+dated figures in this file, measure by hand as above, then commit `quality/results/` and `quality/charts/`,
+update the figures here and rebuild the technical PDF
 (`user-journeys/scripts/build_technical.py`), whose chapter *Coding standards and quality* summarises this file.
