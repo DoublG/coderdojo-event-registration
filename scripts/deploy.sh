@@ -12,8 +12,11 @@
 #      A failure here aborts the deploy; the running site is untouched.
 #   4. Syncs the release into ~/app (keeping .env, media/, private_media/),
 #      runs migrations (+ collectstatic when STATIC_ROOT is configured).
-#   5. Gracefully reloads gunicorn (HUP to its master process) and does a
-#      smoke-test request over the app's unix socket.
+#   5. Puts the new code live and does a smoke-test request over the app's
+#      unix socket. Level27 runs the app as the systemd service py10102.service
+#      with either gunicorn (HUP to its master: a graceful reload) or daphne
+#      (the server chosen in the panel; it can't reload, so it's stopped and
+#      systemd starts it again, Restart=always after 30 s: half a minute down).
 #   6. Installs the two Celery worker units (scripts/systemd/, systemd *user*
 #      units), restarts them so they run the new code, and pings them. All
 #      mail goes through them, so a deploy that can't start them fails
@@ -128,12 +131,24 @@ missing_env_keys() {
     echo "\$missing"
 }
 
-# gunicorn.conf.py (the concurrency cap per web worker, CAPACITY.md) only
-# counts when gunicorn starts in \$APP without a -c of its own: say whether it does.
-gunicorn_config() {
-    local master args cwd
+daphne_pid() { pgrep -u "\$USER" -o -f "daphne.*\$SOCKET" || true; }
+
+# Which server Level27 runs (the panel's choice). gunicorn.conf.py (the
+# concurrency cap per web worker, CAPACITY.md) only counts when gunicorn starts
+# in \$APP without a -c of its own: say whether it does. daphne has no such cap.
+app_server() {
+    local master args cwd pid
     master="\$(pgrep -u "\$USER" -o -f "gunicorn.*\$SOCKET" || true)"
-    [ -n "\$master" ] || { echo "gunicorn: not running"; return; }
+    if [ -z "\$master" ]; then
+        pid="\$(daphne_pid)"
+        if [ -n "\$pid" ]; then
+            echo "daphne: \$(tr '\\0' ' ' < "/proc/\$pid/cmdline")"
+            echo "gunicorn.conf.py: not used (daphne): no concurrency cap per worker"
+        else
+            echo "app server: neither gunicorn nor daphne is running on \$SOCKET"
+        fi
+        return
+    fi
     args="\$(tr '\\0' ' ' < "/proc/\$master/cmdline")"
     cwd="\$(readlink "/proc/\$master/cwd")"
     echo "gunicorn: \$args (in \$cwd)"
@@ -157,8 +172,8 @@ if [ "\$MODE" = check ]; then
     else
         echo ".env: MISSING"
     fi
-    step "gunicorn"
-    gunicorn_config
+    step "App server"
+    app_server
     step "Celery workers"
     if ! user_systemd; then
         echo "celery: systemd --user isn't reachable for \$USER, so a deploy can't start the workers (ask Level27 to enable lingering)"
@@ -215,14 +230,32 @@ else
     echo "collectstatic: skipped (STATIC_ROOT not set)"
 fi
 
-step "Reloading gunicorn"
+step "Putting the new code live"
 MASTER="\$(pgrep -u "\$USER" -o -f "gunicorn.*\$SOCKET" || true)"
-[ -n "\$MASTER" ] || die "gunicorn master not found (is the app running? restart it from the Level27 panel)"
-kill -HUP "\$MASTER"
-sleep 5
-kill -0 "\$MASTER" 2>/dev/null || die "gunicorn master \$MASTER died after reload"
-echo "gunicorn master \$MASTER reloaded, \$(pgrep -u "\$USER" -P "\$MASTER" | wc -l) worker(s) up"
-gunicorn_config
+OLD_DAPHNE="\$(daphne_pid)"
+if [ -n "\$MASTER" ]; then
+    kill -HUP "\$MASTER"
+    sleep 5
+    kill -0 "\$MASTER" 2>/dev/null || die "gunicorn master \$MASTER died after reload"
+    echo "gunicorn master \$MASTER reloaded, \$(pgrep -u "\$USER" -P "\$MASTER" | wc -l) worker(s) up"
+elif [ -n "\$OLD_DAPHNE" ]; then
+    # daphne can't reload: stop it, and systemd (Restart=always) starts it on the new code.
+    kill -TERM "\$OLD_DAPHNE"
+    echo "daphne \$OLD_DAPHNE stopped; waiting for systemd to start it again (about 30 s)"
+    NEW=""
+    for _ in \$(seq 1 90); do
+        NEW="\$(daphne_pid)"
+        [ -n "\$NEW" ] && [ "\$NEW" != "\$OLD_DAPHNE" ] && break
+        NEW=""
+        sleep 1
+    done
+    [ -n "\$NEW" ] || die "daphne didn't come back within 90 s: restart the app from the Level27 panel"
+    sleep 3
+    echo "daphne \$NEW running the new code"
+else
+    die "neither gunicorn nor daphne found on \$SOCKET (is the app running? restart it from the Level27 panel)"
+fi
+app_server
 
 step "Smoke test"
 HOST="\$(grep -E '^ALLOWED_HOSTS=' "\$APP/.env" | cut -d= -f2 | tr ',' '\n' | grep -vE '^(localhost|127\.0\.0\.1|)\$' | head -1)"
