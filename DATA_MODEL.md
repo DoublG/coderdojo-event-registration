@@ -2197,8 +2197,8 @@ those when it still finds them.)
   rebuild, is started by beat but only enqueues its real work on the
   default queue.
 - **The commands** live in the panel, not in the repo:
-  - `cd /var/python/py10102/app && nice -n 10 celery -A website worker -n periodic@%h -Q periodic -c 1 -B --scheduler django_celery_beat.schedulers:DatabaseScheduler --max-tasks-per-child 100 --max-memory-per-child 200000 -l WARNING`
-  - `cd /var/python/py10102/app && nice -n 10 celery -A website worker -n mailing@%h -Q celery -c 1 --max-tasks-per-child 100 --max-memory-per-child 200000 -l INFO`
+  - `cd /var/python/py10102/app && nice -n 10 celery -A website worker -n periodic@%h -Q periodic -c 1 -B --scheduler django_celery_beat.schedulers:DatabaseScheduler --max-tasks-per-child 100 --max-memory-per-child 160000 -l WARNING`
+  - `cd /var/python/py10102/app && nice -n 10 celery -A website worker -n mailing@%h -Q celery -c 1 --max-tasks-per-child 100 --max-memory-per-child 160000 -l INFO`
   - The `cd` is needed: the scripts start in the home directory, where
     `celery -A website` can't find the project. The settings read
     `~/app/.env` themselves (`environ.Env.read_env`). `celery` comes from
@@ -2216,11 +2216,24 @@ those when it still finds them.)
     enforce `CELERY_TASK_TIME_LIMIT`, and a hung SMTP or IMAP connection
     would then block the queue for good. Prefork is worth the extra
     process.
-  - `--max-memory-per-child 200000` (200 MB) and `--max-tasks-per-child 100`
-    recycle the child before it grows. A big campaign resolve
-    or engagement rebuild can't keep its memory afterwards.
-  - The component has a memory limit of its own (512 MB for both workers,
-    mode *kill*).
+  - `--max-memory-per-child 160000` (160 MB) and `--max-tasks-per-child 100`
+    recycle the child before it grows. An idle child is about 143 MB (all
+    of Django), so it's replaced after any task that grew it by more than
+    about 17 MB (in practice the nightly engagement rebuild and big
+    campaign chunks); a big campaign resolve or engagement rebuild can't
+    keep its memory afterwards. 200 MB (until 7 October 2026) let two
+    children grow past what the component has room for.
+  - `website.celery.freeze_before_fork` calls `gc.freeze()` in the parent
+    before every fork, so the children (and embedded beat) keep sharing
+    the parent's loaded Django instead of copying it as the garbage
+    collector touches it.
+  - The component has a memory limit of its own, for both workers together:
+    the kernel slows them down and swaps above 512 MiB (`memory.high`) and
+    kills them above 563 MiB (`memory.max`). Measured on 7 October 2026:
+    411 MiB idle (PSS: periodic main 74, embedded beat 102, its child 68;
+    mailing main 85, its child 79), and every job but the engagement
+    rebuild (33 MB) needs 1.4 MB or less (`MEMORY_PROFILE.md`): the memory
+    is the five processes that each load Django, not the work.
   - Batches and campaign launches work in chunks (`MAILING_BATCH_SIZE`,
     bulk inserts per chunk, `.iterator()` over audiences), never a whole
     audience in memory.

@@ -332,3 +332,22 @@ class GunicornConfigTests(TestCase):
     def test_reading_it_again_on_a_reload_changes_nothing(self):
         first = dict(self.load())
         self.assertEqual(self.load(), first)
+
+
+class CeleryForkMemoryTests(TestCase):
+    """website.celery freezes the parent's objects before a worker forks, so
+    the children keep sharing its memory (DATA_MODEL.md §11)."""
+
+    def test_the_parent_freezes_its_objects_before_each_fork(self):
+        import gc
+
+        from celery.signals import worker_before_create_process
+
+        from website.celery import freeze_before_fork
+
+        self.assertIn(freeze_before_fork, [ref() for _, ref in worker_before_create_process.receivers])
+        self.addCleanup(gc.unfreeze)
+        with mock.patch("gc.collect") as collect:
+            worker_before_create_process.send(sender=None)
+        collect.assert_called_once()
+        self.assertGreater(gc.get_freeze_count(), 0)
