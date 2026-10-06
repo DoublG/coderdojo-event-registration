@@ -145,7 +145,7 @@ Worth knowing:
 | Background-check documents | `private_media/` | only the ones awaiting review, 10 MB each at most | deleted at the reviewer's decision |
 | The code | `~/app` and `~/deploy/releases/` (5 kept) | 7 MB per release | each deploy; the user-journey PDFs and the load test aren't shipped (they were 46 MB a release) |
 | Python packages | `~/.pyenv/versions/py10102-3.14.7` | 236 MB | a dependency upgrade |
-| Celery's logs | the systemd journal | small | the periodic worker logs at WARNING; at INFO its 10-second mail dispatcher alone wrote about 6 MB a day |
+| Celery's logs | `~/logs/worker-<id>/` (Level27's worker component) | small | the periodic worker logs at WARNING; at INFO its 10-second mail dispatcher alone wrote about 6 MB a day |
 
 **Where people can upload files:**
 
@@ -182,7 +182,7 @@ Families never upload anything: a child's picture is one of the standard avatars
    badge, ..., deletes the old file once the change is committed, unless it's a standard image or another
    row still uses it. An erased person's photo was already deleted by the erasure (`privacy.erasure`).
 6. **Quieter logs:** the periodic Celery worker logs at WARNING in production
-   (`scripts/systemd/coolregistration-celery-periodic.service`); failures and the mail queue's warnings still
+   (its command in Level27's worker component *celery*); failures and the mail queue's warnings still
    show. The devcontainer keeps INFO.
 
 **Tried on 30 September 2026**, before and after:
@@ -624,8 +624,8 @@ To fill in the budget above (the versions are already asked in `MAINTENANCE.md`,
 4. **The proxy's maximum request body** (`client_max_body_size` or equivalent): it should be 12 MB, like the
    devcontainer's, so a file just over the site's 10 MB gets the site's own message.
 5. Redis's `maxmemory` and `maxmemory-policy`, and whether this Redis is ours alone.
-6. Whether systemd user units may use the memory controller (`MemoryMax=`), for a hard cap per worker, and
-   the journal's size limit.
+6. The worker component's memory limit (512 MB, *kill* when exceeded) covers both workers together: whether
+   that's enough, and whether Level27 rotates `~/logs/worker-<id>/`.
 7. The disk quota for `~/app` (media), `~/deploy` and the logs.
 
 ## Measuring again

@@ -59,7 +59,6 @@ for developers. Where the line runs:
 | **The site** | the apps (`accounts/`, `api/`, `applications/`, `content/`, `core/`, `dojos/`, `events/`, `geo/`, `mailing/`, `monitoring/`, `notifications/`, `pathways/`, `privacy/`), `website/` (settings, URLs, ASGI, Celery), `locale/`, `main.py`, `manage.py` | **yes**: this is production code |
 | Its dependencies | `requirements.txt` | **yes**, installed by every deploy |
 | The web server's config | `gunicorn.conf.py` (the cap of requests per worker) | **yes**, read by gunicorn from `~/app` |
-| The Celery workers' units | `scripts/systemd/*.service` | **yes**, installed by `deploy.sh` into systemd (the rest of `scripts/` stays local) |
 | Tests | `*/tests.py`, `*/testing.py` | shipped inside the apps, never run there |
 | Seeders | `*/management/commands/seed_*.py`, `applications/seeding.py`, `accounts/seed_credentials.py`, `pages/seed_translations.py` | shipped inside the apps; demo data, run only in the devcontainer (`.devcontainer/start.sh`). The ones that matter in production are idempotent and safe: `load_mail_templates` (create-only, run by `deploy.sh`) |
 | Import commands | `*/management/commands/import_*.py` | shipped, but their libraries (`geopandas`, `pandas`, ...) are only in `requirements-dev.txt`, so they only work in development |
@@ -73,7 +72,7 @@ for developers. Where the line runs:
 | Documents | `README.md`, `MAINTENANCE.md`, `SECURITY.md`; `CLAUDE.md`, `DATA_MODEL.md`, `CAPACITY.md`, `MEMORY_PROFILE.md`, this file | the first three ship (harmless); the others don't |
 
 So **a change to production code** is anything in the apps (other than tests and seeders), `website/`,
-`locale/`, `requirements.txt`, `gunicorn.conf.py` or the systemd units: it needs its tests, goes through CI,
+`locale/`, `requirements.txt` or `gunicorn.conf.py`: it needs its tests, goes through CI,
 and reaches the site at the next `deploy.sh`. A change to the devcontainer needs a container rebuild (or the
 restart its file says), never a deploy.
 

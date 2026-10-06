@@ -218,7 +218,7 @@ complexity: [`CODING_STANDARDS.md`](CODING_STANDARDS.md).
 
 Production is Level27 Python hosting. [`scripts/deploy.sh --check`](scripts/deploy.sh) is a read-only
 preflight; `scripts/deploy.sh` deploys: it checks the new code before touching the live site, migrates,
-reloads gunicorn, restarts the two Celery workers ([`scripts/systemd/`](scripts/systemd/)) and smoke-tests.
+reloads gunicorn, restarts the two Celery workers (run by Level27's worker component) and smoke-tests.
 Details in [`CLAUDE.md`](CLAUDE.md#deploying-level27).
 
 ---
@@ -234,7 +234,7 @@ docs/             the help centre (Sphinx, en/fr/nl)
 user-journeys/    persona PDFs (en/nl/fr), pitch deck, technical PDF, and the scripts that make them
 loadtest/         load test, its results and charts (CAPACITY.md), Grafana screenshots (MONITORING.md)
 quality/          code-quality measurements (coverage, complexity), their results and charts
-scripts/          deploy script and the Celery systemd units
+scripts/          deploy script
 .devcontainer/    the development environment (monitoring/: Prometheus and Grafana's provisioning)
 .github/          the CI workflows (tests, code audit, help centre)
 DATA_MODEL.md     the data model and design decisions

@@ -17,10 +17,13 @@
 #      with either gunicorn (HUP to its master: a graceful reload) or daphne
 #      (the server chosen in the panel; it can't reload, so it's stopped and
 #      systemd starts it again, Restart=always after 30 s: half a minute down).
-#   6. Installs the two Celery worker units (scripts/systemd/, systemd *user*
-#      units), restarts them so they run the new code, and pings them. All
-#      mail goes through them, so a deploy that can't start them fails
-#      (DATA_MODEL.md §11, "Production: two Celery workers under systemd").
+#   6. Restarts the two Celery workers so they run the new code, and pings
+#      them. Level27 runs them, not this script: the worker component "celery"
+#      (Optioneel component in the panel) holds both commands and starts a
+#      worker again whenever it stops, so a warm shutdown (SIGTERM: finish the
+#      task in hand) is the restart. All mail goes through them, so a deploy
+#      whose workers don't come back fails (DATA_MODEL.md §11, "Production:
+#      two Celery workers as a Level27 worker component").
 #
 # Usage:
 #   scripts/deploy.sh             # deploy (asks for confirmation)
@@ -48,7 +51,8 @@ KEEP="${DEPLOY_KEEP:-5}"
 REMOTE_APP="app"
 REMOTE_PY='$HOME/.pyenv/versions/py10102-3.14.7/bin/python'
 REMOTE_SOCKET="/var/run/socket/py10102.socket"
-CELERY_UNITS="coolregistration-celery-periodic coolregistration-celery-mailing"
+# The systemd user units earlier deploys installed; removed when still there.
+LEGACY_UNITS="coolregistration-celery-periodic coolregistration-celery-mailing"
 
 # Never shipped: dev tooling and local-only material.
 EXCLUDES_RE='^(\.devcontainer/|\.claude/|\.vscode/|\.github/|docs/|scripts/|user-journeys/|loadtest/|quality/|AGENTS\.md$|CLAUDE\.md$|DATA_MODEL\.md$|CAPACITY\.md$|CODING_STANDARDS\.md$|MEMORY_PROFILE\.md$|requirements-dev\.txt$|pyproject\.toml$|\.env\.example$)'
@@ -116,30 +120,47 @@ remote_script() {
 cat <<REMOTE
 set -euo pipefail
 MODE="$MODE"; RELEASE="$RELEASE"; KEEP="$KEEP"; EXAMPLE_KEYS="$EXAMPLE_KEYS"
-APP="\$HOME/$REMOTE_APP"; PY="$REMOTE_PY"; SOCKET="$REMOTE_SOCKET"; CELERY_UNITS="$CELERY_UNITS"
+APP="\$HOME/$REMOTE_APP"; PY="$REMOTE_PY"; SOCKET="$REMOTE_SOCKET"; LEGACY_UNITS="$LEGACY_UNITS"
 REL="\$HOME/deploy/releases/\$RELEASE"
 step() { printf '\n\033[1m[server] %s\033[0m\n' "\$*"; }
 die() { printf '\033[31m[server] error:\033[0m %s\n' "\$*" >&2; exit 1; }
 
 # systemctl --user over a non-login ssh session needs the user's runtime dir.
 [ -n "\${XDG_RUNTIME_DIR:-}" ] || [ ! -d "/run/user/\$(id -u)" ] || export XDG_RUNTIME_DIR="/run/user/\$(id -u)"
-user_systemd() { systemctl --user show-environment >/dev/null 2>&1; }
 
-# Without lingering, systemd --user (and so the Celery workers) doesn't start
-# at boot: after a server restart the workers stay down until someone logs in.
-linger_note() {
-    if [ "\$(loginctl show-user "\$USER" -p Linger --value 2>/dev/null)" = yes ]; then
-        echo "lingering: on (the workers start at boot)"
-    else
-        echo "lingering: OFF, so the workers won't start after a server reboot (ask Level27: loginctl enable-linger \$USER)"
-    fi
+# The Celery workers' main processes (not their pool children): the ones the
+# worker component's scripts (~/.worker/<id>) start.
+celery_mains() {
+    local pid parent
+    for pid in \$(pgrep -u "\$USER" -f "celery -A website worker" || true); do
+        parent="\$(ps -o ppid= -p "\$pid" | tr -d ' ')"
+        tr '\\0' ' ' < "/proc/\$parent/cmdline" 2>/dev/null | grep -q "celery -A website worker" || echo "\$pid"
+    done
+}
+celery_list() {
+    local pid
+    for pid in \$(celery_mains); do echo "worker \$pid: \$(tr '\\0' ' ' < "/proc/\$pid/cmdline" | cut -c1-160)"; done
+}
+
+# Earlier deploys ran the workers as systemd user units; next to the worker
+# component they'd be a second beat (every job twice). Stop and remove them.
+remove_legacy_units() {
+    local unit found=""
+    for unit in \$LEGACY_UNITS; do
+        if [ -f "\$HOME/.config/systemd/user/\$unit.service" ]; then found="\$found \$unit"; fi
+    done
+    [ -n "\$found" ] || return 0
+    systemctl --user disable --now \$found 2>/dev/null || true
+    for unit in \$found; do rm -f "\$HOME/.config/systemd/user/\$unit.service"; done
+    systemctl --user daemon-reload 2>/dev/null || true
+    echo "removed the old systemd units:\$found"
 }
 
 # Both workers answer a ping. Right after a (re)start Celery still has to reach
-# the broker, so ask a few times before giving up.
+# the broker, and Level27 has to start the worker again, so ask a while.
 celery_ping() {
     local n
-    for _ in 1 2 3 4 5 6; do
+    for _ in \$(seq 1 18); do
         n="\$( cd "\$APP" && "\$PY" -m celery -A website inspect ping --timeout 10 2>/dev/null | grep -c ': OK' || true)"
         [ "\$n" -ge 2 ] && return 0
         sleep 5
@@ -197,12 +218,13 @@ if [ "\$MODE" = check ]; then
     step "App server"
     app_server
     step "Celery workers"
-    if ! user_systemd; then
-        echo "celery: systemd --user isn't reachable for \$USER, so a deploy can't start the workers (ask Level27 to enable lingering)"
-    else
-        for unit in \$CELERY_UNITS; do echo "\$unit: \$(systemctl --user is-active "\$unit" 2>/dev/null || true)"; done
-        linger_note
-    fi
+    celery_list
+    [ "\$(celery_mains | wc -l)" -eq 2 ] || echo "celery: expected 2 workers, check the worker component \"celery\" in the Level27 panel and ~/logs/worker-*/"
+    for unit in \$LEGACY_UNITS; do
+        if [ -f "\$HOME/.config/systemd/user/\$unit.service" ]; then
+            echo "\$unit: old systemd unit still installed (\$(systemctl --user is-active "\$unit" 2>/dev/null || true)), the next deploy removes it"
+        fi
+    done
     step "Would-be requirements install (dry run)"
     "\$PY" -m pip install --dry-run --quiet -r /dev/stdin < "\$HOME/deploy/check-requirements.txt" \
         && echo "requirements: installable" || echo "requirements: NOT installable (see above)"
@@ -287,26 +309,25 @@ echo "GET / (Host: \${HOST:-localhost}) -> \$CODE"
 case "\$CODE" in 2??|3??) ;; *) die "smoke test failed (HTTP \$CODE) — check ~/logs and 'manage.py check --deploy'";; esac
 
 step "Celery workers"
-if ! user_systemd; then
-    die "the site is live, but systemd --user isn't reachable for \$USER, so the Celery workers were NOT started (ask Level27 to enable lingering)"
+remove_legacy_units
+# A restart, not a reload: a worker keeps running the code it started with.
+# SIGTERM is Celery's warm shutdown; the worker component starts it again.
+OLD_WORKERS="\$(celery_mains | tr '\\n' ' ')"
+[ -n "\$OLD_WORKERS" ] || die "the site is live, but no Celery worker runs: check the worker component \"celery\" in the Level27 panel and ~/logs/worker-*/"
+kill -TERM \$OLD_WORKERS
+for _ in \$(seq 1 130); do
+    alive=""
+    for pid in \$OLD_WORKERS; do if kill -0 "\$pid" 2>/dev/null; then alive="\$alive \$pid"; fi; done
+    if [ -z "\$alive" ]; then break; fi
+    sleep 1
+done
+[ -z "\$alive" ] || die "the site is live, but Celery worker(s)\$alive didn't stop within 130 s"
+echo "workers \$OLD_WORKERS stopped (warm shutdown); waiting for Level27 to start them again"
+if celery_ping; then
+    celery_list
+    echo "celery: both workers answer"
 else
-    UNIT_DIR="\$HOME/.config/systemd/user"
-    mkdir -p "\$UNIT_DIR"
-    for unit in \$CELERY_UNITS; do
-        install -m 644 "\$HOME/deploy/systemd/\$unit.service" "\$UNIT_DIR/\$unit.service"
-    done
-    rm -rf "\$HOME/deploy/systemd"
-    systemctl --user daemon-reload
-    systemctl --user enable --quiet \$CELERY_UNITS
-    # A restart, not a reload: a worker keeps running the code it started with.
-    systemctl --user restart \$CELERY_UNITS
-    for unit in \$CELERY_UNITS; do echo "\$unit: \$(systemctl --user is-active "\$unit" || true)"; done
-    linger_note
-    if celery_ping; then
-        echo "celery: both workers answer"
-    else
-        die "the site is live, but the Celery workers don't answer a ping — check: journalctl --user -u coolregistration-celery-mailing"
-    fi
+    die "the site is live, but the Celery workers don't answer a ping: check ~/logs/worker-*/worker-command*.log"
 fi
 
 step "Cleaning old releases (keeping \$KEEP)"
@@ -337,10 +358,6 @@ scp -q -o BatchMode=yes "$BUNDLE" "$REMOTE:deploy/incoming.tar.gz"
 if [ -f "$ENV_FILE" ]; then
     scp -q -o BatchMode=yes "$ENV_FILE" "$REMOTE:deploy/incoming.env"
 fi
-# The Celery units live in scripts/ (never bundled): uploaded on their own,
-# installed by the remote script.
-"${SSH[@]}" 'rm -rf ~/deploy/systemd && mkdir -p ~/deploy/systemd'
-scp -q -o BatchMode=yes scripts/systemd/*.service "$REMOTE:deploy/systemd/"
 
 # --- 3-5. install, verify, go live -------------------------------------------------
 remote_script | "${SSH[@]}" bash -s

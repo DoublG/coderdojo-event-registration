@@ -82,7 +82,7 @@ Level27, since the account has no root. Until 1–4 are done, a deploy stops bef
    `django.contrib.gis` loads them; no headers needed.
 3. **A running Redis** for the account, with `maxmemory` 128 MB and `maxmemory-policy volatile-lru`
    ([`CAPACITY.md`](CAPACITY.md), finding 6).
-4. **systemd lingering** for `py10102` (`loginctl enable-linger py10102`), so the two Celery workers keep running.
+4. **The worker component *celery*** (*Optioneel component* in the Level27 panel) with the two Celery workers' commands (CLAUDE.md, "Deploying"); Level27 keeps them running.
 5. **gunicorn started in `~/app`** (or with `-c ~/app/gunicorn.conf.py`): today it doesn't read our
    `gunicorn.conf.py`, so the per-worker request cap is off.
 6. **The proxy's request body limit at 12 MB** ([`CAPACITY.md`](CAPACITY.md)).
@@ -154,8 +154,8 @@ django-oauth-toolkit, django-auditlog, django-ninja, channels and django-celery-
 test suite runs all of them.
 
 **Python upgrades** (3.14 → 3.15): a new pyenv environment on the server (`deploy.sh` installs into the
-one gunicorn runs from, see CLAUDE.md), the devcontainer's base image, and the Celery units in
-`scripts/systemd/`, which name the Python path.
+one gunicorn runs from, see CLAUDE.md), the devcontainer's base image, and the Celery worker
+component's commands in the Level27 panel, which run `celery` from the PATH of that environment.
 
 **Operating system, MySQL and Redis** upgrades on production go through Level27. Try the new versions
 in the devcontainer first by changing the image tags in `.devcontainer/docker-compose.yml`.

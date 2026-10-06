@@ -2166,16 +2166,21 @@ retries and scheduled sends are all just rows.
    `send(category=service)`. From then on, nothing calls `send_mail`
    directly.
 
-#### Production: two Celery workers under systemd
+#### Production: two Celery workers as a Level27 worker component
 
-Level27 has Redis. The setup is kept lean: **two worker processes**, each a
-systemd service next to the gunicorn that Level27 manages, with beat
-running inside the first one.
+Level27 has Redis. The setup is kept lean: **two worker processes**, with
+beat running inside the first one. Level27 doesn't let us install systemd
+units, so they run as the project's **worker component** *celery*
+(*Optioneel component* in the panel): one *Commando* per worker, each a
+script in `~/.worker/<id>` that Level27 keeps running and starts again
+when it stops, with output in `~/logs/worker-<id>/`. (Until 7 October 2026
+they were systemd user units installed by `deploy.sh`; a deploy removes
+those when it still finds them.)
 
-| Service | Runs | Queue | Concurrency |
+| Worker | Runs | Queue | Concurrency |
 |---|---|---|---|
-| `coolregistration-celery-periodic` | beat (embedded, `-B`) and the jobs beat triggers: `send_pending_emails` (the dispatcher), `requeue_stuck_emails`, `process_bounces`, later the nightly engagement rebuild | `periodic` | 1 |
-| `coolregistration-celery-mailing` | everything else: `send_email_batch`, `launch_campaign`, and any future task | `celery` (the default) | 1 |
+| `periodic@…` | beat (embedded, `-B`) and the jobs beat triggers: `send_pending_emails` (the dispatcher), `requeue_stuck_emails`, `process_bounces`, later the nightly engagement rebuild | `periodic` | 1 |
+| `mailing@…` | everything else: `send_email_batch`, `launch_campaign`, and any future task | `celery` (the default) | 1 |
 
 - **Routing.** `CELERY_TASK_ROUTES` in the settings sends each
   beat-triggered task to `periodic`. Everything else stays on the default
@@ -2191,24 +2196,19 @@ running inside the first one.
   holds up the dispatcher. A heavy job, such as the nightly engagement
   rebuild, is started by beat but only enqueues its real work on the
   default queue.
-- **The unit files** live in the repo under `scripts/systemd/`.
-  `scripts/` is never bundled into the release, so `deploy.sh` installs the
-  units itself.
-  - `WorkingDirectory=%h/app`. The settings read `~/app/.env` themselves
-    (`environ.Env.read_env`), so there's no `EnvironmentFile=` and no
-    systemd quoting rules to trip over.
-  - `ExecStart` uses the same pyenv env as gunicorn:
-    `%h/.pyenv/versions/py10102-3.14.7/bin/celery -A website worker -Q <queue> -c 1 -l INFO`,
-    plus `-B --scheduler django_celery_beat.schedulers:DatabaseScheduler`
-    on the periodic one, and `--max-tasks-per-child` to cap slow memory
-    growth.
-  - `Restart=always`, `RestartSec=5`.
-  - Logs go to the journal (`journalctl --user -u …`), not to files. The
-    periodic worker logs at WARNING: at INFO its 10-second dispatcher
+- **The commands** live in the panel, not in the repo:
+  - `cd /var/python/py10102/app && nice -n 10 celery -A website worker -n periodic@%h -Q periodic -c 1 -B --scheduler django_celery_beat.schedulers:DatabaseScheduler --max-tasks-per-child 100 --max-memory-per-child 200000 -l WARNING`
+  - `cd /var/python/py10102/app && nice -n 10 celery -A website worker -n mailing@%h -Q celery -c 1 --max-tasks-per-child 100 --max-memory-per-child 200000 -l INFO`
+  - The `cd` is needed: the scripts start in the home directory, where
+    `celery -A website` can't find the project. The settings read
+    `~/app/.env` themselves (`environ.Env.read_env`). `celery` comes from
+    the PATH the scripts get from `~/.bashrc`, the pyenv env daphne runs
+    from.
+  - The periodic worker logs at WARNING: at INFO its 10-second dispatcher
     alone wrote about 6 MB a day (`CAPACITY.md`, "Disk").
-- **Sharing the machine with the website.** Gunicorn, both workers and
-  Redis all run on the same Level27 system and share its memory, so the
-  website must win:
+- **Sharing the machine with the website.** The web server, both workers
+  and Redis all run on the same Level27 system and share its memory, so
+  the website must win:
   - Concurrency 1 with the prefork pool: per worker, one parent process
     plus one child that runs the tasks, and embedded beat is a process of
     its own on the periodic worker: five Python processes in total (about
@@ -2216,23 +2216,23 @@ running inside the first one.
     enforce `CELERY_TASK_TIME_LIMIT`, and a hung SMTP or IMAP connection
     would then block the queue for good. Prefork is worth the extra
     process.
-  - `--max-memory-per-child` (e.g. 200 MB) and `--max-tasks-per-child`
-    (e.g. 100) recycle the child before it grows. A big campaign resolve
+  - `--max-memory-per-child 200000` (200 MB) and `--max-tasks-per-child 100`
+    recycle the child before it grows. A big campaign resolve
     or engagement rebuild can't keep its memory afterwards.
+  - The component has a memory limit of its own (512 MB for both workers,
+    mode *kill*).
   - Batches and campaign launches work in chunks (`MAILING_BATCH_SIZE`,
     bulk inserts per chunk, `.iterator()` over audiences), never a whole
     audience in memory.
   - `EMAIL_TIMEOUT` and an IMAP timeout are set, so a stuck connection
     fails and retries instead of hanging.
-  - `Nice=10` on both units: under CPU pressure, web requests go first.
-  - Hard caps (`MemoryHigh=`/`MemoryMax=`) only if Level27's systemd lets
-    user units use the memory controller. Otherwise the per-child limits
-    above are the cap.
-- **Stopping cleanly.** `KillSignal=SIGTERM` is Celery's warm shutdown:
-  the worker finishes the task in hand and stops taking new ones.
-  `TimeoutStopSec` must be longer than the slowest batch (e.g. 120 s).
-  If it's killed anyway, `acks_late` means the broker hands the batch out
-  again, and rows already marked `sent` are skipped.
+  - `nice -n 10` on both: under CPU pressure, web requests go first.
+- **Restarting on a deploy.** `deploy.sh` sends SIGTERM to each worker's
+  main process: Celery's warm shutdown, the worker finishes the task in
+  hand and stops taking new ones; Level27 then starts it again on the new
+  code, and the deploy waits until both answer a ping. If one is killed
+  anyway, `acks_late` means the broker hands the batch out again, and rows
+  already marked `sent` are skipped.
 - **Redis.** Each use gets its own db: the cache on 0, Channels on 1, the
   Celery broker on 2 (today the broker shares 0 with the cache; that's
   phase 1). If Level27's Redis needs a password or a unix socket, the
@@ -2422,9 +2422,9 @@ Each phase ships with tests (the repo rule) and updates this section and
     unsubscribe (tested through nginx), and the newsletter opt-in on
     sign-up.
 
-  The production side is done: the two unit files in `scripts/systemd/`,
-  and every `deploy.sh` run installs, restarts and pings them (it fails
-  if it can't). **Every mail goes through the engine** (decided
+  The production side is done: the two workers run as Level27's worker
+  component, and every `deploy.sh` run restarts and pings them (it fails
+  if they don't come back). **Every mail goes through the engine** (decided
   2026-09-25): the onboarding mails and the password reset are `service`
   templates too, so production mail depends on the workers running.
 - phase 7: scopes, a subquery per rule, rule validation, the admin
@@ -2505,9 +2505,9 @@ the side.
    - the `send_pending_emails` / `requeue_stuck_emails` beat jobs (claim,
      dispatch into `send_email_batch` subtasks, priority, `send_after`, Celery `rate_limit` and autoretry) and one-click
      unsubscribe headers
-   - run the two workers in production under systemd, with SMTP and IMAP
-     credentials in `~/app/.env` (see "Production: two Celery workers under
-     systemd"), and the same two in `start.sh`
+   - run the two workers in production (Level27's worker component), with SMTP and IMAP
+     credentials in `~/app/.env` (see "Production: two Celery workers as a
+     Level27 worker component"), and the same two in `start.sh`
    - then move `applications.services` mail to `send()`. Only once the
      production worker runs, because that mail is queued from then on.
 
@@ -2573,11 +2573,11 @@ the side.
    rate limiting and the retries, and nothing sends mail directly from a
    request. See
    "Sending pipeline" above.
-9. **Production runs Celery under systemd, with Level27's Redis as the
+9. **Production runs Celery as a Level27 worker component, with Level27's Redis as the
    broker. Kept lean: two workers.** A periodic worker with beat embedded
    runs the scheduled jobs; a mailing worker runs everything else. Each has
    concurrency 1, and both share the machine's memory with the website, so
-   they recycle their child processes and run at lower priority. See "Production: two Celery workers under systemd"
+   they recycle their child processes and run at lower priority. See "Production: two Celery workers as a Level27 worker component"
    above.
 10. **The privacy explanation goes on the parent's Mail preferences card**,
     above the opt-in/out toggles, and next to the newsletter opt-in on
@@ -2596,15 +2596,12 @@ the side.
 
 #### Still open
 
-- **Level27 details for the systemd setup** (see "Production: two Celery
-  workers under systemd"):
-  - User units, or system units installed by Level27? User units need
-    lingering enabled for `py10102`.
+- **Level27 details for the Celery workers** (see "Production: two Celery
+  workers as a Level27 worker component"):
   - How to reach Redis: host/port or a unix socket? Is there a password?
     Which db numbers can we use?
-  - Can user units use systemd's memory controller (`MemoryMax=`)? If not,
-    the per-child limits are the only cap. The memory itself is shared
-    with gunicorn on the same system (decided).
+  - Is the worker component's 512 MB limit enough for both workers, and
+    are `~/logs/worker-<id>/` rotated?
 - **Review the `account_type` attribute.** The resolver already limits every
   audience to active adult accounts, so `account_type = adult` changes
   nothing and `= ninja` always matches nobody. No seeded segment uses it
