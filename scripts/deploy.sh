@@ -10,7 +10,8 @@
 #        - installs requirements.txt into the Python env gunicorn runs from;
 #        - runs `manage.py check` against the new code and the live .env.
 #      A failure here aborts the deploy; the running site is untouched.
-#   4. Syncs the release into ~/app (keeping .env, media/, private_media/),
+#   4. Syncs the release into ~/app (keeping .env, media/, private_media/ and
+#      the demo logins in seed_credentials.csv),
 #      runs migrations (+ collectstatic when STATIC_ROOT is configured).
 #   5. Puts the new code live and does a smoke-test request over the app's
 #      unix socket. Level27 runs the app as the systemd service py10102.service
@@ -261,7 +262,7 @@ step "Syncing into \$APP"
 rsync -a --delete \
     --exclude='.env' --exclude='media/' --exclude='private_media/' \
     --exclude='staticfiles/' --exclude='.venv/' --exclude='.git/' \
-    --exclude='__pycache__/' \
+    --exclude='__pycache__/' --exclude='seed_credentials.csv' \
     "\$REL/" "\$APP/"
 
 step "Migrating"
