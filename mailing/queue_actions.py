@@ -11,6 +11,7 @@ and withdraws the mail still waiting for that address; unblocking deletes it.
 The audit log records both; neither touches the person's own mail choices (a
 complaint switched those off through mailing.preferences)."""
 
+from django.db.models import QuerySet
 from django.utils.translation import gettext as _
 
 from .models import EmailMessage, EmailSuppression
@@ -21,7 +22,7 @@ class MailQueueError(Exception):
     """Why a mail can't be sent again, in words for the dashboard."""
 
 
-def retry_problem(message):
+def retry_problem(message: EmailMessage) -> str | None:
     """Why `message` can't be sent again, or None when it can."""
     if message.status != EmailMessage.Status.FAILED:
         return _("Only a mail that failed can be sent again.")
@@ -35,7 +36,7 @@ def retry_problem(message):
     return None
 
 
-def retry(message):
+def retry(message: EmailMessage) -> None:
     """Put a failed mail back in the queue, to go out with the next round."""
     if problem := retry_problem(message):
         raise MailQueueError(problem)
@@ -51,7 +52,7 @@ def retry(message):
         raise MailQueueError(_("Only a mail that failed can be sent again."))
 
 
-def retry_failed(messages):
+def retry_failed(messages: QuerySet[EmailMessage]) -> tuple[int, int]:
     """Send every failed mail in `messages` (a queryset) again that can be.
     Returns (sent again, skipped); a skipped one is blocked or cleared."""
     retried = skipped = 0
@@ -65,7 +66,7 @@ def retry_failed(messages):
     return retried, skipped
 
 
-def block(email, note=""):
+def block(email: str, note: str = "") -> tuple[EmailSuppression, int]:
     """Stop all mail to `email`, whatever the person chose: an EmailSuppression
     "Blocked by hand", created with save() so the audit log records who. Mail
     still waiting for the address is withdrawn here (the worker only checks the
@@ -81,7 +82,7 @@ def block(email, note=""):
     return suppression, withdrawn
 
 
-def unblock(suppression):
+def unblock(suppression: EmailSuppression) -> str:
     """Let mail go to the address again. Returns the address."""
     email = suppression.email
     suppression.delete()  # delete(), not a queryset: the audit log records who did it

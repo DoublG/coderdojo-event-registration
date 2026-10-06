@@ -15,6 +15,20 @@ rich==15.0.0
 markdown-it-py==4.2.0
 mdurl==0.1.2
 
+# Type checking (CODING_STANDARDS.md, "Type checking"): mypy with django-stubs'
+# plugin, over the modules listed in pyproject.toml's [tool.mypy] (with mypy's
+# mypy_extensions, pathspec, librt and ast_serialize, and django-stubs'
+# django-stubs-ext and types-PyYAML; typing_extensions and asgiref are in
+# requirements.txt).
+mypy==2.4.0
+django-stubs==6.1.2
+django-stubs-ext==6.1.2
+mypy_extensions==1.1.0
+pathspec==1.1.1
+librt==0.16.0
+ast_serialize==0.12.1
+types-PyYAML==6.0.12.20260906
+
 # The test results as JUnit XML for the Tests workflow's summary
 # (manage.py test --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner).
 unittest-xml-reporting==4.0.0

@@ -110,3 +110,31 @@ exclude_also = [
     "raise NotImplementedError",
     "if TYPE_CHECKING:",
 ]
+
+# Type checking (CODING_STANDARDS.md, "Type checking"): mypy with django-stubs' plugin,
+# gradually. Only the modules in `files` are checked, and they're fully annotated
+# (disallow_untyped_defs); whatever they import is read for its types but its own
+# errors aren't reported (follow_imports = "silent"). Add a module here once it's
+# annotated: the service modules first. `mypy` (no arguments) runs it, also in the
+# Code audit workflow.
+[tool.mypy]
+python_version = "3.14"
+plugins = ["mypy_django_plugin.main"]
+files = [
+    "dojos/team.py",
+    "mailing/queue_actions.py",
+    "privacy/retention.py",
+]
+follow_imports = "silent"
+# Libraries without type information (two-factor, auditlog, oauth toolkit, ...).
+ignore_missing_imports = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+# Not warn_return_any yet: checked modules call unannotated ones, whose results are Any;
+# switch it on once most of what they call is annotated too.
+
+[tool.django-stubs]
+django_settings_module = "website.settings"

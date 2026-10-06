@@ -17,10 +17,13 @@ Every rule violation raises TeamError with a message fit to show the user.
 """
 
 from datetime import timedelta
+from typing import TYPE_CHECKING
 
 from django.db import transaction
+from django.db.models import QuerySet
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import Promise
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 
@@ -29,6 +32,9 @@ from notifications.services import notify
 
 from .access import is_approved_mentor
 from .models import Dojo, DojoMembership
+
+if TYPE_CHECKING:  # accounts imports this module; only the type is needed here
+    from accounts.models import User
 
 # How long an active dojo can go without events before its team and the
 # board are nudged to plan a session or mark it dormant.
@@ -39,11 +45,17 @@ class TeamError(Exception):
     pass
 
 
-def _team_url(dojo):
+def _team_url(dojo: Dojo) -> str:
     return reverse("dojo_team_manage", kwargs={"dojo_id": dojo.id})
 
 
-def notify_managers(dojo, text, url="", exclude=None, params=None):
+def notify_managers(
+    dojo: Dojo,
+    text: str | Promise,
+    url: str = "",
+    exclude: "User | None" = None,
+    params: dict[str, object] | None = None,
+) -> None:
     """One notification per active champion/mentor of `dojo`, each in its
     recipient's language (see notifications.services.notify)."""
     for membership in dojo.memberships.managers().select_related("user"):
@@ -52,7 +64,7 @@ def notify_managers(dojo, text, url="", exclude=None, params=None):
         notify(membership.user, text, url=url, dojo=dojo, params=params)
 
 
-def _activate(membership, by=None):
+def _activate(membership: DojoMembership, by: "User | None" = None) -> None:
     membership.status = DojoMembership.ACTIVE
     membership.joined_at = timezone.now()
     membership.left_at = None
@@ -63,12 +75,12 @@ def _activate(membership, by=None):
 # --- joining ---------------------------------------------------------------
 
 
-def request_to_join(dojo, user):
+def request_to_join(dojo: Dojo, user: "User") -> DojoMembership:
     if not is_approved_mentor(user):
         raise TeamError(_("Only approved mentors can ask to join a dojo's team."))
     if not dojo.is_public:
         raise TeamError(_("This dojo isn't accepting join requests right now."))
-    membership = DojoMembership.objects.filter(dojo=dojo, user=user).first()
+    membership: DojoMembership | None = DojoMembership.objects.filter(dojo=dojo, user=user).first()
     if membership is not None and membership.status != DojoMembership.DORMANT:
         raise TeamError(_("You're already on this team, or your request is pending."))
     if membership is None:
@@ -87,7 +99,7 @@ def request_to_join(dojo, user):
     return membership
 
 
-def accept_request(membership, by):
+def accept_request(membership: DojoMembership, by: "User") -> DojoMembership:
     if membership.status != DojoMembership.REQUESTED:
         raise TeamError(_("That request has already been handled."))
     _activate(membership, by=by)
@@ -101,7 +113,7 @@ def accept_request(membership, by):
     return membership
 
 
-def decline_request(membership, by, reason="declined"):
+def decline_request(membership: DojoMembership, by: "User | None", reason: str = "declined") -> None:
     """A declined request goes back to `dormant` if the person was on the
     team before (keeping their history), otherwise it's removed."""
     if membership.status != DojoMembership.REQUESTED:
@@ -121,10 +133,10 @@ def decline_request(membership, by, reason="declined"):
     notify(membership.user, text, params={"dojo": dojo.name})
 
 
-def add_mentor(dojo, user, by):
+def add_mentor(dojo: Dojo, user: "User", by: "User") -> DojoMembership:
     if not is_approved_mentor(user):
         raise TeamError(_("Only approved mentors can be added to a dojo's team."))
-    membership = DojoMembership.objects.filter(dojo=dojo, user=user).first()
+    membership: DojoMembership | None = DojoMembership.objects.filter(dojo=dojo, user=user).first()
     if membership is not None and membership.status == DojoMembership.ACTIVE:
         raise TeamError(_("%(name)s is already on this team.") % {"name": user.team_name})
     if membership is None:
@@ -136,7 +148,7 @@ def add_mentor(dojo, user, by):
     return membership
 
 
-def promote_youth_mentor(dojo, ninja_user, by_membership):
+def promote_youth_mentor(dojo: Dojo, ninja_user: "User", by_membership: DojoMembership) -> DojoMembership:
     if not ninja_user.is_ninja:
         raise TeamError(_("Only a ninja's own account can be promoted to youth mentor."))
     if not ninja_user.is_active:
@@ -144,7 +156,7 @@ def promote_youth_mentor(dojo, ninja_user, by_membership):
             _("%(name)s's login is switched off; their guardian can switch it back on.")
             % {"name": ninja_user.team_name}
         )
-    membership = DojoMembership.objects.filter(dojo=dojo, user=ninja_user).first()
+    membership: DojoMembership | None = DojoMembership.objects.filter(dojo=dojo, user=ninja_user).first()
     if membership is not None and membership.status == DojoMembership.ACTIVE:
         raise TeamError(_("%(name)s is already on this team.") % {"name": ninja_user.team_name})
     if membership is None:
@@ -164,13 +176,13 @@ def promote_youth_mentor(dojo, ninja_user, by_membership):
 # --- leaving ----------------------------------------------------------------
 
 
-def _make_dormant(membership):
+def _make_dormant(membership: DojoMembership) -> None:
     membership.status = DojoMembership.DORMANT
     membership.left_at = timezone.now()
     membership.save(update_fields=["status", "left_at"])
 
 
-def remove_member(membership):
+def remove_member(membership: DojoMembership) -> None:
     if membership.role == DojoMembership.CHAMPION:
         raise TeamError(_("The champion can't be removed; transfer the champion role first."))
     if membership.status != DojoMembership.ACTIVE:
@@ -178,7 +190,7 @@ def remove_member(membership):
     _make_dormant(membership)
 
 
-def end_all_memberships(user):
+def end_all_memberships(user: "User") -> None:
     """For erasing an account (privacy.erasure): every membership of `user`
     ends, the champion's too. Pending requests go (as a declined one would),
     the rest become dormant, kept for past sessions' teams. Only the
@@ -191,14 +203,14 @@ def end_all_memberships(user):
             _make_dormant(membership)
 
 
-def leave(membership):
+def leave(membership: DojoMembership) -> None:
     if membership.role == DojoMembership.CHAMPION:
         raise TeamError(_("As champion you can't leave; transfer the champion role to a mentor first."))
     _make_dormant(membership)
 
 
 @transaction.atomic
-def transfer_champion(dojo, from_membership, to_membership):
+def transfer_champion(dojo: Dojo, from_membership: DojoMembership, to_membership: DojoMembership) -> None:
     if from_membership.role != DojoMembership.CHAMPION or from_membership.dojo_id != dojo.id:
         raise TeamError(_("Only the champion can hand over the champion role."))
     if (
@@ -235,12 +247,12 @@ LIFECYCLE_ACTIONS = {
 }
 
 
-def active_events(dojo):
+def active_events(dojo: Dojo) -> QuerySet[Event]:
     """Upcoming events still being prepared or open for sign-ups."""
     return dojo.event_set.filter(start_time__gte=timezone.now(), status__in=[Event.DRAFT, Event.OPEN])
 
 
-def change_status(dojo, action):
+def change_status(dojo: Dojo, action: str) -> Dojo:
     if action not in LIFECYCLE_ACTIONS:
         raise TeamError(_("Unknown action."))
     sources, target = LIFECYCLE_ACTIONS[action]
@@ -262,7 +274,7 @@ def change_status(dojo, action):
     return dojo
 
 
-def needs_dormancy_nudge(dojo):
+def needs_dormancy_nudge(dojo: Dojo) -> bool:
     """An active dojo whose last event was over half a year ago and that has
     nothing coming up — shown as a banner on its dashboard until someone
     plans a session or marks it dormant (DATA_MODEL.md §10, decision 5).

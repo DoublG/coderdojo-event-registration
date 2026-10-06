@@ -39,9 +39,10 @@ and capacity in [`CAPACITY.md`](CAPACITY.md), memory per function in [`MEMORY_PR
 5. [Test coverage](#test-coverage)
 6. [Complexity and maintainability](#complexity-and-maintainability)
 7. [Layers between the apps](#layers-between-the-apps)
-8. [Accessibility](#accessibility)
-9. [Commits, reviews and keeping documents current](#commits-reviews-and-keeping-documents-current)
-10. [Measuring again](#measuring-again)
+8. [Type checking](#type-checking)
+9. [Accessibility](#accessibility)
+10. [Commits, reviews and keeping documents current](#commits-reviews-and-keeping-documents-current)
+11. [Measuring again](#measuring-again)
 
 ---
 
@@ -309,6 +310,34 @@ also in the Code audit workflow.
   engine for a `campaigns` app with their models (their tables kept their names, the content types moved,
   so permissions and the audit log follow), so the engine never depends on them.
 
+## Type checking
+
+**mypy with django-stubs' Django plugin, introduced gradually** (6 October 2026). The codebase was written
+without type annotations; checking all of it at once gave hundreds of findings, mostly noise in views and
+forms. So only the modules listed in `pyproject.toml`'s `[tool.mypy] files` are checked, and those are
+fully annotated:
+
+- **What's checked:** the service modules first, the rule modules every view calls (`dojos/team.py`,
+  `mailing/queue_actions.py`, `privacy/retention.py` to start). Every function there has annotations
+  (`disallow_untyped_defs`); what they import is read for its types, but its own errors aren't reported
+  (`follow_imports = "silent"`). Libraries without type information are ignored.
+- **Growing it:** a service module joins the list once it's annotated, and new service code is written
+  annotated. Views, forms, templates and tests stay unannotated; that's where the checker gives least.
+  `warn_return_any` waits until most of what the checked modules call is annotated.
+- **Django specifics:** the plugin knows models, fields and lookups, and checks a `filter()`'s lookups
+  against the model. A queryset carrying an annotation is typed with `WithAnnotations[Model, TypedDict]`
+  from `django_stubs_ext` (a development package), imported only under `TYPE_CHECKING` (see
+  `privacy.retention.with_inactive_since`). The site's managers are built as
+  `class X(models.Manager.from_queryset(...))`, which the plugin can't type, so a result taken from one is
+  annotated where it's assigned (`membership: DojoMembership | None = ...first()`). An import needed only for
+  a type goes under `TYPE_CHECKING`, to avoid import cycles between the apps.
+- **What it found on day one:** a lookup comparing a timestamp with a plain date in the retention job
+  (Django made it a naive midnight and warned on every run), and a field lookup that could in principle
+  return a relation without a column.
+- **Running it:** `mypy` (no arguments: the configuration says what to check). It's a job in the Code audit
+  workflow too (`types`), which installs the site's requirements and system libraries, since the plugin
+  starts Django.
+
 ## Accessibility
 
 The site aims at **WCAG 2.2 AA** on every page, public and management alike, in both themes. Checked on 6
@@ -346,7 +375,7 @@ light and the dark theme, and every page reflows at 320px wide.
 - **Commits**: a summary line that says what changed for whom, then a body with the why and the parts. Small,
   coherent commits on `main` (or a branch with a pull request for larger work). Commits made by Claude in the
   devcontainer carry Claude's identity and a `Co-Authored-By` line.
-- **Before pushing**: the lint commands above, the tests of what you touched (the whole suite for anything
+- **Before pushing**: the lint commands above and `mypy`, the tests of what you touched (the whole suite for anything
   shared), and the user-journey check for user-facing pages (`python3 user-journeys/scripts/check_journeys.py`),
   plus the accessibility check after a markup or style change (`user-journeys/scripts/check_a11y.py`).
 - **CI must be green.** A security finding on a line that's fine gets its `noqa` with a reason; an advisory

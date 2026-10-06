@@ -58,15 +58,16 @@ child is erased). DATA_MODEL.md §16 lists what is still to decide.
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from functools import reduce
 from operator import or_
+from typing import TYPE_CHECKING, Any
 
 from auditlog.models import LogEntry as AuditLogEntry
 from django.conf import settings
 from django.contrib.sessions.models import Session
 from django.db import transaction
-from django.db.models import Exists, OuterRef, Q, Subquery
+from django.db.models import Exists, Field, Manager, OuterRef, Q, QuerySet, Subquery
 from django.db.models.functions import Coalesce, Greatest
 from django.urls import reverse
 from django.utils import formats, timezone
@@ -79,6 +80,19 @@ from dojos.models import Dojo, DojoMembership
 from privacy.erasure import erase_person, sole_children
 from privacy.models import ErasureRecord, RetentionNotice
 
+if TYPE_CHECKING:
+    from typing import TypedDict
+
+    from django_stubs_ext import WithAnnotations
+
+    from accounts.models import Ninja
+
+    class _InactiveSince(TypedDict):
+        inactive_since: datetime
+
+    # A User with with_inactive_since()'s annotation (django-stubs; types only, never imported at run time).
+    UserInactiveSince = WithAnnotations[User, _InactiveSince]
+
 logger = logging.getLogger(__name__)
 
 TEMPLATE_KEY = "account_deletion_reminder"
@@ -89,11 +103,11 @@ AUDIT_LOG_BATCH = 1000
 MAIL_CONTENT_BATCH = 1000
 
 
-def _first_reminder():
+def _first_reminder() -> int:
     return max(settings.ACCOUNT_DELETION_REMINDER_DAYS)
 
 
-def with_inactive_since(users):
+def with_inactive_since(users: QuerySet[User] | Manager[User]) -> "QuerySet[UserInactiveSince]":
     """Annotate `inactive_since` on a User queryset: the last login (or
     `date_joined`, never logged in), or a later login of one of the
     account's children's own logins."""
@@ -106,16 +120,19 @@ def with_inactive_since(users):
     return users.annotate(inactive_since=Greatest(own, Coalesce(Subquery(child_login), own)))
 
 
-def inactive_since(user):
-    return with_inactive_since(User.objects.filter(pk=user.pk)).values_list("inactive_since", flat=True).get()
+def inactive_since(user: User) -> datetime:
+    since: datetime = (
+        with_inactive_since(User.objects.filter(pk=user.pk)).values_list("inactive_since", flat=True).get()
+    )
+    return since
 
 
-def is_volunteer(user):
+def is_volunteer(user: User) -> bool:
     """Ever on a dojo's team as champion or mentor: cleaned, not erased."""
     return user.dojo_memberships.filter(role__in=DojoMembership.MANAGER_ROLES, joined_at__isnull=False).exists()
 
 
-def champion_of_active_dojos(user):
+def champion_of_active_dojos(user: User) -> list[Dojo]:
     return list(
         Dojo.objects.filter(
             status=Dojo.ACTIVE,
@@ -126,14 +143,17 @@ def champion_of_active_dojos(user):
     )
 
 
-def candidates(today=None):
+def candidates(today: date | None = None) -> "QuerySet[UserInactiveSince]":
     """Accounts the rule applies to whose first reminder is due or past:
     not erased yet, no organisation role, not a superuser, never a ninja's
     own login (it goes with the family) or an API client's technical
     account (it never logs in)."""
     today = today or timezone.localdate()
     # A day's margin for time zones: handle_account decides by the date.
-    cutoff = today - timedelta(days=settings.ACCOUNT_RETENTION_DAYS - _first_reminder() - 1)
+    day = today - timedelta(days=settings.ACCOUNT_RETENTION_DAYS - _first_reminder() - 1)
+    # The start of that day in the site's time zone, not a bare date: inactive_since
+    # is a timestamp (Django would otherwise make the date a naive midnight).
+    cutoff = timezone.make_aware(datetime.combine(day, time.min))
     erased = ErasureRecord.objects.filter(model=User._meta.label, object_id=OuterRef("pk"))
     return (
         with_inactive_since(User.objects)
@@ -150,16 +170,16 @@ class Plan:
     """Where one account stands: its date and the notices it has had."""
 
     user: User
-    since: object
-    date: object
-    notices: dict  # days_before -> RetentionNotice
+    since: datetime
+    date: date
+    notices: dict[int, RetentionNotice]  # days_before -> RetentionNotice
 
     @property
-    def first_sent(self):
+    def first_sent(self) -> bool:
         return _first_reminder() in self.notices
 
 
-def plan_for(user, today=None):
+def plan_for(user: User, today: date | None = None) -> Plan:
     today = today or timezone.localdate()
     since = inactive_since(user)
     notices = {n.days_before: n for n in RetentionNotice.objects.filter(account=user, inactive_since=since)}
@@ -171,7 +191,7 @@ def plan_for(user, today=None):
     return Plan(user, since, max(date, earliest), notices)
 
 
-def apply_retention(today=None):
+def apply_retention(today: date | None = None) -> dict[str, int]:
     """The nightly job: reminders, deletions, the audit log and sessions.
     One account's failure is logged and never stops the rest."""
     today = today or timezone.localdate()
@@ -205,7 +225,7 @@ def apply_retention(today=None):
     return done
 
 
-def handle_account(user, today=None):
+def handle_account(user: User, today: date | None = None) -> str | None:
     """Send the reminder that's due, or apply the rule once the date has
     passed. Returns what happened (a key of `apply_retention`'s result) or
     None."""
@@ -236,7 +256,7 @@ def handle_account(user, today=None):
 # --- reminders ---------------------------------------------------------------
 
 
-def remind(plan, days):
+def remind(plan: Plan, days: int) -> None:
     """Mail reminder `days` and record it. The mail is `service` mail, so it
     can't be switched off; a blocked address or an account without one is
     recorded as suppressed by send(), and the date stands."""
@@ -255,9 +275,9 @@ def remind(plan, days):
             _notify_mentors(dojo, user, plan.date, passed=False)
 
 
-def reminder_context(plan):
+def reminder_context(plan: Plan) -> dict[str, object]:
     user = plan.user
-    context = {
+    context: dict[str, object] = {
         "deletion_date": plan.date,
         "login_url": settings.SITE_URL + reverse("login"),
     }
@@ -271,7 +291,7 @@ def reminder_context(plan):
     return context
 
 
-def _notify_mentors(dojo, champion, date, passed):
+def _notify_mentors(dojo: Dojo, champion: User, date: date, passed: bool) -> None:
     """The dojo's other managers, on the dashboard bell: the champion
     can't be cleaned while the dojo depends on them."""
     from dojos.team import notify_managers
@@ -300,7 +320,7 @@ def _notify_mentors(dojo, champion, date, passed):
 # --- the organisation's list -----------------------------------------------
 
 
-def champions_needing_attention(today=None):
+def champions_needing_attention(today: date | None = None) -> list[dict[str, Any]]:
     """Champions of an active dojo who got their first reminder: they can't
     be cleaned until the role moves. One row per dojo, soonest date first."""
     today = today or timezone.localdate()
@@ -315,7 +335,7 @@ def champions_needing_attention(today=None):
         .select_related("dojo", "user")
         .distinct()
     )
-    rows = []
+    rows: list[dict[str, Any]] = []
     for membership in memberships:
         plan = plan_for(membership.user, today)
         if plan.first_sent:  # about the current period, not one a login ended
@@ -334,7 +354,7 @@ def champions_needing_attention(today=None):
 # --- the audit log -----------------------------------------------------------
 
 
-def remove_old_invitations():
+def remove_old_invitations() -> int:
     """Organisation invitations 30 days after they were accepted, withdrawn
     or expired (accounts.invitations, DATA_MODEL.md §23)."""
     from accounts.invitations import remove_old
@@ -342,7 +362,7 @@ def remove_old_invitations():
     return remove_old()
 
 
-def remove_old_audit_log_entries():
+def remove_old_audit_log_entries() -> int:
     """Entries with no account behind them, older than the period, in
     batches. The entries of an account go with its erasure."""
     cutoff = timezone.now() - timedelta(days=settings.AUDIT_LOG_RETENTION_DAYS)
@@ -357,22 +377,24 @@ def remove_old_audit_log_entries():
 # --- mail content --------------------------------------------------------------
 
 
-def mail_content_values():
+def mail_content_values() -> dict[str, str | None]:
     """{column: empty value} for the mail fields the privacy registry marks
     `personal`: what the `mail_content` rule clears. Read from the
     classification, so a personal field added later is cleared too."""
     from mailing.models import EmailMessage
 
-    values = {}
+    values: dict[str, str | None] = {}
     for name, spec in privacy_registry.get(EmailMessage).fields.items():
         if spec.on_erasure != Erasure.DELETE:
             continue
         model_field = EmailMessage._meta.get_field(name)
+        if not isinstance(model_field, Field):  # a reverse relation has no column to clear
+            continue
         values[model_field.attname] = None if model_field.null else ""
     return values
 
 
-def clear_old_mail_content(now=None):
+def clear_old_mail_content(now: datetime | None = None) -> int:
     """Empty the personal fields of mail older than MAIL_CONTENT_RETENTION_DAYS,
     in primary-key ranges of MAIL_CONTENT_BATCH (the table only grows, and its
     ids follow `created_at`). With `QuerySet.update()`, so a batch is one
@@ -415,11 +437,11 @@ def clear_old_mail_content(now=None):
 _LONG_AGO = timezone.make_aware(datetime(1970, 1, 1))
 
 
-def _cutoff(days, now=None):
+def _cutoff(days: int, now: datetime | None = None) -> datetime:
     return (now or timezone.now()) - timedelta(days=days)
 
 
-def children_to_erase(today=None):
+def children_to_erase(today: date | None = None) -> "QuerySet[Ninja]":
     """Children past `CHILD_RETENTION_DAYS` since their last activity (their
     latest session, upcoming ones included; their own login; or, never having
     done either, since they were added), or aged `CHILD_RETENTION_AGE` or
@@ -458,7 +480,7 @@ def children_to_erase(today=None):
     return children.filter(due, erased=False)
 
 
-def erase_old_children(today=None):
+def erase_old_children(today: date | None = None) -> int:
     """The `child` rule: erase each child it's due for, with their own login
     (privacy.erasure.erase_child), one transaction each. Returns how many."""
     from privacy.erasure import erase_child
@@ -474,7 +496,7 @@ def erase_old_children(today=None):
     return erased
 
 
-def remove_old_applications():
+def remove_old_applications() -> int:
     """The `application` rule: rejected applications `APPLICATION_RETENTION_DAYS`
     after the decision. An approved one stays while the account does: it's what
     makes them a mentor or champion."""
@@ -490,7 +512,7 @@ def remove_old_applications():
         ).delete()[0]
 
 
-def remove_old_background_check_decisions():
+def remove_old_background_check_decisions() -> int:
     """The `background_check` rule for the decisions (the document itself is
     gone at the decision): `BackgroundCheckHistory` rows
     `BACKGROUND_CHECK_HISTORY_RETENTION_DAYS` after they were made. Access never
@@ -507,7 +529,7 @@ def remove_old_background_check_decisions():
         ).delete()[0]
 
 
-def remove_old_engagement_changes(today=None):
+def remove_old_engagement_changes(today: date | None = None) -> int:
     """The `engagement` rule for stage changes: `NinjaEngagementChange` rows
     `ENGAGEMENT_CHANGE_RETENTION_DAYS` after the day they happened. A segment's
     `stage_changed` rule can't look back further than that."""
@@ -519,7 +541,7 @@ def remove_old_engagement_changes(today=None):
     return NinjaEngagementChange.objects.filter(changed_on__lt=since).delete()[0]
 
 
-def remove_old_bounce_records():
+def remove_old_bounce_records() -> int:
     """The `mail_log` rule: `BounceRecord`s `BOUNCE_RECORD_RETENTION_DAYS` after
     they were read, never sooner than the soft-bounce window they're counted in.
     The handled-mailbox rows (`ProcessedImapMessage`) stay: they hold nothing
@@ -532,7 +554,7 @@ def remove_old_bounce_records():
     return BounceRecord.objects.filter(created_at__lt=_cutoff(days)).delete()[0]
 
 
-def remove_old_notifications():
+def remove_old_notifications() -> int:
     """The `notification` rule: notifications that were read,
     `NOTIFICATION_RETENTION_DAYS` after they were made. Unread ones stay."""
     from notifications.models import Notification
@@ -544,7 +566,7 @@ def remove_old_notifications():
     ).delete()[0]
 
 
-def remove_old_admin_log_entries():
+def remove_old_admin_log_entries() -> int:
     """The `admin_log` rule: the Django admin's own log of changes made by hand,
     `ADMIN_LOG_RETENTION_DAYS` after the change. The audit log has its own rule."""
     from django.contrib.admin.models import LogEntry

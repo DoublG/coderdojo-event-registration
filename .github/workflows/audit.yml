@@ -64,6 +64,39 @@ jobs:
       # line on the site carries `# noqa: Sxxx` with its reason.
       - run: ruff check --extend-select S --output-format github .
 
+  # mypy with django-stubs' plugin over the modules in pyproject.toml's [tool.mypy]
+  # (CODING_STANDARDS.md, "Type checking"). The plugin runs django.setup(), so this
+  # needs the site's requirements, its system libraries and its settings.
+  types:
+    runs-on: ubuntu-24.04
+    env:
+      DEBUG: "false"
+      SILK: "false"
+      SECRET_KEY: ci-only-not-a-secret-${{ github.run_id }}-with-enough-length-and-variety-0123456789
+      ALLOWED_HOSTS: coolregistration.localhost
+      CSRF_TRUSTED_ORIGINS: https://coolregistration.localhost
+      COOKIE_DOMAIN: coolregistration.localhost
+      EMAIL_HOST: ""
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config default-libmysqlclient-dev \
+            gdal-bin libgdal-dev libgeos-dev libproj-dev
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Install mypy and django-stubs (the pins in requirements-dev.txt)
+        run: >-
+          pip install $(grep -hE '^(mypy|django-stubs|django-stubs-ext|mypy_extensions|pathspec|librt|ast_serialize|types-PyYAML)=='
+          requirements-dev.txt)
+      - run: mypy
+
   dependencies:
     runs-on: ubuntu-24.04
     steps:
