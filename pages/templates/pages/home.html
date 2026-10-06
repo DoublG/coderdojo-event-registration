@@ -136,7 +136,7 @@
             {% include "dojos/partials/_mentor_avatar.html" with mentor=mentor %}
             <div>
               <p class="cd-mentor__name heading-sm">{{ mentor.name }}</p>
-              <p class="cd-mentor__role body-sm">{{ mentor|localized:"position" }}</p>
+              <p class="cd-mentor__role body-sm">{{ mentor|localized:"position"|in_lang }}</p>
             </div>
           </div>
         </a>
@@ -150,8 +150,8 @@
     <div class="shell section">
       <div class="center">
         <figure class="cd-testimonial" style="max-width:520px;">
-          <blockquote class="cd-testimonial__quote body-lg">{{ testimonial|localized:"quote" }}</blockquote>
-          <figcaption class="cd-testimonial__author body-sm">— {{ testimonial.author }}{% if testimonial|localized:"role" %}, {{ testimonial|localized:"role" }}{% endif %}</figcaption>
+          <blockquote class="cd-testimonial__quote body-lg">{{ testimonial|localized:"quote"|in_lang }}</blockquote>
+          <figcaption class="cd-testimonial__author body-sm">— {{ testimonial.author }}{% if testimonial|localized:"role" %}, {{ testimonial|localized:"role"|in_lang }}{% endif %}</figcaption>
         </figure>
       </div>
     </div>
@@ -166,10 +166,10 @@
         {% for faq in faqs %}
           <div class="cd-faq__item" data-open="false">
             <button class="cd-faq__question heading-sm">
-              <span>{{ faq|localized:"question" }}</span>
+              <span>{{ faq|localized:"question"|in_lang }}</span>
               <span class="cd-faq__icon" aria-hidden="true">+</span>
             </button>
-            <p class="cd-faq__answer body" hidden>{% with answer=faq|localized:"answer" %}{{ answer }} {% only_in answer %}{% endwith %}</p>
+            <p class="cd-faq__answer body" hidden>{% with answer=faq|localized:"answer" %}{{ answer|in_lang }} {% only_in answer %}{% endwith %}</p>
           </div>
         {% endfor %}
       </div>

@@ -13,7 +13,7 @@ is deliberately not wired up here.
 <div class="cd-attendance" id="attendance-{{ event.id }}">
   <div class="cd-attendance__header">
     <div>
-      <h3 class="cd-attendance__title heading-md">{{ event.name }} — {{ event.start_time|date:"D j M Y, H:i" }}</h3>
+      <h2 class="cd-attendance__title heading-md">{{ event.name }} — {{ event.start_time|date:"D j M Y, H:i" }}</h2>
       {% include "dojos/partials/_attendance_summary.html" %}
     </div>
     {% if registrations or team_rows %}{% if dojo_access.can_take_attendance %}
@@ -37,7 +37,7 @@ is deliberately not wired up here.
     {% endfor %}
   </div>
 
-  <h4 class="cd-attendance__team-title label">{% translate "Session team" %}</h4>
+  <h3 class="cd-attendance__team-title label">{% translate "Session team" %}</h3>
   <div class="cd-attendance__list">
     {% for row in team_rows %}
       {% include "dojos/partials/_attendance_team_row.html" %}

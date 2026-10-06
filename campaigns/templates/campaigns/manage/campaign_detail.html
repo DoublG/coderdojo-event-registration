@@ -12,7 +12,7 @@
   .campaign-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: var(--space-3); }
   .campaign-stats div { border: 1px solid var(--border); border-radius: var(--radius-md, 8px); padding: var(--space-3); }
   .campaign-stats strong { display: block; font-size: 1.4rem; color: var(--ink); }
-  .campaign-preview { white-space: pre-wrap; background: var(--surface-sunken); padding: var(--space-4); border-radius: var(--radius-md, 8px); font-family: inherit; margin: var(--space-2) 0 var(--space-4); }
+  .campaign-preview { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--surface-sunken); padding: var(--space-4); border-radius: var(--radius-md, 8px); font-family: inherit; margin: var(--space-2) 0 var(--space-4); }
   .campaign-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
   .campaign-actions form { margin: 0; }
 </style>
@@ -50,8 +50,8 @@
     <div class="cd-card campaign-card">
       <h2 class="heading-md">{% translate "Preview" %}</h2>
       {% for preview in previews %}
-        <p class="label">{{ preview.language }}: {{ preview.subject }}</p>
-        <pre class="campaign-preview body-sm">{{ preview.body }}</pre>
+        <p class="label">{{ preview.language }}: <span lang="{{ preview.code }}">{{ preview.subject }}</span></p>
+        <pre class="campaign-preview body-sm" lang="{{ preview.code }}">{{ preview.body }}</pre>
       {% empty %}
         <p class="body-sm">{% blocktranslate with key=campaign.template_key %}No template “{{ key }}” exists yet.{% endblocktranslate %}</p>
       {% endfor %}

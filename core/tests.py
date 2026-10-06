@@ -755,8 +755,11 @@ class SiteFormRenderingTests(TestCase):
 
     def test_errors_come_under_the_input(self):
         html = self.form({"kind": "a", "size": "s"})["name"].as_field_group()
-        self.assertLess(html.index("<input"), html.index('<ul class="cd-form__errors">'))
+        self.assertLess(html.index("<input"), html.index('<ul class="cd-form__errors"'))
         self.assertIn('aria-invalid="true"', html)
+        # The input's aria-describedby names the error list, so a screen reader reads it (WCAG 3.3.1).
+        self.assertRegex(html, r'aria-describedby="[^"]*\bid_name_error\b')
+        self.assertIn('<ul class="cd-form__errors" id="id_name_error">', html)
 
     def test_checkbox_and_radio_layouts(self):
         form = self.form()
@@ -1058,6 +1061,15 @@ class MarkdownifyTests(TestCase):
         from core.templatetags.markdown_extras import markdownify
 
         return markdownify(text)
+
+    def test_headings_never_skip_a_level_and_can_start_lower(self):
+        from core.templatetags.markdown_extras import markdownify
+
+        # A lone ### is the first heading under the page's own, not three levels down.
+        self.assertIn("<h2>Bring with you</h2>", self.render("### Bring with you"))
+        html = markdownify("### Bring with you\n\n##### Tip", 3)
+        self.assertIn("<h3>Bring with you</h3>", html)
+        self.assertIn("<h4>Tip</h4>", html)
 
     def test_headings_start_at_h2(self):
         html = self.render("# Title\n\n## Part\n\n### Detail")
@@ -1573,3 +1585,103 @@ ValueError: <b>bad</b>]]></error>
             )
         self.assertIn("## Test results", target.read_text())
         self.assertIn("::error file=events/tests.py,line=24", out.getvalue())
+
+
+class AccessibilityTests(TestCase):
+    """WCAG 2.2 AA basics an axe scan of every page once found missing
+    (user-journeys/scripts/check_a11y.py runs that scan in a browser): a
+    skip link and one main landmark, heading levels that never skip, no empty
+    table header, and other-language texts marked with their language."""
+
+    HEADING = re.compile(r"<h([1-6])\b")
+
+    def setUp(self):
+        from datetime import timedelta
+
+        from events.models import Event
+
+        cache.clear()
+        self.dojo = make_dojo("Ghent", description="# About us\n\n### Bring with you\n\nA laptop.")
+        start = timezone.now() + timedelta(days=5)
+        self.event = Event.objects.create(
+            name="Coding Saturday",
+            dojo=self.dojo,
+            places=10,
+            status=Event.OPEN,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+            description="### Bring with you\n\n- a laptop\n\n#### And\n\nwater",
+        )
+        self.pathway = Pathway.objects.create(name="Scratch", min_age=7, max_age=12)
+        self.addCleanup(cache.clear)
+
+    def public_pages(self):
+        return [
+            reverse("home"),
+            reverse("dojo_list"),
+            reverse("event_list"),
+            reverse("dojo_detail", args=[self.dojo.pk]),
+            reverse("event_detail", args=[self.event.pk]),
+            reverse("pathway_detail", args=[self.pathway.pk]),
+            reverse("register"),
+            reverse("register_guardian"),
+            reverse("login"),
+            reverse("login_link_request"),
+            reverse("password_reset"),
+            reverse("contact"),
+            reverse("code_of_conduct"),
+        ]
+
+    def assert_landmarks(self, html, url):
+        self.assertEqual(html.count("<main"), 1, f"one <main> on {url}")
+        self.assertRegex(html, r'<main\b[^>]*\bid="main"', url)
+        self.assertIn('class="cd-skip-link label" href="#main"', html, url)
+        self.assertLess(html.index("cd-skip-link"), html.index("<main"), f"the skip link comes first on {url}")
+
+    def test_every_public_page_has_a_skip_link_one_main_and_headings_that_never_skip(self):
+        for url in self.public_pages():
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200, url)
+            # The debug toolbar (tests run with --debug-mode) adds its own headings.
+            html = response.content.decode().split('<div id="djDebug"')[0]
+            self.assert_landmarks(html, url)
+            levels = [int(level) for level in self.HEADING.findall(html)]
+            headings = re.findall(r"<h[1-6][^>]*>[^<]{0,40}", html)
+            self.assertEqual(levels[:1], [1], f"the first heading is the page's <h1> on {url}: {levels}")
+            for before, after in zip(levels, levels[1:], strict=False):
+                self.assertLessEqual(after, before + 1, f"a heading level skipped on {url}: {headings}")
+
+    def test_the_management_shell_has_a_skip_link_and_one_main(self):
+        from accounts.models import OrganisationRole, User
+
+        admin = User.objects.create(username="orgadmin", email="ann@example.com")
+        OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
+        self.client.force_login(admin)
+        url = reverse("manage_mail_log")
+        self.assert_landmarks(self.client.get(url).content.decode(), url)
+
+    def test_no_template_has_an_empty_table_header(self):
+        """A screen reader announces each column by its header: an action column
+        gets a .visually-hidden one (WCAG 1.3.1)."""
+        from pathlib import Path
+
+        empty = re.compile(r"<th\b[^>]*>\s*</th>")
+        found = [
+            str(path.relative_to(settings.BASE_DIR))
+            for path in Path(settings.BASE_DIR).glob("*/templates/**/*.html")
+            if empty.search(path.read_text())
+        ]
+        self.assertEqual(found, [])
+
+    def test_a_fallback_text_is_marked_with_its_language_and_the_note_with_the_pages(self):
+        from django.template import Context, Template
+        from django.utils import translation
+
+        self.dojo.languages = ["nl"]
+        self.dojo.description = "Welkom"
+        with translation.override("en-us"):
+            html = Template(
+                '{% load content_i18n %}{% with d=dojo|localized:"description" %}{{ d|in_lang }} {% only_in d %}{% endwith %}'
+            ).render(Context({"dojo": self.dojo}))
+        self.assertIn('<span lang="nl-be">Welkom</span>', html)
+        self.assertIn('content-lang-note" lang="en-us"', html)

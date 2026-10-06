@@ -74,7 +74,9 @@ def _previews(campaign, user):
     previews = []
     for template in EmailTemplate.objects.filter(key=campaign.template_key).order_by("language"):
         subject, body = render_template(template.key, template.language, context)
-        previews.append({"language": template.get_language_display(), "subject": subject, "body": body})
+        previews.append(
+            {"language": template.get_language_display(), "code": template.language, "subject": subject, "body": body}
+        )
     return previews
 
 

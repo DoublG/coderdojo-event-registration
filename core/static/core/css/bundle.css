@@ -278,7 +278,7 @@
   box-shadow: var(--shadow-md);
 }
 .cd-cta__title { margin: 0; color: var(--on-primary); }
-.cd-cta__subtitle { margin: 0; color: var(--on-primary); opacity: 0.92; max-width: 52ch; }
+.cd-cta__subtitle { margin: 0; color: var(--on-primary); max-width: 52ch; }
 .cd-cta .cd-btn--primary { background: var(--on-primary); color: var(--primary); }
 .cd-cta .cd-btn--primary:hover { background: var(--surface-sunken); }
 
@@ -444,6 +444,9 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
 /* ---------- Table ---------- */
 .cd-table-wrap {
   overflow-x: auto;
+  /* Keeps absolutely positioned content (a .visually-hidden header) inside the
+     scrolling box, instead of widening the whole page. */
+  position: relative;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
@@ -722,6 +725,11 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
 /* A help text can be a list (Django's password rules). */
 .cd-form__help ul { margin: 0; padding-left: 1.2em; }
 .cd-form__fieldset legend { padding: 0; margin-bottom: var(--space-1); }
+/* A radio or checkbox in a list: at least 24px to tap (WCAG 2.5.8). */
+.cd-form__fieldset input[type="radio"],
+.cd-form__fieldset input[type="checkbox"] {
+  width: 24px; height: 24px; margin: 0 var(--space-2) 0 0; vertical-align: middle; accent-color: var(--primary);
+}
 .cd-form__label { color: var(--ink); }
 /* An upload with a current file (core/widgets/clearable_file_input.html). */
 .cd-file-input { display: flex; flex-direction: column; gap: var(--space-2); }
@@ -771,10 +779,10 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
 }
 .cd-form__checkbox-row input[type="checkbox"] {
   accent-color: var(--primary);
-  width: 18px;
-  height: 18px;
+  width: 24px; /* WCAG 2.5.8: a target of at least 24px */
+  height: 24px;
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: 0;
 }
 .cd-form__checkbox-row label { color: var(--ink); }
 
@@ -1099,6 +1107,12 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
   border: none;
   padding: 0;
   cursor: pointer;
+  /* A 24px target around the 16px icon (WCAG 2.5.8), centred where the icon was. */
+  min-width: 24px;
+  min-height: 24px;
+  margin-left: -4px;
+  align-items: center;
+  justify-content: center;
 }
 .cd-dojo-finder__icon svg { width: 16px; height: 16px; }
 
@@ -1629,3 +1643,40 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
   .cd-promo--hero .cd-promo__image { width: 100%; height: 180px; }
   .cd-promo--banner .cd-promo__image { display: none; }
 }
+
+/* --- Accessibility helpers -------------------------------------------------------
+   Text for screen readers only (an empty-looking table header, an icon's name), and
+   the "Skip to content" link: off-screen until it gets keyboard focus. */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.cd-skip-link {
+  position: absolute;
+  left: var(--space-3);
+  top: -200px;
+  z-index: 1000;
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface, #fff);
+  color: var(--ink);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-md, 8px);
+  text-decoration: none;
+}
+.cd-skip-link:focus { top: var(--space-3); }
+/* The skip link's target: focused from a script, not something to click. */
+main:focus { outline: none; }
+/* A plain link in running text (no class of its own) uses the site's link colour in
+   both themes: the browser's default blue is 1.9:1 on the dark surface. :where() keeps
+   this weaker than any link style a component sets. */
+:where(.cd-root a:not([class])) { color: var(--secondary); }
+:where(.cd-root a:not([class]):hover) { color: var(--secondary-hover); }
+/* The attendance row's Award belt / Award badge / Pathways toggles: a 24px target. */
+.cd-attendance details > summary { padding: var(--space-1) 0; cursor: pointer; }

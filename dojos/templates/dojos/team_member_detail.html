@@ -48,7 +48,7 @@
       {% include "dojos/partials/_mentor_avatar.html" with mentor=mentor %}
       <div>
         <h1 class="display-lg">{{ mentor.name }}</h1>
-        <p class="body role-line">{{ mentor|localized:"position" }}</p>
+        <p class="body role-line">{{ mentor|localized:"position"|in_lang }}</p>
         <p class="body-sm facts-line">
           CoderDojo Belgium
           {% if mentor.joined_date %} · {% blocktranslate with year=mentor.joined_date|date:"Y" %}On the team since {{ year }}{% endblocktranslate %}{% endif %}
@@ -59,7 +59,7 @@
     {% if mentor|localized:"bio" %}
       <div class="col about">
         <h2 class="heading-md">{% blocktranslate with name=mentor.name %}About {{ name }}{% endblocktranslate %}</h2>
-        <p class="body">{{ mentor|localized:"bio" }}</p>
+        <p class="body">{{ mentor|localized:"bio"|in_lang }}</p>
       </div>
     {% endif %}
 

@@ -45,6 +45,7 @@ shell_content, shell_extra_style and shell_scripts.
 <script src="{% javascript_catalog_url %}"></script>
 <script src="{% static 'core/js/bundle.js' %}"></script>
 {% block shell_body_start %}{% endblock %}
+<a class="cd-skip-link label" href="#main">{% translate "Skip to content" %}</a>
 
 <div class="cd-root admin-page-root" style="padding: 0;">
   <div class="cd-admin-nav-shell" style="display: flex;" id="adminnav-page">
@@ -74,7 +75,8 @@ shell_content, shell_extra_style and shell_scripts.
       </div>
     </nav>
 
-    <div class="admin-main">
+    {# The page's own content: the skip link above jumps here (WCAG 2.4.1). #}
+    <main class="admin-main" id="main" tabindex="-1">
       <button type="button" class="cd-admin-nav__toggle label" data-cd-adminnav-toggle aria-expanded="false" style="margin-bottom: var(--space-4);">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         {% translate "Menu" %}
@@ -86,7 +88,7 @@ shell_content, shell_extra_style and shell_scripts.
       </div>
 
       {% if messages %}
-        <div class="cd-form__notes" style="margin-bottom: var(--space-4);">
+        <div class="cd-form__notes" role="status" style="margin-bottom: var(--space-4);">
           {% for message in messages %}
             <p class="cd-form__note {% if message.level_tag == 'error' %}cd-form__note--error{% else %}cd-form__note--success{% endif %}">{{ message }}</p>
           {% endfor %}
@@ -94,7 +96,7 @@ shell_content, shell_extra_style and shell_scripts.
       {% endif %}
       {% include "accounts/partials/_sign_in_notice.html" %}
       {% block shell_content %}{% endblock %}
-    </div>
+    </main>
   </div>
 </div>
 <script nonce="{{ csp_nonce }}">

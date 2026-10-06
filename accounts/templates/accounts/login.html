@@ -32,7 +32,7 @@
 
       <div class="cd-login__header">
         {% if wizard.steps.current == "auth" and link_login %}
-          <h2 class="cd-login__title heading-lg">{% if link_user %}{% translate "Log in" %}{% else %}{% translate "This link doesn't work any more" %}{% endif %}</h2>
+          <h1 class="cd-login__title heading-lg">{% if link_user %}{% translate "Log in" %}{% else %}{% translate "This link doesn't work any more" %}{% endif %}</h1>
           <p class="cd-login__subtitle body-sm">
             {% if link_user %}
               {% blocktranslate trimmed with name=link_user.get_full_name|default:link_user.username email=link_user.email %}
@@ -43,10 +43,10 @@
             {% endif %}
           </p>
         {% elif wizard.steps.current == "auth" %}
-          <h2 class="cd-login__title heading-lg">{% translate "Welcome back" %}</h2>
+          <h1 class="cd-login__title heading-lg">{% translate "Welcome back" %}</h1>
           <p class="cd-login__subtitle body-sm">{% translate "Log in to see your dojo's schedule and manage your account." %}</p>
         {% else %}
-          <h2 class="cd-login__title heading-lg">{% translate "Confirm it's you" %}</h2>
+          <h1 class="cd-login__title heading-lg">{% translate "Confirm it's you" %}</h1>
           <p class="cd-login__subtitle body-sm">
             {% if wizard.steps.current == "backup" %}
               {% translate "Enter one of the backup codes you saved when you turned on two-step login. Each code works once." %}
@@ -61,7 +61,7 @@
 
       {% if messages %}
         <div class="cd-form__notes">
-          {% for message in messages %}<p class="cd-form__note caption">{{ message }}</p>{% endfor %}
+          {% for message in messages %}<p class="cd-form__note caption" role="status">{{ message }}</p>{% endfor %}
         </div>
       {% endif %}
 

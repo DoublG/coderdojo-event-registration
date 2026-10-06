@@ -77,7 +77,7 @@
               <th class="label" scope="col">{% translate "Date" %}</th>
               <th class="label" scope="col">{% translate "Session" %}</th>
               <th class="label" scope="col">{% translate "Dojo" %}</th>
-              <th class="label" scope="col" aria-label="{% translate "Actions" %}"></th>
+              <th class="label" scope="col"><span class="visually-hidden">{% translate "Actions" %}</span></th>
             </tr>
           </thead>
           <tbody>
@@ -86,7 +86,7 @@
               <tr>
                 <td class="body-sm">{{ registration.event.start_time|date:"j M Y, H:i" }}</td>
                 <td class="body-sm">
-                  {{ registration.event|localized:"name" }}
+                  {{ registration.event|localized:"name"|in_lang }}
                   {% if registration.waiting_list %}<span class="cd-badge cd-badge--warning caption">{% translate "Waiting list" %}</span>{% endif %}
                 </td>
                 <td class="body-sm">{{ registration.event.dojo.name }}</td>
@@ -117,8 +117,8 @@
         <div class="belt-current">
           <span class="belt-swatch" style="--belt-colour: {{ current_belt.colour|default:'var(--surface-sunken)' }};" aria-hidden="true"></span>
           <div>
-            <h3 class="heading-md">{{ current_belt|localized:"name" }}</h3>
-            {% if current_belt|localized:"requirements" %}<p class="body-sm">{{ current_belt|localized:"requirements" }}</p>{% endif %}
+            <h3 class="heading-md">{{ current_belt|localized:"name"|in_lang }}</h3>
+            {% if current_belt|localized:"requirements" %}<p class="body-sm">{{ current_belt|localized:"requirements"|in_lang }}</p>{% endif %}
           </div>
         </div>
         <div class="cd-table-wrap">
@@ -134,7 +134,7 @@
             <tbody>
               {% for award in belt_history %}
                 <tr>
-                  <td class="body-sm"><span class="belt-swatch belt-swatch--sm" style="--belt-colour: {{ award.belt.colour|default:'var(--surface-sunken)' }};" aria-hidden="true"></span>{{ award.belt|localized:"name" }}</td>
+                  <td class="body-sm"><span class="belt-swatch belt-swatch--sm" style="--belt-colour: {{ award.belt.colour|default:'var(--surface-sunken)' }};" aria-hidden="true"></span>{{ award.belt|localized:"name"|in_lang }}</td>
                   <td class="body-sm">{{ award.awarded_on|date:"j M Y" }}</td>
                   <td class="body-sm">{{ award.awarded_by_label|default:"—" }}</td>
                   <td class="body-sm">{{ award.note|default:"—" }}</td>
@@ -159,7 +159,8 @@
             </button>
           </div>
         </div>
-        <div class="cd-award-grid" id="badges-track">
+        {# It scrolls sideways: focusable, so a keyboard can scroll it too (WCAG 2.1.1). #}
+        <div class="cd-award-grid" id="badges-track" tabindex="0" role="region" aria-label="{% translate "Badges" %}">
           {% include "accounts/partials/_badges_page.html" %}
         </div>
       </section>
@@ -182,9 +183,9 @@
             {% for registration in history %}
               <tr>
                 <td class="body-sm">{{ registration.event.start_time|date:"j M Y" }}</td>
-                <td class="body-sm">{{ registration.event|localized:"name" }}</td>
+                <td class="body-sm">{{ registration.event|localized:"name"|in_lang }}</td>
                 <td class="body-sm">{{ registration.event.dojo.name }}</td>
-                <td class="body-sm">{% for pathway in registration.pathways.all %}{{ pathway|localized:"name" }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
+                <td class="body-sm">{% for pathway in registration.pathways.all %}{{ pathway|localized:"name"|in_lang }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
                 <td class="body-sm">{% for mentor in registration.event.team.all %}{{ mentor.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
               </tr>
             {% empty %}

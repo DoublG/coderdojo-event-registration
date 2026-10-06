@@ -15,16 +15,16 @@
   .signup-root .signup-header .badges { display: flex; gap: var(--space-2); }
   .signup-root .form-card { max-width: 640px; margin: 0 auto; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
   .signup-root .child-select-row {
-    display: flex; align-items: center; gap: var(--space-3);
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3);
     padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md);
   }
   .signup-root .child-select-row + .child-select-row { margin-top: var(--space-3); }
-  .signup-root .child-select-row input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; }
+  .signup-root .child-select-row input[type="checkbox"] { width: 24px; height: 24px; flex-shrink: 0; }
   .signup-root .child-select-row .cd-mentor__avatar { width: 40px; height: 40px; flex-shrink: 0; }
-  .signup-root .child-select-row label { display: flex; flex-direction: column; cursor: pointer; margin-right: auto; }
+  .signup-root .child-select-row label { display: flex; flex-direction: column; cursor: pointer; margin-right: auto; flex: 1 1 10rem; min-width: 0; }
   .signup-root .child-select-row label span:first-child { color: var(--ink); }
   .signup-root .child-select-row label span:last-child { color: var(--ink-muted); }
-  .signup-root .child-select-row--disabled { opacity: 0.55; background: var(--surface-sunken); }
+  .signup-root .child-select-row--disabled { background: var(--surface-sunken); }
   .signup-root .child-select-row--disabled label { cursor: default; }
   .signup-root .child-select-row__status { flex-shrink: 0; }
   .signup-root .signup-summary { margin: var(--space-4) 0 0; }
@@ -75,7 +75,7 @@
 
         {% elif results %}
 
-          <h3 class="cd-form__group-title heading-md">{% translate "You're all set" %}</h3>
+          <h2 class="cd-form__group-title heading-md">{% translate "You're all set" %}</h2>
           <div class="confirmation-card">
             <ul class="confirmation-list">
               {% for result in results %}
@@ -119,7 +119,7 @@
           {% endif %}
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">{% translate "Who's joining?" %}</h3>
+            <h2 class="cd-form__group-title heading-md">{% translate "Who's joining?" %}</h2>
             {% if all_registered %}
               <p class="cd-form__group-desc body-sm">{% translate "Every child on your account is already signed up for this session — see below." %}</p>
             {% else %}
@@ -133,9 +133,9 @@
               {% with child=entry.child %}
                 {% if entry.registration %}
                   <div class="child-select-row child-select-row--disabled">
-                    <input type="checkbox" disabled>
+                    <input type="checkbox" id="es-done-{{ child.id }}" checked disabled>
                     {% include "accounts/partials/_child_avatar.html" with child=child %}
-                    <label>
+                    <label for="es-done-{{ child.id }}">
                       <span class="body">{{ child.full_name }}</span>
                       <span class="body-sm">{% if child.age %}{% blocktranslate with age=child.age %}Age {{ age }}{% endblocktranslate %}{% endif %}{% if child.home_dojo %} · {{ child.home_dojo.name }}{% endif %}</span>
                     </label>

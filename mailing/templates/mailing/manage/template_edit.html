@@ -11,7 +11,7 @@
   .tpl-card h2 { margin-top: 0; }
   .tpl-tabs { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-4); }
   .tpl-tabs a { text-decoration: none; }
-  .tpl-preview { white-space: pre-wrap; background: var(--surface-sunken); padding: var(--space-4); border-radius: var(--radius-md, 8px); font-family: inherit; }
+  .tpl-preview { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--surface-sunken); padding: var(--space-4); border-radius: var(--radius-md, 8px); font-family: inherit; }
   .tpl-card textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 </style>
 {% endblock %}
@@ -52,8 +52,8 @@
       <div class="cd-card tpl-card">
         <h2 class="heading-md">{% translate "Preview" %}</h2>
         {% if preview %}
-          <p class="label">{{ preview.0 }}</p>
-          <pre class="tpl-preview body-sm">{{ preview.1 }}</pre>
+          <p class="label" lang="{{ language }}">{{ preview.0 }}</p>
+          <pre class="tpl-preview body-sm" lang="{{ language }}">{{ preview.1 }}</pre>
           <p class="caption">{% translate "With example data. The mail's language decides how dates are written." %}</p>
         {% else %}
           <p class="body-sm">{% translate "Save to see the preview." %}</p>

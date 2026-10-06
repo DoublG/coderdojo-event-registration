@@ -74,6 +74,14 @@ what the persona sees or does changed: if so, regenerate its PDFs in en, nl and 
 `python user-journeys/scripts/manifest.py` inside the workspace container to take the new baseline, and
 commit `manifest.json`.
 
+## Accessibility check
+
+`scripts/check_a11y.py` (the same venv and seeded logins as the journeys) runs axe-core (WCAG 2.2 A/AA and
+axe's best practices) on every page the journeys visit, logged in as each persona, in the light and the dark
+theme, and checks that each page reflows at 320px wide. It prints what fails and exits 1 when anything does;
+`--quick` does the public pages in the light theme only. The first run downloads axe-core into `.shots/`. It
+changes no data. The standards it checks are in `CODING_STANDARDS.md`, "Accessibility".
+
 ## Screenshot pitfalls
 
 - **Only whole pages.** An htmx endpoint opened on its own URL returns a fragment: no page shell, no

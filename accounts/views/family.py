@@ -57,9 +57,10 @@ def account_home(request):
     return _render_account_home(request)
 
 
-def _render_account_home(request, details_form=None):
+def _render_account_home(request, details_form=None, add_child_form=None):
     """The account page; with `details_form`, its details are shown as that
-    form (edit_account without htmx)."""
+    form (edit_account without htmx); with `add_child_form`, Add a child is
+    that form, open with its errors (add_ninja without htmx)."""
     children = _children_context(request.user)
     applications = list(request.user.applications.all())
     active_kinds = {a.kind for a in applications if a.status != "rejected"}
@@ -70,7 +71,7 @@ def _render_account_home(request, details_form=None):
             "guardian": request.user,
             "form": details_form,
             "children": children,
-            "add_child_form": AddChildForm(guardian=request.user),
+            "add_child_form": add_child_form or AddChildForm(guardian=request.user),
             "applications": applications,
             "has_champion_application": "champion" in active_kinds,
             "has_mentor_application": "mentor" in active_kinds,

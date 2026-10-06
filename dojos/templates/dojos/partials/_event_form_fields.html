@@ -6,7 +6,7 @@ Expects `form` (an events.forms.EventForm) in context, and optionally
 `event` (the Event instance being edited — omitted/None when creating).
 {% endcomment %}
 <div class="cd-form__group">
-  <h3 class="cd-form__group-title heading-md">{% translate "Basics" %}</h3>
+  <h2 class="cd-form__group-title heading-md">{% translate "Basics" %}</h2>
   <p class="cd-form__group-desc body-sm">
     {% if event.pk %}
       {% translate "A session's visibility and whether it's open for registration are controlled by its status above, not by these fields." %}
@@ -28,12 +28,12 @@ Expects `form` (an events.forms.EventForm) in context, and optionally
 </div>
 
 <div class="cd-form__group">
-  <h3 class="cd-form__group-title heading-md">{% translate "Location" %}</h3>
+  <h2 class="cd-form__group-title heading-md">{% translate "Location" %}</h2>
   {{ form.venue_name.as_field_group }}
 </div>
 
 <div class="cd-form__group">
-  <h3 class="cd-form__group-title heading-md">{% translate "Banner image" %}</h3>
+  <h2 class="cd-form__group-title heading-md">{% translate "Banner image" %}</h2>
   <p class="cd-form__group-desc body-sm">{% translate "Shown on the homepage's Upcoming sessions card." %}</p>
   {% if event.image %}
     <div class="cd-form__field">
@@ -62,12 +62,12 @@ Expects `form` (an events.forms.EventForm) in context, and optionally
 </div>
 
 <div class="cd-form__group">
-  <h3 class="cd-form__group-title heading-md">{% translate "About this session" %}</h3>
+  <h2 class="cd-form__group-title heading-md">{% translate "About this session" %}</h2>
   {{ form.description.as_field_group }}
 </div>
 
 <div class="cd-form__group">
-  <h3 class="cd-form__group-title heading-md">{% translate "Pathways" %}</h3>
+  <h2 class="cd-form__group-title heading-md">{% translate "Pathways" %}</h2>
   <div class="cd-form__field">
     <span class="cd-form__label label">{{ form.pathways.label }}</span>
     <ul class="cd-form__errors">{% for error in form.pathways.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>
@@ -84,7 +84,7 @@ Expects `form` (an events.forms.EventForm) in context, and optionally
 </div>
 
 <div class="cd-form__group">
-  <h3 class="cd-form__group-title heading-md">{% translate "Ages &amp; mentors" %}</h3>
+  <h2 class="cd-form__group-title heading-md">{% translate "Ages &amp; mentors" %}</h2>
   <div class="cd-form__row">
     {{ form.min_age.as_field_group }}
     {{ form.max_age.as_field_group }}

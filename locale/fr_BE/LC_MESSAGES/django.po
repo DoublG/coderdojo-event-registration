@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 19:28+0000\n"
+"POT-Creation-Date: 2026-10-06 04:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -172,7 +172,7 @@ msgstr "Mot de passe actuel"
 #: accounts/templates/accounts/manage/security.html:73
 #: accounts/templates/accounts/partials/_account_details_edit.html:20
 #: dojos/forms.py:98 dojos/forms.py:266
-#: dojos/templates/dojos/dojo_detail.html:238
+#: dojos/templates/dojos/dojo_detail.html:240
 #: pages/templates/pages/contact.html:34
 #: privacy/templates/privacy/manage/privacy.html:58
 msgid "Email"
@@ -226,7 +226,7 @@ msgstr "Nom complet"
 
 #: accounts/forms.py:256 accounts/forms.py:312 accounts/forms.py:479
 #: applications/forms.py:25 dojos/forms.py:99
-#: dojos/templates/dojos/dojo_detail.html:244
+#: dojos/templates/dojos/dojo_detail.html:246
 msgid "Phone"
 msgstr "Téléphone"
 
@@ -626,7 +626,7 @@ msgstr "Évaluateurs des extraits de casier"
 msgid "Champions"
 msgstr "Champions"
 
-#: accounts/models.py:551 accounts/templates/accounts/child_detail.html:178
+#: accounts/models.py:551 accounts/templates/accounts/child_detail.html:179
 msgid "Mentors"
 msgstr "Mentors"
 
@@ -675,8 +675,8 @@ msgstr ""
 
 #: accounts/organisation.py:90
 #: accounts/templates/accounts/_security_base.html:8
-#: accounts/templates/accounts/child_detail.html:208
-#: accounts/templates/accounts/child_detail.html:210
+#: accounts/templates/accounts/child_detail.html:209
+#: accounts/templates/accounts/child_detail.html:211
 #: accounts/templates/accounts/guardian_detail.html:77
 #: accounts/templates/accounts/guardian_detail.html:80
 #: accounts/templates/accounts/manage/security.html:3
@@ -1003,7 +1003,7 @@ msgstr "Prochaines sessions"
 
 #: accounts/templates/accounts/child_detail.html:77
 #: accounts/templates/accounts/child_detail.html:129
-#: accounts/templates/accounts/child_detail.html:174
+#: accounts/templates/accounts/child_detail.html:175
 #: dojos/templates/dojos/dojo_event_list.html:23 events/forms.py:61
 #: events/forms.py:147 events/templates/events/event_detail.html:119
 #: events/templates/events/event_list.html:62
@@ -1011,12 +1011,12 @@ msgid "Date"
 msgstr "Date"
 
 #: accounts/templates/accounts/child_detail.html:78
-#: accounts/templates/accounts/child_detail.html:175 campaigns/forms.py:168
+#: accounts/templates/accounts/child_detail.html:176 campaigns/forms.py:168
 msgid "Session"
 msgstr "Session"
 
 #: accounts/templates/accounts/child_detail.html:79
-#: accounts/templates/accounts/child_detail.html:176
+#: accounts/templates/accounts/child_detail.html:177
 #: applications/templates/applications/manage/application_detail.html:17
 #: campaigns/templates/campaigns/manage/_rule_fields.html:47
 #: campaigns/templates/campaigns/manage/_rule_fields.html:57 dojos/models.py:59
@@ -1029,8 +1029,17 @@ msgstr "Dojo"
 #: accounts/templates/accounts/child_detail.html:80
 #: accounts/templates/accounts/manage/people.html:52
 #: accounts/templates/accounts/manage/people.html:90
+#: accounts/templates/accounts/manage/security.html:76
+#: api/templates/api/dojo_api_clients.html:80
+#: applications/templates/applications/manage/_check_table.html:14
 #: campaigns/templates/campaigns/manage/campaign_detail.html:84
 #: campaigns/templates/campaigns/manage/journey_detail.html:62
+#: dojos/templates/dojos/dojo_event_list.html:27
+#: mailing/templates/mailing/manage/mail_log.html:61
+#: mailing/templates/mailing/manage/mail_queue.html:106
+#: mailing/templates/mailing/manage/mail_queue.html:171
+#: privacy/templates/privacy/manage/privacy.html:21
+#: privacy/templates/privacy/manage/privacy.html:61
 msgid "Actions"
 msgstr "Actions"
 
@@ -1082,6 +1091,7 @@ msgid "Note"
 msgstr "Remarque"
 
 #: accounts/templates/accounts/child_detail.html:152
+#: accounts/templates/accounts/child_detail.html:163
 msgid "Badges"
 msgstr "Badges"
 
@@ -1093,24 +1103,24 @@ msgstr "Badges précédents"
 msgid "Next badges"
 msgstr "Badges suivants"
 
-#: accounts/templates/accounts/child_detail.html:169
+#: accounts/templates/accounts/child_detail.html:170
 msgid "Event history"
 msgstr "Sessions passées"
 
-#: accounts/templates/accounts/child_detail.html:177
+#: accounts/templates/accounts/child_detail.html:178
 msgid "Worked on"
 msgstr "A travaillé sur"
 
-#: accounts/templates/accounts/child_detail.html:192
+#: accounts/templates/accounts/child_detail.html:193
 msgid "No past sessions yet."
 msgstr "Aucune session passée pour l'instant."
 
-#: accounts/templates/accounts/child_detail.html:203
+#: accounts/templates/accounts/child_detail.html:204
 #: accounts/templates/accounts/guardian_detail.html:85
 msgid "Your data"
 msgstr "Vos données"
 
-#: accounts/templates/accounts/child_detail.html:204
+#: accounts/templates/accounts/child_detail.html:205
 msgid ""
 "Download a copy of everything we keep about you, as a file you can open or "
 "take elsewhere."
@@ -1118,12 +1128,12 @@ msgstr ""
 "Téléchargez une copie de tout ce que nous conservons à votre sujet, dans un "
 "fichier que vous pouvez ouvrir ou emporter ailleurs."
 
-#: accounts/templates/accounts/child_detail.html:205
+#: accounts/templates/accounts/child_detail.html:206
 #: accounts/templates/accounts/guardian_detail.html:88
 msgid "Download my data"
 msgstr "Télécharger mes données"
 
-#: accounts/templates/accounts/child_detail.html:209
+#: accounts/templates/accounts/child_detail.html:210
 msgid "How you log in (a password or a link we mail you) and two-step login."
 msgstr ""
 "Comment vous vous connectez (un mot de passe ou un lien envoyé par e-mail) "
@@ -1657,7 +1667,7 @@ msgstr "Terminée"
 #: accounts/templates/accounts/manage/admin_access.html:52
 #: accounts/templates/accounts/manage/person.html:59
 #: applications/templates/applications/manage/_check_table.html:36
-#: dojos/templates/dojos/dojo_detail.html:121
+#: dojos/templates/dojos/dojo_detail.html:123
 #: dojos/templates/dojos/dojo_event_detail.html:41
 #: dojos/templates/dojos/dojo_event_list.html:39
 #: dojos/templates/dojos/partials/_dojo_result.html:33 events/models.py:42
@@ -1819,7 +1829,7 @@ msgstr "Nom, adresse e-mail ou nom d'utilisateur"
 #: dojos/templates/dojos/dojo_list.html:61
 #: dojos/templates/dojos/partials/_dojo_finder_widget.html:16
 #: events/templates/events/event_list.html:80
-#: mailing/templates/mailing/manage/mail_log.html:44
+#: mailing/templates/mailing/manage/mail_log.html:45
 #: mailing/templates/mailing/manage/mail_queue.html:46
 #: pages/templates/pages/manage_audit_log.html:43
 #: privacy/templates/privacy/manage/privacy.html:48
@@ -3255,11 +3265,11 @@ msgstr ""
 msgid "%(name)s's login is removed."
 msgstr "Le compte de %(name)s est supprimé."
 
-#: accounts/views/family.py:100
+#: accounts/views/family.py:101
 msgid "Your details are saved."
 msgstr "Vos coordonnées sont enregistrées."
 
-#: accounts/views/family.py:127
+#: accounts/views/family.py:128
 #, python-format
 msgid ""
 "We sent a link to %(email)s. Open it within %(hours)s hours to confirm; "
@@ -3268,12 +3278,12 @@ msgstr ""
 "Nous avons envoyé un lien à %(email)s. Ouvrez-le dans les %(hours)s heures "
 "pour confirmer ; d'ici là, votre adresse reste %(current)s."
 
-#: accounts/views/family.py:167
+#: accounts/views/family.py:168
 #, python-format
 msgid "Your email address is now %(email)s."
 msgstr "Votre adresse e-mail est désormais %(email)s."
 
-#: accounts/views/family.py:189
+#: accounts/views/family.py:190
 #, python-format
 msgid "A spot opened up in %(event)s — a waitlisted family is now confirmed."
 msgstr ""
@@ -3699,8 +3709,8 @@ msgstr "Candidature pour"
 #: content/templates/content/manage/sponsor_list.html:19
 #: dojos/templates/dojos/dojo_event_detail.html:37
 #: dojos/templates/dojos/dojo_event_list.html:25
-#: mailing/templates/mailing/manage/mail_log.html:29
-#: mailing/templates/mailing/manage/mail_log.html:57
+#: mailing/templates/mailing/manage/mail_log.html:30
+#: mailing/templates/mailing/manage/mail_log.html:58
 #: mailing/templates/mailing/manage/mail_queue.html:61
 msgid "Status"
 msgstr "Statut"
@@ -3789,8 +3799,8 @@ msgstr ""
 
 #: applications/templates/applications/manage/application_list.html:17
 #: applications/templates/applications/manage/application_list.html:23
-#: mailing/templates/mailing/manage/mail_log.html:31
-#: mailing/templates/mailing/manage/mail_log.html:38
+#: mailing/templates/mailing/manage/mail_log.html:32
+#: mailing/templates/mailing/manage/mail_log.html:39
 #: pages/templates/pages/manage_audit_log.html:30
 #: pages/templates/pages/manage_audit_log.html:37
 msgid "All"
@@ -4077,7 +4087,7 @@ msgid "Submit application"
 msgstr "Envoyer la candidature"
 
 #: applications/templates/applications/register_helper.html:3
-#: core/templates/core/base.html:45
+#: core/templates/core/base.html:49
 msgid "Volunteer with us"
 msgstr "Devenez bénévole"
 
@@ -4455,8 +4465,8 @@ msgid "New sessions (the automatic mail)"
 msgstr "Nouvelles sessions (le mail automatique)"
 
 #: campaigns/forms.py:34 mailing/forms.py:142
-#: mailing/templates/mailing/manage/mail_log.html:36
-#: mailing/templates/mailing/manage/mail_log.html:56
+#: mailing/templates/mailing/manage/mail_log.html:37
+#: mailing/templates/mailing/manage/mail_log.html:57
 #: mailing/templates/mailing/manage/mail_queue.html:60
 #: mailing/templates/mailing/manage/template_list.html:13
 msgid "Kind of mail"
@@ -4592,7 +4602,7 @@ msgid "Pathway"
 msgstr "Parcours"
 
 #: campaigns/forms.py:180 mailing/forms.py:109
-#: mailing/templates/mailing/manage/mail_log.html:55
+#: mailing/templates/mailing/manage/mail_log.html:56
 #: mailing/templates/mailing/manage/mail_queue.html:59
 #: mailing/templates/mailing/manage/mail_queue.html:103
 msgid "Subject"
@@ -5415,7 +5425,7 @@ msgid "The last %(days)s days, and anything still waiting."
 msgstr "Les %(days)s derniers jours, et tout ce qui attend encore."
 
 #: campaigns/templates/campaigns/dojo/mail_queue.html:43
-#: mailing/templates/mailing/manage/mail_log.html:58
+#: mailing/templates/mailing/manage/mail_log.html:59
 #: mailing/templates/mailing/manage/mail_queue.html:62
 #: mailing/templates/mailing/manage/mail_queue.html:105
 msgid "Queued"
@@ -5430,7 +5440,7 @@ msgstr "En attente"
 #: campaigns/templates/campaigns/dojo/mail_queue.html:45
 #: campaigns/templates/campaigns/manage/_status_badge.html:1
 #: campaigns/templates/campaigns/manage/campaign_list.html:27
-#: mailing/models.py:45 mailing/templates/mailing/manage/mail_log.html:59
+#: mailing/models.py:45 mailing/templates/mailing/manage/mail_log.html:60
 msgid "Sent"
 msgstr "Envoyé"
 
@@ -6362,26 +6372,30 @@ msgstr "À traiter"
 msgid "Audit log"
 msgstr "Journal d'audit"
 
-#: core/templates/core/_manage_shell.html:57
+#: core/templates/core/_manage_shell.html:49 core/templates/core/base.html:26
+msgid "Skip to content"
+msgstr "Aller au contenu"
+
+#: core/templates/core/_manage_shell.html:58
 msgid "Pin sidebar open"
 msgstr "Épingler la barre latérale"
 
 # | msgid "Sign up"
-#: core/templates/core/_manage_shell.html:72
+#: core/templates/core/_manage_shell.html:73
 msgid "Sign out"
 msgstr "Se déconnecter"
 
-#: core/templates/core/_manage_shell.html:81 core/templates/core/menu.html:8
+#: core/templates/core/_manage_shell.html:83 core/templates/core/menu.html:8
 msgid "Menu"
 msgstr "Menu"
 
-#: core/templates/core/base.html:44
+#: core/templates/core/base.html:48
 #: pages/templates/pages/code_of_conduct.html:3
 #: pages/templates/pages/code_of_conduct.html:31
 msgid "Code of conduct"
 msgstr "Code de conduite"
 
-#: core/templates/core/base.html:46 pages/templates/pages/contact.html:3
+#: core/templates/core/base.html:50 pages/templates/pages/contact.html:3
 #: pages/templates/pages/contact.html:29
 msgid "Contact"
 msgstr "Contact"
@@ -6456,7 +6470,7 @@ msgstr "Vos dojos"
 
 # | msgid "Language"
 # | msgid "Mail language"
-#: core/templatetags/content_i18n.py:29
+#: core/templatetags/content_i18n.py:32
 #, python-format
 msgid "Only in %(language)s"
 msgstr "Uniquement en %(language)s"
@@ -6524,7 +6538,7 @@ msgid "Tagline"
 msgstr "Slogan"
 
 #: dojos/forms.py:69 dojos/forms.py:95
-#: dojos/templates/dojos/dojo_detail.html:223
+#: dojos/templates/dojos/dojo_detail.html:225
 msgid "Meets"
 msgstr "Quand"
 
@@ -6550,7 +6564,7 @@ msgid "Municipality"
 msgstr "Commune"
 
 #: dojos/forms.py:101 dojos/forms.py:266
-#: dojos/templates/dojos/dojo_detail.html:233
+#: dojos/templates/dojos/dojo_detail.html:235
 #: mailing/templates/mailing/manage/mail_queue.html:135
 #: mailing/templates/mailing/manage/mail_queue.html:167
 msgid "Address"
@@ -7016,11 +7030,11 @@ msgstr ""
 msgid "No sessions yet."
 msgstr "Pas encore de sessions."
 
-#: dojos/templates/dojos/dojo_detail.html:100
+#: dojos/templates/dojos/dojo_detail.html:102
 msgid "Free"
 msgstr "Gratuit"
 
-#: dojos/templates/dojos/dojo_detail.html:102
+#: dojos/templates/dojos/dojo_detail.html:104
 #: events/templates/events/event_signup.html:62
 #: events/templates/events/partials/_event_row.html:36
 #: pathways/templates/pathways/pathway_detail.html:53
@@ -7028,98 +7042,98 @@ msgstr "Gratuit"
 msgid "Ages %(min)s–%(max)s"
 msgstr "De %(min)s à %(max)s ans"
 
-#: dojos/templates/dojos/dojo_detail.html:103
+#: dojos/templates/dojos/dojo_detail.html:105
 #: pathways/templates/pathways/pathway_detail.html:56
 msgid "No experience needed"
 msgstr "Aucune expérience requise"
 
-#: dojos/templates/dojos/dojo_detail.html:104
+#: dojos/templates/dojos/dojo_detail.html:106
 #, python-format
 msgid "Sessions in %(languages)s"
 msgstr "Sessions en %(languages)s"
 
-#: dojos/templates/dojos/dojo_detail.html:108
-#: dojos/templates/dojos/dojo_detail.html:132
+#: dojos/templates/dojos/dojo_detail.html:110
+#: dojos/templates/dojos/dojo_detail.html:134
 #: events/templates/events/event_detail.html:144
 #: pages/templates/pages/home.html:67 pages/templates/pages/home.html:200
 msgid "Sign up now"
 msgstr "Inscrivez-vous maintenant"
 
-#: dojos/templates/dojos/dojo_detail.html:110
+#: dojos/templates/dojos/dojo_detail.html:112
 msgid "View this dojo's sessions"
 msgstr "Voir les sessions de ce dojo"
 
-#: dojos/templates/dojos/dojo_detail.html:121
+#: dojos/templates/dojos/dojo_detail.html:123
 msgid "Next session"
 msgstr "Prochaine session"
 
-#: dojos/templates/dojos/dojo_detail.html:121
+#: dojos/templates/dojos/dojo_detail.html:123
 #: dojos/templates/dojos/partials/_dojo_result.html:31
 msgid "Waitlist"
 msgstr "Liste d'attente"
 
-#: dojos/templates/dojos/dojo_detail.html:126
+#: dojos/templates/dojos/dojo_detail.html:128
 #, python-format
 msgid "%(counter)s spot left"
 msgid_plural "%(counter)s spots left"
 msgstr[0] "%(counter)s place restante"
 msgstr[1] "%(counter)s places restantes"
 
-#: dojos/templates/dojos/dojo_detail.html:131
+#: dojos/templates/dojos/dojo_detail.html:133
 msgid "View session details →"
 msgstr "Voir la session →"
 
-#: dojos/templates/dojos/dojo_detail.html:139
+#: dojos/templates/dojos/dojo_detail.html:141
 #: dojos/templates/dojos/dojo_manage.html:128
 msgid "About this dojo"
 msgstr "À propos de ce dojo"
 
-#: dojos/templates/dojos/dojo_detail.html:147
+#: dojos/templates/dojos/dojo_detail.html:149
 #: dojos/templates/dojos/dojo_manage.html:133
 #: dojos/templates/dojos/partials/_attendance_row.html:61
 #: dojos/templates/dojos/partials/_event_form_fields.html:70
 msgid "Pathways"
 msgstr "Parcours"
 
-#: dojos/templates/dojos/dojo_detail.html:158
+#: dojos/templates/dojos/dojo_detail.html:160
 msgid "Run by"
 msgstr "Animé par"
 
-#: dojos/templates/dojos/dojo_detail.html:171
+#: dojos/templates/dojos/dojo_detail.html:173
 msgid "No mentors listed yet."
 msgstr "Aucun mentor pour l'instant."
 
-#: dojos/templates/dojos/dojo_detail.html:181
+#: dojos/templates/dojos/dojo_detail.html:183
 msgid "You're an approved mentor — want to help out here?"
 msgstr "Vous êtes un mentor approuvé. Vous voulez aider ici ?"
 
-#: dojos/templates/dojos/dojo_detail.html:182
+#: dojos/templates/dojos/dojo_detail.html:184
 msgid "Ask to join the team"
 msgstr "Demander à rejoindre l'équipe"
 
-#: dojos/templates/dojos/dojo_detail.html:185
+#: dojos/templates/dojos/dojo_detail.html:187
 msgid "Your request to join this team is waiting for an answer."
 msgstr "Votre demande pour rejoindre cette équipe attend une réponse."
 
-#: dojos/templates/dojos/dojo_detail.html:191
+#: dojos/templates/dojos/dojo_detail.html:193
 #: pages/templates/pages/home.html:163
 msgid "Frequently asked questions"
 msgstr "Questions fréquentes"
 
-#: dojos/templates/dojos/dojo_detail.html:208
+#: dojos/templates/dojos/dojo_detail.html:210
 msgid "From this dojo"
 msgstr "Nouvelles de ce dojo"
 
-#: dojos/templates/dojos/dojo_detail.html:219
+#: dojos/templates/dojos/dojo_detail.html:221
 msgid "Visit us"
 msgstr "Nous rendre visite"
 
-#: dojos/templates/dojos/dojo_detail.html:224
-#: dojos/templates/dojos/dojo_detail.html:234
+#: dojos/templates/dojos/dojo_detail.html:226
+#: dojos/templates/dojos/dojo_detail.html:236
 msgid "To be confirmed"
 msgstr "À confirmer"
 
-#: dojos/templates/dojos/dojo_detail.html:227
+#: dojos/templates/dojos/dojo_detail.html:229
 #: events/templates/events/event_detail.html:127
 msgid "Ages"
 msgstr "Âges"
@@ -8689,7 +8703,8 @@ msgstr "La famille a arrêté les nouvelles de ce dojo."
 
 #: mailing/manage/queue.py:101
 msgid "The address is blocked (a bounce, a spam complaint or by hand)."
-msgstr "L'adresse est bloquée (un retour, une plainte pour spam ou manuellement)."
+msgstr ""
+"L'adresse est bloquée (un retour, une plainte pour spam ou manuellement)."
 
 #: mailing/manage/queue.py:103
 msgid "The campaign was cancelled before it went out."
@@ -8885,7 +8900,7 @@ msgstr "Par enfant ; l'inscription aux sessions n'en dépend jamais."
 msgid "Back to your account"
 msgstr "Retour à votre compte"
 
-#: mailing/templates/mailing/manage/mail_log.html:19
+#: mailing/templates/mailing/manage/mail_log.html:20
 msgid ""
 "Every mail the site queued, newest first: who it went to, what it was about, "
 "and whether it went out. Use it to answer “did they get our mail?”, and to "
@@ -8898,7 +8913,7 @@ msgstr ""
 "mail n'est pas affiché ici, car certains contiennent un lien de connexion "
 "personnel."
 
-#: mailing/templates/mailing/manage/mail_log.html:20
+#: mailing/templates/mailing/manage/mail_log.html:21
 msgid ""
 "A year after a mail was queued, its address, subject and text are cleared; "
 "what kind of mail it was and whether it went out stay, for the figures."
@@ -8907,62 +8922,62 @@ msgstr ""
 "sont effacés ; le type d'e-mail et le fait qu'il soit parti restent, pour "
 "les statistiques."
 
-#: mailing/templates/mailing/manage/mail_log.html:25
+#: mailing/templates/mailing/manage/mail_log.html:26
 msgid "Email address or subject"
 msgstr "Adresse e-mail ou objet"
 
-#: mailing/templates/mailing/manage/mail_log.html:45
+#: mailing/templates/mailing/manage/mail_log.html:46
 #: mailing/templates/mailing/manage/mail_queue.html:47
 #: pages/templates/pages/manage_audit_log.html:44
 msgid "Show everything"
 msgstr "Tout afficher"
 
-#: mailing/templates/mailing/manage/mail_log.html:49
+#: mailing/templates/mailing/manage/mail_log.html:50
 #, python-format
 msgid "%(counter)s mail"
 msgid_plural "%(counter)s mails"
 msgstr[0] "%(counter)s e-mail"
 msgstr[1] "%(counter)s e-mails"
 
-#: mailing/templates/mailing/manage/mail_log.html:54
+#: mailing/templates/mailing/manage/mail_log.html:55
 #: mailing/templates/mailing/manage/mail_queue.html:58
 #: mailing/templates/mailing/manage/mail_queue.html:102
 msgid "To"
 msgstr "À"
 
-#: mailing/templates/mailing/manage/mail_log.html:66
+#: mailing/templates/mailing/manage/mail_log.html:67
 msgid "Test mail"
 msgstr "E-mail de test"
 
-#: mailing/templates/mailing/manage/mail_log.html:73
+#: mailing/templates/mailing/manage/mail_log.html:74
 msgid "Not sent"
 msgstr "Non envoyé"
 
-#: mailing/templates/mailing/manage/mail_log.html:80
+#: mailing/templates/mailing/manage/mail_log.html:81
 msgid "Address blocked"
 msgstr "Adresse bloquée"
 
-#: mailing/templates/mailing/manage/mail_log.html:86
+#: mailing/templates/mailing/manage/mail_log.html:87
 msgid "No mail matches."
 msgstr "Aucun e-mail ne correspond."
 
-#: mailing/templates/mailing/manage/mail_log.html:93
+#: mailing/templates/mailing/manage/mail_log.html:94
 #: pages/templates/pages/manage_audit_log.html:88
 msgid "Pages"
 msgstr "Pages"
 
-#: mailing/templates/mailing/manage/mail_log.html:94
+#: mailing/templates/mailing/manage/mail_log.html:95
 #: pages/templates/pages/manage_audit_log.html:89
 msgid "Newer"
 msgstr "Plus récents"
 
-#: mailing/templates/mailing/manage/mail_log.html:95
+#: mailing/templates/mailing/manage/mail_log.html:96
 #: pages/templates/pages/manage_audit_log.html:90
 #, python-format
 msgid "Page %(number)s of %(total)s"
 msgstr "Page %(number)s sur %(total)s"
 
-#: mailing/templates/mailing/manage/mail_log.html:96
+#: mailing/templates/mailing/manage/mail_log.html:97
 #: pages/templates/pages/manage_audit_log.html:91
 msgid "Older"
 msgstr "Plus anciens"
@@ -9889,7 +9904,7 @@ msgstr "Tapez le nom d'utilisateur, %(username)s, pour confirmer"
 msgid "Type the account's username to confirm."
 msgstr "Tapez le nom d'utilisateur du compte pour confirmer."
 
-#: privacy/retention.py:265
+#: privacy/retention.py:281
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
@@ -9901,7 +9916,7 @@ msgstr ""
 "qu'il reste champion. Demandez-lui de passer le rôle à un mentor, ou "
 "contactez l'organisation."
 
-#: privacy/retention.py:271
+#: privacy/retention.py:287
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "

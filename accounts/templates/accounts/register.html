@@ -14,8 +14,8 @@
   .register-choice-root .row > * { flex: 1 1 280px; }
   /* No height: 100% (the row has no height, so it would stop the cards stretching to one height). */
   .register-choice-root .choice-card { display: flex; flex-direction: column; padding: var(--space-6); }
-  .register-choice-root .choice-card .eyebrow { color: var(--primary); margin: 0 0 var(--space-2); }
-  .register-choice-root .choice-card h3 { color: var(--ink); margin: 0 0 var(--space-2); }
+  .register-choice-root .choice-card .eyebrow { color: var(--primary-hover); margin: 0 0 var(--space-2); }
+  .register-choice-root .choice-card h2 { color: var(--ink); margin: 0 0 var(--space-2); }
   .register-choice-root .choice-card p { color: var(--ink-muted); margin: 0 0 var(--space-4); flex: 1; }
   .register-choice-root .choice-card a { color: var(--secondary); }
 </style>
@@ -32,21 +32,21 @@
     <div class="row">
       <div class="cd-card choice-card">
         <p class="label eyebrow">{% translate "For parents &amp; guardians" %}</p>
-        <h3 class="heading-md">{% translate "Register your family" %}</h3>
+        <h2 class="heading-md">{% translate "Register your family" %}</h2>
         <p class="body-sm">{% translate "Create an account and add your children so they can join sessions at any dojo." %}</p>
         <a class="label" href="{% url 'register_guardian' %}">{% translate "Get started →" %}</a>
       </div>
 
       <div class="cd-card choice-card">
         <p class="label eyebrow">{% translate "For organisers" %}</p>
-        <h3 class="heading-md">{% translate "Start a new dojo" %}</h3>
+        <h2 class="heading-md">{% translate "Start a new dojo" %}</h2>
         <p class="body-sm">{% translate "Bring CoderDojo to your city — tell us about your venue and we'll help you get set up." %}</p>
         <a class="label" href="{% url 'register_dojo' %}">{% translate "Apply to start a dojo →" %}</a>
       </div>
 
       <div class="cd-card choice-card">
         <p class="label eyebrow">{% translate "For volunteers" %}</p>
-        <h3 class="heading-md">{% translate "Become a mentor or volunteer" %}</h3>
+        <h2 class="heading-md">{% translate "Become a mentor or volunteer" %}</h2>
         <p class="body-sm">{% translate "Help out at an existing dojo — no teaching experience required, just a Saturday morning." %}</p>
         <a class="label" href="{% url 'register_helper' %}">{% translate "Apply to volunteer →" %}</a>
       </div>

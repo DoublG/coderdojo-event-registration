@@ -18,7 +18,7 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
     </span>
     {% with age=ninja.age pathways=registration.pathways.all current_belt=ninja.current_belt %}
       {% if age is not None or pathways or current_belt %}
-        <span class="cd-attendance__meta caption">{% if age is not None %}{% blocktranslate %}Age {{ age }}{% endblocktranslate %}{% endif %}{% if age is not None and pathways %} · {% endif %}{% for pathway in pathways %}{{ pathway|localized:"name" }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if current_belt %}{% if age is not None or pathways %} · {% endif %}{{ current_belt|localized:"name" }}{% endif %}</span>
+        <span class="cd-attendance__meta caption">{% if age is not None %}{% blocktranslate %}Age {{ age }}{% endblocktranslate %}{% endif %}{% if age is not None and pathways %} · {% endif %}{% for pathway in pathways %}{{ pathway|localized:"name"|in_lang }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if current_belt %}{% if age is not None or pathways %} · {% endif %}{{ current_belt|localized:"name"|in_lang }}{% endif %}</span>
       {% endif %}
       {% if dojo_access.can_view_health_notes and ninja.allergies_notes %}
         {# The family's allergies or notes (health data): champion only, dojos.access.VIEW_HEALTH_NOTES; every time it's shown goes in the audit log. #}{% audit_view ninja %}
@@ -66,7 +66,7 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
           {% for pathway in all_pathways %}
             <label style="display: block;">
               <input type="checkbox" name="pathway" value="{{ pathway.id }}"{% if pathway in registration.pathways.all %} checked{% endif %}>
-              {{ pathway|localized:"name" }}{% if pathway.id in event_pathway_ids %} <span style="color: var(--ink-muted);">{% translate "(this session)" %}</span>{% endif %}
+              {{ pathway|localized:"name"|in_lang }}{% if pathway.id in event_pathway_ids %} <span style="color: var(--ink-muted);">{% translate "(this session)" %}</span>{% endif %}
             </label>
           {% endfor %}
           <button type="submit" class="cd-btn cd-btn--ghost label" style="margin-top: var(--space-2);">{% translate "Save pathways" %}</button>

@@ -22,7 +22,7 @@
       {% include "mailing/partials/_privacy_explanation.html" %}
 
       {% for message in messages %}
-        <p class="cd-form__note cd-form__note--success caption">{{ message }}</p>
+        <p class="cd-form__note cd-form__note--success caption" role="status">{{ message }}</p>
       {% endfor %}
 
       <form method="post" class="cd-form" novalidate>

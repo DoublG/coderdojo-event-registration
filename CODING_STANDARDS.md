@@ -39,8 +39,9 @@ and capacity in [`CAPACITY.md`](CAPACITY.md), memory per function in [`MEMORY_PR
 5. [Test coverage](#test-coverage)
 6. [Complexity and maintainability](#complexity-and-maintainability)
 7. [Layers between the apps](#layers-between-the-apps)
-8. [Commits, reviews and keeping documents current](#commits-reviews-and-keeping-documents-current)
-9. [Measuring again](#measuring-again)
+8. [Accessibility](#accessibility)
+9. [Commits, reviews and keeping documents current](#commits-reviews-and-keeping-documents-current)
+10. [Measuring again](#measuring-again)
 
 ---
 
@@ -308,13 +309,46 @@ also in the Code audit workflow.
   engine for a `campaigns` app with their models (their tables kept their names, the content types moved,
   so permissions and the audit log follow), so the engine never depends on them.
 
+## Accessibility
+
+The site aims at **WCAG 2.2 AA** on every page, public and management alike, in both themes. Checked on 6
+October 2026: axe-core finds nothing on the 61 pages the user journeys visit, logged in as each persona, in the
+light and the dark theme, and every page reflows at 320px wide.
+
+- **Every page has a skip link and one `<main id="main">`** (both page shells, `core/base.html` and
+  `core/_manage_shell.html`): the first Tab lands on *Skip to content*. The public menu is a `<header>`.
+- **Headings never skip a level**, starting at the page's one `<h1>`: a form's section titles are `<h2>`
+  (`cd-form__group-title`), with `<h3>` below them. Text a team writes in Markdown fits under the page's
+  headings: `{{ text|markdownify }}` starts at `<h2>`, `|markdownify:3` under one of the page's `<h2>`s, and
+  its levels are compressed so a lone `###` never jumps.
+- **Form errors are read out**: Django points an invalid field's `aria-describedby` at `<id>_error`, which is
+  the error list's id (`core/templates/core/forms/_help_and_errors.html`). Messages are `role="status"`.
+- **A text in another language than the page is marked with it**: `{{ obj|localized:"field"|in_lang }}` wraps
+  a fallback text in `<span lang>` (never in an attribute or `<title>`); a container of one gets
+  `lang="{{ text.language }}"`. The *Only in …* note is in the page's language.
+- **Contrast**: text uses the tokens' text colours (`--ink`, `--ink-muted`, `--primary-hover` for orange text
+  on a raised surface), never a faded (`opacity`) row; a plain link gets `--secondary` in both themes; a page's
+  own accent colour needs a dark-theme value too.
+- **Targets of at least 24px** (WCAG 2.5.8): radios and checkboxes in forms are 24px, an icon button gets a
+  24px box.
+- **No empty table header**: an action column's `<th>` holds `<span class="visually-hidden">Actions</span>`.
+  Something that scrolls sideways is focusable (`tabindex="0"`, a role and a name), and nothing makes the page
+  wider than 320px (a long word in a preview: `overflow-wrap: anywhere`).
+- **Works without JavaScript**: an htmx form still posts somewhere sensible without htmx (the whole page, never
+  a bare fragment).
+- **Checked by** `core.tests.AccessibilityTests` (skip link and `<main>` in both shells, heading levels on the
+  public pages, no empty `<th>`, `in_lang`) and `MarkdownifyTests`, and in a browser by
+  `user-journeys/scripts/check_a11y.py` (axe-core in both themes plus the 320px reflow; it exits 1 on a
+  problem): run it after changing a page's markup or styles, as the journey check below.
+
 ## Commits, reviews and keeping documents current
 
 - **Commits**: a summary line that says what changed for whom, then a body with the why and the parts. Small,
   coherent commits on `main` (or a branch with a pull request for larger work). Commits made by Claude in the
   devcontainer carry Claude's identity and a `Co-Authored-By` line.
 - **Before pushing**: the lint commands above, the tests of what you touched (the whole suite for anything
-  shared), and the user-journey check for user-facing pages (`python3 user-journeys/scripts/check_journeys.py`).
+  shared), and the user-journey check for user-facing pages (`python3 user-journeys/scripts/check_journeys.py`),
+  plus the accessibility check after a markup or style change (`user-journeys/scripts/check_a11y.py`).
 - **CI must be green.** A security finding on a line that's fine gets its `noqa` with a reason; an advisory
   that can't be reached here gets an `--ignore-vuln` together with its row in `MAINTENANCE.md`'s security log.
 - **Documents change with the code** (`CLAUDE.md`, "Workflow rules"): the help centre in three languages for

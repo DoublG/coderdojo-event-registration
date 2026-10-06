@@ -71,9 +71,9 @@
       {% include "content/partials/_promotion_banner.html" %}
 
       {% if geocode_failed %}
-        <p class="cd-dojo-finder__meta caption">{% blocktranslate %}Couldn't find "{{ search_label }}" — showing every dojo instead.{% endblocktranslate %}</p>
+        <h2 class="cd-dojo-finder__meta caption">{% blocktranslate %}Couldn't find "{{ search_label }}" — showing every dojo instead.{% endblocktranslate %}</h2>
       {% else %}
-        <p class="cd-dojo-finder__meta caption">{% blocktranslate count counter=total_count %}Showing {{ counter }} dojo near {{ search_label }}, nearest first{% plural %}Showing {{ counter }} dojos near {{ search_label }}, nearest first{% endblocktranslate %}</p>
+        <h2 class="cd-dojo-finder__meta caption">{% blocktranslate count counter=total_count %}Showing {{ counter }} dojo near {{ search_label }}, nearest first{% plural %}Showing {{ counter }} dojos near {{ search_label }}, nearest first{% endblocktranslate %}</h2>
       {% endif %}
 
       <ul class="cd-dojo-finder__list">

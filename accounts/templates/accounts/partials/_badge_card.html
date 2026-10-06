@@ -21,8 +21,8 @@ it — see accounts.views.ninja_badges. Same approach as the homepage's
         </svg>
       {% endif %}
     </div>
-    <h3 class="cd-award__title heading-sm">{{ ninja_badge.badge|localized:"name" }}</h3>
-    <p class="cd-award__desc body-sm">{{ ninja_badge.badge|localized:"description" }}</p>
+    <h3 class="cd-award__title heading-sm">{{ ninja_badge.badge|localized:"name"|in_lang }}</h3>
+    <p class="cd-award__desc body-sm">{{ ninja_badge.badge|localized:"description"|in_lang }}</p>
     <p class="cd-award__meta caption">{% blocktranslate with date=ninja_badge.earned_date|date:"j F Y" %}Earned {{ date }}{% endblocktranslate %}</p>
   </article>
 {% else %}
@@ -42,8 +42,8 @@ it — see accounts.views.ninja_badges. Same approach as the homepage's
         </svg>
       {% endif %}
     </div>
-    <h3 class="cd-award__title heading-sm">{{ ninja_badge.badge|localized:"name" }}</h3>
-    <p class="cd-award__desc body-sm">{{ ninja_badge.badge|localized:"description" }}</p>
+    <h3 class="cd-award__title heading-sm">{{ ninja_badge.badge|localized:"name"|in_lang }}</h3>
+    <p class="cd-award__desc body-sm">{{ ninja_badge.badge|localized:"description"|in_lang }}</p>
     {% if ninja_badge.progress_total %}
       <div class="cd-award__progress">
         <div class="cd-award__progress-track">

@@ -1,2 +1,2 @@
 {% if field.help_text %}<div class="cd-form__help caption"{% if field.auto_id %} id="{{ field.auto_id }}_helptext"{% endif %}>{{ field.help_text }}</div>{% endif %}
-{% if field.errors %}<ul class="cd-form__errors">{% for error in field.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>{% endif %}
+{% if field.errors %}<ul class="cd-form__errors"{% if field.auto_id %} id="{{ field.auto_id }}_error"{% endif %}>{% for error in field.errors %}<li class="caption">{{ error }}</li>{% endfor %}</ul>{% endif %}

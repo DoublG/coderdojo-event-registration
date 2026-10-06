@@ -52,7 +52,7 @@
           {% endif %}
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">{% translate "Your details" %}</h3>
+            <h2 class="cd-form__group-title heading-md">{% translate "Your details" %}</h2>
             <p class="body-sm" style="margin: 0 0 var(--space-3);">
               {% blocktranslate with name=request.user.get_full_name|default:request.user.username %}Applying as <strong>{{ name }}</strong>{% endblocktranslate %}{% if request.user.email %} ({{ request.user.email }}){% endif %}.
             </p>
@@ -60,7 +60,7 @@
           </div>
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">{% translate "Your proposed dojo" %}</h3>
+            <h2 class="cd-form__group-title heading-md">{% translate "Your proposed dojo" %}</h2>
             <div class="cd-form__row">
               {{ form.area.as_field_group }}
               {{ form.preferred_schedule.as_field_group }}
@@ -69,7 +69,7 @@
           </div>
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">{% translate "Tell us more" %}</h3>
+            <h2 class="cd-form__group-title heading-md">{% translate "Tell us more" %}</h2>
             {{ form.message.as_field_group }}
             {{ form.consent.as_field_group }}
 

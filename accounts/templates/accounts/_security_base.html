@@ -35,7 +35,7 @@
   <div class="shell">
     <div class="cd-card" style="padding: var(--space-6);">
       {% for message in messages %}
-        <p class="cd-form__note {% if message.level_tag == 'error' %}cd-form__note--error{% else %}cd-form__note--success{% endif %} caption">{{ message }}</p>
+        <p class="cd-form__note {% if message.level_tag == 'error' %}cd-form__note--error{% else %}cd-form__note--success{% endif %} caption" role="status">{{ message }}</p>
       {% endfor %}
       {% block security_content %}{% endblock %}
     </div>

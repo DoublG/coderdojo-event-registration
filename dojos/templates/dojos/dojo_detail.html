@@ -8,6 +8,8 @@
 {% block extra_style %}
 <style>
   .dojo-page-root { background: var(--surface); --dojo-accent: #6b3fa0; }
+  /* The light purple fails on the dark surface (2.4:1); this one is 6:1 on it. */
+  [data-theme="dark"] .dojo-page-root { --dojo-accent: #b08ee0; }
   .dojo-page-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
   .dojo-page-root .col { max-width: 720px; }
   .dojo-page-root .dojo-hero { margin: var(--space-6) 0 var(--space-6); }
@@ -23,7 +25,7 @@
   .dojo-page-root .markdown-content a { color: var(--secondary); }
   .dojo-page-root .markdown-content ul,
   .dojo-page-root .markdown-content ol { padding-left: 1.25em; }
-  /* markdownify: `#` is an h2 (the page's title is the h1), down to h6. */
+  /* markdownify: the description's headings start at h3, under the section's h2 (core.templatetags.markdown_extras). */
   .dojo-page-root .markdown-content h2,
   .dojo-page-root .markdown-content h3,
   .dojo-page-root .markdown-content h4,
@@ -119,7 +121,7 @@
           </div>
           <div>
             <p class="label next-session-full__label">{% translate "Next session" %} · {% if next_event.places_left > 0 %}{% translate "Open" %}{% else %}{% translate "Waitlist" %}{% endif %}</p>
-            <h3 class="heading-sm next-session-full__title">{{ next_event|localized:"name" }}</h3>
+            <h2 class="heading-sm next-session-full__title">{{ next_event|localized:"name"|in_lang }}</h2>
             {% include "events/partials/_audience_badge.html" with event=next_event %}
             <p class="body-sm next-session-full__meta">
               {{ next_event.start_time|date:"D j M" }} · {{ next_event.start_time|time:"H:i" }}
@@ -137,7 +139,7 @@
     {% with description=dojo|localized:"description" %}{% if description %}
       <section class="section col">
         <h2 class="heading-lg section-title">{% translate "About this dojo" %} {% only_in description %}</h2>
-        <div class="body markdown-content"{% if description.is_fallback %} lang="{{ description.language }}"{% endif %}>{{ description|markdownify }}</div>
+        <div class="body markdown-content"{% if description.is_fallback %} lang="{{ description.language }}"{% endif %}>{{ description|markdownify:3 }}</div>
       </section>
     {% endif %}{% endwith %}
 
@@ -147,7 +149,7 @@
           <h2 class="heading-lg section-title">{% translate "Pathways" %}</h2>
           <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
             {% for pathway in pathways %}
-              <a class="cd-badge cd-badge--outline caption" href="{% url 'pathway_detail' pathway_id=pathway.id %}">{{ pathway|localized:"name" }}</a>
+              <a class="cd-badge cd-badge--outline caption" href="{% url 'pathway_detail' pathway_id=pathway.id %}">{{ pathway|localized:"name"|in_lang }}</a>
             {% endfor %}
           </div>
         </section>
@@ -173,7 +175,7 @@
       </div>
 
       {% for message in messages %}
-        <p class="cd-form__note {% if message.level_tag == 'error' %}cd-form__note--error{% else %}cd-form__note--success{% endif %}" style="margin-top: var(--space-4);">{{ message }}</p>
+        <p class="cd-form__note {% if message.level_tag == 'error' %}cd-form__note--error{% else %}cd-form__note--success{% endif %}" role="status" style="margin-top: var(--space-4);">{{ message }}</p>
       {% endfor %}
       {% if join_state == "can_request" %}
         <form class="join-team" method="post" action="{% url 'dojo_join_request' dojo_id=dojo.id %}" style="margin-top: var(--space-4);">
@@ -193,10 +195,10 @@
           {% for faq in faqs %}
             <div class="cd-faq__item" data-open="false">
               <button class="cd-faq__question heading-sm">
-                <span>{{ faq|localized:"question" }}</span>
+                <span>{{ faq|localized:"question"|in_lang }}</span>
                 <span class="cd-faq__icon" aria-hidden="true">+</span>
               </button>
-              <p class="cd-faq__answer body" hidden>{% with answer=faq|localized:"answer" %}{{ answer }} {% only_in answer %}{% endwith %}</p>
+              <p class="cd-faq__answer body" hidden>{% with answer=faq|localized:"answer" %}{{ answer|in_lang }} {% only_in answer %}{% endwith %}</p>
             </div>
           {% endfor %}
         </div>
@@ -250,7 +252,7 @@
       {% with notes=dojo|localized:"visit_notes" %}{% if notes %}
         <div class="cd-card markdown-content" style="padding: var(--space-6); margin-top: var(--space-4);"{% if notes.is_fallback %} lang="{{ notes.language }}"{% endif %}>
           {% only_in notes %}
-          {{ notes|markdownify }}
+          {{ notes|markdownify:3 }}
         </div>
       {% endif %}{% endwith %}
       {% if dojo.address %}

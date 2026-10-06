@@ -10,7 +10,7 @@
   .pathwaydetail-root .shell { max-width: 1080px; margin: 0 auto; padding: var(--space-5) var(--space-4); }
   .pathwaydetail-root .back-link { color: var(--secondary); }
   .pathwaydetail-root .pathway-header { margin: var(--space-6) 0 var(--space-6); max-width: 640px; }
-  .pathwaydetail-root .pathway-header .eyebrow { color: var(--primary); margin: var(--space-3) 0 var(--space-2); }
+  .pathwaydetail-root .pathway-header .eyebrow { color: var(--primary-hover); margin: var(--space-3) 0 var(--space-2); }
   .pathwaydetail-root .pathway-header h1 { color: var(--ink); margin: 0 0 var(--space-2); }
   .pathwaydetail-root .pathway-header p.subtitle { color: var(--ink-muted); margin: 0 0 var(--space-4); }
   .pathwaydetail-root .pathway-header .tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
@@ -46,8 +46,8 @@
   <div class="shell">
 
     <div class="pathway-header">
-      <h1 class="display-2xl">{{ pathway|localized:"name" }}</h1>
-      {% if pathway|localized:"subtitle" %}<p class="body-lg subtitle">{{ pathway|localized:"subtitle" }}</p>{% endif %}
+      <h1 class="display-2xl">{{ pathway|localized:"name"|in_lang }}</h1>
+      {% if pathway|localized:"subtitle" %}<p class="body-lg subtitle">{{ pathway|localized:"subtitle"|in_lang }}</p>{% endif %}
       <div class="tags">
         {% if pathway.min_age or pathway.max_age %}
           <span class="cd-badge cd-badge--accent caption">{% blocktranslate with min=pathway.min_age|default:"7" max=pathway.max_age|default:"18" %}Ages {{ min }}–{{ max }}{% endblocktranslate %}</span>
@@ -76,8 +76,8 @@
           <div class="row">
             {% for project in projects %}
               <article class="cd-card build-card">
-                <h3 class="heading-md">{{ project|localized:"title" }}</h3>
-                <p class="body-sm">{{ project|localized:"description" }}</p>
+                <h3 class="heading-md">{{ project|localized:"title"|in_lang }}</h3>
+                <p class="body-sm">{{ project|localized:"description"|in_lang }}</p>
               </article>
             {% endfor %}
           </div>
@@ -94,8 +94,8 @@
             {% for step in steps %}
               <article class="cd-card step-card">
                 <span class="caption step-num">{{ forloop.counter }}</span>
-                <h3 class="heading-md">{{ step|localized:"title" }}</h3>
-                <p class="body-sm">{{ step|localized:"description" }}</p>
+                <h3 class="heading-md">{{ step|localized:"title"|in_lang }}</h3>
+                <p class="body-sm">{{ step|localized:"description"|in_lang }}</p>
               </article>
             {% endfor %}
           </div>
@@ -110,7 +110,7 @@
           <p class="section-desc body">{% translate "The building blocks every later pathway builds on." %}</p>
           <div class="skills">
             {% for skill in skills %}
-              <span class="cd-badge cd-badge--outline caption">{{ skill|localized:"name" }}</span>
+              <span class="cd-badge cd-badge--outline caption">{{ skill|localized:"name"|in_lang }}</span>
             {% endfor %}
           </div>
         </section>
@@ -125,10 +125,10 @@
             {% for faq in faqs %}
               <div class="cd-faq__item" data-open="false">
                 <button class="cd-faq__question heading-sm">
-                  <span>{{ faq|localized:"question" }}</span>
+                  <span>{{ faq|localized:"question"|in_lang }}</span>
                   <span class="cd-faq__icon" aria-hidden="true">+</span>
                 </button>
-                <p class="cd-faq__answer body" hidden>{% with answer=faq|localized:"answer" %}{{ answer }} {% only_in answer %}{% endwith %}</p>
+                <p class="cd-faq__answer body" hidden>{% with answer=faq|localized:"answer" %}{{ answer|in_lang }} {% only_in answer %}{% endwith %}</p>
               </div>
             {% endfor %}
           </div>
@@ -153,8 +153,8 @@
         <div class="row">
           {% for other in other_pathways %}
             <article class="cd-card other-pathway-card">
-              <h3 class="heading-md">{{ other|localized:"name" }}</h3>
-              <p class="body-sm">{{ other|localized:"subtitle" }}</p>
+              <h3 class="heading-md">{{ other|localized:"name"|in_lang }}</h3>
+              <p class="body-sm">{{ other|localized:"subtitle"|in_lang }}</p>
               <a class="label" href="{% url 'pathway_detail' pathway_id=other.id %}">{% blocktranslate with name=other|localized:"name" %}Explore {{ name }} →{% endblocktranslate %}</a>
             </article>
           {% endfor %}

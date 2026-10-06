@@ -23,7 +23,7 @@
         {% for badge in one_offs %}
           <tr>
             <td class="body-sm">{% if badge.icon %}<img src="{{ badge.icon.url }}" alt="" style="height: 32px; width: 32px; object-fit: contain;">{% else %}—{% endif %}</td>
-            <td class="body-sm"><a href="{% url 'manage_badge_detail' badge_id=badge.id %}">{{ badge|localized:"name" }}</a></td>
+            <td class="body-sm"><a href="{% url 'manage_badge_detail' badge_id=badge.id %}">{{ badge|localized:"name"|in_lang }}</a></td>
             <td class="body-sm">{{ badge|localized:"criteria"|default:"—" }}</td>
             <td class="body-sm cd-table__num">{{ badge.earned_count }}</td>
           </tr>
@@ -50,9 +50,9 @@
         {% for badge in milestones %}
           <tr>
             <td class="body-sm">{% if badge.icon %}<img src="{{ badge.icon.url }}" alt="" style="height: 32px; width: 32px; object-fit: contain;">{% else %}—{% endif %}</td>
-            <td class="body-sm"><a href="{% url 'manage_badge_detail' badge_id=badge.id %}">{{ badge|localized:"name" }}</a></td>
+            <td class="body-sm"><a href="{% url 'manage_badge_detail' badge_id=badge.id %}">{{ badge|localized:"name"|in_lang }}</a></td>
             <td class="body-sm cd-table__num">{{ badge.threshold }}</td>
-            <td class="body-sm">{% if badge.grants_belt %}{{ badge.grants_belt|localized:"name" }}{% else %}—{% endif %}</td>
+            <td class="body-sm">{% if badge.grants_belt %}{{ badge.grants_belt|localized:"name"|in_lang }}{% else %}—{% endif %}</td>
             <td class="body-sm cd-table__num">{{ badge.earned_count }}</td>
           </tr>
         {% empty %}

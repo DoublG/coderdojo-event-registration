@@ -28,7 +28,7 @@
   .guardian-root .child-card__name { color: var(--ink); margin: 0; }
   .guardian-root .child-card__meta { color: var(--ink-muted); margin: 0; }
   .guardian-root .child-card__link { color: var(--secondary); }
-  .guardian-root .next-row { display: flex; align-items: center; gap: var(--space-4); background: var(--surface-sunken); border-radius: var(--radius-md); padding: var(--space-4); }
+  .guardian-root .next-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); background: var(--surface-sunken); border-radius: var(--radius-md); padding: var(--space-4); }
   .guardian-root .next-row + .next-row { margin-top: var(--space-3); }
   .guardian-root .next-row .date-box {
     flex: 0 0 52px; text-align: center; background: var(--surface); border-radius: var(--radius-md); padding: var(--space-2) 0;
@@ -38,7 +38,7 @@
   .guardian-root .next-row .info { flex: 1 1 auto; min-width: 0; }
   .guardian-root .next-row .info h3 { color: var(--ink); margin: 0 0 2px; }
   .guardian-root .next-row .info .meta { color: var(--ink-muted); margin: 0; }
-  .guardian-root .next-row .action { flex: 0 0 auto; display: flex; align-items: center; gap: var(--space-2); }
+  .guardian-root .next-row .action { flex: 0 1 auto; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
   .guardian-root .empty-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); background: var(--surface-sunken); border-radius: var(--radius-md); padding: var(--space-4); flex-wrap: wrap; }
   .guardian-root .empty-row p { color: var(--ink-muted); margin: 0; }
   .guardian-root .add-child { padding: var(--space-6); text-align: center; margin-top: var(--space-6); }

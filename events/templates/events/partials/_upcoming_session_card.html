@@ -20,7 +20,7 @@ see events.views.upcoming_sessions_widget.
     </div>
   </div>
   <div class="cd-event__body">
-    <h3 class="cd-event__title heading-md">{{ event|localized:"name" }}</h3>
+    <h3 class="cd-event__title heading-md">{{ event|localized:"name"|in_lang }}</h3>
     {% if event.is_promoted or event.is_girls_session %}
       <div class="cd-event__badges">
         {% if event.is_promoted %}<span class="cd-badge cd-badge--warning caption">{% translate "Featured" %}</span>{% endif %}

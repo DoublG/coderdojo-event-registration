@@ -27,7 +27,7 @@
   .eventdetail-root .markdown-content a { color: var(--secondary); }
   .eventdetail-root .markdown-content ul,
   .eventdetail-root .markdown-content ol { padding-left: 1.25em; }
-  /* markdownify: `#` is an h2 (the page's title is the h1), down to h6. */
+  /* markdownify: the description's headings start at h3, under the section's h2 (core.templatetags.markdown_extras). */
   .eventdetail-root .markdown-content h2,
   .eventdetail-root .markdown-content h3,
   .eventdetail-root .markdown-content h4,
@@ -61,7 +61,7 @@
         {% if event.image %}
           <img class="event-header__image" src="{{ event.image.url }}" alt="">
         {% endif %}
-        <h1 class="display-xl">{{ event|localized:"name" }}</h1>
+        <h1 class="display-xl">{{ event|localized:"name"|in_lang }}</h1>
       </div>
       {% if event.is_girls_session %}<p>{% include "events/partials/_audience_badge.html" %}</p>{% endif %}
       <p class="body-lg meta">
@@ -77,7 +77,7 @@
         {% with description=event|localized:"description" %}{% if description %}
           <section>
             <h2 class="heading-lg section-title">{% translate "About this session" %}</h2>
-            <div class="body markdown-content"{% if description.is_fallback %} lang="{{ description.language }}"{% endif %}>{% only_in description %}{{ description|markdownify }}</div>
+            <div class="body markdown-content"{% if description.is_fallback %} lang="{{ description.language }}"{% endif %}>{% only_in description %}{{ description|markdownify:3 }}</div>
           </section>
         {% endif %}{% endwith %}
 
@@ -87,7 +87,7 @@
               <h2 class="heading-lg section-title">{% translate "Pathways this session covers" %}</h2>
               <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
                 {% for pathway in pathways %}
-                  <a class="cd-badge cd-badge--outline caption" href="{% url 'pathway_detail' pathway_id=pathway.id %}">{{ pathway|localized:"name" }}</a>
+                  <a class="cd-badge cd-badge--outline caption" href="{% url 'pathway_detail' pathway_id=pathway.id %}">{{ pathway|localized:"name"|in_lang }}</a>
                 {% endfor %}
               </div>
             </section>
@@ -101,10 +101,10 @@
               {% for faq in faqs %}
                 <div class="cd-faq__item" data-open="false">
                   <button class="cd-faq__question heading-sm">
-                    <span>{{ faq|localized:"question" }}</span>
+                    <span>{{ faq|localized:"question"|in_lang }}</span>
                     <span class="cd-faq__icon" aria-hidden="true">+</span>
                   </button>
-                  <p class="cd-faq__answer body" hidden>{% with answer=faq|localized:"answer" %}{{ answer }} {% only_in answer %}{% endwith %}</p>
+                  <p class="cd-faq__answer body" hidden>{% with answer=faq|localized:"answer" %}{{ answer|in_lang }} {% only_in answer %}{% endwith %}</p>
                 </div>
               {% endfor %}
             </div>

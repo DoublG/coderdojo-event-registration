@@ -51,7 +51,7 @@
           {% endif %}
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">{% translate "Your details" %}</h3>
+            <h2 class="cd-form__group-title heading-md">{% translate "Your details" %}</h2>
             <p class="body-sm" style="margin: 0 0 var(--space-3);">
               {% blocktranslate with name=request.user.get_full_name|default:request.user.username %}Applying as <strong>{{ name }}</strong>{% endblocktranslate %}{% if request.user.email %} ({{ request.user.email }}){% endif %}.
             </p>
@@ -59,7 +59,7 @@
           </div>
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">{% translate "How you'd like to help" %}</h3>
+            <h2 class="cd-form__group-title heading-md">{% translate "How you'd like to help" %}</h2>
             <div class="cd-form__row">
               {{ form.dojo.as_field_group }}
               {{ form.mentor_role.as_field_group }}
@@ -67,7 +67,7 @@
           </div>
 
           <div class="cd-form__group">
-            <h3 class="cd-form__group-title heading-md">{% translate "A bit about you" %}</h3>
+            <h2 class="cd-form__group-title heading-md">{% translate "A bit about you" %}</h2>
             {{ form.message.as_field_group }}
             <p class="cd-form__help caption">
               {% blocktranslate trimmed %}Belgian law requires a specific criminal record extract for anyone in contact with

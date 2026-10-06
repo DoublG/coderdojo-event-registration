@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
@@ -22,7 +22,7 @@ from ..models import Guardianship
 from ..template_avatars import TEMPLATE_KID_AVATARS
 from .child_logins import _login_card_context
 from .common import BADGES_PAGE_SIZE, _get_own_ninja
-from .family import _children_context
+from .family import _children_context, _render_account_home
 
 
 @login_required
@@ -30,10 +30,15 @@ def add_ninja(request):
     """The "Register another child" form on the account page
     (accounts/partials/_add_child.html, AddChildForm) — posts here via htmx
     and swaps in the freshly rendered list, plus the form itself out of
-    band: a fresh one after adding, or the posted one with its errors."""
+    band: a fresh one after adding, or the posted one with its errors.
+    Without htmx (no JavaScript, or it didn't load) the form still works: back
+    to the account page, or that page with the form open on its errors."""
     if request.user.is_ninja:
         raise Http404
     guardian = request.user
+    is_htmx = request.headers.get("HX-Request") == "true"
+    if request.method != "POST" and not is_htmx:
+        return redirect("account_home")
     form = AddChildForm(request.POST or None, guardian=guardian)
     if request.method == "POST" and form.is_valid():
         ninja = form.save(commit=False)
@@ -41,7 +46,11 @@ def add_ninja(request):
         with transaction.atomic():  # a child never exists without a guardian
             ninja.save()
             Guardianship.objects.create(guardian=guardian, ninja=ninja, **consent_fields(form.cleaned_data["consent"]))
+        if not is_htmx:
+            return redirect("account_home")
         form = AddChildForm(guardian=guardian)
+    elif not is_htmx:
+        return _render_account_home(request, add_child_form=form)
     return render(
         request,
         "accounts/partials/_children_list.html",

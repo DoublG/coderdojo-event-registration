@@ -23,6 +23,7 @@
 {% block extra_style %}{% endblock %}
 </head>
 <body>
+<a class="cd-skip-link label" href="#main">{% translate "Skip to content" %}</a>
 {# No eval (hx-on, js: values): the Content-Security-Policy forbids it (settings.CONTENT_SECURITY_POLICY). #}
 <meta name="htmx-config" content='{"allowEval": false}'>
 <script src="{% static 'core/vendor/htmx/htmx-2.0.4.min.js' %}"></script>
@@ -30,12 +31,15 @@
 <script src="{% static 'core/js/bundle.js' %}"></script>
 
 <div class="cd-root {% block root_class %}{% endblock %}" style="padding: 0;">
-  <div class="shell site-shell">
+  <header class="shell site-shell">
     {% block menu %}{% include "core/menu.html" %}{% endblock %}
     {% include "accounts/partials/_sign_in_notice.html" %}
-  </div>
+  </header>
 
+  {# The page's own content: the skip link above jumps here (WCAG 2.4.1). #}
+  <main id="main" tabindex="-1">
   {% block content %}{% endblock %}
+  </main>
 
   <div class="shell site-shell">
     <footer class="cd-footer" style="margin-top: var(--space-8);">

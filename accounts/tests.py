@@ -233,9 +233,30 @@ class AddChildViewTests(TempMediaMixin, TestCase):
         response = self.client.post(
             reverse("add_ninja"),
             {"consent": "on", "family_name": "Peeters", "name": "New Kid", "date_of_birth": _dob(10)},
+            HTTP_HX_REQUEST="true",
         )
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/partials/_children_list.html")
         self.assertTrue(Ninja.objects.of_guardian(self.guardian).filter(name="New Kid").exists())
+
+    def test_without_javascript_it_goes_back_to_the_account_page(self):
+        """No htmx (no JavaScript, or it didn't load): never the bare fragment."""
+        self.client.force_login(self.guardian)
+        response = self.client.post(
+            reverse("add_ninja"),
+            {"consent": "on", "family_name": "Peeters", "name": "No JS Kid", "date_of_birth": _dob(10)},
+        )
+        self.assertRedirects(response, reverse("account_home"))
+        self.assertTrue(Ninja.objects.of_guardian(self.guardian).filter(name="No JS Kid").exists())
+        self.assertRedirects(self.client.get(reverse("add_ninja")), reverse("account_home"))
+
+    def test_without_javascript_errors_show_on_the_whole_account_page(self):
+        self.client.force_login(self.guardian)
+        response = self.client.post(reverse("add_ninja"), {"family_name": "Peeters", "name": ""})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/guardian_detail.html")
+        self.assertContains(response, '<details class="cd-card add-child" id="add-child" open>')
+        self.assertFalse(Ninja.objects.of_guardian(self.guardian).exists())
 
     def test_picked_icon_links_the_standard_avatar(self):
         self.client.force_login(self.guardian)

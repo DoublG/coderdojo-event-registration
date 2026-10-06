@@ -20,14 +20,14 @@
     <div class="cd-card cd-login" style="padding: var(--space-6); width: 100%; max-width: 400px;">
       <div class="cd-login__header">
         {% if sent_to %}
-          <h2 class="cd-login__title heading-lg">{% translate "Check your inbox" %}</h2>
+          <h1 class="cd-login__title heading-lg">{% translate "Check your inbox" %}</h1>
           <p class="cd-login__subtitle body-sm">
             {% blocktranslate trimmed with email=sent_to minutes=valid_minutes %}
               If <strong>{{ email }}</strong> belongs to an account that logs in with a link, we've sent one. It works once, within {{ minutes }} minutes.
             {% endblocktranslate %}
           </p>
         {% else %}
-          <h2 class="cd-login__title heading-lg">{% translate "Log in with a link" %}</h2>
+          <h1 class="cd-login__title heading-lg">{% translate "Log in with a link" %}</h1>
           <p class="cd-login__subtitle body-sm">{% translate "Enter your email address and we'll mail you a link to log in. No password needed." %}</p>
         {% endif %}
       </div>
