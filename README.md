@@ -27,7 +27,7 @@ workers for all mail, and Django Channels for live notifications.
 | Developers | [`DATA_MODEL.md`](DATA_MODEL.md) | The data model, one Mermaid diagram per area, and the design decisions behind every larger change |
 | Developers and AI agents | [`CLAUDE.md`](CLAUDE.md) | Conventions, architecture and workflow rules for changing the code safely ([`AGENTS.md`](AGENTS.md) is the same file) |
 | Developers and whoever runs the platform | [`MAINTENANCE.md`](MAINTENANCE.md) | Versions and support dates (development and production), updates, responding to vulnerabilities, code audits, the security log |
-| Developers | [`CODING_STANDARDS.md`](CODING_STANDARDS.md) | Coding standards, linting and formatting, tests and guard tests, test coverage (what is and isn't covered), complexity, production versus development-only code |
+| Developers | [`CODING_STANDARDS.md`](CODING_STANDARDS.md) | Coding standards, linting and formatting, type checking, accessibility (WCAG 2.2 AA), tests and guard tests, test coverage (what is and isn't covered), complexity, production versus development-only code |
 | Developers and whoever runs the platform | [`CAPACITY.md`](CAPACITY.md) | Database growth, disk and uploads, memory per component, load test results with charts, and how to measure again (on production too) |
 | Developers and whoever runs the platform | [`MONITORING.md`](MONITORING.md) | Every metric on `/metrics/` and every panel of the Grafana dashboard explained, with screenshots under load |
 | Developers | [`MEMORY_PROFILE.md`](MEMORY_PROFILE.md) | The memory each of the site's functions uses per call, over every page and background job, and which are worth refactoring |
@@ -196,16 +196,21 @@ words in the help centre's [*Running the site*](https://doublg.github.io/coderdo
 Inside the workspace container:
 
 ```sh
-python manage.py test --debug-mode  # all apps (plain Django test runner, about 1,150 tests)
+python manage.py test --debug-mode  # all apps (plain Django test runner, about 1,190 tests)
 python manage.py test accounts      # one app
 ruff check . && ruff format .       # lint and format
 lint-imports                        # the apps' layers
+mypy                                # types, for the modules listed in pyproject.toml
 ```
+
+From the host, after changing a page's markup or styles: `user-journeys/scripts/check_a11y.py` (axe-core
+accessibility scan of every journey page in both themes, plus a 320px reflow check; see
+[`user-journeys/README.md`](user-journeys/README.md)).
 
 GitHub Actions runs the checks on every push, never a deploy:
 [**Tests**](.github/workflows/tests.yml) (missing migrations and the whole suite, with a summary per app),
-[**Code audit**](.github/workflows/audit.yml) (ruff, its security rules, `pip-audit`, `check --deploy`
-and CodeQL) and the [help centre](.github/workflows/docs.yml)'s build and publication. Coverage and
+[**Code audit**](.github/workflows/audit.yml) (ruff, its security rules, `mypy`, the layers, `pip-audit`,
+`check --deploy` and CodeQL) and the [help centre](.github/workflows/docs.yml)'s build and publication. Coverage and
 complexity: [`CODING_STANDARDS.md`](CODING_STANDARDS.md).
 
 ## Deploying

@@ -614,7 +614,7 @@ language with an “Only in …” note when theirs is missing.</li>
 </ul>
 <h2>Testing</h2>
 <ul>
-<li>About 1,150 tests with the plain Django runner, inside the devcontainer, on their own Redis cache database.</li>
+<li>About 1,190 tests with the plain Django runner, inside the devcontainer, on their own Redis cache database.</li>
 <li>Route tests check status codes, templates, permission gating (404 versus 403) and the database effect of a POST.</li>
 <li>Channels consumers are tested with <code>TransactionTestCase</code> and an in-memory layer; Celery tasks by calling the
 function, never <code>.delay()</code>.</li>
@@ -854,7 +854,7 @@ every journey page, in both themes and at 320px wide, runs from the host (<code>
 </ul>
 
 <h2>Tests</h2>
-<p>1,132 tests (12,900 lines of test code for 25,000 lines of code). Routes are tested for status, template,
+<p>1,191 tests (13,700 lines of test code for 26,200 lines of code, 6 October 2026). Routes are tested for status, template,
 gating and the database effect of a POST; services with their refusals; concurrency with real threads. About
 twenty <b>guard tests</b> fail on new code that forgets a rule: privacy classification, export coverage, an
 audit-log decision, a usable admin, <code>__str__</code> without queries, translated form texts, security headers

@@ -12,9 +12,9 @@ and capacity in [`CAPACITY.md`](CAPACITY.md), memory per function in [`MEMORY_PR
 **In short:**
 
 - **Lint, format and security rules are enforced** on every push and pull request by Ruff (`ruff check`,
-  `ruff format --check`, `ruff check --extend-select S`), with `pip-audit`, `manage.py check --deploy` and
-  CodeQL alongside. The editor in the devcontainer formats and sorts imports on save with the same Ruff.
-- **1,132 tests** (12,900 lines of test code for 25,000 lines of code) run on every change, with a summary on
+  `ruff format --check`, `ruff check --extend-select S`), with `mypy`, `pip-audit`, `manage.py check --deploy`
+  and CodeQL alongside. The editor in the devcontainer formats and sorts imports on save with the same Ruff.
+- **1,191 tests** (13,700 lines of test code for 26,200 lines of code, 6 October 2026) run on every change, with a summary on
   each run's page and failures marked on the line where they failed. About twenty **guard tests** fail when
   new code forgets a project rule (privacy, audit log, admin, translations, security headers, ...).
 - **Coverage: 94% of the site's code** (statements and branches); 87% counting the seeders and import

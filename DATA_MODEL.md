@@ -3231,7 +3231,7 @@ flowchart TD
   stay open; htmx requests get an `HX-Redirect`.
 - **The lock**: what the roles open refuses a request that doesn't meet it,
   middleware or not: `dojos.access.require_dojo_access` and
-  `accounts.organisation.require_organisation_admin` (404),
+  `accounts.organisation.require_area` (404; `require_organisation_admin` until §23),
   `pages.admin_site.AdminSite.has_permission` (the Django admin; `admin.site`
   is ours through `pages.admin_apps.AdminConfig`), and the notification
   WebSocket (`NotificationConsumer.connect`, which reads the session's
@@ -4166,7 +4166,7 @@ confirmed from the new address.
 ### Decisions
 
 - **Confirmed from the new address.** The account holder asks for the
-  change with their **current password** (`accounts.forms.ConfirmPasswordForm`
+  change with their **current password** (`accounts.forms.ConfirmPasswordForm`, since §24 `ConfirmIdentityForm`
   already exists) and the new address; we mail a link there; the address
   only changes when that link is used. Nothing changes until then.
 - **No new model: a signed link.** `django.core.signing` of account id, new
@@ -4198,7 +4198,7 @@ confirmed from the new address.
 - **The organisation can start it too (decided).** For a family that
   lost access to its old mailbox, an organisation admin opens the account
   on *Accounts → Privacy* (`/manage/privacy/`) and uses **Change email
-  address** (`/manage/privacy/<id>/email/`, `require_organisation_admin`),
+  address** (`/manage/privacy/<id>/email/`, `require_organisation_admin`; since §23 `require_area(request, Area.PRIVACY)`),
   after checking who they're dealing with by other means. The same link
   goes to the new address and the same notice to the old one. Their link
   carries who started it and **can be confirmed without logging in**: the
@@ -5082,7 +5082,7 @@ list outside the site, or asking the organisation.
    launch problem otherwise). The From address stays the organisation's
    (SPF/DKIM), with the dojo's name as display name ("CoderDojo Gent via
    CoderDojo Belgium").
-8. **Limits against overuse:** at most `DOJO_MAILINGS_PER_30_DAYS` = 4
+8. **Limits against overuse:** at most `MAILING_DOJO_MAILINGS_PER_30_DAYS` = 4
    launched per dojo (decided), a message length limit, and plain
    text only (links are fine; no attachments, no images). A test mail to
    the sender is always allowed and doesn't count.

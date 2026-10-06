@@ -374,7 +374,7 @@ link for a few minutes but never open a page. Whole pages are never cached: each
 CSRF token and the visitor's nav.
 
 **Queries per page** (the seeded development data, the second visit, so with the caches filled;
-`core.tests.DataCacheTests` keeps the public pages' numbers as guards):
+`pages.tests.DataCacheTests` keeps the public pages' numbers as guards):
 
 | Page | Visitor | | Parent | | Champion | |
 |---|---:|---:|---:|---:|---:|---:|
