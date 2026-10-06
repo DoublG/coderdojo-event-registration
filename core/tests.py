@@ -829,7 +829,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
         from dojos.testing import make_dojo
         from events.forms import BadgeForm, EventForm
         from events.models import Event, Registration
-        from mailing.forms import NewTemplateForm, TemplateVersionForm
+        from mailing.forms import BlockAddressForm, NewTemplateForm, TemplateVersionForm
         from privacy.forms import ConfirmUsernameForm
 
         user = User.objects.create(username="u")
@@ -840,6 +840,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             BadgeForm(),
             DojoCreateForm(),
             AnnouncementForm(dojo=make_dojo("Ghent")),
+            BlockAddressForm(),
             NewTemplateForm(),
             TemplateVersionForm(),
             BackgroundCheckUploadForm(),

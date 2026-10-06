@@ -326,7 +326,7 @@ STEPS = {
         ),
         "queue": (
             "E-mailwachtrij",
-            "Wachtende en mislukte mail, teruggekomen mail en geblokkeerde adressen, met een waarschuwing als de workers stil lijken te liggen. Mislukte mail stuur je met één klik opnieuw (één voor één of alles samen), en een geblokkeerd adres deblokkeer je zodra het weer werkt.",
+            "Wachtende en mislukte mail, teruggekomen mail en geblokkeerde adressen, met een waarschuwing als de workers stil lijken te liggen. Mislukte mail stuur je met één klik opnieuw (één voor één of alles samen), een adres blokkeer je met de hand als iemand vraagt om te stoppen, en je deblokkeert het zodra het weer werkt.",
         ),
         "mail-log": (
             "E-maillogboek",

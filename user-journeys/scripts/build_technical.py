@@ -632,7 +632,6 @@ describing what each login can do; the user-journey PDFs are made from it.</li>
 </ul>
 <h2>Known gaps and open points</h2>
 <ul>
-<li>Blocking an address by hand is only in the Django admin; the dashboard's mail log, sending failed mail again and unblocking are built.</li>
 <li>The API covers dojo clients and attendance; external registrations and event management are planned (§13).</li>
 <li>Some privacy retention rules wait for their periods to be decided; their removals are built and stay off until then (§16).</li>
 <li>Production still lacks MySQL client headers and GDAL/GEOS on the host; the deploy script refuses to go live until then.</li>

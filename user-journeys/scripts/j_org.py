@@ -36,7 +36,7 @@ PAGES = [
         "/manage/mail/",
         "queue",
         "Mail queue",
-        "Waiting and failed mail, bounces and blocked addresses, with a warning when the workers seem down. Failed mail is sent again with one click (one by one or all at once), and a blocked address is unblocked once it works again.",
+        "Waiting and failed mail, bounces and blocked addresses, with a warning when the workers seem down. Failed mail is sent again with one click (one by one or all at once), an address is blocked by hand when someone asks us to stop, and unblocked once it works again.",
     ),
     (
         "/manage/mail/log/",

@@ -1,5 +1,5 @@
 {
- "generated_from": "08407d6",
+ "generated_from": "cd75c73",
  "generated_on": "2026-10-06",
  "personas": {
   "parent": {
@@ -270,7 +270,7 @@
     "content/manage.py:sponsor_list": "a02a2e822456e709",
     "events/manage.py:badge_list": "a2880d0097022467",
     "mailing/manage/queue.py:mail_log": "d0519eda277157d9",
-    "mailing/manage/queue.py:mail_queue": "304a3c5934098804",
+    "mailing/manage/queue.py:mail_queue": "4da6c1b73638956b",
     "mailing/manage/templates.py:template_list": "27c417806d2f34f7",
     "pages/audit_views.py:manage_audit_log": "e1099b228f05cf26",
     "privacy/views.py:manage_privacy": "c18f04b7cf09f2f9"
@@ -293,7 +293,6 @@
     "content/templates/content/manage/sponsor_list.html": "0ed1d7e44ed39b48",
     "events/templates/events/manage/badge_list.html": "26af4d55be3218bf",
     "mailing/templates/mailing/manage/mail_log.html": "a5e87806c84ab0cd",
-    "mailing/templates/mailing/manage/mail_queue.html": "fe563343343f6ad7",
     "mailing/templates/mailing/manage/partials/_retry_button.html": "480c97b745436415",
     "mailing/templates/mailing/manage/template_list.html": "f4bd2a9a9c70a1fa",
     "pages/templates/pages/manage_audit_log.html": "d19a6d607bf3dfce",

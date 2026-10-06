@@ -326,7 +326,7 @@ STEPS = {
         ),
         "queue": (
             "File d'attente des e-mails",
-            "E-mails en attente et en échec, retours et adresses bloquées, avec un avertissement quand les workers semblent arrêtés. Les e-mails en échec se renvoient en un clic (un par un ou tous ensemble), et une adresse bloquée se débloque dès qu'elle fonctionne à nouveau.",
+            "E-mails en attente et en échec, retours et adresses bloquées, avec un avertissement quand les workers semblent arrêtés. Les e-mails en échec se renvoient en un clic (un par un ou tous ensemble), une adresse se bloque à la main quand quelqu'un demande d'arrêter, et se débloque dès qu'elle fonctionne à nouveau.",
         ),
         "mail-log": (
             "Journal des e-mails",

@@ -22,8 +22,9 @@ from accounts.organisation import Area, require_area
 
 from .. import queue_status, services
 from ..categories import MailCategory
+from ..forms import BlockAddressForm
 from ..models import BounceRecord, EmailMessage, EmailSuppression
-from ..queue_actions import MailQueueError, retry, retry_failed, unblock
+from ..queue_actions import MailQueueError, block, retry, retry_failed, unblock
 
 # --- the mail queue: what's waiting, what failed, bounces and blocked addresses ---
 
@@ -35,10 +36,15 @@ MAIL_QUEUE_RECENT_DAYS = 30  # how far back failures and bounces are shown
 
 @login_required
 def mail_queue(request):
+    require_area(request, Area.COMMUNICATION)
+    return _queue_page(request)
+
+
+def _queue_page(request, block_form=None):
     """The mail queue at a glance: mail waiting to go out, mail that failed
     (with Send again), bounces and complaints read from the bounce mailbox,
-    and the addresses nothing is sent to any more (with Unblock)."""
-    require_area(request, Area.COMMUNICATION)
+    and the addresses nothing is sent to any more (with Unblock, and a form to
+    block one by hand). With `block_form`, that form shows its errors."""
     now = timezone.now()
     since = now - timedelta(days=MAIL_QUEUE_RECENT_DAYS)
     Status = EmailMessage.Status
@@ -82,6 +88,7 @@ def mail_queue(request):
             "failed": failed.order_by("-created_at")[:MAIL_QUEUE_LIMIT],
             "bounces": recent_bounces[:MAIL_QUEUE_LIMIT],
             "blocked": blocked.order_by("-created_at")[:MAIL_QUEUE_LIMIT],
+            "block_form": block_form or BlockAddressForm(),
         },
     )
 
@@ -225,3 +232,25 @@ def mail_unblock(request, suppression_id):
         % {"email": email},
     )
     return _back(request)
+
+
+@login_required
+@require_POST
+def mail_block(request):
+    """Block an address by hand; the page again with the form's errors otherwise."""
+    require_area(request, Area.COMMUNICATION)
+    form = BlockAddressForm(request.POST)
+    if not form.is_valid():
+        return _queue_page(request, block_form=form)
+    try:
+        suppression, withdrawn = block(form.cleaned_data["email"], form.cleaned_data["note"])
+    except MailQueueError as error:  # blocked by someone else in between
+        form.add_error("email", str(error))
+        return _queue_page(request, block_form=form)
+    text = _("%(email)s is blocked: nothing is sent there any more.") % {"email": suppression.email}
+    if withdrawn:
+        text += " " + ngettext(
+            "%(count)d mail waiting for it was withdrawn.", "%(count)d mails waiting for it were withdrawn.", withdrawn
+        ) % {"count": withdrawn}
+    messages.success(request, text)
+    return redirect("manage_mail_queue")

@@ -1,19 +1,20 @@
 """Fixing the mail queue from the organisation dashboard: sending a failed
-mail again and unblocking an address. The Mail queue and Mail log pages
+mail again, and blocking or unblocking an address. The Mail queue and Mail log pages
 (mailing.manage) only call these; MailQueueError carries a message for the
 person who clicked.
 
 Sending again puts the same row back in the queue, so the row stays the
 record of exactly what was sent: the worker checks the account's consent and
 the address's block again right before it goes out (tasks.send_email_batch),
-as for any mail. Unblocking deletes the EmailSuppression, which the audit log
-records; it never switches the person's mail choices back on (a complaint
-switched those off through mailing.preferences)."""
+as for any mail. Blocking by hand adds an EmailSuppression ("Blocked by hand")
+and withdraws the mail still waiting for that address; unblocking deletes it.
+The audit log records both; neither touches the person's own mail choices (a
+complaint switched those off through mailing.preferences)."""
 
 from django.utils.translation import gettext as _
 
-from .models import EmailMessage
-from .services import is_suppressed_address
+from .models import EmailMessage, EmailSuppression
+from .services import BLOCKED, is_suppressed_address
 
 
 class MailQueueError(Exception):
@@ -62,6 +63,22 @@ def retry_failed(messages):
         else:
             retried += 1
     return retried, skipped
+
+
+def block(email, note=""):
+    """Stop all mail to `email`, whatever the person chose: an EmailSuppression
+    "Blocked by hand", created with save() so the audit log records who. Mail
+    still waiting for the address is withdrawn here (the worker only checks the
+    block again for mail to an account). Returns (the block, how many mails
+    were withdrawn)."""
+    email = email.strip().lower()
+    if is_suppressed_address(email):
+        raise MailQueueError(_("%(email)s is already blocked.") % {"email": email})
+    suppression = EmailSuppression.objects.create(email=email, reason=EmailSuppression.MANUAL, note=note.strip())
+    withdrawn = EmailMessage.objects.filter(recipient__iexact=email, status=EmailMessage.Status.PENDING).update(
+        status=EmailMessage.Status.SUPPRESSED, status_reason=BLOCKED
+    )
+    return suppression, withdrawn
 
 
 def unblock(suppression):

@@ -1148,6 +1148,54 @@ class MailFixingTests(TestCase):
         self.assertEqual(entry.actor, self.admin)
         self.assertFalse(is_subscribed(self.family, MailCategory.NEWSLETTER))
 
+    # --- block by hand ---
+
+    def test_block_stops_mail_to_an_address_withdraws_what_waits_and_is_recorded(self):
+        from auditlog.models import LogEntry
+
+        waiting = self._mail("Waiting", status=EmailMessage.Status.PENDING, recipient="Stop@Example.com")
+        sent = self._mail("Gone already", status=EmailMessage.Status.SENT, recipient="stop@example.com")
+        response = self.client.post(
+            reverse("manage_mail_block"), {"email": " Stop@Example.com ", "note": "The family asked"}, follow=True
+        )
+        self.assertRedirects(response, reverse("manage_mail_queue"))
+        self.assertContains(response, "stop@example.com is blocked")
+        self.assertContains(response, "1 mail waiting for it was withdrawn.")
+        block = EmailSuppression.objects.get()
+        self.assertEqual(
+            (block.email, block.reason, block.note), ("stop@example.com", EmailSuppression.MANUAL, "The family asked")
+        )
+        waiting.refresh_from_db()
+        sent.refresh_from_db()
+        self.assertEqual(waiting.status, EmailMessage.Status.SUPPRESSED)
+        self.assertEqual(sent.status, EmailMessage.Status.SENT)
+        entry = LogEntry.objects.get_for_object(block).get(action=LogEntry.Action.CREATE)
+        self.assertEqual(entry.actor, self.admin)
+
+    def test_a_blocked_address_gets_no_mail_from_send(self):
+        from .services import BLOCKED, suppressed_reason
+
+        self.client.post(reverse("manage_mail_block"), {"email": "fam@example.com"})
+        self.assertEqual(suppressed_reason(self.family, MailCategory.SERVICE, "fam@example.com"), BLOCKED)
+        self.assertIn("fam@example.com is blocked", self._retry(self._mail("Old failure")).content.decode())
+
+    def test_block_refuses_an_address_already_blocked_or_not_an_address(self):
+        EmailSuppression.objects.create(email="x@example.com", reason=EmailSuppression.HARD_BOUNCE)
+        for data, says in (
+            ({"email": "X@example.com"}, "x@example.com is already blocked."),
+            ({"email": "not an address"}, "Enter a valid email address."),
+        ):
+            response = self.client.post(reverse("manage_mail_block"), data)
+            self.assertEqual(response.status_code, 200)
+            self.assertTemplateUsed(response, "mailing/manage/mail_queue.html")
+            self.assertContains(response, says)
+        self.assertEqual(EmailSuppression.objects.count(), 1)
+
+    def test_the_mail_queue_offers_the_block_form(self):
+        response = self.client.get(reverse("manage_mail_queue"))
+        self.assertContains(response, f'action="{reverse("manage_mail_block")}"')
+        self.assertContains(response, 'name="email"')
+
     # --- who may, and how ---
 
     def test_the_actions_are_post_only_and_need_the_communication_area(self):
@@ -1159,6 +1207,7 @@ class MailFixingTests(TestCase):
             reverse("manage_mail_retry", args=[mail.pk]),
             reverse("manage_mail_retry_failed"),
             reverse("manage_mail_unblock", args=[block.pk]),
+            reverse("manage_mail_block"),
         ]
         for url in urls:
             self.assertEqual(self.client.get(url).status_code, 405)

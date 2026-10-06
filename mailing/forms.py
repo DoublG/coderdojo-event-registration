@@ -7,7 +7,7 @@ from dojos.models import Dojo
 
 from .categories import CAN_OPT_OUT, DESCRIPTIONS, MailCategory, categories_for
 from .dojo_families import active_since, dojos_of
-from .models import EmailTemplate
+from .models import EmailSuppression, EmailTemplate
 from .preferences import muted_dojo_ids, preferences_for
 
 
@@ -156,3 +156,21 @@ class NewTemplateForm(forms.Form):
         if EmailTemplate.objects.filter(key=key).exists():
             raise ValidationError(_("A template with this name already exists."))
         return key
+
+
+class BlockAddressForm(forms.Form):
+    """Block an address by hand, on the Mail queue page (mailing.queue_actions.block)."""
+
+    email = forms.EmailField(label=_("Email address"))
+    note = forms.CharField(
+        label=_("Why"),
+        required=False,
+        max_length=255,
+        help_text=_('Only the organisation sees this, e.g. "The family asked us to stop".'),
+    )
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        if EmailSuppression.objects.filter(email=email).exists():
+            raise ValidationError(_("%(email)s is already blocked.") % {"email": email})
+        return email

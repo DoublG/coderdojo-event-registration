@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 04:58+0000\n"
+"POT-Creation-Date: 2026-10-06 05:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -1029,7 +1029,7 @@ msgstr "Dojo"
 #: dojos/templates/dojos/dojo_event_list.html:27
 #: mailing/templates/mailing/manage/mail_log.html:61
 #: mailing/templates/mailing/manage/mail_queue.html:106
-#: mailing/templates/mailing/manage/mail_queue.html:171
+#: mailing/templates/mailing/manage/mail_queue.html:183
 #: privacy/templates/privacy/manage/privacy.html:21
 #: privacy/templates/privacy/manage/privacy.html:61
 msgid "Actions"
@@ -1078,7 +1078,7 @@ msgstr "Toegekend door"
 
 #: accounts/templates/accounts/child_detail.html:131
 #: applications/templates/applications/manage/check_detail.html:66
-#: mailing/templates/mailing/manage/mail_queue.html:169
+#: mailing/templates/mailing/manage/mail_queue.html:181
 msgid "Note"
 msgstr "Opmerking"
 
@@ -1712,7 +1712,7 @@ msgid "Roles"
 msgstr "Rollen"
 
 #: accounts/templates/accounts/manage/people.html:22
-#: mailing/templates/mailing/manage/mail_queue.html:170
+#: mailing/templates/mailing/manage/mail_queue.html:182
 msgid "Since"
 msgstr "Sinds"
 
@@ -4394,11 +4394,11 @@ msgid "The account was switched off."
 msgstr "Het account werd uitgeschakeld."
 
 # | msgid "Enter a valid email address."
-#: campaigns/dojo_views.py:218 mailing/manage/queue.py:100
+#: campaigns/dojo_views.py:218 mailing/manage/queue.py:107
 msgid "The account has no email address."
 msgstr "Het account heeft geen e-mailadres."
 
-#: campaigns/dojo_views.py:219 mailing/manage/queue.py:97
+#: campaigns/dojo_views.py:219 mailing/manage/queue.py:104
 msgid "This kind of mail doesn't go to this kind of account."
 msgstr "Dit soort mail gaat niet naar dit soort account."
 
@@ -4599,11 +4599,11 @@ msgstr "Je account heeft geen e-mailadres om de test naar te sturen."
 msgid "Campaign saved as a draft."
 msgstr "Campagne opgeslagen als ontwerp."
 
-#: campaigns/manage/campaigns.py:92
+#: campaigns/manage/campaigns.py:94
 msgid "Campaign saved."
 msgstr "Campagne opgeslagen."
 
-#: campaigns/manage/campaigns.py:117
+#: campaigns/manage/campaigns.py:119
 msgid "This is a dojo's own mail: only its champion tests and sends it."
 msgstr ""
 "Dit is een eigen mail van een dojo: alleen de champion ervan test en "
@@ -6511,7 +6511,7 @@ msgstr "Gemeente"
 #: dojos/forms.py:101 dojos/forms.py:266
 #: dojos/templates/dojos/dojo_detail.html:235
 #: mailing/templates/mailing/manage/mail_queue.html:135
-#: mailing/templates/mailing/manage/mail_queue.html:167
+#: mailing/templates/mailing/manage/mail_queue.html:179
 msgid "Address"
 msgstr "Adres"
 
@@ -8627,29 +8627,47 @@ msgstr "Wanneer het gebruikt wordt en welke variabelen het krijgt."
 msgid "A template with this name already exists."
 msgstr "Er bestaat al een sjabloon met die naam."
 
-#: mailing/manage/queue.py:96
+#: mailing/forms.py:164
+msgid "Email address"
+msgstr "E-mailadres"
+
+#: mailing/forms.py:166 mailing/templates/mailing/manage/mail_queue.html:104
+#: mailing/templates/mailing/manage/mail_queue.html:180
+msgid "Why"
+msgstr "Waarom"
+
+#: mailing/forms.py:169
+msgid "Only the organisation sees this, e.g. \"The family asked us to stop\"."
+msgstr "Alleen de organisatie ziet dit, bv. \"Het gezin vroeg ons te stoppen\"."
+
+#: mailing/forms.py:175 mailing/queue_actions.py:76
+#, python-format
+msgid "%(email)s is already blocked."
+msgstr "%(email)s is al geblokkeerd."
+
+#: mailing/manage/queue.py:103
 msgid "The account is switched off."
 msgstr "Het account is uitgeschakeld."
 
-#: mailing/manage/queue.py:98
+#: mailing/manage/queue.py:105
 msgid "The person switched off this kind of mail."
 msgstr "De persoon heeft deze soort e-mail uitgezet."
 
-#: mailing/manage/queue.py:99
+#: mailing/manage/queue.py:106
 msgid "The family stopped this dojo's news."
 msgstr "Het gezin heeft het nieuws van deze dojo stopgezet."
 
-#: mailing/manage/queue.py:101
+#: mailing/manage/queue.py:108
 msgid "The address is blocked (a bounce, a spam complaint or by hand)."
 msgstr ""
 "Het adres is geblokkeerd (teruggekomen e-mail, een spamklacht of met de "
 "hand)."
 
-#: mailing/manage/queue.py:103
+#: mailing/manage/queue.py:110
 msgid "The campaign was cancelled before it went out."
 msgstr "De campagne werd stopgezet voor ze vertrok."
 
-#: mailing/manage/queue.py:180
+#: mailing/manage/queue.py:187
 #, python-format
 msgid ""
 "The mail to %(email)s is back in the queue and goes out within a minute or "
@@ -8658,14 +8676,14 @@ msgstr ""
 "De e-mail aan %(email)s staat weer in de wachtrij en vertrekt binnen een "
 "minuutje."
 
-#: mailing/manage/queue.py:199
+#: mailing/manage/queue.py:206
 #, python-format
 msgid "%(count)d mail is back in the queue."
 msgid_plural "%(count)d mails are back in the queue."
 msgstr[0] "%(count)d e-mail staat weer in de wachtrij."
 msgstr[1] "%(count)d e-mails staan weer in de wachtrij."
 
-#: mailing/manage/queue.py:206
+#: mailing/manage/queue.py:213
 #, python-format
 msgid ""
 "%(count)d mail wasn't sent again: its address is blocked, or its content was "
@@ -8680,11 +8698,11 @@ msgstr[1] ""
 "%(count)d e-mails zijn niet opnieuw verstuurd: hun adres is geblokkeerd, of "
 "hun inhoud is gewist."
 
-#: mailing/manage/queue.py:213
+#: mailing/manage/queue.py:220
 msgid "There's no failed mail to send again."
 msgstr "Er is geen mislukte e-mail om opnieuw te sturen."
 
-#: mailing/manage/queue.py:224
+#: mailing/manage/queue.py:231
 #, python-format
 msgid ""
 "%(email)s is unblocked: mail goes there again. The person's own mail choices "
@@ -8692,6 +8710,18 @@ msgid ""
 msgstr ""
 "%(email)s is gedeblokkeerd: er gaat weer e-mail naartoe. De eigen e-"
 "mailkeuzes van die persoon zijn niet veranderd."
+
+#: mailing/manage/queue.py:250
+#, python-format
+msgid "%(email)s is blocked: nothing is sent there any more."
+msgstr "%(email)s is geblokkeerd: er wordt niets meer naartoe gestuurd."
+
+#: mailing/manage/queue.py:253
+#, python-format
+msgid "%(count)d mail waiting for it was withdrawn."
+msgid_plural "%(count)d mails waiting for it were withdrawn."
+msgstr[0] "%(count)d e-mail die ervoor wachtte, is ingetrokken."
+msgstr[1] "%(count)d e-mails die ervoor wachtten, zijn ingetrokken."
 
 #: mailing/manage/templates.py:69
 msgid ""
@@ -8786,18 +8816,18 @@ msgstr "Harde bounce (5.x.x)"
 msgid "Soft bounce (4.x.x)"
 msgstr "Zachte bounce (4.x.x)"
 
-#: mailing/queue_actions.py:26 mailing/queue_actions.py:50
+#: mailing/queue_actions.py:27 mailing/queue_actions.py:51
 msgid "Only a mail that failed can be sent again."
 msgstr "Alleen een mislukte e-mail kan opnieuw verstuurd worden."
 
-#: mailing/queue_actions.py:29
+#: mailing/queue_actions.py:30
 msgid ""
 "This mail's content was cleared after a year, so it can't be sent again."
 msgstr ""
 "De inhoud van deze e-mail is na een jaar gewist, dus ze kan niet opnieuw "
 "verstuurd worden."
 
-#: mailing/queue_actions.py:31
+#: mailing/queue_actions.py:32
 #, python-format
 msgid ""
 "%(email)s is blocked. Unblock the address first if the mail should go there."
@@ -9002,7 +9032,7 @@ msgstr "Er wacht niets: alle e-mail is vertrokken."
 #: mailing/templates/mailing/manage/mail_queue.html:82
 #: mailing/templates/mailing/manage/mail_queue.html:124
 #: mailing/templates/mailing/manage/mail_queue.html:157
-#: mailing/templates/mailing/manage/mail_queue.html:196
+#: mailing/templates/mailing/manage/mail_queue.html:208
 #, python-format
 msgid "Showing the first %(limit)s."
 msgstr "De eerste %(limit)s worden getoond."
@@ -9029,11 +9059,6 @@ msgstr ""
 "(de mailserver werkt weer, een tikfout in een adres is verbeterd), stuur ze "
 "dan opnieuw: ze gaat terug in de wachtrij, en de e-mailkeuzes en "
 "blokkeringen van de persoon worden opnieuw nagekeken voor ze vertrekt."
-
-#: mailing/templates/mailing/manage/mail_queue.html:104
-#: mailing/templates/mailing/manage/mail_queue.html:168
-msgid "Why"
-msgstr "Waarom"
 
 #: mailing/templates/mailing/manage/mail_queue.html:119
 msgid "No failed mail."
@@ -9084,22 +9109,36 @@ msgstr ""
 "orde gebracht, of een tikfout is verbeterd); hun eigen e-mailkeuzes blijven "
 "zoals ze zijn."
 
-#: mailing/templates/mailing/manage/mail_queue.html:182
+#: mailing/templates/mailing/manage/mail_queue.html:165
+msgid "Block an address"
+msgstr "Een adres blokkeren"
+
+#: mailing/templates/mailing/manage/mail_queue.html:166
+msgid ""
+"For when someone asks us to stop all mail, or an address must not be mailed. "
+"Mail still waiting for it is withdrawn."
+msgstr "Voor als iemand vraagt om geen e-mail meer te sturen, of als een adres geen e-mail mag krijgen. E-mail die nog wacht voor dat adres wordt ingetrokken."
+
+#: mailing/templates/mailing/manage/mail_queue.html:172
+msgid "Block"
+msgstr "Blokkeren"
+
+#: mailing/templates/mailing/manage/mail_queue.html:194
 msgid "This person marked our mail as spam. Unblock only if they asked for it."
 msgstr ""
 "Deze persoon heeft onze e-mail als spam gemeld. Deblokkeer alleen als die "
 "persoon erom vroeg."
 
-#: mailing/templates/mailing/manage/mail_queue.html:182
+#: mailing/templates/mailing/manage/mail_queue.html:194
 #, python-format
 msgid "Unblock %(email)s?"
 msgstr "%(email)s deblokkeren?"
 
-#: mailing/templates/mailing/manage/mail_queue.html:186
+#: mailing/templates/mailing/manage/mail_queue.html:198
 msgid "Unblock"
 msgstr "Deblokkeren"
 
-#: mailing/templates/mailing/manage/mail_queue.html:191
+#: mailing/templates/mailing/manage/mail_queue.html:203
 msgid "No blocked addresses."
 msgstr "Geen geblokkeerde adressen."
 

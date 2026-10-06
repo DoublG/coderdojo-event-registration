@@ -7,6 +7,7 @@ from .queue import (  # noqa: F401
     MAIL_LOG_PAGE_SIZE,
     MAIL_QUEUE_LIMIT,
     MAIL_QUEUE_RECENT_DAYS,
+    mail_block,
     mail_log,
     mail_queue,
     mail_retry,

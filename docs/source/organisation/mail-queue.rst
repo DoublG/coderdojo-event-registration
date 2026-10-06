@@ -53,6 +53,17 @@ A mail can't be sent again when its address is blocked (unblock it first),
 or when it's more than a year old: by then its address, subject and text
 have been cleared.
 
+Blocking an address
+-------------------
+
+When someone asks us to stop sending them anything at all, or an address
+must not be mailed, fill in **Block an address** under **Blocked
+addresses**: the address, and why (only the organisation sees the note).
+From then on nothing is sent there, whatever the person chose on their
+**Mail preferences** page, and mail still waiting to go to that address is
+withdrawn. Who blocked an address is recorded in the audit log. To let mail
+go there again, unblock it (below).
+
 Unblocking an address
 ---------------------
 
