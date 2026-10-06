@@ -117,7 +117,8 @@
       "Bash(google-chrome --headless --disable-gpu --no-sandbox --window-size=1100,900 --screenshot=/tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/switcher_shot.png file:///tmp/claude-1000/-home-erik-coderdojo-event-registration/d9f04db2-2cbe-4e47-aed4-3578cb1bfed5/scratchpad/switcher_dashboard_open.html)",
       "Bash(redis-cli -h 127.0.0.1 -p 6379 ping)",
       "Bash(curl -s -o /dev/null -w \"home status: %{http_code}\\\\n\" http://127.0.0.1:8765/)",
-      "Bash(curl -sk -o /dev/null -w \"https proxy home status: %{http_code}\\\\n\" https://coolregistration.localhost/)"
+      "Bash(curl -sk -o /dev/null -w \"https proxy home status: %{http_code}\\\\n\" https://coolregistration.localhost/)",
+      "ClaudeInChromeDomain(coolregistration.localhost)"
     ],
     "additionalDirectories": [
       "/home/erik/coderdojo-event-registration/.devcontainer/certs/pki",

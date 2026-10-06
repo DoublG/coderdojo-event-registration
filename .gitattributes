@@ -1,0 +1,25 @@
+# Line endings: the repo stores LF and every checkout gets LF, whatever the
+# platform's core.autocrlf says. The working tree is bind-mounted into the
+# Linux devcontainer, where a CRLF shell script fails ("bash\r: not found")
+# and CRLF templates, .po files and SQL scripts give noisy diffs.
+* text=auto eol=lf
+
+# Windows batch files want CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files: never converted, never diffed as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.mo binary
+*.zip binary
+*.gz binary
