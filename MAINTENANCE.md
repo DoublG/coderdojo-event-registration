@@ -24,8 +24,9 @@ Review this page every quarter (see [Calendar](#calendar)) and whenever a versio
 | Operating system | Ubuntu 22.04.5 LTS | Apr 2022 | ended Sep 2024 | **1 Jun 2027** (Ubuntu Pro/ESM to Apr 2032) | Plan the move to 24.04 LTS (to May 2029) or 26.04 LTS (to May 2031) with Level27 **before June 2027**. |
 | Python | 3.14.7 (pyenv `py10102-3.14.7`) | 7 Oct 2025 | 1 Oct 2027 | **31 Oct 2030** | Current. Take each 3.14.x patch release. |
 | Django | 6.1.1 | 5 Aug 2026 | 30 Apr 2027 | **31 Dec 2027** | Upgrade to **6.2 LTS** (Apr 2027, security to Apr 2030) between May and Dec 2027. |
-| MySQL client | 8.0.46 | Apr 2018 (8.0) | ended Apr 2025 | **ended 30 Apr 2026** | **EOL.** The database *server* version is still to confirm (see [below](#still-to-confirm)); move to **8.4 LTS** (security to Apr 2032) or 9.7 LTS (to Apr 2034). |
-| Redis (Celery broker, cache, Channels) | to confirm | | | | See [below](#still-to-confirm). |
+| MySQL server | 8.4.11 | Apr 2024 (8.4 LTS) | Apr 2029 | **30 Apr 2032** | Current LTS, the same as development and the CI (checked 6 Oct 2026 from the server's connection greeting, no login needed). |
+| MySQL client library | 8.0.46 (`libmysqlclient.so.21`, Ubuntu 22.04's package) | Apr 2018 (8.0) | ended Apr 2025 | **ended 30 Apr 2026** upstream | What `mysqlclient` links against; it talks to the 8.4 server fine. Its development headers are missing, so `mysqlclient` can't be built (see [Missing on the server](#missing-on-the-server)). Moves with the operating system's upgrade. |
+| Redis (Celery broker, cache, Channels) | not running | | | | The `.env`'s `REDIS_HOST` refuses connections on 6379 (6 Oct 2026): see [Missing on the server](#missing-on-the-server). |
 | gunicorn / uvicorn | 26.2.0 / 0.53.0 | | | | No fixed support windows: stay on the latest release. |
 
 ### Development (the devcontainer)
@@ -33,7 +34,7 @@ Review this page every quarter (see [Calendar](#calendar)) and whenever a versio
 | Component | Version | Security until | Status and action |
 |---|---|---|---|
 | Workspace image | `python:3.14-trixie` (Debian 13), Python 3.14.7 | Debian 13: to **Jun 2030** (LTS) | Current. Rebuild the image for new Python patch releases. |
-| MySQL | `mysql:8.4` (8.4.11), on volume `db-data-8.4` | 8.4 LTS: **30 Apr 2032** | Current; the version production should move to. The same image as the CI. |
+| MySQL | `mysql:8.4` (8.4.11), on volume `db-data-8.4` | 8.4 LTS: **30 Apr 2032** | Current; production runs the same (8.4.11, confirmed 6 Oct 2026). The same image as the CI. |
 | Redis | `redis:7.2` (7.2.16) | 7.2: 1 Dec 2029 | Current. Match production's version once it's confirmed (see [below](#still-to-confirm)). The same image as the CI. |
 | nginx | `nginx:1.30-alpine` (1.30.5) | 1.30 stable: until the next stable (about April 2027) | Current. Move to the next stable when it's out. Development only. |
 | Mailpit, phpMyAdmin, 2FAuth | `latest` | | Development only; fine on `latest`. |
@@ -70,12 +71,32 @@ calendar: stay on the latest release. Watch these:
 | unittest-xml-reporting, lxml | 4.0.0, 6.1.3 | Development only (`requirements-dev.txt`): the test results as JUnit XML for the Tests workflow's summary. `pip-audit`: no known vulnerabilities (1 Oct 2026). |
 | locust, matplotlib | 2.46.6, 3.11.2 | The load test and its charts ([`loadtest/requirements.txt`](loadtest/requirements.txt), [`CAPACITY.md`](CAPACITY.md)), in a venv of their own: never in the image or on production. `pip-audit -r loadtest/requirements.txt`: no known vulnerabilities (30 Sep 2026). |
 
+### Missing on the server
+
+Found on 6 Oct 2026 with a read-only check over SSH (`scripts/deploy.sh --check` and an inventory); asked of
+Level27, since the account has no root. Until 1–4 are done, a deploy stops before touching the live site.
+
+1. **The MySQL client development headers** (`libmysqlclient-dev`, with its `pkg-config` entry): `mysqlclient`
+   is compiled when it's installed. The runtime library is there.
+2. **GDAL, GEOS and PROJ** (the shared libraries: `libgdal30`, `libgeos-c1v5`, `libproj22`, or `gdal-bin`):
+   `django.contrib.gis` loads them; no headers needed.
+3. **A running Redis** for the account, with `maxmemory` 128 MB and `maxmemory-policy volatile-lru`
+   ([`CAPACITY.md`](CAPACITY.md), finding 6).
+4. **systemd lingering** for `py10102` (`loginctl enable-linger py10102`), so the two Celery workers keep running.
+5. **gunicorn started in `~/app`** (or with `-c ~/app/gunicorn.conf.py`): today it doesn't read our
+   `gunicorn.conf.py`, so the per-worker request cap is off.
+6. **The proxy's request body limit at 12 MB** ([`CAPACITY.md`](CAPACITY.md)).
+7. **Ours:** the server's `.env` lacks `SITE_URL`, the `MAILING_BOUNCE_*` settings, `SECURE_SSL_REDIRECT`,
+   `SECURE_HSTS_SECONDS`, `SECURE_HSTS_INCLUDE_SUBDOMAINS` and `METRICS_TOKEN` (`.env.example` explains each);
+   a local `.env.production` is uploaded by the next deploy.
+
+Present: Ubuntu 22.04.5, Python 3.14.7, `gcc`/`make`/`pkg-config`, MySQL 8.4.11, 64 GB of memory and 12 cores
+(shared), 136 GB free disk.
+
 ### Still to confirm
 
-- **The production database server's version.** The server only shows the MySQL 8.0 *client*. Ask
-  Level27, or run on the server: `mysql -h <DB_HOST> -u <DB_USER> -p -N -e 'SELECT VERSION()'`. If it's 8.0,
-  it is past end of life: ask Level27 for 8.4 LTS.
-- **The production Redis version:** `redis-cli -h <REDIS_HOST> INFO server | grep redis_version`.
+- ~~The production database server's version~~ **Confirmed 6 Oct 2026: MySQL 8.4.11** (8.4 LTS).
+- **The production Redis version**, once it runs: `redis-cli -h <REDIS_HOST> INFO server | grep redis_version`.
 - **Who patches what on the server.** On Level27's managed hosting the operating system, MySQL and Redis are
   expected to be theirs to patch, and Python (pyenv) and the Python packages ours. Confirm this with
   Level27 and note it here.
@@ -275,5 +296,5 @@ A deeper review, by a person with Claude Code's help:
 | 30 Sep 2026 | **oauthlib 3.3.1**, CVE-2026-49265 / GHSA-xpv3-w29h-x7cv (since 1 Oct also PYSEC-2026-4114, which `pip-audit` reports; the workflow's `--ignore-vuln CVE-2026-49265` matches it): timing side channel in PKCE (authorization-code flow). Fixed in 4.0.0. | **Not reachable here:** our API offers only the client-credentials grant (`api/services.py`), which doesn't use PKCE. Low. django-oauth-toolkit 3.4.1 requires `oauthlib>=3.3.0` and doesn't list 4.0 yet. | Open: try oauthlib 4.0.0 with the API tests in the devcontainer; upgrade when django-oauth-toolkit supports it. |
 | 30 Sep 2026 | **Markdown links** (`core/templatetags/markdown_extras.py`, `markdownify`): the text is HTML-escaped, but Python-Markdown keeps any link scheme, so `[x](javascript:...)` in a dojo's or event's description becomes a working `javascript:` link on the public page. Found by the Code audit workflow's security rules (S308). | **High** (stored cross-site scripting): any active champion or mentor can put it on a public page, and a logged-in visitor who clicks it runs the script as themselves. No Content-Security-Policy limits it. | **Fixed 30 Sep 2026:** `markdownify` now cleans its HTML with nh3 against an allowlist (headings from `<h2>`, paragraphs, bold, italic, lists, links; links only `http`, `https`, `mailto` or relative, with `rel="nofollow noopener noreferrer"`). Images, code and anything else are dropped. Tests: `core.tests.MarkdownifyTests`. |
 | 30 Sep 2026 | **`check --deploy` warnings**: no HSTS, no HTTPS redirect, session and CSRF cookies not `Secure`; django-oauth-toolkit's RFC 9700 defaults (implicit and password grants, tokens in the query string, tokens stored in plain text). Also no Content-Security-Policy or Permissions-Policy. | Medium: TLS ends at Level27's proxy, so the cookies' `Secure` flag and HSTS are cheap to add; the OAuth grants we don't offer weren't reachable, tokens stored in plain text were. A CSP limits what any future cross-site scripting bug can do. | **Fixed in the code 30 Sep 2026** (CLAUDE.md, "Security headers"): `Secure` cookies, the proxy header, all RFC 9700 options (tokens now stored hashed), a strict script CSP with nonces (inline handlers moved to `bundle.js`, htmx without eval), Permissions-Policy. Tested with `core.tests.SecurityHeadersTests`, the API tests and a browser crawl of about 480 pages as six roles. **Open on production:** confirm Level27's proxy sets `X-Forwarded-Proto` itself, then set `SECURE_SSL_REDIRECT=true` and raise `SECURE_HSTS_SECONDS` (1 hour, 1 day, 1 year) in `~/app/.env`; `deploy.sh` reports what's still missing. |
-| 30 Sep 2026 | **MySQL 8.0** (the production client, possibly the server) reached end of life on 30 Apr 2026: no more security fixes. | Depends on the server version (to confirm). | Open: confirm with Level27, move to 8.4 LTS. |
+| 30 Sep 2026 | **MySQL 8.0** (the production client, possibly the server) reached end of life on 30 Apr 2026: no more security fixes. | **The server is 8.4.11** (confirmed 6 Oct 2026); only the client library, Ubuntu 22.04's package, is 8.0. | Server closed. The client library moves with the OS upgrade (before Jun 2027). |
 | 30 Sep 2026 | **Devcontainer images** past end of life: MySQL 9.1 (`latest` gone stale), nginx 1.27; the workspace on Debian 12. | Development only, not reachable from outside. | **Fixed 30 Sep 2026:** pinned `mysql:8.4`, `redis:7.2`, `nginx:1.30-alpine`, workspace on `python:3.14-trixie`. The dev data was carried from 9.1 to 8.4 with a dump; the old `db-data` volume is left as a fallback. |
