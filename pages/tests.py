@@ -147,6 +147,11 @@ class ProxyErrorPageTests(TestCase):
             block = self.conf.split(location, 1)[1].split("}", 1)[0]
             self.assertNotIn("proxy_intercept_errors", block)
 
+    def test_every_deploy_puts_it_where_production_apache_serves_it(self):
+        deploy = (settings.BASE_DIR / "scripts" / "deploy.sh").read_text()
+        self.assertIn('.devcontainer/nginx/errors/busy.html "$REMOTE:deploy/busy.html"', deploy)
+        self.assertIn('install -m 644 "\\$HOME/deploy/busy.html" "\\$HOME/errors/busy.html"', deploy)
+
 
 class DevMonitoringTests(SimpleTestCase):
     """Prometheus and Grafana in the devcontainer (the `monitoring` profile):

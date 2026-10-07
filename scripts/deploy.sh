@@ -16,6 +16,9 @@
 #      Puts the help centre (docs/, built here in en/fr/nl) in ~/docs, which
 #      Apache serves at /docs/ (a RewriteRule in the panel's extra Apache
 #      configuration); a build that fails leaves the server's copy as it is.
+#      Puts the page Apache shows when the site can't answer (502/503/504,
+#      .devcontainer/nginx/errors/busy.html, the devcontainer nginx's own) in
+#      ~/errors, which the panel's Apache configuration serves at /_errors/.
 #      Gives Apache (www-data) passage through the home directory (o+x, no
 #      listing): it serves /static/, /media/ and /docs/ from disk there, and
 #      Level27 resets the home to 750 whenever it applies the panel's Apache
@@ -263,6 +266,12 @@ if [ "\$MODE" = check ]; then
         *x) echo "home: \$(stat -c %A "\$HOME"), Apache can reach /static/, /media/ and /docs/" ;;
         *) echo "home: \$(stat -c %A "\$HOME"), Apache CAN'T reach /static/, /media/ or /docs/ (403) until the next deploy (or: chmod o+x ~)" ;;
     esac
+    step "Busy page"
+    if [ -f "\$HOME/errors/busy.html" ]; then
+        echo "~/errors/busy.html: from \$(date -r "\$HOME/errors/busy.html" '+%F %R')"
+    else
+        echo "~/errors/busy.html: none yet, Apache shows its own 503 page (the next deploy puts it there)"
+    fi
     step "Help centre"
     if [ -f "\$HOME/docs/index.html" ]; then
         echo "~/docs: \$(find "\$HOME/docs" -name '*.html' | wc -l) pages, from \$(date -r "\$HOME/docs/index.html" '+%F %R')"
@@ -332,6 +341,13 @@ fi
 # (background-check documents) is closed to others first.
 chmod -R o-rwx "\$APP/private_media" 2>/dev/null || true
 chmod o+x "\$HOME"
+if [ -f "\$HOME/deploy/busy.html" ]; then
+    mkdir -p "\$HOME/errors"
+    install -m 644 "\$HOME/deploy/busy.html" "\$HOME/errors/busy.html"
+    chmod 755 "\$HOME/errors"
+    rm -f "\$HOME/deploy/busy.html"
+    echo "busy page: ~/errors/busy.html"
+fi
 if [ -f "\$HOME/deploy/incoming-docs.tar.gz" ]; then
     # Unpacked next to it, then swapped in: Apache never serves half a help centre.
     rm -rf "\$HOME/deploy/docs-new" "\$HOME/deploy/docs-old"
@@ -427,6 +443,8 @@ scp -q -o BatchMode=yes "$BUNDLE" "$REMOTE:deploy/incoming.tar.gz"
 if [ -f "$ENV_FILE" ]; then
     scp -q -o BatchMode=yes "$ENV_FILE" "$REMOTE:deploy/incoming.env"
 fi
+# The page Apache shows when the site can't answer (.devcontainer/ isn't bundled).
+scp -q -o BatchMode=yes .devcontainer/nginx/errors/busy.html "$REMOTE:deploy/busy.html"
 if [ -n "$DOCS_BUNDLE" ]; then
     scp -q -o BatchMode=yes "$DOCS_BUNDLE" "$REMOTE:deploy/incoming-docs.tar.gz"
 fi
