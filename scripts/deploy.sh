@@ -66,7 +66,7 @@ REMOTE_SOCKET="/var/run/socket/py10102.socket"
 LEGACY_UNITS="coolregistration-celery-periodic coolregistration-celery-mailing"
 
 # Never shipped: dev tooling and local-only material.
-EXCLUDES_RE='^(\.devcontainer/|\.claude/|\.vscode/|\.github/|docs/|scripts/|user-journeys/|loadtest/|quality/|AGENTS\.md$|CLAUDE\.md$|DATA_MODEL\.md$|CAPACITY\.md$|CODING_STANDARDS\.md$|MEMORY_PROFILE\.md$|requirements-dev\.txt$|pyproject\.toml$|\.env\.example$)'
+EXCLUDES_RE='^(\.devcontainer/|\.claude/|\.vscode/|\.github/|docs/|scripts/|user-journeys/|loadtest/|quality/|AGENTS\.md$|CLAUDE\.md$|DATA_MODEL(_[A-Z]+)?\.md$|CAPACITY\.md$|CODING_STANDARDS\.md$|MEMORY_PROFILE\.md$|requirements-dev\.txt$|pyproject\.toml$|\.env\.example$)'
 
 MODE="deploy"
 ASSUME_YES=0

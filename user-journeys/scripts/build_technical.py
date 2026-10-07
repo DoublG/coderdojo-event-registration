@@ -1,6 +1,7 @@
-"""The technical foundation and data model PDF, built from DATA_MODEL.md and CLAUDE.md.
+"""The technical foundation and data model PDF, built from DATA_MODEL.md (plus the
+topic files it splits its largest sections into) and CLAUDE.md.
 
-The diagrams are taken from DATA_MODEL.md as they are (found by a marker text in each
+The diagrams are taken from those files as they are (found by a marker text in each
 block), so the PDF follows the model when it changes; the prose here summarises both
 files. Run from anywhere: python build_technical.py
 """
@@ -20,16 +21,29 @@ OUT = os.path.join(ROOT, "technical-foundation-and-data-model.pdf")
 MERMAID = os.path.join(ROOT, ".shots", "mermaid-11.4.1.min.js")
 MERMAID_URL = "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"
 
-BLOCKS = re.findall(r"```mermaid\n(.*?)```", open(os.path.join(REPO, "DATA_MODEL.md")).read(), re.S)
+# DATA_MODEL.md splits its largest sections into sibling topic files
+# (DATA_MODEL.md's own intro lists them); their diagrams count too.
+DATA_MODEL_FILES = [
+    "DATA_MODEL.md",
+    "DATA_MODEL_REDESIGN.md",
+    "DATA_MODEL_MAILING.md",
+    "DATA_MODEL_API.md",
+    "DATA_MODEL_PRIVACY.md",
+]
+BLOCKS = [
+    block
+    for filename in DATA_MODEL_FILES
+    for block in re.findall(r"```mermaid\n(.*?)```", open(os.path.join(REPO, filename)).read(), re.S)
+]
 
 
 def mm(marker, caption=""):
-    """The first DATA_MODEL.md diagram containing `marker`."""
+    """The first diagram containing `marker`, across DATA_MODEL.md and its topic files."""
     for b in BLOCKS:
         if marker in b:
             cap = f"<figcaption>{caption}</figcaption>" if caption else ""
             return f"<figure><pre class='mermaid'>{html.escape(b)}</pre>{cap}</figure>"
-    raise LookupError(f"No diagram with {marker!r} in DATA_MODEL.md")
+    raise LookupError(f"No diagram with {marker!r} in DATA_MODEL.md or its topic files")
 
 
 CHARTS = os.path.join(REPO, "loadtest", "charts")
