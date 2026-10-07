@@ -3,12 +3,12 @@
   "createdOnFiles": { "v": 1, "at": "2026-09-29T22:55:00Z" },
   "title": "CoderDojo België platform pitch (NL)",
   "cover": "cover",
-  "order": ["cover", "why", "who", "journeys", "parent-find", "parent-manage", "ninja", "volunteer", "on-the-day", "champion", "reviewer", "organisation", "trust", "built", "figures", "timeline", "approach", "demo", "next", "testers"],
+  "order": ["cover", "why", "who", "journeys", "parent-find", "parent-manage", "ninja", "volunteer", "on-the-day", "champion", "reviewer", "organisation", "trust", "built", "figures", "timeline", "approach", "demo", "testers"],
   "sections": {
     "s1": { "description": "Wat het platform is en voor wie", "start": "cover" },
     "s2": { "description": "De gebruikersreizen, persona per persona", "start": "journeys" },
     "s3": { "description": "Hoe het gebouwd is: feiten, cijfers en aanpak", "start": "built" },
-    "s4": { "description": "Wat er nodig is om live te gaan", "start": "next" }
+    "s4": { "description": "Doe mee: testen en de code", "start": "testers" }
   },
   "faces": {
     "fredoka": { "family": "Fredoka", "href": "https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&display=swap" },
