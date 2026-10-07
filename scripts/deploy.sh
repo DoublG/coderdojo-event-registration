@@ -16,6 +16,10 @@
 #      Puts the help centre (docs/, built here in en/fr/nl) in ~/docs, which
 #      Apache serves at /docs/ (a RewriteRule in the panel's extra Apache
 #      configuration); a build that fails leaves the server's copy as it is.
+#      Gives Apache (www-data) passage through the home directory (o+x, no
+#      listing): it serves /static/, /media/ and /docs/ from disk there, and
+#      Level27 resets the home to 750 whenever it applies the panel's Apache
+#      configuration. private_media/ stays closed to others (o-rwx).
 #   5. Puts the new code live and does a smoke-test request over the app's
 #      unix socket. Level27 runs the app as the systemd service py10102.service
 #      with either gunicorn (HUP to its master: a graceful reload) or daphne
@@ -254,6 +258,11 @@ if [ "\$MODE" = check ]; then
     fi
     step "App server"
     app_server
+    step "Apache's access to the files"
+    case "\$(stat -c %A "\$HOME")" in
+        *x) echo "home: \$(stat -c %A "\$HOME"), Apache can reach /static/, /media/ and /docs/" ;;
+        *) echo "home: \$(stat -c %A "\$HOME"), Apache CAN'T reach /static/, /media/ or /docs/ (403) until the next deploy (or: chmod o+x ~)" ;;
+    esac
     step "Help centre"
     if [ -f "\$HOME/docs/index.html" ]; then
         echo "~/docs: \$(find "\$HOME/docs" -name '*.html' | wc -l) pages, from \$(date -r "\$HOME/docs/index.html" '+%F %R')"
@@ -317,6 +326,12 @@ if "\$PY" manage.py shell -c "from django.conf import settings; import sys; sys.
 else
     echo "collectstatic: skipped (STATIC_ROOT not set)"
 fi
+# Apache serves /static/, /media/ and /docs/ from disk, so www-data needs
+# passage (o+x, not listing) through the home directory, which Level27 resets
+# to 750 when it applies the panel's Apache configuration. private_media/
+# (background-check documents) is closed to others first.
+chmod -R o-rwx "\$APP/private_media" 2>/dev/null || true
+chmod o+x "\$HOME"
 if [ -f "\$HOME/deploy/incoming-docs.tar.gz" ]; then
     # Unpacked next to it, then swapped in: Apache never serves half a help centre.
     rm -rf "\$HOME/deploy/docs-new" "\$HOME/deploy/docs-old"
