@@ -36,7 +36,7 @@ classDiagram
         +role  champion | mentor | youth_mentor (unchanged, structural)
         +custom_role  which DojoRole a mentor-role membership follows
     }
-    Dojo "1" --> "*" DojoRole : roles (local ones; global ones have dojo=null)
+    Dojo "1" --> "*" DojoRole : roles (local ones; global ones have no dojo)
     DojoMembership "*" --> "0..1" DojoRole : custom_role
 
     class OrganisationRoleDefinition {
