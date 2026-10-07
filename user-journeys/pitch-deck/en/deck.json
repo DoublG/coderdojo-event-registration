@@ -3,7 +3,7 @@
   "createdOnFiles": { "v": 1, "at": "2026-09-29T22:45:00Z" },
   "title": "CoderDojo Belgium platform pitch (EN)",
   "cover": "cover",
-  "order": ["cover", "why", "who", "journeys", "parent-find", "parent-manage", "ninja", "volunteer", "on-the-day", "champion", "reviewer", "organisation", "trust", "built", "figures", "timeline", "approach", "next"],
+  "order": ["cover", "why", "who", "journeys", "parent-find", "parent-manage", "ninja", "volunteer", "on-the-day", "champion", "reviewer", "organisation", "trust", "built", "figures", "timeline", "approach", "demo", "next"],
   "sections": {
     "s1": { "description": "What the platform is and who it serves", "start": "cover" },
     "s2": { "description": "The user journeys, persona by persona", "start": "journeys" },
