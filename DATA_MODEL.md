@@ -5239,3 +5239,209 @@ erDiagram
 - **The capacity model** (`monitoring/capacity.py`) is code, not data: the
   scenarios, the rows each growing table gains per year, and the measured
   bytes per row in `monitoring/row_sizes.json`.
+
+## 27. Multiple guardians per child, with configurable per-guardian access (not built — written up for stakeholder review before implementation)
+
+**Not built.** `Guardianship` already supports more than one guardian per
+child structurally — `Ninja.objects.of_guardian()`, the data export
+(`privacy.export.children_of`), erasure (`privacy.deletion.preview`: "a
+child erased with the account only if this account is their guardian,
+else kept with their other guardian") and the mail fan-out
+(`mailing.automated.family_of`) are all written against "every guardian of
+this child," not a single FK. What's missing is the self-service way to
+*add* a second one: today a `Guardianship` row is only ever created by the
+account creating its own child (`register_guardian`, `add_ninja`) — nobody
+can link another account in.
+
+Two real-world cases drive this, with different trust levels:
+
+1. **Divorced or separated co-parents** — both should get full, symmetric
+   access to the same child.
+2. **A trusted adult who isn't a parent** ("responsible for also
+   registering other kids of other families") — should be able to sign
+   the child up and see their schedule, without necessarily getting full
+   control of the child's health notes or own login.
+
+Two phases: phase 1 ships the missing invitation mechanism with two fixed
+access levels (reusing `Guardianship.relation`, which exists today but
+isn't read by anything); phase 2 replaces the fixed levels with real
+per-guardian configurable capabilities, so the first guardian can tailor
+exactly what a specific co-guardian may do, rather than picking from two
+presets.
+
+### Decisions
+
+1. **Invite by email, modelled on `accounts.invitations`
+   (`OrganisationInvitation`), not a new pattern (decided).** A new model
+   `accounts.GuardianInvitation` (`ninja`, `invited_by`, `email`,
+   `relation`, `token_hash`, `language`, `created_at`/`expires_at`/
+   `accepted_at`/`accepted_by`/`withdrawn_at`) and a service module
+   `accounts/guardian_invitations.py` (`invite`, `accept`, `withdraw`,
+   `resend`; `GuardianInvitationError` carries the user-facing message,
+   same shape as `TeamError`/`OnboardingError`). Works whether or not the
+   invited address already has an account — same "every account is
+   created by its own holder" principle as the organisation invite: the
+   link only grants anything once an account with that exact address
+   accepts it, so a forwarded link grants nothing. Throttled per inviter
+   like `accounts.invitations._throttle`.
+2. **Every existing guardian is notified on *send*, not only on accept
+   (decided).** The important difference from the organisation-invite
+   pattern: in a co-parenting conflict, the other parent needs to know
+   someone is being added *before* it happens, not find out afterwards.
+   `invite()` notifies every current guardian of the child
+   (`notifications.services.notify` + mail); `accept()` notifies them
+   again, including the inviter.
+3. **The invitee chooses a consent answer at accept time, same as Add a
+   Child (decided).** Each `Guardianship` row keeps its own independent
+   `consent_given_at` (already the case today) — a new guardian's mail
+   consent for this child is theirs to give, never inherited or set by
+   whoever invited them.
+4. **Phase 1 ships with two fixed, hardcoded access levels keyed off
+   `relation` (decided for phase 1, superseded by phase 2):**
+   `PARENT`/`LEGAL_GUARDIAN` get exactly what every guardian gets today
+   (full access — edit the child's details and health notes, manage the
+   child's own login, sign up and cancel, invite and remove other
+   guardians); `OTHER` gets sign-up/cancel and read-only view of the
+   child's page only — no health notes, no login management, no
+   inviting or removing guardians. This ships something real quickly
+   without waiting on phase 2's mechanism.
+5. **Removing a guardian (decided for phase 1, revisit in phase 2):** any
+   full-access guardian (`PARENT`/`LEGAL_GUARDIAN`) may remove another
+   guardian, or step down themselves, as long as the child keeps at least
+   one guardian left (same invariant `privacy.retention`/`privacy.deletion`
+   already rely on: "a child always has a guardian"). The removed
+   guardian is always mailed, so nobody is silently cut off. **Flagged,
+   not fully settled:** whether "immediate removal + a notice after the
+   fact" is enough when it's one co-parent removing another, or whether
+   that specific case needs more friction (confirmation from the
+   organisation, a delay, something else) is a safeguarding/legal
+   question for the stakeholder conversation, not something to decide in
+   code.
+6. **Phase 2: real per-guardian capabilities, reusing the same
+   template-then-override mechanism designed for dojo admin access
+   (recommended, not built).** Instead of two hardcoded levels, define a
+   capability catalog as custom `django-guardian` object permissions
+   scoped per `(user, ninja)` — the same dependency and the same
+   "template, then grant/revoke on top" shape discussed for dojo
+   authorization (champion/mentor capabilities), applied here to
+   `Ninja.Meta.permissions` instead of `Dojo.Meta.permissions`. The
+   catalog: `edit_details`, `view_health_notes` / `edit_health_notes`
+   (kept apart, same reasoning as the dojo's `VIEW_HEALTH_NOTES` — special
+   category data gets its own switch), `sign_up` (register for sessions,
+   cancel places), `manage_login` (give/remove/change the child's own
+   login), `manage_guardians` (invite, remove and customize other
+   guardians' access). `relation` still seeds the starting bundle
+   (`PARENT`/`LEGAL_GUARDIAN` = everything, `OTHER` = `sign_up` only) but
+   stops being the enforcement mechanism once this lands — it becomes
+   just the template a new guardian starts from. **Whoever holds
+   `manage_guardians` is this child's "administrator"**: no separate flag
+   needed, it falls out of the same capability model as everything else.
+   An administrator gets a "Customize access" screen per co-guardian
+   (same shape as the dojo Team page's planned equivalent) to hand-tune
+   any individual capability beyond the template — grant a trusted
+   neighbor `sign_up` without `manage_login`, or take `edit_health_notes`
+   away from someone the family trusts less than the default template
+   assumes. The same invariant as phase 1's removal rule extends here:
+   never leave a child with zero guardians holding `manage_guardians` —
+   there must always be at least one administrator who can manage future
+   access.
+
+### Model changes
+
+```mermaid
+classDiagram
+    direction TB
+    class Guardianship {
+        +relation  parent | legal_guardian | other — phase 1: enforced; phase 2: template seed only
+        +consent_given_at
+    }
+    class GuardianInvitation {
+        +ninja
+        +invited_by
+        +email, relation
+        +token_hash  single use
+        +created_at, expires_at
+        +accepted_at, accepted_by
+        +withdrawn_at
+    }
+    Ninja "1" --> "*" GuardianInvitation : invitations
+    GuardianInvitation "*" --> "0..1" User : accepted_by
+```
+
+Phase 2 adds no new fields: capabilities are `django-guardian`
+`UserObjectPermission` rows keyed on `(user, ninja, permission)`, not
+columns on `Guardianship`.
+
+### Screens
+
+- A **Guardians** card on the child's page (`ninja_detail`,
+  `accounts/views/children.py`): every current guardian with their
+  relation, an "Invite another guardian" action and "Remove"/"Step down"
+  per row. Shown to adult guardians only — never to the ninja's own
+  self-view (`_get_own_ninja(..., allow_self=True)`'s branch): a child
+  doesn't manage who's responsible for them.
+- `/account/guardian-invitations/<token>/`: same GET-shows/POST-confirms
+  shape as `email_change_confirm`. Not logged in, or logged in as the
+  wrong address → the usual sign-up-or-log-in-with-`next` detour already
+  used elsewhere (`register_individual?next=...`). Logged in with the
+  matching address → confirm the child's name, who invited them and what
+  access they'd get, tick the consent checkbox
+  (`accounts/partials/_child_data_consent.html`, same as Add a Child),
+  accept.
+- Phase 2 only: a "Customize access" screen per guardian, administrator
+  only — a checkbox per capability, pre-ticked from the guardian's current
+  rows, a "Reset to [relation] default" action.
+
+### Phases
+
+1. **Foundations (not built):** `GuardianInvitation` model and migration,
+   admin registration, `accounts/privacy.py` classification (mirrors
+   `OrganisationInvitation`'s entry), a retention job cleaning up
+   accepted/withdrawn/expired invitations (same shape as
+   `accounts.invitations.remove_old`), an audit-log decision for
+   invite/accept/remove (recommended: record them, same reasoning as
+   `AdminAccessGrant`).
+2. **Invite, accept, notify, remove (not built):**
+   `accounts/guardian_invitations.py`, the Guardians card, the accept
+   page, three mail templates (`child_guardian_invitation`,
+   `child_guardian_added`, `child_guardian_removed`) in en/nl/fr via
+   `mailing/seed_templates.py` plus a `load_mail_templates` data
+   migration, tests in `accounts/tests.py` (invite/accept/withdraw/
+   throttle, duplicate rejection, other-guardians notified on send and
+   accept, last-guardian protection on removal, self-step-down).
+   `docs/source/parent/...` (en/fr/nl) documents the flow;
+   `user-journeys/scripts/check_journeys.py` will likely flag the parent
+   persona — regenerate its PDFs once this is real.
+3. **Fixed relation-based access levels (not built):** gate the sensitive
+   family views (`edit_ninja`, the child-login management views in
+   `accounts/views/child_logins.py`, the new Guardians screen itself) on
+   `relation in (PARENT, LEGAL_GUARDIAN)` vs `OTHER`; `sign_up`/
+   `cancel_registration` stay open to every guardian regardless of
+   relation.
+4. **Configurable capabilities (recommended, not built, depends on the
+   dojo-authorization `django-guardian` decision landing first so the
+   dependency is only added once):** `Ninja.Meta.permissions`, the
+   `accounts/guardian_access.py` module (capability catalog, relation
+   templates, `apply_template`/`grant`/`revoke`/`capabilities_of`,
+   mirroring whatever shape `dojos/permissions.py` ends up with), the
+   Customize-access screen, replacing phase 3's hardcoded relation check
+   in every gated view with a capability check.
+
+### Open points
+
+- Should both co-parents default to being symmetric administrators (both
+  get `manage_guardians`), or does the inviter pick the invitee's
+  starting bundle every time (as designed above — the inviter chooses
+  `relation`/the template, which naturally gives two parents equal
+  standing while keeping a trusted neighbor non-administrative)?
+- The removal-friction question from decision 5 — needs a safeguarding/
+  legal answer, not an engineering one.
+- Should a non-administrator guardian still *see* the full guardians
+  list (who else has access), even without the rights to change it?
+  Leaning yes — transparency outweighs the privacy cost here, and the
+  list reveals nothing sensitive beyond who is linked.
+- Does `relation` stay a useful display/sort field once phase 2 makes
+  capabilities independently configurable, or should it be dropped in
+  favor of capabilities alone? Leaning keep it (useful for display even
+  once it's "just" a template seed), but document that clearly once
+  phase 2 lands so nobody mistakes it for the enforcement mechanism.
