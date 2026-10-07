@@ -13,6 +13,9 @@
 #   4. Syncs the release into ~/app (keeping .env, media/, private_media/ and
 #      the demo logins in seed_credentials.csv),
 #      runs migrations (+ collectstatic when STATIC_ROOT is configured).
+#      Puts the help centre (docs/, built here in en/fr/nl) in ~/docs, which
+#      Apache serves at /docs/ (a RewriteRule in the panel's extra Apache
+#      configuration); a build that fails leaves the server's copy as it is.
 #   5. Puts the new code live and does a smoke-test request over the app's
 #      unix socket. Level27 runs the app as the systemd service py10102.service
 #      with either gunicorn (HUP to its master: a graceful reload) or daphne
@@ -114,6 +117,39 @@ echo "$(tr -cd '\0' < "$WORK/files" | wc -c) files, $(du -h "$BUNDLE" | cut -f1)
 for required in main.py manage.py requirements.txt website/asgi.py; do
     grep -qzx "$required" "$WORK/files" || die "bundle is missing $required"
 done
+
+# --- 1b. the help centre ------------------------------------------------------
+# Built fresh (en/fr/nl, warnings are errors as on GitHub Pages) with the
+# sphinx-build here, or else in the devcontainer's workspace container. Not in
+# --check (it takes a while). A failed build never stops the deploy: the server
+# keeps the help centre it has.
+DOCS_CONTAINER="coolregistration-dev-workspace"
+DOCS_BUNDLE=""
+build_docs() {
+    local out="$WORK/docs" opts="-W --keep-going -q"
+    if command -v sphinx-build >/dev/null 2>&1 \
+        && make -C docs html-all BUILDDIR="$out" SPHINXOPTS="$opts" > "$WORK/docs.log" 2>&1; then
+        echo "$out/html"; return 0
+    fi
+    if command -v docker >/dev/null 2>&1 && docker exec "$DOCS_CONTAINER" true 2>/dev/null \
+        && docker exec -w /workspace/docs "$DOCS_CONTAINER" sh -c \
+            "rm -rf /tmp/deploy-docs && make html-all BUILDDIR=/tmp/deploy-docs SPHINXOPTS='$opts'" >> "$WORK/docs.log" 2>&1 \
+        && docker cp "$DOCS_CONTAINER:/tmp/deploy-docs/html" "$WORK/docs-html" >> "$WORK/docs.log" 2>&1; then
+        echo "$WORK/docs-html"; return 0
+    fi
+    return 1
+}
+if [ "$MODE" = deploy ]; then
+    step "Building the help centre"
+    if DOCS_HTML="$(build_docs)"; then
+        DOCS_BUNDLE="$WORK/docs.tar.gz"
+        tar -czf "$DOCS_BUNDLE" -C "$DOCS_HTML" .
+        echo "$(find "$DOCS_HTML" -name '*.html' | wc -l) pages, $(du -h "$DOCS_BUNDLE" | cut -f1)"
+    else
+        echo "warning: the help centre didn't build, so the server keeps the one it has:"
+        tail -15 "$WORK/docs.log" | sed 's/^/    /'
+    fi
+fi
 
 # --- the remote side ----------------------------------------------------------
 # One script, run over ssh with `bash -s`; MODE decides whether it only checks.
@@ -218,6 +254,12 @@ if [ "\$MODE" = check ]; then
     fi
     step "App server"
     app_server
+    step "Help centre"
+    if [ -f "\$HOME/docs/index.html" ]; then
+        echo "~/docs: \$(find "\$HOME/docs" -name '*.html' | wc -l) pages, from \$(date -r "\$HOME/docs/index.html" '+%F %R')"
+    else
+        echo "~/docs: none yet (the next deploy puts it there)"
+    fi
     step "Celery workers"
     celery_list
     [ "\$(celery_mains | wc -l)" -eq 2 ] || echo "celery: expected 2 workers, check the worker component \"celery\" in the Level27 panel and ~/logs/worker-*/"
@@ -274,6 +316,17 @@ if "\$PY" manage.py shell -c "from django.conf import settings; import sys; sys.
     "\$PY" manage.py collectstatic --noinput --verbosity 0 && echo "collectstatic: done"
 else
     echo "collectstatic: skipped (STATIC_ROOT not set)"
+fi
+if [ -f "\$HOME/deploy/incoming-docs.tar.gz" ]; then
+    # Unpacked next to it, then swapped in: Apache never serves half a help centre.
+    rm -rf "\$HOME/deploy/docs-new" "\$HOME/deploy/docs-old"
+    mkdir -p "\$HOME/deploy/docs-new"
+    tar -xzf "\$HOME/deploy/incoming-docs.tar.gz" -C "\$HOME/deploy/docs-new"
+    chmod -R u+rwX,go+rX,go-w "\$HOME/deploy/docs-new"
+    [ ! -d "\$HOME/docs" ] || mv "\$HOME/docs" "\$HOME/deploy/docs-old"
+    mv "\$HOME/deploy/docs-new" "\$HOME/docs"
+    rm -rf "\$HOME/deploy/docs-old" "\$HOME/deploy/incoming-docs.tar.gz"
+    echo "help centre: \$(find "\$HOME/docs" -name '*.html' | wc -l) pages in ~/docs"
 fi
 
 step "Putting the new code live"
@@ -358,6 +411,9 @@ step "Uploading"
 scp -q -o BatchMode=yes "$BUNDLE" "$REMOTE:deploy/incoming.tar.gz"
 if [ -f "$ENV_FILE" ]; then
     scp -q -o BatchMode=yes "$ENV_FILE" "$REMOTE:deploy/incoming.env"
+fi
+if [ -n "$DOCS_BUNDLE" ]; then
+    scp -q -o BatchMode=yes "$DOCS_BUNDLE" "$REMOTE:deploy/incoming-docs.tar.gz"
 fi
 
 # --- 3-5. install, verify, go live -------------------------------------------------
