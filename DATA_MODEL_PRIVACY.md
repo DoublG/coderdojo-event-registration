@@ -652,36 +652,40 @@ wiring `relation` into the three places it actually matters from day one.
    something else), is a safeguarding/legal question for the
    stakeholder conversation, not something to decide in code.
 7. **Phase 2: real per-guardian capabilities, fully independent of
-   `relation`, reusing the same template-then-override mechanism
-   designed for dojo admin access (recommended, not built).** A
-   capability catalog as custom `django-guardian` object permissions
-   scoped per `(user, ninja)` — the same dependency and the same
-   "template, then grant/revoke on top" shape discussed for dojo
-   authorization, applied to `Ninja.Meta.permissions` instead of
-   `Dojo.Meta.permissions`. The catalog: `edit_details`,
-   `view_health_notes` / `edit_health_notes` (kept apart, same reasoning
-   as the dojo's `VIEW_HEALTH_NOTES`), `sign_up` (register for sessions,
-   cancel places), `manage_login` (give/remove/change the child's own
-   login), `manage_guardians` (invite, remove and customize other
-   guardians' functional access — **never** the relation-gated GDPR
-   actions in decisions 4–5, which stay relation-gated regardless of
-   capability). Every guardian starts from the same full template on
-   phase 1's unconditional access, so phase 2 is purely subtractive to
-   begin with — nothing changes until an administrator actually
-   customizes someone.
-8. **`manage_guardians` may only be held by `PARENT`/`LEGAL_GUARDIAN`
-   (recommended, not built).** Handing out or revoking other people's
-   access to a child is itself a weight I wouldn't give to a relation
-   that isn't a legal guardian, even if a family wants to configure it
-   that way — so this one capability stays relation-gated on top of the
-   otherwise-independent catalog. Whoever holds it is this child's
-   "administrator"; no separate flag needed. An administrator gets a
-   "Customize access" screen per co-guardian (same shape as the dojo Team
-   page's planned equivalent) to hand-tune any other capability for any
-   guardian — grant a trusted neighbor `sign_up` without `manage_login`,
-   or take `edit_health_notes` away from someone the family trusts less.
-   The same invariant as decision 4 extends here: never leave a child
-   with zero `manage_guardians` holders.
+   `relation`, reusing the custom-role mechanism (`DATA_MODEL_ROLES.md`
+   §28) instead of a per-object permission library (recommended, not
+   built).** A new model, `accounts.GuardianRole` — the same shape as
+   `dojos.DojoRole`: `ninja` FK (null for the single seeded global "Full
+   access" template), `name`, `capabilities`, `is_protected` — plus
+   `Guardianship.custom_role` defaulting every guardian to that global
+   template, matching phase 1's unconditional access, so phase 2 starts
+   purely subtractive: nothing changes for anyone until a `PARENT`/
+   `LEGAL_GUARDIAN` actually creates a trimmed-down role and reassigns
+   someone to it. The catalog: `edit_details`, `view_health_notes` /
+   `edit_health_notes` (kept apart, same reasoning as the dojo's
+   `VIEW_HEALTH_NOTES`), `sign_up` (register for sessions, cancel
+   places), `manage_login` (give/remove/change the child's own login),
+   `manage_guardians` (create/edit this child's own roles and assign
+   guardians to them — **never** the relation-gated GDPR actions in
+   decisions 4–5, which stay relation-gated regardless of any role). No
+   `django-guardian`, no per-object permission rows: a guardian's
+   capabilities are simply whatever row `custom_role` points at.
+8. **`manage_guardians` is reserved — never includable in any
+   `GuardianRole`, and only a `PARENT`/`LEGAL_GUARDIAN` may define or
+   assign this child's roles (recommended, not built).** Same
+   escalation-safety rule as the dojo's `MANAGE_ROLES` (§28 decision 3):
+   role authoring itself must never be delegable through a role, or a
+   role could mint ever-more-powerful roles for itself. Whoever is
+   `PARENT`/`LEGAL_GUARDIAN` is this child's administrator by relation,
+   not by holding a capability — they get a "Customize access" screen to
+   create per-child roles (a name plus a capability checklist, the same
+   shape as the dojo Roles page) and reassign any guardian to one,
+   including trimming a trusted neighbor down to `sign_up` without
+   `manage_login`, or taking `edit_health_notes` away from someone the
+   family trusts less than the default template assumes. Decision 4's
+   invariant extends here unchanged: never leave a child with zero
+   `PARENT`/`LEGAL_GUARDIAN` relations — that's what actually guarantees
+   an administrator always exists, not a capability count.
 
 ### Model changes
 
@@ -705,9 +709,9 @@ classDiagram
     GuardianInvitation "*" --> "0..1" User : accepted_by
 ```
 
-Phase 2 adds no new fields: capabilities are `django-guardian`
-`UserObjectPermission` rows keyed on `(user, ninja, permission)`, not
-columns on `Guardianship`.
+Phase 2 adds `accounts.GuardianRole` (one model, the same shape as
+`dojos.DojoRole`, `DATA_MODEL_ROLES.md` §28) and `Guardianship.custom_role`
+— no per-object permission tables.
 
 ### Screens
 
@@ -725,12 +729,11 @@ columns on `Guardianship`.
   relation, tick the consent checkbox when relation allows it
   (`accounts/partials/_child_data_consent.html`, same as Add a Child,
   `PARENT`/`LEGAL_GUARDIAN` only), accept.
-- Phase 2 only: a "Customize access" screen per guardian, administrator
-  (`manage_guardians` holder) only — a checkbox per capability, pre-ticked
-  from the guardian's current rows, a "Reset to full access" action.
-  `manage_guardians` itself is only offered for a `PARENT`/
-  `LEGAL_GUARDIAN` row (decision 8) — never shown as a checkbox for
-  `OTHER`.
+- Phase 2 only: a "Customize access" screen, `PARENT`/`LEGAL_GUARDIAN`
+  only (decision 8, never `OTHER`) — create/edit this child's own roles
+  (a name plus a capability checklist, the same shape as the dojo Roles
+  page, §28) and reassign any guardian to one of them, including back to
+  the default "Full access" template.
 
 ### Phases
 
@@ -761,23 +764,25 @@ columns on `Guardianship`.
    consent checkbox from `OTHER`. Tests covering an `OTHER`-relation
    account's deletion never erasing the child, and a child never ending
    up with zero `PARENT`/`LEGAL_GUARDIAN` relations.
-4. **Configurable capabilities (recommended, not built, depends on the
-   dojo-authorization `django-guardian` decision landing first so the
-   dependency is only added once):** `Ninja.Meta.permissions`, a
-   `accounts/guardian_access.py` module (capability catalog,
-   `apply_template`/`grant`/`revoke`/`capabilities_of`, the
-   `manage_guardians`-requires-`PARENT`/`LEGAL_GUARDIAN` rule, mirroring
-   whatever shape `dojos/permissions.py` ends up with), the
-   Customize-access screen, gating the sensitive family views
-   (`edit_ninja`, `accounts/views/child_logins.py`) on capabilities
-   instead of phase 2's "everyone gets everything."
+4. **Configurable capabilities (recommended, not built, depends on
+   §28's dojo-role mechanism landing first so the pattern is only built
+   once):** `accounts.GuardianRole` and its migration, a
+   `accounts/guardian_roles.py` module (`create_role`/`update_role`/
+   `delete_role`/`assign_role`, mirroring `dojos/roles.py`; the
+   `manage_guardians`-is-reserved rule enforced the same way as the
+   dojo's `MANAGE_ROLES`), the Customize-access screen, gating the
+   sensitive family views (`edit_ninja`, `accounts/views/child_logins.py`)
+   on the guardian's `custom_role.capabilities` instead of phase 2's
+   "everyone gets everything."
 
 ### Open points
 
-- Should both co-parents default to holding `manage_guardians` (symmetric
-  administrators), or does the inviter decide per invitation? Leaning
-  default-on for `PARENT`/`LEGAL_GUARDIAN` (two parents get equal
-  standing automatically) and never offered for `OTHER` (decision 8).
+- Phase 2's default template is "Full access" for every guardian
+  regardless of relation (decision 7) — should `OTHER` instead default
+  to a trimmed template from the start, with a `PARENT`/`LEGAL_GUARDIAN`
+  free to widen it? Leaning no (keep phase 1's "nothing changes until
+  someone deliberately customizes" property clean), but worth asking
+  alongside the stakeholder conversation.
 - The removal-friction question from decision 6 — needs a safeguarding/
   legal answer, not an engineering one.
 - Should a non-administrator guardian still *see* the full guardians

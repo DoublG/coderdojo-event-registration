@@ -33,7 +33,7 @@ update its diagram in the same change.
 11. [Mailing, segmentation and campaigns](#11-mailing-segmentation-and-campaigns)
 12. [Organisation events and promotion (later)](#12-organisation-events-and-promotion-later)
 
-Sections 13–27 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address, organisation people and roles, logging in with an emailed link, mail from a dojo to its families, capacity and monitoring, and multiple guardians per child.
+Sections 13–28 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address, organisation people and roles, logging in with an emailed link, mail from a dojo to its families, capacity and monitoring, multiple guardians per child, and custom roles for a dojo or the organisation.
 
 **Split into topic files, kept out of this one for size.** Every section below still has its number and heading here — so an existing "`DATA_MODEL.md` §N" reference anywhere in the repo still resolves — but the full design history for the largest, most actively-growing subsystems now lives next to this file rather than in it:
 
@@ -41,6 +41,7 @@ Sections 13–27 cover the API, the audit log, two-step login, GDPR, child accou
 - [`DATA_MODEL_MAILING.md`](DATA_MODEL_MAILING.md) — §11 and §25, the mail engine, segmentation, campaigns, journeys and a dojo's own mail.
 - [`DATA_MODEL_API.md`](DATA_MODEL_API.md) — §13, dojo API clients and the event-sync plan.
 - [`DATA_MODEL_PRIVACY.md`](DATA_MODEL_PRIVACY.md) — §16 and §27, GDPR classification/export/erasure/retention and multiple guardians per child.
+- [`DATA_MODEL_ROLES.md`](DATA_MODEL_ROLES.md) — §28, letting a dojo champion or the organisation define their own custom roles.
 
 Everything else — the current data model (§1–9), organisation events (§12), the audit log (§14), two-step login (§15), child accounts through organisation roles (§17–24), and capacity/monitoring (§26) — stays here in full.
 
@@ -2506,7 +2507,20 @@ An invitation so a second adult can be linked as a child's guardian
 `relation` kept strictly as the legal/GDPR descriptor (erasure authority,
 who may exercise the child's GDPR rights, consent eligibility) rather
 than an access level — functional access is a fully independent axis,
-added in a second phase that reuses the dojo-authorization
-template-then-override mechanism. Full design, decisions, phases and open
-points — alongside §16 — are in `DATA_MODEL_PRIVACY.md`.
+added in a second phase that reuses the custom-role mechanism (§28).
+Full design, decisions, phases and open points — alongside §16 — are in
+`DATA_MODEL_PRIVACY.md`.
+
+## 28. Custom roles: dojo and organisation (not built — written up for review before implementation)
+
+Every dojo and the organisation already start from a small set of
+built-in roles (dojo: Champion, Mentor; organisation: Board, Admin,
+Reviewer); when that's genuinely not enough, whoever already owns the
+domain (a dojo's champion; the organisation's admin) can define their own
+named role — a name plus a capability list drawn from what they
+themselves can already do — and assign people to it. Supersedes the
+earlier per-membership capability-override idea (and the `django-guardian`
+dependency proposed for it): a one-off exception is now just a one-off
+role. Full design, decisions, phases and open points are in
+`DATA_MODEL_ROLES.md`.
 
