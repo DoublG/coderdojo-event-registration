@@ -5,10 +5,12 @@ No teaching experience is required — dojos need help running sessions,
 supporting ninjas one-on-one, and general event-day support (board/comms
 roles are also welcome).
 
-You apply with your own CoderDojo account: if you don't have one yet,
-create one first (the same kind of account families use), then log in.
-Your application, background check and the dojos you help at all stay on
-that one login.
+You apply with your own CoderDojo account. Don't have one yet? Go to
+**Get involved** and choose **Become a mentor or volunteer**: you first
+create an account with just your own details (no children needed), and go
+straight on to the application. If you already have an account, for example
+as a parent, log in and use that one. Your application, background check and
+the dojos you help at all stay on that one login.
 
 To apply:
 

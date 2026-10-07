@@ -236,7 +236,7 @@ Which account does what:
 | Account | Created by | Background check | Lands on after login |
 |---|---|---|---|
 | adult (parent) | self-service sign-up (`register_guardian`) | never needed | their account page (`/account/`) |
-| adult champion / mentor | the same self-service sign-up, then an approved `Application` | required for dojo access (a lapsed check blocks the dashboards, never the login) | first accessible dojo's dashboard |
+| adult champion / mentor | the same self-service sign-up, or the one without children (`register_individual`, which goes straight on to the application), then an approved `Application` | required for dojo access (a lapsed check blocks the dashboards, never the login) | first accessible dojo's dashboard |
 | ninja | a parent opts a child in | none | the ninja's own page (`/account/ninja/<id>/`) |
 | adult with an `OrganisationRole` | the same sign-up, or the sign-up behind an organisation invitation; the role is given on the dashboard's People page | not for the role itself | the organisation dashboard (`/manage/`); the Django admin only when asked for (12 hours) |
 
@@ -4640,7 +4640,8 @@ link" (*inloglink*, *lien de connexion*), never "magic link".
   at them (`accounts/sign_in.py`). A ninja login starts with no usable
   password and gets a set-password mail from the guardian's *Own login*
   card (§17, `accounts/child_accounts.give_login`).
-- Family sign-up (`register_guardian`) and the invitation sign-up
+- Family sign-up (`register_guardian`), the sign-up without children
+  (`register_individual`) and the invitation sign-up
   (`accounts.people`, `organisation_invitation_sign_up`) ask for a
   password and log the new account in. The family's address is **not
   confirmed** at sign-up; the invitation's is (the invite link came to it).

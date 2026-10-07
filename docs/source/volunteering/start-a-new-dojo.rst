@@ -2,8 +2,10 @@ Starting a new dojo
 ======================
 
 Bringing CoderDojo to a new city or town starts with an application from
-your own CoderDojo account: if you don't have one yet, create one first
-(the same kind of account families use), then log in.
+your own CoderDojo account. Don't have one yet? Go to **Get involved** and
+choose **Start a new dojo**: you first create an account with just your own
+details (no children needed), and go straight on to the application. If you
+already have an account, for example as a parent, log in and use that one.
 
 #. Log in and choose **Apply to start a dojo** from your account menu (or
    **Get involved** → **Start a new dojo**). Your name and email come from

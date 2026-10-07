@@ -10,6 +10,13 @@ with sync_playwright() as pw:
         "The sign-up page explains the ways in: a family account, helping at a dojo as a mentor, or starting a dojo as a champion. Volunteers use a normal account first.",
         max_h=1800,
     )
+    p = j.go("/register/individual/?next=/register/helper/")
+    j.shot(
+        "sign-up",
+        "An account without children",
+        "Someone with no children to register gets a short sign-up of their own: their details and how they log in, nothing about children. Once the account exists they go straight on to the application they picked.",
+        max_h=1800,
+    )
     j.login("guardian-11")
     p = j.go("/register/helper/")
     j.shot(

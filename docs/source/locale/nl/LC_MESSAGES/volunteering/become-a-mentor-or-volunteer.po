@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 06:26+0000\n"
+"POT-Creation-Date: 2026-10-07 00:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -37,21 +37,26 @@ msgstr ""
 
 #: ../../source/volunteering/become-a-mentor-or-volunteer.rst:8
 msgid ""
-"You apply with your own CoderDojo account: if you don't have one yet, "
-"create one first (the same kind of account families use), then log in. "
-"Your application, background check and the dojos you help at all stay on "
-"that one login."
+"You apply with your own CoderDojo account. Don't have one yet? Go to "
+"**Get involved** and choose **Become a mentor or volunteer**: you first "
+"create an account with just your own details (no children needed), and go"
+" straight on to the application. If you already have an account, for "
+"example as a parent, log in and use that one. Your application, "
+"background check and the dojos you help at all stay on that one login."
 msgstr ""
-"U meldt zich aan met uw eigen CoderDojo-account: hebt u er nog geen, maak"
-" er dan eerst een aan (hetzelfde soort account dat gezinnen gebruiken) en"
-" log in. Uw aanmelding, uw uittreksel uit het strafregister en de dojo's "
-"waar u helpt, blijven allemaal aan die ene login gekoppeld."
+"U solliciteert met uw eigen CoderDojo-account. Hebt u er nog geen? Ga naar "
+"**Doe mee** en kies **Word mentor of vrijwilliger**: u maakt eerst een "
+"account aan met alleen uw eigen gegevens (kinderen zijn niet nodig) en gaat "
+"meteen verder naar de sollicitatie. Hebt u al een account, bijvoorbeeld als "
+"ouder, log dan in en gebruik dat. Uw sollicitatie, uw uittreksel uit het "
+"strafregister en de dojo's waar u helpt, blijven allemaal aan die ene login "
+"gekoppeld."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:13
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:15
 msgid "To apply:"
 msgstr "Om te solliciteren:"
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:15
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:17
 msgid ""
 "Log in and choose **Apply to volunteer** from your account menu (or **Get"
 " involved** → **Become a mentor or volunteer**). Your name and email come"
@@ -61,7 +66,7 @@ msgstr ""
 "→ **Mentor of vrijwilliger worden**). Uw naam en e-mailadres komen uit uw"
 " account; voeg eventueel een telefoonnummer toe."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:18
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:20
 msgid ""
 "Pick a dojo if you already have one in mind, or leave it as \"not sure "
 "yet\" if you're open to any."
@@ -69,7 +74,7 @@ msgstr ""
 "Kies een dojo als u er al één in gedachten hebt, of laat \"nog niet "
 "zeker\" staan als u openstaat voor eender welke."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:20
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:22
 msgid ""
 "Choose your role — volunteer mentor, or something else (board, events, "
 "comms)."
@@ -77,11 +82,11 @@ msgstr ""
 "Kies uw rol — vrijwillige mentor, of iets anders (bestuur, evenementen, "
 "communicatie)."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:22
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:24
 msgid "Tell us a bit about yourself — skills, interests, availability."
 msgstr "Vertel ons iets over uzelf — vaardigheden, interesses, beschikbaarheid."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:23
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:25
 msgid ""
 "Confirm you understand a background check will be required (see :doc"
 ":`background-check`) and submit."
@@ -89,11 +94,11 @@ msgstr ""
 "Bevestig dat u begrijpt dat een uittreksel uit het strafregister vereist "
 "zal zijn (zie :doc:`background-check`) en verstuur het formulier."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:27
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:29
 msgid "What happens next"
 msgstr "Wat gebeurt er daarna?"
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:29
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:31
 msgid ""
 "A CoderDojo Belgium admin looks at your application and emails you a link"
 " to upload your background check document (see :doc:`background-check`). "
@@ -108,7 +113,7 @@ msgstr ""
 "**Vrijwilligerswerk** op uw accountpagina toont bij elke stap waar u "
 "staat."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:35
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:37
 msgid ""
 "Once you're approved, you join a dojo's team through the dojo itself: if "
 "you picked a dojo in your application, a request to join its team is sent"
@@ -123,7 +128,7 @@ msgstr ""
 "dojo of een van de mentoren aanvaardt uw aanvraag, en vanaf dan staat het"
 " dashboard van de dojo voor u open."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:41
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:43
 msgid ""
 "Want to help at another dojo too? You don't need to apply again: choose "
 "**Help at another dojo** from your account menu, find the dojo and ask to"
@@ -202,4 +207,22 @@ msgstr ""
 #~ "gewoon op de hoogte gebracht dat "
 #~ "de vrijwilligersrol nu actief is — "
 #~ "zonder nieuw wachtwoord nodig."
+
+#~ msgid ""
+#~ "You apply with your own CoderDojo "
+#~ "account: if you don't have one "
+#~ "yet, create one first (the same "
+#~ "kind of account families use), then "
+#~ "log in. Your application, background "
+#~ "check and the dojos you help at"
+#~ " all stay on that one login."
+#~ msgstr ""
+#~ "U meldt zich aan met uw eigen "
+#~ "CoderDojo-account: hebt u er nog "
+#~ "geen, maak er dan eerst een aan"
+#~ " (hetzelfde soort account dat gezinnen "
+#~ "gebruiken) en log in. Uw aanmelding, "
+#~ "uw uittreksel uit het strafregister en"
+#~ " de dojo's waar u helpt, blijven "
+#~ "allemaal aan die ene login gekoppeld."
 

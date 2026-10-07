@@ -243,7 +243,18 @@ class LoginMethodChoiceMixin:
         return self.cleaned_data.get("login_method") == User.LOGIN_LINK
 
 
-class RegisterGuardianForm(LoginMethodChoiceMixin, forms.Form):
+class _UniqueEmailMixin:
+    """An email field with the site's "already in use" check, shared by every
+    public sign-up form (RegisterGuardianForm, RegisterIndividualForm)."""
+
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError(_("An account already exists with this email."))
+        return email
+
+
+class RegisterGuardianForm(_UniqueEmailMixin, LoginMethodChoiceMixin, forms.Form):
     """The parent/guardian half of the family-registration page; the
     children are ChildRowsFormSet, next to it."""
 
@@ -283,11 +294,49 @@ class RegisterGuardianForm(LoginMethodChoiceMixin, forms.Form):
         required=False,
     )
 
-    def clean_email(self):
-        email = self.cleaned_data["email"]
-        if User.objects.filter(email__iexact=email).exists():
-            raise ValidationError(_("An account already exists with this email."))
-        return email
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._add_login_method()
+
+    def clean_postal_code(self):
+        return clean_belgian_postal_code(self.cleaned_data["postal_code"])
+
+
+class RegisterIndividualForm(_UniqueEmailMixin, LoginMethodChoiceMixin, forms.Form):
+    """Self-service sign-up for an adult with no children of their own who
+    still wants to get involved (accounts.views.register_individual): start a
+    dojo or volunteer, both of which need a logged-in account first
+    (applications.views.register_dojo/register_helper). Same fields as
+    RegisterGuardianForm, minus the children and their consent — there's
+    nothing here about a child, and a parent who does have one already uses
+    family sign-up instead."""
+
+    name = forms.CharField(
+        label=_("Full name"), max_length=150, widget=forms.TextInput(attrs={"placeholder": "Jane Doe"})
+    )
+    email = forms.EmailField(label=_("Email"), widget=forms.EmailInput(attrs={"placeholder": "jane.doe@example.com"}))
+    phone = forms.CharField(
+        label=_("Phone"),
+        required=False,
+        max_length=30,
+        help_text=_("Only used if we need to reach you about your application."),
+        widget=forms.TextInput(attrs={"placeholder": "+32 4xx xx xx xx"}),
+    )
+    password = forms.CharField(label=_("Password"), widget=forms.PasswordInput())
+    postal_code = forms.CharField(
+        label=_("Postcode"),
+        required=False,
+        max_length=4,
+        help_text=_("So we can tell you about dojos near you."),
+        widget=forms.TextInput(attrs={"placeholder": "9000", "inputmode": "numeric"}),
+    )
+    preferred_language = forms.ChoiceField(label=_("Language for emails"), required=False, choices=settings.LANGUAGES)
+    newsletter = forms.BooleanField(
+        label=_(
+            "Send me the CoderDojo Belgium newsletter and news about events like Coolest Projects and CoderDojo Girlz."
+        ),
+        required=False,
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -1073,6 +1073,129 @@ class RegisterGuardianViewTests(TestCase):
         self.assertEqual(response.context["children"].non_form_errors(), ["Add at least one child."])
         self.assertFalse(User.objects.filter(email="jane@example.com").exists())
 
+    def test_returns_to_the_event_sign_up_it_came_from(self):
+        """Signing up a child for a session as a visitor: event_signup's
+        login wall → Create an account → family sign-up → back there."""
+        next_url = "/events/7/signup/"
+        page = self.client.get(reverse("register_guardian"), {"next": next_url})
+        self.assertContains(page, f'name="next" value="{next_url}"')
+
+        response = self.client.post(reverse("register_guardian"), self._valid_post_data(next=next_url))
+        self.assertRedirects(response, next_url, fetch_redirect_response=False)
+
+    def test_never_returns_to_another_site(self):
+        response = self.client.post(
+            reverse("register_guardian"), self._valid_post_data(next="https://evil.example.com/")
+        )
+        self.assertRedirects(response, reverse("account_home"))
+
+
+class RegisterIndividualViewTests(TestCase):
+    """Sign-up without children, for someone who wants to start a dojo or
+    volunteer: the account first, then on to the application."""
+
+    valid_password = "a-brand-new-password-99"
+
+    def _valid_post_data(self, **overrides):
+        return {
+            "name": "Jane Doe",
+            "email": "jane@example.com",
+            "phone": "",
+            "password": self.valid_password,
+            **overrides,
+        }
+
+    def test_creates_an_account_without_children_and_logs_in(self):
+        response = self.client.post(reverse("register_individual"), self._valid_post_data())
+
+        jane = User.objects.get(email="jane@example.com")
+        self.assertRedirects(response, reverse("account_home"))
+        self.assertEqual((jane.first_name, jane.last_name, jane.account_type), ("Jane", "Doe", User.ADULT))
+        self.assertTrue(jane.check_password(self.valid_password))
+        self.assertFalse(Ninja.objects.of_guardian(jane).exists())
+        self.assertEqual(int(self.client.session["_auth_user_id"]), jane.id)
+
+    def test_goes_straight_on_to_the_application(self):
+        for name in ("register_dojo", "register_helper"):
+            with self.subTest(name):
+                self.client.logout()
+                next_url = reverse(name)
+                page = self.client.get(reverse("register_individual"), {"next": next_url})
+                self.assertContains(page, f'name="next" value="{next_url}"')
+                response = self.client.post(
+                    reverse("register_individual"),
+                    self._valid_post_data(email=f"{name}@example.com", next=next_url),
+                )
+                self.assertRedirects(response, next_url)
+
+    def test_never_returns_to_another_site(self):
+        response = self.client.post(
+            reverse("register_individual"), self._valid_post_data(next="https://evil.example.com/")
+        )
+        self.assertRedirects(response, reverse("account_home"))
+
+    def test_duplicate_email_is_rejected(self):
+        User.objects.create(username="existing", email="jane@example.com")
+        response = self.client.post(reverse("register_individual"), self._valid_post_data())
+        self.assertTrue(response.context["form"].errors.get("email"))
+        self.assertEqual(User.objects.filter(email="jane@example.com").count(), 1)
+
+    def test_weak_password_is_rejected(self):
+        response = self.client.post(reverse("register_individual"), self._valid_post_data(password="password"))
+        self.assertTrue(response.context["form"].errors.get("password"))
+        self.assertFalse(User.objects.filter(email="jane@example.com").exists())
+
+    def test_newsletter_is_opt_in(self):
+        from mailing.categories import MailCategory
+        from mailing.preferences import is_subscribed
+
+        self.client.post(reverse("register_individual"), self._valid_post_data(newsletter="on"))
+        self.assertTrue(is_subscribed(User.objects.get(email="jane@example.com"), MailCategory.NEWSLETTER))
+
+    def test_logged_in_account_is_sent_to_account_page(self):
+        self.client.force_login(User.objects.create(username="someone", email="someone@example.com"))
+        self.assertRedirects(self.client.get(reverse("register_individual")), reverse("account_home"))
+
+    @override_settings(HELP_CENTRE_URL="/docs/")
+    def test_links_to_the_help_centre_page_in_the_visitors_language(self):
+        dojo = self.client.get(reverse("register_individual"), {"next": reverse("register_dojo")})
+        self.assertContains(dojo, 'href="/docs/volunteering/start-a-new-dojo.html"')
+        self.assertNotContains(dojo, "become-a-mentor-or-volunteer.html")
+
+        mentor = self.client.get(
+            reverse("register_individual"), {"next": reverse("register_helper")}, HTTP_ACCEPT_LANGUAGE="nl-be"
+        )
+        self.assertContains(mentor, 'href="/docs/nl/volunteering/become-a-mentor-or-volunteer.html"')
+
+        both = self.client.get(reverse("register_individual"), HTTP_ACCEPT_LANGUAGE="fr-be")
+        self.assertContains(both, 'href="/docs/fr/volunteering/start-a-new-dojo.html"')
+        self.assertContains(both, 'href="/docs/fr/volunteering/become-a-mentor-or-volunteer.html"')
+
+
+class RegisterChooserTests(TestCase):
+    """The "Get involved" chooser: a visitor without an account who wants to
+    start a dojo or volunteer gets the sign-up without children, and a login
+    wall's `next` is carried into family sign-up."""
+
+    def test_visitor_cards_lead_to_sign_up_then_the_application(self):
+        response = self.client.get(reverse("register"))
+        for name in ("register_dojo", "register_helper"):
+            self.assertContains(response, f"{reverse('register_individual')}?next={reverse(name)}")
+
+    def test_logged_in_cards_go_straight_to_the_application(self):
+        self.client.force_login(User.objects.create(username="someone", email="someone@example.com"))
+        response = self.client.get(reverse("register"))
+        self.assertContains(response, f'href="{reverse("register_dojo")}"')
+        self.assertNotContains(response, reverse("register_individual"))
+
+    def test_family_card_carries_the_login_walls_next(self):
+        response = self.client.get(reverse("register"), {"next": "/events/7/signup/"})
+        self.assertContains(response, f"{reverse('register_guardian')}?next=/events/7/signup/")
+
+    def test_login_page_carries_next_to_create_an_account(self):
+        response = self.client.get(reverse("login"), {"next": "/events/7/signup/"})
+        self.assertContains(response, f"{reverse('register')}?next=/events/7/signup/")
+
 
 class RegisterGuardianWhenLoggedInTests(TestCase):
     """Family sign-up is only for people without an account: a logged-in
@@ -3487,13 +3610,36 @@ class SignUpWithLoginLinkTests(LoginLinkTestMixin, TestCase):
         self.assertEqual(list(Ninja.objects.of_guardian(jane).values_list("name", flat=True)), ["Sam"])
         self.assertNotIn("_auth_user_id", self.client.session)
         self.assertTrue(self.mails("login_link", jane).get().subject.startswith("Welcome"))
-
         link = self.link_path(user=jane)
         response = self.client.post(link, link_login_data())
         self.assertRedirects(response, reverse("account_home"))
         self.assertEqual(int(self.client.session["_auth_user_id"]), jane.pk)
         self.client.logout()
         self.assertContains(self.client.get(link), "Email me a new login link")  # the first link is used up
+
+    def test_the_first_link_returns_to_the_event_sign_up(self):
+        from core.testing import link_login_data
+
+        self.client.post(
+            reverse("register_guardian"),
+            self.family_data(login_method="link", next="/events/7/signup/"),
+        )
+        jane = User.objects.get(email="jane@example.com")
+        response = self.client.post(self.link_path(user=jane), link_login_data())
+        self.assertRedirects(response, "/events/7/signup/", fetch_redirect_response=False)
+
+    def test_sign_up_without_children_on_a_link(self):
+        from core.testing import link_login_data
+
+        response = self.client.post(
+            reverse("register_individual"),
+            {"name": "Jo Smit", "email": "jo@example.com", "login_method": "link", "next": reverse("register_helper")},
+        )
+        self.assertContains(response, "Check your inbox")
+        jo = User.objects.get(email="jo@example.com")
+        self.assertTrue(jo.uses_login_link)
+        response = self.client.post(self.link_path(user=jo), link_login_data())
+        self.assertRedirects(response, reverse("register_helper"), fetch_redirect_response=False)
 
     def test_an_invited_account_on_a_link_logs_in_straight_away(self):
         from .invitations import invite

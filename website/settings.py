@@ -207,6 +207,12 @@ METRICS_SLOW_REQUEST_MS = env.int("METRICS_SLOW_REQUEST_MS", default=1000)
 
 SITE_URL = env("SITE_URL", default="https://coolregistration.localhost").rstrip("/")
 
+# The help centre (docs/): the site serves it at /docs/ (nginx in the
+# devcontainer; on production scripts/deploy.sh builds and uploads it), English
+# at the root, French and Dutch under fr/ and nl/. Pages link to it with core's
+# help_url tag.
+HELP_CENTRE_URL = env("HELP_CENTRE_URL", default="/docs/")
+
 # The testers' authenticator in the devcontainer (2FAuth, the `otp` service),
 # which `manage.py seed_otp_vault` fills with the seeded accounts' app keys.
 # Empty everywhere else (production), and the command then does nothing.

@@ -153,7 +153,7 @@
           {% endif %}
         </div>
       {% else %}
-        <p class="cd-login__footer body-sm">{% translate "New to CoderDojo?" %} <a href="{% url 'register' %}">{% translate "Create an account" %}</a></p>
+        <p class="cd-login__footer body-sm">{% translate "New to CoderDojo?" %} <a href="{% url 'register' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">{% translate "Create an account" %}</a></p>
       {% endif %}
 
     </div>

@@ -1,6 +1,6 @@
 {
- "generated_from": "cd75c73",
- "generated_on": "2026-10-06",
+ "generated_from": "389f9f6",
+ "generated_on": "2026-10-07",
  "personas": {
   "parent": {
    "pages": [
@@ -22,7 +22,7 @@
     "accounts/security_views.py:security": "13eb72c780afbbd5",
     "accounts/views/children.py:ninja_detail": "1b7418ab00e7c71c",
     "accounts/views/family.py:account_home": "9c4245e27f2df4b5",
-    "accounts/views/signup.py:register_guardian": "a08851a775ddd771",
+    "accounts/views/signup.py:register_guardian": "38ca31944faca43f",
     "dojos/views/public.py:dojo_detail": "b85a46c12b05c3ff",
     "dojos/views/public.py:dojo_list": "25ead37f977b5163",
     "events/views.py:event_detail": "508021bd288e2ac9",
@@ -45,7 +45,7 @@
     "accounts/templates/accounts/partials/_confirm_identity.html": "c360fa7d0ae12a26",
     "accounts/templates/accounts/partials/_ninja_login_card.html": "58a52d981a3751d4",
     "accounts/templates/accounts/register_check_inbox.html": "a7d436b31778e729",
-    "accounts/templates/accounts/register_guardian.html": "662bfd4544f7018a",
+    "accounts/templates/accounts/register_guardian.html": "b30c62d0ac272346",
     "accounts/templates/accounts/security.html": "93f8070b8156b3c2",
     "content/templates/content/partials/_promotion_banner.html": "1ef59e3fa98820c0",
     "content/templates/content/partials/_promotion_hero.html": "af580d48a777e3ae",
@@ -94,7 +94,7 @@
    },
    "templates": {
     "accounts/templates/accounts/child_detail.html": "2a51f42bd898418d",
-    "accounts/templates/accounts/login.html": "43c19104173a486d",
+    "accounts/templates/accounts/login.html": "724fc598ce501947",
     "accounts/templates/accounts/partials/_badge_card.html": "694d0721544fa7b9",
     "accounts/templates/accounts/partials/_badges_page.html": "561ad9696fda698b",
     "accounts/templates/accounts/partials/_child_avatar.html": "70676cb787eec5d9",
@@ -120,11 +120,13 @@
     "/dojos/51/manage/team/",
     "/register/",
     "/register/dojo/",
-    "/register/helper/"
+    "/register/helper/",
+    "/register/individual/"
    ],
    "views": {
     "accounts/views/family.py:account_home": "9c4245e27f2df4b5",
     "accounts/views/signup.py:register": "1b2f40ffd410cea0",
+    "accounts/views/signup.py:register_individual": "fbffbba27f60a7ca",
     "applications/views.py:register_dojo": "1948ff5a381ae252",
     "applications/views.py:register_helper": "bab5afaaff0164e2",
     "applications/views.py:renew_background_check": "395a29a648e8668a",
@@ -136,7 +138,9 @@
     "dojos/views/team_pages.py:dojo_team_manage": "35a550c2ee0198e4"
    },
    "templates": {
-    "accounts/templates/accounts/register.html": "14f1b98b670c5196",
+    "accounts/templates/accounts/register.html": "7909e902d7449048",
+    "accounts/templates/accounts/register_check_inbox.html": "a7d436b31778e729",
+    "accounts/templates/accounts/register_individual.html": "8bea52e18ab6b8fa",
     "applications/templates/applications/register_dojo.html": "40e0120675fcff17",
     "applications/templates/applications/register_helper.html": "d0519b51362b7acc",
     "applications/templates/applications/upload_background_check.html": "a83cfbc9ab8451c0",
@@ -155,7 +159,8 @@
     "dojos/templates/dojos/partials/_event_promotions.html": "e78e2b58d21b130d",
     "dojos/templates/dojos/partials/_mentor_avatar.html": "f4bcbd2505baf894",
     "dojos/templates/dojos/partials/_translation_fields.html": "698c94d7ae1a3f3d",
-    "events/templates/events/partials/_audience_badge.html": "70a7a01c39560f2e"
+    "events/templates/events/partials/_audience_badge.html": "70a7a01c39560f2e",
+    "mailing/templates/mailing/partials/_privacy_explanation.html": "c9327ec702d441cb"
    }
   },
   "champion": {
@@ -229,7 +234,7 @@
     "applications/manage.py:check_list": "9bedc7717f672963"
    },
    "templates": {
-    "accounts/templates/accounts/login.html": "43c19104173a486d",
+    "accounts/templates/accounts/login.html": "724fc598ce501947",
     "applications/templates/applications/manage/_check_status.html": "432d2b35d7a792ae",
     "applications/templates/applications/manage/_check_table.html": "e4a4632d72a8ca6a",
     "applications/templates/applications/manage/application_detail.html": "84ffb5a6fefaf6f5",

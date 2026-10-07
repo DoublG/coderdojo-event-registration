@@ -34,21 +34,38 @@
         <p class="label eyebrow">{% translate "For parents &amp; guardians" %}</p>
         <h2 class="heading-md">{% translate "Register your family" %}</h2>
         <p class="body-sm">{% translate "Create an account and add your children so they can join sessions at any dojo." %}</p>
-        <a class="label" href="{% url 'register_guardian' %}">{% translate "Get started →" %}</a>
+        {% url 'register_guardian' as register_guardian_url %}
+        {% if request.GET.next %}
+          {# Arrived via a login wall (e.g. signing up a child for an event): carry on there once the account exists. #}
+          <a class="label" href="{{ register_guardian_url }}?next={{ request.GET.next|urlencode }}">{% translate "Get started →" %}</a>
+        {% else %}
+          <a class="label" href="{{ register_guardian_url }}">{% translate "Get started →" %}</a>
+        {% endif %}
       </div>
 
       <div class="cd-card choice-card">
         <p class="label eyebrow">{% translate "For organisers" %}</p>
         <h2 class="heading-md">{% translate "Start a new dojo" %}</h2>
         <p class="body-sm">{% translate "Bring CoderDojo to your city — tell us about your venue and we'll help you get set up." %}</p>
-        <a class="label" href="{% url 'register_dojo' %}">{% translate "Apply to start a dojo →" %}</a>
+        {% url 'register_dojo' as register_dojo_url %}
+        {% if request.user.is_authenticated %}
+          <a class="label" href="{{ register_dojo_url }}">{% translate "Apply to start a dojo →" %}</a>
+        {% else %}
+          {# No account yet, and no children to register: create one here, then straight on to the application. #}
+          <a class="label" href="{% url 'register_individual' %}?next={{ register_dojo_url|urlencode }}">{% translate "Apply to start a dojo →" %}</a>
+        {% endif %}
       </div>
 
       <div class="cd-card choice-card">
         <p class="label eyebrow">{% translate "For volunteers" %}</p>
         <h2 class="heading-md">{% translate "Become a mentor or volunteer" %}</h2>
         <p class="body-sm">{% translate "Help out at an existing dojo — no teaching experience required, just a Saturday morning." %}</p>
-        <a class="label" href="{% url 'register_helper' %}">{% translate "Apply to volunteer →" %}</a>
+        {% url 'register_helper' as register_helper_url %}
+        {% if request.user.is_authenticated %}
+          <a class="label" href="{{ register_helper_url }}">{% translate "Apply to volunteer →" %}</a>
+        {% else %}
+          <a class="label" href="{% url 'register_individual' %}?next={{ register_helper_url|urlencode }}">{% translate "Apply to volunteer →" %}</a>
+        {% endif %}
       </div>
     </div>
 

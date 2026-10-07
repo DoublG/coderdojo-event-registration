@@ -57,4 +57,5 @@ from .signup import (  # noqa: F401
     _create_ninjas,
     register,
     register_guardian,
+    register_individual,
 )

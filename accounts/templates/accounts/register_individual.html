@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-{% load i18n %}
+{% load i18n help_centre %}
 {% block title %}{% translate "Register" %} · CoderDojo Belgium{% endblock %}
 {% block root_class %}register-root{% endblock %}
 {% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
@@ -21,8 +21,22 @@
 
 {% block content %}
   <div class="page">
-    <h1 class="display-lg page-title">{% translate "Register for a dojo" %}</h1>
-    <p class="body-lg page-subtitle">{% translate "Create an account to register your children" %}</p>
+    <h1 class="display-lg page-title">{% translate "Create your account" %}</h1>
+    <p class="body-lg page-subtitle">{% translate "No children to register? Create an account to apply to start a dojo or volunteer." %}</p>
+    <p class="body-sm register-alt-link">{% translate "Signing up as a parent or guardian instead?" %} <a href="{% url 'register_guardian' %}">{% translate "Register your family" %}</a></p>
+    {% url 'register_dojo' as register_dojo_url %}
+    {% url 'register_helper' as register_helper_url %}
+    {% help_url "volunteering/start-a-new-dojo" as dojo_help %}
+    {% help_url "volunteering/become-a-mentor-or-volunteer" as mentor_help %}
+    <p class="body-sm register-alt-link">
+      {% if next == register_dojo_url %}
+        {% blocktranslate %}What happens after you apply? Read <a href="{{ dojo_help }}">Starting a new dojo</a> in our help centre.{% endblocktranslate %}
+      {% elif next == register_helper_url %}
+        {% blocktranslate %}What happens after you apply? Read <a href="{{ mentor_help }}">Becoming a mentor or volunteer</a> in our help centre.{% endblocktranslate %}
+      {% else %}
+        {% blocktranslate %}What happens after you apply? Our help centre explains <a href="{{ dojo_help }}">starting a new dojo</a> and <a href="{{ mentor_help }}">becoming a mentor or volunteer</a>.{% endblocktranslate %}
+      {% endif %}
+    </p>
 
     <div class="form-card">
       <form class="cd-form" id="registration-form-page" method="post" novalidate>
@@ -38,7 +52,7 @@
         {% endif %}
 
         <div class="cd-form__group">
-          <h2 class="cd-form__group-title heading-md">{% translate "Your details (parent/guardian)" %}</h2>
+          <h2 class="cd-form__group-title heading-md">{% translate "Your details" %}</h2>
           <div class="cd-form__row">
             {{ form.name.as_field_group }}
             {{ form.email.as_field_group }}
@@ -54,17 +68,10 @@
             {{ form.postal_code.as_field_group }}
             {{ form.preferred_language.as_field_group }}
           </div>
-          {{ form.consent.as_field_group }}
-          <div class="cd-form__checkbox-row">
-            {{ form.child_data_mail }}
-            <label class="body-sm" for="{{ form.child_data_mail.id_for_label }}">{% include "accounts/partials/_child_data_consent.html" %} <span class="caption">{% translate "Optional; you can change it for each child on your Mail preferences page." %}</span></label>
-          </div>
           {{ form.newsletter.as_field_group }}
           {% include "mailing/partials/_privacy_explanation.html" with short=True %}
           <p class="caption">{% translate "You can change this, and which other mails you get, on your account's Mail preferences page." %}</p>
         </div>
-
-        {% include "accounts/partials/_child_rows_fieldset.html" %}
 
         <div class="cd-form__actions">
           <a class="cd-btn cd-btn--ghost label" href="{% url 'register' %}">{% translate "Cancel" %}</a>
@@ -74,8 +81,4 @@
       </form>
     </div>
   </div>
-{% endblock %}
-
-{% block extra_script %}
-{% include "accounts/partials/_child_rows_script.html" %}
 {% endblock %}

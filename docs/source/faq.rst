@@ -21,9 +21,10 @@ I forgot my password — what do I do?
     email. See :doc:`families/managing-your-account`.
 
 Do I need an account to apply to volunteer or start a dojo?
-    No — those applications (and the background check upload, if you're
-    asked for one) don't require logging in. An account is only created
-    for you once you're approved. See
+    Yes, you apply from your own account. You don't need children for it:
+    **Get involved** → **Start a new dojo** or **Become a mentor or
+    volunteer** lets you create an account with just your own details and
+    takes you straight on to the application. See
     :doc:`volunteering/become-a-mentor-or-volunteer` and
     :doc:`volunteering/start-a-new-dojo`.
 

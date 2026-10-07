@@ -180,6 +180,10 @@ STEPS = {
             "Vrijwilliger worden",
             "De aanmeldpagina legt de mogelijkheden uit: een gezinsaccount, helpen in een dojo als mentor, of een dojo starten als champion. Vrijwilligers gebruiken eerst een gewoon account.",
         ),
+        "sign-up": (
+            "Een account zonder kinderen",
+            "Wie geen kinderen in te schrijven heeft, krijgt een korte aanmelding: je gegevens en hoe je inlogt, niets over kinderen. Zodra het account er is, ga je meteen verder naar de aanvraag die je koos.",
+        ),
         "apply-mentor": (
             "Aanvragen om mentor te worden",
             "Ingelogd kan elke volwassene aanvragen om mentor te worden: eventueel met een dojo, vaardigheden en beschikbaarheid, en akkoord met het uittreksel uit het strafregister. De goedkeuring als mentor geldt één keer per account, niet per dojo.",

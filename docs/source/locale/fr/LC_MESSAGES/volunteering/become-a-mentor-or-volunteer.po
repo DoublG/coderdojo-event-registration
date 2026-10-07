@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 06:26+0000\n"
+"POT-Creation-Date: 2026-10-07 00:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -37,22 +37,27 @@ msgstr ""
 
 #: ../../source/volunteering/become-a-mentor-or-volunteer.rst:8
 msgid ""
-"You apply with your own CoderDojo account: if you don't have one yet, "
-"create one first (the same kind of account families use), then log in. "
-"Your application, background check and the dojos you help at all stay on "
-"that one login."
+"You apply with your own CoderDojo account. Don't have one yet? Go to "
+"**Get involved** and choose **Become a mentor or volunteer**: you first "
+"create an account with just your own details (no children needed), and go"
+" straight on to the application. If you already have an account, for "
+"example as a parent, log in and use that one. Your application, "
+"background check and the dojos you help at all stay on that one login."
 msgstr ""
-"Vous posez votre candidature avec votre propre compte CoderDojo : si vous"
-" n'en avez pas encore, créez-en un d'abord (le même type de compte que "
-"celui des familles), puis connectez-vous. Votre candidature, votre "
-"vérification d'antécédents et les dojos où vous aidez restent tous liés à"
-" cet unique identifiant."
+"Vous posez votre candidature avec votre propre compte CoderDojo. Vous n'en "
+"avez pas encore ? Allez sur **Participer** et choisissez **Devenir mentor "
+"ou bénévole** : vous créez d'abord un compte avec uniquement vos propres "
+"coordonnées (pas besoin d'enfants), puis vous passez directement à la "
+"candidature. Si vous avez déjà un compte, par exemple en tant que parent, "
+"connectez-vous et utilisez-le. Votre candidature, votre extrait de casier "
+"judiciaire et les dojos où vous aidez restent tous liés à cet unique "
+"identifiant."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:13
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:15
 msgid "To apply:"
 msgstr "Pour poser votre candidature :"
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:15
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:17
 msgid ""
 "Log in and choose **Apply to volunteer** from your account menu (or **Get"
 " involved** → **Become a mentor or volunteer**). Your name and email come"
@@ -63,7 +68,7 @@ msgstr ""
 "et votre adresse e-mail proviennent de votre compte ; ajoutez un numéro "
 "de téléphone si vous le souhaitez."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:18
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:20
 msgid ""
 "Pick a dojo if you already have one in mind, or leave it as \"not sure "
 "yet\" if you're open to any."
@@ -71,7 +76,7 @@ msgstr ""
 "Choisissez un dojo si vous en avez déjà un en tête, ou laissez « pas "
 "encore sûr » si vous êtes ouvert·e à n'importe lequel."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:20
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:22
 msgid ""
 "Choose your role — volunteer mentor, or something else (board, events, "
 "comms)."
@@ -79,13 +84,13 @@ msgstr ""
 "Choisissez votre rôle : mentor bénévole, ou autre chose (conseil "
 "d'administration, événements, communication)."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:22
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:24
 msgid "Tell us a bit about yourself — skills, interests, availability."
 msgstr ""
 "Parlez-nous un peu de vous : compétences, centres d'intérêt, "
 "disponibilités."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:23
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:25
 msgid ""
 "Confirm you understand a background check will be required (see :doc"
 ":`background-check`) and submit."
@@ -93,11 +98,11 @@ msgstr ""
 "Confirmez que vous comprenez qu'une vérification d'antécédents sera "
 "nécessaire (voir :doc:`background-check`) et envoyez le formulaire."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:27
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:29
 msgid "What happens next"
 msgstr "Et ensuite ?"
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:29
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:31
 msgid ""
 "A CoderDojo Belgium admin looks at your application and emails you a link"
 " to upload your background check document (see :doc:`background-check`). "
@@ -112,7 +117,7 @@ msgstr ""
 "c'est le cas. La section **Bénévolat** de la page de votre compte indique"
 " où vous en êtes à chaque étape."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:35
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:37
 msgid ""
 "Once you're approved, you join a dojo's team through the dojo itself: if "
 "you picked a dojo in your application, a request to join its team is sent"
@@ -127,7 +132,7 @@ msgstr ""
 " ou l'un de ses mentors accepte votre demande, et le tableau de bord du "
 "dojo vous est alors ouvert."
 
-#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:41
+#: ../../source/volunteering/become-a-mentor-or-volunteer.rst:43
 msgid ""
 "Want to help at another dojo too? You don't need to apply again: choose "
 "**Help at another dojo** from your account menu, find the dojo and ask to"
@@ -208,4 +213,23 @@ msgstr ""
 #~ " de bénévole est désormais actif —"
 #~ " sans nouveau mot de passe "
 #~ "nécessaire."
+
+#~ msgid ""
+#~ "You apply with your own CoderDojo "
+#~ "account: if you don't have one "
+#~ "yet, create one first (the same "
+#~ "kind of account families use), then "
+#~ "log in. Your application, background "
+#~ "check and the dojos you help at"
+#~ " all stay on that one login."
+#~ msgstr ""
+#~ "Vous posez votre candidature avec votre"
+#~ " propre compte CoderDojo : si vous"
+#~ " n'en avez pas encore, créez-en "
+#~ "un d'abord (le même type de compte"
+#~ " que celui des familles), puis "
+#~ "connectez-vous. Votre candidature, votre "
+#~ "vérification d'antécédents et les dojos "
+#~ "où vous aidez restent tous liés à"
+#~ " cet unique identifiant."
 

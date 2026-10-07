@@ -180,6 +180,10 @@ STEPS = {
             "Devenir bénévole",
             "La page d'inscription présente les possibilités : un compte famille, aider dans un dojo comme mentor, ou lancer un dojo comme champion. Les bénévoles utilisent d'abord un compte ordinaire.",
         ),
+        "sign-up": (
+            "Un compte sans enfants",
+            "Sans enfants à inscrire, on dispose d'une inscription courte : vos coordonnées et votre manière de vous connecter, rien sur des enfants. Une fois le compte créé, vous passez directement à la candidature choisie.",
+        ),
         "apply-mentor": (
             "Poser sa candidature comme mentor",
             "Une fois connecté, tout adulte peut poser sa candidature comme mentor : éventuellement avec un dojo, ses compétences et ses disponibilités, en acceptant l'extrait de casier judiciaire. L'approbation comme mentor vaut une fois par compte, pas par dojo.",

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-24 06:26+0000\n"
+"POT-Creation-Date: 2026-10-07 00:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -27,15 +27,20 @@ msgstr "Een nieuwe dojo starten"
 #: ../../source/volunteering/start-a-new-dojo.rst:4
 msgid ""
 "Bringing CoderDojo to a new city or town starts with an application from "
-"your own CoderDojo account: if you don't have one yet, create one first "
-"(the same kind of account families use), then log in."
+"your own CoderDojo account. Don't have one yet? Go to **Get involved** "
+"and choose **Start a new dojo**: you first create an account with just "
+"your own details (no children needed), and go straight on to the "
+"application. If you already have an account, for example as a parent, log"
+" in and use that one."
 msgstr ""
 "CoderDojo naar een nieuwe stad of gemeente brengen begint met een "
-"aanmelding vanuit uw eigen CoderDojo-account: hebt u er nog geen, maak er"
-" dan eerst een aan (hetzelfde soort account dat gezinnen gebruiken) en "
-"log in."
+"sollicitatie vanuit uw eigen CoderDojo-account. Hebt u er nog geen? Ga naar "
+"**Doe mee** en kies **Start een nieuwe dojo**: u maakt eerst een account "
+"aan met alleen uw eigen gegevens (kinderen zijn niet nodig) en gaat meteen "
+"verder naar de sollicitatie. Hebt u al een account, bijvoorbeeld als ouder, "
+"log dan in en gebruik dat."
 
-#: ../../source/volunteering/start-a-new-dojo.rst:8
+#: ../../source/volunteering/start-a-new-dojo.rst:10
 msgid ""
 "Log in and choose **Apply to start a dojo** from your account menu (or "
 "**Get involved** → **Start a new dojo**). Your name and email come from "
@@ -45,7 +50,7 @@ msgstr ""
 "**Een nieuwe dojo starten**). Uw naam en e-mailadres komen uit uw "
 "account; voeg eventueel een telefoonnummer toe."
 
-#: ../../source/volunteering/start-a-new-dojo.rst:11
+#: ../../source/volunteering/start-a-new-dojo.rst:13
 msgid ""
 "Tell us the area/city the dojo would run in, your preferred schedule "
 "(e.g. \"Saturday mornings\"), and a proposed venue if you have one."
@@ -54,7 +59,7 @@ msgstr ""
 "voorkeursschema (bv. \"zaterdagvoormiddag\") en een voorgestelde locatie,"
 " indien u die al hebt."
 
-#: ../../source/volunteering/start-a-new-dojo.rst:13
+#: ../../source/volunteering/start-a-new-dojo.rst:15
 msgid ""
 "Add any relevant experience, a connection at the venue, or anything else "
 "useful for us to know."
@@ -62,7 +67,7 @@ msgstr ""
 "Vermeld relevante ervaring, een contact bij de locatie, of iets anders "
 "dat nuttig voor ons is om te weten."
 
-#: ../../source/volunteering/start-a-new-dojo.rst:15
+#: ../../source/volunteering/start-a-new-dojo.rst:17
 msgid ""
 "Confirm you understand sessions are free and volunteer-run, and that a "
 "background check will be required (see :doc:`background-check`) since a "
@@ -74,11 +79,11 @@ msgstr ""
 "rechtstreeks contact heeft met minderjarigen — en verstuur dan het "
 "formulier."
 
-#: ../../source/volunteering/start-a-new-dojo.rst:20
+#: ../../source/volunteering/start-a-new-dojo.rst:22
 msgid "What happens next"
 msgstr "Wat gebeurt er daarna?"
 
-#: ../../source/volunteering/start-a-new-dojo.rst:22
+#: ../../source/volunteering/start-a-new-dojo.rst:24
 msgid ""
 "A CoderDojo Belgium admin looks at your application and emails you a link"
 " to upload your background check document (see :doc:`background-check`). "
@@ -91,7 +96,7 @@ msgstr ""
 "aanvaard, krijgt u een e-mail en verschijnt er een knop **Een dojo "
 "aanmaken** op uw accountpagina."
 
-#: ../../source/volunteering/start-a-new-dojo.rst:27
+#: ../../source/volunteering/start-a-new-dojo.rst:29
 msgid ""
 "Creating your dojo makes you its **champion**. It starts as a **draft**, "
 "hidden from the public site, while you fill in its profile, add your team"
@@ -164,4 +169,20 @@ msgstr ""
 #~ "u kunt de pagina van uw dojo "
 #~ "beheren en de sessies ervan runnen "
 #~ "— zie :doc:`../dojo-team/running-a-session`."
+
+#~ msgid ""
+#~ "Bringing CoderDojo to a new city "
+#~ "or town starts with an application "
+#~ "from your own CoderDojo account: if "
+#~ "you don't have one yet, create one"
+#~ " first (the same kind of account "
+#~ "families use), then log in."
+#~ msgstr ""
+#~ "CoderDojo naar een nieuwe stad of "
+#~ "gemeente brengen begint met een "
+#~ "aanmelding vanuit uw eigen CoderDojo-"
+#~ "account: hebt u er nog geen, maak"
+#~ " er dan eerst een aan (hetzelfde "
+#~ "soort account dat gezinnen gebruiken) en"
+#~ " log in."
 

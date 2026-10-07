@@ -42,6 +42,11 @@ straight to your family's page, signed in. With a login link, we mail you
 your first link: open it within 3 days to log in for the first time, which
 also confirms your email address.
 
+If you were signing a child up for a session when we asked you to log in,
+and created your account from there (**New to CoderDojo? Create an
+account**), you're taken back to that session's sign-up page instead, so
+you can finish signing up. With a login link, that happens when you open it.
+
 .. note::
 
    Only a parent or legal guardian should create the family account and

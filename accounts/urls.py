@@ -30,6 +30,7 @@ urlpatterns = [
     path("password-reset/complete/", views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
     path("register/", views.register, name="register"),
     path("register/guardian/", views.register_guardian, name="register_guardian"),
+    path("register/individual/", views.register_individual, name="register_individual"),
     path("account/", views.account_home, name="account_home"),
     path("account/security/", security_views.security, name="account_security"),
     path("account/security/app/", security_views.security_app, name="account_security_app"),

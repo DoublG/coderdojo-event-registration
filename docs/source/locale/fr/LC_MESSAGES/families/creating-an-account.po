@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 11:54+0000\n"
+"POT-Creation-Date: 2026-10-07 00:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -142,7 +142,21 @@ msgstr ""
 "envoyons votre premier lien : ouvrez-le dans les 3 jours pour vous "
 "connecter la première fois, ce qui confirme aussi votre adresse e-mail."
 
-#: ../../source/families/creating-an-account.rst:47
+#: ../../source/families/creating-an-account.rst:45
+msgid ""
+"If you were signing a child up for a session when we asked you to log in,"
+" and created your account from there (**New to CoderDojo? Create an "
+"account**), you're taken back to that session's sign-up page instead, so "
+"you can finish signing up. With a login link, that happens when you open "
+"it."
+msgstr ""
+"Si vous inscriviez un enfant à une session quand nous vous avons demandé de "
+"vous connecter, et que vous avez créé votre compte à partir de là "
+"(**Nouveau chez CoderDojo ? Créer un compte**), vous revenez ensuite à la "
+"page d'inscription de cette session pour terminer l'inscription. Avec un "
+"lien de connexion, cela se fait quand vous l'ouvrez."
+
+#: ../../source/families/creating-an-account.rst:52
 msgid ""
 "Only a parent or legal guardian should create the family account and add "
 "children to it — you'll be asked to confirm this when registering. The "
@@ -153,7 +167,7 @@ msgstr ""
 "e-mail utilisée pour l'inscription ne peut pas déjà être utilisée par un "
 "autre compte."
 
-#: ../../source/families/creating-an-account.rst:51
+#: ../../source/families/creating-an-account.rst:56
 msgid ""
 "Once your account exists, see :doc:`../families/finding-a-dojo` to find a"
 " session, or go straight to :doc:`../families/managing-your-account` to "

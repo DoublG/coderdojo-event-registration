@@ -39,6 +39,7 @@ PERSONAS = {
         "/pathways/1/",
         "/register/",
         "/register/guardian/",
+        "/register/individual/",
         "/login/",
         "/login/link/",
         "/password-reset/",

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 11:54+0000\n"
+"POT-Creation-Date: 2026-10-07 00:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -138,7 +138,21 @@ msgstr ""
 "een inloglink mailen we je je eerste link: open hem binnen 3 dagen om je "
 "de eerste keer aan te melden, waarmee je ook je e-mailadres bevestigt."
 
-#: ../../source/families/creating-an-account.rst:47
+#: ../../source/families/creating-an-account.rst:45
+msgid ""
+"If you were signing a child up for a session when we asked you to log in,"
+" and created your account from there (**New to CoderDojo? Create an "
+"account**), you're taken back to that session's sign-up page instead, so "
+"you can finish signing up. With a login link, that happens when you open "
+"it."
+msgstr ""
+"Was je een kind aan het inschrijven voor een sessie toen we je vroegen om "
+"in te loggen, en heb je van daaruit je account gemaakt (**Nieuw bij "
+"CoderDojo? Maak een account aan**), dan kom je daarna terug op de "
+"inschrijfpagina van die sessie, zodat je de inschrijving kunt afronden. Met "
+"een loginlink gebeurt dat wanneer je die opent."
+
+#: ../../source/families/creating-an-account.rst:52
 msgid ""
 "Only a parent or legal guardian should create the family account and add "
 "children to it — you'll be asked to confirm this when registering. The "
@@ -149,7 +163,7 @@ msgstr ""
 "e-mailadres waarmee je je registreert mag nog niet in gebruik zijn bij "
 "een ander account."
 
-#: ../../source/families/creating-an-account.rst:51
+#: ../../source/families/creating-an-account.rst:56
 msgid ""
 "Once your account exists, see :doc:`../families/finding-a-dojo` to find a"
 " session, or go straight to :doc:`../families/managing-your-account` to "
