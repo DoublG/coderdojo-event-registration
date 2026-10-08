@@ -40,10 +40,13 @@
 #   3. Reloads the live gunicorn (graceful HUP, same mechanism
 #      scripts/deploy.sh uses for a code deploy) and warm-restarts both
 #      Celery workers, so nothing is left reading the old database.
-#   4. Verifies via /metrics/ (table row counts) that the live site is
+#   4. Clears the cache (db 0), which still holds the other database's
+#      content (on 8 Oct 2026 the real site showed the test data's pathways
+#      after `restore` until the cache was cleared by hand).
+#   5. Verifies via /metrics/ (table row counts) that the live site is
 #      actually serving the new database, not the old one.
 #
-# `restore` does the same in reverse: copies the backup over .env, reloads,
+# `restore` does the same in reverse: copies the backup over .env, reloads, clears the cache,
 # restarts Celery, verifies, and removes the backup (so a stale backup can
 # never be mistaken for "still switched" later).
 #
@@ -167,6 +170,16 @@ for _ in $(seq 1 18); do
 done
 echo "workers didn't come back within 90s - check ~/logs/worker-*/" >&2
 exit 1
+REMOTE
+
+step "Clearing the cache (Redis db 0 only: the broker and Channels stay)"
+# The cache holds the other database's content (pathways, the dojo finder, a
+# dojo's public page): without this the site mixes both until it expires.
+"${SSH[@]}" bash -s <<'REMOTE'
+set -euo pipefail
+cd ~/app
+"$HOME/.pyenv/versions/py10102-3.14.7/bin/python" manage.py shell -v0 \
+    -c "from django.core.cache import cache; cache.clear(); print('cache cleared')"
 REMOTE
 
 step "Verifying what's actually live"
