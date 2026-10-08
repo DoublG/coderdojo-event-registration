@@ -20,14 +20,20 @@ from `loadtest/results/`.
   replaced files deleted, and the background-check document only as PDF, JPEG or PNG. Production's proxy
   still needs the same 12 MB body limit as the devcontainer.
 - **The whole application needs about 1.5 GB of memory at its peak** with 4 web workers: 750 MB web,
-  650 MB Celery (during the nightly rebuild) and under 50 MB Redis. Plan **2 GB** for the account.
+  650 MB Celery (during the nightly rebuild) and under 50 MB Redis. Plan **2 GB** for the account. On
+  Level27 the Celery component has its own ceiling of about 512 MB: since the rebuild works in batches
+  (8 October 2026) it stays under 400 MB even at the stretch scale ([Celery](#load-celery-workers-and-mail)).
 - **Two problems showed up under load, both fixed on 30 September 2026:**
   1. Signing up at the same moment **overbooked sessions** (25 confirmed places on a session of 22):
      sign-ups for a session now go one at a time.
   2. **Every request in progress holds its own database connection**, so a rush used up MySQL's 151
-     connections and a fifth of the requests failed. Each web worker now takes at most 25 requests at once
-     (`gunicorn.conf.py`); the overflow gets a quick "busy" answer instead of an error, and MySQL stays
-     far below its limit.
+     connections and a fifth of the requests failed. Each web worker now takes at most a fixed number of
+     requests at once (`gunicorn.conf.py`: 25 at first, 8 since 8 October 2026 against production's real
+     32 connections); the overflow gets a quick "busy" answer instead of an error, and MySQL stays under
+     its limit.
+- **The next five years (8 October 2026):** no production limit is reached in the `growth` scenario; in
+  `stretch` the database reaches about 60% of its limit and the rest stays under, with web traffic at that
+  size estimated rather than measured ([the next five years](#the-next-five-years-against-productions-limits-8-oct-2026)).
 - **Caching since 1 October 2026:** the public pages read their content from Redis and a logged-in page
   no longer looks up the account's roles and dojos on every request. A request now costs MySQL **a third
   fewer statements** (24.6 to 16.2), the public pages 1 query instead of 8 to 24, and with 2 web workers
@@ -463,6 +469,35 @@ number everything else below follows from.
 - **In short:** today's setup comfortably serves normal usage and degrades *safely*, not *incorrectly*,
   under a rush far heavier than anything realistic for this site's size — the worst a family sees in an
   overload moment is a friendly "try again in a moment" page, never a lost or duplicated booking.
+
+### The next five years against production's limits (8 Oct 2026)
+
+From the measurements on this page and production's limits, scenario by scenario after five years
+([Database growth](#database-growth)):
+
+| Limit on production | `growth`, 5 years | `stretch`, 5 years | Basis |
+|---|---|---|---|
+| Database size (about 5 GB, read off Level27's panel) | 1.25 GB (25%) | 3.0 GB (**60%**) | projection, mail text cleared after 12 months |
+| Celery memory (about 512 MB) | 380 to 410 MB | about 383 MB | **measured on production**: the batched rebuild at stretch, a campaign of 7,145 mails |
+| Sending mail (120 a minute, our own setting) | about 520 mails a day | about 1,240 a day, 10 minutes of sending | scenario × measured speed |
+| Database connections (32) and web traffic | well under | probably under | measured at `growth` after 1 year; `stretch` estimated |
+
+- **No limit is reached in the `growth` scenario.** In `stretch` probably none either, but there it's
+  partly an estimate.
+- **Web traffic:** measured, 300 people browsing and booking at once (about 60 requests a second) is
+  comfortable. Families mostly arrive through mail, which goes out at 120 a minute, so even a mail to all
+  12,000 families of `stretch` brings at most about 120 a minute: roughly 300 at once if every one of them
+  clicked straight away, realistically 100 to 150. Many families after the same session is the rush test,
+  handled safely ("try again in a moment", no errors, no overbooking).
+- **The uncertainties:** web traffic at `stretch` size isn't measured (5 times the sessions, 14 times the
+  bookings, so each page is somewhat heavier and the 300 may come down; the test would run on production
+  against the stretch copy, after raising the login limiter for one address and agreeing the rush with
+  Level27); the database limit is read off the panel; Level27's mail server limits and backup space are
+  unknown ([Questions for Level27](#questions-for-level27)).
+- **The first limit to come into view is the database size** at `stretch` (60%), and only as long as mail
+  text keeps being cleared after 12 months.
+- **Early warning:** the daily `CapacitySample` and `manage.py capacity_report` follow the database's size
+  and projection, Level27's panel the Celery memory: a sharp rise shows months ahead.
 
 ## Caching
 
