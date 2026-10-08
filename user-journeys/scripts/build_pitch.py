@@ -3,25 +3,72 @@
 The decks themselves live on claude.ai (links in user-journeys/README.md); this renders the same slide
 files to 1920x1080 pages with Chrome, so a copy sits next to the user journeys. Screenshots come
 from .shots/<lang>/ (made by the j_*.py scripts), cropped the way they were for the decks, and the
-Slides app's icons are drawn as simple line icons. Run: python build_pitch.py en|nl
+Slides app's icons are drawn as simple line icons. Run: python build_pitch.py en|nl [--print] [--office]
+
+--print writes a version for paper next to it (<name>-print.pdf): every slide on white, text in black
+or near-black, the accents darker, the cards outlined instead of shaded and no shadows, so it prints
+well in black and white too. The slides themselves don't change: the colours are swapped at build time.
+
+--office also writes <name>.odp for LibreOffice Impress (needs python-pptx and LibreOffice's soffice):
+each slide as one full-slide picture, exactly as in the PDF, with its speaker notes. The text isn't
+editable there and links don't click; edit the deck on claude.ai (or export it to PowerPoint from its
+Share menu) and rebuild.
 """
 
 import base64
+import html as html_lib
 import io
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 
 from PIL import Image
 from playwright.sync_api import sync_playwright
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-LANG = sys.argv[1] if len(sys.argv) > 1 else "en"
+ARGS = [a for a in sys.argv[1:] if not a.startswith("--")]
+LANG = ARGS[0] if ARGS else "en"
+PRINT = "--print" in sys.argv[1:]
+OFFICE = "--office" in sys.argv[1:]
 DECK = os.path.join(ROOT, "pitch-deck", LANG)
 SHOTS = os.path.join(ROOT, ".shots", LANG)
-OUT = os.path.join(ROOT, LANG, "pitch-deck.pdf" if LANG == "en" else "pitchdeck.pdf")
+OUT = os.path.join(
+    ROOT, LANG, ("pitch-deck" if LANG == "en" else "pitchdeck") + ("-print" if PRINT else "") + ".pdf"
+)
+
+# --print: the deck's palette → black-and-white-safe colours on white. Dark and coloured slides become
+# white (the section's own background, first in its style), cards get an outline instead of a tint,
+# light text turns black, the orange and blue accents get dark enough to read as near-black in grey.
+SECTION_BACKGROUND = re.compile(r'(<section[^>]*?style="[^"]*?)background:#[0-9a-fA-F]{6}')
+CARD = "background:#ffffff;border:2px solid #333333"
+PRINT_COLOURS = [
+    ("background:#27404c", CARD),
+    ("background:#f7f8fa", CARD),
+    ("background:#c94823", CARD),
+    ("color:#f3f5f7", "color:#000000"),
+    ("color:#d5dbe1", "color:#000000"),
+    ("color:#ffffff", "color:#000000"),
+    ("color:#edc043", "color:#000000"),
+    ("color:#1c2733", "color:#000000"),
+    ("color:#56606c", "color:#262626"),
+    ("color:#9aa5af", "color:#333333"),
+    ("color:#c94823", "color:#8f2f12"),
+    ("color:#1b5fa8", "color:#0f3d70"),
+    ("border:1px solid #e2e6eb", "border:1px solid #6b6b6b"),
+]
+SHADOW = re.compile(r"box-shadow:[^;\"]*")
+
+
+def for_print(html):
+    html = SECTION_BACKGROUND.sub(r"\1background:#ffffff", html, count=1)
+    for old, new in PRINT_COLOURS:
+        html = html.replace(old, new)
+    return SHADOW.sub("box-shadow:none", html)
 
 # Each screenshot's asset id in the deck → the journey screenshot it was cropped from.
 IMAGES = {
@@ -105,11 +152,12 @@ def main():
         html = open(os.path.join(DECK, "slides", f"{slide_id}.html")).read()
         html = re.sub(r"/_blob/([0-9a-f]{32})", lambda m: images[m.group(1)], html)
         html = re.sub(r'<x-icon name="(\w+)" style="([^"]*)"></x-icon>', icon, html)
-        slides.append(html)
+        slides.append(for_print(html) if PRINT else html)
     fonts = "".join(f'<link rel="stylesheet" href="{face["href"]}">' for face in deck["faces"].values())
+    css = CSS + ("th, td { border-bottom-color: #6b6b6b; }" if PRINT else "")
     doc = (
         f"<!doctype html><html lang='{LANG}'><head><meta charset='utf-8'><title>{deck['title']}</title>"
-        f"{fonts}<style>{CSS}</style></head><body>{''.join(slides)}</body></html>"
+        f"{fonts}<style>{css}</style></head><body>{''.join(slides)}</body></html>"
     )
     with sync_playwright() as pw:
         browser = pw.chromium.launch(channel="chrome")
@@ -117,8 +165,48 @@ def main():
         page.set_content(doc, wait_until="networkidle")
         page.evaluate("document.fonts.ready")
         page.pdf(path=OUT, width="1920px", height="1080px", print_background=True, prefer_css_page_size=True)
+        pictures = []
+        if OFFICE:
+            sections = page.locator("section")
+            pictures = [sections.nth(i).screenshot(type="jpeg", quality=90) for i in range(sections.count())]
         browser.close()
     print(OUT)
+    if OFFICE:
+        print(office(pictures, [notes(s) for s in slides]))
+
+
+def notes(slide_html):
+    """A slide's speaker notes: the plain text of its <aside>."""
+    match = re.search(r"<aside>(.*?)</aside>", slide_html, re.S)
+    return html_lib.unescape(re.sub(r"<[^>]+>", "", match.group(1))).strip() if match else ""
+
+
+def office(pictures, slide_notes):
+    """The rendered slides as a LibreOffice Impress file: a .pptx built here, converted by soffice."""
+    from pptx import Presentation
+    from pptx.util import Emu
+
+    soffice = shutil.which("soffice")
+    if not soffice:
+        raise SystemExit("--office needs LibreOffice's soffice on the PATH")
+    prs = Presentation()
+    prs.slide_width, prs.slide_height = Emu(12192000), Emu(6858000)  # 16:9, as 1920x1080
+    for picture, text in zip(pictures, slide_notes, strict=True):
+        slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank
+        slide.shapes.add_picture(io.BytesIO(picture), 0, 0, prs.slide_width, prs.slide_height)
+        if text:
+            slide.notes_slide.notes_text_frame.text = text
+    target = os.path.splitext(OUT)[0] + ".odp"
+    with tempfile.TemporaryDirectory() as tmp:
+        pptx = os.path.join(tmp, os.path.basename(os.path.splitext(OUT)[0]) + ".pptx")
+        prs.save(pptx)
+        subprocess.run(
+            [soffice, "--headless", "--convert-to", "odp", "--outdir", tmp, pptx],
+            check=True,
+            capture_output=True,
+        )
+        shutil.move(os.path.splitext(pptx)[0] + ".odp", target)
+    return target
 
 
 if __name__ == "__main__":

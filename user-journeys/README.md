@@ -11,14 +11,20 @@ One PDF per persona, walking through the site with screenshots, in English (`en/
 | 5 | Background-check reviewer / beoordelaar / évaluateur | [en/5-reviewer-journey.pdf](en/5-reviewer-journey.pdf) | [nl/5-beoordelaar.pdf](nl/5-beoordelaar.pdf) | [fr/5-evaluateur.pdf](fr/5-evaluateur.pdf) |
 | 6 | Organisation admin / beheerder / administrateur | [en/6-organisation-journey.pdf](en/6-organisation-journey.pdf) | [nl/6-organisatie.pdf](nl/6-organisatie.pdf) | [fr/6-organisation.pdf](fr/6-organisation.pdf) |
 | | **Pitch deck**: the journeys plus facts and figures about the development | [en/pitch-deck.pdf](en/pitch-deck.pdf) | [nl/pitchdeck.pdf](nl/pitchdeck.pdf) | (not yet) |
+| | Pitch deck **for printing** (white, high contrast, fine in black and white) | [en/pitch-deck-print.pdf](en/pitch-deck-print.pdf) | [nl/pitchdeck-print.pdf](nl/pitchdeck-print.pdf) | |
+| | Pitch deck for **LibreOffice Impress** (screen / print) | [en/pitch-deck.odp](en/pitch-deck.odp), [print](en/pitch-deck-print.odp) | [nl/pitchdeck.odp](nl/pitchdeck.odp), [print](nl/pitchdeck-print.odp) | |
 
 The pitch decks are Slides artifacts on claude.ai (private until shared from their Share menu, which
 also exports them to PowerPoint): [English](https://claude.ai/artifact/LDyAfN3vCf5RdS8oxhTDPt),
 [Nederlands](https://claude.ai/artifact/RDPZX7Ua73bKdzqvpifhqa). `pitch-deck/<lang>/` is a copy of their
 slide files, and `python scripts/build_pitch.py en|nl` renders that copy to the PDFs here (the
 screenshots come from `.shots/`, so run the journeys first; icons are drawn as simple line icons). A
-change made in the artifact needs copying back into `pitch-deck/` before rebuilding. The last slide's
-"ask" is still placeholders in brackets.
+change made in the artifact needs copying back into `pitch-deck/` before rebuilding. Add `--print` for the
+paper version (the deck's colours swapped at build time: every slide white, text black or near-black,
+darker accents, outlined cards, no shadows) and `--office` for a LibreOffice Impress `.odp` next to the
+PDF (each slide as one full-slide picture with its speaker notes, so the text can't be edited there and
+links don't click; needs `python-pptx` in the venv and LibreOffice's `soffice`). To rebuild everything:
+`for a in "en" "nl" "en --print" "nl --print"; do python scripts/build_pitch.py $a --office; done`.
 
 Alongside them, **[technical-foundation-and-data-model.pdf](technical-foundation-and-data-model.pdf)**
 explains how the site is built, how its data fits together and why: a summary of `DATA_MODEL.md` and
@@ -43,7 +49,7 @@ From the host (the scripts go through nginx at `https://coolregistration.localho
 browser), with the devcontainer stack up and `seed_credentials.csv` in the repo root:
 
 ```sh
-python3 -m venv /tmp/uj-venv && /tmp/uj-venv/bin/pip install playwright pillow pyotp
+python3 -m venv /tmp/uj-venv && /tmp/uj-venv/bin/pip install playwright pillow pyotp python-pptx
 cd user-journeys/scripts
 for lang in en nl fr; do
   for j in parent ninja volunteer champion reviewer org; do JLANG=$lang /tmp/uj-venv/bin/python j_$j.py; done

@@ -1,0 +1,26 @@
+<section id="capacity" data-transition="fade" style="background:#ffffff;color:#1c2733;font-family:'Nunito', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:20px">
+<p style="font-size:28px;font-weight:700;color:#c94823">Performance</p>
+<h2 style="font-family:'Fredoka', Arial, sans-serif;font-size:64px;font-weight:600;line-height:1.15">What the platform handles today</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:8px;background:#f7f8fa;padding:40px;border-radius:16px">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1.05;color:#c94823">300</p>
+<p style="font-size:26px;line-height:1.35;color:#56606c">people browsing and booking at the same moment: 98% answered straight away, no errors</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#f7f8fa;padding:40px;border-radius:16px">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1.05;color:#c94823">500</p>
+<p style="font-size:26px;line-height:1.35;color:#56606c">families rushing the same five sessions in two minutes: 83% answered at once, the rest asked to try again</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#f7f8fa;padding:40px;border-radius:16px">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1.05;color:#1b5fa8">0</p>
+<p style="font-size:26px;line-height:1.35;color:#56606c">server errors or overbooked sessions in these tests</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#f7f8fa;padding:40px;border-radius:16px">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1.05;color:#1b5fa8">0.1 s</p>
+<p style="font-size:26px;line-height:1.35;color:#56606c">for 95% of pages, measured through the live site</p>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.5;color:#56606c">Measured on 8 October 2026 within the real hosting limits: 3 web processes and 32 database connections, fixed by the hosting package. The platform keeps at most 24 of them busy and asks everyone else to wait a moment, so under pressure it gets slower, never unreliable.</p>
+<aside>Measured on 8 October 2026 on a copy of the site set up with production's exact limits (3 web workers, at most 8 requests each, 32 database connections), plus a test through the live demo domain. 300 users, each clicking every 2 to 8 seconds: 98.1% answered, 1.9% asked to retry, 95% of pages within 96 ms. Rush: 500 families on the same five sessions within two minutes: 83.4% of requests answered, 16.6% got the "try again in a moment" page, no server errors, no session overbooked (a lock on each session decides every booking in turn). Through the live domain: 95% of pages within 110 ms. The 32 connections are part of the hosting package and can't be raised, so more capacity comes from making each page lighter. Details in CAPACITY.md.</aside>
+</section>
