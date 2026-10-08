@@ -118,7 +118,12 @@
       "Bash(redis-cli -h 127.0.0.1 -p 6379 ping)",
       "Bash(curl -s -o /dev/null -w \"home status: %{http_code}\\\\n\" http://127.0.0.1:8765/)",
       "Bash(curl -sk -o /dev/null -w \"https proxy home status: %{http_code}\\\\n\" https://coolregistration.localhost/)",
-      "ClaudeInChromeDomain(coolregistration.localhost)"
+      "ClaudeInChromeDomain(coolregistration.localhost)",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "ClaudeInChromeDomain(github.com)",
+      "mcp__claude-in-chrome__tabs_create_mcp",
+      "mcp__claude-in-chrome__browser_batch",
+      "ClaudeInChromeDomain(app.level27.eu)"
     ],
     "additionalDirectories": [
       "/home/erik/coderdojo-event-registration/.devcontainer/certs/pki",
