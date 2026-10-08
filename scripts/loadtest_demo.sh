@@ -29,14 +29,23 @@
 #                        database's seed_credentials.csv copied as
 #                        seed_credentials-<host>-<db name>.csv), so
 #                        switching databases never overwrites another's.
+#   LOADTEST_MAIL_ENV   the file on the server, relative to its home, with
+#                        the mail settings for a test (default:
+#                        loadtest-mail-mailpit.env): EMAIL_HOST, EMAIL_PORT,
+#                        EMAIL_USE_TLS, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+#                        of the Mailpit component, and MAILING_BOUNCE_IMAP_HOST=
+#                        (empty: no bounce processing). Production sends real
+#                        mail; a test's database has made-up addresses, so
+#                        `switch` refuses to run without this file.
 #
 # What `switch` does, over SSH, on the server (never touches your machine):
 #   1. Backs up ~/app/.env to ~/app/.env.backup-before-loadtest (refuses to
 #      overwrite an existing backup -- run `restore` first if one's already
 #      there, so you never lose the real values).
 #   2. Edits only the DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD lines in
-#      place (sed), leaving every other setting -- SECRET_KEY, mail, Redis,
-#      everything -- untouched.
+#      place (sed), and points the mail at Mailpit with the settings in
+#      ~/$LOADTEST_MAIL_ENV, leaving every other setting -- SECRET_KEY,
+#      Redis, everything -- untouched.
 #   3. Reloads the live gunicorn (graceful HUP, same mechanism
 #      scripts/deploy.sh uses for a code deploy) and warm-restarts both
 #      Celery workers, so nothing is left reading the old database.
@@ -78,7 +87,7 @@ step "Checking connection"
 if [ "$CMD" = status ]; then
     "${SSH[@]}" bash -s <<'REMOTE'
 set -euo pipefail
-echo "~/app/.env currently points at: $(grep -E '^DB_NAME=' ~/app/.env | cut -d= -f2)"
+echo "~/app/.env currently points at: $(grep -E '^DB_NAME=' ~/app/.env | cut -d= -f2), mail via $(grep -E '^EMAIL_HOST=' ~/app/.env | cut -d= -f2)"
 if [ -f ~/app/.env.backup-before-loadtest ]; then
     echo "a backup exists (~/app/.env.backup-before-loadtest), from: $(grep -E '^DB_NAME=' ~/app/.env.backup-before-loadtest | cut -d= -f2)"
     echo "-> looks switched to a test database; run 'restore' when done testing"
@@ -93,6 +102,15 @@ if [ "$CMD" = switch ]; then
     : "${LOADTEST_DB_HOST:?set LOADTEST_DB_HOST}" "${LOADTEST_DB_PORT:?set LOADTEST_DB_PORT}"
     : "${LOADTEST_DB_NAME:?set LOADTEST_DB_NAME}" "${LOADTEST_DB_USER:?set LOADTEST_DB_USER}"
     : "${LOADTEST_DB_PASSWORD:?set LOADTEST_DB_PASSWORD}"
+    MAIL_ENV="${LOADTEST_MAIL_ENV:-loadtest-mail-mailpit.env}"
+    case "$MAIL_ENV" in */*|*..*|"") die "LOADTEST_MAIL_ENV is a file name in the server's home, not a path" ;; esac
+
+    step "Checking the test mail settings (~/$MAIL_ENV on the server)"
+    "${SSH[@]}" bash -s <<REMOTE || die "no ~/$MAIL_ENV with EMAIL_HOST on the server: a test would send real mail (see the header)"
+set -euo pipefail
+grep -q '^EMAIL_HOST=.' ~/"$MAIL_ENV"
+echo "mail during the test via: \$(grep -E '^EMAIL_HOST=' ~/"$MAIL_ENV" | cut -d= -f2)"
+REMOTE
 
     step "Backing up ~/app/.env (refusing to overwrite an existing backup)"
     "${SSH[@]}" bash -s <<'REMOTE'
@@ -116,6 +134,33 @@ sed -i \
   -e 's/^DB_PASSWORD=.*/DB_PASSWORD=${LOADTEST_DB_PASSWORD}/' \
   ~/app/.env
 grep -E '^DB_(HOST|PORT|NAME|USER)=' ~/app/.env
+REMOTE
+
+    step "Pointing the mail at Mailpit (~/$MAIL_ENV)"
+    # Each setting in the file replaces its line in .env, or is added; a
+    # password with any character is copied as it is (no sed).
+    "${SSH[@]}" python3 - "$MAIL_ENV" <<'REMOTE'
+import sys
+from pathlib import Path
+
+home = Path.home()
+values = {}
+for line in (home / sys.argv[1]).read_text().splitlines():
+    if line.strip() and not line.startswith("#") and "=" in line:
+        key, value = line.split("=", 1)
+        values[key] = value
+env = home / "app" / ".env"
+lines, seen = [], set()
+for line in env.read_text().splitlines():
+    key = line.split("=", 1)[0]
+    if key in values:
+        lines.append(f"{key}={values[key]}")
+        seen.add(key)
+    else:
+        lines.append(line)
+lines += [f"{key}={value}" for key, value in values.items() if key not in seen]
+env.write_text("\n".join(lines) + "\n")
+print("mail now via:", values.get("EMAIL_HOST"), "| set:", " ".join(values))
 REMOTE
 fi
 

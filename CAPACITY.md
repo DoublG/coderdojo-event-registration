@@ -847,6 +847,14 @@ connection details: they live on the server, owner-only (`chmod 600`), as
 accounts in `loadtest-data.json` were set to the password `scale-test` for Locust). Source that file
 before `switch`.
 
+**Mail goes to Mailpit during a test, real mail otherwise.** Production sends real mail (`EMAIL_HOST`
+`localhost`, the domain `coolestprojects.be`); the Mailpit component stays up beside it (a fixed IP on
+Level27's network). A test database has made-up addresses, so `switch` also points the mail at Mailpit
+with the settings in `~/loadtest-mail-mailpit.env` on the server (owner-only, copied from `.env` on
+8 October 2026 while it still pointed there; bounce processing off during a test) and refuses to switch
+without that file; `restore` puts the whole `.env` back, real mail included. `status` shows which mail
+server is live.
+
 Don't leave a demo site switched longer than the test needs, and never point this at a site with real
 users — `locustfile.py`'s host guard is the only thing standing between a copy-pasted command and real
 bookings on whatever `--host` it's given.
