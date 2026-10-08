@@ -22,9 +22,9 @@ from accounts.organisation import Area, require_area
 
 from .. import queue_status, services
 from ..categories import MailCategory
-from ..forms import BlockAddressForm
-from ..models import BounceRecord, EmailMessage, EmailSuppression
-from ..queue_actions import MailQueueError, block, retry, retry_failed, unblock
+from ..forms import BlockAddressForm, BlockDomainForm
+from ..models import BlockedDomain, BounceRecord, EmailMessage, EmailSuppression
+from ..queue_actions import MailQueueError, block, block_domain, retry, retry_failed, unblock, unblock_domain
 
 # --- the mail queue: what's waiting, what failed, bounces and blocked addresses ---
 
@@ -40,11 +40,12 @@ def mail_queue(request):
     return _queue_page(request)
 
 
-def _queue_page(request, block_form=None):
+def _queue_page(request, block_form=None, domain_form=None):
     """The mail queue at a glance: mail waiting to go out, mail that failed
     (with Send again), bounces and complaints read from the bounce mailbox,
     and the addresses nothing is sent to any more (with Unblock, and a form to
-    block one by hand). With `block_form`, that form shows its errors."""
+    block one by hand), and the blocked domains. With `block_form` or
+    `domain_form`, that form shows its errors."""
     now = timezone.now()
     since = now - timedelta(days=MAIL_QUEUE_RECENT_DAYS)
     Status = EmailMessage.Status
@@ -71,6 +72,7 @@ def _queue_page(request, block_form=None):
         "failed": EmailMessage.objects.filter(status=Status.FAILED, created_at__gte=since).count(),
         "bounces": BounceRecord.objects.filter(created_at__gte=since).count(),
         "blocked": EmailSuppression.objects.count(),
+        "blocked_domains": BlockedDomain.objects.count(),
     }
     return render(
         request,
@@ -89,6 +91,8 @@ def _queue_page(request, block_form=None):
             "bounces": recent_bounces[:MAIL_QUEUE_LIMIT],
             "blocked": blocked.order_by("-created_at")[:MAIL_QUEUE_LIMIT],
             "block_form": block_form or BlockAddressForm(),
+            "blocked_domains": BlockedDomain.objects.order_by("domain"),
+            "domain_form": domain_form or BlockDomainForm(),
         },
     )
 
@@ -105,7 +109,7 @@ NOT_SENT_REASONS = {
     services.NOT_SUBSCRIBED: gettext_lazy("The person switched off this kind of mail."),
     services.MUTED_DOJO: gettext_lazy("The family stopped this dojo's news."),
     services.NO_ADDRESS: gettext_lazy("The account has no email address."),
-    services.BLOCKED: gettext_lazy("The address is blocked (a bounce, a spam complaint or by hand)."),
+    services.BLOCKED: gettext_lazy("The address or its domain is blocked (a bounce, a spam complaint or by hand)."),
     # campaigns.services.CANCELLED (mailing doesn't import campaigns; a test keeps them equal)
     "The campaign was cancelled.": gettext_lazy("The campaign was cancelled before it went out."),
 }
@@ -254,3 +258,38 @@ def mail_block(request):
         ) % {"count": withdrawn}
     messages.success(request, text)
     return redirect("manage_mail_queue")
+
+
+@login_required
+@require_POST
+def mail_block_domain(request):
+    """Block a whole mail domain; the page again with the form's errors otherwise."""
+    require_area(request, Area.COMMUNICATION)
+    form = BlockDomainForm(request.POST)
+    if not form.is_valid():
+        return _queue_page(request, domain_form=form)
+    try:
+        blocked, withdrawn = block_domain(form.cleaned_data["domain"], form.cleaned_data["note"])
+    except MailQueueError as error:  # blocked by someone else in between
+        form.add_error("domain", str(error))
+        return _queue_page(request, domain_form=form)
+    text = _("%(domain)s is blocked: nothing is sent to its addresses any more.") % {"domain": blocked.domain}
+    if withdrawn:
+        text += " " + ngettext(
+            "%(count)d mail waiting for it was withdrawn.", "%(count)d mails waiting for it were withdrawn.", withdrawn
+        ) % {"count": withdrawn}
+    messages.success(request, text)
+    return redirect("manage_mail_queue")
+
+
+@login_required
+@require_POST
+def mail_unblock_domain(request, domain_id):
+    require_area(request, Area.COMMUNICATION)
+    domain = unblock_domain(get_object_or_404(BlockedDomain, pk=domain_id))
+    messages.success(
+        request,
+        _("%(domain)s is unblocked: mail goes to its addresses again, except those blocked one by one.")
+        % {"domain": domain},
+    )
+    return _back(request)

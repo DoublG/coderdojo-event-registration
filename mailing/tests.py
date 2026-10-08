@@ -1196,6 +1196,99 @@ class MailFixingTests(TestCase):
         self.assertContains(response, f'action="{reverse("manage_mail_block")}"')
         self.assertContains(response, 'name="email"')
 
+    # --- block a domain ---
+
+    def test_a_blocked_domain_covers_its_addresses_and_subdomains_only(self):
+        from .models import BlockedDomain
+        from .services import BLOCKED, domains_of, is_suppressed_address, suppressed_reason
+
+        self.assertEqual(domains_of("A@X.Demo.Example"), ["x.demo.example", "demo.example", "example"])
+        BlockedDomain.objects.create(domain="@Coderdojo-Demo.Example")
+        self.assertEqual(BlockedDomain.objects.get().domain, "coderdojo-demo.example")
+        self.assertTrue(is_suppressed_address("guardian-1@coderdojo-demo.example"))
+        self.assertTrue(is_suppressed_address("x@mail.coderdojo-demo.example"))
+        self.assertFalse(is_suppressed_address("x@coderdojo-demo.example.com"))
+        self.assertFalse(is_suppressed_address("x@notcoderdojo-demo.example"))
+        self.assertFalse(is_suppressed_address("fam@example.com"))
+        self.family.email = "fam@coderdojo-demo.example"
+        self.family.save()
+        self.assertEqual(suppressed_reason(self.family, MailCategory.SERVICE, self.family.email), BLOCKED)
+        self.assertIn(
+            "is blocked", self._retry(self._mail("Old failure", recipient=self.family.email)).content.decode()
+        )
+
+    def test_block_a_domain_withdraws_what_waits_and_is_recorded(self):
+        from auditlog.models import LogEntry
+
+        from .models import BlockedDomain
+
+        waiting = self._mail("Waiting", status="pending", recipient="guardian-1@Coderdojo-Demo.Example")
+        sub = self._mail("Sub", status="pending", recipient="x@mail.coderdojo-demo.example")
+        other = self._mail("Other", status="pending", recipient="fam@example.com")
+        response = self.client.post(
+            reverse("manage_mail_block_domain"),
+            {"domain": " @Coderdojo-Demo.Example ", "note": "Seeded demo addresses"},
+            follow=True,
+        )
+        self.assertRedirects(response, reverse("manage_mail_queue"))
+        self.assertContains(response, "coderdojo-demo.example is blocked")
+        self.assertContains(response, "2 mails waiting for it were withdrawn.")
+        blocked = BlockedDomain.objects.get()
+        self.assertEqual((blocked.domain, blocked.note), ("coderdojo-demo.example", "Seeded demo addresses"))
+        for mail, status in ((waiting, "suppressed"), (sub, "suppressed"), (other, "pending")):
+            mail.refresh_from_db()
+            self.assertEqual(mail.status, status)
+        entry = LogEntry.objects.get_for_object(blocked).get(action=LogEntry.Action.CREATE)
+        self.assertEqual(entry.actor, self.admin)
+        self.assertContains(response, reverse("manage_mail_unblock_domain", args=[blocked.pk]))
+
+    def test_block_a_domain_refuses_one_already_blocked_or_not_a_domain(self):
+        from .models import BlockedDomain
+
+        BlockedDomain.objects.create(domain="example")
+        for data, says in (
+            ({"domain": "*.Example"}, "example is already blocked."),
+            ({"domain": "someone@example.com"}, "Enter a domain such as"),
+            ({"domain": "not a domain"}, "Enter a domain such as"),
+        ):
+            response = self.client.post(reverse("manage_mail_block_domain"), data)
+            self.assertEqual(response.status_code, 200)
+            self.assertTemplateUsed(response, "mailing/manage/mail_queue.html")
+            self.assertContains(response, says)
+        self.assertEqual(BlockedDomain.objects.count(), 1)
+
+    def test_unblock_a_domain_keeps_addresses_blocked_one_by_one(self):
+        from auditlog.models import LogEntry
+
+        from .models import BlockedDomain
+        from .services import is_suppressed_address
+
+        blocked = BlockedDomain.objects.create(domain="coderdojo-demo.example")
+        EmailSuppression.objects.create(email="kept@coderdojo-demo.example", reason=EmailSuppression.MANUAL)
+        response = self.client.post(reverse("manage_mail_unblock_domain", args=[blocked.pk]), follow=True)
+        self.assertContains(response, "coderdojo-demo.example is unblocked")
+        self.assertFalse(BlockedDomain.objects.exists())
+        self.assertFalse(is_suppressed_address("other@coderdojo-demo.example"))
+        self.assertTrue(is_suppressed_address("kept@coderdojo-demo.example"))
+        entry = LogEntry.objects.get(object_pk=str(blocked.pk), action=LogEntry.Action.DELETE)
+        self.assertEqual(entry.actor, self.admin)
+
+    def test_the_domain_actions_are_post_only_and_need_the_communication_area(self):
+        from accounts.models import OrganisationRole
+
+        from .models import BlockedDomain
+
+        blocked = BlockedDomain.objects.create(domain="example")
+        urls = [reverse("manage_mail_block_domain"), reverse("manage_mail_unblock_domain", args=[blocked.pk])]
+        for url in urls:
+            self.assertEqual(self.client.get(url).status_code, 405)
+        board = User.objects.create(username="board", email="bo@example.com")
+        OrganisationRole.objects.create(account=board, role=OrganisationRole.BOARD)
+        self.client.force_login(board)
+        for url in urls:
+            self.assertEqual(self.client.post(url, {"domain": "other.example"}).status_code, 404)
+        self.assertEqual(list(BlockedDomain.objects.values_list("domain", flat=True)), ["example"])
+
     # --- who may, and how ---
 
     def test_the_actions_are_post_only_and_need_the_communication_area(self):

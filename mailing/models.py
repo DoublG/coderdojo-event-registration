@@ -219,6 +219,26 @@ class EmailSuppression(models.Model):
         super().save(*args, **kwargs)
 
 
+class BlockedDomain(models.Model):
+    """A mail domain nothing is sent to, its subdomains included, blocked by
+    hand on the Mail queue page (mailing.queue_actions.block_domain): for
+    example the made-up addresses of seeded demo data (coderdojo-demo.example),
+    or "example" for every address under that top-level domain. Checked with
+    the address blocks, everywhere mail is queued or sent
+    (mailing.services.is_suppressed_address)."""
+
+    domain = models.CharField(max_length=253, unique=True, help_text="Stored lower-case, without the @.")
+    note = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.domain
+
+    def save(self, *args, **kwargs):
+        self.domain = self.domain.strip().lower().lstrip("@").removeprefix("*.").strip(".")
+        super().save(*args, **kwargs)
+
+
 class BounceRecord(models.Model):
     """One bounce or complaint read from the bounce mailbox (append-only):
     what came back, for which address and, when it could be matched, which

@@ -55,6 +55,7 @@ RECORDED = {
     "mailing.MailPreference": {},
     "mailing.ConsentEvent": {},
     "mailing.EmailSuppression": {},
+    "mailing.BlockedDomain": {},
     "campaigns.Campaign": {},
     "campaigns.Journey": {},
     "campaigns.Segment": {},

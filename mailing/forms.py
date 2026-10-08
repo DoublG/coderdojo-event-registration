@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -7,7 +9,7 @@ from dojos.models import Dojo
 
 from .categories import CAN_OPT_OUT, DESCRIPTIONS, MailCategory, categories_for
 from .dojo_families import active_since, dojos_of
-from .models import EmailSuppression, EmailTemplate
+from .models import BlockedDomain, EmailSuppression, EmailTemplate
 from .preferences import muted_dojo_ids, preferences_for
 
 
@@ -174,3 +176,30 @@ class BlockAddressForm(forms.Form):
         if EmailSuppression.objects.filter(email=email).exists():
             raise ValidationError(_("%(email)s is already blocked.") % {"email": email})
         return email
+
+
+DOMAIN_PATTERN = re.compile(r"^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$")
+
+
+class BlockDomainForm(forms.Form):
+    """Block a whole mail domain, on the Mail queue page (mailing.queue_actions.block_domain)."""
+
+    domain = forms.CharField(
+        label=_("Domain"),
+        max_length=253,
+        help_text=_('Everything after the @, e.g. "coderdojo-demo.example". Its subdomains are blocked too.'),
+    )
+    note = forms.CharField(
+        label=_("Why"),
+        required=False,
+        max_length=255,
+        help_text=_('Only the organisation sees this, e.g. "Made-up addresses of the demo data".'),
+    )
+
+    def clean_domain(self):
+        domain = self.cleaned_data["domain"].strip().lower().lstrip("@").removeprefix("*.").strip(".")
+        if not DOMAIN_PATTERN.match(domain):
+            raise ValidationError(_('Enter a domain such as "example.com", without an address in front.'))
+        if BlockedDomain.objects.filter(domain=domain).exists():
+            raise ValidationError(_("%(domain)s is already blocked.") % {"domain": domain})
+        return domain

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 05:38+0000\n"
+"POT-Creation-Date: 2026-10-08 16:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: nl\n"
@@ -20,11 +20,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:2
+#: ../../source/organisation/mail-queue.rst:2
 msgid "Mail queue and mail log"
 msgstr "E-mailwachtrij en e-maillogboek"
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:4
+#: ../../source/organisation/mail-queue.rst:4
 msgid ""
 "Every mail the site sends, from a booking confirmation to a campaign, "
 "first waits in a queue and goes out within a minute or so. **Mail queue**"
@@ -41,7 +41,7 @@ msgstr ""
 "kunt sturen en een adres kunt deblokkeren. **E-maillogboek**, er net "
 "onder, toont elke e-mail die de site verstuurde."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:11
+#: ../../source/organisation/mail-queue.rst:11
 msgid ""
 "At the top are the numbers: mail waiting to be sent, being sent right "
 "now, scheduled for later, sent in the last 24 hours, and failed mail, "
@@ -52,7 +52,7 @@ msgstr ""
 "verstuurd is, en mislukte e-mail, teruggekomen e-mail en geblokkeerde "
 "adressen."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:15
+#: ../../source/organisation/mail-queue.rst:15
 msgid ""
 "If mail that should have gone out has been waiting for more than half an "
 "hour, the page says **Mail isn't going out**. The programs that send the "
@@ -65,7 +65,7 @@ msgstr ""
 "beheert om ze na te kijken. Er gaat niets verloren: de wachtende e-mail "
 "vertrekt zodra ze weer draaien."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:20
+#: ../../source/organisation/mail-queue.rst:20
 msgid ""
 "To look up one person, type (part of) their email address in the search "
 "box: every section then only shows mail for that address."
@@ -73,11 +73,11 @@ msgstr ""
 "Om één persoon op te zoeken, typ je (een deel van) het e-mailadres in het"
 " zoekvak: elk onderdeel toont dan alleen de e-mail voor dat adres."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:24
+#: ../../source/organisation/mail-queue.rst:24
 msgid "The sections"
 msgstr "De onderdelen"
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:26
+#: ../../source/organisation/mail-queue.rst:26
 msgid ""
 "**Waiting to be sent**: mail in the queue, in the order it goes out. "
 "Account and booking mail goes before campaigns, so a big campaign never "
@@ -89,7 +89,7 @@ msgstr ""
 "een grote campagne nooit een inschrijvingsbevestiging ophoudt. **Niet "
 "vóór** is ingevuld voor e-mail die gepland is voor later."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:30
+#: ../../source/organisation/mail-queue.rst:30
 msgid ""
 "**Failed**: mail from the last 30 days that the mail server refused, or "
 "that still couldn't be sent after several tries, with the reason."
@@ -98,7 +98,7 @@ msgstr ""
 " of die na enkele pogingen nog altijd niet verstuurd kon worden, met de "
 "reden."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:32
+#: ../../source/organisation/mail-queue.rst:32
 msgid ""
 "**Bounces and complaints**: mail from the last 30 days that came back "
 "from the recipient's mail server (for example because the address doesn't"
@@ -114,7 +114,7 @@ msgstr ""
 "naar dat adres; een *zachte bounce* (een volle mailbox, een server die "
 "even plat ligt) pas als het een paar keer gebeurt."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:38
+#: ../../source/organisation/mail-queue.rst:38
 msgid ""
 "**Blocked addresses**: addresses nothing is sent to any more, whatever "
 "the person chose on their **Mail preferences** page, with the reason."
@@ -122,11 +122,17 @@ msgstr ""
 "**Geblokkeerde adressen**: adressen waar niets meer naartoe gaat, wat de "
 "persoon ook koos op de pagina **E-mailvoorkeuren**, met de reden."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:42
+#: ../../source/organisation/mail-queue.rst:40
+msgid ""
+"**Blocked domains**: domains no address gets mail in, their subdomains "
+"included."
+msgstr "**Geblokkeerde domeinen**: domeinen waarin geen enkel adres nog e-mail krijgt, ook niet in hun subdomeinen."
+
+#: ../../source/organisation/mail-queue.rst:44
 msgid "Sending failed mail again"
 msgstr "Mislukte e-mail opnieuw sturen"
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:44
+#: ../../source/organisation/mail-queue.rst:46
 msgid ""
 "Once the problem is fixed (the mail server works again, or a typo in an "
 "address was corrected on the account), click **Send again** next to a "
@@ -146,7 +152,7 @@ msgstr ""
 "opnieuw na of de persoon die soort e-mail nog wil en of het adres niet "
 "geblokkeerd is, zoals bij elke e-mail."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:52
+#: ../../source/organisation/mail-queue.rst:54
 msgid ""
 "A mail can't be sent again when its address is blocked (unblock it "
 "first), or when it's more than a year old: by then its address, subject "
@@ -156,11 +162,11 @@ msgstr ""
 " (deblokkeer het eerst), of als ze meer dan een jaar oud is: dan zijn het"
 " adres, het onderwerp en de tekst al gewist."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:57
+#: ../../source/organisation/mail-queue.rst:59
 msgid "Blocking an address"
 msgstr "Een adres blokkeren"
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:59
+#: ../../source/organisation/mail-queue.rst:61
 msgid ""
 "When someone asks us to stop sending them anything at all, or an address "
 "must not be mailed, fill in **Block an address** under **Blocked "
@@ -169,13 +175,21 @@ msgid ""
 "**Mail preferences** page, and mail still waiting to go to that address "
 "is withdrawn. Who blocked an address is recorded in the audit log. To let"
 " mail go there again, unblock it (below)."
-msgstr "Vraagt iemand om helemaal niets meer te sturen, of mag een adres geen e-mail krijgen, vul dan **Een adres blokkeren** in onder **Geblokkeerde adressen**: het adres, en waarom (alleen de organisatie ziet die notitie). Vanaf dan wordt er niets meer naartoe gestuurd, wat de persoon ook koos op de pagina **E-mailvoorkeuren**, en e-mail die nog wacht voor dat adres wordt ingetrokken. Wie een adres blokkeerde, staat in het auditlog. Om er weer e-mail naartoe te laten gaan, deblokkeer je het (zie hieronder)."
+msgstr ""
+"Vraagt iemand om helemaal niets meer te sturen, of mag een adres geen "
+"e-mail krijgen, vul dan **Een adres blokkeren** in onder **Geblokkeerde "
+"adressen**: het adres, en waarom (alleen de organisatie ziet die "
+"notitie). Vanaf dan wordt er niets meer naartoe gestuurd, wat de persoon "
+"ook koos op de pagina **E-mailvoorkeuren**, en e-mail die nog wacht voor "
+"dat adres wordt ingetrokken. Wie een adres blokkeerde, staat in het "
+"auditlog. Om er weer e-mail naartoe te laten gaan, deblokkeer je het (zie"
+" hieronder)."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:68
+#: ../../source/organisation/mail-queue.rst:70
 msgid "Unblocking an address"
 msgstr "Een adres deblokkeren"
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:70
+#: ../../source/organisation/mail-queue.rst:72
 msgid ""
 "Click **Unblock** next to a blocked address once it works again, for "
 "example after the person fixed their mailbox. Mail goes there again from "
@@ -192,11 +206,33 @@ msgstr ""
 " e-mail niet wil, dus deblokkeer alleen als die persoon het je vroeg. Wie"
 " een adres deblokkeerde, staat in het auditlog."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:78
+#: ../../source/organisation/mail-queue.rst:80
+msgid "Blocking a domain"
+msgstr "Een domein blokkeren"
+
+#: ../../source/organisation/mail-queue.rst:82
+msgid ""
+"To stop all mail to every address in a domain, fill in **Block a domain**"
+" under **Blocked domains**: everything after the @, and why. That's for "
+"addresses that must never get mail, for example the made-up addresses of "
+"demo data (``coderdojo-demo.example``); ``example`` blocks every address "
+"that ends in ``.example``. Subdomains are blocked too. Mail still waiting"
+" for an address in the domain is withdrawn, and the site checks the "
+"domain again right before every mail goes out."
+msgstr "Om alle e-mail naar elk adres in een domein te stoppen, vul je **Een domein blokkeren** in onder **Geblokkeerde domeinen**: alles na de @, en waarom. Dat is voor adressen die nooit e-mail mogen krijgen, bijvoorbeeld de verzonnen adressen van demogegevens (``coderdojo-demo.example``); ``example`` blokkeert elk adres dat op ``.example`` eindigt. Subdomeinen worden ook geblokkeerd. E-mail die nog wacht voor een adres in het domein wordt ingetrokken, en de site controleert het domein opnieuw vlak voor elke e-mail vertrekt."
+
+#: ../../source/organisation/mail-queue.rst:90
+msgid ""
+"Click **Unblock** next to a domain to let mail go to its addresses again."
+" Addresses that are blocked one by one stay blocked. Who blocked or "
+"unblocked a domain is recorded in the audit log."
+msgstr "Klik op **Deblokkeren** naast een domein om er weer e-mail naar de adressen te laten gaan. Adressen die apart geblokkeerd zijn, blijven geblokkeerd. Wie een domein blokkeerde of deblokkeerde, staat in het auditlog."
+
+#: ../../source/organisation/mail-queue.rst:95
 msgid "The mail log"
 msgstr "Het e-maillogboek"
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:80
+#: ../../source/organisation/mail-queue.rst:97
 msgid ""
 "**Mail log** lists every mail the site queued, newest first: who it went "
 "to, the subject, what kind of mail it is, whether it went out (and why "
@@ -211,7 +247,7 @@ msgstr ""
 " e-mail gekregen?” te beantwoorden. Een mislukte e-mail heeft ook hier "
 "een knop **Opnieuw sturen**."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:86
+#: ../../source/organisation/mail-queue.rst:103
 msgid ""
 "The text of a mail isn't shown: some mails hold a personal login or "
 "password link, which would let whoever reads it log in as that person. If"
@@ -224,7 +260,7 @@ msgstr ""
 " in de Django-admin, die je aanvraagt wanneer je hem nodig hebt (zie :doc"
 ":`django-admin`)."
 
-#: ../../workspace/docs/source/organisation/mail-queue.rst:91
+#: ../../source/organisation/mail-queue.rst:108
 msgid ""
 "A year after a mail was queued, its address, subject and text are "
 "cleared; the row stays, without them, for the figures."

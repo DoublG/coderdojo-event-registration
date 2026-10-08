@@ -3,6 +3,7 @@
 from core.privacy_registry import Category, LegalBasis, Subject, keep, personal, register, register_not_personal
 
 from .models import (
+    BlockedDomain,
     BounceRecord,
     ConsentEvent,
     DojoMailMute,
@@ -110,4 +111,5 @@ register(
 )
 
 register_not_personal(EmailTemplate, "the mail texts, before any personal detail is filled in")
+register_not_personal(BlockedDomain, "mail domains nothing is sent to, such as the demo data's made-up one")
 register_not_personal(ProcessedImapMessage, "which bounce-mailbox messages were handled, by mailbox and id")

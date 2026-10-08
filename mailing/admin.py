@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html_join
 
 from .models import (
+    BlockedDomain,
     BounceRecord,
     ConsentEvent,
     DojoMailMute,
@@ -81,6 +82,12 @@ class BounceRecordAdmin(admin.ModelAdmin):
     list_display = ["created_at", "email", "kind", "status_code", "diagnostic"]
     list_filter = ["kind"]
     search_fields = ["email", "diagnostic"]
+
+
+@admin.register(BlockedDomain)
+class BlockedDomainAdmin(admin.ModelAdmin):
+    list_display = ["domain", "note", "created_at"]
+    search_fields = ["domain"]
 
 
 @admin.register(EmailSuppression)

@@ -34,6 +34,7 @@
     <div><strong>{{ counts.failed }}</strong><span class="caption">{% blocktranslate with days=recent_days %}failed in the last {{ days }} days{% endblocktranslate %}</span></div>
     <div><strong>{{ counts.bounces }}</strong><span class="caption">{% blocktranslate with days=recent_days %}bounces in the last {{ days }} days{% endblocktranslate %}</span></div>
     <div><strong>{{ counts.blocked }}</strong><span class="caption">{% translate "blocked addresses" %}</span></div>
+    <div><strong>{{ counts.blocked_domains }}</strong><span class="caption">{% translate "blocked domains" %}</span></div>
   </div>
 
   <form method="get" class="cd-card cd-form" style="padding: var(--space-5);">
@@ -205,6 +206,54 @@
       </table>
     </div>
     {% if blocked|length == limit %}<p class="caption">{% blocktranslate %}Showing the first {{ limit }}.{% endblocktranslate %}</p>{% endif %}
+  </section>
+
+  <section class="queue-section">
+    <h2 class="heading-md">{% translate "Blocked domains" %}</h2>
+    <p class="body-sm">{% translate "Nothing is sent to any address in these domains, their subdomains included, whatever the person chose: for example the made-up addresses of demo data. Unblocking a domain doesn't unblock addresses that are blocked one by one." %}</p>
+    <form method="post" action="{% url 'manage_mail_block_domain' %}" class="cd-card cd-form" id="block-domain" style="padding: var(--space-5); margin-bottom: var(--space-4);">
+      {% csrf_token %}
+      <h3 class="heading-sm" style="margin: 0;">{% translate "Block a domain" %}</h3>
+      <p class="body-sm" style="margin: 0;">{% translate "Mail still waiting for an address in the domain is withdrawn." %}</p>
+      <div class="cd-form__row">
+        {{ domain_form.domain.as_field_group }}
+        {{ domain_form.note.as_field_group }}
+      </div>
+      <div class="cd-form__actions">
+        <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Block" %}</button>
+      </div>
+    </form>
+    <div class="cd-table-wrap">
+      <table class="cd-table cd-table--zebra">
+        <thead>
+          <tr>
+            <th class="label" scope="col">{% translate "Domain" %}</th>
+            <th class="label" scope="col">{% translate "Note" %}</th>
+            <th class="label" scope="col">{% translate "Since" %}</th>
+            <th class="label" scope="col"><span class="visually-hidden">{% translate "Actions" %}</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for blocked_domain in blocked_domains %}
+            <tr>
+              <td class="body-sm">{{ blocked_domain.domain }}</td>
+              <td class="body-sm">{{ blocked_domain.note|default:"—" }}</td>
+              <td class="body-sm">{{ blocked_domain.created_at|date:"d/m/Y H:i" }}</td>
+              <td class="body-sm">
+                {% blocktranslate with domain=blocked_domain.domain asvar confirm %}Unblock {{ domain }}? Mail goes to its addresses again.{% endblocktranslate %}
+                <form method="post" action="{% url 'manage_mail_unblock_domain' blocked_domain.pk %}" class="queue-inline-form" data-confirm="{{ confirm }}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Unblock" %}</button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td class="body-sm" colspan="4">{% translate "No blocked domains." %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </section>
 
 {% endblock %}

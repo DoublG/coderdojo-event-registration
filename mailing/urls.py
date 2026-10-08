@@ -20,4 +20,10 @@ urlpatterns = [
     path("manage/mail/<int:message_id>/retry/", manage.mail_retry, name="manage_mail_retry"),
     path("manage/mail/blocked/<int:suppression_id>/unblock/", manage.mail_unblock, name="manage_mail_unblock"),
     path("manage/mail/blocked/new/", manage.mail_block, name="manage_mail_block"),
+    path("manage/mail/blocked-domains/new/", manage.mail_block_domain, name="manage_mail_block_domain"),
+    path(
+        "manage/mail/blocked-domains/<int:domain_id>/unblock/",
+        manage.mail_unblock_domain,
+        name="manage_mail_unblock_domain",
+    ),
 ]

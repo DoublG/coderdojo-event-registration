@@ -8,13 +8,14 @@ record of exactly what was sent: the worker checks the account's consent and
 the address's block again right before it goes out (tasks.send_email_batch),
 as for any mail. Blocking by hand adds an EmailSuppression ("Blocked by hand")
 and withdraws the mail still waiting for that address; unblocking deletes it.
-The audit log records both; neither touches the person's own mail choices (a
+Blocking a domain (BlockedDomain) works the same for every address in it
+and its subdomains. The audit log records all of these; none touches the person's own mail choices (a
 complaint switched those off through mailing.preferences)."""
 
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.utils.translation import gettext as _
 
-from .models import EmailMessage, EmailSuppression
+from .models import BlockedDomain, EmailMessage, EmailSuppression
 from .services import BLOCKED, is_suppressed_address
 
 
@@ -87,3 +88,28 @@ def unblock(suppression: EmailSuppression) -> str:
     email = suppression.email
     suppression.delete()  # delete(), not a queryset: the audit log records who did it
     return email
+
+
+def block_domain(domain: str, note: str = "") -> tuple[BlockedDomain, int]:
+    """Stop all mail to every address in `domain` and its subdomains (made-up
+    demo addresses, a domain that must never be mailed), created with save()
+    so the audit log records who. Mail still waiting for such an address is
+    withdrawn here. Returns (the block, how many mails were withdrawn)."""
+    domain = domain.strip().lower().lstrip("@").removeprefix("*.").strip(".")
+    if BlockedDomain.objects.filter(domain=domain).exists():
+        raise MailQueueError(_("%(domain)s is already blocked.") % {"domain": domain})
+    blocked = BlockedDomain.objects.create(domain=domain, note=note.strip())
+    withdrawn = (
+        EmailMessage.objects.filter(status=EmailMessage.Status.PENDING)
+        .filter(Q(recipient__iendswith=f"@{domain}") | Q(recipient__iendswith=f".{domain}"))
+        .update(status=EmailMessage.Status.SUPPRESSED, status_reason=BLOCKED)
+    )
+    return blocked, withdrawn
+
+
+def unblock_domain(blocked: BlockedDomain) -> str:
+    """Let mail go to the domain again (addresses blocked one by one stay
+    blocked). Returns the domain."""
+    domain = blocked.domain
+    blocked.delete()  # delete(), not a queryset: the audit log records who did it
+    return domain

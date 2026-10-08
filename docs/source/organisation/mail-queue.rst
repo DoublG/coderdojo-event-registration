@@ -37,6 +37,8 @@ The sections
   only does after it happens a few times.
 - **Blocked addresses**: addresses nothing is sent to any more, whatever the
   person chose on their **Mail preferences** page, with the reason.
+- **Blocked domains**: domains no address gets mail in, their subdomains
+  included.
 
 Sending failed mail again
 -------------------------
@@ -73,6 +75,21 @@ then on; the person's own choices on their **Mail preferences** page stay
 as they are. Be careful with a *spam complaint*: the person told their mail
 provider they don't want our mail, so unblock it only if they asked you to.
 Who unblocked an address is recorded in the audit log.
+
+Blocking a domain
+-----------------
+
+To stop all mail to every address in a domain, fill in **Block a domain**
+under **Blocked domains**: everything after the @, and why. That's for
+addresses that must never get mail, for example the made-up addresses of
+demo data (``coderdojo-demo.example``); ``example`` blocks every address
+that ends in ``.example``. Subdomains are blocked too. Mail still waiting
+for an address in the domain is withdrawn, and the site checks the domain
+again right before every mail goes out.
+
+Click **Unblock** next to a domain to let mail go to its addresses again.
+Addresses that are blocked one by one stay blocked. Who blocked or
+unblocked a domain is recorded in the audit log.
 
 The mail log
 ------------

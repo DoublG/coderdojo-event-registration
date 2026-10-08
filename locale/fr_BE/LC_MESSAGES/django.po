@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 00:04+0000\n"
+"POT-Creation-Date: 2026-10-08 16:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -245,7 +245,7 @@ msgid "So we can tell you about dojos and sessions near you."
 msgstr "Pour vous informer des dojos et sessions près de chez vous."
 
 #: accounts/forms.py:281 accounts/forms.py:333 accounts/forms.py:530
-#: mailing/forms.py:22
+#: mailing/forms.py:24
 msgid "Language for emails"
 msgstr "Langue des e-mails"
 
@@ -1049,8 +1049,9 @@ msgstr "Dojo"
 #: campaigns/templates/campaigns/manage/journey_detail.html:62
 #: dojos/templates/dojos/dojo_event_list.html:27
 #: mailing/templates/mailing/manage/mail_log.html:61
-#: mailing/templates/mailing/manage/mail_queue.html:106
-#: mailing/templates/mailing/manage/mail_queue.html:183
+#: mailing/templates/mailing/manage/mail_queue.html:107
+#: mailing/templates/mailing/manage/mail_queue.html:184
+#: mailing/templates/mailing/manage/mail_queue.html:234
 #: privacy/templates/privacy/manage/privacy.html:21
 #: privacy/templates/privacy/manage/privacy.html:61
 msgid "Actions"
@@ -1099,7 +1100,8 @@ msgstr "Décernée par"
 
 #: accounts/templates/accounts/child_detail.html:131
 #: applications/templates/applications/manage/check_detail.html:66
-#: mailing/templates/mailing/manage/mail_queue.html:181
+#: mailing/templates/mailing/manage/mail_queue.html:182
+#: mailing/templates/mailing/manage/mail_queue.html:232
 msgid "Note"
 msgstr "Remarque"
 
@@ -1733,7 +1735,7 @@ msgstr "Ce que chaque rôle ouvre"
 #: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:196
 #: events/forms.py:271 events/forms.py:327 events/forms.py:360
 #: events/templates/events/manage/badge_list.html:18
-#: events/templates/events/manage/badge_list.html:44 mailing/forms.py:137
+#: events/templates/events/manage/badge_list.html:44 mailing/forms.py:139
 #: privacy/templates/privacy/manage/privacy.html:57
 msgid "Name"
 msgstr "Nom"
@@ -1744,7 +1746,8 @@ msgid "Roles"
 msgstr "Rôles"
 
 #: accounts/templates/accounts/manage/people.html:22
-#: mailing/templates/mailing/manage/mail_queue.html:182
+#: mailing/templates/mailing/manage/mail_queue.html:183
+#: mailing/templates/mailing/manage/mail_queue.html:233
 msgid "Since"
 msgstr "Depuis"
 
@@ -1844,7 +1847,7 @@ msgstr "Nom, adresse e-mail ou nom d'utilisateur"
 #: dojos/templates/dojos/partials/_dojo_finder_widget.html:16
 #: events/templates/events/event_list.html:80
 #: mailing/templates/mailing/manage/mail_log.html:45
-#: mailing/templates/mailing/manage/mail_queue.html:46
+#: mailing/templates/mailing/manage/mail_queue.html:47
 #: pages/templates/pages/manage_audit_log.html:43
 #: privacy/templates/privacy/manage/privacy.html:48
 msgid "Search"
@@ -3775,7 +3778,7 @@ msgstr "Candidature pour"
 #: dojos/templates/dojos/dojo_event_list.html:25
 #: mailing/templates/mailing/manage/mail_log.html:30
 #: mailing/templates/mailing/manage/mail_log.html:58
-#: mailing/templates/mailing/manage/mail_queue.html:61
+#: mailing/templates/mailing/manage/mail_queue.html:62
 msgid "Status"
 msgstr "Statut"
 
@@ -3872,7 +3875,7 @@ msgstr "Toutes"
 
 #: applications/templates/applications/manage/application_list.html:21
 #: applications/templates/applications/manage/application_list.html:38
-#: events/forms.py:328 mailing/templates/mailing/manage/mail_queue.html:136
+#: events/forms.py:328 mailing/templates/mailing/manage/mail_queue.html:137
 msgid "Kind"
 msgstr "Type"
 
@@ -4504,11 +4507,11 @@ msgid "The account was switched off."
 msgstr "Le compte a été désactivé."
 
 # | msgid "Enter a valid email address."
-#: campaigns/dojo_views.py:218 mailing/manage/queue.py:107
+#: campaigns/dojo_views.py:218 mailing/manage/queue.py:111
 msgid "The account has no email address."
 msgstr "Le compte n'a pas d'adresse e-mail."
 
-#: campaigns/dojo_views.py:219 mailing/manage/queue.py:104
+#: campaigns/dojo_views.py:219 mailing/manage/queue.py:108
 msgid "This kind of mail doesn't go to this kind of account."
 msgstr "Ce type de mail n'est pas envoyé à ce type de compte."
 
@@ -4528,10 +4531,10 @@ msgstr "Tests envoyés à vous-même"
 msgid "New sessions (the automatic mail)"
 msgstr "Nouvelles sessions (le mail automatique)"
 
-#: campaigns/forms.py:34 mailing/forms.py:142
+#: campaigns/forms.py:34 mailing/forms.py:144
 #: mailing/templates/mailing/manage/mail_log.html:37
 #: mailing/templates/mailing/manage/mail_log.html:57
-#: mailing/templates/mailing/manage/mail_queue.html:60
+#: mailing/templates/mailing/manage/mail_queue.html:61
 #: mailing/templates/mailing/manage/template_list.html:13
 msgid "Kind of mail"
 msgstr "Type d'e-mail"
@@ -4610,8 +4613,8 @@ msgstr "De qui il s'agit, en une phrase."
 #: campaigns/forms.py:127
 #: campaigns/templates/campaigns/manage/segment_list.html:13 dojos/forms.py:68
 #: dojos/forms.py:94 events/forms.py:201 events/forms.py:271
-#: events/forms.py:329 events/forms.py:360 mailing/forms.py:109
-#: mailing/forms.py:144
+#: events/forms.py:329 events/forms.py:360 mailing/forms.py:111
+#: mailing/forms.py:146
 msgid "Description"
 msgstr "Description"
 
@@ -4665,10 +4668,10 @@ msgstr "Jusqu'à l'âge de"
 msgid "Pathway"
 msgstr "Parcours"
 
-#: campaigns/forms.py:180 mailing/forms.py:109
+#: campaigns/forms.py:180 mailing/forms.py:111
 #: mailing/templates/mailing/manage/mail_log.html:56
-#: mailing/templates/mailing/manage/mail_queue.html:59
-#: mailing/templates/mailing/manage/mail_queue.html:103
+#: mailing/templates/mailing/manage/mail_queue.html:60
+#: mailing/templates/mailing/manage/mail_queue.html:104
 msgid "Subject"
 msgstr "Objet"
 
@@ -5364,7 +5367,7 @@ msgstr ""
 #: campaigns/templates/campaigns/dojo/mail_list.html:3
 #: campaigns/templates/campaigns/dojo/mail_queue.html:42
 #: dojos/templates/dojos/_admin_base.html:70
-#: mailing/templates/mailing/manage/mail_queue.html:138
+#: mailing/templates/mailing/manage/mail_queue.html:139
 msgid "Mail"
 msgstr "E-mail"
 
@@ -5490,14 +5493,14 @@ msgstr "Les %(days)s derniers jours, et tout ce qui attend encore."
 
 #: campaigns/templates/campaigns/dojo/mail_queue.html:43
 #: mailing/templates/mailing/manage/mail_log.html:59
-#: mailing/templates/mailing/manage/mail_queue.html:62
-#: mailing/templates/mailing/manage/mail_queue.html:105
+#: mailing/templates/mailing/manage/mail_queue.html:63
+#: mailing/templates/mailing/manage/mail_queue.html:106
 msgid "Queued"
 msgstr "Mis en file"
 
 # | msgid "Waiting list"
 #: campaigns/templates/campaigns/dojo/mail_queue.html:44
-#: mailing/templates/mailing/manage/mail_queue.html:72
+#: mailing/templates/mailing/manage/mail_queue.html:73
 msgid "Waiting"
 msgstr "En attente"
 
@@ -5871,7 +5874,7 @@ msgid "Every dojo"
 msgstr "Tous les dojos"
 
 #: campaigns/templates/campaigns/manage/campaign_list.html:28
-#: mailing/templates/mailing/manage/mail_queue.html:139
+#: mailing/templates/mailing/manage/mail_queue.html:140
 #: pages/templates/pages/manage_audit_log.html:52
 msgid "When"
 msgstr "Quand"
@@ -6629,8 +6632,8 @@ msgstr "Commune"
 
 #: dojos/forms.py:101 dojos/forms.py:266
 #: dojos/templates/dojos/dojo_detail.html:235
-#: mailing/templates/mailing/manage/mail_queue.html:135
-#: mailing/templates/mailing/manage/mail_queue.html:179
+#: mailing/templates/mailing/manage/mail_queue.html:136
+#: mailing/templates/mailing/manage/mail_queue.html:180
 msgid "Address"
 msgstr "Adresse"
 
@@ -8729,72 +8732,97 @@ msgstr ""
 "La newsletter de CoderDojo Belgium et des événements comme Coolest Projects "
 "et CoderDojo Girlz."
 
-#: mailing/forms.py:109
+#: mailing/forms.py:111
 msgid "Text"
 msgstr "Texte"
 
-#: mailing/forms.py:110
+#: mailing/forms.py:112
 msgid "When it's sent and which variables it uses."
 msgstr "Quand il est envoyé et quelles variables il utilise."
 
-#: mailing/forms.py:139
+#: mailing/forms.py:141
 msgid "Lowercase, with _ between words, e.g. campaign_summer_camp."
 msgstr "En minuscules, avec _ entre les mots, p. ex. campaign_summer_camp."
 
-#: mailing/forms.py:140
+#: mailing/forms.py:142
 msgid "campaign_summer_camp"
 msgstr "campaign_summer_camp"
 
-#: mailing/forms.py:147
+#: mailing/forms.py:149
 msgid "When it's used and which variables it takes."
 msgstr "Quand il est utilisé et quelles variables il reçoit."
 
-#: mailing/forms.py:157
+#: mailing/forms.py:159
 msgid "A template with this name already exists."
 msgstr "Un modèle avec ce nom existe déjà."
 
-#: mailing/forms.py:164
+#: mailing/forms.py:166
 msgid "Email address"
 msgstr "Adresse e-mail"
 
-#: mailing/forms.py:166 mailing/templates/mailing/manage/mail_queue.html:104
-#: mailing/templates/mailing/manage/mail_queue.html:180
+#: mailing/forms.py:168 mailing/forms.py:193
+#: mailing/templates/mailing/manage/mail_queue.html:105
+#: mailing/templates/mailing/manage/mail_queue.html:181
 msgid "Why"
 msgstr "Pourquoi"
 
-#: mailing/forms.py:169
+#: mailing/forms.py:171
 msgid "Only the organisation sees this, e.g. \"The family asked us to stop\"."
 msgstr ""
 "Seule l'organisation voit ceci, p. ex. « La famille nous a demandé "
 "d'arrêter »."
 
-#: mailing/forms.py:175 mailing/queue_actions.py:77
+#: mailing/forms.py:177 mailing/queue_actions.py:78
 #, python-format
 msgid "%(email)s is already blocked."
 msgstr "%(email)s est déjà bloquée."
 
-#: mailing/manage/queue.py:103
+#: mailing/forms.py:188 mailing/templates/mailing/manage/mail_queue.html:231
+msgid "Domain"
+msgstr "Domaine"
+
+#: mailing/forms.py:190
+msgid ""
+"Everything after the @, e.g. \"coderdojo-demo.example\". Its subdomains are "
+"blocked too."
+msgstr "Tout ce qui suit le @, p. ex. « coderdojo-demo.example ». Ses sous-domaines sont aussi bloqués."
+
+#: mailing/forms.py:196
+msgid ""
+"Only the organisation sees this, e.g. \"Made-up addresses of the demo data\"."
+msgstr "Seule l'organisation voit ceci, p. ex. « Adresses inventées des données de démonstration »."
+
+#: mailing/forms.py:202
+msgid "Enter a domain such as \"example.com\", without an address in front."
+msgstr "Saisissez un domaine comme « example.com », sans adresse devant."
+
+#: mailing/forms.py:204 mailing/queue_actions.py:100
+#, python-format
+msgid "%(domain)s is already blocked."
+msgstr "%(domain)s est déjà bloqué."
+
+#: mailing/manage/queue.py:107
 msgid "The account is switched off."
 msgstr "Le compte est désactivé."
 
-#: mailing/manage/queue.py:105
+#: mailing/manage/queue.py:109
 msgid "The person switched off this kind of mail."
 msgstr "La personne a désactivé ce type d'e-mail."
 
-#: mailing/manage/queue.py:106
+#: mailing/manage/queue.py:110
 msgid "The family stopped this dojo's news."
 msgstr "La famille a arrêté les nouvelles de ce dojo."
 
-#: mailing/manage/queue.py:108
-msgid "The address is blocked (a bounce, a spam complaint or by hand)."
-msgstr ""
-"L'adresse est bloquée (un retour, une plainte pour spam ou manuellement)."
+#: mailing/manage/queue.py:112
+msgid ""
+"The address or its domain is blocked (a bounce, a spam complaint or by hand)."
+msgstr "L'adresse ou son domaine est bloqué (un retour, une plainte pour spam ou manuellement)."
 
-#: mailing/manage/queue.py:110
+#: mailing/manage/queue.py:114
 msgid "The campaign was cancelled before it went out."
 msgstr "La campagne a été annulée avant son départ."
 
-#: mailing/manage/queue.py:187
+#: mailing/manage/queue.py:191
 #, python-format
 msgid ""
 "The mail to %(email)s is back in the queue and goes out within a minute or "
@@ -8803,14 +8831,14 @@ msgstr ""
 "L'e-mail à %(email)s est de retour dans la file d'attente et part dans la "
 "minute environ."
 
-#: mailing/manage/queue.py:206
+#: mailing/manage/queue.py:210
 #, python-format
 msgid "%(count)d mail is back in the queue."
 msgid_plural "%(count)d mails are back in the queue."
 msgstr[0] "%(count)d e-mail est de retour dans la file d'attente."
 msgstr[1] "%(count)d e-mails sont de retour dans la file d'attente."
 
-#: mailing/manage/queue.py:213
+#: mailing/manage/queue.py:217
 #, python-format
 msgid ""
 "%(count)d mail wasn't sent again: its address is blocked, or its content was "
@@ -8825,11 +8853,11 @@ msgstr[1] ""
 "%(count)d e-mails n'ont pas été renvoyés : leur adresse est bloquée, ou leur "
 "contenu a été effacé."
 
-#: mailing/manage/queue.py:220
+#: mailing/manage/queue.py:224
 msgid "There's no failed mail to send again."
 msgstr "Il n'y a aucun e-mail en échec à renvoyer."
 
-#: mailing/manage/queue.py:231
+#: mailing/manage/queue.py:235
 #, python-format
 msgid ""
 "%(email)s is unblocked: mail goes there again. The person's own mail choices "
@@ -8838,17 +8866,29 @@ msgstr ""
 "%(email)s est débloquée : les e-mails y partent à nouveau. Les choix d'e-"
 "mails de la personne n'ont pas changé."
 
-#: mailing/manage/queue.py:250
+#: mailing/manage/queue.py:254
 #, python-format
 msgid "%(email)s is blocked: nothing is sent there any more."
 msgstr "%(email)s est bloquée : plus rien n'y est envoyé."
 
-#: mailing/manage/queue.py:253
+#: mailing/manage/queue.py:257 mailing/manage/queue.py:279
 #, python-format
 msgid "%(count)d mail waiting for it was withdrawn."
 msgid_plural "%(count)d mails waiting for it were withdrawn."
 msgstr[0] "%(count)d e-mail en attente pour elle a été retiré."
 msgstr[1] "%(count)d e-mails en attente pour elle ont été retirés."
+
+#: mailing/manage/queue.py:276
+#, python-format
+msgid "%(domain)s is blocked: nothing is sent to its addresses any more."
+msgstr "%(domain)s est bloqué : plus rien n'est envoyé à ses adresses."
+
+#: mailing/manage/queue.py:292
+#, python-format
+msgid ""
+"%(domain)s is unblocked: mail goes to its addresses again, except those "
+"blocked one by one."
+msgstr "%(domain)s est débloqué : les e-mails repartent vers ses adresses, sauf celles bloquées une par une."
 
 #: mailing/manage/templates.py:69
 msgid ""
@@ -8890,7 +8930,7 @@ msgstr "Une campagne pas encore envoyée utilise ce modèle."
 msgid "Template “%(key)s” deleted."
 msgstr "Modèle « %(key)s » supprimé."
 
-#: mailing/models.py:46 mailing/templates/mailing/manage/mail_queue.html:87
+#: mailing/models.py:46 mailing/templates/mailing/manage/mail_queue.html:88
 msgid "Failed"
 msgstr "Échec"
 
@@ -8929,7 +8969,7 @@ msgstr "Rejet définitif"
 msgid "Repeated soft bounces"
 msgstr "Rejets temporaires répétés"
 
-#: mailing/models.py:205 mailing/models.py:233
+#: mailing/models.py:205 mailing/models.py:253
 msgid "Spam complaint"
 msgstr "Plainte pour spam"
 
@@ -8937,26 +8977,26 @@ msgstr "Plainte pour spam"
 msgid "Blocked by hand"
 msgstr "Bloqué manuellement"
 
-#: mailing/models.py:231
+#: mailing/models.py:251
 msgid "Hard bounce (5.x.x)"
 msgstr "Rejet définitif (5.x.x)"
 
-#: mailing/models.py:232
+#: mailing/models.py:252
 msgid "Soft bounce (4.x.x)"
 msgstr "Rejet temporaire (4.x.x)"
 
-#: mailing/queue_actions.py:28 mailing/queue_actions.py:52
+#: mailing/queue_actions.py:29 mailing/queue_actions.py:53
 msgid "Only a mail that failed can be sent again."
 msgstr "Seul un e-mail en échec peut être renvoyé."
 
-#: mailing/queue_actions.py:31
+#: mailing/queue_actions.py:32
 msgid ""
 "This mail's content was cleared after a year, so it can't be sent again."
 msgstr ""
 "Le contenu de cet e-mail a été effacé après un an : il ne peut plus être "
 "renvoyé."
 
-#: mailing/queue_actions.py:33
+#: mailing/queue_actions.py:34
 #, python-format
 msgid ""
 "%(email)s is blocked. Unblock the address first if the mail should go there."
@@ -9023,7 +9063,7 @@ msgid "Email address or subject"
 msgstr "Adresse e-mail ou objet"
 
 #: mailing/templates/mailing/manage/mail_log.html:46
-#: mailing/templates/mailing/manage/mail_queue.html:47
+#: mailing/templates/mailing/manage/mail_queue.html:48
 #: pages/templates/pages/manage_audit_log.html:44
 msgid "Show everything"
 msgstr "Tout afficher"
@@ -9036,8 +9076,8 @@ msgstr[0] "%(counter)s e-mail"
 msgstr[1] "%(counter)s e-mails"
 
 #: mailing/templates/mailing/manage/mail_log.html:55
-#: mailing/templates/mailing/manage/mail_queue.html:58
-#: mailing/templates/mailing/manage/mail_queue.html:102
+#: mailing/templates/mailing/manage/mail_queue.html:59
+#: mailing/templates/mailing/manage/mail_queue.html:103
 msgid "To"
 msgstr "À"
 
@@ -9126,56 +9166,60 @@ msgstr "revenus ces %(days)s derniers jours"
 msgid "blocked addresses"
 msgstr "adresses bloquées"
 
-#: mailing/templates/mailing/manage/mail_queue.html:42
+#: mailing/templates/mailing/manage/mail_queue.html:38
+msgid "blocked domains"
+msgstr "domaines bloqués"
+
+#: mailing/templates/mailing/manage/mail_queue.html:43
 msgid "Only show mail for an email address"
 msgstr "N'afficher que les e-mails d'une adresse e-mail"
 
-#: mailing/templates/mailing/manage/mail_queue.html:52
+#: mailing/templates/mailing/manage/mail_queue.html:53
 msgid "Waiting to be sent"
 msgstr "En attente d'envoi"
 
-#: mailing/templates/mailing/manage/mail_queue.html:53
+#: mailing/templates/mailing/manage/mail_queue.html:54
 msgid "In the order they go out: account and booking mail before campaigns."
 msgstr ""
 "Dans l'ordre d'envoi : les e-mails de compte et d'inscription avant les "
 "campagnes."
 
-#: mailing/templates/mailing/manage/mail_queue.html:63
+#: mailing/templates/mailing/manage/mail_queue.html:64
 msgid "Not before"
 msgstr "Pas avant"
 
-#: mailing/templates/mailing/manage/mail_queue.html:72
+#: mailing/templates/mailing/manage/mail_queue.html:73
 msgid "Being sent"
 msgstr "En cours d'envoi"
 
-#: mailing/templates/mailing/manage/mail_queue.html:72
+#: mailing/templates/mailing/manage/mail_queue.html:73
 #, python-format
 msgid "%(counter)s attempt"
 msgid_plural "%(counter)s attempts"
 msgstr[0] "%(counter)s essai"
 msgstr[1] "%(counter)s essais"
 
-#: mailing/templates/mailing/manage/mail_queue.html:77
+#: mailing/templates/mailing/manage/mail_queue.html:78
 msgid "Nothing is waiting: all mail has gone out."
 msgstr "Rien n'attend : tous les e-mails sont partis."
 
-#: mailing/templates/mailing/manage/mail_queue.html:82
-#: mailing/templates/mailing/manage/mail_queue.html:124
-#: mailing/templates/mailing/manage/mail_queue.html:157
-#: mailing/templates/mailing/manage/mail_queue.html:208
+#: mailing/templates/mailing/manage/mail_queue.html:83
+#: mailing/templates/mailing/manage/mail_queue.html:125
+#: mailing/templates/mailing/manage/mail_queue.html:158
+#: mailing/templates/mailing/manage/mail_queue.html:209
 #, python-format
 msgid "Showing the first %(limit)s."
 msgstr "Seuls les %(limit)s premiers sont affichés."
 
-#: mailing/templates/mailing/manage/mail_queue.html:89
+#: mailing/templates/mailing/manage/mail_queue.html:90
 msgid "Send all the failed mail shown here again?"
 msgstr "Renvoyer tous les e-mails en échec affichés ici ?"
 
-#: mailing/templates/mailing/manage/mail_queue.html:93
+#: mailing/templates/mailing/manage/mail_queue.html:94
 msgid "Send all again"
 msgstr "Tout renvoyer"
 
-#: mailing/templates/mailing/manage/mail_queue.html:97
+#: mailing/templates/mailing/manage/mail_queue.html:98
 #, python-format
 msgid ""
 "Mail the mail server refused, or that still couldn't be sent after several "
@@ -9191,15 +9235,15 @@ msgstr ""
 "d'attente, et les choix d'e-mails et les blocages de la personne sont "
 "vérifiés à nouveau avant le départ."
 
-#: mailing/templates/mailing/manage/mail_queue.html:119
+#: mailing/templates/mailing/manage/mail_queue.html:120
 msgid "No failed mail."
 msgstr "Aucun e-mail échoué."
 
-#: mailing/templates/mailing/manage/mail_queue.html:128
+#: mailing/templates/mailing/manage/mail_queue.html:129
 msgid "Bounces and complaints"
 msgstr "Retours et plaintes"
 
-#: mailing/templates/mailing/manage/mail_queue.html:129
+#: mailing/templates/mailing/manage/mail_queue.html:130
 #, python-format
 msgid ""
 "Mail that came back from the recipient's mail server, or that the recipient "
@@ -9211,25 +9255,25 @@ msgstr ""
 "définitif ou une plainte arrête immédiatement les e-mails vers cette "
 "adresse ; des rejets temporaires répétés aussi."
 
-#: mailing/templates/mailing/manage/mail_queue.html:130
+#: mailing/templates/mailing/manage/mail_queue.html:131
 msgid "The bounce mailbox isn't set up on this site, so no bounces are read."
 msgstr ""
 "La boîte des retours n'est pas configurée sur ce site : aucun retour n'est "
 "lu."
 
-#: mailing/templates/mailing/manage/mail_queue.html:137
+#: mailing/templates/mailing/manage/mail_queue.html:138
 msgid "What the mail server said"
 msgstr "Ce qu'a répondu le serveur de messagerie"
 
-#: mailing/templates/mailing/manage/mail_queue.html:152
+#: mailing/templates/mailing/manage/mail_queue.html:153
 msgid "No bounces."
 msgstr "Aucun retour."
 
-#: mailing/templates/mailing/manage/mail_queue.html:161
+#: mailing/templates/mailing/manage/mail_queue.html:162
 msgid "Blocked addresses"
 msgstr "Adresses bloquées"
 
-#: mailing/templates/mailing/manage/mail_queue.html:162
+#: mailing/templates/mailing/manage/mail_queue.html:163
 msgid ""
 "Nothing is sent to these addresses any more, whatever the person chose. "
 "Unblock an address once it works again (the person fixed their mailbox, or a "
@@ -9240,11 +9284,11 @@ msgstr ""
 "personne a réparé sa boîte mail, ou une faute de frappe a été corrigée) ; "
 "ses propres choix d'e-mails restent tels quels."
 
-#: mailing/templates/mailing/manage/mail_queue.html:165
+#: mailing/templates/mailing/manage/mail_queue.html:166
 msgid "Block an address"
 msgstr "Bloquer une adresse"
 
-#: mailing/templates/mailing/manage/mail_queue.html:166
+#: mailing/templates/mailing/manage/mail_queue.html:167
 msgid ""
 "For when someone asks us to stop all mail, or an address must not be mailed. "
 "Mail still waiting for it is withdrawn."
@@ -9253,28 +9297,58 @@ msgstr ""
 "doit plus recevoir d'e-mails. Les e-mails encore en attente pour cette "
 "adresse sont retirés."
 
-#: mailing/templates/mailing/manage/mail_queue.html:172
+#: mailing/templates/mailing/manage/mail_queue.html:173
+#: mailing/templates/mailing/manage/mail_queue.html:224
 msgid "Block"
 msgstr "Bloquer"
 
-#: mailing/templates/mailing/manage/mail_queue.html:194
+#: mailing/templates/mailing/manage/mail_queue.html:195
 msgid "This person marked our mail as spam. Unblock only if they asked for it."
 msgstr ""
 "Cette personne a signalé nos e-mails comme spam. Ne débloquez que si elle "
 "l'a demandé."
 
-#: mailing/templates/mailing/manage/mail_queue.html:194
+#: mailing/templates/mailing/manage/mail_queue.html:195
 #, python-format
 msgid "Unblock %(email)s?"
 msgstr "Débloquer %(email)s ?"
 
-#: mailing/templates/mailing/manage/mail_queue.html:198
+#: mailing/templates/mailing/manage/mail_queue.html:199
+#: mailing/templates/mailing/manage/mail_queue.html:248
 msgid "Unblock"
 msgstr "Débloquer"
 
-#: mailing/templates/mailing/manage/mail_queue.html:203
+#: mailing/templates/mailing/manage/mail_queue.html:204
 msgid "No blocked addresses."
 msgstr "Aucune adresse bloquée."
+
+#: mailing/templates/mailing/manage/mail_queue.html:213
+msgid "Blocked domains"
+msgstr "Domaines bloqués"
+
+#: mailing/templates/mailing/manage/mail_queue.html:214
+msgid ""
+"Nothing is sent to any address in these domains, their subdomains included, "
+"whatever the person chose: for example the made-up addresses of demo data. "
+"Unblocking a domain doesn't unblock addresses that are blocked one by one."
+msgstr "Rien n'est envoyé aux adresses de ces domaines, sous-domaines compris, quels que soient les choix de la personne : par exemple les adresses inventées des données de démonstration. Débloquer un domaine ne débloque pas les adresses bloquées une par une."
+
+#: mailing/templates/mailing/manage/mail_queue.html:217
+msgid "Block a domain"
+msgstr "Bloquer un domaine"
+
+#: mailing/templates/mailing/manage/mail_queue.html:218
+msgid "Mail still waiting for an address in the domain is withdrawn."
+msgstr "Les e-mails encore en attente pour une adresse du domaine sont retirés."
+
+#: mailing/templates/mailing/manage/mail_queue.html:244
+#, python-format
+msgid "Unblock %(domain)s? Mail goes to its addresses again."
+msgstr "Débloquer %(domain)s ? Les e-mails repartiront vers ses adresses."
+
+#: mailing/templates/mailing/manage/mail_queue.html:253
+msgid "No blocked domains."
+msgstr "Aucun domaine bloqué."
 
 # | msgid "Meet the team"
 #: mailing/templates/mailing/manage/template_edit.html:20

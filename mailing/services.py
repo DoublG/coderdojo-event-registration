@@ -13,7 +13,7 @@ from django.db import IntegrityError, transaction
 from django.urls import reverse
 
 from .categories import CAN_OPT_OUT, PRIORITY, MailCategory, categories_for
-from .models import EmailMessage, EmailSuppression
+from .models import BlockedDomain, EmailMessage, EmailSuppression
 from .preferences import is_dojo_muted, is_subscribed
 from .rendering import FALLBACK_LANGUAGE, TemplateMissing, render
 
@@ -47,8 +47,21 @@ def unsubscribe_url(user: "User", category: str, dojo: "Dojo | int | None" = Non
     return settings.SITE_URL + reverse("mail_unsubscribe", kwargs={"token": token})
 
 
+def domains_of(email: str) -> list[str]:
+    """The domain of `email` and every domain above it, which a BlockedDomain
+    can name: "a@x.demo.example" gives x.demo.example, demo.example, example."""
+    labels = [label for label in email.strip().lower().rpartition("@")[2].split(".") if label]
+    return [".".join(labels[i:]) for i in range(len(labels))]
+
+
 def is_suppressed_address(email: str) -> bool:
-    return EmailSuppression.objects.filter(email=email.strip().lower()).exists()
+    """Whether nothing may be sent to `email`: the address itself is blocked
+    (a bounce, a complaint, by hand), or its domain is (BlockedDomain)."""
+    email = email.strip().lower()
+    return (
+        EmailSuppression.objects.filter(email=email).exists()
+        or BlockedDomain.objects.filter(domain__in=domains_of(email)).exists()
+    )
 
 
 # Why a mail wasn't sent (EmailMessage.status_reason); a dojo's mail queue
