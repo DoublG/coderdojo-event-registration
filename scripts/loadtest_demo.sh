@@ -23,7 +23,12 @@
 #                        the throwaway database's connection details.
 #                        Required for `switch`, never hardcoded here or
 #                        committed anywhere -- a fresh database from the
-#                        Level27 panel gives you all five.
+#                        Level27 panel gives you all five. Keep them on
+#                        the server, owner-only, one file per database:
+#                        ~/loadtest-db-<host>-<db name>.env (and that
+#                        database's seed_credentials.csv copied as
+#                        seed_credentials-<host>-<db name>.csv), so
+#                        switching databases never overwrites another's.
 #
 # What `switch` does, over SSH, on the server (never touches your machine):
 #   1. Backs up ~/app/.env to ~/app/.env.backup-before-loadtest (refuses to

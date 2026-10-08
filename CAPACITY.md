@@ -721,6 +721,15 @@ each use — this is a one-off judgement call, not a general exception), `script
 `.env`, repoints it (web + both Celery workers) at a separate, disposable database, and verifies the swap
 via `/metrics/`; `run_demo.sh` then runs `loadtest/run.sh` against the live domain with
 `LOADTEST_CONFIRM_REMOTE_HOST` set to match; `restore` puts the real database back and removes the backup.
+**Keep each database's logins with it.** Every seeded database has its own `seed_credentials.csv` (the
+seeders give each account a random password), so before seeding or switching to another one, copy that
+file under a name that says which database it belongs to, e.g. `seed_credentials-<host>-<db name>.csv`,
+and never let a second seeding overwrite the first. The same goes for the throwaway database's own
+connection details: they live on the server, owner-only (`chmod 600`), as
+`~/loadtest-db-<host>-<db name>.env`, with a note of anything changed by hand (on 8 Oct 2026 the 112
+accounts in `loadtest-data.json` were set to the password `scale-test` for Locust). Source that file
+before `switch`.
+
 Don't leave a demo site switched longer than the test needs, and never point this at a site with real
 users — `locustfile.py`'s host guard is the only thing standing between a copy-pasted command and real
 bookings on whatever `--host` it's given.
