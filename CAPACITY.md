@@ -432,6 +432,33 @@ the real connection limit, and the gap between the two was worse than the formul
 suggested (the formula says cap 25/3 workers *fails*, which is right, but gives no sense that it fails
 this badly — 70% request failure, not a modest overrun).
 
+### Conclusion: what production can actually support today
+
+With the fix above live, production runs **3 web workers × 8 concurrent requests = 24 in flight at once**,
+against a real database ceiling of 32 connections (`max_user_connections`, fixed by the hosting package —
+`LEVEL27_QUESTIONS.md`) — 8 connections of headroom for Celery and admin/maintenance work. That's the one
+number everything else below follows from.
+
+- **Normal browsing and booking:** comfortable. Measured at 300 concurrent active users (each clicking
+  every 2–8 seconds — not 300 people hitting refresh at once, but 300 real sessions browsing, reading
+  event pages, logging in and booking): **98.1% answered**, a 1.9% clean refusal rate, **zero errors**,
+  96 ms typical response time. Ordinary traffic — a dojo's families checking sessions, a handful of people
+  signing up at any moment — sits well under this.
+- **A registration rush** (500 families converging on the same five sessions within about two minutes —
+  deliberately far more aggressive than anything seen on the site so far): **83.4% answered**, **16.6%
+  get a clean "busy, try again" page** (an immediate, fast 503 with `Retry-After`, not a hang or an
+  error), **zero server errors, zero overbooked or corrupted bookings** (the row lock in
+  `events.registrations` holds regardless of load). Response time for the requests that get through: 210 ms
+  typical.
+- **What would actually raise this ceiling:** not more web workers alone — `workers × (cap − 1) + 5` has
+  to stay under `max_user_connections`, so more workers just means a lower cap each, not more total
+  capacity. The real lever is `max_user_connections` itself (today fixed at 32 by the Level27 package —
+  worth asking whether it can be raised, `LEVEL27_QUESTIONS.md`); only then does raising workers and/or
+  the cap together actually buy more headroom.
+- **In short:** today's setup comfortably serves normal usage and degrades *safely*, not *incorrectly*,
+  under a rush far heavier than anything realistic for this site's size — the worst a family sees in an
+  overload moment is a friendly "try again in a moment" page, never a lost or duplicated booking.
+
 ## Caching
 
 Measured on **1 October 2026**. Before, the database did work for every page that it had already done
