@@ -306,9 +306,9 @@ gunicorn really reads the file: not if it starts elsewhere or with a `-c` of its
 production 8 Oct 2026** (3 workers, `gunicorn.conf.py` read; cap 25 at first confirmation, cap 8 after the
 same day's fix, below) — production briefly ran daphne instead, with no equivalent per-worker limit at
 all, from 6 to 8 Oct 2026. With the mechanism back in
-place, the open question is sizing: 3 workers × 25 is still well past 32 — see
-[`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) for the open decision (lower `WEB_CONCURRENCY` or the cap,
-or raise the MySQL limit).
+place, the question was sizing: 3 workers × 25 was well past 32, so the cap was lowered to 8 (below).
+Raising the MySQL limit isn't an option: Level27 confirmed on 8 Oct 2026 that it's part of the hosting
+package and can't be changed.
 
 **The rush with and without the cap** (4 web workers, 500 families signing up for the same five sessions,
 each clicking again every 0.5 to 2 seconds: about 350 requests a second, far beyond anything real):
@@ -450,11 +450,16 @@ number everything else below follows from.
   error), **zero server errors, zero overbooked or corrupted bookings** (the row lock in
   `events.registrations` holds regardless of load). Response time for the requests that get through: 210 ms
   typical.
-- **What would actually raise this ceiling:** not more web workers alone — `workers × (cap − 1) + 5` has
-  to stay under `max_user_connections`, so more workers just means a lower cap each, not more total
-  capacity. The real lever is `max_user_connections` itself (today fixed at 32 by the Level27 package —
-  worth asking whether it can be raised, `LEVEL27_QUESTIONS.md`); only then does raising workers and/or
-  the cap together actually buy more headroom.
+- **The ceiling is fixed, so capacity has to come from efficiency.** Level27 confirmed (8 Oct 2026) that
+  `max_user_connections` = 32 is part of the hosting package and can't be raised. More web workers don't
+  help either — `workers × (cap − 1) + 5` has to stay under 32, so more workers just means a lower cap
+  each. What *does* raise real capacity is making each request hold its database connection for less
+  time, since 24 connections serve more requests per second when each finishes faster: fewer queries per
+  request (`select_related`, the data caches in `core/caching.py`, `pages.tests.DataCacheTests`' query
+  counts as guards), keeping slow work out of the request (Celery), and serving static and media files
+  from Apache, never Django. Watch `coderdojo_http_db_queries_total` per view and the p95 per view
+  (`MONITORING.md`) for the pages worth tuning next; the caching work of 1 October 2026 already cut a third
+  of the statements per request ([Caching](#caching)).
 - **In short:** today's setup comfortably serves normal usage and degrades *safely*, not *incorrectly*,
   under a rush far heavier than anything realistic for this site's size — the worst a family sees in an
   overload moment is a friendly "try again in a moment" page, never a lost or duplicated booking.

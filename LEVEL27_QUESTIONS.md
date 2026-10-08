@@ -56,7 +56,7 @@ line to `MAINTENANCE.md`'s security log):
 Confirmed 8 Oct 2026 from the app's own DB connection: `max_connections` = 350,
 **`max_user_connections` = 32** (our app's own DB user — also visible in the Level27 panel's package
 configuration as "Connecties: 32", so it's a fixed property of the hosting package, not a server-wide
-setting they could casually raise). `CAPACITY.md`'s per-worker concurrency cap (`gunicorn.conf.py`, 25
+setting they could casually raise — and Level27 has since confirmed it can't be raised at all, see below). `CAPACITY.md`'s per-worker concurrency cap (`gunicorn.conf.py`, 25
 per worker) was sized against the devcontainer's default of 151 and explicitly flagged "possibly lower
 on shared hosting" — it's much lower. The formula in `CAPACITY.md` ("Capping requests per web worker"),
 *workers × (cap − 1) + 5 < max_user_connections*, puts the whole safe budget at one worker with the cap
@@ -74,5 +74,9 @@ just graceful `503` refusals) and a quarter of the throughput of every other con
 2026:** `gunicorn.conf.py`'s default changed from 25 to 8 and deployed; confirmed live by reading the
 running master's own environment rather than trusted blind (`MAINTENANCE.md`, Security log — the
 `--check` diagnostic for this was itself wrong until the same day). This is our own panel setting, not
-Level27's — but asking Level27 to raise the 32-connection limit is still worth doing in parallel, since it
-would widen the safety margin at any cap.
+Level27's.
+
+**Answered 8 Oct 2026: the limits can't be raised.** Level27 confirmed that `max_user_connections` (32)
+and the package's other limits are part of the current hosting package. So the site has to be engineered
+to work efficiently within them — shorter requests, fewer queries per request, slow work in Celery — not
+sized up past them (`CAPACITY.md`, "Conclusion: what production can actually support today").
