@@ -123,7 +123,9 @@
       "ClaudeInChromeDomain(github.com)",
       "mcp__claude-in-chrome__tabs_create_mcp",
       "mcp__claude-in-chrome__browser_batch",
-      "ClaudeInChromeDomain(app.level27.eu)"
+      "ClaudeInChromeDomain(app.level27.eu)",
+      "ClaudeInChromeDomain(app.level27.be)",
+      "Bash(ssh -o BatchMode=yes py10102@c40a7b15f.l27powered.eu:*)"
     ],
     "additionalDirectories": [
       "/home/erik/coderdojo-event-registration/.devcontainer/certs/pki",
