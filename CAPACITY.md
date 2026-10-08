@@ -582,7 +582,10 @@ real mailing worker, PSS sampled every 2 seconds): 5.3 seconds for 9,000 childre
 mailing child from 136 to at least 180 MB RSS (73 to 115 MB PSS), Celery as a whole from 336 to about
 382 MB PSS (+46 MB), well under 512 MB; afterwards the child was over 160 MB and Celery replaced it, as
 designed. Much less than the 300 MB measured in the devcontainer before 3 October (that refactor removed
-the copies per booking). The samples are 2 seconds apart, so the very top may sit a little higher. The
+the copies per booking). The samples are 2 seconds apart, so the very top may sit a little higher. On the
+real data the same evening (212 rows): 0.27 seconds and no measurable growth. Level27's graph averages per
+minute, so it can't show a peak this short: the 2-second PSS samples are the measure for the rebuild, the
+graph for anything that lasts minutes, like a campaign. The
 database graphs are fine: both databases far below their limit of about 5 GB.
 
 **Booking mail during a campaign** (measured on 2 October 2026, `test_capacity`: a campaign to all 7,145
