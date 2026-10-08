@@ -3,10 +3,16 @@ loadtest/summarize.py and the projection of `manage.py capacity_report --json`:
 
     python3 loadtest/charts.py loadtest/results/2026-09-30.json loadtest/results/capacity-2026-09-30.json
     python3 loadtest/charts.py --caching loadtest/results/2026-10-01-caching.json
+    python3 loadtest/charts.py --level27 loadtest/results/2026-10-08-level27-realistic.json
 
 Writes PNGs to loadtest/charts/. Needs matplotlib (loadtest/requirements.txt).
 The run names below are the ones of 30 September 2026; a new round of runs
-uses the same names (CAPACITY.md, "Measuring again") or edits RUNS."""
+uses the same names (CAPACITY.md, "Measuring again") or edits RUNS. --level27
+is the one-off rerun against Level27's real `max_user_connections` (32) and
+worker count (3), kept separate from RUNS/MYSQL_MAX_CONNECTIONS so it doesn't
+disturb the quarterly devcontainer measurement above; re-run the same way if
+the real limit or worker count changes (CAPACITY.md, "Rerun against Level27's
+real limits")."""
 
 import json
 import sys
@@ -32,6 +38,16 @@ RUNS = {
     "memory": "D300w4",
 }
 MYSQL_MAX_CONNECTIONS = 151
+
+# The 8 Oct 2026 rerun against Level27's real limits: 3 web workers (not 4),
+# max_user_connections 32 (not the devcontainer's 151 default). Separate
+# constants so this one-off doesn't touch the quarterly measurement above.
+LEVEL27_RUNS = {
+    "rush": ["rush-cap25", "rush-nocap", "rush-cap10", "rush-cap8"],
+    "normal": ["normal-cap25", "normal-cap10", "normal-cap8"],
+    "connections": ["rush-cap25", "rush-cap8"],
+}
+LEVEL27_MAX_CONNECTIONS = 32
 
 plt.rcParams.update(
     {
@@ -128,6 +144,32 @@ def rush_connections(runs):
     ax.set_ylabel("open MySQL connections")
     ax.legend(loc="lower right")
     save(fig, "rush-connections")
+
+
+def rush_connections_level27(runs):
+    """Same idea as rush_connections(), against Level27's real numbers."""
+    fig, ax = figure(
+        "The old cap let connections run past the real limit; 8 doesn't",
+        "Rush: 500 families signing up for the same five sessions, 3 web workers. MySQL connections, "
+        "sampled every 2 s.",
+        width=9,
+    )
+    for colour, name in zip((SERIES[1], SERIES[0]), LEVEL27_RUNS["connections"], strict=True):
+        run = runs[name]
+        points = [
+            (t, n) for t, n in zip(run["metrics"]["t"], run["metrics"]["db_connections"], strict=True) if n is not None
+        ]
+        ts, ns = zip(*points, strict=True)
+        ax.plot(ts, ns, color=colour, label=run["label"])
+    ax.axhline(LEVEL27_MAX_CONNECTIONS, color=INK_2, linestyle=(0, (4, 3)), linewidth=1.2)
+    ax.text(
+        2, LEVEL27_MAX_CONNECTIONS + 1.5, f"max_user_connections ({LEVEL27_MAX_CONNECTIONS})", color=INK_2, fontsize=9
+    )
+    ax.set_ylim(0, LEVEL27_MAX_CONNECTIONS + 10)
+    ax.set_xlabel("seconds into the test")
+    ax.set_ylabel("open MySQL connections")
+    ax.legend(loc="lower right")
+    save(fig, "rush-connections-level27")
 
 
 def rush_latency(runs):
@@ -297,6 +339,26 @@ def caching(runs):
 def main():
     if sys.argv[1] == "--caching":
         caching(json.load(open(sys.argv[2]))["runs"])
+        return
+    if sys.argv[1] == "--level27":
+        runs = json.load(open(sys.argv[2]))["runs"]
+        rush_connections_level27(runs)
+        outcomes(
+            runs,
+            LEVEL27_RUNS["rush"],
+            "The old cap (25) was the worst setting tested, not a safe middle ground",
+            "What happened to every request in the rush, against production's real 3 workers and "
+            "max_user_connections 32.",
+            "rush-outcomes-level27",
+        )
+        outcomes(
+            runs,
+            LEVEL27_RUNS["normal"],
+            "Lowering the cap trades a few clean refusals for zero real errors",
+            "300 users, ordinary heavy load (not a rush) — the old cap (25) refused nothing, but had no "
+            "headroom left for a rush.",
+            "normal-outcomes-level27",
+        )
         return
     runs = json.load(open(sys.argv[1]))["runs"]
     workers(runs)

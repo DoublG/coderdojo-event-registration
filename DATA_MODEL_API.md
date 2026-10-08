@@ -186,9 +186,10 @@ django-ninja stays the framework (`/api/v1/`, OpenAPI reference at
   hour. Should secrets expire, e.g. after a year?
 - django-oauth-toolkit 3.4.1 officially supports Django up to 6.0; it runs
   our tests on 6.1. Watch its releases.
-- **Production:** the deploy is blocked until the server has MySQL client
-  headers and GDAL/GEOS (see "Deploying" in `CLAUDE.md`); the API needs
-  nothing more (same gunicorn, under `/api/`).
+- **Production:** live and deployed — the MySQL client headers and GDAL/GEOS
+  that used to block this are present (confirmed 8 Oct 2026, see
+  `MAINTENANCE.md`); the API needs nothing more (same app server, under
+  `/api/`).
 - **For `/events/sync` (decision 6):** a cap on rows per call (50 covers a
   full year of weekly sessions with room to spare; proposing 200 so a
   twice-weekly dojo or a mid-year bulk correction doesn't need to split

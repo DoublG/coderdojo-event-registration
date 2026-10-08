@@ -31,7 +31,7 @@ update its diagram in the same change.
 9. [Geo reference data](#9-geo-reference-data)
 10. [Redesign: rationale and plan](#10-redesign-rationale-and-plan)
 11. [Mailing, segmentation and campaigns](#11-mailing-segmentation-and-campaigns)
-12. [Organisation events and promotion (later)](#12-organisation-events-and-promotion-later)
+12. [Organisation events and promotion](#12-organisation-events-and-promotion)
 
 Sections 13–28 cover the API, the audit log, two-step login, GDPR, child accounts, home dojos, a dojo's languages, the management area, reviewing on the dashboard, changing an email address, organisation people and roles, logging in with an emailed link, mail from a dojo to its families, capacity and monitoring, multiple guardians per child, and custom roles for a dojo or the organisation.
 
@@ -204,7 +204,7 @@ classDiagram
         +consent_given_at  the child's details may choose its mail
     }
     class Ninja {
-        +name  first name; a child aged 7–17
+        +name  first name, a child aged 7–17
         +family_name  full_name = name + family_name
         +date_of_birth
         +gender  girl | boy | other | unspecified
@@ -1005,7 +1005,7 @@ written, so this list wins where they differ):
   and sessions. The column is hidden from anyone without it.
 - The admin's section is auditlog's own ("Audit log" → "Log entries"),
   apart from Django's "Administration" → "Log entries"; no renaming.
-- The seeders are wrapped in `core.audit.without_audit_log` (16
+- The seeders are wrapped in `core.audit.without_audit_log` (20
   `seed_*` commands and `describe_seed_accounts`).
 
 ### Choosing a package
@@ -1644,7 +1644,7 @@ the document is still deleted the moment a decision is made.
   The rule that a renewal can only be uploaded once the check has lapsed
   stays.
 - **Access like the rest of the dashboard.** `require_reviewer(request)`
-  (`accounts.organisation`): a 404 without the role, or below the sign-in
+  (`accounts.organisation`; since §23 `require_area(request, Area.VOLUNTEERS)`): a 404 without the role, or below the sign-in
   policy. It also guards the document download, which now also tells the
   browser not to keep a copy (`Cache-Control: no-store`). The Organisation
   context (§20) opens for a reviewer who isn't an organisation admin too,
@@ -2059,11 +2059,11 @@ a *Technical access* link for every role.
    (disabled for your own account, with the reason), save; their role
    changes and technical-access grants with reasons.
 4. **Roles** (`/manage/people/roles/`): the area × role table, read-only.
-5. **Technical access** (`/manage/technical-access/`, every role): when
+5. **Technical access** (`/manage/django-admin/`, every role): when
    closed, the reason and password form and what it opens ("the Django
    admin, with your role's permissions, for 12 hours; recorded in the
    audit log"); when open, the time left, *Open the Django admin* and *End
-   technical access*; your earlier grants below.
+   technical access* (`/manage/django-admin/end/`); your earlier grants below.
 6. **Accepting an invitation** (`/invitation/<token>/`, public): who
    invited you to which roles, then *Create an account* or *Log in*;
    afterwards `/manage/`. An expired, used or withdrawn link says so.

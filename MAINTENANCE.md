@@ -6,7 +6,7 @@ platform. Conventions for changing the code are in [`CLAUDE.md`](CLAUDE.md); dep
 "Deploying (Level27)" section. How big the database gets and how much memory each component needs is in
 [`CAPACITY.md`](CAPACITY.md).
 
-**Last checked: 30 September 2026.** Dates from [endoflife.date](https://endoflife.date), the
+**Last checked: 8 October 2026.** Dates from [endoflife.date](https://endoflife.date), the
 [Django roadmap](https://www.djangoproject.com/download/) and [PEP 790](https://peps.python.org/pep-0790/).
 Review this page every quarter (see [Calendar](#calendar)) and whenever a version changes.
 
@@ -25,8 +25,8 @@ Review this page every quarter (see [Calendar](#calendar)) and whenever a versio
 | Python | 3.14.7 (pyenv `py10102-3.14.7`) | 7 Oct 2025 | 1 Oct 2027 | **31 Oct 2030** | Current. Take each 3.14.x patch release. |
 | Django | 6.1.1 | 5 Aug 2026 | 30 Apr 2027 | **31 Dec 2027** | Upgrade to **6.2 LTS** (Apr 2027, security to Apr 2030) between May and Dec 2027. |
 | MySQL server | 8.4.11 | Apr 2024 (8.4 LTS) | Apr 2029 | **30 Apr 2032** | Current LTS, the same as development and the CI (checked 6 Oct 2026 from the server's connection greeting, no login needed). |
-| MySQL client library | 8.0.46 (`libmysqlclient.so.21`, Ubuntu 22.04's package) | Apr 2018 (8.0) | ended Apr 2025 | **ended 30 Apr 2026** upstream | What `mysqlclient` links against; it talks to the 8.4 server fine. Its development headers are missing, so `mysqlclient` can't be built (see [Missing on the server](#missing-on-the-server)). Moves with the operating system's upgrade. |
-| Redis (Celery broker, cache, Channels) | not running | | | | The `.env`'s `REDIS_HOST` refuses connections on 6379 (6 Oct 2026): see [Missing on the server](#missing-on-the-server). |
+| MySQL client library | 8.0.46 (`libmysqlclient.so.21`, Ubuntu 22.04's package) | Apr 2018 (8.0) | ended Apr 2025 | **ended 30 Apr 2026** upstream | What `mysqlclient` links against; it talks to the 8.4 server fine. Its development headers (`libmysqlclient-dev`) are now present too (confirmed 8 Oct 2026: `mysqlclient` 2.3.0 built and working). Moves with the operating system's upgrade. |
+| Redis (Celery broker, cache, Channels) | 8.10.1 | | | | Running (confirmed 8 Oct 2026, `redis-cli INFO server`); `maxmemory` 512 MB, policy `allkeys-lru` — see [`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md), it should be `volatile-lru`. Much newer than the devcontainer's `redis:7.2`; worth trying 7.2 → 8.x in development to match. |
 | gunicorn / uvicorn | 26.2.0 / 0.53.0 | | | | No fixed support windows: stay on the latest release. |
 
 ### Development (the devcontainer)
@@ -63,7 +63,7 @@ calendar: stay on the latest release. Watch these:
 | django-two-factor-auth | 1.18.1 | Officially supports Django up to 5.2; we run and test it on 6.1. Check its release notes on every Django upgrade. |
 | django-oauth-toolkit | 3.4.1 | Officially lists Django up to 6.0; tested here on 6.1. Its `oauthlib` has an open advisory (see [Security log](#security-log)). |
 | celery, kombu, channels, channels-redis | 5.6.3, 5.6.2, 4.3.2, (see file) | Upgrade together with Redis. |
-| mysqlclient | 2.3.0 | Needs the MySQL client headers on the server (missing on Level27 today, see CLAUDE.md). |
+| mysqlclient | 2.3.0 | Needs the MySQL client headers on the server; present since at least 8 Oct 2026 (see "Missing on the server"). |
 | nh3, django-permissions-policy | 0.3.7, 4.34.0 | Security: the Markdown allowlist and the Permissions-Policy header. Keep them current. |
 | coverage, radon (mando, colorama) | 7.16.2, 6.0.1 (0.7.1, 0.4.6) | Development only (`requirements-dev.txt`): test coverage and complexity ([`CODING_STANDARDS.md`](CODING_STANDARDS.md)). `pip-audit`: no known vulnerabilities (1 Oct 2026). |
 | import-linter, grimp (rich, markdown-it-py, mdurl) | 2.15, 3.17 (15.0.0, 4.2.0, 0.1.2) | Development only (`requirements-dev.txt`): the layers between the apps (`lint-imports`, [`CODING_STANDARDS.md`](CODING_STANDARDS.md), "Layers"), also in the Code audit workflow. `pip-audit`: no known vulnerabilities (2 Oct 2026). |
@@ -74,32 +74,40 @@ calendar: stay on the latest release. Watch these:
 ### Missing on the server
 
 Found on 6 Oct 2026 with a read-only check over SSH (`scripts/deploy.sh --check` and an inventory); asked of
-Level27, since the account has no root. Until 1–4 are done, a deploy stops before touching the live site.
+Level27, since the account has no root. **Re-checked 8 Oct 2026: items 1–4 and most of 7 are resolved** —
+Level27 (or we, for 7) sorted them within two days. What's still open is tracked in
+[`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md), not duplicated here.
 
-1. **The MySQL client development headers** (`libmysqlclient-dev`, with its `pkg-config` entry): `mysqlclient`
-   is compiled when it's installed. The runtime library is there.
-2. **GDAL, GEOS and PROJ** (the shared libraries: `libgdal30`, `libgeos-c1v5`, `libproj22`, or `gdal-bin`):
-   `django.contrib.gis` loads them; no headers needed.
-3. **A running Redis** for the account, with `maxmemory` 128 MB and `maxmemory-policy volatile-lru`
-   ([`CAPACITY.md`](CAPACITY.md), finding 6).
-4. **The worker component *celery*** (*Optioneel component* in the Level27 panel) with the two Celery workers' commands (CLAUDE.md, "Deploying"); Level27 keeps them running.
-5. **gunicorn started in `~/app`** (or with `-c ~/app/gunicorn.conf.py`): today it doesn't read our
-   `gunicorn.conf.py`, so the per-worker request cap is off.
-6. **The proxy's request body limit at 12 MB** ([`CAPACITY.md`](CAPACITY.md)).
-7. **Ours:** the server's `.env` lacks `SITE_URL`, the `MAILING_BOUNCE_*` settings, `SECURE_SSL_REDIRECT`,
-   `SECURE_HSTS_SECONDS`, `SECURE_HSTS_INCLUDE_SUBDOMAINS` and `METRICS_TOKEN` (`.env.example` explains each);
-   a local `.env.production` is uploaded by the next deploy.
+1. ~~The MySQL client development headers~~ — present (`libmysqlclient-dev` 8.0.46), `mysqlclient` builds
+   and works.
+2. ~~GDAL, GEOS and PROJ~~ — present (GDAL 3.4.1, GEOS 3.10.2, PROJ 22); `django.contrib.gis` works
+   (`geo.functions.DistanceSphere` imports and queries fine).
+3. ~~A running Redis~~ — running (8.10.1), but with `maxmemory` 512 MB and `maxmemory-policy allkeys-lru`,
+   not the `volatile-lru` our caching design assumes ([`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) #1).
+4. ~~The worker component *celery*~~ — present, both workers running and answering pings.
+5. ~~gunicorn started in `~/app`~~ — confirmed 8 Oct 2026 (`scripts/deploy.sh --check`): gunicorn runs
+   in `~/app` with no `-c` of its own, so `gunicorn.conf.py`'s cap is read and active (production was
+   briefly on daphne, with no equivalent cap, from 6 to 8 Oct 2026). See
+   [`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) for why the cap's current numbers (3 workers × 25)
+   still don't reconcile with MySQL's real connection limit.
+6. **The proxy's request body limit at 12 MB** — still unconfirmed
+   ([`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) #2).
+7. **Ours:** ~~the server's `.env` lacks `SITE_URL`, the `MAILING_BOUNCE_*` settings, `SECURE_SSL_REDIRECT`,
+   `SECURE_HSTS_SECONDS`, `SECURE_HSTS_INCLUDE_SUBDOMAINS` and `METRICS_TOKEN`~~ — all those keys are now in
+   `~/app/.env` (confirmed 8 Oct 2026). `SECURE_HSTS_SECONDS` is at 3600 (1 hour, the first step of the
+   Security log's 30 Sep 2026 entry); `SECURE_SSL_REDIRECT` is still `false` and `MAILING_BOUNCE_ADDRESS`/
+   `MAILING_BOUNCE_IMAP_HOST` are still empty — raising those further is ours to do, not Level27's.
 
 Present: Ubuntu 22.04.5, Python 3.14.7, `gcc`/`make`/`pkg-config`, MySQL 8.4.11, 64 GB of memory and 12 cores
-(shared), 136 GB free disk.
+(shared), 116 GB free disk (8 Oct 2026; was 136 GB on 6 Oct — watch this, the volume is at 93% used).
 
 ### Still to confirm
 
 - ~~The production database server's version~~ **Confirmed 6 Oct 2026: MySQL 8.4.11** (8.4 LTS).
-- **The production Redis version**, once it runs: `redis-cli -h <REDIS_HOST> INFO server | grep redis_version`.
-- **Who patches what on the server.** On Level27's managed hosting the operating system, MySQL and Redis are
-  expected to be theirs to patch, and Python (pyenv) and the Python packages ours. Confirm this with
-  Level27 and note it here.
+- ~~The production Redis version~~ **Confirmed 8 Oct 2026: Redis 8.10.1** — much newer than the
+  devcontainer's `redis:7.2.16`; try 8.x in development to match (update
+  `.devcontainer/docker-compose.yml` and the CI workflows' Redis service together).
+- **Who patches what on the server** — still open, see [`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) #6.
 
 ---
 
@@ -295,6 +303,9 @@ A deeper review, by a person with Claude Code's help:
 |---|---|---|---|
 | 30 Sep 2026 | **oauthlib 3.3.1**, CVE-2026-49265 / GHSA-xpv3-w29h-x7cv (since 1 Oct also PYSEC-2026-4114, which `pip-audit` reports; the workflow's `--ignore-vuln CVE-2026-49265` matches it): timing side channel in PKCE (authorization-code flow). Fixed in 4.0.0. | **Not reachable here:** our API offers only the client-credentials grant (`api/services.py`), which doesn't use PKCE. Low. django-oauth-toolkit 3.4.1 requires `oauthlib>=3.3.0` and doesn't list 4.0 yet. | Open: try oauthlib 4.0.0 with the API tests in the devcontainer; upgrade when django-oauth-toolkit supports it. |
 | 30 Sep 2026 | **Markdown links** (`core/templatetags/markdown_extras.py`, `markdownify`): the text is HTML-escaped, but Python-Markdown keeps any link scheme, so `[x](javascript:...)` in a dojo's or event's description becomes a working `javascript:` link on the public page. Found by the Code audit workflow's security rules (S308). | **High** (stored cross-site scripting): any active champion or mentor can put it on a public page, and a logged-in visitor who clicks it runs the script as themselves. No Content-Security-Policy limits it. | **Fixed 30 Sep 2026:** `markdownify` now cleans its HTML with nh3 against an allowlist (headings from `<h2>`, paragraphs, bold, italic, lists, links; links only `http`, `https`, `mailto` or relative, with `rel="nofollow noopener noreferrer"`). Images, code and anything else are dropped. Tests: `core.tests.MarkdownifyTests`. |
-| 30 Sep 2026 | **`check --deploy` warnings**: no HSTS, no HTTPS redirect, session and CSRF cookies not `Secure`; django-oauth-toolkit's RFC 9700 defaults (implicit and password grants, tokens in the query string, tokens stored in plain text). Also no Content-Security-Policy or Permissions-Policy. | Medium: TLS ends at Level27's proxy, so the cookies' `Secure` flag and HSTS are cheap to add; the OAuth grants we don't offer weren't reachable, tokens stored in plain text were. A CSP limits what any future cross-site scripting bug can do. | **Fixed in the code 30 Sep 2026** (CLAUDE.md, "Security headers"): `Secure` cookies, the proxy header, all RFC 9700 options (tokens now stored hashed), a strict script CSP with nonces (inline handlers moved to `bundle.js`, htmx without eval), Permissions-Policy. Tested with `core.tests.SecurityHeadersTests`, the API tests and a browser crawl of about 480 pages as six roles. **Open on production:** confirm Level27's proxy sets `X-Forwarded-Proto` itself, then set `SECURE_SSL_REDIRECT=true` and raise `SECURE_HSTS_SECONDS` (1 hour, 1 day, 1 year) in `~/app/.env`; `deploy.sh` reports what's still missing. |
+| 30 Sep 2026 | **`check --deploy` warnings**: no HSTS, no HTTPS redirect, session and CSRF cookies not `Secure`; django-oauth-toolkit's RFC 9700 defaults (implicit and password grants, tokens in the query string, tokens stored in plain text). Also no Content-Security-Policy or Permissions-Policy. | Medium: TLS ends at Level27's proxy, so the cookies' `Secure` flag and HSTS are cheap to add; the OAuth grants we don't offer weren't reachable, tokens stored in plain text were. A CSP limits what any future cross-site scripting bug can do. | **Fixed in the code 30 Sep 2026** (CLAUDE.md, "Security headers"): `Secure` cookies, the proxy header, all RFC 9700 options (tokens now stored hashed), a strict script CSP with nonces (inline handlers moved to `bundle.js`, htmx without eval), Permissions-Policy. Tested with `core.tests.SecurityHeadersTests`, the API tests and a browser crawl of about 480 pages as six roles. **Partially done on production, confirmed 8 Oct 2026:** `SECURE_HSTS_SECONDS` is now `3600` (the first of the three planned steps — 1 hour, 1 day, 1 year); `SECURE_SSL_REDIRECT` is still `false`, and whether Level27's proxy sets `X-Forwarded-Proto` itself is still unconfirmed (that's the precondition for turning the redirect on safely — see `LEVEL27_QUESTIONS.md`). `deploy.sh` reports both values on every `--check`. |
 | 30 Sep 2026 | **MySQL 8.0** (the production client, possibly the server) reached end of life on 30 Apr 2026: no more security fixes. | **The server is 8.4.11** (confirmed 6 Oct 2026); only the client library, Ubuntu 22.04's package, is 8.0. | Server closed. The client library moves with the OS upgrade (before Jun 2027). |
 | 30 Sep 2026 | **Devcontainer images** past end of life: MySQL 9.1 (`latest` gone stale), nginx 1.27; the workspace on Debian 12. | Development only, not reachable from outside. | **Fixed 30 Sep 2026:** pinned `mysql:8.4`, `redis:7.2`, `nginx:1.30-alpine`, workspace on `python:3.14-trixie`. The dev data was carried from 9.1 to 8.4 with a dump; the old `db-data` volume is left as a fallback. |
+| 8 Oct 2026 | **Documentation drift from production**, found during a documentation review with SSH access to the server: the "Missing on the server" items (MySQL headers, GDAL/GEOS, Redis) from 6 Oct 2026 were resolved within two days without the docs being updated; `mysqlclient` and `django.contrib.gis` work; Redis runs (8.10.1) but as `allkeys-lru`/512 MB, not the assumed `volatile-lru`; `~/app/.env` has all the keys the 6 Oct check said were missing; production's MySQL user has `max_user_connections` = 32, well under the 151 the per-worker concurrency cap was sized against. | **Not a vulnerability, an operational risk:** the connection-exhaustion protection `CAPACITY.md` describes needed the right app server to be in effect, against a real limit tighter than assumed. | Docs corrected 8 Oct 2026. **App server switched from daphne back to gunicorn the same day** (the panel's `website` component, "server: uvicorn" = our `gunicorn -k uvicorn.workers.UvicornWorker`), so `gunicorn.conf.py`'s cap is active again. **Measured, not just calculated, 8 Oct 2026** (`CAPACITY.md`, "Rerun against Level27's real limits": the devcontainer rebuilt to match production's 3 workers and 32-connection limit exactly, then load-tested): today's cap of 25 produces real `500` errors under a rush (not just `503` refusals) and a quarter of the throughput of every other setting; cap 8 eliminates every `500` tested. **Fixed 8 Oct 2026** (release `20261008-110338-8f46815-dirty`): `gunicorn.conf.py`'s default changed from 25 to 8 and deployed via `scripts/deploy.sh --yes`; confirmed live by reading the master process's own environment (`scripts/deploy.sh --check`, fixed the same day to report this truthfully instead of a hardcoded "25" — see below). `SECURE_SSL_REDIRECT` is still `false` on production. |
+| 8 Oct 2026 | **`scripts/deploy.sh --check`'s "gunicorn.conf.py: read (concurrency cap N per worker...)" line always said N=25**, regardless of the deployed file's actual default or the running master's real environment — it evaluated `${UVICORN_LIMIT_CONCURRENCY:-25}` in the SSH session's own shell, which never has that variable set (it's never sourced from `.env` into a login shell), so the expansion silently fell through to the hardcoded default every time. Found while verifying the cap-8 fix above: the diagnostic claimed "25" immediately after deploying "8." | **Tooling gave false confidence, not a vulnerability:** anyone trusting this line to confirm a cap change took effect would have been wrong, silently. | **Fixed 8 Oct 2026:** `app_server()` now reads the deployed file's actual default (`grep` on `gunicorn.conf.py`) and separately checks the live master's `/proc/<pid>/environ` for a real override, and reports which one is actually in effect. |
+| 8 Oct 2026 | **Static and media files 403'd for every visitor** for at least 7 minutes (09:57–10:04 CEST, likely longer): Apache's error log showed `AH00035: ... search permissions are missing on a component of the path (filesystem path '/var/python/py10102/app')` for every `/static/`, `/media/` and (presumably) `/docs/` request. Cause: switching the app server in the Level27 panel made Level27 reapply the Apache configuration, which reset `~` (the account's home directory) to `750` — stripping the `o+x` bit Apache (running as `www-data`, in no group shared with `py10102`) needs to even traverse into `~/app/staticfiles`/`~/app/media`/`~/docs` to serve them, regardless of the `Require all granted` in the "Extra Apache configuratie" box (that's an authorization check, not a filesystem permission). `scripts/deploy.sh` already runs `chmod o+x "$HOME"` on every deploy for exactly this reason, but that only happens on a code deploy — not on a panel-only change like this one, so the fix lapsed silently. | **Availability, not a data exposure:** every visitor saw an unstyled, broken page until fixed. The underlying "Extra Apache configuratie" (confirmed live in the panel, 8 Oct 2026) is our own config, aliasing `/static/`, `/media/`, `/docs/`, `/_errors/` straight to disk under the home directory — the same pattern the devcontainer's nginx uses for parity. No alternative Level27-managed static-asset location (exempt from the `750` reset) was found; this dependency is structural to the chosen architecture, not a Level27 mistake. | **Fixed 8 Oct 2026** (`chmod o+x ~`, confirmed by fresh `200`s in the access log). **Not yet fixed structurally** — deliberately left as a documented gotcha rather than code changed (decision made 8 Oct 2026): after *any* Level27 panel change (not just a code deploy), re-run `chmod o+x ~` before trusting static/media/docs to load. `scripts/deploy.sh --check` does not currently surface this (it only reports `~`'s permissions, doesn't fail on them). |

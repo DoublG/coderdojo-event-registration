@@ -5,8 +5,10 @@ the Celery workers and Redis need. For developers and whoever runs the platform.
 2026** in the devcontainer; rerun the measurements ([Measuring again](#measuring-again)) after a large
 change and at least once a year, and the production-safe part on production itself
 ([Load testing production](#load-testing-production)). Versions and updates are in
-[`MAINTENANCE.md`](MAINTENANCE.md); the design of the workers is in [`DATA_MODEL.md`](DATA_MODEL.md) §11. The
-charts come from `loadtest/charts.py`, the figures behind them from `loadtest/results/`.
+[`MAINTENANCE.md`](MAINTENANCE.md); open technical questions for Level27 are in
+[`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md); the design of the workers is in
+[`DATA_MODEL.md`](DATA_MODEL.md) §11. The charts come from `loadtest/charts.py`, the figures behind them
+from `loadtest/results/`.
 
 **In short:**
 
@@ -231,15 +233,21 @@ Plan **2 GB** for the account. With 2 web workers: about 1.3 GB at peak, but see
 MySQL isn't in this budget: on Level27 it runs separately (to confirm, see
 [Questions for Level27](#questions-for-level27)).
 
-**Celery's per-child limit.** Both workers recycle their child at `--max-memory-per-child 200000`
-(200 MB, compared with the child's peak RSS after each task). An idle child sits at 143–148 MB RSS, so
-there are about 50 MB of room. The nightly engagement rebuild takes the mailing child to 300 MB (4.9
-seconds for 9,000 children), after which Celery replaces it, as intended: the memory goes back. (Measured
-before 3 October 2026, when the rebuild stopped making a copy of each session and dojo per booking: about
-100 MB less at its peak, [`MEMORY_PROFILE.md`](MEMORY_PROFILE.md).) A
-campaign launch stays at 160 MB (the audience is queued in chunks). The periodic worker's child never came
-near the limit. The limit is right as it is; watch for "exceeded memory limit" in the worker log after
-every task, which would mean the baseline has grown.
+**Celery's per-child limit.** This section's measurements used `--max-memory-per-child 200000` (200 MB,
+compared with the child's peak RSS after each task). **Production's actual worker component commands use
+`--max-memory-per-child 160000`** (156 MB; confirmed 8 Oct 2026 by reading the commands Level27 runs,
+`~/.worker/*`) — lower than what was measured here, not 200 MB. An idle child sits at 143–148 MB RSS, so
+against the real 160 MB limit there's only about 12–17 MB of room, not the 50 MB this page assumed. The
+nightly engagement rebuild takes the mailing child to 300 MB (4.9 seconds for 9,000 children), which is
+well past 160 MB too; Celery's limit is only checked *after* a task finishes (it replaces the child then,
+not mid-task), so this isn't a crash risk, but the 200 MB this page measured against is not the number
+production runs with — reconcile the two (either raise the panel's commands to 200 MB+, or re-measure
+against 160 MB) rather than trusting this page's "50 MB of room" figure. (Measured before 3 October 2026,
+when the rebuild stopped making a copy of each session and dojo per booking: about 100 MB less at its
+peak, [`MEMORY_PROFILE.md`](MEMORY_PROFILE.md).) A campaign launch stays at 160 MB (the audience is queued
+in chunks) — already at the production limit. The periodic worker's child never came near either limit.
+Watch for "exceeded memory limit" in the worker log after every task, which would mean the baseline has
+grown.
 
 ## Load: web requests
 
@@ -276,8 +284,12 @@ clicks. Times in milliseconds.
 **The problem.** Under ASGI, Django runs every request in a thread of its own with a database connection of
 its own, and uvicorn starts any number of requests at once. So the site's MySQL connections are about *web
 workers × requests in progress per worker*, plus about 5 for Celery, with nothing capping the middle
-number. In a rush that goes past MySQL's `max_connections` (151 in the devcontainer, possibly lower on
-shared hosting), and every request that can't get a connection fails with a 500.
+number. In a rush that goes past MySQL's `max_connections` (151 in the devcontainer), and every request
+that can't get a connection fails with a 500. **On production this is tighter than it looks:** the app's
+own DB user has `max_user_connections` = 32 (confirmed 8 Oct 2026, against `max_connections` 350 overall) —
+well under the devcontainer's 151 this cap was sized against. Production runs gunicorn with **3 workers**
+(confirmed 8 Oct 2026) at the default cap of 25 — see [`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) for
+why 3 × 25 still doesn't reconcile with 32, even with the cap mechanism itself working correctly.
 
 **The cap.** uvicorn's `limit_concurrency`: a worker already holding that many connections answers a new
 one with an immediate *503 Service Unavailable* instead of starting it. Level27 manages gunicorn's command
@@ -285,8 +297,14 @@ one with an immediate *503 Service Unavailable* instead of starting it. Level27 
 so it's set in **`gunicorn.conf.py`**, which gunicorn reads by itself from the folder it starts in
 (`~/app`): **25 per worker** (`UVICORN_LIMIT_CONCURRENCY` changes it). A worker then runs at most 24
 requests at once (uvicorn counts the new connection too), so 4 workers use at most about 100 connections
-plus Celery's, under 151. `scripts/deploy.sh` (and its `--check`) says whether gunicorn really reads the
-file: not if it starts elsewhere or with a `-c` of its own.
+plus Celery's, under 151 — but against production's real `max_user_connections` of 32 (confirmed 8 Oct
+2026), even one worker at this cap is already tight. `scripts/deploy.sh` (and its `--check`) says whether
+gunicorn really reads the file: not if it starts elsewhere or with a `-c` of its own. **Confirmed active on
+production 8 Oct 2026** (3 workers, `gunicorn.conf.py` read, cap 25) — production briefly ran daphne
+instead, with no equivalent per-worker limit at all, from 6 to 8 Oct 2026. With the mechanism back in
+place, the open question is sizing: 3 workers × 25 is still well past 32 — see
+[`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) for the open decision (lower `WEB_CONCURRENCY` or the cap,
+or raise the MySQL limit).
 
 **The rush with and without the cap** (4 web workers, 500 families signing up for the same five sessions,
 each clicking again every 0.5 to 2 seconds: about 350 requests a second, far beyond anything real):
@@ -315,8 +333,9 @@ each clicking again every 0.5 to 2 seconds: about 350 requests a second, far bey
   (`.devcontainer/nginx/errors/busy.html`: the site's design, in Dutch, French and English, no script,
   trying again by itself after 30 seconds), for a 503 from the cap, a 502 while the site is down or
   restarting and a 504, with the status kept and `Retry-After: 30`. `/health/` and `/api/` keep their own
-  answers, and so do Django's own 404 and 500 pages. It's the example for production: ask Level27 to serve
-  that page the same way ([Questions](#questions-for-level27)).
+  answers, and so do Django's own 404 and 500 pages. It's the example for production, and already in
+  place there: `scripts/deploy.sh` uploads it to `~/errors/busy.html` every deploy, served at `/_errors/`
+  through the panel's Apache configuration (confirmed present on production, dated 7 Oct 2026).
 
   ![The proxy's busy page: desktop in light mode, a phone in dark mode](user-journeys/images/proxy-busy-page.png)
 
@@ -332,20 +351,82 @@ each clicking again every 0.5 to 2 seconds: about 350 requests a second, far bey
 | Cap 10 | 15 | 0.6% | 110 ms |
 | Cap 25, connections kept open between requests | 17 | **26%** | 92 ms |
 
-- **25 is the setting:** nothing refused under normal load, while a rush stays far from MySQL's limit.
+- **25 was the setting** for this devcontainer measurement (4 workers, MySQL's 151-connection default):
+  nothing refused under normal load, while a rush stayed far from MySQL's limit. **This does not hold on
+  production** — see "Rerun against Level27's real limits" below, which replaces 25 as the recommendation
+  for production specifically.
   10 already turns away normal traffic.
 - **The cap counts open connections, not requests.** When the client keeps its connection open between
   requests (the last row), idle connections take places too and a quarter of the requests were refused at
   25. Behind a proxy that opens a connection per request (nginx's default towards its upstream), open
   connections are requests in progress; a proxy that keeps a pool of connections to gunicorn open would
   need a higher cap. **That's Level27's proxy: ask how it connects to the socket**
-  ([Questions](#questions-for-level27)), and until then watch `coderdojo_http_server_errors_total` and
-  the proxy's 503s after deploying.
+  ([`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) #3), and until then watch
+  `coderdojo_http_server_errors_total` and the proxy's 503s after deploying.
 - **WebSockets count too:** every open notification bell holds a connection for as long as the dashboard is
   open. A few dozen across 4 workers are fine at 25; hundreds would need the cap raised, or the bell
   served by a worker of its own.
 - To size the cap for another MySQL limit: *workers × (cap − 1) + 5 < max_user_connections*, leaving room
   for the Django admin and maintenance commands.
+
+### Rerun against Level27's real limits (8 Oct 2026)
+
+Every number above was measured against the devcontainer's MySQL defaults (`max_connections` 151, 4 web
+workers) — not what production actually has. Once production's real numbers were confirmed
+(`max_user_connections` 32, 3 gunicorn workers; `LEVEL27_QUESTIONS.md`), the whole cap matrix was rerun in
+the devcontainer with those exact constraints reproduced: `ALTER USER` on the dev DB user to
+`MAX_USER_CONNECTIONS 32`, gunicorn started with `-w 3`, otherwise the same `growth`-scale database,
+Locust scenarios and `/metrics/` sampling as above (raw results:
+[`loadtest/results/2026-10-08-level27-realistic.json`](loadtest/results/2026-10-08-level27-realistic.json);
+charts from `loadtest/charts.py --level27`).
+
+![The old cap let connections run past the real limit during a rush; cap 8 stays well under it](loadtest/charts/rush-connections-level27.png)
+
+| Run (3 workers, `max_user_connections` 32) | Peak DB connections | Requests | Failed | **500 errors** | 503 refused | p95 |
+|---|---:|---:|---:|---:|---:|---:|
+| Rush, cap 25 (**today's production setting**) | 33 | 8,666 | 70.2% | **805** | 4,903 | 360 ms |
+| Rush, no cap | 33 | 33,313 | 14.7% | **3,719** | 0 | 470 ms |
+| Rush, cap 10 | 22 | 37,697 | 21.3% | **0** | 7,686 | 160 ms |
+| Rush, cap 8 | 19 | 30,940 | 16.6% | **0** | 4,727 | 210 ms |
+| 300 users (normal), cap 25 | 11 | 11,539 | 0% | 0 | 0 | 110 ms |
+| 300 users (normal), cap 10 | 11 | 11,422 | 1.3% | 0 | 137 | 97 ms |
+| 300 users (normal), cap 8 | 11 | 10,804 | 1.9% | 0 | 189 | 96 ms |
+
+**The headline: today's production setting (cap 25, 3 workers) is the worst option measured, not a safe
+middle ground.** It's the only rush run with real server errors (805 of them — about 9% of all its
+requests, confirmed in the raw Locust failures as genuine `500 Internal Server Error` responses, not
+503 refusals) *and* the lowest throughput of any rush run (8,666 requests in two minutes, against 30–38
+thousand for every other configuration) — 3 workers × cap 25 lets 75 requests queue up per worker group
+against a database that can only actually serve 32 at once, so most of that concurrency sits blocked
+rather than failing fast, and Django returns a 500 once a request finally gets to the front and still
+can't get a connection. No worker crashes or restarts were involved (checked the gunicorn error log) —
+these are legitimate application-level errors under normal operation, at normal-for-a-rush load.
+
+![The old cap (25) was the worst setting tested, not a safe middle ground](loadtest/charts/rush-outcomes-level27.png)
+
+**Cap 8 and cap 10 both eliminate every 500 error**, in the rush *and* the normal-load scenarios — zero,
+across all four runs at those caps. The trade-off is more visible (but clean) `503`/"busy, try again"
+refusals: about 17–21% of rush requests instead of today's 70%, and a small 1.3–1.9% refusal rate even
+under ordinary heavy traffic (300 concurrent users), where cap 25 refused nothing. Cap 8 gives a slightly
+wider safety margin than cap 10 (peak 19 vs. 22 connections, comfortably under 32) for a similar refusal
+rate and the lowest p95 isn't meaningfully different between them.
+
+![Lowering the cap trades a few clean refusals for zero real errors](loadtest/charts/normal-outcomes-level27.png)
+
+**Fixed 8 Oct 2026: `gunicorn.conf.py`'s default changed from 25 to 8** (not an `.env` override — more
+reliable, since it takes effect on any reload regardless of how Level27's systemd unit sources
+environment variables) and deployed to production (`scripts/deploy.sh --yes`, release
+`20261008-110338-8f46815-dirty`). Confirmed live, not assumed: read the deployed file's own default and
+the running master's `/proc/<pid>/environ` directly over SSH, rather than trusting
+`scripts/deploy.sh --check`'s own summary line, which turned out to always say "25" regardless of the
+real value until fixed the same day (`MAINTENANCE.md`, Security log). This changes production behaviour —
+more visible refusals under heavy load in exchange for zero server errors — which is why it was applied
+deliberately rather than silently from a documentation pass. If `WEB_CONCURRENCY`/the worker count changes
+later, resize the cap with the same formula and ideally rerun this matrix rather than trust the formula
+alone — cap 25 passed the formula's informal reasoning well enough until it was actually measured against
+the real connection limit, and the gap between the two was worse than the formula alone would have
+suggested (the formula says cap 25/3 workers *fails*, which is right, but gives no sense that it fails
+this badly — 70% request failure, not a modest overrun).
 
 ## Caching
 
@@ -472,7 +553,11 @@ One Redis holds the cache (db 0), the Channels layer (db 1) and the Celery broke
   never are; the container itself is capped at 256 MB (`mem_limit`), for Redis's overhead and the fork of
   a background save. 128 MB is about 30 times the peak of the load tests. **Every cache key must have a
   timeout** (`core.caching` and `cache.set` always pass one): a key without one could never be evicted.
-  Production's settings are still unknown ([Questions](#questions-for-level27)).
+  **Production's settings, confirmed 8 Oct 2026:** Redis 8.10.1, `maxmemory` 512 MB, policy
+  **`allkeys-lru`** — unlike the devcontainer, this does *not* protect the broker's and `/metrics/`'s
+  untimed keys from eviction once Redis fills up. Current usage is tiny (2.3 MB), so there's no live
+  incident, but it's a real gap in the design's safety margin, not just an unconfirmed setting
+  ([`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) #1).
 
 ## Findings and what to do
 
@@ -490,20 +575,33 @@ In order of urgency.
    without the lock. The rushes checked since (150 families without the cap, 150 with it): exactly 22
    confirmed on every session, no duplicate positions, no lock timeouts.
 2. **Database connections weren't limited** (availability). **Capped on 30 September 2026** at 25
-   requests per web worker (`gunicorn.conf.py`, [above](#capping-requests-per-web-worker)). *Still to
-   confirm on production:* that gunicorn reads the file (`scripts/deploy.sh --check`), how Level27's proxy
-   connects to gunicorn, and MySQL's `max_user_connections`.
+   requests per web worker (`gunicorn.conf.py`, [above](#capping-requests-per-web-worker)), confirmed
+   active on production 8 Oct 2026 (3 gunicorn workers, cap read from the file) — but production's
+   `max_user_connections` turns out to be 32 (confirmed 8 Oct 2026), tighter than the 151 the cap was
+   designed against. **Measured, not just calculated, 8 Oct 2026** ("Rerun against Level27's real
+   limits," above): at cap 25 with 3 workers, a rush produces real `500` errors (805 of them, ~9% of
+   requests) and collapses to a quarter of the throughput of every other setting tested — not a graceful
+   degradation. Cap 8 or 10 eliminates every `500` in both a rush and normal heavy load, at the cost of
+   more visible `503` refusals (17–21% of a rush, 1.3–1.9% of normal heavy load, vs. 0% today).
+   **Fixed 8 Oct 2026:** `gunicorn.conf.py`'s default changed from 25 to 8 and deployed (release
+   `20261008-110338-8f46815-dirty`); confirmed live by reading the master process's own environment, not
+   assumed — `scripts/deploy.sh --check` trusted a hardcoded display value here until the same day (see
+   the Security log in `MAINTENANCE.md`). This was a deliberate trade-off, not a docs fix: today's zero
+   visible refusals for zero real errors. *Still open:* how Level27's proxy connects to the app's socket
+   ([`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) #3) affects whether 8 is still right once that's known.
 3. **Uploads had no limits** (disk, privacy). **Guarded on 30 September 2026** ([the
    guardrails](#disk-files-and-uploads)): size and type checks, images made smaller and stripped of their
-   metadata, replaced files deleted. *Still to do on production:* the proxy's body limit (Level27).
+   metadata, replaced files deleted. *Still to do on production:* confirm the proxy's body limit
+   ([`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) #2).
 4. **Mail text was kept forever** (growth). **Built on 3 October 2026:** the daily retention job clears a
    mail's subject, body, address and account link 12 months after it was created (`mail_content`): about a
    quarter less database after five years. Run `OPTIMIZE TABLE mailing_emailmessage` once after the first
    large clean-up on production if the disk space itself is needed back.
 5. **Four web workers** (`WEB_CONCURRENCY`) if the account's memory allows: much better response times under
    load for about 200 MB more.
-6. **Redis limits:** set `maxmemory` and `volatile-lru` on production (or confirm what it has). The
-   devcontainer runs with them since 2 October 2026 (128 MB, the container capped at 256 MB).
+6. **Redis limits:** confirmed 8 Oct 2026 — `maxmemory` 512 MB, but policy `allkeys-lru`, not
+   `volatile-lru`. Ask Level27 to switch it ([`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) #1); the
+   devcontainer runs with `volatile-lru` since 2 October 2026 (128 MB, the container capped at 256 MB).
 7. **Celery's logs** grew about 6 MB a day, mostly the periodic worker's routine runs. **Fixed on 30
    September 2026:** that worker logs at WARNING in production.
 8. **Booking mail waited behind a campaign** (mail). **Fixed on 2 October 2026**
@@ -612,21 +710,12 @@ counts the proxy's open connections: raise it, see [above](#capping-requests-per
 
 ## Questions for Level27
 
-To fill in the budget above (the versions are already asked in `MAINTENANCE.md`, "Still to confirm"):
-
-1. How much memory and how many CPU cores the account gets, and whether it's a hard limit.
-2. MySQL's `max_connections` and `max_user_connections`, whether MySQL runs on the same machine (and so in
-   our memory), and the disk quota for the database, its binary logs and backups.
-3. **How the proxy connects to gunicorn's socket:** a new connection per request, or a pool kept open
-   (keep-alive)? The latter needs a higher cap. And whether it can show our own page for a 502, 503 and 504
-   from the site, as the devcontainer's nginx does (`.devcontainer/nginx/errors/busy.html`, `nginx.conf`'s
-   `error_page`): with the status kept, `Retry-After`, and not for `/health/` and `/api/`.
-4. **The proxy's maximum request body** (`client_max_body_size` or equivalent): it should be 12 MB, like the
-   devcontainer's, so a file just over the site's 10 MB gets the site's own message.
-5. Redis's `maxmemory` and `maxmemory-policy`, and whether this Redis is ours alone.
-6. The worker component's memory limit (512 MB, *kill* when exceeded) covers both workers together: whether
-   that's enough, and whether Level27 rotates `~/logs/worker-<id>/`.
-7. The disk quota for `~/app` (media), `~/deploy` and the logs.
+Level27 sponsors the hosting, so this isn't about capacity or budget — the concrete technical
+configuration questions (the proxy's connection behaviour and body limit, Redis's eviction policy, who
+patches what) now live in one place, [`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md), kept separate from
+this measurement page so they don't go stale here unnoticed. MySQL's `max_connections` (350) and
+`max_user_connections` (32) are confirmed (8 Oct 2026, read directly from the app's own DB connection) —
+see "Capping requests per web worker" above for why `max_user_connections` matters more than it looks.
 
 ## Measuring again
 
@@ -649,8 +738,8 @@ python manage.py capacity_report --json --years 5 > loadtest/results/capacity-$(
 export DB_NAME=test_capacity DEBUG=false SILK=false SECURE_COOKIES=false EMAIL_HOST= \
        REDIS_CACHE_DB=4 REDIS_CHANNELS_DB=5 CELERY_BROKER_DB=6 MAILING_BOUNCE_IMAP_HOST= METRICS_TOKEN=loadtest
 gunicorn -k uvicorn.workers.UvicornWorker main:app -b 127.0.0.1:8001 -w 4 &
-celery -A website worker -n periodic-load@%h -Q periodic -c 1 -B --scheduler django_celery_beat.schedulers:DatabaseScheduler --max-tasks-per-child 100 --max-memory-per-child 200000 &
-celery -A website worker -n mailing-load@%h -Q celery -c 1 --max-tasks-per-child 100 --max-memory-per-child 200000 &
+celery -A website worker -n periodic-load@%h -Q periodic -c 1 -B --scheduler django_celery_beat.schedulers:DatabaseScheduler --max-tasks-per-child 100 --max-memory-per-child 160000 &
+celery -A website worker -n mailing-load@%h -Q celery -c 1 --max-tasks-per-child 100 --max-memory-per-child 160000 &
 
 # 4. Load, sampling /metrics/ as it goes; the names are the ones loadtest/charts.py draws
 python manage.py shell -c "exec(open('loadtest/prepare.py').read())" > /tmp/loadtest.json

@@ -181,7 +181,7 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
   per guardian and child, on the `Guardianship` (`consent_given_at`,
   `consent_wording_version`); links from before, or made in the admin,
   have none. The mail privacy explanation says so
-  (`PRIVACY_WORDING_VERSION` 2026-09-26). `seed_guardians` seeds both: most
+  (`PRIVACY_WORDING_VERSION` 2026-09-29). `seed_guardians` seeds both: most
   families consented for every child, every 4th (`guardian-2`, `-6`, ...)
   for none, a few (`guardian-N` with N % 8 = 3) for their first child
   only; `seed_credentials.csv` marks those children `[no consent]`.

@@ -22,7 +22,13 @@
 #      Gives Apache (www-data) passage through the home directory (o+x, no
 #      listing): it serves /static/, /media/ and /docs/ from disk there, and
 #      Level27 resets the home to 750 whenever it applies the panel's Apache
-#      configuration. private_media/ stays closed to others (o-rwx).
+#      configuration — confirmed 8 Oct 2026 that this isn't limited to editing
+#      the Apache box itself: switching the app server (gunicorn/daphne) in
+#      the panel triggers it too, and broke static/media for several minutes
+#      until the next deploy (or a manual `chmod o+x ~`) fixed it. There's no
+#      automatic fix for a panel-only change: after one, check (`--check`
+#      reports this) or just re-run `chmod o+x ~` before trusting the site.
+#      private_media/ stays closed to others (o-rwx).
 #   5. Puts the new code live and does a smoke-test request over the app's
 #      unix socket. Level27 runs the app as the systemd service py10102.service
 #      with either gunicorn (HUP to its master: a graceful reload) or daphne
@@ -66,7 +72,7 @@ REMOTE_SOCKET="/var/run/socket/py10102.socket"
 LEGACY_UNITS="coolregistration-celery-periodic coolregistration-celery-mailing"
 
 # Never shipped: dev tooling and local-only material.
-EXCLUDES_RE='^(\.devcontainer/|\.claude/|\.vscode/|\.github/|docs/|scripts/|user-journeys/|loadtest/|quality/|AGENTS\.md$|CLAUDE\.md$|DATA_MODEL(_[A-Z]+)?\.md$|CAPACITY\.md$|CODING_STANDARDS\.md$|MEMORY_PROFILE\.md$|requirements-dev\.txt$|pyproject\.toml$|\.env\.example$)'
+EXCLUDES_RE='^(\.devcontainer/|\.claude/|\.vscode/|\.github/|docs/|scripts/|user-journeys/|loadtest/|quality/|AGENTS\.md$|CLAUDE\.md$|DATA_MODEL(_[A-Z]+)?\.md$|CAPACITY\.md$|CODING_STANDARDS\.md$|MEMORY_PROFILE\.md$|LEVEL27_QUESTIONS\.md$|requirements-dev\.txt$|pyproject\.toml$|\.env\.example$)'
 
 MODE="deploy"
 ASSUME_YES=0
@@ -242,7 +248,19 @@ app_server() {
     if echo "\$args" | grep -qE -- ' (-c|--config)[ =]'; then
         echo "gunicorn.conf.py: IGNORED, gunicorn is started with a config of its own: the concurrency cap is off"
     elif [ "\$cwd" = "\$APP" ] && [ -f "\$APP/gunicorn.conf.py" ]; then
-        echo "gunicorn.conf.py: read (concurrency cap \${UVICORN_LIMIT_CONCURRENCY:-25} per worker, from gunicorn's next start or reload)"
+        # The SSH session's own shell never has UVICORN_LIMIT_CONCURRENCY set
+        # (it's not sourced from .env into a login shell), so a bash default
+        # expansion here would always print the same fallback regardless of
+        # the deployed file or the master's real environment — read both for
+        # real instead (found 8 Oct 2026, after this always silently said 25).
+        local file_default env_override
+        file_default="\$(grep -oE '"UVICORN_LIMIT_CONCURRENCY", *"[0-9]+"' "\$APP/gunicorn.conf.py" | grep -oE '[0-9]+' || echo '?')"
+        env_override="\$(tr '\\0' '\\n' < "/proc/\$master/environ" 2>/dev/null | grep '^UVICORN_LIMIT_CONCURRENCY=' | cut -d= -f2 || true)"
+        if [ -n "\$env_override" ]; then
+            echo "gunicorn.conf.py: read (concurrency cap \$env_override per worker, from UVICORN_LIMIT_CONCURRENCY in the master's environment)"
+        else
+            echo "gunicorn.conf.py: read (concurrency cap \$file_default per worker, the file's own default; no UVICORN_LIMIT_CONCURRENCY override in the master's environment)"
+        fi
     else
         echo "gunicorn.conf.py: NOT read, gunicorn doesn't start in \$APP: the concurrency cap is off"
     fi

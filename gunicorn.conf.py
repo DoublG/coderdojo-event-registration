@@ -8,12 +8,17 @@
 # one in a thread of its own), so this also caps the site's connections at
 # workers x limit (+ about 5 for Celery), under MySQL's max_connections.
 # uvicorn counts open connections, so an open notification WebSocket takes a
-# place too. Measured in CAPACITY.md, "Capping requests per web worker".
+# place too. Measured in CAPACITY.md, "Capping requests per web worker": 25
+# was only ever validated against the devcontainer's 151-connection MySQL
+# default. Rerun on 8 Oct 2026 against production's real numbers (3 workers,
+# `max_user_connections` 32), 25 produced real 500 errors under a rush (not
+# just 503 refusals) and a quarter of the throughput of every other setting
+# tested; 8 eliminated every 500 in both a rush and normal heavy load.
 import os
 
 from uvicorn.workers import UvicornWorker
 
 UvicornWorker.CONFIG_KWARGS = {
     **UvicornWorker.CONFIG_KWARGS,
-    "limit_concurrency": int(os.environ.get("UVICORN_LIMIT_CONCURRENCY", "25")),
+    "limit_concurrency": int(os.environ.get("UVICORN_LIMIT_CONCURRENCY", "8")),
 }

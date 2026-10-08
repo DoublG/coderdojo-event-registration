@@ -29,6 +29,7 @@ workers for all mail, and Django Channels for live notifications.
 | Developers and whoever runs the platform | [`MAINTENANCE.md`](MAINTENANCE.md) | Versions and support dates (development and production), updates, responding to vulnerabilities, code audits, the security log |
 | Developers | [`CODING_STANDARDS.md`](CODING_STANDARDS.md) | Coding standards, linting and formatting, type checking, accessibility (WCAG 2.2 AA), tests and guard tests, test coverage (what is and isn't covered), complexity, production versus development-only code |
 | Developers and whoever runs the platform | [`CAPACITY.md`](CAPACITY.md) | Database growth, disk and uploads, memory per component, load test results with charts, and how to measure again (on production too) |
+| Developers and whoever runs the platform | [`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) | Open technical questions for Level27 (our hosting sponsor): proxy and Redis configuration, patching responsibilities |
 | Developers and whoever runs the platform | [`MONITORING.md`](MONITORING.md) | Every metric on `/metrics/` and every panel of the Grafana dashboard explained, with screenshots under load |
 | Developers | [`MEMORY_PROFILE.md`](MEMORY_PROFILE.md) | The memory each of the site's functions uses per call, over every page and background job, and which are worth refactoring |
 | Security researchers | [`SECURITY.md`](SECURITY.md) | How to report a vulnerability, and what's supported |
@@ -218,8 +219,9 @@ complexity: [`CODING_STANDARDS.md`](CODING_STANDARDS.md).
 
 Production is Level27 Python hosting. [`scripts/deploy.sh --check`](scripts/deploy.sh) is a read-only
 preflight; `scripts/deploy.sh` deploys: it checks the new code before touching the live site, migrates,
-reloads gunicorn, restarts the two Celery workers (run by Level27's worker component) and smoke-tests.
-Details in [`CLAUDE.md`](CLAUDE.md#deploying-level27).
+reloads gunicorn or restarts daphne (whichever the Level27 panel runs — gunicorn as of 8 Oct 2026), restarts
+the two Celery workers (run by Level27's worker component) and smoke-tests. Details in
+[`CLAUDE.md`](CLAUDE.md#deploying-level27).
 
 ---
 
