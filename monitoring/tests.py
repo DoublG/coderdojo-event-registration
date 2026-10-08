@@ -316,13 +316,13 @@ class GunicornConfigTests(TestCase):
             runpy.run_path(str(django_settings.BASE_DIR / "gunicorn.conf.py"))
         return UvicornWorker.CONFIG_KWARGS
 
-    def test_each_worker_takes_at_most_25_at_once(self):
+    def test_each_worker_takes_at_most_8_at_once(self):
         with mock.patch.dict("os.environ"):
             import os
 
             os.environ.pop("UVICORN_LIMIT_CONCURRENCY", None)
             config = self.load()
-        self.assertEqual(config["limit_concurrency"], 25)
+        self.assertEqual(config["limit_concurrency"], 8)
         # uvicorn's own choices stay.
         self.assertEqual(config["loop"], "auto")
 
