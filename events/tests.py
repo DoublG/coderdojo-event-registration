@@ -864,6 +864,87 @@ class EngagementTests(TestCase):
         rebuild()
         self.assertEqual(NinjaEngagement.objects.count(), count)
 
+    def _snapshot(self):
+        from .models import NinjaEngagement
+
+        return sorted(
+            NinjaEngagement.objects.values_list(
+                "ninja_id", "dojo_id", "main_dojo_id", "stage", "attended_180d", "offered_180d", "missed_in_a_row"
+            ),
+            key=lambda row: (row[0], row[1] or 0),
+        )
+
+    def test_batches_give_the_same_rows_as_one_batch(self):
+        """The rebuild works a batch of children at a time (CAPACITY.md):
+        any batch size gives the same rows, and a stage change is recorded
+        once, in the batch of that child."""
+        from .engagement import rebuild
+        from .models import NinjaEngagement, NinjaEngagementChange
+
+        elsewhere = make_dojo("Antwerp")
+        children = [self.ninja] + [
+            Ninja.objects.create(name=f"Child {n}", home_dojo=self.dojo if n % 2 else None) for n in range(5)
+        ]
+        sessions = [self._session(days) for days in (150, 120, 90, 60)] + [self._session(30, dojo=elsewhere)]
+        for n, child in enumerate(children):
+            for session in sessions[n % 3 :]:
+                self._came(session, ninja=child, attended=bool(n % 2) or None)
+        self.assertEqual(rebuild(batch_size=1000), NinjaEngagement.objects.count())
+        whole = self._snapshot()
+        self.assertEqual(rebuild(batch_size=2), len(whole))
+        self.assertEqual(self._snapshot(), whole)
+
+        NinjaEngagement.objects.filter(ninja=children[1], dojo=None).update(stage=NinjaEngagement.LAPSED)
+        rebuild(batch_size=2)
+        rebuild(batch_size=1)
+        self.assertEqual(NinjaEngagementChange.objects.filter(ninja=children[1]).count(), 1)
+        self.assertEqual(NinjaEngagementChange.objects.count(), 1)
+
+    def test_a_batch_reads_only_its_childrens_registrations(self):
+        from core.testing import site_queries
+
+        from .engagement import _registrations_by_ninja
+
+        other = Ninja.objects.create(name="Noor")
+        session = self._session(30)
+        self._came(session)
+        self._came(session, ninja=other)
+        came, _no_shows, _upcoming = _registrations_by_ninja(
+            timezone.now(), Dojo.objects.in_bulk(), ninjas=(other.pk, other.pk)
+        )
+        self.assertEqual(set(came), {other.pk})
+        with site_queries() as captured:
+            _registrations_by_ninja(timezone.now(), {}, events={}, marked_events=set(), ninjas=(0, 0))
+        self.assertEqual(len(captured), 1)  # only the registrations: the rest comes in once
+
+    def test_each_batch_starts_on_a_fresh_connection(self):
+        """Outside a transaction (the task's case) every batch calls
+        close_old_connections, so a connection MySQL closed while the worker
+        was slow is replaced; inside one (a test, a caller's) it never does."""
+        from unittest import mock
+
+        from . import engagement
+
+        for _ in range(3):
+            Ninja.objects.create(name="Child")
+        with mock.patch.object(engagement, "close_old_connections") as close:
+            engagement.rebuild(batch_size=2)
+        close.assert_not_called()
+        with (
+            mock.patch.object(engagement, "connection", mock.Mock(in_atomic_block=False)),
+            mock.patch.object(engagement, "close_old_connections") as close,
+        ):
+            engagement.rebuild(batch_size=2)
+        self.assertEqual(close.call_count, 2)  # 4 children, 2 batches
+
+    def test_a_stuck_rebuild_is_not_handed_out_again(self):
+        """Acknowledged when it starts and stopped after ten minutes: a run
+        that dies or hangs isn't retried the same night (CAPACITY.md)."""
+        from .tasks import rebuild_engagement
+
+        self.assertFalse(rebuild_engagement.acks_late)
+        self.assertEqual(rebuild_engagement.time_limit, 600)
+
 
 class OrganisationAndExternalEventTests(TestCase):
     """The organisation's own events (DATA_MODEL.md §12): "Organised by"

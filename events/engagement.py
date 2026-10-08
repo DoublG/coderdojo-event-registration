@@ -21,7 +21,7 @@ trigger on); the rebuild_engagement task runs it nightly.
 from collections import Counter, defaultdict
 from datetime import timedelta
 
-from django.db import transaction
+from django.db import close_old_connections, connection, transaction
 from django.utils import timezone
 
 from accounts.models import Ninja, age_on
@@ -38,6 +38,8 @@ REGULAR_MIN_RATE = 0.5
 AT_RISK_MISSED = 3
 NO_SHOW_DAYS = 90
 ADULT_AGE = 18
+# Children per batch of the rebuild: its memory follows this, not the number of children.
+BATCH_SIZE = 500
 
 
 def is_aimed_at(ninja, event):
@@ -150,11 +152,13 @@ def _row(ninja, dojo, main, overall, visits, sessions, no_shows, upcoming, today
     )
 
 
-def _sessions_by_dojo(now, history_start):
-    """{dojo_id: [event]}: the sessions each dojo ran in the history window."""
+def _sessions_by_dojo(events, now, history_start):
+    """{dojo_id: [event]}: the sessions each dojo ran in the history window,
+    taken from `events` (_sessions_by_id), so each session is one object."""
     sessions = defaultdict(list)
-    for event in Event.objects.exclude(status=Event.DRAFT).filter(start_time__lte=now, start_time__gte=history_start):
-        sessions[event.dojo_id].append(event)
+    for event in events.values():
+        if history_start <= event.start_time <= now:
+            sessions[event.dojo_id].append(event)
     return sessions
 
 
@@ -169,21 +173,30 @@ def _sessions_by_id(dojos):
     return events
 
 
-def _registrations_by_ninja(now, dojos):
+def _marked_events():
+    """The sessions where the dojo marked anyone's attendance."""
+    return set(Registration.objects.filter(attended__isnull=False).values_list("event_id", flat=True))
+
+
+def _registrations_by_ninja(now, dojos, events=None, marked_events=None, ninjas=None):
     """Each child's registrations, sorted into what came of them:
     came {ninja_id: {event_id: (event, marked)}}, no_shows {ninja_id: [event]}
     and upcoming {ninja_id: {dojo_id}}. The registrations are read as plain
     values, a chunk at a time, and point at shared event objects, so the
-    memory follows the number of sessions rather than of registrations."""
-    events = _sessions_by_id(dojos)
-    marked_events = set(Registration.objects.filter(attended__isnull=False).values_list("event_id", flat=True))
+    memory follows the number of sessions rather than of registrations.
+    `ninjas` (first id, last id) limits it to one batch of children; a
+    batched rebuild passes `events` and `marked_events` in, loaded once."""
+    if events is None:
+        events = _sessions_by_id(dojos)
+    if marked_events is None:
+        marked_events = _marked_events()
     came, no_shows, upcoming = defaultdict(dict), defaultdict(list), defaultdict(set)
-    rows = (
-        Registration.objects.exclude(event__status=Event.DRAFT)
-        .values_list("ninja_id", "event_id", "attended", "waiting_list")
-        .iterator(chunk_size=2000)
-    )
-    for ninja_id, event_id, attended, waiting_list in rows:
+    rows = Registration.objects.exclude(event__status=Event.DRAFT)
+    if ninjas is not None:
+        rows = rows.filter(ninja_id__gte=ninjas[0], ninja_id__lte=ninjas[1])
+    for ninja_id, event_id, attended, waiting_list in rows.values_list(
+        "ninja_id", "event_id", "attended", "waiting_list"
+    ).iterator(chunk_size=2000):
         event = events[event_id]
         if event.start_time > now:
             if not waiting_list:
@@ -211,9 +224,14 @@ def _main_dojo(ninja, visits, history_start):
     return main, dojos
 
 
-def _stage_changes(rows, today):
-    """A NinjaEngagementChange for every child whose overall stage moved."""
-    previous = dict(NinjaEngagement.objects.filter(dojo__isnull=True).values_list("ninja_id", "stage"))
+def _stage_changes(rows, today, ninjas):
+    """A NinjaEngagementChange for every child in the batch `ninjas` (first
+    id, last id) whose overall stage moved."""
+    previous = dict(
+        NinjaEngagement.objects.filter(
+            dojo__isnull=True, ninja_id__gte=ninjas[0], ninja_id__lte=ninjas[1]
+        ).values_list("ninja_id", "stage")
+    )
     return [
         NinjaEngagementChange(ninja=row.ninja, from_stage=previous[row.ninja.pk], to_stage=row.stage, changed_on=today)
         for row in rows
@@ -221,19 +239,14 @@ def _stage_changes(rows, today):
     ]
 
 
-def rebuild(today=None):
-    """Recompute every NinjaEngagement row. Returns how many rows it wrote."""
-    now = timezone.now()
-    today = today or timezone.localdate()
-    history_start = now - timedelta(days=HISTORY_DAYS)
-    sessions = _sessions_by_dojo(now, history_start)
-    # Every dojo once, shared by the sessions and the children's home dojos
-    # (a select_related would give each row its own copy).
-    every_dojo = Dojo.objects.in_bulk()
-    came, no_shows, upcoming = _registrations_by_ninja(now, every_dojo)
-
+def _rebuild_batch(ninjas, *, now, today, history_start, sessions, every_dojo, events, marked_events):
+    """Recompute the rows of the children with an id in `ninjas` (first,
+    last) and replace theirs, in one transaction. Returns how many rows."""
+    came, no_shows, upcoming = _registrations_by_ninja(
+        now, every_dojo, events=events, marked_events=marked_events, ninjas=ninjas
+    )
     rows = []
-    for ninja in Ninja.objects.select_related(None):
+    for ninja in Ninja.objects.select_related(None).filter(pk__gte=ninjas[0], pk__lte=ninjas[1]):
         if ninja.home_dojo_id is not None:
             ninja.home_dojo = every_dojo[ninja.home_dojo_id]
         visits = came.get(ninja.pk, {})
@@ -249,11 +262,50 @@ def rebuild(today=None):
         rows.append(_row(ninja, None, main, True, **shared))
         rows.extend(_row(ninja, dojo, main, False, **shared) for dojo in dojos.values())
 
-    changes = _stage_changes(rows, today)
+    changes = _stage_changes(rows, today, ninjas)
     with transaction.atomic():
-        NinjaEngagement.objects.all().delete()
+        NinjaEngagement.objects.filter(ninja_id__gte=ninjas[0], ninja_id__lte=ninjas[1]).delete()
         NinjaEngagement.objects.bulk_create(rows, batch_size=500)
         # Rebuilding twice on a day doesn't record the same change twice.
         NinjaEngagementChange.objects.filter(changed_on=today, ninja_id__in=[c.ninja_id for c in changes]).delete()
         NinjaEngagementChange.objects.bulk_create(changes, batch_size=500)
     return len(rows)
+
+
+def rebuild(today=None, batch_size=BATCH_SIZE):
+    """Recompute every NinjaEngagement row, `batch_size` children at a time
+    (CAPACITY.md, "Load: Celery workers and mail"): each batch reads only
+    its children's registrations and is written in its own transaction, so
+    the memory follows the batch, not the number of children. While it
+    runs, children already done show their new stage and the others last
+    night's. Each batch gets a fresh database connection. Returns how many
+    rows it wrote."""
+    now = timezone.now()
+    today = today or timezone.localdate()
+    history_start = now - timedelta(days=HISTORY_DAYS)
+    # Every dojo and session once, shared by every batch, the children's home
+    # dojos and their registrations (a select_related would give each row its
+    # own copy).
+    every_dojo = Dojo.objects.in_bulk()
+    events = _sessions_by_id(every_dojo)
+    context = {
+        "now": now,
+        "today": today,
+        "history_start": history_start,
+        "sessions": _sessions_by_dojo(events, now, history_start),
+        "every_dojo": every_dojo,
+        "events": events,
+        "marked_events": _marked_events(),
+    }
+    ids = list(Ninja.objects.order_by("pk").values_list("pk", flat=True))
+    written = 0
+    for start in range(0, len(ids), batch_size):
+        # A fresh database connection for every batch (Django's own
+        # close_old_connections, with CONN_MAX_AGE 0): one that broke while
+        # the worker was slow (MySQL closes an idle one) is replaced instead of
+        # failing the rest. Never inside a transaction (a test's).
+        if not connection.in_atomic_block:
+            close_old_connections()
+        batch = ids[start : start + batch_size]
+        written += _rebuild_batch((batch[0], batch[-1]), **context)
+    return written

@@ -585,7 +585,27 @@ designed. Much less than the 300 MB measured in the devcontainer before 3 Octobe
 the copies per booking). The samples are 2 seconds apart, so the very top may sit a little higher. On the
 real data the same evening (212 rows): 0.27 seconds and no measurable growth. Level27's graph averages per
 minute, so it can't show a peak this short: the 2-second PSS samples are the measure for the rebuild, the
-graph for anything that lasts minutes, like a campaign. The
+graph for anything that lasts minutes, like a campaign.
+
+**At the stretch scale it broke, and the rebuild now works in batches (8 October 2026).** `seed_scale
+--scenario stretch --years 5` (150 dojos, 43,298 children, 410,400 bookings, 101,000 rows to write) on
+production the same way: the mailing child grew to 287 MB RSS / 223 MB PSS and the component reached
+Level27's ceiling, where the kernel **throttles instead of killing** (`mem_cgroup_handle_over_high`, the
+process in state D): 5 seconds of CPU in 11 minutes, the periodic worker missing its heartbeats (so no
+mail was dispatched), MySQL closing the idle connection; after 19 minutes the task failed with
+`OperationalError 4031` (disconnected for inactivity), and only then could the workers restart. Fixed with
+standard means, no code of our own that watches memory:
+
+- **Batches:** `events.engagement.rebuild` handles 500 children at a time (`BATCH_SIZE`): each batch
+  reads only its children's registrations and writes in its own transaction, so the memory follows the
+  batch, not the number of children (the sessions and dojos are loaded once and shared). While it runs,
+  children already done show their new stage and the others the previous one.
+- **A fresh database connection per batch** (Django's `close_old_connections`, with `CONN_MAX_AGE` 0), so a
+  connection MySQL closed while the worker was slow is replaced instead of failing the rest. Between tasks
+  Celery's Django fixup already does this.
+- **Celery's own task options:** `rebuild_engagement` is acknowledged when it starts (not `acks_late`), so
+  a run that dies or hangs isn't handed out again the same night, and it has its own `time_limit` of 10
+  minutes instead of the global 30. The
 database graphs are fine: both databases far below their limit of about 5 GB.
 
 **Booking mail during a campaign** (measured on 2 October 2026, `test_capacity`: a campaign to all 7,145
