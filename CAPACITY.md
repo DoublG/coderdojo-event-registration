@@ -570,21 +570,20 @@ would make every batch recycle its child (not a crash, a few seconds' restart ea
 engagement rebuild (about 300 MB) runs on the same worker, one task at a time, so it never adds to a
 campaign; still, keep big campaigns away from 03:00.
 
-**Level27's own memory graph (panel, *Inzichten*, 8 October 2026) shows less room than this page planned
-for.** The *Optioneel component* and *Object cache* tabs show the same curve, `py10102`, with a limit of
-about **512 MB**, so it is most likely the whole app account (gunicorn and both Celery workers together),
-not the workers alone; to confirm with Level27 ([`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md)). Read off
-the graph: about 350 MB at rest, 400 to 410 MB during the campaign above, back to 345 MB after the
-workers restarted. The processes' RSS adds up to about 1.4 GB, but they share most of their pages
-(forked children), and the graph counts what is really used. That leaves about **100 MB of room**, not
-the 2 GB this page planned. Mail fits (60 MB extra for 7,145 mails); the risk is the nightly engagement
-rebuild once the data grows: on the scale data it takes the mailing child from about 145 to 300 MB, which
-would bring the account to about 505 MB, at the limit. What happens at the limit (a process killed, or
-swap) is the open question; a killed rebuild is handed out again (`acks_late`) and could fail every
-night. Before the data grows: measure the rebuild on production the same way (switch to the scale
-database, run `rebuild_engagement`, watch the graph, restore), ask Level27 for more memory, and lower the
-baseline (the periodic worker with `--pool solo` saves a process). The database graphs are fine: both
-databases far below their limit of about 5 GB.
+**Level27's own memory graph (panel, *Inzichten*, 8 October 2026): the Celery component has about
+512 MB.** The *Optioneel component* tab (the *Object cache* tab shows the same curve) draws `py10102` with
+a limit of about 512 MB: the Celery worker component. Its curve matches the Celery processes' PSS (shared
+pages split fairly; summed RSS counts the forked children's shared pages several times): 336 MB of PSS at
+rest against about 350 MB on the graph, while the whole account (gunicorn too) is about 750 MB. During
+the campaign above the graph showed 400 to 410 MB: about 100 MB of room.
+
+**The nightly engagement rebuild on production** (same day, the scale database, the task queued onto the
+real mailing worker, PSS sampled every 2 seconds): 5.3 seconds for 9,000 children and 22,782 rows; the
+mailing child from 136 to at least 180 MB RSS (73 to 115 MB PSS), Celery as a whole from 336 to about
+382 MB PSS (+46 MB), well under 512 MB; afterwards the child was over 160 MB and Celery replaced it, as
+designed. Much less than the 300 MB measured in the devcontainer before 3 October (that refactor removed
+the copies per booking). The samples are 2 seconds apart, so the very top may sit a little higher. The
+database graphs are fine: both databases far below their limit of about 5 GB.
 
 **Booking mail during a campaign** (measured on 2 October 2026, `test_capacity`: a campaign to all 7,145
 adult accounts, and a booking confirmation queued every 3 seconds while it was being queued; the time from
