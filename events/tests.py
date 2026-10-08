@@ -900,6 +900,24 @@ class EngagementTests(TestCase):
         self.assertEqual(NinjaEngagementChange.objects.filter(ninja=children[1]).count(), 1)
         self.assertEqual(NinjaEngagementChange.objects.count(), 1)
 
+    def test_the_batch_size_is_a_setting(self):
+        from unittest import mock
+
+        from django.conf import settings
+        from django.test import override_settings
+
+        from . import engagement
+
+        for _ in range(4):
+            Ninja.objects.create(name="Child")
+        with (
+            override_settings(ENGAGEMENT_REBUILD_BATCH_SIZE=2),
+            mock.patch.object(engagement, "_rebuild_batch", return_value=0) as batch,
+        ):
+            engagement.rebuild()
+        self.assertEqual(batch.call_count, 3)  # 5 children, 2 at a time
+        self.assertEqual(settings.ENGAGEMENT_REBUILD_BATCH_SIZE, 500)
+
     def test_a_batch_reads_only_its_childrens_registrations(self):
         from core.testing import site_queries
 

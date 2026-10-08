@@ -219,6 +219,10 @@ HELP_CENTRE_URL = env("HELP_CENTRE_URL", default="/docs/")
 OTP_VAULT_URL = env("OTP_VAULT_URL", default="").rstrip("/")
 
 # The mail engine (mailing app, DATA_MODEL.md §11 "Sending pipeline").
+# Children per batch of the nightly engagement rebuild (events/engagement.py):
+# its memory follows this, not the number of children. 500 keeps the Celery
+# component far under Level27's 512 MB even at the stretch scale (CAPACITY.md).
+ENGAGEMENT_REBUILD_BATCH_SIZE = env.int("ENGAGEMENT_REBUILD_BATCH_SIZE", default=500)
 MAILING_BATCH_SIZE = env.int("MAILING_BATCH_SIZE", default=20)  # rows per send_email_batch subtask
 # Rows in flight (claimed, not yet sent): what the broker holds, first in,
 # first out. Two batches is 20 seconds of sending at 6 batches a minute, so mail

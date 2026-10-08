@@ -21,6 +21,7 @@ trigger on); the rebuild_engagement task runs it nightly.
 from collections import Counter, defaultdict
 from datetime import timedelta
 
+from django.conf import settings
 from django.db import close_old_connections, connection, transaction
 from django.utils import timezone
 
@@ -38,8 +39,6 @@ REGULAR_MIN_RATE = 0.5
 AT_RISK_MISSED = 3
 NO_SHOW_DAYS = 90
 ADULT_AGE = 18
-# Children per batch of the rebuild: its memory follows this, not the number of children.
-BATCH_SIZE = 500
 
 
 def is_aimed_at(ninja, event):
@@ -272,14 +271,16 @@ def _rebuild_batch(ninjas, *, now, today, history_start, sessions, every_dojo, e
     return len(rows)
 
 
-def rebuild(today=None, batch_size=BATCH_SIZE):
+def rebuild(today=None, batch_size=None):
     """Recompute every NinjaEngagement row, `batch_size` children at a time
+    (default settings.ENGAGEMENT_REBUILD_BATCH_SIZE)
     (CAPACITY.md, "Load: Celery workers and mail"): each batch reads only
     its children's registrations and is written in its own transaction, so
     the memory follows the batch, not the number of children. While it
     runs, children already done show their new stage and the others last
     night's. Each batch gets a fresh database connection. Returns how many
     rows it wrote."""
+    batch_size = batch_size or settings.ENGAGEMENT_REBUILD_BATCH_SIZE
     now = timezone.now()
     today = today or timezone.localdate()
     history_start = now - timedelta(days=HISTORY_DAYS)
