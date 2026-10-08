@@ -97,4 +97,7 @@ batches).
 - **Why the *Object cache* tab shows the same curve:** Celery and Redis (the broker and the cache) are set
   up together and interconnected, so one curve covers both.
 
-Still open: whether the 512 MB can be raised within the package, if it's ever needed.
+- **Set to kill (8 October 2026) and tested:** a rebuild forced over the limit was killed after 19
+  seconds and the mailing worker was back 10 seconds later, mail dispatch never stopped (`CAPACITY.md`).
+- **The limit itself (512 MiB) is fixed by the package:** the dashboard shows it but doesn't let it be
+  changed.

@@ -622,6 +622,16 @@ recovers by itself in seconds; throttling instead slows every process in it, the
 until the heavy task gives up, which took 19 minutes. Either way the batched rebuild stays far below the
 ceiling; the setting only decides how the component recovers if something else ever reaches it.
 
+**Kill, tested on production (8 October 2026).** The dashboard set to *kill* (limit 512 MiB, which the
+package doesn't let us raise), the stretch copy, and `ENGAGEMENT_REBUILD_BATCH_SIZE=100000` in `.env` for
+the test so the rebuild ran as one batch, the way it did before the fix. The rebuild's process grew to
+315 MB RSS (249 MB PSS), Celery to about 515 MB PSS, and 19 seconds after it started the process was
+killed (SIGKILL, `WorkerLostError`), followed by the mailing worker's main process; Level27 started the
+mailing worker again and it was `ready` 10 seconds later. The periodic worker (beat and the mail
+dispatcher) ran on untouched, and the rebuild was not handed out again (acknowledged when it starts).
+Compared with throttle: 19 seconds to the kill and 10 to recover, instead of 19 minutes with mail standing
+still. Samples: `loadtest-out/demo-2026-10-08/engagement-oom-kill.tsv` (not in git).
+
 **The nightly engagement rebuild on production** (same day, the scale database, the task queued onto the
 real mailing worker, PSS sampled every 2 seconds): 5.3 seconds for 9,000 children and 22,782 rows; the
 mailing child from 136 to at least 180 MB RSS (73 to 115 MB PSS), Celery as a whole from 336 to about
