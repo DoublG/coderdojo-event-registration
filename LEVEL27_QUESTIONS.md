@@ -80,3 +80,12 @@ Level27's.
 and the package's other limits are part of the current hosting package. So the site has to be engineered
 to work efficiently within them — shorter requests, fewer queries per request, slow work in Celery — not
 sized up past them (`CAPACITY.md`, "Conclusion: what production can actually support today").
+
+## Memory limit of the app (open, 8 Oct 2026)
+
+The panel's *Inzichten* shows the same memory curve (`py10102`) with a limit of about 512 MB under
+*Optioneel component* and *Object cache*. Questions: is that 512 MB for the whole app account (gunicorn
+plus the Celery worker component together), or for one component? What happens when it's reached: is a
+process killed (which one), or does it swap? Can it be raised within the package, or only with a bigger
+one? We use about 350 MB at rest and 410 MB while sending a campaign; the nightly engagement rebuild could
+need about 150 MB more once the data grows (`CAPACITY.md`, "Load: Celery workers and mail").
