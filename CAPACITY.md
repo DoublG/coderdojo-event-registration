@@ -551,6 +551,25 @@ each starting on an empty cache and the seeded bookings, a new connection per re
 - **Sending is paced on purpose:** 7,200 mails an hour, so a campaign to 6,600 families takes about 55
   minutes and one to 12,000 about 1 hour 40. Booking and account mail are claimed first (lower `PRIORITY`).
 
+**On production (8 October 2026):** the live demo switched to a throwaway copy of the `seed_scale` growth
+database (`scripts/loadtest_demo.sh`, imported over SSH), one `dojo_news` campaign to every adult account
+(7,145 mails, launched as the dashboard does), production's two workers with `--max-tasks-per-child 100
+--max-memory-per-child 160000`, mail to Mailpit. Sampled every 5 s with `ps` and the `mysql` client:
+
+| | Result |
+|---|---|
+| Queuing (14:35 → 14:40) | all 7,145 in about 4½ minutes, chunks of 200 |
+| Sending (14:35 → 15:35) | 7,145 sent, 0 failed, a steady 120 a minute |
+| The whole app's memory | 1,378 MB idle, **1,425 MB at the most** |
+| A Celery child | 136 → **147 MB at the most**, under the 160 MB limit; replaced only by the 100-task recycle |
+
+Nothing broke: no memory-limit recycle, no error in the worker logs, memory flat however many mails were
+waiting. The audience size doesn't matter for memory (chunks of 200, batches of 20); what grows is the time
+to send. The limit is the 13 MB between a child's 147 MB and 160 MB: a heavier template or a bigger batch
+would make every batch recycle its child (not a crash, a few seconds' restart each time). The nightly
+engagement rebuild (about 300 MB) runs on the same worker, one task at a time, so it never adds to a
+campaign; still, keep big campaigns away from 03:00.
+
 **Booking mail during a campaign** (measured on 2 October 2026, `test_capacity`: a campaign to all 7,145
 adult accounts, and a booking confirmation queued every 3 seconds while it was being queued; the time from
 queued to sent):
