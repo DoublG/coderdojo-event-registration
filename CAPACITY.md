@@ -610,7 +610,17 @@ campaign; still, keep big campaigns away from 03:00.
 a limit of about 512 MB: the Celery worker component. Its curve matches the Celery processes' PSS (shared
 pages split fairly; summed RSS counts the forked children's shared pages several times): 336 MB of PSS at
 rest against about 350 MB on the graph, while the whole account (gunicorn too) is about 750 MB. During
-the campaign above the graph showed 400 to 410 MB: about 100 MB of room.
+the campaign above the graph showed 400 to 410 MB: about 100 MB of room. **Answered by the account
+holder (8 October 2026):** the *Object cache* tab shows the same curve because Celery and Redis (the
+broker and the cache) are set up together on Level27, interconnected, so one curve covers both (Redis is
+small: under 50 MB, about the gap between the Celery PSS and the graph). **What happens at the ceiling is a
+choice in Level27's dashboard per additional component: kill or throttle.** On 8 October it was throttle
+(below). **Recommended: kill.** A killed process is restarted (a task child by its Celery worker, a worker
+by Level27), mail tasks are handed out again (`acks_late`, each mail marked sent the moment it goes, so
+nobody gets one twice) and `rebuild_engagement` is not (acknowledged when it starts), so the component
+recovers by itself in seconds; throttling instead slows every process in it, the mail dispatcher too,
+until the heavy task gives up, which took 19 minutes. Either way the batched rebuild stays far below the
+ceiling; the setting only decides how the component recovers if something else ever reaches it.
 
 **The nightly engagement rebuild on production** (same day, the scale database, the task queued onto the
 real mailing worker, PSS sampled every 2 seconds): 5.3 seconds for 9,000 children and 22,782 rows; the

@@ -81,10 +81,20 @@ and the package's other limits are part of the current hosting package. So the s
 to work efficiently within them — shorter requests, fewer queries per request, slow work in Celery — not
 sized up past them (`CAPACITY.md`, "Conclusion: what production can actually support today").
 
-## Memory limit of the Celery component (open, 8 Oct 2026)
+## Memory limit of the Celery component (answered 8 Oct 2026)
 
 The panel's *Inzichten* shows the worker component (`py10102`, *Optioneel component*) with a limit of
 about 512 MB; its curve matches the Celery processes' PSS (about 350 MB at rest, 410 MB while sending a
-campaign, about 380 MB during the nightly engagement rebuild at a year's growth). Questions: what happens
-when it's reached (a process killed, which one, or swap)? Can it be raised within the package? Why does
-the *Object cache* tab show the same curve?
+campaign, about 380 MB during the nightly engagement rebuild, also at the stretch scale since it works in
+batches).
+
+**Answered by the account holder, from the dashboard:**
+
+- **What happens at the limit is our choice:** each additional component can be set to *kill* or
+  *throttle* when it runs out of memory. It was on throttle on 8 October (the stretch test: every process
+  in the component slowed down, mail stalled for 19 minutes). Recommended: **kill**, so the component
+  recovers by itself in seconds (`CAPACITY.md`, "Load: Celery workers and mail").
+- **Why the *Object cache* tab shows the same curve:** Celery and Redis (the broker and the cache) are set
+  up together and interconnected, so one curve covers both.
+
+Still open: whether the 512 MB can be raised within the package, if it's ever needed.
