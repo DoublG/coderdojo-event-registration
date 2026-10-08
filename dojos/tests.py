@@ -12,7 +12,9 @@ from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import Ninja, User
+from accounts.template_avatars import TEMPLATE_KID_AVATARS
 from content.models import OrganisationTeamMember
+from core.image_library import use_library_image
 from core.testing import TempMediaMixin
 from events.models import Event, Registration
 from geo.models import AdministrativeBoundary, Municipality
@@ -20,7 +22,7 @@ from notifications.consumers import NotificationConsumer
 from notifications.services import notify
 from pathways.models import Pathway
 
-from . import access, team
+from . import access, public_cache, team
 from .models import Dojo, DojoMembership
 from .testing import add_member, make_champion, make_dojo, make_mentor
 
@@ -321,6 +323,46 @@ class DojoTeamViewTests(TestCase):
             response = self.client.get(reverse("dojo_team", kwargs={"dojo_id": dojo.id}))
             self.assertContains(response, "Ann Lee")
             self.assertContains(response, "Teacher")
+
+
+class YouthMentorAvatarTests(TempMediaMixin, TestCase):
+    """A youth mentor's team-page avatar is the standard avatar the child
+    picked (Ninja.photo), never another photo of the child (one set in
+    the Django admin)."""
+
+    def setUp(self):
+        super().setUp()
+        self.dojo = make_dojo("Ghent")
+        self.kid = User.objects.create(username="kid", first_name="Kid", account_type=User.NINJA)
+        self.ninja = Ninja.objects.create(name="Kid", account=self.kid)
+        self.membership = add_member(self.dojo, self.kid, DojoMembership.YOUTH_MENTOR)
+        self.url = reverse("dojo_team", kwargs={"dojo_id": self.dojo.id})
+
+    def test_shows_the_childs_standard_avatar(self):
+        use_library_image(self.ninja, "photo", "ninjas", TEMPLATE_KID_AVATARS[0][0], save=True)
+
+        self.assertEqual(self.membership.photo, self.ninja.photo)
+        self.assertContains(self.client.get(self.url), self.ninja.photo.url)
+
+    def test_never_shows_an_uploaded_photo_of_the_child(self):
+        self.ninja.photo = "ninjas/uploaded.jpg"
+        self.ninja.save()
+
+        self.assertFalse(DojoMembership.objects.get(pk=self.membership.pk).photo)
+        self.assertNotContains(self.client.get(self.url), "uploaded.jpg")
+
+    def test_the_accounts_own_team_photo_wins(self):
+        use_library_image(self.ninja, "photo", "ninjas", TEMPLATE_KID_AVATARS[0][0], save=True)
+        use_library_image(self.kid, "photo", "ninjas", TEMPLATE_KID_AVATARS[1][0], save=True)
+
+        self.assertEqual(DojoMembership.objects.get(pk=self.membership.pk).photo, self.kid.photo)
+
+    def test_a_new_avatar_clears_the_cached_dojo_page(self):
+        public_cache.detail(self.dojo.id)
+        use_library_image(self.ninja, "photo", "ninjas", TEMPLATE_KID_AVATARS[0][0], save=True)
+
+        mentors = public_cache.detail(self.dojo.id)["mentors"]
+        self.assertEqual(mentors[0].photo.name, self.ninja.photo.name)
 
 
 class PublicDojoVisibilityTests(TestCase):

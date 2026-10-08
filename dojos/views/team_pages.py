@@ -88,7 +88,7 @@ def dojo_team_manage(request, dojo_id):
     requests, and (for MANAGE_TEAM) the forms to act on them."""
     access = require_dojo_access(request, dojo_id)
     dojo = access.dojo
-    memberships = dojo.memberships.select_related("user", "promoted_by__user")
+    memberships = dojo.memberships.select_related("user__ninja", "promoted_by__user")
     transfer_candidates = memberships.filter(
         status=DojoMembership.ACTIVE,
         role=DojoMembership.MENTOR,

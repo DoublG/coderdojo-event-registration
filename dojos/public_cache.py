@@ -23,9 +23,11 @@ TIMEOUT = 600
 PROFILE_FIELDS = {"display_name", "title", "bio", "photo", "show_on_team_pages", "first_name", "last_name"}
 # Only what the listing shows goes into the cache, never a member's email
 # address or password hash.
-TEAM_FIELDS = ["id", "dojo", "user", "role", "status"] + [
-    f"user__{name}" for name in ("id", "account_type", "username", *sorted(PROFILE_FIELDS))
-]
+TEAM_FIELDS = (
+    ["id", "dojo", "user", "role", "status"]
+    + [f"user__{name}" for name in ("id", "account_type", "username", *sorted(PROFILE_FIELDS))]
+    + ["user__ninja__id", "user__ninja__account", "user__ninja__photo"]
+)
 
 
 def detail(dojo_id):
@@ -63,6 +65,7 @@ def clear_all():
 def connect():
     from django.contrib.auth import get_user_model
 
+    from accounts.models import Ninja
     from content.models import FAQ, Announcement
     from pathways.models import Pathway
 
@@ -90,6 +93,13 @@ def connect():
             return
         clear(*DojoMembership.objects.filter(user=instance).values_list("dojo_id", flat=True))
 
+    def ninja_avatar_changed(sender, instance, update_fields=None, **kwargs):
+        # A youth mentor's avatar on the team listing is the child's own
+        # (DojoMembership.photo).
+        if not instance.account_id or (update_fields is not None and "photo" not in update_fields):
+            return
+        clear(*DojoMembership.objects.filter(user_id=instance.account_id).values_list("dojo_id", flat=True))
+
     for signal in (post_save, post_delete):
         signal.connect(dojo_changed, sender=Dojo, weak=False, dispatch_uid=f"dojos.detail.dojo.{signal is post_save}")
         signal.connect(
@@ -105,6 +115,7 @@ def connect():
             everywhere, sender=Pathway, weak=False, dispatch_uid=f"dojos.detail.pathways.{signal is post_save}"
         )
     post_save.connect(profile_changed, sender=get_user_model(), weak=False, dispatch_uid="dojos.detail.profile")
+    post_save.connect(ninja_avatar_changed, sender=Ninja, weak=False, dispatch_uid="dojos.detail.ninja-avatar")
     m2m_changed.connect(
         pathways_changed, sender=Dojo.pathways.through, weak=False, dispatch_uid="dojos.detail.dojo-pathways"
     )

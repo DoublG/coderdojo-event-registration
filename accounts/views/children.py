@@ -156,9 +156,9 @@ def edit_ninja(request, ninja_id):
 def ninja_avatar(request, ninja_id):
     """A child's own login picks its avatar on its own page, over htmx like
     edit_ninja: GET swaps the header for the picker, POST saves and swaps
-    back. Only the standard avatars (ChildAvatarForm); uploading a photo is
-    the guardian's. The guardians may use it too, though their edit form
-    has the same choice."""
+    back. Only the standard avatars (ChildAvatarForm), as on the guardian's
+    edit form: nobody uploads a child's photo on the site. The guardians
+    may use it too."""
     child = _get_own_ninja(request, ninja_id, allow_self=True)
     form = ChildAvatarForm(child, request.POST or None)
     if request.method == "POST" and form.is_valid():

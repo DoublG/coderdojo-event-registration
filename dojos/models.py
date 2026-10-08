@@ -4,6 +4,7 @@ from django.db.models import Case, When
 from django.utils.translation import gettext_lazy as _
 
 from core.content_languages import LANGUAGE_CODES, TranslatableModel, clean_languages, language_name
+from core.image_library import is_library_image
 from core.uploads import ICON_SIDE, UploadedImageField
 from geo.models import AdministrativeBoundary, Municipality
 
@@ -166,7 +167,7 @@ class DojoMembershipQuerySet(models.QuerySet):
         return (
             self.active()
             .filter(user__show_on_team_pages=True)
-            .select_related("user")
+            .select_related("user__ninja")
             .order_by(
                 Case(
                     When(role=DojoMembership.CHAMPION, then=0),
@@ -283,6 +284,15 @@ class DojoMembership(models.Model):
 
     @property
     def photo(self):
+        """The account's team-page photo; for a youth mentor without one,
+        the standard avatar the child picked (Ninja.photo). Never any other
+        photo of the child (only the Django admin can set one): the team
+        page is public."""
+        if self.user.photo or not self.user.is_ninja:
+            return self.user.photo
+        ninja = getattr(self.user, "ninja", None)
+        if ninja is not None and is_library_image(ninja.photo):
+            return ninja.photo
         return self.user.photo
 
     @property

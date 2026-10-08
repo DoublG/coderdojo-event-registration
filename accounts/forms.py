@@ -747,8 +747,8 @@ class EditChildForm(ChildForm):
 
 class ChildAvatarForm(forms.Form):
     """A child's own login picks its avatar (accounts.views.ninja_avatar):
-    one of the standard ones only. Uploading a photo stays the guardian's
-    to do, so there's no file field here."""
+    one of the standard ones only. Nobody uploads a child's photo on the
+    site (only the Django admin can set one), so there's no file field."""
 
     icon = forms.ChoiceField(label=_("Pick your avatar"), choices=TEMPLATE_KID_AVATARS, widget=forms.RadioSelect)
 
