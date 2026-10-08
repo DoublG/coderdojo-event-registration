@@ -1,0 +1,26 @@
+<section id="growth" data-transition="fade" style="background:#ffffff;color:#1c2733;font-family:'Nunito', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:20px">
+<p style="font-size:28px;font-weight:700;color:#c94823">Prestaties</p>
+<h2 style="font-family:'Fredoka', Arial, sans-serif;font-size:64px;font-weight:600;line-height:1.15">Klaar voor vijf jaar groei</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:8px;background:#f7f8fa;padding:40px;border-radius:16px">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1.05;color:#c94823">43.000</p>
+<p style="font-size:26px;line-height:1.35;color:#56606c">kinderen en 410.000 inschrijvingen: vijf jaar van de sterkste groei die we verwachten</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#f7f8fa;padding:40px;border-radius:16px">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1.05;color:#c94823">36 s</p>
+<p style="font-size:26px;line-height:1.35;color:#56606c">voor de nachtelijke blik op hoe elk kind naar de sessies komt, terwijl de mail gewoon vertrekt</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#f7f8fa;padding:40px;border-radius:16px">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1.05;color:#1b5fa8">75%</p>
+<p style="font-size:26px;line-height:1.35;color:#56606c">van het geheugen van de hosting voor al het achtergrondwerk op het drukste moment (383 van 512 MB)</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#f7f8fa;padding:40px;border-radius:16px">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1.05;color:#1b5fa8">1 dag</p>
+<p style="font-size:26px;line-height:1.35;color:#56606c">van de grens vinden tot een oplossing die live staat en opnieuw getest is</p>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.5;color:#56606c">We hebben de echte hosting met opzet voorbij zijn grens geduwd. Op deze schaal liep het nachtelijke werk eerst vast op de geheugengrens van de hosting. Nu werkt het in kleine porties, zodat het geheugen gelijk blijft, hoe groot de organisatie ook wordt.</p>
+<aside>Getest op 8 oktober 2026 op de echte hosting, voor de test omgeschakeld naar een wegwerpkopie van de gegevens zo groot als het "stretch"-scenario na vijf jaar: 150 dojo's, 43.298 kinderen, 410.400 inschrijvingen. De nachtelijke herberekening van de betrokkenheid (hoe elk kind naar de sessies komt, gebruikt door de dashboards en de mailreeksen) bracht de achtergrondprocessen toen tot aan de geheugengrens van de hosting van ongeveer 512 MB, waar de server elk proces vertraagt in plaats van er één te stoppen: de mail lag stil en na 19 minuten mislukte de taak. Dezelfde dag werd de herberekening aangepast om 500 kinderen tegelijk te verwerken, elke portie met een eigen databaseverbinding, en een vastgelopen run wordt niet meer opnieuw geprobeerd. Opnieuw getest op dezelfde gegevens: 101.049 rijen in 36 seconden, het proces vlak op 181 MB, al het achtergrondwerk samen op ongeveer 383 MB, de mail vertrok gewoon. Met de echte gegevens van vandaag duurt het een kwart seconde. Details in CAPACITY.md.</aside>
+</section>

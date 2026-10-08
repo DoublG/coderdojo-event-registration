@@ -1,0 +1,26 @@
+<section id="growth" data-transition="fade" style="background:#ffffff;color:#1c2733;font-family:'Nunito', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:20px">
+<p style="font-size:28px;font-weight:700;color:#c94823">Performance</p>
+<h2 style="font-family:'Fredoka', Arial, sans-serif;font-size:64px;font-weight:600;line-height:1.15">Ready for five years of growth</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:8px;background:#f7f8fa;padding:40px;border-radius:16px">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1.05;color:#c94823">43,000</p>
+<p style="font-size:26px;line-height:1.35;color:#56606c">children and 410,000 bookings: five years of the strongest growth we foresee</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#f7f8fa;padding:40px;border-radius:16px">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1.05;color:#c94823">36 s</p>
+<p style="font-size:26px;line-height:1.35;color:#56606c">for the nightly look at how every child comes to sessions, while mail keeps going out</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#f7f8fa;padding:40px;border-radius:16px">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1.05;color:#1b5fa8">75%</p>
+<p style="font-size:26px;line-height:1.35;color:#56606c">of the hosting's memory for all background work at its busiest (383 of 512 MB)</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#f7f8fa;padding:40px;border-radius:16px">
+<p style="font-family:'Fredoka', Arial, sans-serif;font-size:96px;font-weight:600;line-height:1.05;color:#1b5fa8">1 day</p>
+<p style="font-size:26px;line-height:1.35;color:#56606c">from finding the limit to a fix that is live and tested again</p>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.5;color:#56606c">We pushed the live hosting past what it can take, on purpose. At this size the nightly work first got stuck at the hosting's memory limit. It now works in small batches, so its memory stays the same however large the organisation grows.</p>
+<aside>Tested on 8 October 2026 on the live hosting, switched for the test to a throwaway copy of the data at the size of the "stretch" scenario after five years: 150 dojos, 43,298 children, 410,400 bookings. The nightly engagement rebuild (how each child comes to sessions, used by the dashboards and by mail journeys) then took the background workers to the hosting's memory ceiling of about 512 MB, where the server slows every process down instead of stopping one: mail stood still and after 19 minutes the job failed. The same day the rebuild was changed to work 500 children at a time, each batch with its own database connection, and a stuck run is no longer retried. Retested on the same data: 101,049 rows in 36 seconds, the worker flat at 181 MB, all background work together at about 383 MB, mail going out as usual. With today's real data it takes a quarter of a second. Details in CAPACITY.md.</aside>
+</section>
