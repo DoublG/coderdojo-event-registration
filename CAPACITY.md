@@ -605,7 +605,12 @@ standard means, no code of our own that watches memory:
   Celery's Django fixup already does this.
 - **Celery's own task options:** `rebuild_engagement` is acknowledged when it starts (not `acks_late`), so
   a run that dies or hangs isn't handed out again the same night, and it has its own `time_limit` of 10
-  minutes instead of the global 30. The
+  minutes instead of the global 30.
+
+**Retested after the deploy** (same day, the same stretch data on production): 101,049 rows in 35.8
+seconds, the mailing child flat at 181 MB RSS / 116 MB PSS for the whole run, Celery at about 383 MB PSS,
+well under 512 MB. In the devcontainer on the same data the old rebuild peaked at +193 MB and the batched
+one at +82 MB (18 and 20 seconds); what's left is mostly the 15,300 sessions, loaded once and shared. The
 database graphs are fine: both databases far below their limit of about 5 GB.
 
 **Booking mail during a campaign** (measured on 2 October 2026, `test_capacity`: a campaign to all 7,145
