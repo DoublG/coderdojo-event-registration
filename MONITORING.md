@@ -120,8 +120,9 @@ handles. The `view` label is the URL name, so `/events/71/` and `/events/72/` co
 | `cache_hits_total`, `cache_misses_total` | counter | `cache` | Reads of each data cache (`core.caching`) that found it, or had to build it | The hit ratio; one that drops under load means the cache is cleared too often |
 
 The time measured is Django's only. A request that waits for a free worker, or that uvicorn refuses with a 503
-because the worker already has 25 connections (`gunicorn.conf.py`), never reaches Django: that wait and those
-refusals are not here (they're in gunicorn's log, and in what the load test itself measures).
+because the worker already has as many connections as `gunicorn.conf.py`'s cap allows (8, since 8 Oct 2026;
+was 25), never reaches Django: that wait and those refusals are not here (they're in gunicorn's log, and in
+what the load test itself measures).
 
 ### Database
 

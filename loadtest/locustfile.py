@@ -12,7 +12,14 @@ data file comes from loadtest/prepare.py, every synthetic login's password
 is seed_scale's, `LOADTEST_PASSWORD`) and refuse any host that isn't local,
 so they can never book real sessions or mail real families. `public` only
 reads public pages, finding the sessions on /events/ itself, and is the mode
-for production (CAPACITY.md, "Load testing production")."""
+for production (CAPACITY.md, "Load testing production").
+
+Testing a non-local host anyway (e.g. a demo app deliberately, temporarily
+pointed at a throwaway database): set LOADTEST_CONFIRM_REMOTE_HOST to the
+exact hostname you're targeting. It must match --host exactly, on purpose —
+this is a one-time, explicit confirmation, not a standing setting: if you
+copy a working command to test a *different* host later (including the
+real one) without changing this, it's refused again."""
 
 import json
 import os
@@ -28,14 +35,19 @@ if MODE not in ("mixed", "rush", "public"):
 DATA = json.load(open(os.environ["LOADTEST_DATA"])) if MODE != "public" else {"events": []}
 PASSWORD = os.environ.get("LOADTEST_PASSWORD", "scale-test")
 LOCAL_HOSTS = ("localhost", "127.0.0.1", "::1", "coolregistration.localhost")
+CONFIRMED_REMOTE_HOST = os.environ.get("LOADTEST_CONFIRM_REMOTE_HOST", "")
 
 
 @events.test_start.add_listener
 def only_public_beyond_local(environment, **kwargs):
-    """The modes that log in and book only run against a local test site."""
+    """The modes that log in and book only run against a local test site,
+    or a remote one explicitly confirmed host-by-host (see the docstring)."""
     host = urlparse(environment.host or "").hostname or ""
-    if MODE != "public" and host not in LOCAL_HOSTS:
-        raise SystemExit(f"LOADTEST_MODE={MODE} logs in and books sessions: only against a local site, not {host}.")
+    if MODE != "public" and host not in LOCAL_HOSTS and host != CONFIRMED_REMOTE_HOST:
+        raise SystemExit(
+            f"LOADTEST_MODE={MODE} logs in and books sessions: only against a local site, not {host}. "
+            f"To confirm {host} is a safe, throwaway target on purpose, set LOADTEST_CONFIRM_REMOTE_HOST={host}."
+        )
 
 
 class SiteUser(HttpUser):

@@ -295,13 +295,17 @@ why 3 × 25 still doesn't reconcile with 32, even with the cap mechanism itself 
 one with an immediate *503 Service Unavailable* instead of starting it. Level27 manages gunicorn's command
 (`gunicorn -k uvicorn.workers.UvicornWorker main:app`), and uvicorn's gunicorn worker has no setting for it,
 so it's set in **`gunicorn.conf.py`**, which gunicorn reads by itself from the folder it starts in
-(`~/app`): **25 per worker** (`UVICORN_LIMIT_CONCURRENCY` changes it). A worker then runs at most 24
-requests at once (uvicorn counts the new connection too), so 4 workers use at most about 100 connections
-plus Celery's, under 151 — but against production's real `max_user_connections` of 32 (confirmed 8 Oct
-2026), even one worker at this cap is already tight. `scripts/deploy.sh` (and its `--check`) says whether
+(`~/app`): **8 per worker as of 8 Oct 2026** (`UVICORN_LIMIT_CONCURRENCY` changes it; this section's
+measurements below used the then-default of 25, which is what the "Rerun against Level27's real limits"
+section further down found unsafe against production's real connection limit — read that section for why
+the default changed). A worker then runs at most 23 (or, at the time of measurement, 24) requests at once
+(uvicorn counts the new connection too), so 4 workers use at most about 100 connections plus Celery's,
+under 151 — but against production's real `max_user_connections` of 32 (confirmed 8 Oct 2026), even one
+worker at the old cap of 25 was already tight. `scripts/deploy.sh` (and its `--check`) says whether
 gunicorn really reads the file: not if it starts elsewhere or with a `-c` of its own. **Confirmed active on
-production 8 Oct 2026** (3 workers, `gunicorn.conf.py` read, cap 25) — production briefly ran daphne
-instead, with no equivalent per-worker limit at all, from 6 to 8 Oct 2026. With the mechanism back in
+production 8 Oct 2026** (3 workers, `gunicorn.conf.py` read; cap 25 at first confirmation, cap 8 after the
+same day's fix, below) — production briefly ran daphne instead, with no equivalent per-worker limit at
+all, from 6 to 8 Oct 2026. With the mechanism back in
 place, the open question is sizing: 3 workers × 25 is still well past 32 — see
 [`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) for the open decision (lower `WEB_CONCURRENCY` or the cap,
 or raise the MySQL limit).
@@ -672,11 +676,22 @@ parts of them are meant to be repeated **on production itself**. What's safe the
 | The site's own figures | yes, read-only | `/metrics/` with the `METRICS_TOKEN` |
 | Whether the cap is on | yes, read-only | `scripts/deploy.sh --check` (the *gunicorn* step) |
 | A public load test | **yes, with care** | `loadtest/run.sh ... public`: visitors only, no login, nothing written |
-| The mixed load and the rush | **no** | they log in and book: `locustfile.py` refuses any host that isn't local |
+| The mixed load and the rush | **no, unless the site has no real users yet** | they log in and book: `locustfile.py` refuses any host that isn't local, unless `LOADTEST_CONFIRM_REMOTE_HOST` explicitly confirms that exact host |
 
-The mixed load and the rush book sessions and send mail, so on production they'd reach real families.
-They need a `seed_scale` database and stay on a local test site; to test bookings on Level27's own
-machines, run them against a staging copy there (a second app with a `test_` database), never the live site.
+The mixed load and the rush book sessions and send mail, so on a production site with real families
+they'd reach real people. They need a `seed_scale`-shaped database and stay on a local test site; to test
+bookings on Level27's own machines against a site that *does* have real users, run them against a staging
+copy there (a second app with a `test_` database), never the live site.
+
+**On a demo/showcase deployment with no real users yet** (confirmed with whoever owns the decision before
+each use — this is a one-off judgement call, not a general exception), `scripts/loadtest_demo.sh` and
+`scripts/run_demo.sh` automate the safe version of this (8 Oct 2026): `switch` backs up the live app's
+`.env`, repoints it (web + both Celery workers) at a separate, disposable database, and verifies the swap
+via `/metrics/`; `run_demo.sh` then runs `loadtest/run.sh` against the live domain with
+`LOADTEST_CONFIRM_REMOTE_HOST` set to match; `restore` puts the real database back and removes the backup.
+Don't leave a demo site switched longer than the test needs, and never point this at a site with real
+users — `locustfile.py`'s host guard is the only thing standing between a copy-pasted command and real
+bookings on whatever `--host` it's given.
 
 **A public load test on production**, from a developer's machine (not the server: the load generator
 shouldn't compete with the site for CPU):
