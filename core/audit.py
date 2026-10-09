@@ -7,12 +7,25 @@ dashboard (/manage/audit-log/, pages.audit_views), with health, criminal-record
 and security values hidden (`is_hidden`), and in the Django admin."""
 
 import datetime
+from collections.abc import Callable
 from functools import wraps
+from typing import TYPE_CHECKING, Any
 
 from auditlog.context import disable_auditlog
 from auditlog.middleware import AuditlogMiddleware as BaseAuditlogMiddleware
 from auditlog.mixins import AuditlogHistoryAdminMixin
 from auditlog.signals import accessed
+from django.db.models import Model
+from django.http import HttpRequest, HttpResponse
+
+if TYPE_CHECKING:
+    from auditlog.models import LogEntry
+    from django.contrib.admin import ModelAdmin
+
+    _AdminBase = ModelAdmin[Any]
+else:
+    _AdminBase = object
+
 
 # Who may see the audit log (the organisation's admin role, accounts/organisation.py).
 AUDIT_LOG_PERMISSION = "auditlog.view_logentry"
@@ -26,7 +39,7 @@ USER_OPTIONS = {
 }
 # What a two-step login device updates on every login.
 _LOGIN_BOOKKEEPING = ["last_used_at", "throttling_failure_timestamp", "throttling_failure_count"]
-RECORDED = {
+RECORDED: dict[str, dict[str, list[str]]] = {
     "accounts.User": {**USER_OPTIONS, "m2m_fields": ["groups", "user_permissions"]},
     # The Background checks admin saves through this proxy of User.
     "applications.BackgroundCheck": USER_OPTIONS,
@@ -88,7 +101,7 @@ RECORDED = {
 }
 
 
-def register_models():
+def register_models() -> None:
     """Register `RECORDED` with auditlog (from CoreConfig.ready). Each model
     gets an explicit `include_fields` of its own columns: auditlog 3.4.1
     otherwise diffs a new row over every relation, reverse ones included."""
@@ -106,7 +119,7 @@ def register_models():
         )
 
 
-def mask(value):
+def mask(value: object) -> str:
     """AUDITLOG_MASK_CALLABLE: hide a masked field's value entirely
     (auditlog's default keeps half of it)."""
     return "***"
@@ -118,11 +131,11 @@ class AuditlogMiddleware(BaseAuditlogMiddleware):
     infrastructure's logs have the rest."""
 
     @staticmethod
-    def _get_remote_port(request):
+    def _get_remote_port(request: HttpRequest) -> None:
         return None
 
 
-def log_access(obj):
+def log_access(obj: Model) -> None:
     """Record that the current request's account viewed `obj` (an ACCESS
     entry). Only for special-category data (a child's health notes, a
     criminal-record extract) and data handed out on request; `obj`'s model
@@ -130,23 +143,25 @@ def log_access(obj):
     accessed.send(sender=obj.__class__, instance=obj)
 
 
-def without_audit_log(handle):
+def without_audit_log[**P, R](handle: Callable[P, R]) -> Callable[P, R]:
     """For a management command's `handle` that seeds demo data: seed data
     isn't history."""
 
     @wraps(handle)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         with disable_auditlog():
             return handle(*args, **kwargs)
 
     return wrapper
 
 
-class LogAccessAdminMixin:
+class LogAccessAdminMixin(_AdminBase):
     """For the ModelAdmin of a model holding special-category data: opening
     a row's change page in the Django admin is recorded as a view."""
 
-    def change_view(self, request, object_id, form_url="", extra_context=None):
+    def change_view(
+        self, request: HttpRequest, object_id: str, form_url: str = "", extra_context: dict[str, Any] | None = None
+    ) -> HttpResponse:
         if request.method == "GET":
             from django.contrib.admin.utils import unquote
 
@@ -165,13 +180,15 @@ class AuditHistoryAdminMixin(AuditlogHistoryAdminMixin):
 
     show_auditlog_history_link = True
 
-    def get_list_display(self, request):
+    def get_list_display(self, request: HttpRequest) -> Any:
         list_display = super().get_list_display(request)
         if not request.user.has_perm(AUDIT_LOG_PERMISSION):
             list_display = [name for name in list_display if name != "auditlog_link"]
         return list_display
 
-    def auditlog_history_view(self, request, object_id, extra_context=None):
+    def auditlog_history_view(
+        self, request: HttpRequest, object_id: str, extra_context: dict[str, Any] | None = None
+    ) -> Any:
         from django.core.exceptions import PermissionDenied
 
         if not request.user.has_perm(AUDIT_LOG_PERMISSION):
@@ -187,7 +204,7 @@ HIDDEN = "****"
 DISPLAY_LENGTH = 120
 
 
-def _hidden_categories():
+def _hidden_categories() -> set[str]:
     from core.privacy_registry import Category
 
     # Health, criminal records and secrets: the dashboard only says that
@@ -195,7 +212,7 @@ def _hidden_categories():
     return {Category.SPECIAL, Category.CRIMINAL, Category.SECURITY}
 
 
-def is_hidden(model, field_name):
+def is_hidden(model: type[Model] | None, field_name: str) -> bool:
     """Whether the dashboard hides this field's values (as HIDDEN): a field
     the privacy registry classifies as health, criminal-record or security
     data, or one the log masks already. A model the registry doesn't know,
@@ -208,7 +225,7 @@ def is_hidden(model, field_name):
         return True
     if field_name in RECORDED.get(model._meta.label, {}).get("mask_fields", ()):
         return True
-    entry = site.get(model) or site.get(model._meta.concrete_model)
+    entry = site.get(model) or site.get(model._meta.concrete_model or model)
     if entry is None:
         return True
     if field_name in entry.not_personal:
@@ -217,12 +234,12 @@ def is_hidden(model, field_name):
     return privacy is None or privacy.category in _hidden_categories()
 
 
-def _shorten(value):
-    value = str(value)
-    return value if len(value) <= DISPLAY_LENGTH else value[:DISPLAY_LENGTH] + "…"
+def _shorten(value: object) -> str:
+    text = str(value)
+    return text if len(text) <= DISPLAY_LENGTH else text[:DISPLAY_LENGTH] + "…"
 
 
-def _display_value(field, value):
+def _display_value(field: Any, value: Any) -> str:
     """One stored value (auditlog keeps them as strings) as a person reads it:
     a choice's label, a linked row's name, a date in Belgian notation."""
     from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -251,7 +268,7 @@ def _display_value(field, value):
     return _shorten(value)
 
 
-def display_changes(entry):
+def display_changes(entry: "LogEntry") -> list[dict[str, Any]]:
     """An audit log entry's changes for the organisation dashboard: a list of
     {"field", "before", "after", "hidden"}, with every value `is_hidden`
     hides replaced by HIDDEN. A many-to-many change has no "before"; its
@@ -259,7 +276,7 @@ def display_changes(entry):
     from django.core.exceptions import FieldDoesNotExist
 
     model = entry.content_type.model_class() if entry.content_type_id else None
-    rows = []
+    rows: list[dict[str, Any]] = []
     for name, values in (entry.changes_dict or {}).items():
         field = None
         if model is not None:

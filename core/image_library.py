@@ -19,21 +19,23 @@ from pathlib import Path
 
 from django.core.files import File
 from django.core.files.storage import default_storage
+from django.db.models import Model
+from django.db.models.fields.files import FieldFile
 
 LIBRARY_PREFIX = "library"
 
 # kind → the bundled directory its standard images come from. Filled by the
 # apps that own them (register_library, from their AppConfig.ready()): core
 # knows no app (CODING_STANDARDS.md, "Layers").
-LIBRARY_DIRS = {}
+LIBRARY_DIRS: dict[str, Path] = {}
 
 
-def register_library(kind, directory):
+def register_library(kind: str, directory: str | Path) -> None:
     """Make `directory`'s images the standard images of `kind`."""
     LIBRARY_DIRS[kind] = Path(directory)
 
 
-def _source(kind, filename):
+def _source(kind: str, filename: str) -> Path:
     source = LIBRARY_DIRS[kind] / filename
     # Filenames come from form posts too: only a plain name of a file that
     # really is in the library, never a path out of it.
@@ -42,7 +44,7 @@ def _source(kind, filename):
     return source
 
 
-def library_name(kind, filename):
+def library_name(kind: str, filename: str) -> str:
     """The storage name a field is set to in order to use this standard
     image. Copies the file into media storage the first time it's needed."""
     source = _source(kind, filename)
@@ -56,21 +58,23 @@ def library_name(kind, filename):
     return name
 
 
-def use_library_image(instance, field_name, kind, filename, save=False):
+def use_library_image(instance: Model, field_name: str, kind: str, filename: str, save: bool = False) -> None:
     """Point `instance.<field_name>` at a standard image (no copy made)."""
     setattr(instance, field_name, library_name(kind, filename))
     if save:
         instance.save(update_fields=[field_name])
 
 
-def is_library_image(fieldfile):
-    return bool(fieldfile) and fieldfile.name.startswith(f"{LIBRARY_PREFIX}/")
+def is_library_image(fieldfile: FieldFile | None) -> bool:
+    name = fieldfile.name if fieldfile else None
+    return bool(name and name.startswith(f"{LIBRARY_PREFIX}/"))
 
 
-def library_filename(fieldfile, kind):
+def library_filename(fieldfile: FieldFile | None, kind: str) -> str | None:
     """The standard image's filename if the field uses one of this kind
     (e.g. to preselect it in a picker), else None."""
     prefix = f"{LIBRARY_PREFIX}/{kind}/"
-    if fieldfile and fieldfile.name.startswith(prefix):
-        return fieldfile.name[len(prefix) :]
+    name = fieldfile.name if fieldfile else None
+    if name and name.startswith(prefix):
+        return name[len(prefix) :]
     return None

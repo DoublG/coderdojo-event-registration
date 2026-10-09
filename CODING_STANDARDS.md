@@ -25,8 +25,9 @@ and capacity in [`CAPACITY.md`](CAPACITY.md), memory per function in [`MEMORY_PR
   `C901` fails any new one, seed code excepted.
 - **The apps are layered:** `lint-imports` (import-linter) fails an app that imports a layer above its own,
   locally and in CI ([Layers between the apps](#layers-between-the-apps)).
-- **Types are checked gradually:** mypy checks the service modules listed in `pyproject.toml` (fully
-  annotated), on every push too; the rest of the code isn't type-checked yet (see "Type checking").
+- **Types are checked:** mypy checks every module that isn't a view, form, admin, model, template tag,
+  migration, command or test (listed in `pyproject.toml`, fully annotated), on every push too; those
+  others aren't type-checked (see "Type checking").
 - **Not checked:** a minimum coverage. The coverage and complexity figures are a map, not a gate: measured
   every Monday by the **Code quality** workflow (its summary shows the change since the previous week),
   and by hand for the dated figures in this file.
@@ -319,18 +320,21 @@ without type annotations; checking all of it at once gave hundreds of findings, 
 forms. So only the modules listed in `pyproject.toml`'s `[tool.mypy] files` are checked, and those are
 fully annotated:
 
-- **What's checked:** the service modules first, the rule modules every view calls: `applications/services.py`,
-  `dojos/team.py`, `events/awards.py`, `events/registrations.py`, `mailing/queue_actions.py`,
-  `mailing/services.py` and `privacy/retention.py` (6 October 2026); then access, notifications and the
-  data caches: `accounts/admin_access.py`, `accounts/home_dojo.py`, `accounts/organisation_people.py`,
-  `core/caching.py`, `dojos/access.py`, `events/engagement.py` and `notifications/services.py` (9 October
-  2026). A view's `request.user` is typed `User | AnonymousUser`, so a function that also takes a logged-out
-  visitor says so (`dojos.access.managing_membership`). Every function there has annotations
+- **What's checked:** every module of the site that isn't a view, a form, an admin, a model, a template tag,
+  a migration, a management command, a test or a `privacy.py` declaration: the services and rule modules,
+  the Celery tasks, the caches, the segmentation, the mail engine, the privacy registry, export and
+  erasure, the API's auth and client services, monitoring and geocoding (90 modules, 9 October 2026;
+  the first seven on 6 October). A view's `request.user` is typed `User | AnonymousUser`, so a function that
+  also takes a logged-out visitor says so (`dojos.access.managing_membership`), and one that needs a
+  logged-in account gets it through a check that raises otherwise (`accounts.two_step._account`). Every
+  function there has annotations
   (`disallow_untyped_defs`); what they import is read for its types, but its own errors aren't reported
   (`follow_imports = "silent"`). Libraries without type information are ignored.
-- **Growing it:** a service module joins the list once it's annotated, and new service code is written
-  annotated. Views, forms, templates and tests stay unannotated; that's where the checker gives least.
-  `warn_return_any` waits until most of what the checked modules call is annotated.
+- **Growing it:** a new module of that kind is written annotated and joins the list in the same change.
+  Views, forms, admins, templates and tests stay unannotated; that's where the checker gives least.
+  `warn_return_any` stays off: with everything above annotated it still finds 40 returns, nearly all a
+  value from a `from_queryset` manager, the cache or django-otp (which have no types), each needing an
+  annotated variable or a `cast` to say what it is.
 - **Django specifics:** the plugin knows models, fields and lookups, and checks a `filter()`'s lookups
   against the model. A queryset carrying an annotation is typed with `WithAnnotations[Model, TypedDict]`
   from `django_stubs_ext` (a development package), imported only under `TYPE_CHECKING` (see
@@ -344,8 +348,13 @@ fully annotated:
   a background-check decision whose required `reviewed_at` relied on the caller having set it; a field
   lookup that could in principle return a relation without a column; and `send()`'s documentation
   promising it took a dojo's id, which its foreign key wouldn't have accepted (no caller did). All fixed.
-  The next seven (9 October 2026) turned up no bug, only places where the code relied on something the
-  checker can't see (a first visit that exists because one was counted), now written so it can.
+  The rest (9 October 2026) turned up no bug, only places where the code relied on something the checker
+  can't see, now written so it can: an optional relation checked by its id and then used (`row.user_id`,
+  then `row.user`), a dojo mailing's dojo taken as set (`campaigns.services._dojo_of`), a child's login
+  taken as there after a separate check (`child_accounts._active_account`), a lambda's default argument
+  standing in for `functools.partial`. Per-request memos on `HttpRequest` (`_sign_in_status`,
+  `_account_navigation`) and attributes set on a row for its template (`Dojo.next_event`) carry a
+  `type: ignore[attr-defined]`.
 - **The layers hold for types too:** a type-only import goes under `TYPE_CHECKING`, and never upwards
   (`mailing.services.send` types its `campaign` as `Any`, since the mail engine may not import `campaigns`).
 - **Running it:** `mypy` (no arguments: the configuration says what to check). It's a job in the Code audit

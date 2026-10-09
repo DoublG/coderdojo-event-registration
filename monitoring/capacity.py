@@ -10,8 +10,10 @@ each a best estimate from how the site works (which actions write which
 rows); change them when real figures say otherwise."""
 
 import json
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
 
 ROW_SIZES_FILE = Path(__file__).with_name("row_sizes.json")
 # A table without a measured size, or with too few rows to measure (InnoDB's
@@ -46,23 +48,23 @@ class Scenario:
     journeys_per_family: int = 1
 
     @property
-    def sessions(self):
+    def sessions(self) -> int:
         return self.dojos * self.sessions_per_dojo
 
     @property
-    def bookings(self):
+    def bookings(self) -> int:
         return self.sessions * self.bookings_per_session
 
     @property
-    def children(self):
+    def children(self) -> int:
         return round(self.families * self.children_per_family)
 
     @property
-    def new_families(self):
+    def new_families(self) -> int:
         return round(self.families * self.new_family_share)
 
     @property
-    def mail_per_year(self):
+    def mail_per_year(self) -> int:
         return round(sum(mail_breakdown(self).values()))
 
 
@@ -75,7 +77,7 @@ SCENARIOS = {
 }
 
 
-def mail_breakdown(s):
+def mail_breakdown(s: Scenario) -> dict[str, float]:
     """Mails per year by what sends them (mailing.automated, campaigns, journeys)."""
     booked = s.bookings * 1.1  # plus the waiting list, about a tenth more
     return {
@@ -89,7 +91,7 @@ def mail_breakdown(s):
     }
 
 
-def _audit_entries(s):
+def _audit_entries(s: Scenario) -> float:
     """Audit log entries per year (core.audit.RECORDED): a booking is created,
     marked and sometimes cancelled; a session is created, edited and its
     team marked; a new family writes its account, children, guardianships,
@@ -106,7 +108,7 @@ def _audit_entries(s):
 # table: (kind, rows(scenario)). "yearly" rows are added every year and
 # kept; "level" rows stay about that many however long the site runs
 # (rebuilt, expired or bounded by the people active now).
-GROWTH = {
+GROWTH: dict[str, tuple[str, Callable[[Scenario], float]]] = {
     "events_event": ("yearly", lambda s: s.sessions),
     "events_event_team": ("yearly", lambda s: s.sessions * s.team_per_session),
     "events_event_pathways": ("yearly", lambda s: s.sessions * 2),
@@ -133,14 +135,14 @@ GROWTH = {
 }
 
 
-def load_row_sizes():
+def load_row_sizes() -> dict[str, Any]:
     try:
         return json.loads(ROW_SIZES_FILE.read_text())
     except FileNotFoundError:
         return {"tables": {}, "mail_content_bytes": 0}
 
 
-def measure_row_sizes(tables, mail_content_bytes):
+def measure_row_sizes(tables: dict[str, dict[str, int]], mail_content_bytes: int) -> dict[str, Any]:
     """Bytes per row (data plus indexes) of each table with enough rows to
     tell, from `collect.database_tables()`."""
     return {
@@ -153,7 +155,7 @@ def measure_row_sizes(tables, mail_content_bytes):
     }
 
 
-def row_bytes(table, sizes, current=None):
+def row_bytes(table: str, sizes: dict[str, Any], current: dict[str, int] | None = None) -> float:
     measured = sizes["tables"].get(table)
     if measured:
         return measured
@@ -162,13 +164,19 @@ def row_bytes(table, sizes, current=None):
     return DEFAULT_ROW_BYTES
 
 
-def project(scenario, years, current_tables, sizes, clear_mail_content=False):
+def project(
+    scenario: Scenario,
+    years: int,
+    current_tables: dict[str, dict[str, int]],
+    sizes: dict[str, Any],
+    clear_mail_content: bool = False,
+) -> dict[str, float]:
     """{table: bytes} after `years` more years of `scenario`, on top of what
     every table holds now. With `clear_mail_content`, mail older than a year
     keeps its row but not its subject and body (the `mail_content`
     retention rule in core.privacy_registry, not yet applied by the retention
     job)."""
-    result = {}
+    result: dict[str, float] = {}
     for table, (kind, rows_per_year) in GROWTH.items():
         current = current_tables.get(table, {})
         now = current.get("data_bytes", 0) + current.get("index_bytes", 0)
@@ -187,7 +195,7 @@ def project(scenario, years, current_tables, sizes, clear_mail_content=False):
     return result
 
 
-def scenario_dict(scenario):
+def scenario_dict(scenario: Scenario) -> dict[str, Any]:
     return {
         **asdict(scenario),
         "sessions": scenario.sessions,

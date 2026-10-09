@@ -11,7 +11,10 @@ the scope it needs (`OAuth2.operation`), so OAuth-aware tools (the
 reference page's Authorize button, client generators) get the token
 themselves."""
 
+from typing import Any
+
 from django.conf import settings
+from django.http import HttpRequest
 from ninja.errors import HttpError
 from ninja.security.base import AuthBase
 from ninja.throttling import AuthRateThrottle
@@ -35,11 +38,11 @@ class OAuth2(AuthBase):
         "clientCredentials": {"tokenUrl": TOKEN_URL, "scopes": settings.OAUTH2_PROVIDER["SCOPES"]},
     }
 
-    def __init__(self, scope):
+    def __init__(self, scope: str) -> None:
         super().__init__()
         self.scope = scope
 
-    def operation(self, **extra):
+    def operation(self, **extra: Any) -> dict[str, Any]:
         """The decorator arguments of an endpoint that needs this scope: the
         check itself, the scope in the spec, and the error answers."""
         return {
@@ -48,14 +51,14 @@ class OAuth2(AuthBase):
             **extra,
         }
 
-    def __call__(self, request):
+    def __call__(self, request: HttpRequest) -> DojoApiClient | None:
         header = request.headers.get("Authorization", "")
         scheme, _, token = header.partition(" ")
         if scheme.lower() != "bearer" or not token:
             return None
         return self.authenticate(request, token)
 
-    def authenticate(self, request, token):
+    def authenticate(self, request: HttpRequest, token: str) -> DojoApiClient | None:
         valid, oauth_request = get_oauthlib_core().verify_request(request, scopes=[])
         if not valid:
             return None
@@ -72,7 +75,7 @@ class OAuth2(AuthBase):
 class ClientRateThrottle(AuthRateThrottle):
     """Requests per client, whatever its name."""
 
-    def get_cache_key(self, request):
+    def get_cache_key(self, request: HttpRequest) -> Any:
         client = getattr(request, "auth", None)
         if client is None:
             return super().get_cache_key(request)

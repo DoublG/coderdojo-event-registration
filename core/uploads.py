@@ -21,6 +21,7 @@ Django; between the two limits the family sees this module's message."""
 import io
 import logging
 import os
+from typing import IO, TYPE_CHECKING, Any
 
 from django.apps import apps
 from django.core.exceptions import ValidationError
@@ -32,6 +33,9 @@ from django.utils.translation import gettext_lazy as _
 from PIL import Image, ImageOps
 
 from .image_library import LIBRARY_PREFIX
+
+if TYPE_CHECKING:
+    from django_stubs_ext import StrOrPromise
 
 logger = logging.getLogger(__name__)
 
@@ -49,22 +53,22 @@ DOCUMENT_UPLOAD_HELP = _("A PDF, JPEG or PNG file of at most 10 MB.")
 DOCUMENT_SIGNATURES = (b"%PDF-", b"\xff\xd8\xff", b"\x89PNG\r\n\x1a\n")
 
 
-def with_upload_help(text=None):
+def with_upload_help(text: "StrOrPromise | None" = None) -> "StrOrPromise":
     """A form's help text for an image upload: its own text, then the limits."""
     return format_lazy("{} {}", text, IMAGE_UPLOAD_HELP) if text else IMAGE_UPLOAD_HELP
 
 
-def _is_new_upload(value):
+def _is_new_upload(value: Any) -> bool:
     """Validators also run on a row's existing file (the admin re-validates
     the whole row); only a file that's being uploaded now is checked."""
     return bool(value) and not getattr(value, "_committed", False)
 
 
-def _megabytes(size):
+def _megabytes(size: int) -> str:
     return f"{size / 1024 / 1024:.1f}".rstrip("0").rstrip(".")
 
 
-def validate_image_upload(value):
+def validate_image_upload(value: Any) -> None:
     if not _is_new_upload(value):
         return
     if value.size > MAX_UPLOAD_BYTES:
@@ -90,7 +94,7 @@ def validate_image_upload(value):
         )
 
 
-def validate_document_upload(value):
+def validate_document_upload(value: Any) -> None:
     if not _is_new_upload(value):
         return
     if value.size > MAX_UPLOAD_BYTES:
@@ -108,7 +112,7 @@ def validate_document_upload(value):
         raise ValidationError(_("Upload a PDF, JPEG or PNG file."), code="file_type")
 
 
-def _in_srgb(image, mode):
+def _in_srgb(image: Image.Image, mode: str) -> Image.Image:
     """The image in `mode`, its colours converted to sRGB when it carries a
     colour profile of its own (a phone's Display P3, for one), so dropping
     the profile doesn't shift them."""
@@ -119,13 +123,15 @@ def _in_srgb(image, mode):
 
             source = ImageCms.ImageCmsProfile(io.BytesIO(profile))
             converted = image.convert(mode) if image.mode != mode else image
-            return ImageCms.profileToProfile(converted, source, ImageCms.createProfile("sRGB"), outputMode=mode)
+            result = ImageCms.profileToProfile(converted, source, ImageCms.createProfile("sRGB"), outputMode=mode)
+            if result is not None:  # None only when converting in place, which this doesn't ask for
+                return result
         except Exception:
             logger.info("Couldn't apply an uploaded image's colour profile", exc_info=True)
     return image.convert(mode)
 
 
-def shrink_image(file, max_side):
+def shrink_image(file: IO[bytes], max_side: int) -> tuple[ContentFile[bytes], str] | None:
     """The image at most `max_side` pixels on its longest side, re-encoded
     from its pixels alone: (ContentFile, extension), or None when Pillow
     can't read it. Nothing of the original file's metadata survives: EXIF
@@ -134,11 +140,11 @@ def shrink_image(file, max_side):
     applied to the pixels first."""
     file.seek(0)
     try:
-        with Image.open(file) as image:
+        with Image.open(file) as opened:
             # A JPEG decodes straight at a reduced scale: a big photo never
             # takes its full size in memory.
-            image.draft("RGB", (max_side, max_side))
-            image = ImageOps.exif_transpose(image)
+            opened.draft("RGB", (max_side, max_side))
+            image = ImageOps.exif_transpose(opened)
             transparent = image.mode in ("RGBA", "LA", "PA") or (image.mode == "P" and "transparency" in image.info)
             image.thumbnail((max_side, max_side), Image.Resampling.LANCZOS)
             clean = _in_srgb(image, "RGBA" if transparent else "RGB")
@@ -158,8 +164,8 @@ def shrink_image(file, max_side):
     return ContentFile(out.getvalue()), extension
 
 
-def is_library_name(name):
-    return bool(name) and name.startswith(f"{LIBRARY_PREFIX}/")
+def is_library_name(name: str | None) -> bool:
+    return bool(name and name.startswith(f"{LIBRARY_PREFIX}/"))
 
 
 class UploadedImageField(models.ImageField):
@@ -167,19 +173,19 @@ class UploadedImageField(models.ImageField):
     and re-encoded when saved, and its file deleted when it's replaced or
     its row goes (see the module docstring)."""
 
-    def __init__(self, *args, max_side=BANNER_SIDE, **kwargs):
+    def __init__(self, *args: Any, max_side: int = BANNER_SIDE, **kwargs: Any) -> None:
         self.max_side = max_side
         kwargs.setdefault("validators", [validate_image_upload])
         super().__init__(*args, **kwargs)
 
-    def deconstruct(self):
+    def deconstruct(self) -> Any:
         name, path, args, kwargs = super().deconstruct()
         kwargs["max_side"] = self.max_side
         if kwargs.get("validators") == [validate_image_upload]:
             del kwargs["validators"]
         return name, path, args, kwargs
 
-    def pre_save(self, model_instance, add):
+    def pre_save(self, model_instance: models.Model, add: bool) -> Any:
         file = getattr(model_instance, self.attname)
         if file and not file._committed and not is_library_name(file.name):
             shrunk = shrink_image(file.file, self.max_side)
@@ -193,17 +199,17 @@ class UploadedImageField(models.ImageField):
 # --- deleting files nobody uses any more ----------------------------------------------
 
 
-def _upload_fields(model):
+def _upload_fields(model: type[models.Model]) -> list[UploadedImageField]:
     return [field for field in model._meta.fields if isinstance(field, UploadedImageField)]
 
 
-def _delete_later(model, field, name):
+def _delete_later(model: type[models.Model], field: UploadedImageField, name: str | None) -> None:
     """Delete `name` from the field's storage once the transaction commits,
     unless it's a standard image or another row still points at it."""
     if not name or is_library_name(name):
         return
 
-    def delete():
+    def delete() -> None:
         if model._base_manager.filter(**{field.attname: name}).exists():
             return
         try:
@@ -214,17 +220,23 @@ def _delete_later(model, field, name):
     transaction.on_commit(delete)
 
 
-def _remember_files(sender, instance, raw=False, update_fields=None, **kwargs):
+def _remember_files(
+    sender: type[models.Model],
+    instance: models.Model,
+    raw: bool = False,
+    update_fields: Any = None,
+    **kwargs: Any,
+) -> None:
     if raw or instance._state.adding or instance.pk is None:
         return
     fields = [f for f in _upload_fields(sender) if update_fields is None or f.name in update_fields]
     if not fields:
         return
     stored = sender._base_manager.filter(pk=instance.pk).values(*[f.attname for f in fields]).first() or {}
-    instance._stored_files = {f.attname: stored.get(f.attname) for f in fields}
+    instance.__dict__["_stored_files"] = {f.attname: stored.get(f.attname) for f in fields}
 
 
-def _delete_replaced(sender, instance, raw=False, **kwargs):
+def _delete_replaced(sender: type[models.Model], instance: models.Model, raw: bool = False, **kwargs: Any) -> None:
     stored = instance.__dict__.pop("_stored_files", None)
     if raw or not stored:
         return
@@ -235,14 +247,14 @@ def _delete_replaced(sender, instance, raw=False, **kwargs):
             _delete_later(sender, field, old)
 
 
-def _delete_with_row(sender, instance, **kwargs):
+def _delete_with_row(sender: type[models.Model], instance: models.Model, **kwargs: Any) -> None:
     for field in _upload_fields(sender):
         current = getattr(instance, field.attname)
         if current:
             _delete_later(sender, field, current.name)
 
 
-def connect_cleanup():
+def connect_cleanup() -> None:
     """Only for the models with an UploadedImageField (proxies included): a
     receiver for every model would stop Django's fast bulk deletes."""
     for model in apps.get_models():

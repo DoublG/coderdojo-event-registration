@@ -383,8 +383,11 @@ def mail_content_values() -> dict[str, str | None]:
     classification, so a personal field added later is cleared too."""
     from mailing.models import EmailMessage
 
+    entry = privacy_registry.get(EmailMessage)
+    if entry is None:  # privacy.tests.EveryFieldIsClassifiedTests keeps it classified
+        raise LookupError("mailing.EmailMessage has no privacy classification")
     values: dict[str, str | None] = {}
-    for name, spec in privacy_registry.get(EmailMessage).fields.items():
+    for name, spec in entry.fields.items():
         if spec.on_erasure != Erasure.DELETE:
             continue
         model_field = EmailMessage._meta.get_field(name)

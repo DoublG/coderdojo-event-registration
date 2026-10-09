@@ -13,25 +13,29 @@ the database.
 import json
 from functools import reduce
 from operator import or_
+from typing import TYPE_CHECKING, Any
 
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import FileField, Q
+from django.db.models import FileField, Model, Q, QuerySet
 from django.utils import timezone
 
 from accounts.models import Ninja
 from core import privacy_registry as registry
-from core.privacy_registry import Subject, classifiable_fields
+from core.privacy_registry import ModelPrivacy, Subject, classifiable_fields
+
+if TYPE_CHECKING:
+    from accounts.models import User
 
 
 class _Encoder(DjangoJSONEncoder):
-    def default(self, o):
+    def default(self, o: Any) -> Any:
         try:
             return super().default(o)
         except TypeError:
             return str(o)
 
 
-def children_of(user):
+def children_of(user: "User") -> QuerySet[Ninja]:
     """The children whose data this login gets with its own: an adult's
     children, or a ninja login's own child record (never its siblings)."""
     if user.is_ninja:
@@ -39,7 +43,7 @@ def children_of(user):
     return Ninja.objects.of_guardian(user)
 
 
-def _rows(entry, user, children):
+def _rows(entry: ModelPrivacy, user: "User", children: list[Ninja]) -> "QuerySet[Model] | list[Model]":
     conditions = []
     for subject, lookup in entry.subjects.items():
         if subject == Subject.ACCOUNT:
@@ -53,7 +57,7 @@ def _rows(entry, user, children):
     return entry.model._base_manager.filter(reduce(or_, conditions)).distinct().order_by("pk")
 
 
-def _value(obj, model_field):
+def _value(obj: Model, model_field: Any) -> Any:
     if model_field.many_to_many:
         return [str(related) for related in getattr(obj, model_field.name).all()]
     if model_field.is_relation:
@@ -65,8 +69,8 @@ def _value(obj, model_field):
     return value
 
 
-def _record(entry, obj):
-    record = {}
+def _record(entry: ModelPrivacy, obj: Model) -> dict[str, Any]:
+    record: dict[str, Any] = {}
     for model_field in classifiable_fields(entry.model):
         spec = entry.fields.get(model_field.name)
         if model_field.primary_key or (spec is not None and not spec.export):
@@ -75,10 +79,10 @@ def _record(entry, obj):
     return record
 
 
-def export_person(user):
+def export_person(user: "User") -> dict[str, Any]:
     """Everything the site keeps about this account and its children, as a dict."""
     children = list(children_of(user))
-    data = {}
+    data: dict[str, Any] = {}
     for entry in registry.registered():
         if not entry.subjects:
             continue
@@ -97,9 +101,9 @@ def export_person(user):
     }
 
 
-def export_json(user):
+def export_json(user: "User") -> str:
     return json.dumps(export_person(user), cls=_Encoder, indent=2, ensure_ascii=False)
 
 
-def export_filename(user):
+def export_filename(user: "User") -> str:
     return f"coderdojo-data-{user.get_username()}-{timezone.localdate():%Y-%m-%d}.json"
