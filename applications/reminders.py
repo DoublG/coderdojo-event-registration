@@ -9,11 +9,11 @@ Both are service mail through mailing.services.send_or_log, with an
 idempotency key, so a job that runs twice mails nobody twice.
 """
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.auth.models import Permission
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.urls import reverse
 from django.utils import timezone
 
@@ -24,7 +24,7 @@ from mailing.services import send_or_log
 REMIND_BEFORE = timedelta(days=30)
 
 
-def remind_expiring_checks(now=None):
+def remind_expiring_checks(now: datetime | None = None) -> int:
     """Mail everyone whose check expires within REMIND_BEFORE, once per
     expiry date. Returns how many accounts were due."""
     now = now or timezone.now()
@@ -47,7 +47,7 @@ def remind_expiring_checks(now=None):
     return len(due)
 
 
-def reviewers():
+def reviewers() -> QuerySet[User]:
     """The accounts that review background checks: the reviewer role, or the
     permission granted by hand (not every superuser)."""
     permission = Permission.objects.filter(
@@ -61,7 +61,7 @@ def reviewers():
     )
 
 
-def mail_reviewers(now=None):
+def mail_reviewers(now: datetime | None = None) -> int:
     """While documents wait for review, mail each reviewer once a day how
     many (never counting their own). Returns how many reviewers were mailed."""
     day = timezone.localdate(now or timezone.now())

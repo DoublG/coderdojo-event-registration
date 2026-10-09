@@ -5,8 +5,10 @@ measured at the child's main dojo; StageAtDojoAttribute reads a dojo's own
 row. Figures are as of the last nightly rebuild."""
 
 from datetime import timedelta
+from typing import Any
 
 from django.db.models import Q
+from django.http import QueryDict
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -16,7 +18,7 @@ from events.models import NinjaEngagement
 from ..base import NINJA, SegmentAttribute, SegmentChoice, choice_q, number_q
 
 
-def _overall(q):
+def _overall(q: Q) -> Q:
     return Q(pk__in=NinjaEngagement.objects.filter(q, dojo__isnull=True).values("ninja_id"))
 
 
@@ -24,10 +26,10 @@ class _EngagementAttribute(SegmentAttribute):
     scope = NINJA
     field = ""
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return []
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         return _overall(number_q(self.field, operator, value))
 
 
@@ -37,10 +39,10 @@ class EngagementStageAttribute(SegmentAttribute):
     value_type = "choice"
     scope = NINJA
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [SegmentChoice(value, label) for value, label in NinjaEngagement.STAGE_CHOICES]
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         return _overall(choice_q("stage", operator, value))
 
 
@@ -54,13 +56,13 @@ class StageAtDojoAttribute(SegmentAttribute):
     scope = NINJA
     operators = ["in"]
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [SegmentChoice(value, label) for value, label in NinjaEngagement.STAGE_CHOICES]
 
-    def dojo_choices(self):
+    def dojo_choices(self) -> list[SegmentChoice]:
         return [SegmentChoice(d.pk, d.name) for d in Dojo.objects.exclude(status=Dojo.DRAFT).order_by("name")]
 
-    def validate(self, operator, value):
+    def validate(self, operator: str, value: Any) -> None:
         if operator != "in":
             raise ValueError(
                 _("“%(label)s” supports in, not “%(operator)s”.") % {"label": self.label, "operator": operator}
@@ -74,12 +76,12 @@ class StageAtDojoAttribute(SegmentAttribute):
         ):
             raise ValueError(_("“%(label)s” needs a dojo and at least one stage.") % {"label": self.label})
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         return Q(
             pk__in=NinjaEngagement.objects.filter(dojo_id=value["dojo"], stage__in=value["stages"]).values("ninja_id")
         )
 
-    def describe(self, operator, value):
+    def describe(self, operator: str, value: Any) -> str:
         labels = {c.value: c.label for c in self.choices()}
         dojo = dict((c.value, c.label) for c in self.dojo_choices()).get(value.get("dojo"), _("a dojo"))
         return _("At %(dojo)s: %(stages)s") % {
@@ -87,7 +89,7 @@ class StageAtDojoAttribute(SegmentAttribute):
             "stages": ", ".join(str(labels.get(s, s)) for s in value.get("stages", [])),
         }
 
-    def value_from_form(self, operator, data):
+    def value_from_form(self, operator: str, data: QueryDict) -> Any:
         try:
             return {"dojo": int(data.get("dojo", "")), "stages": data.getlist("value")}
         except ValueError:
@@ -100,7 +102,7 @@ class AttendanceRateAttribute(_EngagementAttribute):
     value_type = "number"
     unit = _("%")
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         return _overall(number_q("attendance_rate", operator, value / 100))
 
 
@@ -131,7 +133,7 @@ class DaysSinceLastVisitAttribute(_EngagementAttribute):
     value_type = "number"
     unit = _(" days")
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         # More days since the last visit = an earlier last visit.
         cutoff = timezone.localdate() - timedelta(days=int(value))
         lookup = "last_attended__lte" if operator == "gte" else "last_attended__gte"
@@ -146,10 +148,10 @@ class HasUpcomingAttribute(SegmentAttribute):
     value_type = "boolean"
     scope = NINJA
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [SegmentChoice(True, _("Yes")), SegmentChoice(False, _("No"))]
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         if operator != "is":
             raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         return _overall(Q(has_upcoming=bool(value)))
@@ -163,8 +165,8 @@ class MainDojoStatusAttribute(SegmentAttribute):
     value_type = "choice"
     scope = NINJA
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [SegmentChoice(value, label) for value, label in Dojo.STATUS_CHOICES]
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         return _overall(choice_q("main_dojo__status", operator, value))

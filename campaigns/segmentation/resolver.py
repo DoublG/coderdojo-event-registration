@@ -1,27 +1,46 @@
 from functools import reduce
 from operator import and_, or_
+from typing import Any, TypedDict
 
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 from accounts.models import Guardianship, Ninja, User
-from campaigns.models import SegmentGroup
+from campaigns.models import Segment, SegmentGroup
 
 from .base import NINJA
 from .registry import get_attribute
 
 
-def serialize_segment(segment):
+class RuleData(TypedDict):
+    attribute: str
+    operator: str
+    value: Any
+
+
+class GroupData(TypedDict):
+    scope: str
+    operator: str
+    rules: list[RuleData]
+    children: list["GroupData"]
+
+
+class SegmentDefinition(TypedDict):
+    name: str
+    groups: list[GroupData]
+
+
+def serialize_segment(segment: Segment) -> SegmentDefinition:
     """A segment's definition as plain data: what a Campaign freezes in
     `segment_snapshot` at launch, and what the resolver works on.
 
     {"name": ..., "groups": [{"scope", "operator", "rules": [{"attribute",
     "operator", "value"}], "children": [...]}]}, the root groups first."""
     groups = list(segment.groups.prefetch_related("rules").order_by("id"))
-    children = {}
+    children: dict[int | None, list[SegmentGroup]] = {}
     for group in groups:
         children.setdefault(group.parent_id, []).append(group)
 
-    def node(group):
+    def node(group: SegmentGroup) -> GroupData:
         return {
             "scope": group.scope,
             "operator": group.operator,
@@ -35,7 +54,7 @@ def serialize_segment(segment):
     return {"name": segment.name, "groups": [node(root) for root in children.get(None, [])]}
 
 
-def _has_rules(nodes):
+def _has_rules(nodes: list[GroupData]) -> bool:
     return any(n["rules"] or _has_rules(n["children"]) for n in nodes)
 
 
@@ -58,22 +77,22 @@ class SegmentResolver:
     child-data consent: only to tell a dojo's team how many families an
     audience leaves out (campaigns.dojo_audiences), never to send."""
 
-    def __init__(self, require_consent=True):
+    def __init__(self, require_consent: bool = True) -> None:
         self.require_consent = require_consent
 
-    def resolve(self, segment):
+    def resolve(self, segment: Segment) -> QuerySet[User]:
         return self.resolve_definition(serialize_segment(segment))
 
-    def resolve_definition(self, definition):
+    def resolve_definition(self, definition: SegmentDefinition | None) -> QuerySet[User]:
         """The accounts for a serialized definition (serialize_segment), e.g. a
         campaign's frozen `segment_snapshot`."""
-        roots = (definition or {}).get("groups", [])
+        roots = definition.get("groups", []) if definition else []
         if not _has_rules(roots):
             return User.objects.none()
         query = reduce(and_, (self._user_q(root) for root in roots), Q())
         return User.objects.filter(is_active=True, account_type=User.ADULT).exclude(email="").filter(query)
 
-    def _user_q(self, group):
+    def _user_q(self, group: GroupData) -> Q:
         """A Q on User for any group (a ninja group is projected to guardians)."""
         if group["scope"] == NINJA:
             # Only the guardians who agreed to this child's details choosing
@@ -88,7 +107,7 @@ class SegmentResolver:
         parts += [self._user_q(child) for child in group["children"]]
         return self._combine(group, parts)
 
-    def _ninja_q(self, group):
+    def _ninja_q(self, group: GroupData) -> Q:
         parts = [self._rule_q(rule, Ninja) for rule in group["rules"]]
         for child in group["children"]:
             if child["scope"] != NINJA:
@@ -96,14 +115,14 @@ class SegmentResolver:
             parts.append(self._ninja_q(child))
         return self._combine(group, parts)
 
-    def _rule_q(self, rule, model):
+    def _rule_q(self, rule: RuleData, model: type[User] | type[Ninja]) -> Q:
         attribute = get_attribute(rule["attribute"])
         expected = NINJA if model is Ninja else "user"
         if attribute.scope != expected:
             raise ValueError(f"“{attribute.label}” can't be used in a {expected} group.")
         return Q(pk__in=model.objects.filter(attribute.build_q(rule["operator"], rule["value"])).values("pk"))
 
-    def _combine(self, group, parts):
+    def _combine(self, group: GroupData, parts: list[Q]) -> Q:
         if not parts:
             return Q()
         if group["operator"] == SegmentGroup.Operator.AND:

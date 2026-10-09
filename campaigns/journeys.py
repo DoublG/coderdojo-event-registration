@@ -5,31 +5,37 @@ Paired with a "changed recently" rule (stage_changed), that's a triggered
 mail: "we miss you" the week a child becomes at risk. Every change of a
 journey goes through here; the dashboard views only call these."""
 
-from datetime import timedelta
+from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
 
+from django.db.models import QuerySet
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from campaigns.models import Campaign, JourneyDelivery
+from campaigns.models import Campaign, Journey, JourneyDelivery
 from campaigns.segmentation.resolver import SegmentResolver
 from campaigns.services import CampaignError, launch_problems
 from mailing.preferences import subscribed_q
 from mailing.services import send
 
+if TYPE_CHECKING:
+    from accounts.models import User
+    from mailing.models import EmailMessage
 
-def problems(journey):
+
+def problems(journey: Journey) -> list[str]:
     """What stops the journey from running: the same checks as a campaign's."""
     stand_in = Campaign(category=journey.category, template_key=journey.template_key, segment=journey.segment)
     return [p for p in launch_problems(stand_in) if p != "Only a draft can be launched."]
 
 
-def audience(journey):
+def audience(journey: Journey) -> "QuerySet[User]":
     if journey.segment is None:
         return SegmentResolver().resolve_definition(None)
     return SegmentResolver().resolve(journey.segment).filter(subscribed_q(journey.category))
 
 
-def due(journey, now=None):
+def due(journey: Journey, now: datetime | None = None) -> "QuerySet[User]":
     """Who gets it on the next run: matching now, and not within the cool-down."""
     now = now or timezone.now()
     recent = JourneyDelivery.objects.filter(
@@ -38,7 +44,7 @@ def due(journey, now=None):
     return audience(journey).exclude(pk__in=recent.values("user_id"))
 
 
-def activate(journey):
+def activate(journey: Journey) -> None:
     if found := problems(journey):
         raise CampaignError(_(" ").join(found))
     journey.is_active = True
@@ -46,18 +52,18 @@ def activate(journey):
     journey.save(update_fields=["is_active", "activated_at"])
 
 
-def pause(journey):
+def pause(journey: Journey) -> None:
     journey.is_active = False
     journey.save(update_fields=["is_active"])
 
 
-def send_test(journey, user):
+def send_test(journey: Journey, user: "User") -> "EmailMessage":
     if not user.email:
         raise CampaignError(_("Your account has no email address to send the test to."))
     return send(user, journey.category, journey.template_key, journey.context, test=True)
 
 
-def run_one(journey, now=None):
+def run_one(journey: Journey, now: datetime | None = None) -> int:
     """Send the journey's mail to everyone due. Returns how many."""
     now = now or timezone.now()
     today = timezone.localdate()
@@ -75,10 +81,8 @@ def run_one(journey, now=None):
     return sent
 
 
-def run(now=None):
+def run(now: datetime | None = None) -> dict[int, int]:
     """All active journeys whose checks pass. Returns {journey id: sent}."""
-    from campaigns.models import Journey
-
     return {
         journey.pk: run_one(journey, now)
         for journey in Journey.objects.filter(is_active=True)
@@ -86,7 +90,7 @@ def run(now=None):
     }
 
 
-def stats(journey, days=30):
+def stats(journey: Journey, days: int = 30) -> dict[str, int]:
     since = timezone.now() - timedelta(days=days)
     deliveries = JourneyDelivery.objects.filter(journey=journey)
     return {

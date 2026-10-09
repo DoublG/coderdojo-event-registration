@@ -2,8 +2,10 @@
 (campaigns.journeys) and "time for something new" campaigns."""
 
 from datetime import timedelta
+from typing import Any
 
 from django.db.models import Q
+from django.http import QueryDict
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -23,10 +25,10 @@ class StageChangedAttribute(SegmentAttribute):
     scope = NINJA
     operators = ["within_days"]
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [SegmentChoice(value, label) for value, label in NinjaEngagement.STAGE_CHOICES]
 
-    def validate(self, operator, value):
+    def validate(self, operator: str, value: Any) -> None:
         stages = {c.value for c in self.choices()}
         if (
             operator != "within_days"
@@ -39,7 +41,7 @@ class StageChangedAttribute(SegmentAttribute):
         ):
             raise ValueError(_("“%(label)s” needs the new stage(s) and a number of days.") % {"label": self.label})
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         changes = NinjaEngagementChange.objects.filter(
             to_stage__in=value["to"],
             changed_on__gte=timezone.localdate() - timedelta(days=value["days"]),
@@ -48,7 +50,7 @@ class StageChangedAttribute(SegmentAttribute):
             changes = changes.filter(from_stage__in=value["from"])
         return Q(pk__in=changes.values("ninja_id"))
 
-    def describe(self, operator, value):
+    def describe(self, operator: str, value: Any) -> str:
         labels = {c.value: c.label for c in self.choices()}
         names = lambda stages: str(_(" or ")).join(str(labels.get(s, s)) for s in stages)  # noqa: E731
         if value.get("from"):
@@ -62,7 +64,7 @@ class StageChangedAttribute(SegmentAttribute):
             "days": value.get("days"),
         }
 
-    def value_from_form(self, operator, data):
+    def value_from_form(self, operator: str, data: QueryDict) -> Any:
         try:
             days = int(data.get("days", ""))
         except ValueError:
@@ -79,10 +81,10 @@ class NoNewBeltAttribute(SegmentAttribute):
     value_type = "days"
     scope = NINJA
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return []
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         if operator != "within_days":
             raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         recent = NinjaBelt.objects.filter(awarded_on__gte=timezone.localdate() - timedelta(days=value))
@@ -98,10 +100,10 @@ class NotOnATeamAttribute(SegmentAttribute):
     value_type = "days"
     scope = USER
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return []
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         if operator != "within_days":
             raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         since = timezone.now() - timedelta(days=value)

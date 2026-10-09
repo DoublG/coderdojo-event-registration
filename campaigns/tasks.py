@@ -7,7 +7,7 @@ from celery import shared_task
 
 
 @shared_task(name="mailing.tasks.launch_campaign")
-def launch_campaign(campaign_id, cursor=0):
+def launch_campaign(campaign_id: int, cursor: int = 0) -> int:
     """Queue one chunk of a launched campaign's mail, then the next chunk as
     a new task at the back of the queue (default queue): the mailing worker
     sends what's waiting in between, so booking mail never waits for a whole
@@ -21,7 +21,7 @@ def launch_campaign(campaign_id, cursor=0):
 
 
 @shared_task(name="mailing.tasks.launch_due_campaigns")
-def launch_due_campaigns():
+def launch_due_campaigns() -> int:
     """Beat, every minute (periodic queue, so it stays quick): hands due and
     interrupted campaigns to launch_campaign and completes finished ones."""
     from .services import launch_due
@@ -30,7 +30,7 @@ def launch_due_campaigns():
 
 
 @shared_task(name="mailing.tasks.run_journeys")
-def run_journeys():
+def run_journeys() -> dict[int, int]:
     """Daily (default queue): send each active journey to those newly due."""
     from .journeys import run
 

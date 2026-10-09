@@ -19,14 +19,22 @@ limit on mail to families."""
 
 from dataclasses import dataclass
 from datetime import timedelta
+from typing import TYPE_CHECKING, Any
 
+from django.db.models import QuerySet
 from django.utils import timezone
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
-from campaigns.segmentation.resolver import SegmentResolver
+from campaigns.segmentation.resolver import GroupData, RuleData, SegmentDefinition, SegmentResolver
 from events.models import Event, NinjaEngagement
 from mailing.categories import MailCategory
+
+if TYPE_CHECKING:
+    from django_stubs_ext import StrOrPromise
+
+    from dojos.models import Dojo
+    from pathways.models import Pathway
 
 FAMILY_TEMPLATE = "dojo_message"
 TEAM_TEMPLATE = "dojo_team_message"
@@ -45,15 +53,15 @@ class DojoAudienceError(Exception):
 @dataclass(frozen=True)
 class Audience:
     key: str
-    label: str
-    description: str
-    params: tuple = ()
+    label: "StrOrPromise"
+    description: "StrOrPromise"
+    params: tuple[str, ...] = ()
     needs_consent: bool = False
     category: str = MailCategory.DOJO_NEWS
     template: str = FAMILY_TEMPLATE
 
     @property
-    def is_team(self):
+    def is_team(self) -> bool:
         return self.category == MailCategory.VOLUNTEER
 
 
@@ -131,43 +139,43 @@ AUDIENCES = [
 BY_KEY = {audience.key: audience for audience in AUDIENCES}
 
 
-def get(key):
+def get(key: str) -> Audience:
     try:
         return BY_KEY[key]
     except KeyError:
         raise DojoAudienceError(gettext("Pick who should get the mail.")) from None
 
 
-def sessions_for(dojo):
+def sessions_for(dojo: "Dojo") -> QuerySet[Event]:
     """The sessions a mailing can be about: published ones, from a month ago on."""
     since = timezone.now() - timedelta(days=SESSION_DAYS_BACK)
     return Event.objects.filter(dojo=dojo, start_time__gte=since).exclude(status=Event.DRAFT).order_by("start_time")
 
 
-def pathways_for(dojo):
+def pathways_for(dojo: "Dojo") -> "QuerySet[Pathway]":
     return dojo.pathways.order_by("name")
 
 
-def available(dojo):
+def available(dojo: "Dojo") -> list[Audience]:
     """The audiences this dojo can use (the pathway one needs pathways)."""
     has_pathways = pathways_for(dojo).exists()
     return [a for a in AUDIENCES if a.key != PATHWAY or has_pathways]
 
 
-def _int(value):
+def _int(value: Any) -> int | None:
     try:
         return int(value)
     except (TypeError, ValueError):
         return None
 
 
-def clean_params(key, dojo, raw):
+def clean_params(key: str, dojo: "Dojo", raw: dict[str, Any] | None) -> dict[str, Any]:
     """The audience's parameters, checked against the dojo: a session or
     pathway of another dojo is refused. Returns a plain dict for
     `Campaign.audience_params`, or raises DojoAudienceError."""
     audience = get(key)
     raw = raw or {}
-    params = {}
+    params: dict[str, Any] = {}
     if "event" in audience.params:
         event = _int(raw.get("event"))
         if event is None or not sessions_for(dojo).filter(pk=event).exists():
@@ -196,15 +204,15 @@ def clean_params(key, dojo, raw):
     return params
 
 
-def _group(scope, rules, operator="and"):
+def _group(scope: str, rules: list[RuleData], operator: str = "and") -> GroupData:
     return {"scope": scope, "operator": operator, "rules": rules, "children": []}
 
 
-def _rule(attribute, operator, value):
+def _rule(attribute: str, operator: str, value: Any) -> RuleData:
     return {"attribute": attribute, "operator": operator, "value": value}
 
 
-def definition(key, dojo, params):
+def definition(key: str, dojo: "Dojo", params: dict[str, Any] | None) -> SegmentDefinition:
     """The segment definition for the audience, limited to `dojo`. Checks
     the parameters first (clean_params)."""
     params = clean_params(key, dojo, params)
@@ -245,7 +253,7 @@ def definition(key, dojo, params):
     return {"name": str(get(key).label), "groups": groups}
 
 
-def describe(key, dojo, params):
+def describe(key: str, dojo: "Dojo", params: dict[str, Any] | None) -> str:
     """The audience as one sentence, for the dojo's pages."""
     audience = BY_KEY.get(key)
     if audience is None:
@@ -271,14 +279,15 @@ def describe(key, dojo, params):
             "max": params.get("max_age"),
         }
     if key == PATHWAY:
-        pathway = pathways_for(dojo).filter(pk=params.get("pathway")).first()
+        pathway_id = params.get("pathway")
+        pathway = pathways_for(dojo).filter(pk=pathway_id).first() if pathway_id is not None else None
         return gettext("Children on the pathway %(pathway)s") % {
             "pathway": pathway.localized("name") if pathway else "?"
         }
     return str(audience.label)
 
 
-def reach(key, dojo, params):
+def reach(key: str, dojo: "Dojo", params: dict[str, Any] | None) -> tuple[int, int]:
     """(accounts it reaches, families it leaves out for lack of the
     child-data consent): only accounts who want this kind of mail from the
     dojo count."""

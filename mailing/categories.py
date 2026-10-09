@@ -6,6 +6,8 @@ Preferences per account (MailPreference) aren't built yet; CAN_OPT_OUT and
 DEFAULT_SUBSCRIBED already record the agreed rules for when they are.
 """
 
+from typing import TYPE_CHECKING
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -21,7 +23,7 @@ class MailCategory(models.TextChoices):
 
 # service/registration mail is about the account or a booking the recipient
 # made, so it can't be switched off (a hard bounce still stops it).
-CAN_OPT_OUT = {
+CAN_OPT_OUT: dict[str, bool] = {
     MailCategory.SERVICE: False,
     MailCategory.REGISTRATION: False,
     MailCategory.REMINDER: True,
@@ -33,7 +35,7 @@ CAN_OPT_OUT = {
 # What applies while an account hasn't made a choice. The newsletter always
 # needs an explicit opt-in; reminders and dojo news are on by default
 # (decided 2026-09-25).
-DEFAULT_SUBSCRIBED = {
+DEFAULT_SUBSCRIBED: dict[str, bool] = {
     MailCategory.SERVICE: True,
     MailCategory.REGISTRATION: True,
     MailCategory.REMINDER: True,
@@ -54,7 +56,7 @@ ALLOWED_FOR_NINJA_ACCOUNTS = {
 
 # Lower goes first: the dispatcher claims pending mail in this order, so a
 # password reset never waits behind a campaign.
-PRIORITY = {
+PRIORITY: dict[str, int] = {
     MailCategory.SERVICE: 0,
     MailCategory.REGISTRATION: 1,
     MailCategory.REMINDER: 5,
@@ -67,8 +69,11 @@ PRIORITY = {
 # pipeline" step 5) a consent was given under; recorded on ConsentEvent.
 PRIVACY_WORDING_VERSION = "2026-09-29"
 
+if TYPE_CHECKING:
+    from accounts.models import User
 
-def categories_for(user):
+
+def categories_for(user: "User") -> list[MailCategory]:
     """The categories `user` can receive at all."""
     if user.is_ninja:
         return [c for c in MailCategory if c in ALLOWED_FOR_NINJA_ACCOUNTS]

@@ -3,10 +3,14 @@ from __future__ import annotations
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import Q
+from django.http import QueryDict
 from django.utils.translation import gettext_lazy as _
+
+if TYPE_CHECKING:
+    from django_stubs_ext import StrOrPromise
 
 USER = "user"
 NINJA = "ninja"
@@ -36,7 +40,7 @@ OPERATORS = {
 @dataclass(frozen=True)
 class SegmentChoice:
     value: Any
-    label: str
+    label: StrOrPromise
 
 
 class SegmentAttribute(ABC):
@@ -47,7 +51,7 @@ class SegmentAttribute(ABC):
     subquery, so build_q can follow to-many relations freely."""
 
     key: str
-    label: str
+    label: StrOrPromise
     value_type: str
     scope: str
     # False keeps it out of the organisation's segment builder (its kind of
@@ -114,7 +118,7 @@ class SegmentAttribute(ABC):
         values = value if isinstance(value, list) else [value]
         return f"{self.label} {op} {', '.join(str(labels.get(str(v), v)) for v in values)}"
 
-    def value_from_form(self, operator: str, data) -> Any:
+    def value_from_form(self, operator: str, data: QueryDict) -> Any:
         """The rule's JSON value from the builder's form fields (`data` is a
         QueryDict): choices come back as their real (typed) values."""
         by_text = {str(c.value): c.value for c in self.choices()}

@@ -23,10 +23,10 @@ PARTS = {
 }
 
 
-def take_sample():
+def take_sample() -> CapacitySample:
     """Today's CapacitySample (replaced if it's taken again the same day)."""
     now = timezone.now()
-    data = {}
+    data: dict[str, object] = {}
     for name, read in PARTS.items():
         try:
             data[name] = read()
@@ -39,7 +39,7 @@ def take_sample():
 
 
 @shared_task
-def record_capacity_sample():
+def record_capacity_sample() -> None:
     """Daily: the day's CapacitySample, for the growth trend (CAPACITY.md).
     A few quick reads, so it runs on the periodic queue."""
     take_sample()

@@ -2,7 +2,10 @@
 cover several localities (geo.Municipality rows), so every test here asks
 "does any municipality with this postcode match?"."""
 
+from typing import Any
+
 from django.db.models import Exists, ExpressionWrapper, F, FloatField, OuterRef, Q
+from django.http import QueryDict
 from django.utils.translation import gettext_lazy as _
 
 from dojos.models import Dojo
@@ -14,7 +17,7 @@ from ..base import USER, SegmentAttribute, SegmentChoice, choice_q
 BRUSSELS = "brussels"
 
 
-def _in_province(province_ids):
+def _in_province(province_ids: Any) -> Exists:
     return Exists(
         AdministrativeBoundary.objects.filter(
             kind=AdministrativeBoundary.PROVINCE,
@@ -35,13 +38,13 @@ class ProvinceAttribute(SegmentAttribute):
     value_type = "choice"
     scope = USER
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         provinces = AdministrativeBoundary.objects.filter(kind=AdministrativeBoundary.PROVINCE).order_by("name")
         return [SegmentChoice(p.pk, p.name) for p in provinces] + [
             SegmentChoice(BRUSSELS, _("Brussels-Capital Region"))
         ]
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         values = [value] if operator == "equals" else value
         province_ids = [v for v in values if v != BRUSSELS]
         matched = Q(pk__in=[])
@@ -64,12 +67,12 @@ class LanguageAttribute(SegmentAttribute):
     value_type = "choice"
     scope = USER
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         from django.conf import settings
 
         return [SegmentChoice(code, name) for code, name in settings.LANGUAGES] + [SegmentChoice("", _("Not set"))]
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         return choice_q("preferred_language", operator, value)
 
 
@@ -82,13 +85,13 @@ class NearDojoAttribute(SegmentAttribute):
     value_type = "distance"
     scope = USER
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [
             SegmentChoice(dojo.pk, dojo.name)
             for dojo in Dojo.objects.filter(kind=Dojo.DOJO).exclude(location=None).order_by("name")
         ]
 
-    def validate(self, operator, value):
+    def validate(self, operator: str, value: Any) -> None:
         if operator not in self.operators:
             raise ValueError(
                 _("“%(label)s” supports %(join)s, not “%(operator)s”.")
@@ -99,20 +102,20 @@ class NearDojoAttribute(SegmentAttribute):
         if value.get("dojo") not in {choice.value for choice in self.choices()}:
             raise ValueError(_("Pick a dojo that has a location."))
 
-    def describe(self, operator, value):
+    def describe(self, operator: str, value: Any) -> str:
         names = {c.value: c.label for c in self.choices()}
         return _("Lives within %(km)s km of %(dojo)s") % {
             "km": value.get("km"),
             "dojo": names.get(value.get("dojo"), _("a dojo")),
         }
 
-    def value_from_form(self, operator, data):
+    def value_from_form(self, operator: str, data: QueryDict) -> Any:
         try:
             return {"dojo": int(data.get("dojo", "")), "km": float(data.get("km", ""))}
         except ValueError:
             return None
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         if operator != "within":
             raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         origin = Dojo.objects.get(pk=value["dojo"]).location

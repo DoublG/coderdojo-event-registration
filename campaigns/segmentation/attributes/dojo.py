@@ -7,7 +7,9 @@ sessions" mail), so no child-data consent is needed for them.
 `in_builder = False` keeps an attribute out of the organisation's segment
 builder, which has no fields for its kind of value."""
 
-from django.db.models import Q
+from typing import Any
+
+from django.db.models import Q, QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Guardianship
@@ -18,11 +20,11 @@ from mailing.dojo_families import active_since, ninjas_of
 from ..base import NINJA, USER, SegmentAttribute, SegmentChoice
 
 
-def _dojo_choices():
+def _dojo_choices() -> list[SegmentChoice]:
     return [SegmentChoice(d.pk, d.name) for d in Dojo.objects.exclude(status=Dojo.DRAFT).order_by("name")]
 
 
-def _ids(operator, value):
+def _ids(operator: str, value: Any) -> list[int]:
     if operator == "equals":
         return [value]
     if operator in ("in", "not_in"):
@@ -30,11 +32,11 @@ def _ids(operator, value):
     raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
 
 
-def _guardians_of(ninjas):
+def _guardians_of(ninjas: QuerySet[Any]) -> Q:
     return Q(pk__in=Guardianship.objects.filter(ninja__in=ninjas).values("guardian_id"))
 
 
-def _children_of_dojos(ids):
+def _children_of_dojos(ids: list[int]) -> Q:
     since = active_since()
     q = Q(pk__in=[])
     for dojo_id in ids:
@@ -51,10 +53,10 @@ class ChildOfDojoAttribute(SegmentAttribute):
     value_type = "choice"
     scope = NINJA
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return _dojo_choices()
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         matched = _children_of_dojos(_ids(operator, value))
         return ~matched if operator == "not_in" else matched
 
@@ -68,10 +70,10 @@ class DojoFamilyAttribute(SegmentAttribute):
     value_type = "choice"
     scope = USER
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return _dojo_choices()
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         from accounts.models import Ninja
 
         matched = _guardians_of(Ninja.objects.filter(_children_of_dojos(_ids(operator, value))))
@@ -85,13 +87,13 @@ class _FamilyRegisteredAttribute(SegmentAttribute):
     scope = USER
     waiting_list = False
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [
             SegmentChoice(event.pk, str(event))
             for event in Event.objects.exclude(status=Event.DRAFT).order_by("-start_time")
         ]
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         registrations = Registration.objects.filter(event_id__in=_ids(operator, value), waiting_list=self.waiting_list)
         matched = _guardians_of(registrations.values("ninja_id"))
         return ~matched if operator == "not_in" else matched
@@ -119,10 +121,10 @@ class FamilyVisitedDojoAttribute(SegmentAttribute):
     operators = ["within_days"]
     in_builder = False
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return []
 
-    def validate(self, operator, value):
+    def validate(self, operator: str, value: Any) -> None:
         if (
             operator != "within_days"
             or not isinstance(value, dict)
@@ -133,7 +135,7 @@ class FamilyVisitedDojoAttribute(SegmentAttribute):
         ):
             raise ValueError(_("“%(label)s” needs a dojo and a number of days.") % {"label": self.label})
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         from datetime import timedelta
 
         from django.utils import timezone
@@ -147,7 +149,7 @@ class FamilyVisitedDojoAttribute(SegmentAttribute):
         )
         return _guardians_of(came.values("ninja_id"))
 
-    def describe(self, operator, value):
+    def describe(self, operator: str, value: Any) -> str:
         dojo = Dojo.objects.filter(pk=value.get("dojo")).values_list("name", flat=True).first() or _("a dojo")
         return _("A child came to %(dojo)s in the last %(days)s days") % {"dojo": dojo, "days": value.get("days")}
 
@@ -161,10 +163,10 @@ class DojoTeamAttribute(SegmentAttribute):
     value_type = "choice"
     scope = USER
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return _dojo_choices()
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         from dojos.models import DojoMembership
 
         members = DojoMembership.objects.filter(
