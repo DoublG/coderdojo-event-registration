@@ -22,7 +22,7 @@ from collections import Counter, defaultdict
 from datetime import timedelta
 
 from django.conf import settings
-from django.db import close_old_connections, connection, transaction
+from django.db import transaction
 from django.utils import timezone
 
 from accounts.models import Ninja, age_on
@@ -278,8 +278,7 @@ def rebuild(today=None, batch_size=None):
     its children's registrations and is written in its own transaction, so
     the memory follows the batch, not the number of children. While it
     runs, children already done show their new stage and the others last
-    night's. Each batch gets a fresh database connection. Returns how many
-    rows it wrote."""
+    night's. Returns how many rows it wrote."""
     batch_size = batch_size or settings.ENGAGEMENT_REBUILD_BATCH_SIZE
     now = timezone.now()
     today = today or timezone.localdate()
@@ -301,12 +300,6 @@ def rebuild(today=None, batch_size=None):
     ids = list(Ninja.objects.order_by("pk").values_list("pk", flat=True))
     written = 0
     for start in range(0, len(ids), batch_size):
-        # A fresh database connection for every batch (Django's own
-        # close_old_connections, with CONN_MAX_AGE 0): one that broke while
-        # the worker was slow (MySQL closes an idle one) is replaced instead of
-        # failing the rest. Never inside a transaction (a test's).
-        if not connection.in_atomic_block:
-            close_old_connections()
         batch = ids[start : start + batch_size]
         written += _rebuild_batch((batch[0], batch[-1]), **context)
     return written

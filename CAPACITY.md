@@ -655,9 +655,11 @@ standard means, no code of our own that watches memory:
   reads only its children's registrations and writes in its own transaction, so the memory follows the
   batch, not the number of children (the sessions and dojos are loaded once and shared). While it runs,
   children already done show their new stage and the others the previous one.
-- **A fresh database connection per batch** (Django's `close_old_connections`, with `CONN_MAX_AGE` 0), so a
-  connection MySQL closed while the worker was slow is replaced instead of failing the rest. Between tasks
-  Celery's Django fixup already does this.
+- **No idle connection:** the batches are also what keeps MySQL from closing the connection. Each
+  batch's write follows its reads after seconds of computing, not minutes, and the next batch starts right
+  after its commit. No code of our own manages the connection: Celery's Django fixup closes it before and
+  after every task (a per-batch `close_old_connections` was tried and removed on 9 October 2026: it ran
+  between batches, where the connection is never idle).
 - **Celery's own task options:** `rebuild_engagement` is acknowledged when it starts (not `acks_late`), so
   a run that dies or hangs isn't handed out again the same night, and it has its own `time_limit` of 10
   minutes instead of the global 30.

@@ -935,26 +935,6 @@ class EngagementTests(TestCase):
             _registrations_by_ninja(timezone.now(), {}, events={}, marked_events=set(), ninjas=(0, 0))
         self.assertEqual(len(captured), 1)  # only the registrations: the rest comes in once
 
-    def test_each_batch_starts_on_a_fresh_connection(self):
-        """Outside a transaction (the task's case) every batch calls
-        close_old_connections, so a connection MySQL closed while the worker
-        was slow is replaced; inside one (a test, a caller's) it never does."""
-        from unittest import mock
-
-        from . import engagement
-
-        for _ in range(3):
-            Ninja.objects.create(name="Child")
-        with mock.patch.object(engagement, "close_old_connections") as close:
-            engagement.rebuild(batch_size=2)
-        close.assert_not_called()
-        with (
-            mock.patch.object(engagement, "connection", mock.Mock(in_atomic_block=False)),
-            mock.patch.object(engagement, "close_old_connections") as close,
-        ):
-            engagement.rebuild(batch_size=2)
-        self.assertEqual(close.call_count, 2)  # 4 children, 2 batches
-
     def test_a_stuck_rebuild_is_not_handed_out_again(self):
         """Acknowledged when it starts and stopped after ten minutes: a run
         that dies or hangs isn't retried the same night (CAPACITY.md)."""
