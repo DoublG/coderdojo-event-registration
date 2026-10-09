@@ -49,7 +49,7 @@ GUARDIAN = "guardian"
 class EmailChangeError(Exception):
     """A change that can't be made, with a message for the person."""
 
-    def __init__(self, message):
+    def __init__(self, message: str) -> None:
         super().__init__(message)
         self.message = message
 
@@ -64,11 +64,11 @@ class ChangeRequest:
     started_as: str | None = None  # ORGANISATION, GUARDIAN, or None: the account holder
 
 
-def _same(a, b):
+def _same(a: str | None, b: str | None) -> bool:
     return (a or "").strip().lower() == (b or "").strip().lower()
 
 
-def check_new_address(user, new_email):
+def check_new_address(user: User, new_email: str) -> None:
     """Raise EmailChangeError when `user` can't move to `new_email`."""
     if _same(new_email, user.email):
         raise EmailChangeError(_("That's already the account's email address."))
@@ -80,7 +80,7 @@ def check_new_address(user, new_email):
         )
 
 
-def organisation_blocker(user):
+def organisation_blocker(user: User) -> str:
     """Why the organisation can't start a change for `user` from its
     dashboard, or "" when it can. Those accounts are changed in the Django
     admin (as for deleting an account)."""
@@ -97,13 +97,13 @@ def organisation_blocker(user):
     return ""
 
 
-def _fingerprint(email):
+def _fingerprint(email: str | None) -> str:
     """Stands for the current address in a link (which ends up in server
     logs), without showing it."""
     return salted_hmac(SALT, (email or "").strip().lower(), algorithm="sha256").hexdigest()[:16]
 
 
-def is_guardian_of(guardian, account):
+def is_guardian_of(guardian: User | None, account: User) -> bool:
     """Whether `guardian` is a guardian of the child whose own login is `account`."""
     from .models import Guardianship
 
@@ -114,7 +114,7 @@ def is_guardian_of(guardian, account):
     )
 
 
-def make_token(user, new_email, started_by=None, started_as=None):
+def make_token(user: User, new_email: str, started_by: User | None = None, started_as: str | None = None) -> str:
     return signing.dumps(
         {
             "u": user.pk,
@@ -127,11 +127,11 @@ def make_token(user, new_email, started_by=None, started_as=None):
     )
 
 
-def confirm_url(token):
+def confirm_url(token: str) -> str:
     return settings.SITE_URL + reverse("confirm_email_change", kwargs={"token": token})
 
 
-def read_token(token):
+def read_token(token: str) -> ChangeRequest:
     """The ChangeRequest behind a link, or EmailChangeError when it's
     broken, expired or already used (the address has changed since)."""
     try:
@@ -151,7 +151,7 @@ def read_token(token):
     return ChangeRequest(user=user, new_email=data["e"], started_by=started_by, started_as=started_as)
 
 
-def request_change(user, new_email, started_by=None, started_as=None):
+def request_change(user: User, new_email: str, started_by: User | None = None, started_as: str | None = None) -> None:
     """Mail a confirmation link for `user`'s new address to that address.
     `started_by` is who started it, if it wasn't the account holder: an
     organisation admin (`started_as` ORGANISATION, the default), or a
@@ -175,7 +175,9 @@ def request_change(user, new_email, started_by=None, started_as=None):
         "confirm_url": confirm_url(make_token(user, new_email, started_by, started_as)),
         "valid_hours": VALID_HOURS,
         "by_organisation": started_by is not None and started_as == ORGANISATION,
-        "by_guardian": (started_by.get_full_name() or started_by.get_username()) if started_as == GUARDIAN else "",
+        "by_guardian": (started_by.get_full_name() or started_by.get_username())
+        if started_by is not None and started_as == GUARDIAN
+        else "",
     }
     try:
         send(user, MailCategory.SERVICE, "email_change_confirm", context, address=new_email)
@@ -184,7 +186,7 @@ def request_change(user, new_email, started_by=None, started_as=None):
         raise EmailChangeError(_("We can't send the confirmation mail right now. Please try again later.")) from None
 
 
-def confirm_change(change):
+def confirm_change(change: ChangeRequest) -> User:
     """Make the change a link asked for: tell the old address, then save
     the new one (through save(), so the audit log has it). Checked again
     under a lock, so two clicks on the link change it once."""

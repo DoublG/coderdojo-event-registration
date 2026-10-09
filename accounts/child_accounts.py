@@ -14,6 +14,8 @@ Views only call these functions; `ChildAccountError` carries a message for
 the guardian.
 """
 
+from typing import TYPE_CHECKING
+
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ValidationError
@@ -28,6 +30,11 @@ from django.utils.translation import gettext as _
 from .models import User
 from .provisioning import unique_username
 
+if TYPE_CHECKING:
+    from mailing.models import EmailMessage
+
+    from .models import Ninja
+
 DELETED = "deleted"
 DISABLED = "disabled"
 
@@ -36,27 +43,27 @@ class ChildAccountError(Exception):
     """A user-facing reason the change can't be made."""
 
 
-def has_active_login(ninja):
+def has_active_login(ninja: "Ninja") -> bool:
     return ninja.account is not None and ninja.account.is_active
 
 
-def _clean_email(email, account=None):
-    email = (email or "").strip()
-    if not email:
+def _clean_email(email: str | None, account: User | None = None) -> str:
+    address = (email or "").strip()
+    if not address:
         raise ChildAccountError(_("Your child's own email address is needed for a login."))
     try:
-        validate_email(email)
+        validate_email(address)
     except ValidationError:
         raise ChildAccountError(_("Enter a valid email address.")) from None
-    taken = User.objects.filter(email__iexact=email)
+    taken = User.objects.filter(email__iexact=address)
     if account is not None:
         taken = taken.exclude(pk=account.pk)
     if taken.exists():
         raise ChildAccountError(_("An account already exists with this email."))
-    return email
+    return address
 
 
-def set_password_url(account):
+def set_password_url(account: User) -> str:
     """A link to choose a password: Django's password-reset confirm page.
     It stops working once the password is set (the token covers it)."""
     path = reverse(
@@ -69,7 +76,7 @@ def set_password_url(account):
     return settings.SITE_URL + path
 
 
-def send_login_mail(guardian, account):
+def send_login_mail(guardian: User, account: User) -> "EmailMessage | None":
     """The child's first mail: a link to choose a password, or, for a login
     on a login link, the first login link (DATA_MODEL.md §24)."""
     from mailing.categories import MailCategory
@@ -90,7 +97,7 @@ def send_login_mail(guardian, account):
     return send_or_log(account, MailCategory.SERVICE, "ninja_account_created", context)
 
 
-def waiting_for_first_login(account):
+def waiting_for_first_login(account: User) -> bool:
     """Whether the child hasn't used its first mail yet: no password chosen,
     or, on a login link, never logged in. The card then offers to send it
     again."""
@@ -100,14 +107,14 @@ def waiting_for_first_login(account):
 
 
 @transaction.atomic
-def give_login(guardian, ninja, email, login_method=User.LOGIN_PASSWORD):
+def give_login(guardian: User, ninja: "Ninja", email: str | None, login_method: str = User.LOGIN_PASSWORD) -> User:
     """Create the child's login, or switch a disabled one back on, and mail
     the child a link to choose a password, or its first login link
     (`login_method`, the guardian's choice, DATA_MODEL.md §24)."""
     account = ninja.account
     if account is not None and account.is_active:
         raise ChildAccountError(_("%(name)s already has a login.") % {"name": ninja.name})
-    email = _clean_email(email, account)
+    address = _clean_email(email, account)
     if account is None:
         account = User(
             username=unique_username(slugify(ninja.name) or "ninja"),
@@ -117,7 +124,7 @@ def give_login(guardian, ninja, email, login_method=User.LOGIN_PASSWORD):
             preferred_language=guardian.preferred_language,
         )
     account.is_active = True
-    account.email = email
+    account.email = address
     account.login_method = User.LOGIN_LINK if login_method == User.LOGIN_LINK else User.LOGIN_PASSWORD
     # No password until the child chooses one; a re-enabled login never
     # gets its old password back.
@@ -130,21 +137,20 @@ def give_login(guardian, ninja, email, login_method=User.LOGIN_PASSWORD):
     return account
 
 
-def resend_login_mail(guardian, ninja):
+def resend_login_mail(guardian: User, ninja: "Ninja") -> "EmailMessage | None":
     """Mail the set-password link, or the first login link, again (a new
     one; the old one keeps working until it's used)."""
-    if not has_active_login(ninja):
+    return send_login_mail(guardian, _active_account(ninja))
+
+
+def _active_account(ninja: "Ninja") -> User:
+    account = ninja.account
+    if account is None or not account.is_active:
         raise ChildAccountError(_("%(name)s doesn't have a login.") % {"name": ninja.name})
-    return send_login_mail(guardian, ninja.account)
+    return account
 
 
-def _active_account(ninja):
-    if not has_active_login(ninja):
-        raise ChildAccountError(_("%(name)s doesn't have a login.") % {"name": ninja.name})
-    return ninja.account
-
-
-def turn_off_two_step(guardian, ninja):
+def turn_off_two_step(guardian: User, ninja: "Ninja") -> None:
     """The guardian turns off the child's two-step login (a lost phone):
     what the organisation does for an adult (DATA_MODEL.md §24)."""
     from . import two_step
@@ -155,7 +161,7 @@ def turn_off_two_step(guardian, ninja):
     two_step.turn_off(account, by_guardian=guardian)
 
 
-def switch_to_password(guardian, ninja):
+def switch_to_password(guardian: User, ninja: "Ninja") -> User:
     """The guardian switches the child's login from a login link back to a
     password: none until the child chooses one, from the set-password mail."""
     from .login_links import LoginLinkError, reset_to_password
@@ -169,7 +175,7 @@ def switch_to_password(guardian, ninja):
     return account
 
 
-def change_email(guardian, ninja, new_email):
+def change_email(guardian: User, ninja: "Ninja", new_email: str) -> None:
     """The guardian changes the address of the child's login, confirmed
     from the new address (accounts.email_change, DATA_MODEL.md §24)."""
     from .email_change import GUARDIAN, EmailChangeError, request_change
@@ -182,7 +188,7 @@ def change_email(guardian, ninja, new_email):
 
 
 @transaction.atomic
-def remove_login(ninja):
+def remove_login(ninja: "Ninja") -> str:
     """Delete the child's login, or disable it if it was ever on a dojo's
     team. Returns DELETED or DISABLED. The ninja itself (registrations,
     belts, badges) is never touched."""

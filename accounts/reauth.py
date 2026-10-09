@@ -9,23 +9,27 @@ in the session here, whatever the way in.
 """
 
 import time
+from typing import Any
 
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
+from django.http import HttpRequest
 
 LOGIN_AT_SESSION = "accounts_login_at"
 RECENT_MINUTES = 10
 
 
 @receiver(user_logged_in, dispatch_uid="accounts.reauth.record_login_time")
-def _record_login_time(sender, request, user, **kwargs):
+def _record_login_time(sender: Any, request: HttpRequest | None, user: Any, **kwargs: Any) -> None:
     session = getattr(request, "session", None)
     if session is not None:
         session[LOGIN_AT_SESSION] = int(time.time())
 
 
-def recently_authenticated(request):
+def recently_authenticated(request: HttpRequest) -> bool:
     """Whether this session logged in within the last RECENT_MINUTES."""
     session = getattr(request, "session", None)
     login_at = session.get(LOGIN_AT_SESSION) if session is not None else None
-    return bool(login_at) and time.time() - login_at <= RECENT_MINUTES * 60
+    if not login_at:
+        return False
+    return time.time() - login_at <= RECENT_MINUTES * 60

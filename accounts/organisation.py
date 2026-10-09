@@ -36,12 +36,22 @@ and a superuser opens every area.
 or revoked; it's also safe to call by hand.
 """
 
+from typing import TYPE_CHECKING, Any
+
 from django.contrib.auth.models import Group, Permission
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from django.http import HttpRequest
 from django.utils.translation import gettext_lazy
 
 from .models import OrganisationRole
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AnonymousUser
+
+    from .models import User
+
+    AnyUser = User | AnonymousUser
 
 GROUP_NAMES = {
     OrganisationRole.BOARD: "Organisation: board",
@@ -161,17 +171,17 @@ ROLE_PERMISSIONS = {
 }
 
 
-def role_areas(role):
+def role_areas(role: str) -> list[str]:
     """The areas `role` opens, from ROLE_PERMISSIONS (the Roles page)."""
-    held = set()
+    held: set[str] = set()
     for model, actions in ROLE_PERMISSIONS[role].items():
         app_label, model_name = model.split(".")
         held |= {f"{app_label}.{a if '_' in a else f'{a}_{model_name}'}" for a in actions}
     return [area for area, perm in AREA_PERMISSIONS.items() if perm in held]
 
 
-def _permissions(spec):
-    perms = []
+def _permissions(spec: dict[str, list[str]]) -> list[Permission]:
+    perms: list[Permission] = []
     for model, actions in spec.items():
         app_label, model_name = model.split(".")
         perms += Permission.objects.filter(
@@ -181,9 +191,9 @@ def _permissions(spec):
     return perms
 
 
-def ensure_groups():
+def ensure_groups() -> dict[str, Group]:
     """Create/refresh the role groups with exactly their permissions."""
-    groups = {}
+    groups: dict[str, Group] = {}
     for role, name in GROUP_NAMES.items():
         group, _ = Group.objects.get_or_create(name=name)
         group.permissions.set(_permissions(ROLE_PERMISSIONS[role]))
@@ -191,7 +201,7 @@ def ensure_groups():
     return groups
 
 
-def sync_organisation_access(user):
+def sync_organisation_access(user: "User") -> None:
     """Put `user` in exactly the groups of the roles they hold. A role no
     longer makes the account staff: the Django admin is asked for, 12 hours
     at a time (accounts.admin_access, DATA_MODEL.md §23), so losing the last
@@ -211,23 +221,23 @@ def sync_organisation_access(user):
     admin_access.sync_staff(user)
 
 
-def is_organisation_admin(user):
+def is_organisation_admin(user: "AnyUser") -> bool:
     """Holds the `admin` organisation role. Which dashboard pages that opens
     is a matter of areas (has_area); this is the role itself."""
     return user.is_authenticated and user.organisation_roles.filter(role=OrganisationRole.ADMIN).exists()
 
 
-def has_area(user, area):
+def has_area(user: "AnyUser", area: str) -> bool:
     """May open the organisation dashboard's `area` (an `Area`)."""
     return user.is_authenticated and user.has_perm(AREA_PERMISSIONS[area])
 
 
-def areas_of(user):
+def areas_of(user: "AnyUser") -> list[str]:
     """The areas `user` may open, in the sidebar's order."""
     return [area for area in AREA_PERMISSIONS if has_area(user, area)]
 
 
-def require_area(request, area):
+def require_area(request: HttpRequest, area: str) -> None:
     """For every view of the organisation dashboard: 404 unless the account
     may open `area` (same no-leak reasoning as dojos.access), and its login
     meets the organisation's sign-in policy (accounts.sign_in)."""
@@ -239,7 +249,7 @@ def require_area(request, area):
         raise Http404
 
 
-def is_reviewer(user):
+def is_reviewer(user: "AnyUser") -> bool:
     """May review background checks and decide applications (DATA_MODEL.md
     §21): the Volunteers area, i.e. the reviewer role or the permission
     granted some other way (by hand, or a superuser)."""
@@ -248,7 +258,7 @@ def is_reviewer(user):
 
 @receiver(post_save, sender=OrganisationRole)
 @receiver(post_delete, sender=OrganisationRole)
-def _role_changed(sender, instance, **kwargs):
+def _role_changed(sender: Any, instance: OrganisationRole, **kwargs: Any) -> None:
     from .models import User
 
     user = User.objects.filter(pk=instance.account_id).first()
