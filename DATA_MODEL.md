@@ -951,6 +951,146 @@ erDiagram
 4. Docs (en/fr/nl) for families: where featured events appear, and that
    some events register externally.
 
+### Homepage promotions in a carousel, two side by side (planned, not built)
+
+**Goal.** The homepage's featured spot (`homepage_hero`) becomes a
+carousel that shows two promoted events next to each other and scrolls to
+the others, so the organisation can feature several events at once (e.g.
+CoderDojo Girlz and Coolest Projects) without each one pushing the rest of
+the homepage below the fold. Today every showing `homepage_hero` promotion
+is a full-width card (image left, text right), stacked under each other
+(`content/partials/_promotion_hero.html`).
+
+**No model change.** `Promotion`, its placements, `rank`,
+`Promotion.objects.showing()` and the cached list
+(`content.cache.promotions_showing`) stay as they are: every live
+promotion is in the carousel, in rank order. No migration, no new privacy
+classification or audit-log decision, no change to the Promotions
+dashboard's statuses (*Showing* stays true: every showing promotion can be
+reached).
+
+Decisions (proposed; to confirm before building):
+- **Reuse the homepage's carousel, extended.** Same markup as *What
+  you'll learn* and *Upcoming sessions*: a scroll-snap track
+  (`carousel__track`) with previous/next buttons (`carousel__nav`), wired by
+  `CoderDojo.initCarousel` in `bundle.js`. That function gets an optional
+  fourth-plus argument, `options` (`{loop, interval, pauseButton}`); the two
+  existing carousels pass none and keep behaving exactly as now (stop at
+  the ends, no timer). No library: a timer and a scroll are local browser
+  behaviour, which is where the conventions allow hand-written JS.
+- **Two per view on wide screens, one below about 48rem.** Each card is
+  `flex: 0 0 calc((100% - gap) / 2)` (narrow: about 85%, so the next card
+  peeks in and shows there is more to swipe). The step is one card, so
+  next/previous moves one event at a time.
+- **By count:** one promotion keeps today's wide card (no carousel, no
+  buttons, no timer); two show side by side, and the buttons and timer only
+  come alive when not everything fits (a narrow screen); three or more
+  scroll and rotate. Rank decides which two are seen first.
+- **It loops.** *Next* on the last card goes back to the first, *Previous*
+  on the first goes to the last, so the buttons are never disabled. It
+  rewinds with a smooth scroll rather than cloning cards for a seamless
+  loop: clones would put every link and heading on the page twice for
+  screen readers and keyboard users.
+- **It moves on by itself, on a timer:** one card every 7 seconds
+  (`interval: 7000`, long enough to read a title and pitch; the same number
+  for every visitor, set in `home.html`). Because it moves on its own for
+  more than 5 seconds next to other content, WCAG 2.2.2 (*Pause, Stop,
+  Hide*) requires a way to stop it, and the WAI-ARIA carousel pattern adds
+  the rest:
+  - a **pause/play button** next to previous/next, first in the controls,
+    with a translated label that says what it does ("Pause featured
+    events" / "Play featured events") and a matching icon;
+  - the timer **pauses while the mouse is over the carousel or keyboard
+    focus is inside it**, and resumes when it leaves (unless the visitor
+    pressed pause);
+  - a visitor who uses *Previous*/*Next* or swipes the track has taken over:
+    the timer **stops for the rest of that page view** (the button then
+    shows *Play*);
+  - **no timer at all with `prefers-reduced-motion: reduce`** (the button
+    starts on *Play*), and none while the tab is hidden
+    (`visibilitychange`), so it doesn't race through cards nobody sees;
+  - the track has `aria-live="off"` while rotating and `"polite"` once
+    stopped, so a screen reader isn't interrupted every 7 seconds but does
+    hear the new card when the visitor moves it.
+- **The cards turn vertical** inside the carousel: the image on top at a
+  fixed 16:9 ratio (`aspect-ratio` + `object-fit: cover`, so a portrait
+  banner can't make one card taller), then eyebrow, title, pitch, organiser,
+  and the *Find out more* button pushed to the bottom (`margin-top: auto`),
+  so the buttons line up whatever the titles' length in each language.
+- **Accessible:** the track is a labelled region (`role="region"`,
+  `aria-label` "Featured events", `tabindex="0"`, so it scrolls from the
+  keyboard: axe's `scrollable-region-focusable`); the buttons have
+  translated `aria-label`s ("Previous featured events" / "Next featured
+  events", plus the pause/play button above) and are at least 24px
+  (they're 36px). Each card keeps its `h2`
+  under the hero's `h1`. Without JavaScript the track still scrolls by
+  swipe, trackpad or keyboard; there's no timer and the buttons do nothing
+  (they're rendered `hidden` and shown by the script, so a visitor without
+  JavaScript never sees dead buttons).
+- **Other placements unchanged.** `event_list_top` and `dojo_finder_banner`
+  are slim banners that already fit several stacked; `upcoming_first`
+  already lives in the Upcoming sessions carousel.
+
+Build steps:
+1. **Shared carousel CSS.** The `carousel__*` rules live in `home.html`'s
+   own `<style>` under `.home-root`; that's enough while the carousel stays
+   on the homepage. Add `.home-root .carousel__track .cd-promo--hero` there
+   (the card width above, `scroll-snap-align: start`) and the vertical card
+   rules (`.cd-promo--slide`, or a modifier on the hero card) to the
+   *Promotion* block of `bundle.css`, with the narrow-screen width in its
+   `@media` rule. Colours only through the existing tokens (both themes).
+2. **Template.** `_promotion_hero.html`: with one promotion, today's card;
+   with more, a `carousel__controls` row aligned right (no visible
+   heading: the hero above introduces it, and the region's label names it
+   for screen readers) and a `carousel__track` with the cards. IDs
+   `promo-carousel-track`/`-prev`/`-next`.
+3. **JavaScript.** Extend `initCarousel` in `bundle.js` with the
+   `options` above: `loop` (wrap in the button handlers, never disable
+   them), `interval` + `pauseButton` (the timer, its pause/resume rules,
+   `aria-live` switching, reduced motion, hidden tab). The pause button's
+   two labels come from the template as `data-` attributes (translated
+   there, so they also work without the JavaScript catalog). One more call
+   in `home.html`'s `extra_script`:
+   `CoderDojo.initCarousel(track, prev, next, ".cd-promo", {loop: true, interval: 7000, pauseButton: pause})`
+   (it already returns quietly when the elements aren't there, e.g. with
+   one promotion or none). The existing two calls stay unchanged. New texts
+   in `locale/` (nl/fr) and `compilemessages`.
+4. **Seed data.** `seed_organisation` adds two more `homepage_hero`
+   promotions (the other organisation event and a dojo session, ranks 1 and
+   2, each found by event + placement so it stays rerun-safe), so the dev
+   site shows a carousel with something to scroll to.
+5. **Tests.** `pages.tests`: with one promotion the wide card and no
+   carousel; with three the track holds all three in rank order, has its
+   label, the three buttons (pause, previous, next, with their labels and
+   `hidden` until the script runs); the homepage query-count guard
+   (`DataCacheTests`) stays unchanged (still one cached list).
+   `core.tests.AccessibilityTests` and `SecurityHeadersTests` (no inline
+   handlers) keep passing. The repo has no JavaScript test runner, so the
+   timer is checked by hand in a browser (Playwright, from the host against
+   `https://coolregistration.localhost`): it advances and loops, hover and
+   focus pause it, pause/play works, *Next* stops it, reduced motion starts
+   it paused; and the two other homepage carousels still stop at the ends.
+6. **Checks and docs.** `user-journeys/scripts/check_a11y.py` (both themes,
+   320px reflow). The help centre: `docs/source/organisation/promotions.rst`
+   (the homepage place is a carousel showing two at a time that moves on
+   by itself every few seconds and starts over after the last one, rank
+   decides the order; choose a wide image, it's cropped to 16:9) and `families/signing-up-for-a-session.rst`'s *Featured events* if
+   its wording changes, with the fr/nl `.po` updates. The placement's label
+   becomes "Homepage: featured events carousel" (a choices-only migration,
+   plus nl/fr). `check_journeys.py`: the homepage is captured, so regenerate
+   the affected personas' PDFs if its screenshot changes visibly, then rerun
+   `manifest.py`. Update the *Placements* bullet above and mark this
+   subsection built.
+
+Decided: it loops and moves on by a timer (2026-10-09).
+
+Open points:
+- 7 seconds per card, or another interval? (A number in `home.html`, easy
+  to change later.)
+- A cap on how many promotions the carousel holds (e.g. six), so a busy
+  period doesn't hide the last ones far to the right? (Proposed: no cap for
+  now; the dashboard shows what's live, and rank sets the order.)
+
 ## 13. API based management (in progress)
 
 Dojo API clients over OAuth 2.0 client credentials (`/api/v1/`): built for
