@@ -321,7 +321,11 @@ fully annotated:
 
 - **What's checked:** the service modules first, the rule modules every view calls: `applications/services.py`,
   `dojos/team.py`, `events/awards.py`, `events/registrations.py`, `mailing/queue_actions.py`,
-  `mailing/services.py` and `privacy/retention.py` (6 October 2026). Every function there has annotations
+  `mailing/services.py` and `privacy/retention.py` (6 October 2026); then access, notifications and the
+  data caches: `accounts/admin_access.py`, `accounts/home_dojo.py`, `accounts/organisation_people.py`,
+  `core/caching.py`, `dojos/access.py`, `events/engagement.py` and `notifications/services.py` (9 October
+  2026). A view's `request.user` is typed `User | AnonymousUser`, so a function that also takes a logged-out
+  visitor says so (`dojos.access.managing_membership`). Every function there has annotations
   (`disallow_untyped_defs`); what they import is read for its types, but its own errors aren't reported
   (`follow_imports = "silent"`). Libraries without type information are ignored.
 - **Growing it:** a service module joins the list once it's annotated, and new service code is written
@@ -340,6 +344,8 @@ fully annotated:
   a background-check decision whose required `reviewed_at` relied on the caller having set it; a field
   lookup that could in principle return a relation without a column; and `send()`'s documentation
   promising it took a dojo's id, which its foreign key wouldn't have accepted (no caller did). All fixed.
+  The next seven (9 October 2026) turned up no bug, only places where the code relied on something the
+  checker can't see (a first visit that exists because one was counted), now written so it can.
 - **The layers hold for types too:** a type-only import goes under `TYPE_CHECKING`, and never upwards
   (`mailing.services.send` types its `campaign` as `Any`, since the mail engine may not import `campaigns`).
 - **Running it:** `mypy` (no arguments: the configuration says what to check). It's a job in the Code audit

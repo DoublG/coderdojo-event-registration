@@ -121,12 +121,19 @@ exclude_also = [
 python_version = "3.14"
 plugins = ["mypy_django_plugin.main"]
 files = [
+    "accounts/admin_access.py",
+    "accounts/home_dojo.py",
+    "accounts/organisation_people.py",
     "applications/services.py",
+    "core/caching.py",
+    "dojos/access.py",
     "dojos/team.py",
     "events/awards.py",
+    "events/engagement.py",
     "events/registrations.py",
     "mailing/queue_actions.py",
     "mailing/services.py",
+    "notifications/services.py",
     "privacy/retention.py",
 ]
 follow_imports = "silent"

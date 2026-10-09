@@ -14,18 +14,23 @@ Hybrid assignment (DATA_MODEL.md §18):
 The dojo team only reads it (the Members page); it never sets it.
 """
 
-from django.db.models import Count
+from typing import TYPE_CHECKING
+
+from django.db.models import Count, QuerySet
 from django.utils import timezone
 
 from dojos.models import Dojo
 
+if TYPE_CHECKING:  # types only, like backfill()'s imports inside the function
+    from accounts.models import Ninja
 
-def home_dojo_choices():
+
+def home_dojo_choices() -> QuerySet[Dojo]:
     """The dojos a guardian can pick: the public ones."""
     return Dojo.objects.public().order_by("name")
 
 
-def assign_on_signup(ninja, dojo):
+def assign_on_signup(ninja: "Ninja", dojo: Dojo) -> bool:
     """Give `ninja` `dojo` as home dojo if they have none yet. Returns
     whether it was set."""
     if ninja.home_dojo_id is not None or dojo.kind != Dojo.DOJO:
@@ -36,7 +41,7 @@ def assign_on_signup(ninja, dojo):
     return True
 
 
-def set_home_dojo(ninja, dojo):
+def set_home_dojo(ninja: "Ninja", dojo: Dojo | None) -> None:
     """The guardian's choice (a public dojo, or None to clear it). Changing
     it restarts `member_since`; picking the same dojo changes nothing.
     Doesn't save: the caller saves the child together with the rest of
@@ -47,7 +52,7 @@ def set_home_dojo(ninja, dojo):
     ninja.member_since = timezone.localdate() if dojo else None
 
 
-def backfill(ninjas=None):
+def backfill(ninjas: "QuerySet[Ninja] | None" = None) -> int:
     """For children without a home dojo: the regular dojo they came to most
     (marked present, else any confirmed place), first visit there as
     `member_since`. For data from before home dojos were assigned; returns
@@ -66,6 +71,7 @@ def backfill(ninjas=None):
             continue
         dojo_id = busiest["event__dojo"]
         first = source.filter(event__dojo_id=dojo_id).order_by("event__start_time").first()
+        assert first is not None  # `busiest` counted at least one place there
         ninja.home_dojo_id = dojo_id
         ninja.member_since = timezone.localdate(first.event.start_time)
         ninja.save(update_fields=["home_dojo", "member_since"])

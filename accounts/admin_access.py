@@ -16,6 +16,7 @@ message.
 """
 
 from datetime import timedelta
+from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 from django.db import transaction
@@ -26,6 +27,9 @@ from django.utils.translation import gettext_lazy
 
 from .models import AdminAccessGrant, OrganisationRole, User
 
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AnonymousUser
+
 ADMIN_ACCESS_HOURS = 12
 BELGIAN_TIME = ZoneInfo("Europe/Brussels")
 
@@ -34,25 +38,26 @@ class AdminAccessError(Exception):
     """A user-facing reason access can't be given or ended."""
 
 
-def open_grant(user):
+def open_grant(user: "User | AnonymousUser") -> AdminAccessGrant | None:
     """The account's open grant, or None."""
     if not user.is_authenticated:
         return None
-    return AdminAccessGrant.objects.open().filter(account=user).first()
+    grant: AdminAccessGrant | None = AdminAccessGrant.objects.open().filter(account=user).first()
+    return grant
 
 
-def may_ask(user):
+def may_ask(user: "User | AnonymousUser") -> bool:
     """Holds an organisation role, so may ask for the Django admin."""
     return user.is_authenticated and user.account_type == User.ADULT and user.organisation_roles.exists()
 
 
-def may_use_admin(user):
+def may_use_admin(user: "User | AnonymousUser") -> bool:
     """What the admin site asks on top of Django's own check: a superuser,
     or an open grant."""
     return user.is_superuser or open_grant(user) is not None
 
 
-def sync_staff(user):
+def sync_staff(user: User) -> None:
     """`is_staff` on exactly while the account may use the Django admin."""
     needs_staff = user.is_superuser or AdminAccessGrant.objects.open().filter(account=user).exists()
     if user.is_staff != needs_staff:
@@ -60,13 +65,13 @@ def sync_staff(user):
         user.save(update_fields=["is_staff"])
 
 
-def until_label(grant):
+def until_label(grant: AdminAccessGrant) -> str:
     """The end time as people read it (Belgian time)."""
     return timezone.localtime(grant.expires_at, BELGIAN_TIME).strftime("%H:%M")
 
 
 @transaction.atomic
-def request_access(user, reason):
+def request_access(user: User, reason: str | None) -> AdminAccessGrant:
     reason = (reason or "").strip()
     if not may_ask(user):
         raise AdminAccessError(_("Only an account with an organisation role can ask for the Django admin."))
@@ -83,7 +88,7 @@ def request_access(user, reason):
     return grant
 
 
-def _notify_admins(grant):
+def _notify_admins(grant: AdminAccessGrant) -> None:
     """Every other organisation admin gets a dashboard notification."""
     from notifications.services import notify
 
@@ -101,7 +106,7 @@ def _notify_admins(grant):
         )
 
 
-def end(grant, by=None, end_reason=AdminAccessGrant.ENDED):
+def end(grant: AdminAccessGrant, by: User | None = None, end_reason: str = AdminAccessGrant.ENDED) -> AdminAccessGrant:
     """Ends an open grant now (the holder, `by` someone else, or the job)."""
     if not grant.is_open and end_reason != AdminAccessGrant.EXPIRED:
         raise AdminAccessError(_("This access has already ended."))
@@ -113,7 +118,7 @@ def end(grant, by=None, end_reason=AdminAccessGrant.ENDED):
     return grant
 
 
-def end_for(user, by=None, end_reason=AdminAccessGrant.ENDED):
+def end_for(user: User, by: User | None = None, end_reason: str = AdminAccessGrant.ENDED) -> AdminAccessGrant | None:
     """Ends the account's open grant, if any."""
     grant = open_grant(user)
     if grant is not None:
@@ -121,7 +126,7 @@ def end_for(user, by=None, end_reason=AdminAccessGrant.ENDED):
     return grant
 
 
-def close_expired():
+def close_expired() -> int:
     """Closes every grant whose time is up (through save(), so the audit
     log records it) and takes staff status away; returns how many."""
     now = timezone.now()

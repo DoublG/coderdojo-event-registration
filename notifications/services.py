@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Any
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.conf import settings
@@ -5,12 +7,25 @@ from django.utils import translation
 
 from .models import Notification
 
+if TYPE_CHECKING:  # every domain app notifies; only the types are needed here
+    from django.utils.functional import Promise
 
-def _group_name(recipient_id):
+    from accounts.models import User
+    from dojos.models import Dojo
+
+
+def _group_name(recipient_id: int) -> str:
     return f"notifications_user_{recipient_id}"
 
 
-def notify(recipient, text, url="", dojo=None, params=None, organisation=False):
+def notify(
+    recipient: "User",
+    text: "str | Promise",
+    url: str = "",
+    dojo: "Dojo | None" = None,
+    params: dict[str, Any] | None = None,
+    organisation: bool = False,
+) -> Notification:
     """Creates a Notification and nudges that recipient's open WebSocket
     connection(s) (notifications.consumers.NotificationConsumer) to
     re-render and push themselves — see dojos.templates.dojos.partials.
