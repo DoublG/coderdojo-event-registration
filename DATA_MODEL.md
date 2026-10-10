@@ -2664,3 +2664,183 @@ dependency proposed for it): a one-off exception is now just a one-off
 role. Full design, decisions, phases and open points are in
 `DATA_MODEL_ROLES.md`.
 
+
+## 29. Yes/no questions on a session's sign-up (not built — plan)
+
+A dojo team can ask families a few yes/no questions when they sign a child
+up for a session. The example that started it: *"Will your child bring
+their own laptop?"* A "no" tells the team how many laptops to bring. The
+team sets the questions per session, the family answers them per child
+while signing up, and the team sees the answers and the totals on the
+attendance list.
+
+### What it is, and what it isn't
+
+- **Yes/no only.** No free text, no multiple choice. That keeps the
+  answers easy to count and keeps health data out of it: the family's
+  health notes (`Ninja.allergies_notes`, champion only) stay the one place
+  for allergies and similar. The question editor says so under its field.
+- **Per session, per child.** Each `Event` has its own questions (0–5),
+  answered for each child being signed up. Two children from one family
+  can answer differently (one brings a laptop, the other doesn't).
+- **Every question must be answered.** Radio buttons *Yes* / *No* with
+  neither picked, so a family can't skip one by accident. A question that
+  should be optional is worded so that "no" is the easy answer.
+- **Never a condition for a place.** An answer doesn't change who gets a
+  place or the waiting list, the same as `Event.audience`.
+- **Not for organisation dojo events that register on another site**
+  (`Event.external_registration_url`): the card isn't shown for them,
+  since there are no sign-ups here.
+
+### Data model (`events` app)
+
+```mermaid
+erDiagram
+    Event ||--o{ EventQuestion : "asks"
+    Registration ||--o{ RegistrationAnswer : "answers"
+    EventQuestion ||--o{ RegistrationAnswer : "is answered by"
+```
+
+- **`EventQuestion`**: `event` (FK, `related_name="questions"`, cascade),
+  `text` (`CharField(200)`), `position` (ordering). A
+  `TranslatableModel` with `TRANSLATABLE_FIELDS = ("text",)` and
+  `content_languages()` from `event.dojo`, like `Event` itself (§19): the
+  team writes it in the dojo's languages, families see it with
+  `|localized:"text"|in_lang`. `__str__` is the text only (no query).
+- **`RegistrationAnswer`**: `registration` (FK, `related_name="answers"`,
+  cascade), `question` (FK, `related_name="answers"`, cascade), `answer`
+  (`BooleanField`), `answered_at`. `unique_together =
+  ("registration", "question")`. A cancelled place deletes its answers
+  with the `Registration`; a waiting-list promotion keeps them.
+
+No JSON field on `Registration`: separate rows let the totals be one
+`GROUP BY`, let a question be removed cleanly, and the privacy registry
+classifies a column, not keys inside a JSON value.
+
+### Rules (in `events/questions.py`, never in views)
+
+- `set_questions(event, ...)` / `add_question`, `edit_question`,
+  `remove_question`, `move_question`; `QuestionError` with a user-facing
+  message. At most `MAX_QUESTIONS = 5`.
+- **Changing questions after sign-ups:**
+  - Adding one: children already signed up have no answer. The team sees
+    "Not asked" for them; families can answer it later (phase 2).
+  - Editing the text: allowed, with a note that families who already
+    answered saw the old wording. Changing the meaning means removing
+    the question and adding a new one.
+  - Removing one deletes its answers (`data-confirm` names how many).
+- **Answers are saved by `events.registrations.sign_up`**, which gets
+  `answers={child_id: {question_id: bool}}` and creates them in the same
+  locked transaction as the registration, so a sign-up and its answers
+  are saved together or not at all. It checks that each new child has
+  answered every question *read after taking the lock* (a question added
+  while the form was open gives a `RegistrationError`: "The questions for
+  this session changed, please check them again").
+
+### Pages
+
+**Dojo team: a *Sign-up questions* card on the event detail page**
+(`dojo_event_detail`, `MANAGE_EVENTS`): the list with Edit / Remove /
+move up and down, and an *Add a question* form, all htmx that re-renders
+the card (and works as plain posts without JavaScript), with the per-language
+fields from `dojos/partials/_translation_fields.html`. New views in
+`dojos/views/event_pages.py` (`dojo_event_question_add`, `_edit`,
+`_remove`, `_move`), each through `require_dojo_access` and scoped to the
+URL's event. The card also shows the totals so far (confirmed and waiting
+list separately).
+
+**New session: questions copied from the dojo's latest session.** Like
+`Event.pathways` from `Dojo.pathways`, a new event starts with the
+questions of the dojo's most recent event (by `start_time`), so a team
+that always asks about laptops doesn't type it every time. The create
+page says so; the team can remove them on the detail page.
+
+**Families: the sign-up page** (`event_signup`). Under each child's row,
+the session's questions as a `fieldset` per child (legend: the child's
+first name; WCAG: one group per question with its own legend, 24px
+targets). Without JavaScript every child's questions show; with it,
+`bundle.js` shows them only for ticked children (no inline script: the
+page's existing script moves into `bundle.js` or gets a listener there).
+`SignUpForm` gets the questions and reads `q-<child_id>-<question_id>` =
+`yes|no` for each selected child; a missing answer is an error next to
+that question, and the ticked children and answers given stay filled in.
+A ninja's own login answers its own questions the same way.
+
+**Dojo team: the attendance list** (`_attendance_context`,
+`_attendance.html`). Each child's row shows their answers as small
+badges (the question shortened by CSS, the full text in the column
+header / `title`), "Not asked" when there is none. Above the list a
+summary per question: "Own laptop: 9 yes · 3 no". Prefetch
+`answers` in `_attendance_context` (no query per row; extend the query
+count guard).
+
+**Families: confirmation and account page.** The sign-up confirmation
+lists each child's answers. Phase 2: the account page's upcoming
+registrations get *Change answers* until the session starts
+(`events.questions.change_answers`, the family's own children only, 404
+otherwise), also to answer a question added after they signed up.
+
+**Mail.** The booking mails (`registration_confirmed`,
+`registration_waitlisted`) get an `answers` variable listing them, added
+to the seeded templates in every language (`mailing/seed_templates.py`).
+Phase 2.
+
+### Cross-cutting
+
+- **Privacy** (`events/privacy.py`): `EventQuestion` is
+  `register_not_personal` (the dojo's own text). `RegistrationAnswer` has
+  `subjects={Subject.CHILD: "registration__ninja"}`, the `registration`
+  retention rule, `seen_by=FAMILY_AND_TEAM`, `answer`/`answered_at`
+  `keep(Category.CHILD, ANONYMISED_CHILD)` like `Registration`, so it's
+  in the family's data export and follows the registration on erasure.
+- **Audit log**: `RegistrationAnswer` and `EventQuestion` go in
+  `core.tests.AuditLogCoverageTests.NOT_RECORDED` ("logistics answers, no
+  sensitive data"; "the dojo's own text, like the event"). Open point
+  below.
+- **Django admin**: `EventQuestion` inline on the Event admin
+  (`TranslationAdminMixin`), `RegistrationAnswer` inline on the
+  Registration admin, both fully editable (CLAUDE.md, "The admin always
+  stays fully usable").
+- **API** (phase 2): the attendance endpoints include each registration's
+  answers, under the existing attendance scope.
+- **Seeders**: `seed_events` gives about half the upcoming sessions the
+  laptop question (rerun-safe: found by event + position, Dutch/French
+  text in `pages/seed_translations.py`), `seed_upcoming_registrations`
+  answers it for the children it signs up.
+- **i18n**: every new text in the catalogs (nl "je", fr "vous").
+- **Docs**: the families' sign-up page and the dojo teams' events and
+  attendance pages in `docs/source/`, with fr/nl; `user-journeys/` will
+  flag the parent and champion personas (sign-up, event detail,
+  attendance), so those PDFs get regenerated.
+- **Tests** (`events/tests.py`, `dojos/tests.py`): question rules (max 5,
+  scoped to the event, team only, 404 for another dojo, 403 without
+  `MANAGE_EVENTS`); sign-up saves answers, refuses a missing answer,
+  keeps the form filled in, refuses when the questions changed under the
+  lock, no answers asked for an event without questions (today's page
+  unchanged); cancel deletes answers, promotion keeps them; copying on a
+  new event; attendance shows answers and totals within the query
+  count; privacy export includes answers; `SiteFormTextsAreTranslatedTests`
+  for the new form.
+
+### Phases
+
+1. Models, `events/questions.py`, the team's card, the sign-up page,
+   answers and totals on the attendance list, privacy, admin, seeders,
+   tests, docs. That's the whole laptop case.
+2. Changing answers from the account page, answers in the booking mails,
+   the API.
+
+### Open points
+
+1. **Copy from the last session**, or a set of default questions per dojo
+   on its Settings page? The plan copies (no new screen); a dojo-level
+   default is easy to add later if teams ask.
+2. **Record answers in the audit log?** `Registration` is recorded. The
+   plan leaves answers out as low-risk logistics; record them if the team
+   wants to see who changed an answer (matters once families can change
+   them, phase 2).
+3. **Maximum of 5 questions**: enough? A long list makes signing up
+   several children tedious.
+4. **Organisation-wide questions** (the organisation asking the same
+   thing at every dojo) are out of scope; the per-event model doesn't
+   block them.
