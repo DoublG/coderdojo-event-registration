@@ -1,22 +1,35 @@
 {% load content_i18n %}{% load i18n %}{% comment %}
-The homepage_hero placement (content.Promotion): a large card per active
-promotion, rank first. Expects `promotions` (Promotion.objects.showing(...)).
+The homepage_hero placement (content.Promotion), rank first. Expects
+`promotions` (Promotion.objects.showing(...)). One promotion is a wide card;
+two or more are a carousel showing two at a time (DATA_MODEL.md §12),
+looping and moving on by a timer that home.html starts
+(CoderDojo.initCarousel with loop/interval/pauseButton). The buttons are
+`hidden` until that script shows them: without JavaScript the track still
+scrolls, and nobody sees buttons that do nothing.
 {% endcomment %}
-{% for promotion in promotions %}
-  {% with event=promotion.event %}
-    <article class="cd-promo cd-promo--hero">
-      {% if promotion.display_image %}
-        <img class="cd-promo__image" src="{{ promotion.display_image.url }}" alt="">
-      {% endif %}
-      <div class="cd-promo__body">
-        <p class="cd-promo__eyebrow label">{% translate "Featured" %} · {{ event.start_time|date:"D j M" }}</p>
-        <h2 class="cd-promo__title display-lg">{{ promotion.display_title }}</h2>
-        {% if promotion|localized:"text" %}<p class="cd-promo__text body-lg">{{ promotion|localized:"text"|in_lang }}</p>{% endif %}
-        <p class="cd-promo__meta body-sm">{% include "events/partials/_organiser.html" %}{% if event.venue_name %} · {{ event.venue_name }}{% endif %}</p>
-        <div class="cd-promo__actions">
-          <a class="cd-btn cd-btn--primary label" href="{% url 'event_detail' event_id=event.id %}">{% translate "Find out more" %}</a>
-        </div>
-      </div>
-    </article>
-  {% endwith %}
-{% endfor %}
+{% if promotions|length > 1 %}
+  <div class="promo-carousel">
+    {% translate "Pause featured events" as pause_label %}{% translate "Play featured events" as play_label %}
+    <div class="carousel__controls promo-carousel__controls">
+      <button type="button" class="carousel__nav" id="promo-carousel-pause" hidden aria-label="{{ pause_label }}" data-label-pause="{{ pause_label }}" data-label-play="{{ play_label }}">
+        <svg data-icon-pause width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+        <svg data-icon-play hidden width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>
+      </button>
+      <button type="button" class="carousel__nav" id="promo-carousel-prev" hidden aria-label="{% translate "Previous featured events" %}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button type="button" class="carousel__nav" id="promo-carousel-next" hidden aria-label="{% translate "Next featured events" %}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+    <div class="carousel__track" id="promo-carousel-track" role="region" aria-label="{% translate "Featured events" %}" tabindex="0" aria-live="polite">
+      {% for promotion in promotions %}
+        {% include "content/partials/_promotion_hero_card.html" with slide=True %}
+      {% endfor %}
+    </div>
+  </div>
+{% else %}
+  {% for promotion in promotions %}
+    {% include "content/partials/_promotion_hero_card.html" %}
+  {% endfor %}
+{% endif %}

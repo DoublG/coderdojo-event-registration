@@ -142,6 +142,52 @@ class PromotionPlacementTests(TestCase):
         self.assertContains(response, "Sign up your project!")
         self.assertContains(response, "Organised by CoderDojo Belgium")
 
+    def test_one_homepage_promotion_is_a_wide_card_without_a_carousel(self):
+        self._promote(Promotion.HOMEPAGE_HERO, title="Show what you made")
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, 'class="cd-promo cd-promo--hero"')
+        # The markup, not the bare names: home.html's CSS and script mention them.
+        self.assertNotContains(response, 'id="promo-carousel-track"')
+        self.assertNotContains(response, 'class="cd-promo cd-promo--hero cd-promo--slide"')
+
+    def test_several_homepage_promotions_are_a_carousel_in_rank_order(self):
+        self._promote(Promotion.HOMEPAGE_HERO, title="Second", rank=2)
+        self._promote(Promotion.HOMEPAGE_HERO, title="First", rank=0)
+        Promotion.objects.create(
+            event=self.soon,
+            placement=Promotion.HOMEPAGE_HERO,
+            rank=1,
+            title="Middle",
+            starts_at=timezone.now() - timedelta(hours=1),
+        )
+        content = self.client.get(reverse("home")).content.decode()
+        self.assertEqual(content.count('class="cd-promo cd-promo--hero cd-promo--slide"'), 3)
+        self.assertLess(content.index(">First<"), content.index(">Middle<"))
+        self.assertLess(content.index(">Middle<"), content.index(">Second<"))
+        # A labelled region the keyboard can scroll (axe: scrollable-region-focusable).
+        self.assertIn('id="promo-carousel-track" role="region" aria-label="Featured events" tabindex="0"', content)
+        # Pause, previous and next, labelled, and hidden until the script shows
+        # them: without JavaScript nobody sees buttons that do nothing.
+        for button_id, label in (
+            ("promo-carousel-pause", "Pause featured events"),
+            ("promo-carousel-prev", "Previous featured events"),
+            ("promo-carousel-next", "Next featured events"),
+        ):
+            self.assertIn(f'id="{button_id}" hidden aria-label="{label}"', content)
+        self.assertIn('data-label-play="Play featured events"', content)
+        # Each card keeps its own heading under the page's h1.
+        self.assertEqual(content.count('<h2 class="cd-promo__title heading-lg">'), 3)
+        # The timer is started by home.html with the options.
+        self.assertIn("{ loop: true, interval: 7000,", content)
+
+    def test_carousel_buttons_are_translated(self):
+        self._promote(Promotion.HOMEPAGE_HERO, rank=0)
+        self._promote(Promotion.HOMEPAGE_HERO, rank=1)
+        self.client.cookies["django_language"] = "nl-be"
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, 'aria-label="Evenementen in de kijker pauzeren"')
+        self.assertContains(response, 'aria-label="Evenementen in de kijker"')
+
     def test_nothing_promoted_shows_nothing(self):
         for url in (reverse("home"), reverse("event_list"), reverse("dojo_list")):
             # The markup, not the bare name: a page's own CSS may style .cd-promo-list.

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 04:40+0000\n"
+"POT-Creation-Date: 2026-10-10 19:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -103,13 +103,15 @@ msgstr "Il y a quatre endroits :"
 
 #: ../../source/organisation/promotions.rst:37
 msgid ""
-"**Homepage: large card under the introduction**, the first thing visitors"
-" see."
-msgstr ""
-"**Page d'accueil : grande carte sous l'introduction**, la première chose "
-"que voient les visiteurs."
+"**Homepage: featured events carousel**, the first thing visitors see. "
+"With one promotion it's a large card. With more, it shows two at a time "
+"side by side (one on a phone) and moves on to the next one every few "
+"seconds, starting over after the last one; visitors can pause it or move "
+"through it themselves. Choose a wide image: in the carousel it's cropped "
+"to 16:9."
+msgstr "**Page d'accueil : carrousel des événements à la une**, la première chose que voient les visiteurs. Avec une seule promotion, c'est une grande carte. Avec plusieurs, il en montre deux à la fois côte à côte (une sur un téléphone) et passe à la suivante toutes les quelques secondes, en recommençant après la dernière ; les visiteurs peuvent le mettre en pause ou le parcourir eux-mêmes. Choisissez une image large : dans le carrousel, elle est recadrée en 16:9."
 
-#: ../../source/organisation/promotions.rst:39
+#: ../../source/organisation/promotions.rst:43
 msgid ""
 "**Homepage: first in Upcoming sessions**, before the sessions in date "
 "order, with a **Featured** label."
@@ -117,13 +119,13 @@ msgstr ""
 "**Page d'accueil : en tête des Prochaines séances**, avant les séances "
 "classées par date, avec l'étiquette **Mis en avant**."
 
-#: ../../source/organisation/promotions.rst:41
+#: ../../source/organisation/promotions.rst:45
 msgid "**Events page: pinned above the list**, shown when nobody has searched."
 msgstr ""
 "**Page Événements : épinglée au-dessus de la liste**, affichée quand "
 "personne n'a lancé de recherche."
 
-#: ../../source/organisation/promotions.rst:42
+#: ../../source/organisation/promotions.rst:46
 msgid ""
 "**Dojo finder: banner above the results**, on the dojo finder page "
 "(**Dojos**). Not on the homepage's small dojo finder: the homepage "
@@ -133,11 +135,11 @@ msgstr ""
 "recherche de dojos (**Dojos**). Pas dans la petite recherche de dojo de "
 "la page d'accueil : celle-ci met déjà des événements en avant plus haut."
 
-#: ../../source/organisation/promotions.rst:46
+#: ../../source/organisation/promotions.rst:50
 msgid "For each promotion you choose:"
 msgstr "Pour chaque promotion, vous choisissez :"
 
-#: ../../source/organisation/promotions.rst:48
+#: ../../source/organisation/promotions.rst:52
 msgid ""
 "**Event**: any upcoming event, of any dojo. A draft event can be picked; "
 "the promotion only shows once the event is published."
@@ -146,7 +148,7 @@ msgstr ""
 " Vous pouvez choisir un événement en brouillon ; la promotion n'apparaît "
 "qu'une fois l'événement publié."
 
-#: ../../source/organisation/promotions.rst:50
+#: ../../source/organisation/promotions.rst:54
 msgid ""
 "**Show from** and **Show until**: when it shows. Leave **Show until** "
 "empty to stop when the event starts. A promotion never shows after its "
@@ -157,7 +159,7 @@ msgstr ""
 "l'événement. Une promotion n'apparaît jamais après la fin de son "
 "événement."
 
-#: ../../source/organisation/promotions.rst:53
+#: ../../source/organisation/promotions.rst:57
 msgid ""
 "**Rank**: the order within a place, lowest first. To reorder, change the "
 "ranks."
@@ -165,7 +167,7 @@ msgstr ""
 "**Rang** : l'ordre au sein d'un endroit, le plus bas d'abord. Pour "
 "changer l'ordre, modifiez les rangs."
 
-#: ../../source/organisation/promotions.rst:55
+#: ../../source/organisation/promotions.rst:59
 msgid ""
 "**Title**, **Short pitch** and **Image** (all optional): replace the "
 "event's name and banner, and add a line of text."
@@ -173,7 +175,7 @@ msgstr ""
 "**Titre**, **Accroche** et **Image** (tous facultatifs) : remplacent le "
 "nom et la bannière de l'événement, et ajoutent une ligne de texte."
 
-#: ../../source/organisation/promotions.rst:57
+#: ../../source/organisation/promotions.rst:61
 msgid ""
 "**In Nederlands** and **In Français** (optional): the title and pitch in "
 "those languages. Visitors see the version in their own language, else the"
@@ -183,7 +185,7 @@ msgstr ""
 "l'accroche dans ces langues. Les visiteurs voient la version dans leur "
 "langue, sinon l'anglaise."
 
-#: ../../source/organisation/promotions.rst:61
+#: ../../source/organisation/promotions.rst:65
 msgid ""
 "You can also start from the event: on an event's page in its dojo's "
 "dashboard, the **Promotions** card lists where that event is promoted, "
@@ -196,7 +198,7 @@ msgstr ""
 "nouvelle promotion avec l'événement déjà choisi. Seules les personnes "
 "ayant le rôle **administrateur** de l'organisation voient cette carte."
 
-#: ../../source/organisation/promotions.rst:66
+#: ../../source/organisation/promotions.rst:70
 msgid ""
 "The list shows each promotion's status: **Showing**, **Scheduled** (it "
 "starts later), **Event not public** (the event is still a draft, or its "
@@ -208,7 +210,7 @@ msgstr ""
 "(l'événement est encore en brouillon, ou son dojo n'est pas actif) ou "
 "**Terminée**. Ouvrez une promotion pour la modifier ou la retirer."
 
-#: ../../source/organisation/promotions.rst:71
+#: ../../source/organisation/promotions.rst:75
 msgid ""
 "A promotion only changes where an event is shown, never who can sign up. "
 "To reach people by mail as well, send a campaign that links to the event."
@@ -216,4 +218,13 @@ msgstr ""
 "Une promotion ne change que l'endroit où un événement est affiché, jamais"
 " qui peut s'inscrire. Pour toucher aussi les gens par e-mail, envoyez une"
 " campagne qui renvoie vers l'événement."
+
+#~ msgid ""
+#~ "**Homepage: large card under the "
+#~ "introduction**, the first thing visitors "
+#~ "see."
+#~ msgstr ""
+#~ "**Page d'accueil : grande carte sous "
+#~ "l'introduction**, la première chose que "
+#~ "voient les visiteurs."
 

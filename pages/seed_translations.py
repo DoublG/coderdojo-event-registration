@@ -1048,6 +1048,14 @@ T = {
         "Geen dojo in de buurt? Kom naar onze meisjesnamiddag in Gent.",
         "Pas de dojo près de chez vous ? Rejoignez notre après-midi pour filles à Gand.",
     ),
+    "An afternoon for girls who want to try coding. No experience needed.": (
+        "Een namiddag voor meisjes die willen leren programmeren. Geen ervaring nodig.",
+        "Un après-midi pour les filles qui veulent essayer le code. Aucune expérience requise.",
+    ),
+    "A Saturday of coding at a dojo near you.": (
+        "Een zaterdag vol programmeren in een dojo bij jou in de buurt.",
+        "Un samedi de code dans un dojo près de chez vous.",
+    ),
 }
 
 GIRLZ_PREFIX = {EN: "CoderDojo Girlz: ", NL: "CoderDojo Girlz: ", FR: "CoderDojo Girlz : "}

@@ -191,7 +191,7 @@ class Promotion(OrganisationContent):
     UPCOMING_FIRST = "upcoming_first"
     DOJO_FINDER_BANNER = "dojo_finder_banner"
     PLACEMENT_CHOICES = [
-        (HOMEPAGE_HERO, _("Homepage: large card under the introduction")),
+        (HOMEPAGE_HERO, _("Homepage: featured events carousel")),
         (EVENT_LIST_TOP, _("Events page: pinned above the list")),
         (UPCOMING_FIRST, _("Homepage: first in Upcoming sessions")),
         (DOJO_FINDER_BANNER, _("Dojo finder: banner above the results")),

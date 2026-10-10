@@ -1638,9 +1638,18 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
 .cd-promo--hero { padding: var(--space-6); box-shadow: var(--shadow-md); }
 .cd-promo--hero .cd-promo__image { width: 280px; height: 200px; }
 .cd-promo--banner .cd-promo__image { width: 72px; height: 72px; }
+/* A homepage_hero promotion in the featured-events carousel: vertical, the
+   image at a fixed 16:9 (a portrait banner can't make one card taller), the
+   button at the bottom so the buttons line up whatever the titles' length. */
+.cd-promo--slide { flex-direction: column; align-items: stretch; margin-top: 0; padding: var(--space-5); }
+.cd-promo--slide .cd-promo__image { width: 100%; height: auto; aspect-ratio: 16 / 9; }
+.cd-promo--slide .cd-promo__body { flex: 1 1 auto; }
+.cd-promo--slide .cd-promo__actions { margin-top: auto; padding-top: var(--space-2); }
 @media (max-width: 640px) {
   .cd-promo { flex-direction: column; align-items: stretch; }
   .cd-promo--hero .cd-promo__image { width: 100%; height: 180px; }
+  .cd-promo--slide .cd-promo__image { height: auto; }
+  .cd-promo--slide { padding: var(--space-4); }
   .cd-promo--banner .cd-promo__image { display: none; }
 }
 

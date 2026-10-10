@@ -8,7 +8,7 @@ with sync_playwright() as pw:
     j.shot(
         "home",
         "Discover CoderDojo",
-        "A parent lands on the homepage. The dojo finder and the upcoming-sessions carousel are right there, no account needed.",
+        "A parent lands on the homepage. Featured events take turns at the top, two at a time, and the dojo finder and the upcoming-sessions carousel are right there, no account needed.",
         max_h=1700,
     )
     p = j.go("/dojos/?location=Westerlo&pathway=2")

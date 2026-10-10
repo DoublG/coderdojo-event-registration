@@ -547,12 +547,33 @@ if (typeof window.gettext !== "function") {
   }
 
   // Shared prev/next scroll-snap carousel behaviour (pathways, upcoming
-  // sessions, ...). `cardSelector` finds one card to measure its width +
-  // gap for a "one page" scroll step. Content can be static or grow via
-  // htmx (e.g. lazy-loaded carousel batches) — either way scrollWidth is
+  // sessions, featured events). `cardSelector` finds one card to measure its
+  // width + gap for a "one card" scroll step. Content can be static or grow
+  // via htmx (e.g. lazy-loaded carousel batches) — either way scrollWidth is
   // re-measured on every scroll/resize/htmx swap.
-  function initCarousel(track, prevBtn, nextBtn, cardSelector) {
+  //
+  // `options` (optional; without it the carousel stops at its ends and never
+  // moves by itself):
+  //   loop: Next on the last card goes back to the first and Previous on the
+  //     first to the last, so the buttons are never disabled. It rewinds with
+  //     a scroll rather than cloning cards (clones would repeat every link
+  //     and heading for screen readers).
+  //   interval + pauseButton: moves on one card every `interval` ms, with the
+  //     pause/play button WCAG 2.2.2 asks for (its labels in data-label-pause
+  //     / data-label-play, its icons [data-icon-pause] / [data-icon-play]).
+  //     Hovering the cards or focus inside them holds it; Previous/Next, a
+  //     swipe or the arrow keys stop it for the rest of the page view (the
+  //     visitor took over); prefers-reduced-motion starts it paused; a hidden
+  //     tab holds it. The track's aria-live is "off" while it rotates.
+  //   The buttons may be rendered `hidden` (no dead buttons without
+  //   JavaScript): with options they're shown here, and hidden again while
+  //   every card fits, when there's nothing to move to.
+  function initCarousel(track, prevBtn, nextBtn, cardSelector, options) {
     if (!track || !prevBtn || !nextBtn) return;
+    options = options || {};
+    var pauseBtn = options.pauseButton || null;
+    var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var behavior = options.loop && reducedMotion ? "auto" : "smooth";
 
     function stepSize() {
       var card = track.querySelector(cardSelector);
@@ -561,21 +582,127 @@ if (typeof window.gettext !== "function") {
       return card.getBoundingClientRect().width + gap;
     }
 
+    function maxScroll() {
+      return track.scrollWidth - track.clientWidth - 1;
+    }
+
+    function everythingFits() {
+      return track.scrollWidth <= track.clientWidth + 1;
+    }
+
     function updateButtons() {
-      var maxScroll = track.scrollWidth - track.clientWidth - 1;
+      if (options.loop) {
+        var fits = everythingFits();
+        [prevBtn, nextBtn, pauseBtn].forEach(function (button) {
+          if (button) button.hidden = fits;
+        });
+        return;
+      }
       prevBtn.disabled = track.scrollLeft <= 0;
-      nextBtn.disabled = track.scrollLeft >= maxScroll;
+      nextBtn.disabled = track.scrollLeft >= maxScroll();
+    }
+
+    function goNext() {
+      if (options.loop && track.scrollLeft >= maxScroll()) {
+        track.scrollTo({ left: 0, behavior: behavior });
+      } else {
+        track.scrollBy({ left: stepSize(), behavior: behavior });
+      }
+    }
+
+    function goPrevious() {
+      if (options.loop && track.scrollLeft <= 0) {
+        track.scrollTo({ left: track.scrollWidth, behavior: behavior });
+      } else {
+        track.scrollBy({ left: -stepSize(), behavior: behavior });
+      }
+    }
+
+    // The timer (only with interval + pauseButton).
+    var rotating = Boolean(options.interval && pauseBtn);
+    var stopped = reducedMotion; // the visitor's choice: pause, or took over
+    var held = { hover: false, focus: false };
+    var timer = null;
+
+    function canMove() {
+      return !stopped && !held.hover && !held.focus && !document.hidden && !everythingFits();
+    }
+
+    function schedule() {
+      clearTimeout(timer);
+      timer = null;
+      if (canMove()) {
+        timer = setTimeout(function () {
+          goNext();
+          schedule();
+        }, options.interval);
+      }
+    }
+
+    function showState() {
+      pauseBtn.setAttribute("aria-label", pauseBtn.getAttribute(stopped ? "data-label-play" : "data-label-pause"));
+      // An <svg> has no .hidden property: set the attribute itself.
+      pauseBtn.querySelector("[data-icon-pause]").toggleAttribute("hidden", stopped);
+      pauseBtn.querySelector("[data-icon-play]").toggleAttribute("hidden", !stopped);
+      track.setAttribute("aria-live", stopped ? "polite" : "off");
+    }
+
+    function stop() {
+      if (!rotating || stopped) return;
+      stopped = true;
+      showState();
+      schedule();
     }
 
     prevBtn.addEventListener("click", function () {
-      track.scrollBy({ left: -stepSize(), behavior: "smooth" });
+      stop();
+      goPrevious();
     });
     nextBtn.addEventListener("click", function () {
-      track.scrollBy({ left: stepSize(), behavior: "smooth" });
+      stop();
+      goNext();
     });
     track.addEventListener("scroll", updateButtons);
     track.addEventListener("htmx:afterSwap", updateButtons);
-    window.addEventListener("resize", updateButtons);
+    window.addEventListener("resize", function () {
+      updateButtons();
+      if (rotating) schedule();
+    });
+
+    if (options.loop) {
+      prevBtn.hidden = false;
+      nextBtn.hidden = false;
+    }
+
+    if (rotating) {
+      pauseBtn.hidden = false;
+      pauseBtn.addEventListener("click", function () {
+        stopped = !stopped;
+        showState();
+        schedule();
+      });
+      // A swipe, the trackpad or the arrow keys: the visitor took over.
+      track.addEventListener("touchstart", stop, { passive: true });
+      track.addEventListener("wheel", function (event) {
+        if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) stop();
+      }, { passive: true });
+      track.addEventListener("keydown", function (event) {
+        if (["ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"].indexOf(event.key) !== -1) stop();
+      });
+      // Hold while the cards are pointed at or hold keyboard focus (the
+      // controls don't hold it: they're how it's paused and played).
+      track.addEventListener("mouseenter", function () { held.hover = true; schedule(); });
+      track.addEventListener("mouseleave", function () { held.hover = false; schedule(); });
+      track.addEventListener("focusin", function () { held.focus = true; schedule(); });
+      track.addEventListener("focusout", function (event) {
+        if (track.contains(event.relatedTarget)) return;
+        held.focus = false;
+        schedule();
+      });
+      document.addEventListener("visibilitychange", schedule);
+      showState();
+      schedule();
+    }
     updateButtons();
   }
 

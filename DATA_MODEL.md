@@ -924,7 +924,9 @@ erDiagram
 
 - **Placements** are a fixed list; each template shows the active
   promotions for its placement, ordered by `rank`:
-  - `homepage_hero`: a large card at the top of the homepage
+  - `homepage_hero`: the featured-events carousel at the top of the
+    homepage (one promotion: a large card; more: two side by side,
+    looping on a timer; see the subsection below)
   - `event_list_top`: pinned above the date-ordered event list
   - `upcoming_first`: first in the upcoming-sessions carousel, before the
     date order
@@ -951,7 +953,24 @@ erDiagram
 4. Docs (en/fr/nl) for families: where featured events appear, and that
    some events register externally.
 
-### Homepage promotions in a carousel, two side by side (planned, not built)
+### Homepage promotions in a carousel, two side by side (built)
+
+Built 2026-10-10 as planned below: `content/partials/_promotion_hero.html`
+(+ `_promotion_hero_card.html`, one card wide or as a `cd-promo--slide`),
+`CoderDojo.initCarousel`'s `options` in `bundle.js`, the card width in
+`home.html` and the slide card in `bundle.css`; tests in
+`content.tests.PromotionPlacementTests`. Differences from the plan: the
+tests sit with the other placement tests in `content/tests.py`, not
+`pages.tests`; hovering or focusing the *cards* holds the timer, the
+controls don't (they're how it's paused and played: a click on *Play*
+would otherwise keep it held by the button's own focus); with
+`prefers-reduced-motion` *Previous*/*Next* also jump instead of
+scrolling smoothly; the seeded dojo session is the soonest open session
+of a public dojo, found by placement and kind of dojo. The timer was
+checked by hand in Chrome (Playwright through nginx): advances, loops
+both ways, hover and focus hold it, pause/play, *Next* stops it, reduced
+motion starts paused, one card plus a peek at 375px, and the pathways
+carousel still stops at its ends.
 
 **Goal.** The homepage's featured spot (`homepage_hero`) becomes a
 carousel that shows two promoted events next to each other and scrolls to
@@ -1084,12 +1103,10 @@ Build steps:
 
 Decided: it loops and moves on by a timer (2026-10-09).
 
-Open points:
-- 7 seconds per card, or another interval? (A number in `home.html`, easy
-  to change later.)
-- A cap on how many promotions the carousel holds (e.g. six), so a busy
-  period doesn't hide the last ones far to the right? (Proposed: no cap for
-  now; the dashboard shows what's live, and rank sets the order.)
+Open points, built with the proposed answer (easy to change later):
+- 7 seconds per card (`interval: 7000` in `home.html`).
+- No cap on how many promotions the carousel holds; the dashboard shows
+  what's live, and rank sets the order.
 
 ## 13. API based management (in progress)
 

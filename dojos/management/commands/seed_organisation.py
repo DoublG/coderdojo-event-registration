@@ -62,6 +62,12 @@ PROMOTIONS = [
         0,
         "Show the world what you made. Sign up your project now!",
     ),
+    (
+        "CoderDojo Girlz: Build your first website",
+        Promotion.HOMEPAGE_HERO,
+        1,
+        "An afternoon for girls who want to try coding. No experience needed.",
+    ),
     ("Coolest Projects Belgium", Promotion.EVENT_LIST_TOP, 0, ""),
     ("CoderDojo Girlz: Build your first website", Promotion.UPCOMING_FIRST, 0, ""),
     (
@@ -71,6 +77,10 @@ PROMOTIONS = [
         "Not near a dojo? Join our girls' afternoon in Ghent.",
     ),
 ]
+
+# Third in the homepage's featured-events carousel, so it has something to
+# scroll to (DATA_MODEL.md §12): a dojo's session rather than the organisation's.
+DOJO_SESSION_PROMOTION = (2, "A Saturday of coding at a dojo near you.")
 
 
 def next_saturday_in(weeks, today):
@@ -149,6 +159,7 @@ class Command(BaseCommand):
                 defaults={"rank": rank, "text": text},
             )
             promotions += created
+        promotions += self._promote_a_dojo_session()
 
         self.stdout.write(
             self.style.SUCCESS(
@@ -156,3 +167,21 @@ class Command(BaseCommand):
                 f"events={len(events)}, new promotions={promotions}."
             )
         )
+
+    def _promote_a_dojo_session(self):
+        """The soonest open session of a public dojo, unless one is promoted
+        on the homepage already (rerun-safe: found by placement and kind of
+        dojo, so a rerun neither adds a second one nor moves it)."""
+        if Promotion.objects.filter(placement=Promotion.HOMEPAGE_HERO, event__dojo__kind=Dojo.DOJO).exists():
+            return 0
+        event = (
+            Event.objects.visible()
+            .filter(dojo__kind=Dojo.DOJO, status=Event.OPEN, start_time__gt=timezone.now())
+            .order_by("start_time", "id")
+            .first()
+        )
+        if event is None:
+            return 0
+        rank, text = DOJO_SESSION_PROMOTION
+        Promotion.objects.create(event=event, placement=Promotion.HOMEPAGE_HERO, rank=rank, text=text)
+        return 1

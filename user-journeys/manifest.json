@@ -1,6 +1,6 @@
 {
- "generated_from": "389f9f6",
- "generated_on": "2026-10-07",
+ "generated_from": "73d3938",
+ "generated_on": "2026-10-10",
  "personas": {
   "parent": {
    "pages": [
@@ -48,7 +48,8 @@
     "accounts/templates/accounts/register_guardian.html": "b30c62d0ac272346",
     "accounts/templates/accounts/security.html": "93f8070b8156b3c2",
     "content/templates/content/partials/_promotion_banner.html": "1ef59e3fa98820c0",
-    "content/templates/content/partials/_promotion_hero.html": "af580d48a777e3ae",
+    "content/templates/content/partials/_promotion_hero.html": "99bdf3404afaa713",
+    "content/templates/content/partials/_promotion_hero_card.html": "66c4ea9eba9de249",
     "core/templates/core/menu.html": "fc0ae6dd632f1501",
     "core/templates/core/partials/_active_filters.html": "1cbfed7bdc3914e6",
     "dojos/templates/dojos/dojo_detail.html": "b9a992425ed6f148",
@@ -69,7 +70,7 @@
     "events/templates/events/partials/_upcoming_sessions_page.html": "b9b259ae69c47594",
     "mailing/templates/mailing/mail_preferences.html": "d2f848cc3c275167",
     "mailing/templates/mailing/partials/_privacy_explanation.html": "c9327ec702d441cb",
-    "pages/templates/pages/home.html": "8f2f7a3c97ef8c59",
+    "pages/templates/pages/home.html": "052dbd2ef20a0049",
     "pathways/templates/pathways/partials/_pathway_card.html": "e57369b4a76dd3c7",
     "privacy/templates/privacy/account_deleted.html": "f6ca27c83e40c528",
     "privacy/templates/privacy/delete_account.html": "f9422d794b1c048e"
@@ -135,7 +136,7 @@
     "dojos/views/event_pages.py:dojo_event_detail": "fff80c0aa8fa8e57",
     "dojos/views/event_pages.py:dojo_event_list": "b08426c380c8f4c8",
     "dojos/views/public.py:dojo_detail": "b85a46c12b05c3ff",
-    "dojos/views/team_pages.py:dojo_team_manage": "35a550c2ee0198e4"
+    "dojos/views/team_pages.py:dojo_team_manage": "6a36f45f19ea2456"
    },
    "templates": {
     "accounts/templates/accounts/register.html": "7909e902d7449048",
@@ -190,7 +191,7 @@
     "dojos/views/profile.py:dojo_manage": "2108d6a7127fcce8",
     "dojos/views/profile.py:dojo_updates": "0bc42271fa5558f5",
     "dojos/views/team_pages.py:dojo_members": "a71a600696c51325",
-    "dojos/views/team_pages.py:dojo_team_manage": "35a550c2ee0198e4"
+    "dojos/views/team_pages.py:dojo_team_manage": "6a36f45f19ea2456"
    },
    "templates": {
     "accounts/templates/accounts/partials/_child_avatar.html": "70676cb787eec5d9",

@@ -91,7 +91,7 @@ STEPS = {
     "parent": {
         "home": (
             "Découvrir CoderDojo",
-            "Un parent arrive sur la page d'accueil. La recherche de dojos et le carrousel des prochaines sessions sont là tout de suite, sans compte.",
+            "Un parent arrive sur la page d'accueil. Les événements à la une défilent en haut, deux à la fois, et la recherche de dojos et le carrousel des prochaines sessions sont là tout de suite, sans compte.",
         ),
         "finder": (
             "Trouver un dojo près de chez vous",
