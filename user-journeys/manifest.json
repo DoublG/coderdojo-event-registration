@@ -1,5 +1,5 @@
 {
- "generated_from": "73d3938",
+ "generated_from": "2b3fb5e",
  "generated_on": "2026-10-10",
  "personas": {
   "parent": {
@@ -48,8 +48,8 @@
     "accounts/templates/accounts/register_guardian.html": "b30c62d0ac272346",
     "accounts/templates/accounts/security.html": "93f8070b8156b3c2",
     "content/templates/content/partials/_promotion_banner.html": "1ef59e3fa98820c0",
-    "content/templates/content/partials/_promotion_hero.html": "99bdf3404afaa713",
-    "content/templates/content/partials/_promotion_hero_card.html": "66c4ea9eba9de249",
+    "content/templates/content/partials/_promotion_hero.html": "71c53fc4e54100f3",
+    "content/templates/content/partials/_promotion_hero_card.html": "977f7a87f7507684",
     "core/templates/core/menu.html": "fc0ae6dd632f1501",
     "core/templates/core/partials/_active_filters.html": "1cbfed7bdc3914e6",
     "dojos/templates/dojos/dojo_detail.html": "b9a992425ed6f148",
@@ -70,7 +70,7 @@
     "events/templates/events/partials/_upcoming_sessions_page.html": "b9b259ae69c47594",
     "mailing/templates/mailing/mail_preferences.html": "d2f848cc3c275167",
     "mailing/templates/mailing/partials/_privacy_explanation.html": "c9327ec702d441cb",
-    "pages/templates/pages/home.html": "052dbd2ef20a0049",
+    "pages/templates/pages/home.html": "627a03dbaeafcf83",
     "pathways/templates/pathways/partials/_pathway_card.html": "e57369b4a76dd3c7",
     "privacy/templates/privacy/account_deleted.html": "f6ca27c83e40c528",
     "privacy/templates/privacy/delete_account.html": "f9422d794b1c048e"

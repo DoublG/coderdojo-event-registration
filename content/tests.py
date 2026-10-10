@@ -176,7 +176,7 @@ class PromotionPlacementTests(TestCase):
             self.assertIn(f'id="{button_id}" hidden aria-label="{label}"', content)
         self.assertIn('data-label-play="Play featured events"', content)
         # Each card keeps its own heading under the page's h1.
-        self.assertEqual(content.count('<h2 class="cd-promo__title heading-lg">'), 3)
+        self.assertEqual(content.count('<h2 class="cd-promo__title display-lg">'), 3)
         # The timer is started by home.html with the options.
         self.assertIn("{ loop: true, interval: 7000,", content)
 

@@ -35,11 +35,10 @@ grouped by place, and choose **New promotion** to add one.
 There are four places:
 
 - **Homepage: featured events carousel**, the first thing visitors see.
-  With one promotion it's a large card. With more, it shows two at a time
-  side by side (one on a phone) and moves on to the next one every few
-  seconds, starting over after the last one; visitors can pause it or
-  move through it themselves. Choose a wide image: in the carousel it's
-  cropped to 16:9.
+  With one promotion it's a large card. With more, it shows them one at
+  a time and moves on to the next one every few seconds, starting over
+  after the last one; visitors can pause it or move through it
+  themselves.
 - **Homepage: first in Upcoming sessions**, before the sessions in date
   order, with a **Featured** label.
 - **Events page: pinned above the list**, shown when nobody has searched.

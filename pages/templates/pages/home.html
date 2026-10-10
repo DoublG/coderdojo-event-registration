@@ -44,17 +44,13 @@
   .home-root .carousel__track::-webkit-scrollbar { display: none; }
   .home-root .carousel__track .cd-pathway { flex: 0 0 240px; scroll-snap-align: start; }
   .home-root .carousel__track .upcoming-sessions__card { flex: 0 0 280px; scroll-snap-align: start; }
-  /* Featured events (content/partials/_promotion_hero.html): two cards per
-     view, one (with the next peeking in) on a narrow screen; the controls
-     sit right above the track. */
+  /* Featured events (content/partials/_promotion_hero.html): one card per
+     view, full width; the controls sit right above the track. */
   .home-root .carousel__nav[hidden], .home-root .carousel__nav svg[hidden] { display: none; }
   .home-root .promo-carousel { margin-top: var(--space-5); }
   .home-root .promo-carousel__controls { justify-content: flex-end; margin-bottom: var(--space-3); }
   .home-root .promo-carousel .carousel__track { padding: var(--space-1) var(--space-1) var(--space-3); scroll-padding-left: var(--space-1); }
-  .home-root .carousel__track .cd-promo--slide { flex: 0 0 calc((100% - var(--space-5)) / 2); scroll-snap-align: start; }
-  @media (max-width: 48rem) {
-    .home-root .carousel__track .cd-promo--slide { flex-basis: 85%; }
-  }
+  .home-root .carousel__track .cd-promo--slide { flex: 0 0 100%; scroll-snap-align: start; }
 
   /* role rings — see dojos/dojo_team.html for the full five-role writeup. Reused
      verbatim wherever .cd-mentor__avatar appears; the role is always also spelled

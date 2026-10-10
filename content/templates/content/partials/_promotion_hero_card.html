@@ -1,6 +1,6 @@
 {% load content_i18n %}{% load i18n %}{% comment %}
-One homepage_hero promotion: wide (image left), or with `slide` a vertical
-card in the carousel (image on top at 16:9, button at the bottom).
+One homepage_hero promotion, a wide card (image left); with `slide`, one
+slide of the carousel.
 {% endcomment %}
 {% with event=promotion.event %}
   <article class="cd-promo cd-promo--hero{% if slide %} cd-promo--slide{% endif %}">
@@ -9,7 +9,7 @@ card in the carousel (image on top at 16:9, button at the bottom).
     {% endif %}
     <div class="cd-promo__body">
       <p class="cd-promo__eyebrow label">{% translate "Featured" %} · {{ event.start_time|date:"D j M" }}</p>
-      <h2 class="cd-promo__title {% if slide %}heading-lg{% else %}display-lg{% endif %}">{{ promotion.display_title }}</h2>
+      <h2 class="cd-promo__title display-lg">{{ promotion.display_title }}</h2>
       {% if promotion|localized:"text" %}<p class="cd-promo__text body-lg">{{ promotion|localized:"text"|in_lang }}</p>{% endif %}
       <p class="cd-promo__meta body-sm">{% include "events/partials/_organiser.html" %}{% if event.venue_name %} · {{ event.venue_name }}{% endif %}</p>
       <div class="cd-promo__actions">

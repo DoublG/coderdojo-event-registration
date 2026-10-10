@@ -925,8 +925,8 @@ erDiagram
 - **Placements** are a fixed list; each template shows the active
   promotions for its placement, ordered by `rank`:
   - `homepage_hero`: the featured-events carousel at the top of the
-    homepage (one promotion: a large card; more: two side by side,
-    looping on a timer; see the subsection below)
+    homepage (one promotion: a large card; more: one at a time, looping
+    on a timer; see the subsection below)
   - `event_list_top`: pinned above the date-ordered event list
   - `upcoming_first`: first in the upcoming-sessions carousel, before the
     date order
@@ -953,10 +953,17 @@ erDiagram
 4. Docs (en/fr/nl) for families: where featured events appear, and that
    some events register externally.
 
-### Homepage promotions in a carousel, two side by side (built)
+### Homepage promotions in a carousel (built)
+
+**Changed 2026-10-10, after building: one card at a time, not two side by
+side.** Each slide is the same wide card a single promotion shows (image
+left, text right; stacked on a phone), full width, so the vertical slide
+card and the 16:9 crop below were dropped. Everything else (loop, timer,
+pause/play and the pausing rules, hidden buttons without JavaScript)
+stands. The plan below still says two per view; read it with this change.
 
 Built 2026-10-10 as planned below: `content/partials/_promotion_hero.html`
-(+ `_promotion_hero_card.html`, one card wide or as a `cd-promo--slide`),
+(+ `_promotion_hero_card.html`, the wide card, a `cd-promo--slide` in the carousel),
 `CoderDojo.initCarousel`'s `options` in `bundle.js`, the card width in
 `home.html` and the slide card in `bundle.css`; tests in
 `content.tests.PromotionPlacementTests`. Differences from the plan: the
@@ -969,7 +976,7 @@ scrolling smoothly; the seeded dojo session is the soonest open session
 of a public dojo, found by placement and kind of dojo. The timer was
 checked by hand in Chrome (Playwright through nginx): advances, loops
 both ways, hover and focus hold it, pause/play, *Next* stops it, reduced
-motion starts paused, one card plus a peek at 375px, and the pathways
+motion starts paused, one full-width card at 375px, and the pathways
 carousel still stops at its ends.
 
 **Goal.** The homepage's featured spot (`homepage_hero`) becomes a
@@ -997,7 +1004,7 @@ Decisions (proposed; to confirm before building):
   existing carousels pass none and keep behaving exactly as now (stop at
   the ends, no timer). No library: a timer and a scroll are local browser
   behaviour, which is where the conventions allow hand-written JS.
-- **Two per view on wide screens, one below about 48rem.** Each card is
+- **Two per view on wide screens, one below about 48rem.** *(Superseded: one card per view, see the change note above.)* Each card is
   `flex: 0 0 calc((100% - gap) / 2)` (narrow: about 85%, so the next card
   peeks in and shows there is more to swipe). The step is one card, so
   next/previous moves one event at a time.
@@ -1031,7 +1038,7 @@ Decisions (proposed; to confirm before building):
   - the track has `aria-live="off"` while rotating and `"polite"` once
     stopped, so a screen reader isn't interrupted every 7 seconds but does
     hear the new card when the visitor moves it.
-- **The cards turn vertical** inside the carousel: the image on top at a
+- **The cards turn vertical** *(superseded: the wide card stays, see the change note above)* inside the carousel: the image on top at a
   fixed 16:9 ratio (`aspect-ratio` + `object-fit: cover`, so a portrait
   banner can't make one card taller), then eyebrow, title, pitch, organiser,
   and the *Find out more* button pushed to the bottom (`margin-top: auto`),

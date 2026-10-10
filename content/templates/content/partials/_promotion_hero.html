@@ -1,7 +1,7 @@
 {% load content_i18n %}{% load i18n %}{% comment %}
 The homepage_hero placement (content.Promotion), rank first. Expects
 `promotions` (Promotion.objects.showing(...)). One promotion is a wide card;
-two or more are a carousel showing two at a time (DATA_MODEL.md §12),
+two or more are a carousel showing one at a time (DATA_MODEL.md §12),
 looping and moving on by a timer that home.html starts
 (CoderDojo.initCarousel with loop/interval/pauseButton). The buttons are
 `hidden` until that script shows them: without JavaScript the track still

@@ -91,7 +91,7 @@ STEPS = {
     "parent": {
         "home": (
             "CoderDojo ontdekken",
-            "Een ouder komt op de startpagina. Bovenaan wisselen evenementen in de kijker elkaar af, twee tegelijk, en de dojozoeker en de carrousel met komende sessies staan er meteen, zonder account.",
+            "Een ouder komt op de startpagina. Bovenaan wisselen evenementen in de kijker elkaar af, een voor een, en de dojozoeker en de carrousel met komende sessies staan er meteen, zonder account.",
         ),
         "finder": (
             "Een dojo in de buurt vinden",
