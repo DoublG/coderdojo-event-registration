@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-10 19:41+0000\n"
+"POT-Creation-Date: 2026-10-10 21:04+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -45,7 +45,8 @@ msgstr "Cet accès est déjà terminé."
 msgid "Your child's own email address is needed for a login."
 msgstr "L'adresse e-mail de votre enfant est nécessaire pour un compte."
 
-#: accounts/child_accounts.py:57 accounts/invitations.py:101
+#: accounts/child_accounts.py:57 accounts/guardian_invitations.py:149
+#: accounts/invitations.py:101
 msgid "Enter a valid email address."
 msgstr "Saisissez une adresse e-mail valide."
 
@@ -244,7 +245,7 @@ msgid "So we can tell you about dojos and sessions near you."
 msgstr "Pour vous informer des dojos et sessions près de chez vous."
 
 #: accounts/forms.py:281 accounts/forms.py:333 accounts/forms.py:530
-#: mailing/forms.py:24
+#: mailing/forms.py:25
 msgid "Language for emails"
 msgstr "Langue des e-mails"
 
@@ -269,7 +270,7 @@ msgstr ""
 msgid "So we can tell you about dojos near you."
 msgstr "Pour vous informer des dojos près de chez vous."
 
-#: accounts/forms.py:359 accounts/forms.py:668
+#: accounts/forms.py:359 accounts/forms.py:705
 msgid "First name"
 msgstr "Prénom"
 
@@ -282,7 +283,7 @@ msgstr "Nom"
 msgid "Required from"
 msgstr "Obligatoire à partir du"
 
-#: accounts/forms.py:453 accounts/forms.py:569 accounts/forms.py:631
+#: accounts/forms.py:453 accounts/forms.py:569 accounts/forms.py:668
 msgid "Your password"
 msgstr "Votre mot de passe"
 
@@ -306,7 +307,7 @@ msgstr ""
 msgid "Their name"
 msgstr "Nom"
 
-#: accounts/forms.py:518
+#: accounts/forms.py:518 accounts/forms.py:597
 msgid "Their email address"
 msgstr "Adresse e-mail"
 
@@ -335,19 +336,42 @@ msgstr ""
 "Nous y envoyons un lien. L'adresse ne change qu'une fois le lien ouvert ; il "
 "n'est pas nécessaire de se connecter pour cela."
 
-#: accounts/forms.py:601
+#: accounts/forms.py:599
+msgid "How are they related to the child?"
+msgstr "Quel est son lien avec l'enfant ?"
+
+#: accounts/forms.py:601 accounts/models.py:323
+msgid "Parent"
+msgstr "Parent"
+
+#: accounts/forms.py:602 accounts/models.py:323
+msgid "Legal guardian"
+msgstr "Tuteur légal"
+
+#: accounts/forms.py:603
+msgid "Someone else (a grandparent, a carer, a neighbour, ...)"
+msgstr "Quelqu'un d'autre (un grand-parent, une personne qui garde l'enfant, un voisin, ...)"
+
+#: accounts/forms.py:608
+msgid ""
+"Every guardian manages the child the same way. Only a parent or legal "
+"guardian can also invite or remove guardians, and decide about the child's "
+"data."
+msgstr "Chaque responsable gère l'enfant de la même façon. Seul un parent ou tuteur légal peut aussi inviter ou retirer des responsables, et décider des données de l'enfant."
+
+#: accounts/forms.py:638
 msgid "How will they log in?"
 msgstr "Comment votre enfant se connectera-t-il ?"
 
-#: accounts/forms.py:603
+#: accounts/forms.py:640
 msgid "With a password they choose"
 msgstr "Avec un mot de passe qu'il choisit lui-même"
 
-#: accounts/forms.py:604
+#: accounts/forms.py:641
 msgid "With a link we mail them each time (no password)"
 msgstr "Avec un lien que nous lui envoyons chaque fois (pas de mot de passe)"
 
-#: accounts/forms.py:634
+#: accounts/forms.py:671
 msgid ""
 "We send a link there. The address only changes once it's opened; your child "
 "doesn't need to log in for that."
@@ -355,23 +379,23 @@ msgstr ""
 "Nous y envoyons un lien. L'adresse ne change qu'une fois ce lien ouvert ; "
 "votre enfant n'a pas besoin de se connecter pour cela."
 
-#: accounts/forms.py:659
+#: accounts/forms.py:696
 msgid "Gender (optional)"
 msgstr "Genre (facultatif)"
 
-#: accounts/forms.py:662
+#: accounts/forms.py:699
 msgid "Avatar"
 msgstr "Avatar"
 
-#: accounts/forms.py:669
+#: accounts/forms.py:706
 msgid "Family name"
 msgstr "Nom de famille"
 
-#: accounts/forms.py:670
+#: accounts/forms.py:707
 msgid "Allergies or notes (optional)"
 msgstr "Allergies ou remarques (facultatif)"
 
-#: accounts/forms.py:674
+#: accounts/forms.py:711
 msgid ""
 "Only the champion (the person running the dojo) sees this, on the list of a "
 "session your child is signed up for."
@@ -379,83 +403,139 @@ msgstr ""
 "Seul le champion (la personne qui dirige le dojo) voit ceci, sur la liste "
 "d'une session à laquelle votre enfant est inscrit."
 
-#: accounts/forms.py:678
+#: accounts/forms.py:715
 msgid "First name is required."
 msgstr "Le prénom est obligatoire."
 
-#: accounts/forms.py:679
+#: accounts/forms.py:716
 msgid "Family name is required."
 msgstr "Le nom de famille est obligatoire."
 
-#: accounts/forms.py:683 accounts/forms.py:781
+#: accounts/forms.py:720 accounts/forms.py:818
 msgid "None"
 msgstr "Aucune"
 
-#: accounts/forms.py:701
+#: accounts/forms.py:738
 msgid "Date of birth (optional)"
 msgstr "Date de naissance (facultatif)"
 
-#: accounts/forms.py:711
+#: accounts/forms.py:748
 msgid "Home dojo"
 msgstr "Dojo d'attache"
 
-#: accounts/forms.py:711
+#: accounts/forms.py:748
 msgid "None yet"
 msgstr "Aucun pour l'instant"
 
-#: accounts/forms.py:726 accounts/forms.py:769
+#: accounts/forms.py:763 accounts/forms.py:806
 msgid "Date of birth"
 msgstr "Date de naissance"
 
-#: accounts/forms.py:737
+#: accounts/forms.py:774
 msgid "Keep the current photo"
 msgstr "Garder la photo actuelle"
 
-#: accounts/forms.py:737
+#: accounts/forms.py:774
 msgid "No avatar"
 msgstr "Pas d'avatar"
 
-#: accounts/forms.py:753
+#: accounts/forms.py:790
 #: accounts/templates/accounts/partials/_child_header_display.html:14
 msgid "Pick your avatar"
 msgstr "Choisissez votre avatar"
 
-#: accounts/forms.py:770
+#: accounts/forms.py:807
 #: accounts/templates/accounts/partials/_child_header_display.html:34
 #: dojos/templates/dojos/partials/_attendance_row.html:25
 msgid "Allergies or notes"
 msgstr "Allergies ou remarques"
 
-#: accounts/forms.py:775
+#: accounts/forms.py:812
 msgid "Date of birth is required."
 msgstr "La date de naissance est obligatoire."
 
-#: accounts/forms.py:779
+#: accounts/forms.py:816
 msgid "Sam"
 msgstr "Sam"
 
-#: accounts/forms.py:780
+#: accounts/forms.py:817
 msgid "Peeters"
 msgstr "Dupont"
 
-#: accounts/forms.py:788
+#: accounts/forms.py:825
 msgid "Gender"
 msgstr "Genre"
 
-#: accounts/forms.py:789
+#: accounts/forms.py:826
 msgid "Optional, never shown publicly. Lets us tell you about girls' sessions."
 msgstr ""
 "Facultatif, jamais affiché publiquement. Nous permet de vous informer des "
 "sessions pour filles."
 
-#: accounts/forms.py:813
+#: accounts/forms.py:850
 msgid "Add at least one child."
 msgstr "Ajoutez au moins un enfant."
 
-#: accounts/invitations.py:72
+#: accounts/guardian_invitations.py:95
+msgid "Only a parent or legal guardian of the child can do this."
+msgstr "Seul un parent ou tuteur légal de l'enfant peut le faire."
+
+#: accounts/guardian_invitations.py:100 accounts/invitations.py:72
 msgid "You've just sent an invitation: wait a minute before the next one."
 msgstr ""
 "Vous venez d'envoyer une invitation : attendez une minute avant la suivante."
+
+#: accounts/guardian_invitations.py:151
+msgid "Choose how this person is related to the child."
+msgstr "Choisissez le lien de cette personne avec l'enfant."
+
+#: accounts/guardian_invitations.py:153
+msgid "That's your own address."
+msgstr "C'est votre propre adresse."
+
+#: accounts/guardian_invitations.py:156
+msgid "This address belongs to a child's own login: invite an adult."
+msgstr "Cette adresse appartient au compte d'un enfant : invitez un adulte."
+
+#: accounts/guardian_invitations.py:158
+msgid "This person is already a guardian of %(name)s."
+msgstr "Cette personne est déjà responsable de %(name)s."
+
+#: accounts/guardian_invitations.py:160
+msgid "This address already has an invitation waiting: send it again below."
+msgstr "Cette adresse a déjà une invitation en attente : renvoyez-la ci-dessous."
+
+#: accounts/guardian_invitations.py:192 accounts/invitations.py:133
+msgid "This invitation was already accepted or withdrawn."
+msgstr "Cette invitation a déjà été acceptée ou retirée."
+
+#: accounts/guardian_invitations.py:206 accounts/invitations.py:144
+msgid "This invitation isn't waiting any more."
+msgstr "Cette invitation n'est plus en attente."
+
+#: accounts/guardian_invitations.py:247 accounts/invitations.py:168
+msgid "This invitation isn't valid any more."
+msgstr "Cette invitation n'est plus valable."
+
+#: accounts/guardian_invitations.py:249 accounts/invitations.py:170
+msgid "This invitation is for another email address."
+msgstr "Cette invitation est destinée à une autre adresse e-mail."
+
+#: accounts/guardian_invitations.py:276
+msgid "Only a parent or legal guardian of the child can remove a guardian."
+msgstr "Seul un parent ou tuteur légal de l'enfant peut retirer un responsable."
+
+#: accounts/guardian_invitations.py:282
+msgid ""
+"%(name)s always needs a parent or legal guardian on the site, and you're the "
+"only one. To stop, delete your account (from your account page): %(name)s's "
+"details go with it."
+msgstr "%(name)s a toujours besoin d'un parent ou tuteur légal sur le site, et vous êtes le seul. Pour arrêter, supprimez votre compte (depuis la page de votre compte) : les données de %(name)s partent avec lui."
+
+#: accounts/guardian_invitations.py:285
+msgid ""
+"%(name)s always needs a parent or legal guardian, and this is the only one."
+msgstr "%(name)s a toujours besoin d'un parent ou tuteur légal, et c'est le seul."
 
 #: accounts/invitations.py:105
 msgid "Choose at least one role."
@@ -478,22 +558,6 @@ msgid ""
 "This address already has an invitation waiting: send it again from People."
 msgstr ""
 "Une invitation attend déjà pour cette adresse : renvoyez-la depuis Personnes."
-
-#: accounts/invitations.py:133
-msgid "This invitation was already accepted or withdrawn."
-msgstr "Cette invitation a déjà été acceptée ou retirée."
-
-#: accounts/invitations.py:144
-msgid "This invitation isn't waiting any more."
-msgstr "Cette invitation n'est plus en attente."
-
-#: accounts/invitations.py:168
-msgid "This invitation isn't valid any more."
-msgstr "Cette invitation n'est plus valable."
-
-#: accounts/invitations.py:170
-msgid "This invitation is for another email address."
-msgstr "Cette invitation est destinée à une autre adresse e-mail."
 
 #: accounts/invitations.py:181
 #, python-format
@@ -588,7 +652,7 @@ msgstr "Fille"
 msgid "Boy"
 msgstr "Garçon"
 
-#: accounts/models.py:236
+#: accounts/models.py:236 accounts/models.py:323
 msgid "Other"
 msgstr "Autre"
 
@@ -596,66 +660,66 @@ msgstr "Autre"
 msgid "Prefer not to say"
 msgstr "Je préfère ne pas le dire"
 
-#: accounts/models.py:437
+#: accounts/models.py:447
 #: applications/templates/applications/manage/check_list.html:38
 msgid "Expired"
 msgstr "Expirés"
 
-#: accounts/models.py:438
+#: accounts/models.py:448
 msgid "Ended early"
 msgstr "Terminé plus tôt"
 
 # | msgid "Organisation"
-#: accounts/models.py:439
+#: accounts/models.py:449
 msgid "Ended by an organisation admin"
 msgstr "Terminé par un administrateur de l'organisation"
 
 # | msgid "Organisation"
-#: accounts/models.py:440
+#: accounts/models.py:450
 msgid "Organisation role removed"
 msgstr "Rôle dans l'organisation retiré"
 
-#: accounts/models.py:546 accounts/templates/accounts/manage/people.html:115
+#: accounts/models.py:611 accounts/templates/accounts/manage/people.html:115
 msgid "Superusers"
 msgstr "Superutilisateurs"
 
 # | msgid "Organisation"
-#: accounts/models.py:547
+#: accounts/models.py:612
 msgid "Organisation admins"
 msgstr "Administrateurs de l'organisation"
 
 # | msgid "No team members listed yet."
-#: accounts/models.py:548
+#: accounts/models.py:613
 msgid "Board members"
 msgstr "Membres du conseil d'administration"
 
-#: accounts/models.py:549
+#: accounts/models.py:614
 msgid "Background-check reviewers"
 msgstr "Évaluateurs des extraits de casier"
 
-#: accounts/models.py:550
+#: accounts/models.py:615
 msgid "Champions"
 msgstr "Champions"
 
-#: accounts/models.py:551 accounts/templates/accounts/child_detail.html:179
+#: accounts/models.py:616 accounts/templates/accounts/child_detail.html:191
 msgid "Mentors"
 msgstr "Mentors"
 
-#: accounts/models.py:552
+#: accounts/models.py:617
 msgid "Every adult account (parents too)"
 msgstr "Tout compte d'adulte (parents compris)"
 
-#: accounts/models.py:560
+#: accounts/models.py:625
 msgid "Password or login link (two-step login optional)"
 msgstr ""
 "Mot de passe ou lien de connexion (connexion en deux étapes facultative)"
 
-#: accounts/models.py:561
+#: accounts/models.py:626
 msgid "Two-step login (authenticator app or passkey)"
 msgstr ""
 "Connexion en deux étapes (application d'authentification ou clé d'accès)"
 
-#: accounts/models.py:562
+#: accounts/models.py:627
 msgid "Two-step login with a passkey"
 msgstr "Connexion en deux étapes avec une clé d'accès"
 
@@ -686,8 +750,8 @@ msgstr ""
 
 #: accounts/organisation.py:100
 #: accounts/templates/accounts/_security_base.html:8
-#: accounts/templates/accounts/child_detail.html:209
-#: accounts/templates/accounts/child_detail.html:211
+#: accounts/templates/accounts/child_detail.html:221
+#: accounts/templates/accounts/child_detail.html:223
 #: accounts/templates/accounts/guardian_detail.html:77
 #: accounts/templates/accounts/guardian_detail.html:80
 #: accounts/templates/accounts/manage/security.html:3
@@ -937,7 +1001,8 @@ msgstr ""
 "déconnecté·e de vos autres appareils."
 
 #: accounts/templates/accounts/change_email.html:30
-#: accounts/templates/accounts/child_detail.html:99
+#: accounts/templates/accounts/child_detail.html:111
+#: accounts/templates/accounts/guardian_remove.html:34
 #: accounts/templates/accounts/ninja_login_action.html:40
 #: accounts/templates/accounts/partials/_account_details_edit.html:30
 #: accounts/templates/accounts/partials/_add_child.html:30
@@ -1008,27 +1073,27 @@ msgstr "Enregistrer le mot de passe"
 msgid "Log out instead"
 msgstr "Me déconnecter plutôt"
 
-#: accounts/templates/accounts/child_detail.html:72
-#: pages/templates/pages/home.html:120
+#: accounts/templates/accounts/child_detail.html:84
+#: pages/templates/pages/home.html:116
 msgid "Upcoming sessions"
 msgstr "Prochaines sessions"
 
-#: accounts/templates/accounts/child_detail.html:77
-#: accounts/templates/accounts/child_detail.html:129
-#: accounts/templates/accounts/child_detail.html:175
+#: accounts/templates/accounts/child_detail.html:89
+#: accounts/templates/accounts/child_detail.html:141
+#: accounts/templates/accounts/child_detail.html:187
 #: dojos/templates/dojos/dojo_event_list.html:23 events/forms.py:61
 #: events/forms.py:147 events/templates/events/event_detail.html:119
 #: events/templates/events/event_list.html:62
 msgid "Date"
 msgstr "Date"
 
-#: accounts/templates/accounts/child_detail.html:78
-#: accounts/templates/accounts/child_detail.html:176 campaigns/forms.py:168
+#: accounts/templates/accounts/child_detail.html:90
+#: accounts/templates/accounts/child_detail.html:188 campaigns/forms.py:168
 msgid "Session"
 msgstr "Session"
 
-#: accounts/templates/accounts/child_detail.html:79
-#: accounts/templates/accounts/child_detail.html:177
+#: accounts/templates/accounts/child_detail.html:91
+#: accounts/templates/accounts/child_detail.html:189
 #: applications/templates/applications/manage/application_detail.html:17
 #: campaigns/templates/campaigns/manage/_rule_fields.html:47
 #: campaigns/templates/campaigns/manage/_rule_fields.html:57 dojos/models.py:60
@@ -1038,7 +1103,7 @@ msgstr "Session"
 msgid "Dojo"
 msgstr "Dojo"
 
-#: accounts/templates/accounts/child_detail.html:80
+#: accounts/templates/accounts/child_detail.html:92
 #: accounts/templates/accounts/manage/people.html:52
 #: accounts/templates/accounts/manage/people.html:90
 #: accounts/templates/accounts/manage/security.html:76
@@ -1056,85 +1121,85 @@ msgstr "Dojo"
 msgid "Actions"
 msgstr "Actions"
 
-#: accounts/templates/accounts/child_detail.html:85
+#: accounts/templates/accounts/child_detail.html:97
 #: accounts/templates/accounts/partials/_children_list.html:32
 #, python-format
 msgid "Remove %(child)s from %(event)s?"
 msgstr "Désinscrire %(child)s de %(event)s ?"
 
-#: accounts/templates/accounts/child_detail.html:90
+#: accounts/templates/accounts/child_detail.html:102
 #: accounts/templates/accounts/partials/_children_list.html:42
 #: events/templates/events/event_signup.html:85
 #: events/templates/events/event_signup.html:183
 msgid "Waiting list"
 msgstr "Liste d'attente"
 
-#: accounts/templates/accounts/child_detail.html:95
+#: accounts/templates/accounts/child_detail.html:107
 #: dojos/templates/dojos/partials/_dojo_result.html:40
 msgid "View"
 msgstr "Voir"
 
-#: accounts/templates/accounts/child_detail.html:99
+#: accounts/templates/accounts/child_detail.html:111
 #: accounts/templates/accounts/partials/_children_list.html:55
 msgid "Leave waiting list"
 msgstr "Quitter la liste d'attente"
 
-#: accounts/templates/accounts/child_detail.html:106
+#: accounts/templates/accounts/child_detail.html:118
 msgid "No upcoming sessions."
 msgstr "Aucune session à venir."
 
-#: accounts/templates/accounts/child_detail.html:106
+#: accounts/templates/accounts/child_detail.html:118
 msgid "Find a session"
 msgstr "Trouver une session"
 
-#: accounts/templates/accounts/child_detail.html:116
-#: accounts/templates/accounts/child_detail.html:128 dojos/forms.py:406
+#: accounts/templates/accounts/child_detail.html:128
+#: accounts/templates/accounts/child_detail.html:140 dojos/forms.py:406
 #: dojos/templates/dojos/dojo_members.html:37
 msgid "Belt"
 msgstr "Ceinture"
 
-#: accounts/templates/accounts/child_detail.html:130
+#: accounts/templates/accounts/child_detail.html:142
 msgid "Awarded by"
 msgstr "Décernée par"
 
-#: accounts/templates/accounts/child_detail.html:131
+#: accounts/templates/accounts/child_detail.html:143
 #: applications/templates/applications/manage/check_detail.html:66
 #: mailing/templates/mailing/manage/mail_queue.html:182
 #: mailing/templates/mailing/manage/mail_queue.html:232
 msgid "Note"
 msgstr "Remarque"
 
-#: accounts/templates/accounts/child_detail.html:152
-#: accounts/templates/accounts/child_detail.html:163
+#: accounts/templates/accounts/child_detail.html:164
+#: accounts/templates/accounts/child_detail.html:175
 msgid "Badges"
 msgstr "Badges"
 
-#: accounts/templates/accounts/child_detail.html:154
+#: accounts/templates/accounts/child_detail.html:166
 msgid "Previous badges"
 msgstr "Badges précédents"
 
-#: accounts/templates/accounts/child_detail.html:157
+#: accounts/templates/accounts/child_detail.html:169
 msgid "Next badges"
 msgstr "Badges suivants"
 
-#: accounts/templates/accounts/child_detail.html:170
+#: accounts/templates/accounts/child_detail.html:182
 msgid "Event history"
 msgstr "Sessions passées"
 
-#: accounts/templates/accounts/child_detail.html:178
+#: accounts/templates/accounts/child_detail.html:190
 msgid "Worked on"
 msgstr "A travaillé sur"
 
-#: accounts/templates/accounts/child_detail.html:193
+#: accounts/templates/accounts/child_detail.html:205
 msgid "No past sessions yet."
 msgstr "Aucune session passée pour l'instant."
 
-#: accounts/templates/accounts/child_detail.html:204
+#: accounts/templates/accounts/child_detail.html:216
 #: accounts/templates/accounts/guardian_detail.html:85
 msgid "Your data"
 msgstr "Vos données"
 
-#: accounts/templates/accounts/child_detail.html:205
+#: accounts/templates/accounts/child_detail.html:217
 msgid ""
 "Download a copy of everything we keep about you, as a file you can open or "
 "take elsewhere."
@@ -1142,12 +1207,12 @@ msgstr ""
 "Téléchargez une copie de tout ce que nous conservons à votre sujet, dans un "
 "fichier que vous pouvez ouvrir ou emporter ailleurs."
 
-#: accounts/templates/accounts/child_detail.html:206
+#: accounts/templates/accounts/child_detail.html:218
 #: accounts/templates/accounts/guardian_detail.html:88
 msgid "Download my data"
 msgstr "Télécharger mes données"
 
-#: accounts/templates/accounts/child_detail.html:210
+#: accounts/templates/accounts/child_detail.html:222
 msgid "How you log in (a password or a link we mail you) and two-step login."
 msgstr ""
 "Comment vous vous connectez (un mot de passe ou un lien envoyé par e-mail) "
@@ -1194,6 +1259,7 @@ msgstr ""
 "votre nouvelle adresse pour en choisir un nouveau."
 
 #: accounts/templates/accounts/confirm_email_change.html:55
+#: accounts/templates/accounts/guardian_invitation.html:44
 #: accounts/templates/accounts/invitation.html:40
 #: accounts/templates/accounts/login.html:3
 #: accounts/templates/accounts/login.html:36
@@ -1346,11 +1412,12 @@ msgstr "Trouver un dojo où aider"
 msgid "Apply to volunteer"
 msgstr "Devenir bénévole"
 
-#: accounts/templates/accounts/invitation.html:3
-#: accounts/templates/accounts/invitation.html:25
-msgid "Invitation to the organisation"
-msgstr "Invitation dans l'organisation"
+#: accounts/templates/accounts/guardian_invitation.html:3
+#: accounts/templates/accounts/guardian_invitation.html:26
+msgid "Invitation to be a guardian"
+msgstr "Invitation à être responsable"
 
+#: accounts/templates/accounts/guardian_invitation.html:32
 #: accounts/templates/accounts/invitation.html:28
 msgid ""
 "This invitation isn't valid any more: it was used, withdrawn or has expired. "
@@ -1358,6 +1425,147 @@ msgid ""
 msgstr ""
 "Cette invitation n'est plus valable : elle a été utilisée, retirée ou a "
 "expiré. Demandez à la personne qui vous a invité de la renvoyer."
+
+#: accounts/templates/accounts/guardian_invitation.html:34
+msgid ""
+"%(inviter)s invites you to be %(name)s's guardian on CoderDojo Belgium, as "
+"their parent."
+msgstr "%(inviter)s vous invite à être responsable de %(name)s sur CoderDojo Belgium, en tant que parent."
+
+#: accounts/templates/accounts/guardian_invitation.html:34
+msgid ""
+"%(inviter)s invites you to be %(name)s's guardian on CoderDojo Belgium, as "
+"their legal guardian."
+msgstr "%(inviter)s vous invite à être responsable de %(name)s sur CoderDojo Belgium, en tant que tuteur légal."
+
+#: accounts/templates/accounts/guardian_invitation.html:34
+msgid ""
+"%(inviter)s invites you to be %(name)s's guardian on CoderDojo Belgium, as a "
+"trusted adult."
+msgstr "%(inviter)s vous invite à être responsable de %(name)s sur CoderDojo Belgium, en tant qu'adulte de confiance."
+
+#: accounts/templates/accounts/guardian_invitation.html:35
+msgid ""
+"As a guardian you can sign %(name)s up for sessions, change their details "
+"and their own login, and you get the mails about them. %(name)s's other "
+"guardians can see that you're one."
+msgstr "En tant que responsable, vous pouvez inscrire %(name)s aux séances, modifier ses données et son propre compte, et vous recevez les e-mails le ou la concernant. Les autres responsables de %(name)s voient que vous en êtes un."
+
+#: accounts/templates/accounts/guardian_invitation.html:37
+msgid ""
+"Create your account with <strong>%(email)s</strong> to accept; you come back "
+"here afterwards."
+msgstr "Créez votre compte avec <strong>%(email)s</strong> pour accepter ; vous revenez ici ensuite."
+
+#: accounts/templates/accounts/guardian_invitation.html:39
+#: accounts/templates/accounts/invitation.html:35
+msgid "Create my account"
+msgstr "Créer mon compte"
+
+#: accounts/templates/accounts/guardian_invitation.html:42
+#: accounts/templates/accounts/invitation.html:38
+#, python-format
+msgid ""
+"There's already an account with <strong>%(email)s</strong>: log in with it "
+"to accept."
+msgstr ""
+"Un compte existe déjà avec <strong>%(email)s</strong> : connectez-vous avec "
+"lui pour accepter."
+
+#: accounts/templates/accounts/guardian_invitation.html:47
+#: accounts/templates/accounts/invitation.html:43
+#, python-format
+msgid ""
+"This invitation is for <strong>%(email)s</strong>. Log out, then open the "
+"link again and log in with that address, or create an account with it."
+msgstr ""
+"Cette invitation est destinée à <strong>%(email)s</strong>. Déconnectez-"
+"vous, rouvrez le lien et connectez-vous avec cette adresse, ou créez un "
+"compte avec elle."
+
+#: accounts/templates/accounts/guardian_invitation.html:49
+msgid "You're already %(name)s's guardian."
+msgstr "Vous êtes déjà responsable de %(name)s."
+
+#: accounts/templates/accounts/guardian_invitation.html:51
+msgid "Go to %(name)s's page"
+msgstr "Aller à la page de %(name)s"
+
+#: accounts/templates/accounts/guardian_invitation.html:59
+#: accounts/templates/accounts/partials/_add_child.html:27
+#: accounts/templates/accounts/register_guardian.html:60
+msgid ""
+"Optional; you can change it for each child on your Mail preferences page."
+msgstr ""
+"Facultatif ; vous pouvez le modifier pour chaque enfant sur votre page "
+"Préférences e-mail."
+
+#: accounts/templates/accounts/guardian_invitation.html:63
+#: accounts/templates/accounts/invitation.html:48
+msgid "Accept the invitation"
+msgstr "Accepter l'invitation"
+
+#: accounts/templates/accounts/guardian_remove.html:3
+msgid "Step down as guardian"
+msgstr "Ne plus être responsable"
+
+#: accounts/templates/accounts/guardian_remove.html:3
+msgid "Remove a guardian"
+msgstr "Retirer un responsable"
+
+#: accounts/templates/accounts/guardian_remove.html:15
+msgid "Stop being %(name)s's guardian"
+msgstr "Ne plus être responsable de %(name)s"
+
+#: accounts/templates/accounts/guardian_remove.html:16
+msgid ""
+"You won't see %(name)s on your account any more, can't sign them up and "
+"won't get their mails. Their other guardians keep everything as it is, and "
+"are told."
+msgstr "Vous ne verrez plus %(name)s sur votre compte, ne pourrez plus l'inscrire et ne recevrez plus ses e-mails. Pour ses autres responsables, rien ne change ; ils sont prévenus."
+
+#: accounts/templates/accounts/guardian_remove.html:18
+msgid "Remove %(guardian)s as %(name)s's guardian"
+msgstr "Retirer %(guardian)s comme responsable de %(name)s"
+
+#: accounts/templates/accounts/guardian_remove.html:19
+msgid ""
+"%(guardian)s won't see %(name)s on their account any more, can't sign them "
+"up and won't get their mails. We mail %(guardian)s and %(name)s's other "
+"guardians that you removed them."
+msgstr "%(guardian)s ne verra plus %(name)s sur son compte, ne pourra plus l'inscrire et ne recevra plus ses e-mails. Nous prévenons par e-mail %(guardian)s et les autres responsables de %(name)s que vous l'avez retiré."
+
+#: accounts/templates/accounts/guardian_remove.html:26
+#: accounts/templates/accounts/login_link_reauth.html:17
+#: accounts/templates/accounts/security_backup_codes.html:22
+#: accounts/templates/accounts/security_confirm.html:12
+#: accounts/templates/accounts/security_login_method.html:14
+#: privacy/templates/privacy/manage/delete.html:17
+#: privacy/templates/privacy/manage/email.html:15
+msgid "Back"
+msgstr "Retour"
+
+#: accounts/templates/accounts/guardian_remove.html:35
+#: accounts/templates/accounts/partials/_guardians_card.html:28
+msgid "Step down"
+msgstr "Me retirer"
+
+#: accounts/templates/accounts/guardian_remove.html:35
+#: accounts/templates/accounts/partials/_child_rows_script.html:15
+#: accounts/templates/accounts/partials/_guardians_card.html:28
+#: accounts/templates/accounts/security.html:58
+#: accounts/templates/accounts/security.html:73
+#: accounts/templates/accounts/security_confirm.html:25
+#: campaigns/templates/campaigns/manage/_segment_group.html:28
+#: dojos/templates/dojos/dojo_team_manage.html:83
+#: dojos/templates/dojos/dojo_updates.html:53
+msgid "Remove"
+msgstr "Retirer"
+
+#: accounts/templates/accounts/invitation.html:3
+#: accounts/templates/accounts/invitation.html:25
+msgid "Invitation to the organisation"
+msgstr "Invitation dans l'organisation"
 
 #: accounts/templates/accounts/invitation.html:30
 #, python-format
@@ -1372,33 +1580,6 @@ msgstr ""
 #, python-format
 msgid "Create your account with <strong>%(email)s</strong> to accept."
 msgstr "Créez votre compte avec <strong>%(email)s</strong> pour accepter."
-
-#: accounts/templates/accounts/invitation.html:35
-msgid "Create my account"
-msgstr "Créer mon compte"
-
-#: accounts/templates/accounts/invitation.html:38
-#, python-format
-msgid ""
-"There's already an account with <strong>%(email)s</strong>: log in with it "
-"to accept."
-msgstr ""
-"Un compte existe déjà avec <strong>%(email)s</strong> : connectez-vous avec "
-"lui pour accepter."
-
-#: accounts/templates/accounts/invitation.html:43
-#, python-format
-msgid ""
-"This invitation is for <strong>%(email)s</strong>. Log out, then open the "
-"link again and log in with that address, or create an account with it."
-msgstr ""
-"Cette invitation est destinée à <strong>%(email)s</strong>. Déconnectez-"
-"vous, rouvrez le lien et connectez-vous avec cette adresse, ou créez un "
-"compte avec elle."
-
-#: accounts/templates/accounts/invitation.html:48
-msgid "Accept the invitation"
-msgstr "Accepter l'invitation"
 
 #: accounts/templates/accounts/invitation_sign_up.html:3
 #: accounts/templates/accounts/invitation_sign_up.html:22
@@ -1547,15 +1728,6 @@ msgstr ""
 "Nous avons envoyé un lien de connexion à <strong>%(email)s</strong>. Ouvrez-"
 "le sur cet appareil dans les %(minutes)s minutes : il vous reconnecte et "
 "vous ramène ici, et vous pouvez continuer."
-
-#: accounts/templates/accounts/login_link_reauth.html:17
-#: accounts/templates/accounts/security_backup_codes.html:22
-#: accounts/templates/accounts/security_confirm.html:12
-#: accounts/templates/accounts/security_login_method.html:14
-#: privacy/templates/privacy/manage/delete.html:17
-#: privacy/templates/privacy/manage/email.html:15
-msgid "Back"
-msgstr "Retour"
 
 #: accounts/templates/accounts/login_link_request.html:3
 #: accounts/templates/accounts/login_link_request.html:31
@@ -1734,7 +1906,7 @@ msgstr "Ce que chaque rôle ouvre"
 #: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:196
 #: events/forms.py:271 events/forms.py:327 events/forms.py:360
 #: events/templates/events/manage/badge_list.html:18
-#: events/templates/events/manage/badge_list.html:44 mailing/forms.py:139
+#: events/templates/events/manage/badge_list.html:44 mailing/forms.py:146
 #: privacy/templates/privacy/manage/privacy.html:57
 msgid "Name"
 msgstr "Nom"
@@ -1767,6 +1939,7 @@ msgid "Nobody has an organisation role yet."
 msgstr "Personne n'a encore de rôle dans l'organisation."
 
 #: accounts/templates/accounts/manage/people.html:42
+#: accounts/templates/accounts/partials/_guardians_card.html:37
 msgid "Invitations waiting"
 msgstr "Invitations en attente"
 
@@ -1777,11 +1950,13 @@ msgstr "Valable jusqu'au"
 
 # | msgid "Aimed at"
 #: accounts/templates/accounts/manage/people.html:65
+#: accounts/templates/accounts/partials/_guardians_card.html:49
 #: mailing/templates/mailing/manage/partials/_retry_button.html:6
 msgid "Send again"
 msgstr "Renvoyer"
 
 #: accounts/templates/accounts/manage/people.html:69
+#: accounts/templates/accounts/partials/_guardians_card.html:54
 msgid "Withdraw"
 msgstr "Retirer"
 
@@ -1886,6 +2061,7 @@ msgid "Organisation roles"
 msgstr "Rôles dans l'organisation"
 
 #: accounts/templates/accounts/manage/people_add.html:56
+#: accounts/templates/accounts/partials/_guardians_card.html:70
 msgid "Send the invitation"
 msgstr "Envoyer l'invitation"
 
@@ -2240,14 +2416,6 @@ msgstr "Enregistrer un autre enfant ?"
 msgid "Register another child"
 msgstr "Enregistrer un autre enfant"
 
-#: accounts/templates/accounts/partials/_add_child.html:27
-#: accounts/templates/accounts/register_guardian.html:60
-msgid ""
-"Optional; you can change it for each child on your Mail preferences page."
-msgstr ""
-"Facultatif ; vous pouvez le modifier pour chaque enfant sur votre page "
-"Préférences e-mail."
-
 #: accounts/templates/accounts/partials/_add_child.html:31
 msgid "Add child"
 msgstr "Ajouter l'enfant"
@@ -2331,16 +2499,6 @@ msgstr "Ajouter un autre enfant"
 msgid "Child {n}"
 msgstr "Enfant {n}"
 
-#: accounts/templates/accounts/partials/_child_rows_script.html:15
-#: accounts/templates/accounts/security.html:58
-#: accounts/templates/accounts/security.html:73
-#: accounts/templates/accounts/security_confirm.html:25
-#: campaigns/templates/campaigns/manage/_segment_group.html:28
-#: dojos/templates/dojos/dojo_team_manage.html:83
-#: dojos/templates/dojos/dojo_updates.html:53
-msgid "Remove"
-msgstr "Retirer"
-
 #: accounts/templates/accounts/partials/_children_list.html:11
 msgid "Your children"
 msgstr "Vos enfants"
@@ -2371,7 +2529,7 @@ msgid "Not registered for an upcoming session."
 msgstr "Pas inscrit à une prochaine session."
 
 #: accounts/templates/accounts/partials/_children_list.html:62
-#: pages/templates/pages/home.html:79
+#: pages/templates/pages/home.html:75
 msgid "Browse events"
 msgstr "Voir les événements"
 
@@ -2399,6 +2557,39 @@ msgstr ""
 #: accounts/templates/accounts/partials/_confirm_identity.html:18
 msgid "Mail me a confirmation link"
 msgstr "Envoyez-moi un lien de confirmation"
+
+#: accounts/templates/accounts/partials/_guardians_card.html:12
+msgid "Guardians"
+msgstr "Responsables"
+
+#: accounts/templates/accounts/partials/_guardians_card.html:17
+msgid ""
+"Every guardian can sign %(name)s up for sessions, change their details and "
+"their own login, and gets the mails about them."
+msgstr "Chaque responsable peut inscrire %(name)s aux séances, modifier ses données et son propre compte, et reçoit les e-mails le ou la concernant."
+
+#: accounts/templates/accounts/partials/_guardians_card.html:24
+msgid "you"
+msgstr "vous"
+
+#: accounts/templates/accounts/partials/_guardians_card.html:43
+msgid "until %(date)s"
+msgstr "jusqu'au %(date)s"
+
+#: accounts/templates/accounts/partials/_guardians_card.html:63
+msgid "Invite another guardian"
+msgstr "Inviter un autre responsable"
+
+#: accounts/templates/accounts/partials/_guardians_card.html:64
+msgid ""
+"For example %(name)s's other parent. We mail them a link; they become a "
+"guardian once they accept it with an account on that address. %(name)s's "
+"other guardians are told right away, and can withdraw the invitation."
+msgstr "Par exemple l'autre parent de %(name)s. Nous lui envoyons un lien ; la personne devient responsable une fois qu'elle l'accepte avec un compte à cette adresse. Les autres responsables de %(name)s sont prévenus tout de suite et peuvent retirer l'invitation."
+
+#: accounts/templates/accounts/partials/_guardians_card.html:75
+msgid "Only a parent or legal guardian can invite or remove guardians."
+msgstr "Seul un parent ou tuteur légal peut inviter ou retirer des responsables."
 
 #: accounts/templates/accounts/partials/_ninja_login_card.html:14
 #: dojos/templates/dojos/dojo_members.html:54
@@ -3355,6 +3546,36 @@ msgid "A spot opened up in %(event)s — a waitlisted family is now confirmed."
 msgstr ""
 "Une place s'est libérée pour %(event)s : une famille de la liste d'attente "
 "est maintenant confirmée."
+
+#: accounts/views/guardians.py:68
+msgid "Enter a valid email address and choose a relation."
+msgstr "Saisissez une adresse e-mail valide et choisissez un lien avec l'enfant."
+
+#: accounts/views/guardians.py:81
+msgid ""
+"We've mailed an invitation to %(email)s. %(name)s's other guardians have "
+"been told."
+msgstr "Nous avons envoyé une invitation à %(email)s. Les autres responsables de %(name)s ont été prévenus."
+
+#: accounts/views/guardians.py:101
+msgid "We've mailed %(email)s a new link."
+msgstr "Nous avons envoyé un nouveau lien à %(email)s."
+
+#: accounts/views/guardians.py:115
+msgid "The invitation to %(email)s is withdrawn."
+msgstr "L'invitation à %(email)s est retirée."
+
+#: accounts/views/guardians.py:136
+msgid "You're no longer %(name)s's guardian."
+msgstr "Vous n'êtes plus responsable de %(name)s."
+
+#: accounts/views/guardians.py:140
+msgid "%(guardian)s is no longer %(name)s's guardian. We've let them know."
+msgstr "%(guardian)s n'est plus responsable de %(name)s. Nous l'avons prévenu."
+
+#: accounts/views/guardians.py:179
+msgid "You're now %(name)s's guardian."
+msgstr "Vous êtes maintenant responsable de %(name)s."
 
 #: api/forms.py:16
 msgid "Scan app at the door"
@@ -4530,7 +4751,7 @@ msgstr "Tests envoyés à vous-même"
 msgid "New sessions (the automatic mail)"
 msgstr "Nouvelles sessions (le mail automatique)"
 
-#: campaigns/forms.py:34 mailing/forms.py:144
+#: campaigns/forms.py:34 mailing/forms.py:151
 #: mailing/templates/mailing/manage/mail_log.html:37
 #: mailing/templates/mailing/manage/mail_log.html:57
 #: mailing/templates/mailing/manage/mail_queue.html:61
@@ -4612,8 +4833,8 @@ msgstr "De qui il s'agit, en une phrase."
 #: campaigns/forms.py:127
 #: campaigns/templates/campaigns/manage/segment_list.html:13 dojos/forms.py:68
 #: dojos/forms.py:94 events/forms.py:201 events/forms.py:271
-#: events/forms.py:329 events/forms.py:360 mailing/forms.py:111
-#: mailing/forms.py:146
+#: events/forms.py:329 events/forms.py:360 mailing/forms.py:118
+#: mailing/forms.py:153
 msgid "Description"
 msgstr "Description"
 
@@ -4667,7 +4888,7 @@ msgstr "Jusqu'à l'âge de"
 msgid "Pathway"
 msgstr "Parcours"
 
-#: campaigns/forms.py:180 mailing/forms.py:111
+#: campaigns/forms.py:180 mailing/forms.py:118
 #: mailing/templates/mailing/manage/mail_log.html:56
 #: mailing/templates/mailing/manage/mail_queue.html:60
 #: mailing/templates/mailing/manage/mail_queue.html:104
@@ -7141,7 +7362,7 @@ msgstr "Sessions en %(languages)s"
 #: dojos/templates/dojos/dojo_detail.html:110
 #: dojos/templates/dojos/dojo_detail.html:134
 #: events/templates/events/event_detail.html:144
-#: pages/templates/pages/home.html:78 pages/templates/pages/home.html:211
+#: pages/templates/pages/home.html:74 pages/templates/pages/home.html:207
 msgid "Sign up now"
 msgstr "Inscrivez-vous maintenant"
 
@@ -7202,7 +7423,7 @@ msgid "Your request to join this team is waiting for an answer."
 msgstr "Votre demande pour rejoindre cette équipe attend une réponse."
 
 #: dojos/templates/dojos/dojo_detail.html:193
-#: pages/templates/pages/home.html:174
+#: pages/templates/pages/home.html:170
 msgid "Frequently asked questions"
 msgstr "Questions fréquentes"
 
@@ -7335,7 +7556,7 @@ msgstr "Trouver un dojo"
 
 #: dojos/templates/dojos/dojo_list.html:31
 #: events/templates/events/event_list.html:94
-#: pages/templates/pages/home.html:110
+#: pages/templates/pages/home.html:106
 #: pathways/templates/pathways/pathway_detail.html:143
 msgid "Find a dojo near you"
 msgstr "Trouvez un dojo près de chez vous"
@@ -8751,56 +8972,56 @@ msgstr ""
 "La newsletter de CoderDojo Belgium et des événements comme Coolest Projects "
 "et CoderDojo Girlz."
 
-#: mailing/forms.py:111
+#: mailing/forms.py:118
 msgid "Text"
 msgstr "Texte"
 
-#: mailing/forms.py:112
+#: mailing/forms.py:119
 msgid "When it's sent and which variables it uses."
 msgstr "Quand il est envoyé et quelles variables il utilise."
 
-#: mailing/forms.py:141
+#: mailing/forms.py:148
 msgid "Lowercase, with _ between words, e.g. campaign_summer_camp."
 msgstr "En minuscules, avec _ entre les mots, p. ex. campaign_summer_camp."
 
-#: mailing/forms.py:142
+#: mailing/forms.py:149
 msgid "campaign_summer_camp"
 msgstr "campaign_summer_camp"
 
-#: mailing/forms.py:149
+#: mailing/forms.py:156
 msgid "When it's used and which variables it takes."
 msgstr "Quand il est utilisé et quelles variables il reçoit."
 
-#: mailing/forms.py:159
+#: mailing/forms.py:166
 msgid "A template with this name already exists."
 msgstr "Un modèle avec ce nom existe déjà."
 
-#: mailing/forms.py:166
+#: mailing/forms.py:173
 msgid "Email address"
 msgstr "Adresse e-mail"
 
-#: mailing/forms.py:168 mailing/forms.py:193
+#: mailing/forms.py:175 mailing/forms.py:200
 #: mailing/templates/mailing/manage/mail_queue.html:105
 #: mailing/templates/mailing/manage/mail_queue.html:181
 msgid "Why"
 msgstr "Pourquoi"
 
-#: mailing/forms.py:171
+#: mailing/forms.py:178
 msgid "Only the organisation sees this, e.g. \"The family asked us to stop\"."
 msgstr ""
 "Seule l'organisation voit ceci, p. ex. « La famille nous a demandé "
 "d'arrêter »."
 
-#: mailing/forms.py:177 mailing/queue_actions.py:78
+#: mailing/forms.py:184 mailing/queue_actions.py:78
 #, python-format
 msgid "%(email)s is already blocked."
 msgstr "%(email)s est déjà bloquée."
 
-#: mailing/forms.py:188 mailing/templates/mailing/manage/mail_queue.html:231
+#: mailing/forms.py:195 mailing/templates/mailing/manage/mail_queue.html:231
 msgid "Domain"
 msgstr "Domaine"
 
-#: mailing/forms.py:190
+#: mailing/forms.py:197
 msgid ""
 "Everything after the @, e.g. \"coderdojo-demo.example\". Its subdomains are "
 "blocked too."
@@ -8808,18 +9029,18 @@ msgstr ""
 "Tout ce qui suit le @, p. ex. « coderdojo-demo.example ». Ses sous-domaines "
 "sont aussi bloqués."
 
-#: mailing/forms.py:196
+#: mailing/forms.py:203
 msgid ""
 "Only the organisation sees this, e.g. \"Made-up addresses of the demo data\"."
 msgstr ""
 "Seule l'organisation voit ceci, p. ex. « Adresses inventées des données de "
 "démonstration »."
 
-#: mailing/forms.py:202
+#: mailing/forms.py:209
 msgid "Enter a domain such as \"example.com\", without an address in front."
 msgstr "Saisissez un domaine comme « example.com », sans adresse devant."
 
-#: mailing/forms.py:204 mailing/queue_actions.py:100
+#: mailing/forms.py:211 mailing/queue_actions.py:100
 #, python-format
 msgid "%(domain)s is already blocked."
 msgstr "%(domain)s est déjà bloqué."
@@ -9869,15 +10090,15 @@ msgstr ""
 msgid "CoderDojo Belgium · Free coding club for kids and teens"
 msgstr "CoderDojo Belgium · Club de code gratuit pour enfants et ados"
 
-#: pages/templates/pages/home.html:74
+#: pages/templates/pages/home.html:70
 msgid "Free coding club · Saturdays"
 msgstr "Club de code gratuit · le samedi"
 
-#: pages/templates/pages/home.html:75
+#: pages/templates/pages/home.html:71
 msgid "Build something awesome with code."
 msgstr "Créez quelque chose de génial avec du code."
 
-#: pages/templates/pages/home.html:76
+#: pages/templates/pages/home.html:72
 msgid ""
 "Free, for ages 7–18. No experience needed — bring a laptop and an idea, "
 "we'll help with the rest."
@@ -9885,64 +10106,64 @@ msgstr ""
 "Gratuit, de 7 à 18 ans. Aucune expérience requise : apportez un ordinateur "
 "portable et une idée, nous vous aidons pour le reste."
 
-#: pages/templates/pages/home.html:88
+#: pages/templates/pages/home.html:84
 msgid "What you'll learn"
 msgstr "Ce que vous allez apprendre"
 
-#: pages/templates/pages/home.html:89
+#: pages/templates/pages/home.html:85
 msgid "Pick a path — or try a bit of everything before you commit to one."
 msgstr ""
 "Choisissez un parcours, ou essayez un peu de tout avant de vous décider."
 
-#: pages/templates/pages/home.html:92
+#: pages/templates/pages/home.html:88
 msgid "Previous pathways"
 msgstr "Parcours précédents"
 
-#: pages/templates/pages/home.html:95
+#: pages/templates/pages/home.html:91
 msgid "Next pathways"
 msgstr "Parcours suivants"
 
-#: pages/templates/pages/home.html:111
+#: pages/templates/pages/home.html:107
 msgid "Every session is free and run by local volunteers."
 msgstr "Chaque session est gratuite et animée par des bénévoles locaux."
 
-#: pages/templates/pages/home.html:121
+#: pages/templates/pages/home.html:117
 msgid "Free sessions with open spots, soonest first."
 msgstr "Sessions gratuites avec des places libres, les plus proches d'abord."
 
-#: pages/templates/pages/home.html:124
+#: pages/templates/pages/home.html:120
 msgid "Previous sessions"
 msgstr "Sessions précédentes"
 
-#: pages/templates/pages/home.html:127
+#: pages/templates/pages/home.html:123
 msgid "Next sessions"
 msgstr "Sessions suivantes"
 
-#: pages/templates/pages/home.html:135
+#: pages/templates/pages/home.html:131
 msgid "See every upcoming event →"
 msgstr "Voir tous les événements à venir →"
 
-#: pages/templates/pages/home.html:140
+#: pages/templates/pages/home.html:136
 msgid "Meet the team"
 msgstr "Découvrez l'équipe"
 
-#: pages/templates/pages/home.html:141
+#: pages/templates/pages/home.html:137
 msgid "Our team and volunteers who keep every dojo running."
 msgstr "Notre équipe et les bénévoles qui font tourner chaque dojo."
 
-#: pages/templates/pages/home.html:155
+#: pages/templates/pages/home.html:151
 msgid "No team members listed yet."
 msgstr "Aucun membre de l'équipe pour l'instant."
 
-#: pages/templates/pages/home.html:194
+#: pages/templates/pages/home.html:190
 msgid "Made possible by"
 msgstr "Rendu possible grâce à"
 
-#: pages/templates/pages/home.html:209
+#: pages/templates/pages/home.html:205
 msgid "Ready to build your first project?"
 msgstr "Prêt pour votre premier projet ?"
 
-#: pages/templates/pages/home.html:210
+#: pages/templates/pages/home.html:206
 msgid ""
 "Free, for ages 7–18. No experience needed — spots are limited, so sign up "
 "before Saturday."
@@ -10118,7 +10339,7 @@ msgstr "Tapez le nom d'utilisateur, %(username)s, pour confirmer"
 msgid "Type the account's username to confirm."
 msgstr "Tapez le nom d'utilisateur du compte pour confirmer."
 
-#: privacy/retention.py:301
+#: privacy/retention.py:302
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
@@ -10130,7 +10351,7 @@ msgstr ""
 "qu'il reste champion. Demandez-lui de passer le rôle à un mentor, ou "
 "contactez l'organisation."
 
-#: privacy/retention.py:307
+#: privacy/retention.py:308
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "

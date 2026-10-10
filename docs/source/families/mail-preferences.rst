@@ -27,7 +27,9 @@ and their belts) to choose which news about sessions and events you get.
 It's off unless you ticked it when you signed up or added the child, and
 you can change it at any time. It's only about mail: signing your child up
 for sessions, their belts and badges never depend on it. If both parents
-have an account, each chooses for themselves.
+have an account, each chooses for themselves. Only a parent or legal
+guardian sees this switch: a guardian added as **Other** isn't asked (see
+:doc:`managing-your-account`).
 
 Choosing which mails you get
 ----------------------------

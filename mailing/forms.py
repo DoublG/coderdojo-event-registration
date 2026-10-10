@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from accounts.models import Guardianship
 from dojos.models import Dojo
 
 from .categories import CAN_OPT_OUT, DESCRIPTIONS, MailCategory, categories_for
@@ -59,7 +60,13 @@ class MailPreferencesForm(forms.Form):
         self.guardianships = (
             []
             if user.is_ninja
-            else list(user.guardianships.select_related("ninja").order_by("ninja__name", "ninja__family_name"))
+            # Only a parent or legal guardian gives this consent
+            # (DATA_MODEL_PRIVACY.md §27): another guardian isn't asked.
+            else list(
+                user.guardianships.filter(relation__in=Guardianship.RESPONSIBLE_RELATIONS)
+                .select_related("ninja")
+                .order_by("ninja__name", "ninja__family_name")
+            )
         )
         for guardianship in self.guardianships:
             self.fields[f"child_{guardianship.ninja_id}"] = forms.BooleanField(

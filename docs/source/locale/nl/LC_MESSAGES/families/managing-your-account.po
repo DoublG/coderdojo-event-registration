@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-03 06:54+0000\n"
+"POT-Creation-Date: 2026-10-10 21:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: nl\n"
@@ -324,10 +324,79 @@ msgstr ""
 "stopt de rol ook."
 
 #: ../../source/families/managing-your-account.rst:123
+msgid "Your child's other guardians"
+msgstr "De andere verantwoordelijken van je kind"
+
+#: ../../source/families/managing-your-account.rst:125
+msgid ""
+"A child can have more than one guardian on the site: for example both "
+"parents, also when they live apart, or a grandparent who brings them. "
+"Each guardian has their own account, sees the child on their family page,"
+" can sign them up and change their details and their own login, and gets "
+"the mails about them."
+msgstr "Een kind kan op de site meer dan één verantwoordelijke hebben: bijvoorbeeld beide ouders, ook als ze apart wonen, of een grootouder die het kind brengt. Elke verantwoordelijke heeft een eigen account, ziet het kind op de gezinspagina, kan het inschrijven en de gegevens en de eigen login aanpassen, en krijgt de e-mails over het kind."
+
+#: ../../source/families/managing-your-account.rst:131
+msgid ""
+"Your child's page has a **Guardians** card that lists them all, with how "
+"each is related to the child: **Parent**, **Legal guardian** or **Other**"
+" (someone else you trust, such as a grandparent or a carer)."
+msgstr "De pagina van je kind heeft een kaart **Verantwoordelijken** met iedereen erop, en de band van elk met het kind: **Ouder**, **Voogd** of **Anders** (iemand anders die je vertrouwt, zoals een grootouder of een opvang)."
+
+#: ../../source/families/managing-your-account.rst:135
+msgid ""
+"To add one, open **Invite another guardian**, enter their email address, "
+"choose how they're related to your child and choose **Send the "
+"invitation**. We mail them a link, valid for 14 days. They create an "
+"account with that address (or log in, if they have one) and accept. Until"
+" then the invitation shows under **Invitations waiting**, where you can "
+"**Send again** (a new link) or **Withdraw** it."
+msgstr "Om iemand toe te voegen, open je **Nog een verantwoordelijke uitnodigen**, vul je het e-mailadres in, kies je de band met je kind en kies je **De uitnodiging versturen**. We mailen een link die 14 dagen geldig is. De persoon maakt een account aan met dat adres (of meldt zich aan, als die er al een heeft) en aanvaardt. Tot dan staat de uitnodiging onder **Wachtende uitnodigingen**, waar je ze **Opnieuw sturen** kunt (een nieuwe link) of **Intrekken**."
+
+#: ../../source/families/managing-your-account.rst:142
+msgid ""
+"Your child's other guardians get a mail as soon as you send an "
+"invitation, not only once it's accepted, and again when it's accepted. A "
+"parent or legal guardian who doesn't agree can withdraw it."
+msgstr "De andere verantwoordelijken van je kind krijgen een e-mail zodra je een uitnodiging verstuurt, niet pas als ze aanvaard is, en opnieuw wanneer ze aanvaard wordt. Een ouder of voogd die het er niet mee eens is, kan ze intrekken."
+
+#: ../../source/families/managing-your-account.rst:146
+msgid ""
+"Only a **parent or legal guardian** can invite or remove guardians. "
+"Someone added as **Other** manages the child like everyone else, but:"
+msgstr "Alleen een **ouder of voogd** kan verantwoordelijken uitnodigen of verwijderen. Iemand die als **Anders** is toegevoegd, beheert het kind zoals iedereen, maar:"
+
+#: ../../source/families/managing-your-account.rst:149
+msgid ""
+"isn't asked whether your child's details may choose which mails you get "
+"(see :doc:`mail-preferences`);"
+msgstr "krijgt niet de vraag of de gegevens van je kind mogen bepalen welke e-mails je krijgt (zie :doc:`mail-preferences`);"
+
+#: ../../source/families/managing-your-account.rst:151
+msgid "doesn't get your child's data in their own copy of their data;"
+msgstr "krijgt de gegevens van je kind niet in de eigen kopie van zijn of haar gegevens;"
+
+#: ../../source/families/managing-your-account.rst:152
+msgid ""
+"doesn't keep your child on the site: if the last parent or legal guardian"
+" deletes their account, your child's details go with it."
+msgstr "houdt je kind niet op de site: als de laatste ouder of voogd het account verwijdert, gaan de gegevens van je kind mee."
+
+#: ../../source/families/managing-your-account.rst:155
+msgid ""
+"**Remove** next to a guardian takes them off (a parent or legal guardian "
+"only); **Step down** next to your own name takes you off. Both ask for "
+"your password first. The person removed and the other guardians are "
+"mailed. Your child always keeps at least one parent or legal guardian on "
+"the site: the only one can't step down, but can delete their account "
+"instead."
+msgstr "**Verwijderen** naast een verantwoordelijke haalt die persoon eraf (alleen voor een ouder of voogd); **Stoppen** naast je eigen naam haalt jou eraf. Beide vragen eerst je wachtwoord. De verwijderde persoon en de andere verantwoordelijken krijgen een e-mail. Je kind houdt op de site altijd minstens één ouder of voogd: de enige kan niet stoppen, maar kan wel het account verwijderen."
+
+#: ../../source/families/managing-your-account.rst:163
 msgid "Getting a copy of your data"
 msgstr "Een kopie van uw gegevens krijgen"
 
-#: ../../source/families/managing-your-account.rst:125
+#: ../../source/families/managing-your-account.rst:165
 msgid ""
 "Your family page has a **Your data** card. **Download my data** gives you"
 " a file with everything we keep about you and your children: your account"
@@ -347,15 +416,15 @@ msgstr ""
 "tekst die u in elke teksteditor kunt openen of naar een andere dienst "
 "kunt meenemen."
 
-#: ../../source/families/managing-your-account.rst:133
+#: ../../source/families/managing-your-account.rst:173
 msgid ""
 "A child with their own login finds the same button on their own page; "
-"their file holds only their own data."
-msgstr ""
-"Een kind met een eigen login vindt dezelfde knop op zijn eigen pagina; "
-"zijn bestand bevat alleen zijn eigen gegevens."
+"their file holds only their own data. A guardian added as **Other** gets "
+"only their own data, not the child's (see \"Your child's other "
+"guardians\")."
+msgstr "Een kind met een eigen login vindt dezelfde knop op de eigen pagina; dat bestand bevat alleen de eigen gegevens. Een verantwoordelijke die als **Anders** is toegevoegd, krijgt alleen de eigen gegevens, niet die van het kind (zie \"De andere verantwoordelijken van je kind\")."
 
-#: ../../source/families/managing-your-account.rst:136
+#: ../../source/families/managing-your-account.rst:177
 msgid ""
 "You can download it once a minute. If you'd rather ask by email or post, "
 "contact us and we'll send it to your account's email address."
@@ -364,32 +433,23 @@ msgstr ""
 " of per post, neem dan contact met ons op en we sturen het naar het "
 "e-mailadres van uw account."
 
-#: ../../source/families/managing-your-account.rst:140
+#: ../../source/families/managing-your-account.rst:181
 msgid "Deleting your account"
 msgstr "Je account verwijderen"
 
-#: ../../source/families/managing-your-account.rst:142
+#: ../../source/families/managing-your-account.rst:183
 msgid ""
 "**Delete my account**, on the same **Your data** card, first shows what "
 "will happen: which of your children are deleted with your account (those "
-"only you are a parent or guardian of, with their own logins, belts and "
-"badges; the sessions they came to keep counting, without their name), and"
-" which stay with their other parent or guardian. Enter your password to "
-"confirm (with a login link: see :doc:`logging-in-with-a-link`); your "
-"account is deleted right away, and that can't be undone. Download your "
-"data first if you'd like a copy."
-msgstr ""
-"**Mijn account verwijderen**, op dezelfde kaart **Jouw gegevens**, toont "
-"eerst wat er zal gebeuren: welke van je kinderen samen met je account "
-"verwijderd worden (die van wie alleen jij ouder of voogd bent, met hun "
-"eigen logins, gordels en badges; de sessies waar ze naartoe kwamen "
-"blijven meetellen, zonder hun naam), en welke bij hun andere ouder of "
-"voogd blijven. Bevestig met je wachtwoord (met een inloglink: zie :doc"
-":`logging-in-with-a-link`); je account wordt meteen verwijderd, en dat "
-"kan niet ongedaan gemaakt worden. Download eerst je gegevens als je een "
-"kopie wil."
+"only you are a parent or legal guardian of, with their own logins, belts "
+"and badges; the sessions they came to keep counting, without their name),"
+" and which stay with their other parent or legal guardian. Enter your "
+"password to confirm (with a login link: see :doc:`logging-in-"
+"with-a-link`); your account is deleted right away, and that can't be "
+"undone. Download your data first if you'd like a copy."
+msgstr "**Mijn account verwijderen**, op dezelfde kaart **Jouw gegevens**, toont eerst wat er gebeurt: welke van je kinderen met je account verwijderd worden (die van wie alleen jij ouder of voogd bent, met hun eigen logins, gordels en badges; de sessies waar ze kwamen blijven meetellen, zonder hun naam), en welke blijven bij hun andere ouder of voogd. Vul je wachtwoord in om te bevestigen (met een aanmeldlink: zie :doc:`logging-in-with-a-link`); je account wordt meteen verwijderd, en dat kan niet ongedaan gemaakt worden. Download eerst je gegevens als je een kopie wilt."
 
-#: ../../source/families/managing-your-account.rst:150
+#: ../../source/families/managing-your-account.rst:191
 msgid ""
 "**Champions and mentors:** your name stays on the sessions you helped run"
 " and on the belts and badges you awarded, and so does your profile on the"
@@ -402,17 +462,17 @@ msgstr ""
 " Als champion van een actieve dojo geef je de rol eerst door aan een van "
 "de mentors."
 
-#: ../../source/families/managing-your-account.rst:155
+#: ../../source/families/managing-your-account.rst:196
 msgid "You can also ask us by email or post; we'll delete it for you."
 msgstr ""
 "Je kan het ons ook per mail of per post vragen; dan verwijderen wij het "
 "voor je."
 
-#: ../../source/families/managing-your-account.rst:158
+#: ../../source/families/managing-your-account.rst:199
 msgid "Accounts you no longer use"
 msgstr "Accounts die je niet meer gebruikt"
 
-#: ../../source/families/managing-your-account.rst:160
+#: ../../source/families/managing-your-account.rst:201
 msgid ""
 "We don't keep data we no longer need. If you don't log in for **two "
 "years**, your account is deleted. A month before that date, and again a "
@@ -428,7 +488,7 @@ msgstr ""
 "beginnen de twee jaar opnieuw. Ook de eigen logins van je kinderen tellen"
 " mee: zolang een van hen inlogt, blijft je account."
 
-#: ../../source/families/managing-your-account.rst:167
+#: ../../source/families/managing-your-account.rst:208
 msgid ""
 "The mail we send you is kept for a year: after that we only keep that a "
 "mail of a certain kind went out on a certain day, not what it said or the"
@@ -438,7 +498,7 @@ msgstr ""
 " bij dat er op een bepaalde dag een e-mail van een bepaald soort vertrok,"
 " niet wat erin stond of naar welk adres hij ging."
 
-#: ../../source/families/managing-your-account.rst:171
+#: ../../source/families/managing-your-account.rst:212
 msgid ""
 "Children only you are a guardian of are deleted with your account: their "
 "details, belts and badges. The sessions they came to keep counting, "
@@ -450,7 +510,7 @@ msgstr ""
 "naartoe kwamen blijven meetellen, zonder hun naam. Een kind dat ook op "
 "het account van een andere ouder staat, blijft bij dat account."
 
-#: ../../source/families/managing-your-account.rst:176
+#: ../../source/families/managing-your-account.rst:217
 msgid ""
 "A child's own login has no date of its own: it goes when the child does, "
 "and the mails about it come to you."
@@ -458,7 +518,7 @@ msgstr ""
 "De eigen login van een kind heeft geen eigen datum: hij verdwijnt samen "
 "met het kind, en de mails daarover krijg jij."
 
-#: ../../source/families/managing-your-account.rst:179
+#: ../../source/families/managing-your-account.rst:220
 msgid ""
 "**Champions and mentors:** your name stays on the sessions you helped run"
 " and on the belts and badges you awarded, and so does your profile on the"
@@ -473,11 +533,11 @@ msgstr ""
 "dojo, blijft je account tot je de rol doorgeeft aan een van de mentors "
 "van de dojo."
 
-#: ../../source/families/managing-your-account.rst:186
+#: ../../source/families/managing-your-account.rst:227
 msgid "Already a champion or mentor?"
 msgstr "Al champion of mentor?"
 
-#: ../../source/families/managing-your-account.rst:188
+#: ../../source/families/managing-your-account.rst:229
 msgid ""
 "Every account has a family page: open **My Account** from your account "
 "menu and use **Add a child** there. Your children are added to the same "
@@ -488,11 +548,11 @@ msgstr ""
 "toegevoegd aan dezelfde login die u al gebruikt, zonder aparte "
 "registratie of tweede account."
 
-#: ../../source/families/managing-your-account.rst:193
+#: ../../source/families/managing-your-account.rst:234
 msgid "Changing your password"
 msgstr "Uw wachtwoord wijzigen"
 
-#: ../../source/families/managing-your-account.rst:195
+#: ../../source/families/managing-your-account.rst:236
 msgid ""
 "Go to **Change password** (also linked from your account page). You'll "
 "need your current password to set a new one."
@@ -500,11 +560,11 @@ msgstr ""
 "Ga naar **Wachtwoord wijzigen** (ook toegankelijk via uw accountpagina). "
 "U hebt uw huidige wachtwoord nodig om een nieuw wachtwoord in te stellen."
 
-#: ../../source/families/managing-your-account.rst:199
+#: ../../source/families/managing-your-account.rst:240
 msgid "Volunteering"
 msgstr "Vrijwilligerswerk"
 
-#: ../../source/families/managing-your-account.rst:201
+#: ../../source/families/managing-your-account.rst:242
 msgid ""
 "The **Volunteering** section of your account page shows any application "
 "you've made to become a mentor or start a dojo, and where your background"

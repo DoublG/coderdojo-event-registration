@@ -1,0 +1,77 @@
+{% load i18n %}{% comment %}
+The child page's "Guardians" card (DATA_MODEL_PRIVACY.md §27), for the
+child's adult guardians only: every guardian with their relation, the
+invitations waiting, and inviting another adult. A parent or legal guardian
+invites, sends again, withdraws and removes; any guardian sees the list and
+can step down. Removing or stepping down opens a page that asks to confirm
+it's them (guardian_remove). The forms post over htmx and swap this card;
+without htmx the view redirects back to the page, with the outcome as a
+message. Built by accounts.views.guardians._guardians_card_context.
+{% endcomment %}
+<section class="section cd-card login-card guardians-card" id="guardians-card" aria-labelledby="guardians-heading">
+  <h2 class="heading-md section-title" id="guardians-heading">{% translate "Guardians" %}</h2>
+
+  {% if guardians_error %}<p class="cd-form__note cd-form__note--error caption" role="alert">{{ guardians_error }}</p>{% endif %}
+  {% if guardians_notice %}<p class="cd-form__note cd-form__note--success caption" role="status">{{ guardians_notice }}</p>{% endif %}
+
+  <p class="body-sm">{% blocktranslate trimmed with name=child.name %}Every guardian can sign {{ name }} up for sessions, change their details and their own login, and gets the mails about them.{% endblocktranslate %}</p>
+
+  <ul class="guardian-list">
+    {% for entry in guardian_links %}
+      {% with link=entry.link %}
+        <li class="guardian-list__row">
+          <span class="guardian-list__name">
+            <span class="body">{{ link.guardian.team_name }}{% if entry.is_you %} <span class="body-sm muted">({% translate "you" %})</span>{% endif %}</span>
+            <span class="body-sm muted">{{ link.get_relation_display }}</span>
+          </span>
+          {% if entry.can_remove %}
+            <a class="cd-btn cd-btn--ghost label" href="{% url 'guardian_remove' ninja_id=child.id guardianship_id=link.id %}">{% if entry.is_you %}{% translate "Step down" %}{% else %}{% translate "Remove" %}{% endif %}</a>
+          {% endif %}
+        </li>
+      {% endwith %}
+    {% endfor %}
+  </ul>
+
+  {% if can_manage_guardians %}
+    {% if guardian_invitations %}
+      <h3 class="label guardians-card__subtitle">{% translate "Invitations waiting" %}</h3>
+      <ul class="guardian-list">
+        {% for invitation in guardian_invitations %}
+          <li class="guardian-list__row">
+            <span class="guardian-list__name">
+              <span class="body">{{ invitation.email }}</span>
+              <span class="body-sm muted">{{ invitation.get_relation_display }} · {% blocktranslate with date=invitation.expires_at|date:"j F" %}until {{ date }}{% endblocktranslate %}</span>
+            </span>
+            <span class="guardian-list__actions">
+              <form method="post" action="{% url 'guardian_invitation_resend' ninja_id=child.id invitation_id=invitation.id %}"
+                    hx-post="{% url 'guardian_invitation_resend' ninja_id=child.id invitation_id=invitation.id %}" hx-target="#guardians-card" hx-swap="outerHTML">
+                {% csrf_token %}
+                <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Send again" %}</button>
+              </form>
+              <form method="post" action="{% url 'guardian_invitation_withdraw' ninja_id=child.id invitation_id=invitation.id %}"
+                    hx-post="{% url 'guardian_invitation_withdraw' ninja_id=child.id invitation_id=invitation.id %}" hx-target="#guardians-card" hx-swap="outerHTML">
+                {% csrf_token %}
+                <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Withdraw" %}</button>
+              </form>
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <details class="guardians-card__invite"{% if guardian_form.errors %} open{% endif %}>
+      <summary class="label">{% translate "Invite another guardian" %}</summary>
+      <p class="body-sm">{% blocktranslate trimmed with name=child.name %}For example {{ name }}'s other parent. We mail them a link; they become a guardian once they accept it with an account on that address. {{ name }}'s other guardians are told right away, and can withdraw the invitation.{% endblocktranslate %}</p>
+      <form method="post" class="cd-form" action="{% url 'guardian_invite' ninja_id=child.id %}"
+            hx-post="{% url 'guardian_invite' ninja_id=child.id %}" hx-target="#guardians-card" hx-swap="outerHTML" novalidate>
+        {% csrf_token %}
+        {{ guardian_form }}
+        <div class="cd-form__actions" style="justify-content: flex-start;">
+          <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Send the invitation" %}</button>
+        </div>
+      </form>
+    </details>
+  {% else %}
+    <p class="body-sm muted">{% translate "Only a parent or legal guardian can invite or remove guardians." %}</p>
+  {% endif %}
+</section>

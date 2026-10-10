@@ -119,7 +119,7 @@ STEPS = {
         ),
         "child": (
             "La page d'un enfant",
-            "Par enfant : coordonnées, ceinture, badges, sessions suivies et à venir, et s'il a son propre compte.",
+            "Par enfant : coordonnées, ceinture, badges, sessions suivies et à venir, s'il a son propre compte, et ses responsables, où un parent en invite un autre (l'autre parent, un grand-parent).",
         ),
         "event": ("Choisir une session", "Le parent ouvre une session du dojo d'attache de l'enfant."),
         "pick-children": (

@@ -104,6 +104,23 @@ urlpatterns = [
         name="ninja_login_use_password",
     ),
     path("account/ninja/<int:ninja_id>/login/email/", views.ninja_login_email, name="ninja_login_email"),
+    path("account/ninja/<int:ninja_id>/guardians/invite/", views.guardian_invite, name="guardian_invite"),
+    path(
+        "account/ninja/<int:ninja_id>/guardians/invitations/<int:invitation_id>/resend/",
+        views.guardian_invitation_resend,
+        name="guardian_invitation_resend",
+    ),
+    path(
+        "account/ninja/<int:ninja_id>/guardians/invitations/<int:invitation_id>/withdraw/",
+        views.guardian_invitation_withdraw,
+        name="guardian_invitation_withdraw",
+    ),
+    path(
+        "account/ninja/<int:ninja_id>/guardians/<int:guardianship_id>/remove/",
+        views.guardian_remove,
+        name="guardian_remove",
+    ),
+    path("account/guardian-invitations/<str:token>/", views.guardian_invitation, name="guardian_invitation"),
     path(
         "account/registration/<int:registration_id>/cancel/",
         views.cancel_registration,

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-03 06:54+0000\n"
+"POT-Creation-Date: 2026-10-10 21:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -331,10 +331,79 @@ msgstr ""
 "compte de votre enfant : le rôle prend fin aussi."
 
 #: ../../source/families/managing-your-account.rst:123
+msgid "Your child's other guardians"
+msgstr "Les autres responsables de votre enfant"
+
+#: ../../source/families/managing-your-account.rst:125
+msgid ""
+"A child can have more than one guardian on the site: for example both "
+"parents, also when they live apart, or a grandparent who brings them. "
+"Each guardian has their own account, sees the child on their family page,"
+" can sign them up and change their details and their own login, and gets "
+"the mails about them."
+msgstr "Un enfant peut avoir plus d'un responsable sur le site : par exemple ses deux parents, même s'ils vivent séparément, ou un grand-parent qui l'accompagne. Chaque responsable a son propre compte, voit l'enfant sur sa page famille, peut l'inscrire, modifier ses données et son propre compte, et reçoit les e-mails le ou la concernant."
+
+#: ../../source/families/managing-your-account.rst:131
+msgid ""
+"Your child's page has a **Guardians** card that lists them all, with how "
+"each is related to the child: **Parent**, **Legal guardian** or **Other**"
+" (someone else you trust, such as a grandparent or a carer)."
+msgstr "La page de votre enfant a une carte **Responsables** qui les liste tous, avec le lien de chacun avec l'enfant : **Parent**, **Tuteur légal** ou **Autre** (quelqu'un d'autre en qui vous avez confiance, comme un grand-parent ou une personne qui garde l'enfant)."
+
+#: ../../source/families/managing-your-account.rst:135
+msgid ""
+"To add one, open **Invite another guardian**, enter their email address, "
+"choose how they're related to your child and choose **Send the "
+"invitation**. We mail them a link, valid for 14 days. They create an "
+"account with that address (or log in, if they have one) and accept. Until"
+" then the invitation shows under **Invitations waiting**, where you can "
+"**Send again** (a new link) or **Withdraw** it."
+msgstr "Pour en ajouter un, ouvrez **Inviter un autre responsable**, saisissez son adresse e-mail, choisissez son lien avec votre enfant et choisissez **Envoyer l'invitation**. Nous lui envoyons un lien valable 14 jours. La personne crée un compte avec cette adresse (ou se connecte, si elle en a déjà un) et accepte. D'ici là, l'invitation apparaît sous **Invitations en attente**, où vous pouvez la **Renvoyer** (un nouveau lien) ou la **Retirer**."
+
+#: ../../source/families/managing-your-account.rst:142
+msgid ""
+"Your child's other guardians get a mail as soon as you send an "
+"invitation, not only once it's accepted, and again when it's accepted. A "
+"parent or legal guardian who doesn't agree can withdraw it."
+msgstr "Les autres responsables de votre enfant reçoivent un e-mail dès que vous envoyez une invitation, pas seulement une fois qu'elle est acceptée, et de nouveau quand elle l'est. Un parent ou tuteur légal qui n'est pas d'accord peut la retirer."
+
+#: ../../source/families/managing-your-account.rst:146
+msgid ""
+"Only a **parent or legal guardian** can invite or remove guardians. "
+"Someone added as **Other** manages the child like everyone else, but:"
+msgstr "Seul un **parent ou tuteur légal** peut inviter ou retirer des responsables. Une personne ajoutée comme **Autre** gère l'enfant comme tout le monde, mais :"
+
+#: ../../source/families/managing-your-account.rst:149
+msgid ""
+"isn't asked whether your child's details may choose which mails you get "
+"(see :doc:`mail-preferences`);"
+msgstr "n'est pas invitée à dire si les données de votre enfant peuvent choisir les e-mails que vous recevez (voir :doc:`mail-preferences`) ;"
+
+#: ../../source/families/managing-your-account.rst:151
+msgid "doesn't get your child's data in their own copy of their data;"
+msgstr "ne reçoit pas les données de votre enfant dans sa propre copie de ses données ;"
+
+#: ../../source/families/managing-your-account.rst:152
+msgid ""
+"doesn't keep your child on the site: if the last parent or legal guardian"
+" deletes their account, your child's details go with it."
+msgstr "ne garde pas votre enfant sur le site : si le dernier parent ou tuteur légal supprime son compte, les données de votre enfant partent avec lui."
+
+#: ../../source/families/managing-your-account.rst:155
+msgid ""
+"**Remove** next to a guardian takes them off (a parent or legal guardian "
+"only); **Step down** next to your own name takes you off. Both ask for "
+"your password first. The person removed and the other guardians are "
+"mailed. Your child always keeps at least one parent or legal guardian on "
+"the site: the only one can't step down, but can delete their account "
+"instead."
+msgstr "**Retirer** à côté d'un responsable le retire (un parent ou tuteur légal seulement) ; **Me retirer** à côté de votre propre nom vous retire. Les deux demandent d'abord votre mot de passe. La personne retirée et les autres responsables reçoivent un e-mail. Votre enfant garde toujours au moins un parent ou tuteur légal sur le site : le seul ne peut pas se retirer, mais peut supprimer son compte."
+
+#: ../../source/families/managing-your-account.rst:163
 msgid "Getting a copy of your data"
 msgstr "Obtenir une copie de vos données"
 
-#: ../../source/families/managing-your-account.rst:125
+#: ../../source/families/managing-your-account.rst:165
 msgid ""
 "Your family page has a **Your data** card. **Download my data** gives you"
 " a file with everything we keep about you and your children: your account"
@@ -354,15 +423,15 @@ msgstr ""
 "un fichier JSON : du texte brut que vous pouvez ouvrir dans n'importe "
 "quel éditeur de texte ou emporter vers un autre service."
 
-#: ../../source/families/managing-your-account.rst:133
+#: ../../source/families/managing-your-account.rst:173
 msgid ""
 "A child with their own login finds the same button on their own page; "
-"their file holds only their own data."
-msgstr ""
-"Un enfant qui a son propre compte trouve le même bouton sur sa propre "
-"page ; son fichier ne contient que ses propres données."
+"their file holds only their own data. A guardian added as **Other** gets "
+"only their own data, not the child's (see \"Your child's other "
+"guardians\")."
+msgstr "Un enfant qui a son propre compte trouve le même bouton sur sa page ; son fichier ne contient que ses propres données. Un responsable ajouté comme **Autre** reçoit seulement ses propres données, pas celles de l'enfant (voir « Les autres responsables de votre enfant »)."
 
-#: ../../source/families/managing-your-account.rst:136
+#: ../../source/families/managing-your-account.rst:177
 msgid ""
 "You can download it once a minute. If you'd rather ask by email or post, "
 "contact us and we'll send it to your account's email address."
@@ -371,32 +440,23 @@ msgstr ""
 "demander par e-mail ou par courrier, contactez-nous et nous l'enverrons à"
 " l'adresse e-mail de votre compte."
 
-#: ../../source/families/managing-your-account.rst:140
+#: ../../source/families/managing-your-account.rst:181
 msgid "Deleting your account"
 msgstr "Supprimer votre compte"
 
-#: ../../source/families/managing-your-account.rst:142
+#: ../../source/families/managing-your-account.rst:183
 msgid ""
 "**Delete my account**, on the same **Your data** card, first shows what "
 "will happen: which of your children are deleted with your account (those "
-"only you are a parent or guardian of, with their own logins, belts and "
-"badges; the sessions they came to keep counting, without their name), and"
-" which stay with their other parent or guardian. Enter your password to "
-"confirm (with a login link: see :doc:`logging-in-with-a-link`); your "
-"account is deleted right away, and that can't be undone. Download your "
-"data first if you'd like a copy."
-msgstr ""
-"**Supprimer mon compte**, sur la même carte **Vos données**, montre "
-"d'abord ce qui va se passer : lesquels de vos enfants sont supprimés avec"
-" votre compte (ceux dont vous êtes le seul parent ou tuteur, avec leur "
-"propre compte, leurs ceintures et badges ; les sessions auxquelles ils "
-"ont participé restent comptées, sans leur nom), et lesquels restent avec "
-"leur autre parent ou tuteur. Confirmez avec votre mot de passe (avec un "
-"lien de connexion : voir :doc:`logging-in-with-a-link`) ; votre compte "
-"est supprimé immédiatement, et c'est irréversible. Téléchargez d'abord "
-"vos données si vous souhaitez en garder une copie."
+"only you are a parent or legal guardian of, with their own logins, belts "
+"and badges; the sessions they came to keep counting, without their name),"
+" and which stay with their other parent or legal guardian. Enter your "
+"password to confirm (with a login link: see :doc:`logging-in-"
+"with-a-link`); your account is deleted right away, and that can't be "
+"undone. Download your data first if you'd like a copy."
+msgstr "**Supprimer mon compte**, sur la même carte **Vos données**, montre d'abord ce qui va se passer : lesquels de vos enfants sont supprimés avec votre compte (ceux dont vous êtes le seul parent ou tuteur légal, avec leurs propres comptes, ceintures et badges ; les séances auxquelles ils sont venus continuent de compter, sans leur nom), et lesquels restent avec leur autre parent ou tuteur légal. Saisissez votre mot de passe pour confirmer (avec un lien de connexion : voir :doc:`logging-in-with-a-link`) ; votre compte est supprimé tout de suite, et cela ne peut pas être annulé. Téléchargez d'abord vos données si vous en voulez une copie."
 
-#: ../../source/families/managing-your-account.rst:150
+#: ../../source/families/managing-your-account.rst:191
 msgid ""
 "**Champions and mentors:** your name stays on the sessions you helped run"
 " and on the belts and badges you awarded, and so does your profile on the"
@@ -409,17 +469,17 @@ msgstr ""
 "l'afficher. Comme champion d'un dojo actif, passez d'abord le rôle à un "
 "de ses mentors."
 
-#: ../../source/families/managing-your-account.rst:155
+#: ../../source/families/managing-your-account.rst:196
 msgid "You can also ask us by email or post; we'll delete it for you."
 msgstr ""
 "Vous pouvez aussi nous le demander par e-mail ou par courrier ; nous le "
 "supprimerons pour vous."
 
-#: ../../source/families/managing-your-account.rst:158
+#: ../../source/families/managing-your-account.rst:199
 msgid "Accounts you no longer use"
 msgstr "Les comptes que vous n'utilisez plus"
 
-#: ../../source/families/managing-your-account.rst:160
+#: ../../source/families/managing-your-account.rst:201
 msgid ""
 "We don't keep data we no longer need. If you don't log in for **two "
 "years**, your account is deleted. A month before that date, and again a "
@@ -436,7 +496,7 @@ msgstr ""
 "personnels de vos enfants comptent aussi : tant que l'un d'eux se "
 "connecte, votre compte reste."
 
-#: ../../source/families/managing-your-account.rst:167
+#: ../../source/families/managing-your-account.rst:208
 msgid ""
 "The mail we send you is kept for a year: after that we only keep that a "
 "mail of a certain kind went out on a certain day, not what it said or the"
@@ -446,7 +506,7 @@ msgstr ""
 "gardons seulement qu'un e-mail d'un certain type est parti un certain "
 "jour, pas ce qu'il disait ni l'adresse à laquelle il a été envoyé."
 
-#: ../../source/families/managing-your-account.rst:171
+#: ../../source/families/managing-your-account.rst:212
 msgid ""
 "Children only you are a guardian of are deleted with your account: their "
 "details, belts and badges. The sessions they came to keep counting, "
@@ -458,7 +518,7 @@ msgstr ""
 "auxquelles ils ont participé restent comptées, sans leur nom. Un enfant "
 "qui figure aussi sur le compte d'un autre parent reste sur ce compte."
 
-#: ../../source/families/managing-your-account.rst:176
+#: ../../source/families/managing-your-account.rst:217
 msgid ""
 "A child's own login has no date of its own: it goes when the child does, "
 "and the mails about it come to you."
@@ -466,7 +526,7 @@ msgstr ""
 "Le compte personnel d'un enfant n'a pas de date propre : il disparaît "
 "avec l'enfant, et les e-mails à ce sujet vous sont envoyés."
 
-#: ../../source/families/managing-your-account.rst:179
+#: ../../source/families/managing-your-account.rst:220
 msgid ""
 "**Champions and mentors:** your name stays on the sessions you helped run"
 " and on the belts and badges you awarded, and so does your profile on the"
@@ -481,11 +541,11 @@ msgstr ""
 "dojo actif, votre compte reste jusqu'à ce que vous passiez le rôle à un "
 "des mentors du dojo."
 
-#: ../../source/families/managing-your-account.rst:186
+#: ../../source/families/managing-your-account.rst:227
 msgid "Already a champion or mentor?"
 msgstr "Déjà champion ou mentor ?"
 
-#: ../../source/families/managing-your-account.rst:188
+#: ../../source/families/managing-your-account.rst:229
 msgid ""
 "Every account has a family page: open **My Account** from your account "
 "menu and use **Add a child** there. Your children are added to the same "
@@ -496,11 +556,11 @@ msgstr ""
 "au même identifiant que vous utilisez déjà, sans inscription séparée ni "
 "second compte."
 
-#: ../../source/families/managing-your-account.rst:193
+#: ../../source/families/managing-your-account.rst:234
 msgid "Changing your password"
 msgstr "Modifier votre mot de passe"
 
-#: ../../source/families/managing-your-account.rst:195
+#: ../../source/families/managing-your-account.rst:236
 msgid ""
 "Go to **Change password** (also linked from your account page). You'll "
 "need your current password to set a new one."
@@ -509,11 +569,11 @@ msgstr ""
 "page de votre compte). Vous aurez besoin de votre mot de passe actuel "
 "pour en définir un nouveau."
 
-#: ../../source/families/managing-your-account.rst:199
+#: ../../source/families/managing-your-account.rst:240
 msgid "Volunteering"
 msgstr "Bénévolat"
 
-#: ../../source/families/managing-your-account.rst:201
+#: ../../source/families/managing-your-account.rst:242
 msgid ""
 "The **Volunteering** section of your account page shows any application "
 "you've made to become a mentor or start a dojo, and where your background"

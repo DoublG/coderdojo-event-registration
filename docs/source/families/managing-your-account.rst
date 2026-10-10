@@ -119,6 +119,46 @@ happens, and it shows on your child's page. If you'd rather they didn't,
 talk to the dojo's team, or remove your child's login, which also ends
 the role.
 
+Your child's other guardians
+------------------------------
+
+A child can have more than one guardian on the site: for example both
+parents, also when they live apart, or a grandparent who brings them.
+Each guardian has their own account, sees the child on their family page,
+can sign them up and change their details and their own login, and gets
+the mails about them.
+
+Your child's page has a **Guardians** card that lists them all, with how
+each is related to the child: **Parent**, **Legal guardian** or **Other**
+(someone else you trust, such as a grandparent or a carer).
+
+To add one, open **Invite another guardian**, enter their email address,
+choose how they're related to your child and choose **Send the
+invitation**. We mail them a link, valid for 14 days. They create an
+account with that address (or log in, if they have one) and accept. Until
+then the invitation shows under **Invitations waiting**, where you can
+**Send again** (a new link) or **Withdraw** it.
+
+Your child's other guardians get a mail as soon as you send an
+invitation, not only once it's accepted, and again when it's accepted. A
+parent or legal guardian who doesn't agree can withdraw it.
+
+Only a **parent or legal guardian** can invite or remove guardians.
+Someone added as **Other** manages the child like everyone else, but:
+
+- isn't asked whether your child's details may choose which mails you
+  get (see :doc:`mail-preferences`);
+- doesn't get your child's data in their own copy of their data;
+- doesn't keep your child on the site: if the last parent or legal
+  guardian deletes their account, your child's details go with it.
+
+**Remove** next to a guardian takes them off (a parent or legal guardian
+only); **Step down** next to your own name takes you off. Both ask for
+your password first. The person removed and the other guardians are
+mailed. Your child always keeps at least one parent or legal guardian on
+the site: the only one can't step down, but can delete their account
+instead.
+
 Getting a copy of your data
 -----------------------------
 
@@ -131,7 +171,8 @@ decisions (never the document itself). It's a JSON file: plain text you
 can open in any text editor, or take to another service.
 
 A child with their own login finds the same button on their own page;
-their file holds only their own data.
+their file holds only their own data. A guardian added as **Other** gets
+only their own data, not the child's (see "Your child's other guardians").
 
 You can download it once a minute. If you'd rather ask by email or post,
 contact us and we'll send it to your account's email address.
@@ -141,9 +182,9 @@ Deleting your account
 
 **Delete my account**, on the same **Your data** card, first shows what
 will happen: which of your children are deleted with your account (those
-only you are a parent or guardian of, with their own logins, belts and
-badges; the sessions they came to keep counting, without their name),
-and which stay with their other parent or guardian. Enter your password to
+only you are a parent or legal guardian of, with their own logins, belts
+and badges; the sessions they came to keep counting, without their name),
+and which stay with their other parent or legal guardian. Enter your password to
 confirm (with a login link: see :doc:`logging-in-with-a-link`); your account is deleted right away, and that can't be undone.
 Download your data first if you'd like a copy.
 

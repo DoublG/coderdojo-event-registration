@@ -55,7 +55,7 @@ with sync_playwright() as pw:
     j.shot(
         "child",
         "A child's page",
-        "Per child: details, belt, badges, sessions attended and upcoming, and whether the child has a login of their own.",
+        "Per child: details, belt, badges, sessions attended and upcoming, whether the child has a login of their own, and the child's guardians, where a parent invites another (the other parent, a grandparent).",
         max_h=2000,
     )
     p = j.go("/events/71/")

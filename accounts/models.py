@@ -320,7 +320,12 @@ class Guardianship(models.Model):
     PARENT = "parent"
     LEGAL_GUARDIAN = "legal_guardian"
     OTHER = "other"
-    RELATION_CHOICES = [(PARENT, "Parent"), (LEGAL_GUARDIAN, "Legal guardian"), (OTHER, "Other")]
+    RELATION_CHOICES = [(PARENT, _("Parent")), (LEGAL_GUARDIAN, _("Legal guardian")), (OTHER, _("Other"))]
+    # The relations with parental responsibility (DATA_MODEL_PRIVACY.md §27):
+    # only they give the consent, exercise the child's GDPR rights, invite or
+    # remove guardians, and count for erasure. `relation` is never an access
+    # level: every guardian manages the child the same way.
+    RESPONSIBLE_RELATIONS = (PARENT, LEGAL_GUARDIAN)
 
     guardian = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -349,6 +354,11 @@ class Guardianship(models.Model):
 
     def __str__(self):
         return f"{self.guardian} → {self.ninja}"
+
+    @property
+    def is_responsible(self):
+        """Holds parental responsibility (a parent or legal guardian)."""
+        return self.relation in self.RESPONSIBLE_RELATIONS
 
 
 class OrganisationRoleManager(models.Manager):
@@ -510,6 +520,61 @@ class OrganisationInvitation(models.Model):
     withdrawn_at = models.DateTimeField(null=True, blank=True)
 
     objects = OrganisationInvitationManager()
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.email} ({self.created_at:%Y-%m-%d})"
+
+    @property
+    def is_pending(self):
+        return self.accepted_at is None and self.withdrawn_at is None and self.expires_at > timezone.now()
+
+
+class GuardianInvitationQuerySet(models.QuerySet):
+    def pending(self, now=None):
+        """Not accepted, withdrawn or expired yet."""
+        now = now or timezone.now()
+        return self.filter(accepted_at__isnull=True, withdrawn_at__isnull=True, expires_at__gt=now)
+
+
+class GuardianInvitationManager(models.Manager.from_queryset(GuardianInvitationQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().select_related("ninja", "invited_by")
+
+
+class GuardianInvitation(models.Model):
+    """An invitation to another adult to become a child's guardian
+    (DATA_MODEL_PRIVACY.md §27): a co-parent, or a trusted adult. Sent by a
+    parent or legal guardian of the child; the link is accepted by an
+    account with this same address (made from the link, or logged in), which
+    then gets a Guardianship with `relation`. Every guardian of the child is
+    told when it's sent and when it's accepted. Made, resent, withdrawn and
+    accepted only through accounts.guardian_invitations; the link's token is
+    stored only as a hash."""
+
+    ninja = models.ForeignKey(Ninja, on_delete=models.CASCADE, related_name="guardian_invitations")
+    email = models.EmailField()
+    relation = models.CharField(max_length=20, choices=Guardianship.RELATION_CHOICES)
+    language = models.CharField(max_length=10, blank=True, help_text="The invitation mail's language.")
+    invited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    token_hash = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    expires_at = models.DateTimeField()
+    accepted_at = models.DateTimeField(null=True, blank=True)
+    accepted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="guardian_invitations",
+    )
+    withdrawn_at = models.DateTimeField(null=True, blank=True)
+
+    objects = GuardianInvitationManager()
 
     class Meta:
         ordering = ["-created_at"]

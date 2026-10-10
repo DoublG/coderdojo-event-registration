@@ -1,0 +1,69 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Invitation to be a guardian" %} · CoderDojo Belgium{% endblock %}
+{% block root_class %}invitation-root{% endblock %}
+{% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
+
+{% block extra_style %}
+<style>
+  .invitation-root { background: var(--surface-sunken); }
+  .invitation-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+  .invitation-root .page-title { color: var(--ink); margin: 0 0 var(--space-4); }
+  .invitation-root .form-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
+</style>
+{% endblock %}
+
+{% block content %}
+  {% comment %}
+  The link from the child_guardian_invitation mail
+  (accounts.views.guardian_invitation, DATA_MODEL_PRIVACY.md §27). `state`:
+  invalid, sign_up (no account with the address yet), log_in (one exists),
+  other_account (logged in with another address), already (already this
+  child's guardian) or accept.
+  {% endcomment %}
+  <div class="page">
+    <h1 class="display-lg page-title">{% translate "Invitation to be a guardian" %}</h1>
+    <div class="form-card">
+      {% for message in messages %}
+        <p class="cd-form__note {% if message.level_tag == 'error' %}cd-form__note--error{% else %}cd-form__note--success{% endif %} caption" role="status">{{ message }}</p>
+      {% endfor %}
+      {% if state == "invalid" %}
+        <p class="body">{% translate "This invitation isn't valid any more: it was used, withdrawn or has expired. Ask the person who invited you to send it again." %}</p>
+      {% else %}
+        <p class="body">{% with inviter=invitation.invited_by.team_name name=invitation.ninja.name %}{% if invitation.relation == "parent" %}{% blocktranslate trimmed %}{{ inviter }} invites you to be {{ name }}'s guardian on CoderDojo Belgium, as their parent.{% endblocktranslate %}{% elif invitation.relation == "legal_guardian" %}{% blocktranslate trimmed %}{{ inviter }} invites you to be {{ name }}'s guardian on CoderDojo Belgium, as their legal guardian.{% endblocktranslate %}{% else %}{% blocktranslate trimmed %}{{ inviter }} invites you to be {{ name }}'s guardian on CoderDojo Belgium, as a trusted adult.{% endblocktranslate %}{% endif %}{% endwith %}</p>
+        <p class="body-sm">{% blocktranslate trimmed with name=invitation.ninja.name %}As a guardian you can sign {{ name }} up for sessions, change their details and their own login, and you get the mails about them. {{ name }}'s other guardians can see that you're one.{% endblocktranslate %}</p>
+        {% if state == "sign_up" %}
+          <p class="body-sm">{% blocktranslate with email=invitation.email %}Create your account with <strong>{{ email }}</strong> to accept; you come back here afterwards.{% endblocktranslate %}</p>
+          <div class="cd-form__actions" style="justify-content: flex-start;">
+            <a class="cd-btn cd-btn--primary label" href="{{ sign_up_url }}">{% translate "Create my account" %}</a>
+          </div>
+        {% elif state == "log_in" %}
+          <p class="body-sm">{% blocktranslate with email=invitation.email %}There's already an account with <strong>{{ email }}</strong>: log in with it to accept.{% endblocktranslate %}</p>
+          <div class="cd-form__actions" style="justify-content: flex-start;">
+            <a class="cd-btn cd-btn--primary label" href="{{ login_url }}">{% translate "Log in" %}</a>
+          </div>
+        {% elif state == "other_account" %}
+          <p class="body-sm">{% blocktranslate with email=invitation.email %}This invitation is for <strong>{{ email }}</strong>. Log out, then open the link again and log in with that address, or create an account with it.{% endblocktranslate %}</p>
+        {% elif state == "already" %}
+          <p class="body-sm">{% blocktranslate with name=invitation.ninja.name %}You're already {{ name }}'s guardian.{% endblocktranslate %}</p>
+          <div class="cd-form__actions" style="justify-content: flex-start;">
+            <a class="cd-btn cd-btn--primary label" href="{% url 'ninja_detail' ninja_id=invitation.ninja_id %}">{% blocktranslate with name=invitation.ninja.name %}Go to {{ name }}'s page{% endblocktranslate %}</a>
+          </div>
+        {% else %}
+          <form method="post" class="cd-form">
+            {% csrf_token %}
+            {% if may_give_consent %}
+              <div class="cd-form__checkbox-row">
+                <input type="checkbox" id="gi-consent" name="consent"{% if form.consent.value %} checked{% endif %}>
+                <label class="body-sm" for="gi-consent">{% include "accounts/partials/_child_data_consent.html" %} <span class="caption">{% translate "Optional; you can change it for each child on your Mail preferences page." %}</span></label>
+              </div>
+            {% endif %}
+            <div class="cd-form__actions" style="justify-content: flex-start;">
+              <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Accept the invitation" %}</button>
+            </div>
+          </form>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

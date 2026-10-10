@@ -52,6 +52,10 @@ RECORDED: dict[str, dict[str, list[str]]] = {
     "accounts.AdminAccessGrant": {},
     # Who invited whom to which roles, and when it was accepted or withdrawn.
     "accounts.OrganisationInvitation": {"exclude_fields": ["token_hash"]},
+    # Who invited whom to be a child's guardian, and when it was accepted or
+    # withdrawn (DATA_MODEL_PRIVACY.md §27): who is responsible for a child
+    # can be disputed between separated parents.
+    "accounts.GuardianInvitation": {"exclude_fields": ["token_hash"]},
     # The organisation roles' permission groups (accounts/organisation.py).
     "auth.Group": {"m2m_fields": ["permissions"]},
     "dojos.Dojo": {},

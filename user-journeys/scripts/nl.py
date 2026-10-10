@@ -119,7 +119,7 @@ STEPS = {
         ),
         "child": (
             "De pagina van een kind",
-            "Per kind: gegevens, gordel, badges, bezochte en komende sessies, en of het kind een eigen login heeft.",
+            "Per kind: gegevens, gordel, badges, bezochte en komende sessies, of het kind een eigen login heeft, en de verantwoordelijken van het kind, waar een ouder iemand anders uitnodigt (de andere ouder, een grootouder).",
         ),
         "event": ("Een sessie kiezen", "De ouder opent een sessie in de thuisdojo van het kind."),
         "pick-children": (

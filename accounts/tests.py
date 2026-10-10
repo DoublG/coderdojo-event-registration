@@ -4027,3 +4027,328 @@ class CachedSessionTests(TestCase):
         self.assertTrue(Session.objects.filter(session_key=self.client.session.session_key).exists())
         cache.clear()
         self.assertEqual(self.client.get(reverse("account_home")).status_code, 200)
+
+
+class GuardianInvitationTests(TestCase):
+    """A child's guardians (accounts.guardian_invitations,
+    DATA_MODEL_PRIVACY.md §27): a parent invites another adult, every
+    guardian hears of it before it happens, only an account with the invited
+    address can accept, and a child always keeps a parent or legal guardian."""
+
+    def setUp(self):
+        from django.core.cache import cache
+        from django.core.management import call_command
+
+        cache.clear()  # the one-invitation-a-minute throttle
+        call_command("load_mail_templates", verbosity=0)
+        self.mother = self._adult("mother", "sarah@example.com", "Sarah")
+        self.father = self._adult("father", "tom@example.com", "Tom")
+        self.child = Ninja.objects.create(name="Emma", family_name="Peeters")
+        self.mother_link = Guardianship.objects.create(guardian=self.mother, ninja=self.child)
+        self.client.force_login(self.mother)
+
+    def _adult(self, username, email, first_name):
+        user = User.objects.create(username=username, email=email, first_name=first_name)
+        user.set_password("pw-123456!")
+        user.save()
+        return user
+
+    def _invite(self, email="tom@example.com", relation=Guardianship.PARENT, **headers):
+        return self.client.post(
+            reverse("guardian_invite", kwargs={"ninja_id": self.child.id}),
+            {"email": email, "relation": relation},
+            **headers,
+        )
+
+    def _token(self):
+        import re
+
+        from mailing.models import EmailMessage
+
+        body = EmailMessage.objects.filter(template_key="child_guardian_invitation").latest("pk").body
+        return re.search(r"/account/guardian-invitations/([^/\s]+)/", body).group(1)
+
+    def _link(self, token=None):
+        return reverse("guardian_invitation", kwargs={"token": token or self._token()})
+
+    def _mails(self, key):
+        from mailing.models import EmailMessage
+
+        return EmailMessage.objects.filter(template_key=key)
+
+    def test_the_card_shows_on_the_childs_page_for_guardians_only(self):
+        response = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
+        self.assertContains(response, 'id="guardians-card"')
+        self.assertContains(response, "Invite another guardian")
+        # Never to the child's own login.
+        own = User.objects.create(username="emma", account_type=User.NINJA)
+        self.child.account = own
+        self.child.save()
+        self.client.force_login(own)
+        response = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
+        self.assertNotContains(response, 'id="guardians-card"')
+
+    def test_inviting_mails_the_address_and_tells_the_other_guardians_before_it_happens(self):
+        from .models import GuardianInvitation
+
+        grandma = self._adult("grandma", "oma@example.com", "Oma")
+        Guardianship.objects.create(guardian=grandma, ninja=self.child, relation=Guardianship.OTHER)
+        response = self._invite()
+        self.assertRedirects(
+            response,
+            reverse("ninja_detail", kwargs={"ninja_id": self.child.id}) + "#guardians-card",
+            fetch_redirect_response=False,
+        )
+        invitation = GuardianInvitation.objects.get()
+        self.assertEqual(
+            (invitation.email, invitation.relation, invitation.invited_by), ("tom@example.com", "parent", self.mother)
+        )
+        self.assertEqual(invitation.token_hash, guardian_hash(self._token()))
+        self.assertEqual(self._mails("child_guardian_invitation").get().recipient, "tom@example.com")
+        # The other guardian hears of it now; the one who sent it doesn't need to.
+        self.assertEqual(list(self._mails("child_guardian_invited").values_list("user", flat=True)), [grandma.pk])
+        self.assertFalse(Guardianship.objects.filter(guardian=self.father).exists())
+
+    def test_the_card_swaps_over_htmx_with_the_invitation_waiting(self):
+        response = self._invite(HTTP_HX_REQUEST="true")
+        self.assertTemplateUsed(response, "accounts/partials/_guardians_card.html")
+        self.assertContains(response, "Invitations waiting")
+        self.assertContains(response, "tom@example.com")
+
+    def test_only_a_parent_or_legal_guardian_invites(self):
+        from .models import GuardianInvitation
+
+        grandma = self._adult("grandma", "oma@example.com", "Oma")
+        Guardianship.objects.create(guardian=grandma, ninja=self.child, relation=Guardianship.OTHER)
+        self.client.force_login(grandma)
+        self._invite()
+        self.assertFalse(GuardianInvitation.objects.exists())
+        page = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.child.id}))
+        self.assertContains(page, "Only a parent or legal guardian can invite or remove guardians.")
+        self.assertNotContains(page, "Invite another guardian")
+
+    def test_another_familys_child_is_a_404(self):
+        stranger = self._adult("stranger", "x@example.com", "X")
+        self.client.force_login(stranger)
+        self.assertEqual(self._invite().status_code, 404)
+
+    def test_refused_addresses(self):
+        from .guardian_invitations import GuardianInvitationError, invite
+
+        for email, relation in (("", "parent"), ("sarah@example.com", "parent"), ("tom@example.com", "boss")):
+            with self.assertRaises(GuardianInvitationError):
+                invite(self.child, email, relation, self.mother)
+        Guardianship.objects.create(guardian=self.father, ninja=self.child)
+        with self.assertRaisesMessage(GuardianInvitationError, "already a guardian"):
+            invite(self.child, "TOM@example.com", "parent", self.mother)
+
+    def test_one_waiting_invitation_per_address_and_a_minute_between_them(self):
+        from .guardian_invitations import GuardianInvitationError, invite
+
+        invite(self.child, "tom@example.com", "parent", self.mother)
+        with self.assertRaisesMessage(GuardianInvitationError, "already has an invitation waiting"):
+            invite(self.child, "tom@example.com", "parent", self.mother)
+        with self.assertRaisesMessage(GuardianInvitationError, "wait a minute"):
+            invite(self.child, "other@example.com", "parent", self.mother)
+
+    def test_accepting_with_the_invited_address_links_the_child_and_tells_the_others(self):
+        self._invite()
+        link = self._link()
+        self.client.force_login(self.father)
+        self.assertContains(self.client.get(link), "Accept the invitation")
+        response = self.client.post(link, {"consent": "on"})
+        self.assertRedirects(
+            response, reverse("ninja_detail", kwargs={"ninja_id": self.child.id}), fetch_redirect_response=False
+        )
+        new = Guardianship.objects.get(guardian=self.father, ninja=self.child)
+        self.assertEqual(new.relation, Guardianship.PARENT)
+        self.assertIsNotNone(new.consent_given_at)
+        self.assertEqual(list(self._mails("child_guardian_added").values_list("user", flat=True)), [self.mother.pk])
+        self.assertIn(self.child, Ninja.objects.of_guardian(self.father))
+        # Single use.
+        self.assertContains(self.client.get(link), "isn't valid any more")
+
+    def test_a_trusted_adult_is_never_asked_for_the_consent(self):
+        self._invite(relation=Guardianship.OTHER)
+        link = self._link()
+        self.client.force_login(self.father)
+        self.assertNotContains(self.client.get(link), 'name="consent"')
+        self.client.post(link, {"consent": "on"})
+        new = Guardianship.objects.get(guardian=self.father)
+        self.assertEqual(new.relation, Guardianship.OTHER)
+        self.assertIsNone(new.consent_given_at)
+
+    def test_another_account_cannot_accept_and_a_post_is_a_404(self):
+        self._invite()
+        link = self._link()
+        stranger = self._adult("stranger", "x@example.com", "X")
+        self.client.force_login(stranger)
+        self.assertContains(self.client.get(link), "This invitation is for <strong>tom@example.com</strong>")
+        self.assertEqual(self.client.post(link).status_code, 404)
+        self.assertFalse(Guardianship.objects.filter(guardian=stranger).exists())
+
+    def test_logged_out_it_offers_an_account_or_a_login_and_comes_back(self):
+        from .guardian_invitations import invite
+
+        invite(self.child, "new@example.com", "parent", self.mother)
+        new_link = self._link()
+        cache_clear()
+        invite(self.child, "tom@example.com", "parent", self.mother)
+        existing_link = self._link()
+        self.client.logout()
+        # No account with the address yet: make one, then back here.
+        response = self.client.get(new_link)
+        self.assertContains(response, "Create my account")
+        self.assertContains(response, f"{reverse('register_individual')}?next=")
+        # An account exists: log in with it, then back here.
+        response = self.client.get(existing_link)
+        self.assertContains(response, f"{reverse('login')}?next=")
+
+    def test_withdrawn_by_the_other_parent(self):
+        from .guardian_invitations import invite
+
+        Guardianship.objects.create(guardian=self.father, ninja=self.child)
+        invitation = invite(self.child, "new@example.com", "other", self.mother)
+        token = self._token()
+        self.client.force_login(self.father)
+        self.client.post(
+            reverse("guardian_invitation_withdraw", kwargs={"ninja_id": self.child.id, "invitation_id": invitation.id})
+        )
+        invitation.refresh_from_db()
+        self.assertIsNotNone(invitation.withdrawn_at)
+        self.assertContains(self.client.get(self._link(token)), "isn't valid any more")
+
+    def test_resend_gives_a_new_link(self):
+        from .guardian_invitations import invite
+
+        invitation = invite(self.child, "tom@example.com", "parent", self.mother)
+        old = self._token()
+        cache_clear()
+        self.client.post(
+            reverse("guardian_invitation_resend", kwargs={"ninja_id": self.child.id, "invitation_id": invitation.id})
+        )
+        self.assertNotEqual(self._token(), old)
+        self.assertContains(self.client.get(self._link(old)), "isn't valid any more")
+
+    def test_an_invitation_from_a_removed_parent_stops_working(self):
+        from .guardian_invitations import invite
+
+        father_link = Guardianship.objects.create(guardian=self.father, ninja=self.child)
+        invite(self.child, "new@example.com", "parent", self.father)
+        token = self._token()
+        father_link.delete()
+        self.client.logout()
+        self.assertContains(self.client.get(self._link(token)), "isn't valid any more")
+
+    def test_removing_another_guardian_asks_the_password_and_mails_them(self):
+        father_link = Guardianship.objects.create(guardian=self.father, ninja=self.child)
+        url = reverse("guardian_remove", kwargs={"ninja_id": self.child.id, "guardianship_id": father_link.id})
+        self.assertContains(self.client.get(url), "Remove Tom as Emma")
+        self.client.post(url, {"password": "wrong"})
+        self.assertTrue(Guardianship.objects.filter(pk=father_link.pk).exists())
+        response = self.client.post(url, {"password": "pw-123456!"})
+        self.assertRedirects(
+            response,
+            reverse("ninja_detail", kwargs={"ninja_id": self.child.id}) + "#guardians-card",
+            fetch_redirect_response=False,
+        )
+        self.assertFalse(Guardianship.objects.filter(pk=father_link.pk).exists())
+        removed = self._mails("child_guardian_removed")
+        self.assertEqual(set(removed.values_list("user", flat=True)), {self.mother.pk, self.father.pk})
+        self.assertIn("removed you", removed.get(user=self.father).body)
+
+    def test_a_trusted_adult_cannot_remove_others_but_can_step_down(self):
+        grandma = self._adult("grandma", "oma@example.com", "Oma")
+        grandma_link = Guardianship.objects.create(guardian=grandma, ninja=self.child, relation=Guardianship.OTHER)
+        self.client.force_login(grandma)
+        url = reverse("guardian_remove", kwargs={"ninja_id": self.child.id, "guardianship_id": self.mother_link.id})
+        self.client.post(url, {"password": "pw-123456!"})
+        self.assertTrue(Guardianship.objects.filter(pk=self.mother_link.pk).exists())
+        url = reverse("guardian_remove", kwargs={"ninja_id": self.child.id, "guardianship_id": grandma_link.id})
+        self.assertRedirects(
+            self.client.post(url, {"password": "pw-123456!"}), reverse("account_home"), fetch_redirect_response=False
+        )
+        self.assertFalse(Guardianship.objects.filter(pk=grandma_link.pk).exists())
+
+    def test_a_child_always_keeps_a_parent_or_legal_guardian(self):
+        from .guardian_invitations import GuardianInvitationError, remove
+
+        grandma = self._adult("grandma", "oma@example.com", "Oma")
+        Guardianship.objects.create(guardian=grandma, ninja=self.child, relation=Guardianship.OTHER)
+        # The only parent can't step down, even with a trusted adult left.
+        with self.assertRaisesMessage(GuardianInvitationError, "always needs a parent or legal guardian"):
+            remove(self.mother_link, self.mother)
+        url = reverse("guardian_remove", kwargs={"ninja_id": self.child.id, "guardianship_id": self.mother_link.id})
+        self.assertContains(self.client.get(url), "always needs a parent or legal guardian")
+        # With a second parent, either may go.
+        father_link = Guardianship.objects.create(guardian=self.father, ninja=self.child)
+        remove(father_link, self.mother)
+        self.assertFalse(Guardianship.objects.filter(pk=father_link.pk).exists())
+
+    def test_remove_old_deletes_ended_invitations_after_30_days(self):
+        from .guardian_invitations import KEEP_DAYS, invite, remove_old, withdraw
+        from .models import GuardianInvitation
+
+        invitation = invite(self.child, "tom@example.com", "parent", self.mother)
+        withdraw(invitation, self.mother)
+        self.assertEqual(remove_old(), 0)
+        self.assertEqual(remove_old(timezone.now() + timedelta(days=KEEP_DAYS + 1)), 1)
+        self.assertFalse(GuardianInvitation.objects.exists())
+
+
+class GuardianRelationPrivacyTests(TestCase):
+    """`relation` decides only what goes with parental responsibility
+    (DATA_MODEL_PRIVACY.md §27): erasure with the account, the child's data
+    in an export, and the consent on Mail preferences."""
+
+    def setUp(self):
+        self.mother = User.objects.create(username="mother", email="m@example.com")
+        self.grandma = User.objects.create(username="grandma", email="g@example.com")
+        self.child = Ninja.objects.create(name="Emma")
+        Guardianship.objects.create(guardian=self.mother, ninja=self.child)
+        Guardianship.objects.create(guardian=self.grandma, ninja=self.child, relation=Guardianship.OTHER)
+
+    def test_a_trusted_adult_does_not_keep_the_child_when_the_parent_goes(self):
+        from privacy.erasure import sole_children
+
+        self.assertEqual(sole_children(self.mother), [self.child])
+        self.assertEqual(sole_children(self.grandma), [])
+
+    def test_a_second_parent_keeps_the_child(self):
+        from privacy.erasure import sole_children
+
+        father = User.objects.create(username="father", email="f@example.com")
+        Guardianship.objects.create(guardian=father, ninja=self.child, relation=Guardianship.LEGAL_GUARDIAN)
+        self.assertEqual(sole_children(self.mother), [])
+
+    def test_deleting_a_trusted_adults_account_never_erases_the_child(self):
+        from privacy.deletion import delete_account
+
+        delete_account(self.grandma)
+        self.child.refresh_from_db()
+        self.assertEqual(self.child.name, "Emma")
+        self.assertEqual(list(self.child.guardianships.values_list("guardian", flat=True)), [self.mother.pk])
+
+    def test_only_a_parents_export_holds_the_child(self):
+        from privacy.export import children_of
+
+        self.assertEqual(list(children_of(self.mother)), [self.child])
+        self.assertEqual(list(children_of(self.grandma)), [])
+
+    def test_mail_preferences_offer_the_consent_to_a_parent_only(self):
+        from mailing.forms import MailPreferencesForm
+
+        self.assertIn(f"child_{self.child.id}", MailPreferencesForm(user=self.mother).fields)
+        self.assertNotIn(f"child_{self.child.id}", MailPreferencesForm(user=self.grandma).fields)
+
+
+def guardian_hash(token):
+    from .guardian_invitations import _hash
+
+    return _hash(token)
+
+
+def cache_clear():
+    from django.core.cache import cache
+
+    cache.clear()

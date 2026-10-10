@@ -5,6 +5,7 @@ from core.audit import AuditHistoryAdminMixin, LogAccessAdminMixin
 
 from .models import (
     AdminAccessGrant,
+    GuardianInvitation,
     Guardianship,
     Ninja,
     OrganisationInvitation,
@@ -61,6 +62,19 @@ class OrganisationInvitationAdmin(admin.ModelAdmin):
     list_display = ["email", "name", "created_at", "expires_at", "accepted_at", "withdrawn_at"]
     search_fields = ["email", "name"]
     raw_id_fields = ["invited_by", "accepted_by"]
+
+
+@admin.register(GuardianInvitation)
+class GuardianInvitationAdmin(admin.ModelAdmin):
+    """Invitations to become a child's guardian (DATA_MODEL_PRIVACY.md §27),
+    sent, resent and withdrawn on the child's page by a parent or legal
+    guardian (accounts.guardian_invitations). An edit here skips its rules:
+    no mail goes out, the other guardians aren't told, and the link's token
+    is only a hash (a new link is sent from the child's page)."""
+
+    list_display = ["email", "ninja", "relation", "created_at", "expires_at", "accepted_at", "withdrawn_at"]
+    search_fields = ["email", "ninja__name", "ninja__family_name"]
+    raw_id_fields = ["ninja", "invited_by", "accepted_by"]
 
 
 @admin.register(SignInRequirement)

@@ -81,6 +81,8 @@ The site removes these by itself, every night:
   figures.
 - **Invitations** to the organisation are removed 30 days after they were
   accepted, withdrawn or ran out (an invitation is valid for 14 days).
+- **Invitations to be a child's guardian** are removed the same way: 30
+  days after they were accepted, withdrawn or ran out (valid for 14 days).
 - **Login sessions** end two weeks after they last changed, and are then
   removed.
 

@@ -56,6 +56,7 @@ nightly job is `privacy.tasks.apply_retention` (10:00, default queue).
 | `audit_log` | `auditlog.LogEntry` | with the account it's about or was made by; two years after the entry when no account is behind it | `AUDIT_LOG_RETENTION_DAYS = 730` | nightly job |
 | `admin_access` | `AdminAccessGrant` | with the audit log (a grant itself lasts 12 hours) | `accounts.admin_access.ADMIN_ACCESS_HOURS = 12` | nightly job, with the account |
 | `organisation_invitation` | `OrganisationInvitation` | removed 30 days after it was accepted, withdrawn or expired (it expires after 14 days) | `accounts.invitations.KEEP_DAYS = 30`, `VALID_DAYS = 14` | nightly job |
+| `guardian_invitation` | `GuardianInvitation` | removed 30 days after it was accepted, withdrawn or expired (it expires after 14 days) | `accounts.guardian_invitations.KEEP_DAYS = 30`, `VALID_DAYS = 14` | nightly job |
 | `mail_content` | `EmailMessage` (not `JourneyDelivery`) | account link, address, subject, body, idempotency key and Message-ID cleared 12 months after the mail was created; mail still pending or sending is left alone; the row stays for the figures | `MAIL_CONTENT_RETENTION_DAYS = 365` | nightly job |
 | `login_session` | `Session` | two weeks after the session last changed (Django's default, not set here); expired rows deleted | `SESSION_COOKIE_AGE` (default 1,209,600 s) | nightly job |
 | `task_result` | `django_celery_results` | a day (Celery's default); with `CELERY_TASK_IGNORE_RESULT` almost nothing is stored | `result_expires` (default) | `celery.backend_cleanup`, 04:00 (django-celery-beat's default entry) |
@@ -563,9 +564,61 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
   form (aggregated numbers only).
 
 
-## 27. Multiple guardians per child, with configurable per-guardian access (not built — written up for stakeholder review before implementation)
+## 27. Multiple guardians per child, with configurable per-guardian access (phases 1–3 built 10 October 2026; phase 4 waits for §28)
 
-**Not built.** `Guardianship` already supports more than one guardian per
+**Built (phases 1–3), 10 October 2026.** `accounts.GuardianInvitation`,
+the rules in `accounts/guardian_invitations.py` (`invite`, `resend`,
+`withdraw`, `accept`, `removal_problem`, `remove`, `remove_old`;
+`GuardianInvitationError`), the *Guardians* card on the child's page
+(`accounts/views/guardians.py`, `accounts/partials/_guardians_card.html`),
+the accept page (`/account/guardian-invitations/<token>/`), the remove /
+step-down page, four service mails, and `relation` wired into erasure,
+the export and the consent (decisions 3–5). Tests:
+`accounts.tests.GuardianInvitationTests`, `GuardianRelationPrivacyTests`.
+Help centre: `families/managing-your-account` ("Your child's other
+guardians"), `families/mail-preferences`, `organisation/privacy`.
+
+**Where the build differs from the design below** (decided while
+building; easy to revisit):
+
+- **Mail, not dashboard notifications.** Families have no notification
+  bell (it exists only in the dojo and organisation dashboards), so a
+  `notify()` would never be seen. Every "tell the guardians" in decision 2
+  is a service mail instead, and the *Guardians* card lists the
+  invitations waiting. Hence a fourth template, `child_guardian_invited`
+  (to the other guardians on send), next to `child_guardian_invitation`,
+  `child_guardian_added` and `child_guardian_removed`.
+- **Only a parent or legal guardian invites** (the design didn't say who
+  may): someone added as `OTHER` can't add more people.
+- **Any parent or legal guardian may withdraw or resend**, not only the
+  one who sent it: the point of telling the other parent on send is that
+  they can stop it.
+- **An invitation stops working when its sender is no longer a parent or
+  legal guardian of the child** (removed meanwhile).
+- **Removing someone, or stepping down, asks the account to confirm it's
+  them** (`ConfirmIdentityForm`, like the child's-login actions), on its
+  own page.
+- **Any guardian may step down**, also an `OTHER`; only a parent or legal
+  guardian removes others. The only parent or legal guardian can't step
+  down (the page says to delete the account instead), even with an
+  `OTHER` left (decision 4).
+- **Every guardian sees the full list** (the open point below leaned
+  yes): an `OTHER` sees who else is linked, without the actions.
+- **Sign-up from the invitation** reuses `register_individual` with a
+  safe `next` back to the accept page, rather than a sign-up page of its
+  own.
+- **Wording:** in Dutch the general role is *verantwoordelijke* (*voogd*
+  stays the legal guardian, *begeleider* would read as a coach at
+  CoderDojo); in French *responsable*.
+- **Audit log:** `GuardianInvitation` is recorded (minus `token_hash`),
+  as phase 1 recommended; `Guardianship` already was.
+
+Decision 6's open question (more friction when one co-parent removes the
+other) is unchanged: built as "immediate, with a mail to the removed
+person and every other guardian", waiting for the safeguarding/legal
+answer.
+
+**Before it was built:** `Guardianship` already supports more than one guardian per
 child structurally — `Ninja.objects.of_guardian()`, the data export
 (`privacy.export.children_of`), erasure (`privacy.deletion.preview`: "a
 child erased with the account only if this account is their guardian,
@@ -737,7 +790,7 @@ Phase 2 adds `accounts.GuardianRole` (one model, the same shape as
 
 ### Phases
 
-1. **Foundations (not built):** `GuardianInvitation` model and migration,
+1. **Foundations (built):** `GuardianInvitation` model and migration,
    admin registration, `accounts/privacy.py` classification (mirrors
    `OrganisationInvitation`'s entry), a retention job cleaning up
    accepted/withdrawn/expired invitations (same shape as
@@ -745,7 +798,8 @@ Phase 2 adds `accounts.GuardianRole` (one model, the same shape as
    invite/accept/remove (recommended: record them, same reasoning as
    `AdminAccessGrant`).
 2. **Invite, accept, notify, remove, with every guardian getting full
-   functional access regardless of relation (not built):**
+   functional access regardless of relation (built; see the differences
+   above):**
    `accounts/guardian_invitations.py`, the Guardians card, the accept
    page, three mail templates (`child_guardian_invitation`,
    `child_guardian_added`, `child_guardian_removed`) in en/nl/fr via
@@ -757,7 +811,7 @@ Phase 2 adds `accounts.GuardianRole` (one model, the same shape as
    flow; `user-journeys/scripts/check_journeys.py` will likely flag the
    parent persona — regenerate its PDFs once this is real.
 3. **Wire `relation` into erasure, GDPR-rights authority and consent
-   eligibility (not built, decisions 3–5):** update
+   eligibility (built, decisions 3–5):** update
    `privacy/deletion.py`'s preview/delete logic to key off
    `relation in (PARENT, LEGAL_GUARDIAN)` instead of "any guardian";
    gate the data-export and erasure-request views the same way; hide the
@@ -776,6 +830,14 @@ Phase 2 adds `accounts.GuardianRole` (one model, the same shape as
    "everyone gets everything."
 
 ### Open points
+
+- **The retention job and a trusted adult** (found while building
+  decision 4): a child whose only parent hasn't logged in for two years is
+  erased with that parent, even when an `OTHER` guardian still signs the
+  child up every week, since only parents and legal guardians count. The
+  parent gets the reminder mails first. Should an `OTHER` guardian's
+  activity (or the child's sessions) count as the family being active?
+  A question for the stakeholder conversation.
 
 - Phase 2's default template is "Full access" for every guardian
   regardless of relation (decision 7) — should `OTHER` instead default

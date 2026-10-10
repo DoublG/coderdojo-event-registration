@@ -21,7 +21,7 @@ from django.utils.translation import gettext_lazy as _
 from core.image_library import library_filename
 from geo.models import Municipality
 
-from .models import Ninja, SignInRequirement, User
+from .models import Guardianship, Ninja, SignInRequirement, User
 from .template_avatars import TEMPLATE_KID_AVATARS
 
 
@@ -586,6 +586,43 @@ class OrganisationEmailChangeForm(_NewEmailMixin, forms.Form):
         self.fields["new_email"].help_text = _(
             "We send a link there. The address only changes once they open it; they don't need to log in for that."
         )
+
+
+class InviteGuardianForm(forms.Form):
+    """The child page's *Guardians* card: invite another adult to become the
+    child's guardian (accounts.views.guardian_invite). The rules (who may
+    invite, which addresses) live in accounts.guardian_invitations.invite;
+    the view adds its GuardianInvitationError to the form."""
+
+    email = forms.EmailField(label=_("Their email address"), widget=forms.EmailInput(attrs={"autocomplete": "off"}))
+    relation = forms.ChoiceField(
+        label=_("How are they related to the child?"),
+        choices=[
+            (Guardianship.PARENT, _("Parent")),
+            (Guardianship.LEGAL_GUARDIAN, _("Legal guardian")),
+            (Guardianship.OTHER, _("Someone else (a grandparent, a carer, a neighbour, ...)")),
+        ],
+        initial=Guardianship.PARENT,
+        widget=forms.RadioSelect,
+        help_text=_(
+            "Every guardian manages the child the same way. Only a parent or legal guardian can also invite "
+            "or remove guardians, and decide about the child's data."
+        ),
+    )
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("auto_id", "gi-%s")
+        super().__init__(*args, **kwargs)
+
+
+class AcceptGuardianInvitationForm(forms.Form):
+    """Accepting a guardian invitation (accounts.views.guardian_invitation):
+    the optional consent to the child's details choosing mail, offered only
+    to a parent or legal guardian (accounts.guardian_invitations
+    .may_give_consent). The approved wording is a partial
+    (_child_data_consent.html), so the page writes the label itself."""
+
+    consent = forms.BooleanField(required=False)
 
 
 class ChildLoginForm(forms.Form):

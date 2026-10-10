@@ -19,7 +19,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import FileField, Model, Q, QuerySet
 from django.utils import timezone
 
-from accounts.models import Ninja
+from accounts.models import Guardianship, Ninja
 from core import privacy_registry as registry
 from core.privacy_registry import ModelPrivacy, Subject, classifiable_fields
 
@@ -36,11 +36,16 @@ class _Encoder(DjangoJSONEncoder):
 
 
 def children_of(user: "User") -> QuerySet[Ninja]:
-    """The children whose data this login gets with its own: an adult's
-    children, or a ninja login's own child record (never its siblings)."""
+    """The children whose data this login gets with its own: the children an
+    adult is a parent or legal guardian of (exercising a child's GDPR rights
+    goes with parental responsibility, DATA_MODEL_PRIVACY.md §27; another
+    guardian's export holds only their own link), or a ninja login's own
+    child record (never its siblings)."""
     if user.is_ninja:
         return Ninja.objects.filter(account=user)
-    return Ninja.objects.of_guardian(user)
+    return Ninja.objects.filter(
+        guardianships__guardian=user, guardianships__relation__in=Guardianship.RESPONSIBLE_RELATIONS
+    ).distinct()
 
 
 def _rows(entry: ModelPrivacy, user: "User", children: list[Ninja]) -> "QuerySet[Model] | list[Model]":

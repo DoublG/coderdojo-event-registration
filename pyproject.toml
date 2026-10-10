@@ -127,6 +127,7 @@ files = [
     "accounts/consent.py",
     "accounts/email_change.py",
     "accounts/home_dojo.py",
+    "accounts/guardian_invitations.py",
     "accounts/invitations.py",
     "accounts/login_links.py",
     "accounts/navigation.py",

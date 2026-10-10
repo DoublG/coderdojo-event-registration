@@ -55,6 +55,17 @@
   .child-page-root .login-card .cd-form__note { margin: 0 0 var(--space-3); }
   .child-page-root .login-card .cd-form__actions { gap: var(--space-3); flex-wrap: wrap; }
   .child-page-root .login-card .login-facts { margin: 0 0 var(--space-3); padding-left: var(--space-5); }
+  .child-page-root .guardian-list { list-style: none; margin: 0 0 var(--space-4); padding: 0; }
+  .child-page-root .guardian-list__row {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3);
+    padding: var(--space-3) 0; border-top: 1px solid var(--border);
+  }
+  .child-page-root .guardian-list__name { display: flex; flex-direction: column; min-width: 0; }
+  .child-page-root .guardian-list__actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+  .child-page-root .guardians-card__subtitle { color: var(--ink); margin: 0 0 var(--space-2); }
+  .child-page-root .guardians-card__invite summary { cursor: pointer; color: var(--secondary); min-height: 24px; }
+  .child-page-root .guardians-card__invite[open] summary { margin-bottom: var(--space-3); }
+  .child-page-root .muted { color: var(--ink-muted); }
   .child-page-root .upcoming-actions { display: flex; gap: var(--space-2); justify-content: flex-end; flex-wrap: wrap; }
 </style>
 {% endblock %}
@@ -66,6 +77,7 @@
 
     {% if can_edit %}
       {% include "accounts/partials/_ninja_login_card.html" %}
+      {% include "accounts/partials/_guardians_card.html" %}
     {% endif %}
 
     <section class="section" aria-labelledby="upcoming-heading">

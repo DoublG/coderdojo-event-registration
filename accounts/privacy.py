@@ -6,6 +6,7 @@ from core.privacy_registry import Category, Computed, LegalBasis, Subject, anony
 
 from .models import (
     AdminAccessGrant,
+    GuardianInvitation,
     Guardianship,
     Ninja,
     OrganisationInvitation,
@@ -170,6 +171,30 @@ register(
         "invited_by": personal(Category.IDENTITY, export=False),
     },
     not_personal=["id", "roles", "language", "token_hash", "created_at", "expires_at", "accepted_at", "withdrawn_at"],
+)
+
+register(
+    GuardianInvitation,
+    subjects={Subject.EMAIL: "email", Subject.ACCOUNT: "accepted_by", Subject.CHILD: "ninja"},
+    purpose="Inviting another adult to become a child's guardian (a co-parent, a trusted adult)",
+    legal_basis=LegalBasis.CONTRACT,
+    retention="guardian_invitation",
+    seen_by="The child's parents and legal guardians; the organisation (Django admin)",
+    fields={
+        ("email", "accepted_by"): personal(Category.IDENTITY),
+        "ninja": personal(Category.CHILD),
+        "invited_by": personal(Category.IDENTITY, export=False),
+    },
+    not_personal=[
+        "id",
+        "relation",
+        "language",
+        "token_hash",
+        "created_at",
+        "expires_at",
+        "accepted_at",
+        "withdrawn_at",
+    ],
 )
 
 register(

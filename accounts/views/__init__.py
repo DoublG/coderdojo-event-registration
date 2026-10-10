@@ -1,6 +1,7 @@
 """The accounts app's pages, by area: logging in and passwords (auth), family
 sign-up (signup), the account page and its details (family), a child's pages
-(children) and a child's own login (child_logins), with what they share
+(children), a child's own login (child_logins) and a child's guardians
+(guardians), with what they share
 (common). The Sign-in security pages are accounts.security_views. Every view
 is importable from here, as urls.py does."""
 
@@ -52,6 +53,14 @@ from .family import (  # noqa: F401
     change_email,
     confirm_email_change,
     edit_account,
+)
+from .guardians import (  # noqa: F401
+    _guardians_card_context,
+    guardian_invitation,
+    guardian_invitation_resend,
+    guardian_invitation_withdraw,
+    guardian_invite,
+    guardian_remove,
 )
 from .signup import (  # noqa: F401
     _create_ninjas,

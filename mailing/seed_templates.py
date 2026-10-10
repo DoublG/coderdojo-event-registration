@@ -1743,6 +1743,205 @@ savoir qu'il y en a un tout près.
         },
         "unsubscribe": True,
     },
+    {
+        "key": "child_guardian_invitation",
+        "category": MailCategory.SERVICE,
+        "description": "An invitation to become a child's guardian (accounts/guardian_invitations.py; sent to "
+        "the address, which may not have an account yet). Variables: invited_by, child_name, relation (parent, "
+        "legal_guardian, other), accept_url, valid_days.",
+        "subject": {
+            "en-us": "{{ invited_by }} invites you to be {{ child_name }}'s guardian at CoderDojo",
+            "nl-be": "{{ invited_by }} nodigt je uit als verantwoordelijke voor {{ child_name }} bij CoderDojo",
+            "fr-be": "{{ invited_by }} vous invite à être responsable de {{ child_name }} chez CoderDojo",
+        },
+        "body": {
+            "en-us": """
+Hi,
+
+{{ invited_by }} invites you to be {{ child_name }}'s guardian on the CoderDojo Belgium site, as {% if relation == "parent" %}parent{% elif relation == "legal_guardian" %}legal guardian{% else %}another trusted adult{% endif %}.
+
+As a guardian you can sign {{ child_name }} up for CoderDojo sessions, change their details, and you get the mails about them.
+
+Create your account with this address (or log in, if you have one) and accept here:
+
+{{ accept_url }}
+
+The link works for {{ valid_days }} days. Didn't expect this? You can ignore this email.
+""",
+            "nl-be": """
+Hallo,
+
+{{ invited_by }} nodigt je uit als verantwoordelijke voor {{ child_name }} op de site van CoderDojo Belgium, als {% if relation == "parent" %}ouder{% elif relation == "legal_guardian" %}voogd{% else %}andere vertrouwenspersoon{% endif %}.
+
+Als verantwoordelijke kun je {{ child_name }} inschrijven voor CoderDojo-sessies en de gegevens aanpassen, en je krijgt de e-mails over {{ child_name }}.
+
+Maak een account aan met dit adres (of meld je aan, als je er al een hebt) en aanvaard hier:
+
+{{ accept_url }}
+
+De link werkt {{ valid_days }} dagen. Verwachtte je dit niet? Dan mag je deze e-mail negeren.
+""",
+            "fr-be": """
+Bonjour,
+
+{{ invited_by }} vous invite à être responsable de {{ child_name }} sur le site de CoderDojo Belgium, en tant que {% if relation == "parent" %}parent{% elif relation == "legal_guardian" %}tuteur légal{% else %}autre adulte de confiance{% endif %}.
+
+En tant que responsable, vous pouvez inscrire {{ child_name }} aux séances CoderDojo, modifier ses données, et vous recevez les e-mails le ou la concernant.
+
+Créez votre compte avec cette adresse (ou connectez-vous, si vous en avez déjà un) et acceptez ici :
+
+{{ accept_url }}
+
+Le lien est valable {{ valid_days }} jours. Vous ne vous y attendiez pas ? Vous pouvez ignorer cet e-mail.
+""",
+        },
+    },
+    {
+        "key": "child_guardian_invited",
+        "category": MailCategory.SERVICE,
+        "description": "To a child's other guardians when someone is invited to become the child's guardian, "
+        "before it happens (accounts/guardian_invitations.py). Variables: invited_by, email, relation, "
+        "child_name, child_url, valid_days.",
+        "subject": {
+            "en-us": "Someone is invited to be {{ child_name }}'s guardian",
+            "nl-be": "Iemand is uitgenodigd als verantwoordelijke voor {{ child_name }}",
+            "fr-be": "Quelqu'un est invité à être responsable de {{ child_name }}",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{{ invited_by }} invited {{ email }} to be {{ child_name }}'s guardian on the CoderDojo Belgium site, as {% if relation == "parent" %}parent{% elif relation == "legal_guardian" %}legal guardian{% else %}another trusted adult{% endif %}. They become one if they accept within {{ valid_days }} days; then they can sign {{ child_name }} up, change their details and get their mails, like you.
+
+Don't agree? A parent or legal guardian of {{ child_name }} can withdraw the invitation on their page:
+
+{{ child_url }}
+
+Questions? Contact us.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{{ invited_by }} heeft {{ email }} uitgenodigd als verantwoordelijke voor {{ child_name }} op de site van CoderDojo Belgium, als {% if relation == "parent" %}ouder{% elif relation == "legal_guardian" %}voogd{% else %}andere vertrouwenspersoon{% endif %}. Wie de uitnodiging binnen {{ valid_days }} dagen aanvaardt, kan {{ child_name }} inschrijven, de gegevens aanpassen en krijgt de e-mails, net als jij.
+
+Niet akkoord? Een ouder of voogd van {{ child_name }} kan de uitnodiging intrekken op diens pagina:
+
+{{ child_url }}
+
+Vragen? Neem contact met ons op.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{{ invited_by }} a invité {{ email }} à être responsable de {{ child_name }} sur le site de CoderDojo Belgium, en tant que {% if relation == "parent" %}parent{% elif relation == "legal_guardian" %}tuteur légal{% else %}autre adulte de confiance{% endif %}. S'il ou elle accepte dans les {{ valid_days }} jours, il ou elle pourra inscrire {{ child_name }}, modifier ses données et recevoir ses e-mails, comme vous.
+
+Vous n'êtes pas d'accord ? Un parent ou tuteur légal de {{ child_name }} peut retirer l'invitation sur sa page :
+
+{{ child_url }}
+
+Des questions ? Contactez-nous.
+""",
+        },
+    },
+    {
+        "key": "child_guardian_added",
+        "category": MailCategory.SERVICE,
+        "description": "To a child's guardians when someone accepted an invitation to be the child's guardian "
+        "(accounts/guardian_invitations.py). Variables: guardian_name, relation, child_name, child_url.",
+        "subject": {
+            "en-us": "{{ guardian_name }} is now {{ child_name }}'s guardian",
+            "nl-be": "{{ guardian_name }} is nu verantwoordelijke voor {{ child_name }}",
+            "fr-be": "{{ guardian_name }} est maintenant responsable de {{ child_name }}",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{{ guardian_name }} accepted the invitation and is now {{ child_name }}'s guardian on the CoderDojo Belgium site, as {% if relation == "parent" %}parent{% elif relation == "legal_guardian" %}legal guardian{% else %}another trusted adult{% endif %}.
+
+You see {{ child_name }}'s guardians on their page:
+
+{{ child_url }}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{{ guardian_name }} heeft de uitnodiging aanvaard en is nu verantwoordelijke voor {{ child_name }} op de site van CoderDojo Belgium, als {% if relation == "parent" %}ouder{% elif relation == "legal_guardian" %}voogd{% else %}andere vertrouwenspersoon{% endif %}.
+
+Je ziet wie verantwoordelijk is voor {{ child_name }} op diens pagina:
+
+{{ child_url }}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{{ guardian_name }} a accepté l'invitation et est maintenant responsable de {{ child_name }} sur le site de CoderDojo Belgium, en tant que {% if relation == "parent" %}parent{% elif relation == "legal_guardian" %}tuteur légal{% else %}autre adulte de confiance{% endif %}.
+
+Vous voyez les responsables de {{ child_name }} sur sa page :
+
+{{ child_url }}
+""",
+        },
+    },
+    {
+        "key": "child_guardian_removed",
+        "category": MailCategory.SERVICE,
+        "description": "A child's guardian was removed or stepped down (accounts/guardian_invitations.py), to "
+        "them and the others. Variables: guardian_name, removed_by, stepped_down, removed_you, child_name, "
+        "child_url.",
+        "subject": {
+            "en-us": "{% if removed_you %}You're no longer {{ child_name }}'s guardian{% else %}{{ guardian_name }} is no longer {{ child_name }}'s guardian{% endif %}",
+            "nl-be": "{% if removed_you %}Je bent niet langer verantwoordelijke voor {{ child_name }}{% else %}{{ guardian_name }} is niet langer verantwoordelijke voor {{ child_name }}{% endif %}",
+            "fr-be": "{% if removed_you %}Vous n'êtes plus responsable de {{ child_name }}{% else %}{{ guardian_name }} n'est plus responsable de {{ child_name }}{% endif %}",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{% if removed_you %}{{ removed_by }} removed you as {{ child_name }}'s guardian on the CoderDojo Belgium site. You no longer see {{ child_name }} on your account, can't sign them up and won't get their mails.
+
+Think this is a mistake? Talk to {{ removed_by }}, or contact us.{% elif stepped_down %}{{ guardian_name }} stepped down as {{ child_name }}'s guardian on the CoderDojo Belgium site.
+
+You see {{ child_name }}'s guardians on their page:
+
+{{ child_url }}{% else %}{{ removed_by }} removed {{ guardian_name }} as {{ child_name }}'s guardian on the CoderDojo Belgium site.
+
+You see {{ child_name }}'s guardians on their page:
+
+{{ child_url }}{% endif %}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{% if removed_you %}{{ removed_by }} heeft je verwijderd als verantwoordelijke voor {{ child_name }} op de site van CoderDojo Belgium. Je ziet {{ child_name }} niet meer op je account, kunt {{ child_name }} niet meer inschrijven en krijgt de e-mails niet meer.
+
+Denk je dat dit een vergissing is? Spreek erover met {{ removed_by }}, of neem contact met ons op.{% elif stepped_down %}{{ guardian_name }} is gestopt als verantwoordelijke voor {{ child_name }} op de site van CoderDojo Belgium.
+
+Je ziet wie verantwoordelijk is voor {{ child_name }} op diens pagina:
+
+{{ child_url }}{% else %}{{ removed_by }} heeft {{ guardian_name }} verwijderd als verantwoordelijke voor {{ child_name }} op de site van CoderDojo Belgium.
+
+Je ziet wie verantwoordelijk is voor {{ child_name }} op diens pagina:
+
+{{ child_url }}{% endif %}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{% if removed_you %}{{ removed_by }} vous a retiré comme responsable de {{ child_name }} sur le site de CoderDojo Belgium. Vous ne voyez plus {{ child_name }} sur votre compte, ne pouvez plus l'inscrire et ne recevez plus ses e-mails.
+
+Vous pensez que c'est une erreur ? Parlez-en avec {{ removed_by }}, ou contactez-nous.{% elif stepped_down %}{{ guardian_name }} n'est plus responsable de {{ child_name }} sur le site de CoderDojo Belgium, à sa demande.
+
+Vous voyez les responsables de {{ child_name }} sur sa page :
+
+{{ child_url }}{% else %}{{ removed_by }} a retiré {{ guardian_name }} comme responsable de {{ child_name }} sur le site de CoderDojo Belgium.
+
+Vous voyez les responsables de {{ child_name }} sur sa page :
+
+{{ child_url }}{% endif %}
+""",
+        },
+    },
 ]
 
 
@@ -1901,6 +2100,39 @@ SAMPLE_CONTEXT = {
         "method": "link",
         "new_email": "emma@example.com",
         "by_guardian": "",
+    },
+    "child_guardian_invitation": {
+        **_common,
+        "invited_by": "Sarah Peeters",
+        "child_name": "Emma",
+        "relation": "parent",
+        "accept_url": "https://coolregistration.localhost/account/guardian-invitations/abc-123/",
+        "valid_days": 14,
+    },
+    "child_guardian_invited": {
+        **_common,
+        "invited_by": "Sarah Peeters",
+        "email": "tom@example.com",
+        "relation": "parent",
+        "child_name": "Emma",
+        "child_url": "https://coolregistration.localhost/account/ninja/1/",
+        "valid_days": 14,
+    },
+    "child_guardian_added": {
+        **_common,
+        "guardian_name": "Tom Janssens",
+        "relation": "parent",
+        "child_name": "Emma",
+        "child_url": "https://coolregistration.localhost/account/ninja/1/",
+    },
+    "child_guardian_removed": {
+        **_common,
+        "guardian_name": "Tom Janssens",
+        "removed_by": "Sarah Peeters",
+        "stepped_down": False,
+        "removed_you": False,
+        "child_name": "Emma",
+        "child_url": "https://coolregistration.localhost/account/ninja/1/",
     },
     "organisation_invitation": {
         **_common,

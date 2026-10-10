@@ -211,6 +211,7 @@ def apply_retention(today: date | None = None) -> dict[str, int]:
             done[outcome] += 1
     done["audit_log_entries"] = remove_old_audit_log_entries()
     done["organisation_invitations"] = remove_old_invitations()
+    done["guardian_invitations"] = remove_old_guardian_invitations()
     done["mail_content"] = clear_old_mail_content()
     done["sessions"] = Session.objects.filter(expire_date__lt=timezone.now()).delete()[0]
     # The rules waiting for their period: each does nothing while its setting is None.
@@ -358,6 +359,14 @@ def remove_old_invitations() -> int:
     """Organisation invitations 30 days after they were accepted, withdrawn
     or expired (accounts.invitations, DATA_MODEL.md §23)."""
     from accounts.invitations import remove_old
+
+    return remove_old()
+
+
+def remove_old_guardian_invitations() -> int:
+    """Guardian invitations 30 days after they were accepted, withdrawn or
+    expired (accounts.guardian_invitations, DATA_MODEL_PRIVACY.md §27)."""
+    from accounts.guardian_invitations import remove_old
 
     return remove_old()
 

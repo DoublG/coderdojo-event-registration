@@ -2664,7 +2664,7 @@ erDiagram
   scenarios, the rows each growing table gains per year, and the measured
   bytes per row in `monitoring/row_sizes.json`.
 
-## 27. Multiple guardians per child, with configurable per-guardian access (not built — written up for stakeholder review before implementation)
+## 27. Multiple guardians per child, with configurable per-guardian access (phases 1–3 built; phase 4 waits for §28)
 
 An invitation so a second adult can be linked as a child's guardian
 (divorced co-parents, or a trusted adult who isn't a parent), with
@@ -2672,6 +2672,9 @@ An invitation so a second adult can be linked as a child's guardian
 who may exercise the child's GDPR rights, consent eligibility) rather
 than an access level — functional access is a fully independent axis,
 added in a second phase that reuses the custom-role mechanism (§28).
+Built so far: inviting, accepting, withdrawing and removing guardians
+(`accounts/guardian_invitations.py`, the *Guardians* card on the child's
+page) and `relation` deciding erasure, the export and the consent.
 Full design, decisions, phases and open points — alongside §16 — are in
 `DATA_MODEL_PRIVACY.md`.
 

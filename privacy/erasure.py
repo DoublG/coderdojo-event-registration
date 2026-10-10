@@ -46,7 +46,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import models, transaction
 from django.db.models import Q
 
-from accounts.models import Ninja, User
+from accounts.models import Guardianship, Ninja, User
 from core import privacy_registry as registry
 from core.image_library import is_library_image
 from core.privacy_registry import Category, Computed, Erasure, ModelPrivacy, Subject
@@ -59,8 +59,18 @@ _HANDLED_SEPARATELY: set[type[models.Model]] = {AuditLogEntry, AdminLogEntry}
 
 
 def sole_children(user: User) -> list[Ninja]:
-    """The children only `user` is a guardian of: erased with the account."""
-    return [child for child in Ninja.objects.of_guardian(user) if child.guardianships.count() == 1]
+    """The children erased with the account: those `user` is the only parent
+    or legal guardian of (DATA_MODEL_PRIVACY.md §27). Another guardian
+    without parental responsibility (a grandparent, a carer) doesn't keep a
+    child, and deleting such a guardian's account never erases one."""
+    responsible = Guardianship.RESPONSIBLE_RELATIONS
+    return [
+        child
+        for child in Ninja.objects.filter(guardianships__guardian=user, guardianships__relation__in=responsible)
+        .distinct()
+        .order_by("pk")
+        if not child.guardianships.exclude(guardian=user).filter(relation__in=responsible).exists()
+    ]
 
 
 def erase_person(

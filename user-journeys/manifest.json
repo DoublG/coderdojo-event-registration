@@ -1,5 +1,5 @@
 {
- "generated_from": "2b3fb5e",
+ "generated_from": "106215a",
  "generated_on": "2026-10-10",
  "personas": {
   "parent": {
@@ -20,7 +20,7 @@
    ],
    "views": {
     "accounts/security_views.py:security": "13eb72c780afbbd5",
-    "accounts/views/children.py:ninja_detail": "1b7418ab00e7c71c",
+    "accounts/views/children.py:ninja_detail": "1c172951b419df99",
     "accounts/views/family.py:account_home": "9c4245e27f2df4b5",
     "accounts/views/signup.py:register_guardian": "38ca31944faca43f",
     "dojos/views/public.py:dojo_detail": "b85a46c12b05c3ff",
@@ -33,7 +33,7 @@
     "privacy/views.py:delete_my_account": "4475f4654efb476c"
    },
    "templates": {
-    "accounts/templates/accounts/child_detail.html": "2a51f42bd898418d",
+    "accounts/templates/accounts/child_detail.html": "8c4a010a3936358a",
     "accounts/templates/accounts/partials/_badge_card.html": "694d0721544fa7b9",
     "accounts/templates/accounts/partials/_badges_page.html": "561ad9696fda698b",
     "accounts/templates/accounts/partials/_child_avatar.html": "70676cb787eec5d9",
@@ -43,6 +43,7 @@
     "accounts/templates/accounts/partials/_child_rows_fieldset.html": "9b8b7c8790669e5c",
     "accounts/templates/accounts/partials/_child_rows_script.html": "b6bb6fd904161747",
     "accounts/templates/accounts/partials/_confirm_identity.html": "c360fa7d0ae12a26",
+    "accounts/templates/accounts/partials/_guardians_card.html": "7ea586d45c6273bb",
     "accounts/templates/accounts/partials/_ninja_login_card.html": "58a52d981a3751d4",
     "accounts/templates/accounts/register_check_inbox.html": "a7d436b31778e729",
     "accounts/templates/accounts/register_guardian.html": "b30c62d0ac272346",
@@ -88,18 +89,19 @@
    "views": {
     "accounts/security_views.py:security": "13eb72c780afbbd5",
     "accounts/views/auth.py:LoginView": "c09d432776362105",
-    "accounts/views/children.py:ninja_detail": "1b7418ab00e7c71c",
+    "accounts/views/children.py:ninja_detail": "1c172951b419df99",
     "events/views.py:event_detail": "508021bd288e2ac9",
     "events/views.py:event_signup": "14298e097ec60fc0",
     "pathways/views.py:pathway_detail": "b33fb4640ddff05c"
    },
    "templates": {
-    "accounts/templates/accounts/child_detail.html": "2a51f42bd898418d",
+    "accounts/templates/accounts/child_detail.html": "8c4a010a3936358a",
     "accounts/templates/accounts/login.html": "724fc598ce501947",
     "accounts/templates/accounts/partials/_badge_card.html": "694d0721544fa7b9",
     "accounts/templates/accounts/partials/_badges_page.html": "561ad9696fda698b",
     "accounts/templates/accounts/partials/_child_avatar.html": "70676cb787eec5d9",
     "accounts/templates/accounts/partials/_child_header_display.html": "f89a4683b94f27a0",
+    "accounts/templates/accounts/partials/_guardians_card.html": "7ea586d45c6273bb",
     "accounts/templates/accounts/partials/_ninja_login_card.html": "58a52d981a3751d4",
     "accounts/templates/accounts/security.html": "93f8070b8156b3c2",
     "events/templates/events/event_detail.html": "adf104f7f4b37e4e",

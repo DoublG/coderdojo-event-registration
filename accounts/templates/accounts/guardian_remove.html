@@ -1,0 +1,38 @@
+{% extends "accounts/_security_base.html" %}
+{% load i18n %}
+{% block security_title %}{% if stepping_down %}{% translate "Step down as guardian" %}{% else %}{% translate "Remove a guardian" %}{% endif %}{% endblock %}
+
+{% block security_content %}
+  {% comment %}
+    Removing one of a child's guardians, or stepping down yourself
+    (accounts.views.guardian_remove, DATA_MODEL_PRIVACY.md §27), confirmed
+    with the account's own password or recent login. `problem` is why it
+    can't happen (accounts.guardian_invitations.removal_problem).
+  {% endcomment %}
+  {% with name=child.name guardian=link.guardian.team_name %}
+    {% if stepping_down %}
+      <h1 class="heading-lg">{% blocktranslate %}Stop being {{ name }}'s guardian{% endblocktranslate %}</h1>
+      <p class="body">{% blocktranslate %}You won't see {{ name }} on your account any more, can't sign them up and won't get their mails. Their other guardians keep everything as it is, and are told.{% endblocktranslate %}</p>
+    {% else %}
+      <h1 class="heading-lg">{% blocktranslate %}Remove {{ guardian }} as {{ name }}'s guardian{% endblocktranslate %}</h1>
+      <p class="body">{% blocktranslate %}{{ guardian }} won't see {{ name }} on their account any more, can't sign them up and won't get their mails. We mail {{ guardian }} and {{ name }}'s other guardians that you removed them.{% endblocktranslate %}</p>
+    {% endif %}
+  {% endwith %}
+
+  {% if problem %}
+    <p class="cd-form__note cd-form__note--error caption" role="alert">{{ problem }}</p>
+    <div class="cd-form__actions" style="justify-content: flex-start;">
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'ninja_detail' ninja_id=child.id %}">{% translate "Back" %}</a>
+    </div>
+  {% else %}
+    <form method="post" class="cd-form" novalidate>
+      {% csrf_token %}
+      {% for error in form.non_field_errors %}{% if not form.uses_link %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endif %}{% endfor %}
+      {% include "accounts/partials/_confirm_identity.html" %}
+      <div class="cd-form__actions" style="justify-content: flex-start;">
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'ninja_detail' ninja_id=child.id %}">{% translate "Cancel" %}</a>
+        <button type="submit" class="cd-btn cd-btn--danger label">{% if stepping_down %}{% translate "Step down" %}{% else %}{% translate "Remove" %}{% endif %}</button>
+      </div>
+    </form>
+  {% endif %}
+{% endblock %}

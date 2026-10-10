@@ -23,6 +23,7 @@ from ..template_avatars import TEMPLATE_KID_AVATARS
 from .child_logins import _login_card_context
 from .common import BADGES_PAGE_SIZE, _get_own_ninja
 from .family import _children_context, _render_account_home
+from .guardians import _guardians_card_context
 
 
 @login_required
@@ -101,6 +102,7 @@ def ninja_detail(request, ninja_id):
             f"{reverse('ninja_badges', kwargs={'ninja_id': child.id})}?page={badges_page.next_page_number()}"
         )
 
+    can_edit = child.guardianships.filter(guardian=request.user).exists()
     return render(
         request,
         "accounts/child_detail.html",
@@ -108,7 +110,10 @@ def ninja_detail(request, ninja_id):
             "child": child,
             "history": history,
             "upcoming": upcoming,
-            "can_edit": child.guardianships.filter(guardian=request.user).exists(),
+            "can_edit": can_edit,
+            # The Guardians card: adult guardians only, never the child's own
+            # login (a child doesn't manage who's responsible for them).
+            **(_guardians_card_context(request, child) if can_edit else {}),
             "can_pick_avatar": child.account_id == request.user.pk,
             "badges": badges_page.object_list,
             "badges_next_page_url": badges_next_page_url,
