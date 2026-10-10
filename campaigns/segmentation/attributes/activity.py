@@ -3,18 +3,19 @@ who come to sessions. Both take the same window (N days back from today),
 so "everyone active" means the same thing on both sides."""
 
 from datetime import timedelta
+from typing import Any
 
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from dojos.models import Dojo, DojoMembership
 from events.models import Event, Registration
 
-from ..base import NINJA, USER, SegmentAttribute
+from ..base import NINJA, USER, SegmentAttribute, SegmentChoice
 
 
-def _held_sessions(days):
+def _held_sessions(days: int) -> QuerySet[Event]:
     """Non-draft events that started in the last `days` days."""
     now = timezone.now()
     return Event.objects.exclude(status=Event.DRAFT).filter(
@@ -32,10 +33,10 @@ class ActiveTeamMemberAttribute(SegmentAttribute):
     value_type = "days"
     scope = USER
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return []
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         if operator != "within_days":
             raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         memberships = DojoMembership.objects.managers().filter(
@@ -56,10 +57,10 @@ class AttendedWithinDaysAttribute(SegmentAttribute):
     value_type = "days"
     scope = NINJA
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return []
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         if operator != "within_days":
             raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         sessions = _held_sessions(value)

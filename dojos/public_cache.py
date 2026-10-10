@@ -8,6 +8,8 @@ pathways, its team (memberships, and a member's own team-page profile), its
 updates and FAQs. A change that concerns every dojo (a pathway's name, any
 FAQ, since site-wide ones show on every dojo's page) clears them all."""
 
+from typing import Any
+
 from django.core.cache import cache
 from django.db import transaction
 from django.db.models.signals import m2m_changed, post_delete, post_save
@@ -30,14 +32,14 @@ TEAM_FIELDS = (
 )
 
 
-def detail(dojo_id):
+def detail(dojo_id: int) -> dict[str, Any]:
     """{"dojo", "faqs", "announcements", "mentors"} for a public dojo, or a 404."""
     from content.models import FAQ
 
     from .models import Dojo
     from .views import PUBLIC_UPDATES_LIMIT
 
-    def build():
+    def build() -> dict[str, Any]:
         dojo = get_object_or_404(Dojo.objects.public().prefetch_related("pathways"), id=dojo_id)
         return {
             "dojo": dojo,
@@ -49,20 +51,21 @@ def detail(dojo_id):
     return cached(KEY.format(dojo_id=dojo_id), build, TIMEOUT, name="dojos:detail")
 
 
-def clear(*dojo_ids):
+def clear(*dojo_ids: int | None) -> None:
     keys = [KEY.format(dojo_id=dojo_id) for dojo_id in dojo_ids if dojo_id]
     if keys:
         cache.delete_many(keys)
         transaction.on_commit(lambda: cache.delete_many(keys))
 
 
-def clear_all():
+def clear_all() -> None:
     pattern = KEY.format(dojo_id="*")
-    cache.delete_pattern(pattern)
-    transaction.on_commit(lambda: cache.delete_pattern(pattern))
+    # delete_pattern is django-redis's own (CACHES), not in Django's cache API.
+    cache.delete_pattern(pattern)  # type: ignore[attr-defined]
+    transaction.on_commit(lambda: cache.delete_pattern(pattern))  # type: ignore[attr-defined]
 
 
-def connect():
+def connect() -> None:
     from django.contrib.auth import get_user_model
 
     from accounts.models import Ninja
@@ -71,10 +74,12 @@ def connect():
 
     from .models import Dojo, DojoMembership
 
-    def dojo_changed(sender, instance, **kwargs):
+    def dojo_changed(sender: Any, instance: Dojo, **kwargs: Any) -> None:
         clear(instance.pk)
 
-    def pathways_changed(sender, instance, action, reverse, pk_set, **kwargs):
+    def pathways_changed(
+        sender: Any, instance: Any, action: str, reverse: bool, pk_set: set[int] | None, **kwargs: Any
+    ) -> None:
         if not action.startswith("post_"):
             return
         if reverse:  # changed from the pathway's side
@@ -82,18 +87,18 @@ def connect():
         else:
             clear(instance.pk)
 
-    def by_dojo_id(sender, instance, **kwargs):
+    def by_dojo_id(sender: Any, instance: Any, **kwargs: Any) -> None:
         clear(instance.dojo_id)
 
-    def everywhere(sender, **kwargs):
+    def everywhere(sender: Any, **kwargs: Any) -> None:
         clear_all()
 
-    def profile_changed(sender, instance, update_fields=None, **kwargs):
+    def profile_changed(sender: Any, instance: Any, update_fields: Any = None, **kwargs: Any) -> None:
         if update_fields is not None and not PROFILE_FIELDS & set(update_fields):
             return
         clear(*DojoMembership.objects.filter(user=instance).values_list("dojo_id", flat=True))
 
-    def ninja_avatar_changed(sender, instance, update_fields=None, **kwargs):
+    def ninja_avatar_changed(sender: Any, instance: Ninja, update_fields: Any = None, **kwargs: Any) -> None:
         # A youth mentor's avatar on the team listing is the child's own
         # (DojoMembership.photo).
         if not instance.account_id or (update_fields is not None and "photo" not in update_fields):

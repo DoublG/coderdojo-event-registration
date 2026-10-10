@@ -14,7 +14,10 @@ import email.policy
 import logging
 import smtplib
 from datetime import timedelta
+from email.message import EmailMessage as PythonEmailMessage
+from email.policy import Policy
 from email.utils import formataddr, make_msgid, parseaddr
+from typing import Any
 from urllib.parse import urlparse
 
 from celery import Task, group, shared_task
@@ -38,7 +41,7 @@ class TransientSendError(Exception):
     retry the batch later."""
 
 
-def _claim_pending():
+def _claim_pending() -> list[int]:
     """Claim the next pending rows (priority first) and mark them `sending`.
     Never claims more than MAILING_CLAIM_LIMIT rows in flight, so the
     broker holds only a couple of batches (the broker is first in, first
@@ -62,12 +65,12 @@ def _claim_pending():
     return ids
 
 
-def _chunks(ids, size):
+def _chunks(ids: list[int], size: int) -> list[list[int]]:
     return [ids[i : i + size] for i in range(0, len(ids), size)]
 
 
 @shared_task
-def send_pending_emails():
+def send_pending_emails() -> int:
     ids = _claim_pending()
     if ids:
         group(send_email_batch.s(chunk) for chunk in _chunks(ids, settings.MAILING_BATCH_SIZE)).apply_async()
@@ -82,11 +85,11 @@ class QueuedEmail(mail.EmailMessage):
     unsubscribe. Whatever policy the backend asks for (the SMTP backend
     passes email.policy.SMTP) is kept, only its line length changes."""
 
-    def message(self, *, policy=email.policy.default):
-        return super().message(policy=policy.clone(max_line_length=998))
+    def message(self, *, policy: Policy | None = email.policy.default) -> PythonEmailMessage:
+        return super().message(policy=(policy or email.policy.default).clone(max_line_length=998))
 
 
-def _build(row):
+def _build(row: EmailMessage) -> tuple[QueuedEmail, str]:
     """The django.core.mail message for a queued row, with our Message-ID
     (to match bounces) and, for mail people can opt out of, one-click
     unsubscribe headers (RFC 8058)."""
@@ -100,11 +103,11 @@ def _build(row):
         # A dojo's own mailing (DATA_MODEL.md §25): replies reach the dojo,
         # and the name people see says who wrote it; the address stays ours.
         headers["Reply-To"] = row.reply_to
-        if row.dojo_id:
+        if row.dojo:
             name, address = parseaddr(settings.DEFAULT_FROM_EMAIL)
             headers["From"] = formataddr((f"{row.dojo.name} via {name or 'CoderDojo Belgium'}", address))
     envelope_from = settings.MAILING_BOUNCE_ADDRESS.replace("{id}", str(row.pk)) or settings.DEFAULT_FROM_EMAIL
-    if CAN_OPT_OUT[row.category] and row.user_id:
+    if CAN_OPT_OUT[row.category] and row.user is not None:
         headers["List-Unsubscribe"] = f"<{unsubscribe_url(row.user, row.category, row.dojo_id)}>"
         headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
     message = QueuedEmail(
@@ -117,7 +120,7 @@ def _build(row):
     return message, message_id
 
 
-def _is_permanent(error):
+def _is_permanent(error: Exception) -> bool:
     """A 5xx answer about this one message or recipient: retrying won't
     help. Anything else (down, timeout, 4xx, the sender refused) is the
     server's problem and retried."""
@@ -131,7 +134,9 @@ def _is_permanent(error):
 
 
 class SendBatchTask(Task):
-    def on_failure(self, exc, task_id, args, kwargs, einfo):
+    def on_failure(
+        self, exc: Exception, task_id: str, args: tuple[Any, ...], kwargs: dict[str, Any], einfo: Any
+    ) -> None:
         # Only after the last retry: whatever is still `sending` failed.
         ids = args[0] if args else kwargs.get("ids", [])
         EmailMessage.objects.filter(pk__in=ids, status=Status.SENDING).update(
@@ -150,7 +155,7 @@ class SendBatchTask(Task):
     retry_jitter=True,
     max_retries=5,
 )
-def send_email_batch(self, ids):
+def send_email_batch(self: Task, ids: list[int]) -> int:
     """Send the rows in `ids` that are still `sending`. Each row is marked
     `sent` right after its own send, so a retried batch never mails anyone
     twice. A permanent error fails only that row."""
@@ -163,7 +168,7 @@ def send_email_batch(self, ids):
             for row in rows:
                 # Again right before it goes out: a campaign drips out under
                 # the rate limit, and people unsubscribe (or bounce) meanwhile.
-                if row.user_id and (
+                if row.user is not None and (
                     reason := suppressed_reason(
                         row.user, row.category, row.recipient, test=row.is_test, dojo=row.dojo_id
                     )
@@ -190,7 +195,7 @@ def send_email_batch(self, ids):
 
 
 @shared_task
-def requeue_stuck_emails():
+def requeue_stuck_emails() -> int:
     """Rows left `sending` for longer than MAILING_CLAIM_TIMEOUT_MINUTES lost
     their subtask (e.g. a Redis flush): put them back in the queue. Such a
     row can go out twice, which beats never sending it. Also logs the
@@ -215,7 +220,7 @@ def requeue_stuck_emails():
 
 
 @shared_task
-def process_bounces():
+def process_bounces() -> int:
     """Read new bounces and complaints from the bounce mailbox (mailing.bounce).
     Off while MAILING_BOUNCE_IMAP_HOST is empty."""
     if not settings.MAILING_BOUNCE_IMAP_HOST:
@@ -235,7 +240,7 @@ def process_bounces():
 
 
 @shared_task
-def send_session_reminders():
+def send_session_reminders() -> int:
     """Daily: reminders for sessions MAILING_REMINDER_DAYS_BEFORE days ahead."""
     from .automated import send_session_reminders as run
 
@@ -243,7 +248,7 @@ def send_session_reminders():
 
 
 @shared_task
-def announce_new_sessions():
+def announce_new_sessions() -> int:
     """Daily: one "new sessions at your dojo" mail per family and dojo."""
     from .automated import announce_new_sessions as run
 

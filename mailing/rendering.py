@@ -1,6 +1,8 @@
 """Rendering EmailTemplate rows: pick the recipient's language, fill in the
 variables. Plain text, so no HTML autoescaping."""
 
+from typing import Any
+
 from django.conf import settings
 from django.template import Context, Template
 from django.utils import translation
@@ -14,7 +16,7 @@ class TemplateMissing(Exception):
     pass
 
 
-def get_template(key, language):
+def get_template(key: str, language: str) -> EmailTemplate:
     """The template in `language`, else in the fallback language."""
     fallback = getattr(settings, "MAILING_FALLBACK_LANGUAGE", FALLBACK_LANGUAGE)
     templates = {t.language: t for t in EmailTemplate.objects.filter(key=key, language__in=[language, fallback])}
@@ -24,7 +26,7 @@ def get_template(key, language):
     return template
 
 
-def render(key, language, context):
+def render(key: str, language: str, context: dict[str, Any]) -> tuple[str, str]:
     """(subject, body) for template `key` in `language` with `context`."""
     template = get_template(key, language)
     ctx = Context(context, autoescape=False)

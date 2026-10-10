@@ -16,6 +16,7 @@ import resource
 import socket
 import threading
 import time
+from typing import Any
 
 from django.conf import settings
 from django_redis import get_redis_connection
@@ -35,22 +36,22 @@ DURATION_BUCKETS_MS = (50, 100, 250, 500, 1000, 2500, 5000)
 PROCESS_REPORT_EVERY = 60
 PROCESS_TTL = 150
 
-_reporting_pid = None
+_reporting_pid: int | None = None
 # What the request being handled in this thread did, for record_request():
 # the middleware starts it (begin_request) and reads it back (end_request).
 # Django runs a request's synchronous middleware and view in one thread.
 _current = threading.local()
 
 
-def _redis():
+def _redis() -> Any:
     return get_redis_connection("default")
 
 
-def enabled():
+def enabled() -> bool:
     return getattr(settings, "METRICS_ENABLED", True)
 
 
-def process_memory():
+def process_memory() -> dict[str, int]:
     """This process's memory in bytes: `rss` (resident, counting pages it
     shares with its forked siblings in full), `pss` (those shared pages
     divided among the processes sharing them, the fair share: sum it over
@@ -69,11 +70,11 @@ def process_memory():
     return memory
 
 
-def _process_key(role):
+def _process_key(role: str) -> str:
     return f"{PROCESS_KEY_PREFIX}{role}:{socket.gethostname()}:{os.getpid()}"
 
 
-def report_process(role):
+def report_process(role: str) -> None:
     """Store this process's memory under its role (`web`, `celery`,
     `celery-parent`, `beat`) for PROCESS_TTL seconds."""
     if not enabled():
@@ -84,20 +85,20 @@ def report_process(role):
         logger.debug("Couldn't report process memory", exc_info=True)
 
 
-def _forget(role):
+def _forget(role: str) -> None:
     try:
         _redis().delete(_process_key(role))
     except Exception:
         logger.debug("Couldn't remove the process report", exc_info=True)
 
 
-def _keep_reporting(role):
+def _keep_reporting(role: str) -> None:
     while True:
         time.sleep(PROCESS_REPORT_EVERY)
         report_process(role)
 
 
-def start_reporting(role):
+def start_reporting(role: str) -> None:
     """Report this process's memory now and then every minute, once per
     process (a forked child starts its own). Cheap to call on every request."""
     global _reporting_pid
@@ -109,10 +110,10 @@ def start_reporting(role):
     atexit.register(_forget, role)
 
 
-def processes():
+def processes() -> list[dict[str, Any]]:
     """Every process that reported in the last PROCESS_TTL:
     [{"role", "host", "pid", "rss", "pss", "max_rss", "at"}]."""
-    found = []
+    found: list[dict[str, Any]] = []
     connection = _redis()
     keys = sorted(connection.scan_iter(match=f"{PROCESS_KEY_PREFIX}*", count=500))
     for key, value in zip(keys, connection.mget(keys) if keys else [], strict=True):
@@ -123,11 +124,11 @@ def processes():
     return found
 
 
-def begin_request():
+def begin_request() -> None:
     _current.cache = {}
 
 
-def note_cache(name, hit):
+def note_cache(name: str, hit: bool) -> None:
     """Count a read of the data cache `name` (core.caching) for the request
     in progress; outside a request (a task, a command) it isn't counted."""
     counts = getattr(_current, "cache", None)
@@ -136,14 +137,20 @@ def note_cache(name, hit):
         counts[field] = counts.get(field, 0) + 1
 
 
-def end_request():
+def end_request() -> dict[str, int]:
     """The request's cache reads, {"name|hits": n, "name|misses": n}."""
     counts = getattr(_current, "cache", None) or {}
     _current.cache = None
     return counts
 
 
-def record_request(view, milliseconds, status, queries=None, cache_reads=None):
+def record_request(
+    view: str,
+    milliseconds: float,
+    status: int,
+    queries: int | None = None,
+    cache_reads: dict[str, int] | None = None,
+) -> None:
     """One request to `view`: its time, status, database queries and the
     data cache reads it made (end_request())."""
     if not enabled():
@@ -167,7 +174,7 @@ def record_request(view, milliseconds, status, queries=None, cache_reads=None):
         logger.debug("Couldn't record a request", exc_info=True)
 
 
-def record_task(name, seconds, failed=False):
+def record_task(name: str, seconds: float, failed: bool = False) -> None:
     if not enabled():
         return
     try:
@@ -185,22 +192,22 @@ def record_task(name, seconds, failed=False):
         logger.debug("Couldn't record a task", exc_info=True)
 
 
-def _read_hash(key):
+def _read_hash(key: str) -> dict[str, dict[str, float]]:
     """{name: {field: number}} from a hash of "name|field" counters."""
-    grouped = {}
+    grouped: dict[str, dict[str, float]] = {}
     for raw_field, raw_value in _redis().hgetall(key).items():
         name, _, field = raw_field.decode().rpartition("|")
         grouped.setdefault(name, {})[field] = float(raw_value)
     return grouped
 
 
-def requests():
+def requests() -> dict[str, dict[str, float]]:
     return _read_hash(REQUESTS_KEY)
 
 
-def tasks():
+def tasks() -> dict[str, dict[str, float]]:
     return _read_hash(TASKS_KEY)
 
 
-def cache_reads():
+def cache_reads() -> dict[str, dict[str, float]]:
     return _read_hash(CACHE_KEY)

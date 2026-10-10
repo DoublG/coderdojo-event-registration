@@ -6,13 +6,21 @@ same rules: every change is a save() (the audit log only sees saves), and
 milestone badges follow a child's attendance (events.awards.sync_milestones).
 """
 
+from typing import TYPE_CHECKING, Any
+
+from django.db.models import QuerySet
+
 from accounts.models import Ninja
 
 from .awards import sync_milestones
-from .models import TeamAttendance
+from .models import Event, Registration, TeamAttendance
+
+if TYPE_CHECKING:
+    from accounts.models import User
+    from dojos.models import DojoMembership
 
 
-def confirmed_registrations(event):
+def confirmed_registrations(event: Event) -> QuerySet[Registration]:
     """The children with a confirmed (not waitlisted) place, by name."""
     return (
         event.registration_set.filter(waiting_list=False)
@@ -21,7 +29,7 @@ def confirmed_registrations(event):
     )
 
 
-def team_rows(event):
+def team_rows(event: Event) -> list[dict[str, Any]]:
     """One {membership, attended} per person on the session's team
     (`Event.team`), champion first; `attended` from TeamAttendance, None
     when not marked yet."""
@@ -30,7 +38,9 @@ def team_rows(event):
     return [{"membership": m, "attended": marks.get(m.id)} for m in memberships]
 
 
-def mark_child(registration, attended, awarded_as=None):
+def mark_child(
+    registration: Registration, attended: bool | None, awarded_as: "DojoMembership | None" = None
+) -> Registration:
     """Present (True), absent (False) or not marked (None) for one confirmed
     registration. A milestone that grants a belt awards it as `awarded_as`
     (a membership allowed to), else only the badge is earned."""
@@ -41,7 +51,9 @@ def mark_child(registration, attended, awarded_as=None):
     return registration
 
 
-def mark_team_member(event, membership, attended, marked_by):
+def mark_team_member(
+    event: Event, membership: "DojoMembership", attended: bool | None, marked_by: "User"
+) -> TeamAttendance:
     """Present, absent or not marked for one person on the session's team;
     `marked_by` is the account that marked it (a person, or an API client's
     technical account)."""
@@ -53,7 +65,7 @@ def mark_team_member(event, membership, attended, marked_by):
     return record
 
 
-def mark_all_present(event, marked_by, awarded_as=None):
+def mark_all_present(event: Event, marked_by: "User", awarded_as: "DojoMembership | None" = None) -> None:
     """Every confirmed child and everyone on the team present."""
     confirmed = event.registration_set.filter(waiting_list=False)
     for registration in confirmed.exclude(attended=True):

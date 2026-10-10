@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
@@ -15,13 +17,13 @@ class EventAttribute(SegmentAttribute):
     scope = NINJA
     registrations = Registration.objects.all()
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [
             SegmentChoice(event.pk, str(event))
             for event in Event.objects.exclude(status=Event.DRAFT).order_by("-start_time")
         ]
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         event_ids = [value] if operator == "equals" else value
         matched = Q(pk__in=self.registrations.filter(event_id__in=event_ids).values("ninja_id"))
         if operator in ("equals", "in"):

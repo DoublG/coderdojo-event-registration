@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
@@ -12,10 +14,10 @@ class AccountTypeAttribute(SegmentAttribute):
     value_type = "choice"
     scope = USER
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [SegmentChoice(value, label) for value, label in User.ACCOUNT_TYPE_CHOICES]
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         return choice_q("account_type", operator, value)
 
 
@@ -28,10 +30,10 @@ class HasChildrenAttribute(SegmentAttribute):
     value_type = "boolean"
     scope = USER
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [SegmentChoice(True, _("Yes")), SegmentChoice(False, _("No"))]
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         if operator != "is":
             raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         return Q(guardianships__isnull=not value)

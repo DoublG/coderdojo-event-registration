@@ -21,12 +21,19 @@ capability: only the champion can do it (DojoAccess.is_champion).
 """
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from django.core.exceptions import PermissionDenied
-from django.http import Http404
+from django.db.models import QuerySet
+from django.http import Http404, HttpRequest
 from django.shortcuts import get_object_or_404
 
 from .models import Dojo, DojoMembership
+
+if TYPE_CHECKING:  # accounts imports this module; only the types are needed here
+    from django.contrib.auth.models import AnonymousUser
+
+    from accounts.models import User
 
 CHAMPION = DojoMembership.CHAMPION
 MENTOR = DojoMembership.MENTOR
@@ -85,77 +92,78 @@ class DojoAccess:
     membership: DojoMembership
 
     @property
-    def role_label(self):
+    def role_label(self) -> str:
         return ROLE_LABELS[self.role]
 
     @property
-    def is_champion(self):
+    def is_champion(self) -> bool:
         return self.role == CHAMPION
 
-    def can(self, capability):
+    def can(self, capability: str) -> bool:
         return capability in ROLE_CAPABILITIES[self.role]
 
     # Template-friendly shortcuts (templates can't call can() with an argument).
     @property
-    def can_take_attendance(self):
+    def can_take_attendance(self) -> bool:
         return self.can(TAKE_ATTENDANCE)
 
     @property
-    def can_manage_events(self):
+    def can_manage_events(self) -> bool:
         return self.can(MANAGE_EVENTS)
 
     @property
-    def can_edit_settings(self):
+    def can_edit_settings(self) -> bool:
         return self.can(EDIT_SETTINGS)
 
     @property
-    def can_manage_team(self):
+    def can_manage_team(self) -> bool:
         return self.can(MANAGE_TEAM)
 
     @property
-    def can_award_belts(self):
+    def can_award_belts(self) -> bool:
         return self.can(AWARD_BELTS)
 
     @property
-    def can_award_badges(self):
+    def can_award_badges(self) -> bool:
         return self.can(AWARD_BADGES)
 
     @property
-    def can_manage_lifecycle(self):
+    def can_manage_lifecycle(self) -> bool:
         return self.can(MANAGE_LIFECYCLE)
 
     @property
-    def can_post_updates(self):
+    def can_post_updates(self) -> bool:
         return self.can(POST_UPDATES)
 
     @property
-    def can_view_health_notes(self):
+    def can_view_health_notes(self) -> bool:
         return self.can(VIEW_HEALTH_NOTES)
 
     @property
-    def can_manage_api(self):
+    def can_manage_api(self) -> bool:
         return self.can(MANAGE_API)
 
     @property
-    def can_send_mail(self):
+    def can_send_mail(self) -> bool:
         return self.can(SEND_MAIL)
 
 
-def managing_membership(user, dojo):
+def managing_membership(user: "User | AnonymousUser", dojo: Dojo) -> DojoMembership | None:
     """The user's active champion/mentor membership at `dojo`, or None —
     also None when their background check isn't valid."""
     if not user.is_authenticated or not user.background_check_valid:
         return None
-    return dojo.memberships.managers().filter(user=user).first()
+    membership: DojoMembership | None = dojo.memberships.managers().filter(user=user).first()
+    return membership
 
 
-def dojo_role(user, dojo):
+def dojo_role(user: "User | AnonymousUser", dojo: Dojo) -> str | None:
     """CHAMPION, MENTOR or None."""
     membership = managing_membership(user, dojo)
     return membership.role if membership else None
 
 
-def accessible_dojos(user):
+def accessible_dojos(user: "User | AnonymousUser") -> QuerySet[Dojo]:
     """Every dojo whose admin area this user may open, by name — what the
     admin sidebar's dojo switcher lists. Includes draft/dormant/archived
     dojos: their team still needs to set them up or bring them back."""
@@ -172,7 +180,7 @@ def accessible_dojos(user):
     )
 
 
-def require_dojo_access(request, dojo_id, capability=None):
+def require_dojo_access(request: HttpRequest, dojo_id: int, capability: str | None = None) -> DojoAccess:
     """The one way an admin-area view resolves its dojo. No role at all is a
     404, not a 403, so a guessed id doesn't even confirm another dojo
     exists (same reasoning as accounts._get_own_ninja). A role that lacks
@@ -191,7 +199,7 @@ def require_dojo_access(request, dojo_id, capability=None):
     return access
 
 
-def is_approved_mentor(user):
+def is_approved_mentor(user: "User") -> bool:
     """Whether `user` may ask to join a dojo's team, or be added to one: an
     adult account with an approved mentor (or champion) application and a
     valid background check — see applications.services."""

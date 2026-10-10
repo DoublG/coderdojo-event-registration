@@ -17,7 +17,9 @@ message.
 
 import hashlib
 import secrets
-from datetime import timedelta
+from collections.abc import Iterable
+from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.core.cache import cache
@@ -32,6 +34,9 @@ from django.utils.translation import gettext_lazy
 from .models import OrganisationInvitation, OrganisationRole, User
 from .organisation_people import ROLE_LABELS
 
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AnonymousUser
+
 VALID_DAYS = 14
 KEEP_DAYS = 30
 THROTTLE_SECONDS = 60
@@ -41,33 +46,33 @@ class InvitationError(Exception):
     """A user-facing reason the invitation can't be sent or accepted."""
 
 
-def _hash(token):
+def _hash(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
-def _new_token(invitation):
+def _new_token(invitation: OrganisationInvitation) -> str:
     token = secrets.token_urlsafe(32)
     invitation.token_hash = _hash(token)
     return token
 
 
-def find(token):
+def find(token: str | None) -> OrganisationInvitation | None:
     """The invitation behind a link's token, or None."""
     if not token:
         return None
     return OrganisationInvitation.objects.filter(token_hash=_hash(token)).first()
 
 
-def accept_url(token):
+def accept_url(token: str) -> str:
     return settings.SITE_URL + reverse("organisation_invitation", kwargs={"token": token})
 
 
-def _throttle(by):
+def _throttle(by: User) -> None:
     if not cache.add(f"organisation-invitation:{by.pk}", True, THROTTLE_SECONDS):
         raise InvitationError(_("You've just sent an invitation: wait a minute before the next one."))
 
 
-def _mail(invitation, token):
+def _mail(invitation: OrganisationInvitation, token: str) -> None:
     from mailing.services import send_to_address
 
     send_to_address(
@@ -85,28 +90,31 @@ def _mail(invitation, token):
 
 
 @transaction.atomic
-def invite(email, name, roles, by, language=""):
-    email = (email or "").strip()
-    name = (name or "").strip()
+def invite(
+    email: str | None, name: str | None, roles: Iterable[str], by: User, language: str = ""
+) -> OrganisationInvitation:
+    address = (email or "").strip()
+    full_name = (name or "").strip()
     try:
-        validate_email(email)
+        validate_email(address)
     except ValidationError:
         raise InvitationError(_("Enter a valid email address.")) from None
-    roles = [role for role in ROLE_LABELS if role in set(roles)]
-    if not roles:
+    wanted = set(roles)
+    chosen = [role for role in ROLE_LABELS if role in wanted]
+    if not chosen:
         raise InvitationError(_("Choose at least one role."))
-    if not name:
+    if not full_name:
         raise InvitationError(_("Enter the person's name."))
-    if User.objects.filter(email__iexact=email).exists():
+    if User.objects.filter(email__iexact=address).exists():
         raise InvitationError(_("An account already exists with this email: give it roles from its page instead."))
-    if OrganisationInvitation.objects.pending().filter(email__iexact=email).exists():
+    if OrganisationInvitation.objects.pending().filter(email__iexact=address).exists():
         raise InvitationError(_("This address already has an invitation waiting: send it again from People."))
     _throttle(by)
     now = timezone.now()
     invitation = OrganisationInvitation(
-        email=email,
-        name=name,
-        roles=roles,
+        email=address,
+        name=full_name,
+        roles=chosen,
         language=language,
         invited_by=by,
         created_at=now,
@@ -119,7 +127,7 @@ def invite(email, name, roles, by, language=""):
 
 
 @transaction.atomic
-def resend(invitation, by):
+def resend(invitation: OrganisationInvitation, by: User) -> OrganisationInvitation:
     """A new link (the old one stops working), valid VALID_DAYS again."""
     if invitation.accepted_at or invitation.withdrawn_at:
         raise InvitationError(_("This invitation was already accepted or withdrawn."))
@@ -131,7 +139,7 @@ def resend(invitation, by):
     return invitation
 
 
-def withdraw(invitation):
+def withdraw(invitation: OrganisationInvitation) -> OrganisationInvitation:
     if not invitation.is_pending:
         raise InvitationError(_("This invitation isn't waiting any more."))
     invitation.withdrawn_at = timezone.now()
@@ -139,7 +147,7 @@ def withdraw(invitation):
     return invitation
 
 
-def can_accept(invitation, user):
+def can_accept(invitation: OrganisationInvitation, user: "User | AnonymousUser") -> bool:
     return (
         invitation.is_pending
         and user.is_authenticated
@@ -150,7 +158,7 @@ def can_accept(invitation, user):
 
 
 @transaction.atomic
-def accept(invitation, user):
+def accept(invitation: OrganisationInvitation, user: User) -> OrganisationInvitation:
     """Grant the invitation's roles to `user`, whose address must be the
     invited one."""
     from notifications.services import notify
@@ -178,7 +186,7 @@ def accept(invitation, user):
     return invitation
 
 
-def remove_old(now=None):
+def remove_old(now: datetime | None = None) -> int:
     """The retention job: accepted, withdrawn and expired invitations
     `KEEP_DAYS` after they ended. Returns how many."""
     cutoff = (now or timezone.now()) - timedelta(days=KEEP_DAYS)

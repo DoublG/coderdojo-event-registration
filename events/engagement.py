@@ -19,7 +19,8 @@ trigger on); the rebuild_engagement task runs it nightly.
 """
 
 from collections import Counter, defaultdict
-from datetime import timedelta
+from datetime import date, datetime, timedelta
+from typing import Any, TypedDict
 
 from django.conf import settings
 from django.db import transaction
@@ -40,8 +41,23 @@ AT_RISK_MISSED = 3
 NO_SHOW_DAYS = 90
 ADULT_AGE = 18
 
+# The shapes the rebuild passes around, all keyed by primary key.
+Dojos = dict[int, Dojo]  # dojo id -> dojo
+Sessions = dict[int, Event]  # event id -> session
+SessionsByDojo = dict[int, list[Event]]  # dojo id -> the sessions it ran in the history window
+Visits = dict[int, tuple[Event, bool]]  # event id -> (session, whether attendance was marked)
+IdRange = tuple[int, int]  # a batch of children: first id, last id
 
-def is_aimed_at(ninja, event):
+
+class Metrics(TypedDict):
+    offered_180d: int
+    attended_180d: int
+    attendance_rate: float
+    missed_in_a_row: int
+    no_shows_90d: int
+
+
+def is_aimed_at(ninja: Ninja, event: Event) -> bool:
     """Whether `event` was meant for `ninja`: statistics only, it never
     restricts who can sign up."""
     if event.audience == Event.GIRLS and ninja.gender != Ninja.GIRL:
@@ -55,10 +71,21 @@ def is_aimed_at(ninja, event):
     return True
 
 
-def stage(*, age, dojo_max_age, attended_total, first_attended, last_attended, attended_window, rate, missed, today):
+def stage(
+    *,
+    age: int | None,
+    dojo_max_age: int | None,
+    attended_total: int,
+    first_attended: date | None,
+    last_attended: date | None,
+    attended_window: int,
+    rate: float,
+    missed: int,
+    today: date,
+) -> str:
     if age is not None and (age >= ADULT_AGE or (dojo_max_age is not None and age > dojo_max_age)):
         return NinjaEngagement.AGED_OUT
-    if attended_total == 0:
+    if attended_total == 0 or first_attended is None or last_attended is None:
         return NinjaEngagement.NEVER_ATTENDED
     recent = today - timedelta(days=WINDOW_DAYS)
     if first_attended >= today - timedelta(days=NEW_DAYS) or (
@@ -74,14 +101,14 @@ def stage(*, age, dojo_max_age, attended_total, first_attended, last_attended, a
     return NinjaEngagement.OCCASIONAL
 
 
-def _aimed_sessions(ninja, dojo, sessions, history_start):
+def _aimed_sessions(ninja: Ninja, dojo: Dojo | None, sessions: SessionsByDojo, history_start: datetime) -> list[Event]:
     """The sessions `dojo` ran in the history window that were meant for `ninja`."""
     if dojo is None:
         return []
     return [s for s in sessions.get(dojo.pk, []) if s.start_time >= history_start and is_aimed_at(ninja, s)]
 
 
-def _missed_in_a_row(aimed, counted, visits):
+def _missed_in_a_row(aimed: list[Event], counted: set[int], visits: dict[int, Event]) -> int:
     """Sessions offered since the last visit, newest first, until a visit."""
     last_visit = max((visits[pk].start_time for pk in counted), default=None)
     missed = 0
@@ -92,16 +119,25 @@ def _missed_in_a_row(aimed, counted, visits):
     return missed
 
 
-def _metrics(ninja, dojo, sessions, visits, no_shows, now, overall):
+def _metrics(
+    ninja: Ninja,
+    dojo: Dojo | None,
+    sessions: SessionsByDojo,
+    visits: dict[int, Event],
+    no_shows: list[Event],
+    now: datetime,
+    overall: bool,
+) -> Metrics:
     """Window figures for one ninja at one dojo. `visits` maps event id to
     the events the ninja came to (anywhere). For the overall row, `dojo` is
     the main dojo and a visit anywhere counts: sessions they came to at
     another dojo count as offered, and a visit anywhere ends a run of
     missed sessions."""
     window_start = now - timedelta(days=WINDOW_DAYS)
+    dojo_id = dojo.pk if dojo else None
     aimed = _aimed_sessions(ninja, dojo, sessions, now - timedelta(days=HISTORY_DAYS))
     offered = {s.pk for s in aimed if s.start_time >= window_start}
-    counted = {pk for pk, event in visits.items() if overall or event.dojo_id == dojo.pk}
+    counted = {pk for pk, event in visits.items() if overall or event.dojo_id == dojo_id}
     recent_visits = {pk for pk in counted if visits[pk].start_time >= window_start}
     if overall:
         offered |= recent_visits
@@ -113,14 +149,26 @@ def _metrics(ninja, dojo, sessions, visits, no_shows, now, overall):
         "attendance_rate": min(1.0, attended_window / len(offered)) if offered else 0.0,
         "missed_in_a_row": _missed_in_a_row(aimed, counted, visits),
         "no_shows_90d": sum(
-            1 for s in no_shows if (overall or s.dojo_id == dojo.pk) and s.start_time >= no_show_since
+            1 for s in no_shows if (overall or s.dojo_id == dojo_id) and s.start_time >= no_show_since
         ),
     }
 
 
-def _row(ninja, dojo, main, overall, visits, sessions, no_shows, upcoming, today, now):
+def _row(
+    ninja: Ninja,
+    dojo: Dojo | None,
+    main: Dojo | None,
+    overall: bool,
+    visits: Visits,
+    sessions: SessionsByDojo,
+    no_shows: list[Event],
+    upcoming: set[int],
+    today: date,
+    now: datetime,
+) -> NinjaEngagement:
     """One NinjaEngagement row: at `dojo`, or overall (measured at `main`)."""
-    counted = {pk: v for pk, v in visits.items() if overall or v[0].dojo_id == dojo.pk}
+    dojo_id = dojo.pk if dojo else None
+    counted = {pk: v for pk, v in visits.items() if overall or v[0].dojo_id == dojo_id}
     days = sorted(timezone.localtime(event.start_time).date() for event, _marked in counted.values())
     measured_at = main if overall else dojo
     metrics = _metrics(ninja, measured_at, sessions, {pk: v[0] for pk, v in visits.items()}, no_shows, now, overall)
@@ -144,24 +192,24 @@ def _row(ninja, dojo, main, overall, visits, sessions, no_shows, upcoming, today
         first_attended=first,
         last_attended=last,
         attended_total=len(days),
-        has_upcoming=bool(upcoming) if overall else dojo.pk in upcoming,
+        has_upcoming=bool(upcoming) if overall else dojo_id in upcoming,
         from_marked_attendance=all(marked for _event, marked in counted.values()),
         computed_on=today,
         **metrics,
     )
 
 
-def _sessions_by_dojo(events, now, history_start):
+def _sessions_by_dojo(events: Sessions, now: datetime, history_start: datetime) -> SessionsByDojo:
     """{dojo_id: [event]}: the sessions each dojo ran in the history window,
     taken from `events` (_sessions_by_id), so each session is one object."""
-    sessions = defaultdict(list)
+    sessions: defaultdict[int, list[Event]] = defaultdict(list)
     for event in events.values():
         if history_start <= event.start_time <= now:
             sessions[event.dojo_id].append(event)
     return sessions
 
 
-def _sessions_by_id(dojos):
+def _sessions_by_id(dojos: Dojos) -> Sessions:
     """{event_id: event} for every session that isn't a draft, each with its
     dojo from `dojos` attached. Every session is loaded once and shared by
     its registrations: a select_related on the registrations would build a
@@ -172,12 +220,18 @@ def _sessions_by_id(dojos):
     return events
 
 
-def _marked_events():
+def _marked_events() -> set[int]:
     """The sessions where the dojo marked anyone's attendance."""
     return set(Registration.objects.filter(attended__isnull=False).values_list("event_id", flat=True))
 
 
-def _registrations_by_ninja(now, dojos, events=None, marked_events=None, ninjas=None):
+def _registrations_by_ninja(
+    now: datetime,
+    dojos: Dojos,
+    events: Sessions | None = None,
+    marked_events: set[int] | None = None,
+    ninjas: IdRange | None = None,
+) -> tuple[dict[int, Visits], dict[int, list[Event]], dict[int, set[int]]]:
     """Each child's registrations, sorted into what came of them:
     came {ninja_id: {event_id: (event, marked)}}, no_shows {ninja_id: [event]}
     and upcoming {ninja_id: {dojo_id}}. The registrations are read as plain
@@ -189,7 +243,9 @@ def _registrations_by_ninja(now, dojos, events=None, marked_events=None, ninjas=
         events = _sessions_by_id(dojos)
     if marked_events is None:
         marked_events = _marked_events()
-    came, no_shows, upcoming = defaultdict(dict), defaultdict(list), defaultdict(set)
+    came: defaultdict[int, Visits] = defaultdict(dict)
+    no_shows: defaultdict[int, list[Event]] = defaultdict(list)
+    upcoming: defaultdict[int, set[int]] = defaultdict(set)
     rows = Registration.objects.exclude(event__status=Event.DRAFT)
     if ninjas is not None:
         rows = rows.filter(ninja_id__gte=ninjas[0], ninja_id__lte=ninjas[1])
@@ -209,7 +265,7 @@ def _registrations_by_ninja(now, dojos, events=None, marked_events=None, ninjas=
     return came, no_shows, upcoming
 
 
-def _main_dojo(ninja, visits, history_start):
+def _main_dojo(ninja: Ninja, visits: Visits, history_start: datetime) -> tuple[Dojo | None, Dojos]:
     """(main dojo, {dojo_id: dojo} to measure at): the home dojo, else the one
     visited most in the history window, else the last one visited."""
     recent = [event for event, _marked in visits.values() if event.start_time >= history_start]
@@ -223,7 +279,7 @@ def _main_dojo(ninja, visits, history_start):
     return main, dojos
 
 
-def _stage_changes(rows, today, ninjas):
+def _stage_changes(rows: list[NinjaEngagement], today: date, ninjas: IdRange) -> list[NinjaEngagementChange]:
     """A NinjaEngagementChange for every child in the batch `ninjas` (first
     id, last id) whose overall stage moved."""
     previous = dict(
@@ -238,7 +294,17 @@ def _stage_changes(rows, today, ninjas):
     ]
 
 
-def _rebuild_batch(ninjas, *, now, today, history_start, sessions, every_dojo, events, marked_events):
+def _rebuild_batch(
+    ninjas: IdRange,
+    *,
+    now: datetime,
+    today: date,
+    history_start: datetime,
+    sessions: SessionsByDojo,
+    every_dojo: Dojos,
+    events: Sessions,
+    marked_events: set[int],
+) -> int:
     """Recompute the rows of the children with an id in `ninjas` (first,
     last) and replace theirs, in one transaction. Returns how many rows."""
     came, no_shows, upcoming = _registrations_by_ninja(
@@ -250,7 +316,7 @@ def _rebuild_batch(ninjas, *, now, today, history_start, sessions, every_dojo, e
             ninja.home_dojo = every_dojo[ninja.home_dojo_id]
         visits = came.get(ninja.pk, {})
         main, dojos = _main_dojo(ninja, visits, history_start)
-        shared = {
+        shared: dict[str, Any] = {
             "visits": visits,
             "sessions": sessions,
             "no_shows": no_shows.get(ninja.pk, []),
@@ -271,7 +337,7 @@ def _rebuild_batch(ninjas, *, now, today, history_start, sessions, every_dojo, e
     return len(rows)
 
 
-def rebuild(today=None, batch_size=None):
+def rebuild(today: date | None = None, batch_size: int | None = None) -> int:
     """Recompute every NinjaEngagement row, `batch_size` children at a time
     (default settings.ENGAGEMENT_REBUILD_BATCH_SIZE)
     (CAPACITY.md, "Load: Celery workers and mail"): each batch reads only
@@ -288,7 +354,7 @@ def rebuild(today=None, batch_size=None):
     # own copy).
     every_dojo = Dojo.objects.in_bulk()
     events = _sessions_by_id(every_dojo)
-    context = {
+    context: dict[str, Any] = {
         "now": now,
         "today": today,
         "history_start": history_start,

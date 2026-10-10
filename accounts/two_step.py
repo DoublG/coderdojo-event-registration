@@ -13,9 +13,14 @@ offers the others as alternatives, so exactly one app or passkey carries
 that name (`_ensure_default`), whichever was added first.
 """
 
+from typing import TYPE_CHECKING, Any
+
 import django_otp
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.db.models import QuerySet
 from django.dispatch import receiver
+from django.http import HttpRequest
 from django.utils.translation import gettext as _
 from django_otp.plugins.otp_static.models import StaticDevice, StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
@@ -23,6 +28,12 @@ from two_factor.plugins.webauthn.models import WebauthnDevice
 from two_factor.signals import user_verified
 
 from .security_mail import send_security_mail
+
+if TYPE_CHECKING:
+    from .models import User
+
+# django-otp ships no type information, so its devices are Any to the checker.
+Device = Any
 
 APP = "app"
 PASSKEY = "passkey"
@@ -35,40 +46,47 @@ class TwoStepError(Exception):
     """A change that isn't allowed, with a message for the person."""
 
 
-def app_device(user):
+def _account(request: HttpRequest) -> "User":
+    """The request's account: these changes are only offered to a logged-in one."""
+    if not request.user.is_authenticated:
+        raise PermissionDenied
+    return request.user
+
+
+def app_device(user: "User") -> Device | None:
     return TOTPDevice.objects.filter(user=user, confirmed=True).first()
 
 
-def passkeys(user):
+def passkeys(user: "User") -> QuerySet[Any]:
     return WebauthnDevice.objects.filter(user=user, confirmed=True).order_by("created_at", "id")
 
 
-def methods(user):
+def methods(user: "User") -> list[Device]:
     """Every app and passkey on the account, oldest first."""
     devices = list(TOTPDevice.objects.filter(user=user, confirmed=True)) + list(passkeys(user))
     return sorted(devices, key=lambda device: (device.created_at, device.pk))
 
 
-def is_on(user):
+def is_on(user: "User") -> bool:
     return (
         TOTPDevice.objects.filter(user=user, confirmed=True).exists()
         or WebauthnDevice.objects.filter(user=user, confirmed=True).exists()
     )
 
 
-def has_passkey(user):
+def has_passkey(user: "User") -> bool:
     return WebauthnDevice.objects.filter(user=user, confirmed=True).exists()
 
 
-def kind_of(device):
+def kind_of(device: Device) -> str:
     return PASSKEY if isinstance(device, WebauthnDevice) else APP
 
 
-def backup_codes_left(user):
+def backup_codes_left(user: "User") -> int:
     return StaticToken.objects.filter(device__user=user).count()
 
 
-def make_backup_codes(user):
+def make_backup_codes(user: "User") -> list[str]:
     """A fresh set of backup codes, replacing any earlier ones; returned once,
     to show the person (they're kept as plain single-use tokens)."""
     device, _created = StaticDevice.objects.get_or_create(user=user, name=BACKUP_NAME)
@@ -79,7 +97,7 @@ def make_backup_codes(user):
     return codes
 
 
-def _ensure_default(user):
+def _ensure_default(user: "User") -> None:
     current = methods(user)
     if current and not any(device.name == DEFAULT_NAME for device in current):
         first = current[0]
@@ -87,10 +105,10 @@ def _ensure_default(user):
         first.save(update_fields=["name"])
 
 
-def _added(request, device):
+def _added(request: HttpRequest, device: Device) -> Device:
     """After `device` is saved: it counts for this session (the person just
     proved they have it), and they get a mail."""
-    user = request.user
+    user = _account(request)
     was_on = len(methods(user)) > 1  # `device` is already one of them
     device.name = DEFAULT_NAME if not was_on else kind_of(device)
     device.save(update_fields=["name"])
@@ -99,14 +117,14 @@ def _added(request, device):
     return device
 
 
-def add_app(request, form):
+def add_app(request: HttpRequest, form: Any) -> Device:
     """Save the authenticator app a validated two_factor TOTPDeviceForm checked."""
-    if app_device(request.user):
+    if app_device(_account(request)):
         raise TwoStepError(_("This account already has an authenticator app. Remove it first to use another."))
     return _added(request, form.save())
 
 
-def add_passkey(request, setup_data):
+def add_passkey(request: HttpRequest, setup_data: Any) -> Device:
     """Save the passkey a validated WebAuthn registration describes (the
     cleaned data of two_factor's WebauthnDeviceValidationForm). Raises
     TwoStepError when the browser's answer doesn't check out."""
@@ -123,7 +141,7 @@ def add_passkey(request, setup_data):
     return _added(request, device)
 
 
-def requirement_blocks_removal(user, device=None):
+def requirement_blocks_removal(user: "User", device: Device | None = None) -> str | None:
     """The message why removing `device` (None: every method) would leave the
     account below what its role requires, or None."""
     from .sign_in import PASSKEY as PASSKEY_LEVEL
@@ -144,7 +162,7 @@ def requirement_blocks_removal(user, device=None):
     return _("Your role needs two-step login, so you can't remove your last sign-in method. Add another one first.")
 
 
-def remove(user, device):
+def remove(user: "User", device: Device) -> None:
     """Remove one app or passkey. Removing the last one turns two-step login
     off (and drops the backup codes)."""
     if device.user_id != user.pk:
@@ -164,7 +182,7 @@ def remove(user, device):
         _mail(user, "two_step_turned_off", by_organisation=False)
 
 
-def turn_off(user, by_organisation=False, by_guardian=None):
+def turn_off(user: "User", by_organisation: bool = False, by_guardian: "User | None" = None) -> None:
     """Remove every app, passkey and backup code. The person checks this
     themselves (their password, and their role's requirement); the
     organisation uses it for someone who lost their phone
@@ -185,14 +203,14 @@ def turn_off(user, by_organisation=False, by_guardian=None):
     )
 
 
-def _mail(user, key, **context):
+def _mail(user: "User", key: str, **context: Any) -> None:
     """The security mail to the account (and, for a child's own login, a
     notice to its guardians: accounts.security_mail)."""
     send_security_mail(user, key, **context)
 
 
 @receiver(user_verified)
-def _backup_code_used(sender, request, user, device, **kwargs):
+def _backup_code_used(sender: Any, request: HttpRequest, user: "User", device: Device, **kwargs: Any) -> None:
     """A login with a backup code: tell the person, so a stolen code shows."""
     if isinstance(device, StaticDevice):
         _mail(user, "backup_code_used", codes_left=backup_codes_left(user))

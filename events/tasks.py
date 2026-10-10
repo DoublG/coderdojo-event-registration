@@ -6,7 +6,7 @@ from celery import shared_task
 # the next night tries again. Ten minutes is far more than it needs (5 s
 # at a year's growth); the time limit stops one that's stuck.
 @shared_task(acks_late=False, time_limit=10 * 60)
-def rebuild_engagement():
+def rebuild_engagement() -> int:
     """Nightly (beat, default queue: it reads every registration): recompute
     events.NinjaEngagement, see events.engagement."""
     from .engagement import rebuild

@@ -1,7 +1,7 @@
 """Whether mail is going out: shared by the organisation's Mail queue
 (mailing.manage.mail_queue) and a dojo's (campaigns.dojo_views.dojo_mail_queue)."""
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.db.models import Min, Q
 from django.db.models.functions import Coalesce
@@ -14,12 +14,12 @@ from .models import EmailMessage
 STALLED_AFTER = timedelta(minutes=30)
 
 
-def due_q(now=None):
+def due_q(now: datetime | None = None) -> Q:
     now = now or timezone.now()
     return Q(send_after__isnull=True) | Q(send_after__lte=now)
 
 
-def oldest_due(now=None):
+def oldest_due(now: datetime | None = None) -> datetime | None:
     """When the longest-waiting due mail (any mail, anyone's) was due, or None."""
     return (
         EmailMessage.objects.filter(due_q(now), status=EmailMessage.Status.PENDING)
@@ -28,7 +28,7 @@ def oldest_due(now=None):
     )
 
 
-def snapshot(now=None):
+def snapshot(now: datetime | None = None) -> dict[str, int]:
     """Mail waiting to be sent, and how long the oldest due one has waited:
     what /metrics/ shows (registered with monitoring.collect)."""
     now = now or timezone.now()
@@ -40,5 +40,5 @@ def snapshot(now=None):
     }
 
 
-def is_stalled(oldest, now=None):
+def is_stalled(oldest: datetime | None, now: datetime | None = None) -> bool:
     return bool(oldest and (now or timezone.now()) - oldest > STALLED_AFTER)

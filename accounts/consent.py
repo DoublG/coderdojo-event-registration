@@ -11,23 +11,29 @@ wording is accounts/partials/_child_data_consent.html; change it only
 together with CHILD_DATA_WORDING_VERSION. Every change goes through
 `set_consent`, so the audit log records it."""
 
+from datetime import datetime
+from typing import TYPE_CHECKING
+
 from django.utils import timezone
+
+if TYPE_CHECKING:
+    from .models import Guardianship
 
 CHILD_DATA_WORDING_VERSION = "2026-09-26b"
 
 
-def consent_fields(given=True):
+def consent_fields(given: bool = True) -> dict[str, datetime | str]:
     """The Guardianship fields for a new link, with or without the consent."""
     if not given:
         return {}
     return {"consent_given_at": timezone.now(), "consent_wording_version": CHILD_DATA_WORDING_VERSION}
 
 
-def has_consent(guardianship):
+def has_consent(guardianship: "Guardianship") -> bool:
     return guardianship.consent_given_at is not None
 
 
-def set_consent(guardianship, given):
+def set_consent(guardianship: "Guardianship", given: bool) -> bool:
     """Give or withdraw the consent for this guardian and child. Returns
     whether anything changed."""
     if given == has_consent(guardianship):

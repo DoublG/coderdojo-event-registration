@@ -23,6 +23,7 @@ carries a message for the person.
 
 import hashlib
 import logging
+from typing import TYPE_CHECKING
 from urllib.parse import urlencode
 
 from django.conf import settings
@@ -40,6 +41,9 @@ from mailing.services import send_or_log
 from .models import User
 from .security_mail import LOGIN_METHOD_CHANGED, send_security_mail
 
+if TYPE_CHECKING:
+    from mailing.models import EmailMessage
+
 logger = logging.getLogger(__name__)
 
 VALID_MINUTES = 15
@@ -54,7 +58,7 @@ PEOPLE = (User.ADULT, User.NINJA)
 class LoginLinkError(Exception):
     """Something that can't be done, with a message for the person."""
 
-    def __init__(self, message):
+    def __init__(self, message: str) -> None:
         super().__init__(message)
         self.message = message
 
@@ -65,11 +69,11 @@ class _TimedTokens(PasswordResetTokenGenerator):
 
     valid_seconds = 0
 
-    def check_token(self, user, token):
+    def check_token(self, user: User | None, token: str | None) -> bool:
         if not super().check_token(user, token):
             return False
         try:
-            timestamp = base36_to_int(token.split("-")[0])
+            timestamp = base36_to_int((token or "").split("-")[0])
         except ValueError:
             return False
         return self._num_seconds(self._now()) - timestamp <= self.valid_seconds
@@ -79,7 +83,7 @@ class LoginLinkTokens(_TimedTokens):
     key_salt = "accounts.login_links.LoginLinkTokens"
     valid_seconds = VALID_MINUTES * 60
 
-    def _make_hash_value(self, user, timestamp):
+    def _make_hash_value(self, user: User, timestamp: int) -> str:
         last_login = "" if user.last_login is None else user.last_login.replace(microsecond=0, tzinfo=None)
         email = (user.email or "").strip().lower()
         return f"{user.pk}{user.password}{last_login}{timestamp}{email}{user.login_method}{user.is_active}"
@@ -100,7 +104,7 @@ class SwitchTokens(_TimedTokens):
     key_salt = "accounts.login_links.SwitchTokens"
     valid_seconds = SWITCH_VALID_HOURS * 3600
 
-    def _make_hash_value(self, user, timestamp):
+    def _make_hash_value(self, user: User, timestamp: int) -> str:
         email = (user.email or "").strip().lower()
         return f"{user.pk}{user.password}{timestamp}{email}{user.login_method}{user.is_active}"
 
@@ -110,11 +114,11 @@ first_login_tokens = FirstLoginLinkTokens()
 switch_tokens = SwitchTokens()
 
 
-def _uid(user):
+def _uid(user: User) -> str:
     return urlsafe_base64_encode(force_bytes(user.pk))
 
 
-def _user_from_uid(uidb64):
+def _user_from_uid(uidb64: str) -> User | None:
     try:
         pk = int(force_str(urlsafe_base64_decode(uidb64)))
     except (TypeError, ValueError, OverflowError):
@@ -122,17 +126,17 @@ def _user_from_uid(uidb64):
     return User.objects.filter(pk=pk, is_active=True, account_type__in=PEOPLE).first()
 
 
-def _with_next(url, next_url):
+def _with_next(url: str, next_url: str | None) -> str:
     return f"{url}?{urlencode({'next': next_url})}" if next_url else url
 
 
-def login_url(user, next_url=None, first=False):
+def login_url(user: User, next_url: str | None = None, first: bool = False) -> str:
     tokens = first_login_tokens if first else login_tokens
     path = reverse("login_link", kwargs={"uidb64": _uid(user), "token": tokens.make_token(user)})
     return _with_next(settings.SITE_URL + path, next_url)
 
 
-def user_from_link(uidb64, token):
+def user_from_link(uidb64: str, token: str) -> User | None:
     """The account a login link is for, or None when it's broken, expired,
     already used, or the account doesn't log in with a link (any more)."""
     user = _user_from_uid(uidb64)
@@ -143,14 +147,14 @@ def user_from_link(uidb64, token):
     return None
 
 
-def _throttle(key):
+def _throttle(key: str) -> None:
     # cache.add is False when the key exists; None when the cache is down
     # (IGNORE_EXCEPTIONS), and then the request goes ahead.
     if cache.add(key, 1, REQUEST_INTERVAL_SECONDS) is False:
         raise LoginLinkError(_("We just sent a mail. Please wait a minute before asking again."))
 
 
-def send_login_link(user, next_url=None, first=False):
+def send_login_link(user: User, next_url: str | None = None, first: bool = False) -> "EmailMessage | None":
     """Mail `user` a login link (the `login_link` template)."""
     return send_or_log(
         user,
@@ -165,7 +169,7 @@ def send_login_link(user, next_url=None, first=False):
     )
 
 
-def _password_reset_url(user):
+def _password_reset_url(user: User) -> str:
     path = reverse(
         "password_reset_confirm",
         kwargs={"uidb64": _uid(user), "token": default_token_generator.make_token(user)},
@@ -173,16 +177,16 @@ def _password_reset_url(user):
     return settings.SITE_URL + path
 
 
-def request_link(email, next_url=None):
+def request_link(email: str | None, next_url: str | None = None) -> None:
     """Someone asks for a login link for `email`. Whatever the answer, the
     page says the same, so it never tells whether an account exists: an
     account on a link gets one, an account on a password gets a mail saying
     so (with a password-reset link), an unknown address gets nothing. One
     request a minute per address, known or not."""
-    email = (email or "").strip()
-    digest = hashlib.sha256(email.lower().encode()).hexdigest()
+    address = (email or "").strip()
+    digest = hashlib.sha256(address.lower().encode()).hexdigest()
     _throttle(f"accounts:login-link:{digest}")
-    matches = list(User.objects.filter(email__iexact=email, is_active=True, account_type__in=PEOPLE)[:2])
+    matches = list(User.objects.filter(email__iexact=address, is_active=True, account_type__in=PEOPLE)[:2])
     if len(matches) != 1:  # none, or an address two accounts share (the login refuses those too)
         return
     user = matches[0]
@@ -200,7 +204,7 @@ def request_link(email, next_url=None):
         )
 
 
-def reauth_link(user, next_url):
+def reauth_link(user: User, next_url: str | None) -> None:
     """A login link for someone who is logged in but has to confirm it's
     them (accounts.reauth): it brings them back to `next_url`."""
     if not user.uses_login_link:
@@ -212,14 +216,14 @@ def reauth_link(user, next_url):
 # --- Switching --------------------------------------------------------------
 
 
-def switch_url(user):
+def switch_url(user: User) -> str:
     path = reverse(
         "account_login_method_confirm", kwargs={"uidb64": _uid(user), "token": switch_tokens.make_token(user)}
     )
     return settings.SITE_URL + path
 
 
-def request_switch_to_link(user):
+def request_switch_to_link(user: User) -> None:
     """Mail `user` the confirmation of a switch to a login link. Nothing
     changes until it's opened."""
     if user.uses_login_link:
@@ -235,14 +239,14 @@ def request_switch_to_link(user):
     )
 
 
-def user_from_switch_link(uidb64, token):
+def user_from_switch_link(uidb64: str, token: str) -> User | None:
     user = _user_from_uid(uidb64)
     if user is None or user.uses_login_link or not switch_tokens.check_token(user, token):
         return None
     return user
 
 
-def _changed(user, by_guardian=None):
+def _changed(user: User, by_guardian: User | None = None) -> None:
     send_security_mail(
         user,
         "login_method_changed",
@@ -253,7 +257,7 @@ def _changed(user, by_guardian=None):
     )
 
 
-def switch_to_link(user):
+def switch_to_link(user: User) -> User:
     """Log in with a link from now on: the password goes (so the other
     sessions and remembered browsers end). Checked again under a lock, so
     two clicks switch once. The caller keeps its own session with
@@ -270,7 +274,7 @@ def switch_to_link(user):
     return user
 
 
-def switch_to_password(user, raw_password):
+def switch_to_password(user: User, raw_password: str) -> User:
     """Log in with this password from now on (from a session that just
     confirmed it's them, accounts.reauth)."""
     with transaction.atomic():
@@ -285,7 +289,7 @@ def switch_to_password(user, raw_password):
     return user
 
 
-def reset_to_password(user, by_guardian):
+def reset_to_password(user: User, by_guardian: User) -> User:
     """A guardian switches their child's login back to a password: no
     password until the child chooses one (the set-password mail,
     accounts.child_accounts)."""

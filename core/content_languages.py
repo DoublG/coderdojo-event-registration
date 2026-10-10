@@ -14,34 +14,42 @@ can say "only in Nederlands". Templates use the `localized` filter and the
 `only_in` tag from core.templatetags.content_i18n.
 """
 
+from collections.abc import Callable, Iterable
+from typing import TYPE_CHECKING, Any, Self
+
 from django.conf import settings
 from django.db import models
 from django.utils import translation
 
+if TYPE_CHECKING:
+    from django import forms
+
+    TranslationGroups = list[tuple[str, str, list[str]]]
+
 LANGUAGE_CODES = [code for code, _name in settings.LANGUAGES]
 
 
-def language_name(code):
+def language_name(code: str) -> str:
     return dict(settings.LANGUAGES).get(code, code)
 
 
-def normalize(code):
+def normalize(code: str | None) -> str | None:
     """A LANGUAGES code for `code` ("nl", "nl-BE", "nl_be" → "nl-be"), or None."""
     if not code:
         return None
-    code = code.lower().replace("_", "-")
-    if code in LANGUAGE_CODES:
-        return code
-    return next((c for c in LANGUAGE_CODES if c.split("-")[0] == code.split("-")[0]), None)
+    wanted = code.lower().replace("_", "-")
+    if wanted in LANGUAGE_CODES:
+        return wanted
+    return next((c for c in LANGUAGE_CODES if c.split("-")[0] == wanted.split("-")[0]), None)
 
 
-def clean_languages(codes):
+def clean_languages(codes: Iterable[str | None] | None) -> list[str]:
     """Known codes only, in order, without repeats."""
-    seen = []
+    seen: list[str] = []
     for code in codes or []:
-        code = normalize(code)
-        if code and code not in seen:
-            seen.append(code)
+        known = normalize(code)
+        if known and known not in seen:
+            seen.append(known)
     return seen
 
 
@@ -49,19 +57,22 @@ class LocalizedText(str):
     """A string that remembers which language it's in, and whether that's a
     fallback (the visitor's language wasn't available)."""
 
-    def __new__(cls, text, language, is_fallback):
+    language: str
+    is_fallback: bool
+
+    def __new__(cls, text: str, language: str, is_fallback: bool) -> Self:
         obj = super().__new__(cls, text)
         obj.language = language
         obj.is_fallback = is_fallback
         return obj
 
     @property
-    def language_name(self):
+    def language_name(self) -> str:
         return language_name(self.language)
 
 
 class TranslatableModel(models.Model):
-    TRANSLATABLE_FIELDS = ()
+    TRANSLATABLE_FIELDS: tuple[str, ...] = ()
 
     translations = models.JSONField(
         default=dict,
@@ -73,17 +84,17 @@ class TranslatableModel(models.Model):
     class Meta:
         abstract = True
 
-    def content_languages(self):
+    def content_languages(self) -> list[str]:
         raise NotImplementedError
 
-    def main_language(self):
+    def main_language(self) -> str:
         languages = self.content_languages()
         return languages[0] if languages else LANGUAGE_CODES[0]
 
-    def translation_for(self, language, field):
+    def translation_for(self, language: str, field: str) -> str:
         return ((self.translations or {}).get(language) or {}).get(field, "")
 
-    def set_translation(self, language, field, text):
+    def set_translation(self, language: str, field: str, text: str) -> None:
         translations = dict(self.translations or {})
         texts = dict(translations.get(language) or {})
         if text:
@@ -96,7 +107,7 @@ class TranslatableModel(models.Model):
             translations.pop(language, None)
         self.translations = translations
 
-    def localized(self, field, language=None):
+    def localized(self, field: str, language: str | None = None) -> LocalizedText:
         assert field in self.TRANSLATABLE_FIELDS, field  # noqa: S101 (a programming error, never user input)
         base = getattr(self, field) or ""
         main = self.main_language()
@@ -110,20 +121,22 @@ class TranslatableModel(models.Model):
         return LocalizedText(base, main, bool(base))
 
 
-def localized(obj, field, language=None):
+def localized(obj: TranslatableModel, field: str, language: str | None = None) -> LocalizedText:
     return obj.localized(field, language)
 
 
-def translation_field_name(language, field):
+def translation_field_name(language: str, field: str) -> str:
     return f"tr__{language}__{field}"
 
 
-def add_translation_fields(form, instance, make_field):
+def add_translation_fields(
+    form: "forms.BaseForm", instance: TranslatableModel, make_field: "Callable[[str], forms.Field]"
+) -> "TranslationGroups":
     """Add one form field per (other language, translatable field) of
     `instance` to `form`, initialised from its translations; returns the
     groups for the template: [(language, language_name, [field names])].
     `make_field(field)` builds an empty form field like the main one."""
-    groups = []
+    groups: TranslationGroups = []
     for language in instance.content_languages()[1:]:
         names = []
         for field in instance.TRANSLATABLE_FIELDS:
@@ -135,7 +148,7 @@ def add_translation_fields(form, instance, make_field):
     return groups
 
 
-def save_translation_fields(form, instance):
+def save_translation_fields(form: "forms.BaseForm", instance: TranslatableModel) -> None:
     for language in instance.content_languages()[1:]:
         for field in instance.TRANSLATABLE_FIELDS:
             name = translation_field_name(language, field)
@@ -143,7 +156,7 @@ def save_translation_fields(form, instance):
                 instance.set_translation(language, field, (form.cleaned_data[name] or "").strip())
 
 
-def optional_copy(form_field, label):
+def optional_copy(form_field: "forms.Field", label: Any) -> "forms.CharField":
     """An optional text field that looks like `form_field` (same widget,
     without its example placeholder), for one translation of it."""
     import copy
@@ -157,13 +170,13 @@ def optional_copy(form_field, label):
     )
 
 
-def bound_translation_groups(form, groups):
+def bound_translation_groups(form: "forms.BaseForm", groups: "TranslationGroups") -> list[dict[str, Any]]:
     """add_translation_fields' groups with bound fields, for templates:
     [{"code", "name", "fields": [BoundField, ...]}]."""
     return [{"code": code, "name": name, "fields": [form[n] for n in names]} for code, name, names in groups]
 
 
-def organisation_languages():
+def organisation_languages() -> list[str]:
     """The languages the organisation writes its own content in (pathways,
     FAQs, badges, belts, ...): settings.ORGANISATION_LANGUAGES, main first."""
     return clean_languages(getattr(settings, "ORGANISATION_LANGUAGES", None)) or [settings.LANGUAGE_CODE]
@@ -175,7 +188,7 @@ class OrganisationContent(TranslatableModel):
     class Meta:
         abstract = True
 
-    def content_languages(self):
+    def content_languages(self) -> list[str]:
         return organisation_languages()
 
 
@@ -186,7 +199,7 @@ class ScopedContent(TranslatableModel):
     class Meta:
         abstract = True
 
-    def content_languages(self):
+    def content_languages(self) -> list[str]:
         dojo = getattr(self, "dojo", None)
         event = getattr(self, "event", None)
         if dojo is not None:

@@ -1,8 +1,10 @@
+from typing import TYPE_CHECKING
+
 import requests
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import ExpressionWrapper, F, FloatField
+from django.db.models import ExpressionWrapper, F, FloatField, QuerySet
 from django.utils import timezone
 
 from events.models import Event
@@ -12,6 +14,14 @@ from geo.models import Municipality
 from monitoring import recorder
 
 from .models import Dojo
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AnonymousUser
+
+    from accounts.models import User
+    from pathways.models import Pathway
+
+    from .forms import DojoSearchForm
 
 # Default search origin/label before a real search is submitted — matches
 # the dojo-finder search bar's old pre-filled example location.
@@ -27,19 +37,19 @@ DEFAULT_SEARCH_CACHE_KEY = "dojos:by_distance:default_origin"
 DEFAULT_SEARCH_CACHE_TIMEOUT = 60
 
 
-def clear_default_search_cache():
+def clear_default_search_cache() -> None:
     """Forget the cached default list: now, and again once the current
     transaction commits, so a visitor who refilled it in between (from the
     old, still committed data) doesn't keep the change hidden."""
     _clear_now_and_on_commit(DEFAULT_SEARCH_CACHE_KEY)
 
 
-def _clear_now_and_on_commit(key):
+def _clear_now_and_on_commit(key: str) -> None:
     cache.delete(key)
     transaction.on_commit(lambda: cache.delete(key))
 
 
-def postal_code_origin(postal_code):
+def postal_code_origin(postal_code: str | None) -> tuple[Point, str] | None:
     """(Point, label) for a Belgian postcode: the average of its
     municipality centres (a postcode can cover several localities), or
     None for an unknown or empty postcode."""
@@ -53,14 +63,17 @@ def postal_code_origin(postal_code):
     return Point(lon, lat, srid=4326), f"{postal_code} {municipalities[0].name}"
 
 
-def resolve_search_origin(form, user=None):
+def resolve_search_origin(
+    form: "DojoSearchForm", user: "User | AnonymousUser | None" = None
+) -> tuple[Point | None, str, bool]:
     """Given a bound DojoSearchForm, return (origin, search_label,
     geocode_failed) following the priority rules: typed address > browser
     lat/lon > the logged-in account's postcode (User.postal_code, optional)
     > default (Ghent). Shared by the full dojo-finder page and the
     homepage's embedded widget.
     """
-    origin, search_label, geocode_failed = DEFAULT_SEARCH_ORIGIN, DEFAULT_SEARCH_LABEL, False
+    origin: Point | None = DEFAULT_SEARCH_ORIGIN
+    search_label, geocode_failed = DEFAULT_SEARCH_LABEL, False
     if user is not None and user.is_authenticated and (home := postal_code_origin(user.postal_code)):
         # Not cached like the Ghent default (dojos_by_distance checks the
         # origin's identity), so one family's list never leaks to another.
@@ -90,7 +103,9 @@ def resolve_search_origin(form, user=None):
     return origin, search_label, geocode_failed
 
 
-def dojos_by_distance(origin, language=None, pathway=None):
+def dojos_by_distance(
+    origin: Point | None, language: str | None = None, pathway: "Pathway | int | None" = None
+) -> list[Dojo] | QuerySet[Dojo]:
     """Dojo list annotated with distance_km from `origin` and ordered
     nearest-first — or the plain unordered queryset if origin is None (a
     failed geocode).
@@ -123,12 +138,13 @@ def dojos_by_distance(origin, language=None, pathway=None):
         ).order_by(F("distance_km").asc(nulls_last=True))
 
     if is_default:
-        qs = list(qs)
-        cache.set(DEFAULT_SEARCH_CACHE_KEY, qs, DEFAULT_SEARCH_CACHE_TIMEOUT)
+        dojos = list(qs)
+        cache.set(DEFAULT_SEARCH_CACHE_KEY, dojos, DEFAULT_SEARCH_CACHE_TIMEOUT)
+        return dojos
     return qs
 
 
-def attach_next_events(dojos):
+def attach_next_events(dojos: list[Dojo]) -> list[Dojo]:
     """Annotate each dojo in this (already-sliced) list with .next_event —
     one extra query total, instead of one per dojo."""
     upcoming = (
@@ -137,9 +153,9 @@ def attach_next_events(dojos):
         .with_confirmed_count()
         .order_by("start_time")
     )
-    next_event_by_dojo_id = {}
+    next_event_by_dojo_id: dict[int, Event] = {}
     for event in upcoming:
         next_event_by_dojo_id.setdefault(event.dojo_id, event)
     for dojo in dojos:
-        dojo.next_event = next_event_by_dojo_id.get(dojo.id)
+        dojo.next_event = next_event_by_dojo_id.get(dojo.id)  # type: ignore[attr-defined]  # for the template
     return dojos

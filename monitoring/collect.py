@@ -4,6 +4,9 @@ the open WebSockets. Read by /metrics/ and by the daily capacity sample.
 Each function answers from one component, so one that's down doesn't stop
 the others being read (monitoring.views, monitoring.tasks)."""
 
+from collections.abc import Callable
+from typing import Any
+
 from django.conf import settings
 from django.db import connection
 from django_redis import get_redis_connection
@@ -18,7 +21,7 @@ REDIS_STATS = ("evicted_keys", "rejected_connections", "connected_clients", "exp
 QUEUES = ("celery", "periodic")
 
 
-def database_tables():
+def database_tables() -> dict[str, dict[str, int]]:
     """{table: {"rows", "data_bytes", "index_bytes"}} for the site's database.
     `rows` is InnoDB's estimate (fine for sizing, not for counting)."""
     with connection.cursor() as cursor:
@@ -36,7 +39,7 @@ def database_tables():
     }
 
 
-def database_status():
+def database_status() -> dict[str, int]:
     """MySQL's own counters: connections in use and the most since it
     started, queries and slow queries since it started, and its limit."""
     with connection.cursor() as cursor:
@@ -48,7 +51,7 @@ def database_status():
     return status
 
 
-def redis_info():
+def redis_info() -> dict[str, Any]:
     """Redis's memory, its limit and eviction policy, and the keys per db
     (0 cache, 1 Channels, 2 Celery broker: one server for all three)."""
     info = get_redis_connection("default").info()
@@ -63,7 +66,7 @@ def redis_info():
     return result
 
 
-def queue_lengths():
+def queue_lengths() -> dict[str, int]:
     """Tasks waiting per Celery queue (the broker keeps each queue as a list)."""
     from website.celery import app
 
@@ -75,27 +78,28 @@ def queue_lengths():
 # Figures other apps report to /metrics/, registered from their
 # AppConfig.ready() (register_source), so monitoring imports none of them
 # (CODING_STANDARDS.md, "Layers"): "mail_queue" from mailing.
-_SOURCES = {}
+_SOURCES: dict[str, Callable[[], dict[str, int]]] = {}
 
 
-def register_source(name, function):
+def register_source(name: str, function: Callable[[], dict[str, int]]) -> None:
     _SOURCES[name] = function
 
 
-def mail_queue():
+def mail_queue() -> dict[str, int]:
     """Mail waiting to be sent, and how long the oldest due one has waited
     (mailing.queue_status.snapshot)."""
     source = _SOURCES.get("mail_queue")
     return source() if source else {"pending": 0, "sending": 0, "oldest_due_seconds": 0}
 
 
-def websocket_connections():
+def websocket_connections() -> int:
     """Open notification WebSockets, approximately: the members of every
     Channels group. A connection that died without saying goodbye stays in
     its group until channels_redis expires it (a day at most)."""
     import redis
 
-    address = settings.CHANNEL_LAYERS["default"]["CONFIG"]["hosts"][0]["address"]
+    channel_layers: Any = settings.CHANNEL_LAYERS
+    address = channel_layers["default"]["CONFIG"]["hosts"][0]["address"]
     client = redis.Redis.from_url(address, socket_timeout=2)
     try:
         return sum(client.zcard(key) for key in client.scan_iter(match="asgi:group:*", count=500))

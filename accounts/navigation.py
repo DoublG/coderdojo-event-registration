@@ -21,11 +21,20 @@ without any save.
 """
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
 
 from django.core.cache import cache
 from django.db import transaction
 from django.db.models.signals import m2m_changed, post_delete, post_save
 from django.dispatch import receiver
+from django.http import HttpRequest
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AnonymousUser
+
+    from dojos.models import Dojo
+
+    from .models import User
 
 CACHE_TIMEOUT = 300
 
@@ -34,21 +43,21 @@ CACHE_TIMEOUT = 300
 class AccountNavigation:
     approved_champion: bool = False
     approved_mentor: bool = False
-    applied_kinds: frozenset = frozenset()  # Application kinds pending or approved
-    organisation_roles: frozenset = frozenset()  # OrganisationRole roles
-    areas: list = field(default_factory=list)  # accounts.organisation.Area values, in the sidebar's order
-    dojos: list = field(default_factory=list)  # every dojo it manages (dojos.access.accessible_dojos), by name
+    applied_kinds: frozenset[str] = frozenset()  # Application kinds pending or approved
+    organisation_roles: frozenset[str] = frozenset()  # OrganisationRole roles
+    areas: list[str] = field(default_factory=list)  # accounts.organisation.Area values, in the sidebar's order
+    dojos: "list[Dojo]" = field(default_factory=list)  # every dojo it manages (dojos.access.accessible_dojos), by name
 
     @property
-    def admin_dojo(self):
+    def admin_dojo(self) -> "Dojo | None":
         return self.dojos[0] if self.dojos else None
 
 
-def _key(user_id, check_valid):
+def _key(user_id: int, check_valid: bool) -> str:
     return f"accounts:navigation:{user_id}:{int(check_valid)}"
 
 
-def build(user):
+def build(user: "User | AnonymousUser") -> AccountNavigation:
     """AccountNavigation for `user`, from the database."""
     from applications.services import is_approved_champion, is_approved_mentor
     from dojos.access import accessible_dojos
@@ -67,7 +76,7 @@ def build(user):
     )
 
 
-def for_user(user):
+def for_user(user: "User | AnonymousUser") -> AccountNavigation:
     """AccountNavigation for `user`, from the cache when it's there."""
     if not user.is_authenticated:
         return AccountNavigation()
@@ -79,14 +88,15 @@ def for_user(user):
     return navigation
 
 
-def for_request(request):
+def for_request(request: HttpRequest) -> AccountNavigation:
     """for_user() for the request's account, once per request."""
     if not hasattr(request, "_account_navigation"):
-        request._account_navigation = for_user(request.user)
-    return request._account_navigation
+        request._account_navigation = for_user(request.user)  # type: ignore[attr-defined]
+    navigation: AccountNavigation = request._account_navigation  # type: ignore[attr-defined]
+    return navigation
 
 
-def clear(*user_ids):
+def clear(*user_ids: int | None) -> None:
     """Forget the cached navigation of these accounts: now, and again once
     the current transaction commits (a request in between could cache the
     old rows)."""
@@ -97,7 +107,7 @@ def clear(*user_ids):
     transaction.on_commit(lambda: cache.delete_many(keys))
 
 
-def _connect():
+def _connect() -> None:
     from django.contrib.auth import get_user_model
 
     from applications.models import Application
@@ -109,12 +119,14 @@ def _connect():
 
     @receiver(post_save, sender=User, weak=False, dispatch_uid="navigation_user")
     @receiver(post_delete, sender=User, weak=False, dispatch_uid="navigation_user_delete")
-    def user_changed(sender, instance, **kwargs):
+    def user_changed(sender: Any, instance: Any, **kwargs: Any) -> None:
         clear(instance.pk)
 
     @receiver(m2m_changed, sender=User.groups.through, weak=False, dispatch_uid="navigation_groups")
     @receiver(m2m_changed, sender=User.user_permissions.through, weak=False, dispatch_uid="navigation_permissions")
-    def permissions_changed(sender, instance, action, reverse, pk_set, **kwargs):
+    def permissions_changed(
+        sender: Any, instance: Any, action: str, reverse: bool, pk_set: set[int] | None, **kwargs: Any
+    ) -> None:
         if not action.startswith("post_"):
             return
         if reverse:  # changed from the group's or permission's side
@@ -124,20 +136,20 @@ def _connect():
 
     @receiver(post_save, sender=Application, weak=False, dispatch_uid="navigation_application")
     @receiver(post_delete, sender=Application, weak=False, dispatch_uid="navigation_application_delete")
-    def application_changed(sender, instance, **kwargs):
+    def application_changed(sender: Any, instance: Application, **kwargs: Any) -> None:
         clear(instance.account_id)
 
     @receiver(post_save, sender=OrganisationRole, weak=False, dispatch_uid="navigation_role")
     @receiver(post_delete, sender=OrganisationRole, weak=False, dispatch_uid="navigation_role_delete")
-    def role_changed(sender, instance, **kwargs):
+    def role_changed(sender: Any, instance: OrganisationRole, **kwargs: Any) -> None:
         clear(instance.account_id)
 
     @receiver(post_save, sender=DojoMembership, weak=False, dispatch_uid="navigation_membership")
     @receiver(post_delete, sender=DojoMembership, weak=False, dispatch_uid="navigation_membership_delete")
-    def membership_changed(sender, instance, **kwargs):
+    def membership_changed(sender: Any, instance: DojoMembership, **kwargs: Any) -> None:
         clear(instance.user_id)
 
     @receiver(post_save, sender=Dojo, weak=False, dispatch_uid="navigation_dojo")
-    def dojo_changed(sender, instance, **kwargs):
+    def dojo_changed(sender: Any, instance: Dojo, **kwargs: Any) -> None:
         # Its name or kind shows in the switcher of everyone on its team.
         clear(*instance.memberships.values_list("user_id", flat=True))

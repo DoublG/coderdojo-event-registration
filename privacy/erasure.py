@@ -32,9 +32,11 @@ an `ErasureRecord` per account and child is, without personal data, so
 restored.
 """
 
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from functools import reduce
 from operator import or_
+from typing import Any
 
 from auditlog.context import disable_auditlog
 from auditlog.models import LogEntry as AuditLogEntry
@@ -47,21 +49,28 @@ from django.db.models import Q
 from accounts.models import Ninja, User
 from core import privacy_registry as registry
 from core.image_library import is_library_image
-from core.privacy_registry import Category, Computed, Erasure, Subject
+from core.privacy_registry import Category, Computed, Erasure, ModelPrivacy, Subject
 from privacy.models import ErasureRecord
 
 # Handled here rather than row by row: the logs of changes (by the content
 # type and id of what they're about) and login sessions (they end with the
 # password).
-_HANDLED_SEPARATELY = {AuditLogEntry, AdminLogEntry}
+_HANDLED_SEPARATELY: set[type[models.Model]] = {AuditLogEntry, AdminLogEntry}
 
 
-def sole_children(user):
+def sole_children(user: User) -> list[Ninja]:
     """The children only `user` is a guardian of: erased with the account."""
     return [child for child in Ninja.objects.of_guardian(user) if child.guardianships.count() == 1]
 
 
-def erase_person(user, requested_by=None, reason=ErasureRecord.REQUEST, keep_visible=False, *, replay=False):
+def erase_person(
+    user: User,
+    requested_by: User | None = None,
+    reason: str = ErasureRecord.REQUEST,
+    keep_visible: bool = False,
+    *,
+    replay: bool = False,
+) -> list[Ninja]:
     """Erase `user`, the children only they are a guardian of, and those
     children's own logins. Returns the erased children."""
     from dojos.team import end_all_memberships
@@ -83,7 +92,9 @@ def erase_person(user, requested_by=None, reason=ErasureRecord.REQUEST, keep_vis
     return children
 
 
-def erase_child(ninja, requested_by=None, reason=ErasureRecord.REQUEST, *, replay=False):
+def erase_child(
+    ninja: Ninja, requested_by: User | None = None, reason: str = ErasureRecord.REQUEST, *, replay: bool = False
+) -> None:
     """Erase one child and their own login, whatever guardians they have."""
     from dojos.team import end_all_memberships
 
@@ -97,11 +108,11 @@ def erase_child(ninja, requested_by=None, reason=ErasureRecord.REQUEST, *, repla
             _record(Ninja, [ninja], reason, requested_by)
 
 
-def is_erased(user):
+def is_erased(user: User) -> bool:
     return ErasureRecord.objects.filter(model=User._meta.label, object_id=user.pk).exists()
 
 
-def replay_erasures():
+def replay_erasures() -> int:
     """Erase again everyone in the erasure log (after restoring a backup).
     Returns how many were found; rows that no longer exist are skipped."""
     done = 0
@@ -117,7 +128,13 @@ def replay_erasures():
     return done
 
 
-def _record(model, objs, reason, requested_by, keep_visible=False):
+def _record(
+    model: type[models.Model],
+    objs: Iterable[models.Model],
+    reason: str,
+    requested_by: User | None,
+    keep_visible: bool = False,
+) -> None:
     ErasureRecord.objects.bulk_create(
         ErasureRecord(
             model=model._meta.label,
@@ -132,16 +149,16 @@ def _record(model, objs, reason, requested_by, keep_visible=False):
 
 @dataclass
 class _Erasure:
-    accounts: list
-    children: list
+    accounts: list[User]
+    children: list[Ninja]
     keep_visible: bool = False
     delete_audit: bool = False
     # (entry, obj) for the rows that are the person's, and (entry, obj,
     # field name) for others' rows that link to them.
-    rows: list = field(default_factory=list)
-    links: list = field(default_factory=list)
+    rows: list[tuple[ModelPrivacy, models.Model]] = field(default_factory=list)
+    links: list[tuple[ModelPrivacy, models.Model, str]] = field(default_factory=list)
 
-    def run(self):
+    def run(self) -> None:
         # Every row is found before anything changes: erasing clears the
         # very fields (an email address, a child's login) others are found by.
         self._collect()
@@ -153,37 +170,37 @@ class _Erasure:
 
     # --- finding the rows -----------------------------------------------------
 
-    def _collect(self):
+    def _collect(self) -> None:
         account_ids = [account.pk for account in self.accounts]
         child_ids = [child.pk for child in self.children]
         emails = [account.email for account in self.accounts if account.email]
         # One way to find a person's rows per kind of subject (registry.Subject).
-        found_by = {
+        found_by: dict[str, Callable[[str], Q | None]] = {
             Subject.ACCOUNT: lambda lookup: Q(**{f"{lookup}__in": account_ids}) if account_ids else None,
             Subject.CHILD: lambda lookup: Q(**{f"{lookup}__in": child_ids}) if child_ids else None,
             Subject.EMAIL: lambda lookup: (
                 reduce(or_, (Q(**{f"{lookup}__iexact": email}) for email in emails)) if emails else None
             ),
         }
-        targets = {User: account_ids, Ninja: child_ids}
+        targets: dict[Any, list[int]] = {User: account_ids, Ninja: child_ids}
         for entry in registry.registered():
             if entry.model in _HANDLED_SEPARATELY:
                 continue
             own = self._collect_own_rows(entry, found_by)
             self._collect_links(entry, targets, own)
 
-    def _collect_own_rows(self, entry, found_by):
+    def _collect_own_rows(self, entry: ModelPrivacy, found_by: dict[str, Callable[[str], Q | None]]) -> set[int]:
         """The rows of `entry`'s model that are about the person (its
         `subjects`); returns their ids."""
         conditions = [q for subject, lookup in entry.subjects.items() if (q := found_by[subject](lookup)) is not None]
-        own = set()
+        own: set[int] = set()
         if conditions:
             for obj in entry.model._base_manager.filter(reduce(or_, conditions)).distinct().order_by("pk"):
                 own.add(obj.pk)
                 self.rows.append((entry, obj))
         return own
 
-    def _collect_links(self, entry, targets, own):
+    def _collect_links(self, entry: ModelPrivacy, targets: dict[Any, list[int]], own: set[int]) -> None:
         """Others' rows of `entry`'s model whose personal link points at the
         person's account or child (not `own` rows, not kept links)."""
         for name, spec in entry.fields.items():
@@ -196,12 +213,12 @@ class _Erasure:
 
     # --- erasing them --------------------------------------------------------
 
-    def _erase_row(self, entry, obj):
+    def _erase_row(self, entry: ModelPrivacy, obj: models.Model) -> None:
         if self._about_them(entry, obj):
             _delete(entry, obj)
             return
         visible = self.keep_visible and (not entry.visible_when or getattr(obj, entry.visible_when))
-        changed = {}
+        changed: dict[str, Any] = {}
         for name, spec in entry.fields.items():
             if spec.on_erasure == Erasure.KEEP:
                 continue
@@ -209,7 +226,7 @@ class _Erasure:
                 continue  # frozen by erase_person
             if visible and spec.category == Category.PUBLIC_PROFILE:
                 continue
-            model_field = entry.model._meta.get_field(name)
+            model_field: Any = entry.model._meta.get_field(name)
             if spec.on_erasure == Erasure.ANONYMISE:
                 _set(obj, model_field, _replacement(spec.replacement, obj))
             else:
@@ -218,12 +235,12 @@ class _Erasure:
                 changed[model_field.attname] = getattr(obj, model_field.attname)
         _update(entry, obj, changed)
 
-    def _about_them(self, entry, obj):
+    def _about_them(self, entry: ModelPrivacy, obj: models.Model) -> bool:
         """A required link to the person classified `personal`: the row is
         theirs and goes (a guardianship, a mail preference, a belt)."""
-        targets = {User: {a.pk for a in self.accounts}, Ninja: {c.pk for c in self.children}}
+        targets: dict[Any, set[int]] = {User: {a.pk for a in self.accounts}, Ninja: {c.pk for c in self.children}}
         for name, spec in entry.fields.items():
-            model_field = entry.model._meta.get_field(name)
+            model_field: Any = entry.model._meta.get_field(name)
             if (
                 spec.on_erasure == Erasure.DELETE
                 and model_field.is_relation
@@ -234,9 +251,9 @@ class _Erasure:
                 return True
         return False
 
-    def _erase_link(self, entry, obj, name):
+    def _erase_link(self, entry: ModelPrivacy, obj: models.Model, name: str) -> None:
         spec = entry.fields[name]
-        model_field = entry.model._meta.get_field(name)
+        model_field: Any = entry.model._meta.get_field(name)
         if spec.on_erasure == Erasure.DELETE and not model_field.null:
             _delete(entry, obj)
             return
@@ -246,12 +263,12 @@ class _Erasure:
             _empty(obj, model_field)
         _update(entry, obj, {model_field.attname: getattr(obj, model_field.attname)})
 
-    def _clear_logs(self):
+    def _clear_logs(self) -> None:
         """The audit log's and the admin history's entries about the
         person's rows, and the audit entries the accounts made."""
         about = Q(pk__in=[])
         admin_about = Q(pk__in=[])
-        by_type = {}
+        by_type: dict[type[models.Model], list[Any]] = {}
         for entry, obj in self.rows:
             by_type.setdefault(entry.model, []).append(obj.pk)
         for model, pks in by_type.items():
@@ -280,16 +297,16 @@ class _Erasure:
 # Through the queryset, not save()/delete() on the row: a row an earlier
 # deletion already took with it (a cascade) is simply skipped, and no
 # model's save() adds values of its own.
-def _delete(entry, obj):
+def _delete(entry: ModelPrivacy, obj: models.Model) -> None:
     entry.model._base_manager.filter(pk=obj.pk).delete()
 
 
-def _update(entry, obj, values):
+def _update(entry: ModelPrivacy, obj: models.Model, values: dict[str, Any]) -> None:
     if values:
         entry.model._base_manager.filter(pk=obj.pk).update(**values)
 
 
-def _replacement(replacement, obj):
+def _replacement(replacement: object, obj: models.Model) -> Any:
     if isinstance(replacement, Computed):
         return replacement.function(obj)
     if isinstance(replacement, str):
@@ -297,7 +314,7 @@ def _replacement(replacement, obj):
     return replacement
 
 
-def _set(obj, model_field, value):
+def _set(obj: models.Model, model_field: Any, value: Any) -> None:
     if model_field.many_to_many:
         if value:
             raise ImproperlyConfigured(f"privacy: {model_field}: a many-to-many field can only be emptied")
@@ -306,7 +323,7 @@ def _set(obj, model_field, value):
         setattr(obj, model_field.attname, value)
 
 
-def _empty(obj, model_field):
+def _empty(obj: models.Model, model_field: Any) -> None:
     """The field's empty value: null where allowed, else False, the default
     or an empty text. A file is deleted, unless it's a shared library image."""
     if model_field.many_to_many:

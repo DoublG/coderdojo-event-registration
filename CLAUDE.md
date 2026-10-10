@@ -92,7 +92,7 @@ ruff format .             # format
 mypy                      # types: the modules in pyproject.toml's [tool.mypy] files
 ```
 
-**Type checking is gradual** (`CODING_STANDARDS.md`, "Type checking"): mypy with django-stubs' plugin checks only the modules listed in `[tool.mypy] files`, which are fully annotated (the service modules first). A service module you annotate joins the list; new service code is written annotated; views, forms and tests stay as they are. A type-only import goes under `TYPE_CHECKING`.
+**Type checking** (`CODING_STANDARDS.md`, "Type checking"): mypy with django-stubs' plugin checks the modules listed in `[tool.mypy] files`, which are fully annotated: every module that isn't a view, form, admin, model, template tag, migration, management command, test or `privacy.py` declaration (services, tasks, caches, segmentation, the mail engine, ...). A new module of that kind is written annotated and joins the list in the same change; views, forms and tests stay as they are. A type-only import goes under `TYPE_CHECKING`.
 
 ### Deploying (Level27)
 

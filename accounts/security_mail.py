@@ -4,11 +4,16 @@ method changed. They go to the account itself; for a ninja's own login the
 guardians get a notice too (`child_login_changed`), since the login is
 theirs to give and take away (§17)."""
 
+from typing import TYPE_CHECKING, Any
+
 from django.conf import settings
 from django.urls import reverse
 
 from mailing.categories import MailCategory
 from mailing.services import send_or_log
+
+if TYPE_CHECKING:
+    from .models import User
 
 # What changed on a child's login, for the guardians' notice (the template's
 # `change` variable).
@@ -21,11 +26,11 @@ LOGIN_METHOD_CHANGED = "login_method_changed"
 EMAIL_CHANGED = "email_changed"
 
 
-def security_url():
+def security_url() -> str:
     return settings.SITE_URL + reverse("account_security")
 
 
-def send_security_mail(user, key, change=None, **context):
+def send_security_mail(user: "User", key: str, change: str | None = None, **context: Any) -> None:
     """Mail `key` to `user` (when it has an address), and for a ninja's own
     login tell its guardians what changed (`change`, defaults to `key`)."""
     if user.email:
@@ -33,7 +38,7 @@ def send_security_mail(user, key, change=None, **context):
     tell_guardians(user, change or key, **context)
 
 
-def tell_guardians(user, change, **context):
+def tell_guardians(user: "User", change: str, **context: Any) -> None:
     """For a ninja's own login: the `child_login_changed` notice to each of
     the child's guardians."""
     if not user.is_ninja:

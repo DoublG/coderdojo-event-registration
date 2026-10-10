@@ -13,9 +13,13 @@ and the mail is skipped.
 """
 
 import logging
-from datetime import timedelta
+from collections.abc import Callable
+from datetime import date, datetime, timedelta
+from functools import partial
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
+from django.db.models import QuerySet
 from django.urls import reverse
 from django.utils import timezone
 
@@ -29,10 +33,15 @@ from .models import EmailMessage
 from .rendering import TemplateMissing
 from .services import send
 
+if TYPE_CHECKING:
+    from dojos.models import DojoMembership
+
 logger = logging.getLogger(__name__)
 
+Context = dict[str, Any]
 
-def family_of(ninja):
+
+def family_of(ninja: Ninja) -> QuerySet[User]:
     """The accounts a ninja's mail goes to: guardians and, with an email,
     the ninja's own login."""
     ids = set(Guardianship.objects.filter(ninja=ninja).values_list("guardian_id", flat=True))
@@ -41,11 +50,11 @@ def family_of(ninja):
     return User.objects.filter(pk__in=ids, is_active=True).exclude(email="").order_by("id")
 
 
-def _mail_language(user):
+def _mail_language(user: User) -> str:
     return user.preferred_language or settings.LANGUAGE_CODE
 
 
-def _session_context(registration, user=None):
+def _session_context(registration: Registration, user: User | None = None) -> Context:
     """The session's details; its name in `user`'s mail language when the
     dojo wrote one (core.content_languages)."""
     event = registration.event
@@ -61,7 +70,7 @@ def _session_context(registration, user=None):
     }
 
 
-def _queue(user, category, template_key, context, key, dojo=None):
+def _queue(user: User, category: str, template_key: str, context: Context, key: str, dojo: Dojo | None = None) -> int:
     """send() with an idempotency key; returns 1 when this call queued a new
     pending mail (not a repeat, not suppressed), else 0."""
     if EmailMessage.objects.filter(idempotency_key=key).exists():
@@ -70,7 +79,9 @@ def _queue(user, category, template_key, context, key, dojo=None):
     return int(row.status == EmailMessage.Status.PENDING)
 
 
-def _send_to_family(ninja, category, template_key, context, key_prefix):
+def _send_to_family(
+    ninja: Ninja, category: str, template_key: str, context: Context | Callable[[User], Context], key_prefix: str
+) -> int:
     """`context` is a dict, or a function of the recipient (for texts in
     their own language)."""
     sent = 0
@@ -84,7 +95,7 @@ def _send_to_family(ninja, category, template_key, context, key_prefix):
     return sent
 
 
-def booking_mail(registration):
+def booking_mail(registration: Registration) -> int:
     """Right after a sign-up: a confirmation, or the waiting-list notice."""
     template = "registration_waitlisted" if registration.waiting_list else "registration_confirmed"
     return _send_to_family(
@@ -96,7 +107,7 @@ def booking_mail(registration):
     )
 
 
-def waitlist_promoted_mail(registration):
+def waitlist_promoted_mail(registration: Registration) -> int:
     """A place came free and this waitlisted ninja moved up."""
     return _send_to_family(
         registration.ninja,
@@ -107,7 +118,7 @@ def waitlist_promoted_mail(registration):
     )
 
 
-def youth_mentor_promoted_mail(membership):
+def youth_mentor_promoted_mail(membership: "DojoMembership") -> int:
     """A dojo's team made the child a youth mentor: the family is told (no
     approval needed). One mail per promotion, so a re-promotion after
     leaving mails again."""
@@ -117,7 +128,7 @@ def youth_mentor_promoted_mail(membership):
     context = {
         "ninja_name": ninja.name,
         "dojo_name": membership.dojo.name,
-        "promoted_by": membership.promoted_by.name if membership.promoted_by_id else "",
+        "promoted_by": membership.promoted_by.name if membership.promoted_by else "",
         "ninja_url": settings.SITE_URL + reverse("ninja_detail", kwargs={"ninja_id": ninja.pk}),
     }
     stamp = membership.joined_at.isoformat() if membership.joined_at else ""
@@ -126,7 +137,7 @@ def youth_mentor_promoted_mail(membership):
     )
 
 
-def send_session_reminders(today=None):
+def send_session_reminders(today: date | None = None) -> int:
     """A reminder for every confirmed place at a session that starts
     MAILING_REMINDER_DAYS_BEFORE days from `today` (Belgian date).
     Idempotent: running it twice on a day sends nothing new."""
@@ -142,14 +153,14 @@ def send_session_reminders(today=None):
             r.ninja,
             MailCategory.REMINDER,
             "session_reminder",
-            lambda user, r=r: _session_context(r, user),
+            partial(_session_context, r),
             f"reminder:{r.event_id}:{r.ninja_id}",
         )
         for r in registrations
     )
 
 
-def announce_new_sessions(now=None):
+def announce_new_sessions(now: datetime | None = None) -> int:
     """Tell the families of each dojo about its sessions that opened since
     the last run: one mail per family and dojo, listing them. A family
     belongs to a dojo when a child has it as home dojo or came to one of its
@@ -164,7 +175,7 @@ def announce_new_sessions(now=None):
         .exclude(dojo__kind=Dojo.ORGANISATION)
         .order_by("start_time")
     )
-    by_dojo = {}
+    by_dojo: dict[Dojo, list[Event]] = {}
     for event in new:
         by_dojo.setdefault(event.dojo, []).append(event)
 
@@ -173,7 +184,7 @@ def announce_new_sessions(now=None):
     for dojo, events in by_dojo.items():
         users = family_accounts(dojo, since)
 
-        def context_for(user, dojo=dojo, events=events):
+        def context_for(user: User, dojo: Dojo = dojo, events: list[Event] = events) -> Context:
             return {
                 "dojo_name": dojo.name,
                 "dojo_url": settings.SITE_URL + reverse("dojo_detail", kwargs={"dojo_id": dojo.pk}),

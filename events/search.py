@@ -27,21 +27,21 @@ EVENT_LIST_FIRST_PAGE_KEY = "events:list:first-page"
 EVENT_LIST_CACHE_TIMEOUT = 60
 
 
-def clear_event_list_cache():
+def clear_event_list_cache() -> None:
     """Forget the events list's cached first page (now and on commit)."""
     from core.caching import clear
 
     clear(EVENT_LIST_FIRST_PAGE_KEY)
 
 
-def clear_upcoming_cache():
+def clear_upcoming_cache() -> None:
     """Forget the cached list: now, and again once the current transaction
     commits (see dojos.search.clear_default_search_cache)."""
     cache.delete(CACHE_KEY)
     transaction.on_commit(lambda: cache.delete(CACHE_KEY))
 
 
-def upcoming_available_events():
+def upcoming_available_events() -> list[Event]:
     """Upcoming events that still have open spots (or take registrations on
     another website), soonest first — except the ones promoted with the
     `upcoming_first` placement (content.Promotion), which come first, in
@@ -71,7 +71,7 @@ def upcoming_available_events():
         .select_related("dojo")
         .order_by("start_time")[:CACHE_LIMIT]
     )
-    promoted = {}
+    promoted: dict[int, int] = {}
     for promotion in Promotion.objects.showing(Promotion.UPCOMING_FIRST, now=now):
         promoted.setdefault(promotion.event_id, len(promoted))
     for event in events:

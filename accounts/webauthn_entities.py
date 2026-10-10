@@ -9,13 +9,19 @@ from hashlib import sha1
 from urllib.parse import urlsplit
 
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
+from django.http import HttpRequest
 from webauthn.helpers.structs import PublicKeyCredentialRpEntity, PublicKeyCredentialUserEntity
 
 
 class SiteWebauthnEntitiesMixin:
+    request: HttpRequest  # set by the view this is mixed into
+
     @property
-    def webauthn_user(self):
+    def webauthn_user(self) -> PublicKeyCredentialUserEntity:
         user = self.request.user
+        if not user.is_authenticated:  # the package only sets passkeys up for a logged-in account
+            raise PermissionDenied
         return PublicKeyCredentialUserEntity(
             # Same id as the package's default: a hash of the pk, never the pk itself.
             # sha1 only makes an opaque id here, it protects nothing.
@@ -25,13 +31,14 @@ class SiteWebauthnEntitiesMixin:
         )
 
     @property
-    def webauthn_rp(self):
+    def webauthn_rp(self) -> PublicKeyCredentialRpEntity:
         return PublicKeyCredentialRpEntity(
-            id=settings.TWO_FACTOR_WEBAUTHN_RP_ID or urlsplit(settings.SITE_URL).hostname,
+            # The package's AppConfig defaults it to None.
+            id=getattr(settings, "TWO_FACTOR_WEBAUTHN_RP_ID", None) or urlsplit(settings.SITE_URL).hostname,
             name=settings.TWO_FACTOR_WEBAUTHN_RP_NAME,
         )
 
     @property
-    def webauthn_origin(self):
+    def webauthn_origin(self) -> str:
         parts = urlsplit(settings.SITE_URL)
         return f"{parts.scheme}://{parts.netloc}"

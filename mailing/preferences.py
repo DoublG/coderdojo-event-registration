@@ -5,14 +5,21 @@ set_preference(), which also appends a ConsentEvent (proof of consent).
 On top of that, an account can mute one dojo's `dojo_news` mail
 (DojoMailMute, set_dojo_mute; DATA_MODEL.md §25)."""
 
+from typing import TYPE_CHECKING
+
 from django.db import transaction
 from django.db.models import Exists, OuterRef, Q
+from django.db.models.expressions import BaseExpression
 
 from .categories import CAN_OPT_OUT, DEFAULT_SUBSCRIBED, PRIVACY_WORDING_VERSION, MailCategory, categories_for
 from .models import ConsentEvent, DojoMailMute, MailPreference
 
+if TYPE_CHECKING:
+    from accounts.models import User
+    from dojos.models import Dojo
 
-def is_subscribed(user, category):
+
+def is_subscribed(user: "User", category: str) -> bool:
     """Whether `user` wants mail in `category` (and can get it at all)."""
     if category not in categories_for(user):
         return False
@@ -22,7 +29,7 @@ def is_subscribed(user, category):
     return DEFAULT_SUBSCRIBED[category] if choice is None else choice
 
 
-def preferences_for(user):
+def preferences_for(user: "User") -> dict[str, bool]:
     """{category: subscribed} for every category the account can receive."""
     stored = dict(MailPreference.objects.filter(user=user).values_list("category", "subscribed"))
     return {
@@ -31,7 +38,7 @@ def preferences_for(user):
     }
 
 
-def set_preference(user, category, subscribed, source):
+def set_preference(user: "User", category: str, subscribed: bool, source: str) -> bool:
     """Record the account's choice for `category`. Logs a ConsentEvent when
     the effective choice changes. Returns True if it changed. Categories
     that can't be switched off are ignored."""
@@ -52,16 +59,16 @@ def set_preference(user, category, subscribed, source):
     return True
 
 
-def is_dojo_muted(user, dojo):
+def is_dojo_muted(user: "User", dojo: "Dojo | int") -> bool:
     """Whether `user` muted `dojo`'s news (a Dojo or its id)."""
     return DojoMailMute.objects.filter(user=user, dojo=dojo).exists()
 
 
-def muted_dojo_ids(user):
+def muted_dojo_ids(user: "User") -> set[int]:
     return set(DojoMailMute.objects.filter(user=user).values_list("dojo_id", flat=True))
 
 
-def set_dojo_mute(user, dojo, muted, source):
+def set_dojo_mute(user: "User", dojo: "Dojo", muted: bool, source: str) -> bool:
     """Mute or unmute `dojo`'s `dojo_news` mail for `user`. Logs a
     ConsentEvent (category dojo_news, with the dojo) when it changes.
     Returns True if it changed."""
@@ -82,7 +89,7 @@ def set_dojo_mute(user, dojo, muted, source):
     return changed
 
 
-def subscribed_q(category):
+def subscribed_q(category: str) -> Q | BaseExpression:
     """A Q on User for "wants mail in `category`", for filtering audiences
     in the database (a campaign never reaches someone who opted out)."""
     choice = MailPreference.objects.filter(user=OuterRef("pk"), category=category)

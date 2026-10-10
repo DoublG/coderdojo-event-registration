@@ -1,7 +1,7 @@
 from .models import User
 
 
-def unique_username(base):
+def unique_username(base: str | None) -> str:
     """`base`, or `base2`, `base3`, ... — the first username not taken yet."""
     base = base or "user"
     username = base

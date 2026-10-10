@@ -3,6 +3,7 @@ phase 2), built from the classification in `core.privacy_registry` only."""
 
 import csv
 import io
+from collections.abc import Iterable
 from itertools import groupby
 
 from django.utils import timezone
@@ -24,10 +25,13 @@ CSV_COLUMNS = [
 ]
 
 
-def rows():
+Row = dict[str, str]
+
+
+def rows() -> list[Row]:
     """One dict per personal field, by category (in `Category` order), then model and field."""
     order = {category: index for index, category in enumerate(Category.values)}
-    result = []
+    result: list[Row] = []
     for entry in registry.registered():
         for name, spec in entry.fields.items():
             if spec.on_erasure == Erasure.ANONYMISE:
@@ -54,7 +58,7 @@ def rows():
     return result
 
 
-def as_csv():
+def as_csv() -> str:
     output = io.StringIO()
     writer = csv.DictWriter(output, fieldnames=CSV_COLUMNS)
     writer.writeheader()
@@ -62,14 +66,14 @@ def as_csv():
     return output.getvalue()
 
 
-def _cell(text):
+def _cell(text: object) -> str:
     return str(text).replace("|", "\\|").replace("\n", " ")
 
 
-def _erasure(fields):
+def _erasure(fields: Iterable[Row]) -> str:
     """What erasure does to these fields: "delete", or per group of fields
     when they differ ("email, phone: delete; date_joined: keep (...)")."""
-    by_outcome = {}
+    by_outcome: dict[str, list[str]] = {}
     for row in fields:
         outcome = Erasure(row["on_erasure"]).label.lower() + (f" ({row['details']})" if row["details"] else "")
         by_outcome.setdefault(outcome, []).append(row["field"])
@@ -78,7 +82,7 @@ def _erasure(fields):
     return "; ".join(f"{', '.join(names)}: {outcome}" for outcome, names in by_outcome.items())
 
 
-def as_markdown():
+def as_markdown() -> str:
     """Per category, one line per model and purpose with its fields."""
     lines = [
         "# Register of processing activities",
@@ -98,8 +102,8 @@ def as_markdown():
             category_rows,
             key=lambda row: (row["model"], row["purpose"], row["legal_basis"], row["retention"], row["seen_by"]),
         )
-        for (model, purpose, legal_basis, retention, seen_by), fields in grouped:
-            fields = list(fields)
+        for (model, purpose, legal_basis, retention, seen_by), group in grouped:
+            fields = list(group)
             data = f"{model}: " + ", ".join(row["field"] for row in fields)
             erasure = _erasure(fields)
             lines.append(

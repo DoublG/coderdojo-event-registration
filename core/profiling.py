@@ -12,24 +12,29 @@ does nothing, both as a decorator and as a context manager:
         ...
 """
 
+from collections.abc import Callable
+from typing import Any, Literal, TypeVar
+
 from django.conf import settings
+
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 class _NoProfile:
     """Stands in for silk_profile: returns the function unchanged, and does
     nothing around a block."""
 
-    def __call__(self, func):
+    def __call__(self, func: F) -> F:
         return func
 
-    def __enter__(self):
+    def __enter__(self) -> "_NoProfile":
         return self
 
-    def __exit__(self, *exc_info):
+    def __exit__(self, *exc_info: object) -> Literal[False]:
         return False
 
 
-def profile(name=None):
+def profile(name: str | None = None) -> Any:
     """silk_profile(name) while silk is on, else a no-op. Decided when it's
     called, which for a decorator is when the module is imported."""
     if settings.SILK_ENABLED:

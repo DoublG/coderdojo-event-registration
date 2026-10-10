@@ -9,12 +9,15 @@ The pages link to it with {% load js_catalog %}{% javascript_catalog_url %}.
 
 import functools
 import hashlib
+from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
 import django
 from django.conf import settings
 from django.dispatch import receiver
-from django.http import Http404
+from django.http import Http404, HttpRequest
+from django.http.response import HttpResponseBase
 from django.urls import reverse
 from django.utils import translation
 from django.utils.autoreload import file_changed
@@ -24,7 +27,7 @@ from django.views.i18n import JavaScriptCatalog
 ONE_YEAR = 365 * 24 * 60 * 60
 
 
-def _catalog_files():
+def _catalog_files() -> Iterator[Path]:
     """Every compiled JavaScript catalog the site's languages can use: ours
     (LOCALE_PATHS) and Django's own, for each language and its base."""
     locales = set()
@@ -40,7 +43,7 @@ def _catalog_files():
 
 
 @functools.cache
-def catalog_version():
+def catalog_version() -> str:
     digest = hashlib.sha256(django.get_version().encode())
     for path in _catalog_files():
         digest.update(str(path).encode())
@@ -49,14 +52,14 @@ def catalog_version():
 
 
 @receiver(file_changed)
-def _forget_version_on_new_translations(sender, file_path, **kwargs):
+def _forget_version_on_new_translations(sender: Any, file_path: Path, **kwargs: Any) -> None:
     # runserver doesn't restart for a .mo file (Django only drops its own
     # translation caches), so a compilemessages would otherwise keep the old URL.
     if file_path.suffix == ".mo":
         catalog_version.cache_clear()
 
 
-def catalog_url(language=None):
+def catalog_url(language: str | None = None) -> str:
     language = language or translation.get_language()
     if language not in dict(settings.LANGUAGES):
         language = settings.LANGUAGE_CODE
@@ -64,7 +67,7 @@ def catalog_url(language=None):
 
 
 @cache_control(public=True, max_age=ONE_YEAR, immutable=True)
-def javascript_catalog(request, language, version):
+def javascript_catalog(request: HttpRequest, language: str, version: str) -> HttpResponseBase:
     """Serves the current catalog whatever the version in the URL: an old
     version is only ever asked for by a page from before a deploy."""
     if language not in dict(settings.LANGUAGES):

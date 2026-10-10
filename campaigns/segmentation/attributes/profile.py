@@ -1,7 +1,8 @@
 """Tier 1 attributes (DATA_MODEL.md §11): who a child is and what they've
 done, read straight from the site's own data (no snapshot needed)."""
 
-from datetime import timedelta
+from datetime import date, timedelta
+from typing import Any
 
 from django.db.models import Count, Max, Q
 from django.utils import timezone
@@ -18,7 +19,7 @@ from .event import EventAttribute
 NO_BELT = 0
 
 
-def _years_ago(years, today):
+def _years_ago(years: int, today: date) -> date:
     try:
         return today.replace(year=today.year - years)
     except ValueError:  # 29 February in a year without it
@@ -32,10 +33,10 @@ class NinjaAgeAttribute(SegmentAttribute):
     scope = NINJA
     unit = _(" years")
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return []
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         today = timezone.localdate()
         years = int(value)
         if operator == "gte":  # at least N: born on or before N years ago
@@ -51,10 +52,10 @@ class HomeDojoAttribute(SegmentAttribute):
     value_type = "choice"
     scope = NINJA
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [SegmentChoice(d.pk, d.name) for d in Dojo.objects.exclude(status=Dojo.DRAFT).order_by("name")]
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         return choice_q("home_dojo_id", operator, value)
 
 
@@ -66,12 +67,12 @@ class CurrentBeltAttribute(SegmentAttribute):
     value_type = "choice"
     scope = NINJA
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [SegmentChoice(NO_BELT, _("No belt yet"))] + [
             SegmentChoice(b.level, b.localized("name")) for b in Belt.objects.order_by("level")
         ]
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         levels = [value] if operator == "equals" else list(value)
         highest = NinjaBelt.objects.values("ninja_id").annotate(top=Max("belt__level"))
         matched = Q(pk__in=highest.filter(top__in=[lv for lv in levels if lv != NO_BELT]).values("ninja_id"))
@@ -86,10 +87,10 @@ class HasBadgeAttribute(SegmentAttribute):
     value_type = "choice"
     scope = NINJA
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [SegmentChoice(b.pk, b.localized("name")) for b in Badge.objects.order_by("name")]
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         ids = [value] if operator == "equals" else value
         matched = Q(pk__in=NinjaBadge.objects.filter(badge_id__in=ids, earned_date__isnull=False).values("ninja_id"))
         return ~matched if operator == "not_in" else matched
@@ -103,10 +104,10 @@ class PathwayAttribute(SegmentAttribute):
     value_type = "choice"
     scope = NINJA
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [SegmentChoice(p.pk, p.localized("name")) for p in Pathway.objects.order_by("name")]
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         ids = [value] if operator == "equals" else value
         matched = Q(pk__in=Registration.objects.filter(pathways__in=ids).values("ninja_id"))
         return ~matched if operator == "not_in" else matched
@@ -126,10 +127,10 @@ class CancellationsAttribute(SegmentAttribute):
     value_type = "number"
     scope = NINJA
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return []
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         since = timezone.now() - timedelta(days=90)
         counts = (
             RegistrationCancellation.objects.filter(cancelled_at__gte=since).values("ninja_id").annotate(n=Count("id"))
@@ -157,17 +158,17 @@ class AccountRoleAttribute(SegmentAttribute):
     value_type = "choice"
     scope = USER
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return [SegmentChoice(value, label) for value, label in ROLE_CHOICES]
 
-    def _role_q(self, role):
+    def _role_q(self, role: str) -> Q:
         if role == "guardian":
             return Q(pk__in=Guardianship.objects.values("guardian_id"))
         if role in ("mentor", "champion"):
             return Q(pk__in=DojoMembership.objects.filter(role=role, status=DojoMembership.ACTIVE).values("user_id"))
         return Q(organisation_roles__isnull=False)
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         roles = [value] if operator == "equals" else value
         matched = Q(pk__in=[])
         for role in roles:
@@ -181,10 +182,10 @@ class JoinedAttribute(SegmentAttribute):
     value_type = "days"
     scope = USER
 
-    def choices(self):
+    def choices(self) -> list[SegmentChoice]:
         return []
 
-    def build_q(self, operator, value):
+    def build_q(self, operator: str, value: Any) -> Q:
         if operator != "within_days":
             raise ValueError(_("Unsupported operator: %(operator)s") % {"operator": operator})
         return Q(date_joined__gte=timezone.now() - timedelta(days=value))

@@ -31,6 +31,7 @@ import unicodedata
 
 import requests
 from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import Point
 from django.core.cache import cache
 from django_redis import get_redis_connection
 
@@ -67,7 +68,7 @@ class GeocodingUnavailable(requests.RequestException):
     an error from Nominatim, or no Redis to count requests with."""
 
 
-def normalise(address):
+def normalise(address: str) -> str:
     """The text that identifies a search: case, accents' composition,
     commas, spacing and a trailing country name don't matter."""
     text = unicodedata.normalize("NFKC", address).casefold()
@@ -75,11 +76,11 @@ def normalise(address):
     return COUNTRY_SUFFIX.sub("", text).strip()
 
 
-def _cache_key(normalised):
+def _cache_key(normalised: str) -> str:
     return CACHE_KEY.format(digest=hashlib.sha256(normalised.encode()).hexdigest()[:32])
 
 
-def local_lookup(normalised):
+def local_lookup(normalised: str) -> tuple[float, float] | None:
     """(lat, lon) from geo.Municipality for a postcode, a municipality's
     name, or both ("9000", "gent", "9000 gent", "gent 9000"), else None."""
     match = re.fullmatch(r"(\d{4})(?: (.+))?|(.+) (\d{4})", normalised)
@@ -101,7 +102,7 @@ def local_lookup(normalised):
     return sum(lats) / len(lats), sum(lons) / len(lons)
 
 
-def _take_slot(wait):
+def _take_slot(wait: float | None) -> None:
     """Wait for the site's one Nominatim request a second (at most `wait`
     seconds; None: as long as it takes)."""
     try:
@@ -127,7 +128,7 @@ def _take_slot(wait):
         raise GeocodingUnavailable("No Redis to keep to Nominatim's limit.") from error
 
 
-def _back_off(response):
+def _back_off(response: requests.Response) -> None:
     seconds = BACKOFF_SECONDS.get(response.status_code)
     if seconds is None:
         return
@@ -141,11 +142,12 @@ def _back_off(response):
         logger.debug("Couldn't store the Nominatim back-off", exc_info=True)
 
 
-def _nominatim(address, session):
+def _nominatim(address: str, session: requests.Session | None) -> tuple[float, float] | None:
     query = address if "belgium" in address.lower() else f"{address}, Belgium"
+    params: dict[str, str | int] = {"q": query, "format": "json", "limit": 1, "countrycodes": "be"}
     response = (session or requests).get(
         NOMINATIM_URL,
-        params={"q": query, "format": "json", "limit": 1, "countrycodes": "be"},
+        params=params,
         headers={"User-Agent": USER_AGENT},
         timeout=10,
     )
@@ -156,7 +158,9 @@ def _nominatim(address, session):
     return (float(results[0]["lat"]), float(results[0]["lon"])) if results else None
 
 
-def geocode(address, session=None, wait=WEB_WAIT_SECONDS):
+def geocode(
+    address: str, session: requests.Session | None = None, wait: float | None = WEB_WAIT_SECONDS
+) -> tuple[float, float] | None:
     """(lat, lon) for a free-text Belgian address, postcode or town, or None
     when nothing matches. Raises requests.RequestException when it couldn't
     find out (a network or HTTP error, or GeocodingUnavailable): never
@@ -184,7 +188,7 @@ def geocode(address, session=None, wait=WEB_WAIT_SECONDS):
     return coords
 
 
-def find_province(location):
+def find_province(location: Point) -> AdministrativeBoundary | None:
     """The Belgian province (AdministrativeBoundary, kind=PROVINCE) a point
     falls inside — used to keep Dojo.province in sync with Dojo.location
     (see dojos.views.dojo_manage and the one-time backfill this was

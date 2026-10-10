@@ -29,8 +29,13 @@ import email.policy
 import imaplib
 import poplib
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import timedelta
+from email.message import EmailMessage as Mail
+from email.message import Message
+from email.utils import collapse_rfc2231_value
+from typing import TYPE_CHECKING, Any, Literal, Protocol, Self
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -41,11 +46,26 @@ from .categories import CAN_OPT_OUT, categories_for
 from .models import BounceRecord, ConsentEvent, EmailMessage, EmailSuppression, ProcessedImapMessage
 from .preferences import set_preference
 
+if TYPE_CHECKING:
+    from accounts.models import User
+
 STATUS_CODE_RE = re.compile(r"\b([245])\.(\d{1,3})\.(\d{1,3})\b")
 BOUNCE_SUBJECT_RE = re.compile(
     r"undeliver|delivery status notification|delivery failure|failure notice|returned mail|mail delivery failed",
     re.IGNORECASE,
 )
+
+
+Uid = int | str  # an IMAP UID, or a POP3 unique id
+
+
+class Mailbox(Protocol):
+    key: str
+
+    def __enter__(self) -> Self: ...
+    def __exit__(self, *exc: object) -> Literal[False]: ...
+    def unprocessed_uids(self) -> list[Any]: ...
+    def fetch(self, uid: Any) -> Mail: ...
 
 
 @dataclass
@@ -62,7 +82,7 @@ class ImapMailbox:
     mailbox together with its UIDVALIDITY: when the server renumbers its
     UIDs, the processed-message log starts over instead of skipping mail."""
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         imap_class = imaplib.IMAP4_SSL if settings.MAILING_BOUNCE_IMAP_SSL else imaplib.IMAP4
         self.imap = imap_class(
             settings.MAILING_BOUNCE_IMAP_HOST,
@@ -76,23 +96,23 @@ class ImapMailbox:
         self.key = f"{settings.MAILING_BOUNCE_IMAP_MAILBOX}:{uidvalidity}"
         return self
 
-    def __exit__(self, *exc):
+    def __exit__(self, *exc: object) -> Literal[False]:
         try:
             self.imap.logout()
         except (imaplib.IMAP4.error, OSError):
             pass
         return False
 
-    def unprocessed_uids(self):
+    def unprocessed_uids(self) -> list[int]:
         seen = ProcessedImapMessage.objects.filter(mailbox=self.key).values_list("uid", flat=True)
         return self.uids_after(max((int(uid) for uid in seen), default=0))
 
-    def uids_after(self, last_uid):
-        _typ, data = self.imap.uid("SEARCH", None, f"UID {last_uid + 1}:*")
+    def uids_after(self, last_uid: int) -> list[int]:
+        _typ, data = self.imap.uid("SEARCH", f"UID {last_uid + 1}:*")
         # "n:*" always matches the newest message, even when its UID is lower.
         return sorted(uid for uid in map(int, (data[0] or b"").split()) if uid > last_uid)
 
-    def fetch(self, uid):
+    def fetch(self, uid: int) -> Mail:
         _typ, data = self.imap.uid("FETCH", str(uid), "(BODY.PEEK[])")
         raw = next(part[1] for part in data if isinstance(part, tuple))
         return email.message_from_bytes(raw, policy=email.policy.default)
@@ -105,7 +125,7 @@ class Pop3Mailbox:
     ordered, so what's new is whatever hasn't been processed yet. Never
     deletes anything."""
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         pop_class = poplib.POP3_SSL if settings.MAILING_BOUNCE_IMAP_SSL else poplib.POP3
         self.pop = pop_class(
             settings.MAILING_BOUNCE_IMAP_HOST,
@@ -118,17 +138,20 @@ class Pop3Mailbox:
         _resp, listing, _octets = self.pop.uidl()
         # "<message number> <unique id>" per message; numbers are only valid
         # for this session, the unique ids are what we remember.
-        self.numbers = dict(reversed(line.decode().split(" ", 1)) for line in listing)
+        self.numbers: dict[str, str] = {}
+        for line in listing:
+            number, uid = line.decode().split(" ", 1)
+            self.numbers[uid] = number
         return self
 
-    def __exit__(self, *exc):
+    def __exit__(self, *exc: object) -> Literal[False]:
         try:
             self.pop.quit()
         except (poplib.error_proto, OSError):
             pass
         return False
 
-    def unprocessed_uids(self):
+    def unprocessed_uids(self) -> list[str]:
         seen = set(
             ProcessedImapMessage.objects.filter(mailbox=self.key, uid__in=list(self.numbers)).values_list(
                 "uid", flat=True
@@ -136,19 +159,19 @@ class Pop3Mailbox:
         )
         return [uid for uid in self.numbers if uid not in seen]
 
-    def fetch(self, uid):
+    def fetch(self, uid: str) -> Mail:
         _resp, lines, _octets = self.pop.retr(int(self.numbers[uid]))
         return email.message_from_bytes(b"\r\n".join(lines), policy=email.policy.default)
 
 
-MAILBOX_CLASSES = {"imap": ImapMailbox, "pop3": Pop3Mailbox}
+MAILBOX_CLASSES: dict[str, type[Mailbox]] = {"imap": ImapMailbox, "pop3": Pop3Mailbox}
 
 
 class BounceProcessor:
-    def __init__(self, mailbox_class=None):
+    def __init__(self, mailbox_class: type[Mailbox] | None = None) -> None:
         self.mailbox_class = mailbox_class or MAILBOX_CLASSES[settings.MAILING_BOUNCE_PROTOCOL]
 
-    def process(self):
+    def process(self) -> int:
         handled = 0
         with self.connect() as mailbox:
             for uid, message in self.get_new_messages(mailbox):
@@ -162,21 +185,21 @@ class BounceProcessor:
                 handled += 1
         return handled
 
-    def connect(self):
+    def connect(self) -> Mailbox:
         return self.mailbox_class()
 
-    def get_new_messages(self, mailbox):
+    def get_new_messages(self, mailbox: Mailbox) -> Iterator[tuple[Uid, Mail]]:
         for uid in mailbox.unprocessed_uids()[: settings.MAILING_BOUNCE_BATCH]:
             yield uid, mailbox.fetch(uid)
 
     # --- parsing -------------------------------------------------------------
 
-    def parse(self, message):
+    def parse(self, message: Mail) -> Bounce | None:
         if self._is_auto_reply(message):
             return None
         ours = self._match_our_message(message)
         report_type = (
-            (message.get_param("report-type") or "").lower()
+            collapse_rfc2231_value(message.get_param("report-type") or "").lower()
             if message.get_content_type() == "multipart/report"
             else ""
         )
@@ -186,13 +209,13 @@ class BounceProcessor:
             return self._parse_dsn(message, ours)
         return self._parse_plain(message, ours)
 
-    def _is_auto_reply(self, message):
+    def _is_auto_reply(self, message: Mail) -> bool:
         auto = (message.get("Auto-Submitted") or "").lower()
         return (
             auto.startswith("auto-replied") or bool(message.get("X-Autoreply")) or bool(message.get("X-Autorespond"))
         )
 
-    def _parse_dsn(self, message, ours):
+    def _parse_dsn(self, message: Mail, ours: EmailMessage | None) -> Bounce | None:
         for part in message.walk():
             if part.get_content_type() != "message/delivery-status":
                 continue
@@ -206,17 +229,17 @@ class BounceProcessor:
                 return self._bounce(kind, recipient, status, fields.get("Diagnostic-Code") or "", ours)
         return None
 
-    def _status_blocks(self, part):
+    def _status_blocks(self, part: Message) -> list[Message]:
         payload = part.get_payload()
         if isinstance(payload, list):  # the email package splits the report into blocks
-            return payload
+            return [block for block in payload if isinstance(block, Message)]
         text = payload if isinstance(payload, str) else ""
         return [
             email.message_from_string(block + "\n", policy=email.policy.default)
             for block in re.split(r"\n\s*\n", text)
         ]
 
-    def _parse_complaint(self, message, ours):
+    def _parse_complaint(self, message: Mail, ours: EmailMessage | None) -> Bounce | None:
         recipient = ""
         for part in message.walk():
             if part.get_content_type() == "message/feedback-report":
@@ -226,7 +249,7 @@ class BounceProcessor:
                 )
         return self._bounce(BounceRecord.COMPLAINT, recipient, "", "", ours)
 
-    def _parse_plain(self, message, ours):
+    def _parse_plain(self, message: Mail, ours: EmailMessage | None) -> Bounce | None:
         """An older server's bounce without a DSN: only when it's clearly a
         bounce (subject), quotes one of our mails and gives a status code."""
         if ours is None or not BOUNCE_SUBJECT_RE.search(message.get("Subject") or ""):
@@ -237,7 +260,9 @@ class BounceProcessor:
         kind = BounceRecord.HARD if match.group(1) == "5" else BounceRecord.SOFT
         return self._bounce(kind, "", match.group(0), "", ours)
 
-    def _bounce(self, kind, recipient, status, diagnostic, ours):
+    def _bounce(
+        self, kind: str, recipient: str, status: str, diagnostic: object, ours: EmailMessage | None
+    ) -> Bounce | None:
         address = (recipient or (ours.recipient if ours else "")).strip().lower()
         if not address:
             return None
@@ -245,7 +270,7 @@ class BounceProcessor:
             kind=kind, email=address, status_code=status[:20], diagnostic=str(diagnostic)[:255], message=ours
         )
 
-    def _match_our_message(self, message):
+    def _match_our_message(self, message: Mail) -> EmailMessage | None:
         """Our EmailMessage this bounce is about: by the VERP address it was
         sent back to, else by our Message-ID quoted in the returned mail."""
         if "{id}" in settings.MAILING_BOUNCE_ADDRESS:
@@ -261,25 +286,26 @@ class BounceProcessor:
         ids = re.findall(r"<[^<>\s]+@" + domain + ">", self._text(message, include_headers=True))
         return EmailMessage.objects.filter(message_id__in=ids).first() if ids else None
 
-    def _text(self, message, include_headers=False):
+    def _text(self, message: Message, include_headers: bool = False) -> str:
         """All text in the message, including the headers of an attached
         original (message/rfc822 or text/rfc822-headers)."""
-        chunks = []
+        chunks: list[str] = []
         for part in message.walk():
             if include_headers:
                 chunks.extend(f"{name}: {value}" for name, value in part.items())
             if part.get_content_maintype() == "text":  # includes text/rfc822-headers
-                raw = part.get_payload(decode=True) or b""
-                chunks.append(raw.decode(part.get_content_charset() or "utf-8", "replace"))
+                raw = part.get_payload(decode=True)
+                text = raw.decode(part.get_content_charset() or "utf-8", "replace") if isinstance(raw, bytes) else ""
+                chunks.append(text)
         return "\n".join(chunks)
 
-    def _address(self, value):
-        value = str(value or "")
-        return value.split(";", 1)[-1].strip().strip("<>")
+    def _address(self, value: object) -> str:
+        text = str(value or "")
+        return text.split(";", 1)[-1].strip().strip("<>")
 
     # --- acting on it --------------------------------------------------------
 
-    def handle(self, bounce):
+    def handle(self, bounce: Bounce) -> None:
         BounceRecord.objects.create(
             email=bounce.email,
             kind=bounce.kind,
@@ -307,15 +333,15 @@ class BounceProcessor:
                     f"{soft} soft bounces in {settings.MAILING_SOFT_BOUNCE_WINDOW_DAYS} days",
                 )
         elif bounce.kind == BounceRecord.COMPLAINT:
-            user = bounce.message.user if bounce.message and bounce.message.user_id else None
+            user: User | None = bounce.message.user if bounce.message else None
             if user is None:
-                from accounts.models import User
+                from accounts.models import User as Account
 
-                user = User.objects.filter(email__iexact=bounce.email).first()
+                user = Account.objects.filter(email__iexact=bounce.email).first()
             if user is not None:
                 for category in categories_for(user):
                     if CAN_OPT_OUT[category]:
                         set_preference(user, category, False, ConsentEvent.BOUNCE)
 
-    def _suppress(self, address, reason, note):
+    def _suppress(self, address: str, reason: str, note: str) -> None:
         EmailSuppression.objects.get_or_create(email=address, defaults={"reason": reason, "note": note.strip()[:255]})

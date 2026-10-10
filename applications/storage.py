@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import FileSystemStorage, Storage
 
 # No base_url: this storage's files aren't served by any url() pattern, so
 # nothing can build a direct link to them. They're only ever read from disk
@@ -7,7 +7,7 @@ from django.core.files.storage import FileSystemStorage
 private_storage = FileSystemStorage(location=settings.PRIVATE_MEDIA_ROOT, base_url=None)
 
 
-def get_private_storage():
+def get_private_storage() -> Storage:
     """What model fields pass as `storage=`: a callable, so migrations
     reference this function instead of baking PRIVATE_MEDIA_ROOT's absolute
     path (which differs per machine) into the migration file."""

@@ -35,52 +35,51 @@ from .attributes.profile import (
     WaitlistedForEventAttribute,
 )
 from .attributes.registration import AttendedEventAttribute
+from .base import SegmentAttribute
 
-SEGMENT_ATTRIBUTES = {
-    attribute.key: attribute
-    for attribute in [
-        AccountRoleAttribute,
-        AccountTypeAttribute,
-        JoinedAttribute,
-        NotOnATeamAttribute,
-        HasChildrenAttribute,
-        ActiveTeamMemberAttribute,
-        LanguageAttribute,
-        ProvinceAttribute,
-        NearDojoAttribute,
-        NinjaGenderAttribute,
-        NinjaAgeAttribute,
-        HomeDojoAttribute,
-        CurrentBeltAttribute,
-        HasBadgeAttribute,
-        PathwayAttribute,
-        WaitlistedForEventAttribute,
-        CancellationsAttribute,
-        AttendedWithinDaysAttribute,
-        EngagementStageAttribute,
-        StageAtDojoAttribute,
-        StageChangedAttribute,
-        NoNewBeltAttribute,
-        AttendanceRateAttribute,
-        SessionsAttendedAttribute,
-        MissedInARowAttribute,
-        DaysSinceLastVisitAttribute,
-        NoShowsAttribute,
-        HasUpcomingAttribute,
-        MainDojoStatusAttribute,
-        EventAttribute,
-        AttendedEventAttribute,
-        DojoFamilyAttribute,
-        FamilyBookedAttribute,
-        FamilyWaitlistedAttribute,
-        FamilyVisitedDojoAttribute,
-        ChildOfDojoAttribute,
-        DojoTeamAttribute,
-    ]
-}
+_ATTRIBUTE_CLASSES: list[type[SegmentAttribute]] = [
+    AccountRoleAttribute,
+    AccountTypeAttribute,
+    JoinedAttribute,
+    NotOnATeamAttribute,
+    HasChildrenAttribute,
+    ActiveTeamMemberAttribute,
+    LanguageAttribute,
+    ProvinceAttribute,
+    NearDojoAttribute,
+    NinjaGenderAttribute,
+    NinjaAgeAttribute,
+    HomeDojoAttribute,
+    CurrentBeltAttribute,
+    HasBadgeAttribute,
+    PathwayAttribute,
+    WaitlistedForEventAttribute,
+    CancellationsAttribute,
+    AttendedWithinDaysAttribute,
+    EngagementStageAttribute,
+    StageAtDojoAttribute,
+    StageChangedAttribute,
+    NoNewBeltAttribute,
+    AttendanceRateAttribute,
+    SessionsAttendedAttribute,
+    MissedInARowAttribute,
+    DaysSinceLastVisitAttribute,
+    NoShowsAttribute,
+    HasUpcomingAttribute,
+    MainDojoStatusAttribute,
+    EventAttribute,
+    AttendedEventAttribute,
+    DojoFamilyAttribute,
+    FamilyBookedAttribute,
+    FamilyWaitlistedAttribute,
+    FamilyVisitedDojoAttribute,
+    ChildOfDojoAttribute,
+    DojoTeamAttribute,
+]
+SEGMENT_ATTRIBUTES = {attribute.key: attribute for attribute in _ATTRIBUTE_CLASSES}
 
 
-def get_attribute(key: str):
+def get_attribute(key: str) -> SegmentAttribute:
     try:
         attribute_class = SEGMENT_ATTRIBUTES[key]
     except KeyError:
@@ -89,5 +88,5 @@ def get_attribute(key: str):
     return attribute_class()
 
 
-def get_attributes():
+def get_attributes() -> list[SegmentAttribute]:
     return [attribute_class() for attribute_class in SEGMENT_ATTRIBUTES.values()]

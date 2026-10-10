@@ -14,14 +14,22 @@ call these functions; `OrganisationPeopleError` carries a user-facing
 message.
 """
 
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
+
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
+from django.db.models import QuerySet
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 
 from . import admin_access, sign_in
 from .models import AdminAccessGrant, OrganisationRole, User
+
+if TYPE_CHECKING:
+    from auditlog.models import LogEntry
+    from django.utils.functional import Promise
 
 # The roles in the order the pages show them, with what each opens.
 ROLES = [
@@ -54,7 +62,7 @@ class OrganisationPeopleError(Exception):
     """A user-facing reason the change can't be made."""
 
 
-def holders():
+def holders() -> QuerySet[User]:
     """Every account holding an organisation role, with its roles."""
     return (
         User.objects.filter(organisation_roles__isnull=False)
@@ -64,22 +72,22 @@ def holders():
     )
 
 
-def superusers():
+def superusers() -> QuerySet[User]:
     return User.objects.filter(is_superuser=True, is_active=True).order_by("username")
 
 
-def roles_of(account):
+def roles_of(account: User) -> set[str]:
     return set(account.organisation_roles.values_list("role", flat=True))
 
 
-def needs_sign_in_setup(account):
+def needs_sign_in_setup(account: User) -> bool:
     """The sign-in policy asks this account for two-step login (or a passkey)
     and it hasn't set that up yet."""
     enforced, _upcoming = sign_in.requirements_for(account)
     return sign_in.status(account, True, enforced) == sign_in.NEEDS_SETUP
 
 
-def _check_account(account, by):
+def _check_account(account: User, by: User) -> None:
     if account.pk == by.pk:
         raise OrganisationPeopleError(_("You can't change your own roles: ask another organisation admin."))
     if account.account_type != User.ADULT or not account.is_active:
@@ -87,15 +95,15 @@ def _check_account(account, by):
 
 
 @transaction.atomic
-def set_roles(account, roles, by):
+def set_roles(account: User, roles: Iterable[str], by: User) -> tuple[set[str], set[str]]:
     """Give `account` exactly `roles`; returns (added, removed)."""
-    roles = set(roles)
-    unknown = roles - {role for role, _label, _description in ROLES}
+    wanted = set(roles)
+    unknown = wanted - {role for role, _label, _description in ROLES}
     if unknown:
         raise OrganisationPeopleError(_("Unknown role."))
     _check_account(account, by)
     current = roles_of(account)
-    added, removed = roles - current, current - roles
+    added, removed = wanted - current, current - wanted
     if OrganisationRole.ADMIN in removed and not (
         OrganisationRole.objects.filter(role=OrganisationRole.ADMIN, account__is_active=True)
         .exclude(account=account)
@@ -111,7 +119,7 @@ def set_roles(account, roles, by):
     return added, removed
 
 
-def _mail(account, by):
+def _mail(account: User, by: User) -> None:
     from django.conf import settings
 
     from mailing.categories import MailCategory
@@ -131,7 +139,7 @@ def _mail(account, by):
     )
 
 
-def end_access(grant, by):
+def end_access(grant: AdminAccessGrant, by: User) -> AdminAccessGrant:
     """An admin ends someone's open Django admin access."""
     if not grant.is_open:
         raise OrganisationPeopleError(_("This access has already ended."))
@@ -139,7 +147,7 @@ def end_access(grant, by):
     return admin_access.end(grant, by=by, end_reason=end_reason)
 
 
-def role_history(account):
+def role_history(account: User) -> list[tuple["LogEntry", "str | Promise", bool]]:
     """The audit log's entries for this account's organisation roles, newest
     first: (entry, role, granted) tuples."""
     from auditlog.models import LogEntry

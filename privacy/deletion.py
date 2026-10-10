@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 
 from django.utils.translation import gettext as _
 
-from accounts.models import Ninja
+from accounts.models import Ninja, User
 from privacy.erasure import erase_person, is_erased, sole_children
 from privacy.models import ErasureRecord
 from privacy.retention import champion_of_active_dojos, is_volunteer
@@ -32,22 +32,22 @@ class DeletionError(Exception):
 class Preview:
     """What deleting `user` would do."""
 
-    user: object
+    user: User
     # Erased with the account (only this account is their guardian).
-    children: list = field(default_factory=list)
+    children: list[Ninja] = field(default_factory=list)
     # Stay, with their other guardian.
-    shared_children: list = field(default_factory=list)
+    shared_children: list[Ninja] = field(default_factory=list)
     # Cleaned instead of erased: their name stays on past sessions.
     volunteer: bool = False
     keeps_profile: bool = False
-    blockers: list = field(default_factory=list)
+    blockers: list[str] = field(default_factory=list)
 
     @property
-    def possible(self):
+    def possible(self) -> bool:
         return not self.blockers
 
 
-def preview(user):
+def preview(user: User) -> Preview:
     if user.is_ninja:
         return Preview(
             user, blockers=[_("A child's own login is removed by their parent, or goes with the family's account.")]
@@ -84,7 +84,7 @@ def preview(user):
     )
 
 
-def delete_account(user, requested_by=None):
+def delete_account(user: User, requested_by: User | None = None) -> Preview:
     """Erase (or, for a champion or mentor, clean) `user` now. With
     `requested_by` it's the organisation acting on a request; without, the
     account holder themselves."""
