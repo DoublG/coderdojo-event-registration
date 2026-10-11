@@ -58,6 +58,10 @@ MANAGE_API = "manage_api"
 # Write and send the dojo's own mail to its families (campaigns.dojo_views,
 # DATA_MODEL.md §25): it speaks for the whole dojo, so only its champion.
 SEND_MAIL = "send_mail"
+# Open the reports the organisation shares with dojos, on this dojo's own
+# figures (reports, DATA_MODEL_REPORTS.md §30): only its champion (decided
+# 11 October 2026).
+VIEW_REPORTS = "view_reports"
 ALL_CAPABILITIES = frozenset(
     {
         TAKE_ATTENDANCE,
@@ -71,6 +75,7 @@ ALL_CAPABILITIES = frozenset(
         VIEW_HEALTH_NOTES,
         MANAGE_API,
         SEND_MAIL,
+        VIEW_REPORTS,
     }
 )
 
@@ -80,8 +85,8 @@ ROLE_CAPABILITIES = {
     # the dojo's lifecycle (launching it, making it dormant, archiving,
     # reopening) stays with its champion, and so do the children's health
     # notes (the family forms tell parents only the champion sees them), the
-    # dojo's API clients and its mail to the families.
-    MENTOR: ALL_CAPABILITIES - {MANAGE_LIFECYCLE, VIEW_HEALTH_NOTES, MANAGE_API, SEND_MAIL},
+    # dojo's API clients, its mail to the families and the shared reports.
+    MENTOR: ALL_CAPABILITIES - {MANAGE_LIFECYCLE, VIEW_HEALTH_NOTES, MANAGE_API, SEND_MAIL, VIEW_REPORTS},
 }
 
 
@@ -146,6 +151,10 @@ class DojoAccess:
     @property
     def can_send_mail(self) -> bool:
         return self.can(SEND_MAIL)
+
+    @property
+    def can_view_reports(self) -> bool:
+        return self.can(VIEW_REPORTS)
 
 
 def managing_membership(user: "User | AnonymousUser", dojo: Dojo) -> DojoMembership | None:

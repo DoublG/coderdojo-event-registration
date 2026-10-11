@@ -15,6 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.csp import CSP
 from django.utils.translation import get_language
@@ -66,15 +67,16 @@ def _require(request, action):
         raise PermissionDenied
 
 
-def _figures(dataset):
-    """The dataset's rows in the current language, cached for an hour: one
-    query per dataset and language, whatever number of reports use it."""
+def figures(dataset, dojo=None):
+    """The dataset's rows in the current language (all dojos, small groups
+    merged; or one dojo's own, never merged), cached for an hour: one query
+    per dataset, language and dojo, whatever number of reports use it."""
     language = get_language() or settings.LANGUAGE_CODE
 
     def build():
-        table = dataset.table()
+        table = dataset.table(dojo=dojo)
         return {
-            "rows": dataset.labelled(table),
+            "rows": dataset.labelled(table, dojo),
             "hidden": table.hidden,
             "as_of": timezone.localtime().strftime("%H:%M"),
         }
@@ -82,9 +84,50 @@ def _figures(dataset):
     # The labels in the key too: a deploy that changes or translates one gets
     # new figures at once, instead of an hour of reports that can't find it.
     labels = hashlib.sha256("|".join(str(column.label) for column in dataset.columns).encode()).hexdigest()[:12]
-    return caching.cached(
-        f"reports:{dataset.key}:{language}:{settings.REPORT_MIN_GROUP}:{labels}", build, CACHE_SECONDS, name="reports"
-    )
+    scope = f"dojo-{dojo.pk}" if dojo else f"all-{settings.REPORT_MIN_GROUP}"
+    return caching.cached(f"reports:{dataset.key}:{scope}:{language}:{labels}", build, CACHE_SECONDS, name="reports")
+
+
+def csv_response(dataset, dojo=None):
+    """The figures as a CSV file: what works without JavaScript, and what a
+    screen reader or a spreadsheet can use."""
+    rows = figures(dataset, dojo)["rows"]
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="{dataset.key}.csv"'
+    response.write("\ufeff")  # so a spreadsheet opens it as UTF-8
+    writer = csv.writer(response)
+    labels = [str(column.label) for column in dataset.columns_for(dojo)]
+    writer.writerow(labels)
+    for row in rows:
+        writer.writerow([row[label] for label in labels])
+    return response
+
+
+def viewer_context(request, dataset, title, stored_config, editable, dojo=None):
+    """What reports/partials/_viewer.html and report.js need."""
+    viewer_config, missing = to_viewer(stored_config, dataset, dojo)
+    found = figures(dataset, dojo)
+    return {
+        "dataset": dataset,
+        "missing": missing,
+        "hidden": found["hidden"],
+        "as_of": found["as_of"],
+        "min_group": settings.REPORT_MIN_GROUP,
+        "setup": {
+            "config": viewer_config,
+            "title": title,
+            "editable": editable,
+            # The site's theme (the "theme" cookie the nav's switch sets; light by default).
+            "dark": request.COOKIES.get("theme") == "dark",
+            "schema": {
+                str(column.label): "string" if column.kind == DIMENSION else "integer"
+                for column in dataset.columns_for(dojo)
+            },
+            "messages": {"loadFailed": _("The report couldn't be loaded. Try again, or download the figures.")},
+        },
+        "language": (get_language() or "")[:2],
+        "script_version": REPORT_JS_VERSION,
+    }
 
 
 @login_required
@@ -106,59 +149,30 @@ def report_list(request):
 def report_data(request, dataset_key):
     """The figures Perspective loads, as JSON."""
     require_area(request, Area.REPORTS)
-    return JsonResponse(_figures(get_dataset(dataset_key)))
+    return JsonResponse(figures(get_dataset(dataset_key)))
 
 
 @login_required
 def report_csv(request, dataset_key):
-    """The same figures as a CSV file: what works without JavaScript, and
-    what a screen reader or a spreadsheet can use."""
     require_area(request, Area.REPORTS)
-    dataset = get_dataset(dataset_key)
-    rows = _figures(dataset)["rows"]
-    response = HttpResponse(content_type="text/csv; charset=utf-8")
-    response["Content-Disposition"] = f'attachment; filename="{dataset.key}.csv"'
-    response.write("﻿")  # so a spreadsheet opens it as UTF-8
-    writer = csv.writer(response)
-    labels = [str(column.label) for column in dataset.columns]
-    writer.writerow(labels)
-    for row in rows:
-        writer.writerow([row[label] for label in labels])
-    return response
+    return csv_response(get_dataset(dataset_key))
 
 
 def _viewer_page(request, dataset, report, form, config):
-    viewer_config, missing = to_viewer(config, dataset)
-    figures = _figures(dataset)
     can_edit = request.user.has_perm("reports.change_report" if report else "reports.add_report")
+    title = report.label() if report else _("New report")
     return render(
         request,
         "reports/report_detail.html",
         {
+            **viewer_context(request, dataset, title, config, can_edit),
             "report": report,
-            "dataset": dataset,
             "form": form,
             "can_edit": can_edit,
             "can_add": request.user.has_perm("reports.add_report"),
             "can_delete": report is not None and request.user.has_perm("reports.delete_report"),
-            "missing": missing,
-            "hidden": figures["hidden"],
-            "as_of": figures["as_of"],
-            "min_group": settings.REPORT_MIN_GROUP,
-            "setup": {
-                "config": viewer_config,
-                "title": report.name if report else _("New report"),
-                "editable": can_edit,
-                # The site's theme (the "theme" cookie the nav's switch sets; light by default).
-                "dark": request.COOKIES.get("theme") == "dark",
-                "schema": {
-                    str(column.label): "string" if column.kind == DIMENSION else "integer"
-                    for column in dataset.columns
-                },
-                "messages": {"loadFailed": _("The report couldn't be loaded. Try again, or download the figures.")},
-            },
-            "language": (get_language() or "")[:2],
-            "script_version": REPORT_JS_VERSION,
+            "data_url": reverse("manage_report_data", args=[dataset.key]),
+            "csv_url": reverse("manage_report_csv", args=[dataset.key]),
             "active": "reports",
         },
     )
@@ -175,6 +189,9 @@ def _save(request, form, dataset, report):
     report = report or Report(dataset=dataset.key, created_by=request.user)
     report.name = form.cleaned_data["name"]
     report.description = form.cleaned_data["description"]
+    report.status = form.cleaned_data["status"]
+    report.shared_with_dojos = bool(form.cleaned_data.get("shared_with_dojos")) and dataset.shareable
+    report.position = form.cleaned_data["position"] or 0
     report.config = config
     report.updated_by = request.user
     report.save()
@@ -187,7 +204,7 @@ def report_create(request, dataset_key):
     require_area(request, Area.REPORTS)
     _require(request, "add")
     dataset = get_dataset(dataset_key)
-    form = ReportForm(request.POST or None)
+    form = ReportForm(request.POST or None, shareable=dataset.shareable)
     if request.method == "POST" and form.is_valid():
         report = _save(request, form, dataset, None)
         if report:
@@ -204,7 +221,15 @@ def report_detail(request, report_id):
     dataset = get_dataset(report.dataset)
     form = ReportForm(
         request.POST or None,
-        initial={"name": report.name, "description": report.description, "config": json.dumps(report.config)},
+        shareable=dataset.shareable,
+        initial={
+            "name": report.name,
+            "description": report.description,
+            "status": report.status,
+            "shared_with_dojos": report.shared_with_dojos,
+            "position": report.position,
+            "config": json.dumps(report.config),
+        },
     )
     if request.method == "POST":
         as_new = "save_as_new" in request.POST

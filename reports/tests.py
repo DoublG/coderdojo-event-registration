@@ -232,7 +232,7 @@ class ReportPageTests(TestCase):
         response = self.client.get(reverse("manage_report_detail", args=[report.id]))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'id="report-form"')
-        post = {"name": "x", "config": self.config}
+        post = {"name": "x", "status": "draft", "config": self.config}
         self.assertEqual(self.client.post(reverse("manage_report_detail", args=[report.id]), post).status_code, 403)
         self.assertEqual(self.client.post(reverse("manage_report_create", args=["engagement"]), post).status_code, 403)
         self.assertEqual(self.client.post(reverse("manage_report_delete", args=[report.id])).status_code, 403)
@@ -252,7 +252,7 @@ class ReportPageTests(TestCase):
         self.client.force_login(self.admin)
         response = self.client.post(
             reverse("manage_report_create", args=["engagement"]),
-            {"name": "Per dojo", "description": "Children per dojo.", "config": self.config},
+            {"name": "Per dojo", "status": "draft", "description": "Children per dojo.", "config": self.config},
         )
         report = Report.objects.get()
         self.assertRedirects(response, reverse("manage_report_detail", args=[report.id]))
@@ -264,9 +264,9 @@ class ReportPageTests(TestCase):
         self.assertContains(page, 'id="report-viewer"')
         self.assertEqual(page.context["setup"]["config"]["group_by"], ["Main dojo"])
 
-        self.client.post(url, {"name": "Copy", "config": self.config, "save_as_new": "1"})
+        self.client.post(url, {"name": "Copy", "status": "draft", "config": self.config, "save_as_new": "1"})
         self.assertEqual(sorted(Report.objects.values_list("name", flat=True)), ["Copy", "Per dojo"])
-        self.client.post(url, {"name": "Renamed", "config": self.config})
+        self.client.post(url, {"name": "Renamed", "status": "draft", "config": self.config})
         self.assertEqual(Report.objects.get(pk=report.id).name, "Renamed")
 
         self.assertRedirects(
@@ -277,7 +277,7 @@ class ReportPageTests(TestCase):
     def test_settings_that_cant_be_read_are_refused(self):
         self.client.force_login(self.admin)
         response = self.client.post(
-            reverse("manage_report_create", args=["engagement"]), {"name": "x", "config": "[1"}
+            reverse("manage_report_create", args=["engagement"]), {"name": "x", "status": "draft", "config": "[1"}
         )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Report.objects.exists())
@@ -322,3 +322,152 @@ class VendoredPerspectiveTests(SimpleTestCase):
             "viewer/dist/wasm/perspective-viewer.wasm",
         ):
             self.assertTrue((static / "vendor/perspective-5.5.1" / name).is_file(), name)
+
+
+class DojoScopeTests(TestCase):
+    """A dataset filtered to one dojo (DATA_MODEL_REPORTS.md §30): only that
+    dojo's rows, no dojo column, and never merged."""
+
+    def setUp(self):
+        self.ghent, self.bruges = make_dojo("Ghent"), make_dojo("Bruges")
+        year = timezone.localdate().year
+        for i, dojo in enumerate([self.ghent, self.ghent, self.bruges]):
+            ninja = Ninja.objects.create(name=f"Kid {i}", date_of_birth=date(year - 10, 1, 1), gender="girl")
+            NinjaEngagement.objects.create(
+                ninja=ninja, main_dojo=dojo, stage=NinjaEngagement.REGULAR, computed_on=timezone.localdate()
+            )
+
+    def test_one_dojos_rows_unmerged_without_the_dojo_column(self):
+        dataset = EngagementDataset()
+        table = dataset.table(dojo=self.ghent)
+        self.assertEqual(table.hidden, 0)
+        [row] = table.rows
+        self.assertNotIn("main_dojo", row)
+        self.assertEqual(row["ninjas"], 2)  # below the threshold, still shown
+        with translation.override("en-us"):
+            [labelled] = dataset.labelled(table, self.ghent)
+        self.assertNotIn("Main dojo", labelled)
+        self.assertEqual(labelled["Children"], 2)
+
+    def test_settings_on_the_dojo_column_are_dropped_silently(self):
+        stored = {"group_by": ["col:main_dojo", "col:stage"], "filter": [["col:main_dojo", "==", "Ghent"]]}
+        with translation.override("en-us"):
+            config, missing = to_viewer(stored, EngagementDataset(), self.ghent)
+        self.assertEqual((config["group_by"], config["filter"], missing), (["Engagement stage"], [], []))
+
+
+class StandardReportTests(TestCase):
+    def test_install_creates_shares_and_respects_edits(self):
+        from .standard_reports import STANDARD_REPORTS, StandardReport, install
+
+        self.assertEqual(install(), {"created": len(STANDARD_REPORTS), "updated": 0})
+        self.assertEqual(install(), {"created": 0, "updated": 0})
+        report = Report.objects.get(standard_key="children_per_stage")
+        self.assertTrue(report.is_shared)
+        with translation.override("nl-be"):
+            self.assertEqual(report.label(), "Kinderen per betrokkenheidsfase")
+
+        # A newer version in the code updates the unedited one...
+        old = STANDARD_REPORTS["children_per_stage"]
+        newer = StandardReport(old.key, old.name, old.description, old.dataset, {**old.config, "plugin": "X Bar"})
+        edited = Report.objects.get(standard_key="regular_and_lapsed")
+        edited.name = "Ours now"
+        edited.save()
+        old_lapsed = STANDARD_REPORTS["regular_and_lapsed"]
+        newer_lapsed = StandardReport(
+            old_lapsed.key, old_lapsed.name, old_lapsed.description, old_lapsed.dataset, {"plugin": "Y Line"}
+        )
+        patched = {**STANDARD_REPORTS, old.key: newer, old_lapsed.key: newer_lapsed}
+        from unittest import mock
+
+        with mock.patch.dict("reports.standard_reports.STANDARD_REPORTS", patched):
+            self.assertEqual(install(), {"created": 0, "updated": 1})
+        self.assertEqual(Report.objects.get(standard_key="children_per_stage").config["plugin"], "X Bar")
+        # ...never one an admin changed: it's theirs, shown as they wrote it.
+        edited.refresh_from_db()
+        self.assertEqual((edited.name, edited.config.get("plugin")), ("Ours now", "Datagrid"))
+        self.assertEqual(edited.label(), "Ours now")
+
+
+class DojoReportPageTests(TestCase):
+    def setUp(self):
+        from dojos.testing import add_member, make_champion, make_mentor
+
+        cache.clear()
+        self.champion = make_champion(username="champ", email="champ@example.com")
+        self.dojo = make_dojo("Ghent", champion=self.champion)
+        self.mentor = make_mentor(username="mentor", email="mentor@example.com")
+        add_member(self.dojo, self.mentor)
+        self.other_champion = make_champion(username="other", email="other@example.com")
+        self.other = make_dojo("Bruges", champion=self.other_champion)
+        year = timezone.localdate().year
+        for i, dojo in enumerate([self.dojo, self.other, self.other]):
+            ninja = Ninja.objects.create(name=f"Kid {i}", date_of_birth=date(year - 10, 1, 1))
+            NinjaEngagement.objects.create(
+                ninja=ninja, main_dojo=dojo, stage=NinjaEngagement.REGULAR, computed_on=timezone.localdate()
+            )
+        self.shared = Report.objects.create(
+            name="Shared", dataset="engagement", status=Report.PUBLISHED, shared_with_dojos=True
+        )
+        self.draft = Report.objects.create(name="Draft one", dataset="engagement", shared_with_dojos=True)
+        self.organisation_only = Report.objects.create(name="Ours", dataset="engagement", status=Report.PUBLISHED)
+
+    def _url(self, name, **kwargs):
+        return reverse(name, kwargs={"dojo_id": self.dojo.id, **kwargs})
+
+    def test_the_champion_sees_published_shared_reports_only(self):
+        self.client.force_login(self.champion)
+        response = self.client.get(self._url("dojo_report_list"))
+        self.assertContains(response, "Shared")
+        self.assertNotContains(response, "Draft one")
+        self.assertNotContains(response, "Ours")
+        self.assertContains(
+            self.client.get(reverse("dojo_dashboard", args=[self.dojo.id])), self._url("dojo_report_list")
+        )
+        detail = self.client.get(self._url("dojo_report_detail", report_id=self.shared.id))
+        self.assertContains(detail, 'id="report-viewer"')
+        self.assertNotContains(detail, 'id="report-form"')
+        self.assertIn("'wasm-unsafe-eval'", detail["Content-Security-Policy"])
+        for report in (self.draft, self.organisation_only):
+            self.assertEqual(self.client.get(self._url("dojo_report_detail", report_id=report.id)).status_code, 404)
+
+    def test_figures_are_the_dojos_own(self):
+        self.client.force_login(self.champion)
+        data = self.client.get(self._url("dojo_report_data", dataset_key="engagement")).json()
+        self.assertEqual(sum(row["Children"] for row in data["rows"]), 1)
+        self.assertNotIn("Main dojo", data["rows"][0])
+        csv_text = self.client.get(self._url("dojo_report_csv", dataset_key="engagement")).content.decode("utf-8-sig")
+        self.assertNotIn("Main dojo", csv_text)
+        # Another dojo's figures: not this champion's dojo.
+        other = reverse("dojo_report_data", kwargs={"dojo_id": self.other.id, "dataset_key": "engagement"})
+        self.assertEqual(self.client.get(other).status_code, 404)
+
+    def test_mentors_and_strangers_get_nothing(self):
+        self.client.force_login(self.mentor)
+        self.assertEqual(self.client.get(self._url("dojo_report_list")).status_code, 403)
+        self.assertEqual(self.client.get(self._url("dojo_report_data", dataset_key="engagement")).status_code, 403)
+        self.assertNotContains(
+            self.client.get(reverse("dojo_dashboard", args=[self.dojo.id])), self._url("dojo_report_list")
+        )
+        self.client.force_login(self.other_champion)
+        self.assertEqual(self.client.get(self._url("dojo_report_list")).status_code, 404)
+
+    def test_the_organisation_publishes_and_shares(self):
+        admin = User.objects.create(username="admin", email="admin@example.com")
+        OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
+        self.client.force_login(User.objects.get(pk=admin.pk))
+        self.client.post(
+            reverse("manage_report_create", args=["engagement"]),
+            {
+                "name": "New one",
+                "status": Report.PUBLISHED,
+                "shared_with_dojos": "on",
+                "position": "5",
+                "config": "{}",
+            },
+        )
+        report = Report.objects.get(name="New one")
+        self.assertTrue(report.is_shared)
+        self.assertEqual(report.position, 5)
+        self.client.force_login(self.champion)
+        self.assertContains(self.client.get(self._url("dojo_report_list")), "New one")

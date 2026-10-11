@@ -348,6 +348,8 @@ cd "\$APP"
 "\$PY" manage.py migrate --noinput
 # Automated mail needs its templates: creates missing ones, never overwrites.
 "\$PY" manage.py load_mail_templates
+# The standard reports shared with dojos: creates missing ones, updates only unedited ones.
+"\$PY" manage.py load_standard_reports
 if "\$PY" manage.py shell -c "from django.conf import settings; import sys; sys.exit(0 if getattr(settings, 'STATIC_ROOT', None) else 1)" 2>/dev/null; then
     "\$PY" manage.py collectstatic --noinput --verbosity 0 && echo "collectstatic: done"
 else

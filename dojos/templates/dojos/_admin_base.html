@@ -85,6 +85,20 @@ for the sidebar link to highlight, and render with dojos.views._admin_context.
         </ul>
       </div>
 
+      {% if dojo_access.can_view_reports %}
+        <div class="cd-admin-nav__group">
+          <p class="cd-admin-nav__group-label caption">{% translate "Insights" %}</p>
+          <ul class="cd-admin-nav__list">
+            <li>
+              <a href="{% url 'dojo_report_list' dojo_id=dojo.id %}" class="cd-admin-nav__link label{% if active == 'reports' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15v3"/><path d="M12 10v8"/><path d="M17 6v12"/></svg>
+                {% translate "Reports" %}
+              </a>
+            </li>
+          </ul>
+        </div>
+      {% endif %}
+
       {% if dojo_access.can_edit_settings %}
         <div class="cd-admin-nav__group">
           <p class="cd-admin-nav__group-label caption">{% translate "Dojo" %}</p>

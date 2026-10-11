@@ -19,11 +19,14 @@ totals stay right except for those."""
 
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.utils.functional import Promise
 from django.utils.translation import gettext_lazy as _
+
+if TYPE_CHECKING:
+    from dojos.models import Dojo
 
 DIMENSION = "dimension"
 MEASURE = "measure"
@@ -85,9 +88,28 @@ class Dataset:
     count_column = ""
     # Which dimension to replace by "Other" first, then next, ...
     generalise_order: list[str] = []
+    # The dimension that names a dojo, and the lookup that filters the query
+    # on one: a dataset with them can be shared with dojos, each champion
+    # seeing their own dojo's rows only (reports.dojo_views). Empty: the
+    # organisation's only.
+    dojo_column = ""
+    dojo_lookup = ""
 
-    def query_rows(self) -> list[dict[str, Any]]:
+    def query_rows(self, dojo: "Dojo | None" = None) -> list[dict[str, Any]]:
+        """The aggregated rows; with `dojo`, only that dojo's (the filter is
+        in the query, so nothing of another dojo is ever read)."""
         raise NotImplementedError
+
+    @property
+    def shareable(self) -> bool:
+        return bool(self.dojo_column and self.dojo_lookup)
+
+    def columns_for(self, dojo: "Dojo | None" = None) -> list[Column]:
+        """The columns a viewer gets: without the dojo column on one dojo's
+        figures, where it would say the same on every row."""
+        if dojo is None:
+            return self.columns
+        return [column for column in self.columns if column.key != self.dojo_column]
 
     def column(self, key: str) -> Column:
         return next(column for column in self.columns if column.key == key)
@@ -100,7 +122,16 @@ class Dataset:
     def measures(self) -> list[str]:
         return [column.key for column in self.columns if column.kind == MEASURE]
 
-    def table(self, min_group: int | None = None) -> Table:
+    def table(self, min_group: int | None = None, dojo: "Dojo | None" = None) -> Table:
+        if dojo is not None:
+            # A dojo's own figures: never merged (decided 11 October 2026), its
+            # team already knows its children by name from the attendance list.
+            if not self.shareable:
+                raise ValueError(f"{self.key} has no dojo column")
+            keys = [column.key for column in self.columns_for(dojo)]
+            rows = [{key: row.get(key) for key in keys} for row in self.query_rows(dojo)]
+            dimensions = [key for key in self.dimensions if key in keys]
+            return Table(merge(rows, dimensions, self.measures))
         rows = self.query_rows()
         if not self.about_children:
             return Table(merge(rows, self.dimensions, self.measures))
@@ -108,10 +139,10 @@ class Dataset:
             min_group = settings.REPORT_MIN_GROUP
         return generalise(rows, self.dimensions, self.measures, self.count_column, self.generalise_order, min_group)
 
-    def labelled(self, table: Table) -> list[dict[str, Any]]:
+    def labelled(self, table: Table, dojo: "Dojo | None" = None) -> list[dict[str, Any]]:
         """The rows as Perspective gets them: keyed by the columns' labels in
         the current language, dimensions shown as their labels."""
-        columns = [(column, str(column.label)) for column in self.columns]
+        columns = [(column, str(column.label)) for column in self.columns_for(dojo)]
         return [
             {
                 label: column.value_label(row.get(column.key))

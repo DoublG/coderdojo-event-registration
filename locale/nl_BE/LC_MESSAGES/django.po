@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 13:28+0000\n"
+"POT-Creation-Date: 2026-10-11 15:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -463,7 +463,7 @@ msgstr "Sam"
 msgid "Peeters"
 msgstr "Peeters"
 
-#: accounts/forms.py:825 reports/datasets/engagement.py:66
+#: accounts/forms.py:825 reports/datasets/engagement.py:70
 msgid "Gender"
 msgstr "Gender"
 
@@ -636,6 +636,7 @@ msgstr "Bestuurslid"
 #: core/templates/core/partials/_manage_switcher.html:12
 #: core/templates/core/partials/_manage_switcher.html:18
 #: core/templates/core/partials/_manage_switcher.html:42 dojos/models.py:60
+#: reports/templates/reports/report_list.html:30
 msgid "Organisation"
 msgstr "Organisatie"
 
@@ -1039,7 +1040,7 @@ msgstr ""
 #: privacy/templates/privacy/delete_account.html:58
 #: privacy/templates/privacy/manage/delete.html:32
 #: privacy/templates/privacy/manage/email.html:25
-#: reports/templates/reports/report_detail.html:42
+#: reports/templates/reports/report_detail.html:29
 msgid "Cancel"
 msgstr "Annuleren"
 
@@ -1106,7 +1107,7 @@ msgstr "Sessie"
 #: applications/templates/applications/manage/application_detail.html:17
 #: campaigns/templates/campaigns/manage/_rule_fields.html:47
 #: campaigns/templates/campaigns/manage/_rule_fields.html:57 dojos/models.py:60
-#: dojos/templates/dojos/_admin_base.html:90 events/forms.py:48
+#: dojos/templates/dojos/_admin_base.html:104 events/forms.py:48
 #: events/templates/events/event_list.html:66
 #: privacy/templates/privacy/manage/privacy.html:17
 msgid "Dojo"
@@ -1935,7 +1936,7 @@ msgstr "Wat elke rol opent"
 #: events/templates/events/manage/_badge_assign_results.html:11
 #: events/templates/events/manage/badge_list.html:18
 #: events/templates/events/manage/badge_list.html:46 mailing/forms.py:146
-#: privacy/templates/privacy/manage/privacy.html:57 reports/forms.py:11
+#: privacy/templates/privacy/manage/privacy.html:57 reports/forms.py:12
 msgid "Name"
 msgstr "Naam"
 
@@ -2218,7 +2219,7 @@ msgstr "Met een inloglink"
 #: events/templates/events/manage/badge_form.html:17
 #: mailing/templates/mailing/mail_preferences.html:77
 #: mailing/templates/mailing/manage/template_edit.html:47
-#: reports/templates/reports/report_detail.html:44
+#: reports/templates/reports/report_detail.html:31
 msgid "Save"
 msgstr "Opslaan"
 
@@ -2508,7 +2509,7 @@ msgstr "Kind %(n)s"
 
 #: accounts/templates/accounts/partials/_child_rows_fieldset.html:7
 #: privacy/templates/privacy/manage/privacy.html:60
-#: reports/datasets/engagement.py:68
+#: reports/datasets/engagement.py:72
 msgid "Children"
 msgstr "Kinderen"
 
@@ -3630,7 +3631,7 @@ msgstr "Kies wat de client mag doen."
 #: api/templates/api/dojo_api_clients.html:3
 #: api/templates/api/dojo_api_clients.html:4
 #: api/templates/api/dojo_api_clients.html:112
-#: dojos/templates/dojos/_admin_base.html:102
+#: dojos/templates/dojos/_admin_base.html:116
 msgid "API"
 msgstr "API"
 
@@ -4029,7 +4030,7 @@ msgstr "Aangevraagd als"
 #: dojos/templates/dojos/dojo_event_list.html:25
 #: mailing/templates/mailing/manage/mail_log.html:30
 #: mailing/templates/mailing/manage/mail_log.html:58
-#: mailing/templates/mailing/manage/mail_queue.html:62
+#: mailing/templates/mailing/manage/mail_queue.html:62 reports/forms.py:20
 msgid "Status"
 msgstr "Status"
 
@@ -4859,7 +4860,7 @@ msgstr "Wie dit is, in één zin."
 #: campaigns/templates/campaigns/manage/segment_list.html:13 dojos/forms.py:68
 #: dojos/forms.py:94 events/forms.py:201 events/forms.py:271
 #: events/forms.py:339 events/forms.py:380 mailing/forms.py:118
-#: mailing/forms.py:153 reports/forms.py:13
+#: mailing/forms.py:153 reports/forms.py:14
 msgid "Description"
 msgstr "Beschrijving"
 
@@ -5014,7 +5015,7 @@ msgstr "Heeft kinderen op de site"
 #: campaigns/segmentation/attributes/account.py:34
 #: campaigns/segmentation/attributes/engagement.py:152
 #: campaigns/templates/campaigns/manage/_rule_fields.html:29
-#: reports/datasets/base.py:164
+#: reports/datasets/base.py:197
 msgid "Yes"
 msgstr "Ja"
 
@@ -5022,7 +5023,7 @@ msgstr "Ja"
 #: campaigns/segmentation/attributes/account.py:34
 #: campaigns/segmentation/attributes/engagement.py:152
 #: campaigns/templates/campaigns/manage/_rule_fields.html:29
-#: reports/datasets/base.py:164
+#: reports/datasets/base.py:197
 msgid "No"
 msgstr "Nee"
 
@@ -5908,6 +5909,7 @@ msgstr "+ Geneste groep"
 #: campaigns/templates/campaigns/manage/campaign_detail.html:27
 #: dojos/models.py:52 dojos/templates/dojos/dojo_event_detail.html:39
 #: dojos/templates/dojos/dojo_event_list.html:37 events/models.py:41
+#: reports/models.py:24
 msgid "Draft"
 msgstr "Ontwerp"
 
@@ -6425,6 +6427,7 @@ msgid "Logo"
 msgstr "Logo"
 
 #: content/forms.py:104 content/templates/content/manage/sponsor_list.html:15
+#: reports/forms.py:31
 msgid "Order"
 msgstr "Volgorde"
 
@@ -6689,10 +6692,15 @@ msgid "Assign awards"
 msgstr "Onderscheidingen toekennen"
 
 #: core/templates/core/_manage_base.html:165
+#: dojos/templates/dojos/_admin_base.html:90
 msgid "Insights"
 msgstr "Inzichten"
 
 #: core/templates/core/_manage_base.html:170
+#: dojos/templates/dojos/_admin_base.html:95
+#: reports/templates/reports/dojo/report_detail.html:14
+#: reports/templates/reports/dojo/report_list.html:3
+#: reports/templates/reports/dojo/report_list.html:4
 #: reports/templates/reports/report_detail.html:15
 #: reports/templates/reports/report_list.html:3
 #: reports/templates/reports/report_list.html:4
@@ -7294,7 +7302,7 @@ msgstr "Aanwezigheden"
 msgid "Members"
 msgstr "Leden"
 
-#: dojos/templates/dojos/_admin_base.html:95
+#: dojos/templates/dojos/_admin_base.html:109
 #: dojos/templates/dojos/dojo_manage.html:4
 msgid "Settings"
 msgstr "Instellingen"
@@ -10747,113 +10755,161 @@ msgstr ""
 "Er is een bevestigingslink naar %(email)s gestuurd. Het adres verandert "
 "zodra die geopend wordt (binnen %(hours)s uur)."
 
-#: reports/datasets/base.py:36
+#: reports/datasets/base.py:39
 msgid "Other (small groups)"
 msgstr "Andere (kleine groepen)"
 
-#: reports/datasets/base.py:37
+#: reports/datasets/base.py:40
 msgid "Unknown"
 msgstr "Onbekend"
 
-#: reports/datasets/engagement.py:21
-msgid "7–9"
-msgstr "7–9"
+#: reports/datasets/engagement.py:23
+msgid "07–09"
+msgstr "07–09"
 
-#: reports/datasets/engagement.py:22
+#: reports/datasets/engagement.py:24
 msgid "10–12"
 msgstr "10–12"
 
-#: reports/datasets/engagement.py:23
+#: reports/datasets/engagement.py:25
 msgid "13–15"
 msgstr "13–15"
 
-#: reports/datasets/engagement.py:24
+#: reports/datasets/engagement.py:26
 msgid "16–17"
 msgstr "16–17"
 
-#: reports/datasets/engagement.py:25
+#: reports/datasets/engagement.py:27
 msgid "18 and older"
 msgstr "18 en ouder"
 
-#: reports/datasets/engagement.py:48
+#: reports/datasets/engagement.py:50
 msgid "Children and how they come"
 msgstr "Kinderen en hoe vaak ze komen"
 
-#: reports/datasets/engagement.py:50
+#: reports/datasets/engagement.py:52
 msgid ""
 "Every child with an overall engagement stage, from last night's snapshot: "
 "their stage, main dojo and its province, age band and gender, with how many "
 "sessions they came to and were offered."
-msgstr "Elk kind met een betrokkenheidsfase, uit de momentopname van afgelopen nacht: de fase, de hoofddojo en de provincie ervan, de leeftijdsgroep en het geslacht, met hoeveel sessies het kind bijwoonde en aangeboden kreeg."
+msgstr ""
+"Elk kind met een betrokkenheidsfase, uit de momentopname van afgelopen "
+"nacht: de fase, de hoofddojo en de provincie ervan, de leeftijdsgroep en het "
+"geslacht, met hoeveel sessies het kind bijwoonde en aangeboden kreeg."
 
-#: reports/datasets/engagement.py:58
+#: reports/datasets/engagement.py:62
 msgid "Engagement stage"
 msgstr "Betrokkenheidsfase"
 
-#: reports/datasets/engagement.py:63
+#: reports/datasets/engagement.py:67
 msgid "Main dojo"
 msgstr "Hoofddojo"
 
-#: reports/datasets/engagement.py:64
+#: reports/datasets/engagement.py:68
 msgid "Province"
 msgstr "Provincie"
 
-#: reports/datasets/engagement.py:65
+#: reports/datasets/engagement.py:69
 msgid "Age band"
 msgstr "Leeftijdsgroep"
 
-#: reports/datasets/engagement.py:67
+#: reports/datasets/engagement.py:71
 msgid "Signed up for a session"
 msgstr "Ingeschreven voor een sessie"
 
-#: reports/datasets/engagement.py:69
+#: reports/datasets/engagement.py:73
 msgid "Sessions attended (180 days)"
 msgstr "Bijgewoonde sessies (180 dagen)"
 
-#: reports/datasets/engagement.py:70
+#: reports/datasets/engagement.py:74
 msgid "Sessions offered (180 days)"
 msgstr "Aangeboden sessies (180 dagen)"
 
-#: reports/datasets/engagement.py:71
+#: reports/datasets/engagement.py:75
 msgid "Sessions attended (all time)"
 msgstr "Bijgewoonde sessies (altijd)"
 
-#: reports/datasets/engagement.py:72
+#: reports/datasets/engagement.py:76
 msgid "No-shows (90 days)"
 msgstr "Niet komen opdagen (90 dagen)"
 
-#: reports/forms.py:16
+#: reports/forms.py:17
 msgid "What the report shows, for whoever opens it next."
 msgstr "Wat het rapport toont, voor wie het hierna opent."
 
-#: reports/forms.py:25
+#: reports/forms.py:23
+msgid "A draft is only for the organisation's admins."
+msgstr "Een ontwerp is alleen voor de beheerders van de organisatie."
+
+#: reports/forms.py:26
+msgid "Share with the dojos"
+msgstr "Delen met de dojo's"
+
+#: reports/forms.py:28
+msgid ""
+"Once published, every dojo's champion sees it on their own dojo's figures, "
+"read-only."
+msgstr "Zodra het gepubliceerd is, ziet de champion van elke dojo het op de cijfers van de eigen dojo, alleen om te lezen."
+
+#: reports/forms.py:35
+msgid "Where it comes on the dojos' Reports page: lowest first."
+msgstr "Waar het komt op de pagina Rapporten van de dojo's: laagste eerst."
+
+#: reports/forms.py:50
 msgid "The report's settings couldn't be read."
 msgstr "De instellingen van het rapport konden niet gelezen worden."
 
-#: reports/templates/reports/report_detail.html:3
-#: reports/templates/reports/report_detail.html:4
-#: reports/templates/reports/report_detail.html:35
-#: reports/templates/reports/report_list.html:44 reports/views.py:137
-msgid "New report"
-msgstr "Nieuw rapport"
+#: reports/models.py:24
+msgid "Published"
+msgstr "Gepubliceerd"
 
+#: reports/standard_reports.py:39
+msgid "Children per engagement stage"
+msgstr "Kinderen per betrokkenheidsfase"
+
+#: reports/standard_reports.py:40
+msgid "How many children are regular, occasional, new, at risk or lapsed."
+msgstr "Hoeveel kinderen vaste bezoeker, af en toe, nieuw, in gevaar of afgehaakt zijn."
+
+#: reports/standard_reports.py:47
+msgid "Children per age band and gender"
+msgstr "Kinderen per leeftijdsgroep en geslacht"
+
+#: reports/standard_reports.py:48
+msgid "How many children of each age band come, split by gender."
+msgstr "Hoeveel kinderen van elke leeftijdsgroep er komen, opgesplitst per geslacht."
+
+#: reports/standard_reports.py:60
+msgid "Regular and lapsed children"
+msgstr "Vaste bezoekers en afgehaakte kinderen"
+
+#: reports/standard_reports.py:62
+msgid ""
+"Regular children next to those who stopped coming, with the sessions they "
+"came to and were offered in the last 180 days."
+msgstr "Vaste bezoekers naast de kinderen die niet meer komen, met de sessies die ze bijwoonden en aangeboden kregen in de laatste 180 dagen."
+
+#: reports/templates/reports/dojo/report_detail.html:5
 #: reports/templates/reports/report_detail.html:5
-#: reports/templates/reports/report_list.html:45
+#: reports/templates/reports/report_list.html:48
 msgid "Download the figures (CSV)"
 msgstr "Download de cijfers (CSV)"
 
-#: reports/templates/reports/report_detail.html:16
-msgid "Dataset: %(dataset)s, figures as of %(time)s."
-msgstr "Gegevensset: %(dataset)s, cijfers van %(time)s."
+#: reports/templates/reports/dojo/report_detail.html:15
+msgid "%(dojo)s's own figures, as of %(time)s."
+msgstr "De eigen cijfers van %(dojo)s, van %(time)s."
 
-#: reports/templates/reports/report_detail.html:20
+#: reports/templates/reports/dojo/report_list.html:12
 msgid ""
-"Drag columns into Group by and Split by, choose what to show under Columns, "
-"and pick a table or a chart at the top left. Then give the report a name and "
-"save it."
-msgstr "Sleep kolommen naar Groeperen op en Splitsen op, kies onder Kolommen wat je wilt tonen, en kies linksboven een tabel of een grafiek. Geef het rapport daarna een naam en sla het op."
+"Reports CoderDojo Belgium prepared for every dojo, with %(dojo)s's own "
+"figures: only you, as its champion, see them."
+msgstr "Rapporten die CoderDojo Belgium voor elke dojo voorbereidde, met de eigen cijfers van %(dojo)s: alleen jij ziet ze, als champion."
 
-#: reports/templates/reports/report_detail.html:23
+#: reports/templates/reports/dojo/report_list.html:20
+msgid "No reports have been shared with the dojos yet."
+msgstr "Er zijn nog geen rapporten gedeeld met de dojo's."
+
+#: reports/templates/reports/partials/_viewer.html:9
 #, python-format
 msgid ""
 "%(counter)s child is left out: they're in a group of fewer than %(min)s even "
@@ -10862,30 +10918,64 @@ msgid_plural ""
 "%(counter)s children are left out: they're in groups of fewer than %(min)s "
 "even after merging small groups into \"Other\", so totals are that much "
 "lower."
-msgstr[0] "%(counter)s kind is weggelaten: het zit in een groep van minder dan %(min)s, ook nadat kleine groepen samengevoegd zijn tot \"Andere\". De totalen liggen dus zoveel lager."
-msgstr[1] "%(counter)s kinderen zijn weggelaten: ze zitten in groepen van minder dan %(min)s, ook nadat kleine groepen samengevoegd zijn tot \"Andere\". De totalen liggen dus zoveel lager."
+msgstr[0] ""
+"%(counter)s kind is weggelaten: het zit in een groep van minder dan %(min)s, "
+"ook nadat kleine groepen samengevoegd zijn tot \"Andere\". De totalen liggen "
+"dus zoveel lager."
+msgstr[1] ""
+"%(counter)s kinderen zijn weggelaten: ze zitten in groepen van minder dan "
+"%(min)s, ook nadat kleine groepen samengevoegd zijn tot \"Andere\". De "
+"totalen liggen dus zoveel lager."
 
-#: reports/templates/reports/report_detail.html:30
+#: reports/templates/reports/partials/_viewer.html:16
 msgid ""
 "This report used columns the dataset doesn't have any more; they were left "
 "out. Save the report to keep it this way."
-msgstr "Dit rapport gebruikte kolommen die de gegevensset niet meer heeft; die zijn weggelaten. Sla het rapport op om het zo te houden."
+msgstr ""
+"Dit rapport gebruikte kolommen die de gegevensset niet meer heeft; die zijn "
+"weggelaten. Sla het rapport op om het zo te houden."
 
-#: reports/templates/reports/report_detail.html:34
+#: reports/templates/reports/partials/_viewer.html:19
 msgid ""
 "Building reports needs JavaScript. The figures are also available as a CSV "
 "file (top right)."
-msgstr "Voor rapporten maken is JavaScript nodig. De cijfers zijn ook beschikbaar als CSV-bestand (rechtsboven)."
+msgstr ""
+"Voor rapporten maken is JavaScript nodig. De cijfers zijn ook beschikbaar "
+"als CSV-bestand (rechtsboven)."
 
-#: reports/templates/reports/report_detail.html:43
+#: reports/templates/reports/report_detail.html:3
+#: reports/templates/reports/report_detail.html:4
+#: reports/templates/reports/report_list.html:47 reports/views.py:163
+msgid "New report"
+msgstr "Nieuw rapport"
+
+#: reports/templates/reports/report_detail.html:16
+#, python-format
+msgid "Dataset: %(dataset)s, figures as of %(time)s."
+msgstr "Gegevensset: %(dataset)s, cijfers van %(time)s."
+
+#: reports/templates/reports/report_detail.html:20
+msgid ""
+"Drag columns into Group by and Split by, choose what to show under Columns, "
+"and pick a table or a chart at the top left. Then give the report a name and "
+"save it."
+msgstr ""
+"Sleep kolommen naar Groeperen op en Splitsen op, kies onder Kolommen wat je "
+"wilt tonen, en kies linksboven een tabel of een grafiek. Geef het rapport "
+"daarna een naam en sla het op."
+
+#: reports/templates/reports/report_detail.html:30
 msgid "Save as a new report"
 msgstr "Opslaan als nieuw rapport"
 
-#: reports/templates/reports/report_detail.html:50
+#: reports/templates/reports/report_detail.html:37
+#, python-format
 msgid "Delete the report %(name)s? The figures stay; only the report goes."
-msgstr "Het rapport %(name)s verwijderen? De cijfers blijven; alleen het rapport verdwijnt."
+msgstr ""
+"Het rapport %(name)s verwijderen? De cijfers blijven; alleen het rapport "
+"verdwijnt."
 
-#: reports/templates/reports/report_detail.html:51
+#: reports/templates/reports/report_detail.html:38
 msgid "Delete report"
 msgstr "Rapport verwijderen"
 
@@ -10894,52 +10984,84 @@ msgid ""
 "Reports are tables and charts you build yourself on the organisation's "
 "figures. Each report starts from a dataset: figures we prepared so that no "
 "report can point out a child."
-msgstr "Rapporten zijn tabellen en grafieken die je zelf maakt op de cijfers van de organisatie. Elk rapport vertrekt van een gegevensset: cijfers die we zo voorbereid hebben dat geen enkel rapport een kind kan aanwijzen."
+msgstr ""
+"Rapporten zijn tabellen en grafieken die je zelf maakt op de cijfers van de "
+"organisatie. Elk rapport vertrekt van een gegevensset: cijfers die we zo "
+"voorbereid hebben dat geen enkel rapport een kind kan aanwijzen."
 
-#: reports/templates/reports/report_list.html:18
+#: reports/templates/reports/report_list.html:13
+msgid ""
+"A published report shared with the dojos shows in every dojo's admin area, "
+"to its champion only: read-only, on that dojo's own figures."
+msgstr "Een gepubliceerd rapport dat gedeeld is met de dojo's, verschijnt in de beheeromgeving van elke dojo, alleen voor de champion: alleen om te lezen, op de eigen cijfers van die dojo."
+
+#: reports/templates/reports/report_list.html:19
 msgid "Report"
 msgstr "Rapport"
 
-#: reports/templates/reports/report_list.html:19
+#: reports/templates/reports/report_list.html:20
 msgid "Dataset"
 msgstr "Gegevensset"
 
-#: reports/templates/reports/report_list.html:20
+#: reports/templates/reports/report_list.html:21
+msgid "Shown to"
+msgstr "Zichtbaar voor"
+
+#: reports/templates/reports/report_list.html:22
 msgid "Last changed"
 msgstr "Laatst gewijzigd"
 
-#: reports/templates/reports/report_list.html:31
+#: reports/templates/reports/report_list.html:28
+msgid "Standard"
+msgstr "Standaard"
+
+#: reports/templates/reports/report_list.html:30
+msgid "Draft: admins only"
+msgstr "Ontwerp: alleen beheerders"
+
+#: reports/templates/reports/report_list.html:30
+msgid "Organisation and every dojo's champion"
+msgstr "Organisatie en de champion van elke dojo"
+
+#: reports/templates/reports/report_list.html:34
 msgid "No reports yet."
 msgstr "Nog geen rapporten."
 
-#: reports/templates/reports/report_list.html:31
+#: reports/templates/reports/report_list.html:34
 msgid "Start one from a dataset below."
 msgstr "Begin er een vanuit een gegevensset hieronder."
 
-#: reports/templates/reports/report_list.html:37
+#: reports/templates/reports/report_list.html:40
 msgid "Datasets"
 msgstr "Gegevenssets"
 
-#: reports/views.py:142
+#: reports/views.py:126
 msgid "The report couldn't be loaded. Try again, or download the figures."
-msgstr "Het rapport kon niet geladen worden. Probeer het opnieuw, of download de cijfers."
+msgstr ""
+"Het rapport kon niet geladen worden. Probeer het opnieuw, of download de "
+"cijfers."
 
-#: reports/views.py:156
+#: reports/views.py:187
 msgid ""
 "The report's settings couldn't be read. Change something and save again."
-msgstr "De instellingen van het rapport konden niet gelezen worden. Wijzig iets en sla opnieuw op."
+msgstr ""
+"De instellingen van het rapport konden niet gelezen worden. Wijzig iets en "
+"sla opnieuw op."
 
-#: reports/views.py:177 reports/views.py:198
+#: reports/views.py:211 reports/views.py:240
 msgid "Report saved."
 msgstr "Rapport opgeslagen."
 
-#: reports/views.py:198
+#: reports/views.py:240
 msgid "Saved as a new report."
 msgstr "Opgeslagen als nieuw rapport."
 
-#: reports/views.py:209
+#: reports/views.py:251
 msgid "Report deleted."
 msgstr "Rapport verwijderd."
+
+#~ msgid "7–9"
+#~ msgstr "7–9"
 
 #~ msgid "Homepage: large card under the introduction"
 #~ msgstr "Startpagina: grote kaart onder de inleiding"
@@ -10978,10 +11100,6 @@ msgstr "Rapport verwijderd."
 
 #~ msgid "9000"
 #~ msgstr "9000"
-
-# | msgid "Switch to dark mode"
-#~ msgid "Switch dojo"
-#~ msgstr "Andere dojo"
 
 #~ msgid "Uittreksel uit het strafregister (model 2)"
 #~ msgstr "Uittreksel uit het strafregister (model 2)"

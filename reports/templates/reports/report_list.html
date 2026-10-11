@@ -9,6 +9,7 @@
     DATA_MODEL_REPORTS.md §30), and the datasets a new one can be built on.
   {% endcomment %}
   <p class="body-sm">{% translate "Reports are tables and charts you build yourself on the organisation's figures. Each report starts from a dataset: figures we prepared so that no report can point out a child." %}</p>
+  <p class="body-sm">{% translate "A published report shared with the dojos shows in every dojo's admin area, to its champion only: read-only, on that dojo's own figures." %}</p>
 
   <div class="cd-table-wrap">
     <table class="cd-table cd-table--zebra">
@@ -16,18 +17,20 @@
         <tr>
           <th class="label" scope="col">{% translate "Report" %}</th>
           <th class="label" scope="col">{% translate "Dataset" %}</th>
+          <th class="label" scope="col">{% translate "Shown to" %}</th>
           <th class="label" scope="col">{% translate "Last changed" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for report in reports %}
           <tr>
-            <td class="body-sm"><a href="{% url 'manage_report_detail' report_id=report.id %}">{{ report.name }}</a>{% if report.description %}<br><span class="caption muted">{{ report.description|truncatechars:120 }}</span>{% endif %}</td>
+            <td class="body-sm"><a href="{% url 'manage_report_detail' report_id=report.id %}">{{ report.label }}</a>{% if report.standard_key %} <span class="cd-badge cd-badge--outline caption">{% translate "Standard" %}</span>{% endif %}{% if report.description %}<br><span class="caption muted">{{ report.label_description|truncatechars:120 }}</span>{% endif %}</td>
             <td class="body-sm">{% for dataset in datasets %}{% if dataset.key == report.dataset %}{{ dataset.label }}{% endif %}{% endfor %}</td>
+            <td class="body-sm">{% if report.status == "draft" %}<span class="cd-badge cd-badge--outline caption">{% translate "Draft: admins only" %}</span>{% elif report.shared_with_dojos %}<span class="cd-badge cd-badge--success caption">{% translate "Organisation and every dojo's champion" %}</span>{% else %}<span class="cd-badge caption">{% translate "Organisation" %}</span>{% endif %}</td>
             <td class="body-sm">{{ report.updated_at|date:"j M Y, H:i" }}{% if report.updated_by %} · {{ report.updated_by.team_name }}{% endif %}</td>
           </tr>
         {% empty %}
-          <tr><td class="body-sm" colspan="3">{% translate "No reports yet." %}{% if can_add %} {% translate "Start one from a dataset below." %}{% endif %}</td></tr>
+          <tr><td class="body-sm" colspan="4">{% translate "No reports yet." %}{% if can_add %} {% translate "Start one from a dataset below." %}{% endif %}</td></tr>
         {% endfor %}
       </tbody>
     </table>

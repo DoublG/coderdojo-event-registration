@@ -1,0 +1,58 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-11 15:07+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/dojo-team/reports.rst:2
+msgid "Reports for your dojo"
+msgstr "Rapports pour votre dojo"
+
+#: ../../source/dojo-team/reports.rst:4
+msgid ""
+"CoderDojo Belgium prepares reports for every dojo: tables and charts with"
+" your own dojo's figures, such as how many of your children come "
+"regularly, or how many children of each age band come. As the dojo's "
+"**champion**, you find them under **Reports** (in the **Insights** "
+"section) in your dojo's sidebar. Mentors don't see them."
+msgstr "CoderDojo Belgium prépare des rapports pour chaque dojo : des tableaux et des graphiques avec les chiffres de votre propre dojo, comme le nombre de vos enfants qui viennent régulièrement, ou le nombre d'enfants de chaque tranche d'âge. En tant que **champion** du dojo, vous les trouvez sous **Rapports** (dans la section **Analyses**) dans la barre latérale de votre dojo. Les mentors ne les voient pas."
+
+#: ../../source/dojo-team/reports.rst:10
+msgid ""
+"The reports are read-only: you see them the way CoderDojo Belgium made "
+"them, and there's nothing to save. They only ever show your own dojo's "
+"figures, never another dojo's. A child counts for the dojo that is their "
+"main dojo, from last night's figures. Because your team already knows its"
+" children from the attendance list, small groups aren't merged here: a "
+"report can show a group of one child."
+msgstr "Les rapports sont en lecture seule : vous les voyez tels que CoderDojo Belgium les a faits, et il n'y a rien à enregistrer. Ils ne montrent jamais que les chiffres de votre propre dojo, jamais ceux d'un autre. Un enfant compte pour le dojo qui est son dojo principal, d'après les chiffres de la nuit dernière. Comme votre équipe connaît déjà ses enfants grâce à la liste de présence, les petits groupes ne sont pas regroupés ici : un rapport peut montrer un groupe d'un seul enfant."
+
+#: ../../source/dojo-team/reports.rst:17
+msgid ""
+"**Download the figures (CSV)** at the top right gives your dojo's figures"
+" as a spreadsheet file."
+msgstr "**Télécharger les chiffres (CSV)** en haut à droite donne les chiffres de votre dojo sous forme de fichier tableur."
+
+#: ../../source/dojo-team/reports.rst:20
+msgid ""
+"Which reports there are, and what's in them, is decided by CoderDojo "
+"Belgium (see the organisation's :doc:`../organisation/reports` page). If "
+"you'd like another report for your dojo, ask them."
+msgstr "C'est CoderDojo Belgium qui décide quels rapports existent et ce qu'ils contiennent (voir la page :doc:`../organisation/reports` de l'organisation). Si vous souhaitez un autre rapport pour votre dojo, demandez-le-leur."
+

@@ -59,6 +59,7 @@ PERSONAS = {
     "guardian-5-child-1": ["/account/ninja/9/", "/events/72/", "/events/72/signup/"],
     "guardian-11": ["/register/helper/", "/register/dojo/"],
     "owner-51-dojo-westerlo": [
+        "/dojos/51/manage/reports/",
         "/dojos/51/dashboard/",
         "/dojos/51/manage/",
         "/dojos/51/events/",

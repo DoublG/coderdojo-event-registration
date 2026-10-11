@@ -53,6 +53,42 @@ report** removes the report, never the figures.
 A report works in every language: a report saved in Dutch opens in French
 with French column names, and the other way round.
 
+Sharing reports with the dojos
+------------------------------
+
+Below a report, **Status** decides who sees it besides the admins:
+
+- **Draft**: only the organisation's admins. Work on a report as a draft
+  until it's ready.
+- **Published**: ready. With **Share with the dojos** ticked, every
+  dojo's **champion** also sees it, in their dojo's admin area (see
+  :doc:`../dojo-team/reports`). The **Shown to** column on the Reports
+  page says who sees each report.
+
+A shared report is read-only for the champions and shows only their own
+dojo's figures: each dojo gets its own figures from the site, so a champion
+can never see another dojo's. On a dojo's own figures small groups aren't
+merged (the dojo's team knows its children from the attendance list), and
+the **Main dojo** column and whatever refers to it in the report are left
+out. **Order** decides where a report comes on the dojos' Reports page,
+lowest first.
+
+Editing a shared report changes it for every dojo at once. To try something
+out, use **Save as a new report** and keep the copy as a draft.
+
+Standard reports
+----------------
+
+The site comes with a few **standard** reports, published and shared with
+every dojo: children per engagement stage, children per age band and
+gender, and regular and lapsed children. They show in each reader's
+language. You can change them like any report; once you do, the report is
+yours and stays as you left it, and it shows the name as you wrote it. A
+standard report you haven't touched is brought up to date when the site
+gets a new version of it. If you delete one, it comes back with the next
+update of the site: to stop sharing it, set it back to **Draft** or untick
+**Share with the dojos** instead.
+
 The figures as a file
 ---------------------
 

@@ -1,0 +1,21 @@
+{% load i18n %}{% comment %}
+  Perspective's viewer on a dataset's figures (DATA_MODEL_REPORTS.md §30),
+  wired by reports/report.js from `setup` (reports.views.viewer_context);
+  `data_url` is the organisation's or one dojo's figures. The notes above it
+  say what was left out. Its stylesheets and script come from
+  _viewer_head.html and _viewer_script.html.
+{% endcomment %}
+{% if hidden %}
+  <p class="cd-form__note caption" role="note">{% blocktranslate trimmed count counter=hidden with min=min_group %}
+    {{ counter }} child is left out: they're in a group of fewer than {{ min }} even after merging small groups into "Other", so totals are that much lower.
+  {% plural %}
+    {{ counter }} children are left out: they're in groups of fewer than {{ min }} even after merging small groups into "Other", so totals are that much lower.
+  {% endblocktranslate %}</p>
+{% endif %}
+{% if missing %}
+  <p class="cd-form__note cd-form__note--error caption" role="alert">{% translate "This report used columns the dataset doesn't have any more; they were left out. Save the report to keep it this way." %}</p>
+{% endif %}
+<p class="cd-form__note cd-form__note--error caption" id="report-error" role="alert" hidden></p>
+<noscript><p class="cd-form__note caption">{% translate "Building reports needs JavaScript. The figures are also available as a CSV file (top right)." %}</p></noscript>
+<perspective-viewer id="report-viewer" class="report-viewer" data-source="{{ data_url }}" aria-label="{{ setup.title }}"></perspective-viewer>
+{{ setup|json_script:"report-setup" }}

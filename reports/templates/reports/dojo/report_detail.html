@@ -1,0 +1,21 @@
+{% extends "dojos/_admin_base.html" %}
+{% load i18n %}
+{% block admin_page_title %}{{ report.label }}{% endblock %}
+{% block admin_heading %}{{ report.label }}{% endblock %}
+{% block admin_topbar_extra %}<a class="cd-btn cd-btn--ghost label" href="{{ csv_url }}">{% translate "Download the figures (CSV)" %}</a>{% endblock %}
+
+{% block admin_content %}
+  {% comment %}
+    A shared report on this dojo's own figures (reports.dojo_views.dojo_report_detail):
+    read-only, the viewer opens with its settings closed and there's nothing to save.
+  {% endcomment %}
+  <p class="body-sm">
+    <a href="{% url 'dojo_report_list' dojo_id=dojo.id %}">{% translate "Reports" %}</a> ·
+    {% blocktranslate trimmed with dojo=dojo.name time=as_of %}{{ dojo }}'s own figures, as of {{ time }}.{% endblocktranslate %}
+  </p>
+  {% if report.description %}<p class="body">{{ report.label_description }}</p>{% endif %}
+  {% include "reports/partials/_viewer.html" %}
+{% endblock %}
+
+{% block admin_extra_style %}{% include "reports/partials/_viewer_head.html" %}{% endblock %}
+{% block admin_extra_script %}{% include "reports/partials/_viewer_script.html" %}{% endblock %}

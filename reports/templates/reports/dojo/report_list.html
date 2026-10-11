@@ -1,0 +1,30 @@
+{% extends "dojos/_admin_base.html" %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "Reports" %}{% endblock %}
+{% block admin_heading %}{% translate "Reports" %}{% endblock %}
+
+{% block admin_content %}
+  {% comment %}
+    The reports CoderDojo Belgium shares with every dojo (reports.dojo_views,
+    DATA_MODEL_REPORTS.md §30), for the champion, on this dojo's own figures.
+  {% endcomment %}
+  <p class="body-sm">{% blocktranslate trimmed with dojo=dojo.name %}Reports CoderDojo Belgium prepared for every dojo, with {{ dojo }}'s own figures: only you, as its champion, see them.{% endblocktranslate %}</p>
+  <ul class="report-list">
+    {% for report in reports %}
+      <li class="cd-card report-list__item">
+        <h2 class="label"><a href="{% url 'dojo_report_detail' dojo_id=dojo.id report_id=report.id %}">{{ report.label }}</a></h2>
+        {% if report.description %}<p class="body-sm">{{ report.label_description }}</p>{% endif %}
+      </li>
+    {% empty %}
+      <li class="body-sm">{% translate "No reports have been shared with the dojos yet." %}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
+
+{% block admin_extra_style %}
+<style>
+  .report-list { list-style: none; padding: 0; margin: var(--space-4) 0 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+  .report-list__item { padding: var(--space-5); }
+  .report-list__item h2 { margin: 0 0 var(--space-2); }
+</style>
+{% endblock %}

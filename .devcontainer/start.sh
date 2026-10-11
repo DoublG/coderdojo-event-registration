@@ -169,6 +169,10 @@ python manage.py seed_content_languages
 # creates what's missing, so it's safe to run on every start.
 python manage.py seed_mailing
 
+# The standard reports (reports/standard_reports.py), shared with every dojo;
+# creates missing ones and updates unedited ones, so safe on every start.
+python manage.py load_standard_reports
+
 # The engagement snapshot is rebuilt nightly by Celery beat; build it now so
 # attendance badges and engagement segments work right after a start.
 python manage.py rebuild_engagement

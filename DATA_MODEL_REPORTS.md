@@ -60,6 +60,37 @@ the design below:
 - **The board doesn't see Reports yet:** the open point below. One line
   (`"reports.report": _VIEW` in `BOARD_PERMISSIONS`) opens it read-only.
 
+### Sharing with dojos and standard reports (built 11 October 2026)
+
+- **`Report` got** `status` (draft / published), `shared_with_dojos`,
+  `position` (the dojos' order) and `standard_key`/`standard_hash`. The
+  organisation's form has Status, *Share with the dojos* (only for a
+  dataset with a dojo column) and Order; the list says who sees each
+  report.
+- **Datasets name their dojo column** (`dojo_column`, `dojo_lookup`; the
+  engagement dataset: the main dojo). `Dataset.query_rows(dojo)` puts the
+  filter in the query, `columns_for(dojo)` drops the column, and
+  `table(dojo=...)` merges nothing. `reports.config.to_viewer(..., dojo)`
+  leaves out what refers to the dojo column, without a notice.
+- **The dojo area** (`reports/dojo_views.py`): *Insights > Reports* in the
+  sidebar, `/dojos/<id>/manage/reports/` and a report's page, with their own
+  data and CSV endpoints; `dojos.access.VIEW_REPORTS`, which only champions
+  have (a mentor gets a 403, someone not on the team a 404). The figures are
+  cached per dojo and language. Read-only: the viewer opens with its panel
+  closed and there's no save form; regrouping in the browser changes
+  nothing anyone else sees, and other dojos' rows never reach the page.
+- **Standard reports** (`reports/standard_reports.py`): the three above,
+  published and shared, installed by `manage.py load_standard_reports` on
+  every deploy (`scripts/deploy.sh`) and dev start (`.devcontainer/start.sh`).
+  It creates a missing one and updates one still as installed
+  (`standard_hash`, a fingerprint of name, description and settings); an
+  edited one is the admins' and stays. While unedited, the name and
+  description show in the reader's language (`Report.label`). A deleted
+  standard report comes back with the next deploy: unpublishing or
+  unsharing is how to take one away.
+- **Not done:** a notification to the champions when a new report is shared
+  (offered, not decided); dashboards; more datasets.
+
 The organisation's administrators want to build their own reports and
 dashboards: how many children came to a session this year, per province,
 per pathway, how many girls, how many dojos are active, how volunteering
@@ -90,6 +121,13 @@ the views and the storage, not a builder.
   log shows who changed what.
 - **No home-made builder** (11 October 2026): the builder is an existing
   component; we provide the views. See "Options considered".
+- **Sharing with dojos** (11 October 2026): a published report can be shared
+  with **all** dojos (no per-dojo selection); in a dojo only its
+  **champion** sees it; it's **read-only** (no dojo copies); a dojo sees
+  **its own figures, never merged** into "Other" (its team knows its
+  children from the attendance list); and the site ships **standard
+  reports**: children per engagement stage, per age band and gender, and
+  regular versus lapsed children.
 
 ## What it is, and what it isn't
 
@@ -268,8 +306,9 @@ erDiagram
    same period last year. Optionally a monthly mail of a dashboard's
    figures to the board, with charts drawn on the server with matplotlib
    (Perspective needs a browser, a mail doesn't have one).
-4. **Dojo teams:** the same views filtered to one dojo, in the dojo admin
-   area (`dojos.access`, a capability for §28's custom roles).
+4. **Dojo teams** (built for champions, read-only, with standard reports):
+   the same views filtered to one dojo, in the dojo admin area
+   (`dojos.access.VIEW_REPORTS`; a capability for §28's custom roles later).
 
 Each phase brings its tests, the help-centre pages in en/nl/fr
 (`docs/source/organisation/`), translations (the view and column labels;

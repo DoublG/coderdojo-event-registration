@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Ninja
+from dojos.models import Dojo
 from events.models import NinjaEngagement
 
 from .base import DIMENSION, MEASURE, YES_NO, Column, Dataset, choice_values, merge
@@ -16,9 +17,10 @@ from .base import DIMENSION, MEASURE, YES_NO, Column, Dataset, choice_values, me
 ENGAGEMENT = "events.NinjaEngagement"
 
 # Age bands rather than ages: a child's exact age plus a dojo is too close to
-# pointing them out. Worked out from the year of birth.
+# pointing them out. Worked out from the year of birth. "07–09" with a zero:
+# the viewer sorts the bands as text.
 AGE_BANDS: dict[str, Any] = {
-    "7-9": _("7–9"),
+    "7-9": _("07–09"),
     "10-12": _("10–12"),
     "13-15": _("13–15"),
     "16-17": _("16–17"),
@@ -51,6 +53,8 @@ class EngagementDataset(Dataset):
         "its province, age band and gender, with how many sessions they came to and were offered."
     )
     count_column = "ninjas"
+    dojo_column = "main_dojo"
+    dojo_lookup = "main_dojo"
     generalise_order = ["main_dojo", "has_upcoming", "age_band", "gender", "province", "stage"]
     columns = [
         Column(
@@ -72,11 +76,13 @@ class EngagementDataset(Dataset):
         Column("no_shows_90d", _("No-shows (90 days)"), MEASURE, (ENGAGEMENT, "no_shows_90d")),
     ]
 
-    def query_rows(self) -> list[dict[str, Any]]:
+    def query_rows(self, dojo: Dojo | None = None) -> list[dict[str, Any]]:
         this_year = timezone.localdate().year
+        overall = NinjaEngagement.objects.filter(dojo__isnull=True)
+        if dojo is not None:
+            overall = overall.filter(**{self.dojo_lookup: dojo})
         query = (
-            NinjaEngagement.objects.filter(dojo__isnull=True)
-            .values(
+            overall.values(
                 "stage",
                 "main_dojo__name",
                 "main_dojo__province__name",

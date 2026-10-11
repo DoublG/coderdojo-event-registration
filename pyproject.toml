@@ -216,6 +216,7 @@ files = [
     "reports/datasets/__init__.py",
     "reports/datasets/base.py",
     "reports/datasets/engagement.py",
+    "reports/standard_reports.py",
 ]
 follow_imports = "silent"
 # Libraries without type information (two-factor, auditlog, oauth toolkit, ...).

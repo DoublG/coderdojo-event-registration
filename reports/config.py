@@ -9,9 +9,12 @@ the dataset doesn't have any more (a report never breaks on a changed
 dataset; the page says what was dropped)."""
 
 import json
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .datasets.base import COMMON_VALUES, DIMENSION, Dataset
+
+if TYPE_CHECKING:
+    from dojos.models import Dojo
 
 COLUMN = "col:"
 VALUE = "val:"
@@ -46,10 +49,10 @@ def parse(raw: str) -> dict[str, Any]:
 
 
 class _Names:
-    def __init__(self, dataset: Dataset):
+    def __init__(self, dataset: Dataset, dropped: frozenset[str] = frozenset()):
         self.dataset = dataset
         self.key_of = {str(column.label): column.key for column in dataset.columns}
-        self.label_of = {column.key: str(column.label) for column in dataset.columns}
+        self.label_of = {column.key: str(column.label) for column in dataset.columns if column.key not in dropped}
 
     def value_key(self, column_key: str, label: Any) -> Any:
         if not isinstance(label, str):
@@ -108,10 +111,15 @@ def to_stored(config: dict[str, Any], dataset: Dataset) -> dict[str, Any]:
     return stored
 
 
-def to_viewer(stored: dict[str, Any], dataset: Dataset) -> tuple[dict[str, Any], list[str]]:
+def to_viewer(
+    stored: dict[str, Any], dataset: Dataset, dojo: "Dojo | None" = None
+) -> tuple[dict[str, Any], list[str]]:
     """The config for `viewer.restore()` in the current language, and the
     column keys it referred to that the dataset doesn't have any more."""
-    names = _Names(dataset)
+    # On one dojo's figures the dojo column isn't there (Dataset.columns_for):
+    # what refers to it is left out without a notice.
+    dropped = frozenset({dataset.dojo_column}) if dojo is not None else frozenset()
+    names = _Names(dataset, dropped)
     missing: list[str] = []
 
     def known(name: Any) -> bool:
@@ -161,7 +169,7 @@ def to_viewer(stored: dict[str, Any], dataset: Dataset) -> tuple[dict[str, Any],
             if all(known(ref) for ref in refs):
                 expressions[name] = _replace_quoted(expression, {ref: label(ref) for ref in refs})
         config["expressions"] = expressions
-    return config, sorted(set(missing))
+    return config, sorted(set(missing) - dropped)
 
 
 def _replace_quoted(expression: str, mapping: dict[str, str]) -> str:

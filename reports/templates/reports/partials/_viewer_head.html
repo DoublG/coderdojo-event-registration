@@ -1,0 +1,6 @@
+{% load static %}<link rel="stylesheet" href="{% static 'reports/vendor/perspective-5.5.1/viewer/dist/css/pro.css' %}">
+<link rel="stylesheet" href="{% static 'reports/vendor/perspective-5.5.1/viewer/dist/css/pro-dark.css' %}">
+{% if language == "fr" %}<link rel="stylesheet" href="{% static 'reports/vendor/perspective-5.5.1/viewer/dist/css/intl/fr.css' %}">{% elif language == "nl" %}<link rel="stylesheet" href="{% static 'reports/perspective-nl.css' %}">{% endif %}
+<style>
+  .report-viewer { display: block; position: relative; height: max(480px, 70vh); margin: var(--space-4) 0; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+</style>

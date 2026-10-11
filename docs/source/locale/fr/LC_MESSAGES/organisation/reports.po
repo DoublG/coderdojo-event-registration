@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 13:48+0000\n"
+"POT-Creation-Date: 2026-10-11 15:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -32,7 +32,14 @@ msgid ""
 "dashboard. The **admin** role makes, changes and deletes reports; every "
 "admin can change every report, and the audit log shows who changed what "
 "(see :doc:`audit-log`)."
-msgstr "Les rapports sont des tableaux et des graphiques que vous créez vous-même sur les chiffres de l'organisation : combien d'enfants viennent, par province, par dojo, par tranche d'âge, avec quelle régularité. Ouvrez **Rapports** (sous **Analyses**) dans le tableau de bord de l'organisation. Le rôle **administrateur** crée, modifie et supprime les rapports ; chaque administrateur peut modifier chaque rapport, et le journal d'audit montre qui a modifié quoi (voir :doc:`audit-log`)."
+msgstr ""
+"Les rapports sont des tableaux et des graphiques que vous créez vous-même"
+" sur les chiffres de l'organisation : combien d'enfants viennent, par "
+"province, par dojo, par tranche d'âge, avec quelle régularité. Ouvrez "
+"**Rapports** (sous **Analyses**) dans le tableau de bord de "
+"l'organisation. Le rôle **administrateur** crée, modifie et supprime les "
+"rapports ; chaque administrateur peut modifier chaque rapport, et le "
+"journal d'audit montre qui a modifié quoi (voir :doc:`audit-log`)."
 
 #: ../../source/organisation/reports.rst:12
 msgid "Datasets: figures we prepared"
@@ -47,7 +54,16 @@ msgid ""
 "figures (the same stages segments use, see :doc:`segments`), with their "
 "main dojo and its province, age band and gender, whether they're signed "
 "up for a session, and how many sessions they came to and were offered."
-msgstr "Chaque rapport part d'un **jeu de données** : des chiffres préparés pour les rapports, listés sous **Jeux de données** sur la page Rapports. Vous choisissez ce que vous montrez, pas d'où viennent les chiffres. Le premier jeu de données est **Les enfants et leur fréquentation** : chaque enfant avec une phase d'engagement d'après les chiffres de la nuit dernière (les mêmes phases que dans les segments, voir :doc:`segments`), avec son dojo principal et la province de celui-ci, sa tranche d'âge et son genre, s'il est inscrit à une session, et le nombre de sessions auxquelles il a participé et qui lui ont été proposées."
+msgstr ""
+"Chaque rapport part d'un **jeu de données** : des chiffres préparés pour "
+"les rapports, listés sous **Jeux de données** sur la page Rapports. Vous "
+"choisissez ce que vous montrez, pas d'où viennent les chiffres. Le "
+"premier jeu de données est **Les enfants et leur fréquentation** : chaque"
+" enfant avec une phase d'engagement d'après les chiffres de la nuit "
+"dernière (les mêmes phases que dans les segments, voir :doc:`segments`), "
+"avec son dojo principal et la province de celui-ci, sa tranche d'âge et "
+"son genre, s'il est inscrit à une session, et le nombre de sessions "
+"auxquelles il a participé et qui lui ont été proposées."
 
 #: ../../source/organisation/reports.rst:22
 msgid ""
@@ -61,7 +77,18 @@ msgid ""
 " the report says how many; totals are that much lower. With few children,"
 " a lot ends up under **Other**; the more children come, the more detail "
 "the figures keep."
-msgstr "Un jeu de données ne contient jamais de nom, d'adresse ou d'adresse e-mail, ni rien sur la santé ou les extraits de casier judiciaire. Ce ne sont que des nombres. **Les petits groupes sont regroupés** : dans un groupe de moins de cinq enfants (par exemple les filles de 7 à 9 ans d'un dojo), le détail le plus identifiant est remplacé par **Autres (petits groupes)**, et le groupe est ajouté aux autres groupes qui correspondent alors, en commençant par le dojo. Ainsi, aucun rapport ne peut identifier un enfant. Les enfants qui restent ensuite dans un groupe aussi petit sont retirés, et le rapport indique combien ; les totaux sont donc inférieurs d'autant. Avec peu d'enfants, beaucoup se retrouve sous **Autres** ; plus il y a d'enfants, plus les chiffres gardent de détail."
+msgstr ""
+"Un jeu de données ne contient jamais de nom, d'adresse ou d'adresse "
+"e-mail, ni rien sur la santé ou les extraits de casier judiciaire. Ce ne "
+"sont que des nombres. **Les petits groupes sont regroupés** : dans un "
+"groupe de moins de cinq enfants (par exemple les filles de 7 à 9 ans d'un"
+" dojo), le détail le plus identifiant est remplacé par **Autres (petits "
+"groupes)**, et le groupe est ajouté aux autres groupes qui correspondent "
+"alors, en commençant par le dojo. Ainsi, aucun rapport ne peut identifier"
+" un enfant. Les enfants qui restent ensuite dans un groupe aussi petit "
+"sont retirés, et le rapport indique combien ; les totaux sont donc "
+"inférieurs d'autant. Avec peu d'enfants, beaucoup se retrouve sous "
+"**Autres** ; plus il y a d'enfants, plus les chiffres gardent de détail."
 
 #: ../../source/organisation/reports.rst:34
 msgid "Building a report"
@@ -69,7 +96,9 @@ msgstr "Créer un rapport"
 
 #: ../../source/organisation/reports.rst:36
 msgid "On the Reports page, choose **New report** under a dataset."
-msgstr "Sur la page Rapports, choisissez **Nouveau rapport** sous un jeu de données."
+msgstr ""
+"Sur la page Rapports, choisissez **Nouveau rapport** sous un jeu de "
+"données."
 
 #: ../../source/organisation/reports.rst:37
 msgid ""
@@ -78,19 +107,30 @@ msgid ""
 "colours of a chart, for example *Engagement stage*). Under **Columns**, "
 "tick what to count, for example *Children*. Drag a column to **Where** to"
 " show only some of the figures, for example only regular children."
-msgstr "Le panneau des paramètres se trouve à droite. Faites glisser des colonnes vers **Grouper par** (les lignes, par exemple *Province*) et **Diviser par** (les colonnes ou les couleurs d'un graphique, par exemple *Phase d'engagement*). Sous **Colonnes**, cochez ce qu'il faut compter, par exemple *Enfants*. Faites glisser une colonne vers **Filtrer** pour n'afficher qu'une partie des chiffres, par exemple seulement les enfants réguliers."
+msgstr ""
+"Le panneau des paramètres se trouve à droite. Faites glisser des colonnes"
+" vers **Grouper par** (les lignes, par exemple *Province*) et **Diviser "
+"par** (les colonnes ou les couleurs d'un graphique, par exemple *Phase "
+"d'engagement*). Sous **Colonnes**, cochez ce qu'il faut compter, par "
+"exemple *Enfants*. Faites glisser une colonne vers **Filtrer** pour "
+"n'afficher qu'une partie des chiffres, par exemple seulement les enfants "
+"réguliers."
 
 #: ../../source/organisation/reports.rst:42
 msgid ""
 "At the top left, choose how to show it: a table (**Datagrid**) or a "
 "chart, such as **Y Bar** for bars."
-msgstr "En haut à gauche, choisissez comment l'afficher : un tableau (**Grille de données**) ou un graphique, comme **Barres Y** pour des barres."
+msgstr ""
+"En haut à gauche, choisissez comment l'afficher : un tableau (**Grille de"
+" données**) ou un graphique, comme **Barres Y** pour des barres."
 
 #: ../../source/organisation/reports.rst:44
 msgid ""
 "Below, give the report a name, and a description for whoever opens it "
 "next, and choose **Save**."
-msgstr "En dessous, donnez un nom au rapport, et une description pour la prochaine personne qui l'ouvre, puis choisissez **Enregistrer**."
+msgstr ""
+"En dessous, donnez un nom au rapport, et une description pour la "
+"prochaine personne qui l'ouvre, puis choisissez **Enregistrer**."
 
 #: ../../source/organisation/reports.rst:47
 msgid ""
@@ -99,22 +139,90 @@ msgid ""
 "choose **Save**, or **Save as a new report** to keep the original. The "
 "settings button at the top right of the report opens the panel again. "
 "**Delete report** removes the report, never the figures."
-msgstr "Un rapport enregistré s'ouvre tel qu'il a été enregistré, avec les chiffres actuels (mis à jour toutes les heures ; la page indique quand). Modifiez-le et choisissez **Enregistrer**, ou **Enregistrer comme nouveau rapport** pour garder l'original. Le bouton des paramètres en haut à droite du rapport rouvre le panneau. **Supprimer le rapport** supprime le rapport, jamais les chiffres."
+msgstr ""
+"Un rapport enregistré s'ouvre tel qu'il a été enregistré, avec les "
+"chiffres actuels (mis à jour toutes les heures ; la page indique quand). "
+"Modifiez-le et choisissez **Enregistrer**, ou **Enregistrer comme nouveau"
+" rapport** pour garder l'original. Le bouton des paramètres en haut à "
+"droite du rapport rouvre le panneau. **Supprimer le rapport** supprime le"
+" rapport, jamais les chiffres."
 
 #: ../../source/organisation/reports.rst:53
 msgid ""
 "A report works in every language: a report saved in Dutch opens in French"
 " with French column names, and the other way round."
-msgstr "Un rapport fonctionne dans toutes les langues : un rapport enregistré en néerlandais s'ouvre en français avec des noms de colonnes en français, et inversement."
+msgstr ""
+"Un rapport fonctionne dans toutes les langues : un rapport enregistré en "
+"néerlandais s'ouvre en français avec des noms de colonnes en français, et"
+" inversement."
 
 #: ../../source/organisation/reports.rst:57
+msgid "Sharing reports with the dojos"
+msgstr "Partager des rapports avec les dojos"
+
+#: ../../source/organisation/reports.rst:59
+msgid "Below a report, **Status** decides who sees it besides the admins:"
+msgstr "Sous un rapport, **Statut** détermine qui le voit en plus des administrateurs :"
+
+#: ../../source/organisation/reports.rst:61
+msgid ""
+"**Draft**: only the organisation's admins. Work on a report as a draft "
+"until it's ready."
+msgstr "**Brouillon** : uniquement les administrateurs de l'organisation. Travaillez sur un rapport en brouillon jusqu'à ce qu'il soit prêt."
+
+#: ../../source/organisation/reports.rst:63
+msgid ""
+"**Published**: ready. With **Share with the dojos** ticked, every dojo's "
+"**champion** also sees it, in their dojo's admin area (see :doc:`../dojo-"
+"team/reports`). The **Shown to** column on the Reports page says who sees"
+" each report."
+msgstr "**Publié** : prêt. Avec **Partager avec les dojos** coché, le **champion** de chaque dojo le voit aussi, dans l'espace de gestion de son dojo (voir :doc:`../dojo-team/reports`). La colonne **Visible par** de la page Rapports indique qui voit chaque rapport."
+
+#: ../../source/organisation/reports.rst:68
+msgid ""
+"A shared report is read-only for the champions and shows only their own "
+"dojo's figures: each dojo gets its own figures from the site, so a "
+"champion can never see another dojo's. On a dojo's own figures small "
+"groups aren't merged (the dojo's team knows its children from the "
+"attendance list), and the **Main dojo** column and whatever refers to it "
+"in the report are left out. **Order** decides where a report comes on the"
+" dojos' Reports page, lowest first."
+msgstr "Un rapport partagé est en lecture seule pour les champions et ne montre que les chiffres de leur propre dojo : chaque dojo reçoit ses propres chiffres du site, un champion ne peut donc jamais voir ceux d'un autre dojo. Sur les chiffres propres à un dojo, les petits groupes ne sont pas regroupés (l'équipe connaît ses enfants grâce à la liste de présence), et la colonne **Dojo principal** et tout ce qui y fait référence dans le rapport sont retirés. **Ordre** détermine la place d'un rapport sur la page Rapports des dojos, le plus bas en premier."
+
+#: ../../source/organisation/reports.rst:76
+msgid ""
+"Editing a shared report changes it for every dojo at once. To try "
+"something out, use **Save as a new report** and keep the copy as a draft."
+msgstr "Modifier un rapport partagé le modifie pour tous les dojos à la fois. Pour essayer quelque chose, utilisez **Enregistrer comme nouveau rapport** et gardez la copie en brouillon."
+
+#: ../../source/organisation/reports.rst:80
+msgid "Standard reports"
+msgstr "Rapports standard"
+
+#: ../../source/organisation/reports.rst:82
+msgid ""
+"The site comes with a few **standard** reports, published and shared with"
+" every dojo: children per engagement stage, children per age band and "
+"gender, and regular and lapsed children. They show in each reader's "
+"language. You can change them like any report; once you do, the report is"
+" yours and stays as you left it, and it shows the name as you wrote it. A"
+" standard report you haven't touched is brought up to date when the site "
+"gets a new version of it. If you delete one, it comes back with the next "
+"update of the site: to stop sharing it, set it back to **Draft** or "
+"untick **Share with the dojos** instead."
+msgstr "Le site propose quelques rapports **standard**, publiés et partagés avec chaque dojo : les enfants par phase d'engagement, les enfants par tranche d'âge et genre, et les enfants réguliers et décrochés. Ils s'affichent dans la langue de chaque lecteur. Vous pouvez les modifier comme n'importe quel rapport ; dès que vous le faites, le rapport est à vous et reste tel que vous l'avez laissé, avec le nom que vous avez écrit. Un rapport standard que vous n'avez pas touché est mis à jour quand le site en reçoit une nouvelle version. Si vous en supprimez un, il revient à la prochaine mise à jour du site : pour ne plus le partager, remettez-le en **Brouillon** ou décochez **Partager avec les dojos**."
+
+#: ../../source/organisation/reports.rst:93
 msgid "The figures as a file"
 msgstr "Les chiffres en fichier"
 
-#: ../../source/organisation/reports.rst:59
+#: ../../source/organisation/reports.rst:95
 msgid ""
 "**Download the figures (CSV)** gives a dataset's figures as a spreadsheet"
 " file, with the same merged small groups. It also works without "
 "JavaScript, which building a report needs."
-msgstr "**Télécharger les chiffres (CSV)** donne les chiffres d'un jeu de données sous forme de fichier tableur, avec les mêmes petits groupes regroupés. Cela fonctionne aussi sans JavaScript, nécessaire pour créer un rapport."
+msgstr ""
+"**Télécharger les chiffres (CSV)** donne les chiffres d'un jeu de données"
+" sous forme de fichier tableur, avec les mêmes petits groupes regroupés. "
+"Cela fonctionne aussi sans JavaScript, nécessaire pour créer un rapport."
 
