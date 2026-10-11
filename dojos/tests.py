@@ -224,6 +224,67 @@ class DojoDetailViewTests(TestCase):
         response = self.client.get(reverse("dojo_detail", kwargs={"dojo_id": 999999}))
         self.assertEqual(response.status_code, 404)
 
+    def test_shows_every_session_on_the_soonest_date_with_one(self):
+        dojo = make_dojo("Ghent")
+        day = timezone.now() + timedelta(days=2)
+        morning = Event.objects.create(
+            name="Morning", dojo=dojo, status=Event.OPEN, places=10, start_time=day, end_time=day
+        )
+        afternoon = Event.objects.create(
+            name="Afternoon",
+            dojo=dojo,
+            status=Event.OPEN,
+            places=10,
+            start_time=day + timedelta(hours=4),
+            end_time=day + timedelta(hours=6),
+        )
+        later = Event.objects.create(
+            name="Next week",
+            dojo=dojo,
+            status=Event.OPEN,
+            places=10,
+            start_time=day + timedelta(days=7),
+            end_time=day + timedelta(days=7),
+        )
+
+        response = self.client.get(reverse("dojo_detail", kwargs={"dojo_id": dojo.id}))
+
+        self.assertEqual(list(response.context["next_events"]), [morning, afternoon])
+        self.assertNotIn(later, response.context["next_events"])
+        self.assertContains(response, "Morning")
+        self.assertContains(response, "Afternoon")
+        self.assertNotContains(response, "Next week")
+
+    def test_no_upcoming_sessions_is_an_empty_list(self):
+        dojo = make_dojo("Ghent")
+        response = self.client.get(reverse("dojo_detail", kwargs={"dojo_id": dojo.id}))
+        self.assertEqual(response.context["next_events"], [])
+
+    def test_sign_up_shortcut_only_shown_for_a_single_next_session(self):
+        dojo = make_dojo("Ghent")
+        day = timezone.now() + timedelta(days=2)
+        event = Event.objects.create(
+            name="Only session", dojo=dojo, status=Event.OPEN, places=10, start_time=day, end_time=day
+        )
+        url = reverse("dojo_detail", kwargs={"dojo_id": dojo.id})
+        signup_url = reverse("event_signup", kwargs={"event_id": event.id})
+        signup_link = f'<a class="cd-btn cd-btn--primary label" href="{signup_url}">Sign up now</a>'
+        # One session: the hero shortcut plus the card's own button, both
+        # pointing at it.
+        self.assertContains(self.client.get(url), signup_link, count=2, html=True)
+
+        Event.objects.create(
+            name="Also that day",
+            dojo=dojo,
+            status=Event.OPEN,
+            places=10,
+            start_time=day + timedelta(hours=2),
+            end_time=day + timedelta(hours=3),
+        )
+        # Two sessions that day: no single shortcut to pick one for, so only
+        # the card's own per-session "Sign up now" button remains.
+        self.assertContains(self.client.get(url), signup_link, count=1, html=True)
+
 
 class DojoDetailCacheTests(TestCase):
     """dojos.public_cache: a dojo's page is cached, and shows a change to
@@ -273,11 +334,11 @@ class DojoDetailCacheTests(TestCase):
         event = Event.objects.create(
             name="Session", dojo=self.dojo, status=Event.OPEN, places=2, start_time=start, end_time=start
         )
-        self.assertEqual(self.client.get(self.url).context["next_event"].places_left, 2)
+        self.assertEqual(self.client.get(self.url).context["next_events"][0].places_left, 2)
         Registration.objects.create(
             event=event, ninja=Ninja.objects.create(name="Kid"), position=1, waiting_list=False
         )
-        self.assertEqual(self.client.get(self.url).context["next_event"].places_left, 1)
+        self.assertEqual(self.client.get(self.url).context["next_events"][0].places_left, 1)
 
     def test_a_dojo_going_dormant_is_gone_at_once(self):
         self.client.get(self.url)

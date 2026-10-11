@@ -42,7 +42,9 @@
   .dojo-page-root h2.section-title { color: var(--ink); margin: 0 0 var(--space-4); }
   .dojo-page-root .row { display: flex; gap: var(--space-5); flex-wrap: wrap; }
   .dojo-page-root .row > * { flex: 1 1 220px; }
+  .dojo-page-root .next-session-card { padding: 0; }
   .dojo-page-root .next-session-full { display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); padding: var(--space-5) var(--space-6); flex-wrap: wrap; }
+  .dojo-page-root .next-session-full + .next-session-full { border-top: 1px solid var(--border); }
   .dojo-page-root .next-session-full__info { display: flex; gap: var(--space-3); align-items: center; }
   .dojo-page-root .next-session-full__icon { flex: 0 0 auto; width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--surface-sunken); display: flex; align-items: center; justify-content: center; color: var(--dojo-accent); }
   .dojo-page-root .next-session-full__icon svg { width: 20px; height: 20px; }
@@ -106,33 +108,40 @@
          · {% blocktranslate with languages=dojo.content_languages|language_names %}Sessions in {{ languages }}{% endblocktranslate %}
       </p>
       <div style="display:flex; gap: var(--space-4); flex-wrap: wrap;">
-        {% if next_event %}
-          <a class="cd-btn cd-btn--primary label" href="{% url 'event_signup' event_id=next_event.id %}">{% translate "Sign up now" %}</a>
+        {% if next_events|length == 1 %}
+          <a class="cd-btn cd-btn--primary label" href="{% url 'event_signup' event_id=next_events.0.id %}">{% translate "Sign up now" %}</a>
         {% endif %}
         <a class="cd-btn cd-btn--ghost label" href="{% url 'event_list' %}{% querystring dojo=dojo.id %}">{% translate "View this dojo's sessions" %}</a>
       </div>
     </div>
 
-    {% if next_event %}
-      <div class="cd-card next-session-full">
-        <div class="next-session-full__info">
-          <div class="next-session-full__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    {% if next_events %}
+      <div class="cd-card next-session-card">
+        {% for event in next_events %}
+          <div class="next-session-full">
+            <div class="next-session-full__info">
+              <div class="next-session-full__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              </div>
+              <div>
+                <p class="label next-session-full__label">
+                  {% if next_events|length > 1 %}{% translate "Next sessions" %}{% else %}{% translate "Next session" %}{% endif %}
+                  · {% if event.places_left > 0 %}{% translate "Open" %}{% else %}{% translate "Waitlist" %}{% endif %}
+                </p>
+                <h2 class="heading-sm next-session-full__title">{{ event|localized:"name"|in_lang }}</h2>
+                {% include "events/partials/_audience_badge.html" with event=event %}
+                <p class="body-sm next-session-full__meta">
+                  {{ event.start_time|date:"D j M" }} · {{ event.start_time|time:"H:i" }}
+                  {% if event.places_left > 0 %} · {% blocktranslate count counter=event.places_left %}{{ counter }} spot left{% plural %}{{ counter }} spots left{% endblocktranslate %}{% endif %}
+                </p>
+              </div>
+            </div>
+            <div class="next-session-full__actions">
+              <a class="body-sm" href="{% url 'event_detail' event_id=event.id %}">{% translate "View session details →" %}</a>
+              <a class="cd-btn cd-btn--primary label" href="{% url 'event_signup' event_id=event.id %}">{% translate "Sign up now" %}</a>
+            </div>
           </div>
-          <div>
-            <p class="label next-session-full__label">{% translate "Next session" %} · {% if next_event.places_left > 0 %}{% translate "Open" %}{% else %}{% translate "Waitlist" %}{% endif %}</p>
-            <h2 class="heading-sm next-session-full__title">{{ next_event|localized:"name"|in_lang }}</h2>
-            {% include "events/partials/_audience_badge.html" with event=next_event %}
-            <p class="body-sm next-session-full__meta">
-              {{ next_event.start_time|date:"D j M" }} · {{ next_event.start_time|time:"H:i" }}
-              {% if next_event.places_left > 0 %} · {% blocktranslate count counter=next_event.places_left %}{{ counter }} spot left{% plural %}{{ counter }} spots left{% endblocktranslate %}{% endif %}
-            </p>
-          </div>
-        </div>
-        <div class="next-session-full__actions">
-          <a class="body-sm" href="{% url 'event_detail' event_id=next_event.id %}">{% translate "View session details →" %}</a>
-          <a class="cd-btn cd-btn--primary label" href="{% url 'event_signup' event_id=next_event.id %}">{% translate "Sign up now" %}</a>
-        </div>
+        {% endfor %}
       </div>
     {% endif %}
 

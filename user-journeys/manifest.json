@@ -1,5 +1,5 @@
 {
- "generated_from": "7e80418",
+ "generated_from": "60adeb4",
  "generated_on": "2026-10-11",
  "personas": {
   "parent": {
@@ -23,7 +23,7 @@
     "accounts/views/children.py:ninja_detail": "1c172951b419df99",
     "accounts/views/family.py:account_home": "9c4245e27f2df4b5",
     "accounts/views/signup.py:register_guardian": "38ca31944faca43f",
-    "dojos/views/public.py:dojo_detail": "b85a46c12b05c3ff",
+    "dojos/views/public.py:dojo_detail": "1acdb49cf858b2ef",
     "dojos/views/public.py:dojo_list": "25ead37f977b5163",
     "events/views.py:event_detail": "508021bd288e2ac9",
     "events/views.py:event_list": "530c7d2ed2ec18ab",
@@ -53,7 +53,7 @@
     "content/templates/content/partials/_promotion_hero_card.html": "977f7a87f7507684",
     "core/templates/core/menu.html": "fc0ae6dd632f1501",
     "core/templates/core/partials/_active_filters.html": "1cbfed7bdc3914e6",
-    "dojos/templates/dojos/dojo_detail.html": "b9a992425ed6f148",
+    "dojos/templates/dojos/dojo_detail.html": "21d756cb28357f7b",
     "dojos/templates/dojos/dojo_list.html": "5e937678f7b64dcd",
     "dojos/templates/dojos/partials/_dojo_finder_widget.html": "c9c61eb468cdce6b",
     "dojos/templates/dojos/partials/_dojo_finder_widget_results.html": "79b5b32749140431",
@@ -137,7 +137,7 @@
     "dojos/views/attendance.py:dojo_event_attendance": "fa9728236748547a",
     "dojos/views/event_pages.py:dojo_event_detail": "fff80c0aa8fa8e57",
     "dojos/views/event_pages.py:dojo_event_list": "b08426c380c8f4c8",
-    "dojos/views/public.py:dojo_detail": "b85a46c12b05c3ff",
+    "dojos/views/public.py:dojo_detail": "1acdb49cf858b2ef",
     "dojos/views/team_pages.py:dojo_team_manage": "6a36f45f19ea2456"
    },
    "templates": {
@@ -149,7 +149,7 @@
     "applications/templates/applications/upload_background_check.html": "a83cfbc9ab8451c0",
     "core/templates/core/menu.html": "fc0ae6dd632f1501",
     "dojos/templates/dojos/dojo_dashboard.html": "3db7228d1d6b8360",
-    "dojos/templates/dojos/dojo_detail.html": "b9a992425ed6f148",
+    "dojos/templates/dojos/dojo_detail.html": "21d756cb28357f7b",
     "dojos/templates/dojos/dojo_event_attendance.html": "ec9f89abf8150a29",
     "dojos/templates/dojos/dojo_event_detail.html": "f87e289ed143ce32",
     "dojos/templates/dojos/dojo_event_list.html": "056dc45c2dc15aef",

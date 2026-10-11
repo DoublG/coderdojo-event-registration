@@ -93,19 +93,26 @@ def dojo_detail(request, dojo_id):
     # are worked out per request.
     page = public_cache.detail(dojo_id)
     dojo = page["dojo"]
-    next_event = (
-        dojo.event_set.visible()
-        .filter(start_time__gte=timezone.now())
-        .with_confirmed_count()
-        .order_by("start_time")
-        .first()
+    # Every upcoming session on the soonest date that has one, not just the
+    # single soonest session: a dojo running two sessions that day (a later
+    # second track, or two running in parallel — events.management.commands
+    # .seed_events) shows both, instead of hiding one behind "View this
+    # dojo's sessions". One query (DojoDetailCacheTests counts it): fetch
+    # every upcoming session and narrow to the first one's date in Python
+    # rather than finding that date with a separate aggregate query.
+    upcoming = list(
+        dojo.event_set.visible().filter(start_time__gte=timezone.now()).with_confirmed_count().order_by("start_time")
     )
+    next_events = []
+    if upcoming:
+        next_date = upcoming[0].start_time.date()
+        next_events = [event for event in upcoming if event.start_time.date() == next_date]
     return render(
         request,
         "dojos/dojo_detail.html",
         {
             **page,
-            "next_event": next_event,
+            "next_events": next_events,
             "join_state": _join_state(request.user, dojo),
         },
     )
