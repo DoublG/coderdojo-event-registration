@@ -510,9 +510,19 @@ with their rules in `events/awards.py`:
   from the attendance list by an **active champion or mentor** with a valid
   check (`AWARD_BADGES`, `award_badge`), to a ninja who has been to one of
   that dojo's sessions, once; the row records the account, the membership
-  and an optional note. Milestones are never awarded by hand: they're
-  recomputed (`sync_milestones`) whenever the dojo team marks attendance;
-  an earned badge stays earned if a mark is later undone.
+  and an optional note. A one-off badge can optionally be **restricted to
+  specific dojos** (`Badge.dojos`, blank = any dojo's team may award it) —
+  the organisation's own one-offs (CoderDojo for Girls, Coolest Projects)
+  are restricted to the organisation dojo, so a regular dojo's team can't
+  offer them from their own attendance list. The organisation can still
+  award **any** one-off badge directly to a ninja, whichever dojos (if any)
+  it's restricted to, with no dojo or attendance tie at all
+  (`award_badge_as_organisation`, the *Assign awards* page,
+  `/manage/awards/assign/`) — for the organisation's own events, whose
+  sign-ups and attendance may live entirely on another system. Milestones
+  are never awarded by hand: they're recomputed (`sync_milestones`)
+  whenever the dojo team marks attendance; an earned badge stays earned if
+  a mark is later undone.
 - A **belt** is a ninja's **proficiency level**: one overall track ordered
   by `Belt.level`, not linked to pathways. `NinjaBelt` is an append-only
   history (current belt = the highest level, `Ninja.current_belt`).
@@ -539,6 +549,7 @@ erDiagram
     DOJO_MEMBERSHIP |o--o{ NINJA_BELT : "awarded_as_membership"
     USER |o--o{ NINJA_BADGE : "awarded_by (one-off)"
     DOJO_MEMBERSHIP |o--o{ NINJA_BADGE : "awarded_as_membership (one-off)"
+    BADGE }o--o{ DOJO : "dojos (M2M, optional — restricts who can award it)"
 
     BADGE {
         bigint id PK
@@ -860,6 +871,18 @@ What was built, and the details settled while building it:
   0). The event page links out ("Register on <host>"), `event_signup`
   redirects to the event page, and the upcoming-sessions carousel lists it
   whatever its places.
+- Externally-registered events have no local `Registration` to award a
+  badge from, so the organisation's own one-off badges (section 5) are
+  awarded directly to a ninja's account instead, from the *Assign awards*
+  page (`award_badge_as_organisation`) — not tied to a dojo or attendance.
+  **Not built yet, deliberately out of scope here:** mapping an account on
+  an organisation event's own registration system (e.g. Coolest Projects')
+  to the right `accounts.Ninja` here, including a "shadow" `Ninja` created
+  purely to hold awards/statistics for someone with no account on this
+  site at all. *Assign awards* only takes it as far as picking an existing
+  `Ninja` by name on this page; a future cross-system account mapping would
+  plug into that same search/pick step (`events.manage.badge_assign`)
+  rather than touch `award_badge_as_organisation` itself.
 - `content.Promotion` as below. `Promotion.objects.showing(placement)` is
   the one rule for what's live: started, not ended (`ends_at`, or the
   event's start when empty), the event not finished, and the event in

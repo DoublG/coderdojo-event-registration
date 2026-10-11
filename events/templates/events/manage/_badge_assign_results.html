@@ -1,0 +1,33 @@
+{% load i18n %}{% comment %}
+The Assign awards search results (events.manage.badge_assign): swapped in
+place as a typeahead over htmx, from the same view that renders the whole
+page without JavaScript. Expects `query` and `ninjas` in context.
+{% endcomment %}
+{% if query %}
+  <div class="cd-table-wrap" style="margin-top: var(--space-5);">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label" scope="col">{% translate "Name" %}</th>
+          <th class="label" scope="col">{% translate "Home dojo" %}</th>
+          <th class="label" scope="col">{% translate "Guardians" %}</th>
+          <th class="label" scope="col"><span class="visually-hidden">{% translate "Actions" %}</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ninja in ninjas %}
+          <tr>
+            <td class="body-sm">{{ ninja.full_name }}</td>
+            <td class="body-sm">{{ ninja.home_dojo.name|default:"—" }}</td>
+            <td class="body-sm">
+              {% for link in ninja.guardianships.all %}{{ link.guardian.get_full_name|default:link.guardian.username }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
+            </td>
+            <td class="body-sm"><a class="cd-btn cd-btn--ghost label" href="{% url 'manage_badge_assign_ninja' ninja_id=ninja.id %}">{% translate "Award…" %}</a></td>
+          </tr>
+        {% empty %}
+          <tr><td class="body-sm" colspan="4">{% translate "No ninja matches." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}

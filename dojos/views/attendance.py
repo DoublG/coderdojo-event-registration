@@ -4,6 +4,7 @@ from the list (events.awards)."""
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -55,7 +56,7 @@ def _attendance_context(event):
         # something left to award: belts above their current one, one-off
         # badges they haven't earned yet.
         "belt_forms": _award_forms(AwardBeltForm, registrations, _awardable_belts(registrations)),
-        "badge_forms": _award_forms(AwardBadgeForm, registrations, _awardable_badges(registrations)),
+        "badge_forms": _award_forms(AwardBadgeForm, registrations, _awardable_badges(registrations, event.dojo_id)),
         # How each ninja comes to this dojo (last night's events.engagement snapshot).
         "engagement_by_ninja": {
             row.ninja_id: row
@@ -83,8 +84,15 @@ def _award_forms(form_class, registrations, offers):
     }
 
 
-def _awardable_badges(registrations):
-    one_offs = list(Badge.objects.filter(kind=Badge.ONE_OFF).order_by("name"))
+def _awardable_badges(registrations, dojo_id):
+    """The one-off badges not yet earned, offered to this dojo: any badge
+    with no Badge.dojos restriction, plus any restricted to this dojo."""
+    one_offs = list(
+        Badge.objects.filter(kind=Badge.ONE_OFF)
+        .filter(Q(dojos__isnull=True) | Q(dojos__id=dojo_id))
+        .distinct()
+        .order_by("name")
+    )
     result = {}
     for registration in registrations:
         earned = {nb.badge_id for nb in registration.ninja.badges.all() if nb.earned_date}

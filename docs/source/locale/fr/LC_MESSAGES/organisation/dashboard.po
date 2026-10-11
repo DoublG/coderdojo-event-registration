@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 19:12+0000\n"
+"POT-Creation-Date: 2026-10-11 11:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -20,11 +20,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:2
+#: ../../source/organisation/dashboard.rst:2
 msgid "The organisation dashboard"
 msgstr "Le tableau de bord de l'organisation"
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:4
+#: ../../source/organisation/dashboard.rst:4
 msgid ""
 "The organisation dashboard is where CoderDojo Belgium's own team runs "
 "mail to families and volunteers, chooses which events the public site "
@@ -45,7 +45,7 @@ msgstr ""
 "casier** seulement ceux-ci (voir :doc:`volunteers`), et le **conseil "
 "d'administration** seulement la page pour demander l'admin Django."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:12
+#: ../../source/organisation/dashboard.rst:12
 msgid ""
 "If you're also on a dojo's team, the dashboard and your dojos are in the "
 "same place: click **CoderDojo Belgium** at the top of the sidebar to "
@@ -66,11 +66,11 @@ msgstr ""
 "vérification d'antécédents valide (voir :doc:`promotions`). Sans elle, "
 "vous ne voyez que les sections de l'organisation."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:21
+#: ../../source/organisation/dashboard.rst:21
 msgid "The sidebar has these sections:"
 msgstr "La barre latérale comporte ces sections :"
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:23
+#: ../../source/organisation/dashboard.rst:23
 msgid ""
 "**Campaigns**: one mailing to a group of people, now or at a set time "
 "(see :doc:`campaigns`)."
@@ -78,7 +78,7 @@ msgstr ""
 "**Campagnes** : un envoi à un groupe de personnes, maintenant ou à un "
 "moment choisi (voir :doc:`campaigns`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:25
+#: ../../source/organisation/dashboard.rst:25
 msgid ""
 "**Journeys**: mailings that run by themselves every day, for example to "
 "families whose child has stopped coming (see :doc:`journeys`)."
@@ -86,7 +86,7 @@ msgstr ""
 "**Parcours** : des envois qui tournent seuls chaque jour, par exemple "
 "vers les familles dont l'enfant ne vient plus (voir :doc:`journeys`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:27
+#: ../../source/organisation/dashboard.rst:27
 msgid ""
 "**Segments**: who a campaign or journey is for, described with rules "
 "instead of a list (see :doc:`segments`)."
@@ -94,7 +94,7 @@ msgstr ""
 "**Segments** : à qui s'adresse une campagne ou un parcours, décrit par "
 "des règles plutôt que par une liste (voir :doc:`segments`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:29
+#: ../../source/organisation/dashboard.rst:29
 msgid ""
 "**Mail templates**: the text of every mail the site sends, in each "
 "language (see :doc:`mail-templates`)."
@@ -102,19 +102,24 @@ msgstr ""
 "**Modèles d'e-mail** : le texte de chaque e-mail que le site envoie, dans"
 " chaque langue (voir :doc:`mail-templates`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:31
+#: ../../source/organisation/dashboard.rst:31
 msgid ""
 "**Mail queue**: the mail waiting to go out, failed mail (to send again), "
 "bounces and blocked addresses (to unblock) (see :doc:`mail-queue`)."
-msgstr "**File d'attente des e-mails** : les e-mails en attente d'envoi, les e-mails en échec (à renvoyer), les retours et les adresses bloquées (à débloquer) (voir :doc:`mail-queue`)."
+msgstr ""
+"**File d'attente des e-mails** : les e-mails en attente d'envoi, les "
+"e-mails en échec (à renvoyer), les retours et les adresses bloquées (à "
+"débloquer) (voir :doc:`mail-queue`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:33
+#: ../../source/organisation/dashboard.rst:33
 msgid ""
 "**Mail log**: every mail the site sent, to look one up (see :doc:`mail-"
 "queue`)."
-msgstr "**Journal des e-mails** : chaque e-mail envoyé par le site, pour en retrouver un (voir :doc:`mail-queue`)."
+msgstr ""
+"**Journal des e-mails** : chaque e-mail envoyé par le site, pour en "
+"retrouver un (voir :doc:`mail-queue`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:35
+#: ../../source/organisation/dashboard.rst:35
 msgid ""
 "**Promotions**: which events are featured where on the public site (see "
 ":doc:`promotions`)."
@@ -122,7 +127,7 @@ msgstr ""
 "**Promotions** : quels événements sont mis en avant, et où, sur le site "
 "public (voir :doc:`promotions`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:37
+#: ../../source/organisation/dashboard.rst:37
 msgid ""
 "**Sponsors**: the sponsors and partners on the homepage (see "
 ":doc:`sponsors`)."
@@ -130,13 +135,20 @@ msgstr ""
 "**Sponsors** : les sponsors et partenaires de la page d'accueil (voir "
 ":doc:`sponsors`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:39
+#: ../../source/organisation/dashboard.rst:39
 msgid "**Awards**: the badges ninjas can earn at their dojo (see :doc:`awards`)."
 msgstr ""
 "**Distinctions** : les badges que les ninjas peuvent obtenir dans leur "
 "dojo (voir :doc:`awards`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:41
+#: ../../source/organisation/dashboard.rst:41
+msgid ""
+"**Assign awards**: give a one-off award directly to a ninja's account, "
+"for events that don't run through a dojo's own attendance list (see "
+":doc:`awards`)."
+msgstr "**Attribuer des distinctions** : donner une distinction ponctuelle directement au compte d'un ninja, pour les événements qui ne passent pas par la liste de présence d'un dojo (voir :doc:`awards`)."
+
+#: ../../source/organisation/dashboard.rst:44
 msgid ""
 "**Background checks** and **Applications** (under **Volunteers**): the "
 "criminal-record extracts and applications of new champions and mentors, "
@@ -148,7 +160,7 @@ msgstr ""
 "et mentors, uniquement pour les personnes qui ont le rôle **Évaluateur "
 "des extraits de casier** (voir :doc:`volunteers`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:45
+#: ../../source/organisation/dashboard.rst:48
 msgid ""
 "**Privacy**: a copy of someone's data, or deleting their account, when "
 "they ask by mail or post (see :doc:`privacy`)."
@@ -157,7 +169,7 @@ msgstr ""
 " son compte, quand la personne le demande par e-mail ou par courrier "
 "(voir :doc:`privacy`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:47
+#: ../../source/organisation/dashboard.rst:50
 msgid ""
 "**Sign-in security**: which roles must use two-step login (see :doc"
 ":`sign-in-security`)."
@@ -165,7 +177,7 @@ msgstr ""
 "**Sécurité de connexion** : quels rôles doivent utiliser la connexion en "
 "deux étapes (voir :doc:`sign-in-security`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:49
+#: ../../source/organisation/dashboard.rst:52
 msgid ""
 "**People** (under **Organisation**): who has which role, giving and "
 "taking away roles, and inviting someone new (see :doc:`people`)."
@@ -173,7 +185,7 @@ msgstr ""
 "**Personnes** (sous **Organisation**) : qui a quel rôle, donner et "
 "retirer des rôles, et inviter quelqu'un de nouveau (voir :doc:`people`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:51
+#: ../../source/organisation/dashboard.rst:54
 msgid ""
 "**Audit log** (under **Organisation**): who changed what on the site, "
 "read-only, with sensitive values hidden (see :doc:`audit-log`)."
@@ -182,7 +194,7 @@ msgstr ""
 "site, en lecture seule, avec les valeurs sensibles masquées (voir :doc"
 ":`audit-log`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:53
+#: ../../source/organisation/dashboard.rst:56
 msgid ""
 "**Django admin** (under **Organisation**): asking for the site's "
 "technical admin, for 12 hours, for every role (see :doc:`django-admin`)."
@@ -191,7 +203,7 @@ msgstr ""
 "technique du site, pour 12 heures, pour chaque rôle (voir :doc:`django-"
 "admin`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:56
+#: ../../source/organisation/dashboard.rst:59
 msgid ""
 "People only get mail they want. Every account chooses which kinds of mail"
 " it gets on its **Mail preferences** page; the newsletter and campaigns "
@@ -205,7 +217,7 @@ msgstr ""
 "campagnes. Les adresses dont les e-mails sont revenus sont ignorées "
 "automatiquement."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:61
+#: ../../source/organisation/dashboard.rst:64
 msgid ""
 "Fixing things by hand when something goes wrong (sending a failed mail "
 "again, unblocking an address, the full mail log) stays in the site's "
@@ -217,7 +229,7 @@ msgstr ""
 "reste dans l'admin technique du site, l'admin Django. Vous en demandez "
 "l'accès quand vous en avez besoin (voir :doc:`django-admin`)."
 
-#: ../../workspace/docs/source/organisation/dashboard.rst:66
+#: ../../source/organisation/dashboard.rst:69
 msgid ""
 "The bell at the top of the dashboard shows notifications for the "
 "organisation, for example when someone opens the Django admin or accepts "

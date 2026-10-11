@@ -1,0 +1,29 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{{ ninja.full_name }} · {% translate "Assign awards" %}{% endblock %}
+{% block manage_heading %}{{ ninja.full_name }}{% endblock %}
+{% block manage_topbar_extra %}<a class="cd-btn cd-btn--ghost label" href="{% url 'manage_badge_assign' %}">{% translate "Back to search" %}</a>{% endblock %}
+
+{% block manage_content %}
+  {% comment %}Award a one-off badge directly to this ninja, as the organisation (events.awards.award_badge_as_organisation) — no dojo or attendance tie, so it never checks the ninja attended anywhere.{% endcomment %}
+  <h2 class="heading-md">{% translate "Already earned" %}</h2>
+  {% if earned %}
+    <ul style="padding-left: var(--space-5); margin: 0 0 var(--space-5);">
+      {% for award in earned %}
+        <li class="body-sm">{{ award.badge.name }} — {{ award.earned_date|date:"j M Y" }}{% if award.note %} <span style="color: var(--ink-muted);">({{ award.note }})</span>{% endif %}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="body-sm" style="color: var(--ink-muted);">{% translate "No one-off awards yet." %}</p>
+  {% endif %}
+
+  <h2 class="heading-md">{% translate "Award a new one" %}</h2>
+  <form method="post" class="cd-card cd-form" style="padding: var(--space-5); max-width: 480px;" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="cd-form__notes">{% for error in form.non_field_errors %}<p class="cd-form__note cd-form__note--error caption">{{ error }}</p>{% endfor %}</div>{% endif %}
+    {{ form }}
+    <div class="cd-form__actions">
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Award" %}</button>
+    </div>
+  </form>
+{% endblock %}

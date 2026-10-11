@@ -2400,6 +2400,18 @@ class AwardBadgeViewTests(TestCase):
         self.assertNotContains(response, f'<option value="{self.maker.id}"')
         self.assertNotContains(response, f'<option value="{self.band.id}"')
 
+    def test_a_badge_restricted_to_other_dojos_is_not_offered(self):
+        other_dojo = make_dojo("Antwerp", champion=make_champion(username="elsewhere"))
+        self.explorer.dojos.set([other_dojo])
+        self.client.force_login(self.owner)
+        response = self.client.get(self.page)
+        self.assertContains(response, f'<option value="{self.maker.id}"')
+        self.assertNotContains(response, f'<option value="{self.explorer.id}"')
+        # Still not this dojo's to award, even if someone tries the POST directly.
+        response = self.client.post(self.url, {"badge": self.explorer.id}, HTTP_HX_REQUEST="true")
+        self.assertContains(response, "Ghent can&#x27;t award the Code Explorer badge.")
+        self.assertFalse(self.ninja.badges.filter(badge=self.explorer).exists())
+
     def test_a_refused_award_shows_the_message_in_the_row(self):
         self.client.force_login(self.owner)
         response = self.client.post(self.url, {"badge": self.band.id}, HTTP_HX_REQUEST="true")

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-30 22:51+0000\n"
+"POT-Creation-Date: 2026-10-11 11:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: nl\n"
@@ -40,10 +40,20 @@ msgstr ""
 "aanwezigheidslijst."
 
 #: ../../source/organisation/awards.rst:9
+msgid ""
+"An award can be limited to specific dojos: fill in **Dojos that can award"
+" it** to offer it only at those dojos' sessions, or leave it blank for "
+"any dojo's team to offer it. An award for one of the organisation's own "
+"events (**CoderDojo Girlz**, **Coolest Projects**) is usually limited to "
+"the **CoderDojo Belgium** dojo this way, since it's not meant for a "
+"regular dojo's own sessions."
+msgstr "Een onderscheiding kan beperkt worden tot specifieke dojo's: vul **Dojo's die ze mogen toekennen** in om ze enkel aan te bieden op de sessies van die dojo's, of laat het veld leeg zodat elk dojoteam ze kan toekennen. Een onderscheiding voor een van de eigen evenementen van de organisatie (**CoderDojo Girlz**, **Coolest Projects**) wordt op die manier meestal beperkt tot de dojo **CoderDojo Belgium**, omdat ze niet bedoeld is voor de sessies van een gewone dojo."
+
+#: ../../source/organisation/awards.rst:16
 msgid "There are two kinds:"
 msgstr "Er zijn twee soorten:"
 
-#: ../../source/organisation/awards.rst:11
+#: ../../source/organisation/awards.rst:18
 msgid ""
 "**One-off**: earned by doing something once, for example taking part in a"
 " CoderDojo Girlz session. Describe what earns it under **How to earn "
@@ -53,7 +63,7 @@ msgstr ""
 "deelnemen aan een CoderDojo Girlz-sessie. Beschrijf onder **Hoe je ze "
 "verdient** wat ervoor nodig is."
 
-#: ../../source/organisation/awards.rst:13
+#: ../../source/organisation/awards.rst:20
 msgid ""
 "**Milestone**: reached automatically once a ninja has attended a number "
 "of sessions, such as the attendance wristbands. Fill in **Sessions "
@@ -65,11 +75,11 @@ msgstr ""
 "sessies** in. Een mijlpaal kan ook een gordel toekennen wanneer ze "
 "bereikt wordt (**Geeft ook gordel**)."
 
-#: ../../source/organisation/awards.rst:18
+#: ../../source/organisation/awards.rst:25
 msgid "For each award you also fill in:"
 msgstr "Voor elke onderscheiding vul je ook in:"
 
-#: ../../source/organisation/awards.rst:20
+#: ../../source/organisation/awards.rst:27
 msgid ""
 "**Name** and **Description**, with optional versions in the other "
 "languages. A text left empty in a language shows the English version."
@@ -77,15 +87,20 @@ msgstr ""
 "**Naam** en **Beschrijving**, met optionele versies in de andere talen. "
 "Een tekst die je in een taal leeg laat, toont de Engelse versie."
 
-#: ../../source/organisation/awards.rst:22
+#: ../../source/organisation/awards.rst:29
 msgid ""
 "**Icon**: pick one of the **standard icons**, or upload your own image "
 "(JPEG, PNG, GIF or WebP, at most 10 MB; a square image works best). An "
 "uploaded image wins over a standard icon. It's made smaller, and "
 "everything stored in the file besides the picture itself is removed."
-msgstr "**Icoon**: kies een van de **standaardiconen**, of upload je eigen afbeelding (JPEG, PNG, GIF of WebP, hoogstens 10 MB; een vierkante afbeelding werkt het best). Een geüploade afbeelding gaat voor op een standaardicoon. Ze wordt verkleind, en alles wat naast de afbeelding zelf in het bestand zit, wordt verwijderd."
+msgstr ""
+"**Icoon**: kies een van de **standaardiconen**, of upload je eigen "
+"afbeelding (JPEG, PNG, GIF of WebP, hoogstens 10 MB; een vierkante "
+"afbeelding werkt het best). Een geüploade afbeelding gaat voor op een "
+"standaardicoon. Ze wordt verkleind, en alles wat naast de afbeelding zelf"
+" in het bestand zit, wordt verwijderd."
 
-#: ../../source/organisation/awards.rst:27
+#: ../../source/organisation/awards.rst:34
 msgid ""
 "The list shows how many ninjas have earned each award. Open an award to "
 "change it. An award that no ninja has yet can be removed; one that ninjas"
@@ -97,4 +112,20 @@ msgstr ""
 "enkele ninja heeft, kun je verwijderen; een die ninja's al hebben (of "
 "waar ze naartoe werken) blijft, zodat ze nooit van de pagina van een kind"
 " verdwijnt."
+
+#: ../../source/organisation/awards.rst:40
+msgid "Assigning an award directly"
+msgstr "Een onderscheiding rechtstreeks toekennen"
+
+#: ../../source/organisation/awards.rst:42
+msgid ""
+"Some of the organisation's own events don't have an attendance list on "
+"this site at all — Coolest Projects, for example, takes its sign-ups on "
+"its own website. For those, use **Assign awards** (under **Ninjas**) "
+"instead of a dojo's attendance list: search for the ninja by name, open "
+"their page, and pick a one-off award to give them directly. It's recorded"
+" as the organisation's own award, not tied to any dojo or session, and "
+"only one-off awards they don't already have are offered. This always "
+"works, no matter which dojos (if any) the award itself is limited to."
+msgstr "Sommige eigen evenementen van de organisatie hebben helemaal geen aanwezigheidslijst op deze site — Coolest Projects bijvoorbeeld verzamelt inschrijvingen op zijn eigen website. Gebruik daarvoor **Onderscheidingen toekennen** (onder **Ninja's**) in plaats van de aanwezigheidslijst van een dojo: zoek de ninja op naam, open hun pagina en kies een eenmalige onderscheiding om rechtstreeks toe te kennen. Ze wordt geregistreerd als een onderscheiding van de organisatie zelf, niet gekoppeld aan een dojo of sessie, en enkel eenmalige onderscheidingen die de ninja nog niet heeft, worden aangeboden. Dit werkt altijd, ongeacht tot welke dojo's (als die er zijn) de onderscheiding zelf beperkt is."
 

@@ -155,6 +155,15 @@ class Command(BaseCommand):
         if was_created:
             assign_icon(coolest_badge, COOLEST_PROJECTS_BADGE["icon"])
 
+        # These two are the organisation's own (CoderDojo Girlz, Coolest
+        # Projects, DATA_MODEL.md §12): only the organisation dojo's team may
+        # award them from an attendance list (events.awards.Badge.dojos); the
+        # organisation itself can still award either from Assign awards.
+        organisation_dojo = Dojo.objects.filter(kind=Dojo.ORGANISATION).first()
+        if organisation_dojo is not None:
+            girls_badge.dojos.set([organisation_dojo])
+            coolest_badge.dojos.set([organisation_dojo])
+
         belts = [
             Belt.objects.get_or_create(
                 level=level,

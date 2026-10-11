@@ -1,0 +1,25 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Assign awards" %}{% endblock %}
+{% block manage_heading %}{% translate "Assign awards" %}{% endblock %}
+
+{% block manage_content %}
+  {% comment %}Award a one-off badge directly to a ninja (events.manage.badge_assign_ninja, events.awards.award_badge_as_organisation) — for organisation-run events whose sign-ups happen on another system, with no local attendance list to award it from. The search box is a typeahead over htmx; results also fetch the whole page without JavaScript.{% endcomment %}
+  <p class="body-sm">{% translate "Find a ninja to award a badge directly to their account — for organisation-run events (Coolest Projects, CoderDojo for Girls) whose sign-ups happen on another website, so there's no attendance list here to award it from." %}</p>
+
+  <form method="get" class="cd-card cd-form" style="padding: var(--space-5);">
+    <div class="cd-form__field">
+      <label class="cd-form__label label" for="assign-q">{% translate "Ninja's name" %}</label>
+      <input class="cd-form__input body" type="search" id="assign-q" name="q" value="{{ query }}" autofocus
+             hx-get="{% url 'manage_badge_assign' %}" hx-trigger="input changed delay:300ms, search"
+             hx-target="#assign-results" hx-swap="innerHTML" hx-push-url="true">
+    </div>
+    <div class="cd-form__actions">
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Search" %}</button>
+    </div>
+  </form>
+
+  <div id="assign-results" aria-live="polite">
+    {% include "events/manage/_badge_assign_results.html" %}
+  </div>
+{% endblock %}

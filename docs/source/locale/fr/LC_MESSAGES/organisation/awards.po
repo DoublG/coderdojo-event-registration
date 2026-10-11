@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-30 22:51+0000\n"
+"POT-Creation-Date: 2026-10-11 11:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -40,10 +40,27 @@ msgstr ""
 "sessions, depuis la liste de présence."
 
 #: ../../source/organisation/awards.rst:9
+msgid ""
+"An award can be limited to specific dojos: fill in **Dojos that can award"
+" it** to offer it only at those dojos' sessions, or leave it blank for "
+"any dojo's team to offer it. An award for one of the organisation's own "
+"events (**CoderDojo Girlz**, **Coolest Projects**) is usually limited to "
+"the **CoderDojo Belgium** dojo this way, since it's not meant for a "
+"regular dojo's own sessions."
+msgstr ""
+"Une distinction peut \u00eatre limit\u00e9e \u00e0 des dojos pr\u00e9cis : remplissez **Dojos pouvant "
+"la d\u00e9cerner** pour ne l'offrir qu'aux sessions de ces dojos, ou laissez "
+"le champ vide pour que l'\u00e9quipe de n'importe quel dojo puisse l'offrir. "
+"Une distinction pour l'un des \u00e9v\u00e9nements propres \u00e0 l'organisation "
+"(**CoderDojo Girlz**, **Coolest Projects**) est g\u00e9n\u00e9ralement limit\u00e9e ainsi "
+"au dojo **CoderDojo Belgium**, car elle n'est pas destin\u00e9e aux sessions "
+"d'un dojo ordinaire."
+
+#: ../../source/organisation/awards.rst:16
 msgid "There are two kinds:"
 msgstr "Il en existe deux types :"
 
-#: ../../source/organisation/awards.rst:11
+#: ../../source/organisation/awards.rst:18
 msgid ""
 "**One-off**: earned by doing something once, for example taking part in a"
 " CoderDojo Girlz session. Describe what earns it under **How to earn "
@@ -53,7 +70,7 @@ msgstr ""
 " en participant à une session CoderDojo Girlz. Décrivez comment l'obtenir"
 " sous **Comment l'obtenir**."
 
-#: ../../source/organisation/awards.rst:13
+#: ../../source/organisation/awards.rst:20
 msgid ""
 "**Milestone**: reached automatically once a ninja has attended a number "
 "of sessions, such as the attendance wristbands. Fill in **Sessions "
@@ -65,11 +82,11 @@ msgstr ""
 "**Sessions nécessaires**. Un palier peut aussi décerner une ceinture "
 "lorsqu'il est atteint (**Décerne aussi la ceinture**)."
 
-#: ../../source/organisation/awards.rst:18
+#: ../../source/organisation/awards.rst:25
 msgid "For each award you also fill in:"
 msgstr "Pour chaque distinction, vous remplissez aussi :"
 
-#: ../../source/organisation/awards.rst:20
+#: ../../source/organisation/awards.rst:27
 msgid ""
 "**Name** and **Description**, with optional versions in the other "
 "languages. A text left empty in a language shows the English version."
@@ -78,15 +95,20 @@ msgstr ""
 "autres langues. Un texte laissé vide dans une langue affiche la version "
 "anglaise."
 
-#: ../../source/organisation/awards.rst:22
+#: ../../source/organisation/awards.rst:29
 msgid ""
 "**Icon**: pick one of the **standard icons**, or upload your own image "
 "(JPEG, PNG, GIF or WebP, at most 10 MB; a square image works best). An "
 "uploaded image wins over a standard icon. It's made smaller, and "
 "everything stored in the file besides the picture itself is removed."
-msgstr "**Icône** : choisissez l'une des **icônes standard**, ou téléversez votre propre image (JPEG, PNG, GIF ou WebP, 10 Mo au maximum ; une image carrée convient le mieux). Une image téléversée l'emporte sur une icône standard. Elle est réduite, et tout ce que le fichier contient en dehors de l'image elle-même est supprimé."
+msgstr ""
+"**Icône** : choisissez l'une des **icônes standard**, ou téléversez votre"
+" propre image (JPEG, PNG, GIF ou WebP, 10 Mo au maximum ; une image "
+"carrée convient le mieux). Une image téléversée l'emporte sur une icône "
+"standard. Elle est réduite, et tout ce que le fichier contient en dehors "
+"de l'image elle-même est supprimé."
 
-#: ../../source/organisation/awards.rst:27
+#: ../../source/organisation/awards.rst:34
 msgid ""
 "The list shows how many ninjas have earned each award. Open an award to "
 "change it. An award that no ninja has yet can be removed; one that ninjas"
@@ -98,4 +120,20 @@ msgstr ""
 "encore peut être supprimée ; celle que des ninjas ont déjà (ou qu'ils "
 "sont en train d'obtenir) reste, pour ne jamais disparaître de la page "
 "d'un enfant."
+
+#: ../../source/organisation/awards.rst:40
+msgid "Assigning an award directly"
+msgstr "Attribuer une distinction directement"
+
+#: ../../source/organisation/awards.rst:42
+msgid ""
+"Some of the organisation's own events don't have an attendance list on "
+"this site at all — Coolest Projects, for example, takes its sign-ups on "
+"its own website. For those, use **Assign awards** (under **Ninjas**) "
+"instead of a dojo's attendance list: search for the ninja by name, open "
+"their page, and pick a one-off award to give them directly. It's recorded"
+" as the organisation's own award, not tied to any dojo or session, and "
+"only one-off awards they don't already have are offered. This always "
+"works, no matter which dojos (if any) the award itself is limited to."
+msgstr "Certains événements propres à l'organisation n'ont aucune liste de présence sur ce site — Coolest Projects, par exemple, reçoit ses inscriptions sur son propre site web. Pour ceux-ci, utilisez **Attribuer des distinctions** (sous **Ninjas**) au lieu de la liste de présence d'un dojo : recherchez le ninja par son nom, ouvrez sa page, et choisissez une distinction ponctuelle à lui attribuer directement. Elle est enregistrée comme une distinction de l'organisation elle-même, sans lien avec un dojo ou une session, et seules les distinctions ponctuelles qu'il n'a pas encore sont proposées. Cela fonctionne toujours, quels que soient les dojos (le cas échéant) auxquels la distinction elle-même est limitée."
 

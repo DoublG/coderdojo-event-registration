@@ -120,7 +120,10 @@ CoderDojo Belgium decides which badges exist; your team awards them. On the
 attendance list, **Award badge** lets you pick one of the badges the child
 doesn't have yet and add an optional note about what they did. The badge
 then shows on their child's page. The attendance wristbands aren't in this
-list: they follow the sessions a child attended by themselves.
+list: they follow the sessions a child attended by themselves. A few
+badges, for the organisation's own events (CoderDojo Girlz, Coolest
+Projects), only show up at those events, never at a regular dojo's own
+session.
 
 Your dashboard's **Attendance** page shows the same list for your next
 upcoming session (or your most recent one, if nothing's scheduled), so on

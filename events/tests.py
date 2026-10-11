@@ -743,6 +743,45 @@ class BeltAndBadgeTests(TestCase):
             award_badge(self.ninja, maker, self.champion)
         self.assertEqual(self.ninja.badges.count(), 1)
 
+    def test_a_badge_restricted_to_specific_dojos(self):
+        from dojos.testing import make_champion
+
+        from .awards import BadgeError, award_badge
+
+        other_dojo = make_dojo("Antwerp", champion=make_champion(username="other"))
+        Registration.objects.create(event=_future_event(other_dojo), ninja=self.ninja, waiting_list=False, position=1)
+        girls_only = self.Badge.objects.create(name="CoderDojo for Girls")
+        girls_only.dojos.set([other_dojo])
+
+        # self.dojo (Ghent) isn't in the restriction, even though the ninja
+        # has also been there — the other dojo's own team can award it.
+        with self.assertRaises(BadgeError):
+            award_badge(self.ninja, girls_only, self.mentor)
+        award = award_badge(self.ninja, girls_only, other_dojo.champion_membership)
+        self.assertIsNotNone(award.earned_date)
+
+    def test_the_organisation_awards_directly_with_no_dojo_or_attendance_tie(self):
+        from dojos.testing import make_champion
+
+        from .awards import BadgeError, award_badge_as_organisation
+
+        # No registration anywhere for this ninja: the organisation's own
+        # events may have no local attendance to check against.
+        lone_ninja = Ninja.objects.create(name="Noor")
+        organisation_only = self.Badge.objects.create(name="Coolest Projects 2026")
+        organisation_only.dojos.set([make_dojo("Brussels HQ", champion=make_champion(username="hq"))])
+
+        nobody = User.objects.create(username="parent")
+        with self.assertRaises(BadgeError):
+            award_badge_as_organisation(lone_ninja, organisation_only, nobody)  # no Ninjas area
+
+        admin = User.objects.create(username="org-admin")
+        OrganisationRole.objects.create(account=admin, role=OrganisationRole.ADMIN)
+        award = award_badge_as_organisation(lone_ninja, organisation_only, admin, note="At the showcase")
+        self.assertEqual((award.awarded_by, award.awarded_as_membership, award.note), (admin, None, "At the showcase"))
+        with self.assertRaises(BadgeError):
+            award_badge_as_organisation(lone_ninja, organisation_only, admin)  # already has it
+
     def test_badge_rules(self):
         from dojos.models import DojoMembership
         from dojos.testing import add_member, make_champion, make_mentor
@@ -1178,6 +1217,29 @@ class ManageAwardsTests(TempMediaMixin, TestCase):
         self.assertTrue(badge.icon.name.startswith("awards/"))
         self.assertEqual(badge.translation_for("nl-be", "name"), "Spelmaker")
 
+    def test_restricting_to_specific_dojos(self):
+        from dojos.testing import make_champion
+
+        organisation = make_dojo("CoderDojo Belgium", champion=make_champion(username="org"), kind=Dojo.ORGANISATION)
+        self.client.force_login(self.admin)
+        self.client.post(
+            reverse("manage_badge_create"),
+            {"name": "CoderDojo for Girls", "kind": Badge.ONE_OFF, "dojos": [organisation.id]},
+        )
+        badge = Badge.objects.get(name="CoderDojo for Girls")
+        self.assertEqual(list(badge.dojos.all()), [organisation])
+        response = self.client.get(reverse("manage_badge_list"))
+        self.assertContains(response, organisation.name)
+
+        # Switching to a milestone drops the restriction: it's never
+        # awarded by hand, so which dojos may award it is moot.
+        self.client.post(
+            reverse("manage_badge_detail", kwargs={"badge_id": badge.id}),
+            {"name": "CoderDojo for Girls", "kind": Badge.MILESTONE, "threshold": "3", "dojos": [organisation.id]},
+        )
+        badge.refresh_from_db()
+        self.assertFalse(badge.dojos.exists())
+
     def test_a_standard_icon_is_linked_and_svg_uploads_are_refused(self):
         self.client.force_login(self.admin)
         self.client.post(
@@ -1261,6 +1323,76 @@ class ManageAwardsTests(TempMediaMixin, TestCase):
             self.client.post(reverse("manage_badge_create"), {"name": "Sneaky", "kind": Badge.ONE_OFF})
             self.client.post(reverse("manage_badge_delete", kwargs={"badge_id": badge.id}))
         self.assertEqual(list(Badge.objects.values_list("name", flat=True)), ["Game Maker"])
+
+
+class AssignAwardsTests(TestCase):
+    """The organisation dashboard's Assign awards page (events.manage,
+    events.awards.award_badge_as_organisation): award a one-off badge
+    directly to a ninja, with no dojo or attendance tie."""
+
+    def setUp(self):
+        self.admin = User.objects.create(username="admin")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.ninja = Ninja.objects.create(name="Mila", family_name="Peeters")
+        self.maker = Badge.objects.create(name="Game Maker")
+        self.band = Badge.objects.create(name="White Band", kind=Badge.MILESTONE, threshold=1)
+
+    def test_search_finds_a_ninja_by_name(self):
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("manage_badge_assign"), {"q": "Peeters"})
+        self.assertContains(response, "Mila Peeters")
+        self.assertTemplateUsed(response, "events/manage/badge_assign.html")
+        no_match = self.client.get(reverse("manage_badge_assign"), {"q": "Nobody"})
+        self.assertNotContains(no_match, "Mila Peeters")
+
+    def test_typeahead_gets_back_just_the_results(self):
+        """The search box's htmx request (as-you-type) gets only the results
+        partial, never the whole page — a plain GET (no JavaScript) still
+        gets the whole page, same results included."""
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("manage_badge_assign"), {"q": "Peeters"}, HTTP_HX_REQUEST="true")
+        self.assertContains(response, "Mila Peeters")
+        self.assertTemplateUsed(response, "events/manage/_badge_assign_results.html")
+        self.assertTemplateNotUsed(response, "events/manage/badge_assign.html")
+
+    def test_awards_a_badge_with_no_registration_at_all(self):
+        self.client.force_login(self.admin)
+        url = reverse("manage_badge_assign_ninja", kwargs={"ninja_id": self.ninja.id})
+        response = self.client.post(url, {"badge": self.maker.id, "note": "At the showcase"})
+        self.assertRedirects(response, url)
+        award = self.ninja.badges.get(badge=self.maker)
+        self.assertEqual(
+            (award.awarded_by, award.awarded_as_membership, award.note), (self.admin, None, "At the showcase")
+        )
+
+    def test_only_one_offs_not_yet_earned_are_offered(self):
+        self.client.force_login(self.admin)
+        url = reverse("manage_badge_assign_ninja", kwargs={"ninja_id": self.ninja.id})
+        self.client.post(url, {"badge": self.maker.id})
+        response = self.client.get(url)
+        self.assertNotContains(response, f'value="{self.maker.id}"')
+        self.assertNotContains(response, f'value="{self.band.id}"')
+        self.assertContains(response, "Game Maker")  # in "Already earned" now, not the picker
+
+    def test_dojo_restricted_badges_are_still_offered(self):
+        from dojos.testing import make_champion
+
+        other_dojo = make_dojo("Antwerp", champion=make_champion(username="other"))
+        self.maker.dojos.set([other_dojo])
+        self.client.force_login(self.admin)
+        url = reverse("manage_badge_assign_ninja", kwargs={"ninja_id": self.ninja.id})
+        self.client.post(url, {"badge": self.maker.id})
+        self.assertTrue(self.ninja.badges.filter(badge=self.maker, earned_date__isnull=False).exists())
+
+    def test_only_organisation_admins(self):
+        board = User.objects.create(username="board")
+        OrganisationRole.objects.create(account=board, role=OrganisationRole.BOARD)
+        self.client.force_login(board)
+        self.assertEqual(self.client.get(reverse("manage_badge_assign")).status_code, 404)
+        url = reverse("manage_badge_assign_ninja", kwargs={"ninja_id": self.ninja.id})
+        self.assertEqual(self.client.get(url).status_code, 404)
+        self.client.post(url, {"badge": self.maker.id})
+        self.assertFalse(self.ninja.badges.exists())
 
 
 class SeedUpcomingRegistrationsTests(TestCase):

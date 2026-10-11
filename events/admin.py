@@ -32,6 +32,7 @@ admin.site.register(Registration)
 class BadgeAdmin(TranslationAdminMixin, admin.ModelAdmin):
     list_display = ["name", "kind", "threshold", "grants_belt"]
     list_filter = ["kind"]
+    filter_horizontal = ["dojos"]
 
 
 @admin.register(Belt)

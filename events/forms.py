@@ -322,12 +322,23 @@ class BadgeForm(forms.ModelForm):
 
     class Meta:
         model = Badge
-        fields = ["name", "kind", "description", "criteria", "threshold", "grants_belt", "library_icon", "icon"]
+        fields = [
+            "name",
+            "kind",
+            "description",
+            "criteria",
+            "dojos",
+            "threshold",
+            "grants_belt",
+            "library_icon",
+            "icon",
+        ]
         labels = {
             "name": _("Name"),
             "kind": _("Kind"),
             "description": _("Description"),
             "criteria": _("How to earn it"),
+            "dojos": _("Dojos that can award it"),
             "threshold": _("Sessions needed"),
             "grants_belt": _("Also grants belt"),
             "icon": _("Icon"),
@@ -337,6 +348,11 @@ class BadgeForm(forms.ModelForm):
                 "A one-off is earned by doing something once; a milestone is reached by attending a number of sessions."
             ),
             "criteria": _("One-off only."),
+            "dojos": _(
+                "One-off only. Leave blank for any dojo's team to award it; pick specific dojos (e.g. the "
+                "organisation dojo) to limit it to them. The organisation can always award it directly, from "
+                "Assign awards."
+            ),
             "threshold": _("Milestone only: how many sessions a ninja must attend."),
             "grants_belt": _("Milestone only, optional: reaching it also awards this belt."),
             "icon": with_upload_help(_("Optional: upload your own icon instead (square works best).")),
@@ -357,6 +373,10 @@ class BadgeForm(forms.ModelForm):
             (name, Path(name).stem.replace("-", " ").capitalize()) for name in icons
         ]
         self.fields["library_icon"].initial = library_filename(self.instance.icon, "awards")
+        self.fields["dojos"].queryset = Dojo.objects.order_by("name")
+        self.fields["dojos"].label_from_instance = lambda dojo: (
+            f"{dojo.name} ({_('organisation')})" if dojo.is_organisation else dojo.name
+        )
         labels = {"name": _("Name"), "description": _("Description"), "criteria": _("How to earn it")}
         self.translation_groups = bound_translation_groups(
             self,
@@ -374,9 +394,12 @@ class BadgeForm(forms.ModelForm):
     def clean(self):
         cleaned = super().clean()
         # A one-off never keeps a milestone's threshold or belt, so switching
-        # the kind can't trip Badge.clean() over leftover values.
+        # the kind can't trip Badge.clean() over leftover values. Milestones
+        # are never awarded by hand, so which dojos may award it is moot.
         if cleaned.get("kind") == Badge.ONE_OFF:
             cleaned["threshold"] = cleaned["grants_belt"] = None
+        else:
+            cleaned["dojos"] = Dojo.objects.none()
         return cleaned
 
     def save(self, commit=True):
@@ -387,7 +410,24 @@ class BadgeForm(forms.ModelForm):
         save_translation_fields(self, badge)
         if commit:
             badge.save()
+            self.save_m2m()
         return badge
+
+
+class AssignBadgeForm(forms.Form):
+    """Award a one-off badge to a ninja directly, as the organisation
+    (events.manage.badge_assign_ninja) — for organisation-run events whose
+    registrations live on another system, with nothing local to check
+    attendance against. The queryset is narrowed per ninja by the view (not
+    yet earned); events.awards.award_badge_as_organisation decides for real."""
+
+    badge = forms.ModelChoiceField(
+        label=_("Badge"),
+        queryset=Badge.objects.filter(kind=Badge.ONE_OFF).order_by("name"),
+        empty_label=None,
+        error_messages={"required": _("Pick a badge to award."), "invalid_choice": _("Pick a badge to award.")},
+    )
+    note = forms.CharField(label=_("Note (optional)"), required=False, max_length=300)
 
 
 class _AnyOfMultipleChoiceField(forms.MultipleChoiceField):

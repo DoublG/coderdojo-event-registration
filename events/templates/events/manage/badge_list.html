@@ -16,6 +16,7 @@
           <th class="label" scope="col">{% translate "Icon" %}</th>
           <th class="label" scope="col">{% translate "Name" %}</th>
           <th class="label" scope="col">{% translate "How to earn it" %}</th>
+          <th class="label" scope="col">{% translate "Dojos that can award it" %}</th>
           <th class="label cd-table__num" scope="col">{% translate "Earned by" %}</th>
         </tr>
       </thead>
@@ -25,10 +26,11 @@
             <td class="body-sm">{% if badge.icon %}<img src="{{ badge.icon.url }}" alt="" style="height: 32px; width: 32px; object-fit: contain;">{% else %}—{% endif %}</td>
             <td class="body-sm"><a href="{% url 'manage_badge_detail' badge_id=badge.id %}">{{ badge|localized:"name"|in_lang }}</a></td>
             <td class="body-sm">{{ badge|localized:"criteria"|default:"—" }}</td>
+            <td class="body-sm">{% with dojos=badge.dojos.all %}{% if dojos %}{% for dojo in dojos %}{{ dojo.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}{% translate "Any dojo" %}{% endif %}{% endwith %}</td>
             <td class="body-sm cd-table__num">{{ badge.earned_count }}</td>
           </tr>
         {% empty %}
-          <tr><td class="body-sm" colspan="4">{% translate "No one-off awards yet." %}</td></tr>
+          <tr><td class="body-sm" colspan="5">{% translate "No one-off awards yet." %}</td></tr>
         {% endfor %}
       </tbody>
     </table>

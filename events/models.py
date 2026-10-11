@@ -266,6 +266,14 @@ class Badge(OrganisationContent):
         help_text="Milestone (optional): reaching it also grants this belt.",
     )
     icon = UploadedImageField(upload_to="awards/", max_side=ICON_SIDE, null=True, blank=True)
+    dojos = models.ManyToManyField(
+        "dojos.Dojo",
+        blank=True,
+        related_name="restricted_badges",
+        help_text="One-off only. Leave blank for any dojo's team to award it from the attendance list; pick "
+        "specific dojos (e.g. the organisation dojo, for an award tied to one of its own events) to limit it to "
+        "them. The organisation can always award it directly, from Assign awards, whichever dojos are picked here.",
+    )
 
     class Meta:
         ordering = ["kind", "threshold", "name"]

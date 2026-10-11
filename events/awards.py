@@ -5,8 +5,16 @@ flow call these; nothing else creates NinjaBelt rows (seeders aside).
   belt(s) up. Belts are an append-only history, so a belt at or below the
   ninja's current level is refused, never overwritten.
 - award_badge: a dojo's active champion or mentor awards a ninja a one-off
-  badge (the organisation defines badges; dojo teams only award them).
-  Milestones are never awarded by hand.
+  badge (the organisation defines badges; dojo teams only award them), from
+  the attendance list — so the ninja must have a registration at that dojo.
+  A badge can be restricted to specific dojos (Badge.dojos); blank means any
+  dojo's team may award it. Milestones are never awarded by hand.
+- award_badge_as_organisation: the organisation awards a one-off badge
+  directly to a ninja, with no dojo or attendance tie — for its own events
+  (Coolest Projects, CoderDojo for Girls) whose registrations may live on
+  another system entirely, so there's nothing local to check attendance
+  against. Ignores Badge.dojos: the organisation can always award any
+  one-off badge, whichever dojos (if any) are picked there.
 - sync_milestones: recomputes a ninja's milestone badges (sessions
   attended) after attendance changes. A reached milestone that grants a
   belt awards it, as the membership that marked the attendance.
@@ -22,7 +30,7 @@ from django.utils.translation import gettext as _
 from .models import Badge, Belt, NinjaBadge, NinjaBelt, Registration
 
 if TYPE_CHECKING:  # types only: keep the import graph one-way (see _may_award)
-    from accounts.models import Ninja
+    from accounts.models import Ninja, User
     from dojos.models import DojoMembership
 
 
@@ -85,34 +93,74 @@ def award_belt(
     )
 
 
-def award_badge(
-    ninja: "Ninja", badge: Badge, membership: "DojoMembership", note: str = "", awarded_on: date | None = None
-) -> NinjaBadge:
-    """Award `ninja` the one-off `badge`, as `membership` (an active
-    champion/mentor membership). The ninja must have a registration at one
-    of that dojo's sessions and not have the badge yet."""
-    from dojos.access import AWARD_BADGES
+def _dojo_may_award(badge: Badge, dojo_id: int) -> bool:
+    """Whether `dojo_id`'s team may award `badge` from the attendance list:
+    any dojo, unless Badge.dojos names specific ones."""
+    return not badge.dojos.exists() or badge.dojos.filter(pk=dojo_id).exists()
 
-    if not _may_award(membership, AWARD_BADGES):
-        raise BadgeError(_("Only a dojo's active champion or mentors can award badges."))
-    if badge.kind != Badge.ONE_OFF:
-        raise BadgeError(_("Milestones are awarded automatically when attendance is marked."))
-    if not Registration.objects.filter(ninja=ninja, event__dojo_id=membership.dojo_id).exists():
-        raise BadgeError(
-            _("%(ninja)s hasn't been to a session at %(dojo)s.")
-            % {"ninja": ninja.full_name, "dojo": membership.dojo.name}
-        )
+
+def _earn_badge(
+    ninja: "Ninja",
+    badge: Badge,
+    user: "User",
+    membership: "DojoMembership | None",
+    note: str,
+    awarded_on: date | None,
+) -> NinjaBadge:
     ninja_badge, created = NinjaBadge.objects.get_or_create(ninja=ninja, badge=badge)
     if not created and ninja_badge.earned_date:
         raise BadgeError(
             _("%(ninja)s already has the %(badge)s badge.") % {"ninja": ninja.full_name, "badge": badge.name}
         )
     ninja_badge.earned_date = awarded_on or timezone.localdate()
-    ninja_badge.awarded_by = membership.user
+    ninja_badge.awarded_by = user
     ninja_badge.awarded_as_membership = membership
     ninja_badge.note = note.strip()
     ninja_badge.save()
     return ninja_badge
+
+
+def award_badge(
+    ninja: "Ninja", badge: Badge, membership: "DojoMembership", note: str = "", awarded_on: date | None = None
+) -> NinjaBadge:
+    """Award `ninja` the one-off `badge`, as `membership` (an active
+    champion/mentor membership). The dojo must be allowed to award it
+    (Badge.dojos), and the ninja must have a registration at one of that
+    dojo's sessions and not have the badge yet."""
+    from dojos.access import AWARD_BADGES
+
+    if not _may_award(membership, AWARD_BADGES):
+        raise BadgeError(_("Only a dojo's active champion or mentors can award badges."))
+    if badge.kind != Badge.ONE_OFF:
+        raise BadgeError(_("Milestones are awarded automatically when attendance is marked."))
+    if not _dojo_may_award(badge, membership.dojo_id):
+        raise BadgeError(
+            _("%(dojo)s can't award the %(badge)s badge.") % {"dojo": membership.dojo.name, "badge": badge.name}
+        )
+    if not Registration.objects.filter(ninja=ninja, event__dojo_id=membership.dojo_id).exists():
+        raise BadgeError(
+            _("%(ninja)s hasn't been to a session at %(dojo)s.")
+            % {"ninja": ninja.full_name, "dojo": membership.dojo.name}
+        )
+    return _earn_badge(ninja, badge, membership.user, membership, note, awarded_on)
+
+
+def award_badge_as_organisation(
+    ninja: "Ninja", badge: Badge, user: "User", note: str = "", awarded_on: date | None = None
+) -> NinjaBadge:
+    """Award `ninja` the one-off `badge` directly, as the organisation (an
+    account with the Ninjas area, accounts.organisation.Area.NINJAS) — for
+    organisation-run events whose registrations live on another system, so
+    there's no local attendance a dojo-team award could check against. Not
+    tied to a dojo team: `awarded_as_membership` stays empty, and Badge.dojos
+    is never checked — the organisation can award any one-off badge."""
+    from accounts.organisation import Area, has_area
+
+    if not has_area(user, Area.NINJAS):
+        raise BadgeError(_("Only the organisation can award this."))
+    if badge.kind != Badge.ONE_OFF:
+        raise BadgeError(_("Milestones are awarded automatically when attendance is marked."))
+    return _earn_badge(ninja, badge, user, None, note, awarded_on)
 
 
 @transaction.atomic
