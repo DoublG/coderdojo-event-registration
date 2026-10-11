@@ -69,11 +69,12 @@ How long data is kept
 The site removes these by itself, every night:
 
 - **Accounts** are deleted two years after their last login. A parent's
-  account stays as long as one of their children uses their own login. The
-  account holder gets a reminder 30 days and 7 days before, and an account
-  is never deleted sooner than 30 days after the first reminder. A
-  champion's or mentor's name stays on past sessions and on the belts and
-  badges they awarded.
+  account stays as long as one of their children uses their own login or
+  comes to a dojo session (whoever signed them up; a session where the child
+  was marked absent doesn't count). The account holder gets a reminder 30
+  days and 7 days before, and an account is never deleted sooner than 30
+  days after the first reminder. A champion's or mentor's name stays on past
+  sessions and on the belts and badges they awarded.
 - **The audit log** keeps an entry as long as the account it's about, or
   that made it; an entry with no account behind it goes after two years.
 - **Mail**: a year after a mail was queued, its address, subject and text are

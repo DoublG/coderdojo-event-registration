@@ -88,7 +88,8 @@ class Erasure(TextChoices):
 # "login_session"; the other periods still need legal input (DATA_MODEL.md
 # §16, open points).
 RETENTION_RULES = {
-    "account": "Until two years after the last login: reminder mails 30 and 7 days before, then erased.",
+    "account": "Until two years after the last login (for a guardian, or a child's own login or dojo session): "
+    "reminder mails 30 and 7 days before, then erased.",
     "organisation_role": "While the organisation role is held.",
     "organisation_invitation": "Deleted 30 days after it was accepted, withdrawn or expired.",
     "guardian_invitation": "Deleted 30 days after it was accepted, withdrawn or expired.",

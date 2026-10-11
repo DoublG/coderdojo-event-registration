@@ -3,8 +3,11 @@ Run every night by `privacy.tasks.apply_retention`; safe to run twice.
 
 **Accounts: two years after the last login** (`ACCOUNT_RETENTION_DAYS`,
 `User.last_login`, or `date_joined` for an account that never logged in).
-A guardian's account counts its children's own logins too: a family is in
-use while a child logs in. Only logging in moves the date on. First the
+A guardian's account counts its children's activity too: a family is in
+use while a child logs in with their own login or comes to a dojo session
+(a confirmed place at a session that has started, unless they were marked
+absent), whichever guardian signed them up. Only a login or a session moves
+the date on; signing up for a session counts once it has started. First the
 account gets the reminder mails (`ACCOUNT_DELETION_REMINDER_DAYS`, 30 and 7
 days before; the service mail `account_deletion_reminder`), then, on the
 date:
@@ -109,15 +112,31 @@ def _first_reminder() -> int:
 
 def with_inactive_since(users: QuerySet[User] | Manager[User]) -> "QuerySet[UserInactiveSince]":
     """Annotate `inactive_since` on a User queryset: the last login (or
-    `date_joined`, never logged in), or a later login of one of the
-    account's children's own logins."""
+    `date_joined`, never logged in), or something later one of the account's
+    children did: a login of their own, or a dojo session they came to (a
+    confirmed place at a session that has started and where they weren't
+    marked absent; most dojos never mark attendance)."""
+    from events.models import Registration
+
     own = Coalesce("last_login", "date_joined")
     child_login = (
         User.objects.filter(ninja__guardianships__guardian=OuterRef("pk"), last_login__isnull=False)
         .order_by("-last_login")
         .values("last_login")[:1]
     )
-    return users.annotate(inactive_since=Greatest(own, Coalesce(Subquery(child_login), own)))
+    child_session = (
+        Registration.objects.filter(
+            ninja__guardianships__guardian=OuterRef("pk"),
+            waiting_list=False,
+            event__start_time__lte=timezone.now(),
+        )
+        .exclude(attended=False)
+        .order_by("-event__start_time")
+        .values("event__start_time")[:1]
+    )
+    return users.annotate(
+        inactive_since=Greatest(own, Coalesce(Subquery(child_login), own), Coalesce(Subquery(child_session), own))
+    )
 
 
 def inactive_since(user: User) -> datetime:

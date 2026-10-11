@@ -202,8 +202,8 @@ We don't keep data we no longer need. If you don't log in for **two
 years**, your account is deleted. A month before that date, and again a
 week before, we mail you to say so; logging in before the date is all it
 takes to keep your account, and every login starts the two years again.
-Your children's own logins count too: while one of them logs in, your
-account stays.
+Your children count too: while one of them logs in with their own login,
+or comes to a dojo session (whoever signed them up), your account stays.
 
 The mail we send you is kept for a year: after that we only keep that a
 mail of a certain kind went out on a certain day, not what it said or the

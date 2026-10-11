@@ -1444,7 +1444,7 @@ Tu ne t'attendais pas à cet e-mail ? Tu peux l'ignorer.
 Hi {{ recipient_name }},
 
 Nobody has logged in to your CoderDojo account for almost two years{% if children %}, and
-your children haven't used their own logins either{% endif %}. We don't keep data we no
+your children haven't used their own logins or come to a dojo session either{% endif %}. We don't keep data we no
 longer need, so on {{ deletion_date|date:"j F Y" }} your account will be
 {% if volunteer %}cleaned up.
 
@@ -1462,7 +1462,7 @@ champion, so your account stays until you hand that role to a mentor (on the doj
 Team page) or the organisation does.
 {% endif %}
 Want to keep your account? Just log in before that date{% if children %} (or let one of your
-children log in with their own login){% endif %}:
+children log in with their own login, or come to a dojo session){% endif %}:
 
 {{ login_url }}
 """,
@@ -1470,7 +1470,7 @@ children log in with their own login){% endif %}:
 Hallo {{ recipient_name }},
 
 Er is al bijna twee jaar niet meer ingelogd op je CoderDojo-account{% if children %}, en ook je
-kinderen gebruikten hun eigen login niet{% endif %}. We bewaren geen gegevens die we niet meer
+kinderen gebruikten hun eigen login niet en kwamen niet naar een dojosessie{% endif %}. We bewaren geen gegevens die we niet meer
 nodig hebben, dus op {{ deletion_date|date:"j F Y" }} wordt je account
 {% if volunteer %}opgeschoond.
 
@@ -1489,7 +1489,7 @@ champion, dus je account blijft tot je die rol doorgeeft aan een mentor (op de
 Team-pagina van de dojo) of de organisatie dat doet.
 {% endif %}
 Wil je je account houden? Log dan gewoon in voor die datum{% if children %} (of laat een van je
-kinderen inloggen met de eigen login){% endif %}:
+kinderen inloggen met de eigen login of naar een dojosessie komen){% endif %}:
 
 {{ login_url }}
 """,
@@ -1497,7 +1497,7 @@ kinderen inloggen met de eigen login){% endif %}:
 Bonjour {{ recipient_name }},
 
 Personne ne s'est connecté à votre compte CoderDojo depuis presque deux ans{% if children %}, et
-vos enfants n'ont pas non plus utilisé leur propre compte{% endif %}. Nous ne gardons pas les
+vos enfants n'ont pas non plus utilisé leur propre compte ni participé à une session de dojo{% endif %}. Nous ne gardons pas les
 données dont nous n'avons plus besoin : le {{ deletion_date|date:"j F Y" }}, votre compte sera
 {% if volunteer %}nettoyé.
 
@@ -1516,7 +1516,7 @@ sans champion : votre compte reste donc jusqu'à ce que vous passiez ce rôle à
 mentor (sur la page Équipe du dojo) ou que l'organisation le fasse.
 {% endif %}
 Vous voulez garder votre compte ? Connectez-vous simplement avant cette date{% if children %} (ou
-laissez un de vos enfants se connecter avec son propre compte){% endif %} :
+laissez un de vos enfants se connecter avec son propre compte ou participer à une session de dojo){% endif %} :
 
 {{ login_url }}
 """,

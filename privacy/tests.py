@@ -705,6 +705,65 @@ class RetentionTests(TestCase):
         self.run_job(700)
         self.assertEqual(len(self.mails(self.parent)), 2)
 
+    def session(self, days_ago, **fields):
+        """A confirmed place for Lotte at a session `days_ago` days ago."""
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from dojos.testing import make_dojo
+        from events.models import Event, Registration
+
+        start = timezone.now() - timedelta(days=days_ago)
+        event = Event.objects.create(
+            name="Coding Saturday",
+            dojo=make_dojo(f"Dojo {Event.objects.count()}"),
+            places=10,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+        )
+        return Registration.objects.create(
+            event=event, ninja=self.child, **{"waiting_list": False, "position": 1, **fields}
+        )
+
+    def test_a_childs_dojo_session_keeps_the_family_in_use(self):
+        """A grandparent who signs Lotte up keeps her parent's account (and so
+        Lotte) from being deleted: her coming to the dojo is the family's
+        activity, whoever signed her up."""
+        from privacy.models import RetentionNotice
+        from privacy.retention import inactive_since
+
+        grandma = self.account("oma", days_ago=1)
+        Guardianship.objects.create(guardian=grandma, ninja=self.child, relation=Guardianship.OTHER)
+        self.run_job()
+        self.assertEqual(len(self.mails(self.parent)), 1)
+        registration = self.session(days_ago=5)
+        self.assertEqual(inactive_since(self.parent), registration.event.start_time)
+        self.run_job(30)
+        self.assertFalse(self.erased(self.parent))
+        self.assertFalse(RetentionNotice.objects.filter(account=self.parent).exists())
+        # Two years after that session, the usual reminders start again.
+        self.assertEqual(self.run_job(695)["reminders"], 1)
+        self.assertEqual(len(self.mails(self.parent)), 2)
+        self.assertIn("come to a dojo session", self.mails(self.parent)[-1].body)
+
+    def test_only_a_session_the_child_came_to_counts(self):
+        """Not a place on the waiting list, not a session where they were
+        marked absent, and not one that hasn't started yet."""
+        from privacy.retention import inactive_since
+
+        before = inactive_since(self.parent)
+        self.session(days_ago=5, waiting_list=True)
+        self.session(days_ago=6, attended=False)
+        self.session(days_ago=-3)
+        self.assertEqual(inactive_since(self.parent), before)
+        self.assertEqual(self.run_job()["reminders"], 1)
+        # Unmarked attendance counts: most dojos never mark it.
+        marked = self.session(days_ago=7, attended=True)
+        unmarked = self.session(days_ago=4)
+        self.assertEqual(inactive_since(self.parent), unmarked.event.start_time)
+        self.assertLess(marked.event.start_time, unmarked.event.start_time)
+
     def test_organisation_roles_and_superusers_are_left_alone(self):
         from accounts.models import OrganisationRole
 

@@ -52,7 +52,7 @@ nightly job is `privacy.tasks.apply_retention` (10:00, default queue).
 
 | Rule | What | Period | In the code | Applied by |
 |---|---|---|---|---|
-| `account` | accounts (`User`), their mail preferences and dojo mutes, `RetentionNotice` | erased two years after the last login (a guardian's counts its children's own logins); reminders 30 and 7 days before; never sooner than 30 days after the first reminder; champions and mentors cleaned, not erased; a champion of an active dojo held back | `ACCOUNT_RETENTION_DAYS = 730`, `ACCOUNT_DELETION_REMINDER_DAYS = (30, 7)`, `ACCOUNT_DELETION_NOTICE_DAYS = 30` | nightly job |
+| `account` | accounts (`User`), their mail preferences and dojo mutes, `RetentionNotice` | erased two years after the last login (a guardian's counts its children's own logins and the dojo sessions they came to); reminders 30 and 7 days before; never sooner than 30 days after the first reminder; champions and mentors cleaned, not erased; a champion of an active dojo held back | `ACCOUNT_RETENTION_DAYS = 730`, `ACCOUNT_DELETION_REMINDER_DAYS = (30, 7)`, `ACCOUNT_DELETION_NOTICE_DAYS = 30` | nightly job |
 | `audit_log` | `auditlog.LogEntry` | with the account it's about or was made by; two years after the entry when no account is behind it | `AUDIT_LOG_RETENTION_DAYS = 730` | nightly job |
 | `admin_access` | `AdminAccessGrant` | with the audit log (a grant itself lasts 12 hours) | `accounts.admin_access.ADMIN_ACCESS_HOURS = 12` | nightly job, with the account |
 | `organisation_invitation` | `OrganisationInvitation` | removed 30 days after it was accepted, withdrawn or expired (it expires after 14 days) | `accounts.invitations.KEEP_DAYS = 30`, `VALID_DAYS = 14` | nightly job |
@@ -370,8 +370,11 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
        reminder goes once per period of inactivity and again after a
        later one.
      - **Logging in is what counts.** Any login moves the date two years
-       on; nothing else does (Django only updates `last_login` at login,
-       and a session lasts at most `SESSION_COOKIE_AGE`).
+       on (Django only updates `last_login` at login, and a session lasts
+       at most `SESSION_COOKIE_AGE`). For a guardian, so does a child's
+       own login, and (decided 11 October 2026, §27's open point) a dojo
+       session the child came to: a confirmed place at a session that has
+       started, unless they were marked absent, whoever signed them up.
      - **The deletion itself is the erasure of phase 5**
        (`erase_person(user, requested_by=None, reason="retention")`, with
        its `ErasureRecord`), so phase 5 comes first: the account is
@@ -536,7 +539,8 @@ only if needed) and possibly an encrypted field as single-purpose helpers.
 
 - ~~A child whose own login is in use~~ Decided: a child's own logins
   count toward their guardians' two years, and the login goes with the
-  family (phase 4).
+  family (phase 4). So do the dojo sessions the child came to (decided
+  11 October 2026, §27).
 - **Retention periods** for each rule in phase 4: needs legal input
   (Belgian law, the insurer for `TeamAttendance`, the rules for
   criminal-record extracts). Decided so far: accounts two years after the
@@ -831,13 +835,15 @@ Phase 2 adds `accounts.GuardianRole` (one model, the same shape as
 
 ### Open points
 
-- **The retention job and a trusted adult** (found while building
-  decision 4): a child whose only parent hasn't logged in for two years is
-  erased with that parent, even when an `OTHER` guardian still signs the
-  child up every week, since only parents and legal guardians count. The
-  parent gets the reminder mails first. Should an `OTHER` guardian's
-  activity (or the child's sessions) count as the family being active?
-  A question for the stakeholder conversation.
+- ~~The retention job and a trusted adult~~ Decided (11 October 2026):
+  the child's activity counts. A child whose only parent hasn't logged in
+  for two years still kept coming to the dojo (an `OTHER` guardian signing
+  them up, say), so the family is in use: `privacy.retention.with_inactive_since`
+  counts the latest session the child came to (a confirmed place at a
+  session that has started, not marked absent) alongside the logins. The
+  family is erased only once neither the parent nor the child has done
+  anything for two years. An `OTHER` guardian's own login still doesn't
+  count for the parent's account.
 
 - Phase 2's default template is "Full access" for every guardian
   regardless of relation (decision 7) — should `OTHER` instead default

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-10 21:12+0000\n"
+"POT-Creation-Date: 2026-10-11 06:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -173,20 +173,15 @@ msgstr "Le site supprime ceci lui-même, chaque nuit :"
 #: ../../source/organisation/privacy.rst:71
 msgid ""
 "**Accounts** are deleted two years after their last login. A parent's "
-"account stays as long as one of their children uses their own login. The "
-"account holder gets a reminder 30 days and 7 days before, and an account "
-"is never deleted sooner than 30 days after the first reminder. A "
-"champion's or mentor's name stays on past sessions and on the belts and "
-"badges they awarded."
-msgstr ""
-"**Les comptes** sont supprimés deux ans après la dernière connexion. Le "
-"compte d'un parent reste tant qu'un de ses enfants utilise sa propre "
-"connexion. Le titulaire du compte reçoit un rappel 30 jours et 7 jours "
-"avant, et un compte n'est jamais supprimé moins de 30 jours après le "
-"premier rappel. Le nom d'un champion ou d'un mentor reste sur les "
-"sessions passées et sur les ceintures et badges qu'il a attribués."
+"account stays as long as one of their children uses their own login or "
+"comes to a dojo session (whoever signed them up; a session where the "
+"child was marked absent doesn't count). The account holder gets a "
+"reminder 30 days and 7 days before, and an account is never deleted "
+"sooner than 30 days after the first reminder. A champion's or mentor's "
+"name stays on past sessions and on the belts and badges they awarded."
+msgstr "**Les comptes** sont supprimés deux ans après la dernière connexion. Le compte d'un parent reste tant qu'un de ses enfants utilise sa propre connexion ou participe à une session de dojo (peu importe qui l'a inscrit ; une session où l'enfant a été noté absent ne compte pas). Le titulaire du compte reçoit un rappel 30 jours et 7 jours avant, et un compte n'est jamais supprimé moins de 30 jours après le premier rappel. Le nom d'un champion ou d'un mentor reste sur les sessions passées et sur les ceintures et badges qu'il a attribués."
 
-#: ../../source/organisation/privacy.rst:77
+#: ../../source/organisation/privacy.rst:78
 msgid ""
 "**The audit log** keeps an entry as long as the account it's about, or "
 "that made it; an entry with no account behind it goes after two years."
@@ -195,7 +190,7 @@ msgstr ""
 "concerne, ou qui l'a créée, existe ; une entrée sans compte derrière elle"
 " disparaît après deux ans."
 
-#: ../../source/organisation/privacy.rst:79
+#: ../../source/organisation/privacy.rst:80
 msgid ""
 "**Mail**: a year after a mail was queued, its address, subject and text "
 "are cleared. What kind of mail it was and whether it went out stay, for "
@@ -205,7 +200,7 @@ msgstr ""
 "objet et son texte sont effacés. Le type d'e-mail et le fait qu'il soit "
 "parti restent, pour les statistiques."
 
-#: ../../source/organisation/privacy.rst:82
+#: ../../source/organisation/privacy.rst:83
 msgid ""
 "**Invitations** to the organisation are removed 30 days after they were "
 "accepted, withdrawn or ran out (an invitation is valid for 14 days)."
@@ -214,13 +209,16 @@ msgstr ""
 " été acceptées, retirées ou expirées (une invitation est valable 14 "
 "jours)."
 
-#: ../../source/organisation/privacy.rst:84
+#: ../../source/organisation/privacy.rst:85
 msgid ""
 "**Invitations to be a child's guardian** are removed the same way: 30 "
 "days after they were accepted, withdrawn or ran out (valid for 14 days)."
-msgstr "Les **invitations à être responsable d'un enfant** sont supprimées de la même façon : 30 jours après avoir été acceptées, retirées ou expirées (valables 14 jours)."
+msgstr ""
+"Les **invitations à être responsable d'un enfant** sont supprimées de la "
+"même façon : 30 jours après avoir été acceptées, retirées ou expirées "
+"(valables 14 jours)."
 
-#: ../../source/organisation/privacy.rst:86
+#: ../../source/organisation/privacy.rst:87
 msgid ""
 "**Login sessions** end two weeks after they last changed, and are then "
 "removed."
@@ -228,11 +226,11 @@ msgstr ""
 "**Les sessions de connexion** expirent deux semaines après leur dernière "
 "modification, puis sont supprimées."
 
-#: ../../source/organisation/privacy.rst:89
+#: ../../source/organisation/privacy.rst:90
 msgid "Some data is removed at once, not after a period:"
 msgstr "Certaines données sont supprimées immédiatement, pas après un délai :"
 
-#: ../../source/organisation/privacy.rst:91
+#: ../../source/organisation/privacy.rst:92
 msgid ""
 "**A criminal-record extract** is deleted the moment a reviewer decides on"
 " it. Only the decision is kept."
@@ -240,7 +238,7 @@ msgstr ""
 "**Un extrait de casier judiciaire** est supprimé dès qu'un évaluateur a "
 "pris sa décision. Seule la décision est conservée."
 
-#: ../../source/organisation/privacy.rst:93
+#: ../../source/organisation/privacy.rst:94
 msgid ""
 "**Two-step login** methods (an authenticator app, passkeys, backup codes)"
 " are removed when someone turns two-step login off."
@@ -249,7 +247,7 @@ msgstr ""
 "d'authentification, des passkeys, des codes de secours) sont supprimées "
 "quand quelqu'un désactive la connexion en deux étapes."
 
-#: ../../source/organisation/privacy.rst:96
+#: ../../source/organisation/privacy.rst:97
 msgid ""
 "For some data, how long to keep it hasn't been decided yet, so the site "
 "doesn't remove it by itself: a child's details and their sessions, belts "
