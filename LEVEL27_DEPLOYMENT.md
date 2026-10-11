@@ -4,13 +4,14 @@ How production is provisioned on Level27, what each component does, how a deploy
 end, and how load is tested safely against the live site. For developers and whoever runs the platform.
 Versions and their support windows are in [`MAINTENANCE.md`](MAINTENANCE.md); open questions for Level27
 are in [`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md); measured capacity and load figures are in
-[`CAPACITY.md`](CAPACITY.md); the day-to-day deploy commands are in `scripts/CLAUDE.md`'s "Deploying
-(Level27)" section. This page is a snapshot of the Level27 panel on **11 October 2026**; the panel is the
-source of truth, this page a guided tour of it.
+[`CAPACITY.md`](CAPACITY.md); the day-to-day deploy commands are in
+[`scripts/CLAUDE.md`'s "Deploying (Level27)" section](scripts/CLAUDE.md#deploying-level27). This page is
+a snapshot of the Level27 panel on **11 October 2026**; the panel is the source of truth, this page a
+guided tour of it.
 
 A rendered PDF of this page, with the screenshots below in full size, is
 [`user-journeys/level27-deployment.pdf`](user-journeys/level27-deployment.pdf) (built the same way as the
-other PDFs under `user-journeys/`, see its `README.md`).
+other PDFs under `user-journeys/`, see its [`README.md`](user-journeys/README.md)).
 
 ---
 
@@ -42,7 +43,7 @@ below is managed either through the Level27 panel/API, or over SSH as the unpriv
 At a glance, the panel's own status page shows project status, component status, running status, limits,
 URL and SSL all **OK**, with monitoring also OK. The linked URL table shows `demo.coolestprojects.be` with
 health, SSL and **forced SSL** all green and **caching off** (an intentional choice — see
-["Architectural principles"](#architectural-choices-visible-in-the-panel) below).
+["Architectural choices visible in the panel"](#architectural-choices-visible-in-the-panel) below).
 
 ### The 7 components
 
@@ -408,10 +409,10 @@ log):
 
 | Question | Where |
 |---|---|
-| Exact deploy commands, day to day | `scripts/CLAUDE.md`, "Deploying (Level27)" |
+| Exact deploy commands, day to day | [`scripts/CLAUDE.md`, "Deploying (Level27)"](scripts/CLAUDE.md#deploying-level27) |
 | Versions running in production, their end-of-life dates, the security log | [`MAINTENANCE.md`](MAINTENANCE.md) |
 | Open technical questions for Level27, and what they've already answered | [`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md) |
 | Measured load, memory per component, database growth, how to measure again | [`CAPACITY.md`](CAPACITY.md) |
-| Every Prometheus metric and Grafana panel explained | `MONITORING.md` |
-| How a security incident or data breach is handled | `MAINTENANCE.md`, "Responding to a vulnerability" |
-| How the background Celery/beat design was decided | `DATA_MODEL.md` §11 |
+| Every Prometheus metric and Grafana panel explained | [`MONITORING.md`](MONITORING.md) |
+| How a security incident or data breach is handled | [`MAINTENANCE.md`, "Responding to a vulnerability"](MAINTENANCE.md#responding-to-a-vulnerability) |
+| How the two-Celery-worker design on Level27 was decided | [`DATA_MODEL_MAILING.md`, "Production: two Celery workers as a Level27 worker component"](DATA_MODEL_MAILING.md#production-two-celery-workers-as-a-level27-worker-component) |
