@@ -1125,6 +1125,30 @@ class MarkdownifyTests(TestCase):
         self.assertEqual(self.render(None), "")
 
 
+class DatabaseSqlModeTests(TestCase):
+    """Every connection runs MySQL's strict mode (MAINTENANCE.md, security
+    log, 11 Oct 2026): set by the site itself, so production's empty server
+    default doesn't matter."""
+
+    def test_connections_are_strict(self):
+        from django.conf import settings
+        from django.db import connection
+
+        self.assertIn(settings.MYSQL_SQL_MODE, settings.DATABASES["default"]["OPTIONS"]["init_command"])
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT @@SESSION.sql_mode")
+            modes = set(cursor.fetchone()[0].split(","))
+        self.assertEqual(modes, set(settings.MYSQL_SQL_MODE.split(",")))
+
+    def test_a_value_too_long_is_an_error_not_cut_off(self):
+        from django.db import DataError, transaction
+
+        from accounts.models import Ninja
+
+        with self.assertRaises(DataError), transaction.atomic():
+            Ninja.objects.create(name="x" * 500)
+
+
 class SecurityHeadersTests(TestCase):
     """HTTPS, Content-Security-Policy and Permissions-Policy (settings.py, MAINTENANCE.md's security log)."""
 

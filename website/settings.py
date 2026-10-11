@@ -527,6 +527,9 @@ ASGI_APPLICATION = "website.asgi.application"
 # Inside the .devcontainer workspace, DB_* env vars (see docker-compose.yml)
 # point this at the `db` service instead.
 
+MYSQL_SQL_MODE = (
+    "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
+)
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.mysql",
@@ -535,6 +538,12 @@ DATABASES = {
         "PASSWORD": env("DB_PASSWORD", default="coderdojo"),
         "HOST": env("DB_HOST", default="127.0.0.1"),
         "PORT": env("DB_PORT", default="13306"),
+        # MySQL's strict mode on every connection, whatever the server's own
+        # default (Level27's is empty): exactly MySQL 8.4's default sql_mode,
+        # so production behaves like development and the CI, where a value
+        # too long for its column is an error instead of being cut off
+        # silently (Django's check mysql.W002; MAINTENANCE.md, security log).
+        "OPTIONS": {"init_command": f"SET sql_mode='{MYSQL_SQL_MODE}'"},
     }
 }
 
