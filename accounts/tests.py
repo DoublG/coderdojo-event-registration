@@ -4230,6 +4230,23 @@ class GuardianInvitationTests(TestCase):
         self.assertNotEqual(self._token(), old)
         self.assertContains(self.client.get(self._link(old)), "isn't valid any more")
 
+    def test_without_htmx_the_outcome_shows_on_the_page_it_redirects_to(self):
+        from .guardian_invitations import invite
+
+        # The full-page fallback (no htmx) redirects to the child's page:
+        # that page must actually show the outcome, not swallow it.
+        response = self._invite(relation="boss", follow=True)
+        self.assertContains(response, "Enter a valid email address and choose a relation.")
+
+        invitation = invite(self.child, "new@example.com", "parent", self.mother)
+        response = self.client.post(
+            reverse(
+                "guardian_invitation_withdraw", kwargs={"ninja_id": self.child.id, "invitation_id": invitation.id}
+            ),
+            follow=True,
+        )
+        self.assertContains(response, "is withdrawn")
+
     def test_an_invitation_from_a_removed_parent_stops_working(self):
         from .guardian_invitations import invite
 
@@ -4265,10 +4282,10 @@ class GuardianInvitationTests(TestCase):
         self.client.post(url, {"password": "pw-123456!"})
         self.assertTrue(Guardianship.objects.filter(pk=self.mother_link.pk).exists())
         url = reverse("guardian_remove", kwargs={"ninja_id": self.child.id, "guardianship_id": grandma_link.id})
-        self.assertRedirects(
-            self.client.post(url, {"password": "pw-123456!"}), reverse("account_home"), fetch_redirect_response=False
-        )
+        response = self.client.post(url, {"password": "pw-123456!"}, follow=True)
+        self.assertRedirects(response, reverse("account_home"))
         self.assertFalse(Guardianship.objects.filter(pk=grandma_link.pk).exists())
+        self.assertContains(response, "no longer")
 
     def test_a_child_always_keeps_a_parent_or_legal_guardian(self):
         from .guardian_invitations import GuardianInvitationError, remove
