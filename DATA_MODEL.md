@@ -42,6 +42,7 @@ Sections 13–28 cover the API, the audit log, two-step login, GDPR, child accou
 - [`DATA_MODEL_API.md`](DATA_MODEL_API.md) — §13, dojo API clients and the event-sync plan.
 - [`DATA_MODEL_PRIVACY.md`](DATA_MODEL_PRIVACY.md) — §16 and §27, GDPR classification/export/erasure/retention and multiple guardians per child.
 - [`DATA_MODEL_ROLES.md`](DATA_MODEL_ROLES.md) — §28, letting a dojo champion or the organisation define their own custom roles.
+- [`DATA_MODEL_REPORTS.md`](DATA_MODEL_REPORTS.md) — §30, reporting dashboards the organisation builds itself (plan, with the options researched).
 
 Everything else — the current data model (§1–9), organisation events (§12), the audit log (§14), two-step login (§15), child accounts through organisation roles (§17–24), and capacity/monitoring (§26) — stays here in full.
 
@@ -2904,3 +2905,20 @@ Phase 2.
 4. **Organisation-wide questions** (the organisation asking the same
    thing at every dojo) are out of scope; the per-event model doesn't
    block them.
+
+
+## 30. Reporting dashboards for the organisation (not built — plan)
+
+The organisation's administrators build their own reports and dashboards
+on `/manage/reports/` (decided 11 October 2026).
+A report is a dataset (registrations, ninjas, dojos, ...), a measure, up to
+two groupings and a period, shown as a chart with its table. Saved reports go
+on dashboards. The datasets are a code registry of curated, aggregate-only
+fields (the segment builder's pattern), checked against the privacy registry,
+with small groups of children hidden. Charts are SVG drawn on the server
+with matplotlib (already used for the quality and capacity charts). The
+other options (django-sql-explorer, embedded notebooks such as marimo,
+Metabase/Superset, Grafana, dashboard-as-code packages) were researched and
+set aside: they hand out raw SQL over children's data, need a developer per
+dashboard, or can't run on Level27. Design, phases and open points are in
+`DATA_MODEL_REPORTS.md`.
