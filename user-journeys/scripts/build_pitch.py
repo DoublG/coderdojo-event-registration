@@ -37,9 +37,7 @@ PRINT = "--print" in sys.argv[1:]
 OFFICE = "--office" in sys.argv[1:]
 DECK = os.path.join(ROOT, "pitch-deck", LANG)
 SHOTS = os.path.join(ROOT, ".shots", LANG)
-OUT = os.path.join(
-    ROOT, LANG, ("pitch-deck" if LANG == "en" else "pitchdeck") + ("-print" if PRINT else "") + ".pdf"
-)
+OUT = os.path.join(ROOT, LANG, ("pitch-deck" if LANG == "en" else "pitchdeck") + ("-print" if PRINT else "") + ".pdf")
 
 # --print: the deck's palette → black-and-white-safe colours on white. Dark and coloured slides become
 # white (the section's own background, first in its style), cards get an outline instead of a tint,
@@ -69,6 +67,7 @@ def for_print(html):
     for old, new in PRINT_COLOURS:
         html = html.replace(old, new)
     return SHADOW.sub("box-shadow:none", html)
+
 
 # Each screenshot's asset id in the deck → the journey screenshot it was cropped from.
 IMAGES = {

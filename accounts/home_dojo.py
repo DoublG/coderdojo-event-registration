@@ -71,7 +71,7 @@ def backfill(ninjas: "QuerySet[Ninja] | None" = None) -> int:
             continue
         dojo_id = busiest["event__dojo"]
         first = source.filter(event__dojo_id=dojo_id).order_by("event__start_time").first()
-        assert first is not None  # `busiest` counted at least one place there
+        assert first is not None  # noqa: S101 (a programming error, never user input: `busiest` counted at least one place there)
         ninja.home_dojo_id = dojo_id
         ninja.member_since = timezone.localdate(first.event.start_time)
         ninja.save(update_fields=["home_dojo", "member_since"])

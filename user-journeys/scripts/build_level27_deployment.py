@@ -21,7 +21,9 @@ def shot(name, caption="", rot=False):
         data = base64.b64encode(f.read()).decode()
     cap = f"<figcaption>{caption}</figcaption>" if caption else ""
     cls = "chart rot" if rot else "chart"
-    return f"<figure class='{cls}'><img src='data:image/jpeg;base64,{data}' alt='{html.escape(caption)}'>{cap}</figure>"
+    return (
+        f"<figure class='{cls}'><img src='data:image/jpeg;base64,{data}' alt='{html.escape(caption)}'>{cap}</figure>"
+    )
 
 
 CSS = """
@@ -205,10 +207,14 @@ traverse into <code>~/app/staticfiles</code>/<code>media</code>. Caused a real o
 static/media for 7+ minutes) on 8 October 2026 when a panel-only change reset the permission outside of any
 code deploy. <b>Not fully closed</b>: a panel change that isn't a code deploy still needs this run by hand.</li>
 </ol>
-{why("Production env vars live only on the server, in ~/app/.env, never in this repository. manage.py check "
-     "before touching the live app is what stops a broken migration or missing setting from ever reaching "
-     "production, and the warm Celery shutdown is the only lever available since there's no systemd access "
-     "to create units of our own on this account.")}
+{
+        why(
+            "Production env vars live only on the server, in ~/app/.env, never in this repository. manage.py check "
+            "before touching the live app is what stops a broken migration or missing setting from ever reaching "
+            "production, and the warm Celery shutdown is the only lever available since there's no systemd access "
+            "to create units of our own on this account."
+        )
+    }
 """,
 )
 
@@ -238,9 +244,13 @@ whole component's 512 MiB kill limit.</li>
 <li><b><code>periodic</code> logs at <code>WARNING</code>, <code>mailing</code> at <code>INFO</code></b>
 &mdash; the periodic worker's 10-second dispatcher would flood the log at <code>INFO</code>.</li>
 </ul>
-{why("The component's 512 MiB ceiling is fixed by the Level27 package, not adjustable from the dashboard; "
-     "what is a choice is its behaviour at the limit. Set to kill rather than throttle: a stress test with "
-     "throttle caused a 19-minute mail stall, where kill recovered within seconds of a forced over-limit run.")}
+{
+        why(
+            "The component's 512 MiB ceiling is fixed by the Level27 package, not adjustable from the dashboard; "
+            "what is a choice is its behaviour at the limit. Set to kill rather than throttle: a stress test with "
+            "throttle caused a 19-minute mail stall, where kill recovered within seconds of a forced over-limit run."
+        )
+    }
 """,
 )
 
@@ -299,8 +309,12 @@ past 300 without agreeing it with Level27 first.</li>
 goes to 503.</li>
 <li>Compare against the devcontainer's own figures and keep the dated results file.</li>
 </ol>
-{why("A production run goes through Level27's real proxy with real TLS, so it doubles as an end-to-end check "
-     "of the proxy's own limits and connection behaviour towards gunicorn, not just the application's own cap.")}
+{
+        why(
+            "A production run goes through Level27's real proxy with real TLS, so it doubles as an end-to-end check "
+            "of the proxy's own limits and connection behaviour towards gunicorn, not just the application's own cap."
+        )
+    }
 """,
 )
 
