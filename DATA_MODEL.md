@@ -42,7 +42,7 @@ Sections 13–28 cover the API, the audit log, two-step login, GDPR, child accou
 - [`DATA_MODEL_API.md`](DATA_MODEL_API.md) — §13, dojo API clients and the event-sync plan.
 - [`DATA_MODEL_PRIVACY.md`](DATA_MODEL_PRIVACY.md) — §16 and §27, GDPR classification/export/erasure/retention and multiple guardians per child.
 - [`DATA_MODEL_ROLES.md`](DATA_MODEL_ROLES.md) — §28, letting a dojo champion or the organisation define their own custom roles.
-- [`DATA_MODEL_REPORTS.md`](DATA_MODEL_REPORTS.md) — §30, reporting dashboards the organisation builds itself (plan, with the options researched).
+- [`DATA_MODEL_REPORTS.md`](DATA_MODEL_REPORTS.md) — §30, reporting dashboards: curated views plus an embedded Perspective builder (plan, with the options researched).
 
 Everything else — the current data model (§1–9), organisation events (§12), the audit log (§14), two-step login (§15), child accounts through organisation roles (§17–24), and capacity/monitoring (§26) — stays here in full.
 
@@ -2909,16 +2909,14 @@ Phase 2.
 
 ## 30. Reporting dashboards for the organisation (not built — plan)
 
-The organisation's administrators build their own reports and dashboards
-on `/manage/reports/` (decided 11 October 2026).
-A report is a dataset (registrations, ninjas, dojos, ...), a measure, up to
-two groupings and a period, shown as a chart with its table. Saved reports go
-on dashboards. The datasets are a code registry of curated, aggregate-only
-fields (the segment builder's pattern), checked against the privacy registry,
-with small groups of children hidden. Charts are SVG drawn on the server
-with matplotlib (already used for the quality and capacity charts). The
-other options (django-sql-explorer, embedded notebooks such as marimo,
-Metabase/Superset, Grafana, dashboard-as-code packages) were researched and
-set aside: they hand out raw SQL over children's data, need a developer per
-dashboard, or can't run on Level27. Design, phases and open points are in
-`DATA_MODEL_REPORTS.md`.
+The SAP Embedded Analytics model: developers define curated *reporting
+views* (a fixed set of aggregated columns each, checked against the privacy
+registry, small groups of children hidden on the server), and the
+organisation's administrators build their own reports and dashboards on them
+(decided 11 October 2026) with Perspective, an open-source pivot table and
+chart component (`<perspective-viewer>`, Apache-2.0) embedded in
+`/manage/reports/`. It runs in the browser, so Level27 serves only one cached
+query per view; a report is the component's saved JSON in a `Report` row. No
+home-made builder (decided the same day). The other options (django-sql-explorer,
+django-report-builder, Metabase/Superset/Grafana, notebooks) were researched
+and set aside. Design, phases and open points are in `DATA_MODEL_REPORTS.md`.
