@@ -13,6 +13,8 @@ env/
 build/
 develop-eggs/
 dist/
+# ...but not the npm packages vendored in their own layout (reports/static/reports/vendor/perspective-*/README.md).
+!reports/static/reports/vendor/perspective-*/*/dist/
 downloads/
 eggs/
 .eggs/

@@ -573,6 +573,7 @@ class OrganisationAreaTests(TestCase):
                 Area.COMMUNICATION,
                 Area.PUBLIC_SITE,
                 Area.NINJAS,
+                Area.REPORTS,
                 Area.PRIVACY,
                 Area.SECURITY,
                 Area.PEOPLE,

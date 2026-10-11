@@ -13,7 +13,7 @@ each one gives:
 
 - **Admin**: the whole organisation dashboard (campaigns, journeys,
   segments, mail templates, the mail queue, promotions, sponsors, awards,
-  privacy, sign-in security, these People pages and the audit log).
+  reports, privacy, sign-in security, these People pages and the audit log).
 - **Background-check reviewer**: background checks and applications (see
   :doc:`volunteers`). Reviewers read criminal-record extracts, so only give
   this role to the people who need it.

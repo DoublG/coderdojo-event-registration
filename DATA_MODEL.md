@@ -2907,7 +2907,7 @@ Phase 2.
    block them.
 
 
-## 30. Reporting dashboards for the organisation (not built — plan)
+## 30. Reporting dashboards for the organisation (phase 1 built)
 
 The SAP Embedded Analytics model: developers define curated *reporting
 views* (a fixed set of aggregated columns each, checked against the privacy
@@ -2919,4 +2919,6 @@ chart component (`<perspective-viewer>`, Apache-2.0) embedded in
 query per view; a report is the component's saved JSON in a `Report` row. No
 home-made builder (decided the same day). The other options (django-sql-explorer,
 django-report-builder, Metabase/Superset/Grafana, notebooks) were researched
-and set aside. Design, phases and open points are in `DATA_MODEL_REPORTS.md`.
+and set aside. Phase 1 is built (11 October 2026): the `reports` app, the
+engagement snapshot as the first dataset, saved reports on `/manage/reports/`.
+Design, what's built, phases and open points are in `DATA_MODEL_REPORTS.md`.

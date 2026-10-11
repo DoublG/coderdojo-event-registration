@@ -296,7 +296,7 @@ also in the Code audit workflow.
 | Layer | Apps | What it is |
 |---|---|---|
 | Top | `pages` | the site as visitors and the organisation meet it: the homepage, `/manage/`'s landing, the audit log page, `/health/`, the Django admin site |
-| Across the domain | `api`, `campaigns`, `privacy` | what reads every app: the API, campaigns and segments, the GDPR operations (export, erasure, retention) |
+| Across the domain | `api`, `campaigns`, `privacy`, `reports` | what reads every app: the API, campaigns and segments, the GDPR operations (export, erasure, retention), the organisation's reports |
 | Domain | `accounts`, `applications`, `content`, `dojos`, `events`, `mailing`, `notifications`, `pathways` | the data and its rules, with the mail engine and the notifications they send through |
 | Foundation | `core`, `geo`, `monitoring` | what every app builds on; knows no app |
 

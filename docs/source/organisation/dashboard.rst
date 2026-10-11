@@ -41,6 +41,8 @@ The sidebar has these sections:
 - **Assign awards**: give a one-off award directly to a ninja's account,
   for events that don't run through a dojo's own attendance list (see
   :doc:`awards`).
+- **Reports** (under **Insights**): tables and charts you build yourself on
+  prepared figures, such as children per province (see :doc:`reports`).
 - **Background checks** and **Applications** (under **Volunteers**): the
   criminal-record extracts and applications of new champions and mentors,
   for people with the **background-check reviewer** role only (see

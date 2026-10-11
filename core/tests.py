@@ -833,12 +833,14 @@ class SiteFormTextsAreTranslatedTests(TestCase):
         from events.models import Event, Registration
         from mailing.forms import BlockAddressForm, NewTemplateForm, TemplateVersionForm
         from privacy.forms import ConfirmUsernameForm
+        from reports.forms import ReportForm
 
         user = User.objects.create(username="u")
         bruges = make_dojo("Bruges")
         return [
             SponsorForm(),
             PromotionForm(),
+            ReportForm(),
             BadgeForm(),
             AssignBadgeForm(),
             DojoCreateForm(),

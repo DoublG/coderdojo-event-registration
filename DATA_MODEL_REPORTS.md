@@ -1,7 +1,64 @@
-# Reporting dashboards for the organisation (§30, not built — plan)
+# Reporting dashboards for the organisation (§30, phase 1 built)
 
 > Split out of `DATA_MODEL.md` (§30 there is the short version). Research
-> and plan of 11 October 2026, for review before anything is built.
+> and plan of 11 October 2026; phase 1 built the same day (see "Built so
+> far" for where it differs from the design below).
+
+## Built so far (11 October 2026)
+
+Phase 1, plus the saving of phase 2: the `reports` app, one dataset, saved
+reports, and the *Reports* area (*Insights* in the sidebar). Dashboards
+(several reports on one page) aren't built yet. Where the build differs from
+the design below:
+
+- **The dataset is the segment builder's table:** *Children and how they
+  come*, from the nightly engagement snapshot (`events.NinjaEngagement`, the
+  overall row per child): stage, main dojo, its province, age band, gender,
+  signed up for a session; children, sessions attended and offered (180
+  days), sessions attended (all time), no-shows (90 days). Registrations,
+  Ninjas, Dojos and the rest follow.
+- **`reports/datasets/`, not `reports/views/`**, so the registry doesn't
+  clash with the app's Django views. "Dataset" is also the word on the pages.
+- **Small groups are generalised, not only left out** (`reports.datasets.base.generalise`):
+  a row with fewer than `REPORT_MIN_GROUP` children gets its most identifying
+  dimension replaced by "Other (small groups)", in a fixed order per dataset
+  (main dojo, signed up, age band, gender, province, stage), and is merged
+  with the rows that then match; only what's still too small after the last
+  dimension is left out, and the page says how many children that was. With
+  the 83 children of the dev data most rows end up under "Other"; real
+  numbers keep more detail.
+- **The saved settings don't depend on the language** (`reports/config.py`):
+  Perspective names columns by the label it shows, so a report is stored with
+  `col:<key>` and `val:<key>` (a translated value in a filter) and turned back
+  into the viewer's language when it's opened; a column the dataset lost is
+  dropped with a notice. `theme`, `title`, `table` and `settings` are never
+  stored: the site decides them.
+- **`Report` has no `period` yet** (the snapshot has no dates to filter on),
+  and has `updated_by` next to `created_by`.
+- **The policy needs `blob:` in `script-src` too**, not only `worker-src`:
+  the bundles import their WebAssembly glue from a `blob:` URL, and the chart
+  renderer's worker imports it again (blocked inside a worker, it fails
+  silently: an empty chart). Still only on the report pages.
+- **Perspective has no Dutch:** `reports/static/reports/perspective-nl.css`
+  is ours (its labels are CSS variables), French is the package's.
+- **View-only** (the `view_report` permission without the others) opens a
+  report with the settings panel closed and no save form; nothing locks the
+  panel, but nothing it does can be saved.
+- **Caching:** the figures per dataset and language, for an hour, keyed on
+  the column labels too (a deploy that changes a label gets new figures at
+  once); `report.js`'s URL carries a hash of its contents, since static files
+  are cached for days.
+- **Accessibility:** the page around the viewer passes axe in both themes
+  (`check_a11y.py` scans `/manage/reports/` and a new report). Inside the
+  viewer, axe finds five things in Perspective's own shadow DOM that we can't
+  fix from here: its column search box has no label, its rollup select no
+  name and a target under 24px, an empty header cell in the data grid, and a
+  `<ul>` holding a `<div>`. `check_a11y.py` leaves `<perspective-viewer>` out
+  of the scan for that reason. Still to do (phase 2): the plain table of a
+  report's numbers on the page; until then the CSV download is the
+  alternative, and these findings are worth reporting upstream.
+- **The board doesn't see Reports yet:** the open point below. One line
+  (`"reports.report": _VIEW` in `BOARD_PERMISSIONS`) opens it read-only.
 
 The organisation's administrators want to build their own reports and
 dashboards: how many children came to a session this year, per province,
@@ -197,7 +254,7 @@ erDiagram
 
 ## Phases
 
-1. **One view and one report:** the `reports` app with the view registry
+1. **One view and one report** (built, with the engagement dataset): the `reports` app with the view registry
    and the privacy check, the Registrations view and its endpoint, small
    groups hidden, Perspective vendored with the page-only policy, the
    area and its permissions, and one report page where an administrator

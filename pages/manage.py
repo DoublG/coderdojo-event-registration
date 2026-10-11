@@ -17,6 +17,7 @@ AREA_LANDINGS = {
     Area.VOLUNTEERS: "manage_check_list",
     Area.PUBLIC_SITE: "manage_promotion_list",
     Area.NINJAS: "manage_badge_list",
+    Area.REPORTS: "manage_report_list",
     Area.PRIVACY: "manage_privacy",
     Area.SECURITY: "manage_security",
     Area.PEOPLE: "manage_people",

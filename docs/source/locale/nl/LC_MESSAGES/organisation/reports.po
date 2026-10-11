@@ -1,0 +1,120 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-11 13:48+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: nl\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/reports.rst:2
+msgid "Reports"
+msgstr "Rapporten"
+
+#: ../../source/organisation/reports.rst:4
+msgid ""
+"Reports are tables and charts you build yourself on the organisation's "
+"figures: how many children come, per province, per dojo, per age band, "
+"how regularly. Open **Reports** (under **Insights**) in the organisation "
+"dashboard. The **admin** role makes, changes and deletes reports; every "
+"admin can change every report, and the audit log shows who changed what "
+"(see :doc:`audit-log`)."
+msgstr "Rapporten zijn tabellen en grafieken die je zelf maakt op de cijfers van de organisatie: hoeveel kinderen er komen, per provincie, per dojo, per leeftijdsgroep, hoe regelmatig. Open **Rapporten** (onder **Inzichten**) in het organisatiedashboard. De rol **beheerder** maakt, wijzigt en verwijdert rapporten; elke beheerder kan elk rapport wijzigen, en de auditlog toont wie wat wijzigde (zie :doc:`audit-log`)."
+
+#: ../../source/organisation/reports.rst:12
+msgid "Datasets: figures we prepared"
+msgstr "Gegevenssets: cijfers die we voorbereidden"
+
+#: ../../source/organisation/reports.rst:14
+msgid ""
+"Every report starts from a **dataset**: figures we prepared for reports, "
+"listed under **Datasets** on the Reports page. You choose what to show, "
+"not where the figures come from. The first dataset is **Children and how "
+"they come**: every child with an engagement stage from last night's "
+"figures (the same stages segments use, see :doc:`segments`), with their "
+"main dojo and its province, age band and gender, whether they're signed "
+"up for a session, and how many sessions they came to and were offered."
+msgstr "Elk rapport vertrekt van een **gegevensset**: cijfers die we voorbereidden voor rapporten, te vinden onder **Gegevenssets** op de pagina Rapporten. Je kiest wat je toont, niet waar de cijfers vandaan komen. De eerste gegevensset is **Kinderen en hoe vaak ze komen**: elk kind met een betrokkenheidsfase uit de cijfers van afgelopen nacht (dezelfde fasen als in segmenten, zie :doc:`segments`), met de hoofddojo en de provincie ervan, de leeftijdsgroep en het geslacht, of het kind ingeschreven is voor een sessie, en hoeveel sessies het bijwoonde en aangeboden kreeg."
+
+#: ../../source/organisation/reports.rst:22
+msgid ""
+"A dataset never contains a name, an address or a mail address, nor "
+"anything about health or background checks. It's counts only. **Small "
+"groups are merged**: a group of fewer than five children (say, the girls "
+"aged 7 to 9 at one dojo) gets its most identifying detail replaced by "
+"**Other (small groups)** and is added to the other groups that then "
+"match, starting with the dojo. That way no report can point out a child. "
+"Children who are still in a group that small after that are left out, and"
+" the report says how many; totals are that much lower. With few children,"
+" a lot ends up under **Other**; the more children come, the more detail "
+"the figures keep."
+msgstr "Een gegevensset bevat nooit een naam, een adres of een e-mailadres, en niets over gezondheid of uittreksels uit het strafregister. Het zijn alleen aantallen. **Kleine groepen worden samengevoegd**: bij een groep van minder dan vijf kinderen (bijvoorbeeld de meisjes van 7 tot 9 in één dojo) wordt het gegeven dat het meest verraadt vervangen door **Andere (kleine groepen)**, en de groep wordt opgeteld bij de andere groepen die dan overeenkomen, te beginnen met de dojo. Zo kan geen enkel rapport een kind aanwijzen. Kinderen die daarna nog in zo'n kleine groep zitten, worden weggelaten, en het rapport zegt hoeveel; de totalen liggen dus zoveel lager. Met weinig kinderen komt veel onder **Andere** terecht; hoe meer kinderen er komen, hoe meer detail de cijfers behouden."
+
+#: ../../source/organisation/reports.rst:34
+msgid "Building a report"
+msgstr "Een rapport maken"
+
+#: ../../source/organisation/reports.rst:36
+msgid "On the Reports page, choose **New report** under a dataset."
+msgstr "Kies op de pagina Rapporten **Nieuw rapport** onder een gegevensset."
+
+#: ../../source/organisation/reports.rst:37
+msgid ""
+"The settings panel is on the right. Drag columns into **Group by** (the "
+"rows, for example *Province*) and **Split by** (the columns or the "
+"colours of a chart, for example *Engagement stage*). Under **Columns**, "
+"tick what to count, for example *Children*. Drag a column to **Where** to"
+" show only some of the figures, for example only regular children."
+msgstr "Rechts staat het paneel met de instellingen. Sleep kolommen naar **Groeperen op** (de rijen, bijvoorbeeld *Provincie*) en **Splitsen op** (de kolommen of de kleuren van een grafiek, bijvoorbeeld *Betrokkenheidsfase*). Vink onder **Kolommen** aan wat je wilt tellen, bijvoorbeeld *Kinderen*. Sleep een kolom naar **Filter** om maar een deel van de cijfers te tonen, bijvoorbeeld alleen de vaste bezoekers."
+
+#: ../../source/organisation/reports.rst:42
+msgid ""
+"At the top left, choose how to show it: a table (**Datagrid**) or a "
+"chart, such as **Y Bar** for bars."
+msgstr "Kies linksboven hoe je het toont: een tabel (**Tabel**) of een grafiek, zoals **Staven Y** voor staven."
+
+#: ../../source/organisation/reports.rst:44
+msgid ""
+"Below, give the report a name, and a description for whoever opens it "
+"next, and choose **Save**."
+msgstr "Geef het rapport daaronder een naam, en een beschrijving voor wie het hierna opent, en kies **Opslaan**."
+
+#: ../../source/organisation/reports.rst:47
+msgid ""
+"Opening a saved report shows it as it was saved, with the figures as of "
+"now (they're updated every hour; the page says when). Change it and "
+"choose **Save**, or **Save as a new report** to keep the original. The "
+"settings button at the top right of the report opens the panel again. "
+"**Delete report** removes the report, never the figures."
+msgstr "Een opgeslagen rapport opent zoals het opgeslagen werd, met de cijfers van nu (ze worden elk uur bijgewerkt; de pagina zegt wanneer). Wijzig het en kies **Opslaan**, of **Opslaan als nieuw rapport** om het origineel te houden. De knop met de instellingen rechtsboven in het rapport opent het paneel weer. **Rapport verwijderen** verwijdert het rapport, nooit de cijfers."
+
+#: ../../source/organisation/reports.rst:53
+msgid ""
+"A report works in every language: a report saved in Dutch opens in French"
+" with French column names, and the other way round."
+msgstr "Een rapport werkt in elke taal: een rapport dat in het Nederlands opgeslagen werd, opent in het Frans met Franse kolomnamen, en omgekeerd."
+
+#: ../../source/organisation/reports.rst:57
+msgid "The figures as a file"
+msgstr "De cijfers als bestand"
+
+#: ../../source/organisation/reports.rst:59
+msgid ""
+"**Download the figures (CSV)** gives a dataset's figures as a spreadsheet"
+" file, with the same merged small groups. It also works without "
+"JavaScript, which building a report needs."
+msgstr "**Download de cijfers (CSV)** geeft de cijfers van een gegevensset als rekenbladbestand, met dezelfde samengevoegde kleine groepen. Dat werkt ook zonder JavaScript, dat nodig is om een rapport te maken."
+

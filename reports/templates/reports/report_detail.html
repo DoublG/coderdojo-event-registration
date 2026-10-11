@@ -1,0 +1,66 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n static %}
+{% block manage_page_title %}{% if report %}{{ report.name }}{% else %}{% translate "New report" %}{% endif %}{% endblock %}
+{% block manage_heading %}{% if report %}{{ report.name }}{% else %}{% translate "New report" %}{% endif %}{% endblock %}
+{% block manage_topbar_extra %}<a class="cd-btn cd-btn--ghost label" href="{% url 'manage_report_csv' dataset_key=dataset.key %}">{% translate "Download the figures (CSV)" %}</a>{% endblock %}
+
+{% block manage_content %}
+  {% comment %}
+    A report (reports.views.report_detail / report_create, DATA_MODEL_REPORTS.md
+    §30): Perspective's viewer on the dataset's figures, wired by
+    reports/report.js; the form saves the viewer's settings.
+  {% endcomment %}
+  <p class="body-sm">
+    <a href="{% url 'manage_report_list' %}">{% translate "Reports" %}</a> ·
+    {% blocktranslate trimmed with dataset=dataset.label time=as_of %}Dataset: {{ dataset }}, figures as of {{ time }}.{% endblocktranslate %}
+  </p>
+  {% if report.description %}<p class="body">{{ report.description }}</p>{% endif %}
+  {% if not report and can_edit %}
+    <p class="body-sm">{% translate "Drag columns into Group by and Split by, choose what to show under Columns, and pick a table or a chart at the top left. Then give the report a name and save it." %}</p>
+  {% endif %}
+  {% if hidden %}
+    <p class="cd-form__note caption" role="note">{% blocktranslate trimmed count counter=hidden with min=min_group %}
+      {{ counter }} child is left out: they're in a group of fewer than {{ min }} even after merging small groups into "Other", so totals are that much lower.
+    {% plural %}
+      {{ counter }} children are left out: they're in groups of fewer than {{ min }} even after merging small groups into "Other", so totals are that much lower.
+    {% endblocktranslate %}</p>
+  {% endif %}
+  {% if missing %}
+    <p class="cd-form__note cd-form__note--error caption" role="alert">{% translate "This report used columns the dataset doesn't have any more; they were left out. Save the report to keep it this way." %}</p>
+  {% endif %}
+
+  <p class="cd-form__note cd-form__note--error caption" id="report-error" role="alert" hidden></p>
+  <noscript><p class="cd-form__note caption">{% translate "Building reports needs JavaScript. The figures are also available as a CSV file (top right)." %}</p></noscript>
+  <perspective-viewer id="report-viewer" class="report-viewer" data-source="{% url 'manage_report_data' dataset_key=dataset.key %}" aria-label="{% if report %}{{ report.name }}{% else %}{% translate 'New report' %}{% endif %}"></perspective-viewer>
+
+  {% if can_edit or can_add and report %}
+    <form class="cd-card cd-form report-form" id="report-form" method="post" novalidate>
+      {% csrf_token %}
+      {{ form }}
+      <div class="cd-form__actions">
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_report_list' %}">{% translate "Cancel" %}</a>
+        {% if report and can_add %}<button type="submit" name="save_as_new" value="1" class="cd-btn cd-btn--ghost label">{% translate "Save as a new report" %}</button>{% endif %}
+        {% if can_edit %}<button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save" %}</button>{% endif %}
+      </div>
+    </form>
+  {% endif %}
+  {% if can_delete %}
+    <form method="post" action="{% url 'manage_report_delete' report_id=report.id %}" style="margin-top: var(--space-4);"
+          data-confirm="{% blocktranslate asvar confirm_msg with name=report.name %}Delete the report {{ name }}? The figures stay; only the report goes.{% endblocktranslate %}{{ confirm_msg }}">
+      {% csrf_token %}<button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Delete report" %}</button>
+    </form>
+  {% endif %}
+  {{ setup|json_script:"report-setup" }}
+{% endblock %}
+
+{% block manage_extra_style %}
+<link rel="stylesheet" href="{% static 'reports/vendor/perspective-5.5.1/viewer/dist/css/pro.css' %}">
+<link rel="stylesheet" href="{% static 'reports/vendor/perspective-5.5.1/viewer/dist/css/pro-dark.css' %}">
+{% if language == "fr" %}<link rel="stylesheet" href="{% static 'reports/vendor/perspective-5.5.1/viewer/dist/css/intl/fr.css' %}">{% elif language == "nl" %}<link rel="stylesheet" href="{% static 'reports/perspective-nl.css' %}">{% endif %}
+<style>
+  .report-viewer { display: block; position: relative; height: max(480px, 70vh); margin: var(--space-4) 0; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+  .report-form { padding: var(--space-5); max-width: 640px; }
+</style>
+{% endblock %}
+
+{% block manage_extra_script %}<script type="module" src="{% static 'reports/report.js' %}?v={{ script_version }}"></script>{% endblock %}

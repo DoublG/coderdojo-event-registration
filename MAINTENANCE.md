@@ -71,6 +71,14 @@ calendar: stay on the latest release. Watch these:
 | unittest-xml-reporting, lxml | 4.0.0, 6.1.3 | Development only (`requirements-dev.txt`): the test results as JUnit XML for the Tests workflow's summary. `pip-audit`: no known vulnerabilities (1 Oct 2026). |
 | locust, matplotlib | 2.46.6, 3.11.2 | The load test and its charts ([`loadtest/requirements.txt`](loadtest/requirements.txt), [`CAPACITY.md`](CAPACITY.md)), in a venv of their own: never in the image or on production. `pip-audit -r loadtest/requirements.txt`: no known vulnerabilities (30 Sep 2026). |
 
+### Browser libraries (served from our own static files)
+
+| Library | Version | Where | Note |
+|---|---|---|---|
+| Perspective (`@perspective-dev/client`, `server`, `viewer`, `viewer-datagrid`, `viewer-charts`) | 5.5.1 (17 Sep 2026), Apache-2.0 | `reports/static/reports/vendor/perspective-5.5.1/` | The organisation's report builder (`reports`, DATA_MODEL_REPORTS.md §30), only on the report pages. No fixed support windows: stay on the latest release; its README has the upgrade steps and the checksums check. Needs WebAssembly and `blob:` scripts and workers in those pages' Content-Security-Policy. Checked 11 Oct 2026. |
+
+htmx and OpenLayers are in their folders' READMEs (CLAUDE.md, "htmx widgets").
+
 ### Missing on the server
 
 Found on 6 Oct 2026 with a read-only check over SSH (`scripts/deploy.sh --check` and an inventory); asked of

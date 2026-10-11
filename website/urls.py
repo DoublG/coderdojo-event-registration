@@ -42,6 +42,7 @@ urlpatterns = [
     path("", include("campaigns.urls")),
     path("", include("content.urls")),
     path("", include("privacy.urls")),
+    path("", include("reports.urls")),
     path("", include("monitoring.urls")),
     path("", include("notifications.urls")),
     # The API (DATA_MODEL.md §13): OAuth 2.0 client credentials, then /api/v1/.

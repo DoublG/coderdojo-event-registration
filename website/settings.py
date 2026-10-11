@@ -425,6 +425,8 @@ INSTALLED_APPS = [
     "privacy",
     "monitoring",
     "api",
+    # The organisation's reports on curated datasets (DATA_MODEL_REPORTS.md §30).
+    "reports",
     # The homepage, /manage/'s landing, the audit log page and the health
     # check, assembled from the apps above (CODING_STANDARDS.md, "Layers").
     "pages",
@@ -771,3 +773,8 @@ ENGAGEMENT_CHANGE_RETENTION_DAYS = None  # a child's engagement stage change
 BOUNCE_RECORD_RETENTION_DAYS = None  # never shorter than MAILING_SOFT_BOUNCE_WINDOW_DAYS
 NOTIFICATION_RETENTION_DAYS = None  # a notification that was read
 ADMIN_LOG_RETENTION_DAYS = None  # the Django admin's own log of changes made by hand
+
+# Reports (DATA_MODEL_REPORTS.md §30): in a dataset about children, a group
+# smaller than this is merged into "Other" before it leaves the server, so a
+# report can't point out one child.
+REPORT_MIN_GROUP = env.int("REPORT_MIN_GROUP", default=5)

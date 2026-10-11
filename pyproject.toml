@@ -41,7 +41,7 @@ max-complexity = 20
 [tool.ruff.lint.isort]
 known-first-party = [
     "accounts", "api", "applications", "campaigns", "content", "core", "dojos", "events", "geo",
-    "mailing", "monitoring", "notifications", "pages", "pathways", "privacy", "website",
+    "mailing", "monitoring", "notifications", "pages", "pathways", "privacy", "reports", "website",
 ]
 
 # The layers between the apps (CODING_STANDARDS.md, "Layers"): `lint-imports`
@@ -54,7 +54,7 @@ known-first-party = [
 [tool.importlinter]
 root_packages = [
     "accounts", "api", "applications", "campaigns", "content", "core", "dojos", "events",
-    "geo", "mailing", "monitoring", "notifications", "pages", "pathways", "privacy",
+    "geo", "mailing", "monitoring", "notifications", "pages", "pathways", "privacy", "reports",
 ]
 include_external_packages = false
 
@@ -65,8 +65,8 @@ layers = [
     # The site as visitors and the organisation meet it, assembled from the rest.
     "pages",
     # What reads across the domain: campaigns and segments, the API, the GDPR
-    # operations (export, erasure, retention).
-    "api : campaigns : privacy",
+    # operations (export, erasure, retention), the reports.
+    "api : campaigns : privacy : reports",
     # The domain, with the mail engine and the notifications it sends through.
     "accounts : applications : content : dojos : events : mailing : notifications : pathways",
     # The foundation: knows no app. Apps register with it from their
@@ -212,6 +212,10 @@ files = [
     "privacy/register.py",
     "privacy/retention.py",
     "privacy/tasks.py",
+    "reports/config.py",
+    "reports/datasets/__init__.py",
+    "reports/datasets/base.py",
+    "reports/datasets/engagement.py",
 ]
 follow_imports = "silent"
 # Libraries without type information (two-factor, auditlog, oauth toolkit, ...).

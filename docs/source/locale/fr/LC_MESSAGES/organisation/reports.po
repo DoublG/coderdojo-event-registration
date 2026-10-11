@@ -1,0 +1,120 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-11 13:48+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/organisation/reports.rst:2
+msgid "Reports"
+msgstr "Rapports"
+
+#: ../../source/organisation/reports.rst:4
+msgid ""
+"Reports are tables and charts you build yourself on the organisation's "
+"figures: how many children come, per province, per dojo, per age band, "
+"how regularly. Open **Reports** (under **Insights**) in the organisation "
+"dashboard. The **admin** role makes, changes and deletes reports; every "
+"admin can change every report, and the audit log shows who changed what "
+"(see :doc:`audit-log`)."
+msgstr "Les rapports sont des tableaux et des graphiques que vous créez vous-même sur les chiffres de l'organisation : combien d'enfants viennent, par province, par dojo, par tranche d'âge, avec quelle régularité. Ouvrez **Rapports** (sous **Analyses**) dans le tableau de bord de l'organisation. Le rôle **administrateur** crée, modifie et supprime les rapports ; chaque administrateur peut modifier chaque rapport, et le journal d'audit montre qui a modifié quoi (voir :doc:`audit-log`)."
+
+#: ../../source/organisation/reports.rst:12
+msgid "Datasets: figures we prepared"
+msgstr "Jeux de données : des chiffres préparés"
+
+#: ../../source/organisation/reports.rst:14
+msgid ""
+"Every report starts from a **dataset**: figures we prepared for reports, "
+"listed under **Datasets** on the Reports page. You choose what to show, "
+"not where the figures come from. The first dataset is **Children and how "
+"they come**: every child with an engagement stage from last night's "
+"figures (the same stages segments use, see :doc:`segments`), with their "
+"main dojo and its province, age band and gender, whether they're signed "
+"up for a session, and how many sessions they came to and were offered."
+msgstr "Chaque rapport part d'un **jeu de données** : des chiffres préparés pour les rapports, listés sous **Jeux de données** sur la page Rapports. Vous choisissez ce que vous montrez, pas d'où viennent les chiffres. Le premier jeu de données est **Les enfants et leur fréquentation** : chaque enfant avec une phase d'engagement d'après les chiffres de la nuit dernière (les mêmes phases que dans les segments, voir :doc:`segments`), avec son dojo principal et la province de celui-ci, sa tranche d'âge et son genre, s'il est inscrit à une session, et le nombre de sessions auxquelles il a participé et qui lui ont été proposées."
+
+#: ../../source/organisation/reports.rst:22
+msgid ""
+"A dataset never contains a name, an address or a mail address, nor "
+"anything about health or background checks. It's counts only. **Small "
+"groups are merged**: a group of fewer than five children (say, the girls "
+"aged 7 to 9 at one dojo) gets its most identifying detail replaced by "
+"**Other (small groups)** and is added to the other groups that then "
+"match, starting with the dojo. That way no report can point out a child. "
+"Children who are still in a group that small after that are left out, and"
+" the report says how many; totals are that much lower. With few children,"
+" a lot ends up under **Other**; the more children come, the more detail "
+"the figures keep."
+msgstr "Un jeu de données ne contient jamais de nom, d'adresse ou d'adresse e-mail, ni rien sur la santé ou les extraits de casier judiciaire. Ce ne sont que des nombres. **Les petits groupes sont regroupés** : dans un groupe de moins de cinq enfants (par exemple les filles de 7 à 9 ans d'un dojo), le détail le plus identifiant est remplacé par **Autres (petits groupes)**, et le groupe est ajouté aux autres groupes qui correspondent alors, en commençant par le dojo. Ainsi, aucun rapport ne peut identifier un enfant. Les enfants qui restent ensuite dans un groupe aussi petit sont retirés, et le rapport indique combien ; les totaux sont donc inférieurs d'autant. Avec peu d'enfants, beaucoup se retrouve sous **Autres** ; plus il y a d'enfants, plus les chiffres gardent de détail."
+
+#: ../../source/organisation/reports.rst:34
+msgid "Building a report"
+msgstr "Créer un rapport"
+
+#: ../../source/organisation/reports.rst:36
+msgid "On the Reports page, choose **New report** under a dataset."
+msgstr "Sur la page Rapports, choisissez **Nouveau rapport** sous un jeu de données."
+
+#: ../../source/organisation/reports.rst:37
+msgid ""
+"The settings panel is on the right. Drag columns into **Group by** (the "
+"rows, for example *Province*) and **Split by** (the columns or the "
+"colours of a chart, for example *Engagement stage*). Under **Columns**, "
+"tick what to count, for example *Children*. Drag a column to **Where** to"
+" show only some of the figures, for example only regular children."
+msgstr "Le panneau des paramètres se trouve à droite. Faites glisser des colonnes vers **Grouper par** (les lignes, par exemple *Province*) et **Diviser par** (les colonnes ou les couleurs d'un graphique, par exemple *Phase d'engagement*). Sous **Colonnes**, cochez ce qu'il faut compter, par exemple *Enfants*. Faites glisser une colonne vers **Filtrer** pour n'afficher qu'une partie des chiffres, par exemple seulement les enfants réguliers."
+
+#: ../../source/organisation/reports.rst:42
+msgid ""
+"At the top left, choose how to show it: a table (**Datagrid**) or a "
+"chart, such as **Y Bar** for bars."
+msgstr "En haut à gauche, choisissez comment l'afficher : un tableau (**Grille de données**) ou un graphique, comme **Barres Y** pour des barres."
+
+#: ../../source/organisation/reports.rst:44
+msgid ""
+"Below, give the report a name, and a description for whoever opens it "
+"next, and choose **Save**."
+msgstr "En dessous, donnez un nom au rapport, et une description pour la prochaine personne qui l'ouvre, puis choisissez **Enregistrer**."
+
+#: ../../source/organisation/reports.rst:47
+msgid ""
+"Opening a saved report shows it as it was saved, with the figures as of "
+"now (they're updated every hour; the page says when). Change it and "
+"choose **Save**, or **Save as a new report** to keep the original. The "
+"settings button at the top right of the report opens the panel again. "
+"**Delete report** removes the report, never the figures."
+msgstr "Un rapport enregistré s'ouvre tel qu'il a été enregistré, avec les chiffres actuels (mis à jour toutes les heures ; la page indique quand). Modifiez-le et choisissez **Enregistrer**, ou **Enregistrer comme nouveau rapport** pour garder l'original. Le bouton des paramètres en haut à droite du rapport rouvre le panneau. **Supprimer le rapport** supprime le rapport, jamais les chiffres."
+
+#: ../../source/organisation/reports.rst:53
+msgid ""
+"A report works in every language: a report saved in Dutch opens in French"
+" with French column names, and the other way round."
+msgstr "Un rapport fonctionne dans toutes les langues : un rapport enregistré en néerlandais s'ouvre en français avec des noms de colonnes en français, et inversement."
+
+#: ../../source/organisation/reports.rst:57
+msgid "The figures as a file"
+msgstr "Les chiffres en fichier"
+
+#: ../../source/organisation/reports.rst:59
+msgid ""
+"**Download the figures (CSV)** gives a dataset's figures as a spreadsheet"
+" file, with the same merged small groups. It also works without "
+"JavaScript, which building a report needs."
+msgstr "**Télécharger les chiffres (CSV)** donne les chiffres d'un jeu de données sous forme de fichier tableur, avec les mêmes petits groupes regroupés. Cela fonctionne aussi sans JavaScript, nécessaire pour créer un rapport."
+

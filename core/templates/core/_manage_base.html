@@ -160,6 +160,20 @@ organisation work lives here, not in the Django admin (CLAUDE.md).
         </div>
       {% endif %}
 
+      {% if contexts.can.reports %}
+        <div class="cd-admin-nav__group">
+          <p class="cd-admin-nav__group-label caption">{% translate "Insights" %}</p>
+          <ul class="cd-admin-nav__list">
+            <li>
+              <a href="{% url 'manage_report_list' %}" class="cd-admin-nav__link label{% if active == 'reports' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15v3"/><path d="M12 10v8"/><path d="M17 6v12"/></svg>
+                {% translate "Reports" %}
+              </a>
+            </li>
+          </ul>
+        </div>
+      {% endif %}
+
       {% if contexts.can.privacy or contexts.can.security %}
         <div class="cd-admin-nav__group">
           <p class="cd-admin-nav__group-label caption">{% translate "Accounts" %}</p>

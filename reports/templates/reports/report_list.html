@@ -1,0 +1,58 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Reports" %}{% endblock %}
+{% block manage_heading %}{% translate "Reports" %}{% endblock %}
+
+{% block manage_content %}
+  {% comment %}
+    The organisation's saved reports (reports.views.report_list,
+    DATA_MODEL_REPORTS.md §30), and the datasets a new one can be built on.
+  {% endcomment %}
+  <p class="body-sm">{% translate "Reports are tables and charts you build yourself on the organisation's figures. Each report starts from a dataset: figures we prepared so that no report can point out a child." %}</p>
+
+  <div class="cd-table-wrap">
+    <table class="cd-table cd-table--zebra">
+      <thead>
+        <tr>
+          <th class="label" scope="col">{% translate "Report" %}</th>
+          <th class="label" scope="col">{% translate "Dataset" %}</th>
+          <th class="label" scope="col">{% translate "Last changed" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in reports %}
+          <tr>
+            <td class="body-sm"><a href="{% url 'manage_report_detail' report_id=report.id %}">{{ report.name }}</a>{% if report.description %}<br><span class="caption muted">{{ report.description|truncatechars:120 }}</span>{% endif %}</td>
+            <td class="body-sm">{% for dataset in datasets %}{% if dataset.key == report.dataset %}{{ dataset.label }}{% endif %}{% endfor %}</td>
+            <td class="body-sm">{{ report.updated_at|date:"j M Y, H:i" }}{% if report.updated_by %} · {{ report.updated_by.team_name }}{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td class="body-sm" colspan="3">{% translate "No reports yet." %}{% if can_add %} {% translate "Start one from a dataset below." %}{% endif %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="heading-md section-title" style="margin-top: var(--space-6);">{% translate "Datasets" %}</h2>
+  <ul class="report-datasets">
+    {% for dataset in datasets %}
+      <li class="cd-card report-datasets__item">
+        <h3 class="label">{{ dataset.label }}</h3>
+        <p class="body-sm">{{ dataset.description }}</p>
+        <p class="report-datasets__actions">
+          {% if can_add %}<a class="cd-btn cd-btn--primary label" href="{% url 'manage_report_create' dataset_key=dataset.key %}">{% translate "New report" %}</a>{% endif %}
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'manage_report_csv' dataset_key=dataset.key %}">{% translate "Download the figures (CSV)" %}</a>
+        </p>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}
+
+{% block manage_extra_style %}
+<style>
+  .report-datasets { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+  .report-datasets__item { padding: var(--space-5); }
+  .report-datasets__item h3 { margin: 0 0 var(--space-2); }
+  .report-datasets__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-3) 0 0; }
+</style>
+{% endblock %}

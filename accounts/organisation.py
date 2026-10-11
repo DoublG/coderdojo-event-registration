@@ -70,6 +70,7 @@ class Area:
     VOLUNTEERS = "volunteers"  # background checks and applications (§21)
     PUBLIC_SITE = "public_site"  # promotions and sponsors
     NINJAS = "ninjas"  # awards
+    REPORTS = "reports"  # reports on curated datasets (reports, DATA_MODEL_REPORTS.md §30)
     PRIVACY = "privacy"  # a person's data: export, deletion, email change
     SECURITY = "security"  # the sign-in policy
     PEOPLE = "people"  # who holds which organisation role (accounts.organisation_people)
@@ -82,6 +83,9 @@ AREA_PERMISSIONS = {
     Area.VOLUNTEERS: REVIEW_PERMISSION,
     Area.PUBLIC_SITE: "accounts.manage_public_site",
     Area.NINJAS: "accounts.manage_ninjas",
+    # The saved report's own view permission; making, changing and deleting
+    # a report take its add/change/delete permissions (reports.views).
+    Area.REPORTS: "reports.view_report",
     Area.PRIVACY: "accounts.manage_privacy",
     Area.SECURITY: "accounts.manage_security",
     Area.PEOPLE: "accounts.manage_people",
@@ -96,6 +100,7 @@ AREA_LABELS = {
     Area.VOLUNTEERS: gettext_lazy("Volunteers: background checks, applications"),
     Area.PUBLIC_SITE: gettext_lazy("Public site: promotions, sponsors"),
     Area.NINJAS: gettext_lazy("Ninjas: awards"),
+    Area.REPORTS: gettext_lazy("Reports: figures and charts on curated data"),
     Area.PRIVACY: gettext_lazy("Privacy: data export, account deletion, email changes"),
     Area.SECURITY: gettext_lazy("Sign-in security"),
     Area.PEOPLE: gettext_lazy("People: organisation roles"),
@@ -146,6 +151,8 @@ ADMIN_PERMISSIONS = {
     "mailing.bouncerecord": _VIEW,
     # The audit log (DATA_MODEL.md §14): the admin role only, never the board.
     "auditlog.logentry": _VIEW,
+    # Reports (DATA_MODEL_REPORTS.md §30): the admins make their own.
+    "reports.report": _EDIT,
     # Its organisation dashboard areas (DATA_MODEL.md §23): all but Volunteers.
     "accounts.organisationrole": [
         "manage_communication",

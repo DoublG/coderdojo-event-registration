@@ -85,6 +85,8 @@ RECORDED: dict[str, dict[str, list[str]]] = {
     "content.OrganisationTeamMember": {},
     "content.Promotion": {},
     "content.Sponsor": {},
+    # Saved reports (DATA_MODEL_REPORTS.md §30): who changed which report.
+    "reports.Report": {},
     "pathways.Pathway": {},
     "pathways.PathwayStep": {},
     "pathways.PathwayProject": {},
