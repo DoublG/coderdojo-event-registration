@@ -267,6 +267,14 @@ class ContactAndCodeOfConductTests(TestCase):
         self.assertContains(response, f'href="{reverse("contact")}"')
         self.assertContains(response, f'href="{reverse("code_of_conduct")}"')
 
+    def test_footer_links_the_help_centre_in_the_visitors_language(self):
+        self.assertContains(self.client.get(reverse("home")), '<a href="/docs/index.html">Help centre</a>', html=True)
+        self.assertContains(
+            self.client.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="nl-be"),
+            '<a href="/docs/nl/index.html">Helpcentrum</a>',
+            html=True,
+        )
+
     def test_contact_page(self):
         response = self.client.get(reverse("contact"))
         self.assertContains(response, "0523.889.476")

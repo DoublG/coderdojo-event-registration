@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-10 21:04+0000\n"
+"POT-Creation-Date: 2026-10-11 06:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -354,7 +354,10 @@ msgid ""
 "Every guardian manages the child the same way. Only a parent or legal "
 "guardian can also invite or remove guardians, and decide about the child's "
 "data."
-msgstr "Elke verantwoordelijke beheert het kind op dezelfde manier. Alleen een ouder of voogd kan ook verantwoordelijken uitnodigen of verwijderen, en beslissen over de gegevens van het kind."
+msgstr ""
+"Elke verantwoordelijke beheert het kind op dezelfde manier. Alleen een ouder "
+"of voogd kan ook verantwoordelijken uitnodigen of verwijderen, en beslissen "
+"over de gegevens van het kind."
 
 #: accounts/forms.py:638
 msgid "How will they log in?"
@@ -492,15 +495,18 @@ msgstr "Dat is je eigen adres."
 
 #: accounts/guardian_invitations.py:156
 msgid "This address belongs to a child's own login: invite an adult."
-msgstr "Dit adres hoort bij de eigen login van een kind: nodig een volwassene uit."
+msgstr ""
+"Dit adres hoort bij de eigen login van een kind: nodig een volwassene uit."
 
 #: accounts/guardian_invitations.py:158
+#, python-format
 msgid "This person is already a guardian of %(name)s."
 msgstr "Deze persoon is al verantwoordelijke voor %(name)s."
 
 #: accounts/guardian_invitations.py:160
 msgid "This address already has an invitation waiting: send it again below."
-msgstr "Dit adres heeft al een uitnodiging die wacht: stuur ze hieronder opnieuw."
+msgstr ""
+"Dit adres heeft al een uitnodiging die wacht: stuur ze hieronder opnieuw."
 
 #: accounts/guardian_invitations.py:192 accounts/invitations.py:133
 msgid "This invitation was already accepted or withdrawn."
@@ -520,16 +526,22 @@ msgstr "Deze uitnodiging is voor een ander e-mailadres."
 
 #: accounts/guardian_invitations.py:276
 msgid "Only a parent or legal guardian of the child can remove a guardian."
-msgstr "Alleen een ouder of voogd van het kind kan een verantwoordelijke verwijderen."
+msgstr ""
+"Alleen een ouder of voogd van het kind kan een verantwoordelijke verwijderen."
 
 #: accounts/guardian_invitations.py:282
+#, python-format
 msgid ""
 "%(name)s always needs a parent or legal guardian on the site, and you're the "
 "only one. To stop, delete your account (from your account page): %(name)s's "
 "details go with it."
-msgstr "%(name)s heeft op de site altijd een ouder of voogd nodig, en jij bent de enige. Wil je stoppen, verwijder dan je account (via je accountpagina): de gegevens van %(name)s gaan mee."
+msgstr ""
+"%(name)s heeft op de site altijd een ouder of voogd nodig, en jij bent de "
+"enige. Wil je stoppen, verwijder dan je account (via je accountpagina): de "
+"gegevens van %(name)s gaan mee."
 
 #: accounts/guardian_invitations.py:285
+#, python-format
 msgid ""
 "%(name)s always needs a parent or legal guardian, and this is the only one."
 msgstr "%(name)s heeft altijd een ouder of voogd nodig, en dit is de enige."
@@ -1414,35 +1426,51 @@ msgstr ""
 "verlopen. Vraag wie je uitnodigde om ze opnieuw te sturen."
 
 #: accounts/templates/accounts/guardian_invitation.html:34
+#, python-format
 msgid ""
 "%(inviter)s invites you to be %(name)s's guardian on CoderDojo Belgium, as "
 "their parent."
-msgstr "%(inviter)s nodigt je uit als verantwoordelijke voor %(name)s op CoderDojo Belgium, als ouder."
+msgstr ""
+"%(inviter)s nodigt je uit als verantwoordelijke voor %(name)s op CoderDojo "
+"Belgium, als ouder."
 
 #: accounts/templates/accounts/guardian_invitation.html:34
+#, python-format
 msgid ""
 "%(inviter)s invites you to be %(name)s's guardian on CoderDojo Belgium, as "
 "their legal guardian."
-msgstr "%(inviter)s nodigt je uit als verantwoordelijke voor %(name)s op CoderDojo Belgium, als voogd."
+msgstr ""
+"%(inviter)s nodigt je uit als verantwoordelijke voor %(name)s op CoderDojo "
+"Belgium, als voogd."
 
 #: accounts/templates/accounts/guardian_invitation.html:34
+#, python-format
 msgid ""
 "%(inviter)s invites you to be %(name)s's guardian on CoderDojo Belgium, as a "
 "trusted adult."
-msgstr "%(inviter)s nodigt je uit als verantwoordelijke voor %(name)s op CoderDojo Belgium, als vertrouwenspersoon."
+msgstr ""
+"%(inviter)s nodigt je uit als verantwoordelijke voor %(name)s op CoderDojo "
+"Belgium, als vertrouwenspersoon."
 
 #: accounts/templates/accounts/guardian_invitation.html:35
+#, python-format
 msgid ""
 "As a guardian you can sign %(name)s up for sessions, change their details "
 "and their own login, and you get the mails about them. %(name)s's other "
 "guardians can see that you're one."
-msgstr "Als verantwoordelijke kun je %(name)s inschrijven voor sessies, de gegevens en de eigen login aanpassen, en je krijgt de e-mails over %(name)s. De andere verantwoordelijken van %(name)s zien dat jij er een bent."
+msgstr ""
+"Als verantwoordelijke kun je %(name)s inschrijven voor sessies, de gegevens "
+"en de eigen login aanpassen, en je krijgt de e-mails over %(name)s. De "
+"andere verantwoordelijken van %(name)s zien dat jij er een bent."
 
 #: accounts/templates/accounts/guardian_invitation.html:37
+#, python-format
 msgid ""
 "Create your account with <strong>%(email)s</strong> to accept; you come back "
 "here afterwards."
-msgstr "Maak je account aan met <strong>%(email)s</strong> om te aanvaarden; daarna kom je hier terug."
+msgstr ""
+"Maak je account aan met <strong>%(email)s</strong> om te aanvaarden; daarna "
+"kom je hier terug."
 
 #: accounts/templates/accounts/guardian_invitation.html:39
 #: accounts/templates/accounts/invitation.html:35
@@ -1470,10 +1498,12 @@ msgstr ""
 "link opnieuw en meld je aan met dat adres, of maak er een account mee aan."
 
 #: accounts/templates/accounts/guardian_invitation.html:49
+#, python-format
 msgid "You're already %(name)s's guardian."
 msgstr "Je bent al verantwoordelijke voor %(name)s."
 
 #: accounts/templates/accounts/guardian_invitation.html:51
+#, python-format
 msgid "Go to %(name)s's page"
 msgstr "Naar de pagina van %(name)s"
 
@@ -1499,26 +1529,36 @@ msgid "Remove a guardian"
 msgstr "Een verantwoordelijke verwijderen"
 
 #: accounts/templates/accounts/guardian_remove.html:15
+#, python-format
 msgid "Stop being %(name)s's guardian"
 msgstr "Niet langer verantwoordelijke zijn voor %(name)s"
 
 #: accounts/templates/accounts/guardian_remove.html:16
+#, python-format
 msgid ""
 "You won't see %(name)s on your account any more, can't sign them up and "
 "won't get their mails. Their other guardians keep everything as it is, and "
 "are told."
-msgstr "Je ziet %(name)s niet meer op je account, kunt %(name)s niet meer inschrijven en krijgt de e-mails niet meer. Voor de andere verantwoordelijken blijft alles zoals het is; zij krijgen een bericht."
+msgstr ""
+"Je ziet %(name)s niet meer op je account, kunt %(name)s niet meer "
+"inschrijven en krijgt de e-mails niet meer. Voor de andere "
+"verantwoordelijken blijft alles zoals het is; zij krijgen een bericht."
 
 #: accounts/templates/accounts/guardian_remove.html:18
+#, python-format
 msgid "Remove %(guardian)s as %(name)s's guardian"
 msgstr "%(guardian)s verwijderen als verantwoordelijke voor %(name)s"
 
 #: accounts/templates/accounts/guardian_remove.html:19
+#, python-format
 msgid ""
 "%(guardian)s won't see %(name)s on their account any more, can't sign them "
 "up and won't get their mails. We mail %(guardian)s and %(name)s's other "
 "guardians that you removed them."
-msgstr "%(guardian)s ziet %(name)s niet meer op diens account, kan %(name)s niet meer inschrijven en krijgt de e-mails niet meer. We mailen %(guardian)s en de andere verantwoordelijken van %(name)s dat jij dit gedaan hebt."
+msgstr ""
+"%(guardian)s ziet %(name)s niet meer op diens account, kan %(name)s niet "
+"meer inschrijven en krijgt de e-mails niet meer. We mailen %(guardian)s en "
+"de andere verantwoordelijken van %(name)s dat jij dit gedaan hebt."
 
 #: accounts/templates/accounts/guardian_remove.html:26
 #: accounts/templates/accounts/login_link_reauth.html:17
@@ -2538,16 +2578,20 @@ msgid "Guardians"
 msgstr "Verantwoordelijken"
 
 #: accounts/templates/accounts/partials/_guardians_card.html:17
+#, python-format
 msgid ""
 "Every guardian can sign %(name)s up for sessions, change their details and "
 "their own login, and gets the mails about them."
-msgstr "Elke verantwoordelijke kan %(name)s inschrijven voor sessies, de gegevens en de eigen login aanpassen, en krijgt de e-mails over %(name)s."
+msgstr ""
+"Elke verantwoordelijke kan %(name)s inschrijven voor sessies, de gegevens en "
+"de eigen login aanpassen, en krijgt de e-mails over %(name)s."
 
 #: accounts/templates/accounts/partials/_guardians_card.html:24
 msgid "you"
 msgstr "jij"
 
 #: accounts/templates/accounts/partials/_guardians_card.html:43
+#, python-format
 msgid "until %(date)s"
 msgstr "tot %(date)s"
 
@@ -2556,15 +2600,21 @@ msgid "Invite another guardian"
 msgstr "Nog een verantwoordelijke uitnodigen"
 
 #: accounts/templates/accounts/partials/_guardians_card.html:64
+#, python-format
 msgid ""
 "For example %(name)s's other parent. We mail them a link; they become a "
 "guardian once they accept it with an account on that address. %(name)s's "
 "other guardians are told right away, and can withdraw the invitation."
-msgstr "Bijvoorbeeld de andere ouder van %(name)s. We mailen een link; wie die aanvaardt met een account op dat adres, wordt verantwoordelijke. De andere verantwoordelijken van %(name)s krijgen meteen een bericht en kunnen de uitnodiging intrekken."
+msgstr ""
+"Bijvoorbeeld de andere ouder van %(name)s. We mailen een link; wie die "
+"aanvaardt met een account op dat adres, wordt verantwoordelijke. De andere "
+"verantwoordelijken van %(name)s krijgen meteen een bericht en kunnen de "
+"uitnodiging intrekken."
 
 #: accounts/templates/accounts/partials/_guardians_card.html:75
 msgid "Only a parent or legal guardian can invite or remove guardians."
-msgstr "Alleen een ouder of voogd kan verantwoordelijken uitnodigen of verwijderen."
+msgstr ""
+"Alleen een ouder of voogd kan verantwoordelijken uitnodigen of verwijderen."
 
 #: accounts/templates/accounts/partials/_ninja_login_card.html:14
 #: dojos/templates/dojos/dojo_members.html:54
@@ -3514,28 +3564,38 @@ msgid "Enter a valid email address and choose a relation."
 msgstr "Vul een geldig e-mailadres in en kies een band met het kind."
 
 #: accounts/views/guardians.py:81
+#, python-format
 msgid ""
 "We've mailed an invitation to %(email)s. %(name)s's other guardians have "
 "been told."
-msgstr "We hebben een uitnodiging gemaild naar %(email)s. De andere verantwoordelijken van %(name)s hebben een bericht gekregen."
+msgstr ""
+"We hebben een uitnodiging gemaild naar %(email)s. De andere "
+"verantwoordelijken van %(name)s hebben een bericht gekregen."
 
 #: accounts/views/guardians.py:101
+#, python-format
 msgid "We've mailed %(email)s a new link."
 msgstr "We hebben een nieuwe link gemaild naar %(email)s."
 
 #: accounts/views/guardians.py:115
+#, python-format
 msgid "The invitation to %(email)s is withdrawn."
 msgstr "De uitnodiging voor %(email)s is ingetrokken."
 
 #: accounts/views/guardians.py:136
+#, python-format
 msgid "You're no longer %(name)s's guardian."
 msgstr "Je bent niet langer verantwoordelijke voor %(name)s."
 
 #: accounts/views/guardians.py:140
+#, python-format
 msgid "%(guardian)s is no longer %(name)s's guardian. We've let them know."
-msgstr "%(guardian)s is niet langer verantwoordelijke voor %(name)s. We hebben het laten weten."
+msgstr ""
+"%(guardian)s is niet langer verantwoordelijke voor %(name)s. We hebben het "
+"laten weten."
 
 #: accounts/views/guardians.py:179
+#, python-format
 msgid "You're now %(name)s's guardian."
 msgstr "Je bent nu verantwoordelijke voor %(name)s."
 
@@ -4331,7 +4391,7 @@ msgid "Submit application"
 msgstr "Aanvraag versturen"
 
 #: applications/templates/applications/register_helper.html:3
-#: core/templates/core/base.html:49
+#: core/templates/core/base.html:50
 msgid "Volunteer with us"
 msgstr "Word vrijwilliger"
 
@@ -6642,12 +6702,16 @@ msgid "Menu"
 msgstr "Menu"
 
 #: core/templates/core/base.html:48
+msgid "Help centre"
+msgstr "Helpcentrum"
+
+#: core/templates/core/base.html:49
 #: pages/templates/pages/code_of_conduct.html:3
 #: pages/templates/pages/code_of_conduct.html:31
 msgid "Code of conduct"
 msgstr "Gedragscode"
 
-#: core/templates/core/base.html:50 pages/templates/pages/contact.html:3
+#: core/templates/core/base.html:51 pages/templates/pages/contact.html:3
 #: pages/templates/pages/contact.html:29
 msgid "Contact"
 msgstr "Contact"
@@ -10268,7 +10332,7 @@ msgstr "Typ de gebruikersnaam, %(username)s, om te bevestigen"
 msgid "Type the account's username to confirm."
 msgstr "Typ de gebruikersnaam van het account om te bevestigen."
 
-#: privacy/retention.py:302
+#: privacy/retention.py:321
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
@@ -10280,7 +10344,7 @@ msgstr ""
 "zolang die persoon champion is. Vraag om de rol door te geven aan een "
 "mentor, of neem contact op met de organisatie."
 
-#: privacy/retention.py:308
+#: privacy/retention.py:327
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
