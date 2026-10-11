@@ -102,6 +102,70 @@ class EventListViewTests(TestCase):
         self.assertEqual(list(response.context["events"]), [event])
 
 
+class EventListSameDojoGroupingTests(TestCase):
+    """A day with several sessions at the same dojo gets a small connecting
+    marker (events/views._cluster_by_dojo_per_day, the event-row-group--same-dojo
+    class in _event_results_page.html) — never for a dojo with just one session
+    that day, and never across page boundaries."""
+
+    def setUp(self):
+        cache.clear()  # the unfiltered first page is cached (events.search)
+
+    def test_same_day_same_dojo_events_are_clustered_and_marked(self):
+        dojo = make_dojo("Ghent")
+        other = make_dojo("Antwerp")
+        now = timezone.now()
+        morning = _future_event(dojo, name="Morning", start_time=now + timedelta(days=7, hours=1))
+        between = _future_event(other, name="Between", start_time=now + timedelta(days=7, hours=2))
+        afternoon = _future_event(dojo, name="Afternoon", start_time=now + timedelta(days=7, hours=3))
+
+        response = self.client.get(reverse("event_list"))
+
+        # Reordered so the same dojo's two sessions sit together, without
+        # losing the other dojo's event or resorting across dojos.
+        self.assertEqual(list(response.context["events"]), [morning, afternoon, between])
+        # The page's own <style> block also mentions the class name (as a
+        # selector), so check the actual element, not just the substring.
+        self.assertContains(response, 'class="event-row-group event-row-group--same-dojo"')
+
+    def test_a_dojo_with_a_single_session_that_day_gets_no_marker(self):
+        dojo = make_dojo("Ghent")
+        _future_event(dojo, name="Only session")
+
+        response = self.client.get(reverse("event_list"))
+
+        self.assertNotContains(response, 'class="event-row-group event-row-group--same-dojo"')
+
+    def test_clustering_stays_within_each_day(self):
+        dojo = make_dojo("Ghent")
+        now = timezone.now()
+        today_event = _future_event(dojo, name="Day 1", start_time=now + timedelta(days=7))
+        tomorrow_event = _future_event(dojo, name="Day 2", start_time=now + timedelta(days=8))
+
+        response = self.client.get(reverse("event_list"))
+
+        self.assertEqual(list(response.context["events"]), [today_event, tomorrow_event])
+        self.assertNotContains(response, 'class="event-row-group event-row-group--same-dojo"')
+
+    def test_clustering_never_moves_an_event_to_a_different_page(self):
+        dojo = make_dojo("Ghent")
+        other = make_dojo("Antwerp")
+        now = timezone.now()
+        # 20 events the same day at `dojo`, filling page 1, plus one more
+        # event at `other` later that same day that must land on page 2.
+        for i in range(20):
+            _future_event(dojo, name=f"Session {i}", start_time=now + timedelta(days=7, minutes=i))
+        last = _future_event(other, name="Overflow", start_time=now + timedelta(days=7, hours=1))
+
+        page1 = self.client.get(reverse("event_list"))
+        self.assertEqual(len(page1.context["events"]), 20)
+        self.assertNotIn(last, page1.context["events"])
+        self.assertIsNotNone(page1.context["next_page_url"])
+
+        page2 = self.client.get(reverse("event_list"), {"page": 2})
+        self.assertEqual(list(page2.context["events"]), [last])
+
+
 class EventListCacheTests(TestCase):
     """The places left on a list come from one annotated query, and the
     unfiltered first page is cached until a session or a booking changes."""

@@ -1,4 +1,5 @@
 from datetime import timedelta
+from itertools import groupby
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -25,6 +26,26 @@ from .search import (
 )
 
 RESULTS_PER_PAGE = 20
+
+
+def _cluster_by_dojo_per_day(events):
+    """Reorder a start_time-ordered list so a day's events for the same dojo sit together.
+
+    Each day's slice is regrouped by dojo with a stable sort: a dojo's
+    events keep their relative order, and the groups themselves keep the
+    order their first event of the day appeared in, so the result still
+    reads top-to-bottom as "roughly chronological, same dojo kept
+    together" rather than being resorted by dojo. Lets the template show a
+    small same-dojo grouping indicator (events/partials/_event_results_page.html).
+    """
+    result = []
+    for _day, day_events in groupby(events, key=lambda event: event.start_time.date()):
+        groups = {}
+        for event in day_events:
+            groups.setdefault(event.dojo_id, []).append(event)
+        for dojo_events in groups.values():
+            result.extend(dojo_events)
+    return result
 
 
 def event_list(request):
@@ -72,7 +93,7 @@ def event_list(request):
         paginator = Paginator(events, RESULTS_PER_PAGE)
         page = paginator.get_page(page_number)
         return {
-            "events": list(page.object_list),
+            "events": _cluster_by_dojo_per_day(list(page.object_list)),
             "total_count": paginator.count,
             "next_page": page.next_page_number() if page.has_next() else None,
         }

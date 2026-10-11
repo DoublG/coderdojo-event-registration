@@ -1,5 +1,5 @@
 {
- "generated_from": "6563b81",
+ "generated_from": "7e80418",
  "generated_on": "2026-10-11",
  "personas": {
   "parent": {
@@ -26,7 +26,7 @@
     "dojos/views/public.py:dojo_detail": "b85a46c12b05c3ff",
     "dojos/views/public.py:dojo_list": "25ead37f977b5163",
     "events/views.py:event_detail": "508021bd288e2ac9",
-    "events/views.py:event_list": "65442378fb181e8a",
+    "events/views.py:event_list": "530c7d2ed2ec18ab",
     "events/views.py:event_signup": "14298e097ec60fc0",
     "mailing/views.py:mail_preferences": "8467f97655ff4f35",
     "pages/views.py:home": "0de5ef2bac6106e2",
@@ -61,10 +61,10 @@
     "dojos/templates/dojos/partials/_dojo_results_page.html": "e3c9d37b335529fc",
     "dojos/templates/dojos/partials/_mentor_avatar.html": "f4bcbd2505baf894",
     "events/templates/events/event_detail.html": "adf104f7f4b37e4e",
-    "events/templates/events/event_list.html": "a7c06383d93d6fc9",
+    "events/templates/events/event_list.html": "cfa1948a36d3d8ad",
     "events/templates/events/event_signup.html": "6d7658b22d93b304",
     "events/templates/events/partials/_audience_badge.html": "70a7a01c39560f2e",
-    "events/templates/events/partials/_event_results_page.html": "7b5694c3896fb11e",
+    "events/templates/events/partials/_event_results_page.html": "7147aaadfe971458",
     "events/templates/events/partials/_event_row.html": "a0a02f88b8748455",
     "events/templates/events/partials/_organiser.html": "2d7af6f1eb27d438",
     "events/templates/events/partials/_upcoming_session_card.html": "6edce7afdb50c256",

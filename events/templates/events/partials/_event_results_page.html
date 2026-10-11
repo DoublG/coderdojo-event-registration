@@ -15,15 +15,27 @@ if a date's events straddle a page boundary, that date's heading can
 appear twice in a row — a minor, accepted trade-off of paginating
 grouped data rather than something worth the added complexity to avoid.
 
-Expects `events` (this page's slice, ordered by start_time) and
-`next_page_url` (falsy on the last page) in context.
+Within a day, events for the same dojo are already clustered together
+by the view (events.views._cluster_by_dojo_per_day), so the nested
+{% regroup %} by dojo below produces one group per dojo, in the order
+its events appear that day — used only to add a small connecting marker
+when a dojo has more than one session that day.
+
+Expects `events` (this page's slice, ordered by start_time and
+pre-clustered by dojo within each day) and `next_page_url` (falsy on
+the last page) in context.
 {% endcomment %}
 {% regroup events by start_time.date as date_groups %}
 {% for date_group in date_groups %}
   <div class="date-group" data-group{% if forloop.last and next_page_url %} hx-get="{{ next_page_url }}" hx-trigger="revealed" hx-swap="afterend"{% endif %}>
     <h2 class="heading-lg">{{ date_group.grouper|date:"l, j F" }}</h2>
-    {% for event in date_group.list %}
-      {% include "events/partials/_event_row.html" %}
+    {% regroup date_group.list by dojo as dojo_groups %}
+    {% for dojo_group in dojo_groups %}
+      <div class="event-row-group{% if dojo_group.list|length > 1 %} event-row-group--same-dojo{% endif %}">
+        {% for event in dojo_group.list %}
+          {% include "events/partials/_event_row.html" %}
+        {% endfor %}
+      </div>
     {% endfor %}
   </div>
 {% empty %}

@@ -42,6 +42,18 @@ SESSION_NAMES = [label for _filename, label in TEMPLATE_IMAGES]
 # Share of upcoming seeded sessions labelled as girls' sessions.
 GIRLS_SESSION_SHARE = 0.06
 
+# A minority of weekend dojos run a second track the same day — a later
+# session, or (see PARALLEL_TRACK_SHARE) a second group meeting at the very
+# same time — so a fresh seed has a real example of two same-dojo sessions
+# on one day (the events list's same-dojo grouping indicator,
+# events.views._cluster_by_dojo_per_day), not just single sessions spread
+# one per day.
+SAME_DAY_SECOND_TRACK_SHARE = 0.12
+# Of those, the share that run at the very same time as a genuinely separate
+# track rather than later that day — e.g. a Scratch group and a Python group
+# meeting in parallel, tagged with their own pathway when both are seeded.
+PARALLEL_TRACK_SHARE = 0.5
+
 # One banner image per session name, shown on the homepage's "Upcoming
 # sessions" card — see events/templates/events/partials/_upcoming_session_card.html.
 SESSION_IMAGES = {label: filename for filename, label in TEMPLATE_IMAGES}
@@ -97,6 +109,31 @@ def weekly_dates(start_date, weekday):
         current += timedelta(days=7)
 
 
+def create_session(dojo, start_dt, end_dt, name, min_age, max_age, capacity, pathways, created_ids):
+    """get_or_create one Event plus its banner, pathways and team — shared by
+    a dojo's regular sessions and its occasional same-day second track."""
+    event, was_created = Event.objects.get_or_create(
+        dojo=dojo,
+        start_time=start_dt,
+        defaults={
+            "name": name,
+            "status": Event.OPEN,
+            "end_time": end_dt,
+            "places": capacity,
+            "location": dojo.location,
+            "min_age": min_age,
+            "max_age": max_age,
+            "description": description_for(name),
+        },
+    )
+    if was_created:
+        created_ids.append(event.id)
+        assign_session_image(event, name)
+        event.pathways.set(pathways)
+        assign_event_team(event)
+    return was_created
+
+
 def assign_event_team(event, max_mentors=2):
     """Who runs the session: the dojo's champion plus a few of its active
     mentors. Its own RNG per event, so it doesn't shift any other choices."""
@@ -122,6 +159,9 @@ class Command(BaseCommand):
         created_ids = []
 
         all_pathways = list(Pathway.objects.order_by("id"))
+        scratch_pathway = next((p for p in all_pathways if p.name == "Scratch"), None)
+        python_pathway = next((p for p in all_pathways if p.name == "Python"), None)
+
         for dojo in Dojo.objects.exclude(location=None):
             # The pathways this dojo provides (a few of them), which its new
             # sessions pre-select. Own RNG: drawing from `rng` only when unset
@@ -146,7 +186,13 @@ class Command(BaseCommand):
                 start_t, end_t = FRIDAY_SLOT
                 dates = weekly_dates(today, FRIDAY)
 
-            for event_date in itertools.islice(dates, EVENTS_PER_DOJO):
+            # Own RNG: drawing only when a dojo actually qualifies (weekend
+            # pattern) would shift every later dojo's choices on a rerun.
+            second_track_rng = random.Random(f"dojo-second-track-{dojo.id}")
+            runs_second_track = pattern == "weekend" and second_track_rng.random() < SAME_DAY_SECOND_TRACK_SHARE
+            runs_parallel_track = runs_second_track and second_track_rng.random() < PARALLEL_TRACK_SHARE
+
+            for index, event_date in enumerate(itertools.islice(dates, EVENTS_PER_DOJO)):
                 start_dt = timezone.make_aware(datetime.combine(event_date, start_t))
                 end_dt = timezone.make_aware(datetime.combine(event_date, end_t))
                 min_age, max_age = rng.choice(AGE_RANGE_CHOICES)
@@ -157,27 +203,55 @@ class Command(BaseCommand):
                 # dojos' choices don't shift.
                 if dojo.status != Dojo.ACTIVE:
                     continue
-                event, was_created = Event.objects.get_or_create(
-                    dojo=dojo,
-                    start_time=start_dt,
-                    defaults={
-                        "name": session_name,
-                        "status": Event.OPEN,
-                        "end_time": end_dt,
-                        "places": capacity,
-                        "location": dojo.location,
-                        "min_age": min_age,
-                        "max_age": max_age,
-                        "description": description_for(session_name),
-                    },
+                # A parallel second track tags this one Scratch (and the
+                # other Python below) instead of the dojo's usual mixed
+                # pathways, so the two read as genuinely separate groups.
+                primary_pathways = dojo_pathways
+                if runs_parallel_track and index == 0 and scratch_pathway and python_pathway:
+                    primary_pathways = [scratch_pathway]
+                was_created = create_session(
+                    dojo, start_dt, end_dt, session_name, min_age, max_age, capacity, primary_pathways, created_ids
                 )
-                if was_created:
-                    created_ids.append(event.id)
-                    assign_session_image(event, session_name)
-                    event.pathways.set(dojo_pathways)
-                    assign_event_team(event)
                 created += 1 if was_created else 0
                 skipped += 1 if not was_created else 0
+
+                if runs_second_track and index == 0:
+                    if runs_parallel_track:
+                        # The very same time, not just the same day — two
+                        # separate groups meeting in parallel (e.g. Scratch
+                        # and Python). Offset by a second so it gets its own
+                        # row (create_session's natural key is dojo+start
+                        # time) without changing what visitors see: the
+                        # "H:i" display drops seconds, so both rows still
+                        # show the identical time.
+                        other_start_dt = start_dt + timedelta(seconds=1)
+                        other_end_dt = end_dt
+                    else:
+                        # The other time slot, same day: a later second
+                        # track rather than a second date, so this dojo's
+                        # two sessions sit next to each other on the list.
+                        other_t = WEEKEND_AFTERNOON if (start_t, end_t) == WEEKEND_MORNING else WEEKEND_MORNING
+                        other_start_dt = timezone.make_aware(datetime.combine(event_date, other_t[0]))
+                        other_end_dt = timezone.make_aware(datetime.combine(event_date, other_t[1]))
+                    other_name = second_track_rng.choice([n for n in SESSION_NAMES if n != session_name])
+                    other_min_age, other_max_age = second_track_rng.choice(AGE_RANGE_CHOICES)
+                    other_capacity = second_track_rng.choice(CAPACITY_CHOICES)
+                    other_pathways = dojo_pathways
+                    if runs_parallel_track and scratch_pathway and python_pathway:
+                        other_pathways = [python_pathway]
+                    was_created = create_session(
+                        dojo,
+                        other_start_dt,
+                        other_end_dt,
+                        other_name,
+                        other_min_age,
+                        other_max_age,
+                        other_capacity,
+                        other_pathways,
+                        created_ids,
+                    )
+                    created += 1 if was_created else 0
+                    skipped += 1 if not was_created else 0
 
         # Seeded sessions are demo data, not news: mark them announced so the
         # daily "new sessions" mail doesn't write to every seeded family.

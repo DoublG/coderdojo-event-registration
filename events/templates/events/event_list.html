@@ -14,6 +14,14 @@
   .event-root .date-group h2 { color: var(--ink); margin: 0 0 var(--space-3); }
   .event-root .event-row { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4) 0; }
   .event-root .event-row + .event-row { border-top: 1px solid var(--border); }
+  /* A thin marker on the left of a day's rows for the same dojo — decorative
+     only, since the dojo name is already in each row's text. */
+  .event-root .event-row-group--same-dojo { position: relative; }
+  .event-root .event-row-group--same-dojo::before {
+    content: ""; position: absolute; top: var(--space-3); bottom: var(--space-3);
+    left: calc(-1 * var(--space-3)); width: 3px; border-radius: var(--radius-sm);
+    background: var(--accent);
+  }
   .event-root .event-row .date-box {
     flex: 0 0 56px; text-align: center; background: var(--surface-sunken);
     border-radius: var(--radius-md); padding: var(--space-2) 0;
