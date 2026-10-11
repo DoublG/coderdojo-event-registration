@@ -18,13 +18,10 @@ with sync_playwright() as pw:
         "The ninja sees their current belt and who awarded it, their badges (with progress towards the next attendance wristband) and every session they came to. They can look, not edit: their details stay with the parent (the one thing they change themselves is their avatar, from the standard set).",
         max_h=2400,
     )
-    p = j.go("/pathways/")
-    if "404" in p.title() or p.locator("text=Page not found").count():
-        p = j.go("/")
-        p.locator("a[href^='/pathways/']").first.click()
-        p.wait_for_load_state("networkidle")
-    else:
-        pass
+    # There's no list of pathways: the homepage's pathway cards lead to them.
+    p = j.go("/")
+    p.locator("a[href^='/pathways/']").first.click()
+    p.wait_for_load_state("networkidle")
     j.shot(
         "pathway",
         "Explore a learning pathway",

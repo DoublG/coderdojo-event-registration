@@ -359,7 +359,8 @@ section(
 child's own login) or <code>service</code> (an API client's technical account). There are no role subclasses.</p>
 <ul>
 <li><b>Parents</b> are plain adult accounts linked to children through <code>Guardianship</code> (a child can have several
-guardians). No check, no approval: a parent only ever manages their own children.</li>
+guardians: a parent or legal guardian invites another adult, such as the child's other parent, by email, and every
+guardian is told of each change). No check, no approval: a parent only ever manages their own children.</li>
 <li><b>A <code>Ninja</code> is not a user.</b> It gets a login only if a guardian gives it one; most never do. The guardian
 creates and removes it and keeps editing the child's details.</li>
 <li><b>Champions and mentors</b> are adult accounts with an approved <code>Application</code> and a valid background check;
@@ -594,7 +595,8 @@ replacement, or kept with a reason. A test fails on any unclassified field, ours
 <li><b>Erasure</b>: rows are found by the registry's subjects, fields emptied or anonymised, <code>User</code> and
 <code>Ninja</code> rows anonymised, never deleted, and an <code>ErasureRecord</code> without personal data allows replaying
 erasures after a backup restore.</li>
-<li><b>Retention</b>: an account is erased two years after its last login, after reminder mails; champions and mentors keep
+<li><b>Retention</b>: an account is erased two years after its last login (a parent's also counts their children's own
+logins and dojo sessions), after reminder mails; champions and mentors keep
 their public team profile. A mail's subject, body and address are cleared 12 months after it was queued; the row stays
 for the statistics.</li>
 </ul>

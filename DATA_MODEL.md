@@ -156,7 +156,10 @@ role subclasses (redesign phases 1–3, section 10).
 - **Parents** are plain adult accounts linked to their children through
   `Guardianship`. A child can have more than one guardian, and any adult
   account can add children from its account page. No background check is
-  ever needed for that.
+  ever needed for that. A parent or legal guardian invites another adult
+  (the child's other parent, say) by email (`GuardianInvitation`, §27 in
+  `DATA_MODEL_PRIVACY.md`); the relation never limits what a guardian can
+  do.
 - **Champions and mentors** are adult accounts with an approved
   `Application` (section 6) and a **valid background check on the
   account**; what they do at a dojo is a `DojoMembership` (section 3).
@@ -213,8 +216,15 @@ classDiagram
         +age() int
     }
 
+    class GuardianInvitation {
+        +email, relation, language
+        +token_hash  14 days
+        +accepted_at, withdrawn_at
+    }
     User "1" --> "*" Guardianship : guardianships (parent)
     Ninja "1" --> "*" Guardianship : guardianships
+    Ninja "1" --> "*" GuardianInvitation : guardian_invitations
+    GuardianInvitation "*" --> "0..1" User : invited_by, accepted_by
     Ninja "0..1" --> "0..1" User : account (ninja login)
     Ninja "*" --> "0..1" Dojo : home_dojo
     class OrganisationRole {
