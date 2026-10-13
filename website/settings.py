@@ -527,9 +527,7 @@ ASGI_APPLICATION = "website.asgi.application"
 # Inside the .devcontainer workspace, DB_* env vars (see docker-compose.yml)
 # point this at the `db` service instead.
 
-MYSQL_SQL_MODE = (
-    "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
-)
+MYSQL_SQL_MODE = "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.mysql",
