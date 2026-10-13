@@ -208,7 +208,7 @@ From the host, after changing a page's markup or styles: `user-journeys/scripts/
 accessibility scan of every journey page in both themes, plus a 320px reflow check; see
 [`user-journeys/README.md`](user-journeys/README.md)).
 
-GitHub Actions runs the checks on every push, never a deploy:
+GitHub Actions runs the checks on every push (and deploys only a push to `demo`, see below):
 [**Tests**](.github/workflows/tests.yml) (missing migrations and the whole suite, with a summary per app),
 [**Code audit**](.github/workflows/audit.yml) (ruff, its security rules, `mypy`, the layers, `pip-audit`,
 `check --deploy` and CodeQL), [**Code quality**](.github/workflows/quality.yml) (every Monday: coverage and
@@ -220,7 +220,9 @@ complexity: [`CODING_STANDARDS.md`](CODING_STANDARDS.md).
 Production is Level27 Python hosting. [`scripts/deploy.sh --check`](scripts/deploy.sh) is a read-only
 preflight; `scripts/deploy.sh` deploys: it checks the new code before touching the live site, migrates,
 reloads gunicorn or restarts daphne (whichever the Level27 panel runs — gunicorn as of 8 Oct 2026), restarts
-the two Celery workers (run by Level27's worker component) and smoke-tests. Details in
+the two Celery workers (run by Level27's worker component) and smoke-tests. A push to the `demo` branch does the same automatically
+([**Deploy to demo**](.github/workflows/deploy-demo.yml)): the tests first, then `scripts/deploy.sh` on a
+runner, with the SSH key from the `demo` environment's secrets. Details in
 [`CLAUDE.md`](CLAUDE.md#deploying-level27).
 
 ---

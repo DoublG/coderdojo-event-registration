@@ -2,6 +2,8 @@
 # against MySQL and Redis, the way the devcontainer runs it, plus a check that no
 # model change is missing its migration.
 # Runs on every push and pull request that changes code, and by hand from the Actions tab.
+# A push to `demo` runs it through deploy-demo.yml instead (called as a reusable
+# workflow), which deploys only when it passes.
 # The results: a summary on the run's page (totals, a table per app, the failed tests
 # with their traceback, the slowest tests), each failed test marked on the line where it
 # failed, and the JUnit XML kept 30 days as the run's "test-results" artifact
@@ -10,6 +12,7 @@ name: Tests
 
 on:
   push:
+    branches-ignore: [demo]
     paths-ignore:
       - "docs/**"
       - "user-journeys/**"
@@ -26,6 +29,7 @@ on:
       - ".github/workflows/audit.yml"
       - ".github/workflows/quality.yml"
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read

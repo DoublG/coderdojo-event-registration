@@ -67,7 +67,7 @@ for developers. Where the line runs:
 | Development-only switches | django-debug-toolbar, django-silk | only while `DEBUG` (or `SILK`) is on; neither is installed on production |
 | The development environment | `.devcontainer/` (Docker Compose, nginx, MySQL, Redis, Mailpit, phpMyAdmin, 2FAuth, `start.sh`, certificates) | **no** |
 | Developer tooling | `requirements-dev.txt`, `pyproject.toml` (Ruff, coverage), `loadtest/`, `quality/`, `user-journeys/` | **no** |
-| Deploying | `scripts/deploy.sh` | **no**: runs from a developer's machine |
+| Deploying | `scripts/deploy.sh` | **no**: runs from a developer's machine, or on GitHub for a push to `demo` (`deploy-demo.yml`) |
 | CI | `.github/` (workflows, `scripts/test_report.py`) | **no**: runs on GitHub |
 | The help centre | `docs/` | **no**: published to GitHub Pages by its own workflow |
 | Documents | `README.md`, `MAINTENANCE.md`, `SECURITY.md`; `CLAUDE.md`, `DATA_MODEL.md`, `CAPACITY.md`, `MEMORY_PROFILE.md`, this file | the first three ship (harmless); the others don't |
@@ -149,6 +149,7 @@ in `pyproject.toml`:
 |---|---|
 | **Tests** (`tests.yml`) | missing migrations; the whole test suite against MySQL 8.4 and Redis 7.2; the results summary |
 | **Code audit** (`audit.yml`) | `ruff check`, `ruff format --check`, the security rules, `pip-audit` over both requirement files, `manage.py check --deploy` with `DEBUG` off, CodeQL |
+| **Deploy to demo** (`deploy-demo.yml`) | on a push to `demo`: the Tests workflow, then `scripts/deploy.sh` to Level27 when it passes |
 | **Help centre** (`docs.yml`) | the Sphinx build with warnings as errors, in three languages |
 
 **Not checked automatically**, on purpose for now: types (no mypy or pyright: the code isn't annotated

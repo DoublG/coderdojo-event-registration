@@ -96,7 +96,7 @@ mypy                      # types: the modules in pyproject.toml's [tool.mypy] f
 
 ### Deploying (Level27)
 
-Production is Level27 Python hosting; `scripts/deploy.sh --check` / `scripts/deploy.sh`. Full detail (the bundle, migrations, daphne/gunicorn, Celery workers, CI workflows) in `scripts/CLAUDE.md` (loaded automatically when working there).
+Production is Level27 Python hosting; `scripts/deploy.sh --check` / `scripts/deploy.sh`, or a push to the `demo` branch (`.github/workflows/deploy-demo.yml`: the tests, then the same script on a runner). Full detail (the bundle, migrations, daphne/gunicorn, Celery workers, CI workflows) in `scripts/CLAUDE.md` (loaded automatically when working there).
 
 ### Documentation outputs: the help centre on GitHub Pages, user journeys, pitch deck, technical PDF
 

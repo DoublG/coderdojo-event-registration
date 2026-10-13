@@ -157,7 +157,7 @@ For each update:
 3. **Run everything:** `python manage.py test`, `ruff check .`, `python manage.py makemigrations --check`
    (an upgrade can need a migration), and click through the pages the package touches. Run the tests
    with warnings on (`python -W error::DeprecationWarning manage.py test <app>`) before a Django upgrade.
-4. **Deploy:** `scripts/deploy.sh --check`, then `scripts/deploy.sh`. The deploy runs `manage.py check`
+4. **Deploy:** `scripts/deploy.sh --check`, then `scripts/deploy.sh` (or push to `demo`: `.github/workflows/deploy-demo.yml` runs the tests and then both). The deploy runs `manage.py check`
    on the new code before touching the live site, and restarts the Celery workers.
 5. **Update this page** when a row changes.
 
