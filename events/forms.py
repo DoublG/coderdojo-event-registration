@@ -454,13 +454,20 @@ class SignUpForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.children = {str(child.id): child for child in children}
 
-    def clean(self):
-        data = super().clean()
-        submitted = data.get("child") or []
-        ordered = [cid for cid in (data.get("child_order") or "").split(",") if cid]
+    def ticked_ids(self):
+        """The ids of this account's ticked children, in the order they were
+        ticked. Read from the post itself, so a page shown again after an
+        error can tick them again in that order (it decides who gets a place
+        and who goes on the waiting list)."""
+        submitted = self.data.getlist("child") if hasattr(self.data, "getlist") else self.data.get("child", [])
+        ordered = [cid for cid in (self.data.get("child_order") or "").split(",") if cid]
         if set(ordered) != set(submitted):
             ordered = submitted  # no script, or a stale order: the page's order
-        selected = [self.children[cid] for cid in dict.fromkeys(ordered) if cid in self.children]
+        return [cid for cid in dict.fromkeys(ordered) if cid in self.children]
+
+    def clean(self):
+        data = super().clean()
+        selected = [self.children[cid] for cid in self.ticked_ids()]
         if not selected:
             raise forms.ValidationError(_("Please select at least one child."))
         data["selected"] = selected

@@ -192,6 +192,7 @@ def event_signup(request, event_id):
     # itself (Ninja.objects.signable_by).
     guardian = request.user
     results = error = None
+    ticked = []
 
     if request.method == "POST":
         form = SignUpForm(request.POST, children=Ninja.objects.signable_by(guardian))
@@ -210,6 +211,10 @@ def event_signup(request, event_id):
     # Read after a sign-up, so the children just signed up show as such
     # (e.g. back on this form through the browser's back button).
     existing_registrations = _registrations_of(event, guardian)
+    if error:
+        # Shown again: the children still to sign up stay ticked, in the
+        # order they were ticked (who gets a place, who waits).
+        ticked = [int(cid) for cid in form.ticked_ids() if int(cid) not in existing_registrations]
     children = [
         {"child": child, "registration": existing_registrations.get(child.id)}
         for child in Ninja.objects.signable_by(guardian)
@@ -230,5 +235,6 @@ def event_signup(request, event_id):
             "results": results,
             "any_waitlisted": any_waitlisted,
             "error": error,
+            "ticked": ticked,
         },
     )

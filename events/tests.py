@@ -1,6 +1,7 @@
 import threading
 from datetime import timedelta
 from io import BytesIO
+from unittest import mock
 
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -589,6 +590,56 @@ class EventSignupViewTests(TestCase):
 
         self.assertIsNotNone(response.context["error"])
         self.assertEqual(Registration.objects.filter(event=event, ninja=self.child).count(), 1)
+
+    def _refused_signup(self, data):
+        """Post `data` with a sign-up that fails under the lock, so the page
+        comes back with its error."""
+        refused = registrations.RegistrationError("Refused under the lock.")
+        with mock.patch.object(registrations, "sign_up", side_effect=refused):
+            return self.client.post(reverse("event_signup", kwargs={"event_id": self.event_for_errors.id}), data)
+
+    def test_an_error_keeps_the_children_ticked_in_their_order(self):
+        """The order the children were ticked in decides who gets a place and
+        who waits, so a page shown again after an error keeps it."""
+        sibling = Ninja.objects.create(name="Sibling")
+        Guardianship.objects.create(guardian=self.guardian, ninja=sibling)
+        self.event_for_errors = _future_event(self.dojo, places=1)
+        self.client.force_login(self.guardian)
+
+        response = self._refused_signup(
+            {"child": [str(self.child.id), str(sibling.id)], "child_order": f"{sibling.id},{self.child.id}"}
+        )
+
+        self.assertEqual(response.context["error"], "Refused under the lock.")
+        self.assertEqual(response.context["ticked"], [sibling.id, self.child.id])
+        self.assertContains(response, f'value="{sibling.id},{self.child.id}"')
+        self.assertContains(response, f'name="child" value="{self.child.id}" checked>', html=False)
+        self.assertContains(response, f'name="child" value="{sibling.id}" checked>', html=False)
+        self.assertFalse(Registration.objects.exists())
+
+    def test_an_error_without_script_keeps_the_ticks_in_page_order(self):
+        """No script means no tick order: the page's order, as when signing up."""
+        sibling = Ninja.objects.create(name="Sibling")
+        Guardianship.objects.create(guardian=self.guardian, ninja=sibling)
+        self.event_for_errors = _future_event(self.dojo, places=1)
+        self.client.force_login(self.guardian)
+
+        response = self._refused_signup({"child": [str(sibling.id), str(self.child.id)], "child_order": ""})
+
+        self.assertEqual(response.context["ticked"], [sibling.id, self.child.id])
+
+    def test_an_error_leaves_out_children_signed_up_meanwhile(self):
+        sibling = Ninja.objects.create(name="Sibling")
+        Guardianship.objects.create(guardian=self.guardian, ninja=sibling)
+        self.event_for_errors = _future_event(self.dojo, places=5)
+        Registration.objects.create(event=self.event_for_errors, ninja=self.child, waiting_list=False, position=1)
+        self.client.force_login(self.guardian)
+
+        response = self._refused_signup(
+            {"child": [str(self.child.id), str(sibling.id)], "child_order": f"{self.child.id},{sibling.id}"}
+        )
+
+        self.assertEqual(response.context["ticked"], [sibling.id])
 
     def test_closed_event_blocks_signup(self):
         event = _future_event(self.dojo, status=Event.CLOSED)

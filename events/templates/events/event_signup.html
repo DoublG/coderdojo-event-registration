@@ -101,7 +101,7 @@
 
         <form class="cd-form" id="event-signup-form" method="post" data-places-left="{{ event.places_left }}" novalidate>
           {% csrf_token %}
-          <input type="hidden" name="child_order" id="child-order-input" value="">
+          <input type="hidden" name="child_order" id="child-order-input" value="{{ ticked|join:"," }}">
 
           {% if error %}
             <div class="cd-form__notes">
@@ -147,7 +147,7 @@
                   </div>
                 {% else %}
                   <div class="child-select-row" data-child-row>
-                    <input type="checkbox" id="es-child-{{ child.id }}" name="child" value="{{ child.id }}">
+                    <input type="checkbox" id="es-child-{{ child.id }}" name="child" value="{{ child.id }}"{% if child.id in ticked %} checked{% endif %}>
                     {% include "accounts/partials/_child_avatar.html" with child=child %}
                     <label for="es-child-{{ child.id }}">
                       <span class="body">{{ child.full_name }}</span>
@@ -198,7 +198,11 @@
     // The order children were *checked* in, not their order in the list —
     // whoever's ticked first gets first claim on a spot. Unchecking removes
     // an id; re-checking puts it back at the end, as the newest pick.
-    var selectionOrder = [];
+    // After an error the page comes back with the children ticked and their
+    // order in the hidden field: start from that order.
+    var selectionOrder = orderInput.value.split(",").filter(function (id) {
+      return rowById[id] && rowById[id].querySelector('input[name="child"]').checked;
+    });
 
     function onCheckboxChange(box) {
       var id = box.value;
@@ -251,7 +255,7 @@
     checkboxes.forEach(function (box) {
       // Covers bfcache/back-button restoring a checked box before any
       // "change" event has fired for it this load.
-      if (box.checked) selectionOrder.push(box.value);
+      if (box.checked && selectionOrder.indexOf(box.value) === -1) selectionOrder.push(box.value);
       box.addEventListener("change", function () {
         onCheckboxChange(box);
         sync();

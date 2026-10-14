@@ -1,6 +1,6 @@
 {
- "generated_from": "5defa1f",
- "generated_on": "2026-10-11",
+ "generated_from": "745a61c",
+ "generated_on": "2026-10-14",
  "personas": {
   "parent": {
    "pages": [
@@ -27,7 +27,7 @@
     "dojos/views/public.py:dojo_list": "25ead37f977b5163",
     "events/views.py:event_detail": "508021bd288e2ac9",
     "events/views.py:event_list": "530c7d2ed2ec18ab",
-    "events/views.py:event_signup": "14298e097ec60fc0",
+    "events/views.py:event_signup": "5e52ddfa529d5e03",
     "mailing/views.py:mail_preferences": "8467f97655ff4f35",
     "pages/views.py:home": "0de5ef2bac6106e2",
     "privacy/views.py:delete_my_account": "4475f4654efb476c"
@@ -62,7 +62,7 @@
     "dojos/templates/dojos/partials/_mentor_avatar.html": "f4bcbd2505baf894",
     "events/templates/events/event_detail.html": "adf104f7f4b37e4e",
     "events/templates/events/event_list.html": "cfa1948a36d3d8ad",
-    "events/templates/events/event_signup.html": "6d7658b22d93b304",
+    "events/templates/events/event_signup.html": "e835ba2a40261b91",
     "events/templates/events/partials/_audience_badge.html": "70a7a01c39560f2e",
     "events/templates/events/partials/_event_results_page.html": "7147aaadfe971458",
     "events/templates/events/partials/_event_row.html": "a0a02f88b8748455",
@@ -91,7 +91,7 @@
     "accounts/views/auth.py:LoginView": "c09d432776362105",
     "accounts/views/children.py:ninja_detail": "1c172951b419df99",
     "events/views.py:event_detail": "508021bd288e2ac9",
-    "events/views.py:event_signup": "14298e097ec60fc0",
+    "events/views.py:event_signup": "5e52ddfa529d5e03",
     "pathways/views.py:pathway_detail": "b33fb4640ddff05c"
    },
    "templates": {
@@ -105,7 +105,7 @@
     "accounts/templates/accounts/partials/_ninja_login_card.html": "58a52d981a3751d4",
     "accounts/templates/accounts/security.html": "93f8070b8156b3c2",
     "events/templates/events/event_detail.html": "adf104f7f4b37e4e",
-    "events/templates/events/event_signup.html": "6d7658b22d93b304",
+    "events/templates/events/event_signup.html": "e835ba2a40261b91",
     "events/templates/events/partials/_audience_badge.html": "70a7a01c39560f2e",
     "events/templates/events/partials/_organiser.html": "2d7af6f1eb27d438",
     "pathways/templates/pathways/pathway_detail.html": "e4ce3be5e80897d5"

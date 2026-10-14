@@ -2824,7 +2824,17 @@ targets). Without JavaScript every child's questions show; with it,
 page's existing script moves into `bundle.js` or gets a listener there).
 `SignUpForm` gets the questions and reads `q-<child_id>-<question_id>` =
 `yes|no` for each selected child; a missing answer is an error next to
-that question, and the ticked children and answers given stay filled in.
+that question, and the answers given stay filled in. **The ticked
+children stay ticked in the order they were ticked** (decided
+2026-10-14): that order decides who gets a place and who goes on the
+waiting list, so an error must never reset it. Already built for every
+sign-up error (`SignUpForm.ticked_ids`, the view's `ticked`, the page
+script starting from the `child_order` field); the question errors use
+the same path. Today's single error message at the top of the form
+(`form.non_field_errors()[0]`) becomes an error per question, which the
+view has to pass to the template differently. The answers are created
+before `booking_mail(registration)` in `sign_up`, so phase 2's mail can
+list them.
 A ninja's own login answers its own questions the same way.
 
 **Dojo team: the attendance list** (`_attendance_context`,
