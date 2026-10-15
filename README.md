@@ -3,6 +3,7 @@
 [![Tests](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/tests.yml)
 [![Code audit](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/audit.yml/badge.svg?branch=main)](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/audit.yml)
 [![Deploy to demo](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/deploy-demo.yml/badge.svg?branch=demo)](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/deploy-demo.yml)
+[![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Frepos%2FDoublG%2Fcoderdojo-event-registration%2Freleases%2Flatest&query=%24.tag_name&label=version&color=blue)](https://github.com/DoublG/coderdojo-event-registration/releases/latest)
 
 The website for [CoderDojo Belgium](https://coderdojobelgium.be)'s free coding clubs for children aged 7–17:
 families find a dojo and sign their children up, volunteers are vetted once and help at any dojo, dojo
