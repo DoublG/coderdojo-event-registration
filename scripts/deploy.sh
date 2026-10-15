@@ -91,11 +91,62 @@ SSH=(ssh -o BatchMode=yes -o ConnectTimeout=15 "$REMOTE")
 EXAMPLE_KEYS="$(grep -oE '^[A-Z_][A-Z0-9_]*' .env.example 2>/dev/null | tr '\n' ' ')"
 
 step() { printf '\n\033[1m==> %s\033[0m\n' "$*"; }
-die() { printf '\033[31merror:\033[0m %s\n' "$*" >&2; exit 1; }
+die() {
+    printf '\033[31merror:\033[0m %s\n' "$*" >&2
+    # On GitHub Actions also an annotation, so the run's page shows the reason.
+    if [ "${GITHUB_ACTIONS:-}" = true ]; then printf '::error::%s\n' "$*" | head -1; fi
+    exit 1
+}
+# A command that fails without its own message still says where it stopped
+# (the trap fires exactly where `set -e` stops the script).
+trap 'die "line $LINENO: \"$BASH_COMMAND\" failed (exit $?)"' ERR
+
+# ssh's own error (the last lines of what it printed), indented.
+ssh_error() { { grep -v '^\s*$' "$1" || true; } | tail -3 | sed 's/^/    /'; }
+
+# Why `ssh $REMOTE` failed, from ssh's own message, and what to do about it.
+explain_ssh_failure() {
+    local log="$1" hint
+    case "$(cat "$log")" in
+        *"Host key verification failed"*|*"host key for"*"has changed"*|*"No "*"host key is known"*)
+            hint="the server's host key isn't in known_hosts, or doesn't match it." ;;
+        *"Permission denied"*)
+            hint="the server refused the key: its public half isn't in the server's ~/.ssh/authorized_keys, or no key was offered (ssh-add -l)." ;;
+        *"Could not resolve hostname"*)
+            hint="the server's name doesn't resolve: check DEPLOY_REMOTE (now $REMOTE)." ;;
+        *"timed out"*|*"Connection refused"*|*"No route to host"*|*"Network is unreachable"*)
+            hint="no connection to the server: a network problem, or the server only accepts SSH from known IP addresses." ;;
+        *"load key"*|*"invalid format"*|*"passphrase"*)
+            hint="the private key can't be read: it's incomplete, or it has a passphrase (BatchMode can't ask for one)." ;;
+        *) hint="see ssh's message above." ;;
+    esac
+    if [ "${GITHUB_ACTIONS:-}" = true ]; then
+        case "$hint" in
+            *"host key"*) hint="$hint On GitHub: the 'demo' environment's variable LEVEL27_KNOWN_HOSTS must hold \`ssh-keyscan\` lines for the host name exactly (no trailing dot)." ;;
+            *"refused the key"*|*"can't be read"*) hint="$hint On GitHub: the 'demo' environment's secret LEVEL27_SSH_KEY must be the whole private key, without a passphrase." ;;
+            *"no connection"*) hint="$hint GitHub's runners connect from changing addresses." ;;
+        esac
+    fi
+    printf '%s' "$hint"
+}
+
+# Copy a file to the server, or stop with scp's own error.
+upload() {
+    local what="$1" src="$2" dest="$3" log="$WORK/scp.log"
+    if ! scp -q -o BatchMode=yes "$src" "$REMOTE:$dest" 2> "$log"; then
+        ssh_error "$log" >&2
+        die "uploading $what to $REMOTE:$dest failed (the live site was not changed)"
+    fi
+}
 
 # --- 0. preflight ----------------------------------------------------------
 step "Preflight"
-"${SSH[@]}" true 2>/dev/null || die "cannot ssh to $REMOTE (is your key loaded? try: ssh-add -l)"
+SSH_LOG="$(mktemp)"
+if ! "${SSH[@]}" true 2> "$SSH_LOG"; then
+    ssh_error "$SSH_LOG" >&2
+    die "cannot ssh to $REMOTE: $(explain_ssh_failure "$SSH_LOG")"
+fi
+rm -f "$SSH_LOG"
 echo "ssh: $REMOTE ok"
 
 SHA="$(git rev-parse --short HEAD)"
@@ -174,6 +225,7 @@ APP="\$HOME/$REMOTE_APP"; PY="$REMOTE_PY"; SOCKET="$REMOTE_SOCKET"; LEGACY_UNITS
 REL="\$HOME/deploy/releases/\$RELEASE"
 step() { printf '\n\033[1m[server] %s\033[0m\n' "\$*"; }
 die() { printf '\033[31m[server] error:\033[0m %s\n' "\$*" >&2; exit 1; }
+trap 'die "line \$LINENO of the server script: \"\$BASH_COMMAND\" failed (exit \$?)"' ERR
 
 # systemctl --user over a non-login ssh session needs the user's runtime dir.
 [ -n "\${XDG_RUNTIME_DIR:-}" ] || [ ! -d "/run/user/\$(id -u)" ] || export XDG_RUNTIME_DIR="/run/user/\$(id -u)"
@@ -444,8 +496,10 @@ REMOTE
 # --- 2/3. check mode: read-only ------------------------------------------------
 if [ "$MODE" = check ]; then
     step "Server checks (read-only)"
-    "${SSH[@]}" 'mkdir -p ~/deploy && cat > ~/deploy/check-requirements.txt' < requirements.txt
-    remote_script | "${SSH[@]}" bash -s
+    "${SSH[@]}" 'mkdir -p ~/deploy && cat > ~/deploy/check-requirements.txt' < requirements.txt \
+        || die "copying requirements.txt to $REMOTE failed (see ssh's message above)"
+    remote_script | "${SSH[@]}" bash -s \
+        || die "the server checks failed: see the [server] lines above (nothing was changed on the server)"
     step "Check finished — nothing was changed on the server"
     exit 0
 fi
@@ -458,17 +512,20 @@ if [ "$ASSUME_YES" -ne 1 ]; then
 fi
 
 step "Uploading"
-"${SSH[@]}" 'mkdir -p ~/deploy/releases'
-scp -q -o BatchMode=yes "$BUNDLE" "$REMOTE:deploy/incoming.tar.gz"
+"${SSH[@]}" 'mkdir -p ~/deploy/releases' \
+    || die "creating ~/deploy/releases on $REMOTE failed (see ssh's message above)"
+upload "the release" "$BUNDLE" deploy/incoming.tar.gz
 if [ -f "$ENV_FILE" ]; then
-    scp -q -o BatchMode=yes "$ENV_FILE" "$REMOTE:deploy/incoming.env"
+    upload "$ENV_FILE" "$ENV_FILE" deploy/incoming.env
 fi
 # The page Apache shows when the site can't answer (.devcontainer/ isn't bundled).
-scp -q -o BatchMode=yes .devcontainer/nginx/errors/busy.html "$REMOTE:deploy/busy.html"
+upload "the busy page" .devcontainer/nginx/errors/busy.html deploy/busy.html
 if [ -n "$DOCS_BUNDLE" ]; then
-    scp -q -o BatchMode=yes "$DOCS_BUNDLE" "$REMOTE:deploy/incoming-docs.tar.gz"
+    upload "the help centre" "$DOCS_BUNDLE" deploy/incoming-docs.tar.gz
 fi
 
 # --- 3-5. install, verify, go live -------------------------------------------------
-remote_script | "${SSH[@]}" bash -s
+# The server script says itself what it changed before stopping ([server] error).
+remote_script | "${SSH[@]}" bash -s \
+    || die "the deploy stopped on the server: see the [server] lines above for the step and whether the live site changed"
 step "Done: $RELEASE is live"
