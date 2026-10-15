@@ -8,8 +8,9 @@
 # One-time setup (repository Settings → Environments → "demo"):
 #   - secret LEVEL27_SSH_KEY: a private key whose public half is in the Level27
 #     account's ~/.ssh/authorized_keys (a key of its own for CI, without a passphrase);
-#   - secret LEVEL27_KNOWN_HOSTS: the server's host key, the output of
-#     `ssh-keyscan c40a7b15f.l27powered.eu` checked against a known-good connection;
+#   - variable LEVEL27_KNOWN_HOSTS: the server's host key, the output of
+#     `ssh-keyscan c40a7b15f.l27powered.eu` checked against a known-good connection
+#     (public, so a variable, which can be read back; a secret of that name works too);
 #   - variable DEPLOY_REMOTE (optional): the ssh target, when it isn't deploy.sh's default.
 # The server's ~/app/.env is kept as it is: CI never uploads one.
 name: Deploy to demo
@@ -52,10 +53,10 @@ jobs:
       - name: Set up the SSH key
         env:
           SSH_KEY: ${{ secrets.LEVEL27_SSH_KEY }}
-          KNOWN_HOSTS: ${{ secrets.LEVEL27_KNOWN_HOSTS }}
+          KNOWN_HOSTS: ${{ vars.LEVEL27_KNOWN_HOSTS || secrets.LEVEL27_KNOWN_HOSTS }}
         run: |
           if [ -z "$SSH_KEY" ] || [ -z "$KNOWN_HOSTS" ]; then
-            echo "::error::LEVEL27_SSH_KEY and LEVEL27_KNOWN_HOSTS must be set on the 'demo' environment"
+            echo "::error::the secret LEVEL27_SSH_KEY and the variable LEVEL27_KNOWN_HOSTS must be set on the 'demo' environment"
             exit 1
           fi
           install -d -m 700 ~/.ssh
