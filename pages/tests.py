@@ -149,7 +149,7 @@ class ProxyErrorPageTests(TestCase):
 
     def test_every_deploy_puts_it_where_production_apache_serves_it(self):
         deploy = (settings.BASE_DIR / "scripts" / "deploy.sh").read_text()
-        self.assertIn('.devcontainer/nginx/errors/busy.html "$REMOTE:deploy/busy.html"', deploy)
+        self.assertIn('upload "the busy page" .devcontainer/nginx/errors/busy.html deploy/busy.html', deploy)
         self.assertIn('install -m 644 "\\$HOME/deploy/busy.html" "\\$HOME/errors/busy.html"', deploy)
 
 

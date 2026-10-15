@@ -56,6 +56,9 @@
 #                     file doesn't exist, and the server's .env is kept as-is
 #                     (default: .env.production; gitignored — never commit it)
 #   DEPLOY_KEEP       releases to keep in ~/deploy/releases (default: 5)
+#   DEPLOY_VERSION    the release's version, as the demo deploy picks it
+#                     (.github/scripts/release_version.sh); default: what
+#                     `git describe` says, e.g. 2026.10.3-2-g10bcd48
 
 set -euo pipefail
 
@@ -157,7 +160,11 @@ if [ -n "$(git status --porcelain)" ]; then
     git status --short | sed 's/^/    /'
 fi
 RELEASE="$(date +%Y%m%d-%H%M%S)-${SHA}${DIRTY}"
+# The version the site shows (core.version): the CalVer tag, or the last one
+# plus the commits since it; the commit alone before the first tag.
+VERSION="${DEPLOY_VERSION:-$(git describe --tags --match '[0-9][0-9][0-9][0-9].*' --always)${DIRTY}}"
 echo "release: $RELEASE"
+echo "version: $VERSION"
 
 if [ -f "$ENV_FILE" ]; then
     echo "env file: $ENV_FILE will be installed as ~/$REMOTE_APP/.env"
@@ -170,7 +177,7 @@ step "Bundling"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 BUNDLE="$WORK/release.tar.gz"
-printf 'release=%s\ncommit=%s\nbuilt=%s\n' "$RELEASE" "$(git rev-parse HEAD)" "$(date -u +%FT%TZ)" > "$WORK/BUILD_INFO"
+printf 'release=%s\nversion=%s\ncommit=%s\nbuilt=%s\n' "$RELEASE" "$VERSION" "$(git rev-parse HEAD)" "$(date -u +%FT%TZ)" > "$WORK/BUILD_INFO"
 
 git ls-files -co --exclude-standard -z \
     | grep -zvE "$EXCLUDES_RE" \
@@ -528,4 +535,4 @@ fi
 # The server script says itself what it changed before stopping ([server] error).
 remote_script | "${SSH[@]}" bash -s \
     || die "the deploy stopped on the server: see the [server] lines above for the step and whether the live site changed"
-step "Done: $RELEASE is live"
+step "Done: $VERSION is live ($RELEASE)"

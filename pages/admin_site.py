@@ -13,7 +13,7 @@ class AdminSite(admin.AdminSite):
     access and that access is still open (accounts.admin_access, DATA_MODEL.md
     §23): checked on every request, so access stops at the minute even when
     the job that takes staff status away runs late. The header says until
-    when."""
+    when, and which version runs (core.version; not in development)."""
 
     def has_permission(self, request):
         from accounts.admin_access import may_use_admin
@@ -41,8 +41,11 @@ class AdminSite(admin.AdminSite):
         from django.utils.translation import gettext as _
 
         from accounts.admin_access import open_grant, until_label
+        from core.version import is_development, version
 
         context = super().each_context(request)
+        if not is_development():
+            context["site_header"] = f"{context['site_header']} · {version()}"
         grant = open_grant(request.user) if not request.user.is_superuser else None
         if grant is not None:
             context["site_header"] = _("%(header)s · access until %(until)s") % {

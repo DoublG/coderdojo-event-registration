@@ -11,6 +11,8 @@ from django.http import Http404, HttpResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
+from core.version import build_info, version
+
 from . import collect, recorder
 
 logger = logging.getLogger(__name__)
@@ -229,4 +231,11 @@ def metrics(request):
         else:
             up.append(({"section": name}, 1))
     out.metric("coderdojo_metrics_section_up", "gauge", "Whether each section could be read.", up)
+    info = build_info()
+    out.metric(
+        "coderdojo_build_info",
+        "gauge",
+        "The running version (core.version), always 1.",
+        [({"version": version(), "commit": info.get("commit", "")}, 1)],
+    )
     return HttpResponse(out.text(), content_type="text/plain; version=0.0.4; charset=utf-8")

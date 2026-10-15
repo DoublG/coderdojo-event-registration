@@ -11215,3 +11215,12 @@ msgstr "Rapport supprimé."
 #~ msgstr ""
 #~ "Confirmez que vous êtes le parent ou le tuteur de l'enfant et que vous "
 #~ "acceptez la façon dont nous conservons ses données."
+
+#: core/templates/core/_manage_shell.html:73
+msgid "Development version"
+msgstr "Version de développement"
+
+#: core/templates/core/_manage_shell.html:73
+#, python-format
+msgid "Version %(version)s"
+msgstr "Version %(version)s"

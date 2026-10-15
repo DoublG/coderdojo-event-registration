@@ -11140,3 +11140,12 @@ msgstr "Rapport verwijderd."
 #~ msgstr ""
 #~ "Bevestig dat je de ouder of voogd van het kind bent en akkoord gaat met "
 #~ "hoe we zijn of haar gegevens bijhouden."
+
+#: core/templates/core/_manage_shell.html:73
+msgid "Development version"
+msgstr "Ontwikkelversie"
+
+#: core/templates/core/_manage_shell.html:73
+#, python-format
+msgid "Version %(version)s"
+msgstr "Versie %(version)s"

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core.cache import cache
 from django.templatetags.static import static
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -1808,3 +1808,76 @@ class CiQualityReportTests(TestCase):
                 self.assertEqual(self.report.main(["x", str(now), str(Path(folder) / "missing.json")]), 0)
             self.assertIn("no previous run to compare with", summary.read_text())
             self.assertEqual(self.report.main(["x", str(Path(folder) / "missing.json")]), 0)
+
+
+class SiteVersionTests(TestCase):
+    """The running version (core.version), read from the BUILD_INFO file
+    deploy.sh writes: shown to the management side, never on a public page."""
+
+    def setUp(self):
+        import tempfile
+        from pathlib import Path
+
+        from core import version
+
+        self.version = version
+        self.base = Path(tempfile.mkdtemp())
+        self.addCleanup(__import__("shutil").rmtree, self.base, True)
+        version.build_info.cache_clear()
+        self.addCleanup(version.build_info.cache_clear)
+
+    def _deployed(self, text):
+        (self.base / "BUILD_INFO").write_text(text)
+        self.version.build_info.cache_clear()
+        override = override_settings(BASE_DIR=self.base)
+        override.enable()
+        self.addCleanup(override.disable)
+
+    def test_reads_the_build_info_lines(self):
+        (self.base / "BUILD_INFO").write_text("release=20261015-1-abc\nversion=2026.10.3\n\nnot a line\n=x\n")
+        self.assertEqual(
+            self.version.read_build_info(self.base / "BUILD_INFO"),
+            {"release": "20261015-1-abc", "version": "2026.10.3"},
+        )
+        self.assertEqual(self.version.read_build_info(self.base / "missing"), {})
+
+    def test_without_a_build_info_it_is_development(self):
+        with override_settings(BASE_DIR=self.base):
+            self.version.build_info.cache_clear()
+            self.assertEqual(self.version.version(), "development")
+            self.assertTrue(self.version.is_development())
+
+    def test_a_deployed_release_has_its_version(self):
+        self._deployed("version=2026.10.3\ncommit=abc\n")
+        self.assertEqual(self.version.version(), "2026.10.3")
+        self.assertFalse(self.version.is_development())
+
+    def _organisation_admin(self):
+        from accounts.models import OrganisationRole, User
+
+        user = User.objects.create(username="orgadmin", email="orgadmin@example.com")
+        OrganisationRole.objects.create(account=user, role=OrganisationRole.ADMIN)
+        self.client.force_login(user)
+
+    def test_the_management_sidebar_shows_it(self):
+        self._organisation_admin()
+        self.version.build_info.cache_clear()
+        with override_settings(BASE_DIR=self.base):
+            self.assertContains(self.client.get(reverse("manage_campaign_list")), "Development version")
+        self._deployed("version=2026.10.3\n")
+        self.assertContains(self.client.get(reverse("manage_campaign_list")), "Version 2026.10.3")
+
+    def test_the_django_admin_header_shows_it_once_deployed(self):
+        from accounts.models import User
+
+        self.client.force_login(User.objects.create_superuser("root", "root@example.com", "pw"))
+        self.version.build_info.cache_clear()
+        with override_settings(BASE_DIR=self.base):
+            self.assertNotContains(self.client.get(reverse("admin:index")), "development")
+        self._deployed("version=2026.10.3\n")
+        self.assertContains(self.client.get(reverse("admin:index")), "· 2026.10.3")
+
+    def test_public_pages_and_the_health_check_never_show_it(self):
+        self._deployed("version=2026.10.3\n")
+        self.assertNotContains(self.client.get(reverse("home")), "2026.10.3")
+        self.assertNotIn("2026.10.3", self.client.get("/health/").content.decode())

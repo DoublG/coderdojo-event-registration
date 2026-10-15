@@ -13,6 +13,12 @@
 #     (public, so a variable, which can be read back; a secret of that name works too);
 #   - variable DEPLOY_REMOTE (optional): the ssh target, when it isn't deploy.sh's default.
 # The server's ~/app/.env is kept as it is: CI never uploads one.
+#
+# Versions (scripts/CLAUDE.md, "Versions"): each deploy gets the next CalVer number
+# (.github/scripts/release_version.sh, e.g. 2026.10.3), which deploy.sh writes into
+# BUILD_INFO for the site to show. Only once the deploy succeeded is the commit tagged
+# with it and a GitHub Release made, so a failed deploy uses up no number; a deploy of
+# a commit that already has one (run again) keeps it.
 name: Deploy to demo
 
 on:
@@ -32,6 +38,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     environment: demo
+    # Writing: the version's tag and its GitHub Release, after a successful deploy.
+    permissions:
+      contents: write
     # One deploy at a time, and never cancel one halfway: a newer push waits its turn.
     concurrency:
       group: deploy-demo
@@ -39,6 +48,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # the tags: the version comes from them
+
+      - name: Pick the version
+        id: version
+        run: .github/scripts/release_version.sh
 
       # Sphinx, so deploy.sh builds the help centre (en/fr/nl) and ships it to ~/docs.
       - uses: actions/setup-python@v7
@@ -68,6 +83,7 @@ jobs:
       - name: Preflight (read-only)
         env:
           DEPLOY_REMOTE: ${{ vars.DEPLOY_REMOTE }}
+          DEPLOY_VERSION: ${{ steps.version.outputs.version }}
         run: |
           [ -n "$DEPLOY_REMOTE" ] || unset DEPLOY_REMOTE
           scripts/deploy.sh --check
@@ -75,14 +91,27 @@ jobs:
       - name: Deploy
         env:
           DEPLOY_REMOTE: ${{ vars.DEPLOY_REMOTE }}
+          DEPLOY_VERSION: ${{ steps.version.outputs.version }}
         run: |
           [ -n "$DEPLOY_REMOTE" ] || unset DEPLOY_REMOTE
           scripts/deploy.sh --yes
 
+      # The tag and the release only now: the version is live. The notes list the
+      # pull requests and commits since the previous release (GitHub's own).
+      - name: Tag and release the version
+        if: ${{ steps.version.outputs.new == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          PREVIOUS: ${{ steps.version.outputs.previous }}
+        run: |
+          gh release create "$VERSION" --target "$GITHUB_SHA" --title "$VERSION" \
+            --generate-notes --notes-start-tag "$PREVIOUS"
+
       - name: Summary
         if: ${{ success() }}
         run: |
-          echo "### Deployed \`$(git rev-parse --short HEAD)\` to Level27" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Deployed ${{ steps.version.outputs.version }} (\`$(git rev-parse --short HEAD)\`) to Level27" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Remove the SSH key
         if: ${{ always() }}

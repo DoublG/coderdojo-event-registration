@@ -19,6 +19,11 @@ Review this page every quarter (see [Calendar](#calendar)) and whenever a versio
 
 ### Production (Level27, `c40a7b15f.l27powered.eu`)
 
+**Which release of the site runs** is its CalVer version (`2026.10.3`: the third release of October 2026), shown in
+the management sidebar, the Django admin's header and `/metrics/` (`coderdojo_build_info`). Every successful demo
+deploy is tagged with it and gets a GitHub Release listing what changed since the previous one (`scripts/CLAUDE.md`,
+"Versions"). The tables below are the platform's versions, not the site's.
+
 | Component | Version | Released | Bugfixes until | Security until | Status and action |
 |---|---|---|---|---|---|
 | Operating system | Ubuntu 22.04.5 LTS | Apr 2022 | ended Sep 2024 | **1 Jun 2027** (Ubuntu Pro/ESM to Apr 2032) | Plan the move to 24.04 LTS (to May 2029) or 26.04 LTS (to May 2031) with Level27 **before June 2027**. |

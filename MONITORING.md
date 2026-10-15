@@ -177,6 +177,7 @@ the tests' cache).
 | `process_pss_bytes` | gauge | `role`, `host`, `pid` | Each process's fair share of memory: pages it shares with forked siblings are divided among them | Sum it per role for the real total, the figure to plan the account's memory on |
 | `process_rss_bytes` | gauge | `role`, `host`, `pid` | Resident memory, counting shared pages in full | Adding these up overstates the total |
 | `process_max_rss_bytes` | gauge | `role`, `host`, `pid` | Peak resident memory | What Celery's `--max-memory-per-child` compares with |
+| `build_info` | gauge | `version`, `commit` | Always 1; its labels are the running version (CalVer, `core.version`) and commit, `development` without a deploy | A change of `version` is a deploy: compare the graphs before and after it |
 | `metrics_section_up` | gauge | `section` | 1 when a section (database, redis, queues, processes, requests, tasks, cache) could be read | A 0 names the component that's down |
 | `up` | gauge | `job` | Prometheus's own: 1 when the scrape answered with metrics | 0 means the site is down, or the host or token is wrong |
 

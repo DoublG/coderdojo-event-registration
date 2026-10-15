@@ -144,6 +144,7 @@ class MetricsViewTests(TestCase):
         ):
             self.assertIn(metric, text)
         self.assertIn('coderdojo_metrics_section_up{section="redis"} 1', text)
+        self.assertIn('coderdojo_build_info{version="development",commit=""} 1', text)
 
     @override_settings(METRICS_TOKEN="secret")
     def test_a_component_that_is_down_is_marked_and_the_rest_still_shows(self):
