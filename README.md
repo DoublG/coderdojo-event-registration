@@ -2,6 +2,7 @@
 
 [![Tests](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/tests.yml)
 [![Code audit](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/audit.yml/badge.svg?branch=main)](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/audit.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/DoublG/coderdojo-event-registration/badge)](https://scorecard.dev/viewer/?uri=github.com/DoublG/coderdojo-event-registration)
 [![Deploy to demo](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/deploy-demo.yml/badge.svg?branch=demo)](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/deploy-demo.yml)
 [![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Frepos%2FDoublG%2Fcoderdojo-event-registration%2Freleases%2Flatest&query=%24.tag_name&label=version&color=blue)](https://github.com/DoublG/coderdojo-event-registration/releases/latest)
 [![Python](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FDoublG%2Fcoderdojo-event-registration%2Fmain%2Fpyproject.toml&query=%24.tool.mypy.python_version&label=python&logo=python&logoColor=white&color=3776AB)](pyproject.toml)
@@ -218,7 +219,7 @@ accessibility scan of every journey page in both themes, plus a 320px reflow che
 GitHub Actions runs the checks on every push (and deploys only what's merged into `demo`, see below):
 [**Tests**](.github/workflows/tests.yml) (missing migrations and the whole suite, with a summary per app),
 [**Code audit**](.github/workflows/audit.yml) (ruff, its security rules, `mypy`, the layers, `pip-audit`,
-`check --deploy` and CodeQL), [**Code quality**](.github/workflows/quality.yml) (every Monday: coverage and
+`check --deploy` and CodeQL), [**Scorecard**](.github/workflows/scorecard.yml) (OpenSSF's supply-chain score, weekly), [**Code quality**](.github/workflows/quality.yml) (every Monday: coverage and
 complexity with the change since the previous week) and the [help centre](.github/workflows/docs.yml)'s build and publication. Coverage and
 complexity: [`CODING_STANDARDS.md`](CODING_STANDARDS.md).
 

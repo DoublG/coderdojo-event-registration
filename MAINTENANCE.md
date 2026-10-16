@@ -277,6 +277,10 @@ whoever pushed):
     summary;
   - **CodeQL** (Python and JavaScript, the `security-extended` queries): its findings are in the
     repository's *Security → Code scanning*, where a false positive is dismissed with its reason.
+- **OpenSSF Scorecard** (`.github/workflows/scorecard.yml`, weekly): the repository's supply-chain
+  practice scored 0–10 (branch protection, actions pinned by commit hash, token permissions, ...), on
+  [scorecard.dev](https://scorecard.dev/viewer/?uri=github.com/DoublG/coderdojo-event-registration) and
+  in Code scanning, one alert per check that can do better.
 - Turn on **Dependabot alerts** too (Settings → Code security): they warn about a new advisory the day it
   is published, between the Monday runs.
 - **Access goes through helpers** (`dojos.access`, `accounts.organisation.require_area`), never ad hoc
