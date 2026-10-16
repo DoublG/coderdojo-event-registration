@@ -28,7 +28,7 @@ deploy is tagged with it and gets a GitHub Release listing what changed since th
 |---|---|---|---|---|---|
 | Operating system | Ubuntu 22.04.5 LTS | Apr 2022 | ended Sep 2024 | **1 Jun 2027** (Ubuntu Pro/ESM to Apr 2032) | Plan the move to 24.04 LTS (to May 2029) or 26.04 LTS (to May 2031) with Level27 **before June 2027**. |
 | Python | 3.14.7 (pyenv `py10102-3.14.7`) | 7 Oct 2025 | 1 Oct 2027 | **31 Oct 2030** | Current. Take each 3.14.x patch release. |
-| Django | 6.1.1 | 5 Aug 2026 | 30 Apr 2027 | **31 Dec 2027** | Upgrade to **6.2 LTS** (Apr 2027, security to Apr 2030) between May and Dec 2027. |
+| Django | 6.1.2 | 5 Aug 2026 | 30 Apr 2027 | **31 Dec 2027** | Upgrade to **6.2 LTS** (Apr 2027, security to Apr 2030) between May and Dec 2027. |
 | MySQL server | 8.4.11 | Apr 2024 (8.4 LTS) | Apr 2029 | **30 Apr 2032** | Current LTS, the same as development and the CI (checked 6 Oct 2026 from the server's connection greeting, no login needed). |
 | MySQL client library | 8.0.46 (`libmysqlclient.so.21`, Ubuntu 22.04's package) | Apr 2018 (8.0) | ended Apr 2025 | **ended 30 Apr 2026** upstream | What `mysqlclient` links against; it talks to the 8.4 server fine. Its development headers (`libmysqlclient-dev`) are now present too (confirmed 8 Oct 2026: `mysqlclient` 2.3.0 built and working). Moves with the operating system's upgrade. |
 | Redis (Celery broker, cache, Channels) | 8.10.1 | | | | Running (confirmed 8 Oct 2026, `redis-cli INFO server`); `maxmemory` 512 MB, policy `allkeys-lru` — see [`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md), it should be `volatile-lru`. Much newer than the devcontainer's `redis:7.2`; worth trying 7.2 → 8.x in development to match. |
@@ -44,7 +44,7 @@ deploy is tagged with it and gets a GitHub Release listing what changed since th
 | nginx | `nginx:1.30-alpine` (1.30.5) | 1.30 stable: until the next stable (about April 2027) | Current. Move to the next stable when it's out. Development only. |
 | Mailpit, phpMyAdmin, 2FAuth | `latest` | | Development only; fine on `latest`. |
 | Prometheus | `prom/prometheus:v3.13.2` | 3.13 LTS: **31 Jul 2027** | Current LTS. Development only, in the `monitoring` profile (off unless `COMPOSE_PROFILES=monitoring`). Take its patch releases; move to the next LTS before July 2027. |
-| Grafana | `grafana/grafana:13.2.0` | 13.2: until the minor after next is out (no date published yet) | Current. Development only, in the `monitoring` profile. Move to the newest minor every few months. |
+| Grafana | `grafana/grafana:13.2.3` | 13.2: until the minor after next is out (no date published yet) | Current. Development only, in the `monitoring` profile. Move to the newest minor every few months. |
 
 Development should run the versions production runs (or will run next), so upgrades are tried there
 first. Prefer a pinned tag (`mysql:8.4`) over `latest`: a `latest` image is pulled once and then never
@@ -64,13 +64,13 @@ calendar: stay on the latest release. Watch these:
 
 | Package | Pinned | Note |
 |---|---|---|
-| Django | 6.1.1 | Take every 6.1.x release (security fixes come as patch releases). See the table above for 6.2 LTS. |
-| django-two-factor-auth | 1.18.1 | Officially supports Django up to 5.2; we run and test it on 6.1. Check its release notes on every Django upgrade. |
+| Django | 6.1.2 | Take every 6.1.x release (security fixes come as patch releases). See the table above for 6.2 LTS. |
+| django-two-factor-auth | 1.18.1 | Officially supports Django up to 5.2; we run and test it on 6.1. Check its release notes on every Django upgrade. It needs `webauthn<2.99`, which keeps webauthn on 2.8.0 and cbor2 on 5.x (Dependabot ignores their majors): move to webauthn 3 and cbor2 6 once a release of it allows them. |
 | django-oauth-toolkit, oauthlib | 3.4.1, 4.0.0 | django-oauth-toolkit officially lists Django up to 6.0 and doesn't list oauthlib 4 yet (it asks for `oauthlib>=3.3.0`); both tested here, on Django 6.1 and oauthlib 4.0.0 (16 Oct 2026). |
 | celery, kombu, channels, channels-redis | 5.6.3, 5.6.2, 4.3.2, (see file) | Upgrade together with Redis. |
 | mysqlclient | 2.3.0 | Needs the MySQL client headers on the server; present since at least 8 Oct 2026 (see "Missing on the server"). |
 | nh3, django-permissions-policy | 0.3.7, 4.34.0 | Security: the Markdown allowlist and the Permissions-Policy header. Keep them current. |
-| coverage, radon (mando, colorama) | 7.16.2, 6.0.1 (0.7.1, 0.4.6) | Development only (`requirements-dev.txt`): test coverage and complexity ([`CODING_STANDARDS.md`](CODING_STANDARDS.md)). `pip-audit`: no known vulnerabilities (1 Oct 2026). |
+| coverage, radon (mando, colorama) | 7.16.2, 6.0.1 (0.7.1, 0.4.6) | Development only (`requirements-dev.txt`): test coverage and complexity ([`CODING_STANDARDS.md`](CODING_STANDARDS.md)). radon 6.0.1 needs `mando<0.8` (Dependabot ignores mando 0.8 and up). `pip-audit`: no known vulnerabilities (1 Oct 2026). |
 | import-linter, grimp (rich, markdown-it-py, mdurl) | 2.15, 3.17 (15.0.0, 4.2.0, 0.1.2) | Development only (`requirements-dev.txt`): the layers between the apps (`lint-imports`, [`CODING_STANDARDS.md`](CODING_STANDARDS.md), "Layers"), also in the Code audit workflow. `pip-audit`: no known vulnerabilities (2 Oct 2026). |
 | mypy, django-stubs (django-stubs-ext, mypy_extensions, pathspec, librt, ast_serialize, types-PyYAML) | 2.4.0, 6.1.2 (6.1.2, 1.1.1, 1.1.1, 0.16.0, 0.12.1, 6.0.12.20260906) | Development only (`requirements-dev.txt`): type checking ([`CODING_STANDARDS.md`](CODING_STANDARDS.md), "Type checking"), also the Code audit's `types` job. django-stubs follows Django's releases (6.1.0 came out two days after Django 6.1); keep its version on our Django's minor. `pip-audit`: no known vulnerabilities (6 Oct 2026). |
 | unittest-xml-reporting, lxml | 4.0.0, 6.1.3 | Development only (`requirements-dev.txt`): the test results as JUnit XML for the Tests workflow's summary. `pip-audit`: no known vulnerabilities (1 Oct 2026). |

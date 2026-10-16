@@ -12,6 +12,16 @@ updates:
       day: monday
       timezone: Europe/Brussels
     open-pull-requests-limit: 5
+    # Held back on purpose: the reason is next to the pin in requirements*.txt.
+    ignore:
+      # django-two-factor-auth 1.18.1 needs webauthn<2.99, and webauthn 2.x needs cbor2<6.
+      - dependency-name: webauthn
+        update-types: ["version-update:semver-major"]
+      - dependency-name: cbor2
+        update-types: ["version-update:semver-major"]
+      # radon 6.0.1 needs mando<0.8.
+      - dependency-name: mando
+        versions: [">=0.8"]
     groups:
       python-minor-and-patch:
         update-types: [minor, patch]
@@ -35,6 +45,10 @@ updates:
       interval: weekly
       day: monday
       timezone: Europe/Brussels
+    ignore:
+      # A new Python version is a decision of its own (MAINTENANCE.md), not a weekly update.
+      - dependency-name: python
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
   - package-ecosystem: docker-compose
     directory: "/.devcontainer"
@@ -42,3 +56,13 @@ updates:
       interval: weekly
       day: monday
       timezone: Europe/Brussels
+    ignore:
+      # MySQL stays on its LTS line (8.4) and Redis on production's version: a new
+      # major moves together with Level27's, by hand (MAINTENANCE.md).
+      - dependency-name: mysql
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: redis
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # Prometheus stays on its LTS line (3.13): patch releases only.
+      - dependency-name: prom/prometheus
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
