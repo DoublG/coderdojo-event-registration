@@ -1,4 +1,6 @@
 # Deploys to Level27 on every push to the `demo` branch, and by hand from the Actions tab.
+# `demo` is protected (repository ruleset "Protect demo"): a push to it is a merged pull
+# request from `main`, with a merge commit.
 # It runs the test suite first (tests.yml, called as a reusable workflow) and deploys
 # only when that passes, with the same scripts/deploy.sh a developer runs locally
 # (scripts/CLAUDE.md, "Deploying"): the new code is checked on the server before the

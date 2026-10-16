@@ -38,6 +38,8 @@ workers for all mail, and Django Channels for live notifications.
 | Developers and whoever runs the platform | [`MONITORING.md`](MONITORING.md) | Every metric on `/metrics/` and every panel of the Grafana dashboard explained, with screenshots under load |
 | Developers | [`MEMORY_PROFILE.md`](MEMORY_PROFILE.md) | The memory each of the site's functions uses per call, over every page and background job, and which are worth refactoring |
 | Security researchers | [`SECURITY.md`](SECURITY.md) | How to report a vulnerability, and what's supported |
+| Contributors | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Setting up, making a change, the checks a pull request needs, how releases work |
+| Everyone taking part | [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | How we treat each other in issues, pull requests and reviews |
 
 ### User journeys (PDF)
 
@@ -213,7 +215,7 @@ From the host, after changing a page's markup or styles: `user-journeys/scripts/
 accessibility scan of every journey page in both themes, plus a 320px reflow check; see
 [`user-journeys/README.md`](user-journeys/README.md)).
 
-GitHub Actions runs the checks on every push (and deploys only a push to `demo`, see below):
+GitHub Actions runs the checks on every push (and deploys only what's merged into `demo`, see below):
 [**Tests**](.github/workflows/tests.yml) (missing migrations and the whole suite, with a summary per app),
 [**Code audit**](.github/workflows/audit.yml) (ruff, its security rules, `mypy`, the layers, `pip-audit`,
 `check --deploy` and CodeQL), [**Code quality**](.github/workflows/quality.yml) (every Monday: coverage and
@@ -225,9 +227,10 @@ complexity: [`CODING_STANDARDS.md`](CODING_STANDARDS.md).
 Production is Level27 Python hosting. [`scripts/deploy.sh --check`](scripts/deploy.sh) is a read-only
 preflight; `scripts/deploy.sh` deploys: it checks the new code before touching the live site, migrates,
 reloads gunicorn or restarts daphne (whichever the Level27 panel runs — gunicorn as of 8 Oct 2026), restarts
-the two Celery workers (run by Level27's worker component) and smoke-tests. A push to the `demo` branch does the same automatically
+the two Celery workers (run by Level27's worker component) and smoke-tests. Merging a pull request from `main` into the protected `demo` branch does the same automatically
 ([**Deploy to demo**](.github/workflows/deploy-demo.yml)): the tests first, then `scripts/deploy.sh` on a
-runner, with the SSH key from the `demo` environment's secrets. Details in
+runner, with the SSH key from the `demo` environment's secrets, and a successful deploy becomes the next
+[release](https://github.com/DoublG/coderdojo-event-registration/releases) (CalVer, `2026.10.3`). Details in
 [`CLAUDE.md`](CLAUDE.md#deploying-level27).
 
 ---
@@ -245,7 +248,8 @@ loadtest/         load test, its results and charts (CAPACITY.md), Grafana scree
 quality/          code-quality measurements (coverage, complexity), their results and charts
 scripts/          deploy script
 .devcontainer/    the development environment (monitoring/: Prometheus and Grafana's provisioning)
-.github/          the CI workflows (tests, code audit, help centre)
+.github/          the CI workflows (tests, code audit, code quality, help centre, deploy), issue and
+                  pull request templates, CODEOWNERS, Dependabot's configuration
 DATA_MODEL.md     the data model and design decisions
 MAINTENANCE.md    versions and support dates, updates, vulnerabilities, audits
 CAPACITY.md       database growth, disk, memory and load: measurements and findings
@@ -253,6 +257,7 @@ MONITORING.md     the metrics and the Grafana dashboard explained, with screensh
 CODING_STANDARDS.md  coding standards, linting, tests, coverage and complexity
 MEMORY_PROFILE.md memory per function, and what's worth refactoring
 SECURITY.md       reporting a vulnerability
+CONTRIBUTING.md   how to contribute; CODE_OF_CONDUCT.md how we treat each other
 CLAUDE.md         conventions and architecture for developers (AGENTS.md links to it)
 requirements.txt  production dependencies (requirements-dev.txt adds the development tools)
 ```

@@ -1,0 +1,4 @@
+# Who's asked to review a pull request, by path (the last matching line wins).
+# https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+*       @DoublG

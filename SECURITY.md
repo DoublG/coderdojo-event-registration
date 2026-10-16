@@ -7,8 +7,9 @@ reports about its security seriously and are grateful for them.
 
 ## Supported versions
 
-Only the current `main` branch is supported: it's what the live site runs. There are no releases or
-older versions that receive fixes.
+Only the latest [release](https://github.com/DoublG/coderdojo-event-registration/releases/latest) (what the
+live site runs; versions are CalVer, e.g. `2026.10.3`) and the `main` branch are supported. A fix goes into
+`main` and out in the next release; older releases don't get fixes of their own.
 
 ## Reporting a vulnerability
 

@@ -1,0 +1,44 @@
+# Weekly update pull requests, grouped so there are few of them. Dependabot's
+# security updates (repository settings) come on top, as soon as an advisory is out.
+# Each update PR is a change like any other (CONTRIBUTING.md): the tests and the
+# code audit run on it, and MAINTENANCE.md's row for the package or image gets
+# updated before it's merged. A major version bump comes on its own.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directories: ["/", "/docs", "/loadtest"]
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Europe/Brussels
+    open-pull-requests-limit: 5
+    groups:
+      python-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Europe/Brussels
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # The workspace image and the devcontainer's services. The MySQL and Redis
+  # services in .github/workflows/*.yml stay on the devcontainer's versions
+  # (CLAUDE.md, "Keep MAINTENANCE.md current"): change them in the same PR.
+  - package-ecosystem: docker
+    directory: "/.devcontainer/dockerfile_workspace"
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Europe/Brussels
+
+  - package-ecosystem: docker-compose
+    directory: "/.devcontainer"
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: Europe/Brussels

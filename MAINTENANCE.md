@@ -128,7 +128,7 @@ Present: Ubuntu 22.04.5, Python 3.14.7, `gcc`/`make`/`pkg-config`, MySQL 8.4.11,
 
 | When | What |
 |---|---|
-| Every week (5 minutes) | Read the security announcements (see [Sources](#sources-to-watch)) and the GitHub Dependabot alerts. |
+| Every week (5 minutes) | Read the security announcements (see [Sources](#sources-to-watch)) and the GitHub Dependabot alerts. Review Dependabot's update pull requests (Mondays, `.github/dependabot.yml`: pip, GitHub Actions, the Docker images): update the package's or image's row on this page in the same pull request before merging. |
 | Every month | Run the [update check](#routine-updates): `pip-audit`, outdated packages, Django patch release. Deploy what's safe. |
 | Every quarter | Review the tables on this page against endoflife.date; bump the *Last checked* date. Run the [code audit](#code-audits) checks. |
 | Every quarter | Measure test coverage and complexity again ([`CODING_STANDARDS.md`](CODING_STANDARDS.md), "Measuring again") and look at what dropped. |

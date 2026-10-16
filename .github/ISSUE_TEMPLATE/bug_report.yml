@@ -1,0 +1,63 @@
+name: Bug report
+description: Something on the site doesn't work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Never include anyone's personal data** (names, email addresses, a child's details, health notes): describe the situation, or reproduce it with the devcontainer's demo data. A security problem goes through [a private report](https://github.com/DoublG/coderdojo-event-registration/security/advisories/new) instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: And what you expected to happen instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Log in as a parent
+        2. Open a session's sign-up page
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: page
+    attributes:
+      label: Page
+      description: The address, without any personal data in it.
+      placeholder: /dojos/12/events/
+  - type: dropdown
+    id: role
+    attributes:
+      label: Logged in as
+      options:
+        - Not logged in
+        - Parent or guardian
+        - Ninja (a child's own login)
+        - Mentor or youth mentor
+        - Champion
+        - Organisation (admin, reviewer or board)
+        - Superuser / Django admin
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - The live site
+        - The devcontainer
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Shown at the bottom of the management sidebar, if you can see it.
+      placeholder: 2026.10.1
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else
+      description: Browser, language, a screenshot (with personal data blurred), an error message.

@@ -136,6 +136,9 @@ in `pyproject.toml`:
 - **In the editor**: the devcontainer installs Ruff's VS Code extension and formats Python on save, with
   imports sorted, using the Ruff from `requirements-dev.txt` (`.devcontainer/devcontainer.json`). A container
   rebuild picks it up.
+- **Before a commit (optional)**: `.pre-commit-config.yaml` runs ruff's lint and format plus a few safety
+  checks (merge-conflict markers, private keys, files over 5 MB) on the staged files, once someone ran
+  `pre-commit install` (`CONTRIBUTING.md`). Its ruff `rev` stays equal to `requirements-dev.txt`'s ruff.
 - **Locally** before pushing:
 
   ```sh
