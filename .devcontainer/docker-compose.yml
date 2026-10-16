@@ -134,7 +134,7 @@ services:
   # mem_limit caps the whole container above that: Redis's own overhead, and
   # the copy-on-write of a background save (fork).
   redis:
-    image: redis:7.2
+    image: redis:8.10
     container_name: ${PROJECT_NAME:-coolregistration-dev}-redis
     restart: unless-stopped
     command: ["redis-server", "--maxmemory", "128mb", "--maxmemory-policy", "volatile-lru"]
