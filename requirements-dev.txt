@@ -4,7 +4,7 @@
 -r requirements.txt
 
 # Lint/format (config in pyproject.toml)
-ruff==0.16.8
+ruff==0.17.0
 
 # The layers between the apps (CODING_STANDARDS.md, "Layers"): `lint-imports`
 # checks the contract in pyproject.toml (with grimp, rich and rich's
@@ -26,7 +26,7 @@ django-stubs-ext==6.1.2
 mypy_extensions==1.1.0
 pathspec==1.1.1
 librt==0.16.0
-ast_serialize==0.12.1
+ast_serialize==0.13.0
 types-PyYAML==6.0.12.20260906
 
 # The test results as JUnit XML for the Tests workflow's summary
@@ -38,7 +38,7 @@ lxml==6.1.3
 # cyclomatic complexity and maintainability (radon, with its mando and colorama).
 coverage==7.16.2
 radon==6.0.1
-mando==0.7.1
+mando==0.8.2
 colorama==0.4.6
 
 # The server production runs (Level27 provides its own there): start.sh uses
@@ -51,16 +51,16 @@ h11==0.16.0
 # import_municipalities, import_dojos) and their dependencies. Imported
 # inside those commands only, never by the running site.
 beautifulsoup4==4.15.0
-geopandas==1.1.4
-narwhals==2.26.0
-numpy==2.5.3
+geopandas==1.2.0
+narwhals==2.27.1
+numpy==2.5.4
 pandas==3.0.6
-platformdirs==4.11.12
+platformdirs==4.13.0
 pyarrow==25.0.1
 pyogrio==0.13.0
 pyproj==3.8.0
 python-dateutil==2.9.0.post0
-shapely==2.1.2
+shapely==2.2.0
 six==1.17.0
 soupsieve==2.9.2
 
@@ -70,7 +70,7 @@ cloudpickle==3.1.2
 contourpy==1.4.0
 cycler==0.12.1
 folium==0.20.0
-fonttools==4.65.0
+fonttools==4.66.1
 geographiclib==2.1
 geopy==2.5.0
 Jinja2==3.1.6
@@ -78,7 +78,7 @@ joblib==1.6.0
 kiwisolver==1.5.1
 libpysal==4.15.0
 mapclassify==2.11.0
-MarkupSafe==3.0.3
+MarkupSafe==3.0.4
 matplotlib==3.11.2
 networkx==3.7
 pointpats==2.6.0
