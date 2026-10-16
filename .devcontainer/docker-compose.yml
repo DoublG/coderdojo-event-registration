@@ -236,7 +236,7 @@ services:
   # visitor is an anonymous Grafana admin, development only) and /prometheus/.
   # nginx answers 503 on those paths while they're off.
   prometheus:
-    image: prom/prometheus:v3.13.2
+    image: prom/prometheus:v3.13.4
     container_name: ${PROJECT_NAME:-coolregistration-dev}-prometheus
     profiles: [monitoring]
     restart: unless-stopped
