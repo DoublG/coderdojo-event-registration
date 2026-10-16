@@ -65,7 +65,7 @@ jobs:
           cache-dependency-path: docs/requirements.txt
 
       - name: Install the help centre's tools
-        run: pip install -r docs/requirements.txt
+        run: pip install --require-hashes -r docs/requirements.txt
 
       - name: Set up the SSH key
         env:

@@ -33,7 +33,7 @@ jobs:
           cache: pip
           cache-dependency-path: docs/requirements.txt
       - name: Install Sphinx
-        run: pip install -r docs/requirements.txt
+        run: pip install --require-hashes -r docs/requirements.txt
       - name: Build en, fr and nl
         working-directory: docs
         env:

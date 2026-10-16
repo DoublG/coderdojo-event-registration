@@ -1,0 +1,120 @@
+# Local development: everything in requirements.in plus tools and libraries
+# that only run on a developer machine / in the .devcontainer, never on the
+# production server.
+#
+# This is the source: edit it, then run scripts/compile_requirements.sh, which
+# writes requirements-dev.txt from it with every package's hashes (pip-compile from pip-tools;
+# commit both). Never edit requirements-dev.txt by hand. pip then installs only files whose
+# hash matches (MAINTENANCE.md, "Hash-checked installs").
+#
+-r requirements.in
+
+# Dependency tools: pip-compile (scripts/compile_requirements.sh) and pip-audit
+# (MAINTENANCE.md); their own dependencies are pinned in requirements-dev.txt.
+pip-tools==7.6.2
+pip-audit==2.10.1
+
+# Lint/format (config in pyproject.toml)
+ruff==0.17.0
+
+# The layers between the apps (CODING_STANDARDS.md, "Layers"): `lint-imports`
+# checks the contract in pyproject.toml (with grimp, rich and rich's
+# markdown-it-py and mdurl; click is in requirements.txt, Pygments below).
+import-linter==2.15
+grimp==3.17
+rich==15.0.0
+markdown-it-py==4.2.0
+mdurl==0.1.2
+
+# Type checking (CODING_STANDARDS.md, "Type checking"): mypy with django-stubs'
+# plugin, over the modules listed in pyproject.toml's [tool.mypy] (with mypy's
+# mypy_extensions, pathspec, librt and ast_serialize, and django-stubs'
+# django-stubs-ext and types-PyYAML; typing_extensions and asgiref are in
+# requirements.txt).
+mypy==2.4.0
+django-stubs==6.1.2
+django-stubs-ext==6.1.2
+mypy_extensions==1.1.0
+pathspec==1.1.1
+librt==0.16.0
+ast_serialize==0.13.0
+types-PyYAML==6.0.12.20260906
+
+# The test results as JUnit XML for the Tests workflow's summary
+# (manage.py test --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner).
+unittest-xml-reporting==4.0.0
+lxml==6.1.3
+
+# Code quality measurements (CODING_STANDARDS.md): test coverage, and
+# cyclomatic complexity and maintainability (radon, with its mando and colorama).
+coverage==7.16.2
+radon==6.0.1
+# mando stays on 0.7: radon 6.0.1 needs mando<0.8 (dependabot.yml ignores it).
+mando==0.7.1
+colorama==0.4.6
+
+# The server production runs (Level27 provides its own there): start.sh uses
+# it when DEBUG is off, to measure the site the way it's served in production.
+gunicorn==26.2.0
+uvicorn==0.54.0
+h11==0.16.0
+
+# Data loading: the import_* management commands (import_boundaries,
+# import_municipalities, import_dojos) and their dependencies. Imported
+# inside those commands only, never by the running site.
+beautifulsoup4==4.15.0
+geopandas==1.2.0
+narwhals==2.27.1
+numpy==2.5.4
+pandas==3.0.6
+platformdirs==4.13.0
+pyarrow==26.0.0
+pyogrio==0.13.0
+pyproj==3.8.0
+python-dateutil==2.9.0.post0
+shapely==2.2.0
+six==1.17.0
+soupsieve==2.9.2
+
+# Geo/analysis stack used when preparing data (not imported by the site).
+branca==0.8.2
+cloudpickle==3.1.2
+contourpy==1.4.0
+cycler==0.12.1
+folium==0.20.0
+fonttools==4.66.1
+geographiclib==2.1
+geopy==2.5.0
+Jinja2==3.1.6
+joblib==1.6.0
+kiwisolver==1.5.1
+libpysal==4.15.0
+mapclassify==2.11.0
+MarkupSafe==3.0.4
+matplotlib==3.11.2
+networkx==3.7
+pointpats==2.6.0
+pyparsing==3.3.3
+scikit-learn==1.9.1
+scipy==1.18.1
+threadpoolctl==3.7.0
+xyzservices==2026.9.1
+
+# End user documentation tools (docs/, `make html-all`; the same pins as
+# docs/requirements.txt). furo is the theme docs/source/conf.py uses.
+Sphinx==9.1.0
+furo==2025.12.19
+accessible-pygments==0.0.5
+Pygments==2.21.0
+sphinx-basic-ng==1.0.0b2
+sphinx-intl==2.4.0
+sphinxcontrib-applehelp==2.0.0
+sphinxcontrib-devhelp==2.0.0
+sphinxcontrib-htmlhelp==2.1.0
+sphinxcontrib-jsmath==1.0.1
+sphinxcontrib-qthelp==2.0.0
+sphinxcontrib-serializinghtml==2.0.0
+
+# Performance metrics
+django-silk==5.6.0
+
