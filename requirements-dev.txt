@@ -63,7 +63,7 @@ pyproj==3.8.0
 python-dateutil==2.9.0.post0
 shapely==2.2.0
 six==1.17.0
-soupsieve==2.9.2
+soupsieve==3.0.3
 
 # Geo/analysis stack used when preparing data (not imported by the site).
 branca==0.8.2
