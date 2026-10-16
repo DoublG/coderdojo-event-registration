@@ -251,7 +251,7 @@ services:
       - prometheus-data:/prometheus
 
   grafana:
-    image: grafana/grafana:13.2.0
+    image: grafana/grafana:13.2.3
     container_name: ${PROJECT_NAME:-coolregistration-dev}-grafana
     profiles: [monitoring]
     restart: unless-stopped
