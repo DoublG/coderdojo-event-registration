@@ -34,7 +34,7 @@ attrs==26.1.0
 autobahn==26.7.1
 Automat==25.4.16
 # 5.x, not 6: webauthn 2.x (below) needs cbor2<6; autobahn takes >=5.2.
-cbor2==5.9.0
+cbor2==6.1.5
 certifi==2026.7.22
 cffi==2.1.1
 charset-normalizer==3.5.1
