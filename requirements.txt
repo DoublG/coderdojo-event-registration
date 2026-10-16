@@ -101,7 +101,7 @@ typing-inspection==0.4.4
 # Its WebAuthn plugin caps webauthn below 3, which is why cbor2 stays on 5.x.
 django-two-factor-auth==1.18.1
 django-otp==1.7.3
-webauthn==2.8.0
+webauthn==3.0.1
 # Pulled in by the above (django-phonenumber-field is a hard dependency of
 # django-two-factor-auth even without its phone plugins, which we don't install):
 django-formtools==2.7
