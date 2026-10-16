@@ -110,13 +110,11 @@ jobs:
       # installing anything (--no-deps --disable-pip). The django-celery-beat URL pin
       # is skipped (it has no version to look up).
       # An ignored advisory must be in MAINTENANCE.md's security log with its assessment:
-      #   CVE-2026-49265 (oauthlib, PKCE): not reachable, the API only offers client credentials.
       #   CVE-2026-106454 (Twisted, IMAP server): not reachable, we run no IMAP server (Twisted is daphne's).
       - name: pip-audit
         run: >-
           pip-audit --no-deps --disable-pip --progress-spinner off
           -r requirements.txt -r requirements-dev.txt
-          --ignore-vuln CVE-2026-49265
           --ignore-vuln CVE-2026-106454
           --desc on
 
