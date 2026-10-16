@@ -56,7 +56,7 @@ narwhals==2.27.1
 numpy==2.5.4
 pandas==3.0.6
 platformdirs==4.13.0
-pyarrow==25.0.1
+pyarrow==26.0.0
 pyogrio==0.13.0
 pyproj==3.8.0
 python-dateutil==2.9.0.post0
