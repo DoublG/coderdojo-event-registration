@@ -41,7 +41,7 @@ The site is then at `https://coolregistration.localhost/` and the seeded logins 
 
 5. Open a pull request against `main` and fill in its checklist. `main` is protected: every change,
    also the maintainers', goes in through a pull request (no force-push, no deleting the branch). The **Tests** and **Code audit** workflows
-   run on it.
+   run on it, and it can only be merged once they pass.
 
 ### What a change often needs as well
 

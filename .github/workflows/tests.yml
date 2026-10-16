@@ -1,7 +1,9 @@
 # The unit tests: the whole Django test suite (`manage.py test`, about 1,190 tests)
 # against MySQL and Redis, the way the devcontainer runs it, plus a check that no
 # model change is missing its migration.
-# Runs on every push and pull request that changes code, and by hand from the Actions tab.
+# Runs on every push that changes code, on every pull request (also one that only
+# changes docs: `test` is a required check on main, "Protect main", and a required
+# check that never runs would block the PR), and by hand from the Actions tab.
 # A push to `demo` runs it through deploy-demo.yml instead (called as a reusable
 # workflow), which deploys only when it passes.
 # The results: a summary on the run's page (totals, a table per app, the failed tests
@@ -21,13 +23,6 @@ on:
       - ".github/workflows/audit.yml"
       - ".github/workflows/quality.yml"
   pull_request:
-    paths-ignore:
-      - "docs/**"
-      - "user-journeys/**"
-      - "**/*.md"
-      - ".github/workflows/docs.yml"
-      - ".github/workflows/audit.yml"
-      - ".github/workflows/quality.yml"
   workflow_dispatch:
   workflow_call:
 
