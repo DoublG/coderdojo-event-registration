@@ -103,7 +103,7 @@ jobs:
 
       # requirements-dev.txt, like the devcontainer: the tests cover the import_* commands too.
       - name: Install Python packages
-        run: pip install -r requirements-dev.txt
+        run: pip install --require-hashes -r requirements-dev.txt
 
       - name: No missing migrations
         run: python manage.py makemigrations --check --dry-run

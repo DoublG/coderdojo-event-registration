@@ -1,6 +1,8 @@
 # Debian 13 (trixie): security support to June 2030. Changing this version? Update its row in
 # MAINTENANCE.md ("Development") in the same change.
-FROM python:3.14-trixie
+# Pinned by digest (the multi-platform index): the tag moves with every rebuild
+# upstream, the digest can't. Dependabot updates the digest with the tag.
+FROM python:3.14-trixie@sha256:446efb4225200a0a196707aa7953898b37962fd3b8859a636035de3af657081e
 
 # git/curl/ca-certificates: general tooling (ca-certificates also needed so
 # start.sh can add our local dev CA to the trust store).
@@ -24,7 +26,7 @@ RUN apt-get update && apt-get install -y \
     gettext \
     && rm -rf /var/lib/apt/lists/*
 
-# requirements-dev.txt = requirements.txt (production runtime) + dev tools and
-# the data-loading libraries (geopandas etc.) — the container needs both.
-COPY requirements.txt requirements-dev.txt /tmp/
-RUN pip install --no-cache-dir -r /tmp/requirements-dev.txt
+# requirements-dev.txt = the production runtime + dev tools and the data-loading
+# libraries (geopandas etc.), compiled with hashes from requirements-dev.in.
+COPY requirements-dev.txt /tmp/
+RUN pip install --no-cache-dir --require-hashes -r /tmp/requirements-dev.txt

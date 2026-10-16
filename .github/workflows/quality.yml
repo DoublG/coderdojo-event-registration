@@ -82,7 +82,7 @@ jobs:
 
       # coverage and radon are in requirements-dev.txt, with what the tests need.
       - name: Install Python packages
-        run: pip install -r requirements-dev.txt
+        run: pip install --require-hashes -r requirements-dev.txt
 
       - name: Run the test suite under coverage
         run: coverage run manage.py test --noinput --debug-mode

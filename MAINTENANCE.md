@@ -58,8 +58,9 @@ looked the dates up.
 
 ### Python packages
 
-Everything the site imports is pinned in [`requirements.txt`](requirements.txt) (production) and
-[`requirements-dev.txt`](requirements-dev.txt) (development tools on top). Most have no support
+Everything the site imports is pinned in [`requirements.in`](requirements.in) (production) and
+[`requirements-dev.in`](requirements-dev.in) (development tools on top), and compiled with hashes into the
+`.txt` files that get installed (see [Hash-checked installs](#hash-checked-installs)). Most have no support
 calendar: stay on the latest release. Watch these:
 
 | Package | Pinned | Note |
@@ -72,6 +73,7 @@ calendar: stay on the latest release. Watch these:
 | nh3, django-permissions-policy | 0.3.7, 4.34.0 | Security: the Markdown allowlist and the Permissions-Policy header. Keep them current. |
 | coverage, radon (mando, colorama) | 7.16.2, 6.0.1 (0.7.1, 0.4.6) | Development only (`requirements-dev.txt`): test coverage and complexity ([`CODING_STANDARDS.md`](CODING_STANDARDS.md)). radon 6.0.1 needs `mando<0.8` (Dependabot ignores mando 0.8 and up). `pip-audit`: no known vulnerabilities (1 Oct 2026). |
 | import-linter, grimp (rich, markdown-it-py, mdurl) | 2.15, 3.17 (15.0.0, 4.2.0, 0.1.2) | Development only (`requirements-dev.txt`): the layers between the apps (`lint-imports`, [`CODING_STANDARDS.md`](CODING_STANDARDS.md), "Layers"), also in the Code audit workflow. `pip-audit`: no known vulnerabilities (2 Oct 2026). |
+| pip-tools, pip-audit (build, pyproject_hooks, wheel, setuptools; pip-audit's own) | 7.6.2, 2.10.1 | Development only (`requirements-dev.in`): pip-compile writes the hash-checked `.txt` files ([Hash-checked installs](#hash-checked-installs)); pip-audit checks them for advisories, also in the Code audit (`.github/requirements/ci-tools.in`). |
 | mypy, django-stubs (django-stubs-ext, mypy_extensions, pathspec, librt, ast_serialize, types-PyYAML) | 2.4.0, 6.1.2 (6.1.2, 1.1.1, 1.1.1, 0.16.0, 0.12.1, 6.0.12.20260906) | Development only (`requirements-dev.txt`): type checking ([`CODING_STANDARDS.md`](CODING_STANDARDS.md), "Type checking"), also the Code audit's `types` job. django-stubs follows Django's releases (6.1.0 came out two days after Django 6.1); keep its version on our Django's minor. `pip-audit`: no known vulnerabilities (6 Oct 2026). |
 | unittest-xml-reporting, lxml | 4.0.0, 6.1.3 | Development only (`requirements-dev.txt`): the test results as JUnit XML for the Tests workflow's summary. `pip-audit`: no known vulnerabilities (1 Oct 2026). |
 | locust, matplotlib | 2.46.6, 3.11.2 | The load test and its charts ([`loadtest/requirements.txt`](loadtest/requirements.txt), [`CAPACITY.md`](CAPACITY.md)), in a venv of their own: never in the image or on production. `pip-audit -r loadtest/requirements.txt`: no known vulnerabilities (30 Sep 2026). |
@@ -148,8 +150,7 @@ Present: Ubuntu 22.04.5, Python 3.14.7, `gcc`/`make`/`pkg-config`, MySQL 8.4.11,
 Monthly, inside the workspace container, from the repo root:
 
 ```sh
-pip install pip-audit                        # once
-pip-audit -r requirements.txt                # known vulnerabilities in what production runs
+pip-audit -r requirements.txt                # known vulnerabilities in what production runs (pip-audit is in requirements-dev)
 pip list --outdated                          # what has a newer release
 ```
 
@@ -157,14 +158,41 @@ For each update:
 
 1. **Read the release notes**, especially for a new major or minor version (deprecations, dropped
    support, changed defaults). For Django, also the "backwards incompatible changes" section.
-2. **Change the pin** in `requirements.txt` (or `requirements-dev.txt` for a development tool), then
-   `pip install -r requirements-dev.txt` in the container (or rebuild it).
+2. **Change the pin** in `requirements.in` (or `requirements-dev.in` for a development tool), run
+   `scripts/compile_requirements.sh`, then `pip install --require-hashes -r requirements-dev.txt` in the
+   container (or rebuild it). Dependabot's pull requests do the first two for you.
 3. **Run everything:** `python manage.py test`, `ruff check .`, `python manage.py makemigrations --check`
    (an upgrade can need a migration), and click through the pages the package touches. Run the tests
    with warnings on (`python -W error::DeprecationWarning manage.py test <app>`) before a Django upgrade.
 4. **Deploy:** `scripts/deploy.sh --check`, then `scripts/deploy.sh` (or push to `demo`: `.github/workflows/deploy-demo.yml` runs the tests and then both). The deploy runs `manage.py check`
    on the new code before touching the live site, and restarts the Celery workers.
 5. **Update this page** when a row changes.
+
+### Hash-checked installs
+
+Every Python package is installed **only when its file matches the hash we recorded** (16 Oct 2026), so a
+package replaced on PyPI, on a mirror or on the way can't get onto the server, a runner or the
+devcontainer: pip stops with a hash mismatch and installs nothing. A hash proves the file is the one we
+compiled, not that it's safe: pip-audit, Dependabot and reviewing updates still do that part.
+
+- **Sources:** `requirements.in`, `requirements-dev.in`, `docs/requirements.in` and
+  `.github/requirements/ci-tools.in` (the tools the Code audit installs on their own). They pin every
+  version; the last two are constrained to `requirements-dev.txt`, so all four agree.
+- **Compiled:** `scripts/compile_requirements.sh` runs pip-compile (pip-tools, in `requirements-dev`)
+  with `--generate-hashes --allow-unsafe` and writes the `.txt` beside each source, listing every file PyPI
+  has for each version (all platforms), so the same file works on Level27, the runners and the devcontainer.
+  Commit the `.in` and the `.txt` together; never edit a `.txt` by hand. `-P <package>` moves one package to
+  its newest allowed version.
+- **Installed with `--require-hashes`** everywhere: `scripts/deploy.sh` (and its `--check` dry run), the
+  workspace Dockerfile, and every workflow. pip would check the hashes anyway once a file has them; the flag
+  also refuses a file without them.
+- **Dependabot** reads the pip-compile command in each `.txt` header, changes the pin in the `.in` file and
+  compiles again, hashes included.
+- **django-celery-beat** is a GitHub archive pinned to a commit (see `requirements.in`); its hash is the
+  archive's. GitHub keeps those archives byte-stable, but if one ever changes, its hash fails until the
+  file is compiled again.
+- **The workspace image** is pinned by digest as well (`FROM python:3.14-trixie@sha256:…`); Dependabot
+  updates the digest with the tag. The Actions are pinned by commit hash (`scripts/CLAUDE.md`).
 
 Patch releases (6.1.1 → 6.1.2) are safe to take quickly. Minor and major versions (Django 6.1 → 6.2,
 Celery 5 → 6) get their own change, tested on the devcontainer first. Never upgrade on production only.

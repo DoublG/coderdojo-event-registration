@@ -55,8 +55,10 @@ The site is then at `https://coolregistration.localhost/` and the seeded logins 
   (WCAG 2.2 AA).
 - **User journeys:** `python3 user-journeys/scripts/check_journeys.py` says whether a persona's PDF needs
   a new version.
-- **Dependencies and images:** a new or upgraded package or Docker image updates its row in
-  [`MAINTENANCE.md`](MAINTENANCE.md); run `pip-audit -r requirements.txt`.
+- **Dependencies and images:** a package goes in `requirements.in` (the site) or `requirements-dev.in`
+  (development only), never in a `.txt` file: run `scripts/compile_requirements.sh`, which writes the
+  `.txt` files with every package's hash, and commit both. A new or upgraded package or Docker image
+  updates its row in [`MAINTENANCE.md`](MAINTENANCE.md); run `pip-audit -r requirements.txt`.
 - **The data model:** update the diagram in [`DATA_MODEL.md`](DATA_MODEL.md).
 
 ### Optional: checks before every commit

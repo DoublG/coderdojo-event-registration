@@ -1,4 +1,6 @@
-# Weekly update pull requests, grouped so there are few of them. Dependabot's
+# Weekly update pull requests, grouped so there are few of them. The Python
+# requirements are compiled with hashes (pip-compile, MAINTENANCE.md "Hash-checked
+# installs"): Dependabot changes the pin in the .in file and recompiles the .txt. Dependabot's
 # security updates (repository settings) come on top, as soon as an advisory is out.
 # Each update PR is a change like any other (CONTRIBUTING.md): the tests and the
 # code audit run on it, and MAINTENANCE.md's row for the package or image gets
@@ -6,7 +8,7 @@
 version: 2
 updates:
   - package-ecosystem: pip
-    directories: ["/", "/docs", "/loadtest"]
+    directories: ["/", "/docs", "/loadtest", "/.github/requirements"]
     schedule:
       interval: weekly
       day: monday
