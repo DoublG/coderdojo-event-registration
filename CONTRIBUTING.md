@@ -39,7 +39,8 @@ The site is then at `https://coolregistration.localhost/` and the seeded logins 
    mypy
    ```
 
-5. Open a pull request against `main` and fill in its checklist. The **Tests** and **Code audit** workflows
+5. Open a pull request against `main` and fill in its checklist. `main` is protected: every change,
+   also the maintainers', goes in through a pull request (no force-push, no deleting the branch). The **Tests** and **Code audit** workflows
    run on it.
 
 ### What a change often needs as well
@@ -73,5 +74,9 @@ deploy is tagged with the next CalVer version (`2026.10.3`) and gets a
 
 ## Licence
 
-This repository doesn't have a licence yet, so contributions can't be reused outside this project for
-now. By opening a pull request you agree that CoderDojo Belgium may use your contribution in this site.
+This repository is public but **not open source**: all rights are reserved ([`LICENSE`](LICENSE)). Whether
+to publish it under an open-source licence will be decided later.
+
+By opening a pull request you agree that your contribution is covered by the same terms, may be used in
+this site, and may be published together with the rest of the project under an open-source licence if
+that is decided later.

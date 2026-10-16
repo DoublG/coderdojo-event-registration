@@ -41,6 +41,7 @@ workers for all mail, and Django Channels for live notifications.
 | Security researchers | [`SECURITY.md`](SECURITY.md) | How to report a vulnerability, and what's supported |
 | Contributors | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Setting up, making a change, the checks a pull request needs, how releases work |
 | Everyone taking part | [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | How we treat each other in issues, pull requests and reviews |
+| Everyone | [`LICENSE`](LICENSE) | Public to read, but not open source: all rights reserved |
 
 ### User journeys (PDF)
 
@@ -259,6 +260,7 @@ CODING_STANDARDS.md  coding standards, linting, tests, coverage and complexity
 MEMORY_PROFILE.md memory per function, and what's worth refactoring
 SECURITY.md       reporting a vulnerability
 CONTRIBUTING.md   how to contribute; CODE_OF_CONDUCT.md how we treat each other
+LICENSE           all rights reserved (public, not open source)
 CLAUDE.md         conventions and architecture for developers (AGENTS.md links to it)
 requirements.txt  production dependencies (requirements-dev.txt adds the development tools)
 ```
