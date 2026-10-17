@@ -247,7 +247,7 @@ STEPS = {
     "champion": {
         "dashboard": (
             "Le tableau de bord du dojo",
-            "La page d'accueil du champion : les présences de la prochaine session, une bannière si le dojo n'est pas actif, et un rappel après six mois sans session.",
+            "La page d'accueil du champion : ce qui demande de l'attention (demandes pour rejoindre l'équipe, présences pas encore notées, brouillons ou sessions sans équipe, extraits de casier de l'équipe qui expirent), la prochaine session avec ses places et les réponses aux questions d'inscription, les sessions à venir sous forme d'agenda, les ninjas en nombres par étape et les chiffres de l'année.",
         ),
         "settings": (
             "Paramètres du dojo",

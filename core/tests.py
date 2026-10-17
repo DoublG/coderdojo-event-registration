@@ -647,8 +647,8 @@ class AuditLogAccessTests(TestCase):
         [entry] = self.views(self.with_notes)
         self.assertEqual(entry.actor, self.champion)
         self.assertEqual(self.views(self.without_notes), [])
-        # The dashboard shows the same list, so it's recorded again.
-        self.client.get(reverse("dojo_dashboard", args=[self.dojo.id]))
+        # The Attendance page shows the same list, so it's recorded again.
+        self.client.get(reverse("dojo_attendance", args=[self.dojo.id]))
         self.assertEqual(len(self.views(self.with_notes)), 2)
 
     def test_a_mentor_sees_no_notes_so_nothing_is_recorded(self):

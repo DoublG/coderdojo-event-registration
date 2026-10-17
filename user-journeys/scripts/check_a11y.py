@@ -61,6 +61,7 @@ PERSONAS = {
     "owner-51-dojo-westerlo": [
         "/dojos/51/manage/reports/",
         "/dojos/51/dashboard/",
+        "/dojos/51/attendance/",
         "/dojos/51/manage/",
         "/dojos/51/events/",
         "/dojos/51/events/new/",

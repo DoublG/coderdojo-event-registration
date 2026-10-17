@@ -176,6 +176,7 @@ files = [
     "core/uploads.py",
     "core/version.py",
     "dojos/access.py",
+    "dojos/dashboard.py",
     "dojos/languages.py",
     "dojos/public_cache.py",
     "dojos/search.py",

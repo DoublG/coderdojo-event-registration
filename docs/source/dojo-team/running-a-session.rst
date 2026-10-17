@@ -1,9 +1,35 @@
 Running a session
 ====================
 
-A dojo's dashboard (for its champion and mentors) is built around the dojo's next upcoming session
-(or its most recent past one, if nothing's scheduled), showing who's
-confirmed for it.
+A dojo's dashboard (for its champion and mentors) is the first page you
+see: what needs your attention, your next sessions, your ninjas and how
+your year is going.
+
+Your dashboard
+----------------
+
+**Needs attention** lists only what's waiting for you, each with a button
+to the page where you deal with it:
+
+- requests to join your team;
+- sessions of the last three months whose attendance isn't fully marked
+  yet;
+- a session in the next two weeks that's still a draft, or that has no
+  team yet;
+- no session planned in the next six weeks;
+- a background check that ends within two months: yours, and for the
+  champion everyone's on the team (a mentor whose check has ended can't
+  open the dashboard any more, so the champion is the one who sees it).
+
+**Next session** shows its date, how many places are taken, the waiting
+list, its team and the answers to its sign-up questions, with **Take
+attendance**. **Coming up** lists the sessions after it.
+
+**Your ninjas** counts the children who have your dojo as their home dojo,
+and how they came over the past year (new, regular, occasional, at risk,
+lapsed): only numbers here, the names are on the **Members** page. **This
+year** shows the sessions you held, how many different ninjas came, the
+share of marked places that turned up, and the belts your team awarded.
 
 Scheduling a session
 ----------------------

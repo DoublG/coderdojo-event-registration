@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 08:53+0000\n"
+"POT-Creation-Date: 2026-10-17 09:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -1897,6 +1897,7 @@ msgstr "Afgelopen"
 #: accounts/templates/accounts/manage/admin_access.html:52
 #: accounts/templates/accounts/manage/person.html:59
 #: applications/templates/applications/manage/_check_table.html:36
+#: dojos/templates/dojos/dojo_dashboard.html:129
 #: dojos/templates/dojos/dojo_detail.html:129
 #: dojos/templates/dojos/dojo_event_detail.html:41
 #: dojos/templates/dojos/dojo_event_list.html:39
@@ -5972,7 +5973,8 @@ msgstr "+ Geneste groep"
 
 #: campaigns/templates/campaigns/manage/_status_badge.html:1
 #: campaigns/templates/campaigns/manage/campaign_detail.html:27
-#: dojos/models.py:52 dojos/templates/dojos/dojo_event_detail.html:39
+#: dojos/models.py:52 dojos/templates/dojos/dojo_dashboard.html:127
+#: dojos/templates/dojos/dojo_event_detail.html:39
 #: dojos/templates/dojos/dojo_event_list.html:37 events/models.py:41
 #: reports/models.py:24
 msgid "Draft"
@@ -6763,6 +6765,7 @@ msgstr "Inzichten"
 
 #: core/templates/core/_manage_base.html:170
 #: dojos/templates/dojos/_admin_base.html:95
+#: dojos/templates/dojos/dojo_dashboard.html:230
 #: reports/templates/reports/dojo/report_detail.html:14
 #: reports/templates/reports/dojo/report_list.html:3
 #: reports/templates/reports/dojo/report_list.html:4
@@ -6780,6 +6783,7 @@ msgstr "Privacy"
 
 # | msgid "Has own login"
 #: core/templates/core/_manage_base.html:186
+#: dojos/templates/dojos/dojo_dashboard.html:64
 #: privacy/templates/privacy/manage/privacy.html:11
 msgid "Needs attention"
 msgstr "Vraagt aandacht"
@@ -6937,6 +6941,23 @@ msgstr "Het bestand is %(size)s MB; het mag hoogstens %(max)s MB zijn."
 #: core/uploads.py:112
 msgid "Upload a PDF, JPEG or PNG file."
 msgstr "Upload een PDF-, JPEG- of PNG-bestand."
+
+#: dojos/dashboard.py:165
+msgid "Today"
+msgstr "Vandaag"
+
+#: dojos/dashboard.py:167 events/forms.py:62
+msgid "This week"
+msgstr "Deze week"
+
+#: dojos/dashboard.py:169
+msgid "Next week"
+msgstr "Volgende week"
+
+#: dojos/dashboard.py:171
+#, python-format
+msgid "Later in %(month)s"
+msgstr "Later in %(month)s"
 
 #: dojos/forms.py:46 events/forms.py:176
 msgid "No template — I'll upload my own below"
@@ -7353,6 +7374,8 @@ msgstr "Dojobeheer"
 
 # | msgid "View event"
 #: dojos/templates/dojos/_admin_base.html:28
+#: dojos/templates/dojos/dojo_dashboard.html:95
+#: dojos/templates/dojos/dojo_dashboard.html:155
 #: dojos/templates/dojos/dojo_event_create.html:3
 #: dojos/templates/dojos/dojo_event_create.html:4
 #: dojos/templates/dojos/dojo_event_list.html:8
@@ -7364,6 +7387,8 @@ msgid "Overview"
 msgstr "Overzicht"
 
 #: dojos/templates/dojos/_admin_base.html:40
+#: dojos/templates/dojos/dojo_dashboard.html:4
+#: dojos/templates/dojos/dojo_dashboard.html:5
 msgid "Dashboard"
 msgstr "Dashboard"
 
@@ -7380,8 +7405,8 @@ msgid "Updates"
 msgstr "Nieuws"
 
 #: dojos/templates/dojos/_admin_base.html:76
-#: dojos/templates/dojos/dojo_dashboard.html:3
-#: dojos/templates/dojos/dojo_dashboard.html:4
+#: dojos/templates/dojos/dojo_attendance.html:3
+#: dojos/templates/dojos/dojo_attendance.html:4
 #: dojos/templates/dojos/dojo_event_attendance.html:3
 #: dojos/templates/dojos/dojo_event_attendance.html:4
 #: dojos/templates/dojos/dojo_event_list.html:61
@@ -7389,6 +7414,7 @@ msgid "Attendance"
 msgstr "Aanwezigheden"
 
 #: dojos/templates/dojos/_admin_base.html:82
+#: dojos/templates/dojos/dojo_dashboard.html:215
 #: dojos/templates/dojos/dojo_members.html:4
 #: dojos/templates/dojos/dojo_members.html:5
 msgid "Members"
@@ -7398,6 +7424,27 @@ msgstr "Leden"
 #: dojos/templates/dojos/dojo_manage.html:4
 msgid "Settings"
 msgstr "Instellingen"
+
+# | msgid "Next session"
+#: dojos/templates/dojos/dojo_attendance.html:8
+#: dojos/templates/dojos/dojo_dashboard.html:83
+#: dojos/templates/dojos/dojo_dashboard.html:148
+msgid "Open session"
+msgstr "Sessie openen"
+
+#: dojos/templates/dojos/dojo_attendance.html:16
+#, python-format
+msgid ""
+"No sessions yet — <a href=\"%(new_event_url)s\">create one</a> to start "
+"taking attendance."
+msgstr ""
+"Nog geen sessies. <a href=\"%(new_event_url)s\">Maak er een aan</a> om "
+"aanwezigheden bij te houden."
+
+# | msgid "No past sessions yet."
+#: dojos/templates/dojos/dojo_attendance.html:16
+msgid "No sessions yet."
+msgstr "Nog geen sessies."
 
 # | msgid "Create a dojo"
 #: dojos/templates/dojos/dojo_create.html:3
@@ -7420,12 +7467,7 @@ msgstr ""
 msgid "Create dojo"
 msgstr "Dojo aanmaken"
 
-# | msgid "Next session"
-#: dojos/templates/dojos/dojo_dashboard.html:8
-msgid "Open session"
-msgstr "Sessie openen"
-
-#: dojos/templates/dojos/dojo_dashboard.html:16
+#: dojos/templates/dojos/dojo_dashboard.html:47
 #, python-format
 msgid ""
 "%(name)s is <strong>%(status)s</strong>, so it and its sessions are hidden "
@@ -7434,16 +7476,16 @@ msgstr ""
 "%(name)s is <strong>%(status)s</strong>, dus de dojo en zijn sessies zijn "
 "verborgen voor de publieke site."
 
-#: dojos/templates/dojos/dojo_dashboard.html:17
+#: dojos/templates/dojos/dojo_dashboard.html:48
 #, python-format
 msgid "Change that under <a href=\"%(settings_url)s\">Settings</a>."
 msgstr "Wijzig dat bij <a href=\"%(settings_url)s\">Instellingen</a>."
 
-#: dojos/templates/dojos/dojo_dashboard.html:23
+#: dojos/templates/dojos/dojo_dashboard.html:54
 msgid "No sessions have been planned for over six months."
 msgstr "Er zijn al meer dan zes maanden geen sessies gepland."
 
-#: dojos/templates/dojos/dojo_dashboard.html:25
+#: dojos/templates/dojos/dojo_dashboard.html:56
 #, python-format
 msgid ""
 "Plan your next session under <a href=\"%(new_event_url)s\">New event</a>."
@@ -7452,34 +7494,215 @@ msgstr ""
 "a>."
 
 # | msgid "Next session"
-#: dojos/templates/dojos/dojo_dashboard.html:25
+#: dojos/templates/dojos/dojo_dashboard.html:56
 msgid "Plan your next session."
 msgstr "Plan je volgende sessie."
 
-#: dojos/templates/dojos/dojo_dashboard.html:26
+#: dojos/templates/dojos/dojo_dashboard.html:57
 #, python-format
 msgid ""
 "Or mark the dojo dormant under <a href=\"%(settings_url)s\">Settings</a>."
 msgstr ""
 "Of zet de dojo op slapend bij <a href=\"%(settings_url)s\">Instellingen</a>."
 
-#: dojos/templates/dojos/dojo_dashboard.html:26
+#: dojos/templates/dojos/dojo_dashboard.html:57
 msgid "Or have the champion mark the dojo dormant."
 msgstr "Of vraag de champion om de dojo op slapend te zetten."
 
-#: dojos/templates/dojos/dojo_dashboard.html:33
+#: dojos/templates/dojos/dojo_dashboard.html:68
+#, python-format
+msgid "%(counter)s request to join the team is waiting."
+msgid_plural "%(counter)s requests to join the team are waiting."
+msgstr[0] "%(counter)s vraag om bij het team te komen wacht op een antwoord."
+msgstr[1] ""
+"%(counter)s vragen om bij het team te komen wachten op een antwoord."
+
+# | msgid "Create a dojo"
+#: dojos/templates/dojos/dojo_dashboard.html:69
+msgid "Open the Team page"
+msgstr "Naar de Team-pagina"
+
+#: dojos/templates/dojos/dojo_dashboard.html:74
 #, python-format
 msgid ""
-"No sessions yet — <a href=\"%(new_event_url)s\">create one</a> to start "
-"taking attendance."
+"Attendance for %(name)s (%(date)s) isn't marked yet for %(counter)s place."
+msgid_plural ""
+"Attendance for %(name)s (%(date)s) isn't marked yet for %(counter)s places."
+msgstr[0] ""
+"De aanwezigheid voor %(name)s (%(date)s) is nog niet aangeduid voor "
+"%(counter)s plaats."
+msgstr[1] ""
+"De aanwezigheid voor %(name)s (%(date)s) is nog niet aangeduid voor "
+"%(counter)s plaatsen."
+
+#: dojos/templates/dojos/dojo_dashboard.html:77
+msgid "Mark attendance"
+msgstr "Aanwezigheid aanduiden"
+
+#: dojos/templates/dojos/dojo_dashboard.html:82
+#, python-format
+msgid "%(name)s (%(date)s) is still a draft, so families can't sign up yet."
 msgstr ""
-"Nog geen sessies. <a href=\"%(new_event_url)s\">Maak er een aan</a> om "
-"aanwezigheden bij te houden."
+"%(name)s (%(date)s) is nog een ontwerp, dus gezinnen kunnen nog niet "
+"inschrijven."
+
+#: dojos/templates/dojos/dojo_dashboard.html:88
+#, python-format
+msgid "%(name)s (%(date)s) has no team yet."
+msgstr "%(name)s (%(date)s) heeft nog geen team."
+
+#: dojos/templates/dojos/dojo_dashboard.html:89
+msgid "Choose the team"
+msgstr "Het team kiezen"
+
+#: dojos/templates/dojos/dojo_dashboard.html:94
+msgid "No session is planned in the next six weeks."
+msgstr "Er is de komende zes weken geen sessie gepland."
+
+#: dojos/templates/dojos/dojo_dashboard.html:102
+#, python-format
+msgid ""
+"Your background check ends on %(date)s. Ask for a new extract in time: you "
+"can upload it once the current check has ended."
+msgstr ""
+"Je uittreksel uit het strafregister vervalt op %(date)s. Vraag tijdig een "
+"nieuw uittreksel aan: je kunt het opladen zodra het huidige vervallen is."
+
+#: dojos/templates/dojos/dojo_dashboard.html:104
+#, python-format
+msgid ""
+"%(name)s's background check has ended: they can't open this admin area until "
+"a new one is approved."
+msgstr ""
+"Het uittreksel uit het strafregister van %(name)s is vervallen: tot een "
+"nieuw uittreksel is goedgekeurd, kan die persoon dit beheer niet openen."
+
+#: dojos/templates/dojos/dojo_dashboard.html:105
+msgid "A new extract is being reviewed."
+msgstr "Een nieuw uittreksel wordt beoordeeld."
+
+#: dojos/templates/dojos/dojo_dashboard.html:107
+#, python-format
+msgid "%(name)s's background check ends on %(date)s."
+msgstr "Het uittreksel uit het strafregister van %(name)s vervalt op %(date)s."
+
+# | msgid "Back to your account"
+#: dojos/templates/dojos/dojo_dashboard.html:111
+msgid "Your account"
+msgstr "Je account"
+
+#: dojos/templates/dojos/dojo_dashboard.html:120
+#: dojos/templates/dojos/dojo_detail.html:128
+msgid "Next session"
+msgstr "Volgende sessie"
+
+#: dojos/templates/dojos/dojo_dashboard.html:131
+#: dojos/templates/dojos/dojo_event_detail.html:43
+#: dojos/templates/dojos/dojo_event_list.html:41 events/models.py:43
+msgid "Closed"
+msgstr "Gesloten"
+
+#: dojos/templates/dojos/dojo_dashboard.html:133
+#, python-format
+msgid "%(taken)s of %(places)s places taken"
+msgstr "%(taken)s van %(places)s plaatsen bezet"
+
+#: dojos/templates/dojos/dojo_dashboard.html:133
+#, python-format
+msgid "%(counter)s on the waiting list"
+msgid_plural "%(counter)s on the waiting list"
+msgstr[0] "%(counter)s op de wachtlijst"
+msgstr[1] "%(counter)s op de wachtlijst"
+
+#: dojos/templates/dojos/dojo_dashboard.html:136
+msgid "Team:"
+msgstr "Team:"
+
+#: dojos/templates/dojos/dojo_dashboard.html:137
+msgid "not chosen yet"
+msgstr "nog niet gekozen"
+
+#: dojos/templates/dojos/dojo_dashboard.html:140
+#: dojos/templates/dojos/partials/_attendance_questions.html:7
+#, python-format
+msgid "%(yes)s yes · %(no)s no"
+msgstr "%(yes)s ja · %(no)s nee"
+
+#: dojos/templates/dojos/dojo_dashboard.html:145
+#: dojos/templates/dojos/dojo_event_detail.html:8
+msgid "Take attendance"
+msgstr "Aanwezigheden bijhouden"
 
 # | msgid "No past sessions yet."
-#: dojos/templates/dojos/dojo_dashboard.html:33
-msgid "No sessions yet."
-msgstr "Nog geen sessies."
+#: dojos/templates/dojos/dojo_dashboard.html:152
+msgid "No sessions planned."
+msgstr "Geen sessies gepland."
+
+#: dojos/templates/dojos/dojo_dashboard.html:165
+msgid "Coming up"
+msgstr "Binnenkort"
+
+#: dojos/templates/dojos/dojo_dashboard.html:166
+msgid "All events"
+msgstr "Alle evenementen"
+
+# | msgid "No past sessions yet."
+#: dojos/templates/dojos/dojo_dashboard.html:196
+msgid "Nothing planned yet."
+msgstr "Nog niets gepland."
+
+#: dojos/templates/dojos/dojo_dashboard.html:201
+msgid "Your ninjas"
+msgstr "Je ninja's"
+
+# | msgid "No children registered yet."
+#: dojos/templates/dojos/dojo_dashboard.html:203
+#, python-format
+msgid "%(counter)s child has this as their home dojo."
+msgid_plural "%(counter)s children have this as their home dojo."
+msgstr[0] "%(counter)s kind heeft deze dojo als thuisdojo."
+msgstr[1] "%(counter)s kinderen hebben deze dojo als thuisdojo."
+
+# | msgid "Shown on the homepage's Upcoming sessions card."
+#: dojos/templates/dojos/dojo_dashboard.html:205
+msgid "How they come"
+msgstr "Hoe ze komen"
+
+#: dojos/templates/dojos/dojo_dashboard.html:210
+msgid "How they came over the past year, updated every night."
+msgstr "Hoe ze het voorbije jaar kwamen, elke nacht bijgewerkt."
+
+#: dojos/templates/dojos/dojo_dashboard.html:213
+msgid ""
+"No members yet: a child gets this as their home dojo at their first sign-up "
+"here."
+msgstr ""
+"Nog geen leden: een kind krijgt deze dojo als thuisdojo bij de eerste "
+"inschrijving hier."
+
+#: dojos/templates/dojos/dojo_dashboard.html:219
+msgid "This year"
+msgstr "Dit jaar"
+
+#: dojos/templates/dojos/dojo_dashboard.html:222
+msgid "Sessions held"
+msgstr "Sessies gehouden"
+
+#: dojos/templates/dojos/dojo_dashboard.html:223
+msgid "Different ninjas"
+msgstr "Verschillende ninja's"
+
+#: dojos/templates/dojos/dojo_dashboard.html:224
+msgid "Turned up"
+msgstr "Opgedaagd"
+
+#: dojos/templates/dojos/dojo_dashboard.html:225
+msgid "Belts awarded"
+msgstr "Gordels toegekend"
+
+#: dojos/templates/dojos/dojo_dashboard.html:228
+msgid "Turned up: of the places marked present or absent."
+msgstr "Opgedaagd: van de plaatsen die als aanwezig of afwezig zijn aangeduid."
 
 #: dojos/templates/dojos/dojo_detail.html:104
 msgid "Free"
@@ -7518,10 +7741,6 @@ msgstr "Bekijk de sessies van deze dojo"
 #: pages/templates/pages/home.html:123
 msgid "Next sessions"
 msgstr "Volgende sessies"
-
-#: dojos/templates/dojos/dojo_detail.html:128
-msgid "Next session"
-msgstr "Volgende sessie"
 
 #: dojos/templates/dojos/dojo_detail.html:129
 #: dojos/templates/dojos/partials/_dojo_result.html:31
@@ -7620,15 +7839,6 @@ msgstr ""
 #: dojos/templates/dojos/dojo_event_create.html:33
 msgid "Create event"
 msgstr "Evenement aanmaken"
-
-#: dojos/templates/dojos/dojo_event_detail.html:8
-msgid "Take attendance"
-msgstr "Aanwezigheden bijhouden"
-
-#: dojos/templates/dojos/dojo_event_detail.html:43
-#: dojos/templates/dojos/dojo_event_list.html:41 events/models.py:43
-msgid "Closed"
-msgstr "Gesloten"
 
 # | msgid "Registrations closed"
 #: dojos/templates/dojos/dojo_event_detail.html:52
@@ -8240,11 +8450,6 @@ msgstr ""
 msgid "Nobody from the team is assigned to this session yet."
 msgstr "Nog niemand van het team is aan deze sessie toegewezen."
 
-#: dojos/templates/dojos/partials/_attendance_questions.html:7
-#, python-format
-msgid "%(yes)s yes · %(no)s no"
-msgstr "%(yes)s ja · %(no)s nee"
-
 # | msgid "Home dojo"
 #: dojos/templates/dojos/partials/_attendance_row.html:16
 #, python-format
@@ -8693,10 +8898,6 @@ msgstr "Alleen de organisatie kan dit toekennen."
 #: events/forms.py:62
 msgid "Any date"
 msgstr "Elke datum"
-
-#: events/forms.py:62
-msgid "This week"
-msgstr "Deze week"
 
 #: events/forms.py:62
 msgid "This month"

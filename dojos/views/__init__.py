@@ -1,7 +1,7 @@
 """The dojos app's pages, by area: the public pages (public), a dojo's settings,
 lifecycle and updates (profile), its team (team_pages), its sessions
 (event_pages), their sign-up questions and the dojo's default ones
-(questions), attendance and awards (attendance) and the notification bell
+(questions), the overview (dashboard), attendance and awards (attendance) and the notification bell
 (bell), with what they share (common). Every view is importable from here, as
 urls.py does."""
 
@@ -13,7 +13,7 @@ from .attendance import (  # noqa: F401
     _awardable_badges,
     _awardable_belts,
     _team_attendance_rows,
-    dojo_dashboard,
+    dojo_attendance,
     dojo_event_attendance,
     dojo_event_attendance_mark,
     dojo_event_attendance_mark_all,
@@ -35,6 +35,7 @@ from .common import (  # noqa: F401
     _admin_context,
     _notification_context,
 )
+from .dashboard import dojo_dashboard  # noqa: F401
 from .event_pages import (  # noqa: F401
     _event_promotions_context,
     dojo_event_create,

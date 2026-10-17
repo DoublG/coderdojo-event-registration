@@ -10,6 +10,7 @@ urlpatterns = [
     path("dojos/<int:dojo_id>/team/", views.dojo_team, name="dojo_team"),
     path("dojos/<int:dojo_id>/join/", views.dojo_join_request, name="dojo_join_request"),
     path("dojos/<int:dojo_id>/dashboard/", views.dojo_dashboard, name="dojo_dashboard"),
+    path("dojos/<int:dojo_id>/attendance/", views.dojo_attendance, name="dojo_attendance"),
     path("dojos/<int:dojo_id>/manage/", views.dojo_manage, name="dojo_manage"),
     path("dojos/<int:dojo_id>/manage/lifecycle/", views.dojo_set_lifecycle, name="dojo_set_lifecycle"),
     path("dojos/<int:dojo_id>/manage/team/", views.dojo_team_manage, name="dojo_team_manage"),

@@ -247,7 +247,7 @@ STEPS = {
     "champion": {
         "dashboard": (
             "Het dashboard van de dojo",
-            "De startpagina van de champion: de aanwezigheden van de volgende sessie, een banner als de dojo niet actief is, en een seintje na zes maanden zonder sessies.",
+            "De startpagina van de champion: wat aandacht vraagt (vragen om bij het team te komen, aanwezigheden die nog niet zijn aangeduid, ontwerpen of sessies zonder team, uittreksels van het team die vervallen), de volgende sessie met haar plaatsen en de antwoorden op de inschrijvingsvragen, de komende sessies als agenda, de ninja's als aantallen per fase en de cijfers van het jaar.",
         ),
         "settings": (
             "Instellingen van de dojo",

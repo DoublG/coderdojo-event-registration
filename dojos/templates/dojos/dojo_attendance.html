@@ -1,0 +1,18 @@
+{% extends "dojos/_admin_base.html" %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "Attendance" %}{% endblock %}
+{% block admin_heading %}{% translate "Attendance" %}{% endblock %}
+
+{% block admin_topbar_extra %}
+  {% if event and dojo_access.can_manage_events %}
+    <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">{% translate "Open session" %}</a>
+  {% endif %}
+{% endblock %}
+
+{% block admin_content %}
+  {% if event %}
+    {% include "dojos/partials/_attendance.html" %}
+  {% else %}
+    <p class="body">{% if dojo_access.can_manage_events %}{% url 'dojo_event_create' dojo_id=dojo.id as new_event_url %}{% blocktranslate %}No sessions yet — <a href="{{ new_event_url }}">create one</a> to start taking attendance.{% endblocktranslate %}{% else %}{% translate "No sessions yet." %}{% endif %}</p>
+  {% endif %}
+{% endblock %}

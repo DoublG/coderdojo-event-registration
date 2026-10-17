@@ -529,13 +529,15 @@ class DojoMembershipRulesTests(TestCase):
         self.assertEqual(mentor.sessions_run, 1)
 
 
-class DojoDashboardViewTests(TestCase):
+class DojoAttendancePageTests(TestCase):
+    """The sidebar's Attendance page: the list for the next session."""
+
     def test_dojo_with_no_sessions_still_renders(self):
         owner = make_champion(username="owner1")
         dojo = make_dojo("Ghent", champion=owner)
         self.client.force_login(owner)
 
-        response = self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": dojo.id}))
+        response = self.client.get(reverse("dojo_attendance", kwargs={"dojo_id": dojo.id}))
 
         self.assertEqual(response.status_code, 200)
         self.assertIsNone(response.context["session"])
@@ -560,7 +562,7 @@ class DojoDashboardViewTests(TestCase):
         )
         self.client.force_login(owner)
 
-        response = self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": dojo.id}))
+        response = self.client.get(reverse("dojo_attendance", kwargs={"dojo_id": dojo.id}))
 
         self.assertEqual(response.context["session"], event)
         self.assertEqual(response.context["registrations"], [registration])
@@ -570,12 +572,12 @@ class DojoDashboardViewTests(TestCase):
     def test_missing_dojo_is_404(self):
         owner = make_champion(username="owner1")
         self.client.force_login(owner)
-        response = self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": 999999}))
+        response = self.client.get(reverse("dojo_attendance", kwargs={"dojo_id": 999999}))
         self.assertEqual(response.status_code, 404)
 
     def test_anonymous_redirected_to_login(self):
         dojo = make_dojo("Ghent")
-        response = self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": dojo.id}))
+        response = self.client.get(reverse("dojo_attendance", kwargs={"dojo_id": dojo.id}))
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("login"), response.url)
 
@@ -585,9 +587,232 @@ class DojoDashboardViewTests(TestCase):
         dojo = make_dojo("Ghent", champion=owner)
         self.client.force_login(other_owner)
 
-        response = self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": dojo.id}))
+        response = self.client.get(reverse("dojo_attendance", kwargs={"dojo_id": dojo.id}))
 
         self.assertEqual(response.status_code, 404)
+
+
+class DojoDashboardTests(TestCase):
+    """The dashboard's overview (dojos.dashboard): what needs the team, the
+    next sessions, the dojo's ninjas and its year so far."""
+
+    def setUp(self):
+        self.owner = make_champion(username="owner1", first_name="Olga", last_name="Owner")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.mentor = make_mentor(username="mentor1", first_name="Hanna", last_name="Helper")
+        self.mentor_membership = add_member(self.dojo, self.mentor)
+        self.url = reverse("dojo_dashboard", kwargs={"dojo_id": self.dojo.id})
+
+    def _event(self, days, status=Event.OPEN, places=10, name="Session"):
+        start = timezone.now() + timedelta(days=days)
+        return Event.objects.create(
+            name=name,
+            dojo=self.dojo,
+            status=status,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+            places=places,
+        )
+
+    def _register(self, event, name="Mila", waiting_list=False, attended=None, **ninja_fields):
+        ninja = Ninja.objects.create(name=name, **ninja_fields)
+        return Registration.objects.create(
+            event=event, ninja=ninja, waiting_list=waiting_list, position=1, attended=attended
+        )
+
+    def _get(self, user):
+        self.client.force_login(user)
+        return self.client.get(self.url)
+
+    def test_renders_with_nothing_yet(self):
+        response = self._get(self.owner)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "dojos/dojo_dashboard.html")
+        overview = response.context["overview"]
+        self.assertIsNone(overview.next_session)
+        self.assertEqual(overview.members, 0)
+        self.assertContains(response, "No sessions planned.")
+
+    def test_gating(self):
+        self.client.logout()
+        self.assertEqual(self.client.get(self.url).status_code, 302)
+        self.client.force_login(make_champion(username="stranger"))
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    def test_sidebar_links_the_dashboard_and_attendance(self):
+        response = self._get(self.owner)
+        self.assertContains(response, f'href="{self.url}" class="cd-admin-nav__link label cd-admin-nav__link--active"')
+        self.assertContains(response, reverse("dojo_attendance", kwargs={"dojo_id": self.dojo.id}))
+
+    def test_next_session_and_coming_up(self):
+        later = self._event(20, name="Later")
+        nxt = self._event(3, name="Next one", places=2)
+        nxt.team.add(self.mentor_membership)
+        self._register(nxt, "Mila")
+        self._register(nxt, "Noah", waiting_list=True)
+        overview = self._get(self.owner).context["overview"]
+        self.assertEqual(overview.next_session, nxt)
+        self.assertEqual(overview.next_session.confirmed_count, 1)
+        self.assertEqual(overview.next_session_waiting, 1)
+        self.assertEqual([[d.events for d in period.dates] for period in overview.agenda], [[[nxt]], [[later]]])
+        self.assertTrue(overview.agenda[0].dates[0].selected)
+        self.assertFalse(overview.agenda[1].dates[0].selected)
+        response = self.client.get(self.url)
+        self.assertContains(response, "1 of 2 places taken")
+        self.assertContains(response, "Hanna Helper")
+        self.assertContains(
+            response, reverse("dojo_event_attendance", kwargs={"dojo_id": self.dojo.id, "event_id": nxt.id})
+        )
+
+    def test_agenda_periods(self):
+        from datetime import date
+
+        from dojos.dashboard import period_title
+
+        wednesday = date(2026, 10, 14)
+        self.assertEqual(period_title(wednesday, wednesday), "Today")
+        self.assertEqual(period_title(date(2026, 10, 18), wednesday), "This week")
+        self.assertEqual(period_title(date(2026, 10, 19), wednesday), "Next week")
+        self.assertEqual(period_title(date(2026, 10, 25), wednesday), "Next week")
+        self.assertEqual(period_title(date(2026, 10, 26), wednesday), "Later in October")
+        self.assertEqual(period_title(date(2026, 11, 7), wednesday), "November")
+        self.assertEqual(period_title(date(2027, 1, 9), wednesday), "January 2027")
+
+    def test_agenda_groups_sessions_of_one_day(self):
+        from dojos.dashboard import agenda
+
+        start = timezone.make_aware(datetime.combine(timezone.localdate() + timedelta(days=10), time(10)))
+        morning = Event.objects.create(
+            name="Morning",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+            places=10,
+        )
+        afternoon = Event.objects.create(
+            name="Afternoon",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time=morning.start_time + timedelta(minutes=30),
+            end_time=morning.end_time + timedelta(minutes=30),
+            places=10,
+        )
+        [period] = agenda([morning, afternoon], timezone.localdate(morning.start_time))
+        [day] = period.dates
+        self.assertEqual(day.events, [morning, afternoon])
+        self.assertTrue(day.selected)
+
+    def test_next_session_shows_the_answers(self):
+        from events.models import EventQuestion, RegistrationAnswer
+
+        event = self._event(3)
+        question = EventQuestion.objects.create(event=event, text="Own laptop?")
+        RegistrationAnswer.objects.create(registration=self._register(event, "Mila"), question=question, answer=True)
+        RegistrationAnswer.objects.create(registration=self._register(event, "Noah"), question=question, answer=False)
+        response = self._get(self.owner)
+        self.assertContains(response, "Own laptop?")
+        self.assertContains(response, "1 yes · 1 no")
+
+    def test_join_requests_only_for_who_manages_the_team(self):
+        add_member(self.dojo, make_mentor(username="asker"), status=DojoMembership.REQUESTED)
+        overview = self._get(self.owner).context["overview"]
+        self.assertEqual(overview.attention.join_requests, 1)
+        self.assertContains(self.client.get(self.url), "1 request to join the team is waiting.")
+
+    def test_unmarked_attendance(self):
+        past = self._event(-5, name="Past session")
+        self._register(past, "Mila")
+        self._register(past, "Noah", attended=True)
+        self._register(past, "Zoe", waiting_list=True)
+        marked = self._event(-12, name="All marked")
+        self._register(marked, "Ann", attended=False)
+        unmarked = self._get(self.owner).context["overview"].attention.unmarked_sessions
+        self.assertEqual(unmarked, [past])
+        self.assertEqual(unmarked[0].unmarked_count, 1)
+        self.assertContains(self.client.get(self.url), "marked yet for 1 place")
+
+    def test_drafts_and_sessions_without_a_team_soon(self):
+        draft = self._event(5, status=Event.DRAFT, name="Draft soon")
+        far = self._event(30, status=Event.DRAFT, name="Draft later")
+        attention = self._get(self.owner).context["overview"].attention
+        self.assertEqual(attention.drafts_soon, [draft])
+        self.assertEqual(attention.without_team_soon, [draft])
+        self.assertNotIn(far, attention.without_team_soon)
+        self.assertFalse(attention.nothing_planned)
+
+    def test_nothing_planned_in_the_next_six_weeks(self):
+        self.assertTrue(self._get(self.owner).context["overview"].attention.nothing_planned)
+        self._event(30)
+        self.assertFalse(self.client.get(self.url).context["overview"].attention.nothing_planned)
+
+    def test_champion_sees_every_expiring_check_mentor_only_their_own(self):
+        self.mentor.background_check_expires_at = timezone.now() + timedelta(days=20)
+        self.mentor.save()
+        lapsed = make_mentor(username="lapsed", first_name="Lars", last_name="Lapsed")
+        add_member(self.dojo, lapsed)
+        lapsed.background_check_expires_at = timezone.now() - timedelta(days=1)
+        lapsed.background_check_status = User.CHECK_SUBMITTED
+        lapsed.save()
+
+        checks = self._get(self.owner).context["overview"].attention.checks
+        self.assertEqual({c.membership.user for c in checks}, {self.mentor, lapsed})
+        response = self.client.get(self.url)
+        self.assertContains(response, "Hanna Helper's background check ends on")
+        self.assertContains(response, "Lars Lapsed's background check has ended")
+        self.assertContains(response, "A new extract is being reviewed.")
+
+        checks = self._get(self.mentor).context["overview"].attention.checks
+        self.assertEqual([(c.membership.user, c.is_self) for c in checks], [(self.mentor, True)])
+        self.assertContains(self.client.get(self.url), "Your background check ends on")
+
+    def test_a_check_far_from_its_end_is_not_listed(self):
+        self.assertEqual(self._get(self.owner).context["overview"].attention.checks, [])
+
+    def test_ninjas_as_counts_per_stage(self):
+        from events.models import NinjaEngagement
+
+        for name, stage in (("Mila", "regular"), ("Noah", "regular"), ("Zoe", "at_risk")):
+            ninja = Ninja.objects.create(name=name, home_dojo=self.dojo)
+            NinjaEngagement.objects.create(
+                ninja=ninja, dojo=self.dojo, main_dojo=self.dojo, stage=stage, computed_on=timezone.localdate()
+            )
+        Ninja.objects.create(name="Visitor")
+        overview = self._get(self.owner).context["overview"]
+        self.assertEqual(overview.members, 3)
+        self.assertEqual([(s, n) for s, _label, n in overview.stages], [("regular", 2), ("at_risk", 1)])
+        response = self.client.get(self.url)
+        self.assertContains(response, "Regular: 2")
+        self.assertNotContains(response, "Zoe")
+
+    def test_this_year(self):
+        from events.models import Belt, NinjaBelt
+
+        past = self._event(-1)
+        self._register(past, "Mila", attended=True)
+        self._register(past, "Noah", attended=False)
+        self._register(past, "Zoe")
+        self._event(-2, status=Event.DRAFT)
+        belt = Belt.objects.create(name="White", level=1)
+        NinjaBelt.objects.create(
+            ninja=past.registration_set.first().ninja,
+            belt=belt,
+            awarded_on=timezone.localdate(),
+            awarded_as_membership=self.dojo.champion_membership,
+        )
+        year = self._get(self.owner).context["overview"].year
+        if timezone.localtime(past.start_time).year == timezone.localtime().year:
+            self.assertEqual((year.sessions, year.ninjas, year.turnout_percent, year.belts), (1, 1, 50, 1))
+
+    def test_health_notes_never_show(self):
+        event = self._event(3)
+        self._register(event, "Mila", allergies_notes="Peanut allergy")
+        self.assertNotContains(self._get(self.owner), "Peanut allergy")
+
+    def test_reports_link_for_the_champion_only(self):
+        reports = reverse("dojo_report_list", kwargs={"dojo_id": self.dojo.id})
+        self.assertContains(self._get(self.owner), f'class="dash__link body-sm" href="{reports}"')
+        self.assertNotContains(self._get(self.mentor), f'class="dash__link body-sm" href="{reports}"')
 
 
 class DojoManageViewTests(TempMediaMixin, TestCase):
@@ -1337,7 +1562,7 @@ class AdminNavDojoSwitcherTests(TestCase):
         self.assertContains(response, "Ghent")
         self.assertContains(response, "Antwerp")
         # The switch-target link for the *other* dojo stays on the same
-        # screen (Attendance here) rather than always landing on one page.
+        # screen (the dashboard here) rather than always landing on one page.
         self.assertContains(response, reverse("dojo_dashboard", kwargs={"dojo_id": antwerp.id}))
 
     def test_switch_links_go_to_manage_when_on_settings(self):
@@ -1521,8 +1746,8 @@ class HelperDojoAccessTests(TestCase):
         self.assertEqual(antwerp_page.context["dojo_access"].role, access.MENTOR)
 
     def test_restricted_helper_is_blocked_from_each_capability(self):
-        """With every capability removed, a helper keeps the dashboard and
-        events list (read-only) but gets a 403 everywhere else, and the
+        """With every capability removed, a helper keeps the dashboard, the
+        Attendance page and the events list (read-only) but gets a 403 everywhere else, and the
         sidebar/buttons for those capabilities are hidden."""
         self.client.force_login(self.helper)
         urls = self._page_urls()
@@ -1552,6 +1777,7 @@ class HelperDojoAccessTests(TestCase):
             )
 
             dashboard = self.client.get(urls["dashboard"])
+            attendance_page = self.client.get(reverse("dojo_attendance", kwargs=self._kw()))
             events = self.client.get(urls["events"])
 
         self.assertEqual(dashboard.status_code, 200)
@@ -1559,8 +1785,10 @@ class HelperDojoAccessTests(TestCase):
         # substring check for the settings URL would match that link too.
         self.assertNotContains(dashboard, f'href="{urls["settings"]}"')
         self.assertNotContains(dashboard, f'href="{urls["create"]}"')
-        self.assertNotContains(dashboard, "Mark all present")
-        self.assertContains(dashboard, "Not marked")
+        self.assertNotContains(dashboard, "Take attendance")
+        self.assertEqual(attendance_page.status_code, 200)
+        self.assertNotContains(attendance_page, "Mark all present")
+        self.assertContains(attendance_page, "Not marked")
         self.assertEqual(events.status_code, 200)
         self.assertNotContains(events, urls["detail"])
         self.assertNotContains(events, urls["attendance"])
@@ -2098,7 +2326,7 @@ class DormancyNudgeTests(TestCase):
         self._event(-200)
         self.client.force_login(owner)
         response = self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": self.dojo.id}))
-        self.assertTrue(response.context["dormancy_nudge"])
+        self.assertTrue(response.context["overview"].dormancy_nudge)
         self.assertContains(response, "No sessions have been planned for over six months")
 
 
@@ -2935,9 +3163,9 @@ class HealthNotesOnAttendanceTests(TestCase):
         response = self.client.post(url, {"attended": "present"}, HTTP_HX_REQUEST="true")
         self.assertContains(response, "Peanut allergy")
 
-    def test_champion_sees_them_on_the_dashboard(self):
+    def test_champion_sees_them_on_the_attendance_page(self):
         self.client.force_login(self.owner)
-        response = self.client.get(reverse("dojo_dashboard", kwargs={"dojo_id": self.dojo.id}))
+        response = self.client.get(reverse("dojo_attendance", kwargs={"dojo_id": self.dojo.id}))
         self.assertContains(response, "Peanut allergy")
 
     def test_mentor_does_not_see_them(self):

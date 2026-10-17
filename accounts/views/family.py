@@ -270,7 +270,7 @@ def cancel_registration(request, registration_id):
             notify_managers(
                 event.dojo,
                 gettext_lazy("A spot opened up in %(event)s — a waitlisted family is now confirmed."),
-                url=reverse("dojo_dashboard", kwargs={"dojo_id": event.dojo_id}),
+                url=reverse("dojo_event_attendance", kwargs={"dojo_id": event.dojo_id, "event_id": event.id}),
                 params={"event": event.name},
             )
 

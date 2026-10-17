@@ -8,7 +8,7 @@ with sync_playwright() as pw:
     j.shot(
         "dashboard",
         "The dojo dashboard",
-        "The champion's home: the next session's attendance, a banner if the dojo isn't active, and the six-month dormancy nudge when the dojo has gone quiet.",
+        "The champion's home: what needs attention (join requests, unmarked attendance, drafts or sessions without a team, the team's background checks running out), the next session with its places and sign-up answers, the coming sessions as an agenda, the ninjas as counts per stage and the year's figures.",
         max_h=1800,
     )
     p = j.go("/dojos/51/manage/")
