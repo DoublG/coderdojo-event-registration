@@ -1514,11 +1514,22 @@ class SignUpQuestionsTests(TestCase):
 
     def test_at_most_five_questions(self):
         event = _future_event(self.dojo)
-        for n in range(questions.MAX_QUESTIONS):
+        for n in range(5):
             questions.add_question(event, f"Question {n}?")
-        with self.assertRaisesMessage(questions.QuestionError, "at most 5"):
+        with self.assertRaisesMessage(questions.QuestionError, "At most 5"):
             questions.add_question(event, "One too many?")
-        self.assertEqual(event.questions.count(), questions.MAX_QUESTIONS)
+        self.assertEqual(event.questions.count(), 5)
+
+    def test_the_maximum_comes_from_the_settings(self):
+        event = _future_event(self.dojo)
+        with self.settings(SIGNUP_QUESTIONS_MAX=1):
+            questions.add_question(event, "Own laptop?")
+            with self.assertRaisesMessage(questions.QuestionError, "At most 1"):
+                questions.add_question(event, "Lunch?")
+            # The dojo's defaults too.
+            questions.add_question(self.dojo, "Own laptop?")
+            with self.assertRaisesMessage(questions.QuestionError, "At most 1"):
+                questions.add_question(self.dojo, "Lunch?")
 
     def test_a_question_needs_text_and_a_session_that_signs_up_here(self):
         event = _future_event(self.dojo)
@@ -1595,20 +1606,26 @@ class SignUpQuestionsTests(TestCase):
         self.assertFalse(waiting.waiting_list)
         self.assertEqual(list(waiting.answers.values_list("answer", flat=True)), [False])
 
-    def test_a_new_session_copies_the_latest_sessions_questions(self):
-        older = _future_event(self.dojo, start_time=timezone.now() + timedelta(days=1))
-        questions.add_question(older, "Older?")
-        latest = _future_event(self.dojo, start_time=timezone.now() + timedelta(days=3))
-        questions.add_question(latest, "Own laptop?")
-        questions.add_question(latest, "Lunch?")
+    def test_a_new_session_starts_with_the_dojos_default_questions(self):
+        self.dojo.languages = ["nl-be", "fr-be"]
+        self.dojo.save()
+        laptop = questions.add_question(self.dojo, "Eigen laptop?", {"fr-be": "Propre ordinateur ?"})
+        lunch = questions.add_question(self.dojo, "Lunch?")
+        questions.move_question(lunch, "up")
+        # Another session's own questions don't matter any more.
+        questions.add_question(_future_event(self.dojo), "Older?")
         new = _future_event(self.dojo, start_time=timezone.now() + timedelta(days=10))
-        questions.copy_from_latest(new)
-        self.assertEqual([q.text for q in new.questions.all()], ["Own laptop?", "Lunch?"])
+        questions.copy_defaults(new)
+        self.assertEqual([q.text for q in new.questions.all()], ["Lunch?", "Eigen laptop?"])
+        self.assertEqual(new.questions.get(text="Eigen laptop?").translations, laptop.translations)
+        # Changing a default later doesn't change a session that has its copy.
+        questions.edit_question(laptop, "Laptop mee?")
+        self.assertTrue(new.questions.filter(text="Eigen laptop?").exists())
         # Never twice, and never to a session that signs up elsewhere.
-        questions.copy_from_latest(new)
+        questions.copy_defaults(new)
         self.assertEqual(new.questions.count(), 2)
         external = _future_event(self.dojo, external_registration_url="https://example.com/")
-        questions.copy_from_latest(external)
+        questions.copy_defaults(external)
         self.assertFalse(external.questions.exists())
 
     def test_the_familys_data_export_has_the_answers(self):
@@ -1784,13 +1801,19 @@ class ChangeAnswersTests(TestCase):
         )
         self.assertEqual(entries.last().changes_dict["answer"], ["True", "False"])
         notification = Notification.objects.get(recipient=champion)
-        self.assertIn("Emma", notification.text)
+        self.assertIn("Families changed their answers", notification.text)
         self.assertEqual(
-            notification.url, reverse("dojo_event_attendance", kwargs={"dojo_id": dojo.id, "event_id": event.id})
+            notification.url, reverse("dojo_event_detail", kwargs={"dojo_id": dojo.id, "event_id": event.id})
         )
         # Saving the same answers again changes nothing and tells nobody.
         self.client.post(url, {f"q-{laptop.id}": "no"})
         self.assertEqual(Notification.objects.filter(recipient=champion).count(), 1)
+        # Another change while that one is unread adds nothing; once read, it does.
+        self.client.post(url, {f"q-{laptop.id}": "yes"})
+        self.assertEqual(Notification.objects.filter(recipient=champion).count(), 1)
+        Notification.objects.filter(recipient=champion).update(read=True)
+        self.client.post(url, {f"q-{laptop.id}": "no"})
+        self.assertEqual(Notification.objects.filter(recipient=champion, read=False).count(), 1)
 
     def test_a_missing_answer_is_marked(self):
         lunch = questions.add_question(self.event, "Lunch?")

@@ -218,6 +218,43 @@ def dojo_event_team_attendance_mark(request, dojo_id, event_id, membership_id):
 
 
 @login_required
+def dojo_event_registration_answers(request, dojo_id, event_id, registration_id):
+    """The team corrects a child's answers to the session's sign-up
+    questions (POST `q-<question id>` = yes|no; a question left out stays
+    as it is), e.g. at the door: any time, also during the session, and
+    recorded in the audit log (events.questions.correct_answer). Same
+    htmx/no-JS handling as dojo_event_attendance_mark."""
+    access = require_dojo_access(request, dojo_id, TAKE_ATTENDANCE)
+    dojo = access.dojo
+    event = get_object_or_404(Event, id=event_id, dojo=dojo)
+    registration = get_object_or_404(
+        Registration.objects.select_related("ninja"), id=registration_id, event=event, waiting_list=False
+    )
+    if request.method == "POST":
+        for question in event.questions.all():
+            value = request.POST.get(f"q-{question.id}")
+            if value in ("yes", "no"):
+                event_questions.correct_answer(registration, question, value == "yes")
+
+    if request.headers.get("HX-Request"):
+        context = {
+            "dojo": dojo,
+            "dojo_access": access,
+            **_attendance_context(event),
+            "registration": Registration.objects.select_related("ninja")
+            .prefetch_related("pathways")
+            .get(pk=registration.pk),
+        }
+        html = render_to_string("dojos/partials/_attendance_row.html", context, request=request)
+        # The totals at the top of the list, out-of-band.
+        totals = render_to_string(
+            "dojos/partials/_attendance_questions.html", {**context, "oob": True}, request=request
+        )
+        return HttpResponse(html + totals)
+    return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
+
+
+@login_required
 def dojo_event_registration_pathways(request, dojo_id, event_id, registration_id):
     """Set which pathways a ninja works on at this session (POST `pathway`,
     repeated) — pre-filled from the event's pathways at signup, narrowed

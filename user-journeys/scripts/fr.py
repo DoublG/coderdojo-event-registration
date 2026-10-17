@@ -225,7 +225,7 @@ STEPS = {
         ),
         "attendance": (
             "Prendre les présences à l'entrée",
-            "Le jour même, le mentor indique chaque enfant présent ou absent (htmx, sans recharger la page). Chaque ligne montre la ceinture de l'enfant, sa régularité, les réponses de la famille aux questions d'inscription (comptées en haut : combien d'ordinateurs apporter) et « En visite » pour les enfants d'un autre dojo ; l'équipe de la session figure aussi, pour l'assurance.",
+            "Le jour même, le mentor indique chaque enfant présent ou absent (htmx, sans recharger la page). Chaque ligne montre la ceinture de l'enfant, sa régularité, les réponses de la famille aux questions d'inscription (comptées en haut : combien d'ordinateurs apporter ; l'équipe en corrige une sous Réponses) et « En visite » pour les enfants d'un autre dojo ; l'équipe de la session figure aussi, pour l'assurance.",
         ),
         "marked": (
             "Présent",
@@ -253,13 +253,17 @@ STEPS = {
             "Paramètres du dojo",
             "En haut, le statut du dojo : seul le champion lance le dojo, le met en sommeil ou l'archive (jamais avec des sessions ouvertes) et le rouvre. En dessous, tout ce qui figure sur la page publique du dojo : nom, description dans chaque langue du dojo, icône, adresse (géolocalisée à l'enregistrement), coordonnées et parcours d'apprentissage.",
         ),
+        "default-questions": (
+            "Questions d'inscription par défaut",
+            "Sous le profil, les questions d'inscription par défaut du dojo : des questions oui/non que chaque nouvelle session reprend (ici celle de l'ordinateur), dans chaque langue du dojo. Chaque session peut les modifier sur sa propre page.",
+        ),
         "events": (
             "Sessions",
             "Toutes les sessions du dojo avec leur statut (brouillon, ouverte, clôturée) et l'étape suivante en un clic.",
         ),
         "new-event": (
             "Planifier une nouvelle session",
-            "Une nouvelle session : date et heures (notation belge), places, âges, public (p. ex. une session pour filles), une bannière de la bibliothèque d'images ou envoyée, l'équipe et les parcours d'apprentissage. Elle reprend les questions d'inscription de la dernière session du dojo et commence en brouillon ; la publier ouvre les inscriptions et les familles reçoivent l'e-mail des nouvelles sessions.",
+            "Une nouvelle session : date et heures (notation belge), places, âges, public (p. ex. une session pour filles), une bannière de la bibliothèque d'images ou envoyée, l'équipe et les parcours d'apprentissage. Elle reprend les questions d'inscription par défaut du dojo et commence en brouillon ; la publier ouvre les inscriptions et les familles reçoivent l'e-mail des nouvelles sessions.",
         ),
         "event": (
             "Une session complète avec liste d'attente",

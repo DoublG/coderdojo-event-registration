@@ -115,6 +115,10 @@ def _answers_context(registration: Registration, user: User) -> list[dict[str, s
         ]
 
 
+def _session_and_answers(registration: Registration, user: User) -> Context:
+    return {**_session_context(registration, user), "answers": _answers_context(registration, user)}
+
+
 def booking_mail(registration: Registration) -> int:
     """Right after a sign-up: a confirmation, or the waiting-list notice,
     with the answers to the session's sign-up questions."""
@@ -123,18 +127,19 @@ def booking_mail(registration: Registration) -> int:
         registration.ninja,
         MailCategory.REGISTRATION,
         template,
-        lambda user: {**_session_context(registration, user), "answers": _answers_context(registration, user)},
+        partial(_session_and_answers, registration),
         f"booking:{registration.pk}",
     )
 
 
 def waitlist_promoted_mail(registration: Registration) -> int:
-    """A place came free and this waitlisted ninja moved up."""
+    """A place came free and this waitlisted ninja moved up (with the
+    answers to the session's sign-up questions)."""
     return _send_to_family(
         registration.ninja,
         MailCategory.REGISTRATION,
         "waitlist_promoted",
-        lambda user: _session_context(registration, user),
+        partial(_session_and_answers, registration),
         f"promoted:{registration.pk}",
     )
 
@@ -160,7 +165,8 @@ def youth_mentor_promoted_mail(membership: "DojoMembership") -> int:
 
 def send_session_reminders(today: date | None = None) -> int:
     """A reminder for every confirmed place at a session that starts
-    MAILING_REMINDER_DAYS_BEFORE days from `today` (Belgian date).
+    MAILING_REMINDER_DAYS_BEFORE days from `today` (Belgian date), with the
+    answers to the session's sign-up questions.
     Idempotent: running it twice on a day sends nothing new."""
     today = today or timezone.localdate()
     day = today + timedelta(days=settings.MAILING_REMINDER_DAYS_BEFORE)
@@ -174,7 +180,7 @@ def send_session_reminders(today: date | None = None) -> int:
             r.ninja,
             MailCategory.REMINDER,
             "session_reminder",
-            partial(_session_context, r),
+            partial(_session_and_answers, r),
             f"reminder:{r.event_id}:{r.ninja_id}",
         )
         for r in registrations

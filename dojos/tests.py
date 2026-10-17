@@ -2987,7 +2987,7 @@ class DojoEventQuestionsTests(TestCase):
 
     def test_adding_a_question_with_htmx_returns_the_card(self):
         response = self._add("Will your child bring their own laptop?")
-        self.assertTemplateUsed(response, "dojos/partials/_event_questions.html")
+        self.assertTemplateUsed(response, "dojos/partials/_questions_card.html")
         self.assertEqual(
             list(self.event.questions.values_list("text", flat=True)), ["Will your child bring their own laptop?"]
         )
@@ -3006,7 +3006,7 @@ class DojoEventQuestionsTests(TestCase):
             self.event.questions.create(text=f"Q{n}?", position=n)
         response = self._add("One too many?")
         self.assertEqual(self.event.questions.count(), 5)
-        self.assertContains(response, "at most 5")
+        self.assertContains(response, "At most 5")
 
     def test_editing_moving_and_removing(self):
         first = self.event.questions.create(text="First?", position=1)
@@ -3058,8 +3058,9 @@ class DojoEventQuestionsTests(TestCase):
         response = self.client.get(reverse("dojo_event_detail", kwargs=self._kw()))
         self.assertNotContains(response, 'id="event-questions"')
 
-    def test_a_new_event_starts_with_the_latest_sessions_questions(self):
-        self.event.questions.create(text="Own laptop?")
+    def test_a_new_event_starts_with_the_dojos_default_questions(self):
+        self.dojo.default_questions.create(text="Own laptop?")
+        self.event.questions.create(text="Not copied?")
         response = self.client.post(
             reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}),
             {
@@ -3119,3 +3120,123 @@ class DojoEventQuestionsTests(TestCase):
         with CaptureQueriesContext(connection) as five:
             self.client.get(url)
         self.assertEqual(len(five.captured_queries), len(one.captured_queries))
+
+
+class DojoDefaultQuestionsTests(TestCase):
+    """The dojo's default sign-up questions on its Settings page (DATA_MODEL.md §29)."""
+
+    def setUp(self):
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.client.force_login(self.owner)
+
+    def _add(self, text, **headers):
+        return self.client.post(
+            reverse("dojo_default_question_add", kwargs={"dojo_id": self.dojo.id}),
+            {"new-question-text": text},
+            **headers,
+        )
+
+    def test_the_card_is_on_the_settings_page(self):
+        response = self.client.get(reverse("dojo_manage", kwargs={"dojo_id": self.dojo.id}))
+        self.assertContains(response, 'id="default-questions"')
+        self.assertContains(response, "Default sign-up questions")
+
+    def test_adding_editing_moving_and_removing(self):
+        response = self._add("Own laptop?", HTTP_HX_REQUEST="true")
+        self.assertTemplateUsed(response, "dojos/partials/_questions_card.html")
+        self._add("Lunch?")
+        laptop, lunch = self.dojo.default_questions.all()
+        kw = {"dojo_id": self.dojo.id}
+        self.client.post(
+            reverse("dojo_default_question_edit", kwargs={**kw, "question_id": laptop.id}),
+            {f"question-{laptop.id}-text": "Bringing your own laptop?"},
+        )
+        self.client.post(
+            reverse("dojo_default_question_move", kwargs={**kw, "question_id": lunch.id}), {"direction": "up"}
+        )
+        self.assertEqual(
+            list(self.dojo.default_questions.values_list("text", flat=True)), ["Lunch?", "Bringing your own laptop?"]
+        )
+        response = self.client.post(reverse("dojo_default_question_remove", kwargs={**kw, "question_id": lunch.id}))
+        self.assertRedirects(
+            response, reverse("dojo_manage", kwargs=kw) + "#default-questions", fetch_redirect_response=False
+        )
+        self.assertEqual(
+            list(self.dojo.default_questions.values_list("text", flat=True)), ["Bringing your own laptop?"]
+        )
+
+    def test_the_maximum_applies_and_shows_without_javascript(self):
+        with self.settings(SIGNUP_QUESTIONS_MAX=1):
+            self._add("Own laptop?")
+            response = self._add("Lunch?", follow=True)
+        self.assertEqual(self.dojo.default_questions.count(), 1)
+        self.assertContains(response, "At most 1")
+
+    def test_another_dojos_question_is_a_404(self):
+        other = make_dojo("Antwerp", champion=make_champion(username="owner2"))
+        foreign = other.default_questions.create(text="Theirs?")
+        url = reverse("dojo_default_question_remove", kwargs={"dojo_id": self.dojo.id, "question_id": foreign.id})
+        self.assertEqual(self.client.post(url).status_code, 404)
+        self.client.force_login(make_champion(username="stranger"))
+        self.assertEqual(self._add("Sneaky?").status_code, 404)
+        self.assertTrue(other.default_questions.exists())
+        self.assertFalse(self.dojo.default_questions.exists())
+
+    def test_a_mentor_without_edit_settings_gets_a_403(self):
+        helper = make_mentor(username="helper1")
+        add_member(self.dojo, helper)
+        self.client.force_login(helper)
+        with patch.dict(access.ROLE_CAPABILITIES, {access.MENTOR: frozenset()}):
+            self.assertEqual(self._add("Own laptop?").status_code, 403)
+        self.assertFalse(self.dojo.default_questions.exists())
+
+
+class TeamCorrectsAnswersTests(TestCase):
+    """The attendance list's Answers form (events.questions.correct_answer)."""
+
+    def setUp(self):
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.event = Event.objects.create(
+            name="Session",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time=timezone.now() - timedelta(minutes=30),
+            end_time=timezone.now() + timedelta(hours=1),
+            places=10,
+        )
+        self.laptop = self.event.questions.create(text="Own laptop?", position=1)
+        self.registration = Registration.objects.create(
+            event=self.event, ninja=Ninja.objects.create(name="Emma"), waiting_list=False, position=1
+        )
+        self.registration.answers.create(question=self.laptop, answer=False)
+        self.url = reverse(
+            "dojo_event_registration_answers",
+            kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.registration.id},
+        )
+        self.client.force_login(self.owner)
+
+    def test_correcting_an_answer_once_the_session_started(self):
+        from auditlog.models import LogEntry
+
+        response = self.client.post(self.url, {f"q-{self.laptop.id}": "yes"}, HTTP_HX_REQUEST="true")
+        self.assertEqual(response.status_code, 200)
+        answer = self.registration.answers.get()
+        self.assertTrue(answer.answer)
+        self.assertEqual(LogEntry.objects.get_for_object(answer).latest("timestamp").actor, self.owner)
+        # The row, and the totals out-of-band.
+        self.assertContains(response, f'id="attendance-row-{self.registration.id}"')
+        self.assertContains(response, 'hx-swap-oob="true"')
+        self.assertContains(response, "1 yes · 0 no")
+
+    def test_the_form_is_on_the_attendance_list(self):
+        response = self.client.get(
+            reverse("dojo_event_attendance", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+        )
+        self.assertContains(response, self.url)
+
+    def test_someone_outside_the_team_gets_a_404(self):
+        self.client.force_login(make_champion(username="stranger"))
+        self.assertEqual(self.client.post(self.url, {f"q-{self.laptop.id}": "yes"}).status_code, 404)
+        self.assertFalse(self.registration.answers.get().answer)

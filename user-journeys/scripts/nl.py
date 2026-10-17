@@ -225,7 +225,7 @@ STEPS = {
         ),
         "attendance": (
             "Aanwezigheden nemen aan de deur",
-            "Op de dag zelf duidt de mentor elk kind aan als aanwezig of afwezig (htmx, zonder de pagina te herladen). Elke rij toont de gordel van het kind, hoe regelmatig het komt, de antwoorden van het gezin op de inschrijfvragen (bovenaan geteld: hoeveel laptops meebrengen) en 'Op bezoek' voor kinderen van een andere dojo; ook het team van de sessie staat erbij, voor de verzekering.",
+            "Op de dag zelf duidt de mentor elk kind aan als aanwezig of afwezig (htmx, zonder de pagina te herladen). Elke rij toont de gordel van het kind, hoe regelmatig het komt, de antwoorden van het gezin op de inschrijfvragen (bovenaan geteld: hoeveel laptops meebrengen; het team verbetert er een onder Antwoorden) en 'Op bezoek' voor kinderen van een andere dojo; ook het team van de sessie staat erbij, voor de verzekering.",
         ),
         "marked": (
             "Aanwezig",
@@ -253,13 +253,17 @@ STEPS = {
             "Instellingen van de dojo",
             "Bovenaan de status van de dojo: alleen de champion lanceert de dojo, zet hem op slapend of archiveert hem (nooit met open sessies) en heropent hem. Daaronder alles op de publieke pagina van de dojo: naam, beschrijving in elke taal van de dojo, icoon, adres (opnieuw gelokaliseerd bij het opslaan), contactgegevens en leertrajecten.",
         ),
+        "default-questions": (
+            "Standaard inschrijfvragen",
+            "Onder het profiel de standaard inschrijfvragen van de dojo: ja/nee-vragen waarmee elke nieuwe sessie start (hier de laptopvraag), in elke taal van de dojo. Elke sessie kan ze op haar eigen pagina wijzigen.",
+        ),
         "events": (
             "Sessies",
             "Alle sessies van de dojo met hun status (concept, open, gesloten) en de volgende stap in één klik.",
         ),
         "new-event": (
             "Een nieuwe sessie plannen",
-            "Een nieuwe sessie: datum en uren (Belgische notatie), plaatsen, leeftijden, doelgroep (bv. een sessie voor meisjes), een banner uit de beeldbibliotheek of een upload, het team en de leertrajecten. Ze krijgt de inschrijfvragen van de laatste sessie van de dojo en start als concept; publiceren opent de inschrijvingen en de gezinnen krijgen de mail met nieuwe sessies.",
+            "Een nieuwe sessie: datum en uren (Belgische notatie), plaatsen, leeftijden, doelgroep (bv. een sessie voor meisjes), een banner uit de beeldbibliotheek of een upload, het team en de leertrajecten. Ze krijgt de standaard inschrijfvragen van de dojo en start als concept; publiceren opent de inschrijvingen en de gezinnen krijgen de mail met nieuwe sessies.",
         ),
         "event": (
             "Een volle sessie met wachtlijst",

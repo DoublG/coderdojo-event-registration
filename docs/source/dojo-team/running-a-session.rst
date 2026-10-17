@@ -60,8 +60,8 @@ removes anyone who has already signed up.
 Sign-up questions
 ------------------
 
-A session's page has a **Sign-up questions** card: up to five questions
-that families answer with yes or no for each child they sign up, such as
+A session's page has a **Sign-up questions** card: a few questions (five
+at most, unless CoderDojo Belgium set another number) that families answer with yes or no for each child they sign up, such as
 "Will your child bring their own laptop?" (a "no" tells you how many
 laptops to bring). **Add a question** adds one; each question can be
 edited, moved up or down, or removed. The card shows the answers so far,
@@ -73,17 +73,18 @@ A few things to know:
 - Questions are yes/no only. Don't use them for health information:
   allergies and similar are in the child's details, which only the
   champion sees (see below).
-- A new session starts with the questions of your dojo's latest session,
-  so you don't have to type them again. Remove the ones you don't need on
-  its page.
+- A new session starts with your dojo's **default sign-up questions**, so
+  you don't have to type them every time. Set them on the **Settings**
+  page, in the same way; changing them there doesn't change sessions that
+  already exist. Remove the ones a session doesn't need on its page.
 - Changing a question's wording keeps the answers already given; to ask
   something else, remove the question and add a new one. Removing a
   question deletes its answers.
 - A question added after families signed up shows **Not asked** for their
   children, until the family answers it from their account page. Families
   can change their answers there until the session starts, so the totals
-  can still move: the champion and mentors get a notification when they
-  do.
+  can still move: the champion and mentors get a notification (one per
+  session, until they've read it).
 - If your dojo writes in more than one language, the question has a field
   per language, like the session's own texts.
 - Sessions that take registrations on another website have no questions.
@@ -113,7 +114,9 @@ it to see which dojo.
 
 If the session has sign-up questions, each child's row shows the family's
 answers, and the top of the list counts them ("3 yes · 2 no"), so you know
-for example how many laptops to bring.
+for example how many laptops to bring. If an answer turns out wrong at the
+door, correct it under **Answers** on the child's row, also once the
+session has started.
 
 If the family entered **allergies or notes** for their child, the
 dojo's champion sees them on that child's row. They're health data, so

@@ -1053,9 +1053,9 @@ T = {
         "Un après-midi pour les filles qui veulent essayer le code. Aucune expérience requise.",
     ),
     # --- sign-up questions (seed_events) --------------------------------------
-    "Will your child bring their own laptop?": (
-        "Brengt je kind een eigen laptop mee?",
-        "Votre enfant apporte-t-il son propre ordinateur portable ?",
+    "Bringing your own laptop?": (
+        "Breng je een eigen laptop mee?",
+        "Vous apportez votre propre ordinateur portable ?",
     ),
     "A Saturday of coding at a dojo near you.": (
         "Een zaterdag vol programmeren in een dojo bij jou in de buurt.",

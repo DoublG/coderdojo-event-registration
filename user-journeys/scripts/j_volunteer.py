@@ -86,7 +86,7 @@ with sync_playwright() as pw:
     j.shot(
         "attendance",
         "Taking attendance at the door",
-        "On the day, the mentor marks each child present or absent (htmx, no page reload). Each row shows the child's belt, engagement stage, the family's answers to the sign-up questions (counted at the top: how many laptops to bring) and a 'Visiting' label for children from another dojo; the session team is listed too, for the insurance.",
+        "On the day, the mentor marks each child present or absent (htmx, no page reload). Each row shows the child's belt, engagement stage, the family's answers to the sign-up questions (counted at the top: how many laptops to bring; the team corrects one under Answers) and a 'Visiting' label for children from another dojo; the session team is listed too, for the insurance.",
         max_h=2200,
     )
     btn = p.locator("button[value=present]").first

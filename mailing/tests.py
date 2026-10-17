@@ -4,6 +4,7 @@ from datetime import timedelta
 from io import StringIO
 from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core import mail as django_mail
 from django.core.management import call_command
@@ -699,6 +700,24 @@ class AutomatedMailTests(TestCase):
         self.assertIn("  Eigen laptop? Nee", dutch.body)
         english = EmailMessage.objects.get(recipient="co@example.com")
         self.assertIn("  Own laptop? No", english.body)
+
+    def test_the_reminder_and_the_moved_up_mail_list_the_answers(self):
+        from .automated import send_session_reminders
+
+        event = self._event(days_ahead=settings.MAILING_REMINDER_DAYS_BEFORE, places=1)
+        laptop = event.questions.create(text="Own laptop?", position=1)
+        other_kid = Ninja.objects.create(name="Liam")
+        first = Registration.objects.create(event=event, ninja=other_kid, waiting_list=False, position=1)
+        waiting = Registration.objects.create(event=event, ninja=self.kid, waiting_list=True, position=2)
+        waiting.answers.create(question=laptop, answer=True)
+        from events import registrations
+
+        registrations.cancel(first, cancelled_by=None)
+        promoted = EmailMessage.objects.get(recipient="co@example.com", template_key="waitlist_promoted")
+        self.assertIn("  Own laptop? Yes", promoted.body)
+        send_session_reminders()
+        reminder = EmailMessage.objects.get(recipient="co@example.com", template_key="session_reminder")
+        self.assertIn("  Own laptop? Yes", reminder.body)
 
     def test_a_session_without_questions_mails_no_answers(self):
         event = self._event(days_ahead=10)

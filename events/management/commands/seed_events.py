@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from core.audit import without_audit_log
 from core.image_library import use_library_image
-from dojos.models import Dojo
+from dojos.models import Dojo, DojoQuestion
 from events.models import Event, EventQuestion
 from events.template_images import TEMPLATE_IMAGES
 from pathways.models import Pathway
@@ -42,10 +42,12 @@ SESSION_NAMES = [label for _filename, label in TEMPLATE_IMAGES]
 # Share of upcoming seeded sessions labelled as girls' sessions.
 GIRLS_SESSION_SHARE = 0.06
 
-# About half the upcoming sessions ask families a yes/no question on the
-# sign-up (events.questions, DATA_MODEL.md §29): the laptop question that
-# started it. Dutch/French in pages/seed_translations.py.
-LAPTOP_QUESTION = "Will your child bring their own laptop?"
+# About half the dojos ask families a yes/no question on the sign-up
+# (events.questions, DATA_MODEL.md §29), as a default question their new
+# sessions start with: the laptop question that started it. Worded so it
+# reads right for a parent and for a ninja signing up themselves.
+# Dutch/French in pages/seed_translations.py.
+LAPTOP_QUESTION = "Bringing your own laptop?"
 LAPTOP_QUESTION_SHARE = 0.5
 
 # A minority of weekend dojos run a second track the same day — a later
@@ -272,12 +274,16 @@ class Command(BaseCommand):
                 event.name = f"CoderDojo Girlz: {event.name}"
                 event.save(update_fields=["audience", "name"])
 
-        # The laptop question, found by event + position (rerun-safe, and
-        # never touches a question the team changed). Per-event RNG.
-        for event in Event.objects.filter(
-            status=Event.OPEN, start_time__gte=timezone.now(), external_registration_url=""
-        ):
-            if random.Random(f"event-laptop-question-{event.id}").random() < LAPTOP_QUESTION_SHARE:
+        # The laptop question as a dojo's default, and on its upcoming
+        # sessions: found by dojo/event + position (rerun-safe, and never
+        # touches a question the team changed). Per-dojo RNG.
+        for dojo in Dojo.objects.filter(kind=Dojo.DOJO):
+            if random.Random(f"dojo-laptop-question-{dojo.id}").random() >= LAPTOP_QUESTION_SHARE:
+                continue
+            DojoQuestion.objects.get_or_create(dojo=dojo, position=1, defaults={"text": LAPTOP_QUESTION})
+            for event in dojo.event_set.filter(
+                status=Event.OPEN, start_time__gte=timezone.now(), external_registration_url=""
+            ):
                 EventQuestion.objects.get_or_create(event=event, position=1, defaults={"text": LAPTOP_QUESTION})
 
         # Backfill: events seeded before Event.image existed have no

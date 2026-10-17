@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 07:45+0000\n"
+"POT-Creation-Date: 2026-10-17 08:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -66,13 +66,14 @@ msgstr ""
 #: ../../source/dojo-team/api-clients.rst:19
 msgid ""
 "**Mark who came**: mark a child or team member present, absent or not "
-"marked yet, or everyone present at once."
+"marked yet, or everyone present at once, and correct a child's answer to "
+"a sign-up question."
 msgstr ""
 "**Indiquer qui est venu** : marquer un enfant ou un membre de l'équipe "
 "présent, absent ou pas encore indiqué, ou tout le monde présent d'un "
-"coup."
+"coup, et corriger la réponse d'un enfant à une question d'inscription."
 
-#: ../../source/dojo-team/api-clients.rst:22
+#: ../../source/dojo-team/api-clients.rst:23
 msgid ""
 "After **Add client**, the page shows the client's **client ID** and "
 "**client secret**. Give both to whoever sets up the app. **The secret is "
@@ -86,11 +87,11 @@ msgstr ""
 "l'afficher à nouveau. S'il se perd, créez-en un nouveau (voir ci-"
 "dessous)."
 
-#: ../../source/dojo-team/api-clients.rst:28
+#: ../../source/dojo-team/api-clients.rst:29
 msgid "What an app can and can't do"
 msgstr "Ce qu'une application peut et ne peut pas faire"
 
-#: ../../source/dojo-team/api-clients.rst:30
+#: ../../source/dojo-team/api-clients.rst:31
 msgid ""
 "A client only ever works for your dojo, and only does what you allowed. "
 "It never sees children's allergies or notes, their family, or anything "
@@ -102,15 +103,15 @@ msgstr ""
 "leur famille ni rien d'autre de leur compte. Ce qu'il indique est "
 "enregistré au nom du client, pas au vôtre."
 
-#: ../../source/dojo-team/api-clients.rst:36
+#: ../../source/dojo-team/api-clients.rst:37
 msgid "New secret and deleting"
 msgstr "Nouveau secret et suppression"
 
-#: ../../source/dojo-team/api-clients.rst:38
+#: ../../source/dojo-team/api-clients.rst:39
 msgid "In **Your clients**:"
 msgstr "Dans **Vos clients** :"
 
-#: ../../source/dojo-team/api-clients.rst:40
+#: ../../source/dojo-team/api-clients.rst:41
 msgid ""
 "**New secret** gives the client a new secret; the old one stops working "
 "at once. Use it when the secret may have leaked, or got lost."
@@ -119,7 +120,7 @@ msgstr ""
 "fonctionner immédiatement. Utilisez-le si le secret a pu fuiter ou s'est "
 "perdu."
 
-#: ../../source/dojo-team/api-clients.rst:42
+#: ../../source/dojo-team/api-clients.rst:43
 msgid ""
 "**Delete** stops the client at once and removes it from the list. What it"
 " marked stays."
@@ -127,17 +128,17 @@ msgstr ""
 "**Supprimer** arrête le client immédiatement et le retire de la liste. Ce"
 " qu'il a indiqué reste."
 
-#: ../../source/dojo-team/api-clients.rst:45
+#: ../../source/dojo-team/api-clients.rst:46
 msgid "The list also shows when each client was last used."
 msgstr ""
 "La liste indique aussi quand chaque client a été utilisé pour la dernière"
 " fois."
 
-#: ../../source/dojo-team/api-clients.rst:48
+#: ../../source/dojo-team/api-clients.rst:49
 msgid "For the app's developer"
 msgstr "Pour le développeur de l'application"
 
-#: ../../source/dojo-team/api-clients.rst:50
+#: ../../source/dojo-team/api-clients.rst:51
 msgid ""
 "The bottom of the **API** page has the addresses the app needs. The app "
 "asks for a token with its client ID and secret (OAuth 2.0, client "

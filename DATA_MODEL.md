@@ -2783,7 +2783,9 @@ classifies a column, not keys inside a JSON value.
 
 - `set_questions(event, ...)` / `add_question`, `edit_question`,
   `remove_question`, `move_question`; `QuestionError` with a user-facing
-  message. At most `MAX_QUESTIONS = 5`.
+  message. At most `settings.SIGNUP_QUESTIONS_MAX` (`max_questions()`;
+  the `SIGNUP_QUESTIONS_MAX` environment variable, 5 when unset; decided
+  17 October 2026), per session and as a dojo's defaults.
 - **Changing questions after sign-ups:**
   - Adding one: children already signed up have no answer. The team sees
     "Not asked" for them; families can answer it later (phase 2).
@@ -2811,11 +2813,14 @@ fields from `dojos/partials/_translation_fields.html`. New views in
 URL's event. The card also shows the totals so far (confirmed and waiting
 list separately).
 
-**New session: questions copied from the dojo's latest session.** Like
-`Event.pathways` from `Dojo.pathways`, a new event starts with the
-questions of the dojo's most recent event (by `start_time`), so a team
-that always asks about laptops doesn't type it every time. The create
-page says so; the team can remove them on the detail page.
+**New session: the dojo's default questions** (decided 17 October 2026,
+replacing the first plan of copying the dojo's latest session). Like
+`Event.pathways` from `Dojo.pathways`, a new event starts with a copy of
+the dojo's default questions (`dojos.DojoQuestion`, set on its Settings
+page; `events.questions.copy_defaults`), so a team that always asks about
+laptops doesn't type it every time. The create page says so; the team can
+change or remove them per session on the detail page, and changing a
+default later never changes a session that has its copy.
 
 **Families: the sign-up page** (`event_signup`). Under each child's row,
 the session's questions as a `fieldset` per child (legend: the child's
@@ -2902,6 +2907,11 @@ Phase 2.
    tests, docs. That's the whole laptop case. **Built** (17 October 2026).
 2. Changing answers from the account page, answers in the booking mails,
    the API. **Built** (17 October 2026).
+3. The decisions on the open points and the follow-ups after phase 2: the
+   dojo's default questions, the maximum from the environment, answers in
+   the moved-up and reminder mails, the team correcting an answer (the
+   attendance list and the API), one notification per session. **Built**
+   (17 October 2026).
 
 ### Built so far (phase 1)
 
@@ -2949,9 +2959,8 @@ As planned above, with these choices made while building it:
   annotations): *Change answers*, or *Answer the new question* when the
   child has fewer answers than the session has questions. A change
   notifies the dojo's champion and mentors (`dojos.team.notify_managers`,
-  decided 17 October 2026), linking to the attendance list for a
-  confirmed child and to the event's page (the questions card) for one on
-  the waiting list; saving the same answers again tells nobody.
+  decided 17 October 2026; once per session while unread, see phase 3);
+  saving the same answers again tells nobody.
 - **Mail**: `booking_mail` passes `answers` = `[{"question", "answer"}]`
   in each recipient's mail language (`mailing.automated._answers_context`:
   the question's own translation, "Yes"/"No" from the catalogs). The
@@ -2973,16 +2982,54 @@ As planned above, with these choices made while building it:
 
 ### Open points
 
-1. **Copy from the last session**, or a set of default questions per dojo
-   on its Settings page? The plan copies (no new screen); a dojo-level
-   default is easy to add later if teams ask.
+1. **Copy from the last session, or default questions per dojo?**
+   Decided (17 October 2026): default questions per dojo, on its Settings
+   page (phase 3).
 2. **Record answers in the audit log?** Decided (17 October 2026): yes,
    since families can change them (phase 2).
-3. **Maximum of 5 questions**: enough? A long list makes signing up
-   several children tedious.
+3. **Maximum of 5 questions**: decided (17 October 2026): 5 is fine, set
+   in the environment (`SIGNUP_QUESTIONS_MAX`) so it can change without a
+   release (phase 3).
 4. **Organisation-wide questions** (the organisation asking the same
-   thing at every dojo) are out of scope; the per-event model doesn't
-   block them.
+   thing at every dojo): decided (17 October 2026) to keep as a possible
+   later step, **not built**. It would fit the same model: an
+   organisation-level list of default questions (like `DojoQuestion`,
+   without a dojo, managed on the organisation dashboard) that
+   `copy_defaults` adds after the dojo's own when a session is created,
+   counted within the same maximum. The answers, totals, mails and API
+   need no change, since they work on a session's own copies.
+
+### Built so far (phase 3)
+
+- **Default questions per dojo**: `dojos.DojoQuestion` (dojo, text,
+  position, a `TranslatableModel` in the dojo's languages), managed on the
+  Settings page (`EDIT_SETTINGS`) with the same card as a session's page:
+  `dojos/partials/_questions_card.html`, `dojos.views.questions`
+  (`questions_context(owner)` for a session or a dojo, and the views for
+  both). The rules in `events.questions` take either owner. A new session
+  copies them (`copy_defaults`, in `dojo_event_create`). Privacy:
+  `register_not_personal`; audit log: not recorded (the dojo's own text);
+  admin: an inline on the Dojo admin and its own page.
+- **The maximum** is `SIGNUP_QUESTIONS_MAX` (environment, default 5;
+  `.env.example`).
+- **Mails**: `waitlist_promoted` and `session_reminder` list the answers
+  too (`mailing.automated._session_and_answers`); migration `0021` updates
+  all four seeded templates, still only rows exactly as seeded.
+- **The team corrects an answer**: on the attendance list (*Answers* on a
+  child's row, `TAKE_ATTENDANCE`, `dojo_event_registration_answers`, the
+  totals re-sent out-of-band) and through the API
+  (`PUT /api/v1/events/{id}/attendance/children/{registration_id}/answers/{question_id}`,
+  write scope), both through `events.questions.correct_answer`: any time,
+  also once the session has started, recorded in the audit log.
+- **One notification per session**: a family's change notifies the
+  champion and mentors with "Families changed their answers to the sign-up
+  questions for <session>" (linking to the session's page), made with
+  `notify(..., once_unread=True)`: no new one while the same one is
+  unread.
+- **Seeded wording**: "Bringing your own laptop?" (nl "Breng je een eigen
+  laptop mee?", fr "Vous apportez votre propre ordinateur portable ?"),
+  right for a parent and for a ninja signing up themselves; about half the
+  dojos have it as a default, and their upcoming sessions ask it.
 
 
 ## 30. Reporting dashboards for the organisation (phase 1 built)

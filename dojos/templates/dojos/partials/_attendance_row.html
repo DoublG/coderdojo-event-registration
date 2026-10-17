@@ -28,6 +28,25 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
               <span class="cd-badge caption {% if answer %}cd-badge--success{% else %}cd-badge--outline{% endif %}" title="{{ text }}"><span class="cd-attendance__answer-q">{{ text|in_lang }}</span> {% if answer is None %}{% translate "Not asked" %}{% elif answer %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</span>
             {% endwith %}{% endfor %}
           </span>
+          {% if dojo_access.can_take_attendance %}
+            {# The team corrects an answer, e.g. at the door (events.questions.correct_answer; recorded in the audit log). #}
+            <details class="cd-attendance__belt caption">
+              <summary>{% translate "Answers" %}</summary>
+              <form class="cd-attendance__answers-form" method="post" action="{% url 'dojo_event_registration_answers' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
+                    hx-post="{% url 'dojo_event_registration_answers' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}"
+                    hx-target="#attendance-row-{{ registration.id }}" hx-swap="outerHTML">
+                {% csrf_token %}
+                {% for question in questions %}{% with answer=answers|get_item:question.id %}
+                  <fieldset class="cd-form__fieldset">
+                    <legend>{{ question|localized:"text"|in_lang }}</legend>
+                    <label><input type="radio" name="q-{{ question.id }}" value="yes"{% if answer %} checked{% endif %}>{% translate "Yes" %}</label>
+                    <label><input type="radio" name="q-{{ question.id }}" value="no"{% if answer is False %} checked{% endif %}>{% translate "No" %}</label>
+                  </fieldset>
+                {% endwith %}{% endfor %}
+                <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Save answers" %}</button>
+              </form>
+            </details>
+          {% endif %}
         {% endwith %}
       {% endif %}
       {% if dojo_access.can_view_health_notes and ninja.allergies_notes %}

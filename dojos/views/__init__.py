@@ -1,6 +1,7 @@
 """The dojos app's pages, by area: the public pages (public), a dojo's settings,
 lifecycle and updates (profile), its team (team_pages), its sessions
-(event_pages), attendance and awards (attendance) and the notification bell
+(event_pages), their sign-up questions and the dojo's default ones
+(questions), attendance and awards (attendance) and the notification bell
 (bell), with what they share (common). Every view is importable from here, as
 urls.py does."""
 
@@ -18,6 +19,7 @@ from .attendance import (  # noqa: F401
     dojo_event_attendance_mark_all,
     dojo_event_award_badge,
     dojo_event_award_belt,
+    dojo_event_registration_answers,
     dojo_event_registration_pathways,
     dojo_event_team_attendance_mark,
 )
@@ -35,14 +37,9 @@ from .common import (  # noqa: F401
 )
 from .event_pages import (  # noqa: F401
     _event_promotions_context,
-    _questions_context,
     dojo_event_create,
     dojo_event_detail,
     dojo_event_list,
-    dojo_event_question_add,
-    dojo_event_question_edit,
-    dojo_event_question_move,
-    dojo_event_question_remove,
     dojo_event_set_status,
 )
 from .profile import (  # noqa: F401
@@ -61,6 +58,17 @@ from .public import (  # noqa: F401
     dojo_list,
     dojo_team,
     team_member_detail,
+)
+from .questions import (  # noqa: F401
+    dojo_default_question_add,
+    dojo_default_question_edit,
+    dojo_default_question_move,
+    dojo_default_question_remove,
+    dojo_event_question_add,
+    dojo_event_question_edit,
+    dojo_event_question_move,
+    dojo_event_question_remove,
+    questions_context,
 )
 from .team_pages import (  # noqa: F401
     TEAM_ACTIONS,

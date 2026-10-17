@@ -160,7 +160,8 @@ Vos inscriptions : {{ account_url }}
         "key": "waitlist_promoted",
         "category": MailCategory.REGISTRATION,
         "description": "A place came free and a waitlisted ninja moved up. "
-        "Variables: ninja_name, event_name, dojo_name, start_time, event_url, account_url.",
+        "Variables: ninja_name, event_name, dojo_name, start_time, event_url, account_url, "
+        "answers (the sign-up questions' answers: question, answer).",
         "subject": {
             "en-us": "Good news: {{ ninja_name }} has a place at {{ event_name }}",
             "nl-be": "Goed nieuws: {{ ninja_name }} heeft een plaats voor {{ event_name }}",
@@ -174,7 +175,10 @@ A place came free at {{ event_name }} at {{ dojo_name }}, and {{ ninja_name }} w
 next on the waiting list, so the place is theirs.
 
 The session starts on {{ start_time|date:"l j F" }} at {{ start_time|date:"H:i" }}: {{ event_url }}
-
+{% if answers %}
+Your answers (you can change them on your account page until the session starts):
+{% for item in answers %}  {{ item.question }} {{ item.answer }}
+{% endfor %}{% endif %}
 If {{ ninja_name }} can't come any more, please cancel on your account page so the
 next person gets the place: {{ account_url }}
 """,
@@ -185,7 +189,10 @@ Er is een plaats vrijgekomen voor {{ event_name }} bij {{ dojo_name }}, en
 {{ ninja_name }} stond als eerste op de wachtlijst. De plaats is dus voor jullie.
 
 De sessie begint op {{ start_time|date:"l j F" }} om {{ start_time|date:"H:i" }}: {{ event_url }}
-
+{% if answers %}
+Je antwoorden (je kan ze tot de sessie begint wijzigen op je accountpagina):
+{% for item in answers %}  {{ item.question }} {{ item.answer }}
+{% endfor %}{% endif %}
 Kan {{ ninja_name }} niet meer komen? Schrijf dan uit via je accountpagina, zodat
 de volgende op de lijst de plaats krijgt: {{ account_url }}
 """,
@@ -196,7 +203,10 @@ Une place s'est libérée pour {{ event_name }} au {{ dojo_name }}, et {{ ninja_
 était en tête de la liste d'attente : la place est pour vous.
 
 La session commence le {{ start_time|date:"l j F" }} à {{ start_time|date:"H:i" }} : {{ event_url }}
-
+{% if answers %}
+Vos réponses (modifiables sur votre page de compte jusqu'au début de la session) :
+{% for item in answers %}  {{ item.question }} {{ item.answer }}
+{% endfor %}{% endif %}
 Si {{ ninja_name }} ne peut plus venir, annulez depuis votre page de compte pour
 que la personne suivante reçoive la place : {{ account_url }}
 """,
@@ -206,7 +216,8 @@ que la personne suivante reçoive la place : {{ account_url }}
         "key": "session_reminder",
         "category": MailCategory.REMINDER,
         "description": "Two days before a session, for every confirmed registration. "
-        "Variables: ninja_name, event_name, dojo_name, start_time, end_time, venue, event_url, account_url.",
+        "Variables: ninja_name, event_name, dojo_name, start_time, end_time, venue, event_url, account_url, "
+        "answers (the sign-up questions' answers: question, answer).",
         "subject": {
             "en-us": "Reminder: {{ event_name }} on {{ start_time|date:'l' }}",
             "nl-be": "Herinnering: {{ event_name }} op {{ start_time|date:'l' }}",
@@ -222,7 +233,10 @@ A quick reminder that {{ ninja_name }} is coming to {{ event_name }} at {{ dojo_
   {{ venue }}
 
 Details: {{ event_url }}
-
+{% if answers %}
+Your answers (you can change them on your account page until the session starts):
+{% for item in answers %}  {{ item.question }} {{ item.answer }}
+{% endfor %}{% endif %}
 Plans changed? Cancel on your account page and the place goes to the waiting
 list: {{ account_url }}
 """,
@@ -235,7 +249,10 @@ Een korte herinnering: {{ ninja_name }} komt naar {{ event_name }} bij {{ dojo_n
   {{ venue }}
 
 Details: {{ event_url }}
-
+{% if answers %}
+Je antwoorden (je kan ze tot de sessie begint wijzigen op je accountpagina):
+{% for item in answers %}  {{ item.question }} {{ item.answer }}
+{% endfor %}{% endif %}
 Plannen gewijzigd? Schrijf uit via je accountpagina, dan gaat de plaats naar de
 wachtlijst: {{ account_url }}
 """,
@@ -248,7 +265,10 @@ Petit rappel : {{ ninja_name }} participe à {{ event_name }} au {{ dojo_name }}
   {{ venue }}
 
 Détails : {{ event_url }}
-
+{% if answers %}
+Vos réponses (modifiables sur votre page de compte jusqu'au début de la session) :
+{% for item in answers %}  {{ item.question }} {{ item.answer }}
+{% endfor %}{% endif %}
 Changement de programme ? Annulez depuis votre page de compte et la place ira à
 la liste d'attente : {{ account_url }}
 """,
@@ -2005,7 +2025,7 @@ _event = {
     "account_url": "https://coolregistration.localhost/account/",
 }
 _answers = {
-    "answers": [{"question": "Will your child bring their own laptop?", "answer": "No"}],
+    "answers": [{"question": "Bringing your own laptop?", "answer": "No"}],
 }
 _common = {
     "recipient_name": "Ellen",
@@ -2014,9 +2034,9 @@ _common = {
 }
 SAMPLE_CONTEXT = {
     "registration_confirmed": {**_common, **_event, **_answers},
-    "waitlist_promoted": {**_common, **_event},
+    "waitlist_promoted": {**_common, **_event, **_answers},
     "registration_waitlisted": {**_common, **_event, **_answers},
-    "session_reminder": {**_common, **_event},
+    "session_reminder": {**_common, **_event, **_answers},
     "new_sessions_at_dojo": {
         **_common,
         "dojo_name": "CoderDojo Ghent",

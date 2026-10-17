@@ -238,6 +238,34 @@ class AttendanceApiTests(ApiTestCase):
         )
         self.assertEqual(data["children"][0]["answers"], [{"question_id": laptop.id, "answer": False}])
 
+    def test_correcting_an_answer_as_the_client(self):
+        from auditlog.models import LogEntry
+
+        client, auth = self.bearer()
+        laptop = self.event.questions.create(text="Own laptop?", position=1)
+        url = f"/api/v1/events/{self.event.id}/attendance/children/{self.registration.id}/answers/{laptop.id}"
+        response = self.client.put(url, {"answer": True}, content_type="application/json", **auth)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["answers"], [{"question_id": laptop.id, "answer": True}])
+        answer = self.registration.answers.get()
+        self.assertEqual(LogEntry.objects.get_for_object(answer).get().actor, client.account)
+        other = Event.objects.create(
+            name="Other",
+            dojo=self.event.dojo,
+            places=5,
+            start_time=self.event.start_time,
+            end_time=self.event.end_time,
+        )
+        foreign = other.questions.create(text="Theirs?")
+        bad = f"/api/v1/events/{self.event.id}/attendance/children/{self.registration.id}/answers/{foreign.id}"
+        self.assertEqual(
+            self.client.put(bad, {"answer": True}, content_type="application/json", **auth).status_code, 404
+        )
+        _client, read_only = self.bearer([DojoApiClient.READ])
+        self.assertEqual(
+            self.client.put(url, {"answer": False}, content_type="application/json", **read_only).status_code, 403
+        )
+
     def test_another_dojos_event_is_a_404(self):
         _client, auth = self.bearer()
         other = make_dojo("Leuven", champion=make_champion(username="olga"))

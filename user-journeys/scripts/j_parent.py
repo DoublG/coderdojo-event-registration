@@ -92,9 +92,11 @@ with sync_playwright() as pw:
         "The confirmation mail",
         "The booking confirmation arrives in the parent's chosen mail language (here Dutch), with the answers to the dojo's questions. In development every mail lands in Mailpit.",
     )
-    reg = django(
-        "from events.models import Registration as R; print(R.objects.get(event_id=2990, ninja_id=9).id)"
-    ).strip().splitlines()[-1]
+    reg = (
+        django("from events.models import Registration as R; print(R.objects.get(event_id=2990, ninja_id=9).id)")
+        .strip()
+        .splitlines()[-1]
+    )
     p = j.go("/account/")
     p.locator(f"a[href='/account/registration/{reg}/answers/']").first.click()
     p.wait_for_load_state("networkidle")

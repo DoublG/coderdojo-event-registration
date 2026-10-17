@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 08:13+0000\n"
+"POT-Creation-Date: 2026-10-17 08:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -452,7 +452,7 @@ msgstr "Choisissez votre avatar"
 
 #: accounts/forms.py:807
 #: accounts/templates/accounts/partials/_child_header_display.html:34
-#: dojos/templates/dojos/partials/_attendance_row.html:35
+#: dojos/templates/dojos/partials/_attendance_row.html:54
 msgid "Allergies or notes"
 msgstr "Allergies ou remarques"
 
@@ -1622,7 +1622,7 @@ msgstr "Me retirer"
 #: campaigns/templates/campaigns/manage/_segment_group.html:28
 #: dojos/templates/dojos/dojo_team_manage.html:83
 #: dojos/templates/dojos/dojo_updates.html:53
-#: dojos/templates/dojos/partials/_event_questions.html:39
+#: dojos/templates/dojos/partials/_questions_card.html:37
 msgid "Remove"
 msgstr "Retirer"
 
@@ -1919,7 +1919,7 @@ msgstr "Terminée"
 #: accounts/templates/accounts/manage/person.html:59
 #: applications/templates/applications/manage/_check_table.html:36
 #: dojos/templates/dojos/dojo_detail.html:129
-#: dojos/templates/dojos/dojo_event_detail.html:56
+#: dojos/templates/dojos/dojo_event_detail.html:41
 #: dojos/templates/dojos/dojo_event_list.html:39
 #: dojos/templates/dojos/partials/_dojo_result.html:33 events/models.py:42
 #: events/templates/events/event_signup.html:75
@@ -3053,6 +3053,7 @@ msgstr "Nouvelle question"
 #: campaigns/segmentation/attributes/engagement.py:152
 #: campaigns/templates/campaigns/manage/_rule_fields.html:29
 #: dojos/templates/dojos/partials/_attendance_row.html:28
+#: dojos/templates/dojos/partials/_attendance_row.html:42
 #: events/templates/events/event_signup.html:101
 #: events/templates/events/event_signup.html:187 mailing/automated.py:112
 #: reports/datasets/base.py:197
@@ -3065,6 +3066,7 @@ msgstr "Oui"
 #: campaigns/segmentation/attributes/engagement.py:152
 #: campaigns/templates/campaigns/manage/_rule_fields.html:29
 #: dojos/templates/dojos/partials/_attendance_row.html:28
+#: dojos/templates/dojos/partials/_attendance_row.html:43
 #: events/templates/events/event_signup.html:101
 #: events/templates/events/event_signup.html:188 mailing/automated.py:112
 #: reports/datasets/base.py:197
@@ -3078,6 +3080,7 @@ msgid "Answer this question."
 msgstr "Répondez à cette question."
 
 #: accounts/templates/accounts/registration_answers.html:47
+#: dojos/templates/dojos/partials/_attendance_row.html:46
 msgid "Save answers"
 msgstr "Enregistrer les réponses"
 
@@ -3675,10 +3678,12 @@ msgstr "Votre adresse e-mail est désormais %(email)s."
 msgid "%(name)s's answers for %(event)s are saved."
 msgstr "Les réponses de %(name)s pour %(event)s sont enregistrées."
 
-#: accounts/views/family.py:229
+#: accounts/views/family.py:228
 #, python-format
-msgid "The family of %(child)s changed their answers for %(event)s."
-msgstr "La famille de %(child)s a modifié ses réponses pour %(event)s."
+msgid "Families changed their answers to the sign-up questions for %(event)s."
+msgstr ""
+"Des familles ont modifié leurs réponses aux questions d'inscription pour "
+"%(event)s."
 
 #: accounts/views/family.py:272
 #, python-format
@@ -4143,7 +4148,7 @@ msgstr "Candidature pour"
 #: campaigns/templates/campaigns/manage/journey_list.html:14
 #: content/templates/content/manage/promotion_list.html:23
 #: content/templates/content/manage/sponsor_list.html:19
-#: dojos/templates/dojos/dojo_event_detail.html:52
+#: dojos/templates/dojos/dojo_event_detail.html:37
 #: dojos/templates/dojos/dojo_event_list.html:25
 #: mailing/templates/mailing/manage/mail_log.html:30
 #: mailing/templates/mailing/manage/mail_log.html:58
@@ -6023,7 +6028,7 @@ msgstr "+ Groupe imbriqué"
 
 #: campaigns/templates/campaigns/manage/_status_badge.html:1
 #: campaigns/templates/campaigns/manage/campaign_detail.html:27
-#: dojos/models.py:52 dojos/templates/dojos/dojo_event_detail.html:54
+#: dojos/models.py:52 dojos/templates/dojos/dojo_event_detail.html:39
 #: dojos/templates/dojos/dojo_event_list.html:37 events/models.py:41
 #: reports/models.py:24
 msgid "Draft"
@@ -7276,97 +7281,97 @@ msgid ""
 msgstr ""
 "Un jeune mentor doit être promu par un champion ou un mentor du même dojo."
 
-#: dojos/team.py:80
+#: dojos/team.py:82
 msgid "Only approved mentors can ask to join a dojo's team."
 msgstr ""
 "Seuls les mentors approuvés peuvent demander à rejoindre l'équipe d'un dojo."
 
 # | msgid "This session isn't accepting new registrations"
-#: dojos/team.py:82
+#: dojos/team.py:84
 msgid "This dojo isn't accepting join requests right now."
 msgstr ""
 "Ce dojo n'accepte pas de demandes pour rejoindre l'équipe pour l'instant."
 
-#: dojos/team.py:85
+#: dojos/team.py:87
 msgid "You're already on this team, or your request is pending."
 msgstr ""
 "Vous faites déjà partie de cette équipe, ou votre demande est en attente."
 
 # | msgid "Ask to join the team"
-#: dojos/team.py:95
+#: dojos/team.py:97
 #, python-format
 msgid "%(name)s asked to join the %(dojo)s team."
 msgstr "%(name)s a demandé à rejoindre l'équipe de %(dojo)s."
 
-#: dojos/team.py:104 dojos/team.py:120
+#: dojos/team.py:106 dojos/team.py:122
 msgid "That request has already been handled."
 msgstr "Cette demande a déjà été traitée."
 
 # | msgid "Youth mentor at %(dojo)s"
-#: dojos/team.py:109
+#: dojos/team.py:111
 #, python-format
 msgid "You're now on the %(dojo)s team."
 msgstr "Vous faites maintenant partie de l'équipe de %(dojo)s."
 
 # | msgid "Your request to join this team is waiting for an answer."
-#: dojos/team.py:129
+#: dojos/team.py:131
 #, python-format
 msgid "Your request to join %(dojo)s was declined."
 msgstr "Votre demande pour rejoindre %(dojo)s a été refusée."
 
-#: dojos/team.py:131
+#: dojos/team.py:133
 #, python-format
 msgid "Your request to join %(dojo)s was closed: the dojo is no longer active."
 msgstr ""
 "Votre demande pour rejoindre %(dojo)s a été clôturée : le dojo n'est plus "
 "actif."
 
-#: dojos/team.py:138
+#: dojos/team.py:140
 msgid "Only approved mentors can be added to a dojo's team."
 msgstr "Seuls les mentors approuvés peuvent être ajoutés à l'équipe d'un dojo."
 
 # | msgid "%(name)s already has a login."
-#: dojos/team.py:141 dojos/team.py:161
+#: dojos/team.py:143 dojos/team.py:163
 #, python-format
 msgid "%(name)s is already on this team."
 msgstr "%(name)s fait déjà partie de cette équipe."
 
 # | msgid "Youth mentor at %(dojo)s"
-#: dojos/team.py:147 notifications/tests.py:40
+#: dojos/team.py:149 notifications/tests.py:40
 #, python-format
 msgid "You've been added to the %(dojo)s team."
 msgstr "Vous avez été ajouté à l'équipe de %(dojo)s."
 
-#: dojos/team.py:153
+#: dojos/team.py:155
 msgid "Only a ninja's own account can be promoted to youth mentor."
 msgstr "Seul le compte propre d'un ninja peut être promu jeune mentor."
 
-#: dojos/team.py:156
+#: dojos/team.py:158
 #, python-format
 msgid "%(name)s's login is switched off; their guardian can switch it back on."
 msgstr "Le compte de %(name)s est désactivé ; son parent peut le réactiver."
 
-#: dojos/team.py:187
+#: dojos/team.py:189
 msgid "The champion can't be removed; transfer the champion role first."
 msgstr ""
 "Le champion ne peut pas être retiré ; transférez d'abord le rôle de champion."
 
-#: dojos/team.py:189
+#: dojos/team.py:191
 msgid "Only active team members can be removed."
 msgstr "Seuls les membres actifs de l'équipe peuvent être retirés."
 
-#: dojos/team.py:208
+#: dojos/team.py:210
 msgid ""
 "As champion you can't leave; transfer the champion role to a mentor first."
 msgstr ""
 "En tant que champion, vous ne pouvez pas partir ; transférez d'abord le rôle "
 "à un mentor."
 
-#: dojos/team.py:215
+#: dojos/team.py:217
 msgid "Only the champion can hand over the champion role."
 msgstr "Seul le champion peut transférer le rôle de champion."
 
-#: dojos/team.py:223
+#: dojos/team.py:225
 msgid ""
 "The champion role can only go to an active mentor of this dojo with a valid "
 "background check."
@@ -7375,20 +7380,20 @@ msgstr ""
 "extrait de casier judiciaire valable."
 
 # | msgid "Youth mentor at %(dojo)s"
-#: dojos/team.py:231
+#: dojos/team.py:233
 #, python-format
 msgid "You're now the champion of %(dojo)s."
 msgstr "Vous êtes maintenant le champion de %(dojo)s."
 
-#: dojos/team.py:257 dojos/views/team_pages.py:204
+#: dojos/team.py:259 dojos/views/team_pages.py:204
 msgid "Unknown action."
 msgstr "Action inconnue."
 
-#: dojos/team.py:260
+#: dojos/team.py:262
 msgid "That change isn't possible from the dojo's current status."
 msgstr "Ce changement n'est pas possible depuis le statut actuel du dojo."
 
-#: dojos/team.py:264
+#: dojos/team.py:266
 msgid ""
 "This dojo still has upcoming events that are in draft or open for sign-ups. "
 "Close or finish those first."
@@ -7595,7 +7600,7 @@ msgstr "À propos de ce dojo"
 
 #: dojos/templates/dojos/dojo_detail.html:158
 #: dojos/templates/dojos/dojo_manage.html:133
-#: dojos/templates/dojos/partials/_attendance_row.html:71
+#: dojos/templates/dojos/partials/_attendance_row.html:90
 #: dojos/templates/dojos/partials/_event_form_fields.html:70
 msgid "Pathways"
 msgstr "Parcours"
@@ -7650,18 +7655,20 @@ msgstr "Retour à l'événement"
 
 # | msgid "Back to session"
 #: dojos/templates/dojos/dojo_event_attendance.html:10
-#: dojos/templates/dojos/dojo_event_detail.html:119
+#: dojos/templates/dojos/dojo_event_detail.html:104
 msgid "Back to events"
 msgstr "Retour aux événements"
 
 #: dojos/templates/dojos/dojo_event_create.html:28
+#, python-format
 msgid ""
-"The new session starts with the sign-up questions of your latest session. "
-"You can change or remove them on its page once it's created."
+"The new session starts with your dojo's <a href=\"%(settings_url)s#default-"
+"questions\">default sign-up questions</a>. You can change or remove them on "
+"its page once it's created."
 msgstr ""
-"La nouvelle session reprend les questions d'inscription de votre dernière "
-"session. Vous pouvez les modifier ou les supprimer sur sa page une fois "
-"créée."
+"La nouvelle session reprend les <a href=\"%(settings_url)s#default-"
+"questions\">questions d'inscription par défaut</a> de votre dojo. Vous "
+"pouvez les modifier ou les supprimer sur sa page une fois créée."
 
 # | msgid "Create account"
 #: dojos/templates/dojos/dojo_event_create.html:33
@@ -7672,38 +7679,38 @@ msgstr "Créer l'événement"
 msgid "Take attendance"
 msgstr "Noter les présences"
 
-#: dojos/templates/dojos/dojo_event_detail.html:58
+#: dojos/templates/dojos/dojo_event_detail.html:43
 #: dojos/templates/dojos/dojo_event_list.html:41 events/models.py:43
 msgid "Closed"
 msgstr "Clôturé"
 
 # | msgid "Registrations closed"
-#: dojos/templates/dojos/dojo_event_detail.html:67
+#: dojos/templates/dojos/dojo_event_detail.html:52
 msgid "Reopen registrations"
 msgstr "Rouvrir les inscriptions"
 
-#: dojos/templates/dojos/dojo_event_detail.html:67
+#: dojos/templates/dojos/dojo_event_detail.html:52
 #: dojos/templates/dojos/dojo_event_list.html:51
 msgid "Publish"
 msgstr "Publier"
 
 # | msgid "Registrations closed"
-#: dojos/templates/dojos/dojo_event_detail.html:71
+#: dojos/templates/dojos/dojo_event_detail.html:56
 #: dojos/templates/dojos/dojo_event_list.html:53
 msgid "Close registrations"
 msgstr "Clôturer les inscriptions"
 
 # | msgid "Back to your account"
-#: dojos/templates/dojos/dojo_event_detail.html:74
+#: dojos/templates/dojos/dojo_event_detail.html:59
 msgid "Back to draft"
 msgstr "Remettre en brouillon"
 
-#: dojos/templates/dojos/dojo_event_detail.html:78
+#: dojos/templates/dojos/dojo_event_detail.html:63
 #: dojos/templates/dojos/dojo_manage.html:178
 msgid "View public page"
 msgstr "Voir la page publique"
 
-#: dojos/templates/dojos/dojo_event_detail.html:83
+#: dojos/templates/dojos/dojo_event_detail.html:68
 msgid ""
 "Hidden from the public site. Publish to make it visible and open for sign-"
 "ups."
@@ -7711,11 +7718,11 @@ msgstr ""
 "Caché du site public. Publiez-le pour le rendre visible et ouvrir les "
 "inscriptions."
 
-#: dojos/templates/dojos/dojo_event_detail.html:85
+#: dojos/templates/dojos/dojo_event_detail.html:70
 msgid "Visible on the public site and open for sign-ups."
 msgstr "Visible sur le site public et ouvert aux inscriptions."
 
-#: dojos/templates/dojos/dojo_event_detail.html:87
+#: dojos/templates/dojos/dojo_event_detail.html:72
 msgid ""
 "Visible on the public site, but no new sign-ups. Reopen to accept sign-ups "
 "again."
@@ -7723,7 +7730,7 @@ msgstr ""
 "Visible sur le site public, mais sans nouvelles inscriptions. Rouvrez pour "
 "accepter à nouveau des inscriptions."
 
-#: dojos/templates/dojos/dojo_event_detail.html:89
+#: dojos/templates/dojos/dojo_event_detail.html:74
 msgid ""
 "You can switch between any of these at any time — existing registrations are "
 "always kept."
@@ -7732,11 +7739,11 @@ msgstr ""
 "existantes sont toujours conservées."
 
 # | msgid "Save"
-#: dojos/templates/dojos/dojo_event_detail.html:108
+#: dojos/templates/dojos/dojo_event_detail.html:93
 msgid "Saved."
 msgstr "Enregistré."
 
-#: dojos/templates/dojos/dojo_event_detail.html:120
+#: dojos/templates/dojos/dojo_event_detail.html:105
 #: dojos/templates/dojos/dojo_manage.html:179
 msgid "Save changes"
 msgstr "Enregistrer les modifications"
@@ -7750,7 +7757,7 @@ msgid "Reopen"
 msgstr "Rouvrir"
 
 #: dojos/templates/dojos/dojo_event_list.html:58
-#: dojos/templates/dojos/partials/_event_questions.html:49
+#: dojos/templates/dojos/partials/_questions_card.html:47
 msgid "Edit"
 msgstr "Modifier"
 
@@ -8261,26 +8268,21 @@ msgstr "Retirer cette nouvelle de la page du dojo ?"
 msgid "No updates yet."
 msgstr "Pas encore de nouvelles."
 
-#: dojos/templates/dojos/partials/_attendance.html:21
-#, python-format
-msgid "%(yes)s yes · %(no)s no"
-msgstr "%(yes)s oui · %(no)s non"
-
 # | msgid "You're all set"
-#: dojos/templates/dojos/partials/_attendance.html:32
+#: dojos/templates/dojos/partials/_attendance.html:27
 msgid "Mark all present"
 msgstr "Tout le monde présent"
 
-#: dojos/templates/dojos/partials/_attendance.html:42
+#: dojos/templates/dojos/partials/_attendance.html:37
 msgid "Nobody has a confirmed place for this session yet."
 msgstr "Personne n'a encore de place confirmée pour cette session."
 
 # | msgid "Session"
-#: dojos/templates/dojos/partials/_attendance.html:46
+#: dojos/templates/dojos/partials/_attendance.html:41
 msgid "Session team"
 msgstr "Équipe de la session"
 
-#: dojos/templates/dojos/partials/_attendance.html:51
+#: dojos/templates/dojos/partials/_attendance.html:46
 #, python-format
 msgid ""
 "Nobody from the team is assigned to this session yet — <a "
@@ -8289,9 +8291,14 @@ msgstr ""
 "Personne de l'équipe n'est encore affecté à cette session. <a "
 "href=\"%(event_url)s\">Choisissez l'équipe sur la page de la session</a>."
 
-#: dojos/templates/dojos/partials/_attendance.html:51
+#: dojos/templates/dojos/partials/_attendance.html:46
 msgid "Nobody from the team is assigned to this session yet."
 msgstr "Personne de l'équipe n'est encore affecté à cette session."
+
+#: dojos/templates/dojos/partials/_attendance_questions.html:7
+#, python-format
+msgid "%(yes)s yes · %(no)s no"
+msgstr "%(yes)s oui · %(no)s non"
 
 # | msgid "Home dojo"
 #: dojos/templates/dojos/partials/_attendance_row.html:16
@@ -8308,49 +8315,53 @@ msgstr "En visite"
 msgid "Not asked"
 msgstr "Pas demandé"
 
+#: dojos/templates/dojos/partials/_attendance_row.html:34
+msgid "Answers"
+msgstr "Réponses"
+
 # | msgid "Awarded by"
-#: dojos/templates/dojos/partials/_attendance_row.html:41
-#: dojos/templates/dojos/partials/_attendance_row.html:47
+#: dojos/templates/dojos/partials/_attendance_row.html:60
+#: dojos/templates/dojos/partials/_attendance_row.html:66
 msgid "Award belt"
 msgstr "Décerner une ceinture"
 
-#: dojos/templates/dojos/partials/_attendance_row.html:57
-#: dojos/templates/dojos/partials/_attendance_row.html:63
+#: dojos/templates/dojos/partials/_attendance_row.html:76
+#: dojos/templates/dojos/partials/_attendance_row.html:82
 msgid "Award badge"
 msgstr "Décerner un badge"
 
 # | msgid "About this session"
-#: dojos/templates/dojos/partials/_attendance_row.html:79
+#: dojos/templates/dojos/partials/_attendance_row.html:98
 msgid "(this session)"
 msgstr "(cette session)"
 
 # | msgid "Next pathways"
-#: dojos/templates/dojos/partials/_attendance_row.html:82
+#: dojos/templates/dojos/partials/_attendance_row.html:101
 msgid "Save pathways"
 msgstr "Enregistrer les parcours"
 
 # | msgid "Sign up for %(name)s"
-#: dojos/templates/dojos/partials/_attendance_row.html:92
+#: dojos/templates/dojos/partials/_attendance_row.html:111
 #: dojos/templates/dojos/partials/_attendance_team_row.html:20
 #, python-format
 msgid "Attendance for %(name)s"
 msgstr "Présence de %(name)s"
 
-#: dojos/templates/dojos/partials/_attendance_row.html:96
-#: dojos/templates/dojos/partials/_attendance_row.html:107
+#: dojos/templates/dojos/partials/_attendance_row.html:115
+#: dojos/templates/dojos/partials/_attendance_row.html:126
 #: dojos/templates/dojos/partials/_attendance_team_row.html:24
 #: dojos/templates/dojos/partials/_attendance_team_row.html:34
 msgid "Present"
 msgstr "Présent"
 
-#: dojos/templates/dojos/partials/_attendance_row.html:101
-#: dojos/templates/dojos/partials/_attendance_row.html:107
+#: dojos/templates/dojos/partials/_attendance_row.html:120
+#: dojos/templates/dojos/partials/_attendance_row.html:126
 #: dojos/templates/dojos/partials/_attendance_team_row.html:29
 #: dojos/templates/dojos/partials/_attendance_team_row.html:34
 msgid "Absent"
 msgstr "Absent"
 
-#: dojos/templates/dojos/partials/_attendance_row.html:107
+#: dojos/templates/dojos/partials/_attendance_row.html:126
 #: dojos/templates/dojos/partials/_attendance_team_row.html:34
 msgid "Not marked"
 msgstr "Non indiqué"
@@ -8464,101 +8475,6 @@ msgstr "Promouvoir cet événement"
 msgid "This event isn't promoted anywhere on the public site."
 msgstr "Cet événement n'est mis en avant nulle part sur le site public."
 
-# | msgid "Sign up now"
-#: dojos/templates/dojos/partials/_event_questions.html:9
-msgid "Sign-up questions"
-msgstr "Questions d'inscription"
-
-#: dojos/templates/dojos/partials/_event_questions.html:10
-#, python-format
-msgid "%(count)s of %(max)s"
-msgstr "%(count)s sur %(max)s"
-
-#: dojos/templates/dojos/partials/_event_questions.html:12
-msgid ""
-"Families answer each question with yes or no for every child they sign up, "
-"e.g. whether they bring their own laptop. The answers show on the attendance "
-"list. They never decide who gets a place."
-msgstr ""
-"Les familles répondent à chaque question par oui ou par non pour chaque "
-"enfant qu'elles inscrivent, p. ex. s'il apporte son propre ordinateur "
-"portable. Les réponses apparaissent sur la liste de présence. Elles ne "
-"décident jamais qui obtient une place."
-
-#: dojos/templates/dojos/partials/_event_questions.html:25
-#, python-format
-msgid "Move up: %(text)s"
-msgstr "Monter : %(text)s"
-
-# | msgid "Home dojo"
-#: dojos/templates/dojos/partials/_event_questions.html:32
-#, python-format
-msgid "Move down: %(text)s"
-msgstr "Descendre : %(text)s"
-
-#: dojos/templates/dojos/partials/_event_questions.html:37
-#, python-format
-msgid "Remove this question? Its %(counter)s answer is deleted with it."
-msgid_plural ""
-"Remove this question? Its %(counter)s answers are deleted with it."
-msgstr[0] ""
-"Supprimer cette question ? Sa %(counter)s réponse est supprimée avec elle."
-msgstr[1] ""
-"Supprimer cette question ? Ses %(counter)s réponses sont supprimées avec "
-"elle."
-
-# | msgid "Remove login"
-#: dojos/templates/dojos/partials/_event_questions.html:37
-msgid "Remove this question?"
-msgstr "Supprimer cette question ?"
-
-#: dojos/templates/dojos/partials/_event_questions.html:45
-#, python-format
-msgid "Confirmed: %(yes)s yes · %(no)s no"
-msgstr "Confirmés : %(yes)s oui · %(no)s non"
-
-#: dojos/templates/dojos/partials/_event_questions.html:45
-#, python-format
-msgid "waiting list: %(yes)s yes · %(no)s no"
-msgstr "liste d'attente : %(yes)s oui · %(no)s non"
-
-#: dojos/templates/dojos/partials/_event_questions.html:56
-#, python-format
-msgid ""
-"%(counter)s answer was given to the current wording. To ask something else, "
-"remove this question and add a new one."
-msgid_plural ""
-"%(counter)s answers were given to the current wording. To ask something "
-"else, remove this question and add a new one."
-msgstr[0] ""
-"%(counter)s réponse a été donnée à la formulation actuelle. Pour demander "
-"autre chose, supprimez cette question et ajoutez-en une nouvelle."
-msgstr[1] ""
-"%(counter)s réponses ont été données à la formulation actuelle. Pour "
-"demander autre chose, supprimez cette question et ajoutez-en une nouvelle."
-
-#: dojos/templates/dojos/partials/_event_questions.html:59
-msgid "Save question"
-msgstr "Enregistrer la question"
-
-#: dojos/templates/dojos/partials/_event_questions.html:67
-msgid "No questions: families only pick which children come."
-msgstr ""
-"Aucune question : les familles choisissent seulement quels enfants viennent."
-
-#: dojos/templates/dojos/partials/_event_questions.html:72
-msgid "Add a question"
-msgstr "Ajouter une question"
-
-#: dojos/templates/dojos/partials/_event_questions.html:79
-msgid "Add question"
-msgstr "Ajouter la question"
-
-#: dojos/templates/dojos/partials/_event_questions.html:84
-#, python-format
-msgid "A session can have at most %(max)s questions."
-msgstr "Une session peut avoir au maximum %(max)s questions."
-
 # | msgid "Location"
 #: dojos/templates/dojos/partials/_notification_bell.html:19
 #: dojos/templates/dojos/partials/_notification_bell.html:27
@@ -8581,6 +8497,122 @@ msgstr "il y a %(since)s"
 msgid "You're all caught up."
 msgstr "Vous êtes à jour."
 
+# | msgid "Sign up now"
+#: dojos/templates/dojos/partials/_questions_card.html:10
+msgid "Default sign-up questions"
+msgstr "Questions d'inscription par défaut"
+
+# | msgid "Sign up now"
+#: dojos/templates/dojos/partials/_questions_card.html:10
+msgid "Sign-up questions"
+msgstr "Questions d'inscription"
+
+#: dojos/templates/dojos/partials/_questions_card.html:11
+#, python-format
+msgid "%(count)s of %(max)s"
+msgstr "%(count)s sur %(max)s"
+
+#: dojos/templates/dojos/partials/_questions_card.html:13
+msgid ""
+"Every new session starts with these questions, e.g. whether the child brings "
+"their own laptop. You can change them per session on the session's page; "
+"changing them here doesn't change sessions that already exist."
+msgstr ""
+"Chaque nouvelle session reprend ces questions, p. ex. si l'enfant apporte "
+"son propre ordinateur portable. Vous pouvez les modifier par session sur la "
+"page de la session ; les modifier ici ne change pas les sessions existantes."
+
+#: dojos/templates/dojos/partials/_questions_card.html:13
+msgid ""
+"Families answer each question with yes or no for every child they sign up, "
+"e.g. whether they bring their own laptop. The answers show on the attendance "
+"list. They never decide who gets a place."
+msgstr ""
+"Les familles répondent à chaque question par oui ou par non pour chaque "
+"enfant qu'elles inscrivent, p. ex. s'il apporte son propre ordinateur "
+"portable. Les réponses apparaissent sur la liste de présence. Elles ne "
+"décident jamais qui obtient une place."
+
+#: dojos/templates/dojos/partials/_questions_card.html:25
+#, python-format
+msgid "Move up: %(text)s"
+msgstr "Monter : %(text)s"
+
+# | msgid "Home dojo"
+#: dojos/templates/dojos/partials/_questions_card.html:31
+#, python-format
+msgid "Move down: %(text)s"
+msgstr "Descendre : %(text)s"
+
+#: dojos/templates/dojos/partials/_questions_card.html:35
+#, python-format
+msgid "Remove this question? Its %(counter)s answer is deleted with it."
+msgid_plural ""
+"Remove this question? Its %(counter)s answers are deleted with it."
+msgstr[0] ""
+"Supprimer cette question ? Sa %(counter)s réponse est supprimée avec elle."
+msgstr[1] ""
+"Supprimer cette question ? Ses %(counter)s réponses sont supprimées avec "
+"elle."
+
+# | msgid "Remove login"
+#: dojos/templates/dojos/partials/_questions_card.html:35
+msgid "Remove this question?"
+msgstr "Supprimer cette question ?"
+
+#: dojos/templates/dojos/partials/_questions_card.html:43
+#, python-format
+msgid "Confirmed: %(yes)s yes · %(no)s no"
+msgstr "Confirmés : %(yes)s oui · %(no)s non"
+
+#: dojos/templates/dojos/partials/_questions_card.html:43
+#, python-format
+msgid "waiting list: %(yes)s yes · %(no)s no"
+msgstr "liste d'attente : %(yes)s oui · %(no)s non"
+
+#: dojos/templates/dojos/partials/_questions_card.html:53
+#, python-format
+msgid ""
+"%(counter)s answer was given to the current wording. To ask something else, "
+"remove this question and add a new one."
+msgid_plural ""
+"%(counter)s answers were given to the current wording. To ask something "
+"else, remove this question and add a new one."
+msgstr[0] ""
+"%(counter)s réponse a été donnée à la formulation actuelle. Pour demander "
+"autre chose, supprimez cette question et ajoutez-en une nouvelle."
+msgstr[1] ""
+"%(counter)s réponses ont été données à la formulation actuelle. Pour "
+"demander autre chose, supprimez cette question et ajoutez-en une nouvelle."
+
+#: dojos/templates/dojos/partials/_questions_card.html:56
+msgid "Save question"
+msgstr "Enregistrer la question"
+
+#: dojos/templates/dojos/partials/_questions_card.html:64
+msgid "No default questions: new sessions start without questions."
+msgstr ""
+"Aucune question par défaut : les nouvelles sessions commencent sans "
+"questions."
+
+#: dojos/templates/dojos/partials/_questions_card.html:64
+msgid "No questions: families only pick which children come."
+msgstr ""
+"Aucune question : les familles choisissent seulement quels enfants viennent."
+
+#: dojos/templates/dojos/partials/_questions_card.html:69
+msgid "Add a question"
+msgstr "Ajouter une question"
+
+#: dojos/templates/dojos/partials/_questions_card.html:75
+msgid "Add question"
+msgstr "Ajouter la question"
+
+#: dojos/templates/dojos/partials/_questions_card.html:80
+#, python-format
+msgid "At most %(max)s questions."
+msgstr "Au maximum %(max)s questions."
+
 #: dojos/templates/dojos/partials/_translation_fields.html:11
 msgid ""
 "Optional. Leave a text empty and visitors who read this language see the "
@@ -8598,36 +8630,36 @@ msgstr "Domaines de prédilection"
 msgid "Get in touch with %(name)s"
 msgstr "Contacter %(name)s"
 
-#: dojos/views/profile.py:57
+#: dojos/views/profile.py:58
 msgid ""
 "Only approved champions with a valid background check can create a dojo."
 msgstr ""
 "Seuls les champions approuvés avec un extrait de casier judiciaire valable "
 "peuvent créer un dojo."
 
-#: dojos/views/profile.py:81
+#: dojos/views/profile.py:82
 #, python-format
 msgid ""
 "%(dojo)s has been created as a draft. Fill in its profile, then launch it."
 msgstr ""
 "%(dojo)s a été créé en brouillon. Complétez son profil, puis lancez-le."
 
-#: dojos/views/profile.py:84
+#: dojos/views/profile.py:85
 msgid "We couldn't find that address on the map; check it on this page."
 msgstr ""
 "Nous n'avons pas trouvé cette adresse sur la carte ; vérifiez-la sur cette "
 "page."
 
-#: dojos/views/profile.py:146
+#: dojos/views/profile.py:149
 #, python-format
 msgid "%(dojo)s is now %(lower)s."
 msgstr "%(dojo)s est maintenant %(lower)s."
 
-#: dojos/views/profile.py:171
+#: dojos/views/profile.py:174
 msgid "Update posted on the dojo's page."
 msgstr "Nouvelle publiée sur la page du dojo."
 
-#: dojos/views/profile.py:192
+#: dojos/views/profile.py:195
 msgid "Update removed."
 msgstr "Nouvelle retirée."
 
@@ -9008,16 +9040,16 @@ msgstr "Jamais venu"
 msgid "Aged out"
 msgstr "Trop âgé"
 
-#: events/questions.py:37
+#: events/questions.py:60
 msgid "Write the question."
 msgstr "Écrivez la question."
 
-#: events/questions.py:39
+#: events/questions.py:62
 #, python-format
 msgid "Keep the question under %(max)s characters."
 msgstr "Gardez la question sous %(max)s caractères."
 
-#: events/questions.py:45
+#: events/questions.py:68
 msgid ""
 "Families sign up for this session on another website, so it has no questions "
 "here."
@@ -9025,22 +9057,24 @@ msgstr ""
 "Les familles s'inscrivent à cette session sur un autre site, elle n'a donc "
 "pas de questions ici."
 
-#: events/questions.py:59
+#: events/questions.py:84
 #, python-format
-msgid "A session can have at most %(max)s questions: remove one first."
-msgstr ""
-"Une session peut avoir au maximum %(max)s questions : supprimez-en d'abord "
-"une."
+msgid "At most %(max)s questions: remove one first."
+msgstr "Au maximum %(max)s questions : supprimez-en d'abord une."
 
-#: events/questions.py:152
+#: events/questions.py:188
 msgid "This session has started, so the answers can't change any more."
 msgstr ""
 "Cette session a commencé : les réponses ne peuvent plus être modifiées."
 
-#: events/questions.py:155 events/registrations.py:71
+#: events/questions.py:191 events/registrations.py:71
 msgid "The questions for this session changed, please check them again."
 msgstr ""
 "Les questions de cette session ont changé, veuillez les vérifier à nouveau."
+
+#: events/questions.py:205
+msgid "That question isn't one of this session's."
+msgstr "Cette question n'appartient pas à cette session."
 
 #: events/registrations.py:61 events/templates/events/event_signup.html:85
 #: events/views.py:202

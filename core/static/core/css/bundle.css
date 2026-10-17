@@ -1184,10 +1184,29 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
 .cd-attendance__person { display: flex; flex-direction: column; gap: 2px; min-width: 120px; }
 .cd-attendance__name { color: var(--ink); }
 .cd-attendance__meta { color: var(--ink-muted); }
+/* The yes/no sign-up questions card (dojos/partials/_questions_card.html):
+   a session's page and the dojo's Settings page. */
+.questions-card { margin: var(--space-5) 0; max-width: 720px; }
+.questions-card__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+.questions-card__head h2 { margin: 0; }
+.questions-card__count, .questions-card__help, .questions-card__totals { color: var(--ink-muted); }
+.questions-card__help { margin: var(--space-1) 0 0; }
+.questions-card__list { list-style: none; margin: var(--space-3) 0 0; padding: 0; display: flex; flex-direction: column; }
+.questions-card__question { padding: var(--space-3) 0; border-top: 1px solid var(--border); }
+.questions-card__question-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+.questions-card__text { flex: 1 1 16rem; min-width: 0; overflow-wrap: anywhere; }
+.questions-card__actions { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+.questions-card__totals { margin: var(--space-1) 0 0; }
+.questions-card__edit, .questions-card__add { margin-top: var(--space-2); }
+.questions-card__edit summary, .questions-card__add summary { cursor: pointer; min-height: 24px; color: var(--secondary); }
+.questions-card__edit .cd-form, .questions-card__add .cd-form { margin-top: var(--space-3); }
+.questions-card__empty { margin: var(--space-3) 0 0; }
 /* The session's yes/no sign-up questions (events.questions): totals above
    the list, each child's answers as badges with the question shortened. */
 .cd-attendance__questions { list-style: none; margin: var(--space-1) 0 0; padding: 0; color: var(--ink-muted); }
 .cd-attendance__answers { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-1); }
+.cd-attendance__answers-form { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2); }
+.cd-attendance__answers-form label { display: inline-flex; align-items: center; min-height: 24px; margin-right: var(--space-3); }
 .cd-attendance__answer-q { display: inline-block; max-width: 14em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
 
 /* A two-button segmented toggle, sized for a thumb — this is the whole point

@@ -18,6 +18,12 @@ with sync_playwright() as pw:
         "At the top, the dojo's status: only the champion launches the dojo, marks it dormant or archives it (never with open sessions) and reopens it. Below, everything on the dojo's public page: name, description in each of the dojo's languages, icon, address (re-geocoded on save), contact details and pathways.",
         max_h=2600,
     )
+    j.shot(
+        "default-questions",
+        "Default sign-up questions",
+        "Below the profile, the dojo's default sign-up questions: yes/no questions every new session starts with (here the laptop question), in each of the dojo's languages. Each session can change them on its own page.",
+        selector="#default-questions",
+    )
     p = j.go("/dojos/51/events/")
     j.shot(
         "events",
@@ -29,7 +35,7 @@ with sync_playwright() as pw:
     j.shot(
         "new-event",
         "Planning a new session",
-        "A new session: date and times (Belgian notation), places, age range, audience (e.g. a girls' session), a banner from the image library or an upload, the team running it and the pathways. It starts with the sign-up questions of the dojo's latest session, and as a draft; publishing opens registrations and the families get the new-sessions mail.",
+        "A new session: date and times (Belgian notation), places, age range, audience (e.g. a girls' session), a banner from the image library or an upload, the team running it and the pathways. It starts with the dojo's default sign-up questions, and as a draft; publishing opens registrations and the families get the new-sessions mail.",
         max_h=2800,
     )
     p = j.go("/dojos/51/events/76/")
