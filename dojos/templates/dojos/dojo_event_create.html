@@ -24,6 +24,10 @@
 
       {% include "dojos/partials/_event_form_fields.html" %}
 
+      {% if copies_questions %}
+        <p class="cd-form__help caption">{% translate "The new session starts with the sign-up questions of your latest session. You can change or remove them on its page once it's created." %}</p>
+      {% endif %}
+
       <div class="cd-form__actions">
         <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_list' dojo_id=dojo.id %}">{% translate "Cancel" %}</a>
         <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Create event" %}</button>

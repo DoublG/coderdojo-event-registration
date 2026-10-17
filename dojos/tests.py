@@ -6,8 +6,9 @@ from channels.testing import WebsocketCommunicator
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
 from django.test import TestCase, TransactionTestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
@@ -2951,3 +2952,170 @@ class HealthNotesOnAttendanceTests(TestCase):
         self.zoe.ninja.save()
         self.client.force_login(self.owner)
         self.assertNotContains(self.client.get(self.url), "cd-attendance__health")
+
+
+class DojoEventQuestionsTests(TestCase):
+    """The event page's Sign-up questions card (DATA_MODEL.md §29) and the
+    answers on the attendance list."""
+
+    def setUp(self):
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.event = Event.objects.create(
+            name="Session",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time=timezone.make_aware(datetime(2030, 1, 1, 10, 0)),
+            end_time=timezone.make_aware(datetime(2030, 1, 1, 12, 0)),
+            places=10,
+        )
+        self.client.force_login(self.owner)
+
+    def _kw(self, **extra):
+        return {"dojo_id": self.dojo.id, "event_id": self.event.id, **extra}
+
+    def _add(self, text, htmx=True):
+        headers = {"HTTP_HX_REQUEST": "true"} if htmx else {}
+        return self.client.post(
+            reverse("dojo_event_question_add", kwargs=self._kw()), {"new-question-text": text}, **headers
+        )
+
+    def test_the_card_shows_on_the_event_page(self):
+        response = self.client.get(reverse("dojo_event_detail", kwargs=self._kw()))
+        self.assertContains(response, 'id="event-questions"')
+        self.assertContains(response, "Add a question")
+
+    def test_adding_a_question_with_htmx_returns_the_card(self):
+        response = self._add("Will your child bring their own laptop?")
+        self.assertTemplateUsed(response, "dojos/partials/_event_questions.html")
+        self.assertEqual(
+            list(self.event.questions.values_list("text", flat=True)), ["Will your child bring their own laptop?"]
+        )
+        self.assertContains(response, "Will your child bring their own laptop?")
+
+    def test_without_javascript_it_goes_back_to_the_event_page(self):
+        response = self._add("Own laptop?", htmx=False)
+        self.assertRedirects(
+            response,
+            reverse("dojo_event_detail", kwargs=self._kw()) + "#event-questions",
+            fetch_redirect_response=False,
+        )
+
+    def test_a_sixth_question_is_refused_on_the_form(self):
+        for n in range(5):
+            self.event.questions.create(text=f"Q{n}?", position=n)
+        response = self._add("One too many?")
+        self.assertEqual(self.event.questions.count(), 5)
+        self.assertContains(response, "at most 5")
+
+    def test_editing_moving_and_removing(self):
+        first = self.event.questions.create(text="First?", position=1)
+        second = self.event.questions.create(text="Second?", position=2)
+        self.client.post(
+            reverse("dojo_event_question_edit", kwargs=self._kw(question_id=first.id)),
+            {f"question-{first.id}-text": "First, reworded?"},
+        )
+        first.refresh_from_db()
+        self.assertEqual(first.text, "First, reworded?")
+        self.client.post(
+            reverse("dojo_event_question_move", kwargs=self._kw(question_id=second.id)), {"direction": "up"}
+        )
+        self.assertEqual(list(self.event.questions.values_list("text", flat=True)), ["Second?", "First, reworded?"])
+        self.client.post(reverse("dojo_event_question_remove", kwargs=self._kw(question_id=second.id)))
+        self.assertEqual(list(self.event.questions.values_list("text", flat=True)), ["First, reworded?"])
+
+    def test_another_dojos_question_or_event_is_a_404(self):
+        other = make_dojo("Antwerp", champion=make_champion(username="owner2"))
+        other_event = Event.objects.create(
+            name="Other", dojo=other, places=5, start_time=self.event.start_time, end_time=self.event.end_time
+        )
+        foreign = other_event.questions.create(text="Theirs?")
+        response = self.client.post(reverse("dojo_event_question_remove", kwargs=self._kw(question_id=foreign.id)))
+        self.assertEqual(response.status_code, 404)
+        response = self.client.post(
+            reverse("dojo_event_question_add", kwargs={"dojo_id": self.dojo.id, "event_id": other_event.id}),
+            {"new-question-text": "Sneaky?"},
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(other_event.questions.filter(pk=foreign.pk).exists())
+
+    def test_someone_outside_the_team_gets_a_404(self):
+        self.client.force_login(make_champion(username="stranger"))
+        self.assertEqual(self._add("Own laptop?").status_code, 404)
+        self.assertFalse(self.event.questions.exists())
+
+    def test_a_mentor_without_manage_events_gets_a_403(self):
+        helper = make_mentor(username="helper1")
+        add_member(self.dojo, helper)
+        self.client.force_login(helper)
+        with patch.dict(access.ROLE_CAPABILITIES, {access.MENTOR: frozenset()}):
+            self.assertEqual(self._add("Own laptop?").status_code, 403)
+        self.assertFalse(self.event.questions.exists())
+
+    def test_a_session_that_registers_elsewhere_has_no_card(self):
+        self.event.external_registration_url = "https://example.com/"
+        self.event.save()
+        response = self.client.get(reverse("dojo_event_detail", kwargs=self._kw()))
+        self.assertNotContains(response, 'id="event-questions"')
+
+    def test_a_new_event_starts_with_the_latest_sessions_questions(self):
+        self.event.questions.create(text="Own laptop?")
+        response = self.client.post(
+            reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}),
+            {
+                "name": "Next session",
+                "event_date": "02/02/2030",
+                "start_time": "14:00",
+                "end_time": "16:30",
+                "places": "25",
+                "venue_name": "",
+                "template_image": "",
+                "description": "",
+                "min_age": "",
+                "max_age": "",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        new = Event.objects.get(name="Next session")
+        self.assertEqual(list(new.questions.values_list("text", flat=True)), ["Own laptop?"])
+
+    def test_the_attendance_list_shows_answers_and_totals(self):
+        laptop = self.event.questions.create(text="Own laptop?", position=1)
+        lunch = self.event.questions.create(text="Lunch?", position=2)
+        emma = Registration.objects.create(
+            event=self.event, ninja=Ninja.objects.create(name="Emma"), waiting_list=False, position=1
+        )
+        lars = Registration.objects.create(
+            event=self.event, ninja=Ninja.objects.create(name="Lars"), waiting_list=False, position=2
+        )
+        emma.answers.create(question=laptop, answer=True)
+        emma.answers.create(question=lunch, answer=False)
+        lars.answers.create(question=laptop, answer=False)  # Lunch was added after Lars signed up.
+        response = self.client.get(reverse("dojo_event_attendance", kwargs=self._kw()))
+        self.assertEqual(
+            response.context["answers_by_registration"],
+            {emma.id: {laptop.id: True, lunch.id: False}, lars.id: {laptop.id: False}},
+        )
+        self.assertContains(response, "Not asked", count=1)
+        self.assertContains(response, "1 yes · 1 no")
+        self.assertContains(response, "0 yes · 1 no")
+
+    def test_the_answers_add_no_query_per_row(self):
+        laptop = self.event.questions.create(text="Own laptop?")
+        url = reverse("dojo_event_attendance", kwargs=self._kw())
+
+        def add_child(n):
+            registration = Registration.objects.create(
+                event=self.event, ninja=Ninja.objects.create(name=f"Kid {n}"), waiting_list=False, position=n
+            )
+            registration.answers.create(question=laptop, answer=bool(n % 2))
+
+        add_child(1)
+        self.client.get(url)  # warm the caches
+        with CaptureQueriesContext(connection) as one:
+            self.client.get(url)
+        for n in range(2, 6):
+            add_child(n)
+        with CaptureQueriesContext(connection) as five:
+            self.client.get(url)
+        self.assertEqual(len(five.captured_queries), len(one.captured_queries))

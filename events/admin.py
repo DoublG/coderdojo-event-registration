@@ -8,14 +8,34 @@ from .models import (
     Badge,
     Belt,
     Event,
+    EventQuestion,
     NinjaBadge,
     NinjaBelt,
     NinjaEngagement,
     NinjaEngagementChange,
     Registration,
+    RegistrationAnswer,
     RegistrationCancellation,
     TeamAttendance,
 )
+
+
+class EventQuestionInline(admin.TabularInline):
+    """The session's yes/no sign-up questions (events.questions). Their
+    texts in the dojo's other languages are edited on the question's own
+    admin page. Editing here bypasses the maximum per session."""
+
+    model = EventQuestion
+    extra = 0
+    fields = ["position", "text"]
+    show_change_link = True
+
+
+class RegistrationAnswerInline(admin.TabularInline):
+    """The family's answers to the session's sign-up questions."""
+
+    model = RegistrationAnswer
+    extra = 0
 
 
 @admin.register(Event)
@@ -23,9 +43,32 @@ class EventAdmin(TranslationAdminMixin, AuditHistoryAdminMixin, BelgiumGISModelA
     list_display = ["name", "dojo", "start_time", "status", "audience"]
     list_filter = ["status", "audience"]
     search_fields = ["name", "dojo__name"]
+    inlines = [EventQuestionInline]
 
 
-admin.site.register(Registration)
+@admin.register(Registration)
+class RegistrationAdmin(admin.ModelAdmin):
+    inlines = [RegistrationAnswerInline]
+
+
+@admin.register(EventQuestion)
+class EventQuestionAdmin(TranslationAdminMixin, admin.ModelAdmin):
+    """A session's yes/no sign-up question. The dojo team manages them on
+    the event's page (events.questions); an edit here bypasses the
+    maximum per session."""
+
+    list_display = ["text", "event", "position"]
+    search_fields = ["text", "event__name"]
+    raw_id_fields = ["event"]
+
+
+@admin.register(RegistrationAnswer)
+class RegistrationAnswerAdmin(admin.ModelAdmin):
+    """A family's yes/no answer for one child's registration."""
+
+    list_display = ["registration", "question", "answer", "answered_at"]
+    list_filter = ["answer"]
+    raw_id_fields = ["registration", "question"]
 
 
 @admin.register(Badge)

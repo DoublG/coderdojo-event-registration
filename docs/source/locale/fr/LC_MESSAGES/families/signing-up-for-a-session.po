@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 16:21+0000\n"
+"POT-Creation-Date: 2026-10-17 07:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -50,6 +50,17 @@ msgstr ""
 
 #: ../../source/families/signing-up-for-a-session.rst:11
 msgid ""
+"If the dojo asks a few questions, such as whether your child brings their"
+" own laptop, answer **Yes** or **No** for each child you ticked. The "
+"answers help the dojo team prepare; they never decide who gets a place."
+msgstr ""
+"Si le dojo pose quelques questions, par exemple si votre enfant apporte "
+"son propre ordinateur portable, répondez **Oui** ou **Non** pour chaque "
+"enfant coché. Les réponses aident l'équipe du dojo à se préparer ; elles "
+"ne décident jamais qui obtient une place."
+
+#: ../../source/families/signing-up-for-a-session.rst:15
+msgid ""
 "Submit. Each selected child is registered individually — a child already "
 "signed up for that session is skipped and flagged as such rather than "
 "double-booked."
@@ -58,7 +69,18 @@ msgstr ""
 "enfant déjà inscrit à cette séance est ignoré et signalé comme tel plutôt"
 " que d'être inscrit deux fois."
 
-#: ../../source/families/signing-up-for-a-session.rst:15
+#: ../../source/families/signing-up-for-a-session.rst:19
+msgid ""
+"If you forget to answer a question, the page tells you which one and "
+"keeps the children you ticked, in the order you ticked them, and the "
+"answers you already gave. The confirmation lists each child's answers."
+msgstr ""
+"Si vous oubliez de répondre à une question, la page vous indique laquelle"
+" et garde les enfants cochés, dans l'ordre où vous les avez cochés, ainsi"
+" que les réponses déjà données. La confirmation reprend les réponses de "
+"chaque enfant."
+
+#: ../../source/families/signing-up-for-a-session.rst:23
 msgid ""
 "A child with their own login (see :doc:`managing-your-account`) can also "
 "sign themselves up the same way; they only see themselves in the list."
@@ -67,11 +89,11 @@ msgstr ""
 "peut aussi s'inscrire lui-même de la même façon ; il ne voit que lui-même"
 " dans la liste."
 
-#: ../../source/families/signing-up-for-a-session.rst:19
+#: ../../source/families/signing-up-for-a-session.rst:27
 msgid "Mails about your booking"
 msgstr "E-mails concernant votre réservation"
 
-#: ../../source/families/signing-up-for-a-session.rst:21
+#: ../../source/families/signing-up-for-a-session.rst:29
 msgid ""
 "After you sign up, you (and any other parent on the account, plus a child"
 " with their own login and email) get a confirmation mail, or a waiting-"
@@ -86,7 +108,7 @@ msgstr ""
 " pouvez désactiver les rappels sur votre page **Préférences d'e-mail** "
 "(voir :doc:`mail-preferences`)."
 
-#: ../../source/families/signing-up-for-a-session.rst:27
+#: ../../source/families/signing-up-for-a-session.rst:35
 msgid ""
 "If a session shows **Registrations closed** instead of a sign-up option, "
 "the dojo has stopped taking new sign-ups for it (this normally happens "
@@ -99,11 +121,11 @@ msgstr ""
 "séance) — contactez directement l'équipe du dojo si vous avez encore "
 "besoin d'une place."
 
-#: ../../source/families/signing-up-for-a-session.rst:33
+#: ../../source/families/signing-up-for-a-session.rst:41
 msgid "Featured events"
 msgstr "Événements mis en avant"
 
-#: ../../source/families/signing-up-for-a-session.rst:35
+#: ../../source/families/signing-up-for-a-session.rst:43
 msgid ""
 "Some events are **featured**: CoderDojo Belgium highlights them for a "
 "while at the top of the homepage, first in **Upcoming sessions**, above "
@@ -118,11 +140,11 @@ msgstr ""
 "événement mis en avant comme à n'importe quel autre ; la mise en avant "
 "disparaît dès que l'événement commence."
 
-#: ../../source/families/signing-up-for-a-session.rst:42
+#: ../../source/families/signing-up-for-a-session.rst:50
 msgid "Events organised by CoderDojo Belgium"
 msgstr "Événements organisés par CoderDojo Belgium"
 
-#: ../../source/families/signing-up-for-a-session.rst:44
+#: ../../source/families/signing-up-for-a-session.rst:52
 msgid ""
 "Besides the sessions dojos run, CoderDojo Belgium organises a few events "
 "itself, such as CoderDojo Girlz and Coolest Projects. Their page says "
@@ -133,7 +155,7 @@ msgstr ""
 "Leur page indique **Organisé par CoderDojo Belgium** au lieu du nom d'un "
 "dojo."
 
-#: ../../source/families/signing-up-for-a-session.rst:48
+#: ../../source/families/signing-up-for-a-session.rst:56
 msgid ""
 "Some of these events take registrations on their own website. Their page "
 "then has a **Register on …** button that opens that website, instead of "
@@ -149,11 +171,11 @@ msgstr ""
 "de votre compte et vous ne recevez de notre part aucun e-mail sur cette "
 "inscription."
 
-#: ../../source/families/signing-up-for-a-session.rst:55
+#: ../../source/families/signing-up-for-a-session.rst:63
 msgid "Girls' sessions"
 msgstr "Séances pour filles"
 
-#: ../../source/families/signing-up-for-a-session.rst:57
+#: ../../source/families/signing-up-for-a-session.rst:65
 msgid ""
 "Some sessions are labelled **Girls' session**. They're aimed at girls, "
 "but the label never stops anyone from signing up."
@@ -162,11 +184,11 @@ msgstr ""
 "s'adressent aux filles, mais l'étiquette n'empêche jamais personne de "
 "s'inscrire."
 
-#: ../../source/families/signing-up-for-a-session.rst:61
+#: ../../source/families/signing-up-for-a-session.rst:69
 msgid "Waiting lists"
 msgstr "Listes d'attente"
 
-#: ../../source/families/signing-up-for-a-session.rst:63
+#: ../../source/families/signing-up-for-a-session.rst:71
 msgid ""
 "Sessions have a limited number of places. If a session is full when you "
 "sign up, your child is placed on the **waiting list** instead of being "
@@ -183,11 +205,11 @@ msgstr ""
 "séance est automatiquement confirmé, et nous vous l'annonçons par e-mail."
 " Aucune action de votre part n'est nécessaire."
 
-#: ../../source/families/signing-up-for-a-session.rst:71
+#: ../../source/families/signing-up-for-a-session.rst:79
 msgid "Cancelling"
 msgstr "Annuler"
 
-#: ../../source/families/signing-up-for-a-session.rst:73
+#: ../../source/families/signing-up-for-a-session.rst:81
 msgid ""
 "If your plans change, cancel from your family account page (see :doc"
 ":`managing-your-account`) rather than just not turning up — that's also "

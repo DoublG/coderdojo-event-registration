@@ -88,6 +88,8 @@ class StrNeverQueriesTests(TestCase):
             NinjaBelt,
             NinjaEngagement,
             NinjaEngagementChange,
+            Registration,
+            RegistrationAnswer,
             RegistrationCancellation,
             TeamAttendance,
         )
@@ -176,6 +178,23 @@ class StrNeverQueriesTests(TestCase):
                     attended=True,
                 ),
                 "piet at Run",
+            ),
+            (
+                RegistrationAnswer.objects.create(
+                    registration=Registration.objects.create(
+                        event=(
+                            asked := Event.objects.create(
+                                name="Asked", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()
+                            )
+                        ),
+                        ninja=ninja,
+                        waiting_list=False,
+                        position=1,
+                    ),
+                    question=asked.questions.create(text="Own laptop?"),
+                    answer=True,
+                ),
+                "Own laptop?: yes",
             ),
         ]
         from django.utils import translation
@@ -435,6 +454,8 @@ class AuditLogCoverageTests(TestCase):
         "events.NinjaEngagement": "rebuilt by the site every night",
         "events.NinjaEngagementChange": "written by the nightly rebuild; itself a history",
         "events.RegistrationCancellation": "itself a log of cancellations",
+        "events.EventQuestion": "the dojo's own text, like the event",
+        "events.RegistrationAnswer": "logistics answers (yes/no), no sensitive data",
         "geo.AdministrativeBoundary": "reference data, from seed files",
         "geo.Municipality": "reference data, from seed files",
         "mailing.BounceRecord": "written by the bounce processing; itself a log",
@@ -825,12 +846,13 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             AwardBeltForm,
             DojoCreateForm,
             DojoProfileForm,
+            EventQuestionForm,
             PromoteYouthMentorForm,
             TransferChampionForm,
         )
         from dojos.testing import make_dojo
         from events.forms import AssignBadgeForm, BadgeForm, EventForm
-        from events.models import Event, Registration
+        from events.models import Event, EventQuestion, Registration
         from mailing.forms import BlockAddressForm, NewTemplateForm, TemplateVersionForm
         from privacy.forms import ConfirmUsernameForm
         from reports.forms import ReportForm
@@ -862,6 +884,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             RegisterIndividualForm(),
             DojoProfileForm(instance=make_dojo("Antwerp")),
             EventForm(dojo=bruges, instance=Event(dojo=bruges)),
+            EventQuestionForm(question=EventQuestion(event=Event(dojo=bruges))),
             CampaignForm(),
             JourneyForm(),
             SegmentForm(),

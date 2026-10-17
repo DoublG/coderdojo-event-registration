@@ -9,7 +9,7 @@ from django.utils import timezone
 from core.audit import without_audit_log
 from core.image_library import use_library_image
 from dojos.models import Dojo
-from events.models import Event
+from events.models import Event, EventQuestion
 from events.template_images import TEMPLATE_IMAGES
 from pathways.models import Pathway
 
@@ -41,6 +41,12 @@ SESSION_NAMES = [label for _filename, label in TEMPLATE_IMAGES]
 
 # Share of upcoming seeded sessions labelled as girls' sessions.
 GIRLS_SESSION_SHARE = 0.06
+
+# About half the upcoming sessions ask families a yes/no question on the
+# sign-up (events.questions, DATA_MODEL.md §29): the laptop question that
+# started it. Dutch/French in pages/seed_translations.py.
+LAPTOP_QUESTION = "Will your child bring their own laptop?"
+LAPTOP_QUESTION_SHARE = 0.5
 
 # A minority of weekend dojos run a second track the same day — a later
 # session, or (see PARALLEL_TRACK_SHARE) a second group meeting at the very
@@ -265,6 +271,14 @@ class Command(BaseCommand):
                 event.audience = Event.GIRLS
                 event.name = f"CoderDojo Girlz: {event.name}"
                 event.save(update_fields=["audience", "name"])
+
+        # The laptop question, found by event + position (rerun-safe, and
+        # never touches a question the team changed). Per-event RNG.
+        for event in Event.objects.filter(
+            status=Event.OPEN, start_time__gte=timezone.now(), external_registration_url=""
+        ):
+            if random.Random(f"event-laptop-question-{event.id}").random() < LAPTOP_QUESTION_SHARE:
+                EventQuestion.objects.get_or_create(event=event, position=1, defaults={"text": LAPTOP_QUESTION})
 
         # Backfill: events seeded before Event.image existed have no
         # banner yet — give them one based on their (already-set) name.

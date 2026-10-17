@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 
 from events import attendance
+from events import questions as event_questions
 from events.awards import BadgeError, BeltError, award_badge, award_belt
 from events.models import Badge, Belt, Event, NinjaEngagement, Registration
 from pathways.models import Pathway
@@ -37,11 +38,12 @@ def _attendance_context(event):
     registrations = list(
         event.registration_set.filter(waiting_list=False)
         .select_related("ninja", "ninja__home_dojo")
-        .prefetch_related("pathways", "ninja__belts__belt", "ninja__badges")
+        .prefetch_related("pathways", "ninja__belts__belt", "ninja__badges", "answers")
         .order_by("ninja__name", "ninja__family_name")
     )
     event_pathway_ids = set(event.pathways.values_list("id", flat=True))
     team_rows = _team_attendance_rows(event)
+    questions = list(event.questions.all())
     return {
         "event": event,
         "registrations": registrations,
@@ -51,6 +53,15 @@ def _attendance_context(event):
         "team_present_count": sum(1 for row in team_rows if row["attended"]),
         # For each row's pathway picker: every pathway, the session's own first.
         "event_pathway_ids": event_pathway_ids,
+        # The session's yes/no sign-up questions (events.questions): each
+        # row's answers by registration id ({question_id: bool}; a question
+        # missing there was added after the child signed up), and the totals
+        # for the confirmed places.
+        "questions": questions,
+        "answers_by_registration": {
+            r.id: {answer.question_id: answer.answer for answer in r.answers.all()} for r in registrations
+        },
+        "question_totals": event_questions.totals(event) if questions else [],
         "all_pathways": sorted(Pathway.objects.all(), key=lambda p: (p.id not in event_pathway_ids, p.name)),
         # Each row's "Award belt" and "Award badge" forms, for a ninja with
         # something left to award: belts above their current one, one-off

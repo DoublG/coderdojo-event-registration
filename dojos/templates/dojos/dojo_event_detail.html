@@ -27,6 +27,21 @@
   .event-promotions-card__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
   .event-promotions-card__list { list-style: none; margin: var(--space-3) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
   .event-promotions-card__empty { margin: var(--space-3) 0 0; }
+  .event-questions-card { margin-bottom: var(--space-5); max-width: 720px; }
+  .event-questions-card__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+  .event-questions-card__head h2 { margin: 0; }
+  .event-questions-card__count, .event-questions-card__help, .event-question__totals { color: var(--ink-muted); }
+  .event-questions-card__help { margin: var(--space-1) 0 0; }
+  .event-questions-card__list { list-style: none; margin: var(--space-3) 0 0; padding: 0; display: flex; flex-direction: column; }
+  .event-question { padding: var(--space-3) 0; border-top: 1px solid var(--border); }
+  .event-question__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+  .event-question__text { flex: 1 1 16rem; min-width: 0; overflow-wrap: anywhere; }
+  .event-question__actions { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+  .event-question__totals { margin: var(--space-1) 0 0; }
+  .event-question__edit, .event-questions-card__add { margin-top: var(--space-2); }
+  .event-question__edit summary, .event-questions-card__add summary { cursor: pointer; min-height: 24px; color: var(--secondary); }
+  .event-question__edit .cd-form, .event-questions-card__add .cd-form { margin-top: var(--space-3); }
+  .event-questions-card__empty { margin: var(--space-3) 0 0; }
 </style>
 {% endblock %}
 
@@ -74,6 +89,10 @@
       {% translate "You can switch between any of these at any time — existing registrations are always kept." %}
     </p>
   </div>
+
+  {% if questions_shown %}
+    {% include "dojos/partials/_event_questions.html" %}
+  {% endif %}
 
   {% if can_promote %}
     {% include "dojos/partials/_event_promotions.html" %}

@@ -1,0 +1,86 @@
+{% load i18n %}{% comment %}
+The event page's Sign-up questions card (dojos.views.event_pages._questions_context,
+DATA_MODEL.md §29): yes/no questions families answer for each child they sign
+up, with the answers so far. Every form posts to its own view and, with htmx,
+gets this card back; without JavaScript it goes back to the event's page.
+{% endcomment %}
+<div class="cd-card event-questions-card" id="event-questions">
+  <div class="event-questions-card__head">
+    <h2 class="cd-form__label label">{% translate "Sign-up questions" %}</h2>
+    <span class="caption event-questions-card__count">{% blocktranslate with count=question_rows|length max=max_questions %}{{ count }} of {{ max }}{% endblocktranslate %}</span>
+  </div>
+  <p class="caption event-questions-card__help">{% translate "Families answer each question with yes or no for every child they sign up, e.g. whether they bring their own laptop. The answers show on the attendance list. They never decide who gets a place." %}</p>
+
+  {% if question_rows %}
+    <ol class="event-questions-card__list">
+      {% for row in question_rows %}{% with question=row.question %}
+        <li class="event-question">
+          <div class="event-question__head">
+            <span class="body-sm event-question__text">{{ question.text }}</span>
+            <div class="event-question__actions">
+              {% if not forloop.first %}
+                <form method="post" action="{% url 'dojo_event_question_move' dojo_id=dojo.id event_id=event.id question_id=question.id %}"
+                      hx-post="{% url 'dojo_event_question_move' dojo_id=dojo.id event_id=event.id question_id=question.id %}" hx-target="#event-questions" hx-swap="outerHTML">
+                  {% csrf_token %}<input type="hidden" name="direction" value="up">
+                  <button type="submit" class="cd-btn cd-btn--ghost label" aria-label="{% blocktranslate with text=question.text %}Move up: {{ text }}{% endblocktranslate %}">↑</button>
+                </form>
+              {% endif %}
+              {% if not forloop.last %}
+                <form method="post" action="{% url 'dojo_event_question_move' dojo_id=dojo.id event_id=event.id question_id=question.id %}"
+                      hx-post="{% url 'dojo_event_question_move' dojo_id=dojo.id event_id=event.id question_id=question.id %}" hx-target="#event-questions" hx-swap="outerHTML">
+                  {% csrf_token %}<input type="hidden" name="direction" value="down">
+                  <button type="submit" class="cd-btn cd-btn--ghost label" aria-label="{% blocktranslate with text=question.text %}Move down: {{ text }}{% endblocktranslate %}">↓</button>
+                </form>
+              {% endif %}
+              <form method="post" action="{% url 'dojo_event_question_remove' dojo_id=dojo.id event_id=event.id question_id=question.id %}"
+                    hx-post="{% url 'dojo_event_question_remove' dojo_id=dojo.id event_id=event.id question_id=question.id %}" hx-target="#event-questions" hx-swap="outerHTML"
+                    data-confirm="{% if question.answer_count %}{% blocktranslate asvar confirm_msg count counter=question.answer_count %}Remove this question? Its {{ counter }} answer is deleted with it.{% plural %}Remove this question? Its {{ counter }} answers are deleted with it.{% endblocktranslate %}{% else %}{% translate "Remove this question?" as confirm_msg %}{% endif %}{{ confirm_msg }}">
+                {% csrf_token %}
+                <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Remove" %}</button>
+              </form>
+            </div>
+          </div>
+          {% if row.totals %}{% with t=row.totals %}
+            <p class="caption event-question__totals">
+              {% blocktranslate with yes=t.yes no=t.no %}Confirmed: {{ yes }} yes · {{ no }} no{% endblocktranslate %}{% if t.waiting_yes or t.waiting_no %} · {% blocktranslate with yes=t.waiting_yes no=t.waiting_no %}waiting list: {{ yes }} yes · {{ no }} no{% endblocktranslate %}{% endif %}
+            </p>
+          {% endwith %}{% endif %}
+          <details class="event-question__edit"{% if row.open %} open{% endif %}>
+            <summary class="caption">{% translate "Edit" %}</summary>
+            <form class="cd-form" method="post" action="{% url 'dojo_event_question_edit' dojo_id=dojo.id event_id=event.id question_id=question.id %}"
+                  hx-post="{% url 'dojo_event_question_edit' dojo_id=dojo.id event_id=event.id question_id=question.id %}" hx-target="#event-questions" hx-swap="outerHTML" novalidate>
+              {% csrf_token %}
+              {{ row.form.text.as_field_group }}
+              {% include "dojos/partials/_translation_fields.html" with form=row.form %}
+              {% if question.answer_count %}
+                <p class="cd-form__help caption">{% blocktranslate count counter=question.answer_count %}{{ counter }} answer was given to the current wording. To ask something else, remove this question and add a new one.{% plural %}{{ counter }} answers were given to the current wording. To ask something else, remove this question and add a new one.{% endblocktranslate %}</p>
+              {% endif %}
+              <div class="cd-form__actions">
+                <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Save question" %}</button>
+              </div>
+            </form>
+          </details>
+        </li>
+      {% endwith %}{% endfor %}
+    </ol>
+  {% else %}
+    <p class="body-sm event-questions-card__empty">{% translate "No questions: families only pick which children come." %}</p>
+  {% endif %}
+
+  {% if question_add_form %}
+    <details class="event-questions-card__add"{% if question_add_form.errors %} open{% endif %}>
+      <summary class="label">{% translate "Add a question" %}</summary>
+      <form class="cd-form" method="post" action="{% url 'dojo_event_question_add' dojo_id=dojo.id event_id=event.id %}"
+            hx-post="{% url 'dojo_event_question_add' dojo_id=dojo.id event_id=event.id %}" hx-target="#event-questions" hx-swap="outerHTML" novalidate>
+        {% csrf_token %}
+        {{ question_add_form.text.as_field_group }}
+        {% include "dojos/partials/_translation_fields.html" with form=question_add_form %}
+        <div class="cd-form__actions">
+          <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Add question" %}</button>
+        </div>
+      </form>
+    </details>
+  {% else %}
+    <p class="caption event-questions-card__empty">{% blocktranslate with max=max_questions %}A session can have at most {{ max }} questions.{% endblocktranslate %}</p>
+  {% endif %}
+</div>

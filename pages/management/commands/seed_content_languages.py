@@ -24,7 +24,7 @@ from content.models import FAQ, Announcement, OrganisationTeamMember, Promotion,
 from core.audit import without_audit_log
 from dojos.languages import region_languages
 from dojos.models import Dojo
-from events.models import Badge, Belt, Event
+from events.models import Badge, Belt, Event, EventQuestion
 from geo.functions import DistanceSphere
 from pages.seed_translations import EN, FR, GIRLZ_PREFIX, NL, translate, translate_session_description
 from pathways.models import Pathway, PathwayProject, PathwayStep, Skill
@@ -120,6 +120,8 @@ class Command(BaseCommand):
         for event in Event.objects.select_related("dojo"):
             n += localize(event, ["description", "name"], event_translator(event))
         counts["sessions"] = n
+
+        run("sign-up questions", EventQuestion.objects.all(), ["text"])
 
         n = 0
         for announcement in Announcement.objects.select_related("dojo"):

@@ -443,16 +443,32 @@ class SignUpForm(forms.Form):
     order they were ticked. The page renders its own checkboxes (CLAUDE.md,
     "Forms": the event sign-up's children stay hand-written); this form only
     reads and checks them. `cleaned_data["selected"]` is the children, in
-    order."""
+    order.
+
+    With the session's yes/no `questions` (events.questions), each ticked
+    child answers each one: `q-<child id>-<question id>` = yes|no.
+    `cleaned_data["answers"]` is {child_id: {question_id: bool}}; a missing
+    answer is in `question_errors` as (child id, question id)."""
 
     child = _AnyOfMultipleChoiceField(required=False)
     # The order the boxes were ticked in, tracked by bundle.js: a checkbox
     # list is always submitted in page order, whatever the click order.
     child_order = forms.CharField(required=False)
 
-    def __init__(self, *args, children, **kwargs):
+    def __init__(self, *args, children, questions=(), **kwargs):
         super().__init__(*args, **kwargs)
         self.children = {str(child.id): child for child in children}
+        self.questions = list(questions)
+        self.question_errors = set()
+
+    @staticmethod
+    def answer_name(child_id, question_id):
+        return f"q-{child_id}-{question_id}"
+
+    def posted_answer(self, child_id, question_id):
+        """ "yes", "no" or "" as posted, to fill the page in again."""
+        value = self.data.get(self.answer_name(child_id, question_id)) if self.is_bound else None
+        return value if value in ("yes", "no") else ""
 
     def ticked_ids(self):
         """The ids of this account's ticked children, in the order they were
@@ -471,4 +487,16 @@ class SignUpForm(forms.Form):
         if not selected:
             raise forms.ValidationError(_("Please select at least one child."))
         data["selected"] = selected
+        answers = {}
+        for child in selected:
+            answers[child.id] = {}
+            for question in self.questions:
+                value = self.posted_answer(child.id, question.id)
+                if value:
+                    answers[child.id][question.id] = value == "yes"
+                else:
+                    self.question_errors.add((child.id, question.id))
+        if self.question_errors:
+            raise forms.ValidationError(_("Answer every question for each child you sign up."))
+        data["answers"] = answers
         return data

@@ -184,6 +184,7 @@ files = [
     "events/attendance.py",
     "events/awards.py",
     "events/engagement.py",
+    "events/questions.py",
     "events/registrations.py",
     "events/search.py",
     "events/tasks.py",

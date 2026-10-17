@@ -1184,6 +1184,11 @@ a.cd-sponsor-logo:hover { border-color: var(--ink-muted); color: var(--ink); }
 .cd-attendance__person { display: flex; flex-direction: column; gap: 2px; min-width: 120px; }
 .cd-attendance__name { color: var(--ink); }
 .cd-attendance__meta { color: var(--ink-muted); }
+/* The session's yes/no sign-up questions (events.questions): totals above
+   the list, each child's answers as badges with the question shortened. */
+.cd-attendance__questions { list-style: none; margin: var(--space-1) 0 0; padding: 0; color: var(--ink-muted); }
+.cd-attendance__answers { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-1); }
+.cd-attendance__answer-q { display: inline-block; max-width: 14em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
 
 /* A two-button segmented toggle, sized for a thumb — this is the whole point
    of the component, so it's the biggest tap target on the row. */

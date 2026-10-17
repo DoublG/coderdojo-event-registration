@@ -35,9 +35,14 @@ from .common import (  # noqa: F401
 )
 from .event_pages import (  # noqa: F401
     _event_promotions_context,
+    _questions_context,
     dojo_event_create,
     dojo_event_detail,
     dojo_event_list,
+    dojo_event_question_add,
+    dojo_event_question_edit,
+    dojo_event_question_move,
+    dojo_event_question_remove,
     dojo_event_set_status,
 )
 from .profile import (  # noqa: F401

@@ -2726,7 +2726,7 @@ role. Full design, decisions, phases and open points are in
 `DATA_MODEL_ROLES.md`.
 
 
-## 29. Yes/no questions on a session's sign-up (not built — plan)
+## 29. Yes/no questions on a session's sign-up (phase 1 built)
 
 A dojo team can ask families a few yes/no questions when they sign a child
 up for a session. The example that started it: *"Will your child bring
@@ -2897,9 +2897,40 @@ Phase 2.
 
 1. Models, `events/questions.py`, the team's card, the sign-up page,
    answers and totals on the attendance list, privacy, admin, seeders,
-   tests, docs. That's the whole laptop case.
+   tests, docs. That's the whole laptop case. **Built** (17 October 2026).
 2. Changing answers from the account page, answers in the booking mails,
    the API.
+
+### Built so far (phase 1)
+
+As planned above, with these choices made while building it:
+
+- **Showing the questions only for ticked children is CSS, not script**:
+  `.child-signup:not(:has(input[name="child"]:checked)) .child-questions`
+  hides them, so the page's script is untouched and a browser without
+  `:has` simply shows every child's questions. The server only asks
+  answers of the ticked children.
+- **The sign-up's errors**: `SignUpForm` (`questions=`) reads
+  `q-<child id>-<question id>`, marks each missing one in
+  `question_errors` and gives one message at the top ("Answer every
+  question for each child you sign up."); the view turns the form into
+  per-child fields (`events.views._question_fields`: value and error), so
+  the page shows "Answer this question." under each missing one with the
+  given answers kept. `registrations.QuestionsChanged` (a
+  `RegistrationError`) is the lock's check; the page then comes back with
+  the questions as they are now.
+- **The team's card** (`dojos/partials/_event_questions.html`,
+  `dojos.views.event_pages._questions_context`) shows the totals per
+  question in the card itself; a plain post without JavaScript redirects
+  to `#event-questions`, or shows the event page with the form's error.
+  The form is `dojos.forms.EventQuestionForm` (a plain `Form`, prefixed per
+  question so several sit on one page).
+- **Admin**: `EventQuestion` is an inline on the Event admin (position and
+  text) and has its own admin page with `TranslationAdminMixin` for its
+  other languages; `RegistrationAnswer` is an inline on the Registration
+  admin and has its own page too.
+- **Open points**: taken as planned (copy from the last session; answers
+  not in the audit log; at most 5).
 
 ### Open points
 

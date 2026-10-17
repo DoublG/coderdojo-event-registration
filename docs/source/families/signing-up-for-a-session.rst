@@ -8,9 +8,17 @@ You'll need to be logged in to your family account to sign up (see
    homepage's **Upcoming sessions**.
 #. Open the session and tick which of your children you'd like to sign
    up for it. You can select more than one at a time.
+#. If the dojo asks a few questions, such as whether your child brings
+   their own laptop, answer **Yes** or **No** for each child you ticked.
+   The answers help the dojo team prepare; they never decide who gets a
+   place.
 #. Submit. Each selected child is registered individually — a child
    already signed up for that session is skipped and flagged as such
    rather than double-booked.
+
+If you forget to answer a question, the page tells you which one and keeps
+the children you ticked, in the order you ticked them, and the answers you
+already gave. The confirmation lists each child's answers.
 
 A child with their own login (see :doc:`managing-your-account`) can also
 sign themselves up the same way; they only see themselves in the list.

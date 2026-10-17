@@ -60,6 +60,26 @@ urlpatterns = [
         name="dojo_event_attendance_mark",
     ),
     path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/questions/",
+        views.dojo_event_question_add,
+        name="dojo_event_question_add",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/questions/<int:question_id>/",
+        views.dojo_event_question_edit,
+        name="dojo_event_question_edit",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/questions/<int:question_id>/remove/",
+        views.dojo_event_question_remove,
+        name="dojo_event_question_remove",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/questions/<int:question_id>/move/",
+        views.dojo_event_question_move,
+        name="dojo_event_question_move",
+    ),
+    path(
         "dojos/<int:dojo_id>/events/<int:event_id>/status/",
         views.dojo_event_set_status,
         name="dojo_event_set_status",
