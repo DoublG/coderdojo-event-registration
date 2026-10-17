@@ -464,9 +464,9 @@ constantly==23.10.4 \
     # via
     #   -r requirements.in
     #   twisted
-cron-descriptor==2.1.1 \
-    --hash=sha256:0f55b469bb81f8c60602baebc08a78fc3b1eb234805793a08a4862f336760390 \
-    --hash=sha256:7b5c96495ce75a0dc368db4c613aa4346099363b40d4baa7945b0ff2bedb8dac
+cron-descriptor==2.2.1 \
+    --hash=sha256:23b42aca983841333aaf28095024e0457f005621d03e658edbd7316a5f2bbd42 \
+    --hash=sha256:6759056f43b3cabca274b5df182bb63571f2f383bdd4d9d3ff4662c527430a65
     # via
     #   -r requirements.in
     #   django-celery-beat
@@ -656,9 +656,9 @@ kombu==5.6.2 \
     # via
     #   -r requirements.in
     #   celery
-markdown==3.11 \
-    --hash=sha256:180224db6aed87ba9ce1f2781ebcd5826253de8ff637112090e24b84502bbf9f \
-    --hash=sha256:cd6c89e7eb308c8b332ed673215a52d208a43f8bacc030b1419376129408719e
+markdown==3.11.1 \
+    --hash=sha256:496f4f80f9ebd3395a04c8ec9595c40bbe8ec19e9c67d21fe071a1643e876606 \
+    --hash=sha256:f1fa378ba5d682900c9ecb55ccceacca936016dda7c3b27097e8ae03ff78feb5
     # via -r requirements.in
 msgpack==1.2.3 \
     --hash=sha256:07c9733089d1b176c3dd2f7fa268452f9d5d784d076473499d754a58e8d1fbbb \
