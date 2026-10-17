@@ -24,6 +24,9 @@ updates:
       # radon 6.0.1 needs mando<0.8.
       - dependency-name: mando
         versions: [">=0.8"]
+      # Sphinx 9.1.0 needs docutils<0.23: drop this once a Sphinx release allows it.
+      - dependency-name: docutils
+        versions: [">=0.23"]
     groups:
       python-minor-and-patch:
         update-types: [minor, patch]
