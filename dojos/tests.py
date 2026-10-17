@@ -1,3 +1,5 @@
+import re
+from collections import Counter
 from datetime import date, datetime, time, timedelta
 from unittest.mock import patch
 
@@ -3182,6 +3184,17 @@ class HealthNotesOnAttendanceTests(TestCase):
         self.assertNotContains(self.client.get(self.url), "cd-attendance__health")
 
 
+def _query_difference(before, after):
+    """The queries only one of two captures ran, numbers left out, for a
+    failure message: this test failed on CI now and then, never locally."""
+
+    def count(capture):
+        return Counter(re.sub(r"\b\d+\b", "N", query["sql"]) for query in capture.captured_queries)
+
+    first, second = count(before), count(after)
+    return f"Only in the first: {dict(first - second)}\nOnly in the second: {dict(second - first)}"
+
+
 class DojoEventQuestionsTests(TestCase):
     """The event page's Sign-up questions card (DATA_MODEL.md §29) and the
     answers on the attendance list."""
@@ -3347,7 +3360,7 @@ class DojoEventQuestionsTests(TestCase):
             add_child(n)
         with CaptureQueriesContext(connection) as five:
             self.client.get(url)
-        self.assertEqual(len(five.captured_queries), len(one.captured_queries))
+        self.assertEqual(len(five.captured_queries), len(one.captured_queries), _query_difference(one, five))
 
 
 class DojoDefaultQuestionsTests(TestCase):
