@@ -757,6 +757,10 @@ OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
 # Requests per client (ninja's throttling, on the cache).
 API_RATE_LIMIT = "600/m"
 
+# The yes/no sign-up questions (events.questions, DATA_MODEL.md §29): at most
+# this many per session, and as a dojo's default questions.
+SIGNUP_QUESTIONS_MAX = env.int("SIGNUP_QUESTIONS_MAX", default=5)
+
 # Retention (privacy.retention, DATA_MODEL.md §16 phase 4). An account is
 # deleted (a champion's or mentor's cleaned) this long after its last login,
 # with reminder mails this many days before, and never sooner than

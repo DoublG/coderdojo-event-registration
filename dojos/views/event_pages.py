@@ -1,5 +1,6 @@
 """A dojo's sessions in its admin area: the events list, creating and editing a
-session, its status, and the organisation's Promotions card."""
+session, its status (its sign-up questions card is .questions), and the
+organisation's Promotions card."""
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
@@ -8,6 +9,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 from accounts.organisation import Area, has_area
 from content.manage import promotion_state
+from events import questions as event_questions
 from events.forms import EventForm
 from events.models import Event
 
@@ -16,6 +18,7 @@ from ..access import (
     require_dojo_access,
 )
 from .common import _admin_context
+from .questions import questions_context
 
 
 @login_required
@@ -46,7 +49,9 @@ def dojo_event_create(request, dojo_id):
     if request.method == "POST":
         form = EventForm(request.POST, request.FILES, instance=Event(dojo=dojo), dojo=dojo)
         if form.is_valid():
-            form.save()
+            event = form.save()
+            # Starts with the dojo's default questions (changeable on its page).
+            event_questions.copy_defaults(event)
             return redirect("dojo_event_list", dojo_id=dojo.id)
     else:
         form = EventForm(instance=Event(dojo=dojo), dojo=dojo)
@@ -56,6 +61,7 @@ def dojo_event_create(request, dojo_id):
         "dojos/dojo_event_create.html",
         {
             "form": form,
+            "copies_questions": dojo.default_questions.exists(),
             "active": "events",
             **_admin_context(request, access),
         },
@@ -93,6 +99,7 @@ def dojo_event_detail(request, dojo_id, event_id):
             "form": form,
             "saved": saved,
             "active": "events",
+            **questions_context(event),
             **_event_promotions_context(request, event),
             **_admin_context(request, access),
         },

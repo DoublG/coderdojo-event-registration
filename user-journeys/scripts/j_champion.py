@@ -1,13 +1,14 @@
-from lib import BASE, Journey, django, mail_ids, mail_shot, sync_playwright  # noqa: F401
+from lib import BASE, Journey, django, laptop_question, mail_ids, mail_shot, sync_playwright  # noqa: F401
 
 with sync_playwright() as pw:
+    laptop_question(76, answer_places=True)
     j = Journey("champion", pw)
     j.login("owner-51-dojo-westerlo")
     p = j.go("/dojos/51/dashboard/")
     j.shot(
         "dashboard",
         "The dojo dashboard",
-        "The champion's home: the next session's attendance, a banner if the dojo isn't active, and the six-month dormancy nudge when the dojo has gone quiet.",
+        "The champion's home: what needs attention (join requests, unmarked attendance, drafts or sessions without a team, the team's background checks running out), the next session with its places and sign-up answers, the coming sessions as an agenda, the ninjas as counts per stage and the year's figures.",
         max_h=1800,
     )
     p = j.go("/dojos/51/manage/")
@@ -16,6 +17,12 @@ with sync_playwright() as pw:
         "Dojo settings",
         "At the top, the dojo's status: only the champion launches the dojo, marks it dormant or archives it (never with open sessions) and reopens it. Below, everything on the dojo's public page: name, description in each of the dojo's languages, icon, address (re-geocoded on save), contact details and pathways.",
         max_h=2600,
+    )
+    j.shot(
+        "default-questions",
+        "Default sign-up questions",
+        "Below the profile, the dojo's default sign-up questions: yes/no questions every new session starts with (here the laptop question), in each of the dojo's languages. Each session can change them on its own page.",
+        selector="#default-questions",
     )
     p = j.go("/dojos/51/events/")
     j.shot(
@@ -28,21 +35,21 @@ with sync_playwright() as pw:
     j.shot(
         "new-event",
         "Planning a new session",
-        "A new session: date and times (Belgian notation), places, age range, audience (e.g. a girls' session), a banner from the image library or an upload, the team running it and the pathways. It starts as a draft; publishing opens registrations and the families get the new-sessions mail.",
+        "A new session: date and times (Belgian notation), places, age range, audience (e.g. a girls' session), a banner from the image library or an upload, the team running it and the pathways. It starts with the dojo's default sign-up questions, and as a draft; publishing opens registrations and the families get the new-sessions mail.",
         max_h=2800,
     )
     p = j.go("/dojos/51/events/76/")
     j.shot(
         "event",
         "A full session with a waiting list",
-        "The session page shows places taken and the waiting list; when a family cancels, the first child waiting is promoted and their family is mailed.",
+        "The session page shows places taken and the waiting list; when a family cancels, the first child waiting is promoted and their family is mailed. Its Sign-up questions card asks families yes/no questions per child (here the laptop question), with the totals for confirmed places and the waiting list.",
         max_h=2200,
     )
     p = j.go("/dojos/51/events/76/attendance/")
     j.shot(
         "attendance",
         "Attendance with health notes",
-        "The champion's attendance list also shows the family's allergy and health notes, only for children with a confirmed place, and every view of them is recorded in the audit log.",
+        "The champion's attendance list also shows the family's allergy and health notes, only for children with a confirmed place, and every view of them is recorded in the audit log. The answers to the sign-up questions are on each row, with the totals at the top.",
         max_h=2000,
     )
     p = j.go("/dojos/51/manage/team/")

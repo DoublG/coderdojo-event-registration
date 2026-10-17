@@ -191,11 +191,13 @@ def event_signup(request, event_id):
     # An adult account signs up its own ninjas; a ninja's own login signs up
     # itself (Ninja.objects.signable_by).
     guardian = request.user
-    results = error = None
+    results = error = form = None
     ticked = []
+    # The session's yes/no questions (events.questions), answered per child.
+    questions = list(event.questions.all())
 
     if request.method == "POST":
-        form = SignUpForm(request.POST, children=Ninja.objects.signable_by(guardian))
+        form = SignUpForm(request.POST, children=Ninja.objects.signable_by(guardian), questions=questions)
         if not event.registration_open:
             error = _("Registrations for this session are closed.")
         elif not form.is_valid():
@@ -204,9 +206,19 @@ def event_signup(request, event_id):
             # Places, positions and "already signed up" are decided under the
             # session's lock (events.registrations), not from what this page read.
             try:
-                results = registrations.sign_up(event, form.cleaned_data["selected"])
+                results = registrations.sign_up(
+                    event, form.cleaned_data["selected"], answers=form.cleaned_data["answers"]
+                )
             except registrations.RegistrationError as problem:
                 error = str(problem)
+                if isinstance(problem, registrations.QuestionsChanged):
+                    # Shown again with the questions as they are now.
+                    questions = list(event.questions.all())
+        if results and questions:
+            given = form.cleaned_data["answers"]
+            for result in results:
+                child_answers = given.get(result["child"].id, {})
+                result["answers"] = [(q, child_answers[q.id]) for q in questions if q.id in child_answers]
 
     # Read after a sign-up, so the children just signed up show as such
     # (e.g. back on this form through the browser's back button).
@@ -216,7 +228,11 @@ def event_signup(request, event_id):
         # order they were ticked (who gets a place, who waits).
         ticked = [int(cid) for cid in form.ticked_ids() if int(cid) not in existing_registrations]
     children = [
-        {"child": child, "registration": existing_registrations.get(child.id)}
+        {
+            "child": child,
+            "registration": existing_registrations.get(child.id),
+            "questions": _question_fields(questions, child, form if error else None),
+        }
         for child in Ninja.objects.signable_by(guardian)
     ]
     all_registered = bool(children) and all(entry["registration"] for entry in children)
@@ -236,5 +252,21 @@ def event_signup(request, event_id):
             "any_waitlisted": any_waitlisted,
             "error": error,
             "ticked": ticked,
+            "has_questions": bool(questions),
         },
     )
+
+
+def _question_fields(questions, child, form):
+    """One child's questions on the sign-up page: [{"question", "name",
+    "value" ("yes", "no" or ""), "error"}]. Shown again after an error with
+    the answers given and the missing ones marked."""
+    return [
+        {
+            "question": question,
+            "name": SignUpForm.answer_name(child.id, question.id),
+            "value": form.posted_answer(child.id, question.id) if form is not None else "",
+            "error": form is not None and (child.id, question.id) in form.question_errors,
+        }
+        for question in questions
+    ]

@@ -18,9 +18,9 @@ from dojos.search import DEFAULT_SEARCH_ORIGIN, dojos_by_distance
 from dojos.testing import make_dojo
 from pathways.models import Pathway
 
-from . import registrations
+from . import questions, registrations
 from .engagement import is_aimed_at
-from .models import Badge, Belt, Event, NinjaBadge, Registration, RegistrationCancellation
+from .models import Badge, Belt, Event, NinjaBadge, Registration, RegistrationAnswer, RegistrationCancellation
 from .search import CACHE_KEY, upcoming_available_events
 
 
@@ -1498,3 +1498,350 @@ class SeedUpcomingRegistrationsTests(TestCase):
         count = Registration.objects.count()
         self._seed()
         self.assertEqual(Registration.objects.count(), count)
+
+
+class SignUpQuestionsTests(TestCase):
+    """events.questions and the answers saved by events.registrations.sign_up
+    (DATA_MODEL.md §29)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.dojo = make_dojo("Ghent")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
+        cls.children = [Ninja.objects.create(name=f"Kid {n}") for n in range(3)]
+        for child in cls.children:
+            Guardianship.objects.create(guardian=cls.guardian, ninja=child)
+
+    def test_at_most_five_questions(self):
+        event = _future_event(self.dojo)
+        for n in range(5):
+            questions.add_question(event, f"Question {n}?")
+        with self.assertRaisesMessage(questions.QuestionError, "At most 5"):
+            questions.add_question(event, "One too many?")
+        self.assertEqual(event.questions.count(), 5)
+
+    def test_the_maximum_comes_from_the_settings(self):
+        event = _future_event(self.dojo)
+        with self.settings(SIGNUP_QUESTIONS_MAX=1):
+            questions.add_question(event, "Own laptop?")
+            with self.assertRaisesMessage(questions.QuestionError, "At most 1"):
+                questions.add_question(event, "Lunch?")
+            # The dojo's defaults too.
+            questions.add_question(self.dojo, "Own laptop?")
+            with self.assertRaisesMessage(questions.QuestionError, "At most 1"):
+                questions.add_question(self.dojo, "Lunch?")
+
+    def test_a_question_needs_text_and_a_session_that_signs_up_here(self):
+        event = _future_event(self.dojo)
+        with self.assertRaises(questions.QuestionError):
+            questions.add_question(event, "   ")
+        external = _future_event(self.dojo, external_registration_url="https://example.com/")
+        with self.assertRaises(questions.QuestionError):
+            questions.add_question(external, "Own laptop?")
+
+    def test_translations_are_kept_for_the_dojos_other_languages(self):
+        self.dojo.languages = ["nl-be", "fr-be"]
+        self.dojo.save()
+        event = _future_event(self.dojo)
+        question = questions.add_question(event, "Eigen laptop?", {"fr-be": "Propre ordinateur ?", "en-us": "x"})
+        self.assertEqual(question.translations, {"fr-be": {"text": "Propre ordinateur ?"}})
+
+    def test_moving_and_removing(self):
+        event = _future_event(self.dojo)
+        first = questions.add_question(event, "First?")
+        second = questions.add_question(event, "Second?")
+        questions.move_question(second, "up")
+        self.assertEqual([q.text for q in event.questions.all()], ["Second?", "First?"])
+        questions.move_question(second, "up")  # already first: nothing changes
+        self.assertEqual([q.text for q in event.questions.all()], ["Second?", "First?"])
+        registration = registrations.sign_up(
+            event, self.children[:1], answers={self.children[0].id: {first.id: True, second.id: False}}
+        )[0]["registration"]
+        questions.remove_question(first)
+        self.assertEqual(list(registration.answers.values_list("question", flat=True)), [second.id])
+
+    def test_sign_up_saves_every_childs_answers(self):
+        event = _future_event(self.dojo, places=1)
+        laptop = questions.add_question(event, "Own laptop?")
+        a, b = self.children[:2]
+        results = registrations.sign_up(event, [a, b], answers={a.id: {laptop.id: True}, b.id: {laptop.id: False}})
+        self.assertEqual(
+            {r["child"].id: list(r["registration"].answers.values_list("answer", flat=True)) for r in results},
+            {a.id: [True], b.id: [False]},
+        )
+        self.assertEqual(
+            questions.totals(event),
+            [{"question": laptop, "yes": 1, "no": 0, "waiting_yes": 0, "waiting_no": 1}],
+        )
+
+    def test_a_missing_answer_saves_nothing(self):
+        """A question added while the form was open: its answer is missing,
+        so nobody is signed up and the family checks the questions again."""
+        event = _future_event(self.dojo)
+        laptop = questions.add_question(event, "Own laptop?")
+        added_later = questions.add_question(event, "Staying for lunch?")
+        a = self.children[0]
+        with self.assertRaises(registrations.QuestionsChanged):
+            registrations.sign_up(event, [a], answers={a.id: {laptop.id: True}})
+        self.assertFalse(Registration.objects.exists())
+        registrations.sign_up(event, [a], answers={a.id: {laptop.id: True, added_later.id: False}})
+        self.assertEqual(RegistrationAnswer.objects.count(), 2)
+
+    def test_a_session_without_questions_needs_no_answers(self):
+        event = _future_event(self.dojo)
+        registrations.sign_up(event, self.children[:1])
+        self.assertFalse(RegistrationAnswer.objects.exists())
+
+    def test_cancelling_deletes_the_answers_and_promotion_keeps_them(self):
+        event = _future_event(self.dojo, places=1)
+        laptop = questions.add_question(event, "Own laptop?")
+        a, b = self.children[:2]
+        first, waiting = (
+            r["registration"]
+            for r in registrations.sign_up(event, [a, b], answers={a.id: {laptop.id: True}, b.id: {laptop.id: False}})
+        )
+        registrations.cancel(first, cancelled_by=self.guardian)
+        self.assertFalse(RegistrationAnswer.objects.filter(registration_id=first.id).exists())
+        waiting.refresh_from_db()
+        self.assertFalse(waiting.waiting_list)
+        self.assertEqual(list(waiting.answers.values_list("answer", flat=True)), [False])
+
+    def test_a_new_session_starts_with_the_dojos_default_questions(self):
+        self.dojo.languages = ["nl-be", "fr-be"]
+        self.dojo.save()
+        laptop = questions.add_question(self.dojo, "Eigen laptop?", {"fr-be": "Propre ordinateur ?"})
+        lunch = questions.add_question(self.dojo, "Lunch?")
+        questions.move_question(lunch, "up")
+        # Another session's own questions don't matter any more.
+        questions.add_question(_future_event(self.dojo), "Older?")
+        new = _future_event(self.dojo, start_time=timezone.now() + timedelta(days=10))
+        questions.copy_defaults(new)
+        self.assertEqual([q.text for q in new.questions.all()], ["Lunch?", "Eigen laptop?"])
+        self.assertEqual(new.questions.get(text="Eigen laptop?").translations, laptop.translations)
+        # Changing a default later doesn't change a session that has its copy.
+        questions.edit_question(laptop, "Laptop mee?")
+        self.assertTrue(new.questions.filter(text="Eigen laptop?").exists())
+        # Never twice, and never to a session that signs up elsewhere.
+        questions.copy_defaults(new)
+        self.assertEqual(new.questions.count(), 2)
+        external = _future_event(self.dojo, external_registration_url="https://example.com/")
+        questions.copy_defaults(external)
+        self.assertFalse(external.questions.exists())
+
+    def test_the_familys_data_export_has_the_answers(self):
+        from privacy.export import export_person
+
+        event = _future_event(self.dojo)
+        laptop = questions.add_question(event, "Own laptop?")
+        a = self.children[0]
+        registrations.sign_up(event, [a], answers={a.id: {laptop.id: True}})
+        records = export_person(self.guardian)["data"]["events.RegistrationAnswer"]["records"]
+        self.assertEqual([r["answer"] for r in records], [True])
+
+
+class SignUpQuestionsViewTests(TestCase):
+    """The sign-up page with the session's yes/no questions."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.dojo = make_dojo("Ghent")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
+        cls.emma = Ninja.objects.create(name="Emma")
+        cls.lars = Ninja.objects.create(name="Lars")
+        for child in (cls.emma, cls.lars):
+            Guardianship.objects.create(guardian=cls.guardian, ninja=child)
+
+    def setUp(self):
+        self.event = _future_event(self.dojo)
+        self.laptop = questions.add_question(self.event, "Will your child bring their own laptop?")
+        self.url = reverse("event_signup", kwargs={"event_id": self.event.id})
+        self.client.force_login(self.guardian)
+
+    def name(self, child):
+        return f"q-{child.id}-{self.laptop.id}"
+
+    def test_each_child_gets_the_questions(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, "Will your child bring their own laptop?", count=2)
+        self.assertContains(response, f'name="{self.name(self.emma)}" value="yes"')
+        self.assertContains(response, f'name="{self.name(self.lars)}" value="no"')
+
+    def test_a_session_without_questions_shows_none(self):
+        event = _future_event(self.dojo)
+        response = self.client.get(reverse("event_signup", kwargs={"event_id": event.id}))
+        self.assertNotContains(response, 'class="child-questions"')
+
+    def test_signing_up_saves_the_answers_and_shows_them(self):
+        response = self.client.post(
+            self.url,
+            {
+                "child": [str(self.emma.id), str(self.lars.id)],
+                "child_order": f"{self.lars.id},{self.emma.id}",
+                self.name(self.emma): "yes",
+                self.name(self.lars): "no",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        answers = dict(RegistrationAnswer.objects.values_list("registration__ninja", "answer"))
+        self.assertEqual(answers, {self.emma.id: True, self.lars.id: False})
+        self.assertEqual(
+            [r["answers"] for r in response.context["results"]], [[(self.laptop, False)], [(self.laptop, True)]]
+        )
+
+    def test_a_missing_answer_keeps_the_form_filled_in_and_the_order(self):
+        response = self.client.post(
+            self.url,
+            {
+                "child": [str(self.emma.id), str(self.lars.id)],
+                "child_order": f"{self.lars.id},{self.emma.id}",
+                self.name(self.emma): "yes",
+            },
+        )
+        self.assertFalse(Registration.objects.exists())
+        self.assertEqual(response.context["error"], "Answer every question for each child you sign up.")
+        self.assertEqual(response.context["ticked"], [self.lars.id, self.emma.id])
+        fields = {entry["child"].id: entry["questions"][0] for entry in response.context["children"]}
+        self.assertEqual((fields[self.emma.id]["value"], fields[self.emma.id]["error"]), ("yes", False))
+        self.assertEqual((fields[self.lars.id]["value"], fields[self.lars.id]["error"]), ("", True))
+        self.assertContains(response, f'id="{self.name(self.lars)}-error"')
+
+    def test_an_unticked_childs_answers_are_not_needed(self):
+        self.client.post(self.url, {"child": [str(self.emma.id)], self.name(self.emma): "no"})
+        self.assertEqual(list(RegistrationAnswer.objects.values_list("answer", flat=True)), [False])
+
+    def test_questions_changed_under_the_lock(self):
+        """A question added after the form was read: the post's answers
+        were complete for the old list, so the page comes back with the
+        new question to answer."""
+        form_post = {"child": [str(self.emma.id)], self.name(self.emma): "yes"}
+        with mock.patch("events.views.SignUpForm.clean", autospec=True) as clean:
+            lunch = questions.add_question(self.event, "Staying for lunch?")
+
+            def stale(form):
+                return {"selected": [self.emma], "answers": {self.emma.id: {self.laptop.id: True}}}
+
+            clean.side_effect = stale
+            response = self.client.post(self.url, form_post)
+        self.assertFalse(Registration.objects.exists())
+        self.assertIn("questions for this session changed", response.context["error"])
+        texts = [item["question"].text for item in response.context["children"][0]["questions"]]
+        self.assertEqual(texts, ["Will your child bring their own laptop?", lunch.text])
+
+
+class ChangeAnswersTests(TestCase):
+    """Changing a child's answers from the account page (DATA_MODEL.md §29,
+    phase 2): events.questions.change_answers and the family's page."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.dojo = make_dojo("Ghent")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
+        cls.emma = Ninja.objects.create(name="Emma")
+        Guardianship.objects.create(guardian=cls.guardian, ninja=cls.emma)
+
+    def setUp(self):
+        self.event = _future_event(self.dojo)
+        self.laptop = questions.add_question(self.event, "Own laptop?")
+        self.registration = registrations.sign_up(
+            self.event, [self.emma], answers={self.emma.id: {self.laptop.id: True}}
+        )[0]["registration"]
+        self.url = reverse("registration_answers", kwargs={"registration_id": self.registration.id})
+        self.client.force_login(self.guardian)
+
+    def answers(self):
+        return dict(self.registration.answers.values_list("question__text", "answer"))
+
+    def test_changing_an_answer(self):
+        self.assertTrue(questions.change_answers(self.registration, {self.laptop.id: False}))
+        self.assertEqual(self.answers(), {"Own laptop?": False})
+        self.assertFalse(questions.change_answers(self.registration, {self.laptop.id: False}))
+
+    def test_answering_a_question_added_later(self):
+        lunch = questions.add_question(self.event, "Lunch?")
+        with self.assertRaises(questions.QuestionError):
+            questions.change_answers(self.registration, {self.laptop.id: True})
+        questions.change_answers(self.registration, {self.laptop.id: True, lunch.id: True})
+        self.assertEqual(self.answers(), {"Own laptop?": True, "Lunch?": True})
+
+    def test_not_once_the_session_started(self):
+        Event.objects.filter(pk=self.event.pk).update(start_time=timezone.now() - timedelta(minutes=5))
+        with self.assertRaisesMessage(questions.QuestionError, "has started"):
+            questions.change_answers(self.registration, {self.laptop.id: False})
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    def test_the_page_shows_and_saves_the_answers(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, f'name="q-{self.laptop.id}" value="yes" checked')
+        response = self.client.post(self.url, {f"q-{self.laptop.id}": "no"})
+        self.assertRedirects(response, reverse("account_home"))
+        self.assertEqual(self.answers(), {"Own laptop?": False})
+
+    def test_a_change_is_in_the_audit_log_and_tells_the_team(self):
+        from auditlog.models import LogEntry
+
+        from dojos.testing import make_champion
+        from notifications.models import Notification
+
+        champion = make_champion(username="champ")
+        dojo = make_dojo("Leuven", champion=champion)
+        event = _future_event(dojo)
+        laptop = questions.add_question(event, "Own laptop?")
+        self.client.post(
+            reverse("event_signup", kwargs={"event_id": event.id}),
+            {"child": [str(self.emma.id)], f"q-{self.emma.id}-{laptop.id}": "yes"},
+        )
+        registration = Registration.objects.get(event=event, ninja=self.emma)
+        answer = registration.answers.get()
+        url = reverse("registration_answers", kwargs={"registration_id": registration.id})
+        self.client.post(url, {f"q-{laptop.id}": "no"})
+        entries = LogEntry.objects.get_for_object(answer).order_by("timestamp")
+        self.assertEqual(
+            [(e.action, e.actor_id) for e in entries],
+            [(LogEntry.Action.CREATE, self.guardian.id), (LogEntry.Action.UPDATE, self.guardian.id)],
+        )
+        self.assertEqual(entries.last().changes_dict["answer"], ["True", "False"])
+        notification = Notification.objects.get(recipient=champion)
+        self.assertIn("Families changed their answers", notification.text)
+        self.assertEqual(
+            notification.url, reverse("dojo_event_detail", kwargs={"dojo_id": dojo.id, "event_id": event.id})
+        )
+        # Saving the same answers again changes nothing and tells nobody.
+        self.client.post(url, {f"q-{laptop.id}": "no"})
+        self.assertEqual(Notification.objects.filter(recipient=champion).count(), 1)
+        # Another change while that one is unread adds nothing; once read, it does.
+        self.client.post(url, {f"q-{laptop.id}": "yes"})
+        self.assertEqual(Notification.objects.filter(recipient=champion).count(), 1)
+        Notification.objects.filter(recipient=champion).update(read=True)
+        self.client.post(url, {f"q-{laptop.id}": "no"})
+        self.assertEqual(Notification.objects.filter(recipient=champion, read=False).count(), 1)
+
+    def test_a_missing_answer_is_marked(self):
+        lunch = questions.add_question(self.event, "Lunch?")
+        response = self.client.get(self.url)
+        self.assertContains(response, "New question")
+        response = self.client.post(self.url, {f"q-{self.laptop.id}": "no"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'id="q-{lunch.id}-error"')
+        self.assertEqual(self.answers(), {"Own laptop?": True})
+
+    def test_another_familys_child_is_a_404(self):
+        self.client.force_login(User.objects.create(username="g2", email="g2@example.com"))
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+        self.assertEqual(self.client.post(self.url, {f"q-{self.laptop.id}": "no"}).status_code, 404)
+        self.assertEqual(self.answers(), {"Own laptop?": True})
+
+    def test_a_session_without_questions_has_no_page(self):
+        other = _future_event(self.dojo)
+        registration = registrations.sign_up(other, [self.emma])[0]["registration"]
+        url = reverse("registration_answers", kwargs={"registration_id": registration.id})
+        self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_the_account_page_links_to_it(self):
+        response = self.client.get(reverse("account_home"))
+        self.assertContains(response, self.url)
+        self.assertContains(response, "Change answers")
+        questions.add_question(self.event, "Lunch?")
+        response = self.client.get(reverse("account_home"))
+        self.assertContains(response, "Answer the new question")
+        child_page = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.emma.id}))
+        self.assertContains(child_page, self.url)

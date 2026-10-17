@@ -64,11 +64,13 @@ done
   in `nl.py` and `fr.py`, keyed by the step keys the `j_*.py` scripts use, so a new step needs its text
   in both. `JLANG=fr` captures the site in French; a new language needs its locale in `lib.py`, its file
   names in `build.py`'s `NAMES` and a captions module.
-- **They change the dev data:** the parent and ninja journeys book real places (sessions 71 and 72
-  at Dojo Zonnebeke, removed again first on a rerun), the volunteer journey resets and then marks
-  attendance on session 76 at Dojo Westerlo, and the booking mail goes through the Celery workers
-  to Mailpit. The seeded IDs used (dojo 51, events 71/72/76, ninja 9, pathway 2, users 352, application 348)
-  change when the database is reseeded; adjust them in the scripts.
+- **They change the dev data:** the parent and ninja journeys book real places (sessions 2990 and 2991
+  at Dojo Zonnebeke, removed again first on a rerun; they must still be upcoming, since a family changes
+  its answers only before a session starts), the volunteer journey resets and then marks attendance on
+  session 76 at Dojo Westerlo, `lib.laptop_question` gives sessions 2990, 2991 and 76 the seeded laptop
+  question (and answers it for session 76's places), and the booking mail goes through the Celery workers
+  to Mailpit. The seeded IDs used (dojo 51, events 2990/2991/76, ninja 9, pathway 2, users 352, application
+  348) change when the database is reseeded, and the sessions' dates pass; adjust them in the scripts.
 
 ## Keeping them current
 

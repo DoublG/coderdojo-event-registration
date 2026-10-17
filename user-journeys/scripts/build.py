@@ -17,7 +17,7 @@ os.makedirs(OUT, exist_ok=True)
 SHOTS = os.path.join(ROOT, ".shots", LANG)
 UI_EN = {
     "brand": "CoderDojo Belgium · user journey",
-    "who": "Screenshots taken on the development site (seeded demo data) as <b>{who}</b>, 29 September 2026.",
+    "who": "Screenshots taken on the development site (seeded demo data) as <b>{who}</b>, 17 October 2026.",
     "journey": "The journey",
     "steps": "Steps in this document",
     "foot": "coolregistration.localhost · generated from the running application",
@@ -52,7 +52,7 @@ INTRO = {
             "Discover dojos and sessions without an account",
             "Create a family account with the children in one go",
             "Follow each child's belts, badges and history",
-            "Sign up for a session, and get the confirmation mail",
+            "Sign up for a session, answer the dojo's questions, and get the confirmation mail",
             "Manage mail, sign-in security and privacy",
         ],
     ),

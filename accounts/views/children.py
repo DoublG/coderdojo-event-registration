@@ -22,7 +22,7 @@ from ..models import Guardianship
 from ..template_avatars import TEMPLATE_KID_AVATARS
 from .child_logins import _login_card_context
 from .common import BADGES_PAGE_SIZE, _get_own_ninja
-from .family import _children_context, _render_account_home
+from .family import ANSWER_COUNTS, _children_context, _render_account_home
 from .guardians import _guardians_card_context
 
 
@@ -81,6 +81,7 @@ def ninja_detail(request, ninja_id):
     upcoming = (
         child.registration_set.filter(event__start_time__gte=now)
         .select_related("event", "event__dojo")
+        .annotate(**ANSWER_COUNTS)
         .order_by("event__start_time")
     )
     belt_history = list(

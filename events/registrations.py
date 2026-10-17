@@ -10,7 +10,7 @@ registrations are still open) is read after taking the lock. Django runs
 MySQL at READ COMMITTED, so those reads see what the transaction before
 committed. Sessions don't wait on each other: the lock is per session."""
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any
 
 from django.db import transaction
@@ -20,6 +20,7 @@ from django.utils.translation import gettext as _
 from accounts.home_dojo import assign_on_signup
 from mailing.automated import booking_mail, waitlist_promoted_mail
 
+from . import questions as event_questions
 from .models import Event, Registration, RegistrationCancellation
 
 if TYPE_CHECKING:  # types only
@@ -30,17 +31,30 @@ class RegistrationError(Exception):
     """A sign-up that can't happen, with a message for the family."""
 
 
+class QuestionsChanged(RegistrationError):
+    """The session's questions changed while the sign-up form was open (or
+    an answer is missing): the family checks them again."""
+
+
 def _lock(event_id: int) -> Event:
     return Event.objects.select_for_update().get(pk=event_id)
 
 
-def sign_up(event: Event, children: "Sequence[Ninja]") -> list[dict[str, Any]]:
+def sign_up(
+    event: Event,
+    children: "Sequence[Ninja]",
+    answers: Mapping[int, Mapping[int, bool]] | None = None,
+) -> list[dict[str, Any]]:
     """Sign `children` up for `event`, in order: a confirmed place while
     there are places, the waiting list after that. Children already signed
     up are skipped. Returns [{"child", "waiting_list", "registration"}] for
     the new ones; raises RegistrationError when registrations are closed or every
     child is already signed up. Their booking mail is queued in the same
-    transaction: none for a sign-up that didn't happen."""
+    transaction: none for a sign-up that didn't happen.
+
+    `answers` is {child_id: {question_id: bool}} for the session's yes/no
+    questions (events.questions): every new child answers every question
+    as they stand under the lock, or nothing is saved (QuestionsChanged)."""
     with transaction.atomic():
         event = _lock(event.pk)
         if not event.registration_open:
@@ -51,6 +65,10 @@ def sign_up(event: Event, children: "Sequence[Ninja]") -> list[dict[str, Any]]:
         new_children = [child for child in children if child.id not in signed_up]
         if not new_children:
             raise RegistrationError(_("The child(ren) you selected are already signed up for this session."))
+
+        questions = list(event.questions.all())
+        if event_questions.missing_answers(questions, new_children, answers or {}):
+            raise QuestionsChanged(_("The questions for this session changed, please check them again."))
 
         position = Registration.objects.filter(event=event).aggregate(Max("position"))["position__max"] or 0
         confirmed = Registration.objects.filter(event=event, waiting_list=False).count()
@@ -65,6 +83,8 @@ def sign_up(event: Event, children: "Sequence[Ninja]") -> list[dict[str, Any]]:
             # What the ninja works on starts as everything the session
             # covers; the dojo team narrows it on the attendance list.
             registration.pathways.set(pathways)
+            if questions:
+                event_questions.save_answers(registration, questions, (answers or {})[child.pk])
             # A child's first sign-up gives them their home dojo.
             assign_on_signup(child, event.dojo)
             if not waiting_list:

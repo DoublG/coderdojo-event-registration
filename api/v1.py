@@ -17,6 +17,7 @@ from django.utils import timezone
 from ninja import NinjaAPI, Schema
 
 from events import attendance
+from events import questions as event_questions
 from events.models import Event
 
 from .auth import TOKEN_URL, ClientRateThrottle, OAuth2
@@ -76,10 +77,25 @@ class EventOut(Schema):
     places: int
 
 
+class QuestionOut(Schema):
+    # A yes/no question families answer per child on the sign-up, in the
+    # dojo's main language.
+    id: int
+    text: str
+
+
+class AnswerOut(Schema):
+    question_id: int
+    answer: bool
+
+
 class ChildOut(Schema):
     registration_id: int
     name: str
     attended: bool | None
+    # The family's answers to the session's questions; a question missing
+    # here was added after the child signed up.
+    answers: list[AnswerOut]
 
 
 class TeamMemberOut(Schema):
@@ -91,8 +107,14 @@ class TeamMemberOut(Schema):
 
 class AttendanceOut(Schema):
     event: EventOut
+    questions: list[QuestionOut]
     children: list[ChildOut]
     team: list[TeamMemberOut]
+
+
+class AnswerIn(Schema):
+    # The child's answer to one of the session's yes/no sign-up questions.
+    answer: bool
 
 
 class AttendedIn(Schema):
@@ -112,7 +134,12 @@ def _event_out(event):
 
 
 def _child_out(registration):
-    return ChildOut(registration_id=registration.id, name=registration.ninja.full_name, attended=registration.attended)
+    return ChildOut(
+        registration_id=registration.id,
+        name=registration.ninja.full_name,
+        attended=registration.attended,
+        answers=[AnswerOut(question_id=a.question_id, answer=a.answer) for a in registration.answers.all()],
+    )
 
 
 def _team_out(row):
@@ -125,6 +152,7 @@ def _team_out(row):
 def _attendance_out(event):
     return AttendanceOut(
         event=_event_out(event),
+        questions=[QuestionOut(id=q.id, text=q.text) for q in event.questions.all()],
         children=[_child_out(r) for r in attendance.confirmed_registrations(event)],
         team=[_team_out(row) for row in attendance.team_rows(event)],
     )
@@ -172,6 +200,23 @@ def mark_child(request, event_id: int, registration_id: int, payload: AttendedIn
     with set_actor(request.auth.account):
         attendance.mark_child(registration, payload.attended)
     return _child_out(registration)
+
+
+@api.put(
+    "/events/{event_id}/attendance/children/{registration_id}/answers/{question_id}",
+    response={200: ChildOut, **ERRORS},
+    **write.operation(summary="Correct a child's answer to a sign-up question"),
+)
+def set_answer(request, event_id: int, registration_id: int, question_id: int, payload: AnswerIn):
+    """Sets the child's answer to one of the session's sign-up questions
+    (`questions` in the attendance), e.g. at the door: the child did bring a
+    laptop. Recorded in the audit log under the client's account."""
+    event = _event(request, event_id)
+    registration = get_object_or_404(attendance.confirmed_registrations(event), id=registration_id)
+    question = get_object_or_404(event.questions.all(), id=question_id)
+    with set_actor(request.auth.account):
+        event_questions.correct_answer(registration, question, payload.answer)
+    return _child_out(attendance.confirmed_registrations(event).get(pk=registration.pk))
 
 
 @api.put(
