@@ -509,6 +509,41 @@ class EventSyncApiTests(ApiTestCase):
         self.assertEqual(self.client.get(f"/api/v1/events/{self.event.id}/attendance", **auth).status_code, 403)
 
 
+class CorsTests(ApiTestCase):
+    """Tools that run in a browser (Excel on the web, a dojo's own page) may
+    call the API from another site (settings.CORS_*); never with the site's
+    cookies, and the rest of the site allows no other site."""
+
+    ORIGIN = "https://dojo.example.org"
+
+    def preflight(self, path, headers="authorization, content-type"):
+        return self.client.options(
+            path,
+            HTTP_ORIGIN=self.ORIGIN,
+            HTTP_ACCESS_CONTROL_REQUEST_METHOD="POST",
+            HTTP_ACCESS_CONTROL_REQUEST_HEADERS=headers,
+        )
+
+    def test_the_api_and_the_token_endpoint_allow_any_site(self):
+        for path in ("/api/v1/events/sync", reverse("oauth2_token")):
+            response = self.preflight(path)
+            self.assertEqual(response.status_code, 200, path)
+            self.assertEqual(response["Access-Control-Allow-Origin"], "*", path)
+            self.assertIn("authorization", response["Access-Control-Allow-Headers"], path)
+            self.assertNotIn("Access-Control-Allow-Credentials", response, path)
+
+    def test_a_call_from_another_site_gets_its_answer(self):
+        _client, auth = self.bearer()
+        response = self.client.get("/api/v1/events", HTTP_ORIGIN=self.ORIGIN, **auth)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Access-Control-Allow-Origin"], "*")
+
+    def test_the_rest_of_the_site_allows_no_other_site(self):
+        for path in ("/", reverse("login"), reverse("dojo_api_clients", args=[self.dojo.id])):
+            response = self.client.get(path, HTTP_ORIGIN=self.ORIGIN)
+            self.assertNotIn("Access-Control-Allow-Origin", response, path)
+
+
 class ServiceAccountTests(ApiTestCase):
     def test_left_out_of_retention_and_deletion(self):
         from privacy.deletion import preview

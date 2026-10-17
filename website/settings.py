@@ -402,6 +402,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "corsheaders",
     "django.contrib.staticfiles",
     "django.contrib.gis",
     "debug_toolbar",
@@ -450,6 +451,9 @@ FORM_RENDERER = "core.forms.SiteFormRenderer"
 MIDDLEWARE = [
     # First, so its timing covers the whole stack (monitoring, CAPACITY.md).
     "monitoring.middleware.RequestMetricsMiddleware",
+    # Before anything that answers on its own (django-cors-headers asks for
+    # it above CommonMiddleware): it answers the API's CORS preflights.
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "django_permissions_policy.PermissionsPolicyMiddleware",
@@ -758,6 +762,14 @@ OAUTH2_PROVIDER = {
 OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
 # Requests per client (ninja's throttling, on the cache).
 API_RATE_LIMIT = "600/m"
+# CORS (django-cors-headers), for the API only: any website may call it from a
+# browser (Excel on the web, Office Scripts, a dojo's own page), since a call
+# proves itself with an OAuth token, never a cookie. Credentials stay off, so a
+# browser never sends the site's session cookie along; the rest of the site
+# sends no CORS headers at all.
+CORS_URLS_REGEX = r"^/api/(v1/|oauth/(token|revoke)/)"
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = False
 
 # Retention (privacy.retention, DATA_MODEL.md §16 phase 4). An account is
 # deleted (a champion's or mentor's cleaned) this long after its last login,

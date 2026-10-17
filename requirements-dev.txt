@@ -35,6 +35,7 @@ asgiref==3.12.1 \
     #   channels-redis
     #   daphne
     #   django
+    #   django-cors-headers
     #   django-permissions-policy
 ast-serialize==0.13.0 \
     --hash=sha256:017ddd4f22e727ef93e66df2d53340a6ff809b7e34cc2218f67918ae6239aad0 \
@@ -883,6 +884,7 @@ django==6.1.2 \
     #   django-auditlog
     #   django-celery-beat
     #   django-celery-results
+    #   django-cors-headers
     #   django-debug-toolbar
     #   django-formtools
     #   django-ninja
@@ -906,6 +908,10 @@ django-celery-beat @ https://github.com/celery/django-celery-beat/archive/dde53d
 django-celery-results==2.6.0 \
     --hash=sha256:9abcd836ae6b61063779244d8887a88fe80bbfaba143df36d3cb07034671277c \
     --hash=sha256:b9ccdca2695b98c7cbbb8dea742311ba9a92773d71d7b4944a676e69a7df1c73
+    # via -r requirements.in
+django-cors-headers==4.9.0 \
+    --hash=sha256:15c7f20727f90044dcee2216a9fd7303741a864865f0c3657e28b7056f61b449 \
+    --hash=sha256:fe5d7cb59fdc2c8c646ce84b727ac2bca8912a247e6e68e1fb507372178e59e8
     # via -r requirements.in
 django-debug-toolbar==8.0.0 \
     --hash=sha256:329dfd6e1c26d9b4501a5cc69294c8bb734206ccb1bd36e96afc4d14128b630a \

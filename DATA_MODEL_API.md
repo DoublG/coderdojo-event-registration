@@ -222,14 +222,19 @@ django-ninja stays the framework (`/api/v1/`, OpenAPI reference at
 7. **Docs** — *built:* the help page for dojo teams
    (`docs/source/dojo-team/api-clients.rst`, en/fr/nl), the API section in
    `CLAUDE.md`; the OpenAPI page is the reference. For phase 3, a page of
-   its own for the non-technical volunteer who runs the spreadsheet
-   (`docs/source/dojo-team/planning-from-a-spreadsheet.rst`, en/fr/nl): the
-   sheet layout (columns A–K named after the fields, results in L and M),
-   what each outcome means, and a complete VBA macro for Excel on Windows
-   (`WinHttpRequest`: a token with the client ID and a secret asked with
-   `InputBox`, never stored in the file; the rows as JSON; each row's
-   outcome and detail written back). Excel for Mac has no `WinHttpRequest`:
-   not covered yet.
+   its own (`docs/source/dojo-team/planning-sessions.rst`, en/fr/nl): the
+   client and scope to make, the fields in plain words, what each outcome
+   means and the rules (never deletes, a started session is left alone).
+   **Decided (17 October 2026): we provide the API, not the tools.** How a
+   dojo calls it (a spreadsheet macro, a script, Office Scripts, anything
+   else) is up to the dojo, so the page has no macro or Excel instructions
+   to keep working across Excel versions. **CORS is on for the API**
+   (django-cors-headers, `CORS_URLS_REGEX` = `/api/v1/` and the token and
+   revoke endpoints, any origin, never credentials: a call proves itself
+   with a token, not a cookie), so tools that run in a browser engine
+   (Excel on the web, Office Scripts, an add-in, a dojo's own page) can
+   call it too; the rest of the site sends no CORS headers
+   (`api.tests.CorsTests`).
 
 ### Open points
 
@@ -250,7 +255,7 @@ django-ninja stays the framework (`/api/v1/`, OpenAPI reference at
   version. Whether `external_ref` should be visible/editable from the
   dojo's own UI (so a champion can tell which of their sessions came from
   a sync) or stay API-only (API-only for now; the Django admin shows it).
-  A ready-made workbook (`.xlsm`) to download, instead of pasting the
-  macro: possible later, but a macro file from a website is something
-  Excel rightly warns about.
+  Tools for dojos (a macro, a workbook to download, an upload page on the
+  site) are out of scope for now: dojos bring their own (decided 17
+  October 2026).
 

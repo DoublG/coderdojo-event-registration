@@ -1,0 +1,291 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) CoderDojo Belgium
+# This file is distributed under the same license as the CoderDojo Belgium —
+# Help Centre package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-17 13:17+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/dojo-team/planning-sessions.rst:2
+msgid "Planning sessions with your own tools"
+msgstr "Planifier les sessions avec vos propres outils"
+
+#: ../../source/dojo-team/planning-sessions.rst:4
+msgid ""
+"Many dojos plan their whole year at once, for example in a spreadsheet. "
+"Instead of typing every session again on the site, your own tool can put "
+"them on the site through the site's API (see :doc:`api-clients`): a "
+"spreadsheet macro, a script, or anything else that can send a request to "
+"a website. Which tool you use, and how you build it, is up to you. Send "
+"the plan again whenever it changes: the site updates the same sessions, "
+"it never adds them twice."
+msgstr ""
+"Beaucoup de dojos planifient toute leur année d'un coup, par exemple dans"
+" un tableur. Au lieu de retaper chaque session sur le site, votre propre "
+"outil peut les mettre sur le site via l'API du site (voir :doc:`api-"
+"clients`) : une macro de tableur, un script ou tout autre outil capable "
+"d'envoyer une requête à un site web. L'outil que vous utilisez, et "
+"comment vous le construisez, c'est à vous de choisir. Renvoyez le "
+"planning chaque fois qu'il change : le site met à jour les mêmes sessions"
+" et ne les ajoute jamais deux fois."
+
+#: ../../source/dojo-team/planning-sessions.rst:12
+msgid ""
+"Only the dojo's **champion** can set this up, because it needs an API "
+"client."
+msgstr ""
+"Seul le **champion** du dojo peut le mettre en place, car il faut un "
+"client API."
+
+#: ../../source/dojo-team/planning-sessions.rst:16
+msgid "Getting started"
+msgstr "Pour commencer"
+
+#: ../../source/dojo-team/planning-sessions.rst:18
+msgid ""
+"On the dojo's **API** page, add a client (for example \"Planning "
+"spreadsheet\") and tick only **Plan sessions: add and change them, e.g. "
+"from a spreadsheet**. Give its **client ID** and **client secret** to "
+"whoever builds the tool. The bottom of the **API** page has the addresses"
+" it needs, and the **Reference** link describes every field exactly."
+msgstr ""
+"Sur la page **API** du dojo, ajoutez un client (par exemple « Tableur de "
+"planification ») et cochez uniquement **Planifier les sessions : les "
+"ajouter et les modifier, par ex. depuis un tableur**. Donnez son "
+"**identifiant client** et son **secret client** à la personne qui "
+"construit l'outil. Le bas de la page **API** donne les adresses "
+"nécessaires, et le lien **Référence** décrit chaque champ en détail."
+
+#: ../../source/dojo-team/planning-sessions.rst:24
+msgid ""
+"The tool sends your sessions to ``/api/v1/events/sync``, at most 200 per "
+"call. Tools that run in a browser, such as Excel on the web, can call the"
+" API too."
+msgstr ""
+"L'outil envoie vos sessions à ``/api/v1/events/sync``, au plus 200 par "
+"appel. Les outils qui fonctionnent dans un navigateur, comme Excel sur le"
+" web, peuvent aussi appeler l'API."
+
+#: ../../source/dojo-team/planning-sessions.rst:29
+msgid "What to send for each session"
+msgstr "Ce qu'il faut envoyer pour chaque session"
+
+#: ../../source/dojo-team/planning-sessions.rst:32
+msgid "Field"
+msgstr "Champ"
+
+#: ../../source/dojo-team/planning-sessions.rst:32
+msgid "What goes in it"
+msgstr "Ce qu'on y met"
+
+#: ../../source/dojo-team/planning-sessions.rst:34
+msgid "external_ref"
+msgstr "external_ref"
+
+#: ../../source/dojo-team/planning-sessions.rst:34
+msgid ""
+"The session's own key: anything that's unique within your dojo and "
+"**never changes** for that session, for example ``2026-W38``. This is how"
+" the site recognises the session the next time. Change the key and the "
+"site sees a new session."
+msgstr ""
+"La clé propre de la session : n'importe quoi d'unique dans votre dojo et "
+"qui **ne change jamais** pour cette session, par exemple ``2026-W38``. "
+"C'est ainsi que le site reconnaît la session la fois suivante. Si vous "
+"changez la clé, le site voit une nouvelle session."
+
+#: ../../source/dojo-team/planning-sessions.rst:38
+msgid "name"
+msgstr "name"
+
+#: ../../source/dojo-team/planning-sessions.rst:38
+msgid "The session's name."
+msgstr "Le nom de la session."
+
+#: ../../source/dojo-team/planning-sessions.rst:39
+msgid "date"
+msgstr "date"
+
+#: ../../source/dojo-team/planning-sessions.rst:39
+msgid "The day."
+msgstr "Le jour."
+
+#: ../../source/dojo-team/planning-sessions.rst:40
+msgid "start_time"
+msgstr "start_time"
+
+#: ../../source/dojo-team/planning-sessions.rst:40
+msgid "When it starts (14:00)."
+msgstr "L'heure de début (14:00)."
+
+#: ../../source/dojo-team/planning-sessions.rst:41
+msgid "end_time"
+msgstr "end_time"
+
+#: ../../source/dojo-team/planning-sessions.rst:41
+msgid "When it ends, on the same day."
+msgstr "L'heure de fin, le même jour."
+
+#: ../../source/dojo-team/planning-sessions.rst:42
+msgid "places"
+msgstr "places"
+
+#: ../../source/dojo-team/planning-sessions.rst:42
+msgid ""
+"How many children can sign up before new sign-ups go on the waiting list;"
+" at least 1."
+msgstr ""
+"Combien d'enfants peuvent s'inscrire avant que les nouvelles inscriptions"
+" aillent sur la liste d'attente ; au moins 1."
+
+#: ../../source/dojo-team/planning-sessions.rst:44
+msgid "venue_name"
+msgstr "venue_name"
+
+#: ../../source/dojo-team/planning-sessions.rst:44
+msgid "Optional. Leave it empty to use the dojo's own address."
+msgstr "Facultatif. Laissez vide pour utiliser l'adresse du dojo."
+
+#: ../../source/dojo-team/planning-sessions.rst:45
+msgid "min_age"
+msgstr "min_age"
+
+#: ../../source/dojo-team/planning-sessions.rst:45
+#: ../../source/dojo-team/planning-sessions.rst:46
+msgid "Optional."
+msgstr "Facultatif."
+
+#: ../../source/dojo-team/planning-sessions.rst:46
+msgid "max_age"
+msgstr "max_age"
+
+#: ../../source/dojo-team/planning-sessions.rst:47
+msgid "audience"
+msgstr "audience"
+
+#: ../../source/dojo-team/planning-sessions.rst:47
+msgid "Optional: ``everyone`` (when empty) or ``girls``."
+msgstr ""
+"Facultatif : ``everyone`` (tout le monde, si vide) ou ``girls`` (session "
+"pour filles)."
+
+#: ../../source/dojo-team/planning-sessions.rst:48
+msgid "status"
+msgstr "status"
+
+#: ../../source/dojo-team/planning-sessions.rst:48
+msgid ""
+"Optional: ``draft``, ``open`` or ``closed``. A new session starts as a "
+"draft, hidden from the site, unless you send ``open``. Leave it empty to "
+"keep the status the session has on the site."
+msgstr ""
+"Facultatif : ``draft`` (brouillon), ``open`` (ouverte) ou ``closed`` "
+"(fermée). Une nouvelle session commence en brouillon, cachée sur le site,"
+" sauf si vous envoyez ``open``. Laissez vide pour garder le statut que la"
+" session a sur le site."
+
+#: ../../source/dojo-team/planning-sessions.rst:54
+msgid ""
+"Send every field every time: an empty venue or age also empties it on the"
+" site."
+msgstr ""
+"Envoyez tous les champs à chaque fois : un lieu ou un âge vide le vide "
+"aussi sur le site."
+
+#: ../../source/dojo-team/planning-sessions.rst:58
+msgid "What the site answers"
+msgstr "Ce que répond le site"
+
+#: ../../source/dojo-team/planning-sessions.rst:60
+msgid "For every session it says what happened, and why:"
+msgstr "Pour chaque session, il dit ce qui s'est passé, et pourquoi :"
+
+#: ../../source/dojo-team/planning-sessions.rst:62
+msgid "**created**: a new session, as a draft unless its status says otherwise."
+msgstr ""
+"**created** : une nouvelle session, en brouillon sauf si son statut dit "
+"autre chose."
+
+#: ../../source/dojo-team/planning-sessions.rst:63
+msgid "**updated**: the session changed to match."
+msgstr "**updated** : la session a été adaptée."
+
+#: ../../source/dojo-team/planning-sessions.rst:64
+msgid "**unchanged**: the session already matched."
+msgstr "**unchanged** : la session correspondait déjà."
+
+#: ../../source/dojo-team/planning-sessions.rst:65
+msgid ""
+"**skipped**: the session has already started, so the site leaves it "
+"alone. Change it on the site if you need to."
+msgstr ""
+"**skipped** : la session a déjà commencé, le site n'y touche donc pas. "
+"Modifiez-la sur le site si nécessaire."
+
+#: ../../source/dojo-team/planning-sessions.rst:67
+msgid ""
+"**error**: this session wasn't saved, for example because the end time is"
+" before the start time, the day is in the past, or the same key was sent "
+"twice. The others are saved anyway: fix this one and send it again."
+msgstr ""
+"**error** : cette session n'a pas été enregistrée, par exemple parce que "
+"l'heure de fin précède l'heure de début, que le jour est passé ou que la "
+"même clé a été envoyée deux fois. Les autres sont quand même enregistrées"
+" : corrigez celle-ci et renvoyez-la."
+
+#: ../../source/dojo-team/planning-sessions.rst:71
+msgid ""
+"**Sending never deletes a session.** Leaving a session out changes "
+"nothing on the site. To stop a planned session, set its status to "
+"``draft`` (hidden) or ``closed``; to delete it, use the session's page on"
+" the site."
+msgstr ""
+"**Un envoi ne supprime jamais une session.** Omettre une session ne "
+"change rien sur le site. Pour arrêter une session planifiée, mettez son "
+"statut sur ``draft`` (cachée) ou ``closed`` ; pour la supprimer, utilisez"
+" la page de la session sur le site."
+
+#: ../../source/dojo-team/planning-sessions.rst:75
+msgid ""
+"The description, the picture, the team and the pathways aren't sent: set "
+"them on the session's page on the site, and the next sync keeps them. A "
+"new session gets the pathways your dojo provides, as it does on the site."
+msgstr ""
+"La description, l'image, l'équipe et les parcours ne sont pas envoyés : "
+"réglez-les sur la page de la session sur le site, et l'envoi suivant les "
+"garde. Une nouvelle session reçoit les parcours que propose votre dojo, "
+"comme sur le site."
+
+#: ../../source/dojo-team/planning-sessions.rst:80
+msgid "Keep the secret safe"
+msgstr "Gardez le secret en sécurité"
+
+#: ../../source/dojo-team/planning-sessions.rst:82
+msgid ""
+"Anyone with the client ID and secret can change your dojo's sessions. "
+"Don't save the secret in a file you share, and give this client only "
+"**Plan sessions**, so it can't see who signed up or who came. If the "
+"secret may have leaked, give the client a **New secret** on the **API** "
+"page: the old one stops working at once."
+msgstr ""
+"Quiconque a l'identifiant client et le secret peut modifier les sessions "
+"de votre dojo. N'enregistrez pas le secret dans un fichier que vous "
+"partagez, et ne donnez à ce client que **Planifier les sessions**, pour "
+"qu'il ne voie pas qui s'est inscrit ni qui est venu. Si le secret a pu "
+"fuiter, donnez au client un **Nouveau secret** sur la page **API** : "
+"l'ancien cesse aussitôt de fonctionner."
+

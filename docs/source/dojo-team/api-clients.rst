@@ -5,7 +5,7 @@ An app or website can work for your dojo through the site's API: an app
 at the door that marks which children and team members came, so you
 don't have to tick them off on the attendance list, or a spreadsheet that
 puts the sessions you planned on the site (see
-:doc:`planning-from-a-spreadsheet`). Only the dojo's **champion** can let
+:doc:`planning-sessions`). Only the dojo's **champion** can let
 an app in.
 
 Adding a client

@@ -7,7 +7,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
+"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-10-17 11:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -22,7 +22,7 @@ msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:2
 msgid "Planning your sessions in a spreadsheet"
-msgstr "Planifier vos sessions dans un tableur"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:4
 msgid ""
@@ -32,23 +32,16 @@ msgid ""
 "Run it again whenever the plan changes: it updates the same sessions, it "
 "never adds them twice."
 msgstr ""
-"Beaucoup de dojos planifient toute leur année d'un coup, dans Excel. Au "
-"lieu de retaper chaque session sur le site, une macro dans ce tableur "
-"peut les mettre sur le site pour vous, via l'API du site (voir :doc:`api-"
-"clients`). Relancez-la chaque fois que le planning change : elle met à "
-"jour les mêmes sessions et ne les ajoute jamais deux fois."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:10
 msgid ""
 "Only the dojo's **champion** can set this up, because it needs an API "
 "client."
 msgstr ""
-"Seul le **champion** du dojo peut le mettre en place, car il faut un "
-"client API."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:14
 msgid "What you need"
-msgstr "Ce qu'il vous faut"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:16
 msgid ""
@@ -57,51 +50,40 @@ msgid ""
 "from a spreadsheet**. Keep the **client ID** and the **client secret** it"
 " shows."
 msgstr ""
-"Sur la page **API** du dojo, ajoutez un client (par exemple « Tableur de "
-"planification ») et cochez uniquement **Planifier les sessions : les "
-"ajouter et les modifier, par ex. depuis un tableur**. Gardez "
-"l'**identifiant client** et le **secret client** affichés."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:20
 msgid ""
 "A spreadsheet with a sheet called **Sessions**, laid out as below, and a "
 "sheet called **Settings** with the client ID in cell **B1**."
 msgstr ""
-"Un classeur avec une feuille nommée **Sessions**, organisée comme ci-"
-"dessous, et une feuille nommée **Settings** avec l'identifiant client "
-"dans la cellule **B1**."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:22
 msgid ""
 "The macro below, in Excel for Windows (the macro uses a Windows part of "
 "Excel to reach the site)."
 msgstr ""
-"La macro ci-dessous, dans Excel pour Windows (la macro utilise un "
-"composant Windows d'Excel pour joindre le site)."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:26
 msgid "The Sessions sheet"
-msgstr "La feuille Sessions"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:28
 msgid ""
 "Row 1 holds these headings, exactly as written, one per column from **A**"
 " to **K**. Every row below it is one session."
 msgstr ""
-"La ligne 1 contient ces en-têtes, écrits exactement ainsi, un par colonne"
-" de **A** à **K**. Chaque ligne en dessous est une session."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:32
 msgid "Heading"
-msgstr "En-tête"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:32
 msgid "What goes in it"
-msgstr "Ce qu'on y met"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:34
 msgid "external_ref"
-msgstr "external_ref"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:34
 msgid ""
@@ -110,89 +92,81 @@ msgid ""
 " the site recognises the session the next time. Change the key and the "
 "site sees a new session."
 msgstr ""
-"La clé propre de la session : n'importe quoi d'unique dans votre dojo et "
-"qui **ne change jamais** pour cette session, par exemple ``2026-W38``. "
-"C'est ainsi que le site reconnaît la session la fois suivante. Si vous "
-"changez la clé, le site voit une nouvelle session."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:38
 msgid "name"
-msgstr "name"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:38
 msgid "The session's name."
-msgstr "Le nom de la session."
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:39
 msgid "date"
-msgstr "date"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:39
 msgid "The day, as a date cell."
-msgstr "Le jour, dans une cellule de date."
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:40
 msgid "start_time"
-msgstr "start_time"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:40
 msgid "When it starts, as a time cell (14:00)."
-msgstr "L'heure de début, dans une cellule d'heure (14:00)."
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:41
 msgid "end_time"
-msgstr "end_time"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:41
 msgid "When it ends, on the same day."
-msgstr "L'heure de fin, le même jour."
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:42
 msgid "places"
-msgstr "places"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:42
 msgid ""
 "How many children can sign up before new sign-ups go on the waiting list;"
 " at least 1."
 msgstr ""
-"Combien d'enfants peuvent s'inscrire avant que les nouvelles inscriptions"
-" aillent sur la liste d'attente ; au moins 1."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:44
 msgid "venue_name"
-msgstr "venue_name"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:44
 msgid "Optional. Leave it empty to use the dojo's own address."
-msgstr "Facultatif. Laissez vide pour utiliser l'adresse du dojo."
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:45
 msgid "min_age"
-msgstr "min_age"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:45
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:46
 msgid "Optional."
-msgstr "Facultatif."
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:46
 msgid "max_age"
-msgstr "max_age"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:47
 msgid "audience"
-msgstr "audience"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:47
 msgid "Optional: ``everyone`` (when empty) or ``girls``."
 msgstr ""
-"Facultatif : ``everyone`` (tout le monde, si vide) ou ``girls`` (session "
-"pour filles)."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:48
 msgid "status"
-msgstr "status"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:48
 msgid ""
@@ -200,48 +174,36 @@ msgid ""
 "draft, hidden from the site, unless you write ``open``. Leave it empty to"
 " keep the status the session has on the site."
 msgstr ""
-"Facultatif : ``draft`` (brouillon), ``open`` (ouverte) ou ``closed`` "
-"(fermée). Une nouvelle session commence en brouillon, cachée sur le site,"
-" sauf si vous écrivez ``open``. Laissez vide pour garder le statut que la"
-" session a sur le site."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:54
 msgid "The macro writes the result of each row in columns **L** and **M**."
 msgstr ""
-"La macro écrit le résultat de chaque ligne dans les colonnes **L** et "
-"**M**."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:57
 msgid "What a run does"
-msgstr "Ce que fait une exécution"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:59
 msgid "For every row, column **L** says what happened, and **M** why:"
 msgstr ""
-"Pour chaque ligne, la colonne **L** dit ce qui s'est passé, et **M** "
-"pourquoi :"
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:61
 msgid "**created**: a new session, as a draft unless its status says otherwise."
 msgstr ""
-"**created** : une nouvelle session, en brouillon sauf si son statut dit "
-"autre chose."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:62
 msgid "**updated**: the session changed to match the row."
-msgstr "**updated** : la session a été adaptée à la ligne."
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:63
 msgid "**unchanged**: the session already matched the row."
-msgstr "**unchanged** : la session correspondait déjà à la ligne."
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:64
 msgid ""
 "**skipped**: the session has already started, so the spreadsheet leaves "
 "it alone. Change it on the site if you need to."
 msgstr ""
-"**skipped** : la session a déjà commencé, le tableur n'y touche donc pas."
-" Modifiez-la sur le site si nécessaire."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:66
 msgid ""
@@ -250,18 +212,12 @@ msgid ""
 "rows. The other rows are saved anyway: fix this one and run the macro "
 "again."
 msgstr ""
-"**error** : cette ligne n'a pas été enregistrée, par exemple parce que "
-"l'heure de fin précède l'heure de début, que le jour est passé ou que la "
-"même clé figure sur deux lignes. Les autres lignes sont quand même "
-"enregistrées : corrigez celle-ci et relancez la macro."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:71
 msgid ""
 "Send every column on every run: an empty venue or age in the spreadsheet "
 "also empties it on the site."
 msgstr ""
-"Envoyez toutes les colonnes à chaque exécution : un lieu ou un âge vide "
-"dans le tableur le vide aussi sur le site."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:74
 msgid ""
@@ -270,10 +226,6 @@ msgid ""
 " ``draft`` (hidden) or ``closed``; to delete it, use the session's page "
 "on the site."
 msgstr ""
-"**Une exécution ne supprime jamais une session.** Retirer une ligne du "
-"tableur ne change rien sur le site. Pour arrêter une session planifiée, "
-"mettez son statut sur ``draft`` (cachée) ou ``closed`` ; pour la "
-"supprimer, utilisez la page de la session sur le site."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:79
 msgid ""
@@ -282,14 +234,10 @@ msgid ""
 " keeps them. A new session gets the pathways your dojo provides, as it "
 "does on the site."
 msgstr ""
-"La description, l'image, l'équipe et les parcours ne sont pas dans le "
-"tableur : réglez-les sur la page de la session sur le site, et "
-"l'exécution suivante les garde. Une nouvelle session reçoit les parcours "
-"que propose votre dojo, comme sur le site."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:85
 msgid "The macro"
-msgstr "La macro"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:87
 msgid ""
@@ -302,20 +250,10 @@ msgid ""
 "**Developer** → **Macros** → **SyncSessions**. It asks for the client "
 "secret every time, so the secret is never saved in the file."
 msgstr ""
-"Dans Excel, ouvrez **Développeur** → **Visual Basic** (ou appuyez sur "
-"Alt+F11), choisissez **Insertion** → **Module** et collez le code ci-"
-"dessous. Mettez l'adresse du site sur la première ligne (elle figure en "
-"bas de la page **API**) et enregistrez le fichier comme **Classeur Excel "
-"(prenant en charge les macros)** (``.xlsm``). La macro envoie les lignes "
-"de la ligne 2 jusqu'à la dernière ligne remplie de la colonne **A** : "
-"gardez donc les sessions groupées, sans lignes vides entre elles. Lancez-"
-"la avec **Développeur** → **Macros** → **SyncSessions**. Elle demande le "
-"secret client à chaque fois, pour que le secret ne soit jamais enregistré"
-" dans le fichier."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:168
 msgid "Keep the secret safe"
-msgstr "Gardez le secret en sécurité"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:170
 msgid ""
@@ -324,15 +262,10 @@ msgid ""
 " who came. If the secret may have leaked, give the client a **New "
 "secret** on the **API** page: the old one stops working at once."
 msgstr ""
-"Quiconque a l'identifiant client et le secret peut modifier les sessions "
-"de votre dojo. Ne donnez à ce client que **Planifier les sessions**, pour"
-" qu'il ne voie pas qui s'est inscrit ni qui est venu. Si le secret a pu "
-"fuiter, donnez au client un **Nouveau secret** sur la page **API** : "
-"l'ancien cesse aussitôt de fonctionner."
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:176
 msgid "For other tools"
-msgstr "Pour d'autres outils"
+msgstr ""
 
 #: ../../source/dojo-team/planning-from-a-spreadsheet.rst:178
 msgid ""
@@ -340,7 +273,4 @@ msgid ""
 " to ``/api/v1/events/sync``. The **Reference** link on the **API** page "
 "describes every field."
 msgstr ""
-"Tout outil ou langage peut faire de même : demander un jeton, puis "
-"envoyer les lignes à ``/api/v1/events/sync``. Le lien **Référence** sur "
-"la page **API** décrit chaque champ."
 
