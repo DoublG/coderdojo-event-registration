@@ -1709,3 +1709,83 @@ class SignUpQuestionsViewTests(TestCase):
         self.assertIn("questions for this session changed", response.context["error"])
         texts = [item["question"].text for item in response.context["children"][0]["questions"]]
         self.assertEqual(texts, ["Will your child bring their own laptop?", lunch.text])
+
+
+class ChangeAnswersTests(TestCase):
+    """Changing a child's answers from the account page (DATA_MODEL.md §29,
+    phase 2): events.questions.change_answers and the family's page."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.dojo = make_dojo("Ghent")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
+        cls.emma = Ninja.objects.create(name="Emma")
+        Guardianship.objects.create(guardian=cls.guardian, ninja=cls.emma)
+
+    def setUp(self):
+        self.event = _future_event(self.dojo)
+        self.laptop = questions.add_question(self.event, "Own laptop?")
+        self.registration = registrations.sign_up(
+            self.event, [self.emma], answers={self.emma.id: {self.laptop.id: True}}
+        )[0]["registration"]
+        self.url = reverse("registration_answers", kwargs={"registration_id": self.registration.id})
+        self.client.force_login(self.guardian)
+
+    def answers(self):
+        return dict(self.registration.answers.values_list("question__text", "answer"))
+
+    def test_changing_an_answer(self):
+        self.assertTrue(questions.change_answers(self.registration, {self.laptop.id: False}))
+        self.assertEqual(self.answers(), {"Own laptop?": False})
+        self.assertFalse(questions.change_answers(self.registration, {self.laptop.id: False}))
+
+    def test_answering_a_question_added_later(self):
+        lunch = questions.add_question(self.event, "Lunch?")
+        with self.assertRaises(questions.QuestionError):
+            questions.change_answers(self.registration, {self.laptop.id: True})
+        questions.change_answers(self.registration, {self.laptop.id: True, lunch.id: True})
+        self.assertEqual(self.answers(), {"Own laptop?": True, "Lunch?": True})
+
+    def test_not_once_the_session_started(self):
+        Event.objects.filter(pk=self.event.pk).update(start_time=timezone.now() - timedelta(minutes=5))
+        with self.assertRaisesMessage(questions.QuestionError, "has started"):
+            questions.change_answers(self.registration, {self.laptop.id: False})
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    def test_the_page_shows_and_saves_the_answers(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, f'name="q-{self.laptop.id}" value="yes" checked')
+        response = self.client.post(self.url, {f"q-{self.laptop.id}": "no"})
+        self.assertRedirects(response, reverse("account_home"))
+        self.assertEqual(self.answers(), {"Own laptop?": False})
+
+    def test_a_missing_answer_is_marked(self):
+        lunch = questions.add_question(self.event, "Lunch?")
+        response = self.client.get(self.url)
+        self.assertContains(response, "New question")
+        response = self.client.post(self.url, {f"q-{self.laptop.id}": "no"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'id="q-{lunch.id}-error"')
+        self.assertEqual(self.answers(), {"Own laptop?": True})
+
+    def test_another_familys_child_is_a_404(self):
+        self.client.force_login(User.objects.create(username="g2", email="g2@example.com"))
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+        self.assertEqual(self.client.post(self.url, {f"q-{self.laptop.id}": "no"}).status_code, 404)
+        self.assertEqual(self.answers(), {"Own laptop?": True})
+
+    def test_a_session_without_questions_has_no_page(self):
+        other = _future_event(self.dojo)
+        registration = registrations.sign_up(other, [self.emma])[0]["registration"]
+        url = reverse("registration_answers", kwargs={"registration_id": registration.id})
+        self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_the_account_page_links_to_it(self):
+        response = self.client.get(reverse("account_home"))
+        self.assertContains(response, self.url)
+        self.assertContains(response, "Change answers")
+        questions.add_question(self.event, "Lunch?")
+        response = self.client.get(reverse("account_home"))
+        self.assertContains(response, "Answer the new question")
+        child_page = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.emma.id}))
+        self.assertContains(child_page, self.url)

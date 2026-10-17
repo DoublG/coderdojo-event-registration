@@ -500,3 +500,39 @@ class SignUpForm(forms.Form):
             raise forms.ValidationError(_("Answer every question for each child you sign up."))
         data["answers"] = answers
         return data
+
+
+class AnswersForm(forms.Form):
+    """A family changes one child's answers to the session's yes/no
+    questions (events.questions.change_answers), from the account page.
+    The page renders its own radio buttons, like the sign-up page; this
+    form reads `q-<question id>` = yes|no for every question.
+    `cleaned_data["answers"]` is {question_id: bool}; a missing one is in
+    `missing`."""
+
+    def __init__(self, *args, questions, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.questions = list(questions)
+        self.missing = set()
+
+    @staticmethod
+    def answer_name(question_id):
+        return f"q-{question_id}"
+
+    def posted_answer(self, question_id):
+        value = self.data.get(self.answer_name(question_id)) if self.is_bound else None
+        return value if value in ("yes", "no") else ""
+
+    def clean(self):
+        data = super().clean()
+        answers = {}
+        for question in self.questions:
+            value = self.posted_answer(question.id)
+            if value:
+                answers[question.id] = value == "yes"
+            else:
+                self.missing.add(question.id)
+        if self.missing:
+            raise forms.ValidationError(_("Answer every question."))
+        data["answers"] = answers
+        return data

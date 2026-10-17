@@ -220,10 +220,23 @@ class AttendanceApiTests(ApiTestCase):
         _client, auth = self.bearer([DojoApiClient.READ])
         data = self.client.get(f"/api/v1/events/{self.event.id}/attendance", **auth).json()
         self.assertEqual(
-            data["children"], [{"registration_id": self.registration.id, "name": "Lotte", "attended": None}]
+            data["children"],
+            [{"registration_id": self.registration.id, "name": "Lotte", "attended": None, "answers": []}],
         )
+        self.assertEqual(data["questions"], [])
         self.assertEqual([m["membership_id"] for m in data["team"]], [self.mentor_membership.id])
         self.assertNotIn("Peanuts", str(data))
+
+    def test_attendance_has_the_sign_up_questions_and_answers(self):
+        _client, auth = self.bearer([DojoApiClient.READ])
+        laptop = self.event.questions.create(text="Own laptop?", position=1)
+        lunch = self.event.questions.create(text="Lunch?", position=2)
+        self.registration.answers.create(question=laptop, answer=False)
+        data = self.client.get(f"/api/v1/events/{self.event.id}/attendance", **auth).json()
+        self.assertEqual(
+            data["questions"], [{"id": laptop.id, "text": "Own laptop?"}, {"id": lunch.id, "text": "Lunch?"}]
+        )
+        self.assertEqual(data["children"][0]["answers"], [{"question_id": laptop.id, "answer": False}])
 
     def test_another_dojos_event_is_a_404(self):
         _client, auth = self.bearer()

@@ -42,7 +42,8 @@ TEMPLATES = [
         "key": "registration_confirmed",
         "category": MailCategory.REGISTRATION,
         "description": "After signing a ninja up for a session with a free place. "
-        "Variables: ninja_name, event_name, dojo_name, start_time, end_time, venue, event_url, account_url.",
+        "Variables: ninja_name, event_name, dojo_name, start_time, end_time, venue, event_url, account_url, "
+        "answers (the sign-up questions' answers: question, answer).",
         "subject": {
             "en-us": "{{ ninja_name }} is signed up for {{ event_name }}",
             "nl-be": "{{ ninja_name }} is ingeschreven voor {{ event_name }}",
@@ -56,7 +57,10 @@ Hi {{ recipient_name }},
 
   When:  {{ start_time|date:"l j F Y" }}, {{ start_time|date:"H:i" }}–{{ end_time|date:"H:i" }}
   Where: {{ venue }}
-
+{% if answers %}
+Your answers (you can change them on your account page until the session starts):
+{% for item in answers %}  {{ item.question }} {{ item.answer }}
+{% endfor %}{% endif %}
 Bring a charged laptop if you have one. The session details are here:
 {{ event_url }}
 
@@ -70,7 +74,10 @@ Hallo {{ recipient_name }},
 
   Wanneer: {{ start_time|date:"l j F Y" }}, {{ start_time|date:"H:i" }}–{{ end_time|date:"H:i" }}
   Waar:    {{ venue }}
-
+{% if answers %}
+Je antwoorden (je kan ze tot de sessie begint wijzigen op je accountpagina):
+{% for item in answers %}  {{ item.question }} {{ item.answer }}
+{% endfor %}{% endif %}
 Breng een opgeladen laptop mee als je er een hebt. Alle details van de sessie:
 {{ event_url }}
 
@@ -84,7 +91,10 @@ Bonjour {{ recipient_name }},
 
   Quand : {{ start_time|date:"l j F Y" }}, {{ start_time|date:"H:i" }}–{{ end_time|date:"H:i" }}
   Où :    {{ venue }}
-
+{% if answers %}
+Vos réponses (modifiables sur votre page de compte jusqu'au début de la session) :
+{% for item in answers %}  {{ item.question }} {{ item.answer }}
+{% endfor %}{% endif %}
 Apportez un ordinateur portable chargé si vous en avez un. Tous les détails de la session :
 {{ event_url }}
 
@@ -97,7 +107,8 @@ pour quelqu'un de la liste d'attente : {{ account_url }}
         "key": "registration_waitlisted",
         "category": MailCategory.REGISTRATION,
         "description": "After signing a ninja up for a full session: they're on the waiting list. "
-        "Variables: ninja_name, event_name, dojo_name, start_time, event_url, account_url.",
+        "Variables: ninja_name, event_name, dojo_name, start_time, event_url, account_url, "
+        "answers (the sign-up questions' answers: question, answer).",
         "subject": {
             "en-us": "{{ ninja_name }} is on the waiting list for {{ event_name }}",
             "nl-be": "{{ ninja_name }} staat op de wachtlijst voor {{ event_name }}",
@@ -110,7 +121,10 @@ Hi {{ recipient_name }},
 {{ event_name }} at {{ dojo_name }} ({{ start_time|date:"l j F" }}) is full, so
 {{ ninja_name }} is on the waiting list. If a place comes free, it goes to whoever
 has waited longest, and we'll mail you straight away.
-
+{% if answers %}
+Your answers (you can change them on your account page until the session starts):
+{% for item in answers %}  {{ item.question }} {{ item.answer }}
+{% endfor %}{% endif %}
 Session details: {{ event_url }}
 Your registrations: {{ account_url }}
 """,
@@ -120,7 +134,10 @@ Hallo {{ recipient_name }},
 {{ event_name }} bij {{ dojo_name }} ({{ start_time|date:"l j F" }}) is volzet, dus
 {{ ninja_name }} staat op de wachtlijst. Komt er een plaats vrij, dan gaat die naar
 wie het langst wacht, en mailen we je meteen.
-
+{% if answers %}
+Je antwoorden (je kan ze tot de sessie begint wijzigen op je accountpagina):
+{% for item in answers %}  {{ item.question }} {{ item.answer }}
+{% endfor %}{% endif %}
 Details van de sessie: {{ event_url }}
 Je inschrijvingen: {{ account_url }}
 """,
@@ -130,7 +147,10 @@ Bonjour {{ recipient_name }},
 {{ event_name }} au {{ dojo_name }} ({{ start_time|date:"l j F" }}) est complet :
 {{ ninja_name }} est donc sur la liste d'attente. Si une place se libère, elle va à
 la personne qui attend depuis le plus longtemps, et nous vous écrivons aussitôt.
-
+{% if answers %}
+Vos réponses (modifiables sur votre page de compte jusqu'au début de la session) :
+{% for item in answers %}  {{ item.question }} {{ item.answer }}
+{% endfor %}{% endif %}
 Détails de la session : {{ event_url }}
 Vos inscriptions : {{ account_url }}
 """,
@@ -1984,15 +2004,18 @@ _event = {
     "event_url": "https://coolregistration.localhost/events/1/",
     "account_url": "https://coolregistration.localhost/account/",
 }
+_answers = {
+    "answers": [{"question": "Will your child bring their own laptop?", "answer": "No"}],
+}
 _common = {
     "recipient_name": "Ellen",
     "site_url": "https://coolregistration.localhost",
     "unsubscribe_url": "https://coolregistration.localhost/mail/unsubscribe/example/",
 }
 SAMPLE_CONTEXT = {
-    "registration_confirmed": {**_common, **_event},
+    "registration_confirmed": {**_common, **_event, **_answers},
     "waitlist_promoted": {**_common, **_event},
-    "registration_waitlisted": {**_common, **_event},
+    "registration_waitlisted": {**_common, **_event, **_answers},
     "session_reminder": {**_common, **_event},
     "new_sessions_at_dojo": {
         **_common,

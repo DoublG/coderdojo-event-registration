@@ -2726,7 +2726,7 @@ role. Full design, decisions, phases and open points are in
 `DATA_MODEL_ROLES.md`.
 
 
-## 29. Yes/no questions on a session's sign-up (phase 1 built)
+## 29. Yes/no questions on a session's sign-up (built)
 
 A dojo team can ask families a few yes/no questions when they sign a child
 up for a session. The example that started it: *"Will your child bring
@@ -2899,7 +2899,7 @@ Phase 2.
    answers and totals on the attendance list, privacy, admin, seeders,
    tests, docs. That's the whole laptop case. **Built** (17 October 2026).
 2. Changing answers from the account page, answers in the booking mails,
-   the API.
+   the API. **Built** (17 October 2026).
 
 ### Built so far (phase 1)
 
@@ -2931,6 +2931,39 @@ As planned above, with these choices made while building it:
   admin and has its own page too.
 - **Open points**: taken as planned (copy from the last session; answers
   not in the audit log; at most 5).
+
+### Built so far (phase 2)
+
+- **Changing answers**: `events.questions.change_answers(registration,
+  {question_id: bool})` under the session's lock, every current question
+  required (a question added since the page was read gives a
+  `QuestionError`), refused once the session has started; it creates the
+  missing answers and updates `answered_at` on a changed one. The page is
+  `accounts.views.registration_answers` (`/account/registration/<id>/answers/`,
+  `events.forms.AnswersForm`, hand-written radios like the sign-up page):
+  a guardian's child or a ninja login's own place, a session with
+  questions that hasn't started, 404 otherwise. The account page and the
+  child's page link to it from each upcoming place (`ANSWER_COUNTS`
+  annotations): *Change answers*, or *Answer the new question* when the
+  child has fewer answers than the session has questions. The team isn't
+  notified of a change; the attendance list and the card always show the
+  answers as they are.
+- **Mail**: `booking_mail` passes `answers` = `[{"question", "answer"}]`
+  in each recipient's mail language (`mailing.automated._answers_context`:
+  the question's own translation, "Yes"/"No" from the catalogs). The
+  seeded `registration_confirmed` and `registration_waitlisted` templates
+  list them in a `{% if answers %}` block that leaves the mail as before
+  without answers; `mailing/migrations/0021_…` updates rows still exactly
+  as seeded (the same sha256 guard as `0020`). `waitlist_promoted` and the
+  reminder don't list them.
+- **API**: `GET /api/v1/events/{id}/attendance` has `questions`
+  (`id`, `text` in the dojo's main language) and each child's `answers`
+  (`question_id`, `answer`), under the read scope;
+  `events.attendance.confirmed_registrations` prefetches them.
+- **Audit log** (open point 2): still not recorded. Families can now change
+  answers, so the team can't see who changed one or when, apart from
+  `answered_at`; add `RegistrationAnswer` to `core.audit.RECORDED` if
+  teams ask for it.
 
 ### Open points
 

@@ -21,11 +21,12 @@ from typing import TYPE_CHECKING, Any
 from django.conf import settings
 from django.db.models import QuerySet
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
+from django.utils.translation import gettext
 
 from accounts.models import Guardianship, Ninja, User
 from dojos.models import Dojo
-from events.models import Event, Registration
+from events.models import Event, Registration, RegistrationAnswer
 
 from .categories import MailCategory
 from .dojo_families import active_since, family_accounts
@@ -95,14 +96,34 @@ def _send_to_family(
     return sent
 
 
+def _answers_context(registration: Registration, user: User) -> list[dict[str, str]]:
+    """The family's answers to the session's sign-up questions (events.questions),
+    in `user`'s mail language: [{"question", "answer"}]."""
+    language = _mail_language(user)
+    answers = (
+        RegistrationAnswer.objects.filter(registration=registration)
+        .select_related("question__event__dojo")
+        .order_by("question__position", "question_id")
+    )
+    with translation.override(language):
+        return [
+            {
+                "question": answer.question.localized("text", language),
+                "answer": gettext("Yes") if answer.answer else gettext("No"),
+            }
+            for answer in answers
+        ]
+
+
 def booking_mail(registration: Registration) -> int:
-    """Right after a sign-up: a confirmation, or the waiting-list notice."""
+    """Right after a sign-up: a confirmation, or the waiting-list notice,
+    with the answers to the session's sign-up questions."""
     template = "registration_waitlisted" if registration.waiting_list else "registration_confirmed"
     return _send_to_family(
         registration.ninja,
         MailCategory.REGISTRATION,
         template,
-        lambda user: _session_context(registration, user),
+        lambda user: {**_session_context(registration, user), "answers": _answers_context(registration, user)},
         f"booking:{registration.pk}",
     )
 

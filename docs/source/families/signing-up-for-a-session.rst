@@ -18,7 +18,13 @@ You'll need to be logged in to your family account to sign up (see
 
 If you forget to answer a question, the page tells you which one and keeps
 the children you ticked, in the order you ticked them, and the answers you
-already gave. The confirmation lists each child's answers.
+already gave. The confirmation lists each child's answers, and so does the
+booking mail.
+
+Changed your mind? On your account page, a session with questions has
+**Change answers** next to it, until the session starts. When the dojo adds
+a question after you signed up, it says **Answer the new question**
+instead.
 
 A child with their own login (see :doc:`managing-your-account`) can also
 sign themselves up the same way; they only see themselves in the list.

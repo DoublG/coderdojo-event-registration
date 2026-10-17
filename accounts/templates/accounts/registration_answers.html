@@ -1,0 +1,51 @@
+{% extends "core/base.html" %}
+{% load content_i18n %}
+{% load i18n %}
+{% block title %}{% translate "Change answers" %} · CoderDojo Belgium{% endblock %}
+{% block root_class %}answers-root{% endblock %}
+{% block menu %}{% include "core/menu.html" with style="background: var(--surface)" %}{% endblock %}
+
+{% block extra_style %}
+<style>
+  .answers-root { background: var(--surface-sunken); }
+  .answers-root .page { max-width: 640px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+  .answers-root .page-title { color: var(--ink); margin: 0 0 var(--space-2); }
+  .answers-root .meta { color: var(--ink-muted); margin: 0 0 var(--space-4); }
+  .answers-root .form-card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--space-6); }
+  .answers-root .answer-question { margin-bottom: var(--space-4); }
+  .answers-root .answer-question legend { color: var(--ink); }
+  .answers-root .answer-question__choices { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+  .answers-root .answer-question__choices label { display: inline-flex; align-items: center; min-height: 24px; cursor: pointer; }
+</style>
+{% endblock %}
+
+{% block content %}
+  {% comment %}A family changes one child's answers to the session's sign-up questions (accounts.views.registration_answers, events.questions.change_answers).{% endcomment %}
+  <div class="page">
+    <h1 class="display-lg page-title">{% blocktranslate with name=registration.ninja.name %}{{ name }}'s answers{% endblocktranslate %}</h1>
+    <p class="body meta">{{ event|localized:"name"|in_lang }} · {{ event.dojo.name }} · {{ event.start_time|date:"D j M" }}, {{ event.start_time|time:"H:i" }}</p>
+    <div class="form-card">
+      <p class="body-sm">{% translate "The dojo team uses these answers to prepare the session. You can change them until it starts. They never change your child's place." %}</p>
+      <form class="cd-form" method="post" novalidate>
+        {% csrf_token %}
+        {% if error %}
+          <div class="cd-form__notes"><p class="cd-form__note cd-form__note--error caption">{{ error }}</p></div>
+        {% endif %}
+        {% for item in fields %}
+          <fieldset class="cd-form__fieldset answer-question"{% if item.error %} aria-describedby="{{ item.name }}-error"{% endif %}>
+            <legend class="body">{{ item.question|localized:"text"|in_lang }}{% if item.not_asked %} <span class="cd-badge cd-badge--accent caption">{% translate "New question" %}</span>{% endif %}</legend>
+            <div class="answer-question__choices body-sm">
+              <label><input type="radio" name="{{ item.name }}" value="yes"{% if item.value == "yes" %} checked{% endif %}>{% translate "Yes" %}</label>
+              <label><input type="radio" name="{{ item.name }}" value="no"{% if item.value == "no" %} checked{% endif %}>{% translate "No" %}</label>
+            </div>
+            {% if item.error %}<ul class="cd-form__errors" id="{{ item.name }}-error"><li class="caption">{% translate "Answer this question." %}</li></ul>{% endif %}
+          </fieldset>
+        {% endfor %}
+        <div class="cd-form__actions">
+          <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">{% translate "Cancel" %}</a>
+          <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Save answers" %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

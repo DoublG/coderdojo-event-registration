@@ -76,10 +76,25 @@ class EventOut(Schema):
     places: int
 
 
+class QuestionOut(Schema):
+    # A yes/no question families answer per child on the sign-up, in the
+    # dojo's main language.
+    id: int
+    text: str
+
+
+class AnswerOut(Schema):
+    question_id: int
+    answer: bool
+
+
 class ChildOut(Schema):
     registration_id: int
     name: str
     attended: bool | None
+    # The family's answers to the session's questions; a question missing
+    # here was added after the child signed up.
+    answers: list[AnswerOut]
 
 
 class TeamMemberOut(Schema):
@@ -91,6 +106,7 @@ class TeamMemberOut(Schema):
 
 class AttendanceOut(Schema):
     event: EventOut
+    questions: list[QuestionOut]
     children: list[ChildOut]
     team: list[TeamMemberOut]
 
@@ -112,7 +128,12 @@ def _event_out(event):
 
 
 def _child_out(registration):
-    return ChildOut(registration_id=registration.id, name=registration.ninja.full_name, attended=registration.attended)
+    return ChildOut(
+        registration_id=registration.id,
+        name=registration.ninja.full_name,
+        attended=registration.attended,
+        answers=[AnswerOut(question_id=a.question_id, answer=a.answer) for a in registration.answers.all()],
+    )
 
 
 def _team_out(row):
@@ -125,6 +146,7 @@ def _team_out(row):
 def _attendance_out(event):
     return AttendanceOut(
         event=_event_out(event),
+        questions=[QuestionOut(id=q.id, text=q.text) for q in event.questions.all()],
         children=[_child_out(r) for r in attendance.confirmed_registrations(event)],
         team=[_team_out(row) for row in attendance.team_rows(event)],
     )

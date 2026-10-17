@@ -682,6 +682,33 @@ class AutomatedMailTests(TestCase):
         dutch = EmailMessage.objects.get(recipient="p@example.com")
         self.assertEqual(dutch.subject, "Emma is ingeschreven voor Scratch")
 
+    def test_the_booking_mail_lists_the_answers_in_each_recipients_language(self):
+        self.dojo.languages = ["en-us", "nl-be"]
+        self.dojo.save()
+        event = self._event(days_ahead=10)
+        laptop = event.questions.create(
+            text="Own laptop?", position=1, translations={"nl-be": {"text": "Eigen laptop?"}}
+        )
+        self.client.force_login(self.parent)
+        self.client.post(
+            reverse("event_signup", kwargs={"event_id": event.id}),
+            {"child": [str(self.kid.id)], f"q-{self.kid.id}-{laptop.id}": "no"},
+        )
+        dutch = EmailMessage.objects.get(recipient="p@example.com")
+        self.assertIn("Je antwoorden", dutch.body)
+        self.assertIn("  Eigen laptop? Nee", dutch.body)
+        english = EmailMessage.objects.get(recipient="co@example.com")
+        self.assertIn("  Own laptop? No", english.body)
+
+    def test_a_session_without_questions_mails_no_answers(self):
+        event = self._event(days_ahead=10)
+        self.client.force_login(self.parent)
+        self.client.post(reverse("event_signup", kwargs={"event_id": event.id}), {"child": [str(self.kid.id)]})
+        body = EmailMessage.objects.get(recipient="co@example.com").body
+        self.assertNotIn("Your answers", body)
+        self.assertIn("Where: ", body)
+        self.assertNotIn("\n\n\n", body)
+
     def test_signup_for_a_full_session_sends_the_waiting_list_notice(self):
         event = self._event(days_ahead=10, places=0)
         self.client.force_login(self.parent)

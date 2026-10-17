@@ -1,13 +1,13 @@
 """The account page: the holder's own details (edited in place), changing the
-email address (a confirmed flow, accounts.email_change) and cancelling a
-child's place."""
+email address (a confirmed flow, accounts.email_change), cancelling a
+child's place and changing its answers to the session's sign-up questions."""
 
 from auditlog.context import set_actor
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -16,7 +16,9 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 
 from dojos.team import notify_managers
+from events import questions as event_questions
 from events import registrations
+from events.forms import AnswersForm
 from events.models import Registration
 
 from .. import email_change, two_step
@@ -27,6 +29,14 @@ from ..forms import (
 )
 from ..models import Ninja, User
 from .auth import _post_login_redirect
+
+# For each upcoming place's "Change answers" link: how many sign-up questions
+# the session has, and how many this child answered (fewer: one was added
+# after they signed up).
+ANSWER_COUNTS = {
+    "question_count": Count("event__questions", distinct=True),
+    "answer_count": Count("answers", distinct=True),
+}
 
 
 def _children_context(parent):
@@ -41,6 +51,7 @@ def _children_context(parent):
         registrations = list(
             child.registration_set.filter(event__start_time__gte=now)
             .select_related("event")
+            .annotate(**ANSWER_COUNTS)
             .order_by("event__start_time")
         )
         children.append({"child": child, "registrations": registrations})
@@ -170,14 +181,74 @@ def confirm_email_change(request, token):
     return render(request, template, {"done": user})
 
 
-@login_required
-def cancel_registration(request, registration_id):
-    registration = get_object_or_404(
+def _own_registration(request, registration_id, **filters):
+    """A place of one of the account's children (or a ninja login's own),
+    else a 404."""
+    return get_object_or_404(
         Registration.objects.filter(
             Q(ninja__guardianships__guardian=request.user) | Q(ninja__account=request.user)
         ).distinct(),
         id=registration_id,
+        **filters,
     )
+
+
+@login_required
+def registration_answers(request, registration_id):
+    """Change one child's answers to the session's yes/no sign-up questions,
+    or answer one added after they signed up (DATA_MODEL.md §29, phase 2):
+    until the session starts, the family's own children only (404
+    otherwise). The rules are events.questions.change_answers."""
+    registration = _own_registration(
+        request, registration_id, event__start_time__gt=timezone.now(), event__questions__isnull=False
+    )
+    event = registration.event
+    questions = list(event.questions.all())
+    form = AnswersForm(request.POST if request.method == "POST" else None, questions=questions)
+    error = None
+    if request.method == "POST":
+        if form.is_valid():
+            try:
+                changed = event_questions.change_answers(registration, form.cleaned_data["answers"])
+            except event_questions.QuestionError as problem:
+                error = str(problem)
+                questions = list(event.questions.all())
+            else:
+                if changed:
+                    messages.success(
+                        request,
+                        _("%(name)s's answers for %(event)s are saved.")
+                        % {"name": registration.ninja.name, "event": event.localized("name")},
+                    )
+                return redirect("account_home")
+        else:
+            error = form.non_field_errors()[0]
+    current = {a.question_id: a.answer for a in registration.answers.all()}
+    fields = []
+    for question in questions:
+        if request.method == "POST" and form.is_bound:
+            value = form.posted_answer(question.id)
+        else:
+            value = {True: "yes", False: "no"}.get(current.get(question.id), "")
+        fields.append(
+            {
+                "question": question,
+                "name": AnswersForm.answer_name(question.id),
+                "value": value,
+                "error": question.id in form.missing,
+                "not_asked": question.id not in current,
+            }
+        )
+    return render(
+        request,
+        "accounts/registration_answers.html",
+        {"registration": registration, "event": event, "fields": fields, "error": error},
+    )
+
+
+@login_required
+def cancel_registration(request, registration_id):
+    registration = _own_registration(request, registration_id)
 
     if request.method == "POST":
         event = registration.event

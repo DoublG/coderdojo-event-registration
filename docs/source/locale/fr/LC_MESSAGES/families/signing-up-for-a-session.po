@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 07:10+0000\n"
+"POT-Creation-Date: 2026-10-17 07:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Claude <noreply@anthropic.com>\n"
 "Language: fr\n"
@@ -73,14 +73,27 @@ msgstr ""
 msgid ""
 "If you forget to answer a question, the page tells you which one and "
 "keeps the children you ticked, in the order you ticked them, and the "
-"answers you already gave. The confirmation lists each child's answers."
+"answers you already gave. The confirmation lists each child's answers, "
+"and so does the booking mail."
 msgstr ""
 "Si vous oubliez de répondre à une question, la page vous indique laquelle"
 " et garde les enfants cochés, dans l'ordre où vous les avez cochés, ainsi"
 " que les réponses déjà données. La confirmation reprend les réponses de "
-"chaque enfant."
+"chaque enfant, tout comme l'e-mail de réservation."
 
-#: ../../source/families/signing-up-for-a-session.rst:23
+#: ../../source/families/signing-up-for-a-session.rst:24
+msgid ""
+"Changed your mind? On your account page, a session with questions has "
+"**Change answers** next to it, until the session starts. When the dojo "
+"adds a question after you signed up, it says **Answer the new question** "
+"instead."
+msgstr ""
+"Vous avez changé d'avis ? Sur votre page de compte, une session avec des "
+"questions affiche **Modifier les réponses**, jusqu'au début de la "
+"session. Si le dojo ajoute une question après votre inscription, il est "
+"indiqué **Répondre à la nouvelle question**."
+
+#: ../../source/families/signing-up-for-a-session.rst:29
 msgid ""
 "A child with their own login (see :doc:`managing-your-account`) can also "
 "sign themselves up the same way; they only see themselves in the list."
@@ -89,11 +102,11 @@ msgstr ""
 "peut aussi s'inscrire lui-même de la même façon ; il ne voit que lui-même"
 " dans la liste."
 
-#: ../../source/families/signing-up-for-a-session.rst:27
+#: ../../source/families/signing-up-for-a-session.rst:33
 msgid "Mails about your booking"
 msgstr "E-mails concernant votre réservation"
 
-#: ../../source/families/signing-up-for-a-session.rst:29
+#: ../../source/families/signing-up-for-a-session.rst:35
 msgid ""
 "After you sign up, you (and any other parent on the account, plus a child"
 " with their own login and email) get a confirmation mail, or a waiting-"
@@ -108,7 +121,7 @@ msgstr ""
 " pouvez désactiver les rappels sur votre page **Préférences d'e-mail** "
 "(voir :doc:`mail-preferences`)."
 
-#: ../../source/families/signing-up-for-a-session.rst:35
+#: ../../source/families/signing-up-for-a-session.rst:41
 msgid ""
 "If a session shows **Registrations closed** instead of a sign-up option, "
 "the dojo has stopped taking new sign-ups for it (this normally happens "
@@ -121,11 +134,11 @@ msgstr ""
 "séance) — contactez directement l'équipe du dojo si vous avez encore "
 "besoin d'une place."
 
-#: ../../source/families/signing-up-for-a-session.rst:41
+#: ../../source/families/signing-up-for-a-session.rst:47
 msgid "Featured events"
 msgstr "Événements mis en avant"
 
-#: ../../source/families/signing-up-for-a-session.rst:43
+#: ../../source/families/signing-up-for-a-session.rst:49
 msgid ""
 "Some events are **featured**: CoderDojo Belgium highlights them for a "
 "while at the top of the homepage, first in **Upcoming sessions**, above "
@@ -140,11 +153,11 @@ msgstr ""
 "événement mis en avant comme à n'importe quel autre ; la mise en avant "
 "disparaît dès que l'événement commence."
 
-#: ../../source/families/signing-up-for-a-session.rst:50
+#: ../../source/families/signing-up-for-a-session.rst:56
 msgid "Events organised by CoderDojo Belgium"
 msgstr "Événements organisés par CoderDojo Belgium"
 
-#: ../../source/families/signing-up-for-a-session.rst:52
+#: ../../source/families/signing-up-for-a-session.rst:58
 msgid ""
 "Besides the sessions dojos run, CoderDojo Belgium organises a few events "
 "itself, such as CoderDojo Girlz and Coolest Projects. Their page says "
@@ -155,7 +168,7 @@ msgstr ""
 "Leur page indique **Organisé par CoderDojo Belgium** au lieu du nom d'un "
 "dojo."
 
-#: ../../source/families/signing-up-for-a-session.rst:56
+#: ../../source/families/signing-up-for-a-session.rst:62
 msgid ""
 "Some of these events take registrations on their own website. Their page "
 "then has a **Register on …** button that opens that website, instead of "
@@ -171,11 +184,11 @@ msgstr ""
 "de votre compte et vous ne recevez de notre part aucun e-mail sur cette "
 "inscription."
 
-#: ../../source/families/signing-up-for-a-session.rst:63
+#: ../../source/families/signing-up-for-a-session.rst:69
 msgid "Girls' sessions"
 msgstr "Séances pour filles"
 
-#: ../../source/families/signing-up-for-a-session.rst:65
+#: ../../source/families/signing-up-for-a-session.rst:71
 msgid ""
 "Some sessions are labelled **Girls' session**. They're aimed at girls, "
 "but the label never stops anyone from signing up."
@@ -184,11 +197,11 @@ msgstr ""
 "s'adressent aux filles, mais l'étiquette n'empêche jamais personne de "
 "s'inscrire."
 
-#: ../../source/families/signing-up-for-a-session.rst:69
+#: ../../source/families/signing-up-for-a-session.rst:75
 msgid "Waiting lists"
 msgstr "Listes d'attente"
 
-#: ../../source/families/signing-up-for-a-session.rst:71
+#: ../../source/families/signing-up-for-a-session.rst:77
 msgid ""
 "Sessions have a limited number of places. If a session is full when you "
 "sign up, your child is placed on the **waiting list** instead of being "
@@ -205,11 +218,11 @@ msgstr ""
 "séance est automatiquement confirmé, et nous vous l'annonçons par e-mail."
 " Aucune action de votre part n'est nécessaire."
 
-#: ../../source/families/signing-up-for-a-session.rst:79
+#: ../../source/families/signing-up-for-a-session.rst:85
 msgid "Cancelling"
 msgstr "Annuler"
 
-#: ../../source/families/signing-up-for-a-session.rst:81
+#: ../../source/families/signing-up-for-a-session.rst:87
 msgid ""
 "If your plans change, cancel from your family account page (see :doc"
 ":`managing-your-account`) rather than just not turning up — that's also "

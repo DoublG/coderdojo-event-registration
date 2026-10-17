@@ -80,7 +80,9 @@ A few things to know:
   something else, remove the question and add a new one. Removing a
   question deletes its answers.
 - A question added after families signed up shows **Not asked** for their
-  children.
+  children, until the family answers it from their account page. Families
+  can change their answers there until the session starts, so the totals
+  can still move.
 - If your dojo writes in more than one language, the question has a field
   per language, like the session's own texts.
 - Sessions that take registrations on another website have no questions.

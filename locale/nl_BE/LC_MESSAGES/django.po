@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 07:08+0000\n"
+"POT-Creation-Date: 2026-10-17 07:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -709,7 +709,7 @@ msgstr "Beoordelaars van uittreksels"
 msgid "Champions"
 msgstr "Champions"
 
-#: accounts/models.py:616 accounts/templates/accounts/child_detail.html:199
+#: accounts/models.py:616 accounts/templates/accounts/child_detail.html:200
 msgid "Mentors"
 msgstr "Mentors"
 
@@ -759,8 +759,8 @@ msgstr ""
 
 #: accounts/organisation.py:105
 #: accounts/templates/accounts/_security_base.html:8
-#: accounts/templates/accounts/child_detail.html:229
-#: accounts/templates/accounts/child_detail.html:231
+#: accounts/templates/accounts/child_detail.html:230
+#: accounts/templates/accounts/child_detail.html:232
 #: accounts/templates/accounts/guardian_detail.html:85
 #: accounts/templates/accounts/guardian_detail.html:88
 #: accounts/templates/accounts/manage/security.html:3
@@ -1010,16 +1010,17 @@ msgstr ""
 "toestellen."
 
 #: accounts/templates/accounts/change_email.html:30
-#: accounts/templates/accounts/child_detail.html:119
+#: accounts/templates/accounts/child_detail.html:120
 #: accounts/templates/accounts/guardian_remove.html:34
 #: accounts/templates/accounts/ninja_login_action.html:40
 #: accounts/templates/accounts/partials/_account_details_edit.html:30
 #: accounts/templates/accounts/partials/_add_child.html:30
 #: accounts/templates/accounts/partials/_child_avatar_picker.html:28
 #: accounts/templates/accounts/partials/_child_header_edit.html:26
-#: accounts/templates/accounts/partials/_children_list.html:55
+#: accounts/templates/accounts/partials/_children_list.html:56
 #: accounts/templates/accounts/register_guardian.html:70
 #: accounts/templates/accounts/register_individual.html:77
+#: accounts/templates/accounts/registration_answers.html:46
 #: accounts/templates/accounts/security_app.html:21
 #: accounts/templates/accounts/security_confirm.html:24
 #: accounts/templates/accounts/security_login_method.html:24
@@ -1089,8 +1090,8 @@ msgid "Upcoming sessions"
 msgstr "Komende sessies"
 
 #: accounts/templates/accounts/child_detail.html:97
-#: accounts/templates/accounts/child_detail.html:149
-#: accounts/templates/accounts/child_detail.html:195
+#: accounts/templates/accounts/child_detail.html:150
+#: accounts/templates/accounts/child_detail.html:196
 #: dojos/templates/dojos/dojo_event_list.html:23 events/forms.py:61
 #: events/forms.py:147 events/templates/events/event_detail.html:119
 #: events/templates/events/event_list.html:70
@@ -1098,12 +1099,12 @@ msgid "Date"
 msgstr "Datum"
 
 #: accounts/templates/accounts/child_detail.html:98
-#: accounts/templates/accounts/child_detail.html:196 campaigns/forms.py:168
+#: accounts/templates/accounts/child_detail.html:197 campaigns/forms.py:168
 msgid "Session"
 msgstr "Sessie"
 
 #: accounts/templates/accounts/child_detail.html:99
-#: accounts/templates/accounts/child_detail.html:197
+#: accounts/templates/accounts/child_detail.html:198
 #: applications/templates/applications/manage/application_detail.html:17
 #: campaigns/templates/campaigns/manage/_rule_fields.html:47
 #: campaigns/templates/campaigns/manage/_rule_fields.html:57 dojos/models.py:60
@@ -1150,67 +1151,79 @@ msgstr "Wachtlijst"
 msgid "View"
 msgstr "Bekijken"
 
-#: accounts/templates/accounts/child_detail.html:119
-#: accounts/templates/accounts/partials/_children_list.html:55
+# | msgid "About this session"
+#: accounts/templates/accounts/child_detail.html:116
+#: accounts/templates/accounts/partials/_children_list.html:52
+msgid "Answer the new question"
+msgstr "Nieuwe vraag beantwoorden"
+
+#: accounts/templates/accounts/child_detail.html:116
+#: accounts/templates/accounts/partials/_children_list.html:52
+#: accounts/templates/accounts/registration_answers.html:4
+msgid "Change answers"
+msgstr "Antwoorden wijzigen"
+
+#: accounts/templates/accounts/child_detail.html:120
+#: accounts/templates/accounts/partials/_children_list.html:56
 msgid "Leave waiting list"
 msgstr "Van de wachtlijst halen"
 
-#: accounts/templates/accounts/child_detail.html:126
+#: accounts/templates/accounts/child_detail.html:127
 msgid "No upcoming sessions."
 msgstr "Geen komende sessies."
 
-#: accounts/templates/accounts/child_detail.html:126
+#: accounts/templates/accounts/child_detail.html:127
 msgid "Find a session"
 msgstr "Zoek een sessie"
 
-#: accounts/templates/accounts/child_detail.html:136
-#: accounts/templates/accounts/child_detail.html:148 dojos/forms.py:441
+#: accounts/templates/accounts/child_detail.html:137
+#: accounts/templates/accounts/child_detail.html:149 dojos/forms.py:441
 #: dojos/templates/dojos/dojo_members.html:37
 msgid "Belt"
 msgstr "Gordel"
 
-#: accounts/templates/accounts/child_detail.html:150
+#: accounts/templates/accounts/child_detail.html:151
 msgid "Awarded by"
 msgstr "Toegekend door"
 
-#: accounts/templates/accounts/child_detail.html:151
+#: accounts/templates/accounts/child_detail.html:152
 #: applications/templates/applications/manage/check_detail.html:66
 #: mailing/templates/mailing/manage/mail_queue.html:182
 #: mailing/templates/mailing/manage/mail_queue.html:232
 msgid "Note"
 msgstr "Opmerking"
 
-#: accounts/templates/accounts/child_detail.html:172
-#: accounts/templates/accounts/child_detail.html:183
+#: accounts/templates/accounts/child_detail.html:173
+#: accounts/templates/accounts/child_detail.html:184
 msgid "Badges"
 msgstr "Badges"
 
-#: accounts/templates/accounts/child_detail.html:174
+#: accounts/templates/accounts/child_detail.html:175
 msgid "Previous badges"
 msgstr "Vorige badges"
 
-#: accounts/templates/accounts/child_detail.html:177
+#: accounts/templates/accounts/child_detail.html:178
 msgid "Next badges"
 msgstr "Volgende badges"
 
-#: accounts/templates/accounts/child_detail.html:190
+#: accounts/templates/accounts/child_detail.html:191
 msgid "Event history"
 msgstr "Eerdere sessies"
 
-#: accounts/templates/accounts/child_detail.html:198
+#: accounts/templates/accounts/child_detail.html:199
 msgid "Worked on"
 msgstr "Werkte aan"
 
-#: accounts/templates/accounts/child_detail.html:213
+#: accounts/templates/accounts/child_detail.html:214
 msgid "No past sessions yet."
 msgstr "Nog geen eerdere sessies."
 
-#: accounts/templates/accounts/child_detail.html:224
+#: accounts/templates/accounts/child_detail.html:225
 #: accounts/templates/accounts/guardian_detail.html:93
 msgid "Your data"
 msgstr "Jouw gegevens"
 
-#: accounts/templates/accounts/child_detail.html:225
+#: accounts/templates/accounts/child_detail.html:226
 msgid ""
 "Download a copy of everything we keep about you, as a file you can open or "
 "take elsewhere."
@@ -1218,12 +1231,12 @@ msgstr ""
 "Download een kopie van alles wat we over jou bijhouden, als bestand dat je "
 "kunt openen of meenemen naar elders."
 
-#: accounts/templates/accounts/child_detail.html:226
+#: accounts/templates/accounts/child_detail.html:227
 #: accounts/templates/accounts/guardian_detail.html:96
 msgid "Download my data"
 msgstr "Mijn gegevens downloaden"
 
-#: accounts/templates/accounts/child_detail.html:230
+#: accounts/templates/accounts/child_detail.html:231
 msgid "How you log in (a password or a link we mail you) and two-step login."
 msgstr ""
 "Hoe je je aanmeldt (een wachtwoord of een link die we je mailen) en "
@@ -2552,16 +2565,16 @@ msgstr "Bekijk de gordels, badges en sessies van %(name)s →"
 msgid "View event"
 msgstr "Bekijk het evenement"
 
-#: accounts/templates/accounts/partials/_children_list.html:61
+#: accounts/templates/accounts/partials/_children_list.html:62
 msgid "Not registered for an upcoming session."
 msgstr "Niet ingeschreven voor een komende sessie."
 
-#: accounts/templates/accounts/partials/_children_list.html:62
+#: accounts/templates/accounts/partials/_children_list.html:63
 #: pages/templates/pages/home.html:75
 msgid "Browse events"
 msgstr "Bekijk de evenementen"
 
-#: accounts/templates/accounts/partials/_children_list.html:67
+#: accounts/templates/accounts/partials/_children_list.html:68
 msgid "No children registered yet."
 msgstr "Nog geen kinderen geregistreerd."
 
@@ -2988,6 +3001,57 @@ msgstr ""
 "Wat gebeurt er nadat je je kandidaat stelt? Ons helpcentrum legt uit hoe je "
 "<a href=\"%(dojo_help)s\">een nieuwe dojo start</a> en hoe je <a "
 "href=\"%(mentor_help)s\">mentor of vrijwilliger wordt</a>."
+
+#: accounts/templates/accounts/registration_answers.html:26
+#, python-format
+msgid "%(name)s's answers"
+msgstr "Antwoorden van %(name)s"
+
+#: accounts/templates/accounts/registration_answers.html:29
+msgid ""
+"The dojo team uses these answers to prepare the session. You can change them "
+"until it starts. They never change your child's place."
+msgstr ""
+"Het dojoteam gebruikt deze antwoorden om de sessie voor te bereiden. Je kan "
+"ze wijzigen tot de sessie begint. Ze veranderen nooit iets aan de plaats van "
+"je kind."
+
+#: accounts/templates/accounts/registration_answers.html:37
+msgid "New question"
+msgstr "Nieuwe vraag"
+
+#: accounts/templates/accounts/registration_answers.html:39
+#: campaigns/segmentation/attributes/account.py:34
+#: campaigns/segmentation/attributes/engagement.py:152
+#: campaigns/templates/campaigns/manage/_rule_fields.html:29
+#: dojos/templates/dojos/partials/_attendance_row.html:28
+#: events/templates/events/event_signup.html:101
+#: events/templates/events/event_signup.html:187 mailing/automated.py:112
+#: reports/datasets/base.py:197
+msgid "Yes"
+msgstr "Ja"
+
+# | msgid "Note"
+#: accounts/templates/accounts/registration_answers.html:40
+#: campaigns/segmentation/attributes/account.py:34
+#: campaigns/segmentation/attributes/engagement.py:152
+#: campaigns/templates/campaigns/manage/_rule_fields.html:29
+#: dojos/templates/dojos/partials/_attendance_row.html:28
+#: events/templates/events/event_signup.html:101
+#: events/templates/events/event_signup.html:188 mailing/automated.py:112
+#: reports/datasets/base.py:197
+msgid "No"
+msgstr "Nee"
+
+# | msgid "About this session"
+#: accounts/templates/accounts/registration_answers.html:42
+#: events/templates/events/event_signup.html:190
+msgid "Answer this question."
+msgstr "Beantwoord deze vraag."
+
+#: accounts/templates/accounts/registration_answers.html:47
+msgid "Save answers"
+msgstr "Antwoorden opslaan"
 
 #: accounts/templates/accounts/security.html:8
 msgid ""
@@ -3548,11 +3612,11 @@ msgstr ""
 msgid "%(name)s's login is removed."
 msgstr "De login van %(name)s is verwijderd."
 
-#: accounts/views/family.py:101
+#: accounts/views/family.py:112
 msgid "Your details are saved."
 msgstr "Je gegevens zijn opgeslagen."
 
-#: accounts/views/family.py:128
+#: accounts/views/family.py:139
 #, python-format
 msgid ""
 "We sent a link to %(email)s. Open it within %(hours)s hours to confirm; "
@@ -3561,12 +3625,17 @@ msgstr ""
 "We hebben een link naar %(email)s gestuurd. Open die binnen %(hours)s uur om "
 "te bevestigen; tot dan blijft je adres %(current)s."
 
-#: accounts/views/family.py:168
+#: accounts/views/family.py:179
 #, python-format
 msgid "Your email address is now %(email)s."
 msgstr "Je e-mailadres is nu %(email)s."
 
-#: accounts/views/family.py:190
+#: accounts/views/family.py:220
+#, python-format
+msgid "%(name)s's answers for %(event)s are saved."
+msgstr "De antwoorden van %(name)s voor %(event)s zijn opgeslagen."
+
+#: accounts/views/family.py:261
 #, python-format
 msgid "A spot opened up in %(event)s — a waitlisted family is now confirmed."
 msgstr ""
@@ -5012,25 +5081,6 @@ msgstr "Soort account"
 #: campaigns/segmentation/attributes/account.py:29
 msgid "Has children on the site"
 msgstr "Heeft kinderen op de site"
-
-#: campaigns/segmentation/attributes/account.py:34
-#: campaigns/segmentation/attributes/engagement.py:152
-#: campaigns/templates/campaigns/manage/_rule_fields.html:29
-#: dojos/templates/dojos/partials/_attendance_row.html:28
-#: events/templates/events/event_signup.html:101
-#: events/templates/events/event_signup.html:187 reports/datasets/base.py:197
-msgid "Yes"
-msgstr "Ja"
-
-# | msgid "Note"
-#: campaigns/segmentation/attributes/account.py:34
-#: campaigns/segmentation/attributes/engagement.py:152
-#: campaigns/templates/campaigns/manage/_rule_fields.html:29
-#: dojos/templates/dojos/partials/_attendance_row.html:28
-#: events/templates/events/event_signup.html:101
-#: events/templates/events/event_signup.html:188 reports/datasets/base.py:197
-msgid "No"
-msgstr "Nee"
 
 #: campaigns/segmentation/attributes/account.py:38
 #: campaigns/segmentation/attributes/activity.py:41
@@ -8816,6 +8866,11 @@ msgstr "Kies minstens één kind."
 msgid "Answer every question for each child you sign up."
 msgstr "Beantwoord elke vraag voor elk kind dat je inschrijft."
 
+# | msgid "About this session"
+#: events/forms.py:536
+msgid "Answer every question."
+msgstr "Beantwoord elke vraag."
+
 #: events/manage.py:57 events/manage.py:69
 msgid "Award saved."
 msgstr "Onderscheiding opgeslagen."
@@ -8884,16 +8939,16 @@ msgstr "Nooit gekomen"
 msgid "Aged out"
 msgstr "Te oud"
 
-#: events/questions.py:36
+#: events/questions.py:37
 msgid "Write the question."
 msgstr "Schrijf de vraag."
 
-#: events/questions.py:38
+#: events/questions.py:39
 #, python-format
 msgid "Keep the question under %(max)s characters."
 msgstr "Hou de vraag onder %(max)s tekens."
 
-#: events/questions.py:44
+#: events/questions.py:45
 msgid ""
 "Families sign up for this session on another website, so it has no questions "
 "here."
@@ -8901,11 +8956,19 @@ msgstr ""
 "Gezinnen schrijven zich voor deze sessie in op een andere website, dus heeft "
 "ze hier geen vragen."
 
-#: events/questions.py:58
+#: events/questions.py:59
 #, python-format
 msgid "A session can have at most %(max)s questions: remove one first."
 msgstr ""
 "Een sessie kan hoogstens %(max)s vragen hebben: verwijder er eerst een."
+
+#: events/questions.py:150
+msgid "This session has started, so the answers can't change any more."
+msgstr "Deze sessie is begonnen, dus de antwoorden kunnen niet meer wijzigen."
+
+#: events/questions.py:153 events/registrations.py:71
+msgid "The questions for this session changed, please check them again."
+msgstr "De vragen voor deze sessie zijn gewijzigd, kijk ze opnieuw na."
 
 #: events/registrations.py:61 events/templates/events/event_signup.html:85
 #: events/views.py:202
@@ -8915,10 +8978,6 @@ msgstr "De inschrijvingen voor deze sessie zijn gesloten."
 #: events/registrations.py:67
 msgid "The child(ren) you selected are already signed up for this session."
 msgstr "De gekozen kinderen zijn al ingeschreven voor deze sessie."
-
-#: events/registrations.py:71
-msgid "The questions for this session changed, please check them again."
-msgstr "De vragen voor deze sessie zijn gewijzigd, kijk ze opnieuw na."
 
 #: events/templates/events/event_detail.html:99
 #: pathways/templates/pathways/pathway_detail.html:123
@@ -9061,11 +9120,6 @@ msgstr "Al bevestigd"
 #, python-format
 msgid "For %(name)s"
 msgstr "Voor %(name)s"
-
-# | msgid "About this session"
-#: events/templates/events/event_signup.html:190
-msgid "Answer this question."
-msgstr "Beantwoord deze vraag."
 
 #: events/templates/events/event_signup.html:199
 msgid "No children on your account yet — register one below to sign them up."

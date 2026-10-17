@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 
 from django.db import transaction
 from django.db.models import Count, Max, Q
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from .models import Event, EventQuestion, Registration, RegistrationAnswer
@@ -134,6 +135,45 @@ def save_answers(registration: Registration, questions: Iterable[EventQuestion],
     """The answers for one new registration (called by sign_up, under the lock)."""
     RegistrationAnswer.objects.bulk_create(
         RegistrationAnswer(registration=registration, question=q, answer=bool(answers[q.pk])) for q in questions
+    )
+
+
+def change_answers(registration: Registration, answers: Mapping[int, bool]) -> bool:
+    """The family changes its answers for one child's place, or answers a
+    question added after it signed up (DATA_MODEL.md §29, phase 2): every
+    question the session has now, until the session starts. Returns whether
+    anything changed. Under the session's lock, like sign_up, so it reads
+    the questions as they are."""
+    with transaction.atomic():
+        event = Event.objects.select_for_update().get(pk=registration.event_id)
+        if event.start_time <= timezone.now():
+            raise QuestionError(_("This session has started, so the answers can't change any more."))
+        questions = list(event.questions.all())
+        if any(q.pk not in answers for q in questions):
+            raise QuestionError(_("The questions for this session changed, please check them again."))
+        existing = {a.question_id: a for a in RegistrationAnswer.objects.filter(registration=registration)}
+        changed = False
+        for question in questions:
+            value = bool(answers[question.pk])
+            answer = existing.get(question.pk)
+            if answer is None:
+                RegistrationAnswer.objects.create(registration=registration, question=question, answer=value)
+                changed = True
+            elif answer.answer != value:
+                answer.answer = value
+                answer.answered_at = timezone.now()
+                answer.save(update_fields=["answer", "answered_at"])
+                changed = True
+        return changed
+
+
+def answers_of(registration: Registration) -> list[RegistrationAnswer]:
+    """One registration's answers in the session's question order, with the
+    question (and its dojo, for its languages) loaded."""
+    return list(
+        RegistrationAnswer.objects.filter(registration=registration)
+        .select_related("question__event__dojo")
+        .order_by("question__position", "question_id")
     )
 
 
