@@ -1,8 +1,9 @@
 """The API, version 1 (DATA_MODEL.md §13), at /api/v1/, reference at
 /api/v1/docs. For now: a dojo's sessions and their attendance, for an app
-at the door. Every call works for the calling client's own dojo only
-(another dojo's session is a 404) and goes through the same code as the
-dojo team's attendance list (events.attendance). Changes are recorded in
+at the door, and syncing the sessions a dojo planned in a spreadsheet.
+Every call works for the calling client's own dojo only (another dojo's
+session is a 404) and goes through the same code as the dojo team's pages
+(events.attendance, events.services). Changes are recorded in
 the audit log with the client's technical account as the actor. Health
 notes and other sensitive fields are never part of it (api.tests checks
 the schema against the privacy classification)."""
@@ -14,12 +15,13 @@ from auditlog.context import set_actor
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from ninja import NinjaAPI, Schema
+from ninja import Field, NinjaAPI, Schema
 
-from events import attendance
+from events import attendance, services
 from events.models import Event
 
 from .auth import TOKEN_URL, ClientRateThrottle, OAuth2
+from .forms import PlannedSessionForm, cell
 from .models import DojoApiClient
 
 
@@ -52,6 +54,9 @@ api = ScopedNinjaAPI(
 
 read = OAuth2(DojoApiClient.READ)
 write = OAuth2(DojoApiClient.WRITE)
+# Listing sessions predates the events scopes: either one will do.
+read_events = OAuth2(DojoApiClient.READ, DojoApiClient.EVENTS_READ)
+plan_events = OAuth2(DojoApiClient.EVENTS_WRITE)
 EVENTS_LIMIT = 50
 
 
@@ -69,11 +74,16 @@ ERRORS = {
 
 class EventOut(Schema):
     id: int
+    external_ref: str | None
     name: str
     start_time: datetime
     end_time: datetime
     status: str
     places: int
+    venue_name: str
+    min_age: int | None
+    max_age: int | None
+    audience: str
 
 
 class ChildOut(Schema):
@@ -103,11 +113,16 @@ class AttendedIn(Schema):
 def _event_out(event):
     return EventOut(
         id=event.id,
+        external_ref=event.external_ref,
         name=event.name,
         start_time=event.start_time,
         end_time=event.end_time,
         status=event.status,
         places=event.places,
+        venue_name=event.venue_name,
+        min_age=event.min_age,
+        max_age=event.max_age,
+        audience=event.audience,
     )
 
 
@@ -134,7 +149,7 @@ def _event(request, event_id):
     return get_object_or_404(Event.objects.filter(dojo=request.auth.dojo), id=event_id)
 
 
-@api.get("/events", response={200: list[EventOut], **ERRORS}, **read.operation(summary="The dojo's sessions"))
+@api.get("/events", response={200: list[EventOut], **ERRORS}, **read_events.operation(summary="The dojo's sessions"))
 def list_events(request, when: Literal["upcoming", "past"] = "upcoming"):
     """Upcoming sessions (from today on, soonest first) or past ones
     (newest first), at most 50."""
@@ -197,3 +212,92 @@ def mark_all_present(request, event_id: int):
     with set_actor(request.auth.account):
         attendance.mark_all_present(event, request.auth.account)
     return _attendance_out(event)
+
+
+# A spreadsheet cell: text or a number, whatever the sheet holds.
+Cell = str | int | float | None
+
+
+class PlannedSessionIn(Schema):
+    external_ref: str | int = Field(
+        description="The row's own key, made once and sent on every sync (e.g. 2026-W38): the same key updates "
+        "the same session. At most 100 characters, unique within the dojo."
+    )
+    name: Cell = None
+    date: Cell = Field(None, description="2026-09-26 or 26/09/2026, or Excel's date number.")
+    start_time: Cell = Field(None, description="14:00, or Excel's time (a fraction of a day).")
+    end_time: Cell = Field(None, description="Later than start_time, on the same day.")
+    places: Cell = Field(None, description="At least 1.")
+    venue_name: Cell = Field(None, description="Blank for the dojo's own address.")
+    min_age: Cell = None
+    max_age: Cell = None
+    audience: Cell = Field(None, description="everyone (when blank) or girls.")
+    status: Cell = Field(
+        None, description="draft, open or closed. Blank keeps the session's status; a new session starts as a draft."
+    )
+
+
+class SyncIn(Schema):
+    events: list[PlannedSessionIn] = Field(max_length=services.SYNC_LIMIT)
+
+
+class SyncRowOut(Schema):
+    external_ref: str
+    outcome: Literal["created", "updated", "unchanged", "skipped", "error"]
+    event_id: int | None
+    detail: str
+
+
+class SyncOut(Schema):
+    results: list[SyncRowOut]
+
+
+@api.post(
+    "/events/sync",
+    response={200: SyncOut, **ERRORS},
+    **plan_events.operation(summary="Add or update planned sessions"),
+)
+def sync_events(request, payload: SyncIn):
+    """Puts the sessions a dojo planned (e.g. a year, in a spreadsheet) on
+    the site, at most 200 rows per call. Each row's `external_ref` decides:
+    a new key adds a session (a draft, unless `status` says otherwise), a
+    known one updates that session. Send every field on every sync: a blank
+    venue or age clears it. The description, picture, team and pathways
+    stay as set on the site.
+
+    Every row is checked and saved on its own: one bad row never stops the
+    others. The answer has one result per row, in the same order, with its
+    `outcome`: `created`, `updated`, `unchanged`, `skipped` (the session
+    has already started, so the sync leaves it alone) or `error`, and a
+    `detail` saying why.
+    A row left out of the sheet changes nothing: the sync never deletes."""
+    results = []
+    forms, sessions = [], []
+    for row in payload.events:
+        form = PlannedSessionForm({name: cell(value) for name, value in row.dict().items()})
+        forms.append(form)
+        if form.is_valid():
+            sessions.append(form.session())
+    with set_actor(request.auth.account):
+        synced = iter(services.sync_sessions(request.auth.dojo, sessions))
+    for form in forms:
+        if form.is_valid():
+            result = next(synced)
+            results.append(
+                SyncRowOut(
+                    external_ref=result.external_ref,
+                    outcome=result.outcome,
+                    event_id=result.event_id,
+                    detail=result.detail,
+                )
+            )
+        else:
+            results.append(
+                SyncRowOut(
+                    external_ref=cell(form.data.get("external_ref")),
+                    outcome="error",
+                    event_id=None,
+                    detail=form.problems(),
+                )
+            )
+    return SyncOut(results=results)

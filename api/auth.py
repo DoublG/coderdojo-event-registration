@@ -1,6 +1,6 @@
 """Who is calling the API: an access token from the OAuth 2.0 client
 credentials flow (TOKEN_URL), of an active dojo API client, with the scope
-the endpoint needs. No token, or an unknown or expired one (or one of a deleted client): 401. A
+the endpoint needs (or one of them, for an endpoint that takes several). No token, or an unknown or expired one (or one of a deleted client): 401. A
 valid token without the scope: 403. `request.auth` is then the
 `DojoApiClient`, and everything it does is limited to its own dojo.
 
@@ -38,16 +38,18 @@ class OAuth2(AuthBase):
         "clientCredentials": {"tokenUrl": TOKEN_URL, "scopes": settings.OAUTH2_PROVIDER["SCOPES"]},
     }
 
-    def __init__(self, scope: str) -> None:
+    def __init__(self, *scopes: str) -> None:
+        """Any one of `scopes` is enough."""
         super().__init__()
-        self.scope = scope
+        self.scopes = scopes
 
     def operation(self, **extra: Any) -> dict[str, Any]:
         """The decorator arguments of an endpoint that needs this scope: the
-        check itself, the scope in the spec, and the error answers."""
+        check itself, the scopes in the spec (each one enough on its own),
+        and the error answers."""
         return {
             "auth": self,
-            "openapi_extra": {"security": [{"OAuth2": [self.scope]}]},
+            "openapi_extra": {"security": [{"OAuth2": [scope]} for scope in self.scopes]},
             **extra,
         }
 
@@ -67,8 +69,9 @@ class OAuth2(AuthBase):
         )
         if client is None:
             return None
-        if not oauth_request.access_token.allow_scopes([self.scope]):
-            raise HttpError(403, f"This client may not do this (needs the {self.scope} scope).")
+        if not any(oauth_request.access_token.allow_scopes([scope]) for scope in self.scopes):
+            needed = " or ".join(self.scopes)
+            raise HttpError(403, f"This client may not do this (needs the {needed} scope).")
         return client
 
 
