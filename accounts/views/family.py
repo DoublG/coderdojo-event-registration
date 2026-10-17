@@ -220,6 +220,17 @@ def registration_answers(request, registration_id):
                         _("%(name)s's answers for %(event)s are saved.")
                         % {"name": registration.ninja.name, "event": event.localized("name")},
                     )
+                    # The team plans with the totals (laptops to bring): tell them.
+                    # A confirmed child is on the attendance list; a waiting one
+                    # only counts on the event's Sign-up questions card.
+                    page = "dojo_event_detail" if registration.waiting_list else "dojo_event_attendance"
+                    notify_managers(
+                        event.dojo,
+                        gettext_lazy("The family of %(child)s changed their answers for %(event)s."),
+                        url=reverse(page, kwargs={"dojo_id": event.dojo_id, "event_id": event.id}),
+                        exclude=request.user,
+                        params={"child": registration.ninja.full_name, "event": event.name},
+                    )
                 return redirect("account_home")
         else:
             error = form.non_field_errors()[0]

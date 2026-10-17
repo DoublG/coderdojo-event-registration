@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 07:45+0000\n"
+"POT-Creation-Date: 2026-10-17 08:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -3635,7 +3635,12 @@ msgstr "Je e-mailadres is nu %(email)s."
 msgid "%(name)s's answers for %(event)s are saved."
 msgstr "De antwoorden van %(name)s voor %(event)s zijn opgeslagen."
 
-#: accounts/views/family.py:261
+#: accounts/views/family.py:229
+#, python-format
+msgid "The family of %(child)s changed their answers for %(event)s."
+msgstr "Het gezin van %(child)s heeft de antwoorden voor %(event)s gewijzigd."
+
+#: accounts/views/family.py:272
 #, python-format
 msgid "A spot opened up in %(event)s — a waitlisted family is now confirmed."
 msgstr ""
@@ -8962,11 +8967,11 @@ msgid "A session can have at most %(max)s questions: remove one first."
 msgstr ""
 "Een sessie kan hoogstens %(max)s vragen hebben: verwijder er eerst een."
 
-#: events/questions.py:150
+#: events/questions.py:152
 msgid "This session has started, so the answers can't change any more."
 msgstr "Deze sessie is begonnen, dus de antwoorden kunnen niet meer wijzigen."
 
-#: events/questions.py:153 events/registrations.py:71
+#: events/questions.py:155 events/registrations.py:71
 msgid "The questions for this session changed, please check them again."
 msgstr "De vragen voor deze sessie zijn gewijzigd, kijk ze opnieuw na."
 

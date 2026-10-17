@@ -1288,7 +1288,8 @@ What we checked in its 3.4.1 source, and what the plan has to work around:
      so the log says it changed, never what it says, `Guardianship`,
      `OrganisationRole`), `Dojo`, `DojoMembership`, `Event` (excluding
      `published_at` and `announced_at`, set by the site itself;
-     `m2m_fields={"team"}`), `Registration`, `TeamAttendance`,
+     `m2m_fields={"team"}`), `Registration`, `RegistrationAnswer` (§29:
+     families change their answers), `TeamAttendance`,
      `NinjaBelt`, `NinjaBadge`, `Badge`, `Belt`, `Application`,
      `BackgroundCheckHistory`, the mail consent and blocks
      (`MailPreference`, `ConsentEvent`, `EmailSuppression`), the
@@ -2864,10 +2865,11 @@ Phase 2.
   retention rule, `seen_by=FAMILY_AND_TEAM`, `answer`/`answered_at`
   `keep(Category.CHILD, ANONYMISED_CHILD)` like `Registration`, so it's
   in the family's data export and follows the registration on erasure.
-- **Audit log**: `RegistrationAnswer` and `EventQuestion` go in
-  `core.tests.AuditLogCoverageTests.NOT_RECORDED` ("logistics answers, no
-  sensitive data"; "the dojo's own text, like the event"). Open point
-  below.
+- **Audit log**: `RegistrationAnswer` is recorded (`core.audit.RECORDED`,
+  decided 17 October 2026 with phase 2: families change answers, so the
+  log says who changed one and when); `EventQuestion` is in
+  `core.tests.AuditLogCoverageTests.NOT_RECORDED` ("the dojo's own text,
+  like the event").
 - **Django admin**: `EventQuestion` inline on the Event admin
   (`TranslationAdminMixin`), `RegistrationAnswer` inline on the
   Registration admin, both fully editable (CLAUDE.md, "The admin always
@@ -2945,9 +2947,11 @@ As planned above, with these choices made while building it:
   questions that hasn't started, 404 otherwise. The account page and the
   child's page link to it from each upcoming place (`ANSWER_COUNTS`
   annotations): *Change answers*, or *Answer the new question* when the
-  child has fewer answers than the session has questions. The team isn't
-  notified of a change; the attendance list and the card always show the
-  answers as they are.
+  child has fewer answers than the session has questions. A change
+  notifies the dojo's champion and mentors (`dojos.team.notify_managers`,
+  decided 17 October 2026), linking to the attendance list for a
+  confirmed child and to the event's page (the questions card) for one on
+  the waiting list; saving the same answers again tells nobody.
 - **Mail**: `booking_mail` passes `answers` = `[{"question", "answer"}]`
   in each recipient's mail language (`mailing.automated._answers_context`:
   the question's own translation, "Yes"/"No" from the catalogs). The
@@ -2960,20 +2964,20 @@ As planned above, with these choices made while building it:
   (`id`, `text` in the dojo's main language) and each child's `answers`
   (`question_id`, `answer`), under the read scope;
   `events.attendance.confirmed_registrations` prefetches them.
-- **Audit log** (open point 2): still not recorded. Families can now change
-  answers, so the team can't see who changed one or when, apart from
-  `answered_at`; add `RegistrationAnswer` to `core.audit.RECORDED` if
-  teams ask for it.
+- **Audit log** (open point 2, decided): `RegistrationAnswer` is recorded
+  in `core.audit.RECORDED`, so the audit log says who gave or changed an
+  answer and when (a family, or the organisation in the Django admin).
+  `save_answers` saves each answer on its own (no `bulk_create`), so the
+  answers given at sign-up are in the log too; the seeder's `bulk_create`
+  runs without the log, as seeders do.
 
 ### Open points
 
 1. **Copy from the last session**, or a set of default questions per dojo
    on its Settings page? The plan copies (no new screen); a dojo-level
    default is easy to add later if teams ask.
-2. **Record answers in the audit log?** `Registration` is recorded. The
-   plan leaves answers out as low-risk logistics; record them if the team
-   wants to see who changed an answer (matters once families can change
-   them, phase 2).
+2. **Record answers in the audit log?** Decided (17 October 2026): yes,
+   since families can change them (phase 2).
 3. **Maximum of 5 questions**: enough? A long list makes signing up
    several children tedious.
 4. **Organisation-wide questions** (the organisation asking the same

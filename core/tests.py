@@ -455,7 +455,6 @@ class AuditLogCoverageTests(TestCase):
         "events.NinjaEngagementChange": "written by the nightly rebuild; itself a history",
         "events.RegistrationCancellation": "itself a log of cancellations",
         "events.EventQuestion": "the dojo's own text, like the event",
-        "events.RegistrationAnswer": "logistics answers (yes/no), no sensitive data",
         "geo.AdministrativeBoundary": "reference data, from seed files",
         "geo.Municipality": "reference data, from seed files",
         "mailing.BounceRecord": "written by the bounce processing; itself a log",

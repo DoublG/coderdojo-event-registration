@@ -82,7 +82,8 @@ A few things to know:
 - A question added after families signed up shows **Not asked** for their
   children, until the family answers it from their account page. Families
   can change their answers there until the session starts, so the totals
-  can still move.
+  can still move: the champion and mentors get a notification when they
+  do.
 - If your dojo writes in more than one language, the question has a field
   per language, like the session's own texts.
 - Sessions that take registrations on another website have no questions.

@@ -1759,6 +1759,39 @@ class ChangeAnswersTests(TestCase):
         self.assertRedirects(response, reverse("account_home"))
         self.assertEqual(self.answers(), {"Own laptop?": False})
 
+    def test_a_change_is_in_the_audit_log_and_tells_the_team(self):
+        from auditlog.models import LogEntry
+
+        from dojos.testing import make_champion
+        from notifications.models import Notification
+
+        champion = make_champion(username="champ")
+        dojo = make_dojo("Leuven", champion=champion)
+        event = _future_event(dojo)
+        laptop = questions.add_question(event, "Own laptop?")
+        self.client.post(
+            reverse("event_signup", kwargs={"event_id": event.id}),
+            {"child": [str(self.emma.id)], f"q-{self.emma.id}-{laptop.id}": "yes"},
+        )
+        registration = Registration.objects.get(event=event, ninja=self.emma)
+        answer = registration.answers.get()
+        url = reverse("registration_answers", kwargs={"registration_id": registration.id})
+        self.client.post(url, {f"q-{laptop.id}": "no"})
+        entries = LogEntry.objects.get_for_object(answer).order_by("timestamp")
+        self.assertEqual(
+            [(e.action, e.actor_id) for e in entries],
+            [(LogEntry.Action.CREATE, self.guardian.id), (LogEntry.Action.UPDATE, self.guardian.id)],
+        )
+        self.assertEqual(entries.last().changes_dict["answer"], ["True", "False"])
+        notification = Notification.objects.get(recipient=champion)
+        self.assertIn("Emma", notification.text)
+        self.assertEqual(
+            notification.url, reverse("dojo_event_attendance", kwargs={"dojo_id": dojo.id, "event_id": event.id})
+        )
+        # Saving the same answers again changes nothing and tells nobody.
+        self.client.post(url, {f"q-{laptop.id}": "no"})
+        self.assertEqual(Notification.objects.filter(recipient=champion).count(), 1)
+
     def test_a_missing_answer_is_marked(self):
         lunch = questions.add_question(self.event, "Lunch?")
         response = self.client.get(self.url)

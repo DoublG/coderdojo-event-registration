@@ -132,10 +132,12 @@ def missing_answers(questions: Iterable[EventQuestion], children: "Iterable[Ninj
 
 
 def save_answers(registration: Registration, questions: Iterable[EventQuestion], answers: Mapping[int, bool]) -> None:
-    """The answers for one new registration (called by sign_up, under the lock)."""
-    RegistrationAnswer.objects.bulk_create(
-        RegistrationAnswer(registration=registration, question=q, answer=bool(answers[q.pk])) for q in questions
-    )
+    """The answers for one new registration (called by sign_up, under the lock).
+    One save() each, so the audit log records them like the registration."""
+    for question in questions:
+        RegistrationAnswer.objects.create(
+            registration=registration, question=question, answer=bool(answers[question.pk])
+        )
 
 
 def change_answers(registration: Registration, answers: Mapping[int, bool]) -> bool:
