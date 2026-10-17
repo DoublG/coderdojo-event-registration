@@ -45,6 +45,7 @@ register(
         "max_age",
         "audience",
         "external_registration_url",
+        "external_ref",
         "published_at",
         "announced_at",
         "pathways",

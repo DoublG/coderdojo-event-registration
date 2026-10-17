@@ -7,9 +7,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: CoderDojo Belgium — Help Centre \n"
+"Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-26 17:29+0000\n"
+"POT-Creation-Date: 2026-10-17 11:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -26,22 +26,24 @@ msgstr "Applications qui travaillent pour votre dojo (API)"
 
 #: ../../source/dojo-team/api-clients.rst:4
 msgid ""
-"An app or website can work for your dojo through the site's API: for now,"
-" an app at the door that marks which children and team members came, so "
-"you don't have to tick them off on the attendance list. Only the dojo's "
-"**champion** can let an app in."
+"An app or website can work for your dojo through the site's API: an app "
+"at the door that marks which children and team members came, so you don't"
+" have to tick them off on the attendance list, or a spreadsheet that puts"
+" the sessions you planned on the site (see :doc:`planning-"
+"from-a-spreadsheet`). Only the dojo's **champion** can let an app in."
 msgstr ""
 "Une application ou un site peut travailler pour votre dojo via l'API du "
-"site : pour l'instant, une application à l'entrée qui indique quels "
-"enfants et membres de l'équipe sont venus, pour que vous n'ayez pas à les"
-" cocher sur la liste de présence. Seul le **champion** du dojo peut "
-"donner accès à une application."
+"site : une application à l'entrée qui indique quels enfants et membres de"
+" l'équipe sont venus, pour que vous n'ayez pas à les cocher sur la liste "
+"de présence, ou un tableur qui met sur le site les sessions que vous avez"
+" planifiées (voir :doc:`planning-from-a-spreadsheet`). Seul le "
+"**champion** du dojo peut donner accès à une application."
 
-#: ../../source/dojo-team/api-clients.rst:10
+#: ../../source/dojo-team/api-clients.rst:12
 msgid "Adding a client"
 msgstr "Ajouter un client"
 
-#: ../../source/dojo-team/api-clients.rst:12
+#: ../../source/dojo-team/api-clients.rst:14
 msgid ""
 "In the sidebar, under **Dojo**, open **API** (only the champion sees it)."
 " Under **Add a client**, give it a name you'll recognise (for example "
@@ -52,7 +54,7 @@ msgstr ""
 "reconnaîtrez (par exemple « Application de scan à l'entrée ») et "
 "choisissez ce qu'il peut faire :"
 
-#: ../../source/dojo-team/api-clients.rst:16
+#: ../../source/dojo-team/api-clients.rst:18
 msgid ""
 "**See the sessions and who has a place**: your dojo's sessions, and for "
 "each one the children with a confirmed place and the session's team."
@@ -61,7 +63,7 @@ msgstr ""
 " pour chacune, les enfants ayant une place confirmée et l'équipe de la "
 "session."
 
-#: ../../source/dojo-team/api-clients.rst:18
+#: ../../source/dojo-team/api-clients.rst:20
 msgid ""
 "**Mark who came**: mark a child or team member present, absent or not "
 "marked yet, or everyone present at once."
@@ -70,7 +72,32 @@ msgstr ""
 "présent, absent ou pas encore indiqué, ou tout le monde présent d'un "
 "coup."
 
-#: ../../source/dojo-team/api-clients.rst:21
+#: ../../source/dojo-team/api-clients.rst:22
+msgid "**See the sessions**: your dojo's sessions only, without who signed up."
+msgstr ""
+"**Voir les sessions** : uniquement les sessions de votre dojo, sans qui "
+"s'y est inscrit."
+
+#: ../../source/dojo-team/api-clients.rst:23
+msgid ""
+"**Plan sessions: add and change them, e.g. from a spreadsheet**: add "
+"sessions and change them (name, day and times, places, venue, ages, "
+"status). It never deletes a session."
+msgstr ""
+"**Planifier les sessions : les ajouter et les modifier, par ex. depuis un"
+" tableur** : ajouter des sessions et les modifier (nom, jour et heures, "
+"places, lieu, âges, statut). Il ne supprime jamais une session."
+
+#: ../../source/dojo-team/api-clients.rst:27
+msgid ""
+"Tick only what the app needs: a planning spreadsheet needs only **Plan "
+"sessions**, an app at the door only the first two."
+msgstr ""
+"Ne cochez que ce dont l'application a besoin : un tableur de "
+"planification n'a besoin que de **Planifier les sessions**, une "
+"application à l'entrée que des deux premiers."
+
+#: ../../source/dojo-team/api-clients.rst:30
 msgid ""
 "After **Add client**, the page shows the client's **client ID** and "
 "**client secret**. Give both to whoever sets up the app. **The secret is "
@@ -84,31 +111,31 @@ msgstr ""
 "l'afficher à nouveau. S'il se perd, créez-en un nouveau (voir ci-"
 "dessous)."
 
-#: ../../source/dojo-team/api-clients.rst:27
+#: ../../source/dojo-team/api-clients.rst:36
 msgid "What an app can and can't do"
 msgstr "Ce qu'une application peut et ne peut pas faire"
 
-#: ../../source/dojo-team/api-clients.rst:29
+#: ../../source/dojo-team/api-clients.rst:38
 msgid ""
 "A client only ever works for your dojo, and only does what you allowed. "
 "It never sees children's allergies or notes, their family, or anything "
-"else from their account. What it marks is recorded under the client's own"
-" name, not yours."
+"else from their account. What it marks or changes is recorded under the "
+"client's own name, not yours."
 msgstr ""
-"Un client ne travaille que pour votre dojo et ne fait que ce que vous "
+"Un client ne travaille que pour votre dojo, et ne fait que ce que vous "
 "avez autorisé. Il ne voit jamais les allergies ou remarques des enfants, "
-"leur famille ni rien d'autre de leur compte. Ce qu'il indique est "
-"enregistré au nom du client, pas au vôtre."
+"leur famille ni rien d'autre de leur compte. Ce qu'il indique ou modifie "
+"est enregistré sous le nom du client, pas sous le vôtre."
 
-#: ../../source/dojo-team/api-clients.rst:35
+#: ../../source/dojo-team/api-clients.rst:44
 msgid "New secret and deleting"
 msgstr "Nouveau secret et suppression"
 
-#: ../../source/dojo-team/api-clients.rst:37
+#: ../../source/dojo-team/api-clients.rst:46
 msgid "In **Your clients**:"
 msgstr "Dans **Vos clients** :"
 
-#: ../../source/dojo-team/api-clients.rst:39
+#: ../../source/dojo-team/api-clients.rst:48
 msgid ""
 "**New secret** gives the client a new secret; the old one stops working "
 "at once. Use it when the secret may have leaked, or got lost."
@@ -117,25 +144,25 @@ msgstr ""
 "fonctionner immédiatement. Utilisez-le si le secret a pu fuiter ou s'est "
 "perdu."
 
-#: ../../source/dojo-team/api-clients.rst:41
+#: ../../source/dojo-team/api-clients.rst:50
 msgid ""
 "**Delete** stops the client at once and removes it from the list. What it"
 " marked stays."
 msgstr ""
-"**Supprimer** arrête le client immédiatement et le retire de la liste. Ce "
-"qu'il a indiqué reste."
+"**Supprimer** arrête le client immédiatement et le retire de la liste. Ce"
+" qu'il a indiqué reste."
 
-#: ../../source/dojo-team/api-clients.rst:44
+#: ../../source/dojo-team/api-clients.rst:53
 msgid "The list also shows when each client was last used."
 msgstr ""
 "La liste indique aussi quand chaque client a été utilisé pour la dernière"
 " fois."
 
-#: ../../source/dojo-team/api-clients.rst:47
+#: ../../source/dojo-team/api-clients.rst:56
 msgid "For the app's developer"
 msgstr "Pour le développeur de l'application"
 
-#: ../../source/dojo-team/api-clients.rst:49
+#: ../../source/dojo-team/api-clients.rst:58
 msgid ""
 "The bottom of the **API** page has the addresses the app needs. The app "
 "asks for a token with its client ID and secret (OAuth 2.0, client "

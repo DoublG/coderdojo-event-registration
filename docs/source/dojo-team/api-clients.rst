@@ -1,10 +1,12 @@
 Apps that work for your dojo (API)
 ===================================
 
-An app or website can work for your dojo through the site's API: for now,
-an app at the door that marks which children and team members came, so
-you don't have to tick them off on the attendance list. Only the dojo's
-**champion** can let an app in.
+An app or website can work for your dojo through the site's API: an app
+at the door that marks which children and team members came, so you
+don't have to tick them off on the attendance list, or a spreadsheet that
+puts the sessions you planned on the site (see
+:doc:`planning-from-a-spreadsheet`). Only the dojo's **champion** can let
+an app in.
 
 Adding a client
 ---------------
@@ -17,6 +19,13 @@ Under **Add a client**, give it a name you'll recognise (for example
   each one the children with a confirmed place and the session's team.
 - **Mark who came**: mark a child or team member present, absent or not
   marked yet, or everyone present at once.
+- **See the sessions**: your dojo's sessions only, without who signed up.
+- **Plan sessions: add and change them, e.g. from a spreadsheet**: add
+  sessions and change them (name, day and times, places, venue, ages,
+  status). It never deletes a session.
+
+Tick only what the app needs: a planning spreadsheet needs only **Plan
+sessions**, an app at the door only the first two.
 
 After **Add client**, the page shows the client's **client ID** and
 **client secret**. Give both to whoever sets up the app. **The secret is
@@ -28,8 +37,8 @@ What an app can and can't do
 
 A client only ever works for your dojo, and only does what you allowed.
 It never sees children's allergies or notes, their family, or anything
-else from their account. What it marks is recorded under the client's own
-name, not yours.
+else from their account. What it marks or changes is recorded under the
+client's own name, not yours.
 
 New secret and deleting
 -----------------------

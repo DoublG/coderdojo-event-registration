@@ -731,6 +731,8 @@ OAUTH2_PROVIDER = {
     "SCOPES": {
         "attendance:read": "See the dojo's sessions and who has a place",
         "attendance:write": "Mark who came to the dojo's sessions",
+        "events:read": "See the dojo's sessions",
+        "events:write": "Add and change the dojo's sessions (e.g. a year planned in a spreadsheet)",
     },
     "SCOPES_BACKEND_CLASS": "api.scopes.ClientScopes",
     "ACCESS_TOKEN_EXPIRE_SECONDS": 3600,

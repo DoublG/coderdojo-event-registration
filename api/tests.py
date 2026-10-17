@@ -83,6 +83,7 @@ class ClientPageTests(ApiTestCase):
         self.client.force_login(self.champion)
         url = reverse("dojo_api_clients", args=[self.dojo.id])
         response = self.client.post(url, {"name": "Scan app", "scope": [DojoApiClient.READ]})
+        self.assertContains(response, "See the sessions and who has a place")
         secret = response.context["new_secret"]
         self.assertContains(response, secret)
         client = DojoApiClient.objects.get()
@@ -295,14 +296,20 @@ class AttendanceApiTests(ApiTestCase):
             for path, operations in spec["paths"].items()
             for method, operation in operations.items()
         }
-        self.assertEqual(needs[("get", "/api/v1/events")], [{"OAuth2": [DojoApiClient.READ]}])
+        # Either scope will do: one entry each (OpenAPI reads the entries as "or").
+        self.assertEqual(
+            needs[("get", "/api/v1/events")],
+            [{"OAuth2": [DojoApiClient.READ]}, {"OAuth2": [DojoApiClient.EVENTS_READ]}],
+        )
         self.assertEqual(
             needs[("put", "/api/v1/events/{event_id}/attendance/children/{registration_id}")],
             [{"OAuth2": [DojoApiClient.WRITE]}],
         )
+        self.assertEqual(needs[("post", "/api/v1/events/sync")], [{"OAuth2": [DojoApiClient.EVENTS_WRITE]}])
         for (method, path), security in needs.items():
-            self.assertEqual(len(security), 1, (method, path))
-            self.assertEqual(len(security[0]["OAuth2"]), 1, (method, path))
+            self.assertTrue(security, (method, path))
+            for entry in security:
+                self.assertEqual(len(entry["OAuth2"]), 1, (method, path))
             self.assertIn(401, spec["paths"][path][method]["responses"])
 
     def test_the_schema_never_holds_sensitive_fields(self):
@@ -323,6 +330,183 @@ class AttendanceApiTests(ApiTestCase):
         for schema in api.get_openapi_schema()["components"]["schemas"].values():
             properties |= set(schema.get("properties", {}))
         self.assertEqual(properties & sensitive, set())
+
+
+class EventSyncApiTests(ApiTestCase):
+    """POST /api/v1/events/sync: a dojo's planned sessions from a spreadsheet
+    (DATA_MODEL_API.md §13, decision 6)."""
+
+    URL = "/api/v1/events/sync"
+
+    def setUp(self):
+        super().setUp()
+        self.day = (timezone.localdate() + timedelta(days=30)).isoformat()
+
+    def row(self, ref="2026-W1", **fields):
+        return {
+            "external_ref": ref,
+            "name": "Coding Saturday",
+            "date": self.day,
+            "start_time": "14:00",
+            "end_time": "17:00",
+            "places": 20,
+            **fields,
+        }
+
+    def sync(self, auth, *rows):
+        response = self.client.post(self.URL, {"events": list(rows)}, content_type="application/json", **auth)
+        self.assertEqual(response.status_code, 200, response.content)
+        return response.json()["results"]
+
+    def planner(self):
+        return self.bearer([DojoApiClient.EVENTS_WRITE])
+
+    def test_needs_the_events_write_scope(self):
+        _client, auth = self.bearer([DojoApiClient.READ, DojoApiClient.WRITE, DojoApiClient.EVENTS_READ])
+        response = self.client.post(self.URL, {"events": [self.row()]}, content_type="application/json", **auth)
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(Event.objects.filter(external_ref="2026-W1").exists())
+
+    def test_a_new_key_adds_a_draft_session_with_the_dojos_pathways(self):
+        from pathways.models import Pathway
+
+        pathway = Pathway.objects.create(name="Scratch")
+        self.dojo.pathways.add(pathway)
+        client, auth = self.planner()
+        [result] = self.sync(auth, self.row(venue_name="Library", min_age=7, max_age=12))
+        event = Event.objects.get(external_ref="2026-W1")
+        self.assertEqual(result, {"external_ref": "2026-W1", "outcome": "created", "event_id": event.id, "detail": ""})
+        self.assertEqual(
+            (event.dojo, event.status, event.name, event.places, event.venue_name, event.min_age, event.max_age),
+            (self.dojo, Event.DRAFT, "Coding Saturday", 20, "Library", 7, 12),
+        )
+        self.assertEqual((event.start_time.hour, event.end_time.hour), (14, 17))
+        self.assertEqual(list(event.pathways.all()), [pathway])
+
+    def test_the_same_key_updates_the_same_session(self):
+        _client, auth = self.planner()
+        self.sync(auth, self.row())
+        [result] = self.sync(auth, self.row(name="Robots", places=12, status="open"))
+        event = Event.objects.get(external_ref="2026-W1")
+        self.assertEqual(result["outcome"], "updated")
+        self.assertEqual((event.name, event.places, event.status), ("Robots", 12, Event.OPEN))
+        self.assertIsNotNone(event.published_at)
+        self.assertEqual(Event.objects.filter(dojo=self.dojo).count(), 2)  # the setUp session and this one
+
+    def test_running_it_again_changes_nothing(self):
+        from auditlog.models import LogEntry
+
+        client, auth = self.planner()
+        self.sync(auth, self.row())
+        event = Event.objects.get(external_ref="2026-W1")
+        entries = LogEntry.objects.get_for_object(event).count()
+        [result] = self.sync(auth, self.row())
+        self.assertEqual(result["outcome"], "unchanged")
+        self.assertEqual(LogEntry.objects.get_for_object(event).count(), entries)
+        self.assertEqual(LogEntry.objects.get_for_object(event).latest("timestamp").actor, client.account)
+
+    def test_a_blank_status_keeps_the_sessions_status(self):
+        _client, auth = self.planner()
+        self.sync(auth, self.row(status="open"))
+        [result] = self.sync(auth, self.row(status="", places=25))
+        self.assertEqual(result["outcome"], "updated")
+        self.assertEqual(Event.objects.get(external_ref="2026-W1").status, Event.OPEN)
+
+    def test_one_bad_row_never_stops_the_others(self):
+        _client, auth = self.planner()
+        results = self.sync(
+            auth,
+            self.row("a"),
+            self.row("b", end_time="13:00"),
+            self.row("c", places="many"),
+            self.row("d", min_age=12, max_age=8),
+            self.row("e", date=(timezone.localdate() - timedelta(days=1)).isoformat()),
+            self.row("a", name="Twice"),
+            self.row("f", status="published"),
+            self.row("g"),
+        )
+        self.assertEqual(
+            [(r["external_ref"], r["outcome"]) for r in results],
+            [
+                ("a", "created"),
+                ("b", "error"),
+                ("c", "error"),
+                ("d", "error"),
+                ("e", "error"),
+                ("a", "error"),
+                ("f", "error"),
+                ("g", "created"),
+            ],
+        )
+        self.assertIn("places", results[2]["detail"])
+        self.assertTrue(all(r["detail"] for r in results if r["outcome"] == "error"))
+        self.assertEqual(
+            sorted(Event.objects.exclude(external_ref=None).values_list("external_ref", flat=True)), ["a", "g"]
+        )
+        self.assertEqual(Event.objects.get(external_ref="a").name, "Coding Saturday")
+
+    def test_a_session_that_has_started_is_left_alone(self):
+        _client, auth = self.planner()
+        self.sync(auth, self.row())
+        start = timezone.now() - timedelta(hours=1)
+        Event.objects.filter(external_ref="2026-W1").update(start_time=start, end_time=start + timedelta(hours=3))
+        [result] = self.sync(auth, self.row(name="Changed"))
+        self.assertEqual(result["outcome"], "skipped")
+        self.assertEqual(Event.objects.get(external_ref="2026-W1").name, "Coding Saturday")
+
+    def test_never_deletes(self):
+        _client, auth = self.planner()
+        self.sync(auth, self.row("a"), self.row("b"))
+        self.sync(auth, self.row("a"))
+        self.assertTrue(Event.objects.filter(external_ref="b").exists())
+
+    def test_keys_belong_to_one_dojo(self):
+        other = make_dojo("Leuven", champion=make_champion(username="olga"))
+        start = timezone.now() + timedelta(days=10)
+        theirs = Event.objects.create(
+            name="Theirs",
+            dojo=other,
+            places=5,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+            external_ref="a",
+        )
+        _client, auth = self.planner()
+        [result] = self.sync(auth, self.row("a"))
+        self.assertEqual(result["outcome"], "created")
+        theirs.refresh_from_db()
+        self.assertEqual(theirs.name, "Theirs")
+        self.assertEqual(Event.objects.filter(external_ref="a").count(), 2)
+
+    def test_excel_values(self):
+        """Numbers as Excel sends them: a decimal key and places, a serial date and a fraction-of-a-day time."""
+        from datetime import date
+
+        _client, auth = self.planner()
+        day = timezone.localdate() + timedelta(days=30)
+        serial = (day - date(1899, 12, 30)).days
+        [result] = self.sync(
+            auth, self.row(202601.0, date=float(serial), start_time=14 / 24, end_time=0.75, places=20.0)
+        )
+        self.assertEqual(result["external_ref"], "202601")
+        event = Event.objects.get(external_ref="202601")
+        self.assertEqual((event.start_time.date(), event.start_time.hour, event.end_time.hour), (day, 14, 18))
+        self.assertEqual(self.sync(auth, self.row("x", date=day.strftime("%d/%m/%Y")))[0]["outcome"], "created")
+
+    def test_at_most_200_rows(self):
+        _client, auth = self.planner()
+        rows = [self.row(str(n)) for n in range(201)]
+        response = self.client.post(self.URL, {"events": rows}, content_type="application/json", **auth)
+        self.assertEqual(response.status_code, 422)
+        self.assertFalse(Event.objects.exclude(external_ref=None).exists())
+
+    def test_listing_sessions_takes_either_read_scope(self):
+        _client, auth = self.bearer([DojoApiClient.EVENTS_READ])
+        Event.objects.filter(pk=self.event.pk).update(external_ref="w1")
+        [event] = self.client.get("/api/v1/events", **auth).json()
+        self.assertEqual(event["external_ref"], "w1")
+        # But not the attendance.
+        self.assertEqual(self.client.get(f"/api/v1/events/{self.event.id}/attendance", **auth).status_code, 403)
 
 
 class ServiceAccountTests(ApiTestCase):

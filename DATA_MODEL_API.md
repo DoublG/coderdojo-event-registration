@@ -6,9 +6,10 @@ Split out of `DATA_MODEL.md` §13 ("API based management") — the dojo API clie
 
 ## 13. API based management (in progress)
 
-**Built: dojo API clients (OAuth 2.0 client credentials) and the attendance
-API** (phases 1 and 4 below, without the check-in codes and organisation
-clients); the rest is the plan. Three needs, from the original notes:
+**Built: dojo API clients (OAuth 2.0 client credentials), the attendance
+API and the event sync for a dojo's planning spreadsheet** (phases 1 to 4
+below, without the check-in codes and organisation clients); the rest is
+the plan. Three needs, from the original notes:
 
 - **External registrations:** some events (CoderDojo Girlz, Coolest
   Projects: organisation events with `Event.external_registration_url`,
@@ -43,12 +44,13 @@ django-ninja stays the framework (`/api/v1/`, OpenAPI reference at
    its technical account switched off and kept for the history, so what
    it marked keeps its name). There's no separate "revoke": deleting is
    how a client is stopped (decided).
-3. **Scopes (built: attendance):** `attendance:read` (the dojo's sessions,
-   who has a confirmed place, the team) and `attendance:write` (mark who
-   came). A client only gets the scopes its champion gave it
-   (`api.scopes.ClientScopes`). Still to add with their phases:
-   `events:read` and `events:write` (phase 3, below) and
-   `external_registrations:write`. **Never** health notes, belts or
+3. **Scopes (built: attendance and events):** `attendance:read` (the
+   dojo's sessions, who has a confirmed place, the team),
+   `attendance:write` (mark who came), `events:read` (the dojo's sessions
+   only) and `events:write` (the sync, decision 6). A client only gets the
+   scopes its champion gave it (`api.scopes.ClientScopes`); the API page
+   ticks none to start with, so a client gets only what it needs. Still to
+   add with its phase: `external_registrations:write`. **Never** health notes, belts or
    badges, team or lifecycle changes: those stay with people.
 4. **A technical account per client (decided, built):**
    `User.account_type = "service"`, unusable password: what
@@ -62,8 +64,10 @@ django-ninja stays the framework (`/api/v1/`, OpenAPI reference at
    `events.ExternalRegistration`, upserted. Shadow `User`/`Ninja` rows would
    put people who never signed up here in exports, retention and segments.
 6. **Event management, designed for a champion planning a whole year at
-   once from a spreadsheet, not just one session at a time (recommended,
-   not built).** The concrete need: a dojo plans its year's sessions in
+   once from a spreadsheet, not just one session at a time (decided,
+   built: `events/services.py`, `api/forms.py`, `POST /api/v1/events/sync`
+   in `api/v1.py`; how it was built is under "As built" at the end of this
+   decision).** The concrete need: a dojo plans its year's sessions in
    Excel, then a macro on that sheet pushes the plan to the site over
    this API instead of the champion re-typing 40-odd sessions into the
    dojo's events screens by hand. Re-running the macro (the plan changed,
@@ -115,6 +119,49 @@ django-ninja stays the framework (`/api/v1/`, OpenAPI reference at
      existing clients keep working unchanged while a new planning-only
      client can still list sessions without being handed attendance
      access it doesn't need.
+   - **As built** (17 October 2026), where it differs from or adds to the
+     plan above:
+     - `Event.external_ref` is **nullable** rather than blank (NULL when
+       unset): MySQL has no partial unique index, but its unique index
+       allows any number of NULLs, so the constraint is a plain
+       `UniqueConstraint(dojo, external_ref)`.
+     - The body is an object, `{"events": [rows]}`, so a later version can
+       add options next to the rows; at most `SYNC_LIMIT` = 200 rows (a
+       422 otherwise, nothing saved). Each row's answer is
+       `{external_ref, outcome, event_id, detail}`, in the rows' order.
+       (`outcome`/`detail` rather than `result`/`message`: those names are
+       taken by sensitive fields elsewhere, and the schema guard
+       `test_the_schema_never_holds_sensitive_fields` matches on names.)
+     - Outcomes: `created`, `updated`, `unchanged` (nothing differs: no
+       save, so a rerun adds nothing to the audit log), `skipped` and
+       `error`. **A session that has already started is never changed by
+       a sync** (`skipped`, with a note to change it on the site): a sheet
+       still saying `open` must not reopen a session the team closed after
+       taking attendance. A new row, or a change that moves a session, into
+       the past is an error. A key used twice in one call: the later row
+       is an error.
+     - Every row is sent whole: a blank venue or age clears it; a blank
+       `status` keeps the session's (a new one starts `draft`). The sync
+       sets `name`, the date and times, `places`, `venue_name`, ages and
+       `audience`; description, image, team, pathways and the other
+       languages' texts stay as set on the site. A created session gets
+       its dojo's pathways, as `EventForm` pre-selects them.
+     - Rows are parsed by a Django form (`api.forms.PlannedSessionForm`),
+       not by the request schema, so a bad cell is that row's error rather
+       than a 422 for the whole call. It takes what Excel sends: numbers
+       as decimals (`12.0`, also a numeric key), a date as text
+       (`2026-09-26`, `26/09/2026`) or a serial number, a time as text or
+       a fraction of a day. Messages follow `Accept-Language`, like the
+       site.
+     - The session rules (`events.services.session_problems`: end after
+       start, at least one place unless registrations are on another
+       website, `min_age <= max_age`) are shared with `EventForm`, which
+       didn't check the last two before. Status changes, the site's and
+       the sync's, go through `events.services.set_status`.
+     - `GET /events` takes either `attendance:read` or `events:read`
+       (`api.auth.OAuth2(*scopes)`, one OpenAPI security entry per scope),
+       and `EventOut` gained `external_ref`, `venue_name`, the ages and
+       `audience`.
 
 ### Phases
 
@@ -141,7 +188,12 @@ django-ninja stays the framework (`/api/v1/`, OpenAPI reference at
    date+time combination, `min_age <= max_age`, `places > 0` — called by
    both `dojos.views.event_pages` (replacing its direct `form.save()`)
    and the API, so the two never drift apart) before phases 3 and 5.
-3. **Event management** (`events:read`/`events:write`, decision 6):
+   *Built for phase 3* (`events/services.py`): the shared rules
+   (`session_problems`, which `EventForm.clean` calls), `set_status` and
+   the sync itself; `EventForm.save()` still saves the site's form (its
+   image picker, translations and team/pathways belong to the form).
+3. **Event management** (`events:read`/`events:write`, decision 6) —
+   *built*, as described there:
    `POST /api/v1/events/sync` (bulk upsert by `external_ref`, for a
    champion planning a year from a spreadsheet — the concrete driver for
    this phase) plus `GET /events` widened to accept either
@@ -169,14 +221,15 @@ django-ninja stays the framework (`/api/v1/`, OpenAPI reference at
    of `dojos.access` applies as on the site.
 7. **Docs** — *built:* the help page for dojo teams
    (`docs/source/dojo-team/api-clients.rst`, en/fr/nl), the API section in
-   `CLAUDE.md`; the OpenAPI page is the reference. *Still to do for phase
-   3:* the actual audience for `/events/sync` is a non-technical dojo
-   volunteer's Excel macro, not a developer reading the OpenAPI page —
-   the help page needs a worked example (a suggested sheet layout: one
-   column per field above, a results column) and a minimal VBA snippet
-   (get a token from `/api/oauth/token/` with `WinHttpRequest`, `POST`
-   the sheet's rows as JSON, write the response back per row), not just
-   the schema reference.
+   `CLAUDE.md`; the OpenAPI page is the reference. For phase 3, a page of
+   its own for the non-technical volunteer who runs the spreadsheet
+   (`docs/source/dojo-team/planning-from-a-spreadsheet.rst`, en/fr/nl): the
+   sheet layout (columns A–K named after the fields, results in L and M),
+   what each outcome means, and a complete VBA macro for Excel on Windows
+   (`WinHttpRequest`: a token with the client ID and a secret asked with
+   `InputBox`, never stored in the file; the rows as JSON; each row's
+   outcome and detail written back). Excel for Mac has no `WinHttpRequest`:
+   not covered yet.
 
 ### Open points
 
@@ -190,14 +243,14 @@ django-ninja stays the framework (`/api/v1/`, OpenAPI reference at
   that used to block this are present (confirmed 8 Oct 2026, see
   `MAINTENANCE.md`); the API needs nothing more (same app server, under
   `/api/`).
-- **For `/events/sync` (decision 6):** a cap on rows per call (50 covers a
-  full year of weekly sessions with room to spare; proposing 200 so a
-  twice-weekly dojo or a mid-year bulk correction doesn't need to split
-  calls) — enforced the same way `EVENTS_LIMIT` already caps `GET
-  /events`. Whether `team`/`pathways` belong in a later version of the
-  sync payload once a client has a way to look membership/pathway ids up
+- **For `/events/sync` (decision 6):** the cap on rows per call is
+  decided (200, `events.services.SYNC_LIMIT`). Whether `team`/`pathways`
+  belong in a later version of the sync payload once a client has a way to look membership/pathway ids up
   (a `GET /team` endpoint doesn't exist yet) — not needed for the first
   version. Whether `external_ref` should be visible/editable from the
   dojo's own UI (so a champion can tell which of their sessions came from
-  a sync) or stay API-only.
+  a sync) or stay API-only (API-only for now; the Django admin shows it).
+  A ready-made workbook (`.xlsm`) to download, instead of pasting the
+  macro: possible later, but a macro file from a website is something
+  Excel rightly warns about.
 
