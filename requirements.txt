@@ -464,9 +464,9 @@ constantly==23.10.4 \
     # via
     #   -r requirements.in
     #   twisted
-cron-descriptor==2.1.1 \
-    --hash=sha256:0f55b469bb81f8c60602baebc08a78fc3b1eb234805793a08a4862f336760390 \
-    --hash=sha256:7b5c96495ce75a0dc368db4c613aa4346099363b40d4baa7945b0ff2bedb8dac
+cron-descriptor==2.2.1 \
+    --hash=sha256:23b42aca983841333aaf28095024e0457f005621d03e658edbd7316a5f2bbd42 \
+    --hash=sha256:6759056f43b3cabca274b5df182bb63571f2f383bdd4d9d3ff4662c527430a65
     # via
     #   -r requirements.in
     #   django-celery-beat
