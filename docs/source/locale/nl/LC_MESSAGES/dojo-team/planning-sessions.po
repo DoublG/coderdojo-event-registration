@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 13:17+0000\n"
+"POT-Creation-Date: 2026-10-17 14:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: nl\n"
@@ -30,20 +30,21 @@ msgid ""
 "Instead of typing every session again on the site, your own tool can put "
 "them on the site through the site's API (see :doc:`api-clients`): a "
 "spreadsheet macro, a script, or anything else that can send a request to "
-"a website. Which tool you use, and how you build it, is up to you. Send "
-"the plan again whenever it changes: the site updates the same sessions, "
-"it never adds them twice."
+"a website. Which tool you use, and how you build it, is up to you; the "
+"examples at the end of this page can get you started. Send the plan again"
+" whenever it changes: the site updates the same sessions, it never adds "
+"them twice."
 msgstr ""
 "Veel dojo's plannen hun hele jaar in één keer, bijvoorbeeld in een "
 "rekenblad. In plaats van elke sessie opnieuw op de site te typen, kan je "
 "eigen programma ze via de API van de site op de site zetten (zie :doc"
 ":`api-clients`): een macro in een rekenblad, een script of iets anders "
 "dat een verzoek naar een website kan sturen. Welk programma je gebruikt "
-"en hoe je het maakt, kies je zelf. Stuur de planning opnieuw telkens ze "
-"verandert: de site werkt dezelfde sessies bij en voegt ze nooit twee keer"
-" toe."
+"en hoe je het maakt, kies je zelf; de voorbeelden onderaan deze pagina "
+"helpen je op weg. Stuur de planning opnieuw telkens ze verandert: de site"
+" werkt dezelfde sessies bij en voegt ze nooit twee keer toe."
 
-#: ../../source/dojo-team/planning-sessions.rst:12
+#: ../../source/dojo-team/planning-sessions.rst:13
 msgid ""
 "Only the dojo's **champion** can set this up, because it needs an API "
 "client."
@@ -51,11 +52,11 @@ msgstr ""
 "Alleen de **champion** van de dojo kan dit instellen, omdat er een API-"
 "client voor nodig is."
 
-#: ../../source/dojo-team/planning-sessions.rst:16
+#: ../../source/dojo-team/planning-sessions.rst:17
 msgid "Getting started"
 msgstr "Aan de slag"
 
-#: ../../source/dojo-team/planning-sessions.rst:18
+#: ../../source/dojo-team/planning-sessions.rst:19
 msgid ""
 "On the dojo's **API** page, add a client (for example \"Planning "
 "spreadsheet\") and tick only **Plan sessions: add and change them, e.g. "
@@ -70,7 +71,7 @@ msgstr ""
 "staan de adressen die het nodig heeft, en de link **Referentie** "
 "beschrijft elk veld precies."
 
-#: ../../source/dojo-team/planning-sessions.rst:24
+#: ../../source/dojo-team/planning-sessions.rst:25
 msgid ""
 "The tool sends your sessions to ``/api/v1/events/sync``, at most 200 per "
 "call. Tools that run in a browser, such as Excel on the web, can call the"
@@ -80,23 +81,23 @@ msgstr ""
 "200 per keer. Ook programma's die in een browser werken, zoals Excel op "
 "het web, kunnen de API gebruiken."
 
-#: ../../source/dojo-team/planning-sessions.rst:29
+#: ../../source/dojo-team/planning-sessions.rst:30
 msgid "What to send for each session"
 msgstr "Wat je per sessie stuurt"
 
-#: ../../source/dojo-team/planning-sessions.rst:32
+#: ../../source/dojo-team/planning-sessions.rst:33
 msgid "Field"
 msgstr "Veld"
 
-#: ../../source/dojo-team/planning-sessions.rst:32
+#: ../../source/dojo-team/planning-sessions.rst:33
 msgid "What goes in it"
 msgstr "Wat erin komt"
 
-#: ../../source/dojo-team/planning-sessions.rst:34
+#: ../../source/dojo-team/planning-sessions.rst:35
 msgid "external_ref"
 msgstr "external_ref"
 
-#: ../../source/dojo-team/planning-sessions.rst:34
+#: ../../source/dojo-team/planning-sessions.rst:35
 msgid ""
 "The session's own key: anything that's unique within your dojo and "
 "**never changes** for that session, for example ``2026-W38``. This is how"
@@ -108,43 +109,43 @@ msgstr ""
 "site de sessie de volgende keer. Verander je de sleutel, dan ziet de site"
 " een nieuwe sessie."
 
-#: ../../source/dojo-team/planning-sessions.rst:38
+#: ../../source/dojo-team/planning-sessions.rst:39
 msgid "name"
 msgstr "name"
 
-#: ../../source/dojo-team/planning-sessions.rst:38
+#: ../../source/dojo-team/planning-sessions.rst:39
 msgid "The session's name."
 msgstr "De naam van de sessie."
 
-#: ../../source/dojo-team/planning-sessions.rst:39
+#: ../../source/dojo-team/planning-sessions.rst:40
 msgid "date"
 msgstr "date"
 
-#: ../../source/dojo-team/planning-sessions.rst:39
+#: ../../source/dojo-team/planning-sessions.rst:40
 msgid "The day."
 msgstr "De dag."
 
-#: ../../source/dojo-team/planning-sessions.rst:40
+#: ../../source/dojo-team/planning-sessions.rst:41
 msgid "start_time"
 msgstr "start_time"
 
-#: ../../source/dojo-team/planning-sessions.rst:40
+#: ../../source/dojo-team/planning-sessions.rst:41
 msgid "When it starts (14:00)."
 msgstr "Wanneer ze begint (14:00)."
 
-#: ../../source/dojo-team/planning-sessions.rst:41
+#: ../../source/dojo-team/planning-sessions.rst:42
 msgid "end_time"
 msgstr "end_time"
 
-#: ../../source/dojo-team/planning-sessions.rst:41
+#: ../../source/dojo-team/planning-sessions.rst:42
 msgid "When it ends, on the same day."
 msgstr "Wanneer ze eindigt, op dezelfde dag."
 
-#: ../../source/dojo-team/planning-sessions.rst:42
+#: ../../source/dojo-team/planning-sessions.rst:43
 msgid "places"
 msgstr "places"
 
-#: ../../source/dojo-team/planning-sessions.rst:42
+#: ../../source/dojo-team/planning-sessions.rst:43
 msgid ""
 "How many children can sign up before new sign-ups go on the waiting list;"
 " at least 1."
@@ -152,42 +153,42 @@ msgstr ""
 "Hoeveel kinderen zich kunnen inschrijven voor nieuwe inschrijvingen op de"
 " wachtlijst komen; minstens 1."
 
-#: ../../source/dojo-team/planning-sessions.rst:44
+#: ../../source/dojo-team/planning-sessions.rst:45
 msgid "venue_name"
 msgstr "venue_name"
 
-#: ../../source/dojo-team/planning-sessions.rst:44
+#: ../../source/dojo-team/planning-sessions.rst:45
 msgid "Optional. Leave it empty to use the dojo's own address."
 msgstr "Optioneel. Laat leeg om het eigen adres van de dojo te gebruiken."
 
-#: ../../source/dojo-team/planning-sessions.rst:45
+#: ../../source/dojo-team/planning-sessions.rst:46
 msgid "min_age"
 msgstr "min_age"
 
-#: ../../source/dojo-team/planning-sessions.rst:45
 #: ../../source/dojo-team/planning-sessions.rst:46
+#: ../../source/dojo-team/planning-sessions.rst:47
 msgid "Optional."
 msgstr "Optioneel."
 
-#: ../../source/dojo-team/planning-sessions.rst:46
+#: ../../source/dojo-team/planning-sessions.rst:47
 msgid "max_age"
 msgstr "max_age"
 
-#: ../../source/dojo-team/planning-sessions.rst:47
+#: ../../source/dojo-team/planning-sessions.rst:48
 msgid "audience"
 msgstr "audience"
 
-#: ../../source/dojo-team/planning-sessions.rst:47
+#: ../../source/dojo-team/planning-sessions.rst:48
 msgid "Optional: ``everyone`` (when empty) or ``girls``."
 msgstr ""
 "Optioneel: ``everyone`` (iedereen, als het leeg is) of ``girls`` "
 "(meisjessessie)."
 
-#: ../../source/dojo-team/planning-sessions.rst:48
+#: ../../source/dojo-team/planning-sessions.rst:49
 msgid "status"
 msgstr "status"
 
-#: ../../source/dojo-team/planning-sessions.rst:48
+#: ../../source/dojo-team/planning-sessions.rst:49
 msgid ""
 "Optional: ``draft``, ``open`` or ``closed``. A new session starts as a "
 "draft, hidden from the site, unless you send ``open``. Leave it empty to "
@@ -198,7 +199,7 @@ msgstr ""
 "``open`` stuurt. Laat leeg om de status te houden die de sessie op de "
 "site heeft."
 
-#: ../../source/dojo-team/planning-sessions.rst:54
+#: ../../source/dojo-team/planning-sessions.rst:55
 msgid ""
 "Send every field every time: an empty venue or age also empties it on the"
 " site."
@@ -206,29 +207,29 @@ msgstr ""
 "Stuur elke keer alle velden mee: een lege locatie of leeftijd maakt die "
 "ook op de site leeg."
 
-#: ../../source/dojo-team/planning-sessions.rst:58
+#: ../../source/dojo-team/planning-sessions.rst:59
 msgid "What the site answers"
 msgstr "Wat de site antwoordt"
 
-#: ../../source/dojo-team/planning-sessions.rst:60
+#: ../../source/dojo-team/planning-sessions.rst:61
 msgid "For every session it says what happened, and why:"
 msgstr "Voor elke sessie zegt ze wat er gebeurde, en waarom:"
 
-#: ../../source/dojo-team/planning-sessions.rst:62
+#: ../../source/dojo-team/planning-sessions.rst:63
 msgid "**created**: a new session, as a draft unless its status says otherwise."
 msgstr ""
 "**created**: een nieuwe sessie, als concept tenzij de status iets anders "
 "zegt."
 
-#: ../../source/dojo-team/planning-sessions.rst:63
+#: ../../source/dojo-team/planning-sessions.rst:64
 msgid "**updated**: the session changed to match."
 msgstr "**updated**: de sessie is aangepast."
 
-#: ../../source/dojo-team/planning-sessions.rst:64
+#: ../../source/dojo-team/planning-sessions.rst:65
 msgid "**unchanged**: the session already matched."
 msgstr "**unchanged**: de sessie klopte al."
 
-#: ../../source/dojo-team/planning-sessions.rst:65
+#: ../../source/dojo-team/planning-sessions.rst:66
 msgid ""
 "**skipped**: the session has already started, so the site leaves it "
 "alone. Change it on the site if you need to."
@@ -236,7 +237,7 @@ msgstr ""
 "**skipped**: de sessie is al begonnen, dus de site laat ze ongemoeid. "
 "Wijzig ze zo nodig op de site."
 
-#: ../../source/dojo-team/planning-sessions.rst:67
+#: ../../source/dojo-team/planning-sessions.rst:68
 msgid ""
 "**error**: this session wasn't saved, for example because the end time is"
 " before the start time, the day is in the past, or the same key was sent "
@@ -247,7 +248,7 @@ msgstr ""
 "twee keer gestuurd werd. De andere worden toch bewaard: verbeter deze en "
 "stuur ze opnieuw."
 
-#: ../../source/dojo-team/planning-sessions.rst:71
+#: ../../source/dojo-team/planning-sessions.rst:72
 msgid ""
 "**Sending never deletes a session.** Leaving a session out changes "
 "nothing on the site. To stop a planned session, set its status to "
@@ -259,7 +260,7 @@ msgstr ""
 "``draft`` (verborgen) of ``closed``; om ze te verwijderen gebruik je de "
 "pagina van de sessie op de site."
 
-#: ../../source/dojo-team/planning-sessions.rst:75
+#: ../../source/dojo-team/planning-sessions.rst:76
 msgid ""
 "The description, the picture, the team and the pathways aren't sent: set "
 "them on the session's page on the site, and the next sync keeps them. A "
@@ -270,11 +271,120 @@ msgstr ""
 "volgende keer blijven ze staan. Een nieuwe sessie krijgt de leertrajecten"
 " die je dojo aanbiedt, zoals op de site."
 
-#: ../../source/dojo-team/planning-sessions.rst:80
+#: ../../source/dojo-team/planning-sessions.rst:81
+msgid "Examples: a macro for Excel or LibreOffice"
+msgstr "Voorbeelden: een macro voor Excel of LibreOffice"
+
+#: ../../source/dojo-team/planning-sessions.rst:83
+msgid ""
+"The two macros below are **only examples**, to show how it can work. They"
+" aren't part of the site and we don't keep them working for every version"
+" of Excel or LibreOffice: copy one, adapt it to your own spreadsheet, and"
+" test it on a few sessions first."
+msgstr ""
+"De twee macro's hieronder zijn **alleen voorbeelden**, om te tonen hoe "
+"het kan werken. Ze horen niet bij de site en we houden ze niet werkend "
+"voor elke versie van Excel of LibreOffice: kopieer er een, pas hem aan je"
+" eigen rekenblad aan en test hem eerst op een paar sessies."
+
+#: ../../source/dojo-team/planning-sessions.rst:88
+msgid "Both expect the same spreadsheet:"
+msgstr "Beide verwachten hetzelfde rekenblad:"
+
+#: ../../source/dojo-team/planning-sessions.rst:90
+msgid ""
+"a sheet called **Sessions**, with the field names above as headings in "
+"row 1, from **A** (``external_ref``) to **K** (``status``), and one "
+"session per row below it, without empty rows in between. Dates and times "
+"can be ordinary date and time cells."
+msgstr ""
+"een blad met de naam **Sessions**, met de veldnamen hierboven als kopjes "
+"in rij 1, van **A** (``external_ref``) tot **K** (``status``), en "
+"daaronder één sessie per rij, zonder lege rijen ertussen. Datums en uren "
+"mogen gewone datum- en tijdcellen zijn."
+
+#: ../../source/dojo-team/planning-sessions.rst:94
+msgid "a sheet called **Settings**, with the client ID in cell **B1**."
+msgstr "een blad met de naam **Settings**, met de client-ID in cel **B1**."
+
+#: ../../source/dojo-team/planning-sessions.rst:96
+msgid ""
+"They ask for the client secret on every run, so the secret is never saved"
+" in the file, and write the site's answer for each row in columns **L** "
+"(what happened) and **M** (why). Put your site's address in the line that"
+" starts with ``SITE`` (it's at the bottom of the **API** page)."
+msgstr ""
+"Ze vragen bij elke uitvoering naar het clientgeheim, zodat het geheim "
+"nooit in het bestand bewaard wordt, en schrijven het antwoord van de site"
+" voor elke rij in de kolommen **L** (wat er gebeurde) en **M** (waarom). "
+"Zet het adres van je site in de regel die begint met ``SITE`` (het staat "
+"onderaan de pagina **API**)."
+
+#: ../../source/dojo-team/planning-sessions.rst:102
+msgid "Excel for Windows"
+msgstr "Excel voor Windows"
+
+#: ../../source/dojo-team/planning-sessions.rst:104
+msgid ""
+"This one uses a Windows part of Excel to reach the site, so it doesn't "
+"run in Excel for Mac or Excel on the web. In Excel, open **Developer** → "
+"**Visual Basic** (or press Alt+F11), choose **Insert** → **Module**, "
+"paste the code and save the file as an **Excel Macro-Enabled Workbook** "
+"(``.xlsm``). Run it with **Developer** → **Macros** → **SyncSessions**."
+msgstr ""
+"Deze gebruikt een Windows-onderdeel van Excel om de site te bereiken, dus"
+" hij werkt niet in Excel voor Mac of Excel op het web. Open in Excel "
+"**Ontwikkelaars** → **Visual Basic** (of druk op Alt+F11), kies "
+"**Invoegen** → **Module**, plak de code en bewaar het bestand als "
+"**Excel-werkmap met macro's** (``.xlsm``). Voer hem uit met "
+"**Ontwikkelaars** → **Macro's** → **SyncSessions**."
+
+#: ../../source/dojo-team/planning-sessions.rst:220
+msgid "LibreOffice Calc"
+msgstr "LibreOffice Calc"
+
+#: ../../source/dojo-team/planning-sessions.rst:222
+msgid ""
+"This one is a Python macro, so it runs in LibreOffice 7.2 or later on "
+"Windows, macOS and Linux (on Linux, you may need to install LibreOffice's"
+" Python support, often a package called ``libreoffice-script-provider-"
+"python``). Save the code as ``sync_sessions.py`` in the "
+"``Scripts/python`` folder of your LibreOffice profile (make the folders "
+"if they aren't there yet):"
+msgstr ""
+"Deze is een Python-macro, dus hij werkt in LibreOffice 7.2 of nieuwer op "
+"Windows, macOS en Linux (op Linux moet je soms de Python-ondersteuning "
+"van LibreOffice installeren, vaak een pakket met de naam ``libreoffice-"
+"script-provider-python``). Bewaar de code als ``sync_sessions.py`` in de "
+"map ``Scripts/python`` van je LibreOffice-profiel (maak de mappen als ze "
+"er nog niet zijn):"
+
+#: ../../source/dojo-team/planning-sessions.rst:229
+msgid "Windows: ``%APPDATA%\\LibreOffice\\4\\user\\Scripts\\python``"
+msgstr "Windows: ``%APPDATA%\\LibreOffice\\4\\user\\Scripts\\python``"
+
+#: ../../source/dojo-team/planning-sessions.rst:230
+msgid "macOS: ``~/Library/Application Support/LibreOffice/4/user/Scripts/python``"
+msgstr "macOS: ``~/Library/Application Support/LibreOffice/4/user/Scripts/python``"
+
+#: ../../source/dojo-team/planning-sessions.rst:231
+msgid "Linux: ``~/.config/libreoffice/4/user/Scripts/python``"
+msgstr "Linux: ``~/.config/libreoffice/4/user/Scripts/python``"
+
+#: ../../source/dojo-team/planning-sessions.rst:233
+msgid ""
+"Then open your spreadsheet and run it with **Tools** → **Macros** → **Run"
+" Macro…** → **My Macros** → **sync_sessions** → **sync_sessions**."
+msgstr ""
+"Open daarna je rekenblad en voer hem uit met **Extra** → **Macro's** → "
+"**Macro uitvoeren…** → **Mijn macro's** → **sync_sessions** → "
+"**sync_sessions**."
+
+#: ../../source/dojo-team/planning-sessions.rst:313
 msgid "Keep the secret safe"
 msgstr "Houd het geheim veilig"
 
-#: ../../source/dojo-team/planning-sessions.rst:82
+#: ../../source/dojo-team/planning-sessions.rst:315
 msgid ""
 "Anyone with the client ID and secret can change your dojo's sessions. "
 "Don't save the secret in a file you share, and give this client only "

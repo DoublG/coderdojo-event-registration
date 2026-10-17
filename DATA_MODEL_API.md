@@ -227,8 +227,12 @@ django-ninja stays the framework (`/api/v1/`, OpenAPI reference at
    means and the rules (never deletes, a started session is left alone).
    **Decided (17 October 2026): we provide the API, not the tools.** How a
    dojo calls it (a spreadsheet macro, a script, Office Scripts, anything
-   else) is up to the dojo, so the page has no macro or Excel instructions
-   to keep working across Excel versions. **CORS is on for the API**
+   else) is up to the dojo. The page ends with two macros, a VBA one for
+   Excel for Windows and a Python one for LibreOffice Calc (any OS), marked
+   as **only examples**: not part of the site, not kept working for every
+   Excel or LibreOffice version. Both send dates and times as the
+   spreadsheet's own numbers (`api.forms.SpreadsheetDateField`/`TimeField`
+   read them), so a change there can break them. **CORS is on for the API**
    (django-cors-headers, `CORS_URLS_REGEX` = `/api/v1/` and the token and
    revoke endpoints, any origin, never credentials: a call proves itself
    with a token, not a cookie), so tools that run in a browser engine
@@ -255,7 +259,7 @@ django-ninja stays the framework (`/api/v1/`, OpenAPI reference at
   version. Whether `external_ref` should be visible/editable from the
   dojo's own UI (so a champion can tell which of their sessions came from
   a sync) or stay API-only (API-only for now; the Django admin shows it).
-  Tools for dojos (a macro, a workbook to download, an upload page on the
-  site) are out of scope for now: dojos bring their own (decided 17
-  October 2026).
+  Tools for dojos (a supported macro, a workbook to download, an upload
+  page on the site) are out of scope for now: dojos bring their own, the
+  help page's macros are examples (decided 17 October 2026).
 

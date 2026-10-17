@@ -258,7 +258,7 @@ Every mail goes through `mailing.services.send` (never `send_mail` directly) —
 
 ### API: OAuth 2.0 client credentials for a dojo's apps
 
-Dojo API clients (`api` app), OAuth 2.0 client credentials, scopes, attendance endpoints, the event sync (`POST /api/v1/events/sync`). Full detail in `api/CLAUDE.md` (loaded automatically when working there); plan and phases in `DATA_MODEL_API.md`. We provide the API, not a dojo's tools: how a dojo calls it is up to the dojo.
+Dojo API clients (`api` app), OAuth 2.0 client credentials, scopes, attendance endpoints, the event sync (`POST /api/v1/events/sync`). Full detail in `api/CLAUDE.md` (loaded automatically when working there); plan and phases in `DATA_MODEL_API.md`. We provide the API, not a dojo's tools: how a dojo calls it is up to the dojo (the help page's Excel and LibreOffice macros are marked as examples only).
 
 ### Privacy: every field is classified
 
