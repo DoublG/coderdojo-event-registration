@@ -1,7 +1,7 @@
 # Dutch texts for the user-journey PDFs (informal "je", like the site).
 UI = {
     "brand": "CoderDojo België · gebruikersreis",
-    "who": "Schermafbeeldingen van de ontwikkelsite (demogegevens), ingelogd als <b>{who}</b>, 29 september 2026.",
+    "who": "Schermafbeeldingen van de ontwikkelsite (demogegevens), ingelogd als <b>{who}</b>, 17 oktober 2026.",
     "journey": "De reis",
     "steps": "Stappen in dit document",
     "foot": "coolregistration.localhost · gemaakt vanuit de draaiende applicatie",
@@ -27,7 +27,7 @@ INTRO = {
             "Dojo's en sessies ontdekken zonder account",
             "In één keer een gezinsaccount maken met de kinderen",
             "De gordels, badges en geschiedenis van elk kind volgen",
-            "Inschrijven voor een sessie en de bevestigingsmail krijgen",
+            "Inschrijven voor een sessie, de vragen van de dojo beantwoorden en de bevestigingsmail krijgen",
             "E-mail, aanmeldbeveiliging en privacy beheren",
         ],
     ),
@@ -126,14 +126,21 @@ STEPS = {
             "Kiezen welke kinderen gaan",
             "De inschrijfpagina toont de kinderen van het gezin; wie al ingeschreven is, staat aangeduid.",
         ),
-        "picked": ("Bevestigen", "Vink de kinderen aan en bevestig."),
+        "picked": (
+            "De vragen van de dojo beantwoorden en bevestigen",
+            "Vink de kinderen aan. Stelt de dojo een vraag, bijvoorbeeld of het kind een eigen laptop meebrengt, dan krijgt elk aangevinkt kind de vragen om met ja of nee te beantwoorden. Daarna bevestig je.",
+        ),
         "confirmed": (
             "Ingeschreven",
-            "De plaats is meteen bevestigd (of het kind komt op de wachtlijst) en er staat een bevestigingsmail klaar.",
+            "De plaats is meteen bevestigd (of het kind komt op de wachtlijst), met de gegeven antwoorden, en er staat een bevestigingsmail klaar.",
         ),
         "mail": (
             "De bevestigingsmail",
-            "De bevestiging komt aan in de taal die de ouder koos. Tijdens de ontwikkeling komt elke mail in Mailpit terecht.",
+            "De bevestiging komt aan in de taal die de ouder koos, met de antwoorden op de vragen van de dojo. Tijdens de ontwikkeling komt elke mail in Mailpit terecht.",
+        ),
+        "answers": (
+            "De antwoorden wijzigen",
+            "Tot de sessie begint, kan het gezin met 'Antwoorden wijzigen' naast elke plaats de antwoorden aanpassen (of een vraag beantwoorden die de dojo later toevoegde). Het team van de dojo krijgt een melding.",
         ),
         "mail-prefs": (
             "E-mailvoorkeuren",
@@ -164,7 +171,7 @@ STEPS = {
         "event": ("De volgende sessie zoeken", "De ninja bekijkt sessies zoals iedereen ..."),
         "signup": (
             "... en schrijft zichzelf in",
-            "Met een eigen login kan een ninja alleen zichzelf inschrijven. De ouder krijgt nog altijd de bevestigingsmail.",
+            "Met een eigen login kan een ninja alleen zichzelf inschrijven, en beantwoordt hij zelf de vragen van de dojo. De ouder krijgt nog altijd de bevestigingsmail.",
         ),
         "done": (
             "Plaats bevestigd",
@@ -214,11 +221,11 @@ STEPS = {
         ),
         "event": (
             "Eén sessie",
-            "De gegevens, status, het team en de leertrajecten van de sessie, ter plaatse aan te passen, plus een link om aanwezigheden te nemen.",
+            "De gegevens, status, het team en de leertrajecten van de sessie, ter plaatse aan te passen, plus een link om aanwezigheden te nemen. De kaart Inschrijfvragen bevat tot vijf ja/nee-vragen die gezinnen per kind beantwoorden (hier: brengt het een eigen laptop mee), met de antwoorden tot nu toe.",
         ),
         "attendance": (
             "Aanwezigheden nemen aan de deur",
-            "Op de dag zelf duidt de mentor elk kind aan als aanwezig of afwezig (htmx, zonder de pagina te herladen). Elke rij toont de gordel van het kind, hoe regelmatig het komt en 'Op bezoek' voor kinderen van een andere dojo; ook het team van de sessie staat erbij, voor de verzekering.",
+            "Op de dag zelf duidt de mentor elk kind aan als aanwezig of afwezig (htmx, zonder de pagina te herladen). Elke rij toont de gordel van het kind, hoe regelmatig het komt, de antwoorden van het gezin op de inschrijfvragen (bovenaan geteld: hoeveel laptops meebrengen) en 'Op bezoek' voor kinderen van een andere dojo; ook het team van de sessie staat erbij, voor de verzekering.",
         ),
         "marked": (
             "Aanwezig",
@@ -252,15 +259,15 @@ STEPS = {
         ),
         "new-event": (
             "Een nieuwe sessie plannen",
-            "Een nieuwe sessie: datum en uren (Belgische notatie), plaatsen, leeftijden, doelgroep (bv. een sessie voor meisjes), een banner uit de beeldbibliotheek of een upload, het team en de leertrajecten. Ze start als concept; publiceren opent de inschrijvingen en de gezinnen krijgen de mail met nieuwe sessies.",
+            "Een nieuwe sessie: datum en uren (Belgische notatie), plaatsen, leeftijden, doelgroep (bv. een sessie voor meisjes), een banner uit de beeldbibliotheek of een upload, het team en de leertrajecten. Ze krijgt de inschrijfvragen van de laatste sessie van de dojo en start als concept; publiceren opent de inschrijvingen en de gezinnen krijgen de mail met nieuwe sessies.",
         ),
         "event": (
             "Een volle sessie met wachtlijst",
-            "De pagina van de sessie toont de ingenomen plaatsen en de wachtlijst; als een gezin annuleert, schuift het eerste wachtende kind door en krijgt dat gezin een mail.",
+            "De pagina van de sessie toont de ingenomen plaatsen en de wachtlijst; als een gezin annuleert, schuift het eerste wachtende kind door en krijgt dat gezin een mail. De kaart Inschrijfvragen stelt gezinnen ja/nee-vragen per kind (hier de laptopvraag), met de totalen voor bevestigde plaatsen en de wachtlijst.",
         ),
         "attendance": (
             "Aanwezigheden met gezondheidsinfo",
-            "De aanwezigheidslijst van de champion toont ook de allergieën en gezondheidsinfo van het gezin, alleen voor kinderen met een bevestigde plaats, en elke keer dat iemand ze bekijkt komt in de auditlog.",
+            "De aanwezigheidslijst van de champion toont ook de allergieën en gezondheidsinfo van het gezin, alleen voor kinderen met een bevestigde plaats, en elke keer dat iemand ze bekijkt komt in de auditlog. De antwoorden op de inschrijfvragen staan op elke rij, met de totalen bovenaan.",
         ),
         "team": (
             "Het team beheren",

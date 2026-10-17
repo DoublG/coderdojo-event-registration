@@ -1,6 +1,7 @@
-from lib import BASE, Journey, django, mail_ids, mail_shot, sync_playwright  # noqa: F401
+from lib import BASE, Journey, django, laptop_question, mail_ids, mail_shot, sync_playwright  # noqa: F401
 
 with sync_playwright() as pw:
+    laptop_question(76, answer_places=True)
     j = Journey("champion", pw)
     j.login("owner-51-dojo-westerlo")
     p = j.go("/dojos/51/dashboard/")
@@ -28,21 +29,21 @@ with sync_playwright() as pw:
     j.shot(
         "new-event",
         "Planning a new session",
-        "A new session: date and times (Belgian notation), places, age range, audience (e.g. a girls' session), a banner from the image library or an upload, the team running it and the pathways. It starts as a draft; publishing opens registrations and the families get the new-sessions mail.",
+        "A new session: date and times (Belgian notation), places, age range, audience (e.g. a girls' session), a banner from the image library or an upload, the team running it and the pathways. It starts with the sign-up questions of the dojo's latest session, and as a draft; publishing opens registrations and the families get the new-sessions mail.",
         max_h=2800,
     )
     p = j.go("/dojos/51/events/76/")
     j.shot(
         "event",
         "A full session with a waiting list",
-        "The session page shows places taken and the waiting list; when a family cancels, the first child waiting is promoted and their family is mailed.",
+        "The session page shows places taken and the waiting list; when a family cancels, the first child waiting is promoted and their family is mailed. Its Sign-up questions card asks families yes/no questions per child (here the laptop question), with the totals for confirmed places and the waiting list.",
         max_h=2200,
     )
     p = j.go("/dojos/51/events/76/attendance/")
     j.shot(
         "attendance",
         "Attendance with health notes",
-        "The champion's attendance list also shows the family's allergy and health notes, only for children with a confirmed place, and every view of them is recorded in the audit log.",
+        "The champion's attendance list also shows the family's allergy and health notes, only for children with a confirmed place, and every view of them is recorded in the audit log. The answers to the sign-up questions are on each row, with the totals at the top.",
         max_h=2000,
     )
     p = j.go("/dojos/51/manage/team/")

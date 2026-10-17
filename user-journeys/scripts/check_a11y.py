@@ -25,7 +25,7 @@ AXE_VERSION = "4.10.2"
 AXE_URL = f"https://cdnjs.cloudflare.com/ajax/libs/axe-core/{AXE_VERSION}/axe.min.js"
 AXE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".shots", f"axe-{AXE_VERSION}.min.js")
 
-# The seeded ids are the journeys' (dojo 51, events 71/72/76, ninja 9, pathway 1,
+# The seeded ids are the journeys' (dojo 51, events 2990/2991/76, ninja 9, pathway 1,
 # check 352, application 348); adjust them after a reseed.
 PERSONAS = {
     None: [
@@ -34,7 +34,7 @@ PERSONAS = {
         "/dojos/?location=Westerlo&pathway=2",
         "/dojos/51/",
         "/events/",
-        "/events/71/",
+        "/events/2990/",
         "/events/76/",
         "/pathways/1/",
         "/register/",
@@ -54,9 +54,9 @@ PERSONAS = {
         "/account/mail/",
         "/account/security/",
         "/account/delete/",
-        "/events/71/signup/",
+        "/events/2990/signup/",
     ],
-    "guardian-5-child-1": ["/account/ninja/9/", "/events/72/", "/events/72/signup/"],
+    "guardian-5-child-1": ["/account/ninja/9/", "/events/2991/", "/events/2991/signup/"],
     "guardian-11": ["/register/helper/", "/register/dojo/"],
     "owner-51-dojo-westerlo": [
         "/dojos/51/manage/reports/",

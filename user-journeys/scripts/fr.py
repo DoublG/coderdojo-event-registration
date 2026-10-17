@@ -1,7 +1,7 @@
 # French texts for the user-journey PDFs ("vous", like the site; terms as in locale/fr_BE).
 UI = {
     "brand": "CoderDojo Belgique · parcours utilisateur",
-    "who": "Captures d'écran du site de développement (données de démonstration), connecté en tant que <b>{who}</b>, 29 septembre 2026.",
+    "who": "Captures d'écran du site de développement (données de démonstration), connecté en tant que <b>{who}</b>, 17 octobre 2026.",
     "journey": "Le parcours",
     "steps": "Étapes de ce document",
     "foot": "coolregistration.localhost · généré à partir de l'application en service",
@@ -27,7 +27,7 @@ INTRO = {
             "Découvrir les dojos et les sessions sans compte",
             "Créer en une fois un compte famille avec les enfants",
             "Suivre les ceintures, badges et l'historique de chaque enfant",
-            "Inscrire à une session et recevoir l'e-mail de confirmation",
+            "Inscrire à une session, répondre aux questions du dojo et recevoir l'e-mail de confirmation",
             "Gérer les e-mails, la sécurité de connexion et la vie privée",
         ],
     ),
@@ -126,14 +126,21 @@ STEPS = {
             "Choisir quels enfants participent",
             "La page d'inscription liste les enfants de la famille ; ceux déjà inscrits sont indiqués.",
         ),
-        "picked": ("Confirmer", "Cochez les enfants et confirmez."),
+        "picked": (
+            "Répondre aux questions du dojo et confirmer",
+            "Cochez les enfants. Si le dojo pose une question, par exemple si l'enfant apporte son propre ordinateur portable, chaque enfant coché reçoit les questions, auxquelles on répond par oui ou par non. Ensuite, confirmez.",
+        ),
         "confirmed": (
             "Inscrit",
-            "La place est confirmée immédiatement (ou l'enfant passe sur la liste d'attente) et un e-mail de confirmation est mis en file d'envoi.",
+            "La place est confirmée immédiatement (ou l'enfant passe sur la liste d'attente), avec les réponses données, et un e-mail de confirmation est mis en file d'envoi.",
         ),
         "mail": (
             "L'e-mail de confirmation",
-            "La confirmation arrive dans la langue choisie par le parent (ici le néerlandais). Pendant le développement, chaque e-mail aboutit dans Mailpit.",
+            "La confirmation arrive dans la langue choisie par le parent (ici le néerlandais), avec les réponses aux questions du dojo. Pendant le développement, chaque e-mail aboutit dans Mailpit.",
+        ),
+        "answers": (
+            "Modifier les réponses",
+            "Jusqu'au début de la session, « Modifier les réponses » à côté de chaque place permet à la famille de les changer (ou de répondre à une question ajoutée plus tard par le dojo). L'équipe du dojo reçoit une notification.",
         ),
         "mail-prefs": (
             "Préférences e-mail",
@@ -164,7 +171,7 @@ STEPS = {
         "event": ("Trouver la prochaine session", "Le ninja parcourt les sessions comme tout le monde ..."),
         "signup": (
             "... et s'inscrit lui-même",
-            "Avec son propre compte, un ninja ne peut inscrire que lui-même. Le parent reçoit toujours l'e-mail de confirmation.",
+            "Avec son propre compte, un ninja ne peut inscrire que lui-même, et répond lui-même aux questions du dojo. Le parent reçoit toujours l'e-mail de confirmation.",
         ),
         "done": (
             "Place confirmée",
@@ -214,11 +221,11 @@ STEPS = {
         ),
         "event": (
             "Une session",
-            "Les données, le statut, l'équipe et les parcours d'apprentissage de la session, modifiables sur place, plus un lien pour prendre les présences.",
+            "Les données, le statut, l'équipe et les parcours d'apprentissage de la session, modifiables sur place, plus un lien pour prendre les présences. La carte Questions d'inscription contient jusqu'à cinq questions oui/non auxquelles les familles répondent par enfant (ici : apporte-t-il son propre ordinateur), avec les réponses reçues.",
         ),
         "attendance": (
             "Prendre les présences à l'entrée",
-            "Le jour même, le mentor indique chaque enfant présent ou absent (htmx, sans recharger la page). Chaque ligne montre la ceinture de l'enfant, sa régularité et « En visite » pour les enfants d'un autre dojo ; l'équipe de la session figure aussi, pour l'assurance.",
+            "Le jour même, le mentor indique chaque enfant présent ou absent (htmx, sans recharger la page). Chaque ligne montre la ceinture de l'enfant, sa régularité, les réponses de la famille aux questions d'inscription (comptées en haut : combien d'ordinateurs apporter) et « En visite » pour les enfants d'un autre dojo ; l'équipe de la session figure aussi, pour l'assurance.",
         ),
         "marked": (
             "Présent",
@@ -252,15 +259,15 @@ STEPS = {
         ),
         "new-event": (
             "Planifier une nouvelle session",
-            "Une nouvelle session : date et heures (notation belge), places, âges, public (p. ex. une session pour filles), une bannière de la bibliothèque d'images ou envoyée, l'équipe et les parcours d'apprentissage. Elle commence en brouillon ; la publier ouvre les inscriptions et les familles reçoivent l'e-mail des nouvelles sessions.",
+            "Une nouvelle session : date et heures (notation belge), places, âges, public (p. ex. une session pour filles), une bannière de la bibliothèque d'images ou envoyée, l'équipe et les parcours d'apprentissage. Elle reprend les questions d'inscription de la dernière session du dojo et commence en brouillon ; la publier ouvre les inscriptions et les familles reçoivent l'e-mail des nouvelles sessions.",
         ),
         "event": (
             "Une session complète avec liste d'attente",
-            "La page de la session montre les places prises et la liste d'attente ; quand une famille annule, le premier enfant en attente avance et sa famille reçoit un e-mail.",
+            "La page de la session montre les places prises et la liste d'attente ; quand une famille annule, le premier enfant en attente avance et sa famille reçoit un e-mail. Sa carte Questions d'inscription pose aux familles des questions oui/non par enfant (ici celle de l'ordinateur), avec les totaux pour les places confirmées et la liste d'attente.",
         ),
         "attendance": (
             "Présences avec informations de santé",
-            "La liste de présences du champion montre aussi les allergies et informations de santé de la famille, uniquement pour les enfants avec une place confirmée, et chaque consultation est enregistrée dans le journal d'audit.",
+            "La liste de présences du champion montre aussi les allergies et informations de santé de la famille, uniquement pour les enfants avec une place confirmée, et chaque consultation est enregistrée dans le journal d'audit. Les réponses aux questions d'inscription figurent sur chaque ligne, avec les totaux en haut.",
         ),
         "team": (
             "Gérer l'équipe",
