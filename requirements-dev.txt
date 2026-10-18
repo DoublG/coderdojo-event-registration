@@ -783,9 +783,9 @@ coverage==7.16.2 \
     --hash=sha256:fb9d92ecfe2d5b494367c67f7446f8b75b68d8d0c8cf3bc3e6997478be25d9e2 \
     --hash=sha256:fd3d72233eb8b48acc94fa57d44e2d32ce8e7abed02882ccb6d855ccc4ed33ec
     # via -r requirements-dev.in
-cron-descriptor==2.1.1 \
-    --hash=sha256:0f55b469bb81f8c60602baebc08a78fc3b1eb234805793a08a4862f336760390 \
-    --hash=sha256:7b5c96495ce75a0dc368db4c613aa4346099363b40d4baa7945b0ff2bedb8dac
+cron-descriptor==2.2.1 \
+    --hash=sha256:23b42aca983841333aaf28095024e0457f005621d03e658edbd7316a5f2bbd42 \
+    --hash=sha256:6759056f43b3cabca274b5df182bb63571f2f383bdd4d9d3ff4662c527430a65
     # via
     #   -r requirements.in
     #   django-celery-beat
@@ -1740,9 +1740,9 @@ mapclassify==2.11.0 \
     --hash=sha256:85dbfe747e5b5aed1f1fd41ef5de0c0ab8322227ee308191a44fff12c59c197d \
     --hash=sha256:a510178db75c9b12db3207d748993e0cc5be4132171a4adc42d0b723515352b1
     # via -r requirements-dev.in
-markdown==3.11 \
-    --hash=sha256:180224db6aed87ba9ce1f2781ebcd5826253de8ff637112090e24b84502bbf9f \
-    --hash=sha256:cd6c89e7eb308c8b332ed673215a52d208a43f8bacc030b1419376129408719e
+markdown==3.11.1 \
+    --hash=sha256:496f4f80f9ebd3395a04c8ec9595c40bbe8ec19e9c67d21fe071a1643e876606 \
+    --hash=sha256:f1fa378ba5d682900c9ecb55ccceacca936016dda7c3b27097e8ae03ff78feb5
     # via -r requirements.in
 markdown-it-py==4.2.0 \
     --hash=sha256:04a21681d6fbb623de53f6f364d352309d4094dd4194040a10fd51833e418d49 \
