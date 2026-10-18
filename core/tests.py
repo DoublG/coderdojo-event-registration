@@ -1875,6 +1875,48 @@ class SiteVersionTests(TestCase):
         self.assertEqual(self.version.version(), "2026.10.3")
         self.assertFalse(self.version.is_development())
 
+    def _checkout(self, head, refs=None, packed=""):
+        git = self.base / ".git"
+        git.mkdir()
+        (git / "HEAD").write_text(head)
+        for ref, commit in (refs or {}).items():
+            (git / ref).parent.mkdir(parents=True, exist_ok=True)
+            (git / ref).write_text(commit + "\n")
+        if packed:
+            (git / "packed-refs").write_text(packed)
+
+    def test_development_shows_the_branch_and_commit(self):
+        self._checkout("ref: refs/heads/main\n", {"refs/heads/main": "5e97fb4a" + "0" * 32})
+        with override_settings(BASE_DIR=self.base):
+            self.assertEqual(self.version.checkout(), "main @ 5e97fb4")
+
+    def test_a_packed_ref_and_a_detached_head(self):
+        self._checkout("ref: refs/heads/feature/x\n", packed="# pack-refs\nabcdef1234 refs/heads/feature/x\n")
+        with override_settings(BASE_DIR=self.base):
+            self.assertEqual(self.version.checkout(), "feature/x @ abcdef1")
+            (self.base / ".git" / "HEAD").write_text("1234567890abcdef\n")
+            self.assertEqual(self.version.checkout(), "1234567")
+
+    def test_a_worktree_reads_its_refs_from_the_main_repository(self):
+        main = self.base / "repo.git"
+        (main / "worktrees" / "wt").mkdir(parents=True)
+        (main / "refs" / "heads").mkdir(parents=True)
+        (main / "refs" / "heads" / "topic").write_text("feedface" + "0" * 32)
+        (main / "worktrees" / "wt" / "HEAD").write_text("ref: refs/heads/topic\n")
+        (main / "worktrees" / "wt" / "commondir").write_text("../..\n")
+        tree = self.base / "tree"
+        tree.mkdir()
+        (tree / ".git").write_text(f"gitdir: {main / 'worktrees' / 'wt'}\n")
+        with override_settings(BASE_DIR=tree):
+            self.assertEqual(self.version.checkout(), "topic @ feedfac")
+
+    def test_no_checkout_without_git_or_on_a_release(self):
+        with override_settings(BASE_DIR=self.base):
+            self.assertEqual(self.version.checkout(), "")
+        self._checkout("ref: refs/heads/main\n", {"refs/heads/main": "5e97fb4a" + "0" * 32})
+        self._deployed("version=2026.10.3\n")
+        self.assertEqual(self.version.checkout(), "")
+
     def _organisation_admin(self):
         from accounts.models import OrganisationRole, User
 
@@ -1887,6 +1929,8 @@ class SiteVersionTests(TestCase):
         self.version.build_info.cache_clear()
         with override_settings(BASE_DIR=self.base):
             self.assertContains(self.client.get(reverse("manage_campaign_list")), "Development version")
+            self._checkout("ref: refs/heads/main\n", {"refs/heads/main": "5e97fb4a" + "0" * 32})
+            self.assertContains(self.client.get(reverse("manage_campaign_list")), "main @ 5e97fb4")
         self._deployed("version=2026.10.3\n")
         self.assertContains(self.client.get(reverse("manage_campaign_list")), "Version 2026.10.3")
 
