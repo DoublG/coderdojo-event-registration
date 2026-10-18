@@ -485,6 +485,13 @@ if SILK_ENABLED:
     # staff logins only (privacy/privacy.py classifies what it stores).
     SILKY_AUTHENTICATION = True
     SILKY_AUTHORISATION = True
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
+        # A test run records no requests: silk's own queries (and its clean-up
+        # of old requests, on a random 10% of them) would land in the tests'
+        # query counts. Silk stays installed, so core.profiling still uses it.
+        def SILKY_INTERCEPT_FUNC(request):
+            return False
+
 
 ROOT_URLCONF = "website.urls"
 

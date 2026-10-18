@@ -3186,7 +3186,7 @@ class HealthNotesOnAttendanceTests(TestCase):
 
 def _query_difference(before, after):
     """The queries only one of two captures ran, numbers left out, for a
-    failure message: this test failed on CI now and then, never locally."""
+    failure message (it found django-silk recording the test's requests)."""
 
     def count(capture):
         return Counter(re.sub(r"\b\d+\b", "N", query["sql"]) for query in capture.captured_queries)
