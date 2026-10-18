@@ -305,3 +305,33 @@ class DojoMembership(models.Model):
         from django.utils import timezone
 
         return self.events.filter(start_time__lt=timezone.now()).count()
+
+
+class DojoQuestionManager(models.Manager):
+    def get_queryset(self):
+        # content_languages() reads the dojo.
+        return super().get_queryset().select_related("dojo")
+
+
+class DojoQuestion(TranslatableModel):
+    """One of a dojo's default sign-up questions (DATA_MODEL.md §29): a new
+    session starts with a copy of these (events.questions.copy_defaults),
+    which the team can then change per session. Set on the dojo's Settings
+    page; the rules are events.questions, like a session's own questions."""
+
+    TRANSLATABLE_FIELDS = ("text",)
+
+    dojo = models.ForeignKey(Dojo, on_delete=models.CASCADE, related_name="default_questions")
+    text = models.CharField(max_length=200, help_text="A question families answer with yes or no.")
+    position = models.PositiveSmallIntegerField(default=0)
+
+    objects = DojoQuestionManager()
+
+    class Meta:
+        ordering = ["position", "id"]
+
+    def __str__(self):
+        return self.text
+
+    def content_languages(self):
+        return self.dojo.content_languages()

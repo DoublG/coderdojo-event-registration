@@ -21,11 +21,12 @@ from typing import TYPE_CHECKING, Any
 from django.conf import settings
 from django.db.models import QuerySet
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
+from django.utils.translation import gettext
 
 from accounts.models import Guardianship, Ninja, User
 from dojos.models import Dojo
-from events.models import Event, Registration
+from events.models import Event, Registration, RegistrationAnswer
 
 from .categories import MailCategory
 from .dojo_families import active_since, family_accounts
@@ -95,25 +96,50 @@ def _send_to_family(
     return sent
 
 
+def _answers_context(registration: Registration, user: User) -> list[dict[str, str]]:
+    """The family's answers to the session's sign-up questions (events.questions),
+    in `user`'s mail language: [{"question", "answer"}]."""
+    language = _mail_language(user)
+    answers = (
+        RegistrationAnswer.objects.filter(registration=registration)
+        .select_related("question__event__dojo")
+        .order_by("question__position", "question_id")
+    )
+    with translation.override(language):
+        return [
+            {
+                "question": answer.question.localized("text", language),
+                "answer": gettext("Yes") if answer.answer else gettext("No"),
+            }
+            for answer in answers
+        ]
+
+
+def _session_and_answers(registration: Registration, user: User) -> Context:
+    return {**_session_context(registration, user), "answers": _answers_context(registration, user)}
+
+
 def booking_mail(registration: Registration) -> int:
-    """Right after a sign-up: a confirmation, or the waiting-list notice."""
+    """Right after a sign-up: a confirmation, or the waiting-list notice,
+    with the answers to the session's sign-up questions."""
     template = "registration_waitlisted" if registration.waiting_list else "registration_confirmed"
     return _send_to_family(
         registration.ninja,
         MailCategory.REGISTRATION,
         template,
-        lambda user: _session_context(registration, user),
+        partial(_session_and_answers, registration),
         f"booking:{registration.pk}",
     )
 
 
 def waitlist_promoted_mail(registration: Registration) -> int:
-    """A place came free and this waitlisted ninja moved up."""
+    """A place came free and this waitlisted ninja moved up (with the
+    answers to the session's sign-up questions)."""
     return _send_to_family(
         registration.ninja,
         MailCategory.REGISTRATION,
         "waitlist_promoted",
-        lambda user: _session_context(registration, user),
+        partial(_session_and_answers, registration),
         f"promoted:{registration.pk}",
     )
 
@@ -139,7 +165,8 @@ def youth_mentor_promoted_mail(membership: "DojoMembership") -> int:
 
 def send_session_reminders(today: date | None = None) -> int:
     """A reminder for every confirmed place at a session that starts
-    MAILING_REMINDER_DAYS_BEFORE days from `today` (Belgian date).
+    MAILING_REMINDER_DAYS_BEFORE days from `today` (Belgian date), with the
+    answers to the session's sign-up questions.
     Idempotent: running it twice on a day sends nothing new."""
     today = today or timezone.localdate()
     day = today + timedelta(days=settings.MAILING_REMINDER_DAYS_BEFORE)
@@ -153,7 +180,7 @@ def send_session_reminders(today: date | None = None) -> int:
             r.ninja,
             MailCategory.REMINDER,
             "session_reminder",
-            partial(_session_context, r),
+            partial(_session_and_answers, r),
             f"reminder:{r.event_id}:{r.ninja_id}",
         )
         for r in registrations

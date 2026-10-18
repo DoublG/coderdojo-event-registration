@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-17 13:17+0000\n"
+"POT-Creation-Date: 2026-10-18 07:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: nl\n"
@@ -55,27 +55,30 @@ msgstr ""
 #: ../../source/dojo-team/api-clients.rst:18
 msgid ""
 "**See the sessions and who has a place**: your dojo's sessions, and for "
-"each one the children with a confirmed place and the session's team."
+"each one the children with a confirmed place (with the family's answers "
+"to the session's sign-up questions) and the session's team."
 msgstr ""
 "**De sessies zien en wie een plaats heeft**: de sessies van je dojo, en "
-"per sessie de kinderen met een bevestigde plaats en het team van de "
-"sessie."
+"per sessie de kinderen met een bevestigde plaats (met de antwoorden van "
+"het gezin op de inschrijfvragen van de sessie) en het team van de sessie."
 
-#: ../../source/dojo-team/api-clients.rst:20
+#: ../../source/dojo-team/api-clients.rst:21
 msgid ""
 "**Mark who came**: mark a child or team member present, absent or not "
-"marked yet, or everyone present at once."
+"marked yet, or everyone present at once, and correct a child's answer to "
+"a sign-up question."
 msgstr ""
 "**Aanduiden wie er kwam**: een kind of teamlid aanwezig, afwezig of nog "
-"niet aangeduid zetten, of iedereen tegelijk aanwezig."
+"niet aangeduid zetten, of iedereen tegelijk aanwezig, en het antwoord van"
+" een kind op een inschrijfvraag verbeteren."
 
-#: ../../source/dojo-team/api-clients.rst:22
+#: ../../source/dojo-team/api-clients.rst:24
 msgid "**See the sessions**: your dojo's sessions only, without who signed up."
 msgstr ""
 "**De sessies zien**: alleen de sessies van je dojo, zonder wie er "
 "ingeschreven is."
 
-#: ../../source/dojo-team/api-clients.rst:23
+#: ../../source/dojo-team/api-clients.rst:25
 msgid ""
 "**Plan sessions: add and change them, e.g. from a spreadsheet**: add "
 "sessions and change them (name, day and times, places, venue, ages, "
@@ -85,7 +88,7 @@ msgstr ""
 "sessies toevoegen en wijzigen (naam, dag en uren, plaatsen, locatie, "
 "leeftijden, status). Een sessie verwijderen kan hij nooit."
 
-#: ../../source/dojo-team/api-clients.rst:27
+#: ../../source/dojo-team/api-clients.rst:29
 msgid ""
 "Tick only what the app needs: a planning spreadsheet needs only **Plan "
 "sessions**, an app at the door only the first two."
@@ -94,7 +97,7 @@ msgstr ""
 "alleen **Sessies plannen** nodig, een app aan de deur alleen de eerste "
 "twee."
 
-#: ../../source/dojo-team/api-clients.rst:30
+#: ../../source/dojo-team/api-clients.rst:32
 msgid ""
 "After **Add client**, the page shows the client's **client ID** and "
 "**client secret**. Give both to whoever sets up the app. **The secret is "
@@ -107,11 +110,11 @@ msgstr ""
 " dus we kunnen het niet opnieuw tonen. Ben je het kwijt, maak dan een "
 "nieuw aan (zie hieronder)."
 
-#: ../../source/dojo-team/api-clients.rst:36
+#: ../../source/dojo-team/api-clients.rst:38
 msgid "What an app can and can't do"
 msgstr "Wat een app wel en niet kan"
 
-#: ../../source/dojo-team/api-clients.rst:38
+#: ../../source/dojo-team/api-clients.rst:40
 msgid ""
 "A client only ever works for your dojo, and only does what you allowed. "
 "It never sees children's allergies or notes, their family, or anything "
@@ -123,15 +126,15 @@ msgstr ""
 "anders van hun account. Wat hij aanduidt of wijzigt, wordt bewaard onder "
 "de naam van de client, niet onder de jouwe."
 
-#: ../../source/dojo-team/api-clients.rst:44
+#: ../../source/dojo-team/api-clients.rst:46
 msgid "New secret and deleting"
 msgstr "Nieuw geheim en verwijderen"
 
-#: ../../source/dojo-team/api-clients.rst:46
+#: ../../source/dojo-team/api-clients.rst:48
 msgid "In **Your clients**:"
 msgstr "In **Je clients**:"
 
-#: ../../source/dojo-team/api-clients.rst:48
+#: ../../source/dojo-team/api-clients.rst:50
 msgid ""
 "**New secret** gives the client a new secret; the old one stops working "
 "at once. Use it when the secret may have leaked, or got lost."
@@ -139,7 +142,7 @@ msgstr ""
 "**Nieuw geheim** geeft de client een nieuw geheim; het oude werkt meteen "
 "niet meer. Gebruik het als het geheim misschien uitgelekt of kwijt is."
 
-#: ../../source/dojo-team/api-clients.rst:50
+#: ../../source/dojo-team/api-clients.rst:52
 msgid ""
 "**Delete** stops the client at once and removes it from the list. What it"
 " marked stays."
@@ -147,15 +150,15 @@ msgstr ""
 "**Verwijderen** zet de client meteen stop en haalt hem uit de lijst. Wat "
 "hij aanduidde, blijft."
 
-#: ../../source/dojo-team/api-clients.rst:53
+#: ../../source/dojo-team/api-clients.rst:55
 msgid "The list also shows when each client was last used."
 msgstr "De lijst toont ook wanneer elke client het laatst gebruikt werd."
 
-#: ../../source/dojo-team/api-clients.rst:56
+#: ../../source/dojo-team/api-clients.rst:58
 msgid "For the app's developer"
 msgstr "Voor wie de app bouwt"
 
-#: ../../source/dojo-team/api-clients.rst:58
+#: ../../source/dojo-team/api-clients.rst:60
 msgid ""
 "The bottom of the **API** page has the addresses the app needs. The app "
 "asks for a token with its client ID and secret (OAuth 2.0, client "
@@ -168,14 +171,64 @@ msgstr ""
 " link **Referentie** is de volledige, technische beschrijving van de API."
 
 #~ msgid ""
+#~ "An app or website can work for "
+#~ "your dojo through the site's API: "
+#~ "for now, an app at the door "
+#~ "that marks which children and team "
+#~ "members came, so you don't have to"
+#~ " tick them off on the attendance "
+#~ "list. Only the dojo's **champion** can"
+#~ " let an app in."
+#~ msgstr ""
+#~ "Een app of website kan via de "
+#~ "API van de site voor je dojo "
+#~ "werken: voorlopig een app aan de "
+#~ "deur die aanduidt welke kinderen en "
+#~ "teamleden er kwamen, zodat je ze "
+#~ "niet op de aanwezigheidslijst hoeft af"
+#~ " te vinken. Alleen de **champion** "
+#~ "van de dojo kan een app toegang"
+#~ " geven."
+
+#~ msgid ""
 #~ "A client only ever works for your"
 #~ " dojo, and only does what you "
 #~ "allowed. It never sees children's "
 #~ "allergies or notes, their family, or "
-#~ "anything else from their account. "
-#~ "Everything it marks is recorded under"
-#~ " its own name, so the attendance "
-#~ "list and the history show which "
-#~ "app marked what."
+#~ "anything else from their account. What"
+#~ " it marks is recorded under the "
+#~ "client's own name, not yours."
 #~ msgstr ""
+#~ "Een client werkt alleen voor je "
+#~ "dojo en doet alleen wat je "
+#~ "toeliet. Hij ziet nooit de allergieën"
+#~ " of opmerkingen van kinderen, hun "
+#~ "gezin of iets anders van hun "
+#~ "account. Wat hij aanduidt, wordt bewaard"
+#~ " onder de naam van de client, "
+#~ "niet onder de jouwe."
+
+#~ msgid ""
+#~ "**See the sessions and who has a"
+#~ " place**: your dojo's sessions, and "
+#~ "for each one the children with a"
+#~ " confirmed place and the session's "
+#~ "team."
+#~ msgstr ""
+#~ "**De sessies zien en wie een "
+#~ "plaats heeft**: de sessies van je "
+#~ "dojo, en per sessie de kinderen "
+#~ "met een bevestigde plaats en het "
+#~ "team van de sessie."
+
+#~ msgid ""
+#~ "**Mark who came**: mark a child or"
+#~ " team member present, absent or not"
+#~ " marked yet, or everyone present at"
+#~ " once."
+#~ msgstr ""
+#~ "**Aanduiden wie er kwam**: een kind "
+#~ "of teamlid aanwezig, afwezig of nog "
+#~ "niet aangeduid zetten, of iedereen "
+#~ "tegelijk aanwezig."
 

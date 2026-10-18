@@ -30,6 +30,7 @@ from ..forms import (
 )
 from ..models import Dojo, DojoMembership
 from .common import PUBLIC_UPDATES_LIMIT, _admin_context
+from .questions import questions_context
 
 
 def _geocode_address(dojo):
@@ -127,6 +128,8 @@ def dojo_manage(request, dojo_id):
             "geocode_failed": geocode_failed,
             "active": "settings",
             "active_event_count": team.active_events(dojo).count(),
+            # The Default questions card: what a new session starts with (DATA_MODEL.md §29).
+            **questions_context(dojo),
             **_admin_context(request, access),
         },
     )

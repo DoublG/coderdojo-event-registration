@@ -10,6 +10,7 @@ urlpatterns = [
     path("dojos/<int:dojo_id>/team/", views.dojo_team, name="dojo_team"),
     path("dojos/<int:dojo_id>/join/", views.dojo_join_request, name="dojo_join_request"),
     path("dojos/<int:dojo_id>/dashboard/", views.dojo_dashboard, name="dojo_dashboard"),
+    path("dojos/<int:dojo_id>/attendance/", views.dojo_attendance, name="dojo_attendance"),
     path("dojos/<int:dojo_id>/manage/", views.dojo_manage, name="dojo_manage"),
     path("dojos/<int:dojo_id>/manage/lifecycle/", views.dojo_set_lifecycle, name="dojo_set_lifecycle"),
     path("dojos/<int:dojo_id>/manage/team/", views.dojo_team_manage, name="dojo_team_manage"),
@@ -50,6 +51,11 @@ urlpatterns = [
         name="dojo_event_registration_pathways",
     ),
     path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/attendance/<int:registration_id>/answers/",
+        views.dojo_event_registration_answers,
+        name="dojo_event_registration_answers",
+    ),
+    path(
         "dojos/<int:dojo_id>/events/<int:event_id>/attendance/team/<int:membership_id>/",
         views.dojo_event_team_attendance_mark,
         name="dojo_event_team_attendance_mark",
@@ -58,6 +64,46 @@ urlpatterns = [
         "dojos/<int:dojo_id>/events/<int:event_id>/attendance/<int:registration_id>/",
         views.dojo_event_attendance_mark,
         name="dojo_event_attendance_mark",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/questions/",
+        views.dojo_event_question_add,
+        name="dojo_event_question_add",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/questions/<int:question_id>/",
+        views.dojo_event_question_edit,
+        name="dojo_event_question_edit",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/questions/<int:question_id>/remove/",
+        views.dojo_event_question_remove,
+        name="dojo_event_question_remove",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/questions/<int:question_id>/move/",
+        views.dojo_event_question_move,
+        name="dojo_event_question_move",
+    ),
+    path(
+        "dojos/<int:dojo_id>/manage/questions/",
+        views.dojo_default_question_add,
+        name="dojo_default_question_add",
+    ),
+    path(
+        "dojos/<int:dojo_id>/manage/questions/<int:question_id>/",
+        views.dojo_default_question_edit,
+        name="dojo_default_question_edit",
+    ),
+    path(
+        "dojos/<int:dojo_id>/manage/questions/<int:question_id>/remove/",
+        views.dojo_default_question_remove,
+        name="dojo_default_question_remove",
+    ),
+    path(
+        "dojos/<int:dojo_id>/manage/questions/<int:question_id>/move/",
+        views.dojo_default_question_move,
+        name="dojo_default_question_move",
     ),
     path(
         "dojos/<int:dojo_id>/events/<int:event_id>/status/",

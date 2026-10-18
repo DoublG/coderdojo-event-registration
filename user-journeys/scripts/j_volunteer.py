@@ -1,7 +1,8 @@
-from lib import BASE, Journey, django, mail_ids, mail_shot, sync_playwright  # noqa: F401
+from lib import BASE, Journey, django, laptop_question, mail_ids, mail_shot, sync_playwright  # noqa: F401
 
 with sync_playwright() as pw:
     django("from events.models import Registration as R; R.objects.filter(event_id=76).update(attended=None)")
+    laptop_question(76, answer_places=True)
     j = Journey("volunteer", pw)
     p = j.go("/register/")
     j.shot(
@@ -78,14 +79,14 @@ with sync_playwright() as pw:
     j.shot(
         "event",
         "One session",
-        "The session's details, status, team and pathways, edited in place, plus a link to take attendance.",
+        "The session's details, status, team and pathways, edited in place, plus a link to take attendance. The Sign-up questions card holds up to five yes/no questions families answer per child (here: do they bring their own laptop), with the answers so far.",
         max_h=2200,
     )
     p = j.go("/dojos/51/events/76/attendance/")
     j.shot(
         "attendance",
         "Taking attendance at the door",
-        "On the day, the mentor marks each child present or absent (htmx, no page reload). Each row shows the child's belt, engagement stage and a 'Visiting' label for children from another dojo; the session team is listed too, for the insurance.",
+        "On the day, the mentor marks each child present or absent (htmx, no page reload). Each row shows the child's belt, engagement stage, the family's answers to the sign-up questions (counted at the top: how many laptops to bring; the team corrects one under Answers) and a 'Visiting' label for children from another dojo; the session team is listed too, for the insurance.",
         max_h=2200,
     )
     btn = p.locator("button[value=present]").first

@@ -49,6 +49,7 @@ a full page reload, with the add form after it, out of band).
           </div>
           <div class="action">
             <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=registration.event.id %}">{% translate "View event" %}</a>
+            {% if registration.question_count %}<a class="cd-btn cd-btn--ghost label" href="{% url 'registration_answers' registration_id=registration.id %}">{% if registration.answer_count < registration.question_count %}{% translate "Answer the new question" %}{% else %}{% translate "Change answers" %}{% endif %}</a>{% endif %}
             <form method="post" action="{% url 'cancel_registration' registration_id=registration.id %}"
                   data-confirm="{{ remove_msg }}">
               {% csrf_token %}

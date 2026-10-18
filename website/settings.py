@@ -489,6 +489,13 @@ if SILK_ENABLED:
     # staff logins only (privacy/privacy.py classifies what it stores).
     SILKY_AUTHENTICATION = True
     SILKY_AUTHORISATION = True
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
+        # A test run records no requests: silk's own queries (and its clean-up
+        # of old requests, on a random 10% of them) would land in the tests'
+        # query counts. Silk stays installed, so core.profiling still uses it.
+        def SILKY_INTERCEPT_FUNC(request):
+            return False
+
 
 ROOT_URLCONF = "website.urls"
 
@@ -770,6 +777,10 @@ API_RATE_LIMIT = "600/m"
 CORS_URLS_REGEX = r"^/api/(v1/|oauth/(token|revoke)/)"
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = False
+
+# The yes/no sign-up questions (events.questions, DATA_MODEL.md §29): at most
+# this many per session, and as a dojo's default questions.
+SIGNUP_QUESTIONS_MAX = env.int("SIGNUP_QUESTIONS_MAX", default=5)
 
 # Retention (privacy.retention, DATA_MODEL.md §16 phase 4). An account is
 # deleted (a champion's or mentor's cleaned) this long after its last login,

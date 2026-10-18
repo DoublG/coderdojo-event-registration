@@ -197,6 +197,61 @@ class Registration(models.Model):
         unique_together = [("event", "ninja")]
 
 
+class EventQuestionManager(models.Manager):
+    def get_queryset(self):
+        # content_languages() reads the event's dojo.
+        return super().get_queryset().select_related("event__dojo")
+
+
+class EventQuestion(TranslatableModel):
+    """A yes/no question the dojo team asks families for each child they
+    sign up for this session (DATA_MODEL.md §29), e.g. "Will your child
+    bring their own laptop?". Yes/no only, at most MAX_QUESTIONS per
+    session; the rules are in events.questions. Written in the dojo's
+    languages, like the event itself."""
+
+    TRANSLATABLE_FIELDS = ("text",)
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="questions")
+    text = models.CharField(max_length=200, help_text="A question families answer with yes or no.")
+    position = models.PositiveSmallIntegerField(default=0)
+
+    objects = EventQuestionManager()
+
+    class Meta:
+        ordering = ["position", "id"]
+
+    def __str__(self):
+        return self.text
+
+    def content_languages(self):
+        return self.event.content_languages()
+
+
+class RegistrationAnswerManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("question")
+
+
+class RegistrationAnswer(models.Model):
+    """A family's yes/no answer to one of the session's questions, for one
+    child's registration. Saved with the registration (events.registrations
+    .sign_up), deleted with it when the place is cancelled."""
+
+    registration = models.ForeignKey(Registration, on_delete=models.CASCADE, related_name="answers")
+    question = models.ForeignKey(EventQuestion, on_delete=models.CASCADE, related_name="answers")
+    answer = models.BooleanField()
+    answered_at = models.DateTimeField(default=timezone.now)
+
+    objects = RegistrationAnswerManager()
+
+    class Meta:
+        unique_together = [("registration", "question")]
+
+    def __str__(self):
+        return f"{self.question}: {'yes' if self.answer else 'no'}"
+
+
 class RegistrationCancellationManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().select_related("ninja", "event__dojo")

@@ -6,11 +6,13 @@ from .models import (
     Badge,
     Belt,
     Event,
+    EventQuestion,
     NinjaBadge,
     NinjaBelt,
     NinjaEngagement,
     NinjaEngagementChange,
     Registration,
+    RegistrationAnswer,
     RegistrationCancellation,
     TeamAttendance,
 )
@@ -65,6 +67,21 @@ register(
         ),
     },
     not_personal=["id", "event"],
+)
+
+register_not_personal(EventQuestion, "a yes/no question the dojo team asks on a session's sign-up, its own text")
+
+register(
+    RegistrationAnswer,
+    subjects={Subject.CHILD: "registration__ninja"},
+    purpose="The family's yes/no answers to a session's sign-up questions, for the dojo team's planning",
+    legal_basis=LegalBasis.CONTRACT,
+    retention="registration",
+    seen_by=FAMILY_AND_TEAM,
+    fields={
+        ("registration", "answer", "answered_at"): keep(Category.CHILD, ANONYMISED_CHILD),
+    },
+    not_personal=["id", "question"],
 )
 
 register(

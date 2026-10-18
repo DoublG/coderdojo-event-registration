@@ -1,7 +1,8 @@
-from lib import BASE, Journey, django, mail_ids, mail_shot, sync_playwright  # noqa: F401
+from lib import BASE, Journey, django, laptop_question, mail_ids, mail_shot, sync_playwright  # noqa: F401
 
 with sync_playwright() as pw:
-    django("from events.models import Registration as R; R.objects.filter(event_id=72, ninja_id=9).delete()")
+    django("from events.models import Registration as R; R.objects.filter(event_id=2991, ninja_id=9).delete()")
+    laptop_question(2991)
     j = Journey("ninja", pw)
     j.login(
         "guardian-5-child-1",
@@ -28,16 +29,17 @@ with sync_playwright() as pw:
         "Pathways (Scratch, Python, web development, ...) show the steps and projects a ninja can work through at the dojo.",
         max_h=1800,
     )
-    p = j.go("/events/72/")
+    p = j.go("/events/2991/")
     j.shot("event", "Find the next session", "The ninja browses sessions like anyone else ...")
-    p = j.go("/events/72/signup/")
+    p = j.go("/events/2991/signup/")
     boxes = p.locator("input[name=child]:not([disabled])")
     if boxes.count():
         boxes.first.check()
+        p.locator(".child-signup:has(input[name=child]:checked) input[type=radio][value=yes]").first.check()
         j.shot(
             "signup",
             "... and signs themselves up",
-            "With their own login a ninja can sign only themselves up. The parent still gets the confirmation mail.",
+            "With their own login a ninja can sign only themselves up, answering the dojo's questions themselves. The parent still gets the confirmation mail.",
         )
         p.locator("form button[type=submit]").last.click()
         p.wait_for_load_state("networkidle")

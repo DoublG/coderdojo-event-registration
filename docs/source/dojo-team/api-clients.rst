@@ -16,9 +16,11 @@ Under **Add a client**, give it a name you'll recognise (for example
 "Scan app at the door") and choose what it may do:
 
 - **See the sessions and who has a place**: your dojo's sessions, and for
-  each one the children with a confirmed place and the session's team.
+  each one the children with a confirmed place (with the family's answers
+  to the session's sign-up questions) and the session's team.
 - **Mark who came**: mark a child or team member present, absent or not
-  marked yet, or everyone present at once.
+  marked yet, or everyone present at once, and correct a child's answer to
+  a sign-up question.
 - **See the sessions**: your dojo's sessions only, without who signed up.
 - **Plan sessions: add and change them, e.g. from a spreadsheet**: add
   sessions and change them (name, day and times, places, venue, ages,

@@ -1,4 +1,4 @@
-"""The dashboard and taking attendance (htmx rows, children and the session's
+"""Taking attendance (htmx rows, children and the session's
 team), with the pathways picked per child and the belts and badges awarded
 from the list (events.awards)."""
 
@@ -11,11 +11,11 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 
 from events import attendance
+from events import questions as event_questions
 from events.awards import BadgeError, BeltError, award_badge, award_belt
 from events.models import Badge, Belt, Event, NinjaEngagement, Registration
 from pathways.models import Pathway
 
-from .. import team
 from ..access import (
     AWARD_BADGES,
     AWARD_BELTS,
@@ -32,16 +32,17 @@ from .common import _admin_context
 def _attendance_context(event):
     """What dojos/partials/_attendance.html needs for one event: its
     confirmed (not waitlisted) registrations, alphabetical, plus how many
-    are already marked present. Shared by the dashboard, the per-event
+    are already marked present. Shared by the Attendance page, the per-event
     attendance page and the htmx endpoints that re-render parts of it."""
     registrations = list(
         event.registration_set.filter(waiting_list=False)
         .select_related("ninja", "ninja__home_dojo")
-        .prefetch_related("pathways", "ninja__belts__belt", "ninja__badges")
+        .prefetch_related("pathways", "ninja__belts__belt", "ninja__badges", "answers")
         .order_by("ninja__name", "ninja__family_name")
     )
     event_pathway_ids = set(event.pathways.values_list("id", flat=True))
     team_rows = _team_attendance_rows(event)
+    questions = list(event.questions.all())
     return {
         "event": event,
         "registrations": registrations,
@@ -51,6 +52,15 @@ def _attendance_context(event):
         "team_present_count": sum(1 for row in team_rows if row["attended"]),
         # For each row's pathway picker: every pathway, the session's own first.
         "event_pathway_ids": event_pathway_ids,
+        # The session's yes/no sign-up questions (events.questions): each
+        # row's answers by registration id ({question_id: bool}; a question
+        # missing there was added after the child signed up), and the totals
+        # for the confirmed places.
+        "questions": questions,
+        "answers_by_registration": {
+            r.id: {answer.question_id: answer.answer for answer in r.answers.all()} for r in registrations
+        },
+        "question_totals": event_questions.totals(event) if questions else [],
         "all_pathways": sorted(Pathway.objects.all(), key=lambda p: (p.id not in event_pathway_ids, p.name)),
         # Each row's "Award belt" and "Award badge" forms, for a ninja with
         # something left to award: belts above their current one, one-off
@@ -105,7 +115,9 @@ def _team_attendance_rows(event):
 
 
 @login_required
-def dojo_dashboard(request, dojo_id):
+def dojo_attendance(request, dojo_id):
+    """The sidebar's Attendance page: the list for the dojo's next session
+    (the overview is the dashboard, dojos.views.dashboard)."""
     access = require_dojo_access(request, dojo_id)
     dojo = access.dojo
     # The session whose attendance we're managing: the next upcoming one, or
@@ -117,10 +129,9 @@ def dojo_dashboard(request, dojo_id):
 
     return render(
         request,
-        "dojos/dojo_dashboard.html",
+        "dojos/dojo_attendance.html",
         {
             "session": session,
-            "dormancy_nudge": team.needs_dormancy_nudge(dojo),
             **(_attendance_context(session) if session is not None else {}),
             "active": "attendance",
             **_admin_context(request, access),
@@ -134,7 +145,7 @@ ATTENDANCE_VALUES = {"present": True, "absent": False, "none": None}
 @login_required
 def dojo_event_attendance(request, dojo_id, event_id):
     """Take attendance for one specific session — reached from that event's
-    detail page. Same list as the dashboard's (dojos/partials/_attendance.html),
+    detail page. Same list as the Attendance page's (dojos/partials/_attendance.html),
     which only ever shows the next/most recent session."""
     access = require_dojo_access(request, dojo_id, TAKE_ATTENDANCE)
     dojo = access.dojo
@@ -203,6 +214,43 @@ def dojo_event_team_attendance_mark(request, dojo_id, event_id, membership_id):
             "dojos/partials/_attendance_summary.html", {**context, "oob": True}, request=request
         )
         return HttpResponse(html + summary)
+    return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
+
+
+@login_required
+def dojo_event_registration_answers(request, dojo_id, event_id, registration_id):
+    """The team corrects a child's answers to the session's sign-up
+    questions (POST `q-<question id>` = yes|no; a question left out stays
+    as it is), e.g. at the door: any time, also during the session, and
+    recorded in the audit log (events.questions.correct_answer). Same
+    htmx/no-JS handling as dojo_event_attendance_mark."""
+    access = require_dojo_access(request, dojo_id, TAKE_ATTENDANCE)
+    dojo = access.dojo
+    event = get_object_or_404(Event, id=event_id, dojo=dojo)
+    registration = get_object_or_404(
+        Registration.objects.select_related("ninja"), id=registration_id, event=event, waiting_list=False
+    )
+    if request.method == "POST":
+        for question in event.questions.all():
+            value = request.POST.get(f"q-{question.id}")
+            if value in ("yes", "no"):
+                event_questions.correct_answer(registration, question, value == "yes")
+
+    if request.headers.get("HX-Request"):
+        context = {
+            "dojo": dojo,
+            "dojo_access": access,
+            **_attendance_context(event),
+            "registration": Registration.objects.select_related("ninja")
+            .prefetch_related("pathways")
+            .get(pk=registration.pk),
+        }
+        html = render_to_string("dojos/partials/_attendance_row.html", context, request=request)
+        # The totals at the top of the list, out-of-band.
+        totals = render_to_string(
+            "dojos/partials/_attendance_questions.html", {**context, "oob": True}, request=request
+        )
+        return HttpResponse(html + totals)
     return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
 
 

@@ -75,6 +75,10 @@
     </p>
   </div>
 
+  {% if questions_shown %}
+    {% include "dojos/partials/_questions_card.html" %}
+  {% endif %}
+
   {% if can_promote %}
     {% include "dojos/partials/_event_promotions.html" %}
   {% endif %}
