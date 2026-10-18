@@ -16,6 +16,9 @@ channels==4.3.2
 channels_redis==4.3.0
 daphne==4.2.3
 django-auditlog==3.4.1
+# CORS for the API only (CORS_URLS_REGEX in settings): lets tools that run in a
+# browser engine (Excel on the web, Office Scripts, a dojo's own web page) call it.
+django-cors-headers==4.9.0
 django-debug-toolbar==8.0.0
 django-environ==0.14.0
 django-permissions-policy==4.34.0

@@ -19,6 +19,7 @@ from core.uploads import with_upload_help
 from dojos.models import Dojo
 from pathways.models import Pathway
 
+from . import services
 from .models import Badge, Event
 from .template_images import TEMPLATE_IMAGES
 
@@ -283,10 +284,17 @@ class EventForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        start_time = cleaned_data.get("start_time")
-        end_time = cleaned_data.get("end_time")
-        if start_time and end_time and end_time <= start_time:
-            self.add_error("end_time", _("End time must be after the start time."))
+        # The rules every session meets, on the site and through the API.
+        problems = services.session_problems(
+            start=cleaned_data.get("start_time"),
+            end=cleaned_data.get("end_time"),
+            places=cleaned_data.get("places"),
+            min_age=cleaned_data.get("min_age"),
+            max_age=cleaned_data.get("max_age"),
+            registers_externally=bool(cleaned_data.get("external_registration_url")),
+        )
+        for field, message in problems.items():
+            self.add_error(field, message)
         if "places" not in self.errors and cleaned_data.get("places") is None:
             if cleaned_data.get("external_registration_url"):
                 cleaned_data["places"] = 0
