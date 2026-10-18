@@ -10,6 +10,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from accounts.organisation import Area, has_area
 from content.manage import promotion_state
 from events import questions as event_questions
+from events import services
 from events.forms import EventForm
 from events.models import Event
 
@@ -142,10 +143,7 @@ def dojo_event_set_status(request, dojo_id, event_id):
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
 
     if request.method == "POST":
-        new_status = request.POST.get("status")
-        if new_status in dict(Event.STATUS_CHOICES) and new_status != event.status:
-            event.status = new_status
-            event.save(update_fields=["status"])
+        services.set_status(event, request.POST.get("status", ""))
 
     next_url = request.POST.get("next")
     if next_url and url_has_allowed_host_and_scheme(

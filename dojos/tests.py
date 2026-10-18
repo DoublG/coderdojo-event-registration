@@ -1076,6 +1076,14 @@ class DojoEventCreateViewTests(TempMediaMixin, TestCase):
         self.assertTrue(response.context["form"].errors)
         self.assertEqual(Event.objects.count(), 0)
 
+    def test_the_session_rules_shared_with_the_api(self):
+        """events.services.session_problems: also what the API's sync checks."""
+        self.client.force_login(self.owner)
+        url = reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id})
+        response = self.client.post(url, self._valid_post_data(places="0", min_age="12", max_age="8"))
+        self.assertEqual(set(response.context["form"].errors), {"places", "max_age"})
+        self.assertEqual(Event.objects.count(), 0)
+
     def test_team_choices_are_this_dojos_active_team(self):
         """Anyone active on this dojo's team — including the champion
         themselves — can be put on a session; other dojos' members, requested

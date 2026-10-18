@@ -39,7 +39,7 @@ Sections 13–28 cover the API, the audit log, two-step login, GDPR, child accou
 
 - [`DATA_MODEL_REDESIGN.md`](DATA_MODEL_REDESIGN.md) — §10, the landed redesign's rationale and phase plan.
 - [`DATA_MODEL_MAILING.md`](DATA_MODEL_MAILING.md) — §11 and §25, the mail engine, segmentation, campaigns, journeys and a dojo's own mail.
-- [`DATA_MODEL_API.md`](DATA_MODEL_API.md) — §13, dojo API clients and the event-sync plan.
+- [`DATA_MODEL_API.md`](DATA_MODEL_API.md) — §13, dojo API clients, attendance and the event sync.
 - [`DATA_MODEL_PRIVACY.md`](DATA_MODEL_PRIVACY.md) — §16 and §27, GDPR classification/export/erasure/retention and multiple guardians per child.
 - [`DATA_MODEL_ROLES.md`](DATA_MODEL_ROLES.md) — §28, letting a dojo champion or the organisation define their own custom roles.
 - [`DATA_MODEL_REPORTS.md`](DATA_MODEL_REPORTS.md) — §30, reporting dashboards: curated views plus an embedded Perspective builder (plan, with the options researched).
@@ -1152,10 +1152,11 @@ Open points, built with the proposed answer (easy to change later):
 ## 13. API based management (in progress)
 
 Dojo API clients over OAuth 2.0 client credentials (`/api/v1/`): built for
-attendance; still planned for event management (including a bulk
-`events/sync` endpoint so a champion can plan a year of sessions in a
-spreadsheet and push it over the API) and external registrations. Full
-design, decisions, phases and open points are in `DATA_MODEL_API.md`.
+attendance and for event planning (`POST /api/v1/events/sync`, a bulk
+upsert by `Event.external_ref`, so a champion can plan a year of sessions
+in a spreadsheet and push it over the API); still planned for external
+registrations. Full design, decisions, phases and open points are in
+`DATA_MODEL_API.md`.
 
 ## 14. Audit log (built)
 

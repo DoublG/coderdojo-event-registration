@@ -89,6 +89,16 @@ class Event(TranslatableModel):
         "there instead of showing the sign-up form, so the event has no registrations or "
         "attendance on this site.",
     )
+    # NULL rather than blank when unset: MySQL has no partial unique index,
+    # but a unique index allows any number of NULLs.
+    external_ref = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text="The session's key in the dojo's own planning (a spreadsheet row), set by the API's sync "
+        "(POST /api/v1/events/sync): the next sync with the same key updates this session instead "
+        "of adding one. Unique per dojo.",
+    )
     team = models.ManyToManyField(
         "dojos.DojoMembership",
         blank=True,
@@ -112,6 +122,11 @@ class Event(TranslatableModel):
     announced_at = models.DateTimeField(null=True, blank=True, editable=False)
 
     objects = EventManager()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["dojo", "external_ref"], name="event_unique_external_ref_per_dojo"),
+        ]
 
     def save(self, *args, **kwargs):
         if self.status == self.OPEN and self.published_at is None:

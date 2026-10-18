@@ -30,7 +30,7 @@ the champion (MANAGE_API). A new client's secret, or a renewed one, is
 shown here once and only its hash is kept.
 {% endcomment %}
 <div class="api-manage">
-  <p class="body-sm muted">{% translate "An API client is an app or website that works for this dojo, for now an app at the door that marks who came. It logs in with its own client ID and secret (OAuth 2.0 client credentials) and can only do what you allow here, for this dojo only. Only you, as the champion, see this page." %}</p>
+  <p class="body-sm muted">{% translate "An API client is an app or website that works for this dojo: an app at the door that marks who came, or a spreadsheet that puts the sessions you planned on the site. It logs in with its own client ID and secret (OAuth 2.0 client credentials) and can only do what you allow here, for this dojo only. Only you, as the champion, see this page." %}</p>
 
   {% if new_secret %}
     <section class="cd-card" role="status">
@@ -56,7 +56,7 @@ shown here once and only its hash is kept.
         {% for checkbox in form.scope %}
           <label class="scope-row body-sm" for="{{ checkbox.id_for_label }}">
             {{ checkbox.tag }}
-            <span>{% if checkbox.data.value == "attendance:read" %}{% translate "See the sessions and who has a place" %}{% else %}{% translate "Mark who came" %}{% endif %} <code class="muted">{{ checkbox.data.value }}</code></span>
+            <span>{{ checkbox.choice_label }} <code class="muted">{{ checkbox.data.value }}</code></span>
           </label>
         {% endfor %}
       </div>
