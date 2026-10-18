@@ -4,7 +4,8 @@
 [![Code audit](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/audit.yml/badge.svg?branch=main)](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/audit.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/DoublG/coderdojo-event-registration/badge)](https://scorecard.dev/viewer/?uri=github.com/DoublG/coderdojo-event-registration)
 [![Deploy to demo](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/deploy-demo.yml/badge.svg?branch=demo)](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/deploy-demo.yml)
-[![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Frepos%2FDoublG%2Fcoderdojo-event-registration%2Freleases%2Flatest&query=%24.tag_name&label=version&color=blue)](https://github.com/DoublG/coderdojo-event-registration/releases/latest)
+[![Demo](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Frepos%2FDoublG%2Fcoderdojo-event-registration%2Freleases%2Flatest&query=%24.tag_name&label=demo&color=blue)](https://github.com/DoublG/coderdojo-event-registration/releases/latest)
+[![Main, not on demo yet](https://img.shields.io/github/commits-since/DoublG/coderdojo-event-registration/demo/main?label=main%2C%20not%20on%20demo&color=orange)](https://github.com/DoublG/coderdojo-event-registration/compare/demo...main)
 [![Python](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FDoublG%2Fcoderdojo-event-registration%2Fmain%2Fpyproject.toml&query=%24.tool.mypy.python_version&label=python&logo=python&logoColor=white&color=3776AB)](pyproject.toml)
 [![Django](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2FDoublG%2Fcoderdojo-event-registration%2Fmain%2Frequirements.in&search=(%3Fm)%5EDjango%3D%3D(.%2B)%24&replace=%241&label=django&logo=django&logoColor=white&color=092E20)](requirements.in)
 
