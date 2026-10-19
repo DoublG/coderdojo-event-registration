@@ -15,7 +15,7 @@ pip-tools==7.6.2
 pip-audit==2.10.1
 
 # Lint/format (config in pyproject.toml)
-ruff==0.17.0
+ruff==0.17.1
 
 # The layers between the apps (CODING_STANDARDS.md, "Layers"): `lint-imports`
 # checks the contract in pyproject.toml (with grimp, rich and rich's
@@ -67,7 +67,7 @@ geopandas==1.2.0
 narwhals==2.27.1
 numpy==2.5.4
 pandas==3.0.6
-platformdirs==4.13.0
+platformdirs==4.13.3
 pyarrow==26.0.0
 pyogrio==0.13.0
 pyproj==3.8.0
@@ -82,7 +82,7 @@ cloudpickle==3.1.2
 contourpy==1.4.0
 cycler==0.12.1
 folium==0.20.0
-fonttools==4.66.1
+fonttools==4.67.0
 geographiclib==2.1
 geopy==2.5.0
 Jinja2==3.1.6
