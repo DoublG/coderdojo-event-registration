@@ -146,7 +146,7 @@ services:
   # and, with the `monitoring` profile, /grafana/ and /prometheus/. No
   # depends_on for those two: a profile that's off would make it fail.
   proxy:
-    image: nginx:1.30-alpine
+    image: nginx:1.31-alpine
     container_name: ${PROJECT_NAME:-coolregistration-dev}-proxy
     restart: unless-stopped
     depends_on:
