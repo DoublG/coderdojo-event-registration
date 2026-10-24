@@ -28,7 +28,7 @@ Markdown==3.11.1
 mysqlclient==2.3.0
 # Cleans the HTML a team's Markdown becomes (core/templatetags/markdown_extras.py).
 nh3==0.3.7
-pillow==12.3.0
+pillow==13.0.0
 redis==8.1.0
 requests==2.34.2
 # Production serves the site with uvicorn workers (main.py), which Level27
