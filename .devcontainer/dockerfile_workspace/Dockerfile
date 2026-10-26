@@ -2,7 +2,7 @@
 # MAINTENANCE.md ("Development") in the same change.
 # Pinned by digest (the multi-platform index): the tag moves with every rebuild
 # upstream, the digest can't. Dependabot updates the digest with the tag.
-FROM python:3.14-trixie@sha256:446efb4225200a0a196707aa7953898b37962fd3b8859a636035de3af657081e
+FROM python:3.14-trixie@sha256:cea61c12bd1fa20828538502b703bfd5bd1adca19dbb2c3e5768741bd3d5968f
 
 # git/curl/ca-certificates: general tooling (ca-certificates also needed so
 # start.sh can add our local dev CA to the trust store).
