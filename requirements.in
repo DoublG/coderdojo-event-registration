@@ -37,7 +37,7 @@ requests==2.34.2
 websockets==17.2
 
 # Pulled in by the above (pinned for reproducible installs):
-asgiref==3.12.1
+asgiref==3.13.0
 attrs==26.1.0
 autobahn==26.7.1
 Automat==25.4.16
@@ -88,7 +88,7 @@ python-crontab==3.4.0
 python-dateutil==2.9.0.post0
 six==1.17.0
 tzdata==2026.5
-tzlocal==5.4.4
+tzlocal==5.4.5
 vine==5.1.0
 wcwidth==0.9.2
 
