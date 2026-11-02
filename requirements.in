@@ -37,7 +37,7 @@ requests==2.34.2
 websockets==17.2
 
 # Pulled in by the above (pinned for reproducible installs):
-asgiref==3.12.1
+asgiref==3.13.0
 attrs==26.1.0
 autobahn==26.7.1
 Automat==25.4.16
