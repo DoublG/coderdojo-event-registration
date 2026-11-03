@@ -116,5 +116,5 @@ webauthn==2.8.0
 django-formtools==2.7
 django-phonenumber-field==8.5.0
 qrcode==8.2
-pyasn1==0.6.4
+pyasn1==0.6.5
 pyasn1-modules==0.4.2
