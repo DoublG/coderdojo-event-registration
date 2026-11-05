@@ -1,8 +1,9 @@
 """Telling a session's families about a change (DATA_MODEL_NOTICES.md,
 §31): the compose page, reached from the session's page (its Mail the
 families card, or the note after a save that changed the venue, times or
-places). Whoever can change the session can send it (MANAGE_EVENTS); the
-rules are events.notices."""
+places), and the Cancel page, which calls the session off and mails its
+families. Whoever can change the session can do both (MANAGE_EVENTS); the
+rules are events.notices and events.services.cancel."""
 
 from django.conf import settings
 from django.contrib import messages
@@ -12,8 +13,8 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 
-from events import notices
-from events.forms import SessionNoticeForm
+from events import notices, services
+from events.forms import CancelSessionForm, SessionNoticeForm
 from events.models import Event, SessionNotice
 from mailing.rendering import TemplateMissing
 
@@ -90,6 +91,60 @@ def dojo_event_notify(request, dojo_id, event_id):
             "picked_audience": str(form["audience"].value() or ""),
             "sent_recently": notices.sent_recently(event),
             "limit": settings.SESSION_NOTICES_PER_DAY,
+            "active": "events",
+            **_admin_context(request, access),
+        },
+    )
+
+
+@login_required
+def dojo_event_cancel(request, dojo_id, event_id):
+    """GET asks (with the families it would mail and an optional note); POST
+    cancels the session and, if ticked, mails its families. A session that's
+    already cancelled goes back to its page."""
+    access = require_dojo_access(request, dojo_id, MANAGE_EVENTS)
+    dojo = access.dojo
+    event = get_object_or_404(Event, id=event_id, dojo=dojo)
+    if event.status == Event.CANCELLED:
+        return redirect(_detail_url(dojo, event))
+
+    if request.method == "POST":
+        form = CancelSessionForm(request.POST, event=event)
+        if form.is_valid():
+            try:
+                notice = services.cancel(
+                    event,
+                    cancelled_by=request.user,
+                    notify=form.cleaned_data["notify"],
+                    message=form.cleaned_data["message"],
+                    translations=form.translations(),
+                )
+            except notices.NoticeError as error:
+                form.add_error(None, str(error))
+            else:
+                if notice:
+                    messages.success(
+                        request,
+                        ngettext(
+                            "The session is cancelled, and %(count)s family account is being mailed.",
+                            "The session is cancelled, and %(count)s family accounts are being mailed.",
+                            notice.recipients,
+                        )
+                        % {"count": notice.recipients},
+                    )
+                else:
+                    messages.success(request, _("The session is cancelled."))
+                return redirect(_detail_url(dojo, event))
+    else:
+        form = CancelSessionForm(event=event)
+
+    return render(
+        request,
+        "dojos/dojo_event_cancel.html",
+        {
+            "event": event,
+            "form": form,
+            "families": len(notices.recipients(event, SessionNotice.BOTH)),
             "active": "events",
             **_admin_context(request, access),
         },

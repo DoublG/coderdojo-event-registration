@@ -445,6 +445,16 @@ class EventSyncApiTests(ApiTestCase):
         self.sync(auth, self.row(places=2, status="open"))
         self.assertEqual(Registration.objects.filter(event=event, waiting_list=False).count(), 2)
 
+    def test_a_cancelled_session_is_left_alone_and_the_sync_cannot_cancel(self):
+        _client, auth = self.planner()
+        self.sync(auth, self.row(status="open"))
+        [result] = self.sync(auth, self.row("other", status="cancelled"))
+        self.assertEqual(result["outcome"], "error")
+        Event.objects.filter(external_ref="2026-W1").update(status=Event.CANCELLED)
+        [result] = self.sync(auth, self.row(name="Back on", status="open"))
+        self.assertEqual(result["outcome"], "skipped")
+        self.assertEqual(Event.objects.get(external_ref="2026-W1").status, Event.CANCELLED)
+
     def test_running_it_again_changes_nothing(self):
         from auditlog.models import LogEntry
 

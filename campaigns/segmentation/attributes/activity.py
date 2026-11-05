@@ -16,11 +16,9 @@ from ..base import NINJA, USER, SegmentAttribute, SegmentChoice
 
 
 def _held_sessions(days: int) -> QuerySet[Event]:
-    """Non-draft events that started in the last `days` days."""
+    """Held events (not drafts, not cancelled) that started in the last `days` days."""
     now = timezone.now()
-    return Event.objects.exclude(status=Event.DRAFT).filter(
-        start_time__gte=now - timedelta(days=days), start_time__lte=now
-    )
+    return Event.objects.held().filter(start_time__gte=now - timedelta(days=days), start_time__lte=now)
 
 
 class ActiveTeamMemberAttribute(SegmentAttribute):

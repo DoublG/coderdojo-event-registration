@@ -42,7 +42,7 @@ def promotion_list(request):
     require_area(request, Area.PUBLIC_SITE)
     now = timezone.now()
     promotions = list(Promotion.objects.order_by("placement", "rank", "starts_at", "id"))
-    visible = set(Event.objects.visible().filter(pk__in={p.event_id for p in promotions}).values_list("pk", flat=True))
+    visible = set(Event.objects.listed().filter(pk__in={p.event_id for p in promotions}).values_list("pk", flat=True))
     groups = []
     for value, label in Promotion.PLACEMENT_CHOICES:
         rows = [(p, promotion_state(p, visible, now)) for p in promotions if p.placement == value]

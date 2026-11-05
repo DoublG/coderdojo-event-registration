@@ -46,6 +46,8 @@
         <span class="cd-badge cd-badge--outline caption">{% translate "Draft" %}</span>
       {% elif event.status == 'open' %}
         <span class="cd-badge cd-badge--success caption">{% translate "Open" %}</span>
+      {% elif event.status == 'cancelled' %}
+        <span class="cd-badge cd-badge--danger caption">{% translate "Cancelled" %}</span>
       {% else %}
         <span class="cd-badge cd-badge--warning caption">{% translate "Closed" %}</span>
       {% endif %}
@@ -56,16 +58,19 @@
         <input type="hidden" name="next" value="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">
         {% if event.status != 'open' %}
           <button type="submit" name="status" value="open" class="cd-btn cd-btn--secondary label">
-            {% if event.status == 'closed' %}{% translate "Reopen registrations" %}{% else %}{% translate "Publish" %}{% endif %}
+            {% if event.status == 'closed' or event.status == 'cancelled' %}{% translate "Reopen registrations" %}{% else %}{% translate "Publish" %}{% endif %}
           </button>
         {% endif %}
-        {% if event.status != 'closed' %}
+        {% if event.status == 'open' or event.status == 'draft' %}
           <button type="submit" name="status" value="closed" class="cd-btn cd-btn--ghost label">{% translate "Close registrations" %}</button>
         {% endif %}
         {% if event.status != 'draft' %}
           <button type="submit" name="status" value="draft" class="cd-btn cd-btn--ghost label">{% translate "Back to draft" %}</button>
         {% endif %}
       </form>
+      {% if event.status == 'open' or event.status == 'closed' %}
+        <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_cancel' dojo_id=dojo.id event_id=event.id %}">{% translate "Cancel session…" %}</a>
+      {% endif %}
       {% if event.status != 'draft' %}
         <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=event.id %}" target="_blank" rel="noopener">{% translate "View public page" %}</a>
       {% endif %}
@@ -75,6 +80,8 @@
         {% translate "Hidden from the public site. Publish to make it visible and open for sign-ups." %}
       {% elif event.status == 'open' %}
         {% translate "Visible on the public site and open for sign-ups." %}
+      {% elif event.status == 'cancelled' %}
+        {% translate "Called off: its page says so, nobody can sign up, and it's left out of the session lists and reminders. Reopen it if it goes ahead after all." %}
       {% else %}
         {% translate "Visible on the public site, but no new sign-ups. Reopen to accept sign-ups again." %}
       {% endif %}

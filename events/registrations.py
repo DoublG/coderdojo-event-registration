@@ -126,11 +126,11 @@ def fill_free_places(event: Event) -> list[Registration]:
     """Give the session's free places to the children waiting longest, in
     waiting-list order, and mail each family (DATA_MODEL_NOTICES.md, "Related
     fix"). Called after the team raised the places (the event form, the
-    API's sync); does nothing for a session that has already started.
+    API's sync); does nothing for a session that has started or is cancelled.
     Returns the promoted registrations."""
     with transaction.atomic():
         event = _lock(event.pk)
-        if event.start_time <= timezone.now():
+        if event.start_time <= timezone.now() or event.status == Event.CANCELLED:
             return []
         return _promote(event)
 

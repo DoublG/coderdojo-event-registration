@@ -58,10 +58,15 @@ page, where you can change any of the details you entered when creating
 it. **Save changes** keeps you on the same page, so you can check the
 result straight away.
 
+Giving a full session more places moves the children who have waited
+longest on its waiting list into the new places straight away, and their
+families get a mail. Giving it fewer places never takes a place away from
+a child who already has one.
+
 Session status
 ---------------
 
-A session is always in one of three states, shown as a badge next to it
+A session is always in one of four states, shown as a badge next to it
 on the **Events** list:
 
 - **Draft** — a new session starts here. It's completely hidden from
@@ -74,14 +79,51 @@ on the **Events** list:
   that session, without hiding it. This is a manual step, normally done
   once you've checked attendance for the session and don't want any
   more sign-ups trickling in afterwards.
+- **Cancelled** — **Cancel session…** calls the session off. Its page
+  stays on the site, marked as cancelled, so families who look it up see
+  what happened, but nobody can sign up, it's left out of the session
+  lists, and no reminder goes out. The registrations are kept, and the
+  session doesn't count as missed for the children who were signed up.
+  When you cancel, you can mail every family with a place or on the
+  waiting list straight away, with a note of your own (for example why,
+  or when the next session is).
 
 You can switch a session between any of these states at any time, from
 the status card at the top of its page: a closed session can be
 reopened (**Reopen registrations**), and an open or closed one can be
 taken off the public site again with **Back to draft**. The **Events**
 list also has a quick button for the most common next step (**Publish**,
-**Close registrations** or **Reopen**). Changing the status never
-removes anyone who has already signed up.
+**Close registrations** or **Reopen**). A cancelled session can be
+reopened the same way if it goes ahead after all. Changing the status
+never removes anyone who has already signed up.
+
+Mailing the families of a session
+----------------------------------
+
+When something changes after families signed up, tell them from the
+session's page: its **Mail the families** card. Everyone who can edit the
+session (the champion and the mentors) can send these mails.
+
+- After you save a new venue, date or time, or number of places for an
+  open session that families signed up for, the card offers a button for
+  each change, such as **Mail about the new venue**. The mail already
+  says what it was before and what it is now.
+- **Write a mail** lets you pick the subject yourself: a prepared mail
+  about the venue, the date or times or the places, or a message of your
+  own.
+
+You choose who gets it: the families with a place, those on the waiting
+list, or both. It goes to the parents and guardians of each child, and to
+a child's own login when it has an email address; a family with several
+children on the session gets one mail. Each family gets it in its own
+language: the prepared part always, your own text when you wrote it in
+that language (otherwise in your dojo's main language). **Preview** shows
+the mail before you **Send** it, and replies go to your dojo's email
+address.
+
+Families can't switch these mails off, so keep them to real changes: you
+can send at most three about a session in any 24 hours, and none once it
+ended more than a day ago. The card lists what was already sent.
 
 Sign-up questions
 ------------------

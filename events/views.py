@@ -52,7 +52,7 @@ def event_list(request):
     form = EventSearchForm(request.GET)
     now = timezone.now()
 
-    events = Event.objects.visible().filter(start_time__gte=now).select_related("dojo").with_confirmed_count()
+    events = Event.objects.listed().filter(start_time__gte=now).select_related("dojo").with_confirmed_count()
     if form.is_valid():
         dojo = form.cleaned_data.get("dojo")
         if dojo == DOJO_ORGANISATION:

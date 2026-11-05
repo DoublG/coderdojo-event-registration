@@ -1,0 +1,33 @@
+{% extends "dojos/_admin_base.html" %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "Cancel this session" %} · {{ event.name }}{% endblock %}
+{% block admin_heading %}{% translate "Cancel this session" %}{% endblock %}
+
+{% block admin_content %}
+{% comment %}
+dojos.views.notices.dojo_event_cancel (DATA_MODEL_NOTICES.md, decision 7): calls the
+session off through events.services.cancel and, if ticked, mails its families the
+prepared session_cancelled mail with the team's note.
+{% endcomment %}
+<div style="max-width: 720px;">
+  <p class="body-sm"><a href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">← {{ event.name }}</a></p>
+  <form method="post" class="cd-card cd-form" style="padding: var(--space-5);" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}{{ form.non_field_errors }}{% endif %}
+    <h2 class="heading-md" style="margin-top: 0;">{{ event.name }}, {{ event.start_time|date:"l j F" }} {{ event.start_time|time:"H:i" }}</h2>
+    <p class="body">{% translate "A cancelled session stays on its page, marked as cancelled, so families who look it up see what happened. Nobody can sign up for it, it's left out of the session lists, and there's no reminder mail. The registrations are kept. You can reopen it later from its page." %}</p>
+    {% if families %}
+      {{ form.notify.as_field_group }}
+      <p class="caption">{% blocktranslate count counter=families %}That's {{ counter }} family account.{% plural %}That's {{ counter }} family accounts.{% endblocktranslate %}</p>
+      {{ form.message.as_field_group }}
+      {% include "dojos/partials/_translation_fields.html" %}
+    {% else %}
+      <p class="body-sm">{% translate "Nobody has signed up for it, so there's nobody to mail." %}</p>
+    {% endif %}
+    <div class="cd-form__actions">
+      <button type="submit" class="cd-btn cd-btn--danger label">{% translate "Cancel the session" %}</button>
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">{% translate "Keep it" %}</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

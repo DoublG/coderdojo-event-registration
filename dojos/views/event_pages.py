@@ -162,7 +162,7 @@ def _event_promotions_context(request, event):
     if not has_area(request.user, Area.PUBLIC_SITE):
         return {"can_promote": False}
     promotions = list(event.promotions.order_by("placement", "rank", "starts_at", "id"))
-    visible = set(Event.objects.visible().filter(pk=event.pk).values_list("pk", flat=True))
+    visible = set(Event.objects.listed().filter(pk=event.pk).values_list("pk", flat=True))
     now = timezone.now()
     return {
         "can_promote": True,

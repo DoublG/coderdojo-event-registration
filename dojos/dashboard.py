@@ -120,6 +120,7 @@ def build(access: DojoAccess, now: datetime | None = None) -> Overview:
     upcoming = list(
         Event.objects.with_confirmed_count()
         .filter(dojo=dojo, start_time__gte=now)
+        .exclude(status=Event.CANCELLED)
         .annotate(waiting_count=Count("registration", filter=Q(registration__waiting_list=True)))
         .prefetch_related("team__user")
         .order_by("start_time")[:AGENDA_LIMIT]
@@ -199,6 +200,7 @@ def unmarked_sessions(dojo: Dojo, now: datetime) -> list[Event]:
     `unmarked_count`."""
     return list(
         dojo.event_set.filter(end_time__lt=now, end_time__gte=now - UNMARKED_LOOKBACK)
+        .exclude(status=Event.CANCELLED)
         .annotate(
             unmarked_count=Count(
                 "registration",
@@ -250,11 +252,11 @@ def _stages(dojo: Dojo) -> list[tuple[str, str, int]]:
 
 
 def _year(dojo: Dojo, now: datetime) -> YearFigures:
-    """This calendar year (Belgian time) up to now: sessions held (not drafts),
+    """This calendar year (Belgian time) up to now: sessions held (not drafts or cancelled),
     different ninjas who came, the share of marked places that turned up, and
     the belts the team awarded."""
     start = timezone.localtime(now).replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-    held = dojo.event_set.filter(start_time__gte=start, start_time__lt=now).exclude(status=Event.DRAFT)
+    held = Event.objects.held().filter(dojo=dojo, start_time__gte=start, start_time__lt=now)
     places = Registration.objects.filter(event__in=held, waiting_list=False).aggregate(
         present=Count("id", filter=Q(attended=True)),
         marked=Count("id", filter=Q(attended__isnull=False)),

@@ -430,8 +430,11 @@ erDiagram
 
 ### Event status
 
-The dojo's team sets any status directly (`dojo_event_set_status`); it isn't a
-one-way lifecycle. Existing registrations are kept whatever the status.
+The dojo's team sets draft, open or closed directly (`dojo_event_set_status`); it
+isn't a one-way lifecycle. Cancelling is its own step (`events.services.cancel`,
+§31: the session's page says so, it's left out of lists, reminders and the
+engagement figures, and the families can be mailed), and a cancelled session
+reopens like a closed one. Existing registrations are kept whatever the status.
 
 ```mermaid
 stateDiagram-v2
@@ -442,10 +445,16 @@ stateDiagram-v2
     open --> draft : Back to draft
     closed --> draft : Back to draft
     draft --> closed
+    open --> cancelled : Cancel session (and mail the families)
+    closed --> cancelled : Cancel session (and mail the families)
+    cancelled --> open : Reopen registrations
+    cancelled --> draft : Back to draft
 
     draft : draft<br/>hidden from the public site
     open : open<br/>public, sign-ups accepted
     closed : closed<br/>public, no new sign-ups
+    cancelled : cancelled<br/>its page says so, left out of lists
+
 ```
 
 ### Engagement and cancellations

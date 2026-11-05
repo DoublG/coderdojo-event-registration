@@ -3645,3 +3645,69 @@ class DojoEventNotifyViewTests(TestCase):
         self.assertEqual(self._edit().context["change_buttons"], [])
         Event.objects.filter(pk=self.event.pk).update(status=Event.DRAFT)
         self.assertEqual(self._edit(venue_name="Library").context["change_buttons"], [])
+
+
+class DojoEventCancelViewTests(TestCase):
+    """The Cancel page (dojos.views.notices.dojo_event_cancel, DATA_MODEL_NOTICES.md)."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from accounts.models import Guardianship
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Ghent", champion=self.owner, email="ghent@example.com")
+        start = timezone.now() + timedelta(days=7)
+        self.event = Event.objects.create(
+            name="Session",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+            places=10,
+        )
+        parent = User.objects.create(username="parent", email="p@example.com")
+        child = Ninja.objects.create(name="Emma")
+        Guardianship.objects.create(guardian=parent, ninja=child)
+        Registration.objects.create(event=self.event, ninja=child, waiting_list=False, position=1)
+        self.url = reverse("dojo_event_cancel", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+        self.detail_url = reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+
+    def test_the_status_card_links_to_it_and_a_mentor_can_cancel(self):
+        from mailing.models import EmailMessage
+
+        self.client.force_login(self.owner)
+        self.assertContains(self.client.get(self.detail_url), self.url)
+        mentor = make_mentor(username="mentor1")
+        add_member(self.dojo, mentor)
+        self.client.force_login(mentor)
+        self.assertContains(self.client.get(self.url), "That's 1 family account.")
+        response = self.client.post(self.url, {"notify": "on", "message": "Sorry!"})
+        self.assertRedirects(response, self.detail_url)
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.CANCELLED)
+        self.assertTrue(
+            EmailMessage.objects.filter(template_key="session_cancelled", recipient="p@example.com").exists()
+        )
+        self.assertRedirects(self.client.get(self.url), self.detail_url)
+
+    def test_unticked_it_cancels_without_mail(self):
+        from mailing.models import EmailMessage
+
+        self.client.force_login(self.owner)
+        self.client.post(self.url, {"message": ""})
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.CANCELLED)
+        self.assertFalse(EmailMessage.objects.filter(template_key="session_cancelled").exists())
+
+    def test_someone_off_the_team_gets_404_and_the_status_card_cannot_cancel(self):
+        self.client.force_login(make_champion(username="owner2"))
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+        self.client.force_login(self.owner)
+        set_status = reverse("dojo_event_set_status", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+        self.client.post(set_status, {"status": "cancelled"})
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.OPEN)

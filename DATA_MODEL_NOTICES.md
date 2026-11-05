@@ -191,6 +191,14 @@ The help centre (the dojo team's page on sessions, en/fr/nl), `DATA_MODEL.md`'s 
    change; a change the families were already mailed about (a notice of that kind with the same
    before/after values) isn't offered again.
 4. `Event.CANCELLED`: the status, everything that must skip it, the cancel page with its notice.
+   **Built 5 Nov 2026:** `Event.CANCELLED` and `Event.NOT_HELD`, `EventQuerySet.listed()` (lists,
+   finder, a dojo's next session, promotions, reminders) and `held()` (engagement, the year's figures,
+   the activity segments), `events.services.cancel` (the only way in; `set_status` refuses it and the
+   API's sync can't set it and leaves a cancelled session alone, so open point 2 is settled that way),
+   the cancellation mail exempt from the daily limit, the Cancel page
+   (`/dojos/<id>/events/<event_id>/cancel/`), and *Cancelled* on the public page and the family's
+   pages. Help centre: `dojo-team/running-a-session.rst` (places, status, "Mailing the families of a
+   session") and `families/signing-up-for-a-session.rst`, `families/mail-preferences.rst`.
 
 ## Open points
 
@@ -198,6 +206,6 @@ Decided 5 November 2026: who sends (`MANAGE_EVENTS`), a real `cancelled` status,
 promotes the waiting list. Still open:
 
 1. The team's free text in `SessionNotice`: keep it with the session, or give it a retention period?
-2. The API's event sync and a cancelled session: leave a cancelled session alone (proposed), or let the
-   spreadsheet cancel and reopen?
+2. ~~The API's event sync and a cancelled session~~ — built as proposed: the sync leaves a cancelled
+   session alone (`skipped`) and can't cancel one; say if the spreadsheet should be able to.
 3. Should the organisation be able to send a notice for a dojo's session (it can't edit those today)?

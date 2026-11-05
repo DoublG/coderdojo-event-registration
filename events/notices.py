@@ -125,8 +125,11 @@ def notice_problems(notice: SessionNotice, now: datetime | None = None) -> list[
     problems = []
     if event.end_time < now - timedelta(hours=settings.SESSION_NOTICE_HOURS_AFTER_END):
         problems.append(_("This session ended too long ago to mail its families about it."))
+    if notice.kind == SessionNotice.CANCELLED and event.status != Event.CANCELLED:
+        problems.append(_("Only a cancelled session can be announced as cancelled."))
     limit = settings.SESSION_NOTICES_PER_DAY
-    if sent_recently(event, now) >= limit:
+    # The cancellation itself always goes out, whatever was sent before.
+    if notice.kind != SessionNotice.CANCELLED and sent_recently(event, now) >= limit:
         problems.append(
             _("You already mailed this session's families %(limit)s times in the last 24 hours, the most you can.")
             % {"limit": limit}

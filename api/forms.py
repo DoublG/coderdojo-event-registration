@@ -92,7 +92,11 @@ class PlannedSessionForm(forms.Form):
     min_age = forms.IntegerField(label="min_age", min_value=0, max_value=99, required=False)
     max_age = forms.IntegerField(label="max_age", min_value=0, max_value=99, required=False)
     audience = forms.ChoiceField(label="audience", choices=Event.AUDIENCE_CHOICES, required=False)
-    status = forms.ChoiceField(label="status", choices=Event.STATUS_CHOICES, required=False)
+    status = forms.ChoiceField(
+        label="status",
+        choices=[(value, label) for value, label in Event.STATUS_CHOICES if value != Event.CANCELLED],
+        required=False,
+    )
 
     def problems(self):
         """The row's errors as one line, each with its field's name."""

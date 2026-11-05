@@ -19,6 +19,17 @@ class EventQuerySet(models.QuerySet):
         governs the public-facing side."""
         return self.exclude(status=Event.DRAFT).filter(dojo__status="active")
 
+    def listed(self):
+        """visible() without cancelled sessions: what lists, the dojo finder,
+        a dojo's next session, promotions and reminders offer. A cancelled
+        session's own page stays readable (visible()), marked as cancelled."""
+        return self.visible().exclude(status=Event.CANCELLED)
+
+    def held(self):
+        """Sessions that took place or will: not drafts, not cancelled (what
+        engagement, the year's figures and the activity segments count)."""
+        return self.exclude(status__in=Event.NOT_HELD)
+
     def with_confirmed_count(self):
         """Adds `confirmed_count` (confirmed, non-waitlisted places), which
         Event.places_left then reads instead of running a query per event:
@@ -37,11 +48,15 @@ class Event(TranslatableModel):
     DRAFT = "draft"
     OPEN = "open"
     CLOSED = "closed"
+    CANCELLED = "cancelled"
     STATUS_CHOICES = [
         (DRAFT, _("Draft")),
         (OPEN, _("Open")),
         (CLOSED, _("Closed")),
+        (CANCELLED, _("Cancelled")),
     ]
+    # Not a session that takes place: left out of engagement and the figures.
+    NOT_HELD = (DRAFT, CANCELLED)
 
     TRANSLATABLE_FIELDS = ("name", "description")
 
@@ -53,7 +68,9 @@ class Event(TranslatableModel):
         default=DRAFT,
         help_text="Draft: hidden from the public site while it's being put together. "
         "Open: visible, registrations open. Closed: visible, registrations closed — "
-        "set manually, normally once attendance for the session has been checked.",
+        "set manually, normally once attendance for the session has been checked. Cancelled: "
+        "called off (events.services.cancel); its page says so, it's left out of lists, reminders "
+        "and the engagement figures, and its registrations are kept.",
     )
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
@@ -158,6 +175,10 @@ class Event(TranslatableModel):
     @property
     def registration_open(self):
         return self.status == self.OPEN
+
+    @property
+    def is_cancelled(self):
+        return self.status == self.CANCELLED
 
     @property
     def registers_externally(self):

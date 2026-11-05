@@ -172,7 +172,7 @@ def send_session_reminders(today: date | None = None) -> int:
     day = today + timedelta(days=settings.MAILING_REMINDER_DAYS_BEFORE)
     registrations = (
         Registration.objects.filter(waiting_list=False, event__start_time__date=day)
-        .filter(event__in=Event.objects.visible())
+        .filter(event__in=Event.objects.listed())
         .select_related("event__dojo", "ninja")
     )
     return sum(

@@ -18,9 +18,10 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from . import registrations
-from .models import Event
+from .models import Event, SessionNotice
 
 if TYPE_CHECKING:
+    from accounts.models import User
     from dojos.models import Dojo
 
 # At most this many rows per sync call: a year of twice-weekly sessions, with room to spare.
@@ -31,6 +32,9 @@ UPDATED = "updated"
 UNCHANGED = "unchanged"
 SKIPPED = "skipped"
 ERROR = "error"
+
+# What set_status (the status card, the API's sync) may set: cancelling is cancel().
+SETTABLE_STATUSES = (Event.DRAFT, Event.OPEN, Event.CLOSED)
 
 # The fields a sync sets; everything else (description, image, team,
 # pathways, translations) stays as the dojo's team set it on the site.
@@ -61,14 +65,53 @@ def session_problems[When: (datetime, time)](
 
 
 def set_status(event: Event, status: str) -> bool:
-    """Any status to any other (draft, open, closed): not a one-way
-    lifecycle, and registrations are kept either way. Returns whether it
-    changed; an unknown status changes nothing."""
-    if status not in dict(Event.STATUS_CHOICES) or status == event.status:
+    """Any status to any other (draft, open, closed; a cancelled session
+    reopens this way too): not a one-way lifecycle, and registrations are
+    kept either way. Returns whether it changed; an unknown status changes
+    nothing, and cancelling is `cancel`'s (it can tell the families)."""
+    if status not in SETTABLE_STATUSES or status == event.status:
         return False
     event.status = status
     event.save(update_fields=["status"])
     return True
+
+
+def cancel(
+    event: Event,
+    *,
+    cancelled_by: "User | None",
+    notify: bool,
+    message: str = "",
+    translations: dict[str, dict[str, str]] | None = None,
+) -> "SessionNotice | None":
+    """Call the session off (DATA_MODEL_NOTICES.md, decision 7): it becomes
+    `cancelled` (its registrations are kept; it's left out of lists,
+    reminders and the engagement figures) and, with `notify`, every family
+    with a place or on the waiting list gets `session_cancelled` with the
+    team's `message` (its `translations` in the dojo's other languages).
+    Returns the SessionNotice sent, or None. A session cancelled already
+    changes nothing; with nobody to mail, it's cancelled without a mail."""
+    from . import notices
+
+    with transaction.atomic():
+        locked = Event.objects.select_for_update().get(pk=event.pk)
+        if locked.status == Event.CANCELLED:
+            event.status = Event.CANCELLED
+            return None
+        locked.status = event.status = Event.CANCELLED
+        locked.save(update_fields=["status"])
+        event = locked
+        if not notify or not notices.recipients(event, SessionNotice.BOTH):
+            return None
+        notice = SessionNotice(
+            event=event,
+            kind=SessionNotice.CANCELLED,
+            audience=SessionNotice.BOTH,
+            message=message,
+            translations=translations or {},
+            sent_by=cancelled_by,
+        )
+        return notices.send_notice(notice)
 
 
 @dataclass(frozen=True)
@@ -142,6 +185,8 @@ def _sync_one(dojo: "Dojo", session: PlannedSession, now: datetime) -> SyncResul
         return SyncResult(
             ref, SKIPPED, event.id, _("This session has already started: change it on the site if needed.")
         )
+    if event.status == Event.CANCELLED:
+        return SyncResult(ref, SKIPPED, event.id, _("This session is cancelled: reopen it on the site first."))
     if values["start_time"] <= now:
         return SyncResult(ref, ERROR, event.id, _("This session would be in the past."))
     changed = [field for field in SYNCED_FIELDS if getattr(event, field) != values[field]]

@@ -51,7 +51,8 @@ kind of mail:
   (or tick the box when you create your account).
 
 Mails about your account (such as a password reset) and about your bookings
-(confirmations, a place coming free on the waiting list) are always sent.
+(confirmations, a place coming free on the waiting list, a dojo's mail
+about a change to a session you signed up for) are always sent.
 
 Your dojos
 ----------

@@ -107,7 +107,7 @@
                 <td class="body-sm">{{ registration.event.start_time|date:"j M Y, H:i" }}</td>
                 <td class="body-sm">
                   {{ registration.event|localized:"name"|in_lang }}
-                  {% if registration.waiting_list %}<span class="cd-badge cd-badge--warning caption">{% translate "Waiting list" %}</span>{% endif %}
+                  {% if registration.event.is_cancelled %}<span class="cd-badge cd-badge--danger caption">{% translate "Cancelled" %}</span>{% elif registration.waiting_list %}<span class="cd-badge cd-badge--warning caption">{% translate "Waiting list" %}</span>{% endif %}
                 </td>
                 <td class="body-sm">{{ registration.event.dojo.name }}</td>
                 <td class="body-sm">

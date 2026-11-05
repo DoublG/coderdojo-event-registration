@@ -2025,3 +2025,93 @@ class SessionNoticeTests(TestCase):
         self.assertEqual(notices.read_change_token(token, self.event), before)
         self.assertIsNone(notices.read_change_token(token + "x", self.event))
         self.assertIsNone(notices.read_change_token(token, _future_event(self.dojo)))
+
+
+class CancelSessionTests(TestCase):
+    """events.services.cancel and the `cancelled` status (DATA_MODEL_NOTICES.md, decision 7)."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.dojo = make_dojo("Ghent", email="ghent@example.com")
+        self.team = User.objects.create(username="team", email="team@example.com")
+        self.event = _future_event(self.dojo, places=1)
+        self.parent = User.objects.create(username="parent", email="p@example.com")
+        self.children = [Ninja.objects.create(name=f"Kid {n}") for n in range(2)]
+        for child in self.children:
+            Guardianship.objects.create(guardian=self.parent, ninja=child)
+        registrations.sign_up(self.event, self.children)
+
+    def _cancelled_mails(self):
+        from mailing.models import EmailMessage
+
+        return EmailMessage.objects.filter(template_key="session_cancelled")
+
+    def test_cancelling_keeps_the_registrations_and_mails_the_families_once(self):
+        from . import services
+
+        notice = services.cancel(self.event, cancelled_by=self.team, notify=True, message="The room flooded.")
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.CANCELLED)
+        self.assertFalse(self.event.registration_open)
+        self.assertEqual(Registration.objects.filter(event=self.event).count(), 2)
+        self.assertEqual((notice.kind, notice.recipients), ("cancelled", 1))
+        mail = self._cancelled_mails().get()
+        self.assertIn("The room flooded.", mail.body)
+        self.assertIn("Kid 0 and Kid 1", mail.body)
+        self.assertIsNone(services.cancel(self.event, cancelled_by=self.team, notify=True))
+        self.assertEqual(self._cancelled_mails().count(), 1)
+
+    def test_without_notify_nothing_is_mailed(self):
+        from . import services
+
+        self.assertIsNone(services.cancel(self.event, cancelled_by=self.team, notify=False))
+        self.assertFalse(self._cancelled_mails().exists())
+
+    def test_the_cancellation_goes_out_whatever_the_daily_limit(self):
+        from django.test import override_settings
+
+        from . import notices, services
+        from .models import SessionNotice
+
+        with override_settings(SESSION_NOTICES_PER_DAY=1):
+            notices.send_notice(
+                SessionNotice(event=self.event, kind="message", subject="Hi", message="Hi", sent_by=self.team)
+            )
+            self.assertIsNotNone(services.cancel(self.event, cancelled_by=self.team, notify=True))
+
+    def test_only_cancel_cancels_and_set_status_reopens(self):
+        from . import services
+
+        self.assertFalse(services.set_status(self.event, Event.CANCELLED))
+        services.cancel(self.event, cancelled_by=self.team, notify=False)
+        self.assertTrue(services.set_status(self.event, Event.OPEN))
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.OPEN)
+
+    def test_a_cancelled_session_is_left_out_of_lists_reminders_and_engagement(self):
+        from mailing.automated import send_session_reminders
+
+        from . import services
+
+        services.cancel(self.event, cancelled_by=self.team, notify=False)
+        self.assertIn(self.event, Event.objects.visible())
+        self.assertNotIn(self.event, Event.objects.listed())
+        self.assertNotIn(self.event, Event.objects.held())
+        day = timezone.localdate(self.event.start_time) - timedelta(days=2)
+        self.assertEqual(send_session_reminders(today=day), 0)
+        Event.objects.filter(pk=self.event.pk).update(places=5)
+        self.assertEqual(registrations.fill_free_places(self.event), [])
+
+    def test_its_page_says_so_and_nobody_can_sign_up(self):
+        from . import services
+
+        services.cancel(self.event, cancelled_by=self.team, notify=False)
+        response = self.client.get(reverse("event_detail", kwargs={"event_id": self.event.pk}))
+        self.assertContains(response, "This session is cancelled.")
+        self.assertNotContains(response, reverse("event_signup", kwargs={"event_id": self.event.pk}))
+        with self.assertRaises(registrations.RegistrationError):
+            registrations.sign_up(self.event, [Ninja.objects.create(name="Late")])

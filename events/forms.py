@@ -461,6 +461,43 @@ class SessionNoticeForm(forms.ModelForm):
         return notice
 
 
+class CancelSessionForm(forms.ModelForm):
+    """Cancelling a session (events.services.cancel, DATA_MODEL_NOTICES.md):
+    whether to mail its families, and an optional note from the team in the
+    dojo's languages, under the prepared `session_cancelled` mail."""
+
+    notify = forms.BooleanField(
+        label=_("Mail the families with a place or on the waiting list"), required=False, initial=True
+    )
+
+    class Meta:
+        model = SessionNotice
+        fields = ["message"]
+        labels = {"message": _("A note from the team (optional)")}
+        help_texts = {"message": _("For example why, or when the next session is. Plain text.")}
+        widgets = {"message": forms.Textarea(attrs={"rows": 5})}
+
+    def __init__(self, *args, event, **kwargs):
+        kwargs.setdefault("instance", SessionNotice(event=event, kind=SessionNotice.CANCELLED))
+        super().__init__(*args, **kwargs)
+        self.fields["message"].max_length = settings.SESSION_NOTICE_MAX_LENGTH
+        self.fields["message"].widget.attrs["maxlength"] = settings.SESSION_NOTICE_MAX_LENGTH
+        groups = add_translation_fields(
+            self, self.instance, lambda field: optional_copy(self.fields["message"], self.fields["message"].label)
+        )
+        # Only the note: a cancellation has no subject of its own.
+        for _language, _name, names in groups:
+            for name in [n for n in names if n.endswith("__subject")]:
+                del self.fields[name]
+                names.remove(name)
+        self.translation_groups = bound_translation_groups(self, groups)
+
+    def translations(self):
+        """The note in the dojo's other languages, as SessionNotice.translations."""
+        save_translation_fields(self, self.instance)
+        return self.instance.translations
+
+
 class BadgeForm(forms.ModelForm):
     """An award (events.Badge) on the organisation dashboard's Awards page
     (events.manage). Only the organisation defines awards; dojo teams only
