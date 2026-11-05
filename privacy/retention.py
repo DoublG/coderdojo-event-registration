@@ -232,6 +232,7 @@ def apply_retention(today: date | None = None) -> dict[str, int]:
     done["organisation_invitations"] = remove_old_invitations()
     done["guardian_invitations"] = remove_old_guardian_invitations()
     done["mail_content"] = clear_old_mail_content()
+    done["session_notice_texts"] = clear_session_notice_texts()
     done["sessions"] = Session.objects.filter(expire_date__lt=timezone.now()).delete()[0]
     # The rules waiting for their period: each does nothing while its setting is None.
     done["children"] = erase_old_children(today)
@@ -466,6 +467,21 @@ def clear_old_mail_content(now: datetime | None = None) -> int:
 # removal runs with it off, or its "deleted" entries would keep what was removed.
 
 _LONG_AGO = timezone.make_aware(datetime(1970, 1, 1))
+
+
+def clear_session_notice_texts() -> int:
+    """The `session_notice` rule (DATA_MODEL_NOTICES.md): empty the team's own
+    subject and text (and their translations) on the notices of sessions whose
+    dojo isn't active any more. The row stays with the session. One
+    `QuerySet.update()`: the notices aren't in the audit log. Returns how many."""
+    from dojos.models import Dojo
+    from events.models import SessionNotice
+
+    return (
+        SessionNotice.objects.exclude(event__dojo__status=Dojo.ACTIVE)
+        .exclude(subject="", message="", translations={})
+        .update(subject="", message="", translations={})
+    )
 
 
 def _cutoff(days: int, now: datetime | None = None) -> datetime:

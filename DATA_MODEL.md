@@ -430,8 +430,11 @@ erDiagram
 
 ### Event status
 
-The dojo's team sets any status directly (`dojo_event_set_status`); it isn't a
-one-way lifecycle. Existing registrations are kept whatever the status.
+The dojo's team sets draft, open or closed directly (`dojo_event_set_status`); it
+isn't a one-way lifecycle. Cancelling is its own step (`events.services.cancel`,
+§31: the session's page says so, it's left out of lists, reminders and the
+engagement figures, and the families can be mailed), and a cancelled session
+reopens like a closed one. Existing registrations are kept whatever the status.
 
 ```mermaid
 stateDiagram-v2
@@ -442,10 +445,16 @@ stateDiagram-v2
     open --> draft : Back to draft
     closed --> draft : Back to draft
     draft --> closed
+    open --> cancelled : Cancel session (and mail the families)
+    closed --> cancelled : Cancel session (and mail the families)
+    cancelled --> open : Reopen registrations
+    cancelled --> draft : Back to draft
 
     draft : draft<br/>hidden from the public site
     open : open<br/>public, sign-ups accepted
     closed : closed<br/>public, no new sign-ups
+    cancelled : cancelled<br/>its page says so, left out of lists
+
 ```
 
 ### Engagement and cancellations
@@ -3048,3 +3057,14 @@ django-report-builder, Metabase/Superset/Grafana, notebooks) were researched
 and set aside. Phase 1 is built (11 October 2026): the `reports` app, the
 engagement snapshot as the first dataset, saved reports on `/manage/reports/`.
 Design, what's built, phases and open points are in `DATA_MODEL_REPORTS.md`.
+
+## 31. Telling families about a change to their session (not built — written up for review)
+
+When a session that families booked changes (venue, times, places) or is called off, whoever can
+change it (`MANAGE_EVENTS`) can mail every family with a place, on the waiting list, or both, from
+prepared mails or with a text of their own, in each family's language. Decided 5 November 2026: the
+senders are whoever can edit the session, a real `Event.CANCELLED` status (closing a session today
+still sends its reminder and counts it as missed), and raising the places promotes the waiting list
+(built first). Proposed: `registration` mail through `send()` (not a §25 campaign) and an append-only
+`events.SessionNotice`. Design, decisions, phases and open points
+are in `DATA_MODEL_NOTICES.md`.

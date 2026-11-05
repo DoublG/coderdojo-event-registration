@@ -9,7 +9,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.translation import gettext as _
 
-from .content_languages import language_name, save_translation_fields, translation_field_name
+from .content_languages import (
+    language_name,
+    language_name_in_sentence,
+    save_translation_fields,
+    translation_field_name,
+)
 
 
 class TranslationAdminMixin:
@@ -62,7 +67,7 @@ class TranslationAdminMixin:
         for language in self._translation_languages(obj):
             fieldsets.append(
                 (
-                    _("In %(language)s") % {"language": language_name(language)},
+                    _("In %(language)s") % {"language": language_name_in_sentence(language)},
                     {
                         "classes": ["collapse"],
                         "fields": [translation_field_name(language, f) for f in self.model.TRANSLATABLE_FIELDS],

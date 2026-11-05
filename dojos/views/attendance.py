@@ -123,9 +123,10 @@ def dojo_attendance(request, dojo_id):
     # The session whose attendance we're managing: the next upcoming one, or
     # else the most recent past one, so the page still shows something once
     # a dojo's calendar has run out.
-    session = dojo.event_set.filter(start_time__gte=timezone.now()).order_by("start_time").first()
+    sessions = dojo.event_set.exclude(status=Event.CANCELLED)
+    session = sessions.filter(start_time__gte=timezone.now()).order_by("start_time").first()
     if session is None:
-        session = dojo.event_set.order_by("-start_time").first()
+        session = sessions.order_by("-start_time").first()
 
     return render(
         request,

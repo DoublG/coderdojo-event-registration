@@ -411,6 +411,52 @@ class BookingTests(TestCase):
         self.assertTrue(Registration.objects.get(pk=results[2]["registration"].pk).waiting_list)
 
 
+class FillFreePlacesTests(TestCase):
+    """events.registrations.fill_free_places: more places go to the children
+    waiting longest (DATA_MODEL_NOTICES.md, "Related fix")."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.dojo = make_dojo("Ghent")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
+        cls.children = [Ninja.objects.create(name=f"Kid {n}") for n in range(4)]
+        for child in cls.children:
+            Guardianship.objects.create(guardian=cls.guardian, ninja=child)
+
+    def _full_session(self, **kwargs):
+        event = _future_event(self.dojo, places=1, **kwargs)
+        results = registrations.sign_up(event, self.children)
+        return event, [r["registration"] for r in results]
+
+    def test_more_places_promote_the_children_waiting_longest_and_mail_them(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from mailing.models import EmailMessage
+
+        call_command("load_mail_templates", stdout=StringIO())
+        event, regs = self._full_session()
+        Event.objects.filter(pk=event.pk).update(places=3)
+        before = EmailMessage.objects.filter(template_key="waitlist_promoted").count()
+        promoted = registrations.fill_free_places(event)
+        self.assertEqual(promoted, regs[1:3])
+        waiting = {r.pk: r.waiting_list for r in Registration.objects.filter(event=event)}
+        self.assertEqual([waiting[r.pk] for r in regs], [False, False, False, True])
+        self.assertEqual(EmailMessage.objects.filter(template_key="waitlist_promoted").count(), before + 2)
+
+    def test_no_free_place_promotes_nobody(self):
+        event, _regs = self._full_session()
+        self.assertEqual(registrations.fill_free_places(event), [])
+        self.assertEqual(Registration.objects.filter(event=event, waiting_list=True).count(), 3)
+
+    def test_a_session_that_started_is_left_alone(self):
+        event, _regs = self._full_session()
+        Event.objects.filter(pk=event.pk).update(places=4, start_time=timezone.now() - timedelta(minutes=5))
+        self.assertEqual(registrations.fill_free_places(event), [])
+        self.assertEqual(Registration.objects.filter(event=event, waiting_list=True).count(), 3)
+
+
 class BookingConcurrencyTests(TransactionTestCase):
     """Families clicking at the same moment (CAPACITY.md, finding 1): real
     threads, each with its own database connection, released together.
@@ -1222,7 +1268,7 @@ class EventLanguageTests(TestCase):
             reverse("event_detail", kwargs={"event_id": self.event.id}), HTTP_ACCEPT_LANGUAGE="fr-be"
         )
         self.assertContains(response, "Leer programmeren.")
-        self.assertContains(response, "Uniquement en Nederlands")
+        self.assertContains(response, "Uniquement en néerlandais")
 
     def test_events_list_filters_on_language(self):
         other = _future_event(make_dojo("Ghent", languages=["nl-be"]), name="Gent")
@@ -1845,3 +1891,227 @@ class ChangeAnswersTests(TestCase):
         self.assertContains(response, "Answer the new question")
         child_page = self.client.get(reverse("ninja_detail", kwargs={"ninja_id": self.emma.id}))
         self.assertContains(child_page, self.url)
+
+
+class SessionNoticeTests(TestCase):
+    """events.notices: telling a session's families about a change (DATA_MODEL_NOTICES.md)."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.dojo = make_dojo("Ghent", email="ghent@example.com")
+        self.team = User.objects.create(username="team", email="team@example.com")
+        self.event = _future_event(self.dojo, places=2, venue_name="Room 1")
+        self.parent = User.objects.create(
+            username="parent", first_name="Ellen", email="p@example.com", preferred_language="nl-be"
+        )
+        self.other = User.objects.create(username="other", email="o@example.com")
+        self.teen = User.objects.create(username="teen", email="t@example.com", account_type=User.NINJA)
+        self.emma = Ninja.objects.create(name="Emma", account=self.teen)
+        self.lucas = Ninja.objects.create(name="Lucas")
+        self.noor = Ninja.objects.create(name="Noor")
+        Guardianship.objects.create(guardian=self.parent, ninja=self.emma)
+        Guardianship.objects.create(guardian=self.parent, ninja=self.lucas)
+        Guardianship.objects.create(guardian=self.other, ninja=self.noor)
+        for position, (child, waiting) in enumerate(((self.emma, False), (self.lucas, False), (self.noor, True)), 1):
+            Registration.objects.create(event=self.event, ninja=child, waiting_list=waiting, position=position)
+
+    def _notice(self, **fields):
+        from .models import SessionNotice
+
+        defaults = {"event": self.event, "kind": SessionNotice.MESSAGE, "audience": SessionNotice.BOTH}
+        defaults.update(fields)
+        defaults.setdefault("subject", "Laptops")
+        defaults.setdefault("message", "Bring one if you can.")
+        defaults.setdefault("sent_by", self.team)
+        return SessionNotice(**defaults)
+
+    def _mails(self):
+        from mailing.models import EmailMessage
+
+        return EmailMessage.objects.filter(template_key__startswith="session_").exclude(
+            template_key="session_reminder"
+        )
+
+    def test_one_entry_per_account_with_all_its_children(self):
+        from . import notices
+
+        families = notices.recipients(self.event, "both")
+        self.assertEqual(
+            [(f.user.username, [r.ninja.name for r in f.registrations]) for f in families],
+            [("parent", ["Emma", "Lucas"]), ("other", ["Noor"]), ("teen", ["Emma"])],
+        )
+
+    def test_the_audience_picks_places_or_the_waiting_list(self):
+        from . import notices
+
+        self.assertEqual([f.user.username for f in notices.recipients(self.event, "confirmed")], ["parent", "teen"])
+        self.assertEqual([f.user.username for f in notices.recipients(self.event, "waiting_list")], ["other"])
+        self.assertEqual(notices.reach(self.event), {"both": 3, "confirmed": 2, "waiting_list": 1})
+
+    def test_an_account_without_email_or_inactive_gets_nothing(self):
+        from . import notices
+
+        User.objects.filter(pk=self.teen.pk).update(email="")
+        User.objects.filter(pk=self.other.pk).update(is_active=False)
+        self.assertEqual([f.user.username for f in notices.recipients(self.event, "both")], ["parent"])
+
+    def test_sending_queues_one_registration_mail_per_account_from_the_dojo(self):
+        from mailing.categories import MailCategory
+
+        from . import notices
+
+        notice = notices.send_notice(self._notice())
+        self.assertEqual(notice.recipients, 3)
+        mails = list(self._mails().order_by("recipient"))
+        self.assertEqual([m.recipient for m in mails], ["o@example.com", "p@example.com", "t@example.com"])
+        self.assertTrue(all(m.category == MailCategory.REGISTRATION for m in mails))
+        self.assertTrue(all((m.dojo_id, m.reply_to) == (self.dojo.pk, "ghent@example.com") for m in mails))
+        parent_mail = next(m for m in mails if m.recipient == "p@example.com")
+        self.assertEqual(parent_mail.subject, "Session: Laptops")
+        self.assertIn("Emma en Lucas", parent_mail.body)  # in the parent's language, both children
+        self.assertIn("Bring one if you can.", parent_mail.body)
+        self.assertEqual(parent_mail.idempotency_key, f"session_notice:{notice.pk}:{self.parent.pk}")
+
+    def test_a_venue_change_shows_what_it_was(self):
+        from . import notices
+        from .models import SessionNotice
+
+        before = notices.snapshot(self.event)
+        Event.objects.filter(pk=self.event.pk).update(venue_name="Library")
+        self.event.refresh_from_db()
+        self.assertEqual(notices.changed_kinds(self.event, before), [SessionNotice.VENUE_CHANGED])
+        changes = notices.changes_for(SessionNotice.VENUE_CHANGED, self.event, before)
+        self.assertEqual(changes, {"venue": ["Room 1", "Library"]})
+        notices.send_notice(self._notice(kind=SessionNotice.VENUE_CHANGED, subject="", message="", changes=changes))
+        body = self._mails().get(recipient="o@example.com").body
+        self.assertIn("Where: Library (was Room 1)", body)
+
+    def test_the_daily_limit_stops_a_notice_and_saves_nothing(self):
+        from django.test import override_settings
+
+        from . import notices
+        from .models import SessionNotice
+
+        with override_settings(SESSION_NOTICES_PER_DAY=1):
+            notices.send_notice(self._notice())
+            with self.assertRaisesMessage(notices.NoticeError, "1 times in the last 24 hours"):
+                notices.send_notice(self._notice())
+        self.assertEqual(SessionNotice.objects.count(), 1)
+        self.assertEqual(self._mails().count(), 3)
+
+    def test_a_session_that_ended_long_ago_or_nobody_to_mail_is_refused(self):
+        from . import notices
+
+        Registration.objects.filter(event=self.event, waiting_list=True).delete()
+        with self.assertRaisesMessage(notices.NoticeError, "Nobody to mail"):
+            notices.send_notice(self._notice(audience="waiting_list"))
+        Event.objects.filter(pk=self.event.pk).update(
+            start_time=timezone.now() - timedelta(days=3), end_time=timezone.now() - timedelta(days=3)
+        )
+        self.event.refresh_from_db()
+        self.assertFalse(notices.can_notify(self.event))
+        with self.assertRaisesMessage(notices.NoticeError, "ended too long ago"):
+            notices.send_notice(self._notice())
+
+    def test_the_change_token_is_signed_and_tied_to_its_session(self):
+        from . import notices
+
+        before = notices.snapshot(self.event)
+        token = notices.change_token(self.event, before)
+        self.assertEqual(notices.read_change_token(token, self.event), before)
+        self.assertIsNone(notices.read_change_token(token + "x", self.event))
+        self.assertIsNone(notices.read_change_token(token, _future_event(self.dojo)))
+
+
+class CancelSessionTests(TestCase):
+    """events.services.cancel and the `cancelled` status (DATA_MODEL_NOTICES.md, decision 7)."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.dojo = make_dojo("Ghent", email="ghent@example.com")
+        self.team = User.objects.create(username="team", email="team@example.com")
+        self.event = _future_event(self.dojo, places=1)
+        self.parent = User.objects.create(username="parent", email="p@example.com")
+        self.children = [Ninja.objects.create(name=f"Kid {n}") for n in range(2)]
+        for child in self.children:
+            Guardianship.objects.create(guardian=self.parent, ninja=child)
+        registrations.sign_up(self.event, self.children)
+
+    def _cancelled_mails(self):
+        from mailing.models import EmailMessage
+
+        return EmailMessage.objects.filter(template_key="session_cancelled")
+
+    def test_cancelling_keeps_the_registrations_and_mails_the_families_once(self):
+        from . import services
+
+        notice = services.cancel(self.event, cancelled_by=self.team, notify=True, message="The room flooded.")
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.CANCELLED)
+        self.assertFalse(self.event.registration_open)
+        self.assertEqual(Registration.objects.filter(event=self.event).count(), 2)
+        self.assertEqual((notice.kind, notice.recipients), ("cancelled", 1))
+        mail = self._cancelled_mails().get()
+        self.assertIn("The room flooded.", mail.body)
+        self.assertIn("Kid 0 and Kid 1", mail.body)
+        self.assertIsNone(services.cancel(self.event, cancelled_by=self.team, notify=True))
+        self.assertEqual(self._cancelled_mails().count(), 1)
+
+    def test_without_notify_nothing_is_mailed(self):
+        from . import services
+
+        self.assertIsNone(services.cancel(self.event, cancelled_by=self.team, notify=False))
+        self.assertFalse(self._cancelled_mails().exists())
+
+    def test_the_cancellation_goes_out_whatever_the_daily_limit(self):
+        from django.test import override_settings
+
+        from . import notices, services
+        from .models import SessionNotice
+
+        with override_settings(SESSION_NOTICES_PER_DAY=1):
+            notices.send_notice(
+                SessionNotice(event=self.event, kind="message", subject="Hi", message="Hi", sent_by=self.team)
+            )
+            self.assertIsNotNone(services.cancel(self.event, cancelled_by=self.team, notify=True))
+
+    def test_only_cancel_cancels_and_set_status_reopens(self):
+        from . import services
+
+        self.assertFalse(services.set_status(self.event, Event.CANCELLED))
+        services.cancel(self.event, cancelled_by=self.team, notify=False)
+        self.assertTrue(services.set_status(self.event, Event.OPEN))
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.OPEN)
+
+    def test_a_cancelled_session_is_left_out_of_lists_reminders_and_engagement(self):
+        from mailing.automated import send_session_reminders
+
+        from . import services
+
+        services.cancel(self.event, cancelled_by=self.team, notify=False)
+        self.assertIn(self.event, Event.objects.visible())
+        self.assertNotIn(self.event, Event.objects.listed())
+        self.assertNotIn(self.event, Event.objects.held())
+        day = timezone.localdate(self.event.start_time) - timedelta(days=2)
+        self.assertEqual(send_session_reminders(today=day), 0)
+        Event.objects.filter(pk=self.event.pk).update(places=5)
+        self.assertEqual(registrations.fill_free_places(self.event), [])
+
+    def test_its_page_says_so_and_nobody_can_sign_up(self):
+        from . import services
+
+        services.cancel(self.event, cancelled_by=self.team, notify=False)
+        response = self.client.get(reverse("event_detail", kwargs={"event_id": self.event.pk}))
+        self.assertContains(response, "This session is cancelled.")
+        self.assertNotContains(response, reverse("event_signup", kwargs={"event_id": self.event.pk}))
+        with self.assertRaises(registrations.RegistrationError):
+            registrations.sign_up(self.event, [Ninja.objects.create(name="Late")])

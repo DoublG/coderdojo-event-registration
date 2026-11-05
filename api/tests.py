@@ -434,6 +434,27 @@ class EventSyncApiTests(ApiTestCase):
         self.assertIsNotNone(event.published_at)
         self.assertEqual(Event.objects.filter(dojo=self.dojo).count(), 2)  # the setUp session and this one
 
+    def test_more_places_promote_the_waiting_list(self):
+        _client, auth = self.planner()
+        self.sync(auth, self.row(places=1, status="open"))
+        event = Event.objects.get(external_ref="2026-W1")
+        for n in range(3):
+            Registration.objects.create(
+                event=event, ninja=Ninja.objects.create(name=f"Kid {n}"), waiting_list=n > 0, position=n + 1
+            )
+        self.sync(auth, self.row(places=2, status="open"))
+        self.assertEqual(Registration.objects.filter(event=event, waiting_list=False).count(), 2)
+
+    def test_a_cancelled_session_is_left_alone_and_the_sync_cannot_cancel(self):
+        _client, auth = self.planner()
+        self.sync(auth, self.row(status="open"))
+        [result] = self.sync(auth, self.row("other", status="cancelled"))
+        self.assertEqual(result["outcome"], "error")
+        Event.objects.filter(external_ref="2026-W1").update(status=Event.CANCELLED)
+        [result] = self.sync(auth, self.row(name="Back on", status="open"))
+        self.assertEqual(result["outcome"], "skipped")
+        self.assertEqual(Event.objects.get(external_ref="2026-W1").status, Event.CANCELLED)
+
     def test_running_it_again_changes_nothing(self):
         from auditlog.models import LogEntry
 

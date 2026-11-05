@@ -244,6 +244,12 @@ MAILING_DOJO_NEWS_ACTIVE_DAYS = 365  # a family belongs to a dojo that long afte
 # launched per dojo in any 30 days, and a message at most this long.
 MAILING_DOJO_MAILINGS_PER_30_DAYS = 4
 MAILING_DOJO_MESSAGE_MAX_LENGTH = 5000
+# Telling a session's families about a change (DATA_MODEL_NOTICES.md, events.notices):
+# at most this many notices per session in any 24 hours, a text at most this long,
+# and none for a session that ended more than this many hours ago.
+SESSION_NOTICES_PER_DAY = 3
+SESSION_NOTICE_MAX_LENGTH = 2000
+SESSION_NOTICE_HOURS_AFTER_END = 24
 
 # Bounces (mailing.bounce): the envelope sender of every mail, so bounces land
 # in that mailbox. "{id}" is replaced by the EmailMessage id when the mail

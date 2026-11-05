@@ -1,6 +1,6 @@
 """The dojos app's pages, by area: the public pages (public), a dojo's settings,
 lifecycle and updates (profile), its team (team_pages), its sessions
-(event_pages), their sign-up questions and the dojo's default ones
+(event_pages), mailing their families about a change (notices), their sign-up questions and the dojo's default ones
 (questions), the overview (dashboard), attendance and awards (attendance) and the notification bell
 (bell), with what they share (common). Every view is importable from here, as
 urls.py does."""
@@ -43,6 +43,7 @@ from .event_pages import (  # noqa: F401
     dojo_event_list,
     dojo_event_set_status,
 )
+from .notices import dojo_event_cancel, dojo_event_notify  # noqa: F401
 from .profile import (  # noqa: F401
     _geocode_address,
     dojo_create,

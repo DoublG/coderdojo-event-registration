@@ -11,6 +11,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from accounts.organisation import Area, require_area
+from core.content_languages import language_name_in_sentence
 
 from .. import template_users
 from ..forms import NewTemplateForm, TemplateVersionForm
@@ -108,6 +109,7 @@ def template_edit(request, key, language):
             "key": key,
             "language": language,
             "language_name": languages[language],
+            "language_in_sentence": language_name_in_sentence(language),
             "tabs": [(code, name, code in versions) for code, name in settings.LANGUAGES],
             "is_new_version": template.pk is None,
             "preview": preview,

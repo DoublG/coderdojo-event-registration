@@ -6,13 +6,14 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext_lazy as _
 
 from accounts.organisation import Area, has_area
 from content.manage import promotion_state
+from events import notices, registrations, services
 from events import questions as event_questions
-from events import services
 from events.forms import EventForm
-from events.models import Event
+from events.models import Event, SessionNotice
 
 from ..access import (
     MANAGE_EVENTS,
@@ -83,12 +84,24 @@ def dojo_event_detail(request, dojo_id, event_id):
     dojo = access.dojo
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
     saved = False
+    promoted = []
+    # The values a save changes, for the note offering to mail the families
+    # (DATA_MODEL_NOTICES.md); a link back from the mail page carries them.
+    token = request.GET.get("change", "")
+    before = notices.read_change_token(token, event) if token else None
 
     if request.method == "POST":
+        before = notices.snapshot(event)
         form = EventForm(request.POST, request.FILES, instance=event, dojo=dojo)
         if form.is_valid():
             event = form.save()
             saved = True
+            # More places: the children waiting longest get them (and a mail).
+            if event.places > before["places"]:
+                promoted = registrations.fill_free_places(event)
+            token = notices.change_token(event, before)
+        else:
+            before = None
     else:
         form = EventForm(instance=event, dojo=dojo)
 
@@ -99,12 +112,45 @@ def dojo_event_detail(request, dojo_id, event_id):
             "event": event,
             "form": form,
             "saved": saved,
+            "promoted": len(promoted),
+            **_notices_context(event, before, token),
             "active": "events",
             **questions_context(event),
             **_event_promotions_context(request, event),
             **_admin_context(request, access),
         },
     )
+
+
+CHANGE_BUTTONS = {
+    SessionNotice.VENUE_CHANGED: _("Mail about the new venue"),
+    SessionNotice.TIME_CHANGED: _("Mail about the new date or times"),
+    SessionNotice.PLACES_CHANGED: _("Mail about the new number of places"),
+}
+
+
+def _notices_context(event, before, token):
+    """The session page's Mail the families card (DATA_MODEL_NOTICES.md):
+    whether it can be used, the notices sent, and after a save that changed
+    the venue, times or places of an open session with registrations, a
+    button per change to the compose page."""
+    can_notify = notices.can_notify(event)
+    sent_notices = list(event.notices.select_related("sent_by")[:10])
+    changes = []
+    if before and can_notify and event.status == Event.OPEN and event.end_time > timezone.now():
+        # A change the families were already mailed about isn't offered again.
+        sent = [(n.kind, n.changes) for n in sent_notices]
+        changes = [
+            (kind, CHANGE_BUTTONS[kind])
+            for kind in notices.changed_kinds(event, before)
+            if (kind, notices.changes_for(kind, event, before)) not in sent
+        ]
+    return {
+        "can_notify": can_notify,
+        "sent_notices": sent_notices,
+        "change_buttons": changes,
+        "change_token": token if changes else "",
+    }
 
 
 def _event_promotions_context(request, event):
@@ -116,7 +162,7 @@ def _event_promotions_context(request, event):
     if not has_area(request.user, Area.PUBLIC_SITE):
         return {"can_promote": False}
     promotions = list(event.promotions.order_by("placement", "rank", "starts_at", "id"))
-    visible = set(Event.objects.visible().filter(pk=event.pk).values_list("pk", flat=True))
+    visible = set(Event.objects.listed().filter(pk=event.pk).values_list("pk", flat=True))
     now = timezone.now()
     return {
         "can_promote": True,

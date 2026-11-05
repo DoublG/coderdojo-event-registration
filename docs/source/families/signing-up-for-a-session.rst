@@ -77,9 +77,18 @@ Waiting lists
 Sessions have a limited number of places. If a session is full when you
 sign up, your child is placed on the **waiting list** instead of being
 turned away outright — you'll see this clearly on the confirmation. If a
-confirmed spot later opens up (someone cancels), the longest-waiting child
-for that session is automatically promoted to confirmed, and we mail you
-when that happens. No action is needed on your part.
+confirmed spot later opens up (someone cancels, or the dojo adds places),
+the longest-waiting child for that session is automatically promoted to
+confirmed, and we mail you when that happens. No action is needed on your
+part.
+
+When a session changes
+-----------------------
+
+If the dojo moves a session you signed up for to another place or time,
+changes its number of places, or cancels it, its team can mail you about
+it, in your own language. A cancelled session stays on its page and on
+your account page, marked **Cancelled**; there's nothing you need to do.
 
 Cancelling
 -----------

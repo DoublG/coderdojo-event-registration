@@ -101,7 +101,7 @@ def dojo_detail(request, dojo_id):
     # every upcoming session and narrow to the first one's date in Python
     # rather than finding that date with a separate aggregate query.
     upcoming = list(
-        dojo.event_set.visible().filter(start_time__gte=timezone.now()).with_confirmed_count().order_by("start_time")
+        dojo.event_set.listed().filter(start_time__gte=timezone.now()).with_confirmed_count().order_by("start_time")
     )
     next_events = []
     if upcoming:

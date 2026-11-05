@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 06:31+0000\n"
+"POT-Creation-Date: 2026-11-05 08:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: nl\n"
@@ -179,7 +179,15 @@ msgid ""
 "reminder 30 days and 7 days before, and an account is never deleted "
 "sooner than 30 days after the first reminder. A champion's or mentor's "
 "name stays on past sessions and on the belts and badges they awarded."
-msgstr "**Accounts** worden verwijderd twee jaar na de laatste aanmelding. Het account van een ouder blijft zolang een van de kinderen de eigen login gebruikt of naar een dojosessie komt (wie het kind ook inschreef; een sessie waar het kind als afwezig is aangeduid, telt niet). De accounthouder krijgt 30 dagen en 7 dagen vooraf een herinnering, en een account wordt nooit vroeger verwijderd dan 30 dagen na de eerste herinnering. De naam van een champion of mentor blijft staan bij voorbije sessies en bij de gordels en badges die die persoon toekende."
+msgstr ""
+"**Accounts** worden verwijderd twee jaar na de laatste aanmelding. Het "
+"account van een ouder blijft zolang een van de kinderen de eigen login "
+"gebruikt of naar een dojosessie komt (wie het kind ook inschreef; een "
+"sessie waar het kind als afwezig is aangeduid, telt niet). De "
+"accounthouder krijgt 30 dagen en 7 dagen vooraf een herinnering, en een "
+"account wordt nooit vroeger verwijderd dan 30 dagen na de eerste "
+"herinnering. De naam van een champion of mentor blijft staan bij voorbije"
+" sessies en bij de gordels en badges die die persoon toekende."
 
 #: ../../source/organisation/privacy.rst:78
 msgid ""
@@ -202,6 +210,20 @@ msgstr ""
 
 #: ../../source/organisation/privacy.rst:83
 msgid ""
+"**A dojo team's own text in a mail to a session's families** (a change to"
+" the session, or a message of their own) stays as long as the dojo is "
+"active. Once the dojo goes dormant or is archived, the text is cleared; "
+"what kind of mail it was, when and to how many families stay with the "
+"session."
+msgstr ""
+"**De eigen tekst van een dojoteam in een mail aan de gezinnen van een "
+"sessie** (een wijziging aan de sessie, of een eigen bericht) blijft "
+"bewaard zolang de dojo actief is. Wordt de dojo slapend of gearchiveerd, "
+"dan wordt de tekst gewist; welk soort mail het was, wanneer en aan "
+"hoeveel gezinnen blijft bij de sessie."
+
+#: ../../source/organisation/privacy.rst:88
+msgid ""
 "**Invitations** to the organisation are removed 30 days after they were "
 "accepted, withdrawn or ran out (an invitation is valid for 14 days)."
 msgstr ""
@@ -209,7 +231,7 @@ msgstr ""
 " aanvaard, ingetrokken of verlopen zijn (een uitnodiging is 14 dagen "
 "geldig)."
 
-#: ../../source/organisation/privacy.rst:85
+#: ../../source/organisation/privacy.rst:90
 msgid ""
 "**Invitations to be a child's guardian** are removed the same way: 30 "
 "days after they were accepted, withdrawn or ran out (valid for 14 days)."
@@ -218,7 +240,7 @@ msgstr ""
 "manier verwijderd: 30 dagen nadat ze aanvaard, ingetrokken of verlopen "
 "zijn (14 dagen geldig)."
 
-#: ../../source/organisation/privacy.rst:87
+#: ../../source/organisation/privacy.rst:92
 msgid ""
 "**Login sessions** end two weeks after they last changed, and are then "
 "removed."
@@ -226,11 +248,11 @@ msgstr ""
 "**Aanmeldsessies** lopen af twee weken nadat ze het laatst veranderden, "
 "en worden dan verwijderd."
 
-#: ../../source/organisation/privacy.rst:90
+#: ../../source/organisation/privacy.rst:95
 msgid "Some data is removed at once, not after a period:"
 msgstr "Sommige gegevens worden meteen verwijderd, niet na een termijn:"
 
-#: ../../source/organisation/privacy.rst:92
+#: ../../source/organisation/privacy.rst:97
 msgid ""
 "**A criminal-record extract** is deleted the moment a reviewer decides on"
 " it. Only the decision is kept."
@@ -238,7 +260,7 @@ msgstr ""
 "**Een uittreksel uit het strafregister** wordt verwijderd zodra een "
 "beoordelaar erover beslist. Alleen de beslissing blijft bewaard."
 
-#: ../../source/organisation/privacy.rst:94
+#: ../../source/organisation/privacy.rst:99
 msgid ""
 "**Two-step login** methods (an authenticator app, passkeys, backup codes)"
 " are removed when someone turns two-step login off."
@@ -247,7 +269,7 @@ msgstr ""
 "passkeys, back-upcodes) worden verwijderd als iemand het aanmelden in "
 "twee stappen uitzet."
 
-#: ../../source/organisation/privacy.rst:97
+#: ../../source/organisation/privacy.rst:102
 msgid ""
 "For some data, how long to keep it hasn't been decided yet, so the site "
 "doesn't remove it by itself: a child's details and their sessions, belts "

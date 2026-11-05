@@ -1186,6 +1186,34 @@ class DojoEventDetailViewTests(TestCase):
         response = self.client.get(self._url(other_event))
         self.assertEqual(response.status_code, 404)
 
+    def test_raising_the_places_promotes_the_waiting_list(self):
+        self.event.places = 1
+        self.event.save()
+        children = [Ninja.objects.create(name=f"Kid {n}") for n in range(3)]
+        for n, child in enumerate(children):
+            Registration.objects.create(event=self.event, ninja=child, waiting_list=n > 0, position=n + 1)
+        self.client.force_login(self.owner)
+
+        response = self.client.post(self._url(), self._valid_post_data(places="2"))
+
+        self.assertEqual(response.context["promoted"], 1)
+        self.assertContains(response, "One child moved from the waiting list")
+        waiting = list(
+            Registration.objects.filter(event=self.event).order_by("position").values_list("waiting_list", flat=True)
+        )
+        self.assertEqual(waiting, [False, False, True])
+
+    def test_lowering_the_places_keeps_every_child_with_a_place(self):
+        children = [Ninja.objects.create(name=f"Kid {n}") for n in range(3)]
+        for n, child in enumerate(children):
+            Registration.objects.create(event=self.event, ninja=child, waiting_list=False, position=n + 1)
+        self.client.force_login(self.owner)
+
+        response = self.client.post(self._url(), self._valid_post_data(places="1"))
+
+        self.assertEqual(response.context["promoted"], 0)
+        self.assertEqual(Registration.objects.filter(event=self.event, waiting_list=False).count(), 3)
+
     def test_get_prefills_form_from_event(self):
         self.client.force_login(self.owner)
 
@@ -3069,12 +3097,12 @@ class DojoLanguagesTests(TempMediaMixin, TestCase):
             reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}), HTTP_ACCEPT_LANGUAGE="fr-be"
         )
         self.assertContains(french, "Un club de code sympa.")
-        self.assertContains(french, "Sessions en")
+        self.assertContains(french, "Sessions en néerlandais, français")
         english = self.client.get(
             reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}), HTTP_ACCEPT_LANGUAGE="en-us"
         )
         self.assertContains(english, "Een gezellige codeerclub.")
-        self.assertContains(english, "Only in Nederlands")
+        self.assertContains(english, "Only in Dutch")
 
     def test_finder_filters_on_language(self):
         french_dojo = make_dojo("Liège", languages=["fr-be"])
@@ -3489,3 +3517,255 @@ class TeamCorrectsAnswersTests(TestCase):
         self.client.force_login(make_champion(username="stranger"))
         self.assertEqual(self.client.post(self.url, {f"q-{self.laptop.id}": "yes"}).status_code, 404)
         self.assertFalse(self.registration.answers.get().answer)
+
+
+class DojoEventNotifyViewTests(TestCase):
+    """The session page's Mail the families card and the compose page
+    (dojos.views.notices, DATA_MODEL_NOTICES.md)."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from accounts.models import Guardianship
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Ghent", champion=self.owner, email="ghent@example.com")
+        start = timezone.localtime(timezone.now() + timedelta(days=7)).replace(
+            hour=14, minute=0, second=0, microsecond=0
+        )
+        self.event = Event.objects.create(
+            name="Session",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+            places=10,
+            venue_name="Room 1",
+        )
+        self.parent = User.objects.create(username="parent", email="p@example.com")
+        child = Ninja.objects.create(name="Emma")
+        Guardianship.objects.create(guardian=self.parent, ninja=child)
+        Registration.objects.create(event=self.event, ninja=child, waiting_list=False, position=1)
+        self.url = reverse("dojo_event_notify", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+        self.detail_url = reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+
+    def _edit(self, **overrides):
+        data = {
+            "name": "Session",
+            "event_date": timezone.localtime(self.event.start_time).strftime("%d/%m/%Y"),
+            "start_time": "14:00",
+            "end_time": "16:00",
+            "places": "10",
+            "venue_name": "Room 1",
+            "template_image": "",
+            "description": "",
+            "min_age": "",
+            "max_age": "",
+            "team": [],
+        }
+        data.update(overrides)
+        return self.client.post(self.detail_url, data)
+
+    def _post(self, **overrides):
+        data = {"kind": "message", "audience": "both", "subject": "Laptops", "message": "Bring one.", "send": "1"}
+        data.update(overrides)
+        return self.client.post(self.url, {key: value for key, value in data.items() if value is not None})
+
+    def test_a_mentor_can_send_and_nobody_else_sees_it(self):
+        mentor = make_mentor(username="mentor1")
+        add_member(self.dojo, mentor)
+        self.client.force_login(mentor)
+        self.assertEqual(self.client.get(self.url).status_code, 200)
+        self.client.force_login(make_champion(username="owner2"))
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+        self.client.logout()
+        self.assertEqual(self.client.get(self.url).status_code, 302)
+
+    def test_sending_mails_the_families_and_goes_back_to_the_session(self):
+        from events.models import SessionNotice
+        from mailing.models import EmailMessage
+
+        self.client.force_login(self.owner)
+        response = self._post()
+        self.assertRedirects(response, self.detail_url)
+        notice = SessionNotice.objects.get()
+        self.assertEqual(
+            (notice.kind, notice.subject, notice.sent_by, notice.recipients), ("message", "Laptops", self.owner, 1)
+        )
+        self.assertTrue(
+            EmailMessage.objects.filter(template_key="session_message", recipient="p@example.com").exists()
+        )
+        detail = self.client.get(self.detail_url)
+        self.assertContains(detail, "Sent to the families")
+
+    def test_preview_shows_the_mail_and_sends_nothing(self):
+        from events.models import SessionNotice
+
+        self.client.force_login(self.owner)
+        response = self._post(send=None, preview="1")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["preview"][0], "Session: Laptops")
+        self.assertFalse(SessionNotice.objects.exists())
+
+    def test_a_message_needs_a_subject_and_a_time_change_its_old_times(self):
+        from events.models import SessionNotice
+
+        self.client.force_login(self.owner)
+        response = self._post(subject="")
+        self.assertIn("subject", response.context["form"].errors)
+        response = self._post(kind="time_changed", old_date="", old_start="", old_end="")
+        self.assertIn("old_date", response.context["form"].errors)
+        self.assertFalse(SessionNotice.objects.exists())
+
+    def test_a_session_nobody_signed_up_for_has_nothing_to_mail(self):
+        Registration.objects.all().delete()
+        self.client.force_login(self.owner)
+        self.assertRedirects(self.client.get(self.url), self.detail_url)
+        self.assertContains(self.client.get(self.detail_url), "Nobody has signed up for this session yet")
+
+    def test_saving_a_new_venue_offers_a_mail_about_it_until_it_is_sent(self):
+        self.client.force_login(self.owner)
+        response = self._edit(venue_name="Library", end_time="17:00")
+        kinds = [kind for kind, _label in response.context["change_buttons"]]
+        self.assertEqual(kinds, ["venue_changed", "time_changed"])
+        token = response.context["change_token"]
+
+        compose = self.client.get(f"{self.url}?kind=venue_changed&change={token}")
+        self.assertEqual(compose.context["form"]["old_venue"].value(), "Room 1")
+        response = self._post(kind="venue_changed", old_venue="Room 1", subject="", message="", change=token)
+        self.assertRedirects(response, f"{self.detail_url}?change={token}")
+        after = self.client.get(f"{self.detail_url}?change={token}")
+        self.assertEqual([kind for kind, _label in after.context["change_buttons"]], ["time_changed"])
+
+    def test_no_offer_for_a_draft_or_an_unchanged_save(self):
+        self.client.force_login(self.owner)
+        self.assertEqual(self._edit().context["change_buttons"], [])
+        Event.objects.filter(pk=self.event.pk).update(status=Event.DRAFT)
+        self.assertEqual(self._edit(venue_name="Library").context["change_buttons"], [])
+
+
+class DojoEventCancelViewTests(TestCase):
+    """The Cancel page (dojos.views.notices.dojo_event_cancel, DATA_MODEL_NOTICES.md)."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from accounts.models import Guardianship
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Ghent", champion=self.owner, email="ghent@example.com")
+        start = timezone.now() + timedelta(days=7)
+        self.event = Event.objects.create(
+            name="Session",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time=start,
+            end_time=start + timedelta(hours=2),
+            places=10,
+        )
+        parent = User.objects.create(username="parent", email="p@example.com")
+        child = Ninja.objects.create(name="Emma")
+        Guardianship.objects.create(guardian=parent, ninja=child)
+        Registration.objects.create(event=self.event, ninja=child, waiting_list=False, position=1)
+        self.url = reverse("dojo_event_cancel", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+        self.detail_url = reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+
+    def test_the_status_card_links_to_it_and_a_mentor_can_cancel(self):
+        from mailing.models import EmailMessage
+
+        self.client.force_login(self.owner)
+        self.assertContains(self.client.get(self.detail_url), self.url)
+        mentor = make_mentor(username="mentor1")
+        add_member(self.dojo, mentor)
+        self.client.force_login(mentor)
+        self.assertContains(self.client.get(self.url), "That's 1 family account.")
+        response = self.client.post(self.url, {"notify": "on", "message": "Sorry!"})
+        self.assertRedirects(response, self.detail_url)
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.CANCELLED)
+        self.assertTrue(
+            EmailMessage.objects.filter(template_key="session_cancelled", recipient="p@example.com").exists()
+        )
+        self.assertRedirects(self.client.get(self.url), self.detail_url)
+
+    def test_unticked_it_cancels_without_mail(self):
+        from mailing.models import EmailMessage
+
+        self.client.force_login(self.owner)
+        self.client.post(self.url, {"message": ""})
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.CANCELLED)
+        self.assertFalse(EmailMessage.objects.filter(template_key="session_cancelled").exists())
+
+    def test_someone_off_the_team_gets_404_and_the_status_card_cannot_cancel(self):
+        self.client.force_login(make_champion(username="owner2"))
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+        self.client.force_login(self.owner)
+        set_status = reverse("dojo_event_set_status", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+        self.client.post(set_status, {"status": "cancelled"})
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.status, Event.OPEN)
+
+
+class SessionNoticeOrganisationTests(TestCase):
+    """The organisation mails only for its own sessions (DATA_MODEL_NOTICES.md,
+    open point 3): its role opens no dojo's session, only a membership of the
+    session's dojo does, which for the organisation is its organisation dojo."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from accounts.models import Guardianship, OrganisationRole
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.admin = make_champion(username="orgadmin")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.org_dojo = make_dojo("CoderDojo Girlz", champion=self.admin, kind=Dojo.ORGANISATION)
+        self.dojo = make_dojo("Ghent", champion=make_champion(username="ghent"))
+        start = timezone.now() + timedelta(days=7)
+        parent = User.objects.create(username="parent", email="p@example.com")
+        child = Ninja.objects.create(name="Emma")
+        Guardianship.objects.create(guardian=parent, ninja=child)
+        self.events = {}
+        for dojo in (self.org_dojo, self.dojo):
+            event = Event.objects.create(
+                name="Session",
+                dojo=dojo,
+                status=Event.OPEN,
+                start_time=start,
+                end_time=start + timedelta(hours=2),
+                places=10,
+            )
+            Registration.objects.create(event=event, ninja=child, waiting_list=False, position=1)
+            self.events[dojo] = event
+
+    def _urls(self, dojo):
+        kwargs = {"dojo_id": dojo.id, "event_id": self.events[dojo].id}
+        return [reverse(name, kwargs=kwargs) for name in ("dojo_event_notify", "dojo_event_cancel")]
+
+    def test_an_organisation_admin_cannot_mail_or_cancel_a_dojos_session(self):
+        self.client.force_login(self.admin)
+        for url in self._urls(self.dojo):
+            self.assertEqual(self.client.get(url).status_code, 404)
+            self.assertEqual(
+                self.client.post(url, {"kind": "message", "subject": "x", "message": "x"}).status_code, 404
+            )
+        self.assertEqual(self.events[self.dojo].notices.count(), 0)
+
+    def test_it_mails_the_families_of_its_own_sessions(self):
+        self.client.force_login(self.admin)
+        for url in self._urls(self.org_dojo):
+            self.assertEqual(self.client.get(url).status_code, 200)
+        notify_url = self._urls(self.org_dojo)[0]
+        self.client.post(
+            notify_url, {"kind": "message", "audience": "both", "subject": "Hi", "message": "See you!", "send": "1"}
+        )
+        self.assertEqual(self.events[self.org_dojo].notices.count(), 1)

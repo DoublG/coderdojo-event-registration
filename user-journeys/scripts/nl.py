@@ -59,7 +59,7 @@ INTRO = {
         [
             "Het dashboard en de volgende sessie opvolgen",
             "Het publieke profiel van de dojo bijhouden",
-            "Sessies plannen en publiceren, de wachtlijst opvolgen",
+            "Sessies plannen en publiceren, de wachtlijst opvolgen, gezinnen een wijziging melden",
             "Aanwezigheden nemen, het team en de leden beheren",
             "Nieuws plaatsen, gezinnen mailen, apps koppelen",
         ],
@@ -221,7 +221,7 @@ STEPS = {
         ),
         "event": (
             "Eén sessie",
-            "De gegevens, status, het team en de leertrajecten van de sessie, ter plaatse aan te passen, plus een link om aanwezigheden te nemen. De kaart Inschrijfvragen bevat tot vijf ja/nee-vragen die gezinnen per kind beantwoorden (hier: brengt het een eigen laptop mee), met de antwoorden tot nu toe.",
+            "De gegevens, status, het team en de leertrajecten van de sessie, ter plaatse aan te passen, plus een link om aanwezigheden te nemen. De kaart Inschrijfvragen bevat tot vijf ja/nee-vragen die gezinnen per kind beantwoorden (hier: brengt het een eigen laptop mee), met de antwoorden tot nu toe. Met Mail de gezinnen laat het team de gezinnen met een plaats of op de wachtlijst weten dat er iets verandert.",
         ),
         "attendance": (
             "Aanwezigheden nemen aan de deur",
@@ -267,7 +267,23 @@ STEPS = {
         ),
         "event": (
             "Een volle sessie met wachtlijst",
-            "De pagina van de sessie toont de ingenomen plaatsen en de wachtlijst; als een gezin annuleert, schuift het eerste wachtende kind door en krijgt dat gezin een mail. De kaart Inschrijfvragen stelt gezinnen ja/nee-vragen per kind (hier de laptopvraag), met de totalen voor bevestigde plaatsen en de wachtlijst.",
+            "De pagina van de sessie toont de ingenomen plaatsen en de wachtlijst; als een gezin annuleert, of het team plaatsen bijzet, schuiven de eerste wachtende kinderen door en krijgen hun gezinnen een mail. De kaart Inschrijfvragen stelt gezinnen ja/nee-vragen per kind (hier de laptopvraag), met de totalen voor bevestigde plaatsen en de wachtlijst. Met Mail de gezinnen meldt het team hun een wijziging; na het opslaan van een nieuwe locatie, nieuwe uren of een ander aantal plaatsen stelt de kaart de passende klaargezette mail voor.",
+        ),
+        "notify": (
+            "De gezinnen een wijziging melden",
+            "Een klaargezette mail over een nieuwe locatie, nieuwe uren of het aantal plaatsen (met hoe het ervoor was, zodat de mail zegt wat er veranderde), of een eigen bericht van het team, aan de gezinnen met een plaats, op de wachtlijst of allebei, met het aantal voor elk. Voorbeeld toont de mail zoals het eerste gezin hem krijgt; elk gezin krijgt hem in zijn eigen taal, met de tekst van het team in die taal als het die schreef.",
+        ),
+        "notified": (
+            "Verstuurd",
+            "De mail gaat naar de ouders en voogden van elk kind in de groep (en naar de eigen login van een kind met een adres), één mail per gezin. De pagina van de sessie toont wat er verstuurd is, wanneer, naar hoeveel accounts en door wie. Gezinnen kunnen deze mails niet uitzetten, dus een sessie krijgt er hoogstens drie per dag.",
+        ),
+        "notice-mail": (
+            "De mail die de gezinnen krijgen",
+            "In de mailtaal van het gezin, met de gegevens van de sessie en de tekst van het team. Antwoorden gaan naar het adres van de dojo.",
+        ),
+        "cancel": (
+            "Een sessie afgelasten",
+            "Sessie annuleren… vraagt eerst. Een geannuleerde sessie blijft op haar pagina staan, met de vermelding dat ze geannuleerd is, zodat gezinnen die ze opzoeken zien wat er gebeurde; niemand kan zich nog inschrijven, ze verdwijnt uit de sessielijsten en herinneringen, en de inschrijvingen blijven bewaard. Aangevinkt krijgen de gezinnen de klaargezette annuleringsmail met een optionele boodschap van het team. Ze kan later heropend worden.",
         ),
         "attendance": (
             "Aanwezigheden met gezondheidsinfo",

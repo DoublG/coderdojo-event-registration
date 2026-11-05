@@ -37,6 +37,8 @@
                 <span class="cd-badge cd-badge--outline caption">{% translate "Draft" %}</span>
               {% elif event.status == 'open' %}
                 <span class="cd-badge cd-badge--success caption">{% translate "Open" %}</span>
+              {% elif event.status == 'cancelled' %}
+                <span class="cd-badge cd-badge--danger caption">{% translate "Cancelled" %}</span>
               {% else %}
                 <span class="cd-badge cd-badge--warning caption">{% translate "Closed" %}</span>
               {% endif %}

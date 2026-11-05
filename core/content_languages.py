@@ -10,7 +10,7 @@ are translatable (TRANSLATABLE_FIELDS) and whose languages apply
 
 `localized(obj, field)` gives the text in the page's language when the dojo
 wrote one, else the main-language text, flagged `is_fallback` so the page
-can say "only in Nederlands". Templates use the `localized` filter and the
+can say "only in Dutch". Templates use the `localized` filter and the
 `only_in` tag from core.templatetags.content_i18n.
 """
 
@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any, Self
 from django.conf import settings
 from django.db import models
 from django.utils import translation
+from django.utils.translation import pgettext_lazy
 
 if TYPE_CHECKING:
     from django import forms
@@ -30,7 +31,25 @@ LANGUAGE_CODES = [code for code, _name in settings.LANGUAGES]
 
 
 def language_name(code: str) -> str:
+    """The language's own name (Nederlands, Français), for lists and pickers."""
     return dict(settings.LANGUAGES).get(code, code)
+
+
+# The languages' names in the reader's language, written as they appear inside a
+# sentence (French lowercases them: "en anglais").
+SENTENCE_NAMES = {
+    "en-us": pgettext_lazy("language name inside a sentence", "English"),
+    "nl-be": pgettext_lazy("language name inside a sentence", "Dutch"),
+    "fr-be": pgettext_lazy("language name inside a sentence", "French"),
+}
+
+
+def language_name_in_sentence(code: str) -> str:
+    """The language's name in the page's language, for a sentence around it
+    ("In %(language)s" → "In het Engels", "En anglais", "In Dutch"); the
+    language's own name (`language_name`) would read "In het English"."""
+    name = SENTENCE_NAMES.get(code)
+    return str(name) if name is not None else language_name(code)
 
 
 def normalize(code: str | None) -> str | None:
@@ -134,7 +153,7 @@ def add_translation_fields(
 ) -> "TranslationGroups":
     """Add one form field per (other language, translatable field) of
     `instance` to `form`, initialised from its translations; returns the
-    groups for the template: [(language, language_name, [field names])].
+    groups for the template: [(language, its name for a sentence, [field names])].
     `make_field(field)` builds an empty form field like the main one."""
     groups: TranslationGroups = []
     for language in instance.content_languages()[1:]:
@@ -144,7 +163,7 @@ def add_translation_fields(
             form.fields[name] = make_field(field)
             form.initial[name] = instance.translation_for(language, field)
             names.append(name)
-        groups.append((language, language_name(language), names))
+        groups.append((language, language_name_in_sentence(language), names))
     return groups
 
 

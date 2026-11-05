@@ -64,6 +64,9 @@
         <h1 class="display-xl">{{ event|localized:"name"|in_lang }}</h1>
       </div>
       {% if event.is_girls_session %}<p>{% include "events/partials/_audience_badge.html" %}</p>{% endif %}
+      {% if event.is_cancelled %}
+        <p class="cd-form__note cd-form__note--error body" role="status"><strong>{% translate "This session is cancelled." %}</strong> {% translate "It won't take place. If your child was signed up, there's nothing you need to do." %}</p>
+      {% endif %}
       <p class="body-lg meta">
         {{ event.start_time|date:"D j M" }} · {{ event.start_time|time:"H:i" }}–{{ event.end_time|time:"H:i" }}
         {% if event.venue_name %} · {{ event.venue_name }}{% endif %}
@@ -136,7 +139,9 @@
             <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{{ event.external_registration_url }}" target="_blank" rel="noopener">{% blocktranslate with host=event.external_registration_host %}Register on {{ host }}{% endblocktranslate %}</a>
             <p class="cd-ticket-panel__note body-sm">{% translate "Registration for this event happens on its own website, not on CoderDojo Belgium." %}</p>
           {% else %}
-            {% if all_registered %}
+            {% if event.is_cancelled %}
+              <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>{% translate "Cancelled" %}</button>
+            {% elif all_registered %}
               <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>{% translate "Already signed up" %}</button>
             {% elif not event.registration_open %}
               <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>{% translate "Registrations closed" %}</button>
@@ -144,7 +149,7 @@
               <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{% url 'event_signup' event_id=event.id %}">{% translate "Sign up now" %}</a>
             {% endif %}
             <p class="cd-ticket-panel__note body-sm">
-              {% if all_registered %}{% translate "Every child on your account is already signed up" %}{% elif not event.registration_open %}{% translate "This session isn't accepting new registrations" %}{% elif event.places_left > 0 %}{% blocktranslate with left=event.places_left total=event.places %}{{ left }} of {{ total }} spots left{% endblocktranslate %}{% else %}{% translate "Full — join the waitlist" %}{% endif %}
+              {% if event.is_cancelled %}{% translate "This session is cancelled." %}{% elif all_registered %}{% translate "Every child on your account is already signed up" %}{% elif not event.registration_open %}{% translate "This session isn't accepting new registrations" %}{% elif event.places_left > 0 %}{% blocktranslate with left=event.places_left total=event.places %}{{ left }} of {{ total }} spots left{% endblocktranslate %}{% else %}{% translate "Full — join the waitlist" %}{% endif %}
             </p>
           {% endif %}
         </div>

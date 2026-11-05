@@ -26,6 +26,16 @@ urlpatterns = [
     path("dojos/<int:dojo_id>/events/new/", views.dojo_event_create, name="dojo_event_create"),
     path("dojos/<int:dojo_id>/events/<int:event_id>/", views.dojo_event_detail, name="dojo_event_detail"),
     path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/notify/",
+        views.dojo_event_notify,
+        name="dojo_event_notify",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/cancel/",
+        views.dojo_event_cancel,
+        name="dojo_event_cancel",
+    ),
+    path(
         "dojos/<int:dojo_id>/events/<int:event_id>/attendance/",
         views.dojo_event_attendance,
         name="dojo_event_attendance",

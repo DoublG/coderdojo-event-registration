@@ -214,7 +214,7 @@ def _sessions_by_id(dojos: Dojos) -> Sessions:
     dojo from `dojos` attached. Every session is loaded once and shared by
     its registrations: a select_related on the registrations would build a
     new Event and Dojo for each one."""
-    events = Event.objects.select_related(None).exclude(status=Event.DRAFT).in_bulk()
+    events = Event.objects.select_related(None).held().in_bulk()
     for event in events.values():
         event.dojo = dojos[event.dojo_id]
     return events
@@ -246,7 +246,7 @@ def _registrations_by_ninja(
     came: defaultdict[int, Visits] = defaultdict(dict)
     no_shows: defaultdict[int, list[Event]] = defaultdict(list)
     upcoming: defaultdict[int, set[int]] = defaultdict(set)
-    rows = Registration.objects.exclude(event__status=Event.DRAFT)
+    rows = Registration.objects.exclude(event__status__in=Event.NOT_HELD)
     if ninjas is not None:
         rows = rows.filter(ninja_id__gte=ninjas[0], ninja_id__lte=ninjas[1])
     for ninja_id, event_id, attended, waiting_list in rows.values_list(

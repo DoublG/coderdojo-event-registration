@@ -1,6 +1,7 @@
-from lib import BASE, Journey, django, laptop_question, mail_ids, mail_shot, sync_playwright  # noqa: F401
+from lib import BASE, Journey, django, keep_upcoming, laptop_question, mail_ids, mail_shot, sync_playwright  # noqa: F401
 
 with sync_playwright() as pw:
+    keep_upcoming(2991)
     django("from events.models import Registration as R; R.objects.filter(event_id=2991, ninja_id=9).delete()")
     laptop_question(2991)
     j = Journey("ninja", pw)

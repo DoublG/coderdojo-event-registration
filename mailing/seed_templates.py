@@ -37,6 +37,12 @@ def _body(language, text, unsubscribe=False, signature=True):
     return body
 
 
+# The variables every mail to a session's families about a change has (events.notices).
+_NOTICE_VARS = (
+    "ninja_names, children (name, waiting_list), event_name, dojo_name, start_time, end_time, venue, "
+    "message (the team's text), can_reply, event_url, account_url"
+)
+
 TEMPLATES = [
     {
         "key": "registration_confirmed",
@@ -318,6 +324,299 @@ Les places sont attribuées par ordre d'inscription. Toutes les sessions de ce d
 """,
         },
         "unsubscribe": True,
+    },
+    {
+        "key": "session_venue_changed",
+        "category": MailCategory.REGISTRATION,
+        "description": "To a session's families: the venue changed (DATA_MODEL_NOTICES.md). Variables: "
+        + _NOTICE_VARS
+        + ", old_venue.",
+        "subject": {
+            "en-us": '{{ event_name }} on {{ start_time|date:"j F" }} moves to {{ venue }}',
+            "nl-be": '{{ event_name }} op {{ start_time|date:"j F" }} verhuist naar {{ venue }}',
+            "fr-be": '{{ event_name }} du {{ start_time|date:"j F" }} déménage : {{ venue }}',
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+You signed {{ ninja_names }} up for {{ event_name }} at {{ dojo_name }}. The session takes place somewhere else now:
+
+  Where: {{ venue }}{% if old_venue %} (was {{ old_venue }}){% endif %}
+  When: {{ start_time|date:"l j F" }}, {{ start_time|date:"H:i" }} to {{ end_time|date:"H:i" }}
+{% if message %}
+A note from the team:
+{{ message }}
+{% endif %}
+Session details: {{ event_url }}
+Your registrations: {{ account_url }}
+{% if can_reply %}
+Questions? Reply to this mail to reach the team of {{ dojo_name }}.{% endif %}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Je schreef {{ ninja_names }} in voor {{ event_name }} bij {{ dojo_name }}. De sessie vindt nu ergens anders plaats:
+
+  Waar: {{ venue }}{% if old_venue %} (was {{ old_venue }}){% endif %}
+  Wanneer: {{ start_time|date:"l j F" }}, van {{ start_time|date:"H:i" }} tot {{ end_time|date:"H:i" }}
+{% if message %}
+Een bericht van het team:
+{{ message }}
+{% endif %}
+Details van de sessie: {{ event_url }}
+Je inschrijvingen: {{ account_url }}
+{% if can_reply %}
+Vragen? Beantwoord deze mail om het team van {{ dojo_name }} te bereiken.{% endif %}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Vous avez inscrit {{ ninja_names }} à {{ event_name }} au {{ dojo_name }}. La session a désormais lieu ailleurs :
+
+  Où : {{ venue }}{% if old_venue %} (auparavant {{ old_venue }}){% endif %}
+  Quand : {{ start_time|date:"l j F" }}, de {{ start_time|date:"H:i" }} à {{ end_time|date:"H:i" }}
+{% if message %}
+Un message de l'équipe :
+{{ message }}
+{% endif %}
+Détails de la session : {{ event_url }}
+Vos inscriptions : {{ account_url }}
+{% if can_reply %}
+Des questions ? Répondez à ce mail pour joindre l'équipe du {{ dojo_name }}.{% endif %}
+""",
+        },
+    },
+    {
+        "key": "session_time_changed",
+        "category": MailCategory.REGISTRATION,
+        "description": "To a session's families: the date or times changed. Variables: "
+        + _NOTICE_VARS
+        + ", old_start_time, old_end_time.",
+        "subject": {
+            "en-us": "{{ event_name }}: new date or time",
+            "nl-be": "{{ event_name }}: nieuwe datum of uren",
+            "fr-be": "{{ event_name }} : nouvelle date ou nouvel horaire",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+You signed {{ ninja_names }} up for {{ event_name }} at {{ dojo_name }}. The session's date or time changed:
+
+  Now: {{ start_time|date:"l j F" }}, {{ start_time|date:"H:i" }} to {{ end_time|date:"H:i" }}
+  Was: {{ old_start_time|date:"l j F" }}, {{ old_start_time|date:"H:i" }} to {{ old_end_time|date:"H:i" }}
+  Where: {{ venue }}
+{% if message %}
+A note from the team:
+{{ message }}
+{% endif %}
+Can't make it at the new time? Please cancel on your account page, so the place goes to a child on the waiting list: {{ account_url }}
+
+Session details: {{ event_url }}
+{% if can_reply %}
+Questions? Reply to this mail to reach the team of {{ dojo_name }}.{% endif %}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Je schreef {{ ninja_names }} in voor {{ event_name }} bij {{ dojo_name }}. De datum of de uren van de sessie zijn veranderd:
+
+  Nu: {{ start_time|date:"l j F" }}, van {{ start_time|date:"H:i" }} tot {{ end_time|date:"H:i" }}
+  Was: {{ old_start_time|date:"l j F" }}, van {{ old_start_time|date:"H:i" }} tot {{ old_end_time|date:"H:i" }}
+  Waar: {{ venue }}
+{% if message %}
+Een bericht van het team:
+{{ message }}
+{% endif %}
+Lukt het niet op het nieuwe moment? Schrijf dan uit op je accountpagina, zodat de plaats naar een kind op de wachtlijst gaat: {{ account_url }}
+
+Details van de sessie: {{ event_url }}
+{% if can_reply %}
+Vragen? Beantwoord deze mail om het team van {{ dojo_name }} te bereiken.{% endif %}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Vous avez inscrit {{ ninja_names }} à {{ event_name }} au {{ dojo_name }}. La date ou l'horaire de la session a changé :
+
+  Désormais : {{ start_time|date:"l j F" }}, de {{ start_time|date:"H:i" }} à {{ end_time|date:"H:i" }}
+  Auparavant : {{ old_start_time|date:"l j F" }}, de {{ old_start_time|date:"H:i" }} à {{ old_end_time|date:"H:i" }}
+  Où : {{ venue }}
+{% if message %}
+Un message de l'équipe :
+{{ message }}
+{% endif %}
+Le nouvel horaire ne vous convient pas ? Annulez l'inscription sur la page de votre compte, pour que la place aille à un enfant de la liste d'attente : {{ account_url }}
+
+Détails de la session : {{ event_url }}
+{% if can_reply %}
+Des questions ? Répondez à ce mail pour joindre l'équipe du {{ dojo_name }}.{% endif %}
+""",
+        },
+    },
+    {
+        "key": "session_places_changed",
+        "category": MailCategory.REGISTRATION,
+        "description": "To a session's families: the number of places changed. Variables: "
+        + _NOTICE_VARS
+        + ", places, old_places.",
+        "subject": {
+            "en-us": "{{ event_name }}: the number of places changed",
+            "nl-be": "{{ event_name }}: het aantal plaatsen is veranderd",
+            "fr-be": "{{ event_name }} : le nombre de places a changé",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+You signed {{ ninja_names }} up for {{ event_name }} at {{ dojo_name }} ({{ start_time|date:"l j F" }}). The session now has {{ places }} places{% if old_places %} (it had {{ old_places }}){% endif %}.
+{% for child in children %}
+  {{ child.name }}: {% if child.waiting_list %}on the waiting list{% else %}has a place{% endif %}{% endfor %}
+
+A child who had a place keeps it. When places come free, they go to the children who have waited longest, and we mail their families straight away.
+{% if message %}
+A note from the team:
+{{ message }}
+{% endif %}
+Session details: {{ event_url }}
+Your registrations: {{ account_url }}
+{% if can_reply %}
+Questions? Reply to this mail to reach the team of {{ dojo_name }}.{% endif %}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Je schreef {{ ninja_names }} in voor {{ event_name }} bij {{ dojo_name }} ({{ start_time|date:"l j F" }}). De sessie heeft nu {{ places }} plaatsen{% if old_places %} (dat waren er {{ old_places }}){% endif %}.
+{% for child in children %}
+  {{ child.name }}: {% if child.waiting_list %}op de wachtlijst{% else %}heeft een plaats{% endif %}{% endfor %}
+
+Wie een plaats had, houdt die. Komen er plaatsen vrij, dan gaan die naar de kinderen die het langst wachten, en mailen we hun gezin meteen.
+{% if message %}
+Een bericht van het team:
+{{ message }}
+{% endif %}
+Details van de sessie: {{ event_url }}
+Je inschrijvingen: {{ account_url }}
+{% if can_reply %}
+Vragen? Beantwoord deze mail om het team van {{ dojo_name }} te bereiken.{% endif %}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Vous avez inscrit {{ ninja_names }} à {{ event_name }} au {{ dojo_name }} ({{ start_time|date:"l j F" }}). La session compte désormais {{ places }} places{% if old_places %} (au lieu de {{ old_places }}){% endif %}.
+{% for child in children %}
+  {{ child.name }} : {% if child.waiting_list %}sur la liste d'attente{% else %}a une place{% endif %}{% endfor %}
+
+Un enfant qui avait une place la garde. Quand des places se libèrent, elles vont aux enfants qui attendent depuis le plus longtemps, et nous prévenons aussitôt leur famille par mail.
+{% if message %}
+Un message de l'équipe :
+{{ message }}
+{% endif %}
+Détails de la session : {{ event_url }}
+Vos inscriptions : {{ account_url }}
+{% if can_reply %}
+Des questions ? Répondez à ce mail pour joindre l'équipe du {{ dojo_name }}.{% endif %}
+""",
+        },
+    },
+    {
+        "key": "session_cancelled",
+        "category": MailCategory.REGISTRATION,
+        "description": "To a session's families: the session is cancelled. Variables: " + _NOTICE_VARS + ", dojo_url.",
+        "subject": {
+            "en-us": 'Cancelled: {{ event_name }} on {{ start_time|date:"j F" }}',
+            "nl-be": 'Geannuleerd: {{ event_name }} op {{ start_time|date:"j F" }}',
+            "fr-be": 'Annulé : {{ event_name }} du {{ start_time|date:"j F" }}',
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+We're sorry: {{ event_name }} at {{ dojo_name }} on {{ start_time|date:"l j F" }} is cancelled. You signed {{ ninja_names }} up for it; there's nothing you need to do.
+{% if message %}
+A note from the team:
+{{ message }}
+{% endif %}
+Other sessions at {{ dojo_name }}: {{ dojo_url }}
+{% if can_reply %}
+Questions? Reply to this mail to reach the team of {{ dojo_name }}.{% endif %}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Het spijt ons: {{ event_name }} bij {{ dojo_name }} op {{ start_time|date:"l j F" }} is geannuleerd. Je had {{ ninja_names }} ervoor ingeschreven; je hoeft niets te doen.
+{% if message %}
+Een bericht van het team:
+{{ message }}
+{% endif %}
+Andere sessies bij {{ dojo_name }}: {{ dojo_url }}
+{% if can_reply %}
+Vragen? Beantwoord deze mail om het team van {{ dojo_name }} te bereiken.{% endif %}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Nous sommes désolés : {{ event_name }} au {{ dojo_name }} du {{ start_time|date:"l j F" }} est annulé. Vous y aviez inscrit {{ ninja_names }} ; vous n'avez rien à faire.
+{% if message %}
+Un message de l'équipe :
+{{ message }}
+{% endif %}
+Autres sessions au {{ dojo_name }} : {{ dojo_url }}
+{% if can_reply %}
+Des questions ? Répondez à ce mail pour joindre l'équipe du {{ dojo_name }}.{% endif %}
+""",
+        },
+    },
+    {
+        "key": "session_message",
+        "category": MailCategory.REGISTRATION,
+        "description": "The team's own subject and text to a session's families, never template code. Variables: "
+        + _NOTICE_VARS
+        + ", subject.",
+        "subject": {
+            "en-us": "{{ event_name }}: {{ subject }}",
+            "nl-be": "{{ event_name }}: {{ subject }}",
+            "fr-be": "{{ event_name }} : {{ subject }}",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+A message from the team of {{ dojo_name }} about {{ event_name }} on {{ start_time|date:"l j F" }}, which you signed {{ ninja_names }} up for:
+
+{{ message }}
+
+Session details: {{ event_url }}
+Your registrations: {{ account_url }}
+{% if can_reply %}
+Reply to this mail to reach the team of {{ dojo_name }}.{% endif %}
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+Een bericht van het team van {{ dojo_name }} over {{ event_name }} op {{ start_time|date:"l j F" }}, waarvoor je {{ ninja_names }} inschreef:
+
+{{ message }}
+
+Details van de sessie: {{ event_url }}
+Je inschrijvingen: {{ account_url }}
+{% if can_reply %}
+Beantwoord deze mail om het team van {{ dojo_name }} te bereiken.{% endif %}
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+Un message de l'équipe du {{ dojo_name }} à propos de {{ event_name }} du {{ start_time|date:"l j F" }}, auquel vous avez inscrit {{ ninja_names }} :
+
+{{ message }}
+
+Détails de la session : {{ event_url }}
+Vos inscriptions : {{ account_url }}
+{% if can_reply %}
+Répondez à ce mail pour joindre l'équipe du {{ dojo_name }}.{% endif %}
+""",
+        },
     },
     {
         "key": "dojo_message",
@@ -2032,6 +2331,17 @@ _common = {
     "site_url": "https://coolregistration.localhost",
     "unsubscribe_url": "https://coolregistration.localhost/mail/unsubscribe/example/",
 }
+_session_notice = {
+    **_event,
+    "ninja_names": "Emma and Lucas",
+    "children": [{"name": "Emma", "waiting_list": False}, {"name": "Lucas", "waiting_list": True}],
+    "start_time": datetime(2026, 10, 10, 14, 0),
+    "end_time": datetime(2026, 10, 10, 17, 0),
+    "venue": "Ghent Campus, room 1.2",
+    "dojo_url": "https://coolregistration.localhost/dojos/1/",
+    "message": "",
+    "can_reply": True,
+}
 SAMPLE_CONTEXT = {
     "registration_confirmed": {**_common, **_event, **_answers},
     "waitlist_promoted": {**_common, **_event, **_answers},
@@ -2053,6 +2363,21 @@ SAMPLE_CONTEXT = {
                 "url": "https://coolregistration.localhost/events/2/",
             },
         ],
+    },
+    "session_venue_changed": {**_common, **_session_notice, "old_venue": "Ghent Public Library"},
+    "session_time_changed": {
+        **_common,
+        **_session_notice,
+        "old_start_time": datetime(2026, 10, 3, 14, 0),
+        "old_end_time": datetime(2026, 10, 3, 17, 0),
+    },
+    "session_places_changed": {**_common, **_session_notice, "places": 20, "old_places": 15},
+    "session_cancelled": {**_common, **_session_notice},
+    "session_message": {
+        **_common,
+        **_session_notice,
+        "subject": "Bring a laptop if you can",
+        "message": "Hi all,\n\nWe're short of laptops on Saturday: please bring one if you have one.",
     },
     "dojo_message": {
         **_common,

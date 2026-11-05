@@ -1,0 +1,41 @@
+{% load i18n %}{% comment %}
+The session page's Mail the families card (dojos.views.event_pages._notices_context,
+DATA_MODEL_NOTICES.md): after a save that changed the venue, times or places of an
+open session with registrations, a button per change to the compose page (carrying
+the values from before in `change_token`); otherwise a link to write a mail; and
+the notices already sent.
+{% endcomment %}
+<section class="cd-card event-notices-card{% if change_buttons %} event-notices-card--changed{% endif %}" aria-labelledby="event-notices-title">
+  <h2 id="event-notices-title" class="heading-md">{% translate "Mail the families" %}</h2>
+  {% if change_buttons %}
+    <p class="body-sm">{% translate "You changed this session after families signed up. Let them know?" %}</p>
+    <div class="event-notices-card__actions">
+      {% for kind, label in change_buttons %}
+        <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_event_notify' dojo_id=dojo.id event_id=event.id %}?kind={{ kind }}&amp;change={{ change_token }}">{{ label }}</a>
+      {% endfor %}
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_notify' dojo_id=dojo.id event_id=event.id %}?kind=message&amp;change={{ change_token }}">{% translate "Write your own message" %}</a>
+    </div>
+  {% elif can_notify %}
+    <p class="body-sm">{% translate "Tell the families with a place or on the waiting list about a change, with a prepared mail or a message of your own." %}</p>
+    <div class="event-notices-card__actions">
+      <a class="cd-btn cd-btn--secondary label" href="{% url 'dojo_event_notify' dojo_id=dojo.id event_id=event.id %}">{% translate "Write a mail" %}</a>
+    </div>
+  {% else %}
+    <p class="body-sm muted">{% translate "Nobody has signed up for this session yet, or it ended a while ago." %}</p>
+  {% endif %}
+  {% if sent_notices %}
+    <h3 class="label event-notices-card__sent-title">{% translate "Sent to the families" %}</h3>
+    <ul class="event-notices-card__list">
+      {% for notice in sent_notices %}
+        <li class="body-sm">
+          {{ notice.get_kind_display }}{% if notice.subject %}: {{ notice.subject }}{% endif %}
+          <span class="caption muted">
+            · {{ notice.sent_at|date:"d/m/Y H:i" }}
+            · {% blocktranslate count counter=notice.recipients %}{{ counter }} account{% plural %}{{ counter }} accounts{% endblocktranslate %}
+            {% if notice.sent_by %}· {{ notice.sent_by.team_name }}{% endif %}
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</section>

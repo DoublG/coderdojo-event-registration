@@ -19,6 +19,17 @@ class EventQuerySet(models.QuerySet):
         governs the public-facing side."""
         return self.exclude(status=Event.DRAFT).filter(dojo__status="active")
 
+    def listed(self):
+        """visible() without cancelled sessions: what lists, the dojo finder,
+        a dojo's next session, promotions and reminders offer. A cancelled
+        session's own page stays readable (visible()), marked as cancelled."""
+        return self.visible().exclude(status=Event.CANCELLED)
+
+    def held(self):
+        """Sessions that took place or will: not drafts, not cancelled (what
+        engagement, the year's figures and the activity segments count)."""
+        return self.exclude(status__in=Event.NOT_HELD)
+
     def with_confirmed_count(self):
         """Adds `confirmed_count` (confirmed, non-waitlisted places), which
         Event.places_left then reads instead of running a query per event:
@@ -37,11 +48,15 @@ class Event(TranslatableModel):
     DRAFT = "draft"
     OPEN = "open"
     CLOSED = "closed"
+    CANCELLED = "cancelled"
     STATUS_CHOICES = [
         (DRAFT, _("Draft")),
         (OPEN, _("Open")),
         (CLOSED, _("Closed")),
+        (CANCELLED, _("Cancelled")),
     ]
+    # Not a session that takes place: left out of engagement and the figures.
+    NOT_HELD = (DRAFT, CANCELLED)
 
     TRANSLATABLE_FIELDS = ("name", "description")
 
@@ -53,7 +68,9 @@ class Event(TranslatableModel):
         default=DRAFT,
         help_text="Draft: hidden from the public site while it's being put together. "
         "Open: visible, registrations open. Closed: visible, registrations closed — "
-        "set manually, normally once attendance for the session has been checked.",
+        "set manually, normally once attendance for the session has been checked. Cancelled: "
+        "called off (events.services.cancel); its page says so, it's left out of lists, reminders "
+        "and the engagement figures, and its registrations are kept.",
     )
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
@@ -158,6 +175,10 @@ class Event(TranslatableModel):
     @property
     def registration_open(self):
         return self.status == self.OPEN
+
+    @property
+    def is_cancelled(self):
+        return self.status == self.CANCELLED
 
     @property
     def registers_externally(self):
@@ -275,6 +296,71 @@ class RegistrationCancellation(models.Model):
 
     def __str__(self):
         return f"{self.ninja} cancelled {self.event}"
+
+
+class SessionNoticeManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("event__dojo")
+
+
+class SessionNotice(TranslatableModel):
+    """A mail the session's team sent to its families about a change
+    (DATA_MODEL_NOTICES.md, §31): append-only, one row per notice sent, the
+    mails themselves are EmailMessage rows (idempotency key
+    `session_notice:<id>:<user>`). Sent only through events.notices."""
+
+    VENUE_CHANGED = "venue_changed"
+    TIME_CHANGED = "time_changed"
+    PLACES_CHANGED = "places_changed"
+    CANCELLED = "cancelled"
+    MESSAGE = "message"
+    KIND_CHOICES = [
+        (VENUE_CHANGED, _("The venue changed")),
+        (TIME_CHANGED, _("The date or times changed")),
+        (PLACES_CHANGED, _("The number of places changed")),
+        (CANCELLED, _("The session is cancelled")),
+        (MESSAGE, _("A message of your own")),
+    ]
+
+    CONFIRMED = "confirmed"
+    WAITING_LIST = "waiting_list"
+    BOTH = "both"
+    AUDIENCE_CHOICES = [
+        (BOTH, _("Families with a place and those on the waiting list")),
+        (CONFIRMED, _("Families with a place")),
+        (WAITING_LIST, _("Families on the waiting list")),
+    ]
+
+    TRANSLATABLE_FIELDS = ("subject", "message")
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="notices")
+    kind = models.CharField(max_length=20, choices=KIND_CHOICES)
+    audience = models.CharField(max_length=20, choices=AUDIENCE_CHOICES, default=BOTH)
+    subject = models.CharField(max_length=150, blank=True, help_text="Only for a message of the team's own.")
+    message = models.TextField(
+        blank=True, help_text="The team's own text: a note under a prepared mail, or the whole message."
+    )
+    changes = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='What changed, as shown in the mail: {"venue": ["before", "after"]}; times as ISO strings.',
+    )
+    sent_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    sent_at = models.DateTimeField(default=timezone.now)
+    recipients = models.PositiveIntegerField(default=0, help_text="Accounts it was queued for.")
+
+    objects = SessionNoticeManager()
+
+    class Meta:
+        ordering = ["-sent_at", "-id"]
+
+    def __str__(self):
+        return f"{self.get_kind_display()}: {self.event}"
+
+    def content_languages(self):
+        return self.event.content_languages()
 
 
 class Belt(OrganisationContent):
