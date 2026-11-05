@@ -3711,3 +3711,61 @@ class DojoEventCancelViewTests(TestCase):
         self.client.post(set_status, {"status": "cancelled"})
         self.event.refresh_from_db()
         self.assertEqual(self.event.status, Event.OPEN)
+
+
+class SessionNoticeOrganisationTests(TestCase):
+    """The organisation mails only for its own sessions (DATA_MODEL_NOTICES.md,
+    open point 3): its role opens no dojo's session, only a membership of the
+    session's dojo does, which for the organisation is its organisation dojo."""
+
+    def setUp(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from accounts.models import Guardianship, OrganisationRole
+
+        call_command("load_mail_templates", stdout=StringIO())
+        self.admin = make_champion(username="orgadmin")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.org_dojo = make_dojo("CoderDojo Girlz", champion=self.admin, kind=Dojo.ORGANISATION)
+        self.dojo = make_dojo("Ghent", champion=make_champion(username="ghent"))
+        start = timezone.now() + timedelta(days=7)
+        parent = User.objects.create(username="parent", email="p@example.com")
+        child = Ninja.objects.create(name="Emma")
+        Guardianship.objects.create(guardian=parent, ninja=child)
+        self.events = {}
+        for dojo in (self.org_dojo, self.dojo):
+            event = Event.objects.create(
+                name="Session",
+                dojo=dojo,
+                status=Event.OPEN,
+                start_time=start,
+                end_time=start + timedelta(hours=2),
+                places=10,
+            )
+            Registration.objects.create(event=event, ninja=child, waiting_list=False, position=1)
+            self.events[dojo] = event
+
+    def _urls(self, dojo):
+        kwargs = {"dojo_id": dojo.id, "event_id": self.events[dojo].id}
+        return [reverse(name, kwargs=kwargs) for name in ("dojo_event_notify", "dojo_event_cancel")]
+
+    def test_an_organisation_admin_cannot_mail_or_cancel_a_dojos_session(self):
+        self.client.force_login(self.admin)
+        for url in self._urls(self.dojo):
+            self.assertEqual(self.client.get(url).status_code, 404)
+            self.assertEqual(
+                self.client.post(url, {"kind": "message", "subject": "x", "message": "x"}).status_code, 404
+            )
+        self.assertEqual(self.events[self.dojo].notices.count(), 0)
+
+    def test_it_mails_the_families_of_its_own_sessions(self):
+        self.client.force_login(self.admin)
+        for url in self._urls(self.org_dojo):
+            self.assertEqual(self.client.get(url).status_code, 200)
+        notify_url = self._urls(self.org_dojo)[0]
+        self.client.post(
+            notify_url, {"kind": "message", "audience": "both", "subject": "Hi", "message": "See you!", "send": "1"}
+        )
+        self.assertEqual(self.events[self.org_dojo].notices.count(), 1)

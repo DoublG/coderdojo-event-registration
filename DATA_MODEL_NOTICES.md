@@ -109,8 +109,9 @@ changed, places changed, cancelled) or with a text of their own, in each family'
 | `recipients` | int | accounts mailed (after suppression and inactive accounts) |
 
 Privacy registry: `sent_by` personal (identity, `export=False` for the families, it's someone else),
-`subject`/`note` personal (free text can name anyone; emptied with the dojo team member's erasure only
-if we decide so, open point 1), the rest not personal; `subjects` for the sender's own export. Audit
+`subject`/`message`/`translations` kept with the session under their own rule, `session_notice`
+(decided 5 Nov 2026: while the dojo is active, cleared by the nightly retention job once it isn't,
+`privacy.retention.clear_session_notice_texts`), the rest not personal; `subjects` for the sender's own export. Audit
 log: not recorded (it is itself a record of what was sent; `core.tests.AuditLogCoverageTests.NOT_RECORDED`
 with that reason). Retention: with the session (`team`/`registration` history rule), or a period of its
 own. The mails themselves are `EmailMessage` rows, cleared after `MAIL_CONTENT_RETENTION_DAYS` as now.
@@ -202,10 +203,10 @@ The help centre (the dojo team's page on sessions, en/fr/nl), `DATA_MODEL.md`'s 
 
 ## Open points
 
-Decided 5 November 2026: who sends (`MANAGE_EVENTS`), a real `cancelled` status, and raising the places
-promotes the waiting list. Still open:
+Decided 5 November 2026: who sends (`MANAGE_EVENTS`), a real `cancelled` status, raising the places
+promotes the waiting list, and open points 1 and 3 below.
 
-1. The team's free text in `SessionNotice`: keep it with the session, or give it a retention period?
+1. ~~The team's free text in `SessionNotice`: keep it with the session, or give it a retention period?~~ — **decided:** kept while the session's dojo is active, cleared once it isn't (`session_notice`).
 2. ~~The API's event sync and a cancelled session~~ — built as proposed: the sync leaves a cancelled
    session alone (`skipped`) and can't cancel one; say if the spreadsheet should be able to.
-3. Should the organisation be able to send a notice for a dojo's session (it can't edit those today)?
+3. ~~Should the organisation be able to send a notice for a dojo's session?~~ — **decided: no.** The organisation never touches sessions it isn't part of: an organisation role opens no dojo's session page, only an active membership of the session's dojo does. It mails for its own events (CoderDojo Girlz, Coolest Projects) through its organisation dojo, like any team (`dojos.tests.SessionNoticeOrganisationTests`).

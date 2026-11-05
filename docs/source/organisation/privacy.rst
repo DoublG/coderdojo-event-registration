@@ -80,6 +80,11 @@ The site removes these by itself, every night:
 - **Mail**: a year after a mail was queued, its address, subject and text are
   cleared. What kind of mail it was and whether it went out stay, for the
   figures.
+- **A dojo team's own text in a mail to a session's families** (a change
+  to the session, or a message of their own) stays as long as the dojo is
+  active. Once the dojo goes dormant or is archived, the text is cleared;
+  what kind of mail it was, when and to how many families stay with the
+  session.
 - **Invitations** to the organisation are removed 30 days after they were
   accepted, withdrawn or ran out (an invitation is valid for 14 days).
 - **Invitations to be a child's guardian** are removed the same way: 30

@@ -88,6 +88,9 @@ class Erasure(TextChoices):
 # "login_session"; the other periods still need legal input (DATA_MODEL.md
 # §16, open points).
 RETENTION_RULES = {
+    "session_notice": "The dojo team's own subject and text on a mail to a session's families: while the "
+    "session's dojo is active, cleared once it goes dormant, is archived or back to draft. Which kind of mail, "
+    "when and to how many stay with the session.",
     "account": "Until two years after the last login (for a guardian, or a child's own login or dojo session): "
     "reminder mails 30 and 7 days before, then erased.",
     "organisation_role": "While the organisation role is held.",

@@ -109,7 +109,9 @@ register(
     fields={
         "sent_by": personal(Category.IDENTITY),
         ("subject", "message", "translations"): keep(
-            Category.IDENTITY, "the dojo team's own text to the session's families, kept with the session"
+            Category.IDENTITY,
+            "the dojo team's own text to the session's families, not about the sender",
+            retention="session_notice",
         ),
     },
     not_personal=["id", "event", "kind", "audience", "changes", "sent_at", "recipients"],
