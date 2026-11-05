@@ -374,6 +374,29 @@ class ContentLanguagesTests(TestCase):
         self.assertEqual((english, english.is_fallback, english.language), ("Nederlands", True, "nl-be"))
         self.assertEqual(normalize("FR_be"), "fr-be")
 
+    def test_a_language_inside_a_sentence_is_named_in_the_page_language(self):
+        """ "In het Engels", "En anglais", "In Dutch": never a language's own name
+        (LANGUAGES) inside a sentence, which read "In het English"."""
+        from django import forms
+        from django.utils import translation
+
+        from core.content_languages import add_translation_fields, language_name, language_name_in_sentence
+
+        self.assertEqual(language_name("nl-be"), "Nederlands")
+        dojo = make_dojo("Brussels", languages=["nl-be", "en-us", "fr-be"])
+        for page, expected in {
+            "nl-be": ["Engels", "Frans"],
+            "fr-be": ["anglais", "français"],
+            "en-us": ["English", "French"],
+        }.items():
+            with translation.override(page):
+                self.assertEqual([language_name_in_sentence(c) for c in ("en-us", "fr-be")], expected)
+                form = forms.Form()
+                groups = add_translation_fields(form, dojo, lambda field: forms.CharField(required=False))
+                self.assertEqual([name for _code, name, _fields in groups], expected)
+        with translation.override("nl-be"):
+            self.assertEqual(translation.gettext("In %(language)s") % {"language": "Engels"}, "In het Engels")
+
     def test_clearing_a_translation_removes_it(self):
         dojo = make_dojo("Brussels", languages=["nl-be", "fr-be"])
         dojo.set_translation("fr-be", "tagline", "Salut")
@@ -437,7 +460,7 @@ class OrganisationContentLanguagesTests(TestCase):
         cache.clear()  # the homepage caches its FAQs
         response = self.client.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="nl-be")
         self.assertContains(response, "Yes, always.")
-        self.assertContains(response, "Alleen in het English")
+        self.assertContains(response, "Alleen in het Engels")
 
 
 class AuditLogCoverageTests(TestCase):

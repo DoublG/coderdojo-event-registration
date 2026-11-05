@@ -1168,7 +1168,7 @@ class DojoMailingTests(TestCase):
         campaign = self._mailing(subject="", audience="session", audience_params={})
         problems = " ".join(campaigns.launch_problems(campaign))
         self.assertIn("Pick one of your dojo's sessions", problems)
-        self.assertIn("in Nederlands", problems)
+        self.assertIn("in Dutch", problems)
         self.assertIn("email address", problems)
 
     def test_at_most_four_mailings_in_30_days(self):

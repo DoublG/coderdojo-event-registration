@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 07:51+0000\n"
+"POT-Creation-Date: 2026-11-05 08:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -5166,8 +5166,8 @@ msgid "Has children on the site"
 msgstr "A des enfants sur le site"
 
 #: campaigns/segmentation/attributes/account.py:38
-#: campaigns/segmentation/attributes/activity.py:41
-#: campaigns/segmentation/attributes/activity.py:65
+#: campaigns/segmentation/attributes/activity.py:39
+#: campaigns/segmentation/attributes/activity.py:63
 #: campaigns/segmentation/attributes/changes.py:89
 #: campaigns/segmentation/attributes/changes.py:108
 #: campaigns/segmentation/attributes/dojo.py:32
@@ -5183,12 +5183,12 @@ msgstr "A des enfants sur le site"
 msgid "Unsupported operator: %(operator)s"
 msgstr "Opérateur non pris en charge : %(operator)s"
 
-#: campaigns/segmentation/attributes/activity.py:32
+#: campaigns/segmentation/attributes/activity.py:30
 msgid "Champion or mentor at a dojo with sessions in the last N days"
 msgstr ""
 "Champion ou mentor d'un dojo ayant eu des sessions ces N derniers jours"
 
-#: campaigns/segmentation/attributes/activity.py:56
+#: campaigns/segmentation/attributes/activity.py:54
 msgid "Came to a session in the last N days"
 msgstr "Est venu à une session ces N derniers jours"
 
@@ -6778,11 +6778,26 @@ msgstr "En savoir plus"
 
 # | msgid "Language"
 # | msgid "Languages"
-#: core/admin_translations.py:65
+#: core/admin_translations.py:70
 #: dojos/templates/dojos/partials/_translation_fields.html:10
 #, python-format
 msgid "In %(language)s"
 msgstr "En %(language)s"
+
+#: core/content_languages.py:41
+msgctxt "language name inside a sentence"
+msgid "English"
+msgstr "anglais"
+
+#: core/content_languages.py:42
+msgctxt "language name inside a sentence"
+msgid "Dutch"
+msgstr "néerlandais"
+
+#: core/content_languages.py:43
+msgctxt "language name inside a sentence"
+msgid "French"
+msgstr "français"
 
 # | msgid "Organisation"
 #: core/templates/core/_manage_base.html:23
@@ -6984,7 +6999,7 @@ msgstr "Vos dojos"
 
 # | msgid "Language"
 # | msgid "Mail language"
-#: core/templatetags/content_i18n.py:32
+#: core/templatetags/content_i18n.py:33
 #, python-format
 msgid "Only in %(language)s"
 msgstr "Uniquement en %(language)s"
@@ -10212,7 +10227,7 @@ msgstr ""
 "%(domain)s est débloqué : les e-mails repartent vers ses adresses, sauf "
 "celles bloquées une par une."
 
-#: mailing/manage/templates.py:69
+#: mailing/manage/templates.py:70
 msgid ""
 "Template created. Write the English version first: it's used for every "
 "language that has no version of its own."
@@ -10220,34 +10235,34 @@ msgstr ""
 "Modèle créé. Rédigez d'abord la version anglaise : elle sert pour chaque "
 "langue sans version propre."
 
-#: mailing/manage/templates.py:98
+#: mailing/manage/templates.py:99
 #, python-format
 msgid "%(language)s version saved."
 msgstr "Version %(language)s enregistrée."
 
-#: mailing/manage/templates.py:135
+#: mailing/manage/templates.py:137
 msgid ""
 "The English version is the fallback for every language: it can't be deleted."
 msgstr ""
 "La version anglaise sert de secours pour toutes les langues : elle ne peut "
 "pas être supprimée."
 
-#: mailing/manage/templates.py:138
+#: mailing/manage/templates.py:140
 msgid "That language version is deleted; English is used instead."
 msgstr ""
 "Cette version linguistique est supprimée ; l'anglaise est utilisée à la "
 "place."
 
-#: mailing/manage/templates.py:141
+#: mailing/manage/templates.py:143
 msgid "The site sends this template itself: it can be edited, not deleted."
 msgstr ""
 "Le site envoie ce modèle lui-même : il peut être modifié, pas supprimé."
 
-#: mailing/manage/templates.py:143
+#: mailing/manage/templates.py:145
 msgid "A campaign that hasn't gone out yet uses this template."
 msgstr "Une campagne pas encore envoyée utilise ce modèle."
 
-#: mailing/manage/templates.py:146
+#: mailing/manage/templates.py:148
 #, python-format
 msgid "Template “%(key)s” deleted."
 msgstr "Modèle « %(key)s » supprimé."
@@ -10694,9 +10709,9 @@ msgid ""
 "%(language_name)s get the English one. This form starts from the English "
 "text."
 msgstr ""
-"Il n'y a pas encore de version %(language_name)s : d'ici là, les personnes "
-"ayant choisi %(language_name)s reçoivent la version anglaise. Ce formulaire "
-"part du texte anglais."
+"Il n'y a pas encore de version en %(language_name)s : d'ici là, les "
+"personnes qui ont choisi de lire en %(language_name)s reçoivent la version "
+"anglaise. Ce formulaire part du texte anglais."
 
 #: mailing/templates/mailing/manage/template_edit.html:37
 msgid "Variables you can use:"
@@ -10741,7 +10756,8 @@ msgstr "Supprimer le modèle"
 #, python-format
 msgid "Delete the %(language_name)s version? English is used instead."
 msgstr ""
-"Supprimer la version %(language_name)s ? L'anglaise sera utilisée à la place."
+"Supprimer la version en %(language_name)s ? La version anglaise sera utilisée "
+"à la place."
 
 #: mailing/templates/mailing/manage/template_list.html:5
 #: mailing/templates/mailing/manage/template_new.html:3
@@ -11409,7 +11425,7 @@ msgstr "Tapez le nom d'utilisateur, %(username)s, pour confirmer"
 msgid "Type the account's username to confirm."
 msgstr "Tapez le nom d'utilisateur du compte pour confirmer."
 
-#: privacy/retention.py:321
+#: privacy/retention.py:322
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
@@ -11421,7 +11437,7 @@ msgstr ""
 "qu'il reste champion. Demandez-lui de passer le rôle à un mentor, ou "
 "contactez l'organisation."
 
-#: privacy/retention.py:327
+#: privacy/retention.py:328
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "

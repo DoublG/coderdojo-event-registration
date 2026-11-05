@@ -105,7 +105,7 @@
         {% with meets=dojo|localized:"schedule_description" %}{% if meets %} · {{ meets }}{% endif %}{% endwith %}
         {% if dojo.min_age or dojo.max_age %} · {% blocktranslate with min=dojo.min_age|default:"7" max=dojo.max_age|default:"18" %}Ages {{ min }}–{{ max }}{% endblocktranslate %}{% endif %}
          · {% translate "No experience needed" %}
-         · {% blocktranslate with languages=dojo.content_languages|language_names %}Sessions in {{ languages }}{% endblocktranslate %}
+         · {% blocktranslate with languages=dojo.content_languages|language_names_in_sentence %}Sessions in {{ languages }}{% endblocktranslate %}
       </p>
       <div style="display:flex; gap: var(--space-4); flex-wrap: wrap;">
         {% if next_events|length == 1 %}

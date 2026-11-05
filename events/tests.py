@@ -1268,7 +1268,7 @@ class EventLanguageTests(TestCase):
             reverse("event_detail", kwargs={"event_id": self.event.id}), HTTP_ACCEPT_LANGUAGE="fr-be"
         )
         self.assertContains(response, "Leer programmeren.")
-        self.assertContains(response, "Uniquement en Nederlands")
+        self.assertContains(response, "Uniquement en néerlandais")
 
     def test_events_list_filters_on_language(self):
         other = _future_event(make_dojo("Ghent", languages=["nl-be"]), name="Gent")

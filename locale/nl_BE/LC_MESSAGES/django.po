@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 07:51+0000\n"
+"POT-Creation-Date: 2026-11-05 08:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -5115,8 +5115,8 @@ msgid "Has children on the site"
 msgstr "Heeft kinderen op de site"
 
 #: campaigns/segmentation/attributes/account.py:38
-#: campaigns/segmentation/attributes/activity.py:41
-#: campaigns/segmentation/attributes/activity.py:65
+#: campaigns/segmentation/attributes/activity.py:39
+#: campaigns/segmentation/attributes/activity.py:63
 #: campaigns/segmentation/attributes/changes.py:89
 #: campaigns/segmentation/attributes/changes.py:108
 #: campaigns/segmentation/attributes/dojo.py:32
@@ -5132,11 +5132,11 @@ msgstr "Heeft kinderen op de site"
 msgid "Unsupported operator: %(operator)s"
 msgstr "Niet-ondersteunde operator: %(operator)s"
 
-#: campaigns/segmentation/attributes/activity.py:32
+#: campaigns/segmentation/attributes/activity.py:30
 msgid "Champion or mentor at a dojo with sessions in the last N days"
 msgstr "Champion of mentor bij een dojo met sessies in de laatste N dagen"
 
-#: campaigns/segmentation/attributes/activity.py:56
+#: campaigns/segmentation/attributes/activity.py:54
 msgid "Came to a session in the last N days"
 msgstr "Kwam naar een sessie in de laatste N dagen"
 
@@ -6720,11 +6720,26 @@ msgstr "Meer weten"
 
 # | msgid "Language"
 # | msgid "Languages"
-#: core/admin_translations.py:65
+#: core/admin_translations.py:70
 #: dojos/templates/dojos/partials/_translation_fields.html:10
 #, python-format
 msgid "In %(language)s"
 msgstr "In het %(language)s"
+
+#: core/content_languages.py:41
+msgctxt "language name inside a sentence"
+msgid "English"
+msgstr "Engels"
+
+#: core/content_languages.py:42
+msgctxt "language name inside a sentence"
+msgid "Dutch"
+msgstr "Nederlands"
+
+#: core/content_languages.py:43
+msgctxt "language name inside a sentence"
+msgid "French"
+msgstr "Frans"
 
 # | msgid "Organisation"
 #: core/templates/core/_manage_base.html:23
@@ -6926,7 +6941,7 @@ msgstr "Jouw dojo's"
 
 # | msgid "Language"
 # | msgid "Mail language"
-#: core/templatetags/content_i18n.py:32
+#: core/templatetags/content_i18n.py:33
 #, python-format
 msgid "Only in %(language)s"
 msgstr "Alleen in het %(language)s"
@@ -10133,7 +10148,7 @@ msgstr ""
 "%(domain)s is gedeblokkeerd: er gaat weer e-mail naar de adressen ervan, "
 "behalve naar adressen die apart geblokkeerd zijn."
 
-#: mailing/manage/templates.py:69
+#: mailing/manage/templates.py:70
 msgid ""
 "Template created. Write the English version first: it's used for every "
 "language that has no version of its own."
@@ -10141,32 +10156,32 @@ msgstr ""
 "Sjabloon aangemaakt. Schrijf eerst de Engelse versie: die wordt gebruikt "
 "voor elke taal zonder eigen versie."
 
-#: mailing/manage/templates.py:98
+#: mailing/manage/templates.py:99
 #, python-format
 msgid "%(language)s version saved."
 msgstr "Versie in het %(language)s opgeslagen."
 
-#: mailing/manage/templates.py:135
+#: mailing/manage/templates.py:137
 msgid ""
 "The English version is the fallback for every language: it can't be deleted."
 msgstr ""
 "De Engelse versie is de reserve voor elke taal: die kan niet verwijderd "
 "worden."
 
-#: mailing/manage/templates.py:138
+#: mailing/manage/templates.py:140
 msgid "That language version is deleted; English is used instead."
 msgstr "Die taalversie is verwijderd; de Engelse wordt gebruikt."
 
-#: mailing/manage/templates.py:141
+#: mailing/manage/templates.py:143
 msgid "The site sends this template itself: it can be edited, not deleted."
 msgstr ""
 "De site verstuurt dit sjabloon zelf: je kunt het bewerken, niet verwijderen."
 
-#: mailing/manage/templates.py:143
+#: mailing/manage/templates.py:145
 msgid "A campaign that hasn't gone out yet uses this template."
 msgstr "Een campagne die nog niet verstuurd is, gebruikt dit sjabloon."
 
-#: mailing/manage/templates.py:146
+#: mailing/manage/templates.py:148
 #, python-format
 msgid "Template “%(key)s” deleted."
 msgstr "Sjabloon “%(key)s” verwijderd."
@@ -11321,7 +11336,7 @@ msgstr "Typ de gebruikersnaam, %(username)s, om te bevestigen"
 msgid "Type the account's username to confirm."
 msgstr "Typ de gebruikersnaam van het account om te bevestigen."
 
-#: privacy/retention.py:321
+#: privacy/retention.py:322
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "
@@ -11333,7 +11348,7 @@ msgstr ""
 "zolang die persoon champion is. Vraag om de rol door te geven aan een "
 "mentor, of neem contact op met de organisatie."
 
-#: privacy/retention.py:327
+#: privacy/retention.py:328
 #, python-format
 msgid ""
 "%(name)s, the champion of %(dojo)s, hasn't logged in for two years. Their "

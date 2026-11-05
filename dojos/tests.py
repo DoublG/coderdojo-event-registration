@@ -3097,12 +3097,12 @@ class DojoLanguagesTests(TempMediaMixin, TestCase):
             reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}), HTTP_ACCEPT_LANGUAGE="fr-be"
         )
         self.assertContains(french, "Un club de code sympa.")
-        self.assertContains(french, "Sessions en")
+        self.assertContains(french, "Sessions en néerlandais, français")
         english = self.client.get(
             reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}), HTTP_ACCEPT_LANGUAGE="en-us"
         )
         self.assertContains(english, "Een gezellige codeerclub.")
-        self.assertContains(english, "Only in Nederlands")
+        self.assertContains(english, "Only in Dutch")
 
     def test_finder_filters_on_language(self):
         french_dojo = make_dojo("Liège", languages=["fr-be"])
