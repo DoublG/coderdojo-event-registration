@@ -50,7 +50,7 @@ WATCHED = {
     "end_time": SessionNotice.TIME_CHANGED,
     "places": SessionNotice.PLACES_CHANGED,
 }
-TOKEN_SALT = "events.notice"
+TOKEN_SALT = "events.notice"  # noqa: S105 (a signing salt's name, not a password)
 TOKEN_MAX_AGE = 60 * 60  # an hour: long enough to write the mail, short enough to stay current
 
 
