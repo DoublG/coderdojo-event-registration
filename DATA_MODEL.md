@@ -3048,3 +3048,14 @@ django-report-builder, Metabase/Superset/Grafana, notebooks) were researched
 and set aside. Phase 1 is built (11 October 2026): the `reports` app, the
 engagement snapshot as the first dataset, saved reports on `/manage/reports/`.
 Design, what's built, phases and open points are in `DATA_MODEL_REPORTS.md`.
+
+## 31. Telling families about a change to their session (not built — written up for review)
+
+When a session that families booked changes (venue, times, places) or is called off, whoever can
+change it (`MANAGE_EVENTS`) can mail every family with a place, on the waiting list, or both, from
+prepared mails or with a text of their own, in each family's language. Decided 5 November 2026: the
+senders are whoever can edit the session, a real `Event.CANCELLED` status (closing a session today
+still sends its reminder and counts it as missed), and raising the places promotes the waiting list
+(built first). Proposed: `registration` mail through `send()` (not a §25 campaign) and an append-only
+`events.SessionNotice`. Design, decisions, phases and open points
+are in `DATA_MODEL_NOTICES.md`.
