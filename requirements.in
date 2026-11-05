@@ -37,7 +37,7 @@ requests==2.34.2
 websockets==17.2
 
 # Pulled in by the above (pinned for reproducible installs):
-asgiref==3.12.1
+asgiref==3.13.0
 attrs==26.1.0
 # 26.7.1, not 26.10.1+: those need cbor2>=6.1, and webauthn 2.x (below) keeps cbor2 on 5.x.
 # CVE-2026-116579 is ignored in audit.yml: daphne's WebSocket server, development only
@@ -59,7 +59,7 @@ packaging==26.3
 pycparser==3.11
 pyOpenSSL==26.4.0
 service-identity==26.1.0
-sqlparse==0.6.0
+sqlparse==0.6.1
 Twisted==26.10.0
 txaio==26.6.1
 typing_extensions==4.16.0
