@@ -65,12 +65,16 @@ done
   in both. `JLANG=fr` captures the site in French; a new language needs its locale in `lib.py`, its file
   names in `build.py`'s `NAMES` and a captions module.
 - **They change the dev data:** the parent and ninja journeys book real places (sessions 2990 and 2991
-  at Dojo Zonnebeke, removed again first on a rerun; they must still be upcoming, since a family changes
-  its answers only before a session starts), the volunteer journey resets and then marks attendance on
-  session 76 at Dojo Westerlo, `lib.laptop_question` gives sessions 2990, 2991 and 76 the seeded laptop
-  question (and answers it for session 76's places), and the booking mail goes through the Celery workers
-  to Mailpit. The seeded IDs used (dojo 51, events 2990/2991/76, ninja 9, pathway 2, users 352, application
-  348) change when the database is reseeded, and the sessions' dates pass; adjust them in the scripts.
+  at Dojo Zonnebeke, removed again first on a rerun; they must be upcoming, since a family changes
+  its answers only before a session starts, so `lib.keep_upcoming` moves a session that has passed forward
+  by whole weeks), the volunteer journey resets and then marks attendance on session 76 at Dojo Westerlo,
+  the champion journey sends a real *Mail the families* message about session 77 (Dojo Westerlo, full with
+  a waiting list, also kept upcoming; that session's earlier notices are deleted first, since a session gets
+  at most three a day) and opens its Cancel page without cancelling, `lib.laptop_question` gives sessions
+  2990, 2991, 76 and 77 the seeded laptop question (and answers it for the places of 76 and 77), and the
+  booking and notice mails go through the Celery workers to Mailpit. The seeded IDs used (dojo 51, events
+  2990/2991/76/77, ninja 9, pathway 2, users 352, application 348) change when the database is reseeded;
+  adjust them in the scripts.
 
 ## Keeping them current
 

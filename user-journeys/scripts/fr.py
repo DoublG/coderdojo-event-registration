@@ -59,7 +59,7 @@ INTRO = {
         [
             "Suivre le tableau de bord et la prochaine session",
             "Tenir à jour le profil public du dojo",
-            "Planifier et publier les sessions, gérer la liste d'attente",
+            "Planifier et publier les sessions, gérer la liste d'attente, prévenir les familles d'un changement",
             "Prendre les présences, gérer l'équipe et les membres",
             "Publier des nouvelles, écrire aux familles, connecter des applications",
         ],
@@ -221,7 +221,7 @@ STEPS = {
         ),
         "event": (
             "Une session",
-            "Les données, le statut, l'équipe et les parcours d'apprentissage de la session, modifiables sur place, plus un lien pour prendre les présences. La carte Questions d'inscription contient jusqu'à cinq questions oui/non auxquelles les familles répondent par enfant (ici : apporte-t-il son propre ordinateur), avec les réponses reçues.",
+            "Les données, le statut, l'équipe et les parcours d'apprentissage de la session, modifiables sur place, plus un lien pour prendre les présences. La carte Questions d'inscription contient jusqu'à cinq questions oui/non auxquelles les familles répondent par enfant (ici : apporte-t-il son propre ordinateur), avec les réponses reçues. Écrire aux familles prévient les familles qui ont une place ou sont sur la liste d'attente d'un changement.",
         ),
         "attendance": (
             "Prendre les présences à l'entrée",
@@ -267,7 +267,23 @@ STEPS = {
         ),
         "event": (
             "Une session complète avec liste d'attente",
-            "La page de la session montre les places prises et la liste d'attente ; quand une famille annule, le premier enfant en attente avance et sa famille reçoit un e-mail. Sa carte Questions d'inscription pose aux familles des questions oui/non par enfant (ici celle de l'ordinateur), avec les totaux pour les places confirmées et la liste d'attente.",
+            "La page de la session montre les places prises et la liste d'attente ; quand une famille annule, ou que l'équipe ajoute des places, les premiers enfants en attente avancent et leurs familles reçoivent un e-mail. Sa carte Questions d'inscription pose aux familles des questions oui/non par enfant (ici celle de l'ordinateur), avec les totaux pour les places confirmées et la liste d'attente. Écrire aux familles sert à les prévenir d'un changement ; après l'enregistrement d'un nouveau lieu, de nouveaux horaires ou d'un autre nombre de places, la carte propose l'e-mail préparé qui convient.",
+        ),
+        "notify": (
+            "Prévenir les familles d'un changement",
+            "Un e-mail préparé sur un nouveau lieu, de nouveaux horaires ou le nombre de places (avec la situation d'avant, pour que l'e-mail dise ce qui a changé), ou un message de l'équipe, aux familles qui ont une place, à celles sur la liste d'attente ou aux deux, avec le nombre pour chacune. Aperçu montre l'e-mail tel que la première famille le reçoit ; chaque famille le reçoit dans sa propre langue, avec le texte de l'équipe dans cette langue s'il a été écrit.",
+        ),
+        "notified": (
+            "Envoyé",
+            "L'e-mail part aux parents et tuteurs de chaque enfant du groupe (et au compte propre d'un enfant qui a une adresse), un e-mail par famille. La page de la session montre ce qui a été envoyé, quand, à combien de comptes et par qui. Les familles ne peuvent pas désactiver ces e-mails : une session en envoie au plus trois par jour.",
+        ),
+        "notice-mail": (
+            "L'e-mail que reçoivent les familles",
+            "Dans la langue d'e-mail de la famille, avec les données de la session et le texte de l'équipe. Les réponses vont à l'adresse du dojo.",
+        ),
+        "cancel": (
+            "Annuler une session",
+            "Annuler la session… demande d'abord confirmation. Une session annulée reste sur sa page, marquée comme annulée, pour que les familles qui la consultent voient ce qui s'est passé ; personne ne peut plus s'inscrire, elle disparaît des listes de sessions et des rappels, et les inscriptions sont conservées. Si la case est cochée, les familles reçoivent l'e-mail d'annulation préparé avec un mot facultatif de l'équipe. Elle peut être rouverte plus tard.",
         ),
         "attendance": (
             "Présences avec informations de santé",

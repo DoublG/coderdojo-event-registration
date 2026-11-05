@@ -1,6 +1,7 @@
-from lib import BASE, Journey, django, laptop_question, mail_ids, mail_shot, sync_playwright  # noqa: F401
+from lib import BASE, Journey, django, keep_upcoming, laptop_question, mail_ids, mail_shot, sync_playwright  # noqa: F401
 
 with sync_playwright() as pw:
+    keep_upcoming(2990, 77)
     django("from events.models import Registration as R; R.objects.filter(event_id=2990, ninja_id=9).delete()")
     # Session 2990 asks the laptop question (sign-up questions, DATA_MODEL.md §29).
     laptop_question(2990)
@@ -32,7 +33,7 @@ with sync_playwright() as pw:
         "Browse sessions",
         "All upcoming sessions, near a place or not, filterable by dojo, date, age, language and pathway.",
     )
-    p = j.go("/events/76/")
+    p = j.go("/events/77/")
     j.shot(
         "event-full",
         "A full session",

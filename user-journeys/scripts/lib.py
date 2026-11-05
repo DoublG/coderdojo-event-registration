@@ -166,6 +166,26 @@ def laptop_question(*event_ids, answer_places=False):
     return [int(i) for i in out.strip().splitlines()[-1].split(",")]
 
 
+def keep_upcoming(*event_ids, days=7):
+    """Move each session that starts within `days` (or has passed) forward by whole weeks,
+    keeping its weekday and times, so the journeys always find it upcoming. Rerun-safe."""
+    django(
+        "from datetime import timedelta\n"
+        "from django.utils import timezone\n"
+        "from auditlog.context import disable_auditlog\n"
+        "from events.models import Event\n"
+        "with disable_auditlog():\n"
+        f"    for e in Event.objects.filter(pk__in={list(event_ids)!r}):\n"
+        "        weeks = 0\n"
+        f"        while e.start_time + timedelta(weeks=weeks) < timezone.now() + timedelta(days={days}):\n"
+        "            weeks += 1\n"
+        "        if weeks:\n"
+        "            e.start_time += timedelta(weeks=weeks)\n"
+        "            e.end_time += timedelta(weeks=weeks)\n"
+        "            e.save(update_fields=['start_time', 'end_time'])\n"
+    )
+
+
 def mail_shot(j, to, before, key, title, text, wait=90):
     t = time.time()
     while time.time() - t < wait:

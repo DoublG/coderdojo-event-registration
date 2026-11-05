@@ -84,7 +84,7 @@ INTRO = {
         [
             "Watch the dashboard and next session",
             "Keep the dojo's public profile up to date",
-            "Plan and publish sessions, handle the waiting list",
+            "Plan and publish sessions, handle the waiting list, tell families about a change",
             "Take attendance, manage the team and members",
             "Post updates, mail families, connect apps",
         ],

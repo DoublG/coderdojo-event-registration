@@ -1,7 +1,15 @@
-from lib import BASE, Journey, django, laptop_question, mail_ids, mail_shot, sync_playwright  # noqa: F401
+from lib import BASE, Journey, django, keep_upcoming, laptop_question, mail_ids, mail_shot, sync_playwright  # noqa: F401
 
 with sync_playwright() as pw:
-    laptop_question(76, answer_places=True)
+    laptop_question(76, 77, answer_places=True)
+    keep_upcoming(77)
+    # A clean slate for the session notices (§31): at most three a day per session.
+    django("from events.models import SessionNotice; SessionNotice.objects.filter(event_id=77).delete()")
+    # The family whose mail is shown: one with the PDF's language as its mail language.
+    family = (
+        "guardian-1@coderdojo-demo.example" if __import__("lib").LANG == "nl" else "guardian-2@coderdojo-demo.example"
+    )
+    before = mail_ids(family)
     j = Journey("champion", pw)
     j.login("owner-51-dojo-westerlo")
     p = j.go("/dojos/51/dashboard/")
@@ -38,12 +46,57 @@ with sync_playwright() as pw:
         "A new session: date and times (Belgian notation), places, age range, audience (e.g. a girls' session), a banner from the image library or an upload, the team running it and the pathways. It starts with the dojo's default sign-up questions, and as a draft; publishing opens registrations and the families get the new-sessions mail.",
         max_h=2800,
     )
-    p = j.go("/dojos/51/events/76/")
+    p = j.go("/dojos/51/events/77/")
     j.shot(
         "event",
         "A full session with a waiting list",
-        "The session page shows places taken and the waiting list; when a family cancels, the first child waiting is promoted and their family is mailed. Its Sign-up questions card asks families yes/no questions per child (here the laptop question), with the totals for confirmed places and the waiting list.",
+        "The session page shows places taken and the waiting list; when a family cancels, or the team adds places, the first children waiting are promoted and their families are mailed. Its Sign-up questions card asks families yes/no questions per child (here the laptop question), with the totals for confirmed places and the waiting list. Mail the families is for telling them about a change; after a save that changes the venue, the times or the places, it offers the matching prepared mail.",
         max_h=2200,
+    )
+    p.on("dialog", lambda d: d.accept())  # Send asks "Send this mail to the families now?"
+    p = j.go("/dojos/51/events/77/notify/?kind=message")
+    p.fill("#id_subject", "Ingang via de achterkant")
+    p.fill(
+        "#id_message",
+        "Hallo! Zaterdag is de voordeur dicht door werken. Kom binnen via de ingang aan de parking achteraan, we hangen pijlen op. Tot dan!",
+    )
+    if p.locator("[name='tr__en-us__subject']").count():
+        p.locator("details:has([name='tr__en-us__subject'])").evaluate("d => (d.open = true)")
+        p.fill("[name='tr__en-us__subject']", "Entrance at the back")
+        p.fill(
+            "[name='tr__en-us__message']",
+            "Hi! On Saturday the front door is closed for building work. Come in through the entrance by the car park at the back, we'll put up arrows. See you then!",
+        )
+    p.click("button[name=preview]")
+    p.wait_for_load_state("networkidle")
+    j.shot(
+        "notify",
+        "Telling the families about a change",
+        "A prepared mail about a new venue, new times or the number of places (with the values from before, so the mail says what changed), or a message of the team's own, to the families with a place, on the waiting list or both, with a count for each. Preview shows the mail as the first family gets it; every family gets it in its own language, with the team's text in that language when they wrote one.",
+        max_h=2400,
+    )
+    p.click("button[name=send]")
+    p.wait_for_load_state("networkidle")
+    j.shot(
+        "notified",
+        "Sent",
+        "The mail goes to the parents and guardians of every child in the group (and a child's own login with an address), one mail per family. The session's page lists what was sent, when, to how many accounts and by whom. Families can't switch these mails off, so a session gets at most three a day.",
+        max_h=1600,
+    )
+    mail_shot(
+        j,
+        family,
+        before,
+        "notice-mail",
+        "The mail the families get",
+        "In the family's own mail language, with the session's details and the team's text. Replies go to the dojo's address.",
+    )
+    p = j.go("/dojos/51/events/77/cancel/")
+    j.shot(
+        "cancel",
+        "Calling a session off",
+        "Cancel session… asks first. A cancelled session stays on its page, marked as cancelled, so families who look it up see what happened; nobody can sign up, it drops out of the session lists and reminders, and the registrations are kept. Ticked, the families get the prepared cancellation mail with an optional note from the team. It can be reopened later.",
+        max_h=1600,
     )
     p = j.go("/dojos/51/events/76/attendance/")
     j.shot(
