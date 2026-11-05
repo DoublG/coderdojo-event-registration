@@ -1,5 +1,5 @@
 {
- "generated_from": "6bd1a5d",
+ "generated_from": "e1e5bad",
  "generated_on": "2026-11-05",
  "personas": {
   "parent": {
@@ -9,7 +9,7 @@
     "/account/delete/",
     "/account/mail/",
     "/account/ninja/9/",
-    "/account/registration/2451/answers/",
+    "/account/registration/2454/answers/",
     "/account/security/",
     "/dojos/",
     "/dojos/51/",
@@ -56,7 +56,7 @@
     "content/templates/content/partials/_promotion_hero_card.html": "977f7a87f7507684",
     "core/templates/core/menu.html": "fc0ae6dd632f1501",
     "core/templates/core/partials/_active_filters.html": "1cbfed7bdc3914e6",
-    "dojos/templates/dojos/dojo_detail.html": "21d756cb28357f7b",
+    "dojos/templates/dojos/dojo_detail.html": "bb3ce4c3b0864ec2",
     "dojos/templates/dojos/dojo_list.html": "5e937678f7b64dcd",
     "dojos/templates/dojos/partials/_dojo_finder_widget.html": "c9c61eb468cdce6b",
     "dojos/templates/dojos/partials/_dojo_finder_widget_results.html": "79b5b32749140431",
@@ -152,7 +152,7 @@
     "applications/templates/applications/upload_background_check.html": "a83cfbc9ab8451c0",
     "core/templates/core/menu.html": "fc0ae6dd632f1501",
     "dojos/templates/dojos/dojo_dashboard.html": "c89615640a4ca2d7",
-    "dojos/templates/dojos/dojo_detail.html": "21d756cb28357f7b",
+    "dojos/templates/dojos/dojo_detail.html": "bb3ce4c3b0864ec2",
     "dojos/templates/dojos/dojo_event_attendance.html": "ec9f89abf8150a29",
     "dojos/templates/dojos/dojo_event_detail.html": "e3273f053dff7791",
     "dojos/templates/dojos/dojo_event_list.html": "966588f53c05af01",
