@@ -28,7 +28,7 @@ Markdown==3.11.1
 mysqlclient==2.3.0
 # Cleans the HTML a team's Markdown becomes (core/templatetags/markdown_extras.py).
 nh3==0.3.7
-pillow==12.3.0
+pillow==13.0.0
 redis==8.1.0
 requests==2.34.2
 # Production serves the site with uvicorn workers (main.py), which Level27
@@ -39,11 +39,14 @@ websockets==17.2
 # Pulled in by the above (pinned for reproducible installs):
 asgiref==3.12.1
 attrs==26.1.0
+# 26.7.1, not 26.10.1+: those need cbor2>=6.1, and webauthn 2.x (below) keeps cbor2 on 5.x.
+# CVE-2026-116579 is ignored in audit.yml: daphne's WebSocket server, development only
+# (MAINTENANCE.md, Security log).
 autobahn==26.7.1
 Automat==25.4.16
 # 5.x, not 6: webauthn 2.x (below) needs cbor2<6; autobahn takes >=5.2.
 cbor2==5.9.0
-certifi==2026.7.22
+certifi==2026.10.23
 cffi==2.1.1
 charset-normalizer==3.5.2
 constantly==23.10.4
@@ -57,7 +60,7 @@ pycparser==3.11
 pyOpenSSL==26.4.0
 service-identity==26.1.0
 sqlparse==0.6.0
-Twisted==26.4.0
+Twisted==26.10.0
 txaio==26.6.1
 typing_extensions==4.16.0
 ujson==6.0.0
@@ -116,5 +119,5 @@ webauthn==2.8.0
 django-formtools==2.7
 django-phonenumber-field==8.5.0
 qrcode==8.2
-pyasn1==0.6.4
+pyasn1==0.6.5
 pyasn1-modules==0.4.2
