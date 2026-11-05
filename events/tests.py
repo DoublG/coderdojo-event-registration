@@ -411,6 +411,52 @@ class BookingTests(TestCase):
         self.assertTrue(Registration.objects.get(pk=results[2]["registration"].pk).waiting_list)
 
 
+class FillFreePlacesTests(TestCase):
+    """events.registrations.fill_free_places: more places go to the children
+    waiting longest (DATA_MODEL_NOTICES.md, "Related fix")."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.dojo = make_dojo("Ghent")
+        cls.guardian = User.objects.create(username="g1", email="g1@example.com")
+        cls.children = [Ninja.objects.create(name=f"Kid {n}") for n in range(4)]
+        for child in cls.children:
+            Guardianship.objects.create(guardian=cls.guardian, ninja=child)
+
+    def _full_session(self, **kwargs):
+        event = _future_event(self.dojo, places=1, **kwargs)
+        results = registrations.sign_up(event, self.children)
+        return event, [r["registration"] for r in results]
+
+    def test_more_places_promote_the_children_waiting_longest_and_mail_them(self):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from mailing.models import EmailMessage
+
+        call_command("load_mail_templates", stdout=StringIO())
+        event, regs = self._full_session()
+        Event.objects.filter(pk=event.pk).update(places=3)
+        before = EmailMessage.objects.filter(template_key="waitlist_promoted").count()
+        promoted = registrations.fill_free_places(event)
+        self.assertEqual(promoted, regs[1:3])
+        waiting = {r.pk: r.waiting_list for r in Registration.objects.filter(event=event)}
+        self.assertEqual([waiting[r.pk] for r in regs], [False, False, False, True])
+        self.assertEqual(EmailMessage.objects.filter(template_key="waitlist_promoted").count(), before + 2)
+
+    def test_no_free_place_promotes_nobody(self):
+        event, _regs = self._full_session()
+        self.assertEqual(registrations.fill_free_places(event), [])
+        self.assertEqual(Registration.objects.filter(event=event, waiting_list=True).count(), 3)
+
+    def test_a_session_that_started_is_left_alone(self):
+        event, _regs = self._full_session()
+        Event.objects.filter(pk=event.pk).update(places=4, start_time=timezone.now() - timedelta(minutes=5))
+        self.assertEqual(registrations.fill_free_places(event), [])
+        self.assertEqual(Registration.objects.filter(event=event, waiting_list=True).count(), 3)
+
+
 class BookingConcurrencyTests(TransactionTestCase):
     """Families clicking at the same moment (CAPACITY.md, finding 1): real
     threads, each with its own database connection, released together.

@@ -91,6 +91,11 @@
         <div class="cd-form__notes">
           {% if saved %}
             <p class="cd-form__note cd-form__note--success">{% translate "Saved." %}</p>
+            {% if promoted %}
+              <p class="cd-form__note cd-form__note--success">
+                {% blocktranslate count counter=promoted %}One child moved from the waiting list into the new places; their family got a mail.{% plural %}{{ counter }} children moved from the waiting list into the new places; their families got a mail.{% endblocktranslate %}
+              </p>
+            {% endif %}
           {% endif %}
           {% for error in form.non_field_errors %}
             <p class="cd-form__note cd-form__note--error">{{ error }}</p>

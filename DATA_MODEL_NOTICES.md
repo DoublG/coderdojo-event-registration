@@ -146,7 +146,7 @@ point 2) and `DATA_MODEL.md`'s event state machine follow.
 - `cancel(event, *, cancelled_by, notify, note)` in `events.services` next to `set_status`, which sets
   `cancelled` and sends the notice when asked.
 
-## Related fix, built first: raising the places (decided 5 Nov 2026)
+## Related fix, built first: raising the places (decided and built 5 Nov 2026)
 
 Since raising `places` leaves the waiting list where it is, saving more places promotes
 the children waiting longest into the new places, through `events.registrations` (locked like
@@ -174,7 +174,9 @@ The help centre (the dojo team's page on sessions, en/fr/nl), `DATA_MODEL.md`'s 
 
 ## Phases
 
-1. Raising places promotes the waiting list (the related fix), on its own.
+1. Raising places promotes the waiting list (the related fix), on its own. **Built 5 Nov 2026:**
+   `events.registrations.fill_free_places`, called by the event page (`dojo_event_detail`, with a note
+   on how many moved up) and the API's sync when the places go up.
 2. `SessionNotice`, `events/notices.py`, the five templates, the compose page and the *Mail the families*
    card (all kinds except cancelled).
 3. The save banner with the signed before-values.

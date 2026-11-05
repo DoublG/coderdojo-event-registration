@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 07:57+0000\n"
+"POT-Creation-Date: 2026-11-05 07:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -7830,7 +7830,7 @@ msgstr "Terug naar het evenement"
 
 # | msgid "Back to session"
 #: dojos/templates/dojos/dojo_event_attendance.html:10
-#: dojos/templates/dojos/dojo_event_detail.html:104
+#: dojos/templates/dojos/dojo_event_detail.html:109
 msgid "Back to events"
 msgstr "Terug naar de evenementen"
 
@@ -7909,7 +7909,22 @@ msgstr ""
 msgid "Saved."
 msgstr "Opgeslagen."
 
-#: dojos/templates/dojos/dojo_event_detail.html:105
+#: dojos/templates/dojos/dojo_event_detail.html:96
+#, python-format
+msgid ""
+"One child moved from the waiting list into the new places; their family got "
+"a mail."
+msgid_plural ""
+"%(counter)s children moved from the waiting list into the new places; their "
+"families got a mail."
+msgstr[0] ""
+"Eén kind schoof van de wachtlijst door naar de nieuwe plaatsen; het gezin "
+"kreeg een mail."
+msgstr[1] ""
+"%(counter)s kinderen schoven van de wachtlijst door naar de nieuwe plaatsen; "
+"hun gezinnen kregen een mail."
+
+#: dojos/templates/dojos/dojo_event_detail.html:110
 #: dojos/templates/dojos/dojo_manage.html:179
 msgid "Save changes"
 msgstr "Wijzigingen opslaan"
@@ -9208,7 +9223,7 @@ msgstr "Hoogstens %(max)s vragen: verwijder er eerst een."
 msgid "This session has started, so the answers can't change any more."
 msgstr "Deze sessie is begonnen, dus de antwoorden kunnen niet meer wijzigen."
 
-#: events/questions.py:191 events/registrations.py:71
+#: events/questions.py:191 events/registrations.py:72
 msgid "The questions for this session changed, please check them again."
 msgstr "De vragen voor deze sessie zijn gewijzigd, kijk ze opnieuw na."
 
@@ -9216,40 +9231,40 @@ msgstr "De vragen voor deze sessie zijn gewijzigd, kijk ze opnieuw na."
 msgid "That question isn't one of this session's."
 msgstr "Die vraag hoort niet bij deze sessie."
 
-#: events/registrations.py:61 events/templates/events/event_signup.html:85
+#: events/registrations.py:62 events/templates/events/event_signup.html:85
 #: events/views.py:202
 msgid "Registrations for this session are closed."
 msgstr "De inschrijvingen voor deze sessie zijn gesloten."
 
-#: events/registrations.py:67
+#: events/registrations.py:68
 msgid "The child(ren) you selected are already signed up for this session."
 msgstr "De gekozen kinderen zijn al ingeschreven voor deze sessie."
 
-#: events/services.py:54
+#: events/services.py:55
 msgid "End time must be after the start time."
 msgstr "Het einduur moet na het beginuur liggen."
 
-#: events/services.py:56
+#: events/services.py:57
 msgid "A session needs at least one place."
 msgstr "Een sessie heeft minstens één plaats nodig."
 
-#: events/services.py:58
+#: events/services.py:59
 msgid "The maximum age can't be below the minimum age."
 msgstr "De maximumleeftijd kan niet lager zijn dan de minimumleeftijd."
 
-#: events/services.py:128 events/services.py:145
+#: events/services.py:129 events/services.py:146
 msgid "This session would be in the past."
 msgstr "Deze sessie zou in het verleden liggen."
 
-#: events/services.py:135
+#: events/services.py:136
 msgid "This session was just created by another call: try again."
 msgstr "Deze sessie is net door een andere oproep aangemaakt: probeer opnieuw."
 
-#: events/services.py:142
+#: events/services.py:143
 msgid "This session has already started: change it on the site if needed."
 msgstr "Deze sessie is al begonnen: wijzig ze zo nodig op de site."
 
-#: events/services.py:169
+#: events/services.py:173
 msgid "This key is used by an earlier row too."
 msgstr "Deze sleutel staat ook al op een eerdere rij."
 

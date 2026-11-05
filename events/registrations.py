@@ -1,5 +1,5 @@
-"""Signing children up for a session and cancelling a place: the places, the
-waiting list and its positions (CAPACITY.md, finding 1).
+"""Signing children up for a session, cancelling a place and filling the
+places the team added: the places, the waiting list and its positions (CAPACITY.md, finding 1).
 
 Both lock the session's row first (`SELECT ... FOR UPDATE`), so sign-ups
 and cancellations for one session happen one at a time: two families
@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any
 
 from django.db import transaction
 from django.db.models import Max
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from accounts.home_dojo import assign_on_signup
@@ -117,14 +118,35 @@ def cancel(registration: Registration, cancelled_by: "User | None") -> Registrat
         registration.delete()
         if not was_confirmed:
             return None
-        # Only into a place that's really free: a session the team gave fewer
-        # places after it filled up stays as it is.
-        if Registration.objects.filter(event=event, waiting_list=False).count() >= event.places:
-            return None
-        promoted = Registration.objects.filter(event=event, waiting_list=True).order_by("position").first()
-        if promoted is None:
-            return None
-        promoted.waiting_list = False
-        promoted.save(update_fields=["waiting_list"])
-        waitlist_promoted_mail(promoted)
-        return promoted
+        promoted = _promote(event, at_most=1)
+        return promoted[0] if promoted else None
+
+
+def fill_free_places(event: Event) -> list[Registration]:
+    """Give the session's free places to the children waiting longest, in
+    waiting-list order, and mail each family (DATA_MODEL_NOTICES.md, "Related
+    fix"). Called after the team raised the places (the event form, the
+    API's sync); does nothing for a session that has already started.
+    Returns the promoted registrations."""
+    with transaction.atomic():
+        event = _lock(event.pk)
+        if event.start_time <= timezone.now():
+            return []
+        return _promote(event)
+
+
+def _promote(event: Event, at_most: int | None = None) -> list[Registration]:
+    """Under the session's lock: move waiting children into the places that
+    are really free (a session the team gave fewer places after it filled up
+    stays as it is), at most `at_most` of them."""
+    free = event.places - Registration.objects.filter(event=event, waiting_list=False).count()
+    if at_most is not None:
+        free = min(free, at_most)
+    if free <= 0:
+        return []
+    promoted = list(Registration.objects.filter(event=event, waiting_list=True).order_by("position")[:free])
+    for registration in promoted:
+        registration.waiting_list = False
+        registration.save(update_fields=["waiting_list"])
+        waitlist_promoted_mail(registration)
+    return promoted

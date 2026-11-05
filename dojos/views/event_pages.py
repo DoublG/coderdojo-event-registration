@@ -10,7 +10,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from accounts.organisation import Area, has_area
 from content.manage import promotion_state
 from events import questions as event_questions
-from events import services
+from events import registrations, services
 from events.forms import EventForm
 from events.models import Event
 
@@ -83,12 +83,17 @@ def dojo_event_detail(request, dojo_id, event_id):
     dojo = access.dojo
     event = get_object_or_404(Event, id=event_id, dojo=dojo)
     saved = False
+    promoted = []
 
     if request.method == "POST":
+        places_before = event.places
         form = EventForm(request.POST, request.FILES, instance=event, dojo=dojo)
         if form.is_valid():
             event = form.save()
             saved = True
+            # More places: the children waiting longest get them (and a mail).
+            if event.places > places_before:
+                promoted = registrations.fill_free_places(event)
     else:
         form = EventForm(instance=event, dojo=dojo)
 
@@ -99,6 +104,7 @@ def dojo_event_detail(request, dojo_id, event_id):
             "event": event,
             "form": form,
             "saved": saved,
+            "promoted": len(promoted),
             "active": "events",
             **questions_context(event),
             **_event_promotions_context(request, event),

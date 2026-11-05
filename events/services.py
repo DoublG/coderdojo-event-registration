@@ -17,6 +17,7 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
+from . import registrations
 from .models import Event
 
 if TYPE_CHECKING:
@@ -148,9 +149,12 @@ def _sync_one(dojo: "Dojo", session: PlannedSession, now: datetime) -> SyncResul
         changed.append("status")
     if not changed:
         return SyncResult(ref, UNCHANGED, event.id)
+    more_places = "places" in changed and values["places"] > event.places
     for field in changed:
         setattr(event, field, session.status if field == "status" else values[field])
     event.save()  # a full save(): the audit log records it, the caches are cleared
+    if more_places:
+        registrations.fill_free_places(event)
     return SyncResult(ref, UPDATED, event.id)
 
 

@@ -1186,6 +1186,34 @@ class DojoEventDetailViewTests(TestCase):
         response = self.client.get(self._url(other_event))
         self.assertEqual(response.status_code, 404)
 
+    def test_raising_the_places_promotes_the_waiting_list(self):
+        self.event.places = 1
+        self.event.save()
+        children = [Ninja.objects.create(name=f"Kid {n}") for n in range(3)]
+        for n, child in enumerate(children):
+            Registration.objects.create(event=self.event, ninja=child, waiting_list=n > 0, position=n + 1)
+        self.client.force_login(self.owner)
+
+        response = self.client.post(self._url(), self._valid_post_data(places="2"))
+
+        self.assertEqual(response.context["promoted"], 1)
+        self.assertContains(response, "One child moved from the waiting list")
+        waiting = list(
+            Registration.objects.filter(event=self.event).order_by("position").values_list("waiting_list", flat=True)
+        )
+        self.assertEqual(waiting, [False, False, True])
+
+    def test_lowering_the_places_keeps_every_child_with_a_place(self):
+        children = [Ninja.objects.create(name=f"Kid {n}") for n in range(3)]
+        for n, child in enumerate(children):
+            Registration.objects.create(event=self.event, ninja=child, waiting_list=False, position=n + 1)
+        self.client.force_login(self.owner)
+
+        response = self.client.post(self._url(), self._valid_post_data(places="1"))
+
+        self.assertEqual(response.context["promoted"], 0)
+        self.assertEqual(Registration.objects.filter(event=self.event, waiting_list=False).count(), 3)
+
     def test_get_prefills_form_from_event(self):
         self.client.force_login(self.owner)
 
