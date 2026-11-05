@@ -16,6 +16,7 @@ from .models import (
     Registration,
     RegistrationAnswer,
     RegistrationCancellation,
+    SessionNotice,
     TeamAttendance,
 )
 
@@ -121,6 +122,18 @@ class RegistrationCancellationAdmin(admin.ModelAdmin):
     list_display = ["cancelled_at", "ninja", "event", "was_waitlisted", "cancelled_by"]
     list_filter = ["was_waitlisted"]
     search_fields = ["ninja__name", "ninja__family_name", "event__name"]
+
+
+@admin.register(SessionNotice)
+class SessionNoticeAdmin(TranslationAdminMixin, admin.ModelAdmin):
+    """The mails a session's team sent its families about a change (append-only in
+    normal use: events.notices). Editing a row here changes the record, never a
+    mail already sent."""
+
+    list_display = ["sent_at", "event", "kind", "audience", "recipients", "sent_by"]
+    list_filter = ["kind", "audience"]
+    search_fields = ["event__name", "event__dojo__name", "subject"]
+    raw_id_fields = ["event", "sent_by"]
 
 
 @admin.register(NinjaEngagementChange)

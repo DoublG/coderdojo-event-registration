@@ -277,6 +277,71 @@ class RegistrationCancellation(models.Model):
         return f"{self.ninja} cancelled {self.event}"
 
 
+class SessionNoticeManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("event__dojo")
+
+
+class SessionNotice(TranslatableModel):
+    """A mail the session's team sent to its families about a change
+    (DATA_MODEL_NOTICES.md, §31): append-only, one row per notice sent, the
+    mails themselves are EmailMessage rows (idempotency key
+    `session_notice:<id>:<user>`). Sent only through events.notices."""
+
+    VENUE_CHANGED = "venue_changed"
+    TIME_CHANGED = "time_changed"
+    PLACES_CHANGED = "places_changed"
+    CANCELLED = "cancelled"
+    MESSAGE = "message"
+    KIND_CHOICES = [
+        (VENUE_CHANGED, _("The venue changed")),
+        (TIME_CHANGED, _("The date or times changed")),
+        (PLACES_CHANGED, _("The number of places changed")),
+        (CANCELLED, _("The session is cancelled")),
+        (MESSAGE, _("A message of your own")),
+    ]
+
+    CONFIRMED = "confirmed"
+    WAITING_LIST = "waiting_list"
+    BOTH = "both"
+    AUDIENCE_CHOICES = [
+        (BOTH, _("Families with a place and those on the waiting list")),
+        (CONFIRMED, _("Families with a place")),
+        (WAITING_LIST, _("Families on the waiting list")),
+    ]
+
+    TRANSLATABLE_FIELDS = ("subject", "message")
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="notices")
+    kind = models.CharField(max_length=20, choices=KIND_CHOICES)
+    audience = models.CharField(max_length=20, choices=AUDIENCE_CHOICES, default=BOTH)
+    subject = models.CharField(max_length=150, blank=True, help_text="Only for a message of the team's own.")
+    message = models.TextField(
+        blank=True, help_text="The team's own text: a note under a prepared mail, or the whole message."
+    )
+    changes = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='What changed, as shown in the mail: {"venue": ["before", "after"]}; times as ISO strings.',
+    )
+    sent_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    sent_at = models.DateTimeField(default=timezone.now)
+    recipients = models.PositiveIntegerField(default=0, help_text="Accounts it was queued for.")
+
+    objects = SessionNoticeManager()
+
+    class Meta:
+        ordering = ["-sent_at", "-id"]
+
+    def __str__(self):
+        return f"{self.get_kind_display()}: {self.event}"
+
+    def content_languages(self):
+        return self.event.content_languages()
+
+
 class Belt(OrganisationContent):
     """A ninja's proficiency level: how skilled they are, not how often they
     came (that's a milestone Badge). One overall track, ordered by `level`;

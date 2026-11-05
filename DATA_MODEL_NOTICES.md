@@ -178,8 +178,18 @@ The help centre (the dojo team's page on sessions, en/fr/nl), `DATA_MODEL.md`'s 
    `events.registrations.fill_free_places`, called by the event page (`dojo_event_detail`, with a note
    on how many moved up) and the API's sync when the places go up.
 2. `SessionNotice`, `events/notices.py`, the five templates, the compose page and the *Mail the families*
-   card (all kinds except cancelled).
-3. The save banner with the signed before-values.
+   card (all kinds except cancelled). **Built 5 Nov 2026:** `events.SessionNotice`, `events/notices.py`
+   (`recipients`, `reach`, `notice_problems`, `send_notice`, `preview`, the change token), the templates
+   `session_venue_changed`, `session_time_changed`, `session_places_changed`, `session_cancelled` and
+   `session_message` (`mailing/seed_templates.py`), `events.forms.SessionNoticeForm`, the compose page
+   `dojos.views.notices.dojo_event_notify` (`/dojos/<id>/events/<event_id>/notify/`, with a *Preview*
+   before *Send*) and the card on the session's page (`dojos/partials/_event_notices.html`). Settings:
+   `SESSION_NOTICES_PER_DAY` (3, any 24 hours), `SESSION_NOTICE_MAX_LENGTH` (2,000),
+   `SESSION_NOTICE_HOURS_AFTER_END` (24).
+3. The save banner with the signed before-values. **Built 5 Nov 2026, with phase 2:** a save of an open
+   session with registrations that changed the venue, times or places turns the card into a button per
+   change; a change the families were already mailed about (a notice of that kind with the same
+   before/after values) isn't offered again.
 4. `Event.CANCELLED`: the status, everything that must skip it, the cancel page with its notice.
 
 ## Open points

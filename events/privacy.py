@@ -14,6 +14,7 @@ from .models import (
     Registration,
     RegistrationAnswer,
     RegistrationCancellation,
+    SessionNotice,
     TeamAttendance,
 )
 
@@ -96,6 +97,22 @@ register(
         "cancelled_by": personal(Category.IDENTITY),
     },
     not_personal=["id", "event"],
+)
+
+register(
+    SessionNotice,
+    subjects={Subject.ACCOUNT: "sent_by"},
+    purpose="Telling the families of a session about a change to it (DATA_MODEL_NOTICES.md)",
+    legal_basis=LegalBasis.CONTRACT,
+    retention="team",
+    seen_by="The session's dojo team; the organisation (Django admin)",
+    fields={
+        "sent_by": personal(Category.IDENTITY),
+        ("subject", "message", "translations"): keep(
+            Category.IDENTITY, "the dojo team's own text to the session's families, kept with the session"
+        ),
+    },
+    not_personal=["id", "event", "kind", "audience", "changes", "sent_at", "recipients"],
 )
 
 AWARDED = dict(

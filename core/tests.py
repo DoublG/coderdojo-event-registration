@@ -1,5 +1,5 @@
 import re
-from datetime import date
+from datetime import date, timedelta
 
 from django.conf import settings
 from django.contrib.staticfiles import finders
@@ -91,6 +91,7 @@ class StrNeverQueriesTests(TestCase):
             Registration,
             RegistrationAnswer,
             RegistrationCancellation,
+            SessionNotice,
             TeamAttendance,
         )
         from mailing.models import ConsentEvent, DojoMailMute, EmailMessage, MailPreference
@@ -160,6 +161,15 @@ class StrNeverQueriesTests(TestCase):
                 "jan: dojo_news from Ghent",
             ),
             (DojoMailMute.objects.create(user=user, dojo=dojo), "jan: muted Ghent"),
+            (
+                SessionNotice.objects.create(
+                    event=Event.objects.create(
+                        name="Moved", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()
+                    ),
+                    kind=SessionNotice.VENUE_CHANGED,
+                ),
+                "The venue changed: Moved",
+            ),
             (
                 Promotion.objects.create(
                     event=Event.objects.create(
@@ -454,6 +464,7 @@ class AuditLogCoverageTests(TestCase):
         "events.NinjaEngagement": "rebuilt by the site every night",
         "events.NinjaEngagementChange": "written by the nightly rebuild; itself a history",
         "events.RegistrationCancellation": "itself a log of cancellations",
+        "events.SessionNotice": "itself a log of the notices a session's team sent",
         "events.EventQuestion": "the dojo's own text, like the event",
         "dojos.DojoQuestion": "the dojo's own text, like the event's questions",
         "geo.AdministrativeBoundary": "reference data, from seed files",
@@ -851,7 +862,7 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             TransferChampionForm,
         )
         from dojos.testing import make_dojo
-        from events.forms import AssignBadgeForm, BadgeForm, EventForm
+        from events.forms import AssignBadgeForm, BadgeForm, EventForm, SessionNoticeForm
         from events.models import Event, EventQuestion, Registration
         from mailing.forms import BlockAddressForm, NewTemplateForm, TemplateVersionForm
         from privacy.forms import ConfirmUsernameForm
@@ -884,6 +895,14 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             RegisterIndividualForm(),
             DojoProfileForm(instance=make_dojo("Antwerp")),
             EventForm(dojo=bruges, instance=Event(dojo=bruges)),
+            SessionNoticeForm(
+                event=Event(
+                    dojo=bruges,
+                    places=10,
+                    start_time=timezone.now(),
+                    end_time=timezone.now() + timedelta(hours=2),
+                )
+            ),
             EventQuestionForm(question=EventQuestion(event=Event(dojo=bruges))),
             CampaignForm(),
             JourneyForm(),

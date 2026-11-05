@@ -19,8 +19,8 @@ from core.uploads import with_upload_help
 from dojos.models import Dojo
 from pathways.models import Pathway
 
-from . import services
-from .models import Badge, Event
+from . import notices, services
+from .models import Badge, Event, SessionNotice
 from .template_images import TEMPLATE_IMAGES
 
 DATE_ANY = ""
@@ -317,6 +317,148 @@ class EventForm(forms.ModelForm):
             event.save()
             self.save_m2m()
         return event
+
+
+class SessionNoticeForm(forms.ModelForm):
+    """Writing a notice to a session's families (DATA_MODEL_NOTICES.md): a
+    prepared mail about the venue, the times or the places, or a message of
+    the team's own, to the families with a place, on the waiting list or
+    both. The values from before the change show under the picked kind
+    (CSS alone, :has), prefilled from the save that offered the notice, or
+    from the session as it is. events.notices decides whether it can go."""
+
+    kind = forms.ChoiceField(label=_("What it's about"), widget=forms.RadioSelect)
+    audience = forms.ChoiceField(
+        label=_("Who gets it"), widget=forms.RadioSelect, choices=SessionNotice.AUDIENCE_CHOICES
+    )
+    old_venue = forms.CharField(
+        label=_("Venue before"),
+        required=False,
+        max_length=200,
+        help_text=_("Leave it empty if the session had no venue of its own."),
+    )
+    old_date = forms.DateField(
+        label=_("Date before"),
+        required=False,
+        input_formats=[BELGIAN_DATE_FORMAT],
+        widget=forms.DateInput(
+            attrs={"placeholder": _("dd/mm/yyyy"), "inputmode": "numeric"}, format=BELGIAN_DATE_FORMAT
+        ),
+    )
+    old_start = forms.TimeField(
+        label=_("Started before"),
+        required=False,
+        input_formats=[BELGIAN_TIME_FORMAT],
+        widget=forms.TimeInput(attrs={"placeholder": _("HH:MM")}, format=BELGIAN_TIME_FORMAT),
+    )
+    old_end = forms.TimeField(
+        label=_("Ended before"),
+        required=False,
+        input_formats=[BELGIAN_TIME_FORMAT],
+        widget=forms.TimeInput(attrs={"placeholder": _("HH:MM")}, format=BELGIAN_TIME_FORMAT),
+    )
+    old_places = forms.IntegerField(label=_("Places before"), required=False, min_value=0)
+
+    KIND_FIELDS = {
+        SessionNotice.VENUE_CHANGED: ("old_venue",),
+        SessionNotice.TIME_CHANGED: ("old_date", "old_start", "old_end"),
+        SessionNotice.PLACES_CHANGED: ("old_places",),
+        SessionNotice.MESSAGE: ("subject",),
+    }
+
+    class Meta:
+        model = SessionNotice
+        fields = ["subject", "message"]
+        labels = {"subject": _("Subject"), "message": _("Your text")}
+        help_texts = {
+            "subject": _("The session's name goes in front of it."),
+            "message": _(
+                "With a prepared mail, an optional note from the team under it; with a message of your own, "
+                "the whole message. Plain text: links work, there's no layout."
+            ),
+        }
+        widgets = {"message": forms.Textarea(attrs={"rows": 8})}
+
+    def __init__(self, *args, event, before=None, **kwargs):
+        self.event = event
+        kwargs.setdefault("instance", SessionNotice(event=event))
+        before = before or notices.snapshot(event)
+        start = timezone.localtime(datetime.fromisoformat(before["start_time"]))
+        end = timezone.localtime(datetime.fromisoformat(before["end_time"]))
+        initial = kwargs.setdefault("initial", {})
+        initial.setdefault("audience", SessionNotice.BOTH)
+        initial.setdefault("old_venue", before["venue"])
+        initial.setdefault("old_date", start.date())
+        initial.setdefault("old_start", start.time())
+        initial.setdefault("old_end", end.time())
+        initial.setdefault("old_places", before["places"])
+        super().__init__(*args, **kwargs)
+        kinds = dict(SessionNotice.KIND_CHOICES)
+        self.fields["kind"].choices = [(kind, kinds[kind]) for kind in notices.COMPOSE_KINDS]
+        self.fields["message"].max_length = settings.SESSION_NOTICE_MAX_LENGTH
+        self.fields["message"].widget.attrs["maxlength"] = settings.SESSION_NOTICE_MAX_LENGTH
+        labels = {"subject": _("Subject"), "message": _("Your text")}
+        self.translation_groups = bound_translation_groups(
+            self,
+            add_translation_fields(
+                self, self.instance, lambda field: optional_copy(self.fields[field], labels[field])
+            ),
+        )
+
+    def kind_options(self):
+        """Per kind: its radio value, label, whether it's picked, and the fields shown under it."""
+        picked = str(self["kind"].value() or "")
+        return [
+            {
+                "key": key,
+                "label": label,
+                "checked": key == picked,
+                "fields": [self[name] for name in self.KIND_FIELDS[key] if name != "subject"],
+            }
+            for key, label in self.fields["kind"].choices
+        ]
+
+    def clean(self):
+        cleaned = super().clean()
+        kind = cleaned.get("kind")
+        required = {
+            SessionNotice.TIME_CHANGED: ("old_date", "old_start", "old_end"),
+            SessionNotice.PLACES_CHANGED: ("old_places",),
+            SessionNotice.MESSAGE: ("subject", "message"),
+        }.get(kind, ())
+        for name in required:
+            if name not in self.errors and cleaned.get(name) in (None, ""):
+                self.add_error(name, _("This field is required."))
+        if kind == SessionNotice.TIME_CHANGED and not self.errors:
+            if cleaned["old_end"] <= cleaned["old_start"]:
+                self.add_error("old_end", _("End time must be after the start time."))
+        return cleaned
+
+    def before(self):
+        """The values from before the change, as events.notices.snapshot has them."""
+        cleaned = self.cleaned_data
+        before = {"venue": cleaned.get("old_venue") or "", "places": cleaned.get("old_places")}
+        if cleaned.get("old_date") and cleaned.get("old_start") and cleaned.get("old_end"):
+            day = cleaned["old_date"]
+            before["start_time"] = timezone.make_aware(datetime.combine(day, cleaned["old_start"])).isoformat()
+            before["end_time"] = timezone.make_aware(datetime.combine(day, cleaned["old_end"])).isoformat()
+        return before
+
+    def build_notice(self, sent_by):
+        """The notice, not saved: events.notices.send_notice checks and sends it."""
+        notice = self.save(commit=False)
+        notice.event = self.event
+        notice.kind = self.cleaned_data["kind"]
+        notice.audience = self.cleaned_data["audience"]
+        notice.sent_by = sent_by
+        if notice.kind != SessionNotice.MESSAGE:
+            notice.subject = ""
+        save_translation_fields(self, notice)
+        if notice.kind != SessionNotice.MESSAGE:
+            for language in notice.content_languages()[1:]:
+                notice.set_translation(language, "subject", "")
+        notice.changes = notices.changes_for(notice.kind, self.event, self.before())
+        return notice
 
 
 class BadgeForm(forms.ModelForm):
