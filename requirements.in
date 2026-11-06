@@ -100,7 +100,7 @@ django-ninja==1.7.1
 # The API's OAuth 2.0 client credentials (api/, DATA_MODEL.md §13).
 django-oauth-toolkit==3.4.1
 jwcrypto==1.6.1
-oauthlib==4.0.0
+oauthlib==4.0.1
 pydantic==2.14.1
 pydantic_core==2.50.1
 annotated-types==0.8.0
