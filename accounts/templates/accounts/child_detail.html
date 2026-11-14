@@ -107,12 +107,13 @@
                 <td class="body-sm">{{ registration.event.start_time|date:"j M Y, H:i" }}</td>
                 <td class="body-sm">
                   {{ registration.event|localized:"name"|in_lang }}
-                  {% if registration.waiting_list %}<span class="cd-badge cd-badge--warning caption">{% translate "Waiting list" %}</span>{% endif %}
+                  {% if registration.event.is_cancelled %}<span class="cd-badge cd-badge--danger caption">{% translate "Cancelled" %}</span>{% elif registration.waiting_list %}<span class="cd-badge cd-badge--warning caption">{% translate "Waiting list" %}</span>{% endif %}
                 </td>
                 <td class="body-sm">{{ registration.event.dojo.name }}</td>
                 <td class="body-sm">
                   <div class="upcoming-actions">
                     <a class="cd-btn cd-btn--ghost label" href="{% url 'event_detail' event_id=registration.event.id %}">{% translate "View" %}</a>
+                    {% if registration.question_count %}<a class="cd-btn cd-btn--ghost label" href="{% url 'registration_answers' registration_id=registration.id %}">{% if registration.answer_count < registration.question_count %}{% translate "Answer the new question" %}{% else %}{% translate "Change answers" %}{% endif %}</a>{% endif %}
                     <form method="post" action="{% url 'cancel_registration' registration_id=registration.id %}"
                           data-confirm="{{ remove_msg }}">
                       {% csrf_token %}

@@ -126,4 +126,9 @@ urlpatterns = [
         views.cancel_registration,
         name="cancel_registration",
     ),
+    path(
+        "account/registration/<int:registration_id>/answers/",
+        views.registration_answers,
+        name="registration_answers",
+    ),
 ]

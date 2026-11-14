@@ -1,0 +1,23 @@
+name: Idea or feature request
+description: Something the site should do, or do differently.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's the problem or need
+      description: Who runs into it (families, ninjas, mentors, champions, the organisation), and when?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help
+      description: Your idea, as concrete as you like. Alternatives you thought about are welcome too.
+    validations:
+      required: true
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else
+      description: Examples, screenshots or links (without anyone's personal data).

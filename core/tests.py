@@ -1,5 +1,5 @@
 import re
-from datetime import date
+from datetime import date, timedelta
 
 from django.conf import settings
 from django.contrib.staticfiles import finders
@@ -88,7 +88,10 @@ class StrNeverQueriesTests(TestCase):
             NinjaBelt,
             NinjaEngagement,
             NinjaEngagementChange,
+            Registration,
+            RegistrationAnswer,
             RegistrationCancellation,
+            SessionNotice,
             TeamAttendance,
         )
         from mailing.models import ConsentEvent, DojoMailMute, EmailMessage, MailPreference
@@ -159,6 +162,15 @@ class StrNeverQueriesTests(TestCase):
             ),
             (DojoMailMute.objects.create(user=user, dojo=dojo), "jan: muted Ghent"),
             (
+                SessionNotice.objects.create(
+                    event=Event.objects.create(
+                        name="Moved", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()
+                    ),
+                    kind=SessionNotice.VENUE_CHANGED,
+                ),
+                "The venue changed: Moved",
+            ),
+            (
                 Promotion.objects.create(
                     event=Event.objects.create(
                         name="Coolest", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()
@@ -176,6 +188,23 @@ class StrNeverQueriesTests(TestCase):
                     attended=True,
                 ),
                 "piet at Run",
+            ),
+            (
+                RegistrationAnswer.objects.create(
+                    registration=Registration.objects.create(
+                        event=(
+                            asked := Event.objects.create(
+                                name="Asked", dojo=dojo, places=1, start_time=timezone.now(), end_time=timezone.now()
+                            )
+                        ),
+                        ninja=ninja,
+                        waiting_list=False,
+                        position=1,
+                    ),
+                    question=asked.questions.create(text="Own laptop?"),
+                    answer=True,
+                ),
+                "Own laptop?: yes",
             ),
         ]
         from django.utils import translation
@@ -345,6 +374,29 @@ class ContentLanguagesTests(TestCase):
         self.assertEqual((english, english.is_fallback, english.language), ("Nederlands", True, "nl-be"))
         self.assertEqual(normalize("FR_be"), "fr-be")
 
+    def test_a_language_inside_a_sentence_is_named_in_the_page_language(self):
+        """ "In het Engels", "En anglais", "In Dutch": never a language's own name
+        (LANGUAGES) inside a sentence, which read "In het English"."""
+        from django import forms
+        from django.utils import translation
+
+        from core.content_languages import add_translation_fields, language_name, language_name_in_sentence
+
+        self.assertEqual(language_name("nl-be"), "Nederlands")
+        dojo = make_dojo("Brussels", languages=["nl-be", "en-us", "fr-be"])
+        for page, expected in {
+            "nl-be": ["Engels", "Frans"],
+            "fr-be": ["anglais", "français"],
+            "en-us": ["English", "French"],
+        }.items():
+            with translation.override(page):
+                self.assertEqual([language_name_in_sentence(c) for c in ("en-us", "fr-be")], expected)
+                form = forms.Form()
+                groups = add_translation_fields(form, dojo, lambda field: forms.CharField(required=False))
+                self.assertEqual([name for _code, name, _fields in groups], expected)
+        with translation.override("nl-be"):
+            self.assertEqual(translation.gettext("In %(language)s") % {"language": "Engels"}, "In het Engels")
+
     def test_clearing_a_translation_removes_it(self):
         dojo = make_dojo("Brussels", languages=["nl-be", "fr-be"])
         dojo.set_translation("fr-be", "tagline", "Salut")
@@ -408,7 +460,7 @@ class OrganisationContentLanguagesTests(TestCase):
         cache.clear()  # the homepage caches its FAQs
         response = self.client.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="nl-be")
         self.assertContains(response, "Yes, always.")
-        self.assertContains(response, "Alleen in het English")
+        self.assertContains(response, "Alleen in het Engels")
 
 
 class AuditLogCoverageTests(TestCase):
@@ -435,6 +487,9 @@ class AuditLogCoverageTests(TestCase):
         "events.NinjaEngagement": "rebuilt by the site every night",
         "events.NinjaEngagementChange": "written by the nightly rebuild; itself a history",
         "events.RegistrationCancellation": "itself a log of cancellations",
+        "events.SessionNotice": "itself a log of the notices a session's team sent",
+        "events.EventQuestion": "the dojo's own text, like the event",
+        "dojos.DojoQuestion": "the dojo's own text, like the event's questions",
         "geo.AdministrativeBoundary": "reference data, from seed files",
         "geo.Municipality": "reference data, from seed files",
         "mailing.BounceRecord": "written by the bounce processing; itself a log",
@@ -626,8 +681,8 @@ class AuditLogAccessTests(TestCase):
         [entry] = self.views(self.with_notes)
         self.assertEqual(entry.actor, self.champion)
         self.assertEqual(self.views(self.without_notes), [])
-        # The dashboard shows the same list, so it's recorded again.
-        self.client.get(reverse("dojo_dashboard", args=[self.dojo.id]))
+        # The Attendance page shows the same list, so it's recorded again.
+        self.client.get(reverse("dojo_attendance", args=[self.dojo.id]))
         self.assertEqual(len(self.views(self.with_notes)), 2)
 
     def test_a_mentor_sees_no_notes_so_nothing_is_recorded(self):
@@ -825,12 +880,13 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             AwardBeltForm,
             DojoCreateForm,
             DojoProfileForm,
+            EventQuestionForm,
             PromoteYouthMentorForm,
             TransferChampionForm,
         )
         from dojos.testing import make_dojo
-        from events.forms import AssignBadgeForm, BadgeForm, EventForm
-        from events.models import Event, Registration
+        from events.forms import AssignBadgeForm, BadgeForm, EventForm, SessionNoticeForm
+        from events.models import Event, EventQuestion, Registration
         from mailing.forms import BlockAddressForm, NewTemplateForm, TemplateVersionForm
         from privacy.forms import ConfirmUsernameForm
         from reports.forms import ReportForm
@@ -862,6 +918,15 @@ class SiteFormTextsAreTranslatedTests(TestCase):
             RegisterIndividualForm(),
             DojoProfileForm(instance=make_dojo("Antwerp")),
             EventForm(dojo=bruges, instance=Event(dojo=bruges)),
+            SessionNoticeForm(
+                event=Event(
+                    dojo=bruges,
+                    places=10,
+                    start_time=timezone.now(),
+                    end_time=timezone.now() + timedelta(hours=2),
+                )
+            ),
+            EventQuestionForm(question=EventQuestion(event=Event(dojo=bruges))),
             CampaignForm(),
             JourneyForm(),
             SegmentForm(),
@@ -1852,6 +1917,48 @@ class SiteVersionTests(TestCase):
         self.assertEqual(self.version.version(), "2026.10.3")
         self.assertFalse(self.version.is_development())
 
+    def _checkout(self, head, refs=None, packed=""):
+        git = self.base / ".git"
+        git.mkdir()
+        (git / "HEAD").write_text(head)
+        for ref, commit in (refs or {}).items():
+            (git / ref).parent.mkdir(parents=True, exist_ok=True)
+            (git / ref).write_text(commit + "\n")
+        if packed:
+            (git / "packed-refs").write_text(packed)
+
+    def test_development_shows_the_branch_and_commit(self):
+        self._checkout("ref: refs/heads/main\n", {"refs/heads/main": "5e97fb4a" + "0" * 32})
+        with override_settings(BASE_DIR=self.base):
+            self.assertEqual(self.version.checkout(), "main @ 5e97fb4")
+
+    def test_a_packed_ref_and_a_detached_head(self):
+        self._checkout("ref: refs/heads/feature/x\n", packed="# pack-refs\nabcdef1234 refs/heads/feature/x\n")
+        with override_settings(BASE_DIR=self.base):
+            self.assertEqual(self.version.checkout(), "feature/x @ abcdef1")
+            (self.base / ".git" / "HEAD").write_text("1234567890abcdef\n")
+            self.assertEqual(self.version.checkout(), "1234567")
+
+    def test_a_worktree_reads_its_refs_from_the_main_repository(self):
+        main = self.base / "repo.git"
+        (main / "worktrees" / "wt").mkdir(parents=True)
+        (main / "refs" / "heads").mkdir(parents=True)
+        (main / "refs" / "heads" / "topic").write_text("feedface" + "0" * 32)
+        (main / "worktrees" / "wt" / "HEAD").write_text("ref: refs/heads/topic\n")
+        (main / "worktrees" / "wt" / "commondir").write_text("../..\n")
+        tree = self.base / "tree"
+        tree.mkdir()
+        (tree / ".git").write_text(f"gitdir: {main / 'worktrees' / 'wt'}\n")
+        with override_settings(BASE_DIR=tree):
+            self.assertEqual(self.version.checkout(), "topic @ feedfac")
+
+    def test_no_checkout_without_git_or_on_a_release(self):
+        with override_settings(BASE_DIR=self.base):
+            self.assertEqual(self.version.checkout(), "")
+        self._checkout("ref: refs/heads/main\n", {"refs/heads/main": "5e97fb4a" + "0" * 32})
+        self._deployed("version=2026.10.3\n")
+        self.assertEqual(self.version.checkout(), "")
+
     def _organisation_admin(self):
         from accounts.models import OrganisationRole, User
 
@@ -1864,6 +1971,8 @@ class SiteVersionTests(TestCase):
         self.version.build_info.cache_clear()
         with override_settings(BASE_DIR=self.base):
             self.assertContains(self.client.get(reverse("manage_campaign_list")), "Development version")
+            self._checkout("ref: refs/heads/main\n", {"refs/heads/main": "5e97fb4a" + "0" * 32})
+            self.assertContains(self.client.get(reverse("manage_campaign_list")), "main @ 5e97fb4")
         self._deployed("version=2026.10.3\n")
         self.assertContains(self.client.get(reverse("manage_campaign_list")), "Version 2026.10.3")
 

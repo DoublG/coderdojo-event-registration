@@ -364,7 +364,7 @@ if [ "\$MODE" = check ]; then
         fi
     done
     step "Would-be requirements install (dry run)"
-    "\$PY" -m pip install --dry-run --quiet -r /dev/stdin < "\$HOME/deploy/check-requirements.txt" \
+    "\$PY" -m pip install --dry-run --quiet --require-hashes -r /dev/stdin < "\$HOME/deploy/check-requirements.txt" \
         && echo "requirements: installable" || echo "requirements: NOT installable (see above)"
     rm -f "\$HOME/deploy/check-requirements.txt"
     exit 0
@@ -385,7 +385,7 @@ M="\$(missing_env_keys)"; [ -z "\$M" ] || echo "warning: .env lacks keys listed 
 
 step "Installing requirements"
 "\$PY" -m pip install --quiet --upgrade pip
-"\$PY" -m pip install --quiet -r "\$REL/requirements.txt"
+"\$PY" -m pip install --quiet --require-hashes -r "\$REL/requirements.txt"
 
 step "Checking the new code before going live"
 ln -sfn "\$APP/.env" "\$REL/.env"

@@ -55,13 +55,15 @@ def notify_managers(
     url: str = "",
     exclude: "User | None" = None,
     params: dict[str, object] | None = None,
+    once_unread: bool = False,
 ) -> None:
     """One notification per active champion/mentor of `dojo`, each in its
-    recipient's language (see notifications.services.notify)."""
+    recipient's language (see notifications.services.notify, also for
+    `once_unread`)."""
     for membership in dojo.memberships.managers().select_related("user"):
         if exclude is not None and membership.user_id == exclude.pk:
             continue
-        notify(membership.user, text, url=url, dojo=dojo, params=params)
+        notify(membership.user, text, url=url, dojo=dojo, params=params, once_unread=once_unread)
 
 
 def _activate(membership: DojoMembership, by: "User | None" = None) -> None:

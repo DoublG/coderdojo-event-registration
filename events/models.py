@@ -19,6 +19,17 @@ class EventQuerySet(models.QuerySet):
         governs the public-facing side."""
         return self.exclude(status=Event.DRAFT).filter(dojo__status="active")
 
+    def listed(self):
+        """visible() without cancelled sessions: what lists, the dojo finder,
+        a dojo's next session, promotions and reminders offer. A cancelled
+        session's own page stays readable (visible()), marked as cancelled."""
+        return self.visible().exclude(status=Event.CANCELLED)
+
+    def held(self):
+        """Sessions that took place or will: not drafts, not cancelled (what
+        engagement, the year's figures and the activity segments count)."""
+        return self.exclude(status__in=Event.NOT_HELD)
+
     def with_confirmed_count(self):
         """Adds `confirmed_count` (confirmed, non-waitlisted places), which
         Event.places_left then reads instead of running a query per event:
@@ -37,11 +48,15 @@ class Event(TranslatableModel):
     DRAFT = "draft"
     OPEN = "open"
     CLOSED = "closed"
+    CANCELLED = "cancelled"
     STATUS_CHOICES = [
         (DRAFT, _("Draft")),
         (OPEN, _("Open")),
         (CLOSED, _("Closed")),
+        (CANCELLED, _("Cancelled")),
     ]
+    # Not a session that takes place: left out of engagement and the figures.
+    NOT_HELD = (DRAFT, CANCELLED)
 
     TRANSLATABLE_FIELDS = ("name", "description")
 
@@ -53,7 +68,9 @@ class Event(TranslatableModel):
         default=DRAFT,
         help_text="Draft: hidden from the public site while it's being put together. "
         "Open: visible, registrations open. Closed: visible, registrations closed — "
-        "set manually, normally once attendance for the session has been checked.",
+        "set manually, normally once attendance for the session has been checked. Cancelled: "
+        "called off (events.services.cancel); its page says so, it's left out of lists, reminders "
+        "and the engagement figures, and its registrations are kept.",
     )
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
@@ -89,6 +106,16 @@ class Event(TranslatableModel):
         "there instead of showing the sign-up form, so the event has no registrations or "
         "attendance on this site.",
     )
+    # NULL rather than blank when unset: MySQL has no partial unique index,
+    # but a unique index allows any number of NULLs.
+    external_ref = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text="The session's key in the dojo's own planning (a spreadsheet row), set by the API's sync "
+        "(POST /api/v1/events/sync): the next sync with the same key updates this session instead "
+        "of adding one. Unique per dojo.",
+    )
     team = models.ManyToManyField(
         "dojos.DojoMembership",
         blank=True,
@@ -112,6 +139,11 @@ class Event(TranslatableModel):
     announced_at = models.DateTimeField(null=True, blank=True, editable=False)
 
     objects = EventManager()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["dojo", "external_ref"], name="event_unique_external_ref_per_dojo"),
+        ]
 
     def save(self, *args, **kwargs):
         if self.status == self.OPEN and self.published_at is None:
@@ -143,6 +175,10 @@ class Event(TranslatableModel):
     @property
     def registration_open(self):
         return self.status == self.OPEN
+
+    @property
+    def is_cancelled(self):
+        return self.status == self.CANCELLED
 
     @property
     def registers_externally(self):
@@ -182,6 +218,61 @@ class Registration(models.Model):
         unique_together = [("event", "ninja")]
 
 
+class EventQuestionManager(models.Manager):
+    def get_queryset(self):
+        # content_languages() reads the event's dojo.
+        return super().get_queryset().select_related("event__dojo")
+
+
+class EventQuestion(TranslatableModel):
+    """A yes/no question the dojo team asks families for each child they
+    sign up for this session (DATA_MODEL.md §29), e.g. "Will your child
+    bring their own laptop?". Yes/no only, at most MAX_QUESTIONS per
+    session; the rules are in events.questions. Written in the dojo's
+    languages, like the event itself."""
+
+    TRANSLATABLE_FIELDS = ("text",)
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="questions")
+    text = models.CharField(max_length=200, help_text="A question families answer with yes or no.")
+    position = models.PositiveSmallIntegerField(default=0)
+
+    objects = EventQuestionManager()
+
+    class Meta:
+        ordering = ["position", "id"]
+
+    def __str__(self):
+        return self.text
+
+    def content_languages(self):
+        return self.event.content_languages()
+
+
+class RegistrationAnswerManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("question")
+
+
+class RegistrationAnswer(models.Model):
+    """A family's yes/no answer to one of the session's questions, for one
+    child's registration. Saved with the registration (events.registrations
+    .sign_up), deleted with it when the place is cancelled."""
+
+    registration = models.ForeignKey(Registration, on_delete=models.CASCADE, related_name="answers")
+    question = models.ForeignKey(EventQuestion, on_delete=models.CASCADE, related_name="answers")
+    answer = models.BooleanField()
+    answered_at = models.DateTimeField(default=timezone.now)
+
+    objects = RegistrationAnswerManager()
+
+    class Meta:
+        unique_together = [("registration", "question")]
+
+    def __str__(self):
+        return f"{self.question}: {'yes' if self.answer else 'no'}"
+
+
 class RegistrationCancellationManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().select_related("ninja", "event__dojo")
@@ -205,6 +296,71 @@ class RegistrationCancellation(models.Model):
 
     def __str__(self):
         return f"{self.ninja} cancelled {self.event}"
+
+
+class SessionNoticeManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("event__dojo")
+
+
+class SessionNotice(TranslatableModel):
+    """A mail the session's team sent to its families about a change
+    (DATA_MODEL_NOTICES.md, §31): append-only, one row per notice sent, the
+    mails themselves are EmailMessage rows (idempotency key
+    `session_notice:<id>:<user>`). Sent only through events.notices."""
+
+    VENUE_CHANGED = "venue_changed"
+    TIME_CHANGED = "time_changed"
+    PLACES_CHANGED = "places_changed"
+    CANCELLED = "cancelled"
+    MESSAGE = "message"
+    KIND_CHOICES = [
+        (VENUE_CHANGED, _("The venue changed")),
+        (TIME_CHANGED, _("The date or times changed")),
+        (PLACES_CHANGED, _("The number of places changed")),
+        (CANCELLED, _("The session is cancelled")),
+        (MESSAGE, _("A message of your own")),
+    ]
+
+    CONFIRMED = "confirmed"
+    WAITING_LIST = "waiting_list"
+    BOTH = "both"
+    AUDIENCE_CHOICES = [
+        (BOTH, _("Families with a place and those on the waiting list")),
+        (CONFIRMED, _("Families with a place")),
+        (WAITING_LIST, _("Families on the waiting list")),
+    ]
+
+    TRANSLATABLE_FIELDS = ("subject", "message")
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="notices")
+    kind = models.CharField(max_length=20, choices=KIND_CHOICES)
+    audience = models.CharField(max_length=20, choices=AUDIENCE_CHOICES, default=BOTH)
+    subject = models.CharField(max_length=150, blank=True, help_text="Only for a message of the team's own.")
+    message = models.TextField(
+        blank=True, help_text="The team's own text: a note under a prepared mail, or the whole message."
+    )
+    changes = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='What changed, as shown in the mail: {"venue": ["before", "after"]}; times as ISO strings.',
+    )
+    sent_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    sent_at = models.DateTimeField(default=timezone.now)
+    recipients = models.PositiveIntegerField(default=0, help_text="Accounts it was queued for.")
+
+    objects = SessionNoticeManager()
+
+    class Meta:
+        ordering = ["-sent_at", "-id"]
+
+    def __str__(self):
+        return f"{self.get_kind_display()}: {self.event}"
+
+    def content_languages(self):
+        return self.event.content_languages()
 
 
 class Belt(OrganisationContent):

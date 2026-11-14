@@ -244,6 +244,12 @@ MAILING_DOJO_NEWS_ACTIVE_DAYS = 365  # a family belongs to a dojo that long afte
 # launched per dojo in any 30 days, and a message at most this long.
 MAILING_DOJO_MAILINGS_PER_30_DAYS = 4
 MAILING_DOJO_MESSAGE_MAX_LENGTH = 5000
+# Telling a session's families about a change (DATA_MODEL_NOTICES.md, events.notices):
+# at most this many notices per session in any 24 hours, a text at most this long,
+# and none for a session that ended more than this many hours ago.
+SESSION_NOTICES_PER_DAY = 3
+SESSION_NOTICE_MAX_LENGTH = 2000
+SESSION_NOTICE_HOURS_AFTER_END = 24
 
 # Bounces (mailing.bounce): the envelope sender of every mail, so bounces land
 # in that mailbox. "{id}" is replaced by the EmailMessage id when the mail
@@ -402,6 +408,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "corsheaders",
     "django.contrib.staticfiles",
     "django.contrib.gis",
     "debug_toolbar",
@@ -450,6 +457,9 @@ FORM_RENDERER = "core.forms.SiteFormRenderer"
 MIDDLEWARE = [
     # First, so its timing covers the whole stack (monitoring, CAPACITY.md).
     "monitoring.middleware.RequestMetricsMiddleware",
+    # Before anything that answers on its own (django-cors-headers asks for
+    # it above CommonMiddleware): it answers the API's CORS preflights.
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "django_permissions_policy.PermissionsPolicyMiddleware",
@@ -485,6 +495,13 @@ if SILK_ENABLED:
     # staff logins only (privacy/privacy.py classifies what it stores).
     SILKY_AUTHENTICATION = True
     SILKY_AUTHORISATION = True
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
+        # A test run records no requests: silk's own queries (and its clean-up
+        # of old requests, on a random 10% of them) would land in the tests'
+        # query counts. Silk stays installed, so core.profiling still uses it.
+        def SILKY_INTERCEPT_FUNC(request):
+            return False
+
 
 ROOT_URLCONF = "website.urls"
 
@@ -731,6 +748,8 @@ OAUTH2_PROVIDER = {
     "SCOPES": {
         "attendance:read": "See the dojo's sessions and who has a place",
         "attendance:write": "Mark who came to the dojo's sessions",
+        "events:read": "See the dojo's sessions",
+        "events:write": "Add and change the dojo's sessions (e.g. a year planned in a spreadsheet)",
     },
     "SCOPES_BACKEND_CLASS": "api.scopes.ClientScopes",
     "ACCESS_TOKEN_EXPIRE_SECONDS": 3600,
@@ -756,6 +775,18 @@ OAUTH2_PROVIDER = {
 OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
 # Requests per client (ninja's throttling, on the cache).
 API_RATE_LIMIT = "600/m"
+# CORS (django-cors-headers), for the API only: any website may call it from a
+# browser (Excel on the web, Office Scripts, a dojo's own page), since a call
+# proves itself with an OAuth token, never a cookie. Credentials stay off, so a
+# browser never sends the site's session cookie along; the rest of the site
+# sends no CORS headers at all.
+CORS_URLS_REGEX = r"^/api/(v1/|oauth/(token|revoke)/)"
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = False
+
+# The yes/no sign-up questions (events.questions, DATA_MODEL.md §29): at most
+# this many per session, and as a dojo's default questions.
+SIGNUP_QUESTIONS_MAX = env.int("SIGNUP_QUESTIONS_MAX", default=5)
 
 # Retention (privacy.retention, DATA_MODEL.md §16 phase 4). An account is
 # deleted (a champion's or mentor's cleaned) this long after its last login,

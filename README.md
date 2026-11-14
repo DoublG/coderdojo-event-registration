@@ -1,6 +1,13 @@
 # CoderDojo Belgium — registration platform
 
 [![Tests](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/tests.yml)
+[![Code audit](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/audit.yml/badge.svg?branch=main)](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/audit.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/DoublG/coderdojo-event-registration/badge)](https://scorecard.dev/viewer/?uri=github.com/DoublG/coderdojo-event-registration)
+[![Deploy to demo](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/deploy-demo.yml/badge.svg?branch=demo)](https://github.com/DoublG/coderdojo-event-registration/actions/workflows/deploy-demo.yml)
+[![Demo](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.github.com%2Frepos%2FDoublG%2Fcoderdojo-event-registration%2Freleases%2Flatest&query=%24.tag_name&label=demo&color=blue)](https://github.com/DoublG/coderdojo-event-registration/releases/latest)
+[![Main, not on demo yet](https://img.shields.io/github/commits-since/DoublG/coderdojo-event-registration/demo/main?label=main%2C%20not%20on%20demo&color=orange)](https://github.com/DoublG/coderdojo-event-registration/compare/demo...main)
+[![Python](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2FDoublG%2Fcoderdojo-event-registration%2Fmain%2Fpyproject.toml&query=%24.tool.mypy.python_version&label=python&logo=python&logoColor=white&color=3776AB)](pyproject.toml)
+[![Django](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2FDoublG%2Fcoderdojo-event-registration%2Fmain%2Frequirements.in&search=(%3Fm)%5EDjango%3D%3D(.%2B)%24&replace=%241&label=django&logo=django&logoColor=white&color=092E20)](requirements.in)
 
 The website for [CoderDojo Belgium](https://coderdojobelgium.be)'s free coding clubs for children aged 7–17:
 families find a dojo and sign their children up, volunteers are vetted once and help at any dojo, dojo
@@ -33,6 +40,9 @@ workers for all mail, and Django Channels for live notifications.
 | Developers and whoever runs the platform | [`MONITORING.md`](MONITORING.md) | Every metric on `/metrics/` and every panel of the Grafana dashboard explained, with screenshots under load |
 | Developers | [`MEMORY_PROFILE.md`](MEMORY_PROFILE.md) | The memory each of the site's functions uses per call, over every page and background job, and which are worth refactoring |
 | Security researchers | [`SECURITY.md`](SECURITY.md) | How to report a vulnerability, and what's supported |
+| Contributors | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Setting up, making a change, the checks a pull request needs, how releases work |
+| Everyone taking part | [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | How we treat each other in issues, pull requests and reviews |
+| Everyone | [`LICENSE`](LICENSE) | Public to read, but not open source: all rights reserved |
 
 ### User journeys (PDF)
 
@@ -208,10 +218,10 @@ From the host, after changing a page's markup or styles: `user-journeys/scripts/
 accessibility scan of every journey page in both themes, plus a 320px reflow check; see
 [`user-journeys/README.md`](user-journeys/README.md)).
 
-GitHub Actions runs the checks on every push (and deploys only a push to `demo`, see below):
+GitHub Actions runs the checks on every push (and deploys only what's merged into `demo`, see below):
 [**Tests**](.github/workflows/tests.yml) (missing migrations and the whole suite, with a summary per app),
 [**Code audit**](.github/workflows/audit.yml) (ruff, its security rules, `mypy`, the layers, `pip-audit`,
-`check --deploy` and CodeQL), [**Code quality**](.github/workflows/quality.yml) (every Monday: coverage and
+`check --deploy` and CodeQL), [**Scorecard**](.github/workflows/scorecard.yml) (OpenSSF's supply-chain score, weekly), [**Code quality**](.github/workflows/quality.yml) (every Monday: coverage and
 complexity with the change since the previous week) and the [help centre](.github/workflows/docs.yml)'s build and publication. Coverage and
 complexity: [`CODING_STANDARDS.md`](CODING_STANDARDS.md).
 
@@ -220,9 +230,10 @@ complexity: [`CODING_STANDARDS.md`](CODING_STANDARDS.md).
 Production is Level27 Python hosting. [`scripts/deploy.sh --check`](scripts/deploy.sh) is a read-only
 preflight; `scripts/deploy.sh` deploys: it checks the new code before touching the live site, migrates,
 reloads gunicorn or restarts daphne (whichever the Level27 panel runs — gunicorn as of 8 Oct 2026), restarts
-the two Celery workers (run by Level27's worker component) and smoke-tests. A push to the `demo` branch does the same automatically
+the two Celery workers (run by Level27's worker component) and smoke-tests. Merging a pull request from `main` into the protected `demo` branch does the same automatically
 ([**Deploy to demo**](.github/workflows/deploy-demo.yml)): the tests first, then `scripts/deploy.sh` on a
-runner, with the SSH key from the `demo` environment's secrets. Details in
+runner, with the SSH key from the `demo` environment's secrets, and a successful deploy becomes the next
+[release](https://github.com/DoublG/coderdojo-event-registration/releases) (CalVer, `2026.10.3`). Details in
 [`CLAUDE.md`](CLAUDE.md#deploying-level27).
 
 ---
@@ -240,7 +251,8 @@ loadtest/         load test, its results and charts (CAPACITY.md), Grafana scree
 quality/          code-quality measurements (coverage, complexity), their results and charts
 scripts/          deploy script
 .devcontainer/    the development environment (monitoring/: Prometheus and Grafana's provisioning)
-.github/          the CI workflows (tests, code audit, help centre)
+.github/          the CI workflows (tests, code audit, code quality, help centre, deploy), issue and
+                  pull request templates, CODEOWNERS, Dependabot's configuration
 DATA_MODEL.md     the data model and design decisions
 MAINTENANCE.md    versions and support dates, updates, vulnerabilities, audits
 CAPACITY.md       database growth, disk, memory and load: measurements and findings
@@ -248,6 +260,8 @@ MONITORING.md     the metrics and the Grafana dashboard explained, with screensh
 CODING_STANDARDS.md  coding standards, linting, tests, coverage and complexity
 MEMORY_PROFILE.md memory per function, and what's worth refactoring
 SECURITY.md       reporting a vulnerability
+CONTRIBUTING.md   how to contribute; CODE_OF_CONDUCT.md how we treat each other
+LICENSE           all rights reserved (public, not open source)
 CLAUDE.md         conventions and architecture for developers (AGENTS.md links to it)
 requirements.txt  production dependencies (requirements-dev.txt adds the development tools)
 ```

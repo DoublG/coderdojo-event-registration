@@ -24,6 +24,10 @@
 
       {% include "dojos/partials/_event_form_fields.html" %}
 
+      {% if copies_questions %}
+        <p class="cd-form__help caption">{% url 'dojo_manage' dojo_id=dojo.id as settings_url %}{% blocktranslate %}The new session starts with your dojo's <a href="{{ settings_url }}#default-questions">default sign-up questions</a>. You can change or remove them on its page once it's created.{% endblocktranslate %}</p>
+      {% endif %}
+
       <div class="cd-form__actions">
         <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_list' dojo_id=dojo.id %}">{% translate "Cancel" %}</a>
         <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Create event" %}</button>

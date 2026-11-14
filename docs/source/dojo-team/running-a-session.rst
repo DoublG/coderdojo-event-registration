@@ -1,9 +1,35 @@
 Running a session
 ====================
 
-A dojo's dashboard (for its champion and mentors) is built around the dojo's next upcoming session
-(or its most recent past one, if nothing's scheduled), showing who's
-confirmed for it.
+A dojo's dashboard (for its champion and mentors) is the first page you
+see: what needs your attention, your next sessions, your ninjas and how
+your year is going.
+
+Your dashboard
+----------------
+
+**Needs attention** lists only what's waiting for you, each with a button
+to the page where you deal with it:
+
+- requests to join your team;
+- sessions of the last three months whose attendance isn't fully marked
+  yet;
+- a session in the next two weeks that's still a draft, or that has no
+  team yet;
+- no session planned in the next six weeks;
+- a background check that ends within two months: yours, and for the
+  champion everyone's on the team (a mentor whose check has ended can't
+  open the dashboard any more, so the champion is the one who sees it).
+
+**Next session** shows its date, how many places are taken, the waiting
+list, its team and the answers to its sign-up questions, with **Take
+attendance**. **Coming up** lists the sessions after it.
+
+**Your ninjas** counts the children who have your dojo as their home dojo,
+and how they came over the past year (new, regular, occasional, at risk,
+lapsed): only numbers here, the names are on the **Members** page. **This
+year** shows the sessions you held, how many different ninjas came, the
+share of marked places that turned up, and the belts your team awarded.
 
 Scheduling a session
 ----------------------
@@ -32,10 +58,15 @@ page, where you can change any of the details you entered when creating
 it. **Save changes** keeps you on the same page, so you can check the
 result straight away.
 
+Giving a full session more places moves the children who have waited
+longest on its waiting list into the new places straight away, and their
+families get a mail. Giving it fewer places never takes a place away from
+a child who already has one.
+
 Session status
 ---------------
 
-A session is always in one of three states, shown as a badge next to it
+A session is always in one of four states, shown as a badge next to it
 on the **Events** list:
 
 - **Draft** — a new session starts here. It's completely hidden from
@@ -48,14 +79,83 @@ on the **Events** list:
   that session, without hiding it. This is a manual step, normally done
   once you've checked attendance for the session and don't want any
   more sign-ups trickling in afterwards.
+- **Cancelled** — **Cancel session…** calls the session off. Its page
+  stays on the site, marked as cancelled, so families who look it up see
+  what happened, but nobody can sign up, it's left out of the session
+  lists, and no reminder goes out. The registrations are kept, and the
+  session doesn't count as missed for the children who were signed up.
+  When you cancel, you can mail every family with a place or on the
+  waiting list straight away, with a note of your own (for example why,
+  or when the next session is).
 
 You can switch a session between any of these states at any time, from
 the status card at the top of its page: a closed session can be
 reopened (**Reopen registrations**), and an open or closed one can be
 taken off the public site again with **Back to draft**. The **Events**
 list also has a quick button for the most common next step (**Publish**,
-**Close registrations** or **Reopen**). Changing the status never
-removes anyone who has already signed up.
+**Close registrations** or **Reopen**). A cancelled session can be
+reopened the same way if it goes ahead after all. Changing the status
+never removes anyone who has already signed up.
+
+Mailing the families of a session
+----------------------------------
+
+When something changes after families signed up, tell them from the
+session's page: its **Mail the families** card. Everyone who can edit the
+session (the champion and the mentors) can send these mails.
+
+- After you save a new venue, date or time, or number of places for an
+  open session that families signed up for, the card offers a button for
+  each change, such as **Mail about the new venue**. The mail already
+  says what it was before and what it is now.
+- **Write a mail** lets you pick the subject yourself: a prepared mail
+  about the venue, the date or times or the places, or a message of your
+  own.
+
+You choose who gets it: the families with a place, those on the waiting
+list, or both. It goes to the parents and guardians of each child, and to
+a child's own login when it has an email address; a family with several
+children on the session gets one mail. Each family gets it in its own
+language: the prepared part always, your own text when you wrote it in
+that language (otherwise in your dojo's main language). **Preview** shows
+the mail before you **Send** it, and replies go to your dojo's email
+address.
+
+Families can't switch these mails off, so keep them to real changes: you
+can send at most three about a session in any 24 hours, and none once it
+ended more than a day ago. The card lists what was already sent.
+
+Sign-up questions
+------------------
+
+A session's page has a **Sign-up questions** card: a few questions (five
+at most, unless CoderDojo Belgium set another number) that families answer with yes or no for each child they sign up, such as
+"Will your child bring their own laptop?" (a "no" tells you how many
+laptops to bring). **Add a question** adds one; each question can be
+edited, moved up or down, or removed. The card shows the answers so far,
+for confirmed places and the waiting list separately. Answers never
+decide who gets a place.
+
+A few things to know:
+
+- Questions are yes/no only. Don't use them for health information:
+  allergies and similar are in the child's details, which only the
+  champion sees (see below).
+- A new session starts with your dojo's **default sign-up questions**, so
+  you don't have to type them every time. Set them on the **Settings**
+  page, in the same way; changing them there doesn't change sessions that
+  already exist. Remove the ones a session doesn't need on its page.
+- Changing a question's wording keeps the answers already given; to ask
+  something else, remove the question and add a new one. Removing a
+  question deletes its answers.
+- A question added after families signed up shows **Not asked** for their
+  children, until the family answers it from their account page. Families
+  can change their answers there until the session starts, so the totals
+  can still move: the champion and mentors get a notification (one per
+  session, until they've read it).
+- If your dojo writes in more than one language, the question has a field
+  per language, like the session's own texts.
+- Sessions that take registrations on another website have no questions.
 
 Taking attendance
 ------------------
@@ -79,6 +179,12 @@ wristbands) up to date.
 
 A child whose home dojo is another dojo is marked **Visiting**; hover over
 it to see which dojo.
+
+If the session has sign-up questions, each child's row shows the family's
+answers, and the top of the list counts them ("3 yes · 2 no"), so you know
+for example how many laptops to bring. If an answer turns out wrong at the
+door, correct it under **Answers** on the child's row, also once the
+session has started.
 
 If the family entered **allergies or notes** for their child, the
 dojo's champion sees them on that child's row. They're health data, so

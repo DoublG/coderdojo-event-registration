@@ -29,38 +29,34 @@ jobs:
   lint:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
-      # The ruff version pinned in requirements-dev.txt.
-      - run: pip install "$(grep -E '^ruff==' requirements-dev.txt)"
+      # The CI tools, hash-checked, at requirements-dev.txt's versions (.github/requirements/).
+      - run: pip install --require-hashes -r .github/requirements/ci-tools.txt
       - run: ruff check --output-format github .
       - run: ruff format --check .
 
   layers:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
-      # import-linter and its dependencies, as pinned in requirements-dev.txt; it
-      # reads the code without importing it, so nothing else is needed.
-      - name: Install import-linter
-        run: >-
-          pip install $(grep -hE '^(import-linter|grimp|rich|markdown-it-py|mdurl|Pygments|click|typing_extensions)=='
-          requirements-dev.txt requirements.txt)
+      # import-linter reads the code without importing it, so the CI tools are enough.
+      - run: pip install --require-hashes -r .github/requirements/ci-tools.txt
       - run: lint-imports
 
   security-lint:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
-      - run: pip install "$(grep -E '^ruff==' requirements-dev.txt)"
+      - run: pip install --require-hashes -r .github/requirements/ci-tools.txt
       # Tests, seeders and local tooling are left out in pyproject.toml; a reviewed
       # line on the site carries `# noqa: Sxxx` with its reason.
       - run: ruff check --extend-select S --output-format github .
@@ -79,43 +75,40 @@ jobs:
       COOKIE_DOMAIN: coolregistration.localhost
       EMAIL_HOST: ""
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install system libraries
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             build-essential pkg-config default-libmysqlclient-dev \
             gdal-bin libgdal-dev libgeos-dev libproj-dev
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
           cache: pip
           cache-dependency-path: requirements.txt
-      - run: pip install -r requirements.txt
-      - name: Install mypy and django-stubs (the pins in requirements-dev.txt)
-        run: >-
-          pip install $(grep -hE '^(mypy|django-stubs|django-stubs-ext|mypy_extensions|pathspec|librt|ast_serialize|types-PyYAML)=='
-          requirements-dev.txt)
+      - run: pip install --require-hashes -r requirements.txt -r .github/requirements/ci-tools.txt
       - run: mypy
 
   dependencies:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
-      - run: pip install pip-audit
-      # Both files are fully pinned, so pip-audit checks them as written, without
-      # installing anything (--no-deps --disable-pip). The django-celery-beat URL pin
+      - run: pip install --require-hashes -r .github/requirements/ci-tools.txt
+      # Both files are fully pinned and hashed, so pip-audit checks them as written,
+      # without installing anything (--no-deps --disable-pip). The django-celery-beat URL pin
       # is skipped (it has no version to look up).
       # An ignored advisory must be in MAINTENANCE.md's security log with its assessment:
-      #   CVE-2026-49265 (oauthlib, PKCE): not reachable, the API only offers client credentials.
+      #   CVE-2026-116579 (autobahn, permessage-brotli): not reachable in production (uvicorn and websockets
+      #   serve WebSockets; autobahn is daphne's, dev only). The fix (26.10.1) needs cbor2 6, which webauthn 2.x doesn't allow.
       - name: pip-audit
         run: >-
           pip-audit --no-deps --disable-pip --progress-spinner off
           -r requirements.txt -r requirements-dev.txt
-          --ignore-vuln CVE-2026-49265
+          --ignore-vuln CVE-2026-116579
           --desc on
 
   django-deploy:
@@ -151,20 +144,20 @@ jobs:
       SECURE_HSTS_SECONDS: "31536000"
       SECURE_HSTS_INCLUDE_SUBDOMAINS: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install system libraries
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             build-essential pkg-config default-libmysqlclient-dev \
             gdal-bin libgdal-dev libgeos-dev libproj-dev
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
           cache: pip
           cache-dependency-path: requirements.txt
       # Only the production set: also proves requirements.txt installs on its own.
-      - run: pip install -r requirements.txt
+      - run: pip install --require-hashes -r requirements.txt
       # Fails on any warning: a new one is a security setting to fix, not to note.
       - name: manage.py check --deploy
         run: |
@@ -178,8 +171,8 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v7
-      - uses: github/codeql-action/init@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
         with:
           languages: python, javascript-typescript
           queries: security-extended
@@ -189,4 +182,4 @@ jobs:
               - "**/vendor/**"
               - "staticfiles/**"
               - "docs/**"
-      - uses: github/codeql-action/analyze@v4
+      - uses: github/codeql-action/analyze@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0

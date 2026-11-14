@@ -39,7 +39,7 @@ Sections 13–28 cover the API, the audit log, two-step login, GDPR, child accou
 
 - [`DATA_MODEL_REDESIGN.md`](DATA_MODEL_REDESIGN.md) — §10, the landed redesign's rationale and phase plan.
 - [`DATA_MODEL_MAILING.md`](DATA_MODEL_MAILING.md) — §11 and §25, the mail engine, segmentation, campaigns, journeys and a dojo's own mail.
-- [`DATA_MODEL_API.md`](DATA_MODEL_API.md) — §13, dojo API clients and the event-sync plan.
+- [`DATA_MODEL_API.md`](DATA_MODEL_API.md) — §13, dojo API clients, attendance and the event sync.
 - [`DATA_MODEL_PRIVACY.md`](DATA_MODEL_PRIVACY.md) — §16 and §27, GDPR classification/export/erasure/retention and multiple guardians per child.
 - [`DATA_MODEL_ROLES.md`](DATA_MODEL_ROLES.md) — §28, letting a dojo champion or the organisation define their own custom roles.
 - [`DATA_MODEL_REPORTS.md`](DATA_MODEL_REPORTS.md) — §30, reporting dashboards: curated views plus an embedded Perspective builder (plan, with the options researched).
@@ -430,8 +430,11 @@ erDiagram
 
 ### Event status
 
-The dojo's team sets any status directly (`dojo_event_set_status`); it isn't a
-one-way lifecycle. Existing registrations are kept whatever the status.
+The dojo's team sets draft, open or closed directly (`dojo_event_set_status`); it
+isn't a one-way lifecycle. Cancelling is its own step (`events.services.cancel`,
+§31: the session's page says so, it's left out of lists, reminders and the
+engagement figures, and the families can be mailed), and a cancelled session
+reopens like a closed one. Existing registrations are kept whatever the status.
 
 ```mermaid
 stateDiagram-v2
@@ -442,10 +445,16 @@ stateDiagram-v2
     open --> draft : Back to draft
     closed --> draft : Back to draft
     draft --> closed
+    open --> cancelled : Cancel session (and mail the families)
+    closed --> cancelled : Cancel session (and mail the families)
+    cancelled --> open : Reopen registrations
+    cancelled --> draft : Back to draft
 
     draft : draft<br/>hidden from the public site
     open : open<br/>public, sign-ups accepted
     closed : closed<br/>public, no new sign-ups
+    cancelled : cancelled<br/>its page says so, left out of lists
+
 ```
 
 ### Engagement and cancellations
@@ -1152,10 +1161,11 @@ Open points, built with the proposed answer (easy to change later):
 ## 13. API based management (in progress)
 
 Dojo API clients over OAuth 2.0 client credentials (`/api/v1/`): built for
-attendance; still planned for event management (including a bulk
-`events/sync` endpoint so a champion can plan a year of sessions in a
-spreadsheet and push it over the API) and external registrations. Full
-design, decisions, phases and open points are in `DATA_MODEL_API.md`.
+attendance and for event planning (`POST /api/v1/events/sync`, a bulk
+upsert by `Event.external_ref`, so a champion can plan a year of sessions
+in a spreadsheet and push it over the API); still planned for external
+registrations. Full design, decisions, phases and open points are in
+`DATA_MODEL_API.md`.
 
 ## 14. Audit log (built)
 
@@ -1288,7 +1298,8 @@ What we checked in its 3.4.1 source, and what the plan has to work around:
      so the log says it changed, never what it says, `Guardianship`,
      `OrganisationRole`), `Dojo`, `DojoMembership`, `Event` (excluding
      `published_at` and `announced_at`, set by the site itself;
-     `m2m_fields={"team"}`), `Registration`, `TeamAttendance`,
+     `m2m_fields={"team"}`), `Registration`, `RegistrationAnswer` (§29:
+     families change their answers), `TeamAttendance`,
      `NinjaBelt`, `NinjaBadge`, `Badge`, `Belt`, `Application`,
      `BackgroundCheckHistory`, the mail consent and blocks
      (`MailPreference`, `ConsentEvent`, `EmailSuppression`), the
@@ -2726,7 +2737,7 @@ role. Full design, decisions, phases and open points are in
 `DATA_MODEL_ROLES.md`.
 
 
-## 29. Yes/no questions on a session's sign-up (not built — plan)
+## 29. Yes/no questions on a session's sign-up (built)
 
 A dojo team can ask families a few yes/no questions when they sign a child
 up for a session. The example that started it: *"Will your child bring
@@ -2782,7 +2793,9 @@ classifies a column, not keys inside a JSON value.
 
 - `set_questions(event, ...)` / `add_question`, `edit_question`,
   `remove_question`, `move_question`; `QuestionError` with a user-facing
-  message. At most `MAX_QUESTIONS = 5`.
+  message. At most `settings.SIGNUP_QUESTIONS_MAX` (`max_questions()`;
+  the `SIGNUP_QUESTIONS_MAX` environment variable, 5 when unset; decided
+  17 October 2026), per session and as a dojo's defaults.
 - **Changing questions after sign-ups:**
   - Adding one: children already signed up have no answer. The team sees
     "Not asked" for them; families can answer it later (phase 2).
@@ -2810,11 +2823,14 @@ fields from `dojos/partials/_translation_fields.html`. New views in
 URL's event. The card also shows the totals so far (confirmed and waiting
 list separately).
 
-**New session: questions copied from the dojo's latest session.** Like
-`Event.pathways` from `Dojo.pathways`, a new event starts with the
-questions of the dojo's most recent event (by `start_time`), so a team
-that always asks about laptops doesn't type it every time. The create
-page says so; the team can remove them on the detail page.
+**New session: the dojo's default questions** (decided 17 October 2026,
+replacing the first plan of copying the dojo's latest session). Like
+`Event.pathways` from `Dojo.pathways`, a new event starts with a copy of
+the dojo's default questions (`dojos.DojoQuestion`, set on its Settings
+page; `events.questions.copy_defaults`), so a team that always asks about
+laptops doesn't type it every time. The create page says so; the team can
+change or remove them per session on the detail page, and changing a
+default later never changes a session that has its copy.
 
 **Families: the sign-up page** (`event_signup`). Under each child's row,
 the session's questions as a `fieldset` per child (legend: the child's
@@ -2864,10 +2880,11 @@ Phase 2.
   retention rule, `seen_by=FAMILY_AND_TEAM`, `answer`/`answered_at`
   `keep(Category.CHILD, ANONYMISED_CHILD)` like `Registration`, so it's
   in the family's data export and follows the registration on erasure.
-- **Audit log**: `RegistrationAnswer` and `EventQuestion` go in
-  `core.tests.AuditLogCoverageTests.NOT_RECORDED` ("logistics answers, no
-  sensitive data"; "the dojo's own text, like the event"). Open point
-  below.
+- **Audit log**: `RegistrationAnswer` is recorded (`core.audit.RECORDED`,
+  decided 17 October 2026 with phase 2: families change answers, so the
+  log says who changed one and when); `EventQuestion` is in
+  `core.tests.AuditLogCoverageTests.NOT_RECORDED` ("the dojo's own text,
+  like the event").
 - **Django admin**: `EventQuestion` inline on the Event admin
   (`TranslationAdminMixin`), `RegistrationAnswer` inline on the
   Registration admin, both fully editable (CLAUDE.md, "The admin always
@@ -2897,24 +2914,132 @@ Phase 2.
 
 1. Models, `events/questions.py`, the team's card, the sign-up page,
    answers and totals on the attendance list, privacy, admin, seeders,
-   tests, docs. That's the whole laptop case.
+   tests, docs. That's the whole laptop case. **Built** (17 October 2026).
 2. Changing answers from the account page, answers in the booking mails,
-   the API.
+   the API. **Built** (17 October 2026).
+3. The decisions on the open points and the follow-ups after phase 2: the
+   dojo's default questions, the maximum from the environment, answers in
+   the moved-up and reminder mails, the team correcting an answer (the
+   attendance list and the API), one notification per session. **Built**
+   (17 October 2026).
+
+### Built so far (phase 1)
+
+As planned above, with these choices made while building it:
+
+- **Showing the questions only for ticked children is CSS, not script**:
+  `.child-signup:not(:has(input[name="child"]:checked)) .child-questions`
+  hides them, so the page's script is untouched and a browser without
+  `:has` simply shows every child's questions. The server only asks
+  answers of the ticked children.
+- **The sign-up's errors**: `SignUpForm` (`questions=`) reads
+  `q-<child id>-<question id>`, marks each missing one in
+  `question_errors` and gives one message at the top ("Answer every
+  question for each child you sign up."); the view turns the form into
+  per-child fields (`events.views._question_fields`: value and error), so
+  the page shows "Answer this question." under each missing one with the
+  given answers kept. `registrations.QuestionsChanged` (a
+  `RegistrationError`) is the lock's check; the page then comes back with
+  the questions as they are now.
+- **The team's card** (`dojos/partials/_event_questions.html`,
+  `dojos.views.event_pages._questions_context`) shows the totals per
+  question in the card itself; a plain post without JavaScript redirects
+  to `#event-questions`, or shows the event page with the form's error.
+  The form is `dojos.forms.EventQuestionForm` (a plain `Form`, prefixed per
+  question so several sit on one page).
+- **Admin**: `EventQuestion` is an inline on the Event admin (position and
+  text) and has its own admin page with `TranslationAdminMixin` for its
+  other languages; `RegistrationAnswer` is an inline on the Registration
+  admin and has its own page too.
+- **Open points**: taken as planned (copy from the last session; answers
+  not in the audit log; at most 5).
+
+### Built so far (phase 2)
+
+- **Changing answers**: `events.questions.change_answers(registration,
+  {question_id: bool})` under the session's lock, every current question
+  required (a question added since the page was read gives a
+  `QuestionError`), refused once the session has started; it creates the
+  missing answers and updates `answered_at` on a changed one. The page is
+  `accounts.views.registration_answers` (`/account/registration/<id>/answers/`,
+  `events.forms.AnswersForm`, hand-written radios like the sign-up page):
+  a guardian's child or a ninja login's own place, a session with
+  questions that hasn't started, 404 otherwise. The account page and the
+  child's page link to it from each upcoming place (`ANSWER_COUNTS`
+  annotations): *Change answers*, or *Answer the new question* when the
+  child has fewer answers than the session has questions. A change
+  notifies the dojo's champion and mentors (`dojos.team.notify_managers`,
+  decided 17 October 2026; once per session while unread, see phase 3);
+  saving the same answers again tells nobody.
+- **Mail**: `booking_mail` passes `answers` = `[{"question", "answer"}]`
+  in each recipient's mail language (`mailing.automated._answers_context`:
+  the question's own translation, "Yes"/"No" from the catalogs). The
+  seeded `registration_confirmed` and `registration_waitlisted` templates
+  list them in a `{% if answers %}` block that leaves the mail as before
+  without answers; `mailing/migrations/0021_…` updates rows still exactly
+  as seeded (the same sha256 guard as `0020`). `waitlist_promoted` and the
+  reminder don't list them.
+- **API**: `GET /api/v1/events/{id}/attendance` has `questions`
+  (`id`, `text` in the dojo's main language) and each child's `answers`
+  (`question_id`, `answer`), under the read scope;
+  `events.attendance.confirmed_registrations` prefetches them.
+- **Audit log** (open point 2, decided): `RegistrationAnswer` is recorded
+  in `core.audit.RECORDED`, so the audit log says who gave or changed an
+  answer and when (a family, or the organisation in the Django admin).
+  `save_answers` saves each answer on its own (no `bulk_create`), so the
+  answers given at sign-up are in the log too; the seeder's `bulk_create`
+  runs without the log, as seeders do.
 
 ### Open points
 
-1. **Copy from the last session**, or a set of default questions per dojo
-   on its Settings page? The plan copies (no new screen); a dojo-level
-   default is easy to add later if teams ask.
-2. **Record answers in the audit log?** `Registration` is recorded. The
-   plan leaves answers out as low-risk logistics; record them if the team
-   wants to see who changed an answer (matters once families can change
-   them, phase 2).
-3. **Maximum of 5 questions**: enough? A long list makes signing up
-   several children tedious.
+1. **Copy from the last session, or default questions per dojo?**
+   Decided (17 October 2026): default questions per dojo, on its Settings
+   page (phase 3).
+2. **Record answers in the audit log?** Decided (17 October 2026): yes,
+   since families can change them (phase 2).
+3. **Maximum of 5 questions**: decided (17 October 2026): 5 is fine, set
+   in the environment (`SIGNUP_QUESTIONS_MAX`) so it can change without a
+   release (phase 3).
 4. **Organisation-wide questions** (the organisation asking the same
-   thing at every dojo) are out of scope; the per-event model doesn't
-   block them.
+   thing at every dojo): decided (17 October 2026) to keep as a possible
+   later step, **not built**. It would fit the same model: an
+   organisation-level list of default questions (like `DojoQuestion`,
+   without a dojo, managed on the organisation dashboard) that
+   `copy_defaults` adds after the dojo's own when a session is created,
+   counted within the same maximum. The answers, totals, mails and API
+   need no change, since they work on a session's own copies.
+
+### Built so far (phase 3)
+
+- **Default questions per dojo**: `dojos.DojoQuestion` (dojo, text,
+  position, a `TranslatableModel` in the dojo's languages), managed on the
+  Settings page (`EDIT_SETTINGS`) with the same card as a session's page:
+  `dojos/partials/_questions_card.html`, `dojos.views.questions`
+  (`questions_context(owner)` for a session or a dojo, and the views for
+  both). The rules in `events.questions` take either owner. A new session
+  copies them (`copy_defaults`, in `dojo_event_create`). Privacy:
+  `register_not_personal`; audit log: not recorded (the dojo's own text);
+  admin: an inline on the Dojo admin and its own page.
+- **The maximum** is `SIGNUP_QUESTIONS_MAX` (environment, default 5;
+  `.env.example`).
+- **Mails**: `waitlist_promoted` and `session_reminder` list the answers
+  too (`mailing.automated._session_and_answers`); migration `0021` updates
+  all four seeded templates, still only rows exactly as seeded.
+- **The team corrects an answer**: on the attendance list (*Answers* on a
+  child's row, `TAKE_ATTENDANCE`, `dojo_event_registration_answers`, the
+  totals re-sent out-of-band) and through the API
+  (`PUT /api/v1/events/{id}/attendance/children/{registration_id}/answers/{question_id}`,
+  write scope), both through `events.questions.correct_answer`: any time,
+  also once the session has started, recorded in the audit log.
+- **One notification per session**: a family's change notifies the
+  champion and mentors with "Families changed their answers to the sign-up
+  questions for <session>" (linking to the session's page), made with
+  `notify(..., once_unread=True)`: no new one while the same one is
+  unread.
+- **Seeded wording**: "Bringing your own laptop?" (nl "Breng je een eigen
+  laptop mee?", fr "Vous apportez votre propre ordinateur portable ?"),
+  right for a parent and for a ninja signing up themselves; about half the
+  dojos have it as a default, and their upcoming sessions ask it.
 
 
 ## 30. Reporting dashboards for the organisation (phase 1 built)
@@ -2932,3 +3057,14 @@ django-report-builder, Metabase/Superset/Grafana, notebooks) were researched
 and set aside. Phase 1 is built (11 October 2026): the `reports` app, the
 engagement snapshot as the first dataset, saved reports on `/manage/reports/`.
 Design, what's built, phases and open points are in `DATA_MODEL_REPORTS.md`.
+
+## 31. Telling families about a change to their session (not built — written up for review)
+
+When a session that families booked changes (venue, times, places) or is called off, whoever can
+change it (`MANAGE_EVENTS`) can mail every family with a place, on the waiting list, or both, from
+prepared mails or with a text of their own, in each family's language. Decided 5 November 2026: the
+senders are whoever can edit the session, a real `Event.CANCELLED` status (closing a session today
+still sends its reminder and counts it as missed), and raising the places promotes the waiting list
+(built first). Proposed: `registration` mail through `send()` (not a §25 campaign) and an append-only
+`events.SessionNotice`. Design, decisions, phases and open points
+are in `DATA_MODEL_NOTICES.md`.

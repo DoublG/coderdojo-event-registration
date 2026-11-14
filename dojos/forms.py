@@ -11,6 +11,7 @@ from core.content_languages import (
     clean_languages,
     optional_copy,
     save_translation_fields,
+    translation_field_name,
 )
 from core.forms import ActiveFilter, SearchFiltersMixin
 from core.image_library import library_filename, use_library_image
@@ -253,6 +254,40 @@ class DojoSearchForm(SearchFiltersMixin, forms.Form):
         if not data.get("location") and data.get("lat") is not None and data.get("lon") is not None:
             filters.insert(0, ActiveFilter(_("Location"), _("Your location"), self.url_without(path, ("lat", "lon"))))
         return filters
+
+
+class EventQuestionForm(forms.Form):
+    """One yes/no question on a session's sign-up (DATA_MODEL.md §29), with
+    its wording in the dojo's other languages. The rules (how many, which
+    sessions) are events.questions'; the view puts its QuestionError on
+    `text`."""
+
+    text = forms.CharField(
+        label=_("Question"),
+        max_length=200,
+        help_text=_(
+            "Families answer yes or no for each child they sign up. Not for health information: "
+            "allergies and similar go in the child's details, which only the champion sees."
+        ),
+        widget=forms.TextInput(attrs={"placeholder": _("e.g. Will your child bring their own laptop?")}),
+    )
+
+    def __init__(self, *args, question, **kwargs):
+        if question.pk:
+            kwargs.setdefault("initial", {"text": question.text})
+        super().__init__(*args, **kwargs)
+        self.question = question
+        self.translation_groups = bound_translation_groups(
+            self,
+            add_translation_fields(self, question, lambda field: optional_copy(self.fields[field], _("Question"))),
+        )
+
+    def translations(self):
+        """{language: text} for the dojo's other languages."""
+        return {
+            language: self.cleaned_data.get(translation_field_name(language, "text"), "")
+            for language in self.question.content_languages()[1:]
+        }
 
 
 class DojoCreateForm(forms.ModelForm):

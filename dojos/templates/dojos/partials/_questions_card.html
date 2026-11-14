@@ -1,0 +1,82 @@
+{% load i18n %}{% comment %}
+The yes/no sign-up questions card (dojos.views.questions.questions_context,
+DATA_MODEL.md §29), for a session (its page: the session's own questions and
+the answers so far) or for a dojo (its Settings page: the default questions
+new sessions start with). Every form posts to its own view and, with htmx,
+gets this card back; without JavaScript it goes back to the page.
+{% endcomment %}
+<div class="cd-card questions-card" id="{{ questions_card_id }}">
+  <div class="questions-card__head">
+    <h2 class="cd-form__label label">{% if questions_for_dojo %}{% translate "Default sign-up questions" %}{% else %}{% translate "Sign-up questions" %}{% endif %}</h2>
+    <span class="caption questions-card__count">{% blocktranslate with count=question_rows|length max=max_questions %}{{ count }} of {{ max }}{% endblocktranslate %}</span>
+  </div>
+  <p class="caption questions-card__help">{% if questions_for_dojo %}{% translate "Every new session starts with these questions, e.g. whether the child brings their own laptop. You can change them per session on the session's page; changing them here doesn't change sessions that already exist." %}{% else %}{% translate "Families answer each question with yes or no for every child they sign up, e.g. whether they bring their own laptop. The answers show on the attendance list. They never decide who gets a place." %}{% endif %}</p>
+
+  {% if question_rows %}
+    <ol class="questions-card__list">
+      {% for row in question_rows %}{% with question=row.question %}
+        <li class="questions-card__question">
+          <div class="questions-card__question-head">
+            <span class="body-sm questions-card__text">{{ question.text }}</span>
+            <div class="questions-card__actions">
+              {% if not forloop.first %}
+                <form method="post" action="{{ row.move_url }}" hx-post="{{ row.move_url }}" hx-target="#{{ questions_card_id }}" hx-swap="outerHTML">
+                  {% csrf_token %}<input type="hidden" name="direction" value="up">
+                  <button type="submit" class="cd-btn cd-btn--ghost label" aria-label="{% blocktranslate with text=question.text %}Move up: {{ text }}{% endblocktranslate %}">↑</button>
+                </form>
+              {% endif %}
+              {% if not forloop.last %}
+                <form method="post" action="{{ row.move_url }}" hx-post="{{ row.move_url }}" hx-target="#{{ questions_card_id }}" hx-swap="outerHTML">
+                  {% csrf_token %}<input type="hidden" name="direction" value="down">
+                  <button type="submit" class="cd-btn cd-btn--ghost label" aria-label="{% blocktranslate with text=question.text %}Move down: {{ text }}{% endblocktranslate %}">↓</button>
+                </form>
+              {% endif %}
+              <form method="post" action="{{ row.remove_url }}" hx-post="{{ row.remove_url }}" hx-target="#{{ questions_card_id }}" hx-swap="outerHTML"
+                    data-confirm="{% if question.answer_count %}{% blocktranslate asvar confirm_msg count counter=question.answer_count %}Remove this question? Its {{ counter }} answer is deleted with it.{% plural %}Remove this question? Its {{ counter }} answers are deleted with it.{% endblocktranslate %}{% else %}{% translate "Remove this question?" as confirm_msg %}{% endif %}{{ confirm_msg }}">
+                {% csrf_token %}
+                <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Remove" %}</button>
+              </form>
+            </div>
+          </div>
+          {% if row.totals %}{% with t=row.totals %}
+            <p class="caption questions-card__totals">
+              {% blocktranslate with yes=t.yes no=t.no %}Confirmed: {{ yes }} yes · {{ no }} no{% endblocktranslate %}{% if t.waiting_yes or t.waiting_no %} · {% blocktranslate with yes=t.waiting_yes no=t.waiting_no %}waiting list: {{ yes }} yes · {{ no }} no{% endblocktranslate %}{% endif %}
+            </p>
+          {% endwith %}{% endif %}
+          <details class="questions-card__edit"{% if row.open %} open{% endif %}>
+            <summary class="caption">{% translate "Edit" %}</summary>
+            <form class="cd-form" method="post" action="{{ row.edit_url }}" hx-post="{{ row.edit_url }}" hx-target="#{{ questions_card_id }}" hx-swap="outerHTML" novalidate>
+              {% csrf_token %}
+              {{ row.form.text.as_field_group }}
+              {% include "dojos/partials/_translation_fields.html" with form=row.form %}
+              {% if question.answer_count %}
+                <p class="cd-form__help caption">{% blocktranslate count counter=question.answer_count %}{{ counter }} answer was given to the current wording. To ask something else, remove this question and add a new one.{% plural %}{{ counter }} answers were given to the current wording. To ask something else, remove this question and add a new one.{% endblocktranslate %}</p>
+              {% endif %}
+              <div class="cd-form__actions">
+                <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Save question" %}</button>
+              </div>
+            </form>
+          </details>
+        </li>
+      {% endwith %}{% endfor %}
+    </ol>
+  {% else %}
+    <p class="body-sm questions-card__empty">{% if questions_for_dojo %}{% translate "No default questions: new sessions start without questions." %}{% else %}{% translate "No questions: families only pick which children come." %}{% endif %}</p>
+  {% endif %}
+
+  {% if question_add_form %}
+    <details class="questions-card__add"{% if question_add_form.errors %} open{% endif %}>
+      <summary class="label">{% translate "Add a question" %}</summary>
+      <form class="cd-form" method="post" action="{{ question_add_url }}" hx-post="{{ question_add_url }}" hx-target="#{{ questions_card_id }}" hx-swap="outerHTML" novalidate>
+        {% csrf_token %}
+        {{ question_add_form.text.as_field_group }}
+        {% include "dojos/partials/_translation_fields.html" with form=question_add_form %}
+        <div class="cd-form__actions">
+          <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Add question" %}</button>
+        </div>
+      </form>
+    </details>
+  {% else %}
+    <p class="caption questions-card__empty">{% blocktranslate with max=max_questions %}At most {{ max }} questions.{% endblocktranslate %}</p>
+  {% endif %}
+</div>

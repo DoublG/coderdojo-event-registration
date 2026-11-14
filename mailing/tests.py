@@ -4,6 +4,7 @@ from datetime import timedelta
 from io import StringIO
 from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core import mail as django_mail
 from django.core.management import call_command
@@ -682,6 +683,51 @@ class AutomatedMailTests(TestCase):
         dutch = EmailMessage.objects.get(recipient="p@example.com")
         self.assertEqual(dutch.subject, "Emma is ingeschreven voor Scratch")
 
+    def test_the_booking_mail_lists_the_answers_in_each_recipients_language(self):
+        self.dojo.languages = ["en-us", "nl-be"]
+        self.dojo.save()
+        event = self._event(days_ahead=10)
+        laptop = event.questions.create(
+            text="Own laptop?", position=1, translations={"nl-be": {"text": "Eigen laptop?"}}
+        )
+        self.client.force_login(self.parent)
+        self.client.post(
+            reverse("event_signup", kwargs={"event_id": event.id}),
+            {"child": [str(self.kid.id)], f"q-{self.kid.id}-{laptop.id}": "no"},
+        )
+        dutch = EmailMessage.objects.get(recipient="p@example.com")
+        self.assertIn("Je antwoorden", dutch.body)
+        self.assertIn("  Eigen laptop? Nee", dutch.body)
+        english = EmailMessage.objects.get(recipient="co@example.com")
+        self.assertIn("  Own laptop? No", english.body)
+
+    def test_the_reminder_and_the_moved_up_mail_list_the_answers(self):
+        from .automated import send_session_reminders
+
+        event = self._event(days_ahead=settings.MAILING_REMINDER_DAYS_BEFORE, places=1)
+        laptop = event.questions.create(text="Own laptop?", position=1)
+        other_kid = Ninja.objects.create(name="Liam")
+        first = Registration.objects.create(event=event, ninja=other_kid, waiting_list=False, position=1)
+        waiting = Registration.objects.create(event=event, ninja=self.kid, waiting_list=True, position=2)
+        waiting.answers.create(question=laptop, answer=True)
+        from events import registrations
+
+        registrations.cancel(first, cancelled_by=None)
+        promoted = EmailMessage.objects.get(recipient="co@example.com", template_key="waitlist_promoted")
+        self.assertIn("  Own laptop? Yes", promoted.body)
+        send_session_reminders()
+        reminder = EmailMessage.objects.get(recipient="co@example.com", template_key="session_reminder")
+        self.assertIn("  Own laptop? Yes", reminder.body)
+
+    def test_a_session_without_questions_mails_no_answers(self):
+        event = self._event(days_ahead=10)
+        self.client.force_login(self.parent)
+        self.client.post(reverse("event_signup", kwargs={"event_id": event.id}), {"child": [str(self.kid.id)]})
+        body = EmailMessage.objects.get(recipient="co@example.com").body
+        self.assertNotIn("Your answers", body)
+        self.assertIn("Where: ", body)
+        self.assertNotIn("\n\n\n", body)
+
     def test_signup_for_a_full_session_sends_the_waiting_list_notice(self):
         event = self._event(days_ahead=10, places=0)
         self.client.force_login(self.parent)
@@ -877,7 +923,7 @@ class TemplateDashboardTests(TestCase):
     def test_write_a_missing_language_starting_from_english(self):
         EmailTemplate.objects.filter(key="campaign_girlz", language="fr-be").delete()
         response = self.client.get(self._edit("campaign_girlz", "fr-be"))
-        self.assertContains(response, "no Français version yet")
+        self.assertContains(response, "no French version yet")
         self.assertEqual(
             response.context["form"]["subject"].value(),
             EmailTemplate.objects.get(key="campaign_girlz", language="en-us").subject,

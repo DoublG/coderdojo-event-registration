@@ -1,5 +1,5 @@
-"""Signing children up for a session and cancelling a place: the places, the
-waiting list and its positions (CAPACITY.md, finding 1).
+"""Signing children up for a session, cancelling a place and filling the
+places the team added: the places, the waiting list and its positions (CAPACITY.md, finding 1).
 
 Both lock the session's row first (`SELECT ... FOR UPDATE`), so sign-ups
 and cancellations for one session happen one at a time: two families
@@ -10,16 +10,18 @@ registrations are still open) is read after taking the lock. Django runs
 MySQL at READ COMMITTED, so those reads see what the transaction before
 committed. Sessions don't wait on each other: the lock is per session."""
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any
 
 from django.db import transaction
 from django.db.models import Max
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from accounts.home_dojo import assign_on_signup
 from mailing.automated import booking_mail, waitlist_promoted_mail
 
+from . import questions as event_questions
 from .models import Event, Registration, RegistrationCancellation
 
 if TYPE_CHECKING:  # types only
@@ -30,17 +32,30 @@ class RegistrationError(Exception):
     """A sign-up that can't happen, with a message for the family."""
 
 
+class QuestionsChanged(RegistrationError):
+    """The session's questions changed while the sign-up form was open (or
+    an answer is missing): the family checks them again."""
+
+
 def _lock(event_id: int) -> Event:
     return Event.objects.select_for_update().get(pk=event_id)
 
 
-def sign_up(event: Event, children: "Sequence[Ninja]") -> list[dict[str, Any]]:
+def sign_up(
+    event: Event,
+    children: "Sequence[Ninja]",
+    answers: Mapping[int, Mapping[int, bool]] | None = None,
+) -> list[dict[str, Any]]:
     """Sign `children` up for `event`, in order: a confirmed place while
     there are places, the waiting list after that. Children already signed
     up are skipped. Returns [{"child", "waiting_list", "registration"}] for
     the new ones; raises RegistrationError when registrations are closed or every
     child is already signed up. Their booking mail is queued in the same
-    transaction: none for a sign-up that didn't happen."""
+    transaction: none for a sign-up that didn't happen.
+
+    `answers` is {child_id: {question_id: bool}} for the session's yes/no
+    questions (events.questions): every new child answers every question
+    as they stand under the lock, or nothing is saved (QuestionsChanged)."""
     with transaction.atomic():
         event = _lock(event.pk)
         if not event.registration_open:
@@ -51,6 +66,10 @@ def sign_up(event: Event, children: "Sequence[Ninja]") -> list[dict[str, Any]]:
         new_children = [child for child in children if child.id not in signed_up]
         if not new_children:
             raise RegistrationError(_("The child(ren) you selected are already signed up for this session."))
+
+        questions = list(event.questions.all())
+        if event_questions.missing_answers(questions, new_children, answers or {}):
+            raise QuestionsChanged(_("The questions for this session changed, please check them again."))
 
         position = Registration.objects.filter(event=event).aggregate(Max("position"))["position__max"] or 0
         confirmed = Registration.objects.filter(event=event, waiting_list=False).count()
@@ -65,6 +84,8 @@ def sign_up(event: Event, children: "Sequence[Ninja]") -> list[dict[str, Any]]:
             # What the ninja works on starts as everything the session
             # covers; the dojo team narrows it on the attendance list.
             registration.pathways.set(pathways)
+            if questions:
+                event_questions.save_answers(registration, questions, (answers or {})[child.pk])
             # A child's first sign-up gives them their home dojo.
             assign_on_signup(child, event.dojo)
             if not waiting_list:
@@ -97,14 +118,35 @@ def cancel(registration: Registration, cancelled_by: "User | None") -> Registrat
         registration.delete()
         if not was_confirmed:
             return None
-        # Only into a place that's really free: a session the team gave fewer
-        # places after it filled up stays as it is.
-        if Registration.objects.filter(event=event, waiting_list=False).count() >= event.places:
-            return None
-        promoted = Registration.objects.filter(event=event, waiting_list=True).order_by("position").first()
-        if promoted is None:
-            return None
-        promoted.waiting_list = False
-        promoted.save(update_fields=["waiting_list"])
-        waitlist_promoted_mail(promoted)
-        return promoted
+        promoted = _promote(event, at_most=1)
+        return promoted[0] if promoted else None
+
+
+def fill_free_places(event: Event) -> list[Registration]:
+    """Give the session's free places to the children waiting longest, in
+    waiting-list order, and mail each family (DATA_MODEL_NOTICES.md, "Related
+    fix"). Called after the team raised the places (the event form, the
+    API's sync); does nothing for a session that has started or is cancelled.
+    Returns the promoted registrations."""
+    with transaction.atomic():
+        event = _lock(event.pk)
+        if event.start_time <= timezone.now() or event.status == Event.CANCELLED:
+            return []
+        return _promote(event)
+
+
+def _promote(event: Event, at_most: int | None = None) -> list[Registration]:
+    """Under the session's lock: move waiting children into the places that
+    are really free (a session the team gave fewer places after it filled up
+    stays as it is), at most `at_most` of them."""
+    free = event.places - Registration.objects.filter(event=event, waiting_list=False).count()
+    if at_most is not None:
+        free = min(free, at_most)
+    if free <= 0:
+        return []
+    promoted = list(Registration.objects.filter(event=event, waiting_list=True).order_by("position")[:free])
+    for registration in promoted:
+        registration.waiting_list = False
+        registration.save(update_fields=["waiting_list"])
+        waitlist_promoted_mail(registration)
+    return promoted

@@ -1,7 +1,9 @@
 # The unit tests: the whole Django test suite (`manage.py test`, about 1,190 tests)
 # against MySQL and Redis, the way the devcontainer runs it, plus a check that no
 # model change is missing its migration.
-# Runs on every push and pull request that changes code, and by hand from the Actions tab.
+# Runs on every push that changes code, on every pull request (also one that only
+# changes docs: `test` is a required check on main, "Protect main", and a required
+# check that never runs would block the PR), and by hand from the Actions tab.
 # A push to `demo` runs it through deploy-demo.yml instead (called as a reusable
 # workflow), which deploys only when it passes.
 # The results: a summary on the run's page (totals, a table per app, the failed tests
@@ -21,13 +23,6 @@ on:
       - ".github/workflows/audit.yml"
       - ".github/workflows/quality.yml"
   pull_request:
-    paths-ignore:
-      - "docs/**"
-      - "user-journeys/**"
-      - "**/*.md"
-      - ".github/workflows/docs.yml"
-      - ".github/workflows/audit.yml"
-      - ".github/workflows/quality.yml"
   workflow_dispatch:
   workflow_call:
 
@@ -82,7 +77,7 @@ jobs:
       DEBUG: "true"
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # The same system libraries as .devcontainer/dockerfile_workspace/Dockerfile:
       # mysqlclient builds against libmysqlclient, django.contrib.gis loads GDAL/GEOS/PROJ.
@@ -93,7 +88,7 @@ jobs:
             build-essential pkg-config default-libmysqlclient-dev \
             gdal-bin libgdal-dev libgeos-dev libproj-dev gettext
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14"
           cache: pip
@@ -103,7 +98,7 @@ jobs:
 
       # requirements-dev.txt, like the devcontainer: the tests cover the import_* commands too.
       - name: Install Python packages
-        run: pip install -r requirements-dev.txt
+        run: pip install --require-hashes -r requirements-dev.txt
 
       - name: No missing migrations
         run: python manage.py makemigrations --check --dry-run
@@ -121,7 +116,7 @@ jobs:
 
       - name: Keep the test results
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: test-results
           path: test-results/

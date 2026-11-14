@@ -1,6 +1,6 @@
-{% load i18n %}{% comment %}
+{% load content_i18n %}{% load i18n %}{% comment %}
 The attendance list for one event — shared by dojo_event_attendance.html
-(a specific session) and dojo_dashboard.html (the next/most recent one).
+(a specific session) and dojo_attendance.html (the next/most recent one).
 Expects `dojo`, `event`, `registrations` (confirmed, not waitlisted),
 `present_count`, and the session's team as `team_rows`/`team_present_count`
 (marked here too: the record of who was there, for the insurance) — see
@@ -15,6 +15,7 @@ is deliberately not wired up here.
     <div>
       <h2 class="cd-attendance__title heading-md">{{ event.name }} — {{ event.start_time|date:"D j M Y, H:i" }}</h2>
       {% include "dojos/partials/_attendance_summary.html" %}
+      {% include "dojos/partials/_attendance_questions.html" %}
     </div>
     {% if registrations or team_rows %}{% if dojo_access.can_take_attendance %}
       <form method="post" action="{% url 'dojo_event_attendance_mark_all' dojo_id=dojo.id event_id=event.id %}"

@@ -168,7 +168,7 @@ class PromotionQuerySet(models.QuerySet):
         return (
             self.filter(placement=placement, starts_at__lte=now, event__end_time__gt=now)
             .filter(Q(ends_at__gt=now) | Q(ends_at=None, event__start_time__gt=now))
-            .filter(event__in=Event.objects.visible())
+            .filter(event__in=Event.objects.listed())
             .order_by("rank", "starts_at", "id")
         )
 

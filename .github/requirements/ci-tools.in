@@ -1,0 +1,18 @@
+# The tools the Code audit workflow (audit.yml) installs without the rest of the
+# development set: ruff, import-linter, mypy with django-stubs, and pip-audit.
+#
+# This is the source: edit it, then run scripts/compile_requirements.sh, which
+# writes .github/requirements/ci-tools.txt from it with every package's hashes (pip-compile from pip-tools;
+# commit both). Never edit .github/requirements/ci-tools.txt by hand. pip then installs only files whose
+# hash matches (MAINTENANCE.md, "Hash-checked installs").
+#
+# Constrained to requirements-dev.txt: the same versions as in the devcontainer.
+-c ../../requirements-dev.txt
+
+ruff
+import-linter
+mypy
+django-stubs
+django-stubs-ext
+types-PyYAML
+pip-audit

@@ -53,6 +53,7 @@ from .family import (  # noqa: F401
     change_email,
     confirm_email_change,
     edit_account,
+    registration_answers,
 )
 from .guardians import (  # noqa: F401
     _guardians_card_context,

@@ -62,6 +62,9 @@ RECORDED: dict[str, dict[str, list[str]]] = {
     "dojos.DojoMembership": {},
     "events.Event": {"exclude_fields": ["published_at", "announced_at"], "m2m_fields": ["team"]},
     "events.Registration": {},
+    # Answers to a session's sign-up questions (DATA_MODEL.md §29): families
+    # change them until the session starts, so the log says who changed one.
+    "events.RegistrationAnswer": {},
     "events.TeamAttendance": {},
     "events.NinjaBelt": {},
     "events.NinjaBadge": {},

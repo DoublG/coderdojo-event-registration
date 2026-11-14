@@ -15,11 +15,18 @@ class DojoApiClient(models.Model):
 
     READ = "attendance:read"
     WRITE = "attendance:write"
-    SCOPE_CHOICES = [(READ, "See the sessions and who has a place"), (WRITE, "Mark who came")]
+    EVENTS_READ = "events:read"
+    EVENTS_WRITE = "events:write"
+    SCOPE_CHOICES = [
+        (READ, "See the sessions and who has a place"),
+        (WRITE, "Mark who came"),
+        (EVENTS_READ, "See the sessions"),
+        (EVENTS_WRITE, "Plan sessions: add and change them"),
+    ]
 
     dojo = models.ForeignKey("dojos.Dojo", on_delete=models.CASCADE, related_name="api_clients")
     name = models.CharField(max_length=100, help_text='What the dojo calls it, e.g. "Scan app at the door".')
-    scopes = models.JSONField(default=list, help_text="What it may do: attendance:read, attendance:write.")
+    scopes = models.JSONField(default=list, help_text="What it may do: the scopes in SCOPE_CHOICES.")
     application = models.OneToOneField(
         oauth2_settings.APPLICATION_MODEL,
         on_delete=models.CASCADE,

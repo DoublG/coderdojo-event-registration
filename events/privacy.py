@@ -6,12 +6,15 @@ from .models import (
     Badge,
     Belt,
     Event,
+    EventQuestion,
     NinjaBadge,
     NinjaBelt,
     NinjaEngagement,
     NinjaEngagementChange,
     Registration,
+    RegistrationAnswer,
     RegistrationCancellation,
+    SessionNotice,
     TeamAttendance,
 )
 
@@ -45,6 +48,7 @@ register(
         "max_age",
         "audience",
         "external_registration_url",
+        "external_ref",
         "published_at",
         "announced_at",
         "pathways",
@@ -66,6 +70,21 @@ register(
     not_personal=["id", "event"],
 )
 
+register_not_personal(EventQuestion, "a yes/no question the dojo team asks on a session's sign-up, its own text")
+
+register(
+    RegistrationAnswer,
+    subjects={Subject.CHILD: "registration__ninja"},
+    purpose="The family's yes/no answers to a session's sign-up questions, for the dojo team's planning",
+    legal_basis=LegalBasis.CONTRACT,
+    retention="registration",
+    seen_by=FAMILY_AND_TEAM,
+    fields={
+        ("registration", "answer", "answered_at"): keep(Category.CHILD, ANONYMISED_CHILD),
+    },
+    not_personal=["id", "question"],
+)
+
 register(
     RegistrationCancellation,
     subjects={Subject.CHILD: "ninja"},
@@ -78,6 +97,24 @@ register(
         "cancelled_by": personal(Category.IDENTITY),
     },
     not_personal=["id", "event"],
+)
+
+register(
+    SessionNotice,
+    subjects={Subject.ACCOUNT: "sent_by"},
+    purpose="Telling the families of a session about a change to it (DATA_MODEL_NOTICES.md)",
+    legal_basis=LegalBasis.CONTRACT,
+    retention="team",
+    seen_by="The session's dojo team; the organisation (Django admin)",
+    fields={
+        "sent_by": personal(Category.IDENTITY),
+        ("subject", "message", "translations"): keep(
+            Category.IDENTITY,
+            "the dojo team's own text to the session's families, not about the sender",
+            retention="session_notice",
+        ),
+    },
+    not_personal=["id", "event", "kind", "audience", "changes", "sent_at", "recipients"],
 )
 
 AWARDED = dict(

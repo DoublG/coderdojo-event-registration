@@ -12,7 +12,7 @@ for developer docs, this is a separate audience. Available in English, French
 ## Building
 
 ```sh
-pip install -r requirements.txt
+pip install --require-hashes -r requirements.txt   # compiled from requirements.in (MAINTENANCE.md)
 make html-all       # builds build/html/ (en), build/html/fr/, build/html/nl/
 ```
 

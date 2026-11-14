@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-11 06:31+0000\n"
+"POT-Creation-Date: 2026-11-05 08:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -179,7 +179,15 @@ msgid ""
 "reminder 30 days and 7 days before, and an account is never deleted "
 "sooner than 30 days after the first reminder. A champion's or mentor's "
 "name stays on past sessions and on the belts and badges they awarded."
-msgstr "**Les comptes** sont supprimés deux ans après la dernière connexion. Le compte d'un parent reste tant qu'un de ses enfants utilise sa propre connexion ou participe à une session de dojo (peu importe qui l'a inscrit ; une session où l'enfant a été noté absent ne compte pas). Le titulaire du compte reçoit un rappel 30 jours et 7 jours avant, et un compte n'est jamais supprimé moins de 30 jours après le premier rappel. Le nom d'un champion ou d'un mentor reste sur les sessions passées et sur les ceintures et badges qu'il a attribués."
+msgstr ""
+"**Les comptes** sont supprimés deux ans après la dernière connexion. Le "
+"compte d'un parent reste tant qu'un de ses enfants utilise sa propre "
+"connexion ou participe à une session de dojo (peu importe qui l'a inscrit"
+" ; une session où l'enfant a été noté absent ne compte pas). Le titulaire"
+" du compte reçoit un rappel 30 jours et 7 jours avant, et un compte n'est"
+" jamais supprimé moins de 30 jours après le premier rappel. Le nom d'un "
+"champion ou d'un mentor reste sur les sessions passées et sur les "
+"ceintures et badges qu'il a attribués."
 
 #: ../../source/organisation/privacy.rst:78
 msgid ""
@@ -202,6 +210,20 @@ msgstr ""
 
 #: ../../source/organisation/privacy.rst:83
 msgid ""
+"**A dojo team's own text in a mail to a session's families** (a change to"
+" the session, or a message of their own) stays as long as the dojo is "
+"active. Once the dojo goes dormant or is archived, the text is cleared; "
+"what kind of mail it was, when and to how many families stay with the "
+"session."
+msgstr ""
+"**Le texte propre d'une équipe de dojo dans un mail aux familles d'une "
+"session** (un changement à la session, ou son propre message) est "
+"conservé tant que le dojo est actif. Quand le dojo est mis en pause ou "
+"archivé, le texte est effacé ; le type de mail, la date et le nombre de "
+"familles restent avec la session."
+
+#: ../../source/organisation/privacy.rst:88
+msgid ""
 "**Invitations** to the organisation are removed 30 days after they were "
 "accepted, withdrawn or ran out (an invitation is valid for 14 days)."
 msgstr ""
@@ -209,7 +231,7 @@ msgstr ""
 " été acceptées, retirées ou expirées (une invitation est valable 14 "
 "jours)."
 
-#: ../../source/organisation/privacy.rst:85
+#: ../../source/organisation/privacy.rst:90
 msgid ""
 "**Invitations to be a child's guardian** are removed the same way: 30 "
 "days after they were accepted, withdrawn or ran out (valid for 14 days)."
@@ -218,7 +240,7 @@ msgstr ""
 "même façon : 30 jours après avoir été acceptées, retirées ou expirées "
 "(valables 14 jours)."
 
-#: ../../source/organisation/privacy.rst:87
+#: ../../source/organisation/privacy.rst:92
 msgid ""
 "**Login sessions** end two weeks after they last changed, and are then "
 "removed."
@@ -226,11 +248,11 @@ msgstr ""
 "**Les sessions de connexion** expirent deux semaines après leur dernière "
 "modification, puis sont supprimées."
 
-#: ../../source/organisation/privacy.rst:90
+#: ../../source/organisation/privacy.rst:95
 msgid "Some data is removed at once, not after a period:"
 msgstr "Certaines données sont supprimées immédiatement, pas après un délai :"
 
-#: ../../source/organisation/privacy.rst:92
+#: ../../source/organisation/privacy.rst:97
 msgid ""
 "**A criminal-record extract** is deleted the moment a reviewer decides on"
 " it. Only the decision is kept."
@@ -238,7 +260,7 @@ msgstr ""
 "**Un extrait de casier judiciaire** est supprimé dès qu'un évaluateur a "
 "pris sa décision. Seule la décision est conservée."
 
-#: ../../source/organisation/privacy.rst:94
+#: ../../source/organisation/privacy.rst:99
 msgid ""
 "**Two-step login** methods (an authenticator app, passkeys, backup codes)"
 " are removed when someone turns two-step login off."
@@ -247,7 +269,7 @@ msgstr ""
 "d'authentification, des passkeys, des codes de secours) sont supprimées "
 "quand quelqu'un désactive la connexion en deux étapes."
 
-#: ../../source/organisation/privacy.rst:97
+#: ../../source/organisation/privacy.rst:102
 msgid ""
 "For some data, how long to keep it hasn't been decided yet, so the site "
 "doesn't remove it by itself: a child's details and their sessions, belts "

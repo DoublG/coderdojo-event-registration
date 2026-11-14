@@ -12,7 +12,7 @@ from dojos.models import Dojo
 from geo.functions import DistanceSphere
 
 from ...engagement import is_aimed_at
-from ...models import Event, Registration
+from ...models import Event, Registration, RegistrationAnswer
 
 # The sessions filled up to test the waiting list, one per state worth
 # testing: full with children waiting, exactly full (the next sign-up
@@ -50,7 +50,8 @@ def sign_up(event, ninja, signed_up_at):
     """What events.views.event_signup does, minus the booking mail (seeded
     families aren't told): the next position, the waiting list once the
     session is full, the session's pathways, and the home dojo on a first
-    sign-up."""
+    sign-up, and an answer to each of the session's yes/no questions (most
+    children bring a laptop; own RNG per registration)."""
     registration = Registration.objects.filter(event=event, ninja=ninja).first()
     if registration is not None:
         return registration, False
@@ -64,6 +65,11 @@ def sign_up(event, ninja, signed_up_at):
         created_at=signed_up_at,
     )
     registration.pathways.set(event.pathways.all())
+    answer_rng = random.Random(f"upcoming-answers-{registration.id}")
+    RegistrationAnswer.objects.bulk_create(
+        RegistrationAnswer(registration=registration, question=question, answer=answer_rng.random() < 0.7)
+        for question in event.questions.all()
+    )
     assign_on_signup(ninja, event.dojo)
     return registration, True
 

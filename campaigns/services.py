@@ -41,7 +41,7 @@ from django.utils.translation import gettext as _
 from campaigns import dojo_audiences
 from campaigns.models import Campaign
 from campaigns.segmentation.resolver import SegmentResolver, serialize_segment
-from core.content_languages import language_name
+from core.content_languages import language_name_in_sentence
 from mailing.categories import CAN_OPT_OUT, MailCategory
 from mailing.models import ConsentEvent, DojoMailMute, EmailMessage, EmailTemplate
 from mailing.preferences import subscribed_q
@@ -116,7 +116,7 @@ def _dojo_launch_problems(campaign: Campaign) -> list[str]:
     if not campaign.subject.strip() or not campaign.message.strip():
         problems.append(
             _("Write a subject and a message in %(language)s, your dojo's main language.")
-            % {"language": language_name(campaign.main_language())}
+            % {"language": language_name_in_sentence(campaign.main_language())}
         )
     if not _dojo_of(campaign).email:
         problems.append(_("Add your dojo's email address in its settings first: replies go there."))

@@ -1,25 +1,64 @@
 {% extends "dojos/_admin_base.html" %}
+{% load content_i18n %}
 {% load i18n %}
-{% block admin_page_title %}{% translate "Attendance" %}{% endblock %}
-{% block admin_heading %}{% translate "Attendance" %}{% endblock %}
+{% block admin_page_title %}{% translate "Dashboard" %}{% endblock %}
+{% block admin_heading %}{% translate "Dashboard" %}{% endblock %}
 
-{% block admin_topbar_extra %}
-  {% if event and dojo_access.can_manage_events %}
-    <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">{% translate "Open session" %}</a>
-  {% endif %}
+{% block admin_extra_style %}
+<style>
+  /* Two independent columns under Needs attention (the next session and the year left,
+     the agenda and the ninjas right), so a tall card never leaves a gap beside it; narrow,
+     the cards stack in source order (never reordered with CSS: focus order follows it). */
+  .dash { display: flex; flex-direction: column; gap: var(--space-5); container-type: inline-size; }
+  .dash__cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); align-items: start; }
+  .dash__col { display: flex; flex-direction: column; gap: var(--space-5); }
+  @container (max-width: 680px) {
+    .dash__cols { display: flex; flex-direction: column; }
+    .dash__col { display: contents; }
+  }
+  .dash h2 { margin: 0 0 var(--space-3); }
+  .dash p { margin: 0; }
+  .dash .muted { color: var(--ink-muted); }
+  .dash__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+  .dash__item { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+  .dash__item p { flex: 1 1 16rem; }
+  .dash__facts { display: flex; flex-direction: column; gap: var(--space-2); margin: var(--space-3) 0; }
+  .dash__actions { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-4); }
+  .dash__stages { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-3) 0; padding: 0; list-style: none; }
+  .dash__figures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin: 0 0 var(--space-3); }
+  .dash__figures div { display: flex; flex-direction: column-reverse; gap: var(--space-1); }
+  .dash__figures dd { margin: 0; }
+  .dash__link { display: inline-block; margin-top: var(--space-3); }
+  /* The Calendar fills its grid cell here, and its day headers are labels, not buttons. */
+  .dash .cd-calendar { max-width: none; }
+  .dash .cd-calendar__dates { list-style: none; margin: 0; padding: 0; }
+  .dash .cd-calendar__events { list-style: none; margin-top: 0; margin-bottom: 0; }
+  .dash .cd-calendar__date-header { cursor: default; }
+  .dash .cd-calendar__date-header:hover { background: transparent; }
+  .dash .cd-calendar__date--selected .cd-calendar__date-header:hover { background: var(--primary); }
+</style>
 {% endblock %}
 
 {% block admin_content %}
+{% comment %}
+The overview a dojo's team lands on (dojos.dashboard builds `overview`): what
+needs them now, the next sessions, the dojo's ninjas (engagement stages as
+counts only) and its year so far. Each part links to the page that does the
+work; nothing is edited here.
+{% endcomment %}
+{% with attention=overview.attention next=overview.next_session %}
+<div class="dash">
+
   {% if dojo.status != 'active' %}
-    <div class="cd-card" style="margin-bottom: var(--space-5); padding: var(--space-4);">
-      <p class="body" style="margin: 0;">
+    <div class="cd-card">
+      <p class="body">
         {% blocktranslate with name=dojo.name status=dojo.get_status_display|lower %}{{ name }} is <strong>{{ status }}</strong>, so it and its sessions are hidden from the public site.{% endblocktranslate %}
         {% if dojo_access.can_manage_lifecycle %}{% url 'dojo_manage' dojo_id=dojo.id as settings_url %}{% blocktranslate %}Change that under <a href="{{ settings_url }}">Settings</a>.{% endblocktranslate %}{% endif %}
       </p>
     </div>
-  {% elif dormancy_nudge %}
-    <div class="cd-card" style="margin-bottom: var(--space-5); padding: var(--space-4);">
-      <p class="body" style="margin: 0;">
+  {% elif overview.dormancy_nudge %}
+    <div class="cd-card">
+      <p class="body">
         {% translate "No sessions have been planned for over six months." %}
         {% url 'dojo_event_create' dojo_id=dojo.id as new_event_url %}{% url 'dojo_manage' dojo_id=dojo.id as settings_url %}
         {% if dojo_access.can_manage_events %}{% blocktranslate %}Plan your next session under <a href="{{ new_event_url }}">New event</a>.{% endblocktranslate %}{% else %}{% translate "Plan your next session." %}{% endif %}
@@ -27,9 +66,184 @@
       </p>
     </div>
   {% endif %}
-  {% if event %}
-    {% include "dojos/partials/_attendance.html" %}
-  {% else %}
-    <p class="body">{% if dojo_access.can_manage_events %}{% url 'dojo_event_create' dojo_id=dojo.id as new_event_url %}{% blocktranslate %}No sessions yet — <a href="{{ new_event_url }}">create one</a> to start taking attendance.{% endblocktranslate %}{% else %}{% translate "No sessions yet." %}{% endif %}</p>
+
+  {% if attention %}
+    <section class="cd-card" aria-labelledby="dash-attention">
+      <h2 class="heading-sm" id="dash-attention">{% translate "Needs attention" %}</h2>
+      <ul class="dash__list">
+        {% if attention.join_requests %}
+          <li class="dash__item">
+            <p class="body-sm">{% blocktranslate count counter=attention.join_requests %}{{ counter }} request to join the team is waiting.{% plural %}{{ counter }} requests to join the team are waiting.{% endblocktranslate %}</p>
+            <a class="cd-btn cd-btn--secondary label" href="{% url 'dojo_team_manage' dojo_id=dojo.id %}">{% translate "Open the Team page" %}</a>
+          </li>
+        {% endif %}
+        {% for event in attention.unmarked_sessions %}
+          <li class="dash__item">
+            <p class="body-sm">{% blocktranslate trimmed with name=event.name date=event.start_time|date:"D j M" count counter=event.unmarked_count %}
+              Attendance for {{ name }} ({{ date }}) isn't marked yet for {{ counter }} place.{% plural %}Attendance for {{ name }} ({{ date }}) isn't marked yet for {{ counter }} places.
+            {% endblocktranslate %}</p>
+            <a class="cd-btn cd-btn--secondary label" href="{% url 'dojo_event_attendance' dojo_id=dojo.id event_id=event.id %}">{% translate "Mark attendance" %}</a>
+          </li>
+        {% endfor %}
+        {% for event in attention.drafts_soon %}
+          <li class="dash__item">
+            <p class="body-sm">{% blocktranslate with name=event.name date=event.start_time|date:"D j M" %}{{ name }} ({{ date }}) is still a draft, so families can't sign up yet.{% endblocktranslate %}</p>
+            <a class="cd-btn cd-btn--secondary label" href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">{% translate "Open session" %}</a>
+          </li>
+        {% endfor %}
+        {% for event in attention.without_team_soon %}
+          <li class="dash__item">
+            <p class="body-sm">{% blocktranslate with name=event.name date=event.start_time|date:"D j M" %}{{ name }} ({{ date }}) has no team yet.{% endblocktranslate %}</p>
+            <a class="cd-btn cd-btn--secondary label" href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">{% translate "Choose the team" %}</a>
+          </li>
+        {% endfor %}
+        {% if attention.nothing_planned %}
+          <li class="dash__item">
+            <p class="body-sm">{% translate "No session is planned in the next six weeks." %}</p>
+            <a class="cd-btn cd-btn--secondary label" href="{% url 'dojo_event_create' dojo_id=dojo.id %}">{% translate "New event" %}</a>
+          </li>
+        {% endif %}
+        {% for check in attention.checks %}
+          <li class="dash__item">
+            <p class="body-sm">
+              {% if check.is_self %}
+                {% blocktranslate with date=check.expires_at|date:"j F Y" %}Your background check ends on {{ date }}. Ask for a new extract in time: you can upload it once the current check has ended.{% endblocktranslate %}
+              {% elif check.lapsed %}
+                {% blocktranslate with name=check.membership.name %}{{ name }}'s background check has ended: they can't open this admin area until a new one is approved.{% endblocktranslate %}
+                {% if check.renewal_submitted %}{% translate "A new extract is being reviewed." %}{% endif %}
+              {% else %}
+                {% blocktranslate with name=check.membership.name date=check.expires_at|date:"j F Y" %}{{ name }}'s background check ends on {{ date }}.{% endblocktranslate %}
+              {% endif %}
+            </p>
+            {% if check.is_self %}
+              <a class="cd-btn cd-btn--ghost label" href="{% url 'account_home' %}">{% translate "Your account" %}</a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
   {% endif %}
+
+  <div class="dash__cols">
+    <div class="dash__col">
+      <section class="cd-card dash__next" aria-labelledby="dash-next">
+        <h2 class="heading-sm" id="dash-next">{% translate "Next session" %}</h2>
+        {% if next %}
+          <p class="body"><strong>{{ next.name }}</strong></p>
+          <p class="body-sm muted">{{ next.start_time|date:"l j F" }}, {{ next.start_time|time:"H:i" }}–{{ next.end_time|time:"H:i" }}</p>
+          <div class="dash__facts">
+            <p class="body-sm">
+              {% if next.status == 'draft' %}
+                <span class="cd-badge cd-badge--outline caption">{% translate "Draft" %}</span>
+              {% elif next.status == 'open' %}
+                <span class="cd-badge cd-badge--success caption">{% translate "Open" %}</span>
+              {% else %}
+                <span class="cd-badge cd-badge--warning caption">{% translate "Closed" %}</span>
+              {% endif %}
+              {% blocktranslate with taken=next.confirmed_count places=next.places %}{{ taken }} of {{ places }} places taken{% endblocktranslate %}{% if overview.next_session_waiting %} · {% blocktranslate count counter=overview.next_session_waiting %}{{ counter }} on the waiting list{% plural %}{{ counter }} on the waiting list{% endblocktranslate %}{% endif %}
+            </p>
+            <p class="body-sm">
+              {% translate "Team:" %}
+              {% for member in next.team.all %}{{ member.name }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="muted">{% translate "not chosen yet" %}</span>{% endfor %}
+            </p>
+            {% for t in overview.next_session_answers %}
+              <p class="body-sm">{{ t.question|localized:"text"|in_lang }} <strong>{% blocktranslate with yes=t.yes no=t.no %}{{ yes }} yes · {{ no }} no{% endblocktranslate %}</strong></p>
+            {% endfor %}
+          </div>
+          <div class="dash__actions">
+            {% if dojo_access.can_take_attendance %}
+              <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_event_attendance' dojo_id=dojo.id event_id=next.id %}">{% translate "Take attendance" %}</a>
+            {% endif %}
+            {% if dojo_access.can_manage_events %}
+              <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=next.id %}">{% translate "Open session" %}</a>
+            {% endif %}
+          </div>
+        {% else %}
+          <p class="body-sm muted">{% translate "No sessions planned." %}</p>
+          {% if dojo_access.can_manage_events %}
+            <div class="dash__actions">
+              <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_event_create' dojo_id=dojo.id %}">{% translate "New event" %}</a>
+            </div>
+          {% endif %}
+        {% endif %}
+      </section>
+
+      <section class="cd-card dash__year" aria-labelledby="dash-year">
+        <h2 class="heading-sm" id="dash-year">{% translate "This year" %}</h2>
+        {% with year=overview.year %}
+          <dl class="dash__figures">
+            <div><dt class="caption muted">{% translate "Sessions held" %}</dt><dd class="heading-md">{{ year.sessions }}</dd></div>
+            <div><dt class="caption muted">{% translate "Different ninjas" %}</dt><dd class="heading-md">{{ year.ninjas }}</dd></div>
+            <div><dt class="caption muted">{% translate "Turned up" %}</dt><dd class="heading-md">{% if year.turnout_percent is None %}—{% else %}{{ year.turnout_percent }}%{% endif %}</dd></div>
+            <div><dt class="caption muted">{% translate "Belts awarded" %}</dt><dd class="heading-md">{{ year.belts }}</dd></div>
+          </dl>
+        {% endwith %}
+        <p class="caption muted dash__link">{% translate "Turned up: of the places marked present or absent." %}</p>
+        {% if dojo_access.can_view_reports %}
+          <p><a class="dash__link body-sm" href="{% url 'dojo_report_list' dojo_id=dojo.id %}">{% translate "Reports" %}</a></p>
+        {% endif %}
+      </section>
+    </div>
+    <div class="dash__col">
+
+      {% comment %}The design system's Calendar (cd-calendar): only days with a session, grouped by period; the next session's day selected.{% endcomment %}
+      <section class="cd-card cd-calendar" aria-labelledby="dash-coming">
+        <div class="cd-calendar__header">
+          <h2 class="cd-calendar__title heading-sm" id="dash-coming">{% translate "Coming up" %}</h2>
+          <a class="body-sm" href="{% url 'dojo_event_list' dojo_id=dojo.id %}">{% translate "All events" %}</a>
+        </div>
+        {% if overview.agenda %}
+          <div class="cd-calendar__list">
+            {% for period in overview.agenda %}
+              <div class="cd-calendar__period">
+                <p class="cd-calendar__period-title caption">{{ period.title }}</p>
+                <ul class="cd-calendar__dates" role="list">
+                  {% for agenda_date in period.dates %}
+                    <li class="cd-calendar__date{% if agenda_date.selected %} cd-calendar__date--selected{% endif %}">
+                      <p class="cd-calendar__date-header">
+                        <span class="visually-hidden">{{ agenda_date.day|date:"l j F" }}</span>
+                        <span class="cd-calendar__date-weekday caption" aria-hidden="true">{{ agenda_date.day|date:"D" }}</span>
+                        <span class="cd-calendar__date-day heading-sm" aria-hidden="true">{{ agenda_date.day|date:"j F" }}</span>
+                      </p>
+                      <ul class="cd-calendar__events" role="list">
+                        {% for event in agenda_date.events %}
+                          <li class="cd-calendar__event">
+                            <span class="cd-calendar__event-time label">{{ event.start_time|time:"H:i" }}</span>
+                            <span class="cd-calendar__event-title body-sm">{% if dojo_access.can_manage_events %}<a href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}">{{ event.name }}</a>{% else %}{{ event.name }}{% endif %}</span>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="cd-calendar__empty body-sm">{% translate "Nothing planned yet." %}</p>
+        {% endif %}
+      </section>
+
+      <section class="cd-card dash__ninjas" aria-labelledby="dash-ninjas">
+        <h2 class="heading-sm" id="dash-ninjas">{% translate "Your ninjas" %}</h2>
+        {% if overview.members %}
+          <p class="body">{% blocktranslate count counter=overview.members %}{{ counter }} child has this as their home dojo.{% plural %}{{ counter }} children have this as their home dojo.{% endblocktranslate %}</p>
+          {% if overview.stages %}
+            <ul class="dash__stages" aria-label="{% translate 'How they come' %}">
+              {% for stage, label, count in overview.stages %}
+                <li class="cd-badge cd-badge--{% if stage == 'at_risk' or stage == 'lapsed' %}warning{% elif stage == 'regular' or stage == 'new' %}success{% else %}outline{% endif %} caption">{{ label }}: {{ count }}</li>
+              {% endfor %}
+            </ul>
+            <p class="caption muted">{% translate "How they came over the past year, updated every night." %}</p>
+          {% endif %}
+        {% else %}
+          <p class="body-sm muted">{% translate "No members yet: a child gets this as their home dojo at their first sign-up here." %}</p>
+        {% endif %}
+        <a class="dash__link body-sm" href="{% url 'dojo_members' dojo_id=dojo.id %}">{% translate "Members" %}</a>
+      </section>
+    </div>
+  </div>
+
+</div>
+{% endwith %}
 {% endblock %}

@@ -1,0 +1,8 @@
+{% load content_i18n %}{% load i18n %}{% comment %}
+The sign-up questions' answers for the confirmed places (events.questions.totals),
+above the attendance list; re-sent out-of-band (`oob`) when the team corrects
+an answer (dojo_event_registration_answers).
+{% endcomment %}{% if question_totals %}
+<ul class="cd-attendance__questions caption" id="attendance-questions-{{ event.id }}"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% for t in question_totals %}<li>{{ t.question|localized:"text"|in_lang }} <strong>{% blocktranslate with yes=t.yes no=t.no %}{{ yes }} yes · {{ no }} no{% endblocktranslate %}</strong></li>{% endfor %}
+</ul>{% endif %}

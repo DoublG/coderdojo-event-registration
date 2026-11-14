@@ -137,6 +137,55 @@ def django(code):
     ).stdout
 
 
+def laptop_question(*event_ids, answer_places=False):
+    """Give the sessions (and their dojos, as a default question) the seeded
+    laptop question (DATA_MODEL.md §29), found by event/dojo + position, in
+    each dojo's languages (seed_content_languages);
+    with `answer_places`, answer it for the places that have no answer yet.
+    Rerun-safe. Prints the question ids, in the order of `event_ids`."""
+    out = django(
+        "import random\n"
+        "from auditlog.context import disable_auditlog\n"
+        "from dojos.models import DojoQuestion\n"
+        "from events.models import Event, EventQuestion, Registration, RegistrationAnswer\n"
+        "from events.management.commands.seed_events import LAPTOP_QUESTION\n"
+        "from pages.management.commands.seed_content_languages import localize\n"
+        "ids = []\n"
+        "with disable_auditlog():\n"
+        f"    for event_id in {list(event_ids)!r}:\n"
+        "        q, _ = EventQuestion.objects.get_or_create(event_id=event_id, position=1, defaults={'text': LAPTOP_QUESTION})\n"
+        "        localize(q, ['text'])\n"
+        "        d, _ = DojoQuestion.objects.get_or_create(dojo_id=Event.objects.get(pk=event_id).dojo_id, position=1, defaults={'text': LAPTOP_QUESTION})\n"
+        "        localize(d, ['text'])\n"
+        "        ids.append(q.id)\n"
+        f"        if {answer_places!r}:\n"
+        "            for r in Registration.objects.filter(event_id=event_id).exclude(answers__question=q):\n"
+        "                RegistrationAnswer.objects.create(registration=r, question=q, answer=random.Random(f'journey-{r.id}').random() < 0.7)\n"
+        "print(','.join(map(str, ids)))\n"
+    )
+    return [int(i) for i in out.strip().splitlines()[-1].split(",")]
+
+
+def keep_upcoming(*event_ids, days=7):
+    """Move each session that starts within `days` (or has passed) forward by whole weeks,
+    keeping its weekday and times, so the journeys always find it upcoming. Rerun-safe."""
+    django(
+        "from datetime import timedelta\n"
+        "from django.utils import timezone\n"
+        "from auditlog.context import disable_auditlog\n"
+        "from events.models import Event\n"
+        "with disable_auditlog():\n"
+        f"    for e in Event.objects.filter(pk__in={list(event_ids)!r}):\n"
+        "        weeks = 0\n"
+        f"        while e.start_time + timedelta(weeks=weeks) < timezone.now() + timedelta(days={days}):\n"
+        "            weeks += 1\n"
+        "        if weeks:\n"
+        "            e.start_time += timedelta(weeks=weeks)\n"
+        "            e.end_time += timedelta(weeks=weeks)\n"
+        "            e.save(update_fields=['start_time', 'end_time'])\n"
+    )
+
+
 def mail_shot(j, to, before, key, title, text, wait=90):
     t = time.time()
     while time.time() - t < wait:

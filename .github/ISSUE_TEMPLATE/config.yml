@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security problem
+    url: https://github.com/DoublG/coderdojo-event-registration/security/advisories/new
+    about: Privately, never in a public issue (SECURITY.md).
+  - name: Help with using the site
+    url: https://doublg.github.io/coderdojo-event-registration/
+    about: The help centre for families, volunteers, dojo teams and the organisation.

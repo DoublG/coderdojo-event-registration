@@ -1,7 +1,7 @@
 # French texts for the user-journey PDFs ("vous", like the site; terms as in locale/fr_BE).
 UI = {
     "brand": "CoderDojo Belgique · parcours utilisateur",
-    "who": "Captures d'écran du site de développement (données de démonstration), connecté en tant que <b>{who}</b>, 29 septembre 2026.",
+    "who": "Captures d'écran du site de développement (données de démonstration), connecté en tant que <b>{who}</b>, 17 octobre 2026.",
     "journey": "Le parcours",
     "steps": "Étapes de ce document",
     "foot": "coolregistration.localhost · généré à partir de l'application en service",
@@ -27,7 +27,7 @@ INTRO = {
             "Découvrir les dojos et les sessions sans compte",
             "Créer en une fois un compte famille avec les enfants",
             "Suivre les ceintures, badges et l'historique de chaque enfant",
-            "Inscrire à une session et recevoir l'e-mail de confirmation",
+            "Inscrire à une session, répondre aux questions du dojo et recevoir l'e-mail de confirmation",
             "Gérer les e-mails, la sécurité de connexion et la vie privée",
         ],
     ),
@@ -59,7 +59,7 @@ INTRO = {
         [
             "Suivre le tableau de bord et la prochaine session",
             "Tenir à jour le profil public du dojo",
-            "Planifier et publier les sessions, gérer la liste d'attente",
+            "Planifier et publier les sessions, gérer la liste d'attente, prévenir les familles d'un changement",
             "Prendre les présences, gérer l'équipe et les membres",
             "Publier des nouvelles, écrire aux familles, connecter des applications",
         ],
@@ -126,14 +126,21 @@ STEPS = {
             "Choisir quels enfants participent",
             "La page d'inscription liste les enfants de la famille ; ceux déjà inscrits sont indiqués.",
         ),
-        "picked": ("Confirmer", "Cochez les enfants et confirmez."),
+        "picked": (
+            "Répondre aux questions du dojo et confirmer",
+            "Cochez les enfants. Si le dojo pose une question, par exemple si l'enfant apporte son propre ordinateur portable, chaque enfant coché reçoit les questions, auxquelles on répond par oui ou par non. Ensuite, confirmez.",
+        ),
         "confirmed": (
             "Inscrit",
-            "La place est confirmée immédiatement (ou l'enfant passe sur la liste d'attente) et un e-mail de confirmation est mis en file d'envoi.",
+            "La place est confirmée immédiatement (ou l'enfant passe sur la liste d'attente), avec les réponses données, et un e-mail de confirmation est mis en file d'envoi.",
         ),
         "mail": (
             "L'e-mail de confirmation",
-            "La confirmation arrive dans la langue choisie par le parent (ici le néerlandais). Pendant le développement, chaque e-mail aboutit dans Mailpit.",
+            "La confirmation arrive dans la langue choisie par le parent (ici le néerlandais), avec les réponses aux questions du dojo. Pendant le développement, chaque e-mail aboutit dans Mailpit.",
+        ),
+        "answers": (
+            "Modifier les réponses",
+            "Jusqu'au début de la session, « Modifier les réponses » à côté de chaque place permet à la famille de les changer (ou de répondre à une question ajoutée plus tard par le dojo). L'équipe du dojo reçoit une notification.",
         ),
         "mail-prefs": (
             "Préférences e-mail",
@@ -164,7 +171,7 @@ STEPS = {
         "event": ("Trouver la prochaine session", "Le ninja parcourt les sessions comme tout le monde ..."),
         "signup": (
             "... et s'inscrit lui-même",
-            "Avec son propre compte, un ninja ne peut inscrire que lui-même. Le parent reçoit toujours l'e-mail de confirmation.",
+            "Avec son propre compte, un ninja ne peut inscrire que lui-même, et répond lui-même aux questions du dojo. Le parent reçoit toujours l'e-mail de confirmation.",
         ),
         "done": (
             "Place confirmée",
@@ -214,11 +221,11 @@ STEPS = {
         ),
         "event": (
             "Une session",
-            "Les données, le statut, l'équipe et les parcours d'apprentissage de la session, modifiables sur place, plus un lien pour prendre les présences.",
+            "Les données, le statut, l'équipe et les parcours d'apprentissage de la session, modifiables sur place, plus un lien pour prendre les présences. La carte Questions d'inscription contient jusqu'à cinq questions oui/non auxquelles les familles répondent par enfant (ici : apporte-t-il son propre ordinateur), avec les réponses reçues. Écrire aux familles prévient les familles qui ont une place ou sont sur la liste d'attente d'un changement.",
         ),
         "attendance": (
             "Prendre les présences à l'entrée",
-            "Le jour même, le mentor indique chaque enfant présent ou absent (htmx, sans recharger la page). Chaque ligne montre la ceinture de l'enfant, sa régularité et « En visite » pour les enfants d'un autre dojo ; l'équipe de la session figure aussi, pour l'assurance.",
+            "Le jour même, le mentor indique chaque enfant présent ou absent (htmx, sans recharger la page). Chaque ligne montre la ceinture de l'enfant, sa régularité, les réponses de la famille aux questions d'inscription (comptées en haut : combien d'ordinateurs apporter ; l'équipe en corrige une sous Réponses) et « En visite » pour les enfants d'un autre dojo ; l'équipe de la session figure aussi, pour l'assurance.",
         ),
         "marked": (
             "Présent",
@@ -240,11 +247,15 @@ STEPS = {
     "champion": {
         "dashboard": (
             "Le tableau de bord du dojo",
-            "La page d'accueil du champion : les présences de la prochaine session, une bannière si le dojo n'est pas actif, et un rappel après six mois sans session.",
+            "La page d'accueil du champion : ce qui demande de l'attention (demandes pour rejoindre l'équipe, présences pas encore notées, brouillons ou sessions sans équipe, extraits de casier de l'équipe qui expirent), la prochaine session avec ses places et les réponses aux questions d'inscription, les sessions à venir sous forme d'agenda, les ninjas en nombres par étape et les chiffres de l'année.",
         ),
         "settings": (
             "Paramètres du dojo",
             "En haut, le statut du dojo : seul le champion lance le dojo, le met en sommeil ou l'archive (jamais avec des sessions ouvertes) et le rouvre. En dessous, tout ce qui figure sur la page publique du dojo : nom, description dans chaque langue du dojo, icône, adresse (géolocalisée à l'enregistrement), coordonnées et parcours d'apprentissage.",
+        ),
+        "default-questions": (
+            "Questions d'inscription par défaut",
+            "Sous le profil, les questions d'inscription par défaut du dojo : des questions oui/non que chaque nouvelle session reprend (ici celle de l'ordinateur), dans chaque langue du dojo. Chaque session peut les modifier sur sa propre page.",
         ),
         "events": (
             "Sessions",
@@ -252,15 +263,31 @@ STEPS = {
         ),
         "new-event": (
             "Planifier une nouvelle session",
-            "Une nouvelle session : date et heures (notation belge), places, âges, public (p. ex. une session pour filles), une bannière de la bibliothèque d'images ou envoyée, l'équipe et les parcours d'apprentissage. Elle commence en brouillon ; la publier ouvre les inscriptions et les familles reçoivent l'e-mail des nouvelles sessions.",
+            "Une nouvelle session : date et heures (notation belge), places, âges, public (p. ex. une session pour filles), une bannière de la bibliothèque d'images ou envoyée, l'équipe et les parcours d'apprentissage. Elle reprend les questions d'inscription par défaut du dojo et commence en brouillon ; la publier ouvre les inscriptions et les familles reçoivent l'e-mail des nouvelles sessions.",
         ),
         "event": (
             "Une session complète avec liste d'attente",
-            "La page de la session montre les places prises et la liste d'attente ; quand une famille annule, le premier enfant en attente avance et sa famille reçoit un e-mail.",
+            "La page de la session montre les places prises et la liste d'attente ; quand une famille annule, ou que l'équipe ajoute des places, les premiers enfants en attente avancent et leurs familles reçoivent un e-mail. Sa carte Questions d'inscription pose aux familles des questions oui/non par enfant (ici celle de l'ordinateur), avec les totaux pour les places confirmées et la liste d'attente. Écrire aux familles sert à les prévenir d'un changement ; après l'enregistrement d'un nouveau lieu, de nouveaux horaires ou d'un autre nombre de places, la carte propose l'e-mail préparé qui convient.",
+        ),
+        "notify": (
+            "Prévenir les familles d'un changement",
+            "Un e-mail préparé sur un nouveau lieu, de nouveaux horaires ou le nombre de places (avec la situation d'avant, pour que l'e-mail dise ce qui a changé), ou un message de l'équipe, aux familles qui ont une place, à celles sur la liste d'attente ou aux deux, avec le nombre pour chacune. Aperçu montre l'e-mail tel que la première famille le reçoit ; chaque famille le reçoit dans sa propre langue, avec le texte de l'équipe dans cette langue s'il a été écrit.",
+        ),
+        "notified": (
+            "Envoyé",
+            "L'e-mail part aux parents et tuteurs de chaque enfant du groupe (et au compte propre d'un enfant qui a une adresse), un e-mail par famille. La page de la session montre ce qui a été envoyé, quand, à combien de comptes et par qui. Les familles ne peuvent pas désactiver ces e-mails : une session en envoie au plus trois par jour.",
+        ),
+        "notice-mail": (
+            "L'e-mail que reçoivent les familles",
+            "Dans la langue d'e-mail de la famille, avec les données de la session et le texte de l'équipe. Les réponses vont à l'adresse du dojo.",
+        ),
+        "cancel": (
+            "Annuler une session",
+            "Annuler la session… demande d'abord confirmation. Une session annulée reste sur sa page, marquée comme annulée, pour que les familles qui la consultent voient ce qui s'est passé ; personne ne peut plus s'inscrire, elle disparaît des listes de sessions et des rappels, et les inscriptions sont conservées. Si la case est cochée, les familles reçoivent l'e-mail d'annulation préparé avec un mot facultatif de l'équipe. Elle peut être rouverte plus tard.",
         ),
         "attendance": (
             "Présences avec informations de santé",
-            "La liste de présences du champion montre aussi les allergies et informations de santé de la famille, uniquement pour les enfants avec une place confirmée, et chaque consultation est enregistrée dans le journal d'audit.",
+            "La liste de présences du champion montre aussi les allergies et informations de santé de la famille, uniquement pour les enfants avec une place confirmée, et chaque consultation est enregistrée dans le journal d'audit. Les réponses aux questions d'inscription figurent sur chaque ligne, avec les totaux en haut.",
         ),
         "team": (
             "Gérer l'équipe",

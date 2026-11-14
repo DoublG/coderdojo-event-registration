@@ -8,9 +8,23 @@ You'll need to be logged in to your family account to sign up (see
    homepage's **Upcoming sessions**.
 #. Open the session and tick which of your children you'd like to sign
    up for it. You can select more than one at a time.
+#. If the dojo asks a few questions, such as whether your child brings
+   their own laptop, answer **Yes** or **No** for each child you ticked.
+   The answers help the dojo team prepare; they never decide who gets a
+   place.
 #. Submit. Each selected child is registered individually — a child
    already signed up for that session is skipped and flagged as such
    rather than double-booked.
+
+If you forget to answer a question, the page tells you which one and keeps
+the children you ticked, in the order you ticked them, and the answers you
+already gave. The confirmation lists each child's answers, and so do the
+booking mail and the reminder before the session.
+
+Changed your mind? On your account page, a session with questions has
+**Change answers** next to it, until the session starts. When the dojo adds
+a question after you signed up, it says **Answer the new question**
+instead.
 
 A child with their own login (see :doc:`managing-your-account`) can also
 sign themselves up the same way; they only see themselves in the list.
@@ -63,9 +77,18 @@ Waiting lists
 Sessions have a limited number of places. If a session is full when you
 sign up, your child is placed on the **waiting list** instead of being
 turned away outright — you'll see this clearly on the confirmation. If a
-confirmed spot later opens up (someone cancels), the longest-waiting child
-for that session is automatically promoted to confirmed, and we mail you
-when that happens. No action is needed on your part.
+confirmed spot later opens up (someone cancels, or the dojo adds places),
+the longest-waiting child for that session is automatically promoted to
+confirmed, and we mail you when that happens. No action is needed on your
+part.
+
+When a session changes
+-----------------------
+
+If the dojo moves a session you signed up for to another place or time,
+changes its number of places, or cancels it, its team can mail you about
+it, in your own language. A cancelled session stays on its page and on
+your account page, marked **Cancelled**; there's nothing you need to do.
 
 Cancelling
 -----------

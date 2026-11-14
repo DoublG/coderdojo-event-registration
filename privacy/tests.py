@@ -1464,3 +1464,39 @@ class WaitingRetentionRulesTests(TestCase):
         with override_settings(BOUNCE_RECORD_RETENTION_DAYS=7, MAILING_SOFT_BOUNCE_WINDOW_DAYS=30):
             self.assertEqual(self.run_job()["bounce_records"], 1)
         self.assertEqual(list(BounceRecord.objects.values_list("email", flat=True)), ["b20@example.com"])
+
+
+class SessionNoticeRetentionTests(TestCase):
+    """privacy.retention.clear_session_notice_texts: the team's own text on a
+    notice to a session's families stays while the dojo is active (the
+    `session_notice` rule, DATA_MODEL_NOTICES.md); the row stays."""
+
+    def test_the_text_goes_once_the_dojo_is_not_active_any_more(self):
+        from django.utils import timezone
+
+        from dojos.models import Dojo
+        from dojos.testing import make_dojo
+        from events.models import Event, SessionNotice
+
+        from .retention import apply_retention, clear_session_notice_texts
+
+        notices = {}
+        for name, status in (("Active", Dojo.ACTIVE), ("Dormant", Dojo.DORMANT), ("Archived", Dojo.ARCHIVED)):
+            dojo = make_dojo(name, status=status)
+            event = Event.objects.create(
+                name=name, dojo=dojo, places=5, start_time=timezone.now(), end_time=timezone.now()
+            )
+            notices[name] = SessionNotice.objects.create(
+                event=event,
+                kind=SessionNotice.MESSAGE,
+                subject="Laptops",
+                message="Bring one.",
+                translations={"fr-be": {"message": "Apportez-en un."}},
+                recipients=4,
+            )
+        self.assertEqual(clear_session_notice_texts(), 2)
+        for name, kept in (("Active", True), ("Dormant", False), ("Archived", False)):
+            notice = SessionNotice.objects.get(pk=notices[name].pk)
+            self.assertEqual(bool(notice.subject or notice.message or notice.translations), kept, name)
+            self.assertEqual((notice.kind, notice.recipients), (SessionNotice.MESSAGE, 4))
+        self.assertEqual(apply_retention()["session_notice_texts"], 0)

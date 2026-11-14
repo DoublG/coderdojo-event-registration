@@ -25,6 +25,7 @@ def notify(
     dojo: "Dojo | None" = None,
     params: dict[str, Any] | None = None,
     organisation: bool = False,
+    once_unread: bool = False,
 ) -> Notification:
     """Creates a Notification and nudges that recipient's open WebSocket
     connection(s) (notifications.consumers.NotificationConsumer) to
@@ -44,9 +45,19 @@ def notify(
     preferred_language.
 
     `dojo` puts it in that dojo's bell; `organisation=True` in the
-    organisation dashboard's bell (DATA_MODEL.md §23)."""
+    organisation dashboard's bell (DATA_MODEL.md §23). With `once_unread`,
+    a notification exactly like one the recipient hasn't read yet isn't
+    made again (that one is returned): for things that can happen many
+    times in a row, such as families changing their answers to a session's
+    sign-up questions."""
     with translation.override(recipient.preferred_language or settings.LANGUAGE_CODE):
         text = str(text) % params if params else str(text)
+    if once_unread:
+        unread = Notification.objects.filter(
+            recipient=recipient, text=text, url=url, dojo=dojo, organisation=organisation, read=False
+        ).first()
+        if unread is not None:
+            return unread
     notification = Notification.objects.create(
         recipient=recipient, text=text, url=url, dojo=dojo, organisation=organisation
     )

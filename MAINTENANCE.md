@@ -28,7 +28,7 @@ deploy is tagged with it and gets a GitHub Release listing what changed since th
 |---|---|---|---|---|---|
 | Operating system | Ubuntu 22.04.5 LTS | Apr 2022 | ended Sep 2024 | **1 Jun 2027** (Ubuntu Pro/ESM to Apr 2032) | Plan the move to 24.04 LTS (to May 2029) or 26.04 LTS (to May 2031) with Level27 **before June 2027**. |
 | Python | 3.14.7 (pyenv `py10102-3.14.7`) | 7 Oct 2025 | 1 Oct 2027 | **31 Oct 2030** | Current. Take each 3.14.x patch release. |
-| Django | 6.1.1 | 5 Aug 2026 | 30 Apr 2027 | **31 Dec 2027** | Upgrade to **6.2 LTS** (Apr 2027, security to Apr 2030) between May and Dec 2027. |
+| Django | 6.1.2 | 5 Aug 2026 | 30 Apr 2027 | **31 Dec 2027** | Upgrade to **6.2 LTS** (Apr 2027, security to Apr 2030) between May and Dec 2027. |
 | MySQL server | 8.4.11 | Apr 2024 (8.4 LTS) | Apr 2029 | **30 Apr 2032** | Current LTS, the same as development and the CI (checked 6 Oct 2026 from the server's connection greeting, no login needed). |
 | MySQL client library | 8.0.46 (`libmysqlclient.so.21`, Ubuntu 22.04's package) | Apr 2018 (8.0) | ended Apr 2025 | **ended 30 Apr 2026** upstream | What `mysqlclient` links against; it talks to the 8.4 server fine. Its development headers (`libmysqlclient-dev`) are now present too (confirmed 8 Oct 2026: `mysqlclient` 2.3.0 built and working). Moves with the operating system's upgrade. |
 | Redis (Celery broker, cache, Channels) | 8.10.1 | | | | Running (confirmed 8 Oct 2026, `redis-cli INFO server`); `maxmemory` 512 MB, policy `allkeys-lru` — see [`LEVEL27_QUESTIONS.md`](LEVEL27_QUESTIONS.md), it should be `volatile-lru`. Much newer than the devcontainer's `redis:7.2`; worth trying 7.2 → 8.x in development to match. |
@@ -43,8 +43,8 @@ deploy is tagged with it and gets a GitHub Release listing what changed since th
 | Redis | `redis:7.2` (7.2.16) | 7.2: 1 Dec 2029 | Current. Match production's version once it's confirmed (see [below](#still-to-confirm)). The same image as the CI. |
 | nginx | `nginx:1.30-alpine` (1.30.5) | 1.30 stable: until the next stable (about April 2027) | Current. Move to the next stable when it's out. Development only. |
 | Mailpit, phpMyAdmin, 2FAuth | `latest` | | Development only; fine on `latest`. |
-| Prometheus | `prom/prometheus:v3.13.2` | 3.13 LTS: **31 Jul 2027** | Current LTS. Development only, in the `monitoring` profile (off unless `COMPOSE_PROFILES=monitoring`). Take its patch releases; move to the next LTS before July 2027. |
-| Grafana | `grafana/grafana:13.2.0` | 13.2: until the minor after next is out (no date published yet) | Current. Development only, in the `monitoring` profile. Move to the newest minor every few months. |
+| Prometheus | `prom/prometheus:v3.13.4` | 3.13 LTS: **31 Jul 2027** | Current LTS. Development only, in the `monitoring` profile (off unless `COMPOSE_PROFILES=monitoring`). Take its patch releases; move to the next LTS before July 2027. |
+| Grafana | `grafana/grafana:13.2.3` | 13.2: until the minor after next is out (no date published yet) | Current. Development only, in the `monitoring` profile. Move to the newest minor every few months. |
 
 Development should run the versions production runs (or will run next), so upgrades are tried there
 first. Prefer a pinned tag (`mysql:8.4`) over `latest`: a `latest` image is pulled once and then never
@@ -58,20 +58,23 @@ looked the dates up.
 
 ### Python packages
 
-Everything the site imports is pinned in [`requirements.txt`](requirements.txt) (production) and
-[`requirements-dev.txt`](requirements-dev.txt) (development tools on top). Most have no support
+Everything the site imports is pinned in [`requirements.in`](requirements.in) (production) and
+[`requirements-dev.in`](requirements-dev.in) (development tools on top), and compiled with hashes into the
+`.txt` files that get installed (see [Hash-checked installs](#hash-checked-installs)). Most have no support
 calendar: stay on the latest release. Watch these:
 
 | Package | Pinned | Note |
 |---|---|---|
-| Django | 6.1.1 | Take every 6.1.x release (security fixes come as patch releases). See the table above for 6.2 LTS. |
-| django-two-factor-auth | 1.18.1 | Officially supports Django up to 5.2; we run and test it on 6.1. Check its release notes on every Django upgrade. |
-| django-oauth-toolkit | 3.4.1 | Officially lists Django up to 6.0; tested here on 6.1. Its `oauthlib` has an open advisory (see [Security log](#security-log)). |
+| Django | 6.1.2 | Take every 6.1.x release (security fixes come as patch releases). See the table above for 6.2 LTS. |
+| django-two-factor-auth | 1.18.1 | Officially supports Django up to 5.2; we run and test it on 6.1. Check its release notes on every Django upgrade. It needs `webauthn<2.99`, which keeps webauthn on 2.8.0 and cbor2 on 5.x (Dependabot ignores their majors): move to webauthn 3 and cbor2 6 once a release of it allows them. |
+| django-oauth-toolkit, oauthlib | 3.4.1, 4.0.1 | django-oauth-toolkit officially lists Django up to 6.0 and doesn't list oauthlib 4 yet (it asks for `oauthlib>=3.3.0`); both tested here, on Django 6.1 and oauthlib 4.0.1 (12 Nov 2026). |
 | celery, kombu, channels, channels-redis | 5.6.3, 5.6.2, 4.3.2, (see file) | Upgrade together with Redis. |
 | mysqlclient | 2.3.0 | Needs the MySQL client headers on the server; present since at least 8 Oct 2026 (see "Missing on the server"). |
 | nh3, django-permissions-policy | 0.3.7, 4.34.0 | Security: the Markdown allowlist and the Permissions-Policy header. Keep them current. |
-| coverage, radon (mando, colorama) | 7.16.2, 6.0.1 (0.7.1, 0.4.6) | Development only (`requirements-dev.txt`): test coverage and complexity ([`CODING_STANDARDS.md`](CODING_STANDARDS.md)). `pip-audit`: no known vulnerabilities (1 Oct 2026). |
+| django-cors-headers | 4.9.0 | Security: CORS for the API only (`CORS_URLS_REGEX`, any origin, never credentials), so browser-based tools can call it. Officially lists Django up to 6.0; tested here on 6.1 (`api.tests.CorsTests`, 17 Oct 2026). `pip-audit`: no known vulnerabilities (17 Oct 2026). Keep it current. |
+| coverage, radon (mando, colorama) | 7.16.2, 6.0.1 (0.7.1, 0.4.6) | Development only (`requirements-dev.txt`): test coverage and complexity ([`CODING_STANDARDS.md`](CODING_STANDARDS.md)). radon 6.0.1 needs `mando<0.8` (Dependabot ignores mando 0.8 and up). `pip-audit`: no known vulnerabilities (1 Oct 2026). |
 | import-linter, grimp (rich, markdown-it-py, mdurl) | 2.15, 3.17 (15.0.0, 4.2.0, 0.1.2) | Development only (`requirements-dev.txt`): the layers between the apps (`lint-imports`, [`CODING_STANDARDS.md`](CODING_STANDARDS.md), "Layers"), also in the Code audit workflow. `pip-audit`: no known vulnerabilities (2 Oct 2026). |
+| pip-tools, pip-audit (build, pyproject_hooks, wheel, setuptools; pip-audit's own) | 7.6.2, 2.10.1 | Development only (`requirements-dev.in`): pip-compile writes the hash-checked `.txt` files ([Hash-checked installs](#hash-checked-installs)); pip-audit checks them for advisories, also in the Code audit (`.github/requirements/ci-tools.in`). |
 | mypy, django-stubs (django-stubs-ext, mypy_extensions, pathspec, librt, ast_serialize, types-PyYAML) | 2.4.0, 6.1.2 (6.1.2, 1.1.1, 1.1.1, 0.16.0, 0.12.1, 6.0.12.20260906) | Development only (`requirements-dev.txt`): type checking ([`CODING_STANDARDS.md`](CODING_STANDARDS.md), "Type checking"), also the Code audit's `types` job. django-stubs follows Django's releases (6.1.0 came out two days after Django 6.1); keep its version on our Django's minor. `pip-audit`: no known vulnerabilities (6 Oct 2026). |
 | unittest-xml-reporting, lxml | 4.0.0, 6.1.3 | Development only (`requirements-dev.txt`): the test results as JUnit XML for the Tests workflow's summary. `pip-audit`: no known vulnerabilities (1 Oct 2026). |
 | locust, matplotlib | 2.46.6, 3.11.2 | The load test and its charts ([`loadtest/requirements.txt`](loadtest/requirements.txt), [`CAPACITY.md`](CAPACITY.md)), in a venv of their own: never in the image or on production. `pip-audit -r loadtest/requirements.txt`: no known vulnerabilities (30 Sep 2026). |
@@ -128,7 +131,7 @@ Present: Ubuntu 22.04.5, Python 3.14.7, `gcc`/`make`/`pkg-config`, MySQL 8.4.11,
 
 | When | What |
 |---|---|
-| Every week (5 minutes) | Read the security announcements (see [Sources](#sources-to-watch)) and the GitHub Dependabot alerts. |
+| Every week (5 minutes) | Read the security announcements (see [Sources](#sources-to-watch)) and the GitHub Dependabot alerts. Review Dependabot's update pull requests (Mondays, `.github/dependabot.yml`: pip, GitHub Actions, the Docker images): update the package's or image's row on this page in the same pull request before merging. |
 | Every month | Run the [update check](#routine-updates): `pip-audit`, outdated packages, Django patch release. Deploy what's safe. |
 | Every quarter | Review the tables on this page against endoflife.date; bump the *Last checked* date. Run the [code audit](#code-audits) checks. |
 | Every quarter | Measure test coverage and complexity again ([`CODING_STANDARDS.md`](CODING_STANDARDS.md), "Measuring again") and look at what dropped. |
@@ -148,8 +151,7 @@ Present: Ubuntu 22.04.5, Python 3.14.7, `gcc`/`make`/`pkg-config`, MySQL 8.4.11,
 Monthly, inside the workspace container, from the repo root:
 
 ```sh
-pip install pip-audit                        # once
-pip-audit -r requirements.txt                # known vulnerabilities in what production runs
+pip-audit -r requirements.txt                # known vulnerabilities in what production runs (pip-audit is in requirements-dev)
 pip list --outdated                          # what has a newer release
 ```
 
@@ -157,14 +159,41 @@ For each update:
 
 1. **Read the release notes**, especially for a new major or minor version (deprecations, dropped
    support, changed defaults). For Django, also the "backwards incompatible changes" section.
-2. **Change the pin** in `requirements.txt` (or `requirements-dev.txt` for a development tool), then
-   `pip install -r requirements-dev.txt` in the container (or rebuild it).
+2. **Change the pin** in `requirements.in` (or `requirements-dev.in` for a development tool), run
+   `scripts/compile_requirements.sh`, then `pip install --require-hashes -r requirements-dev.txt` in the
+   container (or rebuild it). Dependabot's pull requests do the first two for you.
 3. **Run everything:** `python manage.py test`, `ruff check .`, `python manage.py makemigrations --check`
    (an upgrade can need a migration), and click through the pages the package touches. Run the tests
    with warnings on (`python -W error::DeprecationWarning manage.py test <app>`) before a Django upgrade.
 4. **Deploy:** `scripts/deploy.sh --check`, then `scripts/deploy.sh` (or push to `demo`: `.github/workflows/deploy-demo.yml` runs the tests and then both). The deploy runs `manage.py check`
    on the new code before touching the live site, and restarts the Celery workers.
 5. **Update this page** when a row changes.
+
+### Hash-checked installs
+
+Every Python package is installed **only when its file matches the hash we recorded** (16 Oct 2026), so a
+package replaced on PyPI, on a mirror or on the way can't get onto the server, a runner or the
+devcontainer: pip stops with a hash mismatch and installs nothing. A hash proves the file is the one we
+compiled, not that it's safe: pip-audit, Dependabot and reviewing updates still do that part.
+
+- **Sources:** `requirements.in`, `requirements-dev.in`, `docs/requirements.in` and
+  `.github/requirements/ci-tools.in` (the tools the Code audit installs on their own). They pin every
+  version; the last two are constrained to `requirements-dev.txt`, so all four agree.
+- **Compiled:** `scripts/compile_requirements.sh` runs pip-compile (pip-tools, in `requirements-dev`)
+  with `--generate-hashes --allow-unsafe` and writes the `.txt` beside each source, listing every file PyPI
+  has for each version (all platforms), so the same file works on Level27, the runners and the devcontainer.
+  Commit the `.in` and the `.txt` together; never edit a `.txt` by hand. `-P <package>` moves one package to
+  its newest allowed version.
+- **Installed with `--require-hashes`** everywhere: `scripts/deploy.sh` (and its `--check` dry run), the
+  workspace Dockerfile, and every workflow. pip would check the hashes anyway once a file has them; the flag
+  also refuses a file without them.
+- **Dependabot** reads the pip-compile command in each `.txt` header, changes the pin in the `.in` file and
+  compiles again, hashes included.
+- **django-celery-beat** is a GitHub archive pinned to a commit (see `requirements.in`); its hash is the
+  archive's. GitHub keeps those archives byte-stable, but if one ever changes, its hash fails until the
+  file is compiled again.
+- **The workspace image** is pinned by digest as well (`FROM python:3.14-trixie@sha256:…`); Dependabot
+  updates the digest with the tag. The Actions are pinned by commit hash (`scripts/CLAUDE.md`).
 
 Patch releases (6.1.1 → 6.1.2) are safe to take quickly. Minor and major versions (Django 6.1 → 6.2,
 Celery 5 → 6) get their own change, tested on the devcontainer first. Never upgrade on production only.
@@ -215,7 +244,7 @@ remove it (`docker volume ls`, `docker volume rm <project>_db-data`).
 ### Triage
 
 For every advisory, first ask: **is the vulnerable code reachable in our setup?** Check which feature it
-is in and whether we use it (for example, the open oauthlib advisory is in the authorization-code flow,
+is in and whether we use it (for example, oauthlib's PKCE advisory of September 2026 was in the authorization-code flow,
 which our API doesn't offer). Then:
 
 | Severity (in our setup) | Examples | Fix within |
@@ -277,6 +306,10 @@ whoever pushed):
     summary;
   - **CodeQL** (Python and JavaScript, the `security-extended` queries): its findings are in the
     repository's *Security → Code scanning*, where a false positive is dismissed with its reason.
+- **OpenSSF Scorecard** (`.github/workflows/scorecard.yml`, weekly): the repository's supply-chain
+  practice scored 0–10 (branch protection, actions pinned by commit hash, token permissions, ...), on
+  [scorecard.dev](https://scorecard.dev/viewer/?uri=github.com/DoublG/coderdojo-event-registration) and
+  in Code scanning, one alert per check that can do better.
 - Turn on **Dependabot alerts** too (Settings → Code security): they warn about a new advisory the day it
   is published, between the Monday runs.
 - **Access goes through helpers** (`dojos.access`, `accounts.organisation.require_area`), never ad hoc
@@ -314,8 +347,12 @@ A deeper review, by a person with Claude Code's help:
 
 | Found | What | Assessment | Status |
 |---|---|---|---|
+| 14 Nov 2026 | **soupsieve 2.9.2**, CVE-2026-126190 / GHSA-mmhr-3c5m-f64f (descendant combinators polynomial in the nesting depth, fixed in 4.0.0), CVE-2026-126191 / GHSA-6655-6qjp-jx7x and CVE-2026-126193 / GHSA-7g44-g9rc-x53w (a crafted selector's regex backtracking and unbounded recursion, fixed in 3.0.2), CVE-2026-126192 / GHSA-4j63-6c4x-wfg4 (`:has()` with a sibling combinator quadratic, fixed in 2.10.0). Found by the Code audit's `pip-audit` on the main → demo pull request. | **Development only, not reachable from outside:** soupsieve is Beautiful Soup's selector engine, in `requirements-dev.in` (the `import_dojos` command, run by hand on pages we fetch ourselves) and the docs build; it's not in `requirements.txt`, so never on the server, and no visitor's HTML or selector ever reaches it. Low. | **Fixed 14 Nov 2026:** soupsieve 4.1 (Beautiful Soup 4.15.0 asks for `soupsieve>=1.6.1`); the help centre builds with it in en/fr/nl. No ignore needed. |
+| 9 Nov 2026 | **oauthlib 4.0.0**, CVE-2026-49272 / GHSA-3jp2-3mrg-2vxc: the device authorization grant (RFC 8628) hands out a token for a bogus `device_code` to anyone who knows a client ID enabled for that flow. Found by the Code audit's weekly `pip-audit` run (`dependencies` job failing on main from 9 Nov). | **Not reachable here:** the API offers only the client credentials grant to confidential clients (`api/services.py`, every `DojoApiClient`'s `Application`); no client is ever enabled for the device flow, and django-oauth-toolkit's token endpoint refuses a grant type the client doesn't have. Low. | **Fixed 12 Nov 2026:** oauthlib 4.0.1 (`requirements.in` and a recompile; the API and account tests pass on it). No ignore needed. |
+| 5 Nov 2026 | **pip-audit: 71 advisories in 7 packages**, the Code audit's `dependencies` job failing on `main` since its scheduled run of 26 Oct 2026: Pillow 12.3.0 (39, image decoding), filelock 4.2.0 (14, lock files), Twisted 26.4.0 (7: telnet, IMAP, IRC and XML streams, DNS client, HTTP header validation, HTTP/2 rapid reset), pyasn1 0.6.4 (4, CPU use decoding ASN.1), certifi 2026.7.22 (emSign roots with compromised intermediates), setuptools 84.0.0 (Windows wheel install path) and autobahn 26.7.1 (CVE-2026-116579: permessage-brotli decompresses a frame before checking the size limit, so one small frame can take hundreds of MB). | **Pillow: medium to high**, reachable: every image people upload is decoded (`core/uploads.py`), after the size checks. **certifi: medium**, the site's outgoing HTTPS (Nominatim, mail) trusts the bundle. **pyasn1: medium**, reachable: webauthn decodes the attestation a logged-in account sends when it adds a passkey, so one account could tie up a worker's CPU (denial of service, no data). **Twisted: low**, only `daphne` (development's `runserver`) runs it; production serves through gunicorn and uvicorn, and none of telnet, IMAP, IRC or the DNS client are used. **filelock, setuptools: low**, build and development tools only. **autobahn: low, not reachable in production:** it is daphne's WebSocket server, only used in development behind nginx; production's WebSockets go through uvicorn with `websockets`. | **Fixed 5 Nov 2026** (pull request #46): Pillow 13.0.0, certifi 2026.10.23, pyasn1 0.6.5, Twisted 26.10.0 (also fixes CVE-2026-106454 below), filelock 4.2.9, setuptools 84.2.1; the whole suite passes (1,433 tests). **autobahn stays on 26.7.1**, ignored in `audit.yml` (`--ignore-vuln CVE-2026-116579`): its fix (26.10.1) requires cbor2 6.1, and webauthn 2.x (django-two-factor-auth's `webauthn<2.99`) requires cbor2 5. Open: upgrade with webauthn 3 and cbor2 6, then remove the ignore. |
+| 15 Oct 2026 | **Twisted 26.4.0**, CVE-2026-106454: regular-expression denial of service in `twisted.mail.imap4` (`wildcardToRegexp`): an authenticated IMAP client's LIST pattern can block Twisted's reactor. No fixed version yet. Found by the Code audit's `pip-audit` (first failing run on 15 Oct). | **Not reachable here:** Twisted is only installed as `daphne`'s dependency (`runserver` in development); nothing imports `twisted.mail`, and the site runs no IMAP server (production serves through gunicorn and uvicorn). Low. | **Fixed 5 Nov 2026:** upgraded to Twisted 26.10.0; the `--ignore-vuln` is gone from the audit. |
 | 11 Oct 2026 | **MySQL without strict mode on production**: Django's check `mysql.W002` on every deploy. Production's `sql_mode` was empty (Level27's server default), while development and the CI run MySQL 8.4's default (`STRICT_TRANS_TABLES`, `ONLY_FULL_GROUP_BY`, `NO_ZERO_DATE`, ...). | Low to medium (data integrity, not access): a value too long for its column was cut off silently instead of failing, and production accepted queries and dates the tests would reject, so a bug could pass the tests and still corrupt data there. | **Fixed in the code 11 Oct 2026:** `DATABASES["default"]["OPTIONS"]["init_command"]` sets MySQL 8.4's default `sql_mode` on every connection (`settings.MYSQL_SQL_MODE`), whatever the server's own default. Tested by `core.tests.DatabaseSqlModeTests`. Existing rows aren't changed; only new writes are checked. |
-| 30 Sep 2026 | **oauthlib 3.3.1**, CVE-2026-49265 / GHSA-xpv3-w29h-x7cv (since 1 Oct also PYSEC-2026-4114, which `pip-audit` reports; the workflow's `--ignore-vuln CVE-2026-49265` matches it): timing side channel in PKCE (authorization-code flow). Fixed in 4.0.0. | **Not reachable here:** our API offers only the client-credentials grant (`api/services.py`), which doesn't use PKCE. Low. django-oauth-toolkit 3.4.1 requires `oauthlib>=3.3.0` and doesn't list 4.0 yet. | Open: try oauthlib 4.0.0 with the API tests in the devcontainer; upgrade when django-oauth-toolkit supports it. |
+| 30 Sep 2026 | **oauthlib 3.3.1**, CVE-2026-49265 / GHSA-xpv3-w29h-x7cv (since 1 Oct also PYSEC-2026-4114, which `pip-audit` reports; the workflow's `--ignore-vuln CVE-2026-49265` matches it): timing side channel in PKCE (authorization-code flow). Fixed in 4.0.0. | **Not reachable here:** our API offers only the client-credentials grant (`api/services.py`), which doesn't use PKCE. Low. django-oauth-toolkit 3.4.1 requires `oauthlib>=3.3.0` and doesn't list 4.0 yet. | **Fixed 16 Oct 2026:** upgraded to oauthlib 4.0.0 (Dependabot's update), with django-oauth-toolkit 3.4.1; the API tests and the whole suite pass, and the `--ignore-vuln` is gone from the audit. |
 | 30 Sep 2026 | **Markdown links** (`core/templatetags/markdown_extras.py`, `markdownify`): the text is HTML-escaped, but Python-Markdown keeps any link scheme, so `[x](javascript:...)` in a dojo's or event's description becomes a working `javascript:` link on the public page. Found by the Code audit workflow's security rules (S308). | **High** (stored cross-site scripting): any active champion or mentor can put it on a public page, and a logged-in visitor who clicks it runs the script as themselves. No Content-Security-Policy limits it. | **Fixed 30 Sep 2026:** `markdownify` now cleans its HTML with nh3 against an allowlist (headings from `<h2>`, paragraphs, bold, italic, lists, links; links only `http`, `https`, `mailto` or relative, with `rel="nofollow noopener noreferrer"`). Images, code and anything else are dropped. Tests: `core.tests.MarkdownifyTests`. |
 | 30 Sep 2026 | **`check --deploy` warnings**: no HSTS, no HTTPS redirect, session and CSRF cookies not `Secure`; django-oauth-toolkit's RFC 9700 defaults (implicit and password grants, tokens in the query string, tokens stored in plain text). Also no Content-Security-Policy or Permissions-Policy. | Medium: TLS ends at Level27's proxy, so the cookies' `Secure` flag and HSTS are cheap to add; the OAuth grants we don't offer weren't reachable, tokens stored in plain text were. A CSP limits what any future cross-site scripting bug can do. | **Fixed in the code 30 Sep 2026** (CLAUDE.md, "Security headers"): `Secure` cookies, the proxy header, all RFC 9700 options (tokens now stored hashed), a strict script CSP with nonces (inline handlers moved to `bundle.js`, htmx without eval), Permissions-Policy. Tested with `core.tests.SecurityHeadersTests`, the API tests and a browser crawl of about 480 pages as six roles. **Partially done on production, confirmed 8 Oct 2026:** `SECURE_HSTS_SECONDS` is now `3600` (the first of the three planned steps — 1 hour, 1 day, 1 year); `SECURE_SSL_REDIRECT` is still `false`, and whether Level27's proxy sets `X-Forwarded-Proto` itself is still unconfirmed (that's the precondition for turning the redirect on safely — see `LEVEL27_QUESTIONS.md`). `deploy.sh` reports both values on every `--check`. |
 | 30 Sep 2026 | **MySQL 8.0** (the production client, possibly the server) reached end of life on 30 Apr 2026: no more security fixes. | **The server is 8.4.11** (confirmed 6 Oct 2026); only the client library, Ubuntu 22.04's package, is 8.0. | Server closed. The client library moves with the OS upgrade (before Jun 2027). |

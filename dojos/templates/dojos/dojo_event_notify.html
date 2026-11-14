@@ -1,0 +1,113 @@
+{% extends "dojos/_admin_base.html" %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "Mail the families" %} · {{ event.name }}{% endblock %}
+{% block admin_heading %}{% translate "Mail the families" %}{% endblock %}
+
+{% block admin_extra_style %}
+<style>
+  .notice { max-width: 1100px; }
+  .notice .cd-card { padding: var(--space-5); margin-bottom: var(--space-5); }
+  .notice h2 { color: var(--ink); margin: 0 0 var(--space-3); }
+  .notice .muted { color: var(--ink-muted); }
+  .notice-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-5); align-items: start; }
+  @media (max-width: 960px) { .notice-grid { grid-template-columns: minmax(0, 1fr); } }
+  .notice fieldset { border: 0; padding: 0; margin: 0 0 var(--space-4); min-width: 0; }
+  .notice-option { display: block; border: 1px solid var(--border); border-radius: var(--radius-md, 8px); padding: var(--space-3); margin-bottom: var(--space-2); }
+  .notice-option__head { display: flex; gap: var(--space-2); align-items: flex-start; cursor: pointer; }
+  .notice-option__head input { margin-top: 4px; }
+  .notice-option__head p { margin: 0; }
+  .notice-option__fields { display: none; margin: var(--space-3) 0 0 var(--space-5); }
+  .notice-option:has(> .notice-option__head input:checked) { border-color: var(--brand, var(--ink)); }
+  .notice-option:has(> .notice-option__head input:checked) .notice-option__fields { display: block; }
+  .notice-subject { display: none; }
+  .notice form:has(input[name="kind"][value="message"]:checked) .notice-subject { display: block; }
+  .notice-preview { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--surface-sunken); padding: var(--space-4); border-radius: var(--radius-md, 8px); font-family: inherit; margin: var(--space-2) 0 0; }
+  .notice-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+{% comment %}
+dojos.views.notices.dojo_event_notify (DATA_MODEL_NOTICES.md): a prepared
+mail or a message of the team's own to the session's families. The fields
+under each kind and the subject show with CSS alone (:has); without it they
+all show, and only the picked kind's are used.
+{% endcomment %}
+<div class="notice">
+  <p class="body-sm"><a href="{% url 'dojo_event_detail' dojo_id=dojo.id event_id=event.id %}{% if token %}?change={{ token }}{% endif %}">← {{ event.name }}</a></p>
+  <div class="notice-grid">
+    <form method="post" class="cd-card cd-form" novalidate>
+      {% csrf_token %}
+      {% if token %}<input type="hidden" name="change" value="{{ token }}">{% endif %}
+      {% if form.non_field_errors %}{{ form.non_field_errors }}{% endif %}
+
+      <fieldset>
+        <legend class="cd-form__group-title heading-md">{% translate "What it's about" %}</legend>
+        {% for error in form.kind.errors %}<p class="cd-form__error caption">{{ error }}</p>{% endfor %}
+        {% for option in form.kind_options %}
+          <div class="notice-option">
+            <label class="notice-option__head">
+              <input type="radio" name="kind" value="{{ option.key }}"{% if option.checked %} checked{% endif %}>
+              <span><p class="body">{{ option.label }}</p></span>
+            </label>
+            {% if option.fields %}
+              <div class="notice-option__fields">
+                <p class="caption muted">{% translate "How it was before, so the mail can say what changed:" %}</p>
+                <div class="cd-form__row">{% for field in option.fields %}{{ field.as_field_group }}{% endfor %}</div>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </fieldset>
+
+      <fieldset>
+        <legend class="cd-form__group-title heading-md">{% translate "Who gets it" %}</legend>
+        {% for error in form.audience.errors %}<p class="cd-form__error caption">{{ error }}</p>{% endfor %}
+        {% for key, label, count in audience_reach %}
+          <div class="notice-option">
+            <label class="notice-option__head">
+              <input type="radio" name="audience" value="{{ key }}"{% if key == picked_audience %} checked{% endif %}>
+              <span>
+                <p class="body">{{ label }}</p>
+                <p class="caption muted">{% blocktranslate count counter=count %}{{ counter }} family account{% plural %}{{ counter }} family accounts{% endblocktranslate %}</p>
+              </span>
+            </label>
+          </div>
+        {% endfor %}
+      </fieldset>
+
+      <div class="cd-form__group">
+        <h2 class="cd-form__group-title heading-md">{% translate "Your text" %}</h2>
+        <div class="notice-subject">{{ form.subject.as_field_group }}</div>
+        {{ form.message.as_field_group }}
+        {% include "dojos/partials/_translation_fields.html" %}
+      </div>
+
+      <div class="notice-actions">
+        <button type="submit" name="preview" value="1" class="cd-btn cd-btn--secondary label">{% translate "Preview" %}</button>
+        <button type="submit" name="send" value="1" class="cd-btn cd-btn--primary label"
+                data-confirm="{% translate "Send this mail to the families now?" as confirm_msg %}{{ confirm_msg }}">{% translate "Send" %}</button>
+      </div>
+    </form>
+
+    <div>
+      <section class="cd-card">
+        <h2 class="heading-md">{% translate "Preview" %}</h2>
+        {% if preview %}
+          <p class="caption muted">{% translate "As the first family gets it, in your mail language. Every family gets it in its own language, with your text in that language when you wrote one." %}</p>
+          <p class="label">{{ preview.0 }}</p>
+          <pre class="notice-preview body-sm">{{ preview.1 }}</pre>
+        {% else %}
+          <p class="caption muted">{% translate "Press Preview to see the mail before you send it." %}</p>
+        {% endif %}
+      </section>
+      <section class="cd-card">
+        <h2 class="heading-md">{% translate "Good to know" %}</h2>
+        <p class="body-sm">{% translate "It goes to the parents and guardians of every child in the group you pick, and to a child's own login with an email address. A family with several children on this session gets one mail." %}</p>
+        <p class="body-sm">{% translate "Families can't switch these mails off, so keep them to real changes. Replies go to your dojo's email address." %}</p>
+        <p class="caption muted">{% blocktranslate count counter=sent_recently with limit=limit %}{{ counter }} of {{ limit }} mails about this session in the last 24 hours.{% plural %}{{ counter }} of {{ limit }} mails about this session in the last 24 hours.{% endblocktranslate %}</p>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

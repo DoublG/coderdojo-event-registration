@@ -1,8 +1,8 @@
 """Personal data in dojos' models (DATA_MODEL.md §16, `core.privacy_registry`)."""
 
-from core.privacy_registry import Category, LegalBasis, Subject, keep, personal, register
+from core.privacy_registry import Category, LegalBasis, Subject, keep, personal, register, register_not_personal
 
-from .models import Dojo, DojoMembership
+from .models import Dojo, DojoMembership, DojoQuestion
 
 register(
     Dojo,
@@ -55,3 +55,5 @@ register(
     },
     not_personal=["id", "dojo"],
 )
+
+register_not_personal(DojoQuestion, "a default yes/no sign-up question the dojo team writes, its own text")

@@ -25,6 +25,8 @@ def confirmed_registrations(event: Event) -> QuerySet[Registration]:
     return (
         event.registration_set.filter(waiting_list=False)
         .select_related("ninja")
+        # The answers to the sign-up questions (events.questions), for the API.
+        .prefetch_related("answers")
         .order_by("ninja__name", "ninja__family_name")
     )
 
