@@ -43,6 +43,14 @@ team runs it, and which pathways it covers (see below). **Aimed at**
 can mark it as a girls' session: it gets a "Girls' session" label on the
 site, but anyone can still sign up.
 
+Under the places you can also set when registrations **open** and
+**close**. Both are optional and entered like the date and time (for
+example 01/09/2030 09:30). Before the opening moment the session says
+"Registrations not open yet" and nobody can sign up; from the closing
+moment on it says "Registrations closed". The dates only narrow an open
+session: a draft stays hidden and a closed session stays closed, whatever
+the dates say.
+
 For the banner image, pick one of the ready-made templates shown on the
 form, or upload your own further down — uploading a file always takes
 priority if you do both. An uploaded image can be a JPEG, PNG, GIF or WebP

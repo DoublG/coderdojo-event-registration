@@ -199,7 +199,11 @@ def event_signup(request, event_id):
     if request.method == "POST":
         form = SignUpForm(request.POST, children=Ninja.objects.signable_by(guardian), questions=questions)
         if not event.registration_open:
-            error = _("Registrations for this session are closed.")
+            error = (
+                _("Registrations for this session haven't opened yet.")
+                if event.registration_not_yet_open
+                else _("Registrations for this session are closed.")
+            )
         elif not form.is_valid():
             error = form.non_field_errors()[0]
         else:

@@ -378,6 +378,34 @@ class BookingTests(TestCase):
             registrations.sign_up(event, self.children[:1])
         self.assertFalse(Registration.objects.exists())
 
+    def test_the_registration_window_decides_when_families_can_sign_up(self):
+        now = timezone.now()
+        early = _future_event(self.dojo, registration_opens_at=now + timedelta(hours=1))
+        self.assertTrue(early.registration_not_yet_open)
+        self.assertFalse(early.registration_open)
+        with self.assertRaisesMessage(registrations.RegistrationError, "haven't opened yet"):
+            registrations.sign_up(early, self.children[:1])
+
+        late = _future_event(self.dojo, registration_closes_at=now - timedelta(minutes=1))
+        self.assertFalse(late.registration_open)
+        self.assertFalse(late.registration_not_yet_open)
+        with self.assertRaisesMessage(registrations.RegistrationError, "closed"):
+            registrations.sign_up(late, self.children[:1])
+
+        inside = _future_event(
+            self.dojo, registration_opens_at=now - timedelta(hours=1), registration_closes_at=now + timedelta(hours=1)
+        )
+        self.assertTrue(inside.registration_open)
+        self.assertEqual(len(registrations.sign_up(inside, self.children[:1])), 1)
+        self.assertFalse(Registration.objects.filter(event__in=[early, late]).exists())
+
+    def test_a_window_never_opens_a_draft_or_closed_session(self):
+        now = timezone.now()
+        draft = _future_event(self.dojo, status=Event.DRAFT, registration_opens_at=now - timedelta(hours=1))
+        closed = _future_event(self.dojo, status=Event.CLOSED, registration_opens_at=now - timedelta(hours=1))
+        self.assertFalse(draft.registration_open)
+        self.assertFalse(closed.registration_open)
+
     def test_children_already_signed_up_are_skipped(self):
         event = _future_event(self.dojo)
         registrations.sign_up(event, self.children[:1])
@@ -2115,3 +2143,65 @@ class CancelSessionTests(TestCase):
         self.assertNotContains(response, reverse("event_signup", kwargs={"event_id": self.event.pk}))
         with self.assertRaises(registrations.RegistrationError):
             registrations.sign_up(self.event, [Ninja.objects.create(name="Late")])
+
+
+class RegistrationWindowFormTests(TestCase):
+    """The window on the session form (events.forms.EventForm) and on the public page."""
+
+    def setUp(self):
+        self.dojo = make_dojo("Ghent")
+
+    def _data(self, **overrides):
+        data = {
+            "name": "Saturday",
+            "event_date": "01/01/2031",
+            "start_time": "10:00",
+            "end_time": "12:00",
+            "places": "10",
+            "template_image": "",
+            "registration_opens_at": "",
+            "registration_closes_at": "",
+        }
+        data.update(overrides)
+        return data
+
+    def test_the_window_is_saved_in_belgian_notation(self):
+        from .forms import EventForm
+
+        form = EventForm(
+            self._data(registration_opens_at="01/12/2030 09:30", registration_closes_at="31/12/2030 18:00"),
+            instance=Event(dojo=self.dojo),
+            dojo=self.dojo,
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        event = form.save()
+        event.refresh_from_db()
+        self.assertEqual(event.registration_opens_at.strftime("%d/%m/%Y %H:%M"), "01/12/2030 09:30")
+        self.assertEqual(event.registration_closes_at.strftime("%d/%m/%Y %H:%M"), "31/12/2030 18:00")
+
+    def test_both_are_optional(self):
+        from .forms import EventForm
+
+        form = EventForm(self._data(), instance=Event(dojo=self.dojo), dojo=self.dojo)
+        self.assertTrue(form.is_valid(), form.errors)
+        event = form.save()
+        self.assertIsNone(event.registration_opens_at)
+        self.assertIsNone(event.registration_closes_at)
+
+    def test_closing_before_opening_is_refused(self):
+        from .forms import EventForm
+
+        form = EventForm(
+            self._data(registration_opens_at="10/12/2030 09:00", registration_closes_at="01/12/2030 09:00"),
+            instance=Event(dojo=self.dojo),
+            dojo=self.dojo,
+        )
+        self.assertFalse(form.is_valid())
+        self.assertEqual(set(form.errors), {"registration_closes_at"})
+
+    def test_the_public_page_says_when_registrations_open(self):
+        event = _future_event(self.dojo, registration_opens_at=timezone.now() + timedelta(days=2))
+        response = self.client.get(reverse("event_detail", kwargs={"event_id": event.id}))
+        self.assertContains(response, "Registrations not open yet")
+        self.assertContains(response, "Registrations open on")
+        self.assertNotContains(response, reverse("event_signup", kwargs={"event_id": event.id}))

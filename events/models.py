@@ -76,6 +76,19 @@ class Event(TranslatableModel):
     end_time = models.DateTimeField()
 
     places = models.IntegerField()
+    # Optional window for signing up (an open session only): before the
+    # first the sign-up isn't there yet, from the second on it's closed,
+    # whatever the status says. Blank = no limit on that side.
+    registration_opens_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Registrations open from this moment (blank: as soon as the session is open).",
+    )
+    registration_closes_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Registrations close at this moment (blank: only the status closes them).",
+    )
 
     location = models.PointField(srid=4326, null=True, blank=True, spatial_index=False)
     venue_name = models.CharField(max_length=200, blank=True, default="", help_text='e.g. "Ghent Public Library"')
@@ -174,7 +187,24 @@ class Event(TranslatableModel):
 
     @property
     def registration_open(self):
-        return self.status == self.OPEN
+        """Open for sign-ups right now: the status is open and now falls
+        inside the registration window, if the team set one."""
+        return self.status == self.OPEN and self.registration_window_state() == "open"
+
+    def registration_window_state(self, now=None):
+        """ "before", "open" or "after" the team's registration window (always
+        "open" when none is set); the status isn't looked at."""
+        now = now or timezone.now()
+        if self.registration_opens_at and now < self.registration_opens_at:
+            return "before"
+        if self.registration_closes_at and now >= self.registration_closes_at:
+            return "after"
+        return "open"
+
+    @property
+    def registration_not_yet_open(self):
+        """An open session whose registrations start later."""
+        return self.status == self.OPEN and self.registration_window_state() == "before"
 
     @property
     def is_cancelled(self):

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 08:52+0000\n"
+"POT-Creation-Date: 2026-11-15 10:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -1104,7 +1104,7 @@ msgstr "Prochaines sessions"
 #: accounts/templates/accounts/child_detail.html:150
 #: accounts/templates/accounts/child_detail.html:196
 #: dojos/templates/dojos/dojo_event_list.html:23 events/forms.py:62
-#: events/forms.py:148 events/templates/events/event_detail.html:122
+#: events/forms.py:149 events/templates/events/event_detail.html:122
 #: events/templates/events/event_list.html:70
 msgid "Date"
 msgstr "Date"
@@ -1934,7 +1934,7 @@ msgstr "Terminée"
 #: dojos/templates/dojos/dojo_event_list.html:39
 #: dojos/templates/dojos/partials/_dojo_result.html:33 events/models.py:54
 #: events/templates/events/event_signup.html:75
-#: events/templates/events/partials/_event_row.html:34
+#: events/templates/events/partials/_event_row.html:36
 msgid "Open"
 msgstr "Ouvert"
 
@@ -1978,8 +1978,8 @@ msgstr "Ce que chaque rôle ouvre"
 #: campaigns/templates/campaigns/manage/segment_list.html:12
 #: content/forms.py:101 content/templates/content/manage/sponsor_list.html:16
 #: dojos/forms.py:92 dojos/forms.py:301
-#: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:197
-#: events/forms.py:272 events/forms.py:524 events/forms.py:567
+#: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:220
+#: events/forms.py:298 events/forms.py:552 events/forms.py:595
 #: events/templates/events/manage/_badge_assign_results.html:11
 #: events/templates/events/manage/badge_list.html:18
 #: events/templates/events/manage/badge_list.html:46 mailing/forms.py:146
@@ -2599,7 +2599,7 @@ msgstr "Voir les ceintures, badges et sessions de %(name)s →"
 #: accounts/templates/accounts/partials/_children_list.html:53
 #: content/templates/content/manage/promotion_form.html:5
 #: content/templates/content/partials/_promotion_banner.html:20
-#: events/templates/events/partials/_event_row.html:40
+#: events/templates/events/partials/_event_row.html:42
 msgid "View event"
 msgstr "Voir l'événement"
 
@@ -3999,7 +3999,7 @@ msgid "Reject"
 msgstr "Refuser"
 
 # | msgid "Gender (optional)"
-#: applications/forms.py:134 dojos/forms.py:417 events/forms.py:617
+#: applications/forms.py:134 dojos/forms.py:417 events/forms.py:645
 msgid "Note (optional)"
 msgstr "Remarque (facultatif)"
 
@@ -4273,7 +4273,7 @@ msgstr "Toutes"
 
 #: applications/templates/applications/manage/application_list.html:21
 #: applications/templates/applications/manage/application_list.html:38
-#: events/forms.py:525 mailing/templates/mailing/manage/mail_queue.html:137
+#: events/forms.py:553 mailing/templates/mailing/manage/mail_queue.html:137
 msgid "Kind"
 msgstr "Type"
 
@@ -5010,8 +5010,8 @@ msgstr "De qui il s'agit, en une phrase."
 # | msgid "Questions"
 #: campaigns/forms.py:127
 #: campaigns/templates/campaigns/manage/segment_list.html:13 dojos/forms.py:69
-#: dojos/forms.py:95 events/forms.py:202 events/forms.py:272
-#: events/forms.py:526 events/forms.py:567 mailing/forms.py:118
+#: dojos/forms.py:95 events/forms.py:225 events/forms.py:298
+#: events/forms.py:554 events/forms.py:595 mailing/forms.py:118
 #: mailing/forms.py:153 reports/forms.py:14
 msgid "Description"
 msgstr "Description"
@@ -5040,7 +5040,7 @@ msgstr ""
 #: campaigns/forms.py:167
 #: campaigns/templates/campaigns/dojo/mail_detail.html:24
 #: campaigns/templates/campaigns/dojo/mail_form.html:21
-#: dojos/templates/dojos/dojo_event_notify.html:64 events/forms.py:332
+#: dojos/templates/dojos/dojo_event_notify.html:64 events/forms.py:360
 msgid "Who gets it"
 msgstr "Qui le reçoit"
 
@@ -5067,7 +5067,7 @@ msgstr "Jusqu'à l'âge de"
 msgid "Pathway"
 msgstr "Parcours"
 
-#: campaigns/forms.py:180 events/forms.py:372 events/forms.py:400
+#: campaigns/forms.py:180 events/forms.py:400 events/forms.py:428
 #: mailing/forms.py:118 mailing/templates/mailing/manage/mail_log.html:56
 #: mailing/templates/mailing/manage/mail_queue.html:60
 #: mailing/templates/mailing/manage/mail_queue.html:104
@@ -6247,7 +6247,7 @@ msgid "Sent by"
 msgstr "Envoyé par"
 
 #: campaigns/templates/campaigns/manage/campaign_list.html:11
-#: events/models.py:95 pages/templates/pages/code_of_conduct.html:42
+#: events/models.py:108 pages/templates/pages/code_of_conduct.html:42
 msgid "Everyone"
 msgstr "Tout le monde"
 
@@ -6778,7 +6778,7 @@ msgstr "En savoir plus"
 
 # | msgid "Language"
 # | msgid "Languages"
-#: core/admin_translations.py:70
+#: core/admin_translations.py:70 core/tests.py:398
 #: dojos/templates/dojos/partials/_translation_fields.html:10
 #, python-format
 msgid "In %(language)s"
@@ -7054,7 +7054,7 @@ msgstr "Semaine prochaine"
 msgid "Later in %(month)s"
 msgstr "Plus tard en %(month)s"
 
-#: dojos/forms.py:46 events/forms.py:177
+#: dojos/forms.py:46 events/forms.py:198
 msgid "No template — I'll upload my own below"
 msgstr "Pas de modèle, j'envoie le mien ci-dessous"
 
@@ -7093,15 +7093,15 @@ msgid "Extra info"
 msgstr "Infos supplémentaires"
 
 # | msgid "upload your document"
-#: dojos/forms.py:93 events/forms.py:201
+#: dojos/forms.py:93 events/forms.py:224
 msgid "…or upload your own"
 msgstr "…ou envoyez la vôtre"
 
-#: dojos/forms.py:97 events/forms.py:203
+#: dojos/forms.py:97 events/forms.py:226
 msgid "Minimum age"
 msgstr "Âge minimum"
 
-#: dojos/forms.py:98 events/forms.py:204
+#: dojos/forms.py:98 events/forms.py:227
 msgid "Maximum age"
 msgstr "Âge maximum"
 
@@ -7120,7 +7120,7 @@ msgstr "Adresse"
 msgid "Pathways your dojo provides"
 msgstr "Parcours proposés par votre dojo"
 
-#: dojos/forms.py:108 events/forms.py:216
+#: dojos/forms.py:108 events/forms.py:239
 msgid "Uploading a file here overrides the template chosen above."
 msgstr "Un fichier envoyé ici remplace le modèle choisi ci-dessus."
 
@@ -7168,11 +7168,11 @@ msgstr ""
 msgid "e.g. Every 2nd Saturday"
 msgstr "p. ex. un samedi sur deux"
 
-#: dojos/forms.py:142 events/forms.py:239
+#: dojos/forms.py:142 events/forms.py:262
 msgid "7"
 msgstr "7"
 
-#: dojos/forms.py:143 events/forms.py:240
+#: dojos/forms.py:143 events/forms.py:263
 msgid "18"
 msgstr "18"
 
@@ -7194,7 +7194,7 @@ msgstr ""
 
 #: dojos/forms.py:210 dojos/forms.py:255
 #: dojos/templates/dojos/dojo_list.html:40
-#: dojos/templates/dojos/partials/_event_form_fields.html:31 events/forms.py:54
+#: dojos/templates/dojos/partials/_event_form_fields.html:37 events/forms.py:54
 #: events/templates/events/event_detail.html:126
 #: events/templates/events/event_list.html:59
 msgid "Location"
@@ -7302,11 +7302,11 @@ msgstr "Choisissez une ceinture à décerner."
 msgid "What %(name)s did"
 msgstr "Ce que %(name)s a fait"
 
-#: dojos/forms.py:452 events/forms.py:612
+#: dojos/forms.py:452 events/forms.py:640
 msgid "Badge"
 msgstr "Badge"
 
-#: dojos/forms.py:456 events/forms.py:615
+#: dojos/forms.py:456 events/forms.py:643
 msgid "Pick a badge to award."
 msgstr "Choisissez un badge à décerner."
 
@@ -7802,7 +7802,7 @@ msgstr "Gratuit"
 
 #: dojos/templates/dojos/dojo_detail.html:106
 #: events/templates/events/event_signup.html:77
-#: events/templates/events/partials/_event_row.html:36
+#: events/templates/events/partials/_event_row.html:38
 #: pathways/templates/pathways/pathway_detail.html:53
 #, python-format
 msgid "Ages %(min)s–%(max)s"
@@ -7820,7 +7820,7 @@ msgstr "Sessions en %(languages)s"
 
 #: dojos/templates/dojos/dojo_detail.html:112
 #: dojos/templates/dojos/dojo_detail.html:141
-#: events/templates/events/event_detail.html:149
+#: events/templates/events/event_detail.html:151
 #: pages/templates/pages/home.html:74 pages/templates/pages/home.html:207
 msgid "Sign up now"
 msgstr "Inscrivez-vous maintenant"
@@ -7858,7 +7858,7 @@ msgstr "À propos de ce dojo"
 #: dojos/templates/dojos/dojo_detail.html:158
 #: dojos/templates/dojos/dojo_manage.html:133
 #: dojos/templates/dojos/partials/_attendance_row.html:90
-#: dojos/templates/dojos/partials/_event_form_fields.html:70
+#: dojos/templates/dojos/partials/_event_form_fields.html:76
 msgid "Pathways"
 msgstr "Parcours"
 
@@ -8064,7 +8064,7 @@ msgstr[1] ""
 msgid "Save changes"
 msgstr "Enregistrer les modifications"
 
-#: dojos/templates/dojos/dojo_event_list.html:26 events/forms.py:198
+#: dojos/templates/dojos/dojo_event_list.html:26 events/forms.py:221
 msgid "Places"
 msgstr "Places"
 
@@ -8087,7 +8087,7 @@ msgstr "Pas encore de sessions. Créez-en une pour commencer."
 msgid "Mail the families"
 msgstr "Écrire aux familles"
 
-#: dojos/templates/dojos/dojo_event_notify.html:45 events/forms.py:330
+#: dojos/templates/dojos/dojo_event_notify.html:45 events/forms.py:358
 msgid "What it's about"
 msgstr "De quoi s'agit-il"
 
@@ -8104,8 +8104,8 @@ msgid_plural "%(counter)s family accounts"
 msgstr[0] "%(counter)s compte familial"
 msgstr[1] "%(counter)s comptes familiaux"
 
-#: dojos/templates/dojos/dojo_event_notify.html:80 events/forms.py:372
-#: events/forms.py:400
+#: dojos/templates/dojos/dojo_event_notify.html:80 events/forms.py:400
+#: events/forms.py:428
 msgid "Your text"
 msgstr "Votre texte"
 
@@ -8332,7 +8332,7 @@ msgid ""
 msgstr ""
 "Le nom, l'icône et le slogan affichés en haut de la page de votre dojo."
 
-#: dojos/templates/dojos/dojo_manage.html:103 events/forms.py:531
+#: dojos/templates/dojos/dojo_manage.html:103 events/forms.py:559
 #: events/templates/events/manage/badge_list.html:17
 #: events/templates/events/manage/badge_list.html:45
 msgid "Icon"
@@ -8343,7 +8343,7 @@ msgid "Round icon shown at the top of the dojo page, next to its name."
 msgstr "Icône ronde en haut de la page du dojo, à côté de son nom."
 
 #: dojos/templates/dojos/dojo_manage.html:115
-#: dojos/templates/dojos/partials/_event_form_fields.html:53
+#: dojos/templates/dojos/partials/_event_form_fields.html:59
 msgid "No template"
 msgstr "Pas de modèle"
 
@@ -8817,29 +8817,29 @@ msgstr ""
 msgid "A session always runs within a single day."
 msgstr "Une session se déroule toujours sur une seule journée."
 
-#: dojos/templates/dojos/partials/_event_form_fields.html:36
+#: dojos/templates/dojos/partials/_event_form_fields.html:42
 msgid "Banner image"
 msgstr "Image de bannière"
 
-#: dojos/templates/dojos/partials/_event_form_fields.html:37
+#: dojos/templates/dojos/partials/_event_form_fields.html:43
 msgid "Shown on the homepage's Upcoming sessions card."
 msgstr "Affichée sur la carte Prochaines sessions de la page d'accueil."
 
 # | msgid "Current password"
-#: dojos/templates/dojos/partials/_event_form_fields.html:40
+#: dojos/templates/dojos/partials/_event_form_fields.html:46
 msgid "Current banner"
 msgstr "Bannière actuelle"
 
-#: dojos/templates/dojos/partials/_event_form_fields.html:45
+#: dojos/templates/dojos/partials/_event_form_fields.html:51
 msgid "Choose a template"
 msgstr "Choisir un modèle"
 
-#: dojos/templates/dojos/partials/_event_form_fields.html:65
+#: dojos/templates/dojos/partials/_event_form_fields.html:71
 #: events/templates/events/event_detail.html:82
 msgid "About this session"
 msgstr "À propos de cette session"
 
-#: dojos/templates/dojos/partials/_event_form_fields.html:82
+#: dojos/templates/dojos/partials/_event_form_fields.html:88
 msgid ""
 "Optional — shown on the session's public page. A new session starts with the "
 "pathways your dojo provides."
@@ -8847,11 +8847,11 @@ msgstr ""
 "Facultatif : affichés sur la page publique de la session. Une nouvelle "
 "session commence avec les parcours de votre dojo."
 
-#: dojos/templates/dojos/partials/_event_form_fields.html:87
+#: dojos/templates/dojos/partials/_event_form_fields.html:93
 msgid "Ages &amp; mentors"
 msgstr "Âges et mentors"
 
-#: dojos/templates/dojos/partials/_event_form_fields.html:106
+#: dojos/templates/dojos/partials/_event_form_fields.html:112
 msgid "Nobody on this dojo's team yet — add people from the Team page."
 msgstr ""
 "Personne dans l'équipe de ce dojo pour l'instant : ajoutez des personnes "
@@ -9240,53 +9240,77 @@ msgstr "Tous les dojos"
 msgid "%(name)s (organisation)"
 msgstr "%(name)s (organisation)"
 
-#: events/forms.py:151 events/forms.py:345
+#: events/forms.py:152 events/forms.py:373
 msgid "dd/mm/yyyy"
 msgstr "jj/mm/aaaa"
 
-#: events/forms.py:156
+#: events/forms.py:157
 msgid "Starts"
 msgstr "Début"
 
-#: events/forms.py:159 events/forms.py:167 events/forms.py:352
-#: events/forms.py:358
+#: events/forms.py:160 events/forms.py:168 events/forms.py:380
+#: events/forms.py:386
 msgid "HH:MM"
 msgstr "HH:MM"
 
-#: events/forms.py:164
+#: events/forms.py:165
 msgid "Ends"
 msgstr "Fin"
 
+#: events/forms.py:174
+msgid "Registrations open"
+msgstr "Ouverture des inscriptions"
+
+#: events/forms.py:177 events/forms.py:187
+msgid "dd/mm/yyyy HH:MM"
+msgstr "jj/mm/aaaa HH:MM"
+
+#: events/forms.py:180
+msgid ""
+"Optional. Before this moment families can't sign up. Blank: as soon as the "
+"session is open."
+msgstr "Facultatif. Avant ce moment, les familles ne peuvent pas s'inscrire. Vide : dès que la session est ouverte."
+
+#: events/forms.py:184
+msgid "Registrations close"
+msgstr "Clôture des inscriptions"
+
+#: events/forms.py:190
+msgid ""
+"Optional. From this moment families can't sign up any more. Blank: only the "
+"status closes them."
+msgstr "Facultatif. À partir de ce moment, les familles ne peuvent plus s'inscrire. Vide : seul le statut les ferme."
+
 # | msgid "Registering another child?"
-#: events/forms.py:199
+#: events/forms.py:222
 msgid "Registration on another website"
 msgstr "Inscription sur un autre site"
 
-#: events/forms.py:200
+#: events/forms.py:223
 msgid "Venue"
 msgstr "Lieu"
 
-#: events/forms.py:205
+#: events/forms.py:228
 msgid "Aimed at"
 msgstr "Destiné à"
 
 # | msgid "About this session"
-#: events/forms.py:206
+#: events/forms.py:229
 msgid "Team for this session"
 msgstr "Équipe de cette session"
 
-#: events/forms.py:207 events/templates/events/event_detail.html:90
+#: events/forms.py:230 events/templates/events/event_detail.html:90
 msgid "Pathways this session covers"
 msgstr "Parcours abordés pendant cette session"
 
-#: events/forms.py:211
+#: events/forms.py:234
 msgid ""
 "How many children can register before new sign-ups go on the waiting list."
 msgstr ""
 "Combien d'enfants peuvent s'inscrire avant que les nouvelles inscriptions "
 "passent en liste d'attente."
 
-#: events/forms.py:213
+#: events/forms.py:236
 msgid ""
 "Optional. When set, the event page links there instead of showing the sign-"
 "up form, and Places isn't needed."
@@ -9294,38 +9318,38 @@ msgstr ""
 "Facultatif. S'il est rempli, la page de l'événement renvoie vers ce site au "
 "lieu d'afficher le formulaire d'inscription, et Places n'est pas nécessaire."
 
-#: events/forms.py:215
+#: events/forms.py:238
 msgid "Leave blank to use the dojo's own address."
 msgstr "Laisser vide pour utiliser l'adresse du dojo."
 
-#: events/forms.py:217
+#: events/forms.py:240
 msgid "Supports basic Markdown."
 msgstr "Markdown simple accepté."
 
-#: events/forms.py:218
+#: events/forms.py:241
 msgid "A girls' session gets a label on the site. Anyone can still sign up."
 msgstr ""
 "Une session pour filles reçoit une étiquette sur le site. Tout le monde peut "
 "toujours s'inscrire."
 
 # | msgid "Free coding club · Saturdays"
-#: events/forms.py:227
+#: events/forms.py:250
 msgid "Coding Saturday"
 msgstr "Samedi code"
 
-#: events/forms.py:228
+#: events/forms.py:251
 msgid "20"
 msgstr "20"
 
-#: events/forms.py:229
+#: events/forms.py:252
 msgid "https://www.coolestprojects.org/…"
 msgstr "https://www.coolestprojects.org/…"
 
-#: events/forms.py:230
+#: events/forms.py:253
 msgid "e.g. \"Ghent Public Library\""
 msgstr "p. ex. « Bibliothèque de Gand »"
 
-#: events/forms.py:235
+#: events/forms.py:258
 msgid ""
 "What this session is about, what to bring — shown on the session's public "
 "page."
@@ -9334,40 +9358,40 @@ msgstr ""
 "la session."
 
 # | msgid "First name is required."
-#: events/forms.py:302 events/forms.py:431
+#: events/forms.py:330 events/forms.py:459
 msgid "This field is required."
 msgstr "Ce champ est obligatoire."
 
-#: events/forms.py:335
+#: events/forms.py:363
 msgid "Venue before"
 msgstr "Lieu précédent"
 
 # | msgid "Leave empty to use the event's name"
-#: events/forms.py:338
+#: events/forms.py:366
 msgid "Leave it empty if the session had no venue of its own."
 msgstr "Laissez vide si la session n'avait pas de lieu propre."
 
-#: events/forms.py:341
+#: events/forms.py:369
 msgid "Date before"
 msgstr "Date précédente"
 
-#: events/forms.py:349
+#: events/forms.py:377
 msgid "Started before"
 msgstr "Commençait à"
 
-#: events/forms.py:355
+#: events/forms.py:383
 msgid "Ended before"
 msgstr "Finissait à"
 
-#: events/forms.py:360
+#: events/forms.py:388
 msgid "Places before"
 msgstr "Nombre de places précédent"
 
-#: events/forms.py:374
+#: events/forms.py:402
 msgid "The session's name goes in front of it."
 msgstr "Le nom de la session est placé devant."
 
-#: events/forms.py:376
+#: events/forms.py:404
 msgid ""
 "With a prepared mail, an optional note from the team under it; with a "
 "message of your own, the whole message. Plain text: links work, there's no "
@@ -9377,45 +9401,45 @@ msgstr ""
 "avec votre propre message, le message entier. Texte simple : les liens "
 "fonctionnent, il n'y a pas de mise en page."
 
-#: events/forms.py:434 events/services.py:59
+#: events/forms.py:462 events/services.py:61
 msgid "End time must be after the start time."
 msgstr "L'heure de fin doit être après l'heure de début."
 
-#: events/forms.py:470
+#: events/forms.py:498
 msgid "Mail the families with a place or on the waiting list"
 msgstr "Écrire aux familles qui ont une place ou sont sur la liste d'attente"
 
-#: events/forms.py:476
+#: events/forms.py:504
 msgid "A note from the team (optional)"
 msgstr "Un message de l'équipe (facultatif)"
 
-#: events/forms.py:477
+#: events/forms.py:505
 msgid "For example why, or when the next session is. Plain text."
 msgstr ""
 "Par exemple pourquoi, ou quand a lieu la prochaine session. Texte simple."
 
-#: events/forms.py:508
+#: events/forms.py:536
 msgid "Standard icon"
 msgstr "Icône standard"
 
-#: events/forms.py:527 events/forms.py:567
+#: events/forms.py:555 events/forms.py:595
 #: events/templates/events/manage/badge_list.html:19
 msgid "How to earn it"
 msgstr "Comment l'obtenir"
 
-#: events/forms.py:528 events/templates/events/manage/badge_list.html:20
+#: events/forms.py:556 events/templates/events/manage/badge_list.html:20
 msgid "Dojos that can award it"
 msgstr "Dojos pouvant la décerner"
 
-#: events/forms.py:529 events/templates/events/manage/badge_list.html:47
+#: events/forms.py:557 events/templates/events/manage/badge_list.html:47
 msgid "Sessions needed"
 msgstr "Sessions nécessaires"
 
-#: events/forms.py:530 events/templates/events/manage/badge_list.html:48
+#: events/forms.py:558 events/templates/events/manage/badge_list.html:48
 msgid "Also grants belt"
 msgstr "Décerne aussi la ceinture"
 
-#: events/forms.py:535
+#: events/forms.py:563
 msgid ""
 "A one-off is earned by doing something once; a milestone is reached by "
 "attending a number of sessions."
@@ -9423,11 +9447,11 @@ msgstr ""
 "Une distinction ponctuelle s'obtient en faisant quelque chose une fois ; un "
 "palier s'atteint en participant à un certain nombre de sessions."
 
-#: events/forms.py:537
+#: events/forms.py:565
 msgid "One-off only."
 msgstr "Distinctions ponctuelles uniquement."
 
-#: events/forms.py:539
+#: events/forms.py:567
 msgid ""
 "One-off only. Leave blank for any dojo's team to award it; pick specific "
 "dojos (e.g. the organisation dojo) to limit it to them. The organisation can "
@@ -9438,49 +9462,49 @@ msgstr ""
 "ex. le dojo de l'organisation) pour la limiter à eux. L'organisation peut "
 "toujours la décerner directement, depuis Attribuer des distinctions."
 
-#: events/forms.py:543
+#: events/forms.py:571
 msgid "Milestone only: how many sessions a ninja must attend."
 msgstr ""
 "Paliers uniquement : le nombre de sessions auxquelles un ninja doit "
 "participer."
 
-#: events/forms.py:544
+#: events/forms.py:572
 msgid "Milestone only, optional: reaching it also awards this belt."
 msgstr ""
 "Paliers uniquement, facultatif : l'atteindre décerne aussi cette ceinture."
 
-#: events/forms.py:545
+#: events/forms.py:573
 msgid "Optional: upload your own icon instead (square works best)."
 msgstr ""
 "Facultatif : téléversez plutôt votre propre icône (un format carré convient "
 "le mieux)."
 
-#: events/forms.py:549
+#: events/forms.py:577
 msgid "e.g. Game Maker"
 msgstr "p. ex. Créateur de jeux"
 
-#: events/forms.py:551
+#: events/forms.py:579
 msgid "e.g. Build and share a playable game."
 msgstr "p. ex. Créer et partager un jeu jouable."
 
-#: events/forms.py:559
+#: events/forms.py:587
 msgid "None, or my own upload"
 msgstr "Aucune, ou mon propre fichier"
 
-#: events/forms.py:565
+#: events/forms.py:593
 msgid "organisation"
 msgstr "organisation"
 
-#: events/forms.py:675
+#: events/forms.py:703
 msgid "Please select at least one child."
 msgstr "Choisissez au moins un enfant."
 
-#: events/forms.py:687
+#: events/forms.py:715
 msgid "Answer every question for each child you sign up."
 msgstr "Répondez à chaque question pour chaque enfant que vous inscrivez."
 
 # | msgid "About this session"
-#: events/forms.py:723
+#: events/forms.py:751
 msgid "Answer every question."
 msgstr "Répondez à chaque question."
 
@@ -9502,86 +9526,86 @@ msgstr "Distinction supprimée."
 msgid "%(badge)s awarded to %(ninja)s."
 msgstr "%(badge)s décerné à %(ninja)s."
 
-#: events/models.py:95 events/templates/events/partials/_audience_badge.html:4
+#: events/models.py:108 events/templates/events/partials/_audience_badge.html:4
 msgid "Girls' session"
 msgstr "Session pour filles"
 
-#: events/models.py:318
+#: events/models.py:348
 msgid "The venue changed"
 msgstr "Le lieu a changé"
 
-#: events/models.py:319
+#: events/models.py:349
 msgid "The date or times changed"
 msgstr "La date ou l'horaire a changé"
 
-#: events/models.py:320
+#: events/models.py:350
 msgid "The number of places changed"
 msgstr "Le nombre de places a changé"
 
 # | msgid "No past sessions yet."
-#: events/models.py:321
+#: events/models.py:351
 msgid "The session is cancelled"
 msgstr "La session est annulée"
 
-#: events/models.py:322
+#: events/models.py:352
 msgid "A message of your own"
 msgstr "Votre propre message"
 
-#: events/models.py:329
+#: events/models.py:359
 msgid "Families with a place and those on the waiting list"
 msgstr "Les familles qui ont une place et celles sur la liste d'attente"
 
-#: events/models.py:330
+#: events/models.py:360
 msgid "Families with a place"
 msgstr "Les familles qui ont une place"
 
-#: events/models.py:331
+#: events/models.py:361
 msgid "Families on the waiting list"
 msgstr "Les familles sur la liste d'attente"
 
-#: events/models.py:399
+#: events/models.py:429
 msgid "One-off"
 msgstr "Ponctuel"
 
-#: events/models.py:399
+#: events/models.py:429
 msgid "Milestone"
 msgstr "Palier"
 
-#: events/models.py:444
+#: events/models.py:474
 msgid "Only milestone badges have a threshold or grant a belt."
 msgstr "Seuls les badges de palier ont un seuil ou décernent une ceinture."
 
-#: events/models.py:544
+#: events/models.py:574
 #, python-format
 msgid "%(who)s, as %(role)s of %(dojo)s"
 msgstr "%(who)s, en tant que %(role)s de %(dojo)s"
 
-#: events/models.py:569
+#: events/models.py:599
 msgid "New"
 msgstr "Nouveau"
 
-#: events/models.py:570
+#: events/models.py:600
 msgid "Regular"
 msgstr "Régulier"
 
-#: events/models.py:571
+#: events/models.py:601
 msgid "Occasional"
 msgstr "Occasionnel"
 
-#: events/models.py:572
+#: events/models.py:602
 msgid "At risk"
 msgstr "Risque de décrocher"
 
-#: events/models.py:573
+#: events/models.py:603
 msgid "Lapsed"
 msgstr "Décroché"
 
-#: events/models.py:574
+#: events/models.py:604
 msgid "Never came"
 msgstr "Jamais venu"
 
 # | msgid "Log out"
-#: events/models.py:575
+#: events/models.py:605
 msgid "Aged out"
 msgstr "Trop âgé"
 
@@ -9643,7 +9667,7 @@ msgid "This session has started, so the answers can't change any more."
 msgstr ""
 "Cette session a commencé : les réponses ne peuvent plus être modifiées."
 
-#: events/questions.py:191 events/registrations.py:72
+#: events/questions.py:191 events/registrations.py:74
 msgid "The questions for this session changed, please check them again."
 msgstr ""
 "Les questions de cette session ont changé, veuillez les vérifier à nouveau."
@@ -9652,46 +9676,54 @@ msgstr ""
 msgid "That question isn't one of this session's."
 msgstr "Cette question n'appartient pas à cette session."
 
-#: events/registrations.py:62 events/templates/events/event_signup.html:85
-#: events/views.py:202
+#: events/registrations.py:63 events/views.py:203
+msgid "Registrations for this session haven't opened yet."
+msgstr "Les inscriptions pour cette session ne sont pas encore ouvertes."
+
+#: events/registrations.py:64 events/templates/events/event_signup.html:85
+#: events/views.py:205
 msgid "Registrations for this session are closed."
 msgstr "Les inscriptions à cette session sont clôturées."
 
-#: events/registrations.py:68
+#: events/registrations.py:70
 msgid "The child(ren) you selected are already signed up for this session."
 msgstr "Les enfants choisis sont déjà inscrits à cette session."
 
-#: events/services.py:61
+#: events/services.py:63
 msgid "A session needs at least one place."
 msgstr "Une session doit avoir au moins une place."
 
-#: events/services.py:63
+#: events/services.py:65
 msgid "The maximum age can't be below the minimum age."
 msgstr "L'âge maximum ne peut pas être inférieur à l'âge minimum."
 
-#: events/services.py:172 events/services.py:191
+#: events/services.py:67
+msgid "Registrations must close after they open."
+msgstr "Les inscriptions doivent fermer après leur ouverture."
+
+#: events/services.py:176 events/services.py:195
 msgid "This session would be in the past."
 msgstr "Cette session serait dans le passé."
 
-#: events/services.py:179
+#: events/services.py:183
 msgid "This session was just created by another call: try again."
 msgstr "Cette session vient d'être créée par un autre appel : réessayez."
 
-#: events/services.py:186
+#: events/services.py:190
 msgid "This session has already started: change it on the site if needed."
 msgstr "Cette session a déjà commencé : modifiez-la sur le site si nécessaire."
 
-#: events/services.py:189
+#: events/services.py:193
 msgid "This session is cancelled: reopen it on the site first."
 msgstr "Cette session est annulée : rouvrez-la d'abord sur le site."
 
-#: events/services.py:218
+#: events/services.py:222
 msgid "This key is used by an earlier row too."
 msgstr "Cette clé figure aussi sur une ligne précédente."
 
 # | msgid "No past sessions yet."
 #: events/templates/events/event_detail.html:68
-#: events/templates/events/event_detail.html:152
+#: events/templates/events/event_detail.html:154
 msgid "This session is cancelled."
 msgstr "Cette session est annulée."
 
@@ -9726,26 +9758,37 @@ msgstr ""
 msgid "Already signed up"
 msgstr "Déjà inscrit"
 
+# | msgid "Registering another child?"
 #: events/templates/events/event_detail.html:147
+msgid "Registrations not open yet"
+msgstr "Inscriptions pas encore ouvertes"
+
+#: events/templates/events/event_detail.html:149
 #: events/templates/events/event_signup.html:71
-#: events/templates/events/partials/_event_row.html:30
+#: events/templates/events/partials/_event_row.html:32
 msgid "Registrations closed"
 msgstr "Inscriptions clôturées"
 
-#: events/templates/events/event_detail.html:152
+#: events/templates/events/event_detail.html:154
 msgid "Every child on your account is already signed up"
 msgstr "Tous les enfants de votre compte sont déjà inscrits"
 
-#: events/templates/events/event_detail.html:152
+# | msgid "Registering another child?"
+#: events/templates/events/event_detail.html:154
+#, python-format
+msgid "Registrations open on %(when)s"
+msgstr "Ouverture des inscriptions le %(when)s"
+
+#: events/templates/events/event_detail.html:154
 msgid "This session isn't accepting new registrations"
 msgstr "Cette session n'accepte plus de nouvelles inscriptions"
 
-#: events/templates/events/event_detail.html:152
+#: events/templates/events/event_detail.html:154
 #, python-format
 msgid "%(left)s of %(total)s spots left"
 msgstr "%(left)s places libres sur %(total)s"
 
-#: events/templates/events/event_detail.html:152
+#: events/templates/events/event_detail.html:154
 msgid "Full — join the waitlist"
 msgstr "Complet : inscrivez-vous sur la liste d'attente"
 
@@ -9772,7 +9815,7 @@ msgid "Sign up for %(name)s"
 msgstr "S'inscrire à %(name)s"
 
 #: events/templates/events/event_signup.html:73
-#: events/templates/events/partials/_event_row.html:32
+#: events/templates/events/partials/_event_row.html:34
 msgid "Full"
 msgstr "Complet"
 
@@ -9981,6 +10024,11 @@ msgstr "Pas encore de paliers."
 #: events/templates/events/partials/_event_results_page.html:42
 msgid "No upcoming events scheduled right now — check back soon."
 msgstr "Aucun événement prévu pour l'instant. Revenez bientôt."
+
+# | msgid "Next session"
+#: events/templates/events/partials/_event_row.html:30
+msgid "Opens soon"
+msgstr "Ouvre bientôt"
 
 #: events/templates/events/partials/_organiser.html:5
 #, python-format
@@ -10756,8 +10804,8 @@ msgstr "Supprimer le modèle"
 #, python-format
 msgid "Delete the %(language_name)s version? English is used instead."
 msgstr ""
-"Supprimer la version en %(language_name)s ? La version anglaise sera utilisée "
-"à la place."
+"Supprimer la version en %(language_name)s ? La version anglaise sera "
+"utilisée à la place."
 
 #: mailing/templates/mailing/manage/template_list.html:5
 #: mailing/templates/mailing/manage/template_new.html:3

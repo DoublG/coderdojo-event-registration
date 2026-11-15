@@ -127,6 +127,7 @@ class EventSearchForm(SearchFiltersMixin, forms.Form):
 # existing event's values are shown the way the fields read them back.
 BELGIAN_DATE_FORMAT = "%d/%m/%Y"
 BELGIAN_TIME_FORMAT = "%H:%M"
+BELGIAN_DATETIME_FORMAT = "%d/%m/%Y %H:%M"
 
 NO_TEMPLATE_IMAGE = ""
 
@@ -168,6 +169,26 @@ class EventForm(forms.ModelForm):
             format=BELGIAN_TIME_FORMAT,
         ),
     )
+    registration_opens_at = forms.DateTimeField(
+        required=False,
+        label=_("Registrations open"),
+        input_formats=[BELGIAN_DATETIME_FORMAT],
+        widget=forms.DateTimeInput(
+            attrs={"placeholder": _("dd/mm/yyyy HH:MM"), "inputmode": "numeric"},
+            format=BELGIAN_DATETIME_FORMAT,
+        ),
+        help_text=_("Optional. Before this moment families can't sign up. Blank: as soon as the session is open."),
+    )
+    registration_closes_at = forms.DateTimeField(
+        required=False,
+        label=_("Registrations close"),
+        input_formats=[BELGIAN_DATETIME_FORMAT],
+        widget=forms.DateTimeInput(
+            attrs={"placeholder": _("dd/mm/yyyy HH:MM"), "inputmode": "numeric"},
+            format=BELGIAN_DATETIME_FORMAT,
+        ),
+        help_text=_("Optional. From this moment families can't sign up any more. Blank: only the status closes them."),
+    )
     # Not a model field — a shortcut that, on save(), points `image` at one
     # of the standard event banners (core.image_library, no copy made)
     # instead of requiring an upload. An uploaded file (see save()) always
@@ -183,6 +204,8 @@ class EventForm(forms.ModelForm):
         fields = [
             "name",
             "places",
+            "registration_opens_at",
+            "registration_closes_at",
             "external_registration_url",
             "venue_name",
             "image",
@@ -253,6 +276,9 @@ class EventForm(forms.ModelForm):
             self.fields["places"].required = False
         else:
             del self.fields["external_registration_url"]
+        if dojo.is_organisation:
+            del self.fields["registration_opens_at"]
+            del self.fields["registration_closes_at"]
         # Who runs this session: anyone active on the dojo's team (champion,
         # mentors and youth mentors), shown as "Name (Role)".
         self.fields["team"].queryset = dojo.memberships.active().select_related("user").order_by("user__first_name")
@@ -292,6 +318,8 @@ class EventForm(forms.ModelForm):
             min_age=cleaned_data.get("min_age"),
             max_age=cleaned_data.get("max_age"),
             registers_externally=bool(cleaned_data.get("external_registration_url")),
+            registration_opens_at=cleaned_data.get("registration_opens_at"),
+            registration_closes_at=cleaned_data.get("registration_closes_at"),
         )
         for field, message in problems.items():
             self.add_error(field, message)
