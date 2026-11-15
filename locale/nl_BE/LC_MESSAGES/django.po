@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 08:52+0000\n"
+"POT-Creation-Date: 2026-11-15 10:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -419,7 +419,7 @@ msgstr "Geen"
 msgid "Date of birth (optional)"
 msgstr "Geboortedatum (optioneel)"
 
-#: accounts/forms.py:748
+#: accounts/forms.py:748 events/export.py:40
 #: events/templates/events/manage/_badge_assign_results.html:12
 msgid "Home dojo"
 msgstr "Thuisdojo"
@@ -1143,7 +1143,7 @@ msgstr "%(child)s uitschrijven voor %(event)s?"
 #: accounts/templates/accounts/child_detail.html:110
 #: accounts/templates/accounts/partials/_children_list.html:42
 #: campaigns/templates/campaigns/manage/_status_badge.html:1
-#: dojos/templates/dojos/dojo_event_detail.html:50
+#: dojos/templates/dojos/dojo_event_detail.html:53
 #: dojos/templates/dojos/dojo_event_list.html:41 events/models.py:56
 #: events/templates/events/event_detail.html:143
 msgid "Cancelled"
@@ -1151,7 +1151,7 @@ msgstr "Geannuleerd"
 
 #: accounts/templates/accounts/child_detail.html:110
 #: accounts/templates/accounts/partials/_children_list.html:44
-#: events/templates/events/event_signup.html:106
+#: events/export.py:73 events/templates/events/event_signup.html:106
 #: events/templates/events/event_signup.html:221
 msgid "Waiting list"
 msgstr "Wachtlijst"
@@ -1909,7 +1909,7 @@ msgstr "Afgelopen"
 #: applications/templates/applications/manage/_check_table.html:36
 #: dojos/templates/dojos/dojo_dashboard.html:139
 #: dojos/templates/dojos/dojo_detail.html:129
-#: dojos/templates/dojos/dojo_event_detail.html:48
+#: dojos/templates/dojos/dojo_event_detail.html:51
 #: dojos/templates/dojos/dojo_event_list.html:39
 #: dojos/templates/dojos/partials/_dojo_result.html:33 events/models.py:54
 #: events/templates/events/event_signup.html:75
@@ -1956,8 +1956,9 @@ msgstr "Wat elke rol opent"
 #: campaigns/templates/campaigns/manage/segment_list.html:12
 #: content/forms.py:101 content/templates/content/manage/sponsor_list.html:16
 #: dojos/forms.py:92 dojos/forms.py:301
-#: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:197
-#: events/forms.py:272 events/forms.py:524 events/forms.py:567
+#: dojos/templates/dojos/dojo_event_list.html:24 events/export.py:38
+#: events/forms.py:197 events/forms.py:272 events/forms.py:524
+#: events/forms.py:567
 #: events/templates/events/manage/_badge_assign_results.html:11
 #: events/templates/events/manage/badge_list.html:18
 #: events/templates/events/manage/badge_list.html:46 mailing/forms.py:146
@@ -3036,7 +3037,7 @@ msgstr "Nieuwe vraag"
 #: campaigns/segmentation/attributes/engagement.py:152
 #: campaigns/templates/campaigns/manage/_rule_fields.html:29
 #: dojos/templates/dojos/partials/_attendance_row.html:28
-#: dojos/templates/dojos/partials/_attendance_row.html:42
+#: dojos/templates/dojos/partials/_attendance_row.html:42 events/export.py:33
 #: events/templates/events/event_signup.html:101
 #: events/templates/events/event_signup.html:187 mailing/automated.py:112
 #: reports/datasets/base.py:197
@@ -3049,7 +3050,7 @@ msgstr "Ja"
 #: campaigns/segmentation/attributes/engagement.py:152
 #: campaigns/templates/campaigns/manage/_rule_fields.html:29
 #: dojos/templates/dojos/partials/_attendance_row.html:28
-#: dojos/templates/dojos/partials/_attendance_row.html:43
+#: dojos/templates/dojos/partials/_attendance_row.html:43 events/export.py:33
 #: events/templates/events/event_signup.html:101
 #: events/templates/events/event_signup.html:188 mailing/automated.py:112
 #: reports/datasets/base.py:197
@@ -4127,8 +4128,8 @@ msgstr "Aangevraagd als"
 #: campaigns/templates/campaigns/manage/journey_list.html:14
 #: content/templates/content/manage/promotion_list.html:23
 #: content/templates/content/manage/sponsor_list.html:19
-#: dojos/templates/dojos/dojo_event_detail.html:44
-#: dojos/templates/dojos/dojo_event_list.html:25
+#: dojos/templates/dojos/dojo_event_detail.html:47
+#: dojos/templates/dojos/dojo_event_list.html:25 events/export.py:41
 #: mailing/templates/mailing/manage/mail_log.html:30
 #: mailing/templates/mailing/manage/mail_log.html:58
 #: mailing/templates/mailing/manage/mail_queue.html:62 reports/forms.py:20
@@ -5999,7 +6000,7 @@ msgstr "+ Geneste groep"
 #: campaigns/templates/campaigns/manage/_status_badge.html:1
 #: campaigns/templates/campaigns/manage/campaign_detail.html:27
 #: dojos/models.py:52 dojos/templates/dojos/dojo_dashboard.html:137
-#: dojos/templates/dojos/dojo_event_detail.html:46
+#: dojos/templates/dojos/dojo_event_detail.html:49
 #: dojos/templates/dojos/dojo_event_list.html:37 events/models.py:53
 #: reports/models.py:24
 msgid "Draft"
@@ -6720,7 +6721,7 @@ msgstr "Meer weten"
 
 # | msgid "Language"
 # | msgid "Languages"
-#: core/admin_translations.py:70
+#: core/admin_translations.py:70 core/tests.py:398
 #: dojos/templates/dojos/partials/_translation_fields.html:10
 #, python-format
 msgid "In %(language)s"
@@ -7633,7 +7634,7 @@ msgid "Next session"
 msgstr "Volgende sessie"
 
 #: dojos/templates/dojos/dojo_dashboard.html:141
-#: dojos/templates/dojos/dojo_event_detail.html:52
+#: dojos/templates/dojos/dojo_event_detail.html:55
 #: dojos/templates/dojos/dojo_event_list.html:43 events/models.py:55
 msgid "Closed"
 msgstr "Gesloten"
@@ -7665,7 +7666,7 @@ msgid "%(yes)s yes · %(no)s no"
 msgstr "%(yes)s ja · %(no)s nee"
 
 #: dojos/templates/dojos/dojo_dashboard.html:155
-#: dojos/templates/dojos/dojo_event_detail.html:8
+#: dojos/templates/dojos/dojo_event_detail.html:11
 msgid "Take attendance"
 msgstr "Aanwezigheden bijhouden"
 
@@ -7856,7 +7857,7 @@ msgstr "Terug naar het evenement"
 
 # | msgid "Back to session"
 #: dojos/templates/dojos/dojo_event_attendance.html:10
-#: dojos/templates/dojos/dojo_event_detail.html:125
+#: dojos/templates/dojos/dojo_event_detail.html:128
 msgid "Back to events"
 msgstr "Terug naar de evenementen"
 
@@ -7916,37 +7917,41 @@ msgstr ""
 msgid "Create event"
 msgstr "Evenement aanmaken"
 
+#: dojos/templates/dojos/dojo_event_detail.html:8
+msgid "Download the list (CSV)"
+msgstr "Download de lijst (CSV)"
+
 # | msgid "Registrations closed"
-#: dojos/templates/dojos/dojo_event_detail.html:61
+#: dojos/templates/dojos/dojo_event_detail.html:64
 msgid "Reopen registrations"
 msgstr "Inschrijvingen heropenen"
 
-#: dojos/templates/dojos/dojo_event_detail.html:61
+#: dojos/templates/dojos/dojo_event_detail.html:64
 #: dojos/templates/dojos/dojo_event_list.html:53
 msgid "Publish"
 msgstr "Publiceren"
 
 # | msgid "Registrations closed"
-#: dojos/templates/dojos/dojo_event_detail.html:65
+#: dojos/templates/dojos/dojo_event_detail.html:68
 #: dojos/templates/dojos/dojo_event_list.html:55
 msgid "Close registrations"
 msgstr "Inschrijvingen sluiten"
 
 # | msgid "Back to your account"
-#: dojos/templates/dojos/dojo_event_detail.html:68
+#: dojos/templates/dojos/dojo_event_detail.html:71
 msgid "Back to draft"
 msgstr "Terug naar ontwerp"
 
-#: dojos/templates/dojos/dojo_event_detail.html:72
+#: dojos/templates/dojos/dojo_event_detail.html:75
 msgid "Cancel session…"
 msgstr "Sessie annuleren…"
 
-#: dojos/templates/dojos/dojo_event_detail.html:75
+#: dojos/templates/dojos/dojo_event_detail.html:78
 #: dojos/templates/dojos/dojo_manage.html:178
 msgid "View public page"
 msgstr "Publieke pagina bekijken"
 
-#: dojos/templates/dojos/dojo_event_detail.html:80
+#: dojos/templates/dojos/dojo_event_detail.html:83
 msgid ""
 "Hidden from the public site. Publish to make it visible and open for sign-"
 "ups."
@@ -7954,11 +7959,11 @@ msgstr ""
 "Verborgen voor de publieke site. Publiceer om het zichtbaar te maken en de "
 "inschrijvingen te openen."
 
-#: dojos/templates/dojos/dojo_event_detail.html:82
+#: dojos/templates/dojos/dojo_event_detail.html:85
 msgid "Visible on the public site and open for sign-ups."
 msgstr "Zichtbaar op de publieke site en open voor inschrijvingen."
 
-#: dojos/templates/dojos/dojo_event_detail.html:84
+#: dojos/templates/dojos/dojo_event_detail.html:87
 msgid ""
 "Called off: its page says so, nobody can sign up, and it's left out of the "
 "session lists and reminders. Reopen it if it goes ahead after all."
@@ -7967,7 +7972,7 @@ msgstr ""
 "in de lijsten met sessies en de herinneringen. Heropen ze als ze toch "
 "doorgaat."
 
-#: dojos/templates/dojos/dojo_event_detail.html:86
+#: dojos/templates/dojos/dojo_event_detail.html:89
 msgid ""
 "Visible on the public site, but no new sign-ups. Reopen to accept sign-ups "
 "again."
@@ -7975,7 +7980,7 @@ msgstr ""
 "Zichtbaar op de publieke site, maar zonder nieuwe inschrijvingen. Heropen om "
 "weer inschrijvingen te aanvaarden."
 
-#: dojos/templates/dojos/dojo_event_detail.html:88
+#: dojos/templates/dojos/dojo_event_detail.html:91
 msgid ""
 "You can switch between any of these at any time — existing registrations are "
 "always kept."
@@ -7984,11 +7989,11 @@ msgstr ""
 "inschrijvingen blijven altijd behouden."
 
 # | msgid "Save"
-#: dojos/templates/dojos/dojo_event_detail.html:109
+#: dojos/templates/dojos/dojo_event_detail.html:112
 msgid "Saved."
 msgstr "Opgeslagen."
 
-#: dojos/templates/dojos/dojo_event_detail.html:112
+#: dojos/templates/dojos/dojo_event_detail.html:115
 #, python-format
 msgid ""
 "One child moved from the waiting list into the new places; their family got "
@@ -8003,7 +8008,7 @@ msgstr[1] ""
 "%(counter)s kinderen schoven van de wachtlijst door naar de nieuwe plaatsen; "
 "hun gezinnen kregen een mail."
 
-#: dojos/templates/dojos/dojo_event_detail.html:126
+#: dojos/templates/dojos/dojo_event_detail.html:129
 #: dojos/templates/dojos/dojo_manage.html:179
 msgid "Save changes"
 msgstr "Wijzigingen opslaan"
@@ -8681,6 +8686,7 @@ msgstr "Aanwezigheid van %(name)s"
 #: dojos/templates/dojos/partials/_attendance_row.html:126
 #: dojos/templates/dojos/partials/_attendance_team_row.html:24
 #: dojos/templates/dojos/partials/_attendance_team_row.html:34
+#: events/export.py:43
 msgid "Present"
 msgstr "Aanwezig"
 
@@ -8983,15 +8989,15 @@ msgstr "Specialiteiten"
 msgid "Get in touch with %(name)s"
 msgstr "Neem contact op met %(name)s"
 
-#: dojos/views/event_pages.py:126
+#: dojos/views/event_pages.py:142
 msgid "Mail about the new venue"
 msgstr "Mail over de nieuwe locatie"
 
-#: dojos/views/event_pages.py:127
+#: dojos/views/event_pages.py:143
 msgid "Mail about the new date or times"
 msgstr "Mail over de nieuwe datum of uren"
 
-#: dojos/views/event_pages.py:128
+#: dojos/views/event_pages.py:144
 msgid "Mail about the new number of places"
 msgstr "Mail over het nieuwe aantal plaatsen"
 
@@ -9146,6 +9152,23 @@ msgstr "%(dojo)s kan de badge %(badge)s niet toekennen."
 msgid "Only the organisation can award this."
 msgstr "Alleen de organisatie kan dit toekennen."
 
+#: events/export.py:39 events/forms.py:75
+#: events/templates/events/event_list.html:74
+msgid "Age"
+msgstr "Leeftijd"
+
+#: events/export.py:42
+msgid "Waiting list position"
+msgstr "Plaats op de wachtlijst"
+
+#: events/export.py:44
+msgid "Signed up on"
+msgstr "Ingeschreven op"
+
+#: events/export.py:73
+msgid "Has a place"
+msgstr "Heeft een plaats"
+
 #: events/forms.py:63
 msgid "Any date"
 msgstr "Elke datum"
@@ -9153,10 +9176,6 @@ msgstr "Elke datum"
 #: events/forms.py:63
 msgid "This month"
 msgstr "Deze maand"
-
-#: events/forms.py:75 events/templates/events/event_list.html:74
-msgid "Age"
-msgstr "Leeftijd"
 
 #: events/forms.py:76
 msgid "All ages"
