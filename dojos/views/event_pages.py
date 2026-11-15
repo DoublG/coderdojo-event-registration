@@ -23,6 +23,7 @@ from ..access import (
 )
 from .common import _admin_context
 from .questions import questions_context
+from .tracks import tracks_context
 
 
 @login_required
@@ -117,6 +118,7 @@ def dojo_event_detail(request, dojo_id, event_id):
             "promoted": len(promoted),
             **_notices_context(event, before, token),
             **_waiting_list_context(event),
+            **tracks_context(event),
             "active": "events",
             **questions_context(event),
             **_event_promotions_context(request, event),

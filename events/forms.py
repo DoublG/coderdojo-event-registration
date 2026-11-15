@@ -695,11 +695,24 @@ class SignUpForm(forms.Form):
     # list is always submitted in page order, whatever the click order.
     child_order = forms.CharField(required=False)
 
-    def __init__(self, *args, children, questions=(), **kwargs):
+    def __init__(self, *args, children, questions=(), tracks=(), **kwargs):
         super().__init__(*args, **kwargs)
         self.children = {str(child.id): child for child in children}
         self.questions = list(questions)
         self.question_errors = set()
+        # The session's tracks (events.EventTrack): each ticked child picks
+        # one, `track-<child id>` = the track's id.
+        self.tracks = {str(track.id): track for track in tracks}
+        self.track_errors = set()
+
+    @staticmethod
+    def track_name(child_id):
+        return f"track-{child_id}"
+
+    def posted_track(self, child_id):
+        """The track id posted for a child ("" when none), to fill the page in again."""
+        value = self.data.get(self.track_name(child_id)) if self.is_bound else None
+        return value if value in self.tracks else ""
 
     @staticmethod
     def answer_name(child_id, question_id):
@@ -739,6 +752,17 @@ class SignUpForm(forms.Form):
         if self.question_errors:
             raise forms.ValidationError(_("Answer every question for each child you sign up."))
         data["answers"] = answers
+        picked = {}
+        if self.tracks:
+            for child in selected:
+                value = self.posted_track(child.id)
+                if value:
+                    picked[child.id] = int(value)
+                else:
+                    self.track_errors.add(child.id)
+            if self.track_errors:
+                raise forms.ValidationError(_("Pick a track for each child you sign up."))
+        data["tracks"] = picked
         return data
 
 

@@ -7,6 +7,7 @@ from .models import (
     Belt,
     Event,
     EventQuestion,
+    EventTrack,
     NinjaBadge,
     NinjaBelt,
     NinjaEngagement,
@@ -67,12 +68,14 @@ register(
     retention="registration",
     seen_by=FAMILY_AND_TEAM,
     fields={
-        ("ninja", "waiting_list", "position", "attended", "created_at", "pathways"): keep(
+        ("ninja", "waiting_list", "position", "attended", "created_at", "pathways", "track"): keep(
             Category.CHILD, ANONYMISED_CHILD
         ),
     },
     not_personal=["id", "event"],
 )
+
+register_not_personal(EventTrack, "a workshop the dojo team offers at a session: its own name and places")
 
 register_not_personal(EventQuestion, "a yes/no question the dojo team asks on a session's sign-up, its own text")
 

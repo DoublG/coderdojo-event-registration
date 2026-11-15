@@ -80,6 +80,23 @@ longest on its waiting list into the new places straight away, and their
 families get a mail. Giving it fewer places never takes a place away from
 a child who already has one.
 
+Tracks (workshops)
+------------------
+
+A session can offer **tracks**, for example Scratch and Game design, each
+with its own number of places. Add them on the **Tracks** card of the
+session's page (a name and the places). When families sign up, every child
+picks a track and sees how many places each one has left. A full track
+has its own waiting list: a child in it only moves up when a place frees up
+in that same track, even if another track still has room. The session's
+own number of places still counts for all tracks together.
+
+Raising a track's places moves the children waiting in it up, and their
+families get a mail. Lowering them never takes a place from a child who has
+one. A track with children signed up can't be removed. The attendance list
+and the child's page show which track each child is in. A session without
+tracks works as before.
+
 The waiting list
 ----------------
 

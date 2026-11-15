@@ -12,6 +12,7 @@ is tri-state). htmx swaps just this row; without JS it's a plain form post.
         <span class="cd-badge caption {% if engagement.stage == 'regular' %}cd-badge--success{% elif engagement.stage == 'at_risk' %}cd-badge--warning{% elif engagement.stage == 'new' %}cd-badge--accent{% else %}cd-badge--outline{% endif %}"
               title="{% blocktranslate with came=engagement.attended_180d offered=engagement.offered_180d %}Came to {{ came }} of the {{ offered }} sessions meant for them in the last 180 days{% endblocktranslate %}{% if engagement.missed_in_a_row %}{% blocktranslate with missed=engagement.missed_in_a_row %}; missed the last {{ missed }}{% endblocktranslate %}{% endif %}.">{{ engagement.get_stage_display }}</span>
       {% endif %}{% endwith %}
+      {% if registration.track_id %}<span class="cd-badge cd-badge--accent caption">{{ registration.track|localized:"name" }}</span>{% endif %}
       {% if ninja.home_dojo_id and ninja.home_dojo_id != event.dojo_id %}
         <span class="cd-badge cd-badge--outline caption" title="{% blocktranslate with name=ninja.home_dojo.name %}Home dojo: {{ name }}{% endblocktranslate %}">{% translate "Visiting" %}</span>
       {% endif %}

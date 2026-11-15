@@ -26,7 +26,8 @@ from mailing.automated import booking_mail, waitlist_promoted_mail
 
 from . import capacity
 from . import questions as event_questions
-from .models import Event, Registration, RegistrationCancellation
+from .models import Event, EventTrack, Registration, RegistrationCancellation
+from .tracks import counts as track_counts
 
 if TYPE_CHECKING:  # types only
     from accounts.models import Ninja, User
@@ -49,6 +50,7 @@ def sign_up(
     event: Event,
     children: "Sequence[Ninja]",
     answers: Mapping[int, Mapping[int, bool]] | None = None,
+    tracks: Mapping[int, int] | None = None,
 ) -> list[dict[str, Any]]:
     """Sign `children` up for `event`, in order: a confirmed place while
     there are places, the waiting list after that. Children already signed
@@ -59,7 +61,11 @@ def sign_up(
 
     `answers` is {child_id: {question_id: bool}} for the session's yes/no
     questions (events.questions): every new child answers every question
-    as they stand under the lock, or nothing is saved (QuestionsChanged)."""
+    as they stand under the lock, or nothing is saved (QuestionsChanged).
+
+    `tracks` is {child_id: track_id} for a session that has tracks: every new
+    child picks one of them, and a track that's full puts the child on its
+    own waiting list (the session's total still applies)."""
     with transaction.atomic():
         event = _lock(event.pk)
         if not event.registration_open:
@@ -77,6 +83,16 @@ def sign_up(
         if event_questions.missing_answers(questions, new_children, answers or {}):
             raise QuestionsChanged(_("The questions for this session changed, please check them again."))
 
+        event_tracks = {track.pk: track for track in event.tracks.all()}
+        picked: dict[int, EventTrack] = {}
+        if event_tracks:
+            for child in new_children:
+                track = event_tracks.get((tracks or {}).get(child.pk, 0))
+                if track is None:
+                    raise RegistrationError(_("Pick a track for each child."))
+                picked[child.pk] = track
+        track_confirmed = {pk: row["confirmed"] for pk, row in track_counts(event).items()} if event_tracks else {}
+
         position = Registration.objects.filter(event=event).aggregate(Max("position"))["position__max"] or 0
         confirmed = Registration.objects.filter(event=event, waiting_list=False).count()
         team_taken = capacity.team_confirmed(event) if event.reserved_places else 0
@@ -88,11 +104,14 @@ def sign_up(
         for child in new_children:
             position += 1
             is_team_child = child.id in team_ids
-            waiting_list = not capacity.can_take(
-                event, is_team_child=is_team_child, confirmed=confirmed, team_taken=team_taken
+            track = picked.get(child.pk)
+            track_room = track is None or track_confirmed.get(track.pk, 0) < track.places
+            waiting_list = not (
+                track_room
+                and capacity.can_take(event, is_team_child=is_team_child, confirmed=confirmed, team_taken=team_taken)
             )
             registration = Registration.objects.create(
-                event=event, ninja=child, waiting_list=waiting_list, position=position
+                event=event, ninja=child, waiting_list=waiting_list, position=position, track=track
             )
             # What the ninja works on starts as everything the session
             # covers; the dojo team narrows it on the attendance list.
@@ -104,6 +123,8 @@ def sign_up(
             if not waiting_list:
                 confirmed += 1
                 team_taken += is_team_child
+                if track is not None:
+                    track_confirmed[track.pk] = track_confirmed.get(track.pk, 0) + 1
             results.append({"child": child, "waiting_list": waiting_list, "registration": registration})
             booking_mail(registration)
         return results
@@ -174,11 +195,15 @@ def give_place(registration: Registration) -> Registration:
     isn't waiting any more or no place is free. Mails the family."""
     with transaction.atomic():
         event = _lock(registration.event_id)
-        current = Registration.objects.select_related("ninja").filter(pk=registration.pk).first()
+        current = Registration.objects.select_related("ninja", "track").filter(pk=registration.pk).first()
         if current is None or not current.waiting_list:
             raise RegistrationError(_("This child isn't on the waiting list any more."))
         if event.places - Registration.objects.filter(event=event, waiting_list=False).count() <= 0:
             raise RegistrationError(_("No place is free."))
+        if current.track is not None:
+            in_track = Registration.objects.filter(track=current.track, waiting_list=False).count()
+            if in_track >= current.track.places:
+                raise RegistrationError(_("This child's track is full."))
         current.waiting_list = False
         current.save(update_fields=["waiting_list"])
         waitlist_promoted_mail(current)
@@ -196,13 +221,20 @@ def _promote(event: Event, at_most: int | None = None) -> list[Registration]:
     if event.places - confirmed <= 0 or at_most == 0:
         return []
     team_taken = capacity.team_confirmed(event) if event.reserved_places else 0
-    waiting = list(Registration.objects.filter(event=event, waiting_list=True).order_by("position"))
+    waiting = list(
+        Registration.objects.filter(event=event, waiting_list=True).select_related("track").order_by("position")
+    )
     team_ids = capacity.team_child_ids(event, [r.ninja_id for r in waiting]) if event.reserved_places else set()
+    track_confirmed = {pk: row["confirmed"] for pk, row in track_counts(event).items()}
     promoted: list[Registration] = []
     for registration in waiting:
         if at_most is not None and len(promoted) >= at_most:
             break
         is_team_child = registration.ninja_id in team_ids
+        track = registration.track
+        # A full track keeps its own children waiting, whatever the others have free.
+        if track is not None and track_confirmed.get(track.pk, 0) >= track.places:
+            continue
         # Places held for the team's children are skipped over for the others.
         if not capacity.can_take(event, is_team_child=is_team_child, confirmed=confirmed, team_taken=team_taken):
             if confirmed >= event.places:
@@ -214,4 +246,6 @@ def _promote(event: Event, at_most: int | None = None) -> list[Registration]:
         promoted.append(registration)
         confirmed += 1
         team_taken += is_team_child
+        if track is not None:
+            track_confirmed[track.pk] = track_confirmed.get(track.pk, 0) + 1
     return promoted

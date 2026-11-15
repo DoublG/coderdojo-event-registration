@@ -87,3 +87,8 @@ from .team_pages import (  # noqa: F401
     dojo_team_action,
     dojo_team_manage,
 )
+from .tracks import (  # noqa: F401
+    dojo_event_track_add,
+    dojo_event_track_edit,
+    dojo_event_track_remove,
+)

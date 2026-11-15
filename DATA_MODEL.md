@@ -444,6 +444,18 @@ erDiagram
   refused when the child isn't waiting or no place is free, mails the family
   like an automatic promotion. The team's choice ignores the held places of
   *Reserved places*.
+- **Tracks** (`events.EventTrack`: name, places, position; `Registration.track`,
+  nullable; rules in `events/tracks.py`, the session page's *Tracks* card,
+  `MANAGE_EVENTS`): a session with tracks has every child pick one
+  (`sign_up(tracks={child: track})`, refused without one). A track's confirmed
+  places are counted apart: a child is confirmed when the track has room
+  *and* the session's own total, reserved places and the rest of
+  `events.capacity` allow it, else on the waiting list. `_promote` only moves
+  up a child whose own track has room (a full track keeps its children
+  waiting); more places in a track fill it (`edit_track` →
+  `fill_free_places`); a track with registrations can't be removed
+  (`SET_NULL` is only for the admin and cascade deletes). `give_place` checks
+  the child's track too. The name is in the dojo's main language only.
 - **Places:** `Event.places_left` = `places` − confirmed registrations
   (those with `waiting_list=False`). When a confirmed place is cancelled,
   the next person on the waiting list is promoted and the dojo's team (its
