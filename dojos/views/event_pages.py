@@ -48,22 +48,35 @@ def dojo_event_create(request, dojo_id):
     access = require_dojo_access(request, dojo_id, MANAGE_EVENTS)
     dojo = access.dojo
 
+    # ?copy=<session id>: start from one of this dojo's sessions (the form
+    # keeps the query string, so the post knows it too).
+    source = None
+    copy_id = request.GET.get("copy", "")
+    if copy_id:
+        source = get_object_or_404(Event, id=copy_id if copy_id.isdigit() else 0, dojo=dojo)
+    instance = services.copy_of(source) if source else Event(dojo=dojo)
+    initial = {"pathways": list(source.pathways.values_list("pk", flat=True))} if source else {}
+
     if request.method == "POST":
-        form = EventForm(request.POST, request.FILES, instance=Event(dojo=dojo), dojo=dojo)
+        form = EventForm(request.POST, request.FILES, instance=instance, initial=initial, dojo=dojo)
         if form.is_valid():
             event = form.save()
-            # Starts with the dojo's default questions (changeable on its page).
-            event_questions.copy_defaults(event)
+            if source:
+                event_questions.copy_questions(source, event)
+            else:
+                # Starts with the dojo's default questions (changeable on its page).
+                event_questions.copy_defaults(event)
             return redirect("dojo_event_list", dojo_id=dojo.id)
     else:
-        form = EventForm(instance=Event(dojo=dojo), dojo=dojo)
+        form = EventForm(instance=instance, initial=initial, dojo=dojo)
 
     return render(
         request,
         "dojos/dojo_event_create.html",
         {
             "form": form,
-            "copies_questions": dojo.default_questions.exists(),
+            "copy_of": source,
+            "copies_questions": not source and dojo.default_questions.exists(),
             "active": "events",
             **_admin_context(request, access),
         },

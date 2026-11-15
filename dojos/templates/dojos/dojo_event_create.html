@@ -22,6 +22,10 @@
         </div>
       {% endif %}
 
+      {% if copy_of %}
+        <p class="cd-form__help caption">{% blocktranslate with name=copy_of.name %}Copied from “{{ name }}”: pick the date and check the rest. The team and the registrations aren't copied; the sign-up questions are.{% endblocktranslate %}</p>
+      {% endif %}
+
       {% include "dojos/partials/_event_form_fields.html" %}
 
       {% if copies_questions %}

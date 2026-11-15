@@ -9,6 +9,7 @@ makes once per row and sends on every run: a known key updates its session,
 a new one creates a draft. Every row is saved on its own, so one bad row
 never stops the others, and the sync never deletes a session."""
 
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import date, datetime, time
 from typing import TYPE_CHECKING, Any
@@ -222,3 +223,32 @@ def sync_sessions(dojo: "Dojo", sessions: list[PlannedSession]) -> list[SyncResu
         with transaction.atomic():
             results.append(_sync_one(dojo, session, now))
     return results
+
+
+# What a copy of a session keeps (copy_of). Left out on purpose: the date and
+# times (the copy is for another day), the team (who runs it is decided per
+# session), the status (a copy starts as a draft), the registrations and
+# `external_ref` (the planning sheet's key belongs to one session only).
+COPIED_FIELDS = (
+    "name",
+    "description",
+    "venue_name",
+    "min_age",
+    "max_age",
+    "audience",
+    "places",
+    "image",
+    "external_registration_url",
+)
+
+
+def copy_of(event: Event) -> Event:
+    """An unsaved draft for the same dojo, filled in like `event`, to prefill
+    the new-session form (the team picks the date and saves). Its banner
+    points at the same file (a standard image, or an upload shared until
+    one of the two is replaced)."""
+    copy = Event(dojo=event.dojo, translations=deepcopy(event.translations))
+    for field in COPIED_FIELDS:
+        setattr(copy, field, getattr(event, field))
+    copy.location = event.location.clone() if event.location else None
+    return copy

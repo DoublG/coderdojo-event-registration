@@ -147,6 +147,18 @@ def copy_defaults(event: Event) -> list[EventQuestion]:
     )
 
 
+def copy_questions(source: Event, event: Event) -> list[EventQuestion]:
+    """Give `event` the sign-up questions of `source` (a copied session), in
+    the same order. Nothing when `event` already has questions or registers
+    on another website; the answers are never copied."""
+    if event.registers_externally or event.questions.exists():
+        return []
+    return EventQuestion.objects.bulk_create(
+        EventQuestion(event=event, text=q.text, position=q.position, translations=q.translations)
+        for q in source.questions.all()
+    )
+
+
 def missing_answers(questions: Iterable[EventQuestion], children: "Iterable[Ninja]", answers: Answers) -> bool:
     """Whether any of `children` lacks an answer to any of `questions`."""
     question_ids = [q.pk for q in questions]
