@@ -413,6 +413,12 @@ erDiagram
     }
 ```
 
+- **Duplicating a session:** `dojo_event_create?copy=<id>` prefills the form
+  from one of the dojo's sessions (`events.services.copy_of`: name, texts and
+  translations, venue and point, ages, audience, places, banner, pathways);
+  the date, team, status, registrations and `external_ref` are never copied,
+  the sign-up questions are (`events.questions.copy_questions`, instead of the
+  dojo's defaults). The copy is an ordinary new draft.
 - **Places:** `Event.places_left` = `places` − confirmed registrations
   (those with `waiting_list=False`). When a confirmed place is cancelled,
   the next person on the waiting list is promoted and the dojo's team (its

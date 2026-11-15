@@ -63,6 +63,16 @@ longest on its waiting list into the new places straight away, and their
 families get a mail. Giving it fewer places never takes a place away from
 a child who already has one.
 
+Duplicating a session
+----------------------
+
+Most dojos run the same session again and again. On a session's page,
+**Duplicate** opens the new-event form already filled in with that
+session's name, texts, venue, age range, places, banner and pathways, so
+you only pick the new date (and check the rest). The sign-up questions
+come along too. The team, the status and the registrations don't: the
+copy starts as a draft, like any new session.
+
 Session status
 ---------------
 

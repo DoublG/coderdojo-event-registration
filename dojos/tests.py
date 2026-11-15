@@ -1064,6 +1064,91 @@ class DojoEventCreateViewTests(TempMediaMixin, TestCase):
         self.client.post(url, self._valid_post_data(name="B", event_date="02/01/2030", audience=Event.GIRLS))
         self.assertEqual(dict(Event.objects.values_list("name", "audience")), {"A": Event.EVERYONE, "B": Event.GIRLS})
 
+    def _source_session(self):
+        from events.models import EventQuestion
+
+        pathway = Pathway.objects.create(name="Scratch")
+        source = Event.objects.create(
+            dojo=self.dojo,
+            name="Coding Saturday",
+            description="Bring a laptop",
+            venue_name="Library",
+            location=Point(3.72, 51.05),
+            places=12,
+            min_age=8,
+            max_age=12,
+            audience=Event.GIRLS,
+            status=Event.OPEN,
+            external_ref="row-7",
+            start_time=timezone.now() + timedelta(days=3),
+            end_time=timezone.now() + timedelta(days=3, hours=2),
+            translations={"name": {"nl-be": "Codeer-zaterdag"}},
+        )
+        source.pathways.add(pathway)
+        source.team.add(self.dojo.champion_membership)
+        EventQuestion.objects.create(event=source, text="Laptop?", position=1)
+        EventQuestion.objects.create(event=source, text="Photos?", position=2)
+        return source, pathway
+
+    def test_duplicate_button_on_the_session_page(self):
+        source, _pathway = self._source_session()
+        self.client.force_login(self.owner)
+        response = self.client.get(
+            reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": source.id})
+        )
+        url = reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}) + f"?copy={source.id}"
+        self.assertContains(response, f'href="{url}"')
+
+    def test_copy_prefills_the_form_but_not_the_date_or_team(self):
+        source, pathway = self._source_session()
+        self.client.force_login(self.owner)
+        url = reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}) + f"?copy={source.id}"
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertEqual(response.context["copy_of"], source)
+        self.assertEqual(form["name"].value(), "Coding Saturday")
+        self.assertEqual(form["places"].value(), 12)
+        self.assertEqual(form["audience"].value(), Event.GIRLS)
+        self.assertEqual([str(v) for v in form["pathways"].value()], [str(pathway.pk)])
+        self.assertIsNone(form["event_date"].value())
+        self.assertFalse(form["team"].value())
+
+    def test_posting_a_copy_makes_a_draft_with_the_questions_and_no_registrations(self):
+        source, pathway = self._source_session()
+        self.client.force_login(self.owner)
+        url = reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}) + f"?copy={source.id}"
+
+        response = self.client.post(url, self._valid_post_data(name="Coding Saturday", pathways=[pathway.pk]))
+
+        self.assertRedirects(response, reverse("dojo_event_list", kwargs={"dojo_id": self.dojo.id}))
+        copy = Event.objects.exclude(pk=source.pk).get()
+        self.assertEqual(copy.status, Event.DRAFT)
+        self.assertIsNone(copy.external_ref)
+        self.assertEqual(copy.team.count(), 0)
+        self.assertEqual(list(copy.pathways.all()), [pathway])
+        self.assertEqual(
+            list(copy.questions.order_by("position").values_list("text", flat=True)), ["Laptop?", "Photos?"]
+        )
+        self.assertEqual(copy.translations, source.translations)
+        self.assertEqual(copy.location, source.location)
+        # The original is untouched.
+        source.refresh_from_db()
+        self.assertEqual(source.status, Event.OPEN)
+        self.assertEqual(source.questions.count(), 2)
+
+    def test_copy_of_another_dojos_session_or_a_bad_id_is_404(self):
+        other = make_dojo("Antwerp", champion=make_champion(username="owner3"))
+        elsewhere = Event.objects.create(
+            dojo=other, name="X", places=5, start_time=timezone.now(), end_time=timezone.now() + timedelta(hours=1)
+        )
+        self.client.force_login(self.owner)
+        base = reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id})
+        self.assertEqual(self.client.get(f"{base}?copy={elsewhere.id}").status_code, 404)
+        self.assertEqual(self.client.get(f"{base}?copy=abc").status_code, 404)
+
     def test_invalid_post_reshows_form_without_creating(self):
         self.client.force_login(self.owner)
 
