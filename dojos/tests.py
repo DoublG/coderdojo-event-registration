@@ -3769,3 +3769,130 @@ class SessionNoticeOrganisationTests(TestCase):
             notify_url, {"kind": "message", "audience": "both", "subject": "Hi", "message": "See you!", "send": "1"}
         )
         self.assertEqual(self.events[self.org_dojo].notices.count(), 1)
+
+
+class DojoContactFormTests(TestCase):
+    """A visitor writes to a dojo's team without an account (dojos.contact)."""
+
+    def setUp(self):
+        import io
+
+        from django.core.management import call_command
+
+        call_command("load_mail_templates", stdout=io.StringIO())
+        cache.clear()
+        self.owner = make_champion(username="ct-owner", email="owner@example.com")
+        self.mentor = make_mentor(username="ct-mentor", email="mentor@example.com")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        add_member(self.dojo, self.mentor, DojoMembership.MENTOR)
+        self.url = reverse("dojo_contact", kwargs={"dojo_id": self.dojo.id})
+
+    def _post(self, **overrides):
+        data = {"name": "An Peeters", "email": "an@example.com", "message": "Room for a 9-year-old?", "website": ""}
+        data.update(overrides)
+        return self.client.post(self.url, data, REMOTE_ADDR="10.0.0.1")
+
+    def _mails(self):
+        from mailing.models import EmailMessage
+
+        return EmailMessage.objects.filter(template_key="dojo_contact_message")
+
+    def test_the_page_and_the_link_on_the_dojos_page(self):
+        self.assertContains(self.client.get(self.url), "Send the message")
+        self.assertContains(self.client.get(reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id})), self.url)
+
+    def test_a_message_goes_to_the_champion_and_mentors_with_reply_to_the_visitor(self):
+        response = self._post(message="Is there room & a laptop?")
+        self.assertRedirects(response, reverse("dojo_detail", kwargs={"dojo_id": self.dojo.id}))
+        mails = self._mails()
+        self.assertEqual(sorted(m.recipient for m in mails), ["mentor@example.com", "owner@example.com"])
+        for mail in mails:
+            self.assertEqual(mail.reply_to, "an@example.com")
+            self.assertIn("An Peeters", mail.subject)
+            self.assertIn("Is there room & a laptop?", mail.body)
+            self.assertIn("an@example.com", mail.body)
+
+    def test_a_name_with_a_line_break_cant_break_the_subject(self):
+        self._post(name="An\nBcc: x@example.com")
+        self.assertNotIn("\n", self._mails().first().subject)
+
+    def test_a_robot_filling_the_hidden_field_gets_thanks_and_nothing_is_sent(self):
+        response = self._post(website="http://spam.example")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self._mails().count(), 0)
+
+    def test_an_invalid_message_is_shown_again(self):
+        response = self._post(email="not-an-email", message="")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(set(response.context["form"].errors), {"email", "message"})
+        self.assertEqual(self._mails().count(), 0)
+
+    def test_the_fourth_message_from_one_address_in_an_hour_is_refused(self):
+        for n in range(3):
+            self._post(email=f"v{n}@example.com")
+        response = self._post(email="v9@example.com")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Too many messages for now")
+        self.assertEqual(self._mails().count(), 3 * 2)
+
+    def test_the_fourth_message_from_one_email_address_is_refused_from_any_address(self):
+        for n in range(3):
+            self.client.post(
+                self.url,
+                {"name": "A", "email": "same@example.com", "message": "Hi", "website": ""},
+                REMOTE_ADDR=f"10.0.1.{n}",
+            )
+        response = self.client.post(
+            self.url,
+            {"name": "A", "email": "SAME@example.com", "message": "Hi", "website": ""},
+            REMOTE_ADDR="10.0.1.99",
+        )
+        self.assertContains(response, "Too many messages for now")
+
+    def test_a_dojo_gets_at_most_a_set_number_an_hour(self):
+        from . import contact
+
+        for n in range(contact.LIMIT_PER_DOJO):
+            self.client.post(
+                self.url,
+                {"name": "A", "email": f"u{n}@example.com", "message": "Hi", "website": ""},
+                REMOTE_ADDR=f"10.0.2.{n}",
+            )
+        response = self.client.post(
+            self.url,
+            {"name": "A", "email": "late@example.com", "message": "Hi", "website": ""},
+            REMOTE_ADDR="10.0.3.1",
+        )
+        self.assertContains(response, "Too many messages for now")
+
+    def test_the_address_the_proxy_saw_counts_not_what_the_client_claims(self):
+        from . import contact
+
+        for n in range(contact.LIMIT_PER_IP):
+            self.client.post(
+                self.url,
+                {"name": "A", "email": f"p{n}@example.com", "message": "Hi", "website": ""},
+                HTTP_X_FORWARDED_FOR=f"203.0.113.{n}, 198.51.100.7",
+            )
+        response = self.client.post(
+            self.url,
+            {"name": "A", "email": "q@example.com", "message": "Hi", "website": ""},
+            HTTP_X_FORWARDED_FOR="203.0.113.250, 198.51.100.7",
+        )
+        self.assertContains(response, "Too many messages for now")
+
+    def test_only_public_dojos_can_be_written_to(self):
+        draft = make_dojo("Hidden", champion=make_champion(username="ct-draft"), status=Dojo.DRAFT)
+        self.assertEqual(self.client.get(reverse("dojo_contact", kwargs={"dojo_id": draft.id})).status_code, 404)
+        organisation = make_dojo("Org", champion=make_champion(username="ct-org"), kind=Dojo.ORGANISATION)
+        self.assertEqual(
+            self.client.get(reverse("dojo_contact", kwargs={"dojo_id": organisation.id})).status_code, 404
+        )
+
+    def test_a_dojo_without_a_team_cant_receive(self):
+        empty = make_dojo("Empty")
+        response = self.client.post(
+            reverse("dojo_contact", kwargs={"dojo_id": empty.id}),
+            {"name": "A", "email": "a@example.com", "message": "Hi", "website": ""},
+        )
+        self.assertContains(response, "can&#x27;t receive messages right now")

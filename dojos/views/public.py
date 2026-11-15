@@ -11,9 +11,9 @@ from django.utils.translation import gettext as _
 from content.cache import promotions_showing
 from content.models import OrganisationTeamMember, Promotion
 
-from .. import public_cache, team
+from .. import contact, public_cache, team
 from ..access import is_approved_mentor
-from ..forms import DojoSearchForm
+from ..forms import DojoContactForm, DojoSearchForm
 from ..models import Dojo, DojoMembership
 from ..search import attach_next_events, dojos_by_distance, resolve_search_origin
 from .common import RESULTS_PER_PAGE, WIDGET_RESULTS_LIMIT
@@ -152,3 +152,30 @@ def team_member_detail(request, member_id):
             "focus_areas": member.focus_area_list,
         },
     )
+
+
+def dojo_contact(request, dojo_id):
+    """The Send a message form on a public dojo's page: a visitor writes to
+    the dojo's team without an account (dojos.contact). A robot that fills
+    the hidden field gets the same thanks and nothing is sent."""
+    dojo = get_object_or_404(Dojo.objects.public(), id=dojo_id)
+    form = DojoContactForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        data = form.cleaned_data
+        try:
+            if not data["website"]:
+                contact.send_message(
+                    dojo,
+                    name=data["name"],
+                    email=data["email"],
+                    message=data["message"],
+                    ip=contact.client_ip(request),
+                )
+        except contact.ContactError as problem:
+            form.add_error(None, str(problem))
+        else:
+            messages.success(
+                request, _("Your message was sent to %(dojo)s. They'll answer by email.") % {"dojo": dojo.name}
+            )
+            return redirect("dojo_detail", dojo_id=dojo.id)
+    return render(request, "dojos/dojo_contact.html", {"dojo": dojo, "form": form})

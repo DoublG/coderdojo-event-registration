@@ -8,6 +8,7 @@ urlpatterns = [
     path("dojos/new/", views.dojo_create, name="dojo_create"),
     path("dojos/<int:dojo_id>/", views.dojo_detail, name="dojo_detail"),
     path("dojos/<int:dojo_id>/team/", views.dojo_team, name="dojo_team"),
+    path("dojos/<int:dojo_id>/contact/", views.dojo_contact, name="dojo_contact"),
     path("dojos/<int:dojo_id>/join/", views.dojo_join_request, name="dojo_join_request"),
     path("dojos/<int:dojo_id>/dashboard/", views.dojo_dashboard, name="dojo_dashboard"),
     path("dojos/<int:dojo_id>/attendance/", views.dojo_attendance, name="dojo_attendance"),

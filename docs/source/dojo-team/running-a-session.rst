@@ -63,6 +63,20 @@ longest on its waiting list into the new places straight away, and their
 families get a mail. Giving it fewer places never takes a place away from
 a child who already has one.
 
+Messages from visitors
+----------------------
+
+A dojo's public page has **Send a message to the team**: anyone, with or
+without an account, can write to your dojo. The message arrives by email
+for the champion and every mentor, with the visitor as the reply address:
+answer the mail and only the visitor gets your answer. If you don't know
+the person or it looks like spam, ignore it.
+
+To keep spam and floods out, the form allows only a few messages an hour
+per visitor and per email address, and at most twenty an hour for the dojo;
+after that the visitor is asked to try again later. Your dojo's own email
+address on its page stays as it is.
+
 Session status
 ---------------
 

@@ -2281,6 +2281,50 @@ Vous voyez les responsables de {{ child_name }} sur sa page :
 """,
         },
     },
+    {
+        "key": "dojo_contact_message",
+        "category": MailCategory.SERVICE,
+        "description": "A visitor's message to a dojo, sent to its champion and mentors from the dojo's page "
+        "(Reply-To is the visitor). Variables: dojo_name, dojo_url, sender_name, sender_email, message.",
+        "signature": False,
+        "subject": {
+            "en-us": "A message for {{ dojo_name }} from {{ sender_name }}",
+            "nl-be": "Een bericht voor {{ dojo_name }} van {{ sender_name }}",
+            "fr-be": "Un message pour {{ dojo_name }} de {{ sender_name }}",
+        },
+        "body": {
+            "en-us": """
+Hi {{ recipient_name }},
+
+{{ sender_name }} ({{ sender_email }}) wrote to {{ dojo_name }} from the dojo's page on the CoderDojo Belgium site:
+
+{{ message }}
+
+Reply to this mail to answer {{ sender_name }} directly. Nobody else gets your answer.
+If you don't know this person or the message looks like spam, ignore it.
+""",
+            "nl-be": """
+Hallo {{ recipient_name }},
+
+{{ sender_name }} ({{ sender_email }}) schreef naar {{ dojo_name }} via de pagina van de dojo op de site van CoderDojo Belgium:
+
+{{ message }}
+
+Antwoord op deze mail om {{ sender_name }} rechtstreeks te antwoorden. Niemand anders krijgt je antwoord.
+Ken je deze persoon niet of lijkt het bericht op spam? Negeer het dan.
+""",
+            "fr-be": """
+Bonjour {{ recipient_name }},
+
+{{ sender_name }} ({{ sender_email }}) a écrit à {{ dojo_name }} depuis la page du dojo sur le site de CoderDojo Belgium :
+
+{{ message }}
+
+Répondez à ce mail pour répondre directement à {{ sender_name }}. Personne d'autre ne reçoit votre réponse.
+Si vous ne connaissez pas cette personne ou si le message ressemble à du spam, ignorez-le.
+""",
+        },
+    },
 ]
 
 
@@ -2344,6 +2388,14 @@ _session_notice = {
 }
 SAMPLE_CONTEXT = {
     "registration_confirmed": {**_common, **_event, **_answers},
+    "dojo_contact_message": {
+        **_common,
+        "dojo_name": "CoderDojo Ghent",
+        "dojo_url": "https://coolregistration.localhost/dojos/1/",
+        "sender_name": "An Peeters",
+        "sender_email": "an@example.com",
+        "message": "Hello! Is there room for a 9-year-old on Saturday?",
+    },
     "waitlist_promoted": {**_common, **_event, **_answers},
     "registration_waitlisted": {**_common, **_event, **_answers},
     "session_reminder": {**_common, **_event, **_answers},

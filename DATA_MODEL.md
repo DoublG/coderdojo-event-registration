@@ -413,6 +413,13 @@ erDiagram
     }
 ```
 
+- **Contact form on a dojo's page** (`dojos/contact.py`, `dojo_contact`, no
+  model): a visitor's message becomes one `dojo_contact_message` mail (service
+  category) per active champion/mentor, Reply-To the visitor, queued through
+  `mailing.services.send`. Limited without a third party: per client address
+  (the last `X-Forwarded-For` entry, as our proxy saw it), per email address
+  and per dojo, each over an hour, counted in the cache under a hash; plus a
+  honeypot field. The mail content follows the mail retention (365 days).
 - **Places:** `Event.places_left` = `places` − confirmed registrations
   (those with `waiting_list=False`). When a confirmed place is cancelled,
   the next person on the waiting list is promoted and the dojo's team (its
