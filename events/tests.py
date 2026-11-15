@@ -13,7 +13,7 @@ from PIL import Image
 
 from accounts.models import Guardianship, Ninja, OrganisationRole, User
 from core.testing import TempMediaMixin
-from dojos.models import Dojo
+from dojos.models import Dojo, DojoMembership
 from dojos.search import DEFAULT_SEARCH_ORIGIN, dojos_by_distance
 from dojos.testing import make_dojo
 from pathways.models import Pathway
@@ -2115,3 +2115,96 @@ class CancelSessionTests(TestCase):
         self.assertNotContains(response, reverse("event_signup", kwargs={"event_id": self.event.pk}))
         with self.assertRaises(registrations.RegistrationError):
             registrations.sign_up(self.event, [Ninja.objects.create(name="Late")])
+
+
+class JoinSessionTeamTests(TestCase):
+    """A champion or mentor puts themselves on a session's team, or off it."""
+
+    def setUp(self):
+        from dojos.testing import add_member, make_champion, make_mentor
+
+        self.owner = make_champion(username="jt-owner")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.mentor = make_mentor(username="jt-mentor")
+        self.mentor_membership = add_member(self.dojo, self.mentor, DojoMembership.MENTOR)
+        self.event = _future_event(self.dojo)
+
+    def _url(self, action, event=None):
+        from django.urls import reverse
+
+        event = event or self.event
+        return reverse(
+            "dojo_event_team_self", kwargs={"dojo_id": self.dojo.id, "event_id": event.id, "action": action}
+        )
+
+    def test_a_mentor_joins_and_leaves(self):
+        from . import services
+
+        self.assertTrue(services.join_team(self.event, self.mentor_membership))
+        self.assertFalse(services.join_team(self.event, self.mentor_membership), "already on it")
+        self.assertEqual(list(self.event.team.all()), [self.mentor_membership])
+        self.assertTrue(services.leave_team(self.event, self.mentor_membership))
+        self.assertFalse(services.leave_team(self.event, self.mentor_membership))
+        self.assertEqual(self.event.team.count(), 0)
+
+    def test_the_view_changes_only_the_own_place(self):
+        self.client.force_login(self.mentor)
+        self.assertEqual(self.client.get(self._url("join")).status_code, 302)  # POST only
+        self.assertEqual(self.event.team.count(), 0)
+        self.client.post(self._url("join"))
+        self.assertEqual(list(self.event.team.all()), [self.mentor_membership])
+        from django.urls import reverse
+
+        page = self.client.get(
+            reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+        )
+        self.assertContains(page, "Take me off the team")
+        self.client.post(self._url("leave"))
+        self.assertEqual(self.event.team.count(), 0)
+
+    def test_an_unknown_action_is_404(self):
+        self.client.force_login(self.mentor)
+        self.assertEqual(self.client.post(self._url("kick")).status_code, 404)
+
+    def test_outsiders_and_other_dojos_get_404(self):
+        from dojos.testing import make_champion
+
+        self.client.force_login(make_champion(username="jt-outsider"))
+        self.assertEqual(self.client.post(self._url("join")).status_code, 404)
+        self.assertEqual(self.event.team.count(), 0)
+
+    def test_no_change_once_started_or_cancelled(self):
+        from . import services
+
+        started = _future_event(
+            self.dojo, start_time=timezone.now() - timedelta(hours=1), end_time=timezone.now() + timedelta(hours=1)
+        )
+        with self.assertRaisesMessage(services.TeamError, "already started"):
+            services.join_team(started, self.mentor_membership)
+        cancelled = _future_event(self.dojo, status=Event.CANCELLED)
+        with self.assertRaisesMessage(services.TeamError, "cancelled"):
+            services.join_team(cancelled, self.mentor_membership)
+
+    def test_a_dormant_member_or_youth_mentor_cannot(self):
+        from dojos.testing import add_member
+
+        from . import services
+
+        gone = add_member(
+            self.dojo, User.objects.create(username="jt-gone"), DojoMembership.MENTOR, status=DojoMembership.DORMANT
+        )
+        with self.assertRaises(services.TeamError):
+            services.join_team(self.event, gone)
+        youth = add_member(self.dojo, User.objects.create(username="jt-youth"), DojoMembership.YOUTH_MENTOR)
+        with self.assertRaises(services.TeamError):
+            services.join_team(self.event, youth)
+
+    def test_another_dojos_membership_is_refused(self):
+        from dojos.testing import add_member
+
+        from . import services
+
+        other = make_dojo("Antwerp")
+        elsewhere = add_member(other, self.mentor, DojoMembership.MENTOR)
+        with self.assertRaises(services.TeamError):
+            services.join_team(self.event, elsewhere)

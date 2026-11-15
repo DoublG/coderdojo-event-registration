@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 08:52+0000\n"
+"POT-Creation-Date: 2026-11-15 12:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -6720,7 +6720,7 @@ msgstr "Meer weten"
 
 # | msgid "Language"
 # | msgid "Languages"
-#: core/admin_translations.py:70
+#: core/admin_translations.py:70 core/tests.py:398
 #: dojos/templates/dojos/partials/_translation_fields.html:10
 #, python-format
 msgid "In %(language)s"
@@ -7856,7 +7856,7 @@ msgstr "Terug naar het evenement"
 
 # | msgid "Back to session"
 #: dojos/templates/dojos/dojo_event_attendance.html:10
-#: dojos/templates/dojos/dojo_event_detail.html:125
+#: dojos/templates/dojos/dojo_event_detail.html:138
 msgid "Back to events"
 msgstr "Terug naar de evenementen"
 
@@ -7983,12 +7983,34 @@ msgstr ""
 "Je kunt op elk moment tussen deze statussen wisselen; bestaande "
 "inschrijvingen blijven altijd behouden."
 
+#: dojos/templates/dojos/dojo_event_detail.html:95
+msgid "Your part"
+msgstr "Jouw rol"
+
+# | msgid "Youth mentor at %(dojo)s"
+#: dojos/templates/dojos/dojo_event_detail.html:96
+msgid "You're on this session's team."
+msgstr "Je staat in het team van deze sessie."
+
+# | msgid "Youth mentor at %(dojo)s"
+#: dojos/templates/dojos/dojo_event_detail.html:96
+msgid "You're not on this session's team."
+msgstr "Je staat niet in het team van deze sessie."
+
+#: dojos/templates/dojos/dojo_event_detail.html:100
+msgid "Take me off the team"
+msgstr "Haal me uit het team"
+
+#: dojos/templates/dojos/dojo_event_detail.html:100
+msgid "Put me on the team"
+msgstr "Zet me in het team"
+
 # | msgid "Save"
-#: dojos/templates/dojos/dojo_event_detail.html:109
+#: dojos/templates/dojos/dojo_event_detail.html:122
 msgid "Saved."
 msgstr "Opgeslagen."
 
-#: dojos/templates/dojos/dojo_event_detail.html:112
+#: dojos/templates/dojos/dojo_event_detail.html:125
 #, python-format
 msgid ""
 "One child moved from the waiting list into the new places; their family got "
@@ -8003,7 +8025,7 @@ msgstr[1] ""
 "%(counter)s kinderen schoven van de wachtlijst door naar de nieuwe plaatsen; "
 "hun gezinnen kregen een mail."
 
-#: dojos/templates/dojos/dojo_event_detail.html:126
+#: dojos/templates/dojos/dojo_event_detail.html:139
 #: dojos/templates/dojos/dojo_manage.html:179
 msgid "Save changes"
 msgstr "Wijzigingen opslaan"
@@ -8983,17 +9005,27 @@ msgstr "Specialiteiten"
 msgid "Get in touch with %(name)s"
 msgstr "Neem contact op met %(name)s"
 
-#: dojos/views/event_pages.py:126
+#: dojos/views/event_pages.py:130
 msgid "Mail about the new venue"
 msgstr "Mail over de nieuwe locatie"
 
-#: dojos/views/event_pages.py:127
+#: dojos/views/event_pages.py:131
 msgid "Mail about the new date or times"
 msgstr "Mail over de nieuwe datum of uren"
 
-#: dojos/views/event_pages.py:128
+#: dojos/views/event_pages.py:132
 msgid "Mail about the new number of places"
 msgstr "Mail over het nieuwe aantal plaatsen"
+
+# | msgid "Youth mentor at %(dojo)s"
+#: dojos/views/event_pages.py:155
+msgid "You're on this session's team now."
+msgstr "Je staat nu in het team van deze sessie."
+
+# | msgid "Youth mentor at %(dojo)s"
+#: dojos/views/event_pages.py:157
+msgid "You're off this session's team."
+msgstr "Je staat niet meer in het team van deze sessie."
 
 #: dojos/views/notices.py:40
 msgid "There's nobody to mail for this session, or it ended too long ago."
@@ -9594,31 +9626,44 @@ msgstr "Een sessie heeft minstens één plaats nodig."
 msgid "The maximum age can't be below the minimum age."
 msgstr "De maximumleeftijd kan niet lager zijn dan de minimumleeftijd."
 
-#: events/services.py:172 events/services.py:191
-msgid "This session would be in the past."
-msgstr "Deze sessie zou in het verleden liggen."
+# | msgid "Youth mentor at %(dojo)s"
+#: events/services.py:94
+msgid "You're not on this dojo's team."
+msgstr "Je maakt geen deel uit van het team van deze dojo."
 
-#: events/services.py:179
-msgid "This session was just created by another call: try again."
-msgstr "Deze sessie is net door een andere oproep aangemaakt: probeer opnieuw."
-
-#: events/services.py:186
-msgid "This session has already started: change it on the site if needed."
-msgstr "Deze sessie is al begonnen: wijzig ze zo nodig op de site."
-
-#: events/services.py:189
-msgid "This session is cancelled: reopen it on the site first."
-msgstr "Deze sessie is geannuleerd: heropen ze eerst op de site."
-
-#: events/services.py:218
-msgid "This key is used by an earlier row too."
-msgstr "Deze sleutel staat ook al op een eerdere rij."
+#: events/services.py:96
+msgid "Only the champion and mentors can put themselves on a session's team."
+msgstr "Enkel de champion en de mentors kunnen zichzelf in het team van een sessie zetten."
 
 # | msgid "No past sessions yet."
-#: events/templates/events/event_detail.html:68
+#: events/services.py:98 events/templates/events/event_detail.html:68
 #: events/templates/events/event_detail.html:152
 msgid "This session is cancelled."
 msgstr "Deze sessie is geannuleerd."
+
+#: events/services.py:100
+msgid "This session has already started."
+msgstr "Deze sessie is al begonnen."
+
+#: events/services.py:208 events/services.py:227
+msgid "This session would be in the past."
+msgstr "Deze sessie zou in het verleden liggen."
+
+#: events/services.py:215
+msgid "This session was just created by another call: try again."
+msgstr "Deze sessie is net door een andere oproep aangemaakt: probeer opnieuw."
+
+#: events/services.py:222
+msgid "This session has already started: change it on the site if needed."
+msgstr "Deze sessie is al begonnen: wijzig ze zo nodig op de site."
+
+#: events/services.py:225
+msgid "This session is cancelled: reopen it on the site first."
+msgstr "Deze sessie is geannuleerd: heropen ze eerst op de site."
+
+#: events/services.py:254
+msgid "This key is used by an earlier row too."
+msgstr "Deze sleutel staat ook al op een eerdere rij."
 
 #: events/templates/events/event_detail.html:68
 msgid ""

@@ -413,6 +413,12 @@ erDiagram
     }
 ```
 
+- **Joining a session's team** (`events.services.join_team` / `leave_team`,
+  `dojo_event_team_self`, any manager role, POST only): an active champion or
+  mentor of the session's dojo adds or removes *their own* membership in
+  `Event.team`; refused for a session that started or is cancelled, for
+  dormant memberships, youth mentors and another dojo's membership. No new
+  field: who was actually there is still `TeamAttendance`.
 - **Places:** `Event.places_left` = `places` − confirmed registrations
   (those with `waiting_list=False`). When a confirmed place is cancelled,
   the next person on the waiting list is promoted and the dojo's team (its

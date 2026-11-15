@@ -22,7 +22,7 @@ from .models import Event, SessionNotice
 
 if TYPE_CHECKING:
     from accounts.models import User
-    from dojos.models import Dojo
+    from dojos.models import Dojo, DojoMembership
 
 # At most this many rows per sync call: a year of twice-weekly sessions, with room to spare.
 SYNC_LIMIT = 200
@@ -62,6 +62,42 @@ def session_problems[When: (datetime, time)](
     if min_age is not None and max_age is not None and min_age > max_age:
         problems["max_age"] = _("The maximum age can't be below the minimum age.")
     return problems
+
+
+class TeamError(Exception):
+    """A team member can't join or leave this session, with a message."""
+
+
+def join_team(event: Event, membership: "DojoMembership") -> bool:
+    """A member of the dojo's team puts themselves on a session's team (the
+    people who run it, `Event.team`). Only an active champion or mentor of
+    the dojo, for a session that hasn't started and isn't cancelled.
+    Returns whether it changed anything."""
+    _check_can_change_team(event, membership)
+    if event.team.filter(pk=membership.pk).exists():
+        return False
+    event.team.add(membership)
+    return True
+
+
+def leave_team(event: Event, membership: "DojoMembership") -> bool:
+    """The same member takes themselves off the session's team again."""
+    _check_can_change_team(event, membership)
+    if not event.team.filter(pk=membership.pk).exists():
+        return False
+    event.team.remove(membership)
+    return True
+
+
+def _check_can_change_team(event: Event, membership: "DojoMembership") -> None:
+    if membership.dojo_id != event.dojo_id or membership.status != membership.ACTIVE:
+        raise TeamError(_("You're not on this dojo's team."))
+    if membership.role not in membership.MANAGER_ROLES:
+        raise TeamError(_("Only the champion and mentors can put themselves on a session's team."))
+    if event.status == Event.CANCELLED:
+        raise TeamError(_("This session is cancelled."))
+    if event.start_time <= timezone.now():
+        raise TeamError(_("This session has already started."))
 
 
 def set_status(event: Event, status: str) -> bool:
