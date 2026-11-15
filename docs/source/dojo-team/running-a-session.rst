@@ -51,6 +51,15 @@ moment on it says "Registrations closed". The dates only narrow an open
 session: a draft stays hidden and a closed session stays closed, whatever
 the dates say.
 
+A dojo whose team has children of its own can also **hold places for the
+team's children**: say how many places are kept for the children of your
+champion and mentors, and from when everyone can take them (blank: when
+registrations close, or the start of the session). Until then another
+family can only take the places that aren't held; once the moment has
+passed the held places that are still free go to the children waiting
+longest, and their families get a mail. A child counts as the team's when
+one of their parents is an active champion or mentor of the dojo.
+
 For the banner image, pick one of the ready-made templates shown on the
 form, or upload your own further down — uploading a file always takes
 priority if you do both. An uploaded image can be a JPEG, PNG, GIF or WebP

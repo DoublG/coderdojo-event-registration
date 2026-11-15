@@ -189,6 +189,18 @@ class EventForm(forms.ModelForm):
         ),
         help_text=_("Optional. From this moment families can't sign up any more. Blank: only the status closes them."),
     )
+    reserved_release_at = forms.DateTimeField(
+        required=False,
+        label=_("Held places open to everyone on"),
+        input_formats=[BELGIAN_DATETIME_FORMAT],
+        widget=forms.DateTimeInput(
+            attrs={"placeholder": _("dd/mm/yyyy HH:MM"), "inputmode": "numeric"},
+            format=BELGIAN_DATETIME_FORMAT,
+        ),
+        help_text=_(
+            "Optional. Blank: when registrations close, or at the start of the session when they don't close."
+        ),
+    )
     # Not a model field — a shortcut that, on save(), points `image` at one
     # of the standard event banners (core.image_library, no copy made)
     # instead of requiring an upload. An uploaded file (see save()) always
@@ -204,6 +216,8 @@ class EventForm(forms.ModelForm):
         fields = [
             "name",
             "places",
+            "reserved_places",
+            "reserved_release_at",
             "registration_opens_at",
             "registration_closes_at",
             "external_registration_url",
@@ -219,6 +233,7 @@ class EventForm(forms.ModelForm):
         labels = {
             "name": _("Name"),
             "places": _("Places"),
+            "reserved_places": _("Places held for the team's children"),
             "external_registration_url": _("Registration on another website"),
             "venue_name": _("Venue"),
             "image": _("…or upload your own"),
@@ -234,6 +249,9 @@ class EventForm(forms.ModelForm):
             "places": _("How many children can register before new sign-ups go on the waiting list."),
             "external_registration_url": _(
                 "Optional. When set, the event page links there instead of showing the sign-up form, and Places isn't needed."
+            ),
+            "reserved_places": _(
+                "Places kept for children of the dojo's champion and mentors until the moment below. 0: none."
             ),
             "venue_name": _("Leave blank to use the dojo's own address."),
             "image": with_upload_help(_("Uploading a file here overrides the template chosen above.")),
@@ -269,6 +287,7 @@ class EventForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Not sent (an older form, a script): keep the model default.
         self.fields["audience"].required = False
+        self.fields["reserved_places"].required = False
         # Only the organisation's own events (an organisation dojo, DATA_MODEL.md
         # §12) may take registrations on another website; for those, places
         # are optional.
@@ -277,6 +296,8 @@ class EventForm(forms.ModelForm):
         else:
             del self.fields["external_registration_url"]
         if dojo.is_organisation:
+            del self.fields["reserved_places"]
+            del self.fields["reserved_release_at"]
             del self.fields["registration_opens_at"]
             del self.fields["registration_closes_at"]
         # Who runs this session: anyone active on the dojo's team (champion,
@@ -305,6 +326,9 @@ class EventForm(forms.ModelForm):
             ),
         )
 
+    def clean_reserved_places(self):
+        return self.cleaned_data.get("reserved_places") or 0
+
     def clean_audience(self):
         return self.cleaned_data.get("audience") or Event.EVERYONE
 
@@ -320,6 +344,7 @@ class EventForm(forms.ModelForm):
             registers_externally=bool(cleaned_data.get("external_registration_url")),
             registration_opens_at=cleaned_data.get("registration_opens_at"),
             registration_closes_at=cleaned_data.get("registration_closes_at"),
+            reserved_places=cleaned_data.get("reserved_places"),
         )
         for field, message in problems.items():
             self.add_error(field, message)

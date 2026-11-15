@@ -76,6 +76,19 @@ class Event(TranslatableModel):
     end_time = models.DateTimeField()
 
     places = models.IntegerField()
+    # Places held for the children of the dojo's team (an active champion or
+    # mentor among their guardians) until the release moment; from then on
+    # they're ordinary places (events.capacity). 0 = none held.
+    reserved_places = models.PositiveIntegerField(
+        default=0,
+        help_text="Places held for the children of the dojo's team until they're released (0: none held).",
+    )
+    reserved_release_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When the held places open to everyone (blank: when registrations close, "
+        "or at the start of the session when they don't).",
+    )
     # Optional window for signing up (an open session only): before the
     # first the sign-up isn't there yet, from the second on it's closed,
     # whatever the status says. Blank = no limit on that side.
@@ -200,6 +213,14 @@ class Event(TranslatableModel):
         if self.registration_closes_at and now >= self.registration_closes_at:
             return "after"
         return "open"
+
+    def reserved_released(self, now=None):
+        """Whether the places held for the team's children are open to everyone
+        (always, when none are held)."""
+        if self.reserved_places <= 0:
+            return True
+        release = self.reserved_release_at or self.registration_closes_at or self.start_time
+        return (now or timezone.now()) >= release
 
     @property
     def registration_not_yet_open(self):

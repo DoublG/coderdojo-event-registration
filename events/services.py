@@ -51,6 +51,7 @@ def session_problems[When: (datetime, time)](
     registers_externally: bool = False,
     registration_opens_at: datetime | None = None,
     registration_closes_at: datetime | None = None,
+    reserved_places: int | None = None,
 ) -> dict[str, str]:
     """What's wrong with a session's times, places and ages, as {field: message}
     (empty when it's fine). `start` and `end` are both datetimes, or both times
@@ -65,6 +66,8 @@ def session_problems[When: (datetime, time)](
         problems["max_age"] = _("The maximum age can't be below the minimum age.")
     if registration_opens_at and registration_closes_at and registration_closes_at <= registration_opens_at:
         problems["registration_closes_at"] = _("Registrations must close after they open.")
+    if reserved_places and places is not None and reserved_places > places and not registers_externally:
+        problems["reserved_places"] = _("Held places can't be more than the places.")
     return problems
 
 

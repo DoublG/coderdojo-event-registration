@@ -21,6 +21,7 @@ from django.utils.translation import gettext as _
 from accounts.home_dojo import assign_on_signup
 from mailing.automated import booking_mail, waitlist_promoted_mail
 
+from . import capacity
 from . import questions as event_questions
 from .models import Event, Registration, RegistrationCancellation
 
@@ -75,11 +76,18 @@ def sign_up(
 
         position = Registration.objects.filter(event=event).aggregate(Max("position"))["position__max"] or 0
         confirmed = Registration.objects.filter(event=event, waiting_list=False).count()
+        team_taken = capacity.team_confirmed(event) if event.reserved_places else 0
+        team_ids = (
+            capacity.team_child_ids(event, [child.id for child in new_children]) if event.reserved_places else set()
+        )
         pathways = list(event.pathways.all())
         results: list[dict[str, Any]] = []
         for child in new_children:
             position += 1
-            waiting_list = confirmed >= event.places
+            is_team_child = child.id in team_ids
+            waiting_list = not capacity.can_take(
+                event, is_team_child=is_team_child, confirmed=confirmed, team_taken=team_taken
+            )
             registration = Registration.objects.create(
                 event=event, ninja=child, waiting_list=waiting_list, position=position
             )
@@ -92,6 +100,7 @@ def sign_up(
             assign_on_signup(child, event.dojo)
             if not waiting_list:
                 confirmed += 1
+                team_taken += is_team_child
             results.append({"child": child, "waiting_list": waiting_list, "registration": registration})
             booking_mail(registration)
         return results
@@ -141,14 +150,26 @@ def _promote(event: Event, at_most: int | None = None) -> list[Registration]:
     """Under the session's lock: move waiting children into the places that
     are really free (a session the team gave fewer places after it filled up
     stays as it is), at most `at_most` of them."""
-    free = event.places - Registration.objects.filter(event=event, waiting_list=False).count()
-    if at_most is not None:
-        free = min(free, at_most)
-    if free <= 0:
+    confirmed = Registration.objects.filter(event=event, waiting_list=False).count()
+    if event.places - confirmed <= 0 or at_most == 0:
         return []
-    promoted = list(Registration.objects.filter(event=event, waiting_list=True).order_by("position")[:free])
-    for registration in promoted:
+    team_taken = capacity.team_confirmed(event) if event.reserved_places else 0
+    waiting = list(Registration.objects.filter(event=event, waiting_list=True).order_by("position"))
+    team_ids = capacity.team_child_ids(event, [r.ninja_id for r in waiting]) if event.reserved_places else set()
+    promoted: list[Registration] = []
+    for registration in waiting:
+        if at_most is not None and len(promoted) >= at_most:
+            break
+        is_team_child = registration.ninja_id in team_ids
+        # Places held for the team's children are skipped over for the others.
+        if not capacity.can_take(event, is_team_child=is_team_child, confirmed=confirmed, team_taken=team_taken):
+            if confirmed >= event.places:
+                break
+            continue
         registration.waiting_list = False
         registration.save(update_fields=["waiting_list"])
         waitlist_promoted_mail(registration)
+        promoted.append(registration)
+        confirmed += 1
+        team_taken += is_team_child
     return promoted
