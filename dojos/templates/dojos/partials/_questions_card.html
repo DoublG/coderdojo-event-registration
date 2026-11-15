@@ -64,6 +64,19 @@ gets this card back; without JavaScript it goes back to the page.
     <p class="body-sm questions-card__empty">{% if questions_for_dojo %}{% translate "No default questions: new sessions start without questions." %}{% else %}{% translate "No questions: families only pick which children come." %}{% endif %}</p>
   {% endif %}
 
+  {% if question_suggestions %}
+    <div class="questions-card__suggestions" style="display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);margin-top:var(--space-3);">
+      <p class="caption" style="margin:0;">{% translate "Suggestions, added in one click:" %}</p>
+      {% for key, text in question_suggestions %}
+        <form method="post" action="{{ question_add_url }}" hx-post="{{ question_add_url }}" hx-target="#{{ questions_card_id }}" hx-swap="outerHTML" class="questions-card__suggestion">
+          {% csrf_token %}
+          <input type="hidden" name="suggestion" value="{{ key }}">
+          <button type="submit" class="cd-btn cd-btn--ghost label">+ {{ text }}</button>
+        </form>
+      {% endfor %}
+    </div>
+  {% endif %}
+
   {% if question_add_form %}
     <details class="questions-card__add"{% if question_add_form.errors %} open{% endif %}>
       <summary class="label">{% translate "Add a question" %}</summary>

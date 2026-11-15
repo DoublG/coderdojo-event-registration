@@ -3278,6 +3278,38 @@ class DojoEventQuestionsTests(TestCase):
             fetch_redirect_response=False,
         )
 
+    def _suggest(self, key, htmx=True):
+        headers = {"HTTP_HX_REQUEST": "true"} if htmx else {}
+        return self.client.post(reverse("dojo_event_question_add", kwargs=self._kw()), {"suggestion": key}, **headers)
+
+    def test_the_card_offers_suggested_questions_not_yet_asked(self):
+        response = self.client.get(reverse("dojo_event_detail", kwargs=self._kw()))
+        self.assertContains(response, "Will your child bring their own laptop?")
+        self.assertContains(response, "take photos of your child")
+        self._suggest("photos")
+        response = self.client.get(reverse("dojo_event_detail", kwargs=self._kw()))
+        self.assertNotContains(response, "+ Do you agree that we take photos")
+        self.assertContains(response, "+ Will your child bring their own laptop?")
+
+    def test_a_suggestion_is_added_in_one_click_in_the_dojos_languages(self):
+        self.dojo.languages = ["nl-be", "fr-be"]
+        self.dojo.save()
+        response = self._suggest("photos")
+        self.assertTemplateUsed(response, "dojos/partials/_questions_card.html")
+        question = self.event.questions.get()
+        self.assertIn("foto", question.text)  # the dojo's main language (Dutch)
+        self.assertIn("photos", question.translation_for("fr-be", "text"))
+
+    def test_an_unknown_suggestion_adds_nothing(self):
+        self._suggest("nonsense")
+        self.assertEqual(self.event.questions.count(), 0)
+
+    def test_a_suggestion_follows_the_questions_limit(self):
+        for n in range(5):
+            self.event.questions.create(text=f"Q{n}?", position=n)
+        self._suggest("laptop")
+        self.assertEqual(self.event.questions.count(), 5)
+
     def test_a_sixth_question_is_refused_on_the_form(self):
         for n in range(5):
             self.event.questions.create(text=f"Q{n}?", position=n)

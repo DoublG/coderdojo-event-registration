@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 08:52+0000\n"
+"POT-Creation-Date: 2026-11-15 10:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -6720,7 +6720,7 @@ msgstr "Meer weten"
 
 # | msgid "Language"
 # | msgid "Languages"
-#: core/admin_translations.py:70
+#: core/admin_translations.py:70 core/tests.py:398
 #: dojos/templates/dojos/partials/_translation_fields.html:10
 #, python-format
 msgid "In %(language)s"
@@ -8954,14 +8954,18 @@ msgid "No questions: families only pick which children come."
 msgstr "Geen vragen: gezinnen kiezen alleen welke kinderen komen."
 
 #: dojos/templates/dojos/partials/_questions_card.html:69
+msgid "Suggestions, added in one click:"
+msgstr "Suggesties, met één klik toegevoegd:"
+
+#: dojos/templates/dojos/partials/_questions_card.html:82
 msgid "Add a question"
 msgstr "Een vraag toevoegen"
 
-#: dojos/templates/dojos/partials/_questions_card.html:75
+#: dojos/templates/dojos/partials/_questions_card.html:88
 msgid "Add question"
 msgstr "Vraag toevoegen"
 
-#: dojos/templates/dojos/partials/_questions_card.html:80
+#: dojos/templates/dojos/partials/_questions_card.html:93
 #, python-format
 msgid "At most %(max)s questions."
 msgstr "Hoogstens %(max)s vragen."
@@ -9543,16 +9547,28 @@ msgstr ""
 msgid "%(names)s and %(last)s"
 msgstr "%(names)s en %(last)s"
 
-#: events/questions.py:60
+#: events/questions.py:45
+msgid "Will your child bring their own laptop?"
+msgstr "Brengt je kind een eigen laptop mee?"
+
+#: events/questions.py:46
+msgid "Do you agree that we take photos of your child during the session?"
+msgstr "Ga je ermee akkoord dat we tijdens de sessie foto's van je kind nemen?"
+
+#: events/questions.py:79
+msgid "That question isn't one of the suggestions."
+msgstr "Die vraag staat niet bij de suggesties."
+
+#: events/questions.py:104
 msgid "Write the question."
 msgstr "Schrijf de vraag."
 
-#: events/questions.py:62
+#: events/questions.py:106
 #, python-format
 msgid "Keep the question under %(max)s characters."
 msgstr "Hou de vraag onder %(max)s tekens."
 
-#: events/questions.py:68
+#: events/questions.py:112
 msgid ""
 "Families sign up for this session on another website, so it has no questions "
 "here."
@@ -9560,20 +9576,20 @@ msgstr ""
 "Gezinnen schrijven zich voor deze sessie in op een andere website, dus heeft "
 "ze hier geen vragen."
 
-#: events/questions.py:84
+#: events/questions.py:128
 #, python-format
 msgid "At most %(max)s questions: remove one first."
 msgstr "Hoogstens %(max)s vragen: verwijder er eerst een."
 
-#: events/questions.py:188
+#: events/questions.py:232
 msgid "This session has started, so the answers can't change any more."
 msgstr "Deze sessie is begonnen, dus de antwoorden kunnen niet meer wijzigen."
 
-#: events/questions.py:191 events/registrations.py:72
+#: events/questions.py:235 events/registrations.py:72
 msgid "The questions for this session changed, please check them again."
 msgstr "De vragen voor deze sessie zijn gewijzigd, kijk ze opnieuw na."
 
-#: events/questions.py:205
+#: events/questions.py:249
 msgid "That question isn't one of this session's."
 msgstr "Die vraag hoort niet bij deze sessie."
 

@@ -13,8 +13,9 @@ from typing import TYPE_CHECKING, Any
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Count, Max, Q
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_noop
 
 from dojos.models import Dojo, DojoQuestion
 
@@ -35,6 +36,49 @@ Owner = Event | Dojo
 class QuestionError(Exception):
     """A change to a session's (or a dojo's default) questions that can't
     happen, with a message for the dojo team."""
+
+
+# Questions most dojos want, one click to add (the team may still write its
+# own). The wording is translated into the dojo's languages when it's added.
+# Health information is never asked here (see the form's help text).
+SUGGESTIONS = {
+    "laptop": gettext_noop("Will your child bring their own laptop?"),
+    "photos": gettext_noop("Do you agree that we take photos of your child during the session?"),
+}
+
+
+def suggestion_texts(owner: Owner, key: str) -> tuple[str, dict[str, str]]:
+    """The suggested question `key` in the dojo's main language, and in each
+    of its other languages ({language: text})."""
+    languages = owner.content_languages()
+    texts = {}
+    for language in languages:
+        with translation.override(language):
+            texts[language] = translation.gettext(SUGGESTIONS[key])
+    return texts[languages[0]], {language: text for language, text in texts.items() if language != languages[0]}
+
+
+def suggestions(owner: Owner) -> list[tuple[str, str]]:
+    """[(key, text)] of the suggested questions `owner` doesn't have yet, in
+    the page's language."""
+    have = {
+        text.casefold()
+        for text in _questions_of(owner)[0]
+        .objects.filter(**{_questions_of(owner)[1]: owner})
+        .values_list("text", flat=True)
+    }
+    return [
+        (key, _(text)) for key, text in SUGGESTIONS.items() if suggestion_texts(owner, key)[0].casefold() not in have
+    ]
+
+
+def add_suggestion(owner: Owner, key: str) -> Question:
+    """Add suggested question `key` (see SUGGESTIONS); raises QuestionError
+    for an unknown one, like add_question for a full list."""
+    if key not in SUGGESTIONS:
+        raise QuestionError(_("That question isn't one of the suggestions."))
+    text, translations = suggestion_texts(owner, key)
+    return add_question(owner, text, translations)
 
 
 def max_questions() -> int:

@@ -61,6 +61,9 @@ def questions_context(owner, add_form=None, edit_form=None):
         "questions_card_id": "event-questions" if is_event else "default-questions",
         "question_rows": rows,
         "question_add_form": add_form,
+        "question_suggestions": event_questions.suggestions(owner)
+        if len(questions) < event_questions.max_questions()
+        else [],
         "question_add_url": reverse(f"{prefix}_add", kwargs=kw),
         "max_questions": event_questions.max_questions(),
     }
@@ -86,7 +89,21 @@ def _response(request, access, owner, add_form=None, edit_form=None):
     return redirect(url)
 
 
+def _add_suggestion(request, access, owner, new_question):
+    """One click on a suggested question: added in the dojo's languages."""
+    try:
+        event_questions.add_suggestion(owner, request.POST["suggestion"])
+    except event_questions.QuestionError as error:
+        form = EventQuestionForm({"new-question-text": ""}, question=new_question, prefix="new-question")
+        form.is_valid()
+        form.add_error("text", str(error))
+        return _response(request, access, owner, add_form=form)
+    return _response(request, access, owner)
+
+
 def _add(request, access, owner, new_question):
+    if request.POST.get("suggestion"):
+        return _add_suggestion(request, access, owner, new_question)
     form = EventQuestionForm(request.POST, question=new_question, prefix="new-question")
     if form.is_valid():
         try:

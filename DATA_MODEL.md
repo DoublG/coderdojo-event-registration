@@ -2823,6 +2823,16 @@ fields from `dojos/partials/_translation_fields.html`. New views in
 URL's event. The card also shows the totals so far (confirmed and waiting
 list separately).
 
+**Suggested questions** (`events.questions.SUGGESTIONS`, 15 November 2026):
+the card (a session's and the dojo's defaults) offers a laptop question and
+a photo-consent question, added in one click in the dojo's languages
+(`add_suggestion`: the main language in `text`, the others in
+`translations`; one the owner already has isn't offered). Photo consent is
+asked as one of these ordinary yes/no questions, so it's per child and per
+session and nothing is added to `Registration` or `Ninja`; no field about
+how the family heard of the dojo, and no "previous visits" (the engagement
+snapshot knows them), by data minimisation.
+
 **New session: the dojo's default questions** (decided 17 October 2026,
 replacing the first plan of copying the dojo's latest session). Like
 `Event.pathways` from `Dojo.pathways`, a new event starts with a copy of
