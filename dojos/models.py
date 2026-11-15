@@ -58,6 +58,18 @@ class Dojo(TranslatableModel):
     DOJO = "dojo"
     ORGANISATION = "organisation"
     KIND_CHOICES = [(DOJO, _("Dojo")), (ORGANISATION, _("Organisation"))]
+    # What happens when a place frees up on a full session: the child waiting
+    # longest gets it at once (auto), or the team picks who gets it (manual).
+    AUTO = "auto"
+    MANUAL = "manual"
+    WAITLIST_CHOICES = [(AUTO, _("Automatic")), (MANUAL, _("The team chooses"))]
+    waitlist_mode = models.CharField(
+        max_length=10,
+        choices=WAITLIST_CHOICES,
+        default=AUTO,
+        help_text="Automatic: a free place goes to the child waiting longest (the family is mailed). "
+        "The team chooses: it stays free until the team gives it to a child on the waiting list.",
+    )
     kind = models.CharField(
         max_length=12,
         choices=KIND_CHOICES,

@@ -36,6 +36,26 @@ urlpatterns = [
         name="dojo_event_cancel",
     ),
     path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/registrations/<int:registration_id>/give-place/",
+        views.dojo_event_give_place,
+        name="dojo_event_give_place",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/tracks/add/",
+        views.dojo_event_track_add,
+        name="dojo_event_track_add",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/tracks/<int:track_id>/",
+        views.dojo_event_track_edit,
+        name="dojo_event_track_edit",
+    ),
+    path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/tracks/<int:track_id>/remove/",
+        views.dojo_event_track_remove,
+        name="dojo_event_track_remove",
+    ),
+    path(
         "dojos/<int:dojo_id>/events/<int:event_id>/attendance/",
         views.dojo_event_attendance,
         name="dojo_event_attendance",

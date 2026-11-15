@@ -15,7 +15,7 @@ from content.models import FAQ, Promotion
 from core.caching import cached
 from dojos.models import Dojo
 
-from . import registrations
+from . import capacity, registrations
 from .forms import AGE_RANGES, DOJO_ORGANISATION, EventSearchForm, SignUpForm
 from .models import Event, Registration
 from .search import (
@@ -24,6 +24,7 @@ from .search import (
     WIDGET_PAGE_SIZE,
     upcoming_available_events,
 )
+from .tracks import counts as track_counts
 
 RESULTS_PER_PAGE = 20
 
@@ -158,11 +159,18 @@ def event_detail(request, event_id):
     faqs = FAQ.objects.for_event(event)
 
     all_registered = False
+    is_team_child = False
     if request.user.is_authenticated:
         children = list(Ninja.objects.signable_by(request.user))
         if children:
             registered_count = Registration.objects.filter(event=event, ninja__in=children).count()
             all_registered = registered_count == len(children)
+            if event.reserved_places:
+                is_team_child = bool(capacity.team_child_ids(event, [child.id for child in children]))
+    # Places held for the dojo team's children don't count for the others.
+    places_left = (
+        capacity.places_left_for(event, is_team_child=is_team_child) if event.reserved_places else event.places_left
+    )
 
     return render(
         request,
@@ -171,6 +179,7 @@ def event_detail(request, event_id):
             "event": event,
             "faqs": faqs,
             "all_registered": all_registered,
+            "places_left": places_left,
         },
     )
 
@@ -195,11 +204,18 @@ def event_signup(request, event_id):
     ticked = []
     # The session's yes/no questions (events.questions), answered per child.
     questions = list(event.questions.all())
+    tracks = list(event.tracks.all())
 
     if request.method == "POST":
-        form = SignUpForm(request.POST, children=Ninja.objects.signable_by(guardian), questions=questions)
+        form = SignUpForm(
+            request.POST, children=Ninja.objects.signable_by(guardian), questions=questions, tracks=tracks
+        )
         if not event.registration_open:
-            error = _("Registrations for this session are closed.")
+            error = (
+                _("Registrations for this session haven't opened yet.")
+                if event.registration_not_yet_open
+                else _("Registrations for this session are closed.")
+            )
         elif not form.is_valid():
             error = form.non_field_errors()[0]
         else:
@@ -207,7 +223,10 @@ def event_signup(request, event_id):
             # session's lock (events.registrations), not from what this page read.
             try:
                 results = registrations.sign_up(
-                    event, form.cleaned_data["selected"], answers=form.cleaned_data["answers"]
+                    event,
+                    form.cleaned_data["selected"],
+                    answers=form.cleaned_data["answers"],
+                    tracks=form.cleaned_data.get("tracks"),
                 )
             except registrations.RegistrationError as problem:
                 error = str(problem)
@@ -232,6 +251,7 @@ def event_signup(request, event_id):
             "child": child,
             "registration": existing_registrations.get(child.id),
             "questions": _question_fields(questions, child, form if error else None),
+            "track_field": _track_field(tracks, child, form if error else None),
         }
         for child in Ninja.objects.signable_by(guardian)
     ]
@@ -253,8 +273,28 @@ def event_signup(request, event_id):
             "error": error,
             "ticked": ticked,
             "has_questions": bool(questions),
+            "has_tracks": bool(tracks),
         },
     )
+
+
+def _track_field(tracks, child, form):
+    """One child's track choice on the sign-up page, or None for a session
+    without tracks: {"name", "options": [{"track", "value", "label",
+    "selected"}], "error"}. A full track says its waiting list."""
+    if not tracks:
+        return None
+    counts = track_counts(tracks[0].event)
+    picked = form.posted_track(child.id) if form is not None else ""
+    options = []
+    for track in tracks:
+        left = track.places - counts.get(track.pk, {}).get("confirmed", 0)
+        options.append({"track": track, "left": max(0, left), "full": left <= 0, "selected": str(track.id) == picked})
+    return {
+        "name": SignUpForm.track_name(child.id),
+        "options": options,
+        "error": form is not None and child.id in form.track_errors,
+    }
 
 
 def _question_fields(questions, child, form):

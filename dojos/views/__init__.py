@@ -40,6 +40,7 @@ from .event_pages import (  # noqa: F401
     _event_promotions_context,
     dojo_event_create,
     dojo_event_detail,
+    dojo_event_give_place,
     dojo_event_list,
     dojo_event_set_status,
 )
@@ -85,4 +86,9 @@ from .team_pages import (  # noqa: F401
     dojo_members,
     dojo_team_action,
     dojo_team_manage,
+)
+from .tracks import (  # noqa: F401
+    dojo_event_track_add,
+    dojo_event_track_edit,
+    dojo_event_track_remove,
 )

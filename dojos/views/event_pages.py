@@ -2,8 +2,10 @@
 session, its status (its sign-up questions card is .questions), and the
 organisation's Promotions card."""
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
@@ -21,6 +23,7 @@ from ..access import (
 )
 from .common import _admin_context
 from .questions import questions_context
+from .tracks import tracks_context
 
 
 @login_required
@@ -114,6 +117,8 @@ def dojo_event_detail(request, dojo_id, event_id):
             "saved": saved,
             "promoted": len(promoted),
             **_notices_context(event, before, token),
+            **_waiting_list_context(event),
+            **tracks_context(event),
             "active": "events",
             **questions_context(event),
             **_event_promotions_context(request, event),
@@ -127,6 +132,42 @@ CHANGE_BUTTONS = {
     SessionNotice.TIME_CHANGED: _("Mail about the new date or times"),
     SessionNotice.PLACES_CHANGED: _("Mail about the new number of places"),
 }
+
+
+def _waiting_list_context(event):
+    """The session page's Waiting list card: the children waiting, in their
+    order, and how many places are free to give."""
+    if event.registers_externally:
+        return {"waiting_shown": False}
+    waiting = list(event.registration_set.filter(waiting_list=True).select_related("ninja").order_by("position"))
+    free = max(0, event.places - event.registration_set.filter(waiting_list=False).count())
+    return {
+        "waiting_shown": bool(waiting) or event.dojo.waitlist_mode == event.dojo.MANUAL,
+        "waiting_registrations": waiting,
+        "waiting_free_places": free,
+        "waiting_manual": event.dojo.waitlist_mode == event.dojo.MANUAL,
+    }
+
+
+@login_required
+def dojo_event_give_place(request, dojo_id, event_id, registration_id):
+    """The team gives a child on the waiting list a free place (POST only;
+    events.registrations.give_place), the way a dojo whose team chooses fills
+    the places that free up."""
+    access = require_dojo_access(request, dojo_id, MANAGE_EVENTS)
+    event = get_object_or_404(Event, id=event_id, dojo=access.dojo)
+    if request.method == "POST":
+        registration = get_object_or_404(event.registration_set.select_related("ninja"), id=registration_id)
+        try:
+            registrations.give_place(registration)
+        except registrations.RegistrationError as problem:
+            messages.error(request, str(problem))
+        else:
+            messages.success(
+                request,
+                _("%(child)s now has a place, and the family is mailed.") % {"child": registration.ninja.full_name},
+            )
+    return redirect(reverse("dojo_event_detail", args=[access.dojo.id, event.id]) + "#waiting-list")
 
 
 def _notices_context(event, before, token):

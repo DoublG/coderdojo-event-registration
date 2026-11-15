@@ -13,14 +13,23 @@ from PIL import Image
 
 from accounts.models import Guardianship, Ninja, OrganisationRole, User
 from core.testing import TempMediaMixin
-from dojos.models import Dojo
+from dojos.models import Dojo, DojoMembership
 from dojos.search import DEFAULT_SEARCH_ORIGIN, dojos_by_distance
 from dojos.testing import make_dojo
 from pathways.models import Pathway
 
 from . import questions, registrations
 from .engagement import is_aimed_at
-from .models import Badge, Belt, Event, NinjaBadge, Registration, RegistrationAnswer, RegistrationCancellation
+from .models import (
+    Badge,
+    Belt,
+    Event,
+    EventTrack,
+    NinjaBadge,
+    Registration,
+    RegistrationAnswer,
+    RegistrationCancellation,
+)
 from .search import CACHE_KEY, upcoming_available_events
 
 
@@ -377,6 +386,34 @@ class BookingTests(TestCase):
         with self.assertRaisesMessage(registrations.RegistrationError, "Registrations for this session are closed."):
             registrations.sign_up(event, self.children[:1])
         self.assertFalse(Registration.objects.exists())
+
+    def test_the_registration_window_decides_when_families_can_sign_up(self):
+        now = timezone.now()
+        early = _future_event(self.dojo, registration_opens_at=now + timedelta(hours=1))
+        self.assertTrue(early.registration_not_yet_open)
+        self.assertFalse(early.registration_open)
+        with self.assertRaisesMessage(registrations.RegistrationError, "haven't opened yet"):
+            registrations.sign_up(early, self.children[:1])
+
+        late = _future_event(self.dojo, registration_closes_at=now - timedelta(minutes=1))
+        self.assertFalse(late.registration_open)
+        self.assertFalse(late.registration_not_yet_open)
+        with self.assertRaisesMessage(registrations.RegistrationError, "closed"):
+            registrations.sign_up(late, self.children[:1])
+
+        inside = _future_event(
+            self.dojo, registration_opens_at=now - timedelta(hours=1), registration_closes_at=now + timedelta(hours=1)
+        )
+        self.assertTrue(inside.registration_open)
+        self.assertEqual(len(registrations.sign_up(inside, self.children[:1])), 1)
+        self.assertFalse(Registration.objects.filter(event__in=[early, late]).exists())
+
+    def test_a_window_never_opens_a_draft_or_closed_session(self):
+        now = timezone.now()
+        draft = _future_event(self.dojo, status=Event.DRAFT, registration_opens_at=now - timedelta(hours=1))
+        closed = _future_event(self.dojo, status=Event.CLOSED, registration_opens_at=now - timedelta(hours=1))
+        self.assertFalse(draft.registration_open)
+        self.assertFalse(closed.registration_open)
 
     def test_children_already_signed_up_are_skipped(self):
         event = _future_event(self.dojo)
@@ -2115,3 +2152,438 @@ class CancelSessionTests(TestCase):
         self.assertNotContains(response, reverse("event_signup", kwargs={"event_id": self.event.pk}))
         with self.assertRaises(registrations.RegistrationError):
             registrations.sign_up(self.event, [Ninja.objects.create(name="Late")])
+
+
+class RegistrationWindowFormTests(TestCase):
+    """The window on the session form (events.forms.EventForm) and on the public page."""
+
+    def setUp(self):
+        self.dojo = make_dojo("Ghent")
+
+    def _data(self, **overrides):
+        data = {
+            "name": "Saturday",
+            "event_date": "01/01/2031",
+            "start_time": "10:00",
+            "end_time": "12:00",
+            "places": "10",
+            "template_image": "",
+            "registration_opens_at": "",
+            "registration_closes_at": "",
+        }
+        data.update(overrides)
+        return data
+
+    def test_the_window_is_saved_in_belgian_notation(self):
+        from .forms import EventForm
+
+        form = EventForm(
+            self._data(registration_opens_at="01/12/2030 09:30", registration_closes_at="31/12/2030 18:00"),
+            instance=Event(dojo=self.dojo),
+            dojo=self.dojo,
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        event = form.save()
+        event.refresh_from_db()
+        self.assertEqual(event.registration_opens_at.strftime("%d/%m/%Y %H:%M"), "01/12/2030 09:30")
+        self.assertEqual(event.registration_closes_at.strftime("%d/%m/%Y %H:%M"), "31/12/2030 18:00")
+
+    def test_both_are_optional(self):
+        from .forms import EventForm
+
+        form = EventForm(self._data(), instance=Event(dojo=self.dojo), dojo=self.dojo)
+        self.assertTrue(form.is_valid(), form.errors)
+        event = form.save()
+        self.assertIsNone(event.registration_opens_at)
+        self.assertIsNone(event.registration_closes_at)
+
+    def test_closing_before_opening_is_refused(self):
+        from .forms import EventForm
+
+        form = EventForm(
+            self._data(registration_opens_at="10/12/2030 09:00", registration_closes_at="01/12/2030 09:00"),
+            instance=Event(dojo=self.dojo),
+            dojo=self.dojo,
+        )
+        self.assertFalse(form.is_valid())
+        self.assertEqual(set(form.errors), {"registration_closes_at"})
+
+    def test_the_public_page_says_when_registrations_open(self):
+        event = _future_event(self.dojo, registration_opens_at=timezone.now() + timedelta(days=2))
+        response = self.client.get(reverse("event_detail", kwargs={"event_id": event.id}))
+        self.assertContains(response, "Registrations not open yet")
+        self.assertContains(response, "Registrations open on")
+        self.assertNotContains(response, reverse("event_signup", kwargs={"event_id": event.id}))
+
+
+class ReservedPlacesTests(TestCase):
+    """Places held for the children of the dojo's team (events.capacity)."""
+
+    def setUp(self):
+        from dojos.testing import add_member
+
+        self.dojo = make_dojo("Ghent")
+        self.coach = User.objects.create(username="coach", email="coach@example.com")
+        add_member(self.dojo, self.coach, DojoMembership.MENTOR)
+        self.parent = User.objects.create(username="plain", email="plain@example.com")
+        self.team_child = Ninja.objects.create(name="Team kid")
+        Guardianship.objects.create(guardian=self.coach, ninja=self.team_child)
+        self.kids = [Ninja.objects.create(name=f"Kid {n}") for n in range(3)]
+        for kid in self.kids:
+            Guardianship.objects.create(guardian=self.parent, ninja=kid)
+        self.event = _future_event(
+            self.dojo, places=2, reserved_places=1, reserved_release_at=timezone.now() + timedelta(days=1)
+        )
+
+    def _status(self, ninja):
+        return Registration.objects.get(event=self.event, ninja=ninja).waiting_list
+
+    def test_other_families_cannot_take_a_held_place(self):
+        registrations.sign_up(self.event, self.kids[:2])
+        self.assertFalse(self._status(self.kids[0]))
+        self.assertTrue(self._status(self.kids[1]), "the second place is held for the team")
+
+    def test_a_team_child_takes_the_held_place(self):
+        registrations.sign_up(self.event, self.kids[:1])
+        registrations.sign_up(self.event, [self.team_child])
+        self.assertFalse(self._status(self.team_child))
+
+    def test_a_team_child_can_also_take_a_general_place(self):
+        registrations.sign_up(self.event, [self.team_child])
+        registrations.sign_up(self.event, self.kids[:1])
+        self.assertFalse(self._status(self.team_child))
+        self.assertFalse(self._status(self.kids[0]), "the team child used the held place itself")
+
+    def test_a_cancelled_place_moves_up_one_family_but_never_into_the_held_place(self):
+        registrations.sign_up(self.event, self.kids[:3])  # one confirmed, two waiting
+        first = Registration.objects.get(event=self.event, ninja=self.kids[0])
+        registrations.cancel(first, cancelled_by=self.parent)
+        # The general place goes to the family waiting longest; the held one stays free.
+        self.assertFalse(self._status(self.kids[1]))
+        self.assertTrue(self._status(self.kids[2]))
+        self.assertEqual(Registration.objects.filter(event=self.event, waiting_list=False).count(), 1)
+        registrations.sign_up(self.event, [self.team_child])
+        self.assertFalse(self._status(self.team_child))
+
+    def test_waiting_team_child_jumps_the_queue_into_the_held_place(self):
+        registrations.sign_up(self.event, self.kids[:1])
+        registrations.sign_up(self.event, self.kids[1:2])  # waits: the rest is held
+        registrations.sign_up(self.event, [self.team_child])  # takes the held place
+        registrations.cancel(
+            Registration.objects.get(event=self.event, ninja=self.team_child), cancelled_by=self.coach
+        )
+        # The place it leaves is held again, so the waiting family doesn't get it.
+        self.assertTrue(self._status(self.kids[1]))
+
+    def test_released_places_go_to_the_waiting_list(self):
+        registrations.sign_up(self.event, self.kids[:2])
+        Event.objects.filter(pk=self.event.pk).update(reserved_release_at=timezone.now() - timedelta(minutes=1))
+        event = Event.objects.get(pk=self.event.pk)
+        promoted = registrations.fill_free_places(event)
+        self.assertEqual([r.ninja for r in promoted], [self.kids[1]])
+
+    def test_the_release_task_fills_released_places(self):
+        from .tasks import release_reserved_places
+
+        registrations.sign_up(self.event, self.kids[:2])
+        self.assertEqual(release_reserved_places(), 0)
+        Event.objects.filter(pk=self.event.pk).update(reserved_release_at=timezone.now() - timedelta(minutes=1))
+        with mock.patch("events.tasks.fill_session.delay") as delay:
+            self.assertEqual(release_reserved_places(), 1)
+        delay.assert_called_once_with(self.event.pk)
+
+    def test_release_defaults_to_the_close_of_registrations_then_the_start(self):
+        now = timezone.now()
+        closing = _future_event(self.dojo, reserved_places=1, registration_closes_at=now + timedelta(days=2))
+        self.assertFalse(closing.reserved_released(now + timedelta(days=1)))
+        self.assertTrue(closing.reserved_released(now + timedelta(days=3)))
+        plain = _future_event(self.dojo, reserved_places=1)
+        self.assertFalse(plain.reserved_released(now))
+        self.assertTrue(plain.reserved_released(plain.start_time))
+        self.assertTrue(_future_event(self.dojo).reserved_released(now), "nothing held: nothing to release")
+
+    def test_the_page_counts_held_places_only_for_other_families(self):
+        from . import capacity
+
+        registrations.sign_up(self.event, self.kids[:1])
+        self.assertEqual(capacity.places_left_for(self.event, is_team_child=True), 1)
+        self.assertEqual(capacity.places_left_for(self.event, is_team_child=False), 0)
+
+    def test_only_active_managers_count_as_the_team(self):
+        from dojos.testing import add_member
+
+        from . import capacity
+
+        other = User.objects.create(username="dormant", email="d@example.com")
+        add_member(self.dojo, other, DojoMembership.MENTOR, status=DojoMembership.DORMANT)
+        youth_kid = Ninja.objects.create(name="Dormant kid")
+        Guardianship.objects.create(guardian=other, ninja=youth_kid)
+        self.assertEqual(
+            capacity.team_child_ids(self.event, [self.team_child.id, youth_kid.id, self.kids[0].id]),
+            {self.team_child.id},
+        )
+
+    def test_held_places_cannot_exceed_the_places(self):
+        from .services import session_problems
+
+        problems = session_problems(start=None, end=None, places=2, min_age=None, max_age=None, reserved_places=3)
+        self.assertEqual(set(problems), {"reserved_places"})
+
+
+class ManualWaitingListTests(TestCase):
+    """A dojo whose team chooses who gets a free place (Dojo.waitlist_mode)."""
+
+    def setUp(self):
+        from dojos.testing import make_champion
+
+        self.owner = make_champion(username="wl-owner")
+        self.dojo = make_dojo("Ghent", champion=self.owner, waitlist_mode=Dojo.MANUAL)
+        self.parent = User.objects.create(username="wl-parent", email="wl@example.com")
+        self.kids = [Ninja.objects.create(name=f"Kid {n}") for n in range(3)]
+        for kid in self.kids:
+            Guardianship.objects.create(guardian=self.parent, ninja=kid)
+        self.event = _future_event(self.dojo, places=1)
+        results = registrations.sign_up(self.event, self.kids)
+        self.confirmed = results[0]["registration"]
+        self.second = results[1]["registration"]
+        self.third = results[2]["registration"]
+
+    def test_a_cancelled_place_stays_free_and_the_team_is_told(self):
+        from notifications.models import Notification
+
+        registrations.cancel(self.confirmed, cancelled_by=self.parent)
+        self.assertTrue(Registration.objects.get(pk=self.second.pk).waiting_list)
+        self.assertEqual(Registration.objects.filter(event=self.event, waiting_list=False).count(), 0)
+        self.assertEqual(Notification.objects.filter(recipient=self.owner, dojo=self.dojo).count(), 1)
+
+    def test_more_places_promote_nobody(self):
+        Event.objects.filter(pk=self.event.pk).update(places=3)
+        self.assertEqual(registrations.fill_free_places(Event.objects.get(pk=self.event.pk)), [])
+
+    def test_the_team_gives_the_place_to_a_child_of_its_choice(self):
+        registrations.cancel(self.confirmed, cancelled_by=self.parent)
+        # Not the one waiting longest: the team picks the third.
+        registrations.give_place(self.third)
+        self.assertFalse(Registration.objects.get(pk=self.third.pk).waiting_list)
+        self.assertTrue(Registration.objects.get(pk=self.second.pk).waiting_list)
+
+    def test_no_place_no_give(self):
+        with self.assertRaisesMessage(registrations.RegistrationError, "No place is free."):
+            registrations.give_place(self.second)
+
+    def test_giving_twice_is_refused(self):
+        registrations.cancel(self.confirmed, cancelled_by=self.parent)
+        registrations.give_place(self.second)
+        with self.assertRaises(registrations.RegistrationError):
+            registrations.give_place(self.second)
+
+    def test_the_automatic_mode_is_unchanged(self):
+        Dojo.objects.filter(pk=self.dojo.pk).update(waitlist_mode=Dojo.AUTO)
+        event = Event.objects.get(pk=self.event.pk)
+        registrations.cancel(Registration.objects.get(pk=self.confirmed.pk), cancelled_by=self.parent)
+        self.assertFalse(Registration.objects.get(pk=self.second.pk).waiting_list)
+        self.assertEqual(event.dojo.waitlist_mode, Dojo.AUTO)
+
+    def test_the_team_page_lists_the_waiting_and_gives_a_place(self):
+        from django.urls import reverse
+
+        registrations.cancel(self.confirmed, cancelled_by=self.parent)
+        self.client.force_login(self.owner)
+        page = self.client.get(
+            reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+        )
+        self.assertContains(page, 'id="waiting-list"')
+        self.assertContains(page, "Kid 1")
+        self.assertContains(page, "1 place is free.")
+        give = reverse(
+            "dojo_event_give_place",
+            kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.third.id},
+        )
+        self.assertEqual(self.client.get(give).status_code, 302)  # POST only: nothing happens
+        self.assertTrue(Registration.objects.get(pk=self.third.pk).waiting_list)
+        self.client.post(give)
+        self.assertFalse(Registration.objects.get(pk=self.third.pk).waiting_list)
+
+    def test_only_the_dojos_managers_can_give_a_place(self):
+        from django.urls import reverse
+
+        from dojos.testing import make_champion
+
+        registrations.cancel(self.confirmed, cancelled_by=self.parent)
+        self.client.force_login(make_champion(username="wl-outsider"))
+        give = reverse(
+            "dojo_event_give_place",
+            kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.second.id},
+        )
+        self.assertEqual(self.client.post(give).status_code, 404)
+        self.assertTrue(Registration.objects.get(pk=self.second.pk).waiting_list)
+
+    def test_the_dojo_setting_is_on_the_settings_form(self):
+        from dojos.forms import DojoProfileForm
+
+        self.assertIn("waitlist_mode", DojoProfileForm(instance=self.dojo).fields)
+
+
+class SessionTracksTests(TestCase):
+    """A session with tracks: each child picks one, and a track's places and waiting list are its own."""
+
+    def setUp(self):
+        from . import tracks
+
+        self.tracks = tracks
+        self.dojo = make_dojo("Ghent")
+        self.parent = User.objects.create(username="tr-parent", email="tr@example.com")
+        self.kids = [Ninja.objects.create(name=f"Kid {n}") for n in range(4)]
+        for kid in self.kids:
+            Guardianship.objects.create(guardian=self.parent, ninja=kid)
+        self.event = _future_event(self.dojo, places=3)
+        self.scratch = tracks.add_track(self.event, "Scratch", 1)
+        self.games = tracks.add_track(self.event, "Game design", 2)
+
+    def _status(self, ninja):
+        return Registration.objects.get(event=self.event, ninja=ninja)
+
+    def test_each_child_needs_a_track(self):
+        with self.assertRaisesMessage(registrations.RegistrationError, "Pick a track"):
+            registrations.sign_up(self.event, self.kids[:1])
+        with self.assertRaises(registrations.RegistrationError):
+            registrations.sign_up(self.event, self.kids[:1], tracks={self.kids[0].pk: 99999})
+        self.assertFalse(Registration.objects.exists())
+
+    def test_a_full_track_has_its_own_waiting_list(self):
+        registrations.sign_up(
+            self.event,
+            self.kids[:3],
+            tracks={
+                self.kids[0].pk: self.scratch.pk,
+                self.kids[1].pk: self.scratch.pk,
+                self.kids[2].pk: self.games.pk,
+            },
+        )
+        self.assertFalse(self._status(self.kids[0]).waiting_list)
+        self.assertTrue(self._status(self.kids[1]).waiting_list, "Scratch has one place")
+        self.assertFalse(self._status(self.kids[2]).waiting_list, "Game design still has room")
+        self.assertEqual(self._status(self.kids[1]).track, self.scratch)
+
+    def test_the_sessions_total_still_caps_every_track(self):
+        registrations.sign_up(self.event, self.kids[:3], tracks={k.pk: self.games.pk for k in self.kids[:3]})
+        # Game design has 2 places: two confirmed, the third waits; one place of the session's 3 is still free
+        self.assertTrue(self._status(self.kids[2]).waiting_list)
+        registrations.sign_up(self.event, self.kids[3:], tracks={self.kids[3].pk: self.scratch.pk})
+        self.assertFalse(self._status(self.kids[3]).waiting_list)
+        extra = Ninja.objects.create(name="Extra")
+        Guardianship.objects.create(guardian=self.parent, ninja=extra)
+        tracks = self.tracks.add_track(self.event, "Third", 5)
+        registrations.sign_up(self.event, [extra], tracks={extra.pk: tracks.pk})
+        self.assertTrue(self._status(extra).waiting_list, "3 places in all are taken")
+
+    def test_a_cancelled_place_moves_up_a_child_of_the_same_track_only(self):
+        registrations.sign_up(
+            self.event,
+            self.kids[:4],
+            tracks={
+                self.kids[0].pk: self.scratch.pk,
+                self.kids[1].pk: self.games.pk,
+                self.kids[2].pk: self.games.pk,
+                self.kids[3].pk: self.games.pk,
+            },
+        )
+        # 3 places in all taken (Scratch 1, Game design 2): kid 3 waits in Game design.
+        self.assertTrue(self._status(self.kids[3]).waiting_list)
+        registrations.cancel(self._status(self.kids[0]), cancelled_by=self.parent)
+        self.assertTrue(self._status(self.kids[3]).waiting_list, "the freed place was Scratch's, Game design is full")
+        registrations.cancel(self._status(self.kids[1]), cancelled_by=self.parent)
+        self.assertFalse(self._status(self.kids[3]).waiting_list)
+
+    def test_more_places_in_a_track_move_its_waiting_children_up(self):
+        registrations.sign_up(self.event, self.kids[:2], tracks={k.pk: self.scratch.pk for k in self.kids[:2]})
+        self.assertTrue(self._status(self.kids[1]).waiting_list)
+        self.tracks.edit_track(self.scratch, "Scratch", 2)
+        self.assertFalse(self._status(self.kids[1]).waiting_list)
+
+    def test_rules_of_adding_editing_and_removing(self):
+        with self.assertRaisesMessage(self.tracks.TrackError, "Write the track's name"):
+            self.tracks.add_track(self.event, "  ", 3)
+        with self.assertRaisesMessage(self.tracks.TrackError, "at least one place"):
+            self.tracks.add_track(self.event, "X", 0)
+        for n in range(self.tracks.max_tracks() - 2):
+            self.tracks.add_track(self.event, f"T{n}", 1)
+        with self.assertRaisesMessage(self.tracks.TrackError, "At most"):
+            self.tracks.add_track(self.event, "One too many", 1)
+        registrations.sign_up(self.event, self.kids[:1], tracks={self.kids[0].pk: self.scratch.pk})
+        with self.assertRaisesMessage(self.tracks.TrackError, "can't be removed"):
+            self.tracks.remove_track(self.scratch)
+        games_id = self.games.pk
+        self.tracks.remove_track(self.games)
+        self.assertFalse(EventTrack.objects.filter(pk=games_id).exists())
+
+    def test_the_sign_up_form_asks_for_a_track_and_reads_it(self):
+        from .forms import SignUpForm
+
+        children = list(Ninja.objects.signable_by(self.parent))
+        tracks = list(self.event.tracks.all())
+        child = children[0]
+        form = SignUpForm({"child": [str(child.id)]}, children=children, tracks=tracks)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.track_errors, {child.id})
+        form = SignUpForm(
+            {"child": [str(child.id)], f"track-{child.id}": str(self.games.id)}, children=children, tracks=tracks
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["tracks"], {child.id: self.games.id})
+
+    def test_a_family_signs_up_through_the_page_and_sees_each_tracks_places(self):
+        from django.urls import reverse
+
+        self.client.force_login(self.parent)
+        url = reverse("event_signup", kwargs={"event_id": self.event.id})
+        page = self.client.get(url)
+        self.assertContains(page, "Pick a track")
+        self.assertContains(page, "1 place left")
+        self.assertContains(page, "2 places left")
+        child = self.kids[0]
+        refused = self.client.post(url, {"child": [str(child.id)], "child_order": str(child.id)})
+        self.assertContains(refused, "Pick a track for each child")
+        self.assertFalse(Registration.objects.exists())
+        self.client.post(
+            url, {"child": [str(child.id)], "child_order": str(child.id), f"track-{child.id}": str(self.games.id)}
+        )
+        self.assertEqual(self._status(child).track, self.games)
+
+    def test_the_team_page_manages_the_tracks(self):
+        from django.urls import reverse
+
+        from dojos.testing import make_champion
+
+        owner = make_champion(username="tr-owner")
+        dojo = make_dojo("Antwerp", champion=owner)
+        event = _future_event(dojo)
+        self.client.force_login(owner)
+        kw = {"dojo_id": dojo.id, "event_id": event.id}
+        self.client.post(reverse("dojo_event_track_add", kwargs=kw), {"name": "Scratch", "places": "5"})
+        track = event.tracks.get()
+        self.assertEqual((track.name, track.places), ("Scratch", 5))
+        self.client.post(
+            reverse("dojo_event_track_edit", kwargs={**kw, "track_id": track.id}), {"name": "Scratch 2", "places": "6"}
+        )
+        track.refresh_from_db()
+        self.assertEqual((track.name, track.places), ("Scratch 2", 6))
+        page = self.client.get(reverse("dojo_event_detail", kwargs=kw))
+        self.assertContains(page, 'id="tracks"')
+        self.client.post(reverse("dojo_event_track_remove", kwargs={**kw, "track_id": track.id}))
+        self.assertEqual(event.tracks.count(), 0)
+
+    def test_only_the_dojos_managers_manage_tracks(self):
+        from django.urls import reverse
+
+        from dojos.testing import make_champion
+
+        self.client.force_login(make_champion(username="tr-outsider"))
+        url = reverse("dojo_event_track_add", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+        self.assertEqual(self.client.post(url, {"name": "X", "places": "1"}).status_code, 404)
+        self.assertEqual(self.event.tracks.count(), 2)
+
+    def test_a_session_without_tracks_works_as_before(self):
+        plain = _future_event(self.dojo, places=1)
+        results = registrations.sign_up(plain, self.kids[:2])
+        self.assertEqual([r["waiting_list"] for r in results], [False, True])

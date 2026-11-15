@@ -91,6 +91,14 @@
 
   {% include "dojos/partials/_event_notices.html" %}
 
+  {% if tracks_shown %}
+    {% include "dojos/partials/_event_tracks.html" %}
+  {% endif %}
+
+  {% if waiting_shown %}
+    {% include "dojos/partials/_event_waiting_list.html" %}
+  {% endif %}
+
   {% if questions_shown %}
     {% include "dojos/partials/_questions_card.html" %}
   {% endif %}

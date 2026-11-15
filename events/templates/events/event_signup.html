@@ -177,6 +177,21 @@
                     </label>
                     <span class="child-select-row__status cd-badge caption" data-status style="display:none;"></span>
                   </div>
+                  {% if entry.track_field %}
+                    <fieldset class="child-questions">
+                      <legend class="caption">{% blocktranslate with name=child.name %}Track for {{ name }}{% endblocktranslate %}</legend>
+                      <div class="cd-form__field">
+                        <label class="body-sm" for="{{ entry.track_field.name }}">{% translate "Pick a track" %}</label>
+                        <select class="cd-form__select body" id="{{ entry.track_field.name }}" name="{{ entry.track_field.name }}"{% if entry.track_field.error %} aria-describedby="{{ entry.track_field.name }}-error"{% endif %}>
+                          <option value="">—</option>
+                          {% for option in entry.track_field.options %}
+                            <option value="{{ option.track.id }}"{% if option.selected %} selected{% endif %}>{{ option.track|localized:"name" }} · {% if option.full %}{% translate "full: waiting list" %}{% else %}{% blocktranslate count left=option.left %}{{ left }} place left{% plural %}{{ left }} places left{% endblocktranslate %}{% endif %}</option>
+                          {% endfor %}
+                        </select>
+                        {% if entry.track_field.error %}<ul class="cd-form__errors" id="{{ entry.track_field.name }}-error"><li class="caption">{% translate "Pick a track." %}</li></ul>{% endif %}
+                      </div>
+                    </fieldset>
+                  {% endif %}
                   {% if entry.questions %}
                     <fieldset class="child-questions">
                       <legend class="caption">{% blocktranslate with name=child.name %}For {{ name }}{% endblocktranslate %}</legend>

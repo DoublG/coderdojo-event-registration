@@ -489,6 +489,7 @@ class AuditLogCoverageTests(TestCase):
         "events.RegistrationCancellation": "itself a log of cancellations",
         "events.SessionNotice": "itself a log of the notices a session's team sent",
         "events.EventQuestion": "the dojo's own text, like the event",
+        "events.EventTrack": "the dojo's own text, like the event's questions",
         "dojos.DojoQuestion": "the dojo's own text, like the event's questions",
         "geo.AdministrativeBoundary": "reference data, from seed files",
         "geo.Municipality": "reference data, from seed files",

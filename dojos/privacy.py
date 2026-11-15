@@ -23,6 +23,7 @@ register(
         "province",
         "status",
         "kind",
+        "waitlist_mode",
         "icon",
         "tagline",
         "description",

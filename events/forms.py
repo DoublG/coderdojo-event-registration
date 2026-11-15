@@ -127,6 +127,7 @@ class EventSearchForm(SearchFiltersMixin, forms.Form):
 # existing event's values are shown the way the fields read them back.
 BELGIAN_DATE_FORMAT = "%d/%m/%Y"
 BELGIAN_TIME_FORMAT = "%H:%M"
+BELGIAN_DATETIME_FORMAT = "%d/%m/%Y %H:%M"
 
 NO_TEMPLATE_IMAGE = ""
 
@@ -168,6 +169,38 @@ class EventForm(forms.ModelForm):
             format=BELGIAN_TIME_FORMAT,
         ),
     )
+    registration_opens_at = forms.DateTimeField(
+        required=False,
+        label=_("Registrations open"),
+        input_formats=[BELGIAN_DATETIME_FORMAT],
+        widget=forms.DateTimeInput(
+            attrs={"placeholder": _("dd/mm/yyyy HH:MM"), "inputmode": "numeric"},
+            format=BELGIAN_DATETIME_FORMAT,
+        ),
+        help_text=_("Optional. Before this moment families can't sign up. Blank: as soon as the session is open."),
+    )
+    registration_closes_at = forms.DateTimeField(
+        required=False,
+        label=_("Registrations close"),
+        input_formats=[BELGIAN_DATETIME_FORMAT],
+        widget=forms.DateTimeInput(
+            attrs={"placeholder": _("dd/mm/yyyy HH:MM"), "inputmode": "numeric"},
+            format=BELGIAN_DATETIME_FORMAT,
+        ),
+        help_text=_("Optional. From this moment families can't sign up any more. Blank: only the status closes them."),
+    )
+    reserved_release_at = forms.DateTimeField(
+        required=False,
+        label=_("Held places open to everyone on"),
+        input_formats=[BELGIAN_DATETIME_FORMAT],
+        widget=forms.DateTimeInput(
+            attrs={"placeholder": _("dd/mm/yyyy HH:MM"), "inputmode": "numeric"},
+            format=BELGIAN_DATETIME_FORMAT,
+        ),
+        help_text=_(
+            "Optional. Blank: when registrations close, or at the start of the session when they don't close."
+        ),
+    )
     # Not a model field — a shortcut that, on save(), points `image` at one
     # of the standard event banners (core.image_library, no copy made)
     # instead of requiring an upload. An uploaded file (see save()) always
@@ -183,6 +216,10 @@ class EventForm(forms.ModelForm):
         fields = [
             "name",
             "places",
+            "reserved_places",
+            "reserved_release_at",
+            "registration_opens_at",
+            "registration_closes_at",
             "external_registration_url",
             "venue_name",
             "image",
@@ -196,6 +233,7 @@ class EventForm(forms.ModelForm):
         labels = {
             "name": _("Name"),
             "places": _("Places"),
+            "reserved_places": _("Places held for the team's children"),
             "external_registration_url": _("Registration on another website"),
             "venue_name": _("Venue"),
             "image": _("…or upload your own"),
@@ -211,6 +249,9 @@ class EventForm(forms.ModelForm):
             "places": _("How many children can register before new sign-ups go on the waiting list."),
             "external_registration_url": _(
                 "Optional. When set, the event page links there instead of showing the sign-up form, and Places isn't needed."
+            ),
+            "reserved_places": _(
+                "Places kept for children of the dojo's champion and mentors until the moment below. 0: none."
             ),
             "venue_name": _("Leave blank to use the dojo's own address."),
             "image": with_upload_help(_("Uploading a file here overrides the template chosen above.")),
@@ -246,6 +287,7 @@ class EventForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Not sent (an older form, a script): keep the model default.
         self.fields["audience"].required = False
+        self.fields["reserved_places"].required = False
         # Only the organisation's own events (an organisation dojo, DATA_MODEL.md
         # §12) may take registrations on another website; for those, places
         # are optional.
@@ -253,6 +295,11 @@ class EventForm(forms.ModelForm):
             self.fields["places"].required = False
         else:
             del self.fields["external_registration_url"]
+        if dojo.is_organisation:
+            del self.fields["reserved_places"]
+            del self.fields["reserved_release_at"]
+            del self.fields["registration_opens_at"]
+            del self.fields["registration_closes_at"]
         # Who runs this session: anyone active on the dojo's team (champion,
         # mentors and youth mentors), shown as "Name (Role)".
         self.fields["team"].queryset = dojo.memberships.active().select_related("user").order_by("user__first_name")
@@ -279,6 +326,9 @@ class EventForm(forms.ModelForm):
             ),
         )
 
+    def clean_reserved_places(self):
+        return self.cleaned_data.get("reserved_places") or 0
+
     def clean_audience(self):
         return self.cleaned_data.get("audience") or Event.EVERYONE
 
@@ -292,6 +342,9 @@ class EventForm(forms.ModelForm):
             min_age=cleaned_data.get("min_age"),
             max_age=cleaned_data.get("max_age"),
             registers_externally=bool(cleaned_data.get("external_registration_url")),
+            registration_opens_at=cleaned_data.get("registration_opens_at"),
+            registration_closes_at=cleaned_data.get("registration_closes_at"),
+            reserved_places=cleaned_data.get("reserved_places"),
         )
         for field, message in problems.items():
             self.add_error(field, message)
@@ -642,11 +695,24 @@ class SignUpForm(forms.Form):
     # list is always submitted in page order, whatever the click order.
     child_order = forms.CharField(required=False)
 
-    def __init__(self, *args, children, questions=(), **kwargs):
+    def __init__(self, *args, children, questions=(), tracks=(), **kwargs):
         super().__init__(*args, **kwargs)
         self.children = {str(child.id): child for child in children}
         self.questions = list(questions)
         self.question_errors = set()
+        # The session's tracks (events.EventTrack): each ticked child picks
+        # one, `track-<child id>` = the track's id.
+        self.tracks = {str(track.id): track for track in tracks}
+        self.track_errors = set()
+
+    @staticmethod
+    def track_name(child_id):
+        return f"track-{child_id}"
+
+    def posted_track(self, child_id):
+        """The track id posted for a child ("" when none), to fill the page in again."""
+        value = self.data.get(self.track_name(child_id)) if self.is_bound else None
+        return value if value in self.tracks else ""
 
     @staticmethod
     def answer_name(child_id, question_id):
@@ -686,6 +752,17 @@ class SignUpForm(forms.Form):
         if self.question_errors:
             raise forms.ValidationError(_("Answer every question for each child you sign up."))
         data["answers"] = answers
+        picked = {}
+        if self.tracks:
+            for child in selected:
+                value = self.posted_track(child.id)
+                if value:
+                    picked[child.id] = int(value)
+                else:
+                    self.track_errors.add(child.id)
+            if self.track_errors:
+                raise forms.ValidationError(_("Pick a track for each child you sign up."))
+        data["tracks"] = picked
         return data
 
 

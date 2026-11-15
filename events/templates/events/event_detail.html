@@ -143,13 +143,15 @@
               <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>{% translate "Cancelled" %}</button>
             {% elif all_registered %}
               <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>{% translate "Already signed up" %}</button>
+            {% elif event.registration_not_yet_open %}
+              <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>{% translate "Registrations not open yet" %}</button>
             {% elif not event.registration_open %}
               <button type="button" class="cd-btn cd-btn--primary label" style="justify-content:center;" disabled>{% translate "Registrations closed" %}</button>
             {% else %}
               <a class="cd-btn cd-btn--primary label" style="justify-content:center;" href="{% url 'event_signup' event_id=event.id %}">{% translate "Sign up now" %}</a>
             {% endif %}
             <p class="cd-ticket-panel__note body-sm">
-              {% if event.is_cancelled %}{% translate "This session is cancelled." %}{% elif all_registered %}{% translate "Every child on your account is already signed up" %}{% elif not event.registration_open %}{% translate "This session isn't accepting new registrations" %}{% elif event.places_left > 0 %}{% blocktranslate with left=event.places_left total=event.places %}{{ left }} of {{ total }} spots left{% endblocktranslate %}{% else %}{% translate "Full — join the waitlist" %}{% endif %}
+              {% if event.is_cancelled %}{% translate "This session is cancelled." %}{% elif all_registered %}{% translate "Every child on your account is already signed up" %}{% elif event.registration_not_yet_open %}{% blocktranslate with when=event.registration_opens_at|date:"j F Y, H:i" %}Registrations open on {{ when }}{% endblocktranslate %}{% elif not event.registration_open %}{% translate "This session isn't accepting new registrations" %}{% elif places_left > 0 %}{% blocktranslate with left=places_left total=event.places %}{{ left }} of {{ total }} spots left{% endblocktranslate %}{% else %}{% translate "Full — join the waitlist" %}{% endif %}
             </p>
           {% endif %}
         </div>

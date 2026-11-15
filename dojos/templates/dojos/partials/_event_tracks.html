@@ -1,0 +1,47 @@
+{% load i18n %}
+{% comment %}The session page's Tracks card (dojos.views.tracks): the workshops a session offers, each with its own places and waiting list; every child picks one when signing up.{% endcomment %}
+<section class="cd-card" id="tracks" style="padding: var(--space-5); margin-bottom: var(--space-5); max-width: 720px;" aria-labelledby="tracks-heading">
+  <h2 class="h4" id="tracks-heading" style="margin: 0 0 var(--space-2);">{% translate "Tracks" %}</h2>
+  <p class="body-sm">{% translate "Optional workshops within the session, such as Scratch or Game design. With tracks, every child picks one when signing up, and each track has its own places and waiting list; the session's places still count for all of them together. A track with children signed up can't be removed." %}</p>
+  {% for row in track_rows %}
+    <div style="display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-3); padding: var(--space-3) 0; border-top: 1px solid var(--border);">
+      <form method="post" action="{% url 'dojo_event_track_edit' dojo_id=dojo.id event_id=event.id track_id=row.track.id %}" class="cd-form" style="display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-3); flex: 1;">
+        {% csrf_token %}
+        <div class="cd-form__field" style="flex: 2 1 12rem;">
+          <label class="cd-form__label label" for="track-name-{{ row.track.id }}">{% translate "Name" %}</label>
+          <input class="cd-form__input body" id="track-name-{{ row.track.id }}" name="name" value="{{ row.track.name }}" maxlength="100">
+        </div>
+        <div class="cd-form__field" style="flex: 0 1 7rem;">
+          <label class="cd-form__label label" for="track-places-{{ row.track.id }}">{% translate "Places" %}</label>
+          <input class="cd-form__input body" type="number" min="1" id="track-places-{{ row.track.id }}" name="places" value="{{ row.track.places }}">
+        </div>
+        <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Save" %}</button>
+      </form>
+      <p class="caption" style="margin: 0;">{% blocktranslate with confirmed=row.confirmed waiting=row.waiting %}{{ confirmed }} with a place, {{ waiting }} waiting{% endblocktranslate %}</p>
+      {% if row.removable %}
+        <form method="post" action="{% url 'dojo_event_track_remove' dojo_id=dojo.id event_id=event.id track_id=row.track.id %}" data-confirm="{% translate 'Remove this track?' %}">
+          {% csrf_token %}
+          <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Remove" %}</button>
+        </form>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p class="body-sm">{% translate "No tracks: families only pick which children come." %}</p>
+  {% endfor %}
+  {% if can_add_track %}
+    <form method="post" action="{% url 'dojo_event_track_add' dojo_id=dojo.id event_id=event.id %}" class="cd-form" style="display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-3); border-top: 1px solid var(--border); padding-top: var(--space-3);">
+      {% csrf_token %}
+      <div class="cd-form__field" style="flex: 2 1 12rem;">
+        <label class="cd-form__label label" for="new-track-name">{% translate "New track" %}</label>
+        <input class="cd-form__input body" id="new-track-name" name="name" maxlength="100" placeholder="{% translate 'Scratch' %}">
+      </div>
+      <div class="cd-form__field" style="flex: 0 1 7rem;">
+        <label class="cd-form__label label" for="new-track-places">{% translate "Places" %}</label>
+        <input class="cd-form__input body" type="number" min="1" id="new-track-places" name="places">
+      </div>
+      <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Add track" %}</button>
+    </form>
+  {% else %}
+    <p class="caption">{% blocktranslate with max=max_tracks %}At most {{ max }} tracks.{% endblocktranslate %}</p>
+  {% endif %}
+</section>

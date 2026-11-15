@@ -36,7 +36,7 @@ def _attendance_context(event):
     attendance page and the htmx endpoints that re-render parts of it."""
     registrations = list(
         event.registration_set.filter(waiting_list=False)
-        .select_related("ninja", "ninja__home_dojo")
+        .select_related("ninja", "ninja__home_dojo", "track")
         .prefetch_related("pathways", "ninja__belts__belt", "ninja__badges", "answers")
         .order_by("ninja__name", "ninja__family_name")
     )

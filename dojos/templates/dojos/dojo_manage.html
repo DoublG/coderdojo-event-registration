@@ -171,6 +171,11 @@
         {{ form.visit_notes.as_field_group }}
       </div>
 
+      <div class="cd-form__group">
+        <h2 class="cd-form__group-title heading-md">{% translate "Waiting list" %}</h2>
+        {{ form.waitlist_mode.as_field_group }}
+      </div>
+
       {% include "dojos/partials/_translation_fields.html" %}
 
       <div class="cd-form__actions">

@@ -9,6 +9,7 @@ from .models import (
     Belt,
     Event,
     EventQuestion,
+    EventTrack,
     NinjaBadge,
     NinjaBelt,
     NinjaEngagement,
@@ -32,6 +33,17 @@ class EventQuestionInline(admin.TabularInline):
     show_change_link = True
 
 
+class EventTrackInline(admin.TabularInline):
+    """The session's workshops (events.tracks). Editing here bypasses the
+    rules there (a track with registrations can be removed, which empties
+    those registrations' track)."""
+
+    model = EventTrack
+    extra = 0
+    fields = ["position", "name", "places"]
+    show_change_link = True
+
+
 class RegistrationAnswerInline(admin.TabularInline):
     """The family's answers to the session's sign-up questions."""
 
@@ -44,7 +56,7 @@ class EventAdmin(TranslationAdminMixin, AuditHistoryAdminMixin, BelgiumGISModelA
     list_display = ["name", "dojo", "start_time", "status", "audience"]
     list_filter = ["status", "audience"]
     search_fields = ["name", "dojo__name"]
-    inlines = [EventQuestionInline]
+    inlines = [EventQuestionInline, EventTrackInline]
 
 
 @admin.register(Registration)

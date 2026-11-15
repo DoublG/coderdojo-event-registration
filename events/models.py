@@ -76,6 +76,32 @@ class Event(TranslatableModel):
     end_time = models.DateTimeField()
 
     places = models.IntegerField()
+    # Places held for the children of the dojo's team (an active champion or
+    # mentor among their guardians) until the release moment; from then on
+    # they're ordinary places (events.capacity). 0 = none held.
+    reserved_places = models.PositiveIntegerField(
+        default=0,
+        help_text="Places held for the children of the dojo's team until they're released (0: none held).",
+    )
+    reserved_release_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When the held places open to everyone (blank: when registrations close, "
+        "or at the start of the session when they don't).",
+    )
+    # Optional window for signing up (an open session only): before the
+    # first the sign-up isn't there yet, from the second on it's closed,
+    # whatever the status says. Blank = no limit on that side.
+    registration_opens_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Registrations open from this moment (blank: as soon as the session is open).",
+    )
+    registration_closes_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Registrations close at this moment (blank: only the status closes them).",
+    )
 
     location = models.PointField(srid=4326, null=True, blank=True, spatial_index=False)
     venue_name = models.CharField(max_length=200, blank=True, default="", help_text='e.g. "Ghent Public Library"')
@@ -174,7 +200,32 @@ class Event(TranslatableModel):
 
     @property
     def registration_open(self):
-        return self.status == self.OPEN
+        """Open for sign-ups right now: the status is open and now falls
+        inside the registration window, if the team set one."""
+        return self.status == self.OPEN and self.registration_window_state() == "open"
+
+    def registration_window_state(self, now=None):
+        """ "before", "open" or "after" the team's registration window (always
+        "open" when none is set); the status isn't looked at."""
+        now = now or timezone.now()
+        if self.registration_opens_at and now < self.registration_opens_at:
+            return "before"
+        if self.registration_closes_at and now >= self.registration_closes_at:
+            return "after"
+        return "open"
+
+    def reserved_released(self, now=None):
+        """Whether the places held for the team's children are open to everyone
+        (always, when none are held)."""
+        if self.reserved_places <= 0:
+            return True
+        release = self.reserved_release_at or self.registration_closes_at or self.start_time
+        return (now or timezone.now()) >= release
+
+    @property
+    def registration_not_yet_open(self):
+        """An open session whose registrations start later."""
+        return self.status == self.OPEN and self.registration_window_state() == "before"
 
     @property
     def is_cancelled(self):
@@ -193,8 +244,46 @@ class Event(TranslatableModel):
         return host.removeprefix("www.")
 
 
+class EventTrackManager(models.Manager):
+    def get_queryset(self):
+        # content_languages() reads the event's dojo.
+        return super().get_queryset().select_related("event__dojo")
+
+
+class EventTrack(TranslatableModel):
+    """A workshop (an *atelier*) a session offers, with its own places and
+    waiting list (DATA_MODEL.md §4, "Tracks"): a session with tracks has
+    every child pick one, and a track's places are counted apart (the
+    session's own `places` still caps them all together). Rules in
+    events.tracks and events.registrations. Written in the dojo's languages."""
+
+    TRANSLATABLE_FIELDS = ("name",)
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="tracks")
+    name = models.CharField(max_length=100, help_text='e.g. "Scratch" or "Game design".')
+    places = models.PositiveIntegerField(help_text="How many children this track takes before its waiting list.")
+    position = models.PositiveSmallIntegerField(default=0)
+
+    objects = EventTrackManager()
+
+    class Meta:
+        ordering = ["position", "id"]
+
+    def __str__(self):
+        return self.name
+
+    def content_languages(self):
+        return self.event.content_languages()
+
+
 class Registration(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    # The workshop the child picked, for a session that has tracks. Left empty
+    # when its track is removed (a track with registrations can't be, see
+    # events.tracks) or for a session without tracks.
+    track = models.ForeignKey(
+        EventTrack, on_delete=models.SET_NULL, null=True, blank=True, related_name="registrations"
+    )
     ninja = models.ForeignKey("accounts.Ninja", on_delete=models.CASCADE)
     waiting_list = models.BooleanField()
     position = models.IntegerField()
