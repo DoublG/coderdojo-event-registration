@@ -1,0 +1,49 @@
+{% extends "dojos/_admin_base.html" %}
+{% load i18n %}
+{% block admin_page_title %}{% translate "Locations" %}{% endblock %}
+{% block admin_heading %}{% translate "Locations" %}{% endblock %}
+
+{% block admin_extra_style %}
+<style>
+  .locations-manage { max-width: 820px; display: flex; flex-direction: column; gap: var(--space-5); }
+  .locations-manage .cd-card { padding: var(--space-5); }
+  .locations-manage h2 { color: var(--ink); margin: 0 0 var(--space-3); }
+  .locations-manage .muted { color: var(--ink-muted); }
+  .location-row { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--border); }
+  .location-row:last-child { border-bottom: none; }
+  .location-row p { margin: 0; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+{% comment %}The venues a dojo uses (dojos.views.locations); the session form offers them.{% endcomment %}
+<div class="locations-manage">
+  <section class="cd-card">
+    <h2 class="heading-md">{% translate "Add a location" %}</h2>
+    <p class="body-sm muted">{% translate "A venue you hold sessions at. When you create or edit a session you can pick one: its name and place on the map are copied onto the session." %}</p>
+    <form class="cd-form" method="post" action="{% url 'dojo_locations' dojo_id=dojo.id %}">
+      {% csrf_token %}
+      {{ form }}
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Add location" %}</button>
+    </form>
+  </section>
+
+  <section class="cd-card">
+    <h2 class="heading-md">{% translate "Your locations" %}</h2>
+    {% for location in locations %}
+      <div class="location-row">
+        <div>
+          <p class="label">{{ location.name }}</p>
+          <p class="caption muted">{{ location.address|default:"—" }}{% if location.address and not location.location %} · {% translate "not found on the map" %}{% endif %}</p>
+        </div>
+        <form method="post" action="{% url 'dojo_location_delete' dojo_id=dojo.id location_id=location.id %}" data-confirm="{% translate 'Remove this location? Sessions that used it keep their venue.' %}">
+          {% csrf_token %}
+          <button type="submit" class="cd-btn cd-btn--ghost label">{% translate "Remove" %}</button>
+        </form>
+      </div>
+    {% empty %}
+      <p class="body-sm muted">{% translate "No locations yet: sessions use a venue typed on the session, or the dojo's own address." %}</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

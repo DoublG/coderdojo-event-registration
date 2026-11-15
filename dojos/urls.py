@@ -17,6 +17,12 @@ urlpatterns = [
     path("dojos/<int:dojo_id>/manage/team/action/", views.dojo_team_action, name="dojo_team_action"),
     path("dojos/<int:dojo_id>/manage/members/", views.dojo_members, name="dojo_members"),
     path("dojos/<int:dojo_id>/manage/updates/", views.dojo_updates, name="dojo_updates"),
+    path("dojos/<int:dojo_id>/manage/locations/", views.dojo_locations, name="dojo_locations"),
+    path(
+        "dojos/<int:dojo_id>/manage/locations/<int:location_id>/remove/",
+        views.dojo_location_delete,
+        name="dojo_location_delete",
+    ),
     path(
         "dojos/<int:dojo_id>/manage/updates/<int:announcement_id>/delete/",
         views.dojo_update_delete,

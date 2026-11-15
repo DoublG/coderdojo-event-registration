@@ -413,6 +413,12 @@ erDiagram
     }
 ```
 
+- **Locations** (`dojos.DojoLocation`: name, address, geocoded point; the
+  dojo's *Locations* page, `EDIT_SETTINGS`): the session form's `location_choice`
+  copies the picked location's name onto `venue_name` and its point onto
+  `Event.location`, so a session keeps its venue when the location is removed
+  or changed. Only the dojo's own locations are accepted. A dojo with none gets
+  no picker (the typed venue and the dojo's address, as before).
 - **Places:** `Event.places_left` = `places` − confirmed registrations
   (those with `waiting_list=False`). When a confirmed place is cancelled,
   the next person on the waiting list is promoted and the dojo's team (its
