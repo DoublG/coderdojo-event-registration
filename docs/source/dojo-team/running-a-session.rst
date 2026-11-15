@@ -138,6 +138,12 @@ decide who gets a place.
 
 A few things to know:
 
+- Above the **Add a question** form the card suggests the questions most
+  dojos ask (whether the child brings a laptop, and whether you may take
+  photos of the child during the session): one click adds one, in your
+  dojo's languages. A suggestion already asked is no longer offered. Asking
+  for photo consent this way means the answer is recorded per child and per
+  session.
 - Questions are yes/no only. Don't use them for health information:
   allergies and similar are in the child's details, which only the
   champion sees (see below).

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 08:52+0000\n"
+"POT-Creation-Date: 2026-11-15 10:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -6778,7 +6778,7 @@ msgstr "En savoir plus"
 
 # | msgid "Language"
 # | msgid "Languages"
-#: core/admin_translations.py:70
+#: core/admin_translations.py:70 core/tests.py:398
 #: dojos/templates/dojos/partials/_translation_fields.html:10
 #, python-format
 msgid "In %(language)s"
@@ -9020,14 +9020,18 @@ msgstr ""
 "Aucune question : les familles choisissent seulement quels enfants viennent."
 
 #: dojos/templates/dojos/partials/_questions_card.html:69
+msgid "Suggestions, added in one click:"
+msgstr "Suggestions, ajoutées en un clic :"
+
+#: dojos/templates/dojos/partials/_questions_card.html:82
 msgid "Add a question"
 msgstr "Ajouter une question"
 
-#: dojos/templates/dojos/partials/_questions_card.html:75
+#: dojos/templates/dojos/partials/_questions_card.html:88
 msgid "Add question"
 msgstr "Ajouter la question"
 
-#: dojos/templates/dojos/partials/_questions_card.html:80
+#: dojos/templates/dojos/partials/_questions_card.html:93
 #, python-format
 msgid "At most %(max)s questions."
 msgstr "Au maximum %(max)s questions."
@@ -9616,16 +9620,28 @@ msgstr ""
 msgid "%(names)s and %(last)s"
 msgstr "%(names)s et %(last)s"
 
-#: events/questions.py:60
+#: events/questions.py:45
+msgid "Will your child bring their own laptop?"
+msgstr "Votre enfant apportera-t-il son propre ordinateur portable ?"
+
+#: events/questions.py:46
+msgid "Do you agree that we take photos of your child during the session?"
+msgstr "Acceptez-vous que nous prenions des photos de votre enfant pendant la session ?"
+
+#: events/questions.py:79
+msgid "That question isn't one of the suggestions."
+msgstr "Cette question ne fait pas partie des suggestions."
+
+#: events/questions.py:104
 msgid "Write the question."
 msgstr "Écrivez la question."
 
-#: events/questions.py:62
+#: events/questions.py:106
 #, python-format
 msgid "Keep the question under %(max)s characters."
 msgstr "Gardez la question sous %(max)s caractères."
 
-#: events/questions.py:68
+#: events/questions.py:112
 msgid ""
 "Families sign up for this session on another website, so it has no questions "
 "here."
@@ -9633,22 +9649,22 @@ msgstr ""
 "Les familles s'inscrivent à cette session sur un autre site, elle n'a donc "
 "pas de questions ici."
 
-#: events/questions.py:84
+#: events/questions.py:128
 #, python-format
 msgid "At most %(max)s questions: remove one first."
 msgstr "Au maximum %(max)s questions : supprimez-en d'abord une."
 
-#: events/questions.py:188
+#: events/questions.py:232
 msgid "This session has started, so the answers can't change any more."
 msgstr ""
 "Cette session a commencé : les réponses ne peuvent plus être modifiées."
 
-#: events/questions.py:191 events/registrations.py:72
+#: events/questions.py:235 events/registrations.py:72
 msgid "The questions for this session changed, please check them again."
 msgstr ""
 "Les questions de cette session ont changé, veuillez les vérifier à nouveau."
 
-#: events/questions.py:205
+#: events/questions.py:249
 msgid "That question isn't one of this session's."
 msgstr "Cette question n'appartient pas à cette session."
 
@@ -10756,8 +10772,8 @@ msgstr "Supprimer le modèle"
 #, python-format
 msgid "Delete the %(language_name)s version? English is used instead."
 msgstr ""
-"Supprimer la version en %(language_name)s ? La version anglaise sera utilisée "
-"à la place."
+"Supprimer la version en %(language_name)s ? La version anglaise sera "
+"utilisée à la place."
 
 #: mailing/templates/mailing/manage/template_list.html:5
 #: mailing/templates/mailing/manage/template_new.html:3
