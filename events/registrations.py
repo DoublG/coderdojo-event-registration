@@ -59,6 +59,8 @@ def sign_up(
     with transaction.atomic():
         event = _lock(event.pk)
         if not event.registration_open:
+            if event.registration_not_yet_open:
+                raise RegistrationError(_("Registrations for this session haven't opened yet."))
             raise RegistrationError(_("Registrations for this session are closed."))
         signed_up = set(
             Registration.objects.filter(event=event, ninja__in=children).values_list("ninja_id", flat=True)

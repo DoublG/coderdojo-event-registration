@@ -40,6 +40,8 @@ register(
         "start_time",
         "end_time",
         "places",
+        "registration_opens_at",
+        "registration_closes_at",
         "location",
         "venue_name",
         "image",

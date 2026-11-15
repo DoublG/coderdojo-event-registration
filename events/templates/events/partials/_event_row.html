@@ -26,6 +26,8 @@ with Django's built-in `regroup` tag:
     <div class="badges">
       {% if event.registers_externally %}
         <span class="cd-badge cd-badge--outline caption">{% blocktranslate with host=event.external_registration_host %}Register on {{ host }}{% endblocktranslate %}</span>
+      {% elif event.registration_not_yet_open %}
+        <span class="cd-badge cd-badge--outline caption">{% translate "Opens soon" %}</span>
       {% elif not event.registration_open %}
         <span class="cd-badge cd-badge--outline caption">{% translate "Registrations closed" %}</span>
       {% elif event.places_left <= 0 %}
