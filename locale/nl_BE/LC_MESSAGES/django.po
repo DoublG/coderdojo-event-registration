@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 08:52+0000\n"
+"POT-Creation-Date: 2026-11-15 10:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -174,7 +174,7 @@ msgstr "Huidig wachtwoord"
 #: dojos/forms.py:99 dojos/forms.py:301
 #: dojos/templates/dojos/dojo_detail.html:249
 #: pages/templates/pages/contact.html:34
-#: privacy/templates/privacy/manage/privacy.html:58
+#: privacy/templates/privacy/manage/privacy.html:60
 msgid "Email"
 msgstr "E-mail"
 
@@ -421,6 +421,7 @@ msgstr "Geboortedatum (optioneel)"
 
 #: accounts/forms.py:748
 #: events/templates/events/manage/_badge_assign_results.html:12
+#: privacy/templates/privacy/manage/merge.html:21
 msgid "Home dojo"
 msgstr "Thuisdojo"
 
@@ -429,6 +430,7 @@ msgid "None yet"
 msgstr "Nog geen"
 
 #: accounts/forms.py:763 accounts/forms.py:806
+#: privacy/templates/privacy/manage/merge.html:20
 msgid "Date of birth"
 msgstr "Geboortedatum"
 
@@ -1128,8 +1130,9 @@ msgstr "Dojo"
 #: mailing/templates/mailing/manage/mail_queue.html:107
 #: mailing/templates/mailing/manage/mail_queue.html:184
 #: mailing/templates/mailing/manage/mail_queue.html:234
+#: privacy/templates/privacy/manage/merge.html:26
 #: privacy/templates/privacy/manage/privacy.html:21
-#: privacy/templates/privacy/manage/privacy.html:61
+#: privacy/templates/privacy/manage/privacy.html:63
 msgid "Actions"
 msgstr "Acties"
 
@@ -1205,6 +1208,7 @@ msgstr "Opmerking"
 
 #: accounts/templates/accounts/child_detail.html:173
 #: accounts/templates/accounts/child_detail.html:184
+#: privacy/templates/privacy/manage/merge.html:23
 msgid "Badges"
 msgstr "Badges"
 
@@ -1961,7 +1965,7 @@ msgstr "Wat elke rol opent"
 #: events/templates/events/manage/_badge_assign_results.html:11
 #: events/templates/events/manage/badge_list.html:18
 #: events/templates/events/manage/badge_list.html:46 mailing/forms.py:146
-#: privacy/templates/privacy/manage/privacy.html:57 reports/forms.py:12
+#: privacy/templates/privacy/manage/privacy.html:59 reports/forms.py:12
 msgid "Name"
 msgstr "Naam"
 
@@ -2064,7 +2068,7 @@ msgstr ""
 
 #: accounts/templates/accounts/manage/people_add.html:14
 #: accounts/templates/accounts/manage/security.html:59
-#: privacy/templates/privacy/manage/privacy.html:44
+#: privacy/templates/privacy/manage/privacy.html:46
 msgid "Name, email address or username"
 msgstr "Naam, e-mailadres of gebruikersnaam"
 
@@ -2078,7 +2082,7 @@ msgstr "Naam, e-mailadres of gebruikersnaam"
 #: mailing/templates/mailing/manage/mail_log.html:45
 #: mailing/templates/mailing/manage/mail_queue.html:47
 #: pages/templates/pages/manage_audit_log.html:43
-#: privacy/templates/privacy/manage/privacy.html:48
+#: privacy/templates/privacy/manage/privacy.html:50
 msgid "Search"
 msgstr "Zoeken"
 
@@ -2533,7 +2537,7 @@ msgid "Child %(n)s"
 msgstr "Kind %(n)s"
 
 #: accounts/templates/accounts/partials/_child_rows_fieldset.html:7
-#: privacy/templates/privacy/manage/privacy.html:60
+#: privacy/templates/privacy/manage/privacy.html:62
 #: reports/datasets/engagement.py:72
 msgid "Children"
 msgstr "Kinderen"
@@ -2612,6 +2616,7 @@ msgstr "Mail me een bevestigingslink"
 
 #: accounts/templates/accounts/partials/_guardians_card.html:12
 #: events/templates/events/manage/_badge_assign_results.html:13
+#: privacy/templates/privacy/manage/merge.html:25
 msgid "Guardians"
 msgstr "Verantwoordelijken"
 
@@ -2656,6 +2661,7 @@ msgstr ""
 
 #: accounts/templates/accounts/partials/_ninja_login_card.html:14
 #: dojos/templates/dojos/dojo_members.html:54
+#: privacy/templates/privacy/manage/merge.html:32
 msgid "Own login"
 msgstr "Eigen login"
 
@@ -4355,7 +4361,7 @@ msgid "Nobody with a background check matches."
 msgstr "Niemand met een uittreksel komt overeen."
 
 #: applications/templates/applications/manage/check_list.html:25
-#: privacy/templates/privacy/manage/privacy.html:79
+#: privacy/templates/privacy/manage/privacy.html:81
 #, python-format
 msgid ""
 "Showing the first %(search_limit)s; search more precisely to find others."
@@ -6414,7 +6420,7 @@ msgid "Segments"
 msgstr "Segmenten"
 
 #: campaigns/templates/campaigns/manage/segment_list.html:20
-#: privacy/templates/privacy/manage/privacy.html:69
+#: privacy/templates/privacy/manage/privacy.html:71
 msgid "Inactive"
 msgstr "Inactief"
 
@@ -6720,7 +6726,7 @@ msgstr "Meer weten"
 
 # | msgid "Language"
 # | msgid "Languages"
-#: core/admin_translations.py:70
+#: core/admin_translations.py:70 core/tests.py:398
 #: dojos/templates/dojos/partials/_translation_fields.html:10
 #, python-format
 msgid "In %(language)s"
@@ -8325,6 +8331,7 @@ msgstr "Komt"
 
 # | msgid "Session"
 #: dojos/templates/dojos/dojo_members.html:39
+#: privacy/templates/privacy/manage/merge.html:22
 msgid "Sessions"
 msgstr "Sessies"
 
@@ -11336,6 +11343,27 @@ msgstr "Typ de gebruikersnaam, %(username)s, om te bevestigen"
 msgid "Type the account's username to confirm."
 msgstr "Typ de gebruikersnaam van het account om te bevestigen."
 
+#: privacy/merge.py:62
+msgid "Pick two different children."
+msgstr "Kies twee verschillende kinderen."
+
+#: privacy/merge.py:64
+#, python-format
+msgid ""
+"%(name)s has a login of their own: merge into that card instead, or remove "
+"the login first."
+msgstr "%(name)s heeft een eigen login: voeg samen in die kaart, of verwijder eerst de login."
+
+#: privacy/merge.py:71
+msgid ""
+"The two children have no guardian in common: they aren't merged across "
+"families."
+msgstr "De twee kinderen hebben geen voogd gemeen: er wordt niet samengevoegd over gezinnen heen."
+
+#: privacy/merge.py:81 privacy/views.py:200
+msgid "One of the two children doesn't exist any more."
+msgstr "Een van de twee kinderen bestaat niet meer."
+
 #: privacy/retention.py:322
 #, python-format
 msgid ""
@@ -11530,6 +11558,54 @@ msgstr ""
 "het adres, krijgt het oude adres bericht en worden alle sessies van de "
 "account beëindigd. De pagina biedt dan een nieuw wachtwoord aan."
 
+#: privacy/templates/privacy/manage/merge.html:3
+#: privacy/templates/privacy/manage/merge.html:4
+msgid "Merge duplicate children"
+msgstr "Dubbele kinderen samenvoegen"
+
+#: privacy/templates/privacy/manage/merge.html:9
+msgid ""
+"A family sometimes signs the same child up twice, which splits the child's "
+"sessions, badges and belts over two cards. These children have the same name "
+"and at least one guardian in common. Merging moves everything the duplicate "
+"holds onto the card that stays (places at sessions, badges, belts, "
+"guardians, missing details), then deletes the duplicate. It can't be undone, "
+"and the children's logins and other families are never touched."
+msgstr "Een gezin schrijft soms hetzelfde kind twee keer in, waardoor de sessies, badges en gordels van het kind over twee kaarten verdeeld zijn. Deze kinderen hebben dezelfde naam en minstens één voogd gemeen. Samenvoegen verplaatst alles wat het duplicaat bevat naar de kaart die blijft (plaatsen bij sessies, badges, gordels, voogden, ontbrekende gegevens) en verwijdert daarna het duplicaat. Het kan niet ongedaan gemaakt worden, en de logins van de kinderen en andere gezinnen blijven onaangeroerd."
+
+# | msgid "Back to your account"
+#: privacy/templates/privacy/manage/merge.html:10
+msgid "Back to Privacy"
+msgstr "Terug naar Privacy"
+
+#: privacy/templates/privacy/manage/merge.html:19
+msgid "Card"
+msgstr "Kaart"
+
+#: privacy/templates/privacy/manage/merge.html:24
+msgid "Belts"
+msgstr "Gordels"
+
+#: privacy/templates/privacy/manage/merge.html:32
+msgid "Suggested to keep"
+msgstr "Voorgesteld om te behouden"
+
+#: privacy/templates/privacy/manage/merge.html:41
+#, python-format
+msgid ""
+"Merge card #%(duplicate_id)s (%(duplicate)s) into card #%(keep_id)s "
+"(%(keep)s)? This can't be undone."
+msgstr "Kaart #%(duplicate_id)s (%(duplicate)s) samenvoegen in kaart #%(keep_id)s (%(keep)s)? Dit kan niet ongedaan gemaakt worden."
+
+#: privacy/templates/privacy/manage/merge.html:45
+#, python-format
+msgid "Keep this one, merge #%(other)s into it"
+msgstr "Behoud deze, voeg #%(other)s erin samen"
+
+#: privacy/templates/privacy/manage/merge.html:56
+msgid "No duplicates found: no two children of the same family share a name."
+msgstr "Geen dubbels gevonden: geen twee kinderen van hetzelfde gezin hebben dezelfde naam."
+
 #: privacy/templates/privacy/manage/privacy.html:12
 msgid ""
 "These champions haven't logged in for almost two years. Their account is "
@@ -11580,59 +11656,63 @@ msgstr ""
 "zoals het gezin het krijgt met Mijn gegevens downloaden op hun "
 "accountpagina. Stuur het alleen naar het eigen e-mailadres van het account."
 
+#: privacy/templates/privacy/manage/privacy.html:42
+msgid "Merge duplicate children…"
+msgstr "Dubbele kinderen samenvoegen…"
+
 # | msgid "My Account"
-#: privacy/templates/privacy/manage/privacy.html:59
+#: privacy/templates/privacy/manage/privacy.html:61
 msgid "Account"
 msgstr "Account"
 
-#: privacy/templates/privacy/manage/privacy.html:69
+#: privacy/templates/privacy/manage/privacy.html:71
 msgid "Ninja login"
 msgstr "Ninja-login"
 
-#: privacy/templates/privacy/manage/privacy.html:69
+#: privacy/templates/privacy/manage/privacy.html:71
 msgid "Adult"
 msgstr "Volwassene"
 
-#: privacy/templates/privacy/manage/privacy.html:69
+#: privacy/templates/privacy/manage/privacy.html:71
 msgid "Logs in with a link"
 msgstr "Meldt zich aan met een link"
 
-#: privacy/templates/privacy/manage/privacy.html:69
+#: privacy/templates/privacy/manage/privacy.html:71
 msgid "Logs in with a password"
 msgstr "Meldt zich aan met een wachtwoord"
 
-#: privacy/templates/privacy/manage/privacy.html:71
+#: privacy/templates/privacy/manage/privacy.html:73
 msgid "Download data"
 msgstr "Gegevens downloaden"
 
-#: privacy/templates/privacy/manage/privacy.html:71
+#: privacy/templates/privacy/manage/privacy.html:73
 msgid "Change email…"
 msgstr "E-mail wijzigen…"
 
-#: privacy/templates/privacy/manage/privacy.html:71
+#: privacy/templates/privacy/manage/privacy.html:73
 msgid "Delete…"
 msgstr "Verwijderen…"
 
-#: privacy/templates/privacy/manage/privacy.html:74
+#: privacy/templates/privacy/manage/privacy.html:76
 msgid "No accounts match."
 msgstr "Geen accounts gevonden."
 
-#: privacy/views.py:46
+#: privacy/views.py:47
 msgid ""
 "You just downloaded your data. Please wait a minute before trying again."
 msgstr ""
 "Je hebt je gegevens net gedownload. Wacht een minuutje voor je het opnieuw "
 "probeert."
 
-#: privacy/views.py:103
+#: privacy/views.py:104
 msgid "Your password, to confirm"
 msgstr "Je wachtwoord, om te bevestigen"
 
-#: privacy/views.py:122
+#: privacy/views.py:123
 msgid "The account has been deleted."
 msgstr "Het account is verwijderd."
 
-#: privacy/views.py:150
+#: privacy/views.py:151
 #, python-format
 msgid ""
 "A confirmation link was sent to %(email)s. The address changes once they "
@@ -11640,6 +11720,11 @@ msgid ""
 msgstr ""
 "Er is een bevestigingslink naar %(email)s gestuurd. Het adres verandert "
 "zodra die geopend wordt (binnen %(hours)s uur)."
+
+#: privacy/views.py:209
+#, python-format
+msgid "%(duplicate)s was merged into %(keep)s."
+msgstr "%(duplicate)s is samengevoegd met %(keep)s."
 
 #: reports/datasets/base.py:39
 msgid "Other (small groups)"

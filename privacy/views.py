@@ -16,10 +16,11 @@ from django.utils.translation import gettext as _
 
 from accounts import email_change
 from accounts.forms import ConfirmIdentityForm, OrganisationEmailChangeForm
-from accounts.models import User
+from accounts.models import Ninja, User
 from accounts.organisation import Area, require_area
 from core.audit import log_access
 
+from . import merge
 from .deletion import delete_account, preview
 from .export import export_filename, export_json
 from .forms import ConfirmUsernameForm
@@ -157,4 +158,60 @@ def manage_privacy_email(request, user_id):
         request,
         "privacy/manage/email.html",
         {"account": account, "blocker": blocker, "form": form, "active": "privacy"},
+    )
+
+
+def _merge_rows(pairs):
+    """The pairs with what each card holds, so the organisation sees which
+    one to keep: places booked, badges, belts and the guardians."""
+    ids = {n.pk for pair in pairs for n in (pair.first, pair.second)}
+    cards = {
+        n.pk: n
+        for n in Ninja.objects.filter(pk__in=ids)
+        .annotate(
+            registration_total=Count("registration", distinct=True),
+            badge_total=Count("badges", distinct=True),
+            belt_total=Count("belts", distinct=True),
+        )
+        .select_related("home_dojo")
+        .prefetch_related("guardianships__guardian")
+    }
+    rows = []
+    for pair in pairs:
+        first, second = cards[pair.first.pk], cards[pair.second.pk]
+        # The card with more history is the one to keep, the older one on a tie.
+        keep_first = (first.registration_total + first.badge_total + first.belt_total) >= (
+            second.registration_total + second.badge_total + second.belt_total
+        )
+        rows.append({"cards": [first, second], "keep": first if keep_first else second})
+    return rows
+
+
+@login_required
+def manage_privacy_merge(request):
+    """Children signed up twice by the same family (the same name and a
+    guardian in common): merge the duplicate card into the one that stays
+    (privacy.merge). Irreversible, so the button asks first."""
+    require_area(request, Area.PRIVACY)
+    if request.method == "POST":
+        keep = Ninja.objects.filter(pk=request.POST.get("keep", "").strip() or 0).first()
+        duplicate = Ninja.objects.filter(pk=request.POST.get("duplicate", "").strip() or 0).first()
+        if keep is None or duplicate is None:
+            messages.error(request, _("One of the two children doesn't exist any more."))
+        else:
+            try:
+                merge.merge_children(keep, duplicate)
+            except merge.MergeError as problem:
+                messages.error(request, str(problem))
+            else:
+                messages.success(
+                    request,
+                    _("%(duplicate)s was merged into %(keep)s.")
+                    % {"duplicate": duplicate.full_name, "keep": keep.full_name},
+                )
+        return redirect("manage_privacy_merge")
+    return render(
+        request,
+        "privacy/manage/merge.html",
+        {"rows": _merge_rows(merge.candidates()), "active": "privacy"},
     )

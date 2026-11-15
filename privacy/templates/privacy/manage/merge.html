@@ -1,0 +1,57 @@
+{% extends "core/_manage_base.html" %}
+{% load i18n %}
+{% block manage_page_title %}{% translate "Merge duplicate children" %}{% endblock %}
+{% block manage_heading %}{% translate "Merge duplicate children" %}{% endblock %}
+
+{% block manage_content %}
+  {% comment %}Children signed up twice by one family (privacy/merge.py): the same name and a guardian in common.{% endcomment %}
+  <p class="body-sm">{% blocktranslate %}A family sometimes signs the same child up twice, which splits the child's sessions, badges and belts over two cards. These children have the same name and at least one guardian in common. Merging moves everything the duplicate holds onto the card that stays (places at sessions, badges, belts, guardians, missing details), then deletes the duplicate. It can't be undone, and the children's logins and other families are never touched.{% endblocktranslate %}</p>
+  <p><a class="cd-btn cd-btn--ghost label" href="{% url 'manage_privacy' %}">{% translate "Back to Privacy" %}</a></p>
+
+  {% for row in rows %}
+    <section class="cd-card" style="padding: var(--space-5); margin-bottom: var(--space-4);" aria-labelledby="pair-{{ forloop.counter }}">
+      <h2 class="h4" id="pair-{{ forloop.counter }}" style="margin-top: 0;">{{ row.cards.0.full_name }}</h2>
+      <div class="cd-table-wrap">
+        <table class="cd-table cd-table--zebra">
+          <thead>
+            <tr>
+              <th class="label" scope="col">{% translate "Card" %}</th>
+              <th class="label" scope="col">{% translate "Date of birth" %}</th>
+              <th class="label" scope="col">{% translate "Home dojo" %}</th>
+              <th class="label cd-table__num" scope="col">{% translate "Sessions" %}</th>
+              <th class="label cd-table__num" scope="col">{% translate "Badges" %}</th>
+              <th class="label cd-table__num" scope="col">{% translate "Belts" %}</th>
+              <th class="label" scope="col">{% translate "Guardians" %}</th>
+              <th class="label" scope="col"><span class="visually-hidden">{% translate "Actions" %}</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for card in row.cards %}
+              <tr>
+                <td class="body-sm">#{{ card.id }}{% if card == row.keep %} <span class="cd-badge cd-badge--success caption">{% translate "Suggested to keep" %}</span>{% endif %}{% if card.account_id %} <span class="cd-badge cd-badge--outline caption">{% translate "Own login" %}</span>{% endif %}</td>
+                <td class="body-sm">{{ card.date_of_birth|date:"d/m/Y"|default:"—" }}</td>
+                <td class="body-sm">{{ card.home_dojo.name|default:"—" }}</td>
+                <td class="body-sm cd-table__num">{{ card.registration_total }}</td>
+                <td class="body-sm cd-table__num">{{ card.badge_total }}</td>
+                <td class="body-sm cd-table__num">{{ card.belt_total }}</td>
+                <td class="body-sm">{% for g in card.guardianships.all %}{{ g.guardian.get_full_name|default:g.guardian.username }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                <td class="body-sm">
+                  {% for other in row.cards %}{% if other != card and not other.account_id %}
+                    <form method="post" data-confirm="{% blocktranslate with duplicate=other.full_name keep=card.full_name duplicate_id=other.id keep_id=card.id %}Merge card #{{ duplicate_id }} ({{ duplicate }}) into card #{{ keep_id }} ({{ keep }})? This can't be undone.{% endblocktranslate %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="keep" value="{{ card.id }}">
+                      <input type="hidden" name="duplicate" value="{{ other.id }}">
+                      <button type="submit" class="cd-btn cd-btn--ghost label">{% blocktranslate with other=other.id %}Keep this one, merge #{{ other }} into it{% endblocktranslate %}</button>
+                    </form>
+                  {% endif %}{% endfor %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% empty %}
+    <p class="body-sm">{% translate "No duplicates found: no two children of the same family share a name." %}</p>
+  {% endfor %}
+{% endblock %}

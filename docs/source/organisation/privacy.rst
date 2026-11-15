@@ -53,6 +53,28 @@ the page offers them a link to set a new password. Accounts with an
 organisation role, technical administrators and a child's own login can't
 be changed here.
 
+Merging duplicate children
+--------------------------
+
+A family sometimes signs the same child up twice, which splits the child's
+sessions, badges and belts over two cards. On the Privacy page,
+**Merge duplicate children…** lists children with the same name who share
+at least one guardian, with what each card holds (sessions, badges, belts,
+guardians) and a suggestion of which one to keep: the one with more
+history.
+
+Choosing **Keep this one, merge … into it** moves everything the other
+card holds onto the one that stays, then deletes the other: the places at
+sessions (where both cards were signed up, the better place wins and a
+place that becomes free goes to the child waiting longest), the cancellations,
+badges (the one earned first stays), belts, the guardians and any detail
+the card that stays is missing, such as the date of birth. The consent
+given for the children's details is not carried over: the card that stays
+keeps its own. The merge can't be undone.
+
+Children are only merged within one family (they must share a guardian),
+and a card with a child's own login is never the one that goes.
+
 Needs attention
 ---------------
 
