@@ -1093,7 +1093,9 @@ class DojoEventCreateViewTests(TempMediaMixin, TestCase):
     def test_duplicate_button_on_the_session_page(self):
         source, _pathway = self._source_session()
         self.client.force_login(self.owner)
-        response = self.client.get(reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": source.id}))
+        response = self.client.get(
+            reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": source.id})
+        )
         url = reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}) + f"?copy={source.id}"
         self.assertContains(response, f'href="{url}"')
 
@@ -1127,7 +1129,9 @@ class DojoEventCreateViewTests(TempMediaMixin, TestCase):
         self.assertIsNone(copy.external_ref)
         self.assertEqual(copy.team.count(), 0)
         self.assertEqual(list(copy.pathways.all()), [pathway])
-        self.assertEqual(list(copy.questions.order_by("position").values_list("text", flat=True)), ["Laptop?", "Photos?"])
+        self.assertEqual(
+            list(copy.questions.order_by("position").values_list("text", flat=True)), ["Laptop?", "Photos?"]
+        )
         self.assertEqual(copy.translations, source.translations)
         self.assertEqual(copy.location, source.location)
         # The original is untouched.
