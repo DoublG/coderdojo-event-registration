@@ -393,6 +393,10 @@ erDiagram
         datetime start_time "same day as end_time"
         datetime end_time
         int places
+        int reserved_places "held for the dojo team's children"
+        datetime reserved_release_at "when the held places open to all"
+        datetime registration_opens_at "optional: sign-up not there before"
+        datetime registration_closes_at "optional: sign-up closed from"
         point location
         string venue_name
         int min_age
@@ -413,6 +417,23 @@ erDiagram
     }
 ```
 
+- **Registration window:** `registration_opens_at` / `registration_closes_at`
+  (both optional) narrow an *open* session: `Event.registration_open` is
+  `status == open` and now inside the window, so `sign_up`, the public page
+  and the list all agree; a draft or closed session is never opened by a
+  date. `events.services.session_problems` refuses a close before the open.
+- **Reserved places** (`events/capacity.py`): `reserved_places` of the
+  places are held for the children of the dojo's team (a guardian who is an
+  active champion or mentor of the session's dojo) until
+  `Event.reserved_released()` (`reserved_release_at`, else
+  `registration_closes_at`, else the start). A team child takes any free
+  place; another child only a place that isn't held (`confirmed < places −
+  held`, held = reserve − places the team already took). `sign_up` and
+  `_promote` (cancel, more places) apply it under the session's lock, a
+  waiting child that can't take a held place is skipped; the periodic
+  `events.tasks.release_reserved_places` (15 min) fills released places from
+  the waiting list. The public page's "places left" leaves the held ones out
+  for families outside the team.
 - **Places:** `Event.places_left` = `places` − confirmed registrations
   (those with `waiting_list=False`). When a confirmed place is cancelled,
   the next person on the waiting list is promoted and the dojo's team (its

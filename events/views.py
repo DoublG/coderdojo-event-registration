@@ -15,7 +15,7 @@ from content.models import FAQ, Promotion
 from core.caching import cached
 from dojos.models import Dojo
 
-from . import registrations
+from . import capacity, registrations
 from .forms import AGE_RANGES, DOJO_ORGANISATION, EventSearchForm, SignUpForm
 from .models import Event, Registration
 from .search import (
@@ -158,11 +158,18 @@ def event_detail(request, event_id):
     faqs = FAQ.objects.for_event(event)
 
     all_registered = False
+    is_team_child = False
     if request.user.is_authenticated:
         children = list(Ninja.objects.signable_by(request.user))
         if children:
             registered_count = Registration.objects.filter(event=event, ninja__in=children).count()
             all_registered = registered_count == len(children)
+            if event.reserved_places:
+                is_team_child = bool(capacity.team_child_ids(event, [child.id for child in children]))
+    # Places held for the dojo team's children don't count for the others.
+    places_left = (
+        capacity.places_left_for(event, is_team_child=is_team_child) if event.reserved_places else event.places_left
+    )
 
     return render(
         request,
@@ -171,6 +178,7 @@ def event_detail(request, event_id):
             "event": event,
             "faqs": faqs,
             "all_registered": all_registered,
+            "places_left": places_left,
         },
     )
 
@@ -199,7 +207,11 @@ def event_signup(request, event_id):
     if request.method == "POST":
         form = SignUpForm(request.POST, children=Ninja.objects.signable_by(guardian), questions=questions)
         if not event.registration_open:
-            error = _("Registrations for this session are closed.")
+            error = (
+                _("Registrations for this session haven't opened yet.")
+                if event.registration_not_yet_open
+                else _("Registrations for this session are closed.")
+            )
         elif not form.is_valid():
             error = form.non_field_errors()[0]
         else:
