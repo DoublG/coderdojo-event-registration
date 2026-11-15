@@ -2205,3 +2205,97 @@ class RegistrationWindowFormTests(TestCase):
         self.assertContains(response, "Registrations not open yet")
         self.assertContains(response, "Registrations open on")
         self.assertNotContains(response, reverse("event_signup", kwargs={"event_id": event.id}))
+
+
+class ManualWaitingListTests(TestCase):
+    """A dojo whose team chooses who gets a free place (Dojo.waitlist_mode)."""
+
+    def setUp(self):
+        from dojos.testing import make_champion
+
+        self.owner = make_champion(username="wl-owner")
+        self.dojo = make_dojo("Ghent", champion=self.owner, waitlist_mode=Dojo.MANUAL)
+        self.parent = User.objects.create(username="wl-parent", email="wl@example.com")
+        self.kids = [Ninja.objects.create(name=f"Kid {n}") for n in range(3)]
+        for kid in self.kids:
+            Guardianship.objects.create(guardian=self.parent, ninja=kid)
+        self.event = _future_event(self.dojo, places=1)
+        results = registrations.sign_up(self.event, self.kids)
+        self.confirmed = results[0]["registration"]
+        self.second = results[1]["registration"]
+        self.third = results[2]["registration"]
+
+    def test_a_cancelled_place_stays_free_and_the_team_is_told(self):
+        from notifications.models import Notification
+
+        registrations.cancel(self.confirmed, cancelled_by=self.parent)
+        self.assertTrue(Registration.objects.get(pk=self.second.pk).waiting_list)
+        self.assertEqual(Registration.objects.filter(event=self.event, waiting_list=False).count(), 0)
+        self.assertEqual(Notification.objects.filter(recipient=self.owner, dojo=self.dojo).count(), 1)
+
+    def test_more_places_promote_nobody(self):
+        Event.objects.filter(pk=self.event.pk).update(places=3)
+        self.assertEqual(registrations.fill_free_places(Event.objects.get(pk=self.event.pk)), [])
+
+    def test_the_team_gives_the_place_to_a_child_of_its_choice(self):
+        registrations.cancel(self.confirmed, cancelled_by=self.parent)
+        # Not the one waiting longest: the team picks the third.
+        registrations.give_place(self.third)
+        self.assertFalse(Registration.objects.get(pk=self.third.pk).waiting_list)
+        self.assertTrue(Registration.objects.get(pk=self.second.pk).waiting_list)
+
+    def test_no_place_no_give(self):
+        with self.assertRaisesMessage(registrations.RegistrationError, "No place is free."):
+            registrations.give_place(self.second)
+
+    def test_giving_twice_is_refused(self):
+        registrations.cancel(self.confirmed, cancelled_by=self.parent)
+        registrations.give_place(self.second)
+        with self.assertRaises(registrations.RegistrationError):
+            registrations.give_place(self.second)
+
+    def test_the_automatic_mode_is_unchanged(self):
+        Dojo.objects.filter(pk=self.dojo.pk).update(waitlist_mode=Dojo.AUTO)
+        event = Event.objects.get(pk=self.event.pk)
+        registrations.cancel(Registration.objects.get(pk=self.confirmed.pk), cancelled_by=self.parent)
+        self.assertFalse(Registration.objects.get(pk=self.second.pk).waiting_list)
+        self.assertEqual(event.dojo.waitlist_mode, Dojo.AUTO)
+
+    def test_the_team_page_lists_the_waiting_and_gives_a_place(self):
+        from django.urls import reverse
+
+        registrations.cancel(self.confirmed, cancelled_by=self.parent)
+        self.client.force_login(self.owner)
+        page = self.client.get(
+            reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+        )
+        self.assertContains(page, 'id="waiting-list"')
+        self.assertContains(page, "Kid 1")
+        self.assertContains(page, "1 place is free.")
+        give = reverse(
+            "dojo_event_give_place",
+            kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.third.id},
+        )
+        self.assertEqual(self.client.get(give).status_code, 302)  # POST only: nothing happens
+        self.assertTrue(Registration.objects.get(pk=self.third.pk).waiting_list)
+        self.client.post(give)
+        self.assertFalse(Registration.objects.get(pk=self.third.pk).waiting_list)
+
+    def test_only_the_dojos_managers_can_give_a_place(self):
+        from django.urls import reverse
+
+        from dojos.testing import make_champion
+
+        registrations.cancel(self.confirmed, cancelled_by=self.parent)
+        self.client.force_login(make_champion(username="wl-outsider"))
+        give = reverse(
+            "dojo_event_give_place",
+            kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id, "registration_id": self.second.id},
+        )
+        self.assertEqual(self.client.post(give).status_code, 404)
+        self.assertTrue(Registration.objects.get(pk=self.second.pk).waiting_list)
+
+    def test_the_dojo_setting_is_on_the_settings_form(self):
+        from dojos.forms import DojoProfileForm
+
+        self.assertIn("waitlist_mode", DojoProfileForm(instance=self.dojo).fields)

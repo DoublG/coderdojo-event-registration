@@ -420,6 +420,15 @@ erDiagram
   `status == open` and now inside the window, so `sign_up`, the public page
   and the list all agree; a draft or closed session is never opened by a
   date. `events.services.session_problems` refuses a close before the open.
+- **Waiting-list mode** (`Dojo.waitlist_mode`, the dojo's Settings page):
+  `auto` (default) = a freed place goes to the child waiting longest
+  (`events.registrations._promote`); `manual` = `_promote` does nothing, so
+  nobody moves up by itself, `cancel` notifies the dojo's managers once while
+  children wait, and the team gives a place with
+  `registrations.give_place` (the session page's *Waiting list* card,
+  `dojo_event_give_place`, `MANAGE_EVENTS`, POST): under the session's lock,
+  refused when the child isn't waiting or no place is free, mails the family
+  like an automatic promotion.
 - **Places:** `Event.places_left` = `places` − confirmed registrations
   (those with `waiting_list=False`). When a confirmed place is cancelled,
   the next person on the waiting list is promoted and the dojo's team (its

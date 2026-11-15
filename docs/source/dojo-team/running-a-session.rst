@@ -71,6 +71,23 @@ longest on its waiting list into the new places straight away, and their
 families get a mail. Giving it fewer places never takes a place away from
 a child who already has one.
 
+The waiting list
+----------------
+
+When a session is full, families can still sign up: the child goes on the
+waiting list, in the order of signing up. By default (**Automatic**) a
+place that frees up goes to the child waiting longest, whose family gets a
+mail.
+
+If you'd rather choose who gets a place, set **When a place frees up on a
+full session** to **The team chooses** on your dojo's **Settings** page.
+Then nobody moves up by itself: when a place frees up while children are
+waiting, the champion and mentors get a notification, and the session's page
+has a **Waiting list** card with the children in order and a **Give a
+place** button for each, as long as a place is free. The family of the child
+you pick gets the same mail as in automatic mode. Whatever the setting, the
+card lets you give a free place yourself.
+
 Session status
 ---------------
 

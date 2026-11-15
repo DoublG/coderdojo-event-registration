@@ -1,0 +1,30 @@
+{% load i18n %}
+{% comment %}The session page's Waiting list card (dojos.views.event_pages._waiting_list_context): the children waiting in their order, and a button to give each a free place.{% endcomment %}
+<section class="cd-card" id="waiting-list" style="padding: var(--space-5); margin-bottom: var(--space-5); max-width: 720px;" aria-labelledby="waiting-list-heading">
+  <h2 class="h4" id="waiting-list-heading" style="margin: 0 0 var(--space-2);">{% translate "Waiting list" %}</h2>
+  <p class="body-sm">
+    {% if waiting_manual %}
+      {% translate "Your dojo's team chooses who gets a place that frees up: nobody moves up by itself." %}
+    {% else %}
+      {% translate "A place that frees up goes to the child waiting longest. You can also give a place yourself." %}
+    {% endif %}
+    {% blocktranslate count free=waiting_free_places %}{{ free }} place is free.{% plural %}{{ free }} places are free.{% endblocktranslate %}
+  </p>
+  {% if waiting_registrations %}
+    <ol class="body-sm" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2);">
+      {% for registration in waiting_registrations %}
+        <li style="display: flex; justify-content: space-between; align-items: center; gap: var(--space-3);">
+          <span>{{ forloop.counter }}. {{ registration.ninja.full_name }}</span>
+          {% if waiting_free_places > 0 %}
+            <form method="post" action="{% url 'dojo_event_give_place' dojo_id=dojo.id event_id=event.id registration_id=registration.id %}">
+              {% csrf_token %}
+              <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Give a place" %}</button>
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+  {% else %}
+    <p class="body-sm">{% translate "Nobody is waiting." %}</p>
+  {% endif %}
+</section>
