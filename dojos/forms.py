@@ -18,7 +18,7 @@ from core.image_library import library_filename, use_library_image
 from core.uploads import with_upload_help
 from events.models import Badge, Belt
 
-from .models import Dojo
+from .models import Dojo, DojoLocation
 from .template_icons import TEMPLATE_ICONS
 
 NO_TEMPLATE_ICON = ""
@@ -287,6 +287,23 @@ class EventQuestionForm(forms.Form):
         return {
             language: self.cleaned_data.get(translation_field_name(language, "text"), "")
             for language in self.question.content_languages()[1:]
+        }
+
+
+class DojoLocationForm(forms.ModelForm):
+    """A venue on the dojo's Locations page (dojos.views.locations)."""
+
+    class Meta:
+        model = DojoLocation
+        fields = ["name", "address"]
+        labels = {"name": _("Name"), "address": _("Address")}
+        help_texts = {
+            "name": _('Shown on the session, e.g. "Ghent Public Library".'),
+            "address": _("Street and number, postcode, city: used to place the venue on the map."),
+        }
+        widgets = {
+            "name": forms.TextInput(attrs={"placeholder": _("Ghent Public Library")}),
+            "address": forms.TextInput(attrs={"placeholder": _("Street and number, postcode, city")}),
         }
 
 

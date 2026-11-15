@@ -168,6 +168,9 @@ class EventForm(forms.ModelForm):
             format=BELGIAN_TIME_FORMAT,
         ),
     )
+    # Not a model field: one of the dojo's own locations (dojos.DojoLocation),
+    # whose name and point are copied onto the session on save.
+    location_choice = forms.ChoiceField(required=False, label=_("Location"))
     # Not a model field — a shortcut that, on save(), points `image` at one
     # of the standard event banners (core.image_library, no copy made)
     # instead of requiring an upload. An uploaded file (see save()) always
@@ -263,6 +266,18 @@ class EventForm(forms.ModelForm):
         self.fields["pathways"].label_from_instance = lambda pathway: pathway.localized("name")
         if not self.instance.pk:
             self.fields["pathways"].initial = list(dojo.pathways.values_list("pk", flat=True))
+        self.dojo_locations = {str(loc.pk): loc for loc in dojo.locations.all()}
+        if self.dojo_locations:
+            self.fields["location_choice"].choices = [("", _("Another venue (type it below)"))] + [
+                (pk, loc.name) for pk, loc in self.dojo_locations.items()
+            ]
+            self.fields["location_choice"].help_text = _("Picking one of your locations fills in the venue below.")
+            if self.instance.pk and self.instance.venue_name:
+                self.fields["location_choice"].initial = next(
+                    (pk for pk, loc in self.dojo_locations.items() if loc.name == self.instance.venue_name), ""
+                )
+        else:
+            del self.fields["location_choice"]
         self.fields["template_image"].initial = library_filename(self.instance.image, "events") or NO_TEMPLATE_IMAGE
         if self.instance.pk:
             self.fields["event_date"].initial = self.instance.start_time.date()
@@ -307,6 +322,11 @@ class EventForm(forms.ModelForm):
         event_date = self.cleaned_data["event_date"]
         event.start_time = timezone.make_aware(datetime.combine(event_date, self.cleaned_data["start_time"]))
         event.end_time = timezone.make_aware(datetime.combine(event_date, self.cleaned_data["end_time"]))
+
+        chosen = self.dojo_locations.get(self.cleaned_data.get("location_choice") or "")
+        if chosen:
+            event.venue_name = chosen.name
+            event.location = chosen.location.clone() if chosen.location else None
 
         template_image = self.cleaned_data.get("template_image")
         if template_image and not self.files.get("image"):

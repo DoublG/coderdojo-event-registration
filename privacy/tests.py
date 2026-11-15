@@ -289,6 +289,7 @@ class ExportCoverageTests(SimpleTestCase):
 
     EXCEPTIONS = {
         "dojos.Dojo": "a dojo's contact details belong with the dojo; its team's own data is in their export",
+        "dojos.DojoLocation": "a venue the dojo lists, like the dojo's own address",
         "events.Event": "a session's team and children are exported through memberships and registrations",
         "content.Testimonial": "a quote on the site with a name, not linked to an account",
     }

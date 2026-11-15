@@ -2,7 +2,7 @@
 
 from core.privacy_registry import Category, LegalBasis, Subject, keep, personal, register, register_not_personal
 
-from .models import Dojo, DojoMembership, DojoQuestion
+from .models import Dojo, DojoLocation, DojoMembership, DojoQuestion
 
 register(
     Dojo,
@@ -33,6 +33,19 @@ register(
         "languages",
         "pathways",
     ],
+)
+
+register(
+    DojoLocation,
+    purpose="Venues a dojo holds its sessions at, picked on the session form",
+    legal_basis=LegalBasis.LEGITIMATE_INTEREST,
+    retention="published",
+    seen_by="Everyone (a session's venue is public); the dojo's team; the organisation",
+    fields={
+        # A venue is usually a public place, but may be a champion's own address.
+        ("address", "location"): personal(Category.CONTACT_PUBLIC),
+    },
+    not_personal=["id", "dojo", "name"],
 )
 
 register(

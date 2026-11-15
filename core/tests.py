@@ -490,6 +490,7 @@ class AuditLogCoverageTests(TestCase):
         "events.SessionNotice": "itself a log of the notices a session's team sent",
         "events.EventQuestion": "the dojo's own text, like the event",
         "dojos.DojoQuestion": "the dojo's own text, like the event's questions",
+        "dojos.DojoLocation": "a venue the team lists, like the dojo's own address",
         "geo.AdministrativeBoundary": "reference data, from seed files",
         "geo.Municipality": "reference data, from seed files",
         "mailing.BounceRecord": "written by the bounce processing; itself a log",

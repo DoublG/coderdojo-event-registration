@@ -50,6 +50,17 @@ file of at most 10 MB. It's made smaller to fit the page, and everything
 stored in the file besides the picture itself (such as where and with which
 phone a photo was taken) is removed.
 
+Locations
+---------
+
+If you hold sessions at more than one venue, list them once on the
+**Locations** page of your dojo (**Add a location**: a name and an
+address; the address places the venue on the map when the site can find
+it). When you create or edit a session, the **Location** list offers
+them: picking one fills in the venue's name and its place on the map.
+Removing a location from the page never changes the sessions that already
+used it. To change a location, remove it and add it again.
+
 Editing a session
 ------------------
 

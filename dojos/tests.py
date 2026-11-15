@@ -3769,3 +3769,105 @@ class SessionNoticeOrganisationTests(TestCase):
             notify_url, {"kind": "message", "audience": "both", "subject": "Hi", "message": "See you!", "send": "1"}
         )
         self.assertEqual(self.events[self.org_dojo].notices.count(), 1)
+
+
+class DojoLocationsTests(TestCase):
+    """The Locations page and picking a location on the session form."""
+
+    def setUp(self):
+        self.owner = make_champion(username="loc-owner")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.url = reverse("dojo_locations", kwargs={"dojo_id": self.dojo.id})
+
+    def test_only_the_team_with_settings_access_gets_in(self):
+        self.assertEqual(self.client.get(self.url).status_code, 302)
+        self.client.force_login(make_champion(username="loc-other"))
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+        self.client.force_login(self.owner)
+        self.assertContains(self.client.get(self.url), "Add a location")
+
+    @patch("dojos.views.locations.geocode", return_value=(51.05, 3.72))
+    def test_adding_a_location_places_it_on_the_map(self, geocode):
+        self.client.force_login(self.owner)
+        response = self.client.post(self.url, {"name": "Library", "address": "Veldstraat 1, 9000 Gent"})
+        self.assertRedirects(response, self.url)
+        location = self.dojo.locations.get()
+        self.assertEqual((location.location.y, location.location.x), (51.05, 3.72))
+
+    @patch("dojos.views.locations.geocode", return_value=None)
+    def test_an_address_that_isnt_found_still_saves(self, geocode):
+        self.client.force_login(self.owner)
+        self.client.post(self.url, {"name": "Library", "address": "Nowhere"})
+        self.assertIsNone(self.dojo.locations.get().location)
+
+    def test_removing_a_location_keeps_the_sessions_venue(self):
+        from .models import DojoLocation
+
+        library = DojoLocation.objects.create(dojo=self.dojo, name="Library", location=Point(3.72, 51.05))
+        self.client.force_login(self.owner)
+        remove = reverse("dojo_location_delete", kwargs={"dojo_id": self.dojo.id, "location_id": library.id})
+        self.assertEqual(self.client.get(remove).status_code, 302)  # POST only
+        self.assertEqual(self.dojo.locations.count(), 1)
+        self.client.post(remove)
+        self.assertEqual(self.dojo.locations.count(), 0)
+
+    def test_another_dojos_location_cant_be_removed(self):
+        from .models import DojoLocation
+
+        other = make_dojo("Antwerp", champion=make_champion(username="loc-owner2"))
+        theirs = DojoLocation.objects.create(dojo=other, name="Theirs")
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse("dojo_location_delete", kwargs={"dojo_id": self.dojo.id, "location_id": theirs.id})
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(DojoLocation.objects.filter(pk=theirs.pk).exists())
+
+    def _session_data(self, **extra):
+        return {
+            "name": "Saturday",
+            "event_date": "01/01/2031",
+            "start_time": "10:00",
+            "end_time": "12:00",
+            "places": "10",
+            "template_image": "",
+            "venue_name": "",
+            **extra,
+        }
+
+    def test_the_session_form_copies_the_picked_location(self):
+        from .models import DojoLocation
+
+        library = DojoLocation.objects.create(dojo=self.dojo, name="Library", location=Point(3.72, 51.05))
+        self.client.force_login(self.owner)
+        create = reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id})
+        self.assertContains(self.client.get(create), "Another venue (type it below)")
+        self.client.post(create, self._session_data(location_choice=str(library.id)))
+        event = Event.objects.get(dojo=self.dojo)
+        self.assertEqual(event.venue_name, "Library")
+        self.assertEqual((event.location.x, event.location.y), (3.72, 51.05))
+        # Removing the location later leaves the session as it was.
+        library.delete()
+        event.refresh_from_db()
+        self.assertEqual(event.venue_name, "Library")
+
+    def test_without_locations_the_session_form_has_no_picker(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}))
+        self.assertNotIn("location_choice", response.context["form"].fields)
+
+    def test_a_location_of_another_dojo_is_not_accepted(self):
+        from .models import DojoLocation
+
+        other = make_dojo("Antwerp", champion=make_champion(username="loc-owner3"))
+        theirs = DojoLocation.objects.create(dojo=other, name="Theirs")
+        mine = DojoLocation.objects.create(dojo=self.dojo, name="Mine")
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}),
+            self._session_data(location_choice=str(theirs.id)),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("location_choice", response.context["form"].errors)
+        self.assertEqual(Event.objects.count(), 0)
+        self.assertTrue(mine.pk)

@@ -307,6 +307,25 @@ class DojoMembership(models.Model):
         return self.events.filter(start_time__lt=timezone.now()).count()
 
 
+class DojoLocation(models.Model):
+    """A venue a dojo holds its sessions at (DATA_MODEL.md §4): picked on the
+    session form, which copies its name and point onto the session, so a
+    session keeps its venue if the location is later removed. The point is
+    geocoded from the address when it's saved (geo.geocoding.geocode,
+    tolerant: no match leaves it empty)."""
+
+    dojo = models.ForeignKey(Dojo, on_delete=models.CASCADE, related_name="locations")
+    name = models.CharField(max_length=200, help_text='e.g. "Ghent Public Library".')
+    address = models.CharField(max_length=300, blank=True, default="")
+    location = models.PointField(srid=4326, null=True, blank=True, spatial_index=False)
+
+    class Meta:
+        ordering = ["name", "id"]
+
+    def __str__(self):
+        return self.name
+
+
 class DojoQuestionManager(models.Manager):
     def get_queryset(self):
         # content_languages() reads the dojo.

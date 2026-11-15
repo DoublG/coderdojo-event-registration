@@ -109,6 +109,12 @@ for the sidebar link to highlight, and render with dojos.views._admin_context.
                 {% translate "Settings" %}
               </a>
             </li>
+            <li>
+              <a href="{% url 'dojo_locations' dojo_id=dojo.id %}" class="cd-admin-nav__link label{% if active == 'locations' %} cd-admin-nav__link--active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                {% translate "Locations" %}
+              </a>
+            </li>
             {% if dojo_access.can_manage_api %}
               <li>
                 <a href="{% url 'dojo_api_clients' dojo_id=dojo.id %}" class="cd-admin-nav__link label{% if active == 'api' %} cd-admin-nav__link--active{% endif %}">
