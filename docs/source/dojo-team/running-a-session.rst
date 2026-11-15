@@ -63,6 +63,17 @@ longest on its waiting list into the new places straight away, and their
 families get a mail. Giving it fewer places never takes a place away from
 a child who already has one.
 
+Putting yourself on a session's team
+------------------------------------
+
+The **team** of a session is who runs it (the champion and mentors, picked
+on the session form). A champion or mentor can also do it themselves: the
+**Your part** card on a session's page has **Put me on the team** and, once
+you're on it, **Take me off the team**. It only ever changes your own place,
+works until the session starts, and not for a cancelled session. Being on
+the team puts you on the session's attendance list, which records who was
+there.
+
 Session status
 ---------------
 

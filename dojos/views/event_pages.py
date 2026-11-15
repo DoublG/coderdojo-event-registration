@@ -2,7 +2,9 @@
 session, its status (its sign-up questions card is .questions), and the
 organisation's Promotions card."""
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -114,6 +116,8 @@ def dojo_event_detail(request, dojo_id, event_id):
             "saved": saved,
             "promoted": len(promoted),
             **_notices_context(event, before, token),
+            "on_team": event.team.filter(pk=access.membership.pk).exists(),
+            "can_change_team": event.start_time > timezone.now() and event.status != Event.CANCELLED,
             "active": "events",
             **questions_context(event),
             **_event_promotions_context(request, event),
@@ -127,6 +131,32 @@ CHANGE_BUTTONS = {
     SessionNotice.TIME_CHANGED: _("Mail about the new date or times"),
     SessionNotice.PLACES_CHANGED: _("Mail about the new number of places"),
 }
+
+
+@login_required
+def dojo_event_team_self(request, dojo_id, event_id, action):
+    """A champion or mentor puts themselves on the session's team, or takes
+    themselves off (POST only; events.services.join_team / leave_team). Any
+    role of the dojo, since it only ever changes their own place."""
+    access = require_dojo_access(request, dojo_id)
+    event = get_object_or_404(Event, id=event_id, dojo=access.dojo)
+    if action not in ("join", "leave"):
+        raise Http404
+    if request.method == "POST":
+        change = services.join_team if action == "join" else services.leave_team
+        try:
+            changed = change(event, access.membership)
+        except services.TeamError as problem:
+            messages.error(request, str(problem))
+        else:
+            if changed:
+                messages.success(
+                    request,
+                    _("You're on this session's team now.")
+                    if action == "join"
+                    else _("You're off this session's team."),
+                )
+    return redirect("dojo_event_detail", dojo_id=access.dojo.id, event_id=event.id)
 
 
 def _notices_context(event, before, token):

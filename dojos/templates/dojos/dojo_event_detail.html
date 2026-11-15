@@ -89,6 +89,19 @@
     </p>
   </div>
 
+  {% if can_change_team %}
+    <section class="cd-card" id="my-part" style="padding: var(--space-5); margin-bottom: var(--space-5); max-width: 720px; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap;" aria-labelledby="my-part-heading">
+      <div>
+        <h2 class="h4" id="my-part-heading" style="margin: 0 0 var(--space-1);">{% translate "Your part" %}</h2>
+        <p class="body-sm" style="margin: 0;">{% if on_team %}{% translate "You're on this session's team." %}{% else %}{% translate "You're not on this session's team." %}{% endif %}</p>
+      </div>
+      <form method="post" action="{% url 'dojo_event_team_self' dojo_id=dojo.id event_id=event.id action=on_team|yesno:'leave,join' %}">
+        {% csrf_token %}
+        <button type="submit" class="cd-btn cd-btn--secondary label">{% if on_team %}{% translate "Take me off the team" %}{% else %}{% translate "Put me on the team" %}{% endif %}</button>
+      </form>
+    </section>
+  {% endif %}
+
   {% include "dojos/partials/_event_notices.html" %}
 
   {% if questions_shown %}
