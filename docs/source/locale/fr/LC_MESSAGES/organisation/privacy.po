@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium — Help Centre \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 08:24+0000\n"
+"POT-Creation-Date: 2026-11-15 10:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -142,10 +142,42 @@ msgstr ""
 "pas être modifiés ici."
 
 #: ../../source/organisation/privacy.rst:57
+msgid "Merging duplicate children"
+msgstr "Fusionner les enfants en double"
+
+#: ../../source/organisation/privacy.rst:59
+msgid ""
+"A family sometimes signs the same child up twice, which splits the "
+"child's sessions, badges and belts over two cards. On the Privacy page, "
+"**Merge duplicate children…** lists children with the same name who share"
+" at least one guardian, with what each card holds (sessions, badges, "
+"belts, guardians) and a suggestion of which one to keep: the one with "
+"more history."
+msgstr "Une famille inscrit parfois le même enfant deux fois, ce qui répartit ses sessions, badges et ceintures sur deux fiches. Sur la page Vie privée, **Fusionner les enfants en double…** liste les enfants de même nom qui ont au moins un tuteur en commun, avec ce que contient chaque fiche (sessions, badges, ceintures, tuteurs) et une suggestion de la fiche à conserver : celle qui a le plus d'historique."
+
+#: ../../source/organisation/privacy.rst:66
+msgid ""
+"Choosing **Keep this one, merge … into it** moves everything the other "
+"card holds onto the one that stays, then deletes the other: the places at"
+" sessions (where both cards were signed up, the better place wins and a "
+"place that becomes free goes to the child waiting longest), the "
+"cancellations, badges (the one earned first stays), belts, the guardians "
+"and any detail the card that stays is missing, such as the date of birth."
+" The consent given for the children's details is not carried over: the "
+"card that stays keeps its own. The merge can't be undone."
+msgstr "Choisir **Garder celle-ci, y fusionner … ** déplace tout ce que contient l'autre fiche vers celle qui reste, puis supprime l'autre : les places aux sessions (quand les deux fiches étaient inscrites, la meilleure place l'emporte et une place libérée va à l'enfant qui attend depuis le plus longtemps), les annulations, les badges (le premier obtenu reste), les ceintures, les tuteurs et toute information manquante dans la fiche qui reste, comme la date de naissance. Le consentement donné pour les données des enfants n'est pas repris : la fiche qui reste garde le sien. La fusion est irréversible."
+
+#: ../../source/organisation/privacy.rst:75
+msgid ""
+"Children are only merged within one family (they must share a guardian), "
+"and a card with a child's own login is never the one that goes."
+msgstr "On ne fusionne que des enfants d'une même famille (ils doivent partager un tuteur), et une fiche avec un compte propre à l'enfant n'est jamais celle qui disparaît."
+
+#: ../../source/organisation/privacy.rst:79
 msgid "Needs attention"
 msgstr "À traiter"
 
-#: ../../source/organisation/privacy.rst:59
+#: ../../source/organisation/privacy.rst:81
 msgid ""
 "Accounts that haven't logged in for two years are deleted automatically. "
 "A champion of an active dojo is held back until the role moves: they're "
@@ -162,15 +194,15 @@ msgstr ""
 " ou que le dojo est mis en sommeil, le champion quitte la liste. Le "
 "nombre à côté de **Vie privée** dans la barre latérale les compte."
 
-#: ../../source/organisation/privacy.rst:67
+#: ../../source/organisation/privacy.rst:89
 msgid "How long data is kept"
 msgstr "Combien de temps les données sont conservées"
 
-#: ../../source/organisation/privacy.rst:69
+#: ../../source/organisation/privacy.rst:91
 msgid "The site removes these by itself, every night:"
 msgstr "Le site supprime ceci lui-même, chaque nuit :"
 
-#: ../../source/organisation/privacy.rst:71
+#: ../../source/organisation/privacy.rst:93
 msgid ""
 "**Accounts** are deleted two years after their last login. A parent's "
 "account stays as long as one of their children uses their own login or "
@@ -189,7 +221,7 @@ msgstr ""
 "champion ou d'un mentor reste sur les sessions passées et sur les "
 "ceintures et badges qu'il a attribués."
 
-#: ../../source/organisation/privacy.rst:78
+#: ../../source/organisation/privacy.rst:100
 msgid ""
 "**The audit log** keeps an entry as long as the account it's about, or "
 "that made it; an entry with no account behind it goes after two years."
@@ -198,7 +230,7 @@ msgstr ""
 "concerne, ou qui l'a créée, existe ; une entrée sans compte derrière elle"
 " disparaît après deux ans."
 
-#: ../../source/organisation/privacy.rst:80
+#: ../../source/organisation/privacy.rst:102
 msgid ""
 "**Mail**: a year after a mail was queued, its address, subject and text "
 "are cleared. What kind of mail it was and whether it went out stay, for "
@@ -208,7 +240,7 @@ msgstr ""
 "objet et son texte sont effacés. Le type d'e-mail et le fait qu'il soit "
 "parti restent, pour les statistiques."
 
-#: ../../source/organisation/privacy.rst:83
+#: ../../source/organisation/privacy.rst:105
 msgid ""
 "**A dojo team's own text in a mail to a session's families** (a change to"
 " the session, or a message of their own) stays as long as the dojo is "
@@ -222,7 +254,7 @@ msgstr ""
 "archivé, le texte est effacé ; le type de mail, la date et le nombre de "
 "familles restent avec la session."
 
-#: ../../source/organisation/privacy.rst:88
+#: ../../source/organisation/privacy.rst:110
 msgid ""
 "**Invitations** to the organisation are removed 30 days after they were "
 "accepted, withdrawn or ran out (an invitation is valid for 14 days)."
@@ -231,7 +263,7 @@ msgstr ""
 " été acceptées, retirées ou expirées (une invitation est valable 14 "
 "jours)."
 
-#: ../../source/organisation/privacy.rst:90
+#: ../../source/organisation/privacy.rst:112
 msgid ""
 "**Invitations to be a child's guardian** are removed the same way: 30 "
 "days after they were accepted, withdrawn or ran out (valid for 14 days)."
@@ -240,7 +272,7 @@ msgstr ""
 "même façon : 30 jours après avoir été acceptées, retirées ou expirées "
 "(valables 14 jours)."
 
-#: ../../source/organisation/privacy.rst:92
+#: ../../source/organisation/privacy.rst:114
 msgid ""
 "**Login sessions** end two weeks after they last changed, and are then "
 "removed."
@@ -248,11 +280,11 @@ msgstr ""
 "**Les sessions de connexion** expirent deux semaines après leur dernière "
 "modification, puis sont supprimées."
 
-#: ../../source/organisation/privacy.rst:95
+#: ../../source/organisation/privacy.rst:117
 msgid "Some data is removed at once, not after a period:"
 msgstr "Certaines données sont supprimées immédiatement, pas après un délai :"
 
-#: ../../source/organisation/privacy.rst:97
+#: ../../source/organisation/privacy.rst:119
 msgid ""
 "**A criminal-record extract** is deleted the moment a reviewer decides on"
 " it. Only the decision is kept."
@@ -260,7 +292,7 @@ msgstr ""
 "**Un extrait de casier judiciaire** est supprimé dès qu'un évaluateur a "
 "pris sa décision. Seule la décision est conservée."
 
-#: ../../source/organisation/privacy.rst:99
+#: ../../source/organisation/privacy.rst:121
 msgid ""
 "**Two-step login** methods (an authenticator app, passkeys, backup codes)"
 " are removed when someone turns two-step login off."
@@ -269,7 +301,7 @@ msgstr ""
 "d'authentification, des passkeys, des codes de secours) sont supprimées "
 "quand quelqu'un désactive la connexion en deux étapes."
 
-#: ../../source/organisation/privacy.rst:102
+#: ../../source/organisation/privacy.rst:124
 msgid ""
 "For some data, how long to keep it hasn't been decided yet, so the site "
 "doesn't remove it by itself: a child's details and their sessions, belts "

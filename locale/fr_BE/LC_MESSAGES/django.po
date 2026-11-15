@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 08:52+0000\n"
+"POT-Creation-Date: 2026-11-15 10:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_BE <LL@li.org>\n"
@@ -175,7 +175,7 @@ msgstr "Mot de passe actuel"
 #: dojos/forms.py:99 dojos/forms.py:301
 #: dojos/templates/dojos/dojo_detail.html:249
 #: pages/templates/pages/contact.html:34
-#: privacy/templates/privacy/manage/privacy.html:58
+#: privacy/templates/privacy/manage/privacy.html:60
 msgid "Email"
 msgstr "E-mail"
 
@@ -426,6 +426,7 @@ msgstr "Date de naissance (facultatif)"
 
 #: accounts/forms.py:748
 #: events/templates/events/manage/_badge_assign_results.html:12
+#: privacy/templates/privacy/manage/merge.html:21
 msgid "Home dojo"
 msgstr "Dojo d'attache"
 
@@ -434,6 +435,7 @@ msgid "None yet"
 msgstr "Aucun pour l'instant"
 
 #: accounts/forms.py:763 accounts/forms.py:806
+#: privacy/templates/privacy/manage/merge.html:20
 msgid "Date of birth"
 msgstr "Date de naissance"
 
@@ -1139,8 +1141,9 @@ msgstr "Dojo"
 #: mailing/templates/mailing/manage/mail_queue.html:107
 #: mailing/templates/mailing/manage/mail_queue.html:184
 #: mailing/templates/mailing/manage/mail_queue.html:234
+#: privacy/templates/privacy/manage/merge.html:26
 #: privacy/templates/privacy/manage/privacy.html:21
-#: privacy/templates/privacy/manage/privacy.html:61
+#: privacy/templates/privacy/manage/privacy.html:63
 msgid "Actions"
 msgstr "Actions"
 
@@ -1216,6 +1219,7 @@ msgstr "Remarque"
 
 #: accounts/templates/accounts/child_detail.html:173
 #: accounts/templates/accounts/child_detail.html:184
+#: privacy/templates/privacy/manage/merge.html:23
 msgid "Badges"
 msgstr "Badges"
 
@@ -1983,7 +1987,7 @@ msgstr "Ce que chaque rôle ouvre"
 #: events/templates/events/manage/_badge_assign_results.html:11
 #: events/templates/events/manage/badge_list.html:18
 #: events/templates/events/manage/badge_list.html:46 mailing/forms.py:146
-#: privacy/templates/privacy/manage/privacy.html:57 reports/forms.py:12
+#: privacy/templates/privacy/manage/privacy.html:59 reports/forms.py:12
 msgid "Name"
 msgstr "Nom"
 
@@ -2086,7 +2090,7 @@ msgstr ""
 
 #: accounts/templates/accounts/manage/people_add.html:14
 #: accounts/templates/accounts/manage/security.html:59
-#: privacy/templates/privacy/manage/privacy.html:44
+#: privacy/templates/privacy/manage/privacy.html:46
 msgid "Name, email address or username"
 msgstr "Nom, adresse e-mail ou nom d'utilisateur"
 
@@ -2100,7 +2104,7 @@ msgstr "Nom, adresse e-mail ou nom d'utilisateur"
 #: mailing/templates/mailing/manage/mail_log.html:45
 #: mailing/templates/mailing/manage/mail_queue.html:47
 #: pages/templates/pages/manage_audit_log.html:43
-#: privacy/templates/privacy/manage/privacy.html:48
+#: privacy/templates/privacy/manage/privacy.html:50
 msgid "Search"
 msgstr "Rechercher"
 
@@ -2560,7 +2564,7 @@ msgid "Child %(n)s"
 msgstr "Enfant %(n)s"
 
 #: accounts/templates/accounts/partials/_child_rows_fieldset.html:7
-#: privacy/templates/privacy/manage/privacy.html:60
+#: privacy/templates/privacy/manage/privacy.html:62
 #: reports/datasets/engagement.py:72
 msgid "Children"
 msgstr "Enfants"
@@ -2639,6 +2643,7 @@ msgstr "Envoyez-moi un lien de confirmation"
 
 #: accounts/templates/accounts/partials/_guardians_card.html:12
 #: events/templates/events/manage/_badge_assign_results.html:13
+#: privacy/templates/privacy/manage/merge.html:25
 msgid "Guardians"
 msgstr "Responsables"
 
@@ -2683,6 +2688,7 @@ msgstr ""
 
 #: accounts/templates/accounts/partials/_ninja_login_card.html:14
 #: dojos/templates/dojos/dojo_members.html:54
+#: privacy/templates/privacy/manage/merge.html:32
 msgid "Own login"
 msgstr "Propre compte"
 
@@ -4400,7 +4406,7 @@ msgid "Nobody with a background check matches."
 msgstr "Aucune personne avec un extrait de casier ne correspond."
 
 #: applications/templates/applications/manage/check_list.html:25
-#: privacy/templates/privacy/manage/privacy.html:79
+#: privacy/templates/privacy/manage/privacy.html:81
 #, python-format
 msgid ""
 "Showing the first %(search_limit)s; search more precisely to find others."
@@ -6472,7 +6478,7 @@ msgid "Segments"
 msgstr "Segments"
 
 #: campaigns/templates/campaigns/manage/segment_list.html:20
-#: privacy/templates/privacy/manage/privacy.html:69
+#: privacy/templates/privacy/manage/privacy.html:71
 msgid "Inactive"
 msgstr "Inactif"
 
@@ -6778,7 +6784,7 @@ msgstr "En savoir plus"
 
 # | msgid "Language"
 # | msgid "Languages"
-#: core/admin_translations.py:70
+#: core/admin_translations.py:70 core/tests.py:398
 #: dojos/templates/dojos/partials/_translation_fields.html:10
 #, python-format
 msgid "In %(language)s"
@@ -8385,6 +8391,7 @@ msgstr "Assiduité"
 
 # | msgid "Session"
 #: dojos/templates/dojos/dojo_members.html:39
+#: privacy/templates/privacy/manage/merge.html:22
 msgid "Sessions"
 msgstr "Sessions"
 
@@ -10756,8 +10763,8 @@ msgstr "Supprimer le modèle"
 #, python-format
 msgid "Delete the %(language_name)s version? English is used instead."
 msgstr ""
-"Supprimer la version en %(language_name)s ? La version anglaise sera utilisée "
-"à la place."
+"Supprimer la version en %(language_name)s ? La version anglaise sera "
+"utilisée à la place."
 
 #: mailing/templates/mailing/manage/template_list.html:5
 #: mailing/templates/mailing/manage/template_new.html:3
@@ -11425,6 +11432,27 @@ msgstr "Tapez le nom d'utilisateur, %(username)s, pour confirmer"
 msgid "Type the account's username to confirm."
 msgstr "Tapez le nom d'utilisateur du compte pour confirmer."
 
+#: privacy/merge.py:62
+msgid "Pick two different children."
+msgstr "Choisissez deux enfants différents."
+
+#: privacy/merge.py:64
+#, python-format
+msgid ""
+"%(name)s has a login of their own: merge into that card instead, or remove "
+"the login first."
+msgstr "%(name)s a un compte à lui : fusionnez plutôt dans cette fiche, ou supprimez d'abord le compte."
+
+#: privacy/merge.py:71
+msgid ""
+"The two children have no guardian in common: they aren't merged across "
+"families."
+msgstr "Les deux enfants n'ont aucun tuteur en commun : on ne fusionne pas entre familles."
+
+#: privacy/merge.py:81 privacy/views.py:200
+msgid "One of the two children doesn't exist any more."
+msgstr "L'un des deux enfants n'existe plus."
+
 #: privacy/retention.py:322
 #, python-format
 msgid ""
@@ -11621,6 +11649,54 @@ msgstr ""
 "change, l'ancienne adresse est prévenue et toutes les sessions du compte "
 "prennent fin. La page propose ensuite un nouveau mot de passe."
 
+#: privacy/templates/privacy/manage/merge.html:3
+#: privacy/templates/privacy/manage/merge.html:4
+msgid "Merge duplicate children"
+msgstr "Fusionner les enfants en double"
+
+#: privacy/templates/privacy/manage/merge.html:9
+msgid ""
+"A family sometimes signs the same child up twice, which splits the child's "
+"sessions, badges and belts over two cards. These children have the same name "
+"and at least one guardian in common. Merging moves everything the duplicate "
+"holds onto the card that stays (places at sessions, badges, belts, "
+"guardians, missing details), then deletes the duplicate. It can't be undone, "
+"and the children's logins and other families are never touched."
+msgstr "Une famille inscrit parfois le même enfant deux fois, ce qui répartit ses sessions, badges et ceintures sur deux fiches. Ces enfants ont le même nom et au moins un tuteur en commun. La fusion déplace tout ce que contient le doublon vers la fiche qui reste (places aux sessions, badges, ceintures, tuteurs, informations manquantes), puis supprime le doublon. C'est irréversible, et les comptes des enfants et les autres familles ne sont jamais touchés."
+
+# | msgid "Back to your account"
+#: privacy/templates/privacy/manage/merge.html:10
+msgid "Back to Privacy"
+msgstr "Retour à Vie privée"
+
+#: privacy/templates/privacy/manage/merge.html:19
+msgid "Card"
+msgstr "Fiche"
+
+#: privacy/templates/privacy/manage/merge.html:24
+msgid "Belts"
+msgstr "Ceintures"
+
+#: privacy/templates/privacy/manage/merge.html:32
+msgid "Suggested to keep"
+msgstr "Suggérée à conserver"
+
+#: privacy/templates/privacy/manage/merge.html:41
+#, python-format
+msgid ""
+"Merge card #%(duplicate_id)s (%(duplicate)s) into card #%(keep_id)s "
+"(%(keep)s)? This can't be undone."
+msgstr "Fusionner la fiche #%(duplicate_id)s (%(duplicate)s) dans la fiche #%(keep_id)s (%(keep)s) ? C'est irréversible."
+
+#: privacy/templates/privacy/manage/merge.html:45
+#, python-format
+msgid "Keep this one, merge #%(other)s into it"
+msgstr "Garder celle-ci, y fusionner #%(other)s"
+
+#: privacy/templates/privacy/manage/merge.html:56
+msgid "No duplicates found: no two children of the same family share a name."
+msgstr "Aucun doublon trouvé : aucun enfant d'une même famille n'en partage le nom."
+
 #: privacy/templates/privacy/manage/privacy.html:12
 msgid ""
 "These champions haven't logged in for almost two years. Their account is "
@@ -11670,59 +11746,63 @@ msgstr ""
 "parent ou tuteur, tel que la famille l'obtient avec Télécharger mes données "
 "sur sa page de compte. Envoyez-le uniquement à l'adresse e-mail du compte."
 
+#: privacy/templates/privacy/manage/privacy.html:42
+msgid "Merge duplicate children…"
+msgstr "Fusionner les enfants en double…"
+
 # | msgid "My Account"
-#: privacy/templates/privacy/manage/privacy.html:59
+#: privacy/templates/privacy/manage/privacy.html:61
 msgid "Account"
 msgstr "Compte"
 
-#: privacy/templates/privacy/manage/privacy.html:69
+#: privacy/templates/privacy/manage/privacy.html:71
 msgid "Ninja login"
 msgstr "Compte ninja"
 
-#: privacy/templates/privacy/manage/privacy.html:69
+#: privacy/templates/privacy/manage/privacy.html:71
 msgid "Adult"
 msgstr "Adulte"
 
-#: privacy/templates/privacy/manage/privacy.html:69
+#: privacy/templates/privacy/manage/privacy.html:71
 msgid "Logs in with a link"
 msgstr "Se connecte avec un lien"
 
-#: privacy/templates/privacy/manage/privacy.html:69
+#: privacy/templates/privacy/manage/privacy.html:71
 msgid "Logs in with a password"
 msgstr "Se connecte avec un mot de passe"
 
-#: privacy/templates/privacy/manage/privacy.html:71
+#: privacy/templates/privacy/manage/privacy.html:73
 msgid "Download data"
 msgstr "Télécharger les données"
 
-#: privacy/templates/privacy/manage/privacy.html:71
+#: privacy/templates/privacy/manage/privacy.html:73
 msgid "Change email…"
 msgstr "Changer l'e-mail…"
 
-#: privacy/templates/privacy/manage/privacy.html:71
+#: privacy/templates/privacy/manage/privacy.html:73
 msgid "Delete…"
 msgstr "Supprimer…"
 
-#: privacy/templates/privacy/manage/privacy.html:74
+#: privacy/templates/privacy/manage/privacy.html:76
 msgid "No accounts match."
 msgstr "Aucun compte ne correspond."
 
-#: privacy/views.py:46
+#: privacy/views.py:47
 msgid ""
 "You just downloaded your data. Please wait a minute before trying again."
 msgstr ""
 "Vous venez de télécharger vos données. Veuillez patienter une minute avant "
 "de réessayer."
 
-#: privacy/views.py:103
+#: privacy/views.py:104
 msgid "Your password, to confirm"
 msgstr "Votre mot de passe, pour confirmer"
 
-#: privacy/views.py:122
+#: privacy/views.py:123
 msgid "The account has been deleted."
 msgstr "Le compte a été supprimé."
 
-#: privacy/views.py:150
+#: privacy/views.py:151
 #, python-format
 msgid ""
 "A confirmation link was sent to %(email)s. The address changes once they "
@@ -11730,6 +11810,11 @@ msgid ""
 msgstr ""
 "Un lien de confirmation a été envoyé à %(email)s. L'adresse change dès qu'il "
 "est ouvert (dans les %(hours)s heures)."
+
+#: privacy/views.py:209
+#, python-format
+msgid "%(duplicate)s was merged into %(keep)s."
+msgstr "%(duplicate)s a été fusionné dans %(keep)s."
 
 #: reports/datasets/base.py:39
 msgid "Other (small groups)"

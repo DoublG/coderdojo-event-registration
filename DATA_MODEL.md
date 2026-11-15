@@ -413,6 +413,17 @@ erDiagram
     }
 ```
 
+- **Merging duplicate children** (`privacy/merge.py`, the organisation's
+  Privacy page, `manage_privacy_merge`): a family that signed the same child
+  up twice. Candidates are children with the same name that share a
+  guardian; only within one family, and a card with its own login never
+  goes. `events.merge.move_history` moves the duplicate's registrations
+  (`events.registrations.move_registrations`, under each session's lock:
+  the better place wins, a place freed by two confirmed ones is promoted),
+  cancellations, badges (the earliest stays) and belts; engagement rows are
+  dropped (nightly rebuild). Guardians and blank details move to the card
+  that stays; the consent doesn't. The duplicate row is deleted, in one
+  transaction.
 - **Places:** `Event.places_left` = `places` − confirmed registrations
   (those with `waiting_list=False`). When a confirmed place is cancelled,
   the next person on the waiting list is promoted and the dojo's team (its

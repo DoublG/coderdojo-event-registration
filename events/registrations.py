@@ -135,6 +135,40 @@ def fill_free_places(event: Event) -> list[Registration]:
         return _promote(event)
 
 
+def move_registrations(source: "Ninja", target: "Ninja") -> None:
+    """Give `target` the registrations of `source` (a duplicate card being
+    merged, privacy.merge). Under each session's lock: where `target` is
+    signed up already the better place wins (a confirmed place over the
+    waiting list, the attendance and pathways are kept), `source`'s own
+    registration goes, and a confirmed place that becomes free goes to the
+    child waiting longest. Registrations are only ever changed here."""
+    for event_id in list(
+        Registration.objects.filter(ninja=source).order_by("event_id").values_list("event_id", flat=True)
+    ):
+        with transaction.atomic():
+            event = _lock(event_id)
+            moved = Registration.objects.filter(event=event, ninja=source).first()
+            if moved is None:
+                continue
+            kept = Registration.objects.filter(event=event, ninja=target).first()
+            if kept is None:
+                moved.ninja = target
+                moved.save(update_fields=["ninja"])
+                continue
+            freed_place = not moved.waiting_list
+            if not moved.waiting_list and kept.waiting_list:
+                kept.waiting_list = False
+                freed_place = False
+            if kept.attended is None and moved.attended is not None:
+                kept.attended = moved.attended
+            kept.save(update_fields=["waiting_list", "attended"])
+            kept.pathways.add(*moved.pathways.all())
+            moved.delete()
+            if freed_place:
+                # Both held a place: one is free now.
+                _promote(event, at_most=1)
+
+
 def _promote(event: Event, at_most: int | None = None) -> list[Registration]:
     """Under the session's lock: move waiting children into the places that
     are really free (a session the team gave fewer places after it filled up

@@ -1500,3 +1500,140 @@ class SessionNoticeRetentionTests(TestCase):
             self.assertEqual(bool(notice.subject or notice.message or notice.translations), kept, name)
             self.assertEqual((notice.kind, notice.recipients), (SessionNotice.MESSAGE, 4))
         self.assertEqual(apply_retention()["session_notice_texts"], 0)
+
+
+class MergeChildrenTests(TestCase):
+    """Merging a duplicate child card into the one that stays (privacy.merge)."""
+
+    def setUp(self):
+        from datetime import date, timedelta
+
+        from django.core.cache import cache
+        from django.utils import timezone
+
+        from accounts.models import OrganisationRole
+        from dojos.testing import make_dojo
+        from events.models import Badge, Belt, Event, NinjaBadge, NinjaBelt
+
+        cache.clear()
+        self.parent = User.objects.create(username="mum", email="mum@example.com")
+        self.other_parent = User.objects.create(username="dad", email="dad@example.com")
+        self.keep = Ninja.objects.create(name="Lotte", family_name="Peeters")
+        self.dup = Ninja.objects.create(
+            name="lotte", family_name="PEETERS", date_of_birth=date(2016, 5, 1), allergies_notes="nuts"
+        )
+        Guardianship.objects.create(guardian=self.parent, ninja=self.keep)
+        Guardianship.objects.create(guardian=self.parent, ninja=self.dup)
+        Guardianship.objects.create(guardian=self.other_parent, ninja=self.dup)
+        self.admin = User.objects.create(username="orgadmin2")
+        OrganisationRole.objects.create(account=self.admin, role=OrganisationRole.ADMIN)
+        self.dojo = make_dojo("Ghent")
+        now = timezone.now()
+
+        def session(days):
+            return Event.objects.create(
+                dojo=self.dojo,
+                name=f"S{days}",
+                places=1,
+                status=Event.OPEN,
+                start_time=now + timedelta(days=days),
+                end_time=now + timedelta(days=days, hours=2),
+            )
+
+        self.alone, self.both = session(3), session(5)
+        from events.models import Registration
+
+        self.reg_dup_alone = Registration.objects.create(
+            event=self.alone, ninja=self.dup, waiting_list=False, position=1
+        )
+        self.reg_keep_both = Registration.objects.create(
+            event=self.both, ninja=self.keep, waiting_list=True, position=1
+        )
+        self.reg_dup_both = Registration.objects.create(
+            event=self.both, ninja=self.dup, waiting_list=False, position=2
+        )
+        self.badge = Badge.objects.create(name="First", kind=Badge.ONE_OFF)
+        NinjaBadge.objects.create(ninja=self.dup, badge=self.badge, earned_date=date(2026, 1, 1))
+        NinjaBadge.objects.create(ninja=self.keep, badge=self.badge, earned_date=date(2026, 3, 1))
+        self.belt = Belt.objects.create(name="White", level=1)
+        NinjaBelt.objects.create(ninja=self.dup, belt=self.belt, awarded_on=date(2026, 2, 1))
+
+    def test_candidates_are_same_name_children_with_a_guardian_in_common(self):
+        from . import merge
+
+        stranger = Ninja.objects.create(name="Lotte", family_name="Peeters")
+        Guardianship.objects.create(guardian=User.objects.create(username="x"), ninja=stranger)
+        pairs = merge.candidates()
+        self.assertEqual([(p.first, p.second) for p in pairs], [(self.keep, self.dup)])
+
+    def test_merge_moves_everything_and_deletes_the_duplicate(self):
+        from events.models import NinjaBadge, NinjaBelt, Registration
+
+        from . import merge
+
+        merge.merge_children(self.keep, self.dup)
+
+        self.assertFalse(Ninja.objects.filter(pk=self.dup.pk).exists())
+        self.keep.refresh_from_db()
+        # Blank details filled from the duplicate; history and guardians moved.
+        self.assertEqual(str(self.keep.date_of_birth), "2016-05-01")
+        self.assertEqual(self.keep.allergies_notes, "nuts")
+        self.assertEqual(
+            set(Guardianship.objects.filter(ninja=self.keep).values_list("guardian_id", flat=True)),
+            {self.parent.id, self.other_parent.id},
+        )
+        self.assertEqual(NinjaBelt.objects.filter(ninja=self.keep).count(), 1)
+        # The same badge twice: one left, with the earlier date.
+        self.assertEqual([str(b.earned_date) for b in NinjaBadge.objects.filter(ninja=self.keep)], ["2026-01-01"])
+        # Where only the duplicate was signed up the place moves; where both were, the better place wins.
+        self.assertEqual(Registration.objects.get(event=self.alone).ninja, self.keep)
+        both = Registration.objects.get(event=self.both)
+        self.assertEqual(both.ninja, self.keep)
+        self.assertFalse(both.waiting_list)
+
+    def test_two_confirmed_places_free_one_for_the_waiting_list(self):
+        from events.models import Registration
+
+        from . import merge
+
+        Registration.objects.filter(pk=self.reg_keep_both.pk).update(waiting_list=False)
+        self.both.places = 2
+        self.both.save()
+        waiting = Ninja.objects.create(name="Waiting")
+        Registration.objects.create(event=self.both, ninja=waiting, waiting_list=True, position=3)
+        merge.merge_children(self.keep, self.dup)
+        self.assertFalse(Registration.objects.get(event=self.both, ninja=waiting).waiting_list)
+
+    def test_children_of_different_families_are_never_merged(self):
+        from . import merge
+
+        stranger = Ninja.objects.create(name="Lotte", family_name="Peeters")
+        Guardianship.objects.create(guardian=User.objects.create(username="y"), ninja=stranger)
+        with self.assertRaises(merge.MergeError):
+            merge.merge_children(self.keep, stranger)
+        self.assertTrue(Ninja.objects.filter(pk=stranger.pk).exists())
+
+    def test_a_card_with_its_own_login_is_never_the_one_that_goes(self):
+        from . import merge
+
+        self.dup.account = User.objects.create(username="lotte-login", account_type=User.NINJA)
+        self.dup.save()
+        with self.assertRaises(merge.MergeError):
+            merge.merge_children(self.keep, self.dup)
+        with self.assertRaises(merge.MergeError):
+            merge.merge_children(self.keep, self.keep)
+
+    def test_the_page_is_for_the_organisation_and_merges_on_post(self):
+        from django.urls import reverse
+
+        self.client.force_login(self.parent)
+        self.assertEqual(self.client.get(reverse("manage_privacy_merge")).status_code, 404)
+
+        self.client.force_login(self.admin)
+        response = self.client.get(reverse("manage_privacy_merge"))
+        self.assertTemplateUsed(response, "privacy/manage/merge.html")
+        self.assertEqual(len(response.context["rows"]), 1)
+
+        response = self.client.post(reverse("manage_privacy_merge"), {"keep": self.keep.id, "duplicate": self.dup.id})
+        self.assertRedirects(response, reverse("manage_privacy_merge"))
+        self.assertFalse(Ninja.objects.filter(pk=self.dup.pk).exists())
