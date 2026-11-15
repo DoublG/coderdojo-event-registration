@@ -3789,14 +3789,20 @@ class DojoEventRegistrationsCsvTests(TestCase):
         self.question = EventQuestion.objects.create(event=self.event, text="Laptop?", position=1)
         parent = User.objects.create_user(username="parent-csv", email="parent-csv@example.com", password="x")
         self.in_ninja = Ninja.objects.create(
-            name="Ada", family_name="Lovelace", date_of_birth=date.today().replace(year=date.today().year - 10),
+            name="Ada",
+            family_name="Lovelace",
+            date_of_birth=date.today().replace(year=date.today().year - 10),
             allergies_notes="peanuts",
         )
         self.formula_ninja = Ninja.objects.create(name="=SUM(A1)", family_name="Evil")
         for ninja in (self.in_ninja, self.formula_ninja):
             Guardianship.objects.create(guardian=parent, ninja=ninja, relation=Guardianship.PARENT)
-        self.confirmed = Registration.objects.create(event=self.event, ninja=self.in_ninja, waiting_list=False, position=1)
-        self.waiting = Registration.objects.create(event=self.event, ninja=self.formula_ninja, waiting_list=True, position=1)
+        self.confirmed = Registration.objects.create(
+            event=self.event, ninja=self.in_ninja, waiting_list=False, position=1
+        )
+        self.waiting = Registration.objects.create(
+            event=self.event, ninja=self.formula_ninja, waiting_list=True, position=1
+        )
         RegistrationAnswer.objects.create(registration=self.confirmed, question=self.question, answer=True)
         self.url = reverse("dojo_event_registrations_csv", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
 

@@ -136,7 +136,9 @@ def dojo_event_registrations_csv(request, dojo_id, event_id):
     event = get_object_or_404(Event, id=event_id, dojo=access.dojo, external_registration_url="")
     log_access(event)
     response = HttpResponse(content_type="text/csv; charset=utf-8")
-    response["Content-Disposition"] = f'attachment; filename="registrations-{event.start_time:%Y-%m-%d}-{event.id}.csv"'
+    response["Content-Disposition"] = (
+        f'attachment; filename="registrations-{event.start_time:%Y-%m-%d}-{event.id}.csv"'
+    )
     export.write_csv(event, response)
     return response
 

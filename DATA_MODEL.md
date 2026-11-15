@@ -429,6 +429,14 @@ erDiagram
   `dojo_event_give_place`, `MANAGE_EVENTS`, POST): under the session's lock,
   refused when the child isn't waiting or no place is free, mails the family
   like an automatic promotion.
+- **CSV of a session's registrations:** `dojo_event_registrations_csv`
+  (`MANAGE_EVENTS`, not for sessions registering elsewhere), built by
+  `events/export.py`: name, age on the day, home dojo, status, waiting
+  position, presence, signed-up time, one column per sign-up question. No
+  health notes, no date of birth, no parent contact (minimisation); a cell
+  that could run as a spreadsheet formula is prefixed with `'`; every
+  download is an audit-log access entry (`core.audit.log_access`). Nothing
+  is stored: the file is generated per request.
 - **Places:** `Event.places_left` = `places` − confirmed registrations
   (those with `waiting_list=False`). When a confirmed place is cancelled,
   the next person on the waiting list is promoted and the dojo's team (its
