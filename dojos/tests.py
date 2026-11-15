@@ -3769,3 +3769,84 @@ class SessionNoticeOrganisationTests(TestCase):
             notify_url, {"kind": "message", "audience": "both", "subject": "Hi", "message": "See you!", "send": "1"}
         )
         self.assertEqual(self.events[self.org_dojo].notices.count(), 1)
+
+
+class DojoEventRegistrationsCsvTests(TestCase):
+    def setUp(self):
+        from accounts.models import Guardianship
+        from events.models import EventQuestion, RegistrationAnswer
+
+        self.owner = make_champion(username="csv-owner")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.event = Event.objects.create(
+            dojo=self.dojo,
+            name="Saturday",
+            places=1,
+            start_time=timezone.now() + timedelta(days=5),
+            end_time=timezone.now() + timedelta(days=5, hours=2),
+            status=Event.OPEN,
+        )
+        self.question = EventQuestion.objects.create(event=self.event, text="Laptop?", position=1)
+        parent = User.objects.create_user(username="parent-csv", email="parent-csv@example.com", password="x")
+        self.in_ninja = Ninja.objects.create(
+            name="Ada",
+            family_name="Lovelace",
+            date_of_birth=date.today().replace(year=date.today().year - 10),
+            allergies_notes="peanuts",
+        )
+        self.formula_ninja = Ninja.objects.create(name="=SUM(A1)", family_name="Evil")
+        for ninja in (self.in_ninja, self.formula_ninja):
+            Guardianship.objects.create(guardian=parent, ninja=ninja, relation=Guardianship.PARENT)
+        self.confirmed = Registration.objects.create(
+            event=self.event, ninja=self.in_ninja, waiting_list=False, position=1
+        )
+        self.waiting = Registration.objects.create(
+            event=self.event, ninja=self.formula_ninja, waiting_list=True, position=1
+        )
+        RegistrationAnswer.objects.create(registration=self.confirmed, question=self.question, answer=True)
+        self.url = reverse("dojo_event_registrations_csv", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+
+    def test_anonymous_is_sent_to_login(self):
+        self.assertEqual(self.client.get(self.url).status_code, 302)
+
+    def test_someone_outside_the_team_gets_404(self):
+        self.client.force_login(make_champion(username="csv-other"))
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    def test_download_lists_children_answers_and_waiting_list(self):
+        import csv as csvmodule
+        import io
+
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response["Content-Type"].startswith("text/csv"))
+        self.assertIn("attachment", response["Content-Disposition"])
+        text = response.content.decode("utf-8-sig")
+        rows = list(csvmodule.reader(io.StringIO(text)))
+        self.assertEqual(rows[0][-1], "Laptop?")
+        self.assertEqual(len(rows), 3)
+        self.assertEqual(rows[1][0], "Ada Lovelace")
+        self.assertEqual(rows[1][1], "10")
+        self.assertEqual(rows[1][-1], "Yes")
+        # The waiting list comes after, with its position; the name can't run as a formula.
+        self.assertEqual(rows[2][0], "'=SUM(A1) Evil")
+        self.assertEqual(rows[2][4], "1")
+        # Minimised: no health notes, no parent contact details.
+        self.assertNotIn("peanuts", text)
+        self.assertNotIn("parent-csv@example.com", text)
+
+    def test_a_session_registering_elsewhere_has_no_list(self):
+        organisation = make_dojo("Org", champion=self.owner, kind=Dojo.ORGANISATION)
+        external = Event.objects.create(
+            dojo=organisation,
+            name="CP",
+            places=0,
+            start_time=timezone.now(),
+            end_time=timezone.now() + timedelta(hours=1),
+            external_registration_url="https://example.com",
+        )
+        self.client.force_login(self.owner)
+        url = reverse("dojo_event_registrations_csv", kwargs={"dojo_id": organisation.id, "event_id": external.id})
+        self.assertEqual(self.client.get(url).status_code, 404)

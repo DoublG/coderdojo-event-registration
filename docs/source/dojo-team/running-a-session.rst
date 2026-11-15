@@ -97,6 +97,22 @@ list also has a quick button for the most common next step (**Publish**,
 reopened the same way if it goes ahead after all. Changing the status
 never removes anyone who has already signed up.
 
+Downloading the list of registrations
+--------------------------------------
+
+On a session's page, **Download the list (CSV)** saves a spreadsheet file
+with every child who has a place, then those on the waiting list in their
+order: name, age on the day of the session, home dojo, whether the child
+has a place, the position on the waiting list, whether the child was
+present, when the family signed up, and one column per sign-up question
+with the answer. Handy for planning a room or printing a list.
+
+The file leaves out the children's health notes and the parents' contact
+details on purpose; to reach the families, use **Mail the families**.
+Every download is recorded in the audit log, so treat the file like any
+list of children: keep it only as long as you need it. Sessions that take
+their registrations on another website have no list here.
+
 Mailing the families of a session
 ----------------------------------
 

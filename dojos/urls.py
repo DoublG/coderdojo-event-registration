@@ -36,6 +36,11 @@ urlpatterns = [
         name="dojo_event_cancel",
     ),
     path(
+        "dojos/<int:dojo_id>/events/<int:event_id>/registrations.csv",
+        views.dojo_event_registrations_csv,
+        name="dojo_event_registrations_csv",
+    ),
+    path(
         "dojos/<int:dojo_id>/events/<int:event_id>/attendance/",
         views.dojo_event_attendance,
         name="dojo_event_attendance",
