@@ -43,6 +43,23 @@ team runs it, and which pathways it covers (see below). **Aimed at**
 can mark it as a girls' session: it gets a "Girls' session" label on the
 site, but anyone can still sign up.
 
+Under the places you can also set when registrations **open** and
+**close**. Both are optional and entered like the date and time (for
+example 01/09/2030 09:30). Before the opening moment the session says
+"Registrations not open yet" and nobody can sign up; from the closing
+moment on it says "Registrations closed". The dates only narrow an open
+session: a draft stays hidden and a closed session stays closed, whatever
+the dates say.
+
+A dojo whose team has children of its own can also **hold places for the
+team's children**: say how many places are kept for the children of your
+champion and mentors, and from when everyone can take them (blank: when
+registrations close, or the start of the session). Until then another
+family can only take the places that aren't held; once the moment has
+passed the held places that are still free go to the children waiting
+longest, and their families get a mail. A child counts as the team's when
+one of their parents is an active champion or mentor of the dojo.
+
 For the banner image, pick one of the ready-made templates shown on the
 form, or upload your own further down — uploading a file always takes
 priority if you do both. An uploaded image can be a JPEG, PNG, GIF or WebP
@@ -62,6 +79,23 @@ Giving a full session more places moves the children who have waited
 longest on its waiting list into the new places straight away, and their
 families get a mail. Giving it fewer places never takes a place away from
 a child who already has one.
+
+The waiting list
+----------------
+
+When a session is full, families can still sign up: the child goes on the
+waiting list, in the order of signing up. By default (**Automatic**) a
+place that frees up goes to the child waiting longest, whose family gets a
+mail.
+
+If you'd rather choose who gets a place, set **When a place frees up on a
+full session** to **The team chooses** on your dojo's **Settings** page.
+Then nobody moves up by itself: when a place frees up while children are
+waiting, the champion and mentors get a notification, and the session's page
+has a **Waiting list** card with the children in order and a **Give a
+place** button for each, as long as a place is free. The family of the child
+you pick gets the same mail as in automatic mode. Whatever the setting, the
+card lets you give a free place yourself.
 
 Session status
 ---------------

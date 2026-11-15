@@ -335,6 +335,13 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 5 * 60.0,
         "options": {"expires": 5 * 60},
     },
+    # Places held for the team's children that were released (events.capacity):
+    # a short check; the filling itself runs on the default queue.
+    "release-reserved-places": {
+        "task": "events.tasks.release_reserved_places",
+        "schedule": 15 * 60.0,
+        "options": {"expires": 15 * 60},
+    },
     # Heavier daily jobs run on the default queue (the mailing worker), so
     # they never hold up the 10-second dispatcher: an explicit "queue".
     "session-reminders": {

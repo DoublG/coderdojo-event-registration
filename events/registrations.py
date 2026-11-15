@@ -15,12 +15,16 @@ from typing import TYPE_CHECKING, Any
 
 from django.db import transaction
 from django.db.models import Max
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from accounts.home_dojo import assign_on_signup
+from dojos.team import notify_managers
 from mailing.automated import booking_mail, waitlist_promoted_mail
 
+from . import capacity
 from . import questions as event_questions
 from .models import Event, Registration, RegistrationCancellation
 
@@ -59,6 +63,8 @@ def sign_up(
     with transaction.atomic():
         event = _lock(event.pk)
         if not event.registration_open:
+            if event.registration_not_yet_open:
+                raise RegistrationError(_("Registrations for this session haven't opened yet."))
             raise RegistrationError(_("Registrations for this session are closed."))
         signed_up = set(
             Registration.objects.filter(event=event, ninja__in=children).values_list("ninja_id", flat=True)
@@ -73,11 +79,18 @@ def sign_up(
 
         position = Registration.objects.filter(event=event).aggregate(Max("position"))["position__max"] or 0
         confirmed = Registration.objects.filter(event=event, waiting_list=False).count()
+        team_taken = capacity.team_confirmed(event) if event.reserved_places else 0
+        team_ids = (
+            capacity.team_child_ids(event, [child.id for child in new_children]) if event.reserved_places else set()
+        )
         pathways = list(event.pathways.all())
         results: list[dict[str, Any]] = []
         for child in new_children:
             position += 1
-            waiting_list = confirmed >= event.places
+            is_team_child = child.id in team_ids
+            waiting_list = not capacity.can_take(
+                event, is_team_child=is_team_child, confirmed=confirmed, team_taken=team_taken
+            )
             registration = Registration.objects.create(
                 event=event, ninja=child, waiting_list=waiting_list, position=position
             )
@@ -90,6 +103,7 @@ def sign_up(
             assign_on_signup(child, event.dojo)
             if not waiting_list:
                 confirmed += 1
+                team_taken += is_team_child
             results.append({"child": child, "waiting_list": waiting_list, "registration": registration})
             booking_mail(registration)
         return results
@@ -119,7 +133,25 @@ def cancel(registration: Registration, cancelled_by: "User | None") -> Registrat
         if not was_confirmed:
             return None
         promoted = _promote(event, at_most=1)
+        if not promoted and event.dojo.waitlist_mode == event.dojo.MANUAL:
+            _tell_team_a_place_is_free(event)
         return promoted[0] if promoted else None
+
+
+def _tell_team_a_place_is_free(event: Event) -> None:
+    """In "The team chooses" mode nobody moves up by itself: the dojo's
+    managers are told a place is free while children are waiting."""
+    waiting = Registration.objects.filter(event=event, waiting_list=True).count()
+    if waiting:
+        notify_managers(
+            event.dojo,
+            gettext_lazy(
+                "A place is free at %(event)s and %(count)s children are waiting: give it on the session's page."
+            ),
+            url=reverse("dojo_event_detail", args=[event.dojo_id, event.pk]),
+            params={"event": event.name, "count": waiting},
+            once_unread=True,
+        )
 
 
 def fill_free_places(event: Event) -> list[Registration]:
@@ -135,18 +167,51 @@ def fill_free_places(event: Event) -> list[Registration]:
         return _promote(event)
 
 
+def give_place(registration: Registration) -> Registration:
+    """The dojo team gives a waiting child a free place (whatever the dojo's
+    waiting-list mode: the only way to fill a place in "The team chooses"
+    mode). Under the session's lock; raises RegistrationError when the child
+    isn't waiting any more or no place is free. Mails the family."""
+    with transaction.atomic():
+        event = _lock(registration.event_id)
+        current = Registration.objects.select_related("ninja").filter(pk=registration.pk).first()
+        if current is None or not current.waiting_list:
+            raise RegistrationError(_("This child isn't on the waiting list any more."))
+        if event.places - Registration.objects.filter(event=event, waiting_list=False).count() <= 0:
+            raise RegistrationError(_("No place is free."))
+        current.waiting_list = False
+        current.save(update_fields=["waiting_list"])
+        waitlist_promoted_mail(current)
+        return current
+
+
 def _promote(event: Event, at_most: int | None = None) -> list[Registration]:
     """Under the session's lock: move waiting children into the places that
     are really free (a session the team gave fewer places after it filled up
-    stays as it is), at most `at_most` of them."""
-    free = event.places - Registration.objects.filter(event=event, waiting_list=False).count()
-    if at_most is not None:
-        free = min(free, at_most)
-    if free <= 0:
+    stays as it is), at most `at_most` of them. Nothing in a dojo whose team
+    chooses who gets a free place (`give_place`)."""
+    if event.dojo.waitlist_mode == event.dojo.MANUAL:
         return []
-    promoted = list(Registration.objects.filter(event=event, waiting_list=True).order_by("position")[:free])
-    for registration in promoted:
+    confirmed = Registration.objects.filter(event=event, waiting_list=False).count()
+    if event.places - confirmed <= 0 or at_most == 0:
+        return []
+    team_taken = capacity.team_confirmed(event) if event.reserved_places else 0
+    waiting = list(Registration.objects.filter(event=event, waiting_list=True).order_by("position"))
+    team_ids = capacity.team_child_ids(event, [r.ninja_id for r in waiting]) if event.reserved_places else set()
+    promoted: list[Registration] = []
+    for registration in waiting:
+        if at_most is not None and len(promoted) >= at_most:
+            break
+        is_team_child = registration.ninja_id in team_ids
+        # Places held for the team's children are skipped over for the others.
+        if not capacity.can_take(event, is_team_child=is_team_child, confirmed=confirmed, team_taken=team_taken):
+            if confirmed >= event.places:
+                break
+            continue
         registration.waiting_list = False
         registration.save(update_fields=["waiting_list"])
         waitlist_promoted_mail(registration)
+        promoted.append(registration)
+        confirmed += 1
+        team_taken += is_team_child
     return promoted

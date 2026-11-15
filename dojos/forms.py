@@ -86,6 +86,7 @@ class DojoProfileForm(forms.ModelForm):
             "municipality",
             "address",
             "visit_notes",
+            "waitlist_mode",
             "pathways",
         ]
         labels = {
@@ -102,6 +103,7 @@ class DojoProfileForm(forms.ModelForm):
             "address": _("Address"),
             "visit_notes": _("Extra info"),
             "pathways": _("Pathways your dojo provides"),
+            "waitlist_mode": _("When a place frees up on a full session"),
         }
         # Every shown help text translated; the model's own are English notes for the admin.
         help_texts = {
@@ -113,6 +115,10 @@ class DojoProfileForm(forms.ModelForm):
             ),
             "visit_notes": _(
                 "Parking, entrance, accessibility — anything extra for the Visit us section. Supports basic Markdown."
+            ),
+            "waitlist_mode": _(
+                "Automatic: the child waiting longest gets the place at once. The team chooses: the place stays "
+                "free, and you give it to a child on the session's waiting list."
             ),
             "name": "",
             "schedule_description": "",
@@ -126,6 +132,7 @@ class DojoProfileForm(forms.ModelForm):
         # The input classes come from core.forms.SiteBoundField.
         widgets = {
             "pathways": forms.CheckboxSelectMultiple,
+            "waitlist_mode": forms.RadioSelect,
             "name": forms.TextInput(attrs={"placeholder": _("CoderDojo Ghent")}),
             "tagline": forms.Textarea(
                 attrs={"rows": 2, "placeholder": _("A short line shown right under the dojo's name.")}
@@ -152,8 +159,13 @@ class DojoProfileForm(forms.ModelForm):
             ),
         }
 
+    def clean_waitlist_mode(self):
+        return self.cleaned_data.get("waitlist_mode") or self.instance.waitlist_mode or Dojo.AUTO
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Not sent (an older form, a script): keep the dojo's current mode.
+        self.fields["waitlist_mode"].required = False
         self.fields["municipality"].queryset = self.fields["municipality"].queryset.order_by("name")
         self.fields["municipality"].empty_label = _("Not set")
         self.fields["template_icon"].initial = library_filename(self.instance.icon, "dojos") or NO_TEMPLATE_ICON

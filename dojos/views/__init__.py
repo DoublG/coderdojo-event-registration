@@ -40,6 +40,7 @@ from .event_pages import (  # noqa: F401
     _event_promotions_context,
     dojo_event_create,
     dojo_event_detail,
+    dojo_event_give_place,
     dojo_event_list,
     dojo_event_set_status,
 )
