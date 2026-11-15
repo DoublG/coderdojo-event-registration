@@ -393,6 +393,8 @@ erDiagram
         datetime start_time "same day as end_time"
         datetime end_time
         int places
+        datetime registration_opens_at "optional: sign-up not there before"
+        datetime registration_closes_at "optional: sign-up closed from"
         point location
         string venue_name
         int min_age
@@ -413,6 +415,11 @@ erDiagram
     }
 ```
 
+- **Registration window:** `registration_opens_at` / `registration_closes_at`
+  (both optional) narrow an *open* session: `Event.registration_open` is
+  `status == open` and now inside the window, so `sign_up`, the public page
+  and the list all agree; a draft or closed session is never opened by a
+  date. `events.services.session_problems` refuses a close before the open.
 - **Places:** `Event.places_left` = `places` − confirmed registrations
   (those with `waiting_list=False`). When a confirmed place is cancelled,
   the next person on the waiting list is promoted and the dojo's team (its
