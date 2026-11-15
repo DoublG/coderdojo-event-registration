@@ -4,6 +4,9 @@
 {% block admin_heading %}{{ event.name }}{% endblock %}
 
 {% block admin_topbar_extra %}
+  {% if not event.registers_externally %}
+    <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_event_registrations_csv' dojo_id=dojo.id event_id=event.id %}">{% translate "Download the list (CSV)" %}</a>
+  {% endif %}
   {% if dojo_access.can_take_attendance %}
     <a class="cd-btn cd-btn--primary label" href="{% url 'dojo_event_attendance' dojo_id=dojo.id event_id=event.id %}">{% translate "Take attendance" %}</a>
   {% endif %}

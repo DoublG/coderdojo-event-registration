@@ -42,6 +42,7 @@ from .event_pages import (  # noqa: F401
     dojo_event_detail,
     dojo_event_give_place,
     dojo_event_list,
+    dojo_event_registrations_csv,
     dojo_event_set_status,
 )
 from .notices import dojo_event_cancel, dojo_event_notify  # noqa: F401
