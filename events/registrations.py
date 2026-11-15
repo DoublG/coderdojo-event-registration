@@ -15,10 +15,13 @@ from typing import TYPE_CHECKING, Any
 
 from django.db import transaction
 from django.db.models import Max
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from accounts.home_dojo import assign_on_signup
+from dojos.team import notify_managers
 from mailing.automated import booking_mail, waitlist_promoted_mail
 
 from . import capacity
@@ -130,7 +133,25 @@ def cancel(registration: Registration, cancelled_by: "User | None") -> Registrat
         if not was_confirmed:
             return None
         promoted = _promote(event, at_most=1)
+        if not promoted and event.dojo.waitlist_mode == event.dojo.MANUAL:
+            _tell_team_a_place_is_free(event)
         return promoted[0] if promoted else None
+
+
+def _tell_team_a_place_is_free(event: Event) -> None:
+    """In "The team chooses" mode nobody moves up by itself: the dojo's
+    managers are told a place is free while children are waiting."""
+    waiting = Registration.objects.filter(event=event, waiting_list=True).count()
+    if waiting:
+        notify_managers(
+            event.dojo,
+            gettext_lazy(
+                "A place is free at %(event)s and %(count)s children are waiting: give it on the session's page."
+            ),
+            url=reverse("dojo_event_detail", args=[event.dojo_id, event.pk]),
+            params={"event": event.name, "count": waiting},
+            once_unread=True,
+        )
 
 
 def fill_free_places(event: Event) -> list[Registration]:
@@ -146,10 +167,31 @@ def fill_free_places(event: Event) -> list[Registration]:
         return _promote(event)
 
 
+def give_place(registration: Registration) -> Registration:
+    """The dojo team gives a waiting child a free place (whatever the dojo's
+    waiting-list mode: the only way to fill a place in "The team chooses"
+    mode). Under the session's lock; raises RegistrationError when the child
+    isn't waiting any more or no place is free. Mails the family."""
+    with transaction.atomic():
+        event = _lock(registration.event_id)
+        current = Registration.objects.select_related("ninja").filter(pk=registration.pk).first()
+        if current is None or not current.waiting_list:
+            raise RegistrationError(_("This child isn't on the waiting list any more."))
+        if event.places - Registration.objects.filter(event=event, waiting_list=False).count() <= 0:
+            raise RegistrationError(_("No place is free."))
+        current.waiting_list = False
+        current.save(update_fields=["waiting_list"])
+        waitlist_promoted_mail(current)
+        return current
+
+
 def _promote(event: Event, at_most: int | None = None) -> list[Registration]:
     """Under the session's lock: move waiting children into the places that
     are really free (a session the team gave fewer places after it filled up
-    stays as it is), at most `at_most` of them."""
+    stays as it is), at most `at_most` of them. Nothing in a dojo whose team
+    chooses who gets a free place (`give_place`)."""
+    if event.dojo.waitlist_mode == event.dojo.MANUAL:
+        return []
     confirmed = Registration.objects.filter(event=event, waiting_list=False).count()
     if event.places - confirmed <= 0 or at_most == 0:
         return []
