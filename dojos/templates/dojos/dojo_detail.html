@@ -256,6 +256,10 @@
               <span class="body detail-value">{{ dojo.phone }}</span>
             </div>
           {% endif %}
+          <div class="detail-row">
+            <span class="label detail-label">{% translate "Message" %}</span>
+            <span class="body detail-value"><a href="{% url 'dojo_contact' dojo_id=dojo.id %}">{% translate "Send a message to the team" %}</a></span>
+          </div>
         </div>
       </div>
       {% with notes=dojo|localized:"visit_notes" %}{% if notes %}

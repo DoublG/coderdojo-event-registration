@@ -54,6 +54,7 @@ from .profile import (  # noqa: F401
 )
 from .public import (  # noqa: F401
     _join_state,
+    dojo_contact,
     dojo_detail,
     dojo_finder_widget,
     dojo_join_request,

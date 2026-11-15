@@ -290,6 +290,21 @@ class EventQuestionForm(forms.Form):
         }
 
 
+class DojoContactForm(forms.Form):
+    """A visitor's message to a dojo's team (dojos.views.public.dojo_contact).
+    `website` is a honeypot: hidden from people, filled by robots."""
+
+    name = forms.CharField(label=_("Your name"), max_length=100)
+    email = forms.EmailField(label=_("Your email address"), max_length=254, help_text=_("The team answers here."))
+    message = forms.CharField(
+        label=_("Your message"),
+        max_length=2000,
+        widget=forms.Textarea(attrs={"rows": 7}),
+        help_text=_("Please don't include health information about a child."),
+    )
+    website = forms.CharField(required=False, widget=forms.TextInput(attrs={"autocomplete": "off", "tabindex": "-1"}))
+
+
 class DojoCreateForm(forms.ModelForm):
     """What an approved champion fills in to create a dojo (dojos.views.
     dojo_create): just enough to identify it. It starts as a draft; the rest

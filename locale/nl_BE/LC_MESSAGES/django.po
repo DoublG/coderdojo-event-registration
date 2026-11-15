@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CoderDojo Belgium\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 08:52+0000\n"
+"POT-Creation-Date: 2026-11-15 12:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: nl_BE <LL@li.org>\n"
@@ -171,7 +171,7 @@ msgstr "Huidig wachtwoord"
 #: accounts/templates/accounts/manage/people.html:49
 #: accounts/templates/accounts/manage/security.html:73
 #: accounts/templates/accounts/partials/_account_details_edit.html:20
-#: dojos/forms.py:99 dojos/forms.py:301
+#: dojos/forms.py:99 dojos/forms.py:316
 #: dojos/templates/dojos/dojo_detail.html:249
 #: pages/templates/pages/contact.html:34
 #: privacy/templates/privacy/manage/privacy.html:58
@@ -1033,6 +1033,7 @@ msgstr ""
 #: campaigns/templates/campaigns/manage/segment_form.html:11
 #: content/templates/content/manage/promotion_form.html:28
 #: content/templates/content/manage/sponsor_form.html:11
+#: dojos/templates/dojos/dojo_contact.html:34
 #: dojos/templates/dojos/dojo_create.html:31
 #: dojos/templates/dojos/dojo_event_create.html:32
 #: events/templates/events/event_signup.html:208
@@ -1187,7 +1188,7 @@ msgid "Find a session"
 msgstr "Zoek een sessie"
 
 #: accounts/templates/accounts/child_detail.html:137
-#: accounts/templates/accounts/child_detail.html:149 dojos/forms.py:441
+#: accounts/templates/accounts/child_detail.html:149 dojos/forms.py:456
 #: dojos/templates/dojos/dojo_members.html:37
 msgid "Belt"
 msgstr "Gordel"
@@ -1955,7 +1956,7 @@ msgstr "Wat elke rol opent"
 #: campaigns/templates/campaigns/manage/journey_list.html:13
 #: campaigns/templates/campaigns/manage/segment_list.html:12
 #: content/forms.py:101 content/templates/content/manage/sponsor_list.html:16
-#: dojos/forms.py:92 dojos/forms.py:301
+#: dojos/forms.py:92 dojos/forms.py:316
 #: dojos/templates/dojos/dojo_event_list.html:24 events/forms.py:197
 #: events/forms.py:272 events/forms.py:524 events/forms.py:567
 #: events/templates/events/manage/_badge_assign_results.html:11
@@ -3953,7 +3954,7 @@ msgid "Reject"
 msgstr "Afwijzen"
 
 # | msgid "Gender (optional)"
-#: applications/forms.py:134 dojos/forms.py:417 events/forms.py:617
+#: applications/forms.py:134 dojos/forms.py:432 events/forms.py:617
 msgid "Note (optional)"
 msgstr "Opmerking (optioneel)"
 
@@ -4162,7 +4163,7 @@ msgid "Preferred schedule"
 msgstr "Voorkeursmoment"
 
 #: applications/templates/applications/manage/application_detail.html:24
-#: campaigns/forms.py:180
+#: campaigns/forms.py:180 dojos/templates/dojos/dojo_detail.html:260
 msgid "Message"
 msgstr "Bericht"
 
@@ -6720,7 +6721,7 @@ msgstr "Meer weten"
 
 # | msgid "Language"
 # | msgid "Languages"
-#: core/admin_translations.py:70
+#: core/admin_translations.py:70 core/tests.py:398
 #: dojos/templates/dojos/partials/_translation_fields.html:10
 #, python-format
 msgid "In %(language)s"
@@ -6978,6 +6979,15 @@ msgstr "Het bestand is %(size)s MB; het mag hoogstens %(max)s MB zijn."
 msgid "Upload a PDF, JPEG or PNG file."
 msgstr "Upload een PDF-, JPEG- of PNG-bestand."
 
+# | msgid "This session isn't accepting new registrations"
+#: dojos/contact.py:57
+msgid "This dojo can't receive messages right now."
+msgstr "Deze dojo kan op dit moment geen berichten ontvangen."
+
+#: dojos/contact.py:64
+msgid "Too many messages for now: please try again in an hour."
+msgstr "Te veel berichten voor nu: probeer het over een uur opnieuw."
+
 #: dojos/dashboard.py:166
 msgid "Today"
 msgstr "Vandaag"
@@ -7050,7 +7060,7 @@ msgstr "Maximumleeftijd"
 msgid "Municipality"
 msgstr "Gemeente"
 
-#: dojos/forms.py:102 dojos/forms.py:301
+#: dojos/forms.py:102 dojos/forms.py:316
 #: dojos/templates/dojos/dojo_detail.html:244
 #: mailing/templates/mailing/manage/mail_queue.html:136
 #: mailing/templates/mailing/manage/mail_queue.html:180
@@ -7176,76 +7186,96 @@ msgstr ""
 msgid "e.g. Will your child bring their own laptop?"
 msgstr "bv. Brengt je kind een eigen laptop mee?"
 
+#: dojos/forms.py:297
+msgid "Your name"
+msgstr "Je naam"
+
+#: dojos/forms.py:298
+msgid "Your email address"
+msgstr "Je e-mailadres"
+
+#: dojos/forms.py:298
+msgid "The team answers here."
+msgstr "Het team antwoordt hier."
+
+#: dojos/forms.py:300
+msgid "Your message"
+msgstr "Je bericht"
+
 #: dojos/forms.py:303
+msgid "Please don't include health information about a child."
+msgstr "Vermeld geen gezondheidsinformatie over een kind."
+
+#: dojos/forms.py:318
 msgid "e.g. CoderDojo Leuven"
 msgstr "bv. CoderDojo Leuven"
 
 # | msgid "Enter your postcode or city"
-#: dojos/forms.py:304
+#: dojos/forms.py:319
 msgid "Street and number, postcode, city"
 msgstr "Straat en nummer, postcode, gemeente"
 
-#: dojos/forms.py:305
+#: dojos/forms.py:320
 msgid "hello@yourdojo.example"
 msgstr "hallo@jouwdojo.voorbeeld"
 
 # | msgid "Updates"
-#: dojos/forms.py:322
+#: dojos/forms.py:337
 msgid "Update"
 msgstr "Bericht"
 
-#: dojos/forms.py:342
+#: dojos/forms.py:357
 msgid ""
 "e.g. We've moved to the bigger room from October, same time, same entrance."
 msgstr ""
 "bv. Vanaf oktober zitten we in de grotere zaal, zelfde uur, zelfde ingang."
 
 # | msgid "New template"
-#: dojos/forms.py:346
+#: dojos/forms.py:361
 msgid "New update"
 msgstr "Nieuw bericht"
 
-#: dojos/forms.py:351
+#: dojos/forms.py:366
 msgid "Keep it short: 500 characters at most."
 msgstr "Hou het kort: maximaal 500 tekens."
 
-#: dojos/forms.py:362
+#: dojos/forms.py:377
 msgid "Their account's email"
 msgstr "E-mailadres van hun account"
 
-#: dojos/forms.py:363
+#: dojos/forms.py:378
 msgid "mentor@example.com"
 msgstr "mentor@voorbeeld.be"
 
-#: dojos/forms.py:368 dojos/templates/dojos/dojo_members.html:36
+#: dojos/forms.py:383 dojos/templates/dojos/dojo_members.html:36
 msgid "Ninja"
 msgstr "Ninja"
 
 # | msgid "Champion"
-#: dojos/forms.py:377
+#: dojos/forms.py:392
 msgid "New champion"
 msgstr "Nieuwe champion"
 
 # | msgid "%(name)s pathway"
-#: dojos/forms.py:439
+#: dojos/forms.py:454
 #, python-format
 msgid "What %(name)s showed"
 msgstr "Wat %(name)s liet zien"
 
-#: dojos/forms.py:444
+#: dojos/forms.py:459
 msgid "Pick a belt to award."
 msgstr "Kies een gordel om toe te kennen."
 
-#: dojos/forms.py:450
+#: dojos/forms.py:465
 #, python-format
 msgid "What %(name)s did"
 msgstr "Wat %(name)s gedaan heeft"
 
-#: dojos/forms.py:452 events/forms.py:612
+#: dojos/forms.py:467 events/forms.py:612
 msgid "Badge"
 msgstr "Badge"
 
-#: dojos/forms.py:456 events/forms.py:615
+#: dojos/forms.py:471 events/forms.py:615
 msgid "Pick a badge to award."
 msgstr "Kies een badge om toe te kennen."
 
@@ -7481,6 +7511,29 @@ msgstr ""
 #: dojos/templates/dojos/dojo_attendance.html:16
 msgid "No sessions yet."
 msgstr "Nog geen sessies."
+
+# | msgid "About %(name)s"
+#: dojos/templates/dojos/dojo_contact.html:3
+#: dojos/templates/dojos/dojo_contact.html:19
+#, python-format
+msgid "Write to %(name)s"
+msgstr "Schrijf naar %(name)s"
+
+#: dojos/templates/dojos/dojo_contact.html:20
+msgid ""
+"Your message goes by email to the dojo's champion and mentors, who answer "
+"you at the address you give. A copy stays in the site's mail log for a year, "
+"then it's deleted."
+msgstr "Je bericht gaat per e-mail naar de champion en de mentors van de dojo, die je antwoorden op het adres dat je opgeeft. Een kopie blijft een jaar in het maillogboek van de site staan en wordt dan verwijderd."
+
+#: dojos/templates/dojos/dojo_contact.html:30
+msgid "Leave this field empty"
+msgstr "Laat dit veld leeg"
+
+# | msgid "Shown on the homepage's Upcoming sessions card."
+#: dojos/templates/dojos/dojo_contact.html:35
+msgid "Send the message"
+msgstr "Verstuur het bericht"
 
 # | msgid "Create a dojo"
 #: dojos/templates/dojos/dojo_create.html:3
@@ -7848,6 +7901,10 @@ msgstr "Nog te bevestigen"
 #: events/templates/events/event_detail.html:130
 msgid "Ages"
 msgstr "Leeftijd"
+
+#: dojos/templates/dojos/dojo_detail.html:261
+msgid "Send a message to the team"
+msgstr "Stuur een bericht naar het team"
 
 # | msgid "Back to session"
 #: dojos/templates/dojos/dojo_event_attendance.html:8
@@ -9063,6 +9120,11 @@ msgstr "Bericht verwijderd."
 #, python-format
 msgid "Your request to join %(dojo)s has been sent to its team."
 msgstr "Je aanvraag om bij %(dojo)s te komen is naar het team gestuurd."
+
+#: dojos/views/public.py:178
+#, python-format
+msgid "Your message was sent to %(dojo)s. They'll answer by email."
+msgstr "Je bericht is verstuurd naar %(dojo)s. Ze antwoorden per e-mail."
 
 # | msgid "Youth mentor at %(dojo)s"
 #: dojos/views/team_pages.py:117

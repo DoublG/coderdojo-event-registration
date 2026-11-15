@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+{% block title %}{% blocktranslate with name=dojo.name %}Write to {{ name }}{% endblocktranslate %} · CoderDojo Belgium{% endblock %}
+{% block root_class %}info-page-root{% endblock %}
+
+{% block extra_style %}
+<style>
+  .info-page-root .shell { max-width: 720px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+  .info-page-root h1 { color: var(--ink); margin: 0 0 var(--space-3); }
+  .info-page-root .lead { color: var(--ink-muted); margin: 0 0 var(--space-5); }
+  .info-page-root .cd-card { padding: var(--space-5); }
+</style>
+{% endblock %}
+
+{% block content %}
+{% comment %}A visitor writes to a dojo's team (dojos.views.public.dojo_contact, dojos.contact). The "website" field is a honeypot, hidden from people.{% endcomment %}
+<div class="shell">
+  <h1 class="display-lg">{% blocktranslate with name=dojo.name %}Write to {{ name }}{% endblocktranslate %}</h1>
+  <p class="body-lg lead">{% translate "Your message goes by email to the dojo's champion and mentors, who answer you at the address you give. A copy stays in the site's mail log for a year, then it's deleted." %}</p>
+  <form class="cd-card cd-form" method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="cd-form__notes">{% for error in form.non_field_errors %}<p class="cd-form__note cd-form__note--error" role="alert">{{ error }}</p>{% endfor %}</div>
+    {% endif %}
+    {{ form.name.as_field_group }}
+    {{ form.email.as_field_group }}
+    {{ form.message.as_field_group }}
+    <div class="visually-hidden" aria-hidden="true">
+      <label for="{{ form.website.id_for_label }}">{% translate "Leave this field empty" %}</label>
+      {{ form.website }}
+    </div>
+    <div class="cd-form__actions">
+      <a class="cd-btn cd-btn--ghost label" href="{% url 'dojo_detail' dojo_id=dojo.id %}">{% translate "Cancel" %}</a>
+      <button type="submit" class="cd-btn cd-btn--primary label">{% translate "Send the message" %}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
