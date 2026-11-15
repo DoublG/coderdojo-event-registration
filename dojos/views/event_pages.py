@@ -3,6 +3,7 @@ session, its status (its sign-up questions card is .questions), and the
 organisation's Promotions card."""
 
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -10,7 +11,8 @@ from django.utils.translation import gettext_lazy as _
 
 from accounts.organisation import Area, has_area
 from content.manage import promotion_state
-from events import notices, registrations, services
+from core.audit import log_access
+from events import export, notices, registrations, services
 from events import questions as event_questions
 from events.forms import EventForm
 from events.models import Event, SessionNotice
@@ -120,6 +122,20 @@ def dojo_event_detail(request, dojo_id, event_id):
             **_admin_context(request, access),
         },
     )
+
+
+@login_required
+def dojo_event_registrations_csv(request, dojo_id, event_id):
+    """The session's registrations as a CSV file (events.export). Anyone who
+    manages the dojo's sessions; each download is recorded in the audit log,
+    since it hands out a list of children."""
+    access = require_dojo_access(request, dojo_id, MANAGE_EVENTS)
+    event = get_object_or_404(Event, id=event_id, dojo=access.dojo, external_registration_url="")
+    log_access(event)
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="registrations-{event.start_time:%Y-%m-%d}-{event.id}.csv"'
+    export.write_csv(event, response)
+    return response
 
 
 CHANGE_BUTTONS = {
