@@ -1,4 +1,4 @@
 # The load test's tools (CAPACITY.md, "Measuring again"), in a venv of their
 # own: never installed in the devcontainer image or on production.
-locust==2.46.7
+locust==2.47.0
 matplotlib==3.11.2
