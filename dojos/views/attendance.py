@@ -9,9 +9,12 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
+from accounts.models import Ninja
 from events import attendance
 from events import questions as event_questions
+from events import registrations as event_registrations
 from events.awards import BadgeError, BeltError, award_badge, award_belt
 from events.models import Badge, Belt, Event, NinjaEngagement, Registration
 from pathways.models import Pathway
@@ -23,6 +26,7 @@ from ..access import (
     require_dojo_access,
 )
 from ..forms import (
+    AddChildToSessionForm,
     AwardBadgeForm,
     AwardBeltForm,
 )
@@ -46,6 +50,8 @@ def _attendance_context(event):
     return {
         "event": event,
         "registrations": registrations,
+        # The team adds a child of its own dojo (dojo_event_attendance_add).
+        "add_child_form": _add_child_form(event),
         "present_count": sum(1 for r in registrations if r.attended),
         # The session's team, on the same list (who was there: insurance).
         "team_rows": team_rows,
@@ -75,6 +81,22 @@ def _attendance_context(event):
             )
         },
     }
+
+
+def _add_child_form(event, data=None):
+    """The "Add a child" form under the list, or None when there's nobody
+    to add (or the session can't take one: cancelled, signs up elsewhere)."""
+    if event.is_cancelled or event.registers_externally:
+        return None
+    candidates = (
+        Ninja.objects.filter(home_dojo_id=event.dojo_id)
+        .exclude(registration__event=event, registration__waiting_list=False)
+        .order_by("name", "family_name")
+    )
+    if data is None and not candidates.exists():
+        return None
+    waiting = event.registration_set.filter(waiting_list=True).values_list("ninja_id", flat=True)
+    return AddChildToSessionForm(data, event=event, candidates=candidates, waiting=waiting)
 
 
 def _awardable_belts(registrations):
@@ -351,6 +373,41 @@ def dojo_event_award_badge(request, dojo_id, event_id, registration_id):
     return _award_view(
         request, access, event_id, registration_id, AwardBadgeForm, "badge_forms", award_badge, BadgeError
     )
+
+
+@login_required
+def dojo_event_attendance_add(request, dojo_id, event_id):
+    """The team adds a child whose home dojo is this dojo to the session's
+    list (POST `ninja`; events.registrations.add_by_team), e.g. one who came
+    without signing up; marked present once the session has started. An
+    htmx request gets the whole attendance block back."""
+    access = require_dojo_access(request, dojo_id, TAKE_ATTENDANCE)
+    dojo = access.dojo
+    event = get_object_or_404(Event, id=event_id, dojo=dojo)
+    form = None
+    if request.method == "POST":
+        form = _add_child_form(event, request.POST)
+        if form is not None and form.is_valid():
+            ninja = form.cleaned_data["ninja"]
+            try:
+                registration = event_registrations.add_by_team(event, ninja)
+            except event_registrations.RegistrationError as error:
+                form.add_error("ninja", str(error))
+            else:
+                if event.start_time <= timezone.now():
+                    attendance.mark_child(registration, True, awarded_as=access.membership)
+                form = None
+                if not request.headers.get("HX-Request"):
+                    messages.success(request, _("%(name)s is on the list.") % {"name": ninja.full_name})
+        if form is not None and form.errors and not request.headers.get("HX-Request"):
+            messages.error(request, " ".join(error for errors in form.errors.values() for error in errors))
+
+    if request.headers.get("HX-Request"):
+        context = {"dojo": dojo, "dojo_access": access, **_attendance_context(event)}
+        if form is not None and form.errors:
+            context["add_child_form"] = form
+        return render(request, "dojos/partials/_attendance.html", context)
+    return redirect("dojo_event_attendance", dojo_id=dojo.id, event_id=event.id)
 
 
 @login_required

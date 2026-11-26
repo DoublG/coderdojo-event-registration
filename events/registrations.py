@@ -176,6 +176,39 @@ def give_place(registration: Registration) -> Registration:
         return current
 
 
+def add_by_team(event: Event, ninja: "Ninja") -> Registration:
+    """The dojo team puts a child of its own dojo (home dojo = the session's
+    dojo) on the session's attendance list, e.g. one who came without
+    signing up. A confirmed place even when the session is full: the team
+    decides, the child is there. A child on the waiting list gets a place
+    (and the family the promotion mail while the session hasn't started); a
+    new child gets no mail: the family didn't book it. Under the session's
+    lock; raises RegistrationError for a child with a place already, one of
+    another dojo, a cancelled session or one that registers elsewhere. The
+    audit log records who did it (Registration is recorded)."""
+    with transaction.atomic():
+        event = _lock(event.pk)
+        if event.status == Event.CANCELLED:
+            raise RegistrationError(_("This session is cancelled."))
+        if event.registers_externally:
+            raise RegistrationError(_("This session's sign-ups are on another website."))
+        if ninja.home_dojo_id != event.dojo_id:
+            raise RegistrationError(_("Only children whose home dojo is this dojo can be added here."))
+        current = Registration.objects.filter(event=event, ninja=ninja).first()
+        if current is not None:
+            if not current.waiting_list:
+                raise RegistrationError(_("%(name)s already has a place at this session.") % {"name": ninja.full_name})
+            current.waiting_list = False
+            current.save(update_fields=["waiting_list"])
+            if event.start_time > timezone.now():
+                waitlist_promoted_mail(current)
+            return current
+        position = Registration.objects.filter(event=event).aggregate(Max("position"))["position__max"] or 0
+        registration = Registration.objects.create(event=event, ninja=ninja, waiting_list=False, position=position + 1)
+        registration.pathways.set(event.pathways.all())
+        return registration
+
+
 def _promote(event: Event, at_most: int | None = None) -> list[Registration]:
     """Under the session's lock: move waiting children into the places that
     are really free (a session the team gave fewer places after it filled up

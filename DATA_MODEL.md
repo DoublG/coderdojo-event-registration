@@ -433,6 +433,14 @@ erDiagram
   `dojo_event_give_place`, `MANAGE_EVENTS`, POST): under the session's lock,
   refused when the child isn't waiting or no place is free, mails the family
   like an automatic promotion.
+- **Adding a child to the attendance list:** `registrations.add_by_team`
+  (`dojo_event_attendance_add`, `TAKE_ATTENDANCE`, POST): a child whose home
+  dojo is the session's dojo and who has no confirmed place gets one, under
+  the session's lock and even when it's full (the team decides, the child is
+  there); a child on the waiting list moves off it (the promotion mail while
+  the session hasn't started), a new one gets no mail; marked present when
+  the session has started. Not for a cancelled session or one that signs up
+  elsewhere. The audit log records who did it.
 - **CSV of a session's registrations:** `dojo_event_registrations_csv`
   (`MANAGE_EVENTS`, not for sessions registering elsewhere), built by
   `events/export.py`: name, age on the day, home dojo, status, waiting

@@ -3850,3 +3850,107 @@ class DojoEventRegistrationsCsvTests(TestCase):
         self.client.force_login(self.owner)
         url = reverse("dojo_event_registrations_csv", kwargs={"dojo_id": organisation.id, "event_id": external.id})
         self.assertEqual(self.client.get(url).status_code, 404)
+
+
+class AddChildToAttendanceTests(TestCase):
+    """The team adds a child of its own dojo to a session's list
+    (dojo_event_attendance_add, events.registrations.add_by_team)."""
+
+    def setUp(self):
+        from accounts.models import Guardianship
+
+        self.owner = make_champion(username="add-owner")
+        self.dojo = make_dojo("Ghent", champion=self.owner)
+        self.other = make_dojo("Antwerp")
+        now = timezone.now()
+        self.event = Event.objects.create(
+            name="Session",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time=now + timedelta(days=3),
+            end_time=now + timedelta(days=3, hours=2),
+            places=1,
+        )
+        self.parent = User.objects.create(username="add-parent", email="add@example.com")
+        self.full = Ninja.objects.create(name="Booked", home_dojo=self.dojo)
+        self.walk_in = Ninja.objects.create(name="Walkin", home_dojo=self.dojo)
+        self.waiting = Ninja.objects.create(name="Waiting", home_dojo=self.dojo)
+        self.visitor = Ninja.objects.create(name="Visitor", home_dojo=self.other)
+        for kid in (self.full, self.walk_in, self.waiting, self.visitor):
+            Guardianship.objects.create(guardian=self.parent, ninja=kid)
+        Registration.objects.create(event=self.event, ninja=self.full, waiting_list=False, position=1)
+        self.waiting_row = Registration.objects.create(
+            event=self.event, ninja=self.waiting, waiting_list=True, position=2
+        )
+
+    def _url(self):
+        return reverse("dojo_event_attendance_add", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+
+    def _page(self):
+        return reverse("dojo_event_attendance", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+
+    def test_the_list_offers_the_dojos_children_without_a_place(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self._page())
+        form = response.context["add_child_form"]
+        self.assertEqual(set(form.fields["ninja"].queryset), {self.walk_in, self.waiting})
+        self.assertContains(response, "Add a child from your dojo")
+        self.assertContains(response, "Waiting (on the waiting list)")
+
+    def test_adding_a_child_gives_a_place_even_when_full(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(self._url(), {"ninja": self.walk_in.pk})
+        self.assertRedirects(response, self._page())
+        registration = Registration.objects.get(event=self.event, ninja=self.walk_in)
+        self.assertFalse(registration.waiting_list)
+        self.assertIsNone(registration.attended)  # the session hasn't started
+
+    def test_a_child_on_the_waiting_list_moves_off_it(self):
+        self.client.force_login(self.owner)
+        self.client.post(self._url(), {"ninja": self.waiting.pk}, HTTP_HX_REQUEST="true")
+        self.waiting_row.refresh_from_db()
+        self.assertFalse(self.waiting_row.waiting_list)
+        self.assertEqual(Registration.objects.filter(event=self.event, ninja=self.waiting).count(), 1)
+
+    def test_once_started_the_child_is_marked_present(self):
+        Event.objects.filter(pk=self.event.pk).update(
+            start_time=timezone.now() - timedelta(minutes=30), end_time=timezone.now() + timedelta(hours=1)
+        )
+        self.client.force_login(self.owner)
+        response = self.client.post(self._url(), {"ninja": self.walk_in.pk}, HTTP_HX_REQUEST="true")
+        self.assertTemplateUsed(response, "dojos/partials/_attendance.html")
+        self.assertContains(response, "Walkin")
+        self.assertTrue(Registration.objects.get(event=self.event, ninja=self.walk_in).attended)
+
+    def test_a_child_of_another_dojo_is_refused(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(self._url(), {"ninja": self.visitor.pk}, HTTP_HX_REQUEST="true")
+        self.assertContains(response, "Pick a child to add.")
+        self.assertFalse(Registration.objects.filter(event=self.event, ninja=self.visitor).exists())
+
+    def test_the_service_refuses_a_child_with_a_place(self):
+        from events import registrations
+
+        with self.assertRaisesMessage(registrations.RegistrationError, "already has a place"):
+            registrations.add_by_team(self.event, self.full)
+        with self.assertRaisesMessage(registrations.RegistrationError, "home dojo"):
+            registrations.add_by_team(self.event, self.visitor)
+
+    def test_not_on_a_cancelled_session(self):
+        from events import registrations
+
+        Event.objects.filter(pk=self.event.pk).update(status=Event.CANCELLED)
+        with self.assertRaises(registrations.RegistrationError):
+            registrations.add_by_team(Event.objects.get(pk=self.event.pk), self.walk_in)
+        self.client.force_login(self.owner)
+        self.assertIsNone(self.client.get(self._page()).context["add_child_form"])
+
+    def test_get_does_nothing(self):
+        self.client.force_login(self.owner)
+        self.assertEqual(self.client.get(self._url()).status_code, 302)
+        self.assertFalse(Registration.objects.filter(event=self.event, ninja=self.walk_in).exists())
+
+    def test_someone_off_the_team_gets_404(self):
+        self.client.force_login(make_champion(username="add-outsider"))
+        self.assertEqual(self.client.post(self._url(), {"ninja": self.walk_in.pk}).status_code, 404)
+        self.assertFalse(Registration.objects.filter(event=self.event, ninja=self.walk_in).exists())

@@ -1,6 +1,7 @@
 from django import forms
 from django.conf import settings
 from django.utils.functional import lazy
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 from content import cache as content_cache
@@ -445,6 +446,33 @@ class AwardForm(forms.Form):
         """What the select shows (the queryset still accepts any)."""
         self.offered = list(offered)
         self.fields[self.field].widget.choices = [(award.pk, award.localized("name")) for award in self.offered]
+
+
+class AddChildToSessionForm(forms.Form):
+    """The attendance list's "Add a child": `candidates` are the children
+    whose home dojo is this dojo without a place at the session yet
+    (`waiting`: the ids of those on its waiting list).
+    events.registrations.add_by_team decides; the view puts its error on
+    the field."""
+
+    ninja = forms.ModelChoiceField(
+        label=_("Child"),
+        queryset=None,
+        empty_label=_("Pick a child"),
+        error_messages={"required": _("Pick a child to add."), "invalid_choice": _("Pick a child to add.")},
+    )
+
+    def __init__(self, *args, event, candidates, waiting=(), **kwargs):
+        kwargs.setdefault("auto_id", f"add-child-{event.pk}-%s")
+        super().__init__(*args, **kwargs)
+        waiting = set(waiting)
+        field = self.fields["ninja"]
+        field.queryset = candidates
+        field.label_from_instance = lambda ninja: (
+            gettext("%(name)s (on the waiting list)") % {"name": ninja.full_name}
+            if ninja.pk in waiting
+            else ninja.full_name
+        )
 
 
 class AwardBeltForm(AwardForm):

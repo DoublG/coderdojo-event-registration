@@ -15,6 +15,7 @@ from .attendance import (  # noqa: F401
     _team_attendance_rows,
     dojo_attendance,
     dojo_event_attendance,
+    dojo_event_attendance_add,
     dojo_event_attendance_mark,
     dojo_event_attendance_mark_all,
     dojo_event_award_badge,

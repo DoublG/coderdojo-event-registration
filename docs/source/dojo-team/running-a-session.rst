@@ -227,6 +227,15 @@ wristbands) up to date.
 A child whose home dojo is another dojo is marked **Visiting**; hover over
 it to see which dojo.
 
+A child of your dojo who came without signing up can still go on the list:
+open **Add a child from your dojo** under the list, pick the child and
+press **Add to the list**. It offers the children whose home dojo is your
+dojo and who have no place yet. They get a place even when the session is
+full, and once the session has started they're marked present straight
+away. A child on the waiting list moves off it (before the session, their
+family gets the usual mail that a place came free); a child who wasn't
+signed up gets no mail.
+
 If the session has sign-up questions, each child's row shows the family's
 answers, and the top of the list counts them ("3 yes · 2 no"), so you know
 for example how many laptops to bring. If an answer turns out wrong at the

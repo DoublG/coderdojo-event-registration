@@ -38,6 +38,21 @@ is deliberately not wired up here.
     {% endfor %}
   </div>
 
+  {% if add_child_form and dojo_access.can_take_attendance %}
+    {# A child of this dojo who came without signing up (dojos.views.dojo_event_attendance_add). #}
+    <details class="cd-attendance__add"{% if add_child_form.errors %} open{% endif %}>
+      <summary class="label">{% translate "Add a child from your dojo" %}</summary>
+      <form class="cd-attendance__add-form" method="post" action="{% url 'dojo_event_attendance_add' dojo_id=dojo.id event_id=event.id %}"
+            hx-post="{% url 'dojo_event_attendance_add' dojo_id=dojo.id event_id=event.id %}"
+            hx-target="#attendance-{{ event.id }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <p class="caption">{% translate "Children whose home dojo is this dojo and who have no place yet. They get a place even when the session is full, and are marked present once it has started. A child on the waiting list moves off it." %}</p>
+        {{ add_child_form.ninja.as_field_group }}
+        <button type="submit" class="cd-btn cd-btn--secondary label">{% translate "Add to the list" %}</button>
+      </form>
+    </details>
+  {% endif %}
+
   <h3 class="cd-attendance__team-title label">{% translate "Session team" %}</h3>
   <div class="cd-attendance__list">
     {% for row in team_rows %}
