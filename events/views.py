@@ -22,6 +22,7 @@ from .search import (
     EVENT_LIST_CACHE_TIMEOUT,
     EVENT_LIST_FIRST_PAGE_KEY,
     WIDGET_PAGE_SIZE,
+    filter_by_place,
     upcoming_available_events,
 )
 
@@ -62,9 +63,8 @@ def event_list(request):
 
         location = form.cleaned_data.get("location")
         if location:
-            events = events.filter(
-                Q(dojo__address__icontains=location) | Q(dojo__municipality__name__icontains=location)
-            )
+            # Near the place typed: the session's own location, else its dojo's.
+            events = filter_by_place(events, location)
 
         date_bucket = form.cleaned_data.get("date")
         if date_bucket == "week":

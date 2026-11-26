@@ -2371,3 +2371,50 @@ class ManualWaitingListTests(TestCase):
         )
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.save().waitlist_mode, Event.AUTO)
+
+
+class EventListPlaceFilterTests(TestCase):
+    """The events list's Location filter measures from where a session is
+    held: its own location, else its dojo's (events.search.filter_by_place)."""
+
+    GHENT = (51.0543, 3.7174)
+
+    def setUp(self):
+        from django.contrib.gis.geos import Point
+
+        cache.clear()
+        self.ghent_dojo = make_dojo("Ghent", location=Point(3.72, 51.05, srid=4326), address="Kouter 1, Gent")
+        self.liege_dojo = make_dojo("Liège", location=Point(5.57, 50.63, srid=4326), address="Place 1, Liège")
+        # At the Ghent dojo, no location of its own: the dojo's counts.
+        self.at_dojo = _future_event(self.ghent_dojo, name="At the dojo")
+        # The Liège dojo's session held in Ghent.
+        self.moved = _future_event(
+            self.liege_dojo, name="Held in Ghent", location=Point(3.73, 51.06, srid=4326), venue_name="Library"
+        )
+        # The Ghent dojo's session held in Liège.
+        self.away = _future_event(self.ghent_dojo, name="Held in Liege", location=Point(5.58, 50.64, srid=4326))
+        self.home = _future_event(self.liege_dojo, name="Liege at home")
+
+    def _names(self, place, coords):
+        from unittest.mock import patch
+
+        with patch("events.search.geocode", return_value=coords):
+            response = self.client.get(reverse("event_list"), {"location": place})
+        return {event.name for event in response.context["events"]}
+
+    def test_the_sessions_own_location_wins_over_its_dojos(self):
+        self.assertEqual(self._names("Gent", self.GHENT), {"At the dojo", "Held in Ghent"})
+        self.assertEqual(self._names("Liège", (50.63, 5.57)), {"Held in Liege", "Liege at home"})
+
+    def test_a_place_that_cant_be_found_falls_back_to_the_text(self):
+        self.assertEqual(self._names("Kouter", None), {"At the dojo", "Held in Liege"})
+        self.assertEqual(self._names("Library", None), {"Held in Ghent"})
+
+    def test_the_geocoder_being_unavailable_falls_back_to_the_text(self):
+        from unittest.mock import patch
+
+        import requests
+
+        with patch("events.search.geocode", side_effect=requests.RequestException):
+            response = self.client.get(reverse("event_list"), {"location": "Liège"})
+        self.assertEqual({e.name for e in response.context["events"]}, {"Held in Ghent", "Liege at home"})

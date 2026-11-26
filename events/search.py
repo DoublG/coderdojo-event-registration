@@ -1,8 +1,14 @@
+import requests
+from django.contrib.gis.db.models import PointField
+from django.contrib.gis.geos import Point
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Count, F, Q
+from django.db.models import Count, ExpressionWrapper, F, FloatField, Q, QuerySet
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
+from geo.functions import DistanceSphere
+from geo.geocoding import geocode
 from monitoring import recorder
 
 from .models import Event
@@ -25,6 +31,41 @@ CACHE_LIMIT = 200  # bound the cached list's size regardless of how far out even
 # cleared by the same signals.
 EVENT_LIST_FIRST_PAGE_KEY = "events:list:first-page"
 EVENT_LIST_CACHE_TIMEOUT = 60
+
+
+# The events list's place filter: sessions within this distance of the
+# place typed, measured from the session's own location, else its dojo's.
+NEAR_RADIUS_KM = 20
+
+
+def where_held() -> Coalesce:
+    """A session's position: its own `location` when it has one (held
+    somewhere else than the dojo), otherwise its dojo's."""
+    return Coalesce(F("location"), F("dojo__location"), output_field=PointField(srid=4326))
+
+
+def filter_by_place(events: "QuerySet[Event]", place: str) -> "QuerySet[Event]":
+    """The events list's Location filter. The place is geocoded
+    (geo.geocoding.geocode: the cache, the municipalities, then Nominatim):
+    sessions held within NEAR_RADIUS_KM of it (where_held), annotated with
+    `distance_km`. When it can't be placed (no match, or the geocoder is
+    unavailable) it falls back to the text: the dojo's address or
+    municipality, or the session's venue."""
+    try:
+        coords = geocode(place)
+    except requests.RequestException:
+        coords = None
+    if coords is None:
+        return events.filter(
+            Q(dojo__address__icontains=place)
+            | Q(dojo__municipality__name__icontains=place)
+            | Q(venue_name__icontains=place)
+        )
+    lat, lon = coords
+    origin = Point(lon, lat, srid=4326)
+    return events.annotate(
+        distance_km=ExpressionWrapper(DistanceSphere(where_held(), origin) / 1000.0, output_field=FloatField())
+    ).filter(distance_km__lte=NEAR_RADIUS_KM)
 
 
 def clear_event_list_cache() -> None:

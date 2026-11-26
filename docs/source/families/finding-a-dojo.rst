@@ -27,6 +27,10 @@ in the **Language** menu and press **Search**. The **Events** list has the
 same search form and filters, plus a **Dojo**, a **Date** and the child's
 **Age**.
 
+On the **Events** list, a postcode or town shows the sessions held within
+20 km of it, soonest first. A session held somewhere else than its dojo
+counts from where it's held.
+
 To only see dojos that work on a certain pathway (Scratch, Python,
 micro:bit, ...), pick it in the **Pathway** menu and press **Search**. A pathway's own page links
 to the dojo finder and the **Events** list already filtered on it.
