@@ -76,6 +76,21 @@ class Event(TranslatableModel):
     end_time = models.DateTimeField()
 
     places = models.IntegerField()
+    # What happens when a place frees up (the same choices as
+    # Dojo.waitlist_mode): copied from the dojo when the session is created
+    # (save()), then the team can change it for this session alone.
+    AUTO = "auto"
+    MANUAL = "manual"
+    WAITLIST_CHOICES = [(AUTO, _("Automatic")), (MANUAL, _("The team chooses"))]
+    waitlist_mode = models.CharField(
+        max_length=10,
+        choices=WAITLIST_CHOICES,
+        blank=True,
+        default="",
+        help_text="Automatic: a free place goes to the child waiting longest (the family is mailed). "
+        "The team chooses: it stays free until the team gives it to a child on the waiting list. "
+        "Blank on a new session: the dojo's waiting-list mode is copied in.",
+    )
     # Optional window for signing up (an open session only): before the
     # first the sign-up isn't there yet, from the second on it's closed,
     # whatever the status says. Blank = no limit on that side.
@@ -159,6 +174,10 @@ class Event(TranslatableModel):
         ]
 
     def save(self, *args, **kwargs):
+        if not self.waitlist_mode:
+            self.waitlist_mode = self.dojo.waitlist_mode or self.AUTO
+            if kwargs.get("update_fields") is not None:
+                kwargs["update_fields"] = {*kwargs["update_fields"], "waitlist_mode"}
         if self.status == self.OPEN and self.published_at is None:
             self.published_at = timezone.now()
             if kwargs.get("update_fields") is not None:
@@ -171,6 +190,12 @@ class Event(TranslatableModel):
     def content_languages(self):
         """A session is given in, and written in, its dojo's languages."""
         return self.dojo.content_languages()
+
+    @property
+    def team_chooses_places(self):
+        """The team gives a free place itself ("The team chooses"); a row
+        saved without save() (bulk_create) and still blank is automatic."""
+        return self.waitlist_mode == self.MANUAL
 
     @property
     def places_left(self):

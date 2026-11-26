@@ -68,7 +68,8 @@ class Dojo(TranslatableModel):
         choices=WAITLIST_CHOICES,
         default=AUTO,
         help_text="Automatic: a free place goes to the child waiting longest (the family is mailed). "
-        "The team chooses: it stays free until the team gives it to a child on the waiting list.",
+        "The team chooses: it stays free until the team gives it to a child on the waiting list. "
+        "The default for new sessions (Event.waitlist_mode), each of which can change it.",
     )
     kind = models.CharField(
         max_length=12,

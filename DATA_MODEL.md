@@ -393,6 +393,7 @@ erDiagram
         datetime start_time "same day as end_time"
         datetime end_time
         int places
+        string waitlist_mode "auto, manual: copied from the dojo"
         datetime registration_opens_at "optional: sign-up not there before"
         datetime registration_closes_at "optional: sign-up closed from"
         point location
@@ -420,8 +421,11 @@ erDiagram
   `status == open` and now inside the window, so `sign_up`, the public page
   and the list all agree; a draft or closed session is never opened by a
   date. `events.services.session_problems` refuses a close before the open.
-- **Waiting-list mode** (`Dojo.waitlist_mode`, the dojo's Settings page):
-  `auto` (default) = a freed place goes to the child waiting longest
+- **Waiting-list mode** (`Event.waitlist_mode`, on the session's form;
+  `Dojo.waitlist_mode`, the dojo's Settings page, is only the default that
+  `Event.save()` copies into a new session, so changing it leaves planned
+  sessions alone; switching a session to `auto` in the form fills its free
+  places): `auto` (default) = a freed place goes to the child waiting longest
   (`events.registrations._promote`); `manual` = `_promote` does nothing, so
   nobody moves up by itself, `cancel` notifies the dojo's managers once while
   children wait, and the team gives a place with

@@ -88,6 +88,12 @@ place** button for each, as long as a place is free. The family of the child
 you pick gets the same mail as in automatic mode. Whatever the setting, the
 card lets you give a free place yourself.
 
+The dojo's setting is where every new session starts. To do it differently
+for one session, change **When a place frees up** on that session's page:
+changing the dojo's setting later leaves the sessions you already planned
+as they are. When you switch a session to **Automatic** while places are
+free, the children waiting longest get them at once.
+
 Session status
 ---------------
 

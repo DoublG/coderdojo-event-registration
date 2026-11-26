@@ -118,7 +118,8 @@ class DojoProfileForm(forms.ModelForm):
             ),
             "waitlist_mode": _(
                 "Automatic: the child waiting longest gets the place at once. The team chooses: the place stays "
-                "free, and you give it to a child on the session's waiting list."
+                "free, and you give it to a child on the session's waiting list. New sessions start with this "
+                "setting; you can change it per session."
             ),
             "name": "",
             "schedule_description": "",

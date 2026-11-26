@@ -2255,11 +2255,32 @@ class ManualWaitingListTests(TestCase):
             registrations.give_place(self.second)
 
     def test_the_automatic_mode_is_unchanged(self):
-        Dojo.objects.filter(pk=self.dojo.pk).update(waitlist_mode=Dojo.AUTO)
-        event = Event.objects.get(pk=self.event.pk)
+        Event.objects.filter(pk=self.event.pk).update(waitlist_mode=Event.AUTO)
         registrations.cancel(Registration.objects.get(pk=self.confirmed.pk), cancelled_by=self.parent)
         self.assertFalse(Registration.objects.get(pk=self.second.pk).waiting_list)
-        self.assertEqual(event.dojo.waitlist_mode, Dojo.AUTO)
+
+    def test_a_new_session_copies_the_dojos_mode(self):
+        self.assertEqual(self.event.waitlist_mode, Event.MANUAL)
+        Dojo.objects.filter(pk=self.dojo.pk).update(waitlist_mode=Dojo.AUTO)
+        self.assertEqual(_future_event(Dojo.objects.get(pk=self.dojo.pk)).waitlist_mode, Event.AUTO)
+
+    def test_changing_the_dojo_leaves_existing_sessions_alone(self):
+        Dojo.objects.filter(pk=self.dojo.pk).update(waitlist_mode=Dojo.AUTO)
+        registrations.cancel(Registration.objects.get(pk=self.confirmed.pk), cancelled_by=self.parent)
+        self.assertTrue(Registration.objects.get(pk=self.second.pk).waiting_list)
+
+    def test_a_session_can_be_automatic_in_a_manual_dojo(self):
+        event = _future_event(self.dojo, places=1, waitlist_mode=Event.AUTO)
+        first, second = (r["registration"] for r in registrations.sign_up(event, self.kids[:2]))
+        registrations.cancel(first, cancelled_by=self.parent)
+        self.assertFalse(Registration.objects.get(pk=second.pk).waiting_list)
+
+    def test_a_session_can_be_manual_in_an_automatic_dojo(self):
+        dojo = make_dojo("Bruges", champion=self.owner)
+        event = _future_event(dojo, places=1, waitlist_mode=Event.MANUAL)
+        first, second = (r["registration"] for r in registrations.sign_up(event, self.kids[:2]))
+        registrations.cancel(first, cancelled_by=self.parent)
+        self.assertTrue(Registration.objects.get(pk=second.pk).waiting_list)
 
     def test_the_team_page_lists_the_waiting_and_gives_a_place(self):
         from django.urls import reverse
@@ -2299,3 +2320,54 @@ class ManualWaitingListTests(TestCase):
         from dojos.forms import DojoProfileForm
 
         self.assertIn("waitlist_mode", DojoProfileForm(instance=self.dojo).fields)
+
+    def test_the_event_form_starts_with_the_dojos_mode(self):
+        from events.forms import EventForm
+
+        form = EventForm(instance=Event(dojo=self.dojo), dojo=self.dojo)
+        self.assertEqual(form["waitlist_mode"].value(), Event.MANUAL)
+        self.assertEqual(EventForm(instance=self.event, dojo=self.dojo)["waitlist_mode"].value(), Event.MANUAL)
+
+    def test_switching_the_session_to_automatic_fills_the_free_place(self):
+        from django.urls import reverse
+
+        registrations.cancel(self.confirmed, cancelled_by=self.parent)
+        self.client.force_login(self.owner)
+        start = timezone.localtime(self.event.start_time)
+        end = timezone.localtime(self.event.end_time)
+        data = {
+            "name": "Session",
+            "event_date": start.strftime("%d/%m/%Y"),
+            "start_time": start.strftime("%H:%M"),
+            "end_time": end.strftime("%H:%M"),
+            "places": "1",
+            "waitlist_mode": Event.AUTO,
+            "template_image": "",
+        }
+        url = reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Event.objects.get(pk=self.event.pk).waitlist_mode, Event.AUTO)
+        self.assertFalse(Registration.objects.get(pk=self.second.pk).waiting_list)
+        self.assertTrue(Registration.objects.get(pk=self.third.pk).waiting_list)
+
+    def test_a_post_without_the_field_keeps_the_sessions_mode(self):
+        from events.forms import EventForm
+
+        Event.objects.filter(pk=self.event.pk).update(waitlist_mode=Event.AUTO)
+        event = Event.objects.get(pk=self.event.pk)
+        start = timezone.localtime(event.start_time)
+        form = EventForm(
+            {
+                "name": "Session",
+                "event_date": start.strftime("%d/%m/%Y"),
+                "start_time": start.strftime("%H:%M"),
+                "end_time": timezone.localtime(event.end_time).strftime("%H:%M"),
+                "places": "1",
+                "template_image": "",
+            },
+            instance=event,
+            dojo=self.dojo,
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.save().waitlist_mode, Event.AUTO)

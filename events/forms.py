@@ -204,6 +204,7 @@ class EventForm(forms.ModelForm):
         fields = [
             "name",
             "places",
+            "waitlist_mode",
             "registration_opens_at",
             "registration_closes_at",
             "external_registration_url",
@@ -219,6 +220,7 @@ class EventForm(forms.ModelForm):
         labels = {
             "name": _("Name"),
             "places": _("Places"),
+            "waitlist_mode": _("When a place frees up"),
             "external_registration_url": _("Registration on another website"),
             "venue_name": _("Venue"),
             "image": _("…or upload your own"),
@@ -232,6 +234,10 @@ class EventForm(forms.ModelForm):
         # Every shown help text translated; the model's own are English notes for the admin.
         help_texts = {
             "places": _("How many children can register before new sign-ups go on the waiting list."),
+            "waitlist_mode": _(
+                "Automatic: the child waiting longest gets the place at once. The team chooses: the place stays "
+                "free, and you give it to a child on the waiting list. A new session starts with your dojo's setting."
+            ),
             "external_registration_url": _(
                 "Optional. When set, the event page links there instead of showing the sign-up form, and Places isn't needed."
             ),
@@ -263,12 +269,19 @@ class EventForm(forms.ModelForm):
             "max_age": forms.NumberInput(attrs={"placeholder": _("18")}),
             "team": forms.CheckboxSelectMultiple,
             "pathways": forms.CheckboxSelectMultiple,
+            "waitlist_mode": forms.RadioSelect,
         }
 
     def __init__(self, *args, dojo, **kwargs):
         super().__init__(*args, **kwargs)
         # Not sent (an older form, a script): keep the model default.
         self.fields["audience"].required = False
+        # A new session starts with the dojo's waiting-list mode; not sent
+        # (an older form): keep the session's own, or the dojo's on a new one.
+        self.fields["waitlist_mode"].choices = Event.WAITLIST_CHOICES
+        self.fields["waitlist_mode"].required = False
+        if not self.instance.waitlist_mode:
+            self.initial["waitlist_mode"] = dojo.waitlist_mode or Event.AUTO
         # Only the organisation's own events (an organisation dojo, DATA_MODEL.md
         # §12) may take registrations on another website; for those, places
         # are optional.
@@ -307,6 +320,11 @@ class EventForm(forms.ModelForm):
 
     def clean_audience(self):
         return self.cleaned_data.get("audience") or Event.EVERYONE
+
+    def clean_waitlist_mode(self):
+        return (
+            self.cleaned_data.get("waitlist_mode") or self.instance.waitlist_mode or self.initial.get("waitlist_mode")
+        )
 
     def clean(self):
         cleaned_data = super().clean()

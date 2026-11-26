@@ -40,6 +40,7 @@ register(
         "start_time",
         "end_time",
         "places",
+        "waitlist_mode",
         "registration_opens_at",
         "registration_closes_at",
         "location",

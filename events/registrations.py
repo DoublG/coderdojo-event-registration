@@ -124,7 +124,7 @@ def cancel(registration: Registration, cancelled_by: "User | None") -> Registrat
         if not was_confirmed:
             return None
         promoted = _promote(event, at_most=1)
-        if not promoted and event.dojo.waitlist_mode == event.dojo.MANUAL:
+        if not promoted and event.team_chooses_places:
             _tell_team_a_place_is_free(event)
         return promoted[0] if promoted else None
 
@@ -179,9 +179,9 @@ def give_place(registration: Registration) -> Registration:
 def _promote(event: Event, at_most: int | None = None) -> list[Registration]:
     """Under the session's lock: move waiting children into the places that
     are really free (a session the team gave fewer places after it filled up
-    stays as it is), at most `at_most` of them. Nothing in a dojo whose team
-    chooses who gets a free place (`give_place`)."""
-    if event.dojo.waitlist_mode == event.dojo.MANUAL:
+    stays as it is), at most `at_most` of them. Nothing in a session whose
+    team chooses who gets a free place (`Event.waitlist_mode`, `give_place`)."""
+    if event.team_chooses_places:
         return []
     free = event.places - Registration.objects.filter(event=event, waiting_list=False).count()
     if at_most is not None:

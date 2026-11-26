@@ -22,6 +22,7 @@ Expects `form` (an events.forms.EventForm) in context, and optionally
   </div>
   <p class="cd-form__help caption">{% translate "A session always runs within a single day." %}</p>
   {{ form.places.as_field_group }}
+  {% if form.waitlist_mode %}{{ form.waitlist_mode.as_field_group }}{% endif %}
   {% if form.registration_opens_at %}
     <div class="cd-form__row">
       {{ form.registration_opens_at.as_field_group }}

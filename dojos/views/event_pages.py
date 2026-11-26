@@ -96,12 +96,14 @@ def dojo_event_detail(request, dojo_id, event_id):
 
     if request.method == "POST":
         before = notices.snapshot(event)
+        was_manual = event.team_chooses_places
         form = EventForm(request.POST, request.FILES, instance=event, dojo=dojo)
         if form.is_valid():
             event = form.save()
             saved = True
-            # More places: the children waiting longest get them (and a mail).
-            if event.places > before["places"]:
+            # More places, or the session switched to automatic: the children
+            # waiting longest get the free places (and a mail).
+            if event.places > before["places"] or (was_manual and not event.team_chooses_places):
                 promoted = registrations.fill_free_places(event)
             token = notices.change_token(event, before)
         else:
@@ -158,10 +160,10 @@ def _waiting_list_context(event):
     waiting = list(event.registration_set.filter(waiting_list=True).select_related("ninja").order_by("position"))
     free = max(0, event.places - event.registration_set.filter(waiting_list=False).count())
     return {
-        "waiting_shown": bool(waiting) or event.dojo.waitlist_mode == event.dojo.MANUAL,
+        "waiting_shown": bool(waiting) or event.team_chooses_places,
         "waiting_registrations": waiting,
         "waiting_free_places": free,
-        "waiting_manual": event.dojo.waitlist_mode == event.dojo.MANUAL,
+        "waiting_manual": event.team_chooses_places,
     }
 
 
