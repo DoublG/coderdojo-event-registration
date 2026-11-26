@@ -14,7 +14,7 @@ from django_redis import get_redis_connection
 from . import geocoding
 from .geocoding import find_province
 from .models import AdministrativeBoundary, Municipality
-from .widgets import BelgiumOSMWidget
+from .widgets import BelgiumOSMWidget, PointPickerWidget
 
 
 class FindProvinceTests(TestCase):
@@ -69,6 +69,39 @@ class MapWidgetAssetsTests(TestCase):
         response = self.client.get(reverse("admin:dojos_dojo_change", args=[dojo.id]))
         self.assertContains(response, static("geo/vendor/ol-10.9.0/ol.js"))
         self.assertNotContains(response, "cdn.jsdelivr.net")
+
+
+class PointPickerWidgetTests(TestCase):
+    """geo.widgets.PointPickerWidget: one pin, GeoJSON in longitude/latitude,
+    the vendored OpenLayers, and no province overlay."""
+
+    def test_every_script_and_stylesheet_is_ours(self):
+        urls = re.findall(r'(?:src|href)="([^"]+)"', str(PointPickerWidget().media))
+        self.assertIn(static("geo/vendor/ol-10.9.0/ol.js"), urls)
+        self.assertIn(static("geo/js/point_picker.js"), urls)
+        for url in urls:
+            self.assertTrue(url.startswith(settings.STATIC_URL), f"{url} is loaded from another site")
+            self.assertIsNotNone(finders.find(url.removeprefix(settings.STATIC_URL)), f"{url} doesn't exist")
+
+    def test_renders_the_point_in_longitude_latitude(self):
+        html = PointPickerWidget().render("where", Point(4.35, 50.85, srid=4326), attrs={"id": "id_where"})
+        self.assertIn('type="hidden" name="where" id="id_where"', html)
+        self.assertIn("4.35", html)
+        self.assertIn('id="id_where_options"', html)
+        self.assertNotIn("boundaries_geojson", html)
+
+    def test_the_reference_and_its_texts(self):
+        widget = PointPickerWidget(reference=Point(3.7, 51.0, srid=4326), reference_label="Home")
+        html = widget.render("where", None, attrs={"id": "id_where"})
+        self.assertIn('"reference": [3.7, 51.0]', html)
+        self.assertIn('data-text-reference="Home"', html)
+
+    def test_a_point_field_reads_what_the_script_writes(self):
+        from django.contrib.gis import forms
+
+        field = forms.PointField(srid=4326, widget=PointPickerWidget)
+        point = field.clean('{"type": "Point", "coordinates": [4.35, 50.85]}')
+        self.assertEqual((point.srid, point.x, point.y), (4326, 4.35, 50.85))
 
 
 class GeocodingTests(TestCase):

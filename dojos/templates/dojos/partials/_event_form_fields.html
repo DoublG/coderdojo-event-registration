@@ -37,6 +37,7 @@ Expects `form` (an events.forms.EventForm) in context, and optionally
 <div class="cd-form__group">
   <h2 class="cd-form__group-title heading-md">{% translate "Location" %}</h2>
   {{ form.venue_name.as_field_group }}
+  {{ form.location.as_field_group }}
 </div>
 
 <div class="cd-form__group">

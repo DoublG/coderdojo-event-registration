@@ -9,6 +9,7 @@ from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, connection
+from django.templatetags.static import static
 from django.test import TestCase, TransactionTestCase, override_settings
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
@@ -1279,6 +1280,86 @@ class DojoEventDetailViewTests(TestCase):
         self.client.force_login(self.owner)
         response = self.client.get(reverse("dojo_event_list", kwargs={"dojo_id": self.dojo.id}))
         self.assertContains(response, self._url())
+
+
+class DojoEventMapPinTests(TestCase):
+    """The event form's map pin (geo.widgets.PointPickerWidget): Event.location,
+    where the events search counts the session from (events.search.where_held)."""
+
+    def setUp(self):
+        self.owner = make_champion(username="owner1")
+        self.dojo = make_dojo("Ghent", champion=self.owner, location=Point(3.72, 51.05, srid=4326))
+        self.event = Event.objects.create(
+            name="Session",
+            dojo=self.dojo,
+            status=Event.OPEN,
+            start_time=timezone.make_aware(datetime(2030, 1, 1, 10, 0)),
+            end_time=timezone.make_aware(datetime(2030, 1, 1, 12, 0)),
+            places=10,
+        )
+        self.client.force_login(self.owner)
+
+    def _url(self):
+        return reverse("dojo_event_detail", kwargs={"dojo_id": self.dojo.id, "event_id": self.event.id})
+
+    def _post(self, **overrides):
+        data = {
+            "name": "Session",
+            "event_date": "01/01/2030",
+            "start_time": "10:00",
+            "end_time": "12:00",
+            "places": "10",
+            "venue_name": "",
+            "template_image": "",
+            "description": "",
+            "min_age": "",
+            "max_age": "",
+            "team": [],
+        }
+        data.update(overrides)
+        return self.client.post(self._url(), data)
+
+    def test_the_page_shows_the_map_on_our_own_openlayers(self):
+        response = self.client.get(self._url())
+        self.assertContains(response, 'data-point-picker="id_location"')
+        self.assertContains(response, static("geo/vendor/ol-10.9.0/ol.js"))
+        self.assertContains(response, static("geo/js/point_picker.js"))
+        # The dojo's own point is the map's reference marker.
+        self.assertContains(response, '"reference": [3.72, 51.05]')
+
+    def test_the_new_event_page_shows_it_too(self):
+        response = self.client.get(reverse("dojo_event_create", kwargs={"dojo_id": self.dojo.id}))
+        self.assertContains(response, 'data-point-picker="id_location"')
+        self.assertContains(response, static("geo/js/point_picker.js"))
+
+    def test_posting_a_pin_saves_it(self):
+        response = self._post(location='{"type": "Point", "coordinates": [4.35, 50.85]}')
+        self.assertEqual(response.status_code, 200)
+        self.event.refresh_from_db()
+        self.assertEqual(self.event.location.srid, 4326)
+        self.assertAlmostEqual(self.event.location.x, 4.35)
+        self.assertAlmostEqual(self.event.location.y, 50.85)
+
+    def test_an_empty_pin_clears_it(self):
+        Event.objects.filter(pk=self.event.pk).update(location=Point(4.35, 50.85, srid=4326))
+        self._post(location="")
+        self.event.refresh_from_db()
+        self.assertIsNone(self.event.location)
+
+    def test_saving_without_touching_the_map_keeps_the_pin(self):
+        """Without JavaScript the hidden input still sends the stored value back."""
+        Event.objects.filter(pk=self.event.pk).update(location=Point(4.35, 50.85, srid=4326))
+        response = self.client.get(self._url())
+        value = response.context["form"]["location"].value()
+        self._post(location=response.context["form"].fields["location"].widget.serialize(value))
+        self.event.refresh_from_db()
+        self.assertAlmostEqual(self.event.location.x, 4.35)
+
+    def test_something_that_isnt_a_point_is_refused(self):
+        response = self._post(location='{"type": "LineString", "coordinates": [[4, 50], [5, 51]]}')
+        self.assertTrue(response.context["form"].errors.get("location"))
+        self.event.refresh_from_db()
+        self.assertIsNone(self.event.location)
 
 
 class DojoEventAttendanceViewTests(TestCase):

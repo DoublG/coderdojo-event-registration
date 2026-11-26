@@ -55,3 +55,65 @@ class BelgiumOSMWidget(OSMWidget):
 
 class BelgiumGISModelAdmin(GISModelAdmin):
     gis_widget = BelgiumOSMWidget
+
+
+class PointPickerWidget(OSMWidget):
+    """
+    A map with one pin, for the site's own forms (not the Django admin):
+    a session's place, picked on OpenStreetMap.
+
+    It reuses what the admin's widget stands on: Django's GIS form field and
+    widget base (the value goes back and forth as GeoJSON, which
+    ``forms.PointField`` reads and checks), the vendored OpenLayers and the
+    OpenStreetMap tiles the Content-Security-Policy already allows, and
+    Belgium's default view. Its own are the template and the script
+    (``geo/js/point_picker.js``): one point only, buttons to put the pin in
+    the middle of the map or take it away (so it works with the keyboard,
+    and the map pans with the arrow keys), and translated texts. It leaves
+    out the admin widget's province overlay, about 230 KB of GeoJSON on
+    every page, which the tiles' own borders make unnecessary.
+
+    The value is kept in longitude/latitude (``map_srid`` 4326), so the
+    hidden input holds plain GeoJSON. Without JavaScript the input keeps its
+    value, so saving the form never loses the pin. ``reference`` (a Point,
+    optional) is shown as a second, hollow marker, e.g. the dojo's own
+    location, and is where the map opens when there's no pin yet; the form
+    names it (``reference_label``, on the map) and says what counts without
+    a pin (``reference_empty_text``), since geo knows nothing of dojos.
+    """
+
+    template_name = "geo/widgets/point_picker.html"
+    map_srid = 4326
+    geom_type = "POINT"
+    use_fieldset = True
+    default_lon = BelgiumOSMWidget.default_lon
+    default_lat = BelgiumOSMWidget.default_lat
+    default_zoom = BelgiumOSMWidget.default_zoom
+    pin_zoom = 16
+
+    class Media:
+        extend = False
+        css = {"all": ("geo/vendor/ol-10.9.0/ol.css",)}
+        js = ("geo/vendor/ol-10.9.0/ol.js", "geo/js/point_picker.js")
+
+    def __init__(self, attrs=None, reference=None, reference_label="", reference_empty_text=""):
+        super().__init__(attrs=attrs)
+        self.reference = reference
+        self.reference_label = reference_label
+        self.reference_empty_text = reference_empty_text
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        widget_attrs = context["widget"]["attrs"]
+        options = {
+            "default_lon": widget_attrs["default_lon"],
+            "default_lat": widget_attrs["default_lat"],
+            "default_zoom": widget_attrs["default_zoom"],
+            "pin_zoom": self.pin_zoom,
+        }
+        if self.reference is not None:
+            options["reference"] = [self.reference.x, self.reference.y]
+        context["options"] = options
+        context["reference_label"] = self.reference_label
+        context["reference_empty_text"] = self.reference_empty_text
+        return context

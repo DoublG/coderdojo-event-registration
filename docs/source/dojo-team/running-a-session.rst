@@ -43,6 +43,14 @@ team runs it, and which pathways it covers (see below). **Aimed at**
 can mark it as a girls' session: it gets a "Girls' session" label on the
 site, but anyone can still sign up.
 
+When a session isn't held at your dojo's own address, put a pin on the
+map under **Place on the map**: click where it's held, or drag the pin.
+With the keyboard, move the map with the arrow keys and press **Put the
+pin in the middle of the map**. Families searching the Events list by
+postcode or town find the session by that pin; without one, your dojo's
+location counts. **Remove the pin** goes back to that. The map comes from
+OpenStreetMap, whose servers send the map pictures to your browser.
+
 Under the places you can also set when registrations **open** and
 **close**. Both are optional and entered like the date and time (for
 example 01/09/2030 09:30). Before the opening moment the session says

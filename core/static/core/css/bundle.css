@@ -1710,3 +1710,11 @@ main:focus { outline: none; }
 :where(.cd-root a:not([class]):hover) { color: var(--secondary-hover); }
 /* The attendance row's Award belt / Award badge / Pathways toggles: a 24px target. */
 .cd-attendance details > summary { padding: var(--space-1) 0; cursor: pointer; }
+
+/* geo.widgets.PointPickerWidget: one pin on an OpenStreetMap map (geo/js/point_picker.js). */
+.cd-point-picker__map { width: 100%; height: 320px; border: 1px solid var(--border); border-radius: var(--radius-md, 8px); overflow: hidden; background: var(--surface-sunken); }
+.cd-point-picker__map:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.cd-point-picker__status { margin: var(--space-2) 0 0; color: var(--ink-muted); }
+.cd-point-picker__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+.cd-point-picker__actions[hidden] { display: none; }
+@media (max-width: 600px) { .cd-point-picker__map { height: 260px; } }

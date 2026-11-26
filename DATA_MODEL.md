@@ -396,7 +396,7 @@ erDiagram
         string waitlist_mode "auto, manual: copied from the dojo"
         datetime registration_opens_at "optional: sign-up not there before"
         datetime registration_closes_at "optional: sign-up closed from"
-        point location "where it's held, if not the dojo: the events list's place filter"
+        point location "where it's held, if not the dojo: the event form's map pin, the events list's place filter"
         string venue_name
         int min_age
         int max_age

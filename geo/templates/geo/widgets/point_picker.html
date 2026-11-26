@@ -1,0 +1,23 @@
+{% load i18n %}{% comment %}
+geo.widgets.PointPickerWidget: one pin on an OpenStreetMap map, wired by
+geo/js/point_picker.js. The hidden input holds the point as GeoJSON in
+longitude/latitude; without JavaScript it keeps its value, the buttons stay
+hidden and the note under the map says so. The texts the script shows are
+in data attributes, so they come from the site's catalogs.
+{% endcomment %}<div class="cd-point-picker" data-point-picker="{{ widget.attrs.id }}"
+     data-text-pinned="{% translate "Pin at {lat}, {lon}." %}"
+     data-text-empty="{% translate "No pin." %}"
+     data-text-empty-reference="{{ reference_empty_text }}"
+     data-text-reference="{{ reference_label }}">
+  <div class="cd-point-picker__map" id="{{ widget.attrs.id }}_map" tabindex="0" role="region"
+       aria-label="{% translate "Map. Move it with the arrow keys, zoom with + and −." %}"></div>
+  <p class="cd-point-picker__status caption" aria-live="polite" data-point-picker-status>
+    {% if serialized %}{% translate "A pin is set. The map needs JavaScript to move it; saving keeps it." %}{% else %}{% translate "The map needs JavaScript." %}{% endif %}
+  </p>
+  <div class="cd-point-picker__actions" data-point-picker-actions hidden>
+    <button type="button" class="cd-btn cd-btn--ghost label" data-point-picker-centre>{% translate "Put the pin in the middle of the map" %}</button>
+    <button type="button" class="cd-btn cd-btn--ghost label" data-point-picker-clear>{% translate "Remove the pin" %}</button>
+  </div>
+  <input type="hidden" name="{{ widget.name }}" id="{{ widget.attrs.id }}" value="{{ serialized }}">
+  {% with script_id=widget.attrs.id|add:"_options" %}{{ options|json_script:script_id }}{% endwith %}
+</div>

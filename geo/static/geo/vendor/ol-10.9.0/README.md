@@ -1,8 +1,10 @@
 # OpenLayers, served from our own static files
 
-The map widget in the Django admin (`geo.widgets.BelgiumOSMWidget`, with
-`geo/js/belgium_map_widget.js`) loads OpenLayers from here instead of a CDN
-(one connection less, and no admin's IP address goes to a third party).
+The map widgets load OpenLayers from here instead of a CDN (one connection
+less, and no one's IP address goes to a third party for the library): the
+Django admin's (`geo.widgets.BelgiumOSMWidget`, with
+`geo/js/belgium_map_widget.js`) and the event form's map pin
+(`geo.widgets.PointPickerWidget`, with `geo/js/point_picker.js`).
 BSD 2-Clause (`LICENSE.md`).
 
 | File | npm package | Path in the package |
@@ -23,5 +25,5 @@ The map tiles themselves still come from OpenStreetMap's tile servers
    (`core/static/core/vendor/htmx/README.md`).
 2. Copy `dist/ol.js` (dropping the `sourceMappingURL` line) and `ol.css` into
    a new `ol-<version>/` folder, delete the old one, and update the paths in
-   `geo/widgets.py` (`BelgiumOSMWidget.Media`). `geo.tests` fails while they
+   `geo/widgets.py` (`BelgiumOSMWidget.Media` and `PointPickerWidget.Media`). `geo.tests` fails while they
    point at a missing file.

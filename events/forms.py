@@ -17,6 +17,7 @@ from core.forms import SearchFiltersMixin
 from core.image_library import LIBRARY_DIRS, library_filename, use_library_image
 from core.uploads import with_upload_help
 from dojos.models import Dojo
+from geo.widgets import PointPickerWidget
 from pathways.models import Pathway
 
 from . import notices, services
@@ -209,6 +210,7 @@ class EventForm(forms.ModelForm):
             "registration_closes_at",
             "external_registration_url",
             "venue_name",
+            "location",
             "image",
             "description",
             "min_age",
@@ -223,6 +225,7 @@ class EventForm(forms.ModelForm):
             "waitlist_mode": _("When a place frees up"),
             "external_registration_url": _("Registration on another website"),
             "venue_name": _("Venue"),
+            "location": _("Place on the map"),
             "image": _("…or upload your own"),
             "description": _("Description"),
             "min_age": _("Minimum age"),
@@ -242,6 +245,10 @@ class EventForm(forms.ModelForm):
                 "Optional. When set, the event page links there instead of showing the sign-up form, and Places isn't needed."
             ),
             "venue_name": _("Leave blank to use the dojo's own address."),
+            "location": _(
+                "Optional. Click the map where the session is held, or drag the pin. The events search "
+                "finds sessions near a place by this pin; without one, the dojo's own location counts."
+            ),
             "image": with_upload_help(_("Uploading a file here overrides the template chosen above.")),
             "description": _("Supports basic Markdown."),
             "audience": _("A girls' session gets a label on the site. Anyone can still sign up."),
@@ -270,6 +277,7 @@ class EventForm(forms.ModelForm):
             "team": forms.CheckboxSelectMultiple,
             "pathways": forms.CheckboxSelectMultiple,
             "waitlist_mode": forms.RadioSelect,
+            "location": PointPickerWidget,
         }
 
     def __init__(self, *args, dojo, **kwargs):
@@ -282,6 +290,11 @@ class EventForm(forms.ModelForm):
         self.fields["waitlist_mode"].required = False
         if not self.instance.waitlist_mode:
             self.initial["waitlist_mode"] = dojo.waitlist_mode or Event.AUTO
+        # The map opens on the dojo, which it also shows: where the session
+        # counts from in the events search while there's no pin.
+        self.fields["location"].widget.reference = dojo.location
+        self.fields["location"].widget.reference_label = _("Your dojo")
+        self.fields["location"].widget.reference_empty_text = _("No pin: the dojo's own location counts.")
         # Only the organisation's own events (an organisation dojo, DATA_MODEL.md
         # §12) may take registrations on another website; for those, places
         # are optional.

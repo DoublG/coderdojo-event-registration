@@ -13,6 +13,7 @@
 {% endblock %}
 
 {% block admin_extra_style %}
+{{ form.media.css }}
 <style>
   .event-detail-form { max-width: 720px; }
   .event-status-card {
@@ -136,3 +137,5 @@
     </form>
   </div>
 {% endblock %}
+
+{% block admin_extra_script %}{{ form.media.js }}{% endblock %}
